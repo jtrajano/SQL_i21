@@ -7,6 +7,7 @@
 	,@strBatchId NVARCHAR(50) = NULL
 	,@isSuccessful BIT = 0 OUTPUT
 	,@message_id INT = 0 OUTPUT
+	,@batchIdUsed NVARCHAR(50) = '' OUTPUT
 AS
 BEGIN
 
@@ -19,6 +20,7 @@ DECLARE @intPaycheckId INT
 		,@intCreatedEntityId AS INT
 		,@intBankAccountId AS INT
 		,@strBatchNo AS NVARCHAR(50) = @strBatchId
+		,@ysnPaycheckPosted AS BIT
 		,@PAYCHECK INT = 21
 		,@DIRECT_DEPOSIT INT = 23
 		,@BankTransactionTable BankTransactionTable
@@ -31,6 +33,7 @@ SELECT @intPaycheckId = intPaycheckId
 	  ,@dtmPayDate = dtmPayDate
 	  ,@intCreatedEntityId = intCreatedUserId
 	  ,@intBankAccountId = intBankAccountId
+	  ,@ysnPaycheckPosted = ysnPosted
 	  ,@intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END
 FROM tblPRPaycheck 
 WHERE strPaycheckId = @strPaycheckId
@@ -39,16 +42,21 @@ WHERE strPaycheckId = @strPaycheckId
 	CREATING BANK TRANSACTION RECORD
 *****************************************/
 
--- Check if transaction has Bank Account
+-- Validations before generating Bank Transaction Record
 IF @ysnPost = 1
 BEGIN 
 	IF (@intBankAccountId IS NULL)
 	BEGIN
-		-- Bank Account is required to post the transaction
 		RAISERROR('Bank Account is required to post the transaction.', 11, 1)
 		GOTO Post_Exit
 	END
-END 
+
+	IF (@ysnRecap = 0 AND @ysnPaycheckPosted = 1)
+	BEGIN
+		RAISERROR('The transaction is already posted.', 11, 1)
+		GOTO Post_Exit
+	END
+END
 
 IF (@ysnPost = 1)
 BEGIN
@@ -171,7 +179,7 @@ BEGIN
 				ON A.intEmployeeEarningId = B.intEmployeeEarningId
 		LEFT JOIN tblPRDepartment C 
 	ON A.intEmployeeDepartmentId = C.intDepartmentId
-	WHERE A.dblTotal > 0 AND A.strCalculationType <> 'Fringe Benefit'
+	WHERE A.dblTotal <> 0 AND A.strCalculationType <> 'Fringe Benefit'
 	AND intPaycheckId = @intPaycheckId
 		
 	--Place Earning to Temporary Table to Validate Earning GL Distribution
@@ -291,8 +299,8 @@ BEGIN
 		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= E.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = E.intAccountId)
-		,[dblDebit]					= E.dblAmount
-		,[dblCredit]				= 0
+		,[dblDebit]					= CASE WHEN (E.dblAmount > 0) THEN E.dblAmount ELSE 0 END
+		,[dblCredit]				= CASE WHEN (E.dblAmount < 0) THEN ABS(E.dblAmount) ELSE 0 END
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
 		,[intCreatedUserId]			= @intCreatedEntityId
@@ -613,6 +621,7 @@ DECLARE
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
+	,@GLEntries AS RecapTableType
 	-- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.	
 	
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -799,9 +808,18 @@ END
 -- Get the batch post id. 
 IF (@ysnPost = 1 AND @strBatchNo IS NULL)
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchNo OUTPUT 
-	IF @@ERROR <> 0	GOTO Post_Rollback
+	IF (@ysnRecap = 1)
+		SET @strBatchNo = @strTransactionId
+	ELSE
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchNo OUTPUT 
+		IF @@ERROR <> 0	GOTO Post_Rollback
 END
+
+IF (@ysnPost = 1)
+	SET @batchIdUsed = @strBatchNo
+ELSE 
+	SET	@batchIdUsed = (SELECT MAX(strBatchId) FROM	tblGLDetail 
+		WHERE strTransactionId = @strTransactionId AND ysnIsUnposted = 0 AND strCode = @GL_DETAIL_CODE)
 
 IF @ysnPost = 1
 BEGIN
@@ -898,7 +916,6 @@ BEGIN
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId		
-
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
@@ -912,9 +929,65 @@ END
 ELSE IF @ysnPost = 0
 BEGIN
 	-- Reverse the G/L entries
-	EXEC dbo.uspCMReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId	
+	INSERT INTO #tmpGLDetail (
+		[strTransactionId]
+		,[intTransactionId]
+		,[dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[ysnIsUnposted]
+		,[intConcurrencyId]
+		,[intUserId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intEntityId]
+	)
+	SELECT	
+		[strTransactionId]
+		,[intTransactionId]
+		,dtmDate = [dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
+		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
+		,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
+		,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,dtmDateEntered = GETDATE()
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,ysnIsUnposted = 1
+		,[intConcurrencyId]
+		,intUserId = @intUserId
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intEntityId]
+	FROM tblGLDetail 
+	WHERE strBatchId = @batchIdUsed
+		AND strTransactionId = @strTransactionId
+		AND strCode = @GL_DETAIL_CODE
+	ORDER BY intGLDetailId
+		
 	IF @@ERROR <> 0	GOTO Post_Rollback
-	
+
 	-- Update the posted flag in the transaction table
 	UPDATE tblCMBankTransaction
 	SET		ysnPosted = 0
@@ -926,8 +999,67 @@ END
 --=====================================================================================================================================
 -- 	Book the G/L ENTRIES to tblGLDetail (The G/L Ledger detail table)
 ---------------------------------------------------------------------------------------------------------------------------------------
-EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
-IF @isSuccessful = 0 GOTO Post_Rollback
+--EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
+--IF @isSuccessful = 0 GOTO Post_Rollback
+
+INSERT INTO @GLEntries(
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]	
+			) 
+SELECT
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]	 
+FROM #tmpGLDetail
+
+EXEC uspGLBookEntries @GLEntries, @ysnPost
+		
+IF @@ERROR <> 0	GOTO Post_Rollback
 
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP
@@ -935,61 +1067,62 @@ IF @isSuccessful = 0 GOTO Post_Rollback
 IF @ysnRecap = 1 
 BEGIN	
 	-- INSERT THE DATA FROM #tmpGLDetail TO @RecapTable
-	INSERT INTO @RecapTable (
-			[dtmDate] 
-			,[strBatchId]
+	INSERT INTO @RecapTable(
+			[strTransactionId]
+			,[intTransactionId]
 			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
 			,[dtmDateEntered]
-			,[dtmTransactionDate]
+			,[strBatchId]
+			,[strCode]			
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
 			,[strTransactionType]
 			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-	)	
-	SELECT	[dtmDate] 
-			,[strBatchId]
+			,[strModuleName]	
+			) 
+	SELECT
+			[strTransactionId]
+			,[intTransactionId]
 			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
 			,[dtmDateEntered]
-			,[dtmTransactionDate]
+			,[strBatchId]
+			,[strCode]			
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
 			,[strTransactionType]
 			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-	FROM	#tmpGLDetail
+			,[strModuleName]	 
+	FROM #tmpGLDetail
+
 	IF @@ERROR <> 0	GOTO Post_Rollback
-	
 	GOTO Recap_Rollback
 END
 
@@ -1001,30 +1134,32 @@ Post_Commit:
 	SET @isSuccessful = 1	
 	COMMIT TRANSACTION
 
-	DECLARE @actionType NVARCHAR(10)
-	SELECT @actionType = CASE WHEN (@ysnPost = 1) THEN 'Posted' ELSE 'Unposted' END
-	EXEC uspSMAuditLog 'Payroll.view.Paycheck', @intPaycheckId, @intUserId, @actionType, '', '', ''
-
 	IF (@ysnPost = 1 AND @strBatchId IS NOT NULL)
 	BEGIN
 		UPDATE	tblSMStartingNumber
 		SET		intNumber = ISNULL(intNumber, 0) + 1
 		WHERE	intStartingNumberId = @STARTING_NUM_TRANSACTION_TYPE_Id
 	END
+	GOTO Audit_Log
 	GOTO Post_Exit
 
 -- If error occured, undo changes to all tables affected
 Post_Rollback:
 	SET @isSuccessful = 0
-	ROLLBACK TRANSACTION		            
+	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION		            
 	GOTO Post_Exit
 	
 Recap_Rollback: 
 	SET @isSuccessful = 1
-	ROLLBACK TRANSACTION 
-	EXEC uspCMPostRecap @RecapTable
+	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
+	EXEC dbo.uspGLPostRecap @RecapTable
 	GOTO Post_Exit
 	
+Audit_Log:
+	DECLARE @actionType NVARCHAR(10)
+	SELECT @actionType = CASE WHEN (@ysnPost = 1) THEN 'Posted' ELSE 'Unposted' END
+	EXEC uspSMAuditLog 'Payroll.view.Paycheck', @intPaycheckId, @intUserId, @actionType, '', '', ''
+
 -- Clean-up routines:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
@@ -1102,28 +1237,21 @@ BEGIN
 	END
 
 	/* Update the Employee Time Off Tiers and Accrued Hours */
-	SELECT DISTINCT EE.intEmployeeAccrueTimeOffId
-	INTO #tmpAccrueTimeOff
-	FROM tblPRPaycheckEarning PE
-		INNER JOIN tblPREmployeeEarning EE
-			ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
-			WHERE EE.intEmployeeAccrueTimeOffId IS NOT NULL
-				AND PE.intPaycheckId = @intPaycheckId
-				AND EE.intEntityEmployeeId = @intEmployeeId
+	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOff FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
 		
-	DECLARE @intAccrueTimeOffId INT
-	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAccrueTimeOff)
+	DECLARE @intTypeTimeOffId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOff)
 	BEGIN
-		SELECT TOP 1 @intAccrueTimeOffId = intEmployeeAccrueTimeOffId FROM #tmpAccrueTimeOff
+		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOff
 
-		EXEC uspPRUpdateEmployeeTimeOff @intAccrueTimeOffId, @intEmployeeId
-		EXEC uspPRUpdateEmployeeTimeOffHours @intAccrueTimeOffId, @intEmployeeId
+		EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEmployeeId
+		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
 
-		DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
+		DELETE FROM #tmpEmployeeTimeOff WHERE intTypeTimeOffId = @intTypeTimeOffId
 	END
 
 	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 END
 END
 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAccrueTimeOff')) DROP TABLE #tmpAccrueTimeOff
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeTimeOff')) DROP TABLE #tmpEmployeeTimeOff
