@@ -158,6 +158,8 @@ BEGIN TRY
 	,ysnInvalid
 	,ysnPosted
 	,ysnIncludeInQuantityDiscount
+	,ysnShowOnCFInvoice
+	,strDiscountSchedule
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -278,6 +280,8 @@ BEGIN TRY
 	,ysnInvalid
 	,ysnPosted
 	,ysnIncludeInQuantityDiscount
+	,cfInvRptDcnt.ysnShowOnCFInvoice
+	,cfInvRptDcnt.strDiscountSchedule
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN tblCFInvoiceSummaryTempTable AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId
