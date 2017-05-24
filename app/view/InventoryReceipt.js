@@ -1477,7 +1477,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colSubLocation',
-                                                                                width: 90,
+                                                                                width: 100,
                                                                                 dataIndex: 'strDescription',
                                                                                 text: 'Storage Location',
                                                                                 editor: {
@@ -1842,7 +1842,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colLotParentLotId',
-                                                                                width: 100,
+                                                                                width: 110,
                                                                                 dataIndex: 'string',
                                                                                 text: 'Parent Lot Number',
                                                                                 editor: {
