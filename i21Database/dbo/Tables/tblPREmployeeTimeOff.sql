@@ -12,6 +12,7 @@
     [dtmLastAward]         DATETIME        NULL,
     [dblHoursAccrued]      NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblHo__78ECF2A7] DEFAULT ((0)) NULL,
     [dblHoursEarned]       NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblHo__79E116E0] DEFAULT ((0)) NULL,
+	[dblHoursCarryover]	   NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [dblHoursUsed]         NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblHo__7AD53B19] DEFAULT ((0)) NULL,
     [dtmEligible]          DATETIME        CONSTRAINT [DF__tblPREmpl__dtmEl__7BC95F52] DEFAULT (getdate()) NULL,
     [intSort]              INT             NULL,
