@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
+﻿
+CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
 AS
 SELECT   ROUND(ISNULL(cfTransPrice.dblCalculatedAmount, 0), 2) AS dblTotalAmount, smTerm.intTermID, smTerm.strTerm, smTerm.strType, smTerm.dblDiscountEP, 
                          smTerm.intBalanceDue, smTerm.intDiscountDay, smTerm.dblAPR, smTerm.strTermCode, smTerm.ysnAllowEFT, smTerm.intDayofMonthDue, smTerm.intDueNextMonth, 
@@ -6,7 +7,7 @@ SELECT   ROUND(ISNULL(cfTransPrice.dblCalculatedAmount, 0), 2) AS dblTotalAmount
                          cfCardAccount.intAccountId, cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, 
                          cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, cfTrans.strTransactionType, cfCardAccount.intDiscountScheduleId, cfCardAccount.intCustomerId, 
                          ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, arInv.intInvoiceId, arInv.strInvoiceNumber, cfTrans.strInvoiceReportNumber, 
-                         cfTrans.strPrintTimeStamp, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail, cfTrans.dtmInvoiceDate, cfTrans.intSalesPersonId
+                         cfTrans.strPrintTimeStamp, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail, cfTrans.dtmInvoiceDate, cfTrans.intSalesPersonId,cfDiscount.strDiscountSchedule,ISNULL(cfDiscount.ysnShowOnCFInvoice,0) as ysnShowOnCFInvoice
 FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
