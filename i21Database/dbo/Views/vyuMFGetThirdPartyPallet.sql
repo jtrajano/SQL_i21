@@ -63,10 +63,11 @@ LEFT JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intSpecialPalletLotId = L.intLo
 LEFT JOIN dbo.tblICLot AS L1 ON L1.intLotId = WP.intLotId
 LEFT JOIN dbo.tblICInventoryShipmentItemLot IL ON IL.intLotId = L1.intLotId
 WHERE I.intItemId IN (
-		SELECT strAttributeValue
+		SELECT Item Collate Latin1_General_CI_AS
+			FROM [dbo].[fnSplitString]((SELECT strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intAttributeId = 88
-			AND strAttributeValue <> ''
+			AND strAttributeValue <> ''), ',')
 		)
 
 UNION
@@ -134,8 +135,10 @@ JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intSpecialPalletLotId = L.intLotId
 LEFT JOIN dbo.tblICLot AS L1 ON L1.intLotId = WP.intLotId
 LEFT JOIN dbo.tblICInventoryShipmentItemLot IL ON IL.intLotId = L1.intLotId
 WHERE I.intItemId IN (
-		SELECT strAttributeValue
+		SELECT Item Collate Latin1_General_CI_AS
+			FROM [dbo].[fnSplitString]((SELECT strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intAttributeId = 88
-			AND strAttributeValue <> ''
+			AND strAttributeValue <> ''), ',')
+		
 		)
