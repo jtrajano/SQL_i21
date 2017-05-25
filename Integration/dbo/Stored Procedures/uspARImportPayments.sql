@@ -1091,8 +1091,9 @@ IF(@Checking = 1)
 					SELECT @PaymentID = intPaymentId FROM #tmpagcrd
 						EXEC	@return_value = [dbo].[uspARCreatePrePayment]
 								@PaymentID = @PaymentID,
-								@UserId = @UserId,
-								@NewInvoiceId = @NewInvoiceId OUTPUT					
+								@Post = 1,
+								@BatchId = NULL,
+								@UserId = @UserId
 				END TRY								
 							
 				BEGIN CATCH
@@ -2085,8 +2086,9 @@ IF(@Checking = 1)
 					SELECT @PaymentID = intPaymentId FROM #tmpptcrd
 						EXEC	@return_value = [dbo].[uspARCreatePrePayment]
 								@PaymentID = @PaymentID,
-								@UserId = @UserId,
-								@NewInvoiceId = @NewInvoiceId OUTPUT					
+								@Post = 1,
+								@BatchId = NULL,								
+								@UserId = @UserId
 				END TRY								
 							
 				BEGIN CATCH
