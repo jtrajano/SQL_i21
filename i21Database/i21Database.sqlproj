@@ -1357,7 +1357,7 @@
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransfer.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransferDetail.sql" />
-    <Build Include="dbo\Views\vyuLGAllocationDetailOpenGenerateLoads.sql" />
+    <Build Include="dbo\Views\vyuLGGenerateLoadOpenAllocationDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportBillableHours.sql" />
     <Build Include="dbo\Views\vyuCCSite.sql" />
     <Build Include="dbo\Tables\tblSMImportFileHeader.sql" />
