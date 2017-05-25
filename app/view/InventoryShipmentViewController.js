@@ -113,8 +113,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     column: 'intEntityId',
                     value: '{current.intEntityCustomerId}'
                 }],
-                hidden: '{hideShipToLocation}'
-                //fieldLabel: '{setShipToFieldLabel}'
+                hidden: '{hideShipToLocation}',
+                fieldLabel: '{setShipToFieldLabel}'
             },
             cboShipToCompanyAddress: {
                 value: '{current.strShipToLocation}',
@@ -128,8 +128,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     conjunction: 'and',
                     condition: 'noteq'
                 }],
-                hidden: '{hideShipToCompanyLocation}'
-                //fieldLabel: '{setShipToFieldLabel}'
+                hidden: '{hideShipToCompanyLocation}',
+                fieldLabel: '{setShipToFieldLabel}'
             },
             txtShipToAddress: '{strShipToAddress}',
             txtDeliveryInstructions: {
@@ -780,8 +780,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
         
-        if (defaultLocation){
-            record.set('intShipFromLocationId', defaultLocation);
+        if (defaultLocation){            
             Ext.create('i21.store.CompanyLocationBuffered', {
                 storeId: 'icShipFrom',
                 autoLoad: {
@@ -802,6 +801,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }
 
                         if(success && companyLocation){
+                            record.set('intShipFromLocationId', companyLocation.get('intCompanyLocationId'));
                             record.set('strShipFromLocation', companyLocation.get('strLocationName'));
                             record.set('strShipFromStreet', companyLocation.get('strAddress'));
                             record.set('strShipFromCity', companyLocation.get('strCity'));
@@ -921,44 +921,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         
         if (current){
             if (combo.itemId === 'cboShipFromAddress'){
-                    if(Inventory.view.InventoryShipmentViewController.orgValueShipFrom !== current.get('intShipFromLocationId')) {
-                        var buttonAction = function(button) {
-                            if (button === 'yes') {  
-                                //Remove all items in Shipment Grid                   
-                                var shipmentItems = current['tblICInventoryShipmentItems'](),
-                                    shipmentItemRecords = shipmentItems ? shipmentItems.getRange() : [];
-
-                                 var i = shipmentItemRecords.length - 1;
-
-                                  for (; i >= 0; i--) {
-                                      if (!shipmentItemRecords[i].dummy)
-                                           shipmentItems.removeAt(i);
-                                  }
-
-                                  current.set('strShipFromStreet', records[0].get('strAddress'));
-                                  current.set('strShipFromCity', records[0].get('strCity'));
-                                  current.set('strShipFromState', records[0].get('strStateProvince'));
-                                  current.set('strShipFromZipPostalCode', records[0].get('strZipPostalCode'));
-                                  current.set('strShipFromCountry', records[0].get('strCountry'));
-                            }
-                            else {
-                               current.set('intShipFromLocationId', Inventory.view.InventoryShipmentViewController.orgValueShipFrom);
-                            }
-                        };
-                        
-                        if(grdInventoryShipmentCount > 0) {
-                                iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear all Items. Do you want to continue?', buttonAction);
-                            }
-                        else {                            
-                            current.set('strShipFromStreet', records[0].get('strAddress'));
-                            current.set('strShipFromCity', records[0].get('strCity'));
-                            current.set('strShipFromState', records[0].get('strStateProvince'));
-                            current.set('strShipFromZipPostalCode', records[0].get('strZipPostalCode'));
-                            current.set('strShipFromCountry', records[0].get('strCountry'));                            
+                var shipmentItemCount = 0;
+                if (current.tblICInventoryShipmentItems()) {
+                    Ext.Array.each(current.tblICInventoryShipmentItems().data.items, function(row) {
+                        if (!row.dummy) {
+                            shipmentItemCount++;
+                            return false; 
                         }
-                            
-                    }
-                 
+                    });
+                }
+                if (shipmentItemCount == 0){
+                    current.set('intShipFromLocationId', records[0].get('intCompanyLocationId'));
+                    current.set('strShipFromStreet', records[0].get('strAddress'));
+                    current.set('strShipFromCity', records[0].get('strCity'));
+                    current.set('strShipFromState', records[0].get('strStateProvince'));
+                    current.set('strShipFromZipPostalCode', records[0].get('strZipPostalCode'));
+                    current.set('strShipFromCountry', records[0].get('strCountry'));
+                }                
             }
             else if (combo.itemId === 'cboShipToAddress'){
                 current.set('strShipToStreet', records[0].get('strAddress'));
@@ -992,13 +971,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intEntityCustomerId', record.get('intEntityId'));
             current.set('strCustomerName', record.get('strName'));
 
-            current.set('intShipToLocationId', record.get('intShipToId'));   
-            current.set('strShipToLocation', record.get('strShipToLocationName'));   
-            current.set('strShipToStreet', record.get('strShipToAddress'));
-            current.set('strShipToCity', record.get('strShipToCity'));
-            current.set('strShipToState', record.get('strShipToState'));
-            current.set('strShipToZipPostalCode', record.get('strShipToZipCode'));
-            current.set('strShipToCountry', record.get('strShipToCountry'));            
+            // If Order Type is a 'Transfer Order', do not populate the ship to. 
+            if (current.get('intOrderType') != 3){
+                current.set('intShipToLocationId', record.get('intShipToId'));   
+                current.set('strShipToLocation', record.get('strShipToLocationName'));   
+                current.set('strShipToStreet', record.get('strShipToAddress'));
+                current.set('strShipToCity', record.get('strShipToCity'));
+                current.set('strShipToState', record.get('strShipToState'));
+                current.set('strShipToZipPostalCode', record.get('strShipToZipCode'));
+                current.set('strShipToCountry', record.get('strShipToCountry'));            
+            }
         }
 
         var isHidden = true;
@@ -2795,7 +2777,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     },
 
     onOrderTypeSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
+        if (!records || records.length <= 0)
             return;
 
         var win = combo.up('window');
@@ -2804,7 +2786,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (current){
             current.set('intShipToCompanyLocationId', null);
             current.set('intShipToLocationId', null);
-            current.set('strShipToAddress', null);
+            current//.set('strShipToAddress', null);
+            
+            current.set('strShipToLocation', null);
+            current.set('strShipToStreet', null);
+            current.set('strShipToCity', null);
+            current.set('strShipToState', null);
+            current.set('strShipToZipPostalCode', null);
+            current.set('strShipToCountry', null);
 
             //Change Source Type to "None" for "Direct" or "Sales Order" Order Type
             if(current.get('intOrderType') == 4 || current.get('intOrderType') == 2) {
@@ -2846,47 +2835,78 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var grdInventoryShipment = win.down('#grdInventoryShipment');
         var grdInventoryShipmentCount = 0;
-        var grdLotTracking = win.down('#grdLotTracking');
         var origShipFromLocation = current.get('strShipFromLocation');
         var origShipFromLocationId = current.get('intShipFromLocationId');
         var newShipFromLocationId =  record.get('intCompanyLocationId');
-        var newShipFromAddress = record.get('strAddress');
 
         if (current.tblICInventoryShipmentItems()) {
-                Ext.Array.each(current.tblICInventoryShipmentItems().data.items, function(row) {
-                    if (!row.dummy) {
-                        grdInventoryShipmentCount++;
-                    }
-                });
-            }
+            Ext.Array.each(current.tblICInventoryShipmentItems().data.items, function(row) {
+                if (!row.dummy) {
+                    grdInventoryShipmentCount++;
+                }
+                if (grdInventoryShipmentCount > 0){
+                    return false;                 
+                }                    
+            });
+        }
         
         if(origShipFromLocationId !== newShipFromLocationId) {
             var buttonAction = function(button) {
-                if (button === 'yes') {  
-                    //Remove all items in Shipment Grid                   
+                if (button === 'yes') {                      
+                    //Remove all items in the Shipment Grid                   
                     var shipmentItems = current['tblICInventoryShipmentItems'](),
                         shipmentItemRecords = shipmentItems ? shipmentItems.getRange() : [];
 
-                        var i = shipmentItemRecords.length - 1;
-
-                        for (; i >= 0; i--) {
-                            if (!shipmentItemRecords[i].dummy)
-                                shipmentItems.removeAt(i);
-                        }
-                    current.set('strShipFromAddress', newShipFromAddress); 
-                }
-                else {
-                    current.set('strShipFromLocation', origShipFromLocation);
-                    current.set('intShipFromLocationId', origShipFromLocationId);
+                    var i = shipmentItemRecords.length - 1;
+                    for (; i >= 0; i--) {
+                        if (!shipmentItemRecords[i].dummy)
+                            shipmentItems.removeAt(i);
+                    }
                 }
             };
                         
             if(grdInventoryShipmentCount > 0) {
-                    iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear all Items. Do you want to continue?', buttonAction);
+                iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear all Items. Do you want to continue?', buttonAction);
+            }
+        }
+    },
+
+    onShipFromAddressBeforeQuery: function(queryPlan, eOpts){
+        var combo = queryPlan.combo; 
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        var grdInventoryShipment = win.down('#grdInventoryShipment');
+        var grdInventoryShipmentCount = 0;
+
+        if (current.tblICInventoryShipmentItems()) {
+            Ext.Array.each(current.tblICInventoryShipmentItems().data.items, function(row) {
+                if (!row.dummy) {
+                    grdInventoryShipmentCount++;
                 }
-            else {
-                current.set('strShipFromAddress', newShipFromAddress); 
-            }                      
+                if (grdInventoryShipmentCount > 0){
+                    return false;                 
+                }                    
+            });
+        }
+                
+        if(grdInventoryShipmentCount > 0) {
+            var buttonAction = function(button) {
+                if (button === 'yes') {                      
+                    //Remove all items in the Shipment Grid                   
+                    var shipmentItems = current['tblICInventoryShipmentItems'](),
+                        shipmentItemRecords = shipmentItems ? shipmentItems.getRange() : [];
+
+                    var i = shipmentItemRecords.length - 1;
+                    for (; i >= 0; i--) {
+                        if (!shipmentItemRecords[i].dummy)
+                            shipmentItems.removeAt(i);
+                    }
+                    combo.focus();
+                }
+            };
+
+            iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear all Items. Do you want to continue?', buttonAction);
+            return false;
         }
     },
     
@@ -3354,9 +3374,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     init: function(application) {
         this.control({
-            "#cboShipFromAddress": {
-                beforeselect: this.onShipFromAddressBeforeSelect
-                //change: this.onShipFromAddressChange
+            "#cboShipFromAddress":{
+                beforequery: this.onShipFromAddressBeforeQuery,
+                select: this.onShipLocationSelect
             },
             "#cboShipToAddress": {
                 select: this.onShipLocationSelect
