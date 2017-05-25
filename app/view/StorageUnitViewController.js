@@ -21,7 +21,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         helpURL: '/display/DOC/Storage+Locations',
         binding: {
             bind: {
-                title: 'Storage Location - {current.strName}'
+                title: 'Storage Unit - {current.strName}'
             },
             cboItem: {
                 value: '{current.strItemNo}',
@@ -353,7 +353,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            iRely.Msg.showWait('Duplicating Storage Location...');
+            iRely.Msg.showWait('Duplicating Storage Unit...');
             ic.utils.ajax({
                 timeout: 120000,
                 url: '../Inventory/api/StorageLocation/DuplicateStorageLocation',
