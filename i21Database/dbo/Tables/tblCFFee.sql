@@ -23,5 +23,8 @@
     CONSTRAINT [FK_tblCFFee_tblGLAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
 
+GO
 
+CREATE UNIQUE NONCLUSTERED INDEX tblCFFee_UniqueFee
+	ON tblCFFee (strFee);
 

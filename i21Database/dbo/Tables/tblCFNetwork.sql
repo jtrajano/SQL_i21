@@ -83,3 +83,7 @@ GO
 CREATE NONCLUSTERED INDEX [tblCFNetwork_intCustomerId]
     ON [dbo].[tblCFNetwork]([intCustomerId] ASC);
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFNetwork_UniqueNetwork
+	ON tblCFNetwork (strNetwork);
+
