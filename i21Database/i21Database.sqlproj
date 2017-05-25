@@ -5237,6 +5237,8 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateSOStatusFromInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionsPricingHistory.sql" />
     <None Include="Scripts\Post-Deployment\IC\PopulateLotContainerNoAndCondition.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInvoicesTaxDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -163,6 +163,7 @@ INSERT INTO @IntegrationLog
 	,[intIntegrationLogDetailId]
 	,[intInvoiceId]
 	,[intInvoiceDetailId]
+	,[intTemporaryDetailIdForTax]
 	,[intId]
 	,[strTransactionType]
 	,[strType]
@@ -194,6 +195,7 @@ SELECT
 	,[intIntegrationLogDetailId]			= 0
 	,[intInvoiceId]							= [intInvoiceId]
 	,[intInvoiceDetailId]					= NULL
+	,[intTemporaryDetailIdForTax]			= NULL
 	,[intId]								= [intId]
 	,[strTransactionType]					= [strTransactionType]
 	,[strType]								= [strType]
@@ -435,6 +437,7 @@ USING
 		,[intSourceId]							= IE.[intSourceId]
 		,[strSourceId]							= IE.[strSourceId]
 		,[ysnPost]								= IE.[ysnPost]
+		,[intTempDetailIdForTaxes]				= IE.[intTempDetailIdForTaxes]
 	FROM
 		@ItemEntries IE
 	INNER JOIN
@@ -715,6 +718,7 @@ VALUES(
 			,NULL									--[intIntegrationLogDetailId]
 			,INSERTED.[intInvoiceId]				--[intInvoiceId]
 			,INSERTED.[intInvoiceDetailId]			--[intInvoiceDetailId]
+			,Source.[intTempDetailIdForTaxes]		--[intTempDetailIdForTaxes]	
 			,Source.[intId]							--[intId]
 			,Source.[strTransactionType]			--[strTransactionType]
 			,Source.[strType]						--[strType]
@@ -748,6 +752,7 @@ VALUES(
 			,[intIntegrationLogDetailId]
 			,[intInvoiceId]
 			,[intInvoiceDetailId]
+			,[intTemporaryDetailIdForTax]
 			,[intId]
 			,[strTransactionType]
 			,[strType]

@@ -4,6 +4,7 @@
 	[intIntegrationLogId]			INT												NOT NULL,
 	[intInvoiceId]					INT												NULL,
 	[intInvoiceDetailId]			INT												NULL,
+	[intTemporaryDetailIdForTax]	INT												NULL,
 	[intId]							INT												NULL,
 	[strErrorMessage]				NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL,
 	[strTransactionType]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,

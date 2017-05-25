@@ -3,9 +3,8 @@
 */
 CREATE TYPE [dbo].[LineItemTaxDetailStagingTable] AS TABLE
 (		
-	 [intId]								INT				IDENTITY PRIMARY KEY CLUSTERED																																											
+	 [intId]								INT				--IDENTITY PRIMARY KEY CLUSTERED																																											
 	,[intDetailId]							INT												NULL		-- Id of the line item record
-	--,[intInvoiceDetailTaxId]				INT												NULL		-- Invoice Detail Tax Id(Insert new if NULL, else Update existing) 
 	,[intDetailTaxId]						INT												NULL		-- Invoice Detail Tax Id(Insert new if NULL, else Update existing) 
 	,[intTaxGroupId]						INT												NULL		-- Key Value tblSMTaxGroup.intTaxGroupId
 	,[intTaxCodeId]							INT												NOT NULL	-- Key Value tblSMTaxCode.intTaxCodeId
@@ -22,4 +21,13 @@ CREATE TYPE [dbo].[LineItemTaxDetailStagingTable] AS TABLE
 	,[ysnTaxExempt]							BIT												NULL		-- Indicate whether the tax code is marked as exempted
 	,[strNotes]								NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL		-- Details of exemption
 	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id of parent line item detail (InvoiceIntegrationStagingTable) which are also fro processing
+	,[dblCurrencyExchangeRate]				NUMERIC(18, 6)									NULL
+	,[ysnClearExisting]						BIT												NULL
+	,[strTransactionType]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strType]								NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
+	,[intSourceId]							INT												NULL
+	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
+	,[intHeaderId]							INT												NULL
+	,[dtmDate]								DATETIME										NULL	-- Invoice Date
 )

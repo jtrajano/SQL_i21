@@ -25,6 +25,7 @@
 	[intCurrencyId]						INT NULL,
 	[intTermId]							INT NULL,
 	[intInvoiceDetailId]				INT NULL,
+	[intTemporaryDetailIdForTax]		INT NULL,
 	[intId]								INT NULL,
 	[strTransactionType]				NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 	[strType]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
