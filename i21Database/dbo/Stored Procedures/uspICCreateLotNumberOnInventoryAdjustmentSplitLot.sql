@@ -109,6 +109,8 @@ BEGIN
 			,[strTransactionId]
 			,[strSourceTransactionId]
 			,[intSourceTransactionTypeId]
+			,[strContainerNo]
+			,[strCondition]
 	)
 	SELECT	[intLotId]					= TargetLot.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -207,6 +209,8 @@ BEGIN
 			,[strTransactionId]			= Header.strAdjustmentNo
 			,[strSourceTransactionId]	= SourceLot.strTransactionId
 			,[intSourceTransactionTypeId] = SourceLot.intSourceTransactionTypeId
+			,[strContainerNo]			= SourceLot.strContainerNo
+			,[strCondition]				= SourceLot.strCondition
 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
