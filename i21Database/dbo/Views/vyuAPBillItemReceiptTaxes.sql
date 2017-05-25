@@ -130,12 +130,15 @@ SELECT DISTINCT
 		[strCalculationMethod]		= A.strCalculationMethod COLLATE Latin1_General_CI_AS,
 		[dblRate]					= A.dblRate,
 		[intAccountId]				= A.intTaxAccountId,
+											-- 3RD PARTY WILL ALWAYS BE POSSITVE UNLESS CHECKOFF      
 		[dblTax]					= (CASE WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
 											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 THEN A.dblTax * -1
-											ELSE A.dblTax END),
+											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											ELSE (CASE WHEN B.ysnPrice = 1 THEN  A.dblTax * -1 ELSE A.dblTax END) END),
 		[dblAdjustedTax]			= (CASE WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 0 THEN ABS(A.dblAdjustedTax) 
 											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 THEN A.dblAdjustedTax * -1
-											ELSE A.dblAdjustedTax END) ,
+											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											ELSE (CASE WHEN B.ysnPrice = 1 THEN  A.dblAdjustedTax * -1 ELSE A.dblAdjustedTax END) END) ,
 		[ysnTaxAdjusted]			= A.ysnTaxAdjusted,
 		[ysnSeparateOnBill]			= 'false',
 		[ysnCheckOffTax]			= A.ysnCheckoffTax,

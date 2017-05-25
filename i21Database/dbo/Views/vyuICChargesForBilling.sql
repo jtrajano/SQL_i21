@@ -86,6 +86,8 @@ SELECT
 	,[strReceiptType]							= Receipt.strReceiptType
 	,intForexRateTypeId							= ReceiptCharge.intForexRateTypeId
 	,dblForexRate								= ReceiptCharge.dblForexRate
+	,[ysnPrice]									= ReceiptCharge.ysnPrice
+	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
 FROM 
 	tblICInventoryReceiptCharge ReceiptCharge  INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -228,6 +230,8 @@ SELECT
 	,[strReceiptType]							= Receipt.strReceiptType
 	,intForexRateTypeId							= ReceiptCharge.intForexRateTypeId
 	,dblForexRate								= ReceiptCharge.dblForexRate
+	,[ysnPrice]									= ReceiptCharge.ysnPrice
+	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
