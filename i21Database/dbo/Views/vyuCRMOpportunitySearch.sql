@@ -41,6 +41,7 @@
 					,strCompanyLocation
 					,strEntityLocation
 					,intAge = DATEDIFF(day,dtmCreated,GETDATE())
+					,strRFPRFILink
 		from 
 				(
 				select
@@ -51,8 +52,6 @@
 					,dtmExpectedCloseDate = proj.dtmSalesDate
 					,strExpectedCloseDate = CONVERT(nvarchar(10),proj.dtmSalesDate,101)
 					,strPipePercentage = convert(nvarchar(20), cast(round(pipe.dblProbability,2) as numeric(36,2))) + '%'
-					--,dblOpportunityAmmount = (select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
-					--,dblNetOpportunityAmmount = (cast(round(pipe.dblProbability/100,2) as numeric (36,2))*(select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId)))
 					,dblOpportunityAmmount = (select sum(distinct vyuCRMOpportunityQuoteSummary.dblSalesOrderTotal) from vyuCRMOpportunityQuoteSummary where vyuCRMOpportunityQuoteSummary.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
 					,dblNetOpportunityAmmount = (cast(round(pipe.dblProbability/100,2) as numeric (36,2))*(select sum(distinct vyuCRMOpportunityQuoteSummary.dblSalesOrderTotal) from vyuCRMOpportunityQuoteSummary where vyuCRMOpportunityQuoteSummary.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId)))
 					,dblSoftwareAmmount = (select sum(distinct vyuCRMOpportunityQuoteSummary.dblSoftwareAmount) from vyuCRMOpportunityQuoteSummary where vyuCRMOpportunityQuoteSummary.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
@@ -90,7 +89,6 @@
 					,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101)
 					,proj.intPercentComplete
 					,proj.ysnCompleted
-					--,proj.strOpportunityStatus
 					,strOpportunityStatus = (select top 1 tblCRMStatus.strStatus from tblCRMStatus where tblCRMStatus.intStatusId = proj.intStatusId)
 					,strProjectManager = (select top 1 e.strName from tblEMEntity e where e.intEntityId = proj.intInternalProjectManager)
 					,strProjectType = 'CRM'
@@ -109,6 +107,7 @@
 					,cam.strCampaignName
 					,strCompanyLocation = camloc.strLocationName
 					,strEntityLocation = enloc.strLocationName
+					,proj.strRFPRFILink
 				from
 					tblCRMOpportunity proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
