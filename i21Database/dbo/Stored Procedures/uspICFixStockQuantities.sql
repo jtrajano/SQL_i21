@@ -994,7 +994,7 @@ BEGIN
 
 	UPDATE	s
 	SET		dblUnitReserved = 0 
-	FROM	tblICItemStockUOM 
+	FROM	tblICItemStockUOM s
 			
 	INSERT INTO @FixStockReservation (
 			intItemId
