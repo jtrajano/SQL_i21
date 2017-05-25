@@ -4,6 +4,20 @@
 	,@UserId		INT = NULL     
 AS  
   
+DECLARE @intInvoiceId INT 
+SET @intInvoiceId = @InvoiceId
+
+SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
+
+IF (@intInvoiceId IS NULL)
+	BEGIN
+		SET @ForDelete = 0
+	END
+ELSE
+	BEGIN
+		SET @ForDelete = 1
+	END
+
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
