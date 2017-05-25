@@ -618,7 +618,23 @@ SET @batchIdUsed = @batchId
 					ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(D.dblBaseInterest,0.00)) - ISNULL(D.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - D.dblBasePayment),0) <> 0
 					AND  (@GainLossAccount IS NULL OR @GainLossAccount = 0)
 					AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((D.dblPayment - D.dblInterest) + D.dblDiscount)	
-					
+
+				--Validate Bank Account for ACH Payment Method
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'Bank Account is required for payment with ACH payment method!'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				WHERE A.strPaymentMethod = 'ACH' AND ISNULL(intBankAccountId, 0) = 0 
+
 				--+overpayment
 				INSERT INTO
 					@AROverpayment
