@@ -786,7 +786,7 @@ BEGIN
 					[intPODetailId]				=	NULL,
 					[dblQtyOrdered]				=	A.dblOrderQty,
 					[dblQtyReceived]			=	A.dblQuantityToBill,
-					[dblTax]					=	ISNULL(A.dblTax,0),
+					[dblTax]					=	(CASE WHEN C.ysnPrice = 1 THEN ISNULL(A.dblTax,0) * -1 ELSE ISNULL(A.dblTax,0) END), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
 					[dblForexRate]				=	ISNULL(A.dblForexRate,0),
 					[intForexRateTypeId]		=   A.intForexRateTypeId,
 					[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
@@ -963,7 +963,7 @@ BEGIN
 						[intPODetailId]				=	NULL,
 						[dblQtyOrdered]				=	A.dblOrderQty,
 						[dblQtyReceived]			=	A.dblQuantityToBill,
-						[dblTax]					=	(CASE WHEN ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
+						[dblTax]					=	(CASE WHEN ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
 															  WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
 															ELSE ISNULL(A.dblTax,0) END),
 						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
