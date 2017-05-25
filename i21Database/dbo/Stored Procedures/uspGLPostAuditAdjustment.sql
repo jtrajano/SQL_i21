@@ -432,12 +432,8 @@ ELSE
 			,[strDescription]		= A.[strDescription]
 			,[strReference]			= 'AA Audit AdjustmentFY ' + CAST(YEAR(B.[dtmDate]) AS NVARCHAR(50))
 			,[dtmTransactionDate]	= A.[dtmDate]
-			,[dblDebit]				= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
-											WHEN [dblDebit] < 0 THEN 0
-											ELSE [dblDebit] END 
-			,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
-											WHEN [dblCredit] < 0 THEN 0
-											ELSE [dblCredit] END	
+			,[dblDebit]				
+			,[dblCredit]			
 			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
 			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
