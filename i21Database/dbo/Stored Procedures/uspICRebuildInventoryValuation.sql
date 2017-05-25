@@ -637,11 +637,9 @@ BEGIN
 									'Inventory Adjustment'
 								WHEN @strTransactionForm = 'Inventory Receipt' THEN 
 									'AP Clearing'
-								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId LIKE 'SI%' THEN 
+								WHEN @strTransactionForm = 'Inventory Shipment' THEN 
 									'Cost of Goods'
-								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId NOT LIKE 'SI%' THEN 
-									'Inventory In-Transit'
-								WHEN @strTransactionForm = 'Invoice' AND @strTransactionId LIKE 'SI%' THEN 
+								WHEN @strTransactionForm = 'Invoice' THEN 
 									'Cost of Goods'
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
 									CASE WHEN EXISTS (SELECT 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND strTransferType = 'Location to Location') THEN 
