@@ -40,14 +40,14 @@ FROM	tblICInventoryReceipt Receipt
 					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(-rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
-					,dblReceiptTax = ISNULL(rc.dblTax, 0)
+					,dblReceiptTax = ISNULL(-rc.dblTax, 0)
 					,dblVoucherTax = ISNULL(voucher.TaxTotal, 0) 
 					,dblOpenQty = -1 - ISNULL(voucher.QtyTotal, 0)
 					,dblItemsPayable = 
 						ROUND(-rc.dblAmount, 2)
 						- ISNULL(voucher.LineTotal, 0)
 					,dblTaxesPayable = 
-						ISNULL(rc.dblTax, 0)
+						ISNULL(-rc.dblTax, 0)
 						- ISNULL(voucher.TaxTotal, 0) 
 					,i.strItemNo
 					,strItemDescription = i.strDescription	
