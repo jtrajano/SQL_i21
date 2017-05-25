@@ -160,6 +160,9 @@ BEGIN
 			,strTransactionId
 			,strSourceTransactionId
 			,intSourceTransactionTypeId
+			,strContainerNo
+			,strCondition
+
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -206,6 +209,8 @@ BEGIN
 			,strTransactionId			= [Transfer].strTransferNo
 			,strSourceTransactionId		= SourceLot.strTransactionId
 			,intSourceTransactionTypeId = SourceLot.intSourceTransactionTypeId
+			,strContainerNo			= SourceLot.strContainerNo
+			,strCondition			= SourceLot.strCondition
 
 	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId

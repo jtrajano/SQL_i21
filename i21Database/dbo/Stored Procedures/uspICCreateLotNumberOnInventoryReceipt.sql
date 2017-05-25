@@ -218,6 +218,8 @@ BEGIN
 			,strTransactionId
 			,strSourceTransactionId
 			,intSourceTransactionTypeId
+			,strContainerNo
+			,strCondition
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -257,6 +259,8 @@ BEGIN
 			,strTransactionId			= Receipt.strReceiptNumber
 			,strSourceTransactionId		= Receipt.strReceiptNumber
 			,intSourceTransactionTypeId = @InventoryTransactionType_InventoryReceipt
+			,strContainerNo			= ItemLot.strContainerNo
+			,strCondition			= ItemLot.strCondition
 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

@@ -34,7 +34,7 @@ DECLARE @LotType_Manual AS INT = 1
 
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intParentLotId AS INT = NULL
-DECLARE @intErrorFoundOnMFCreateUpdateParentLotNumber AS INT
+DECLARE @intReturnCode AS INT = 0 
 
 -- Lot Number batch number in the starting numbers table. 
 DECLARE @STARTING_NUMBER_BATCH AS INT = 24 
@@ -94,6 +94,8 @@ DECLARE
 	,@intSourceTransactionTypeId AS INT 
 	,@intOwnerId				AS INT 	
 	,@intShiftId				AS INT 
+	,@strContainerNo			AS NVARCHAR(50) 
+	,@strCondition				AS NVARCHAR(50) 
 
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
@@ -125,7 +127,8 @@ BEGIN
 	BEGIN 
 		-- 'Please check for duplicate lot numbers. The lot number {Lot Number} is used more than once in item {Item No} on {Transaction Id}.'
 		EXEC uspICRaiseError 80019, @strLotNumber, @strItemNo, @strReceiptNumber;
-		RETURN -1
+		SET @intReturnCode = -1;
+		GOTO _Exit;
 	END
 END 
 
@@ -179,6 +182,8 @@ SELECT  intId
 		,intSourceTransactionTypeId
 		,intOwnerId 
 		,intShiftId 
+		,strContainerNo
+		,strCondition
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -227,6 +232,8 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intSourceTransactionTypeId
 		,@intOwnerId 
 		,@intShiftId
+		,@strContainerNo
+		,@strCondition
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -254,7 +261,8 @@ BEGIN
 
 		--Please specify the lot numbers for {Item}.
 		EXEC uspICRaiseError 80005, @strItemNo;
-		RETURN -2;
+		SET @intReturnCode = -2;
+		GOTO _Exit_Loop;
 	END 	
 	
 	-- Generate the next lot number - if lot id is NULL AND it is a serial lot item. 
@@ -322,7 +330,8 @@ BEGIN
 
 		--Unable to generate the serial lot number for {Item}.
 		EXEC uspICRaiseError 80009, @strItemNo; 
-		RETURN -3;
+		SET @intReturnCode = -3;
+		GOTO _Exit_Loop;
 	END 	
 
 	-- If weight UOM is specified, make sure weight is not zero. 
@@ -339,7 +348,8 @@ BEGIN
 
 		-- '{Item} with lot number {Lot Number} needs to have a weight.'
 		EXEC uspICRaiseError 80015, @strItemNo, @strLotNumber;
-		RETURN -4; 
+		SET @intReturnCode = -4;
+		GOTO _Exit_Loop;
 	END 
 
 	-- Setup the Lot Status
@@ -382,7 +392,8 @@ BEGIN
 
 		--'Invalid Owner. {Owner Name} is not configured as an Owner for {Item Name}. Please check the Item setup.'
 		EXEC uspICRaiseError 80105, @strName, @strItemNo;
-		RETURN -11;
+		SET @intReturnCode = -11;
+		GOTO _Exit_Loop;
 	END 
 
 	----------------------------------------------
@@ -466,6 +477,8 @@ BEGIN
 						,dblWeightPerQty = @dblWeightPerQty
 						,intSplitFromLotId = @intSplitFromLotId
 						,intItemOwnerId = @intItemOwnerId
+						,strContainerNo = @strContainerNo
+						,strCondition = @strCondition 
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -496,6 +509,8 @@ BEGIN
 				,intSplitFromLotId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSplitFromLotId ELSE LotMaster.intSplitFromLotId END 
 				,intNoPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intNoPallet ELSE LotMaster.intNoPallet END 
 				,intUnitPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intUnitPallet ELSE LotMaster.intUnitPallet END 
+				,strContainerNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContainerNo ELSE LotMaster.strContainerNo END 
+				,strCondition			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strCondition ELSE LotMaster.strCondition END 
 								
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
@@ -509,6 +524,7 @@ BEGIN
 													END 
 												ELSE 0
 										  END
+
 				-- Allow update on the following fields if dblQty is zero.  
 				,dblWeightPerQty		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 														
 														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN
@@ -698,6 +714,8 @@ BEGIN
 				,strSourceTransactionId
 				,intSourceTransactionTypeId
 				,intItemOwnerId
+				,strContainerNo
+				,strCondition
 
 			) VALUES (
 				@intItemId
@@ -745,6 +763,8 @@ BEGIN
 				,@strSourceTransactionId
 				,@intSourceTransactionTypeId
 				,@intItemOwnerId 
+				,@strContainerNo
+				,@strCondition
 			)
 		;
 	
@@ -759,9 +779,9 @@ BEGIN
 		IF ISNULL(@intInsertedLotId, 0) <> 0
 		BEGIN 
 			SET @intParentLotId = NULL
-			SET @intErrorFoundOnMFCreateUpdateParentLotNumber = 0 
+			SET @intReturnCode = 0
 
-			EXEC @intErrorFoundOnMFCreateUpdateParentLotNumber = dbo.uspMFCreateUpdateParentLotNumber 
+			EXEC @intReturnCode = dbo.uspMFCreateUpdateParentLotNumber 
 				@strParentLotNumber
 				,@strParentLotAlias
 				,@intItemId
@@ -775,8 +795,10 @@ BEGIN
 				,@dtmManufacturedDate
 				,@intShiftId
 
-			IF @intErrorFoundOnMFCreateUpdateParentLotNumber <> 0
-				RETURN @intErrorFoundOnMFCreateUpdateParentLotNumber;
+			IF @intReturnCode <> 0
+			BEGIN 
+				GOTO _Exit_Loop;
+			END
 		END 
 
 		-- Insert into a temp table 
@@ -819,7 +841,8 @@ BEGIN
 
 		-- Lot {Lot number} exists in {Quantity UOM used}. Cannot receive in {Quantity UOM proposed value}. Change the receiveing UOM to {Quantity UOM used} or create a new lot.
 		EXEC uspICRaiseError 80011, @strLotNumber, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo, @strUnitMeasureItemUOMFrom; 
-		RETURN -6;
+		SET @intReturnCode = -6;
+		GOTO _Exit_Loop;
 	END 
 
 	-- Validation check point 2 of 5
@@ -834,7 +857,8 @@ BEGIN
 
 		--'The Weight UOM for {Lot number} cannot be changed from {Weight UOM} to {Weight UOM} because a stock from it has been used from a different transaction.'
 		EXEC uspICRaiseError 80012, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo; 
-		RETURN -7;
+		SET @intReturnCode = -7;
+		GOTO _Exit_Loop;
 	END 
 
 	-- Validation check point 3 of 5
@@ -847,7 +871,8 @@ BEGIN
 
 		--'The Sub-Location for {Lot number} cannot be changed from {Sub Location} to {Sub Location} because a stock from it has been used from a different transaction.'
 		EXEC uspICRaiseError 80013, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo;
-		RETURN -8;
+		SET @intReturnCode = -8;
+		GOTO _Exit_Loop;
 	END 
 
 	-- Validation check point 4 of 5
@@ -860,7 +885,8 @@ BEGIN
 
 		--'The Storage Location for {Lot number} cannot be changed from {Storage Location} to {StorageLocation} because a stock from it has been used from a different transaction.'
 		EXEC uspICRaiseError 80014, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo;
-		RETURN -9;
+		SET @intReturnCode = -9;
+		GOTO _Exit_Loop;
 	END
 
 	-- Validation check point 5 of 5
@@ -873,7 +899,8 @@ BEGIN
 
 		--Failed to process the lot number for {Item}. It may have been used on a different sub-location or storage location.'
 		EXEC uspICRaiseError 80010, @strItemNo
-		RETURN -10;
+		SET @intReturnCode = -10;
+		GOTO _Exit_Loop;
 	END
 	
 	-- Fetch the next row from cursor. 
@@ -920,8 +947,12 @@ BEGIN
 		,@intSourceTransactionTypeId
 		,@intOwnerId 
 		,@intShiftId
+		,@strContainerNo
+		,@strCondition
 	;
 END
+
+_Exit_Loop:
 
 CLOSE loopLotItems;
 DEALLOCATE loopLotItems;
@@ -929,4 +960,6 @@ DEALLOCATE loopLotItems;
 -- End of the loop
 ----------------------------------------------------------------------------------------------------------------------------
 
-RETURN 0;
+_Exit:
+
+RETURN @intReturnCode;
