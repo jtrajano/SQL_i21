@@ -261,6 +261,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\1620_to_1630.sql
 :r .\IC\18_FOBPointTypes.sql
 :r .\IC\19_M2MComputations.sql
+:r .\IC\PopulateLotContainerNoAndCondition.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
