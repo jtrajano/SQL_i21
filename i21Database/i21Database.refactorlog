@@ -6573,4 +6573,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblSMMigrationLog]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="90d48dd1-68a9-4ba9-a8e8-9eb9607ec3b0" ChangeDateTime="05/25/2017 15:23:11">
+    <Property Name="ElementName" Value="[dbo].[tblCTWeightGrade].[intOriginDest]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTWeightGrade]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strWhereFinalized" />
+  </Operation>
 </Operations>

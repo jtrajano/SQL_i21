@@ -5315,7 +5315,6 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
     <None Include="Scripts\Post-Deployment\GR\TicketTypes.sql" />
     <None Include="Scripts\Post-Deployment\EM\019_RemoveEmailToParentEntity.sql" />
-    <None Include="Scripts\Post-Deployment\CT\3_Miscellaneous.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddPaycheckDirectDepositEntries.sql" />
     <None Include="Scripts\Post-Deployment\EM\021_MoveCustomerMessageToEntity.sql" />
     <None Include="Scripts\Post-Deployment\EM\022_DefaultDataForContactTypeAndImport.sql" />
@@ -5375,6 +5374,7 @@
     <Build Include="dbo\Stored Procedures\uspSMTransactionApproved.sql" />
     <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\25_ApprovalHistory.sql" />
+    <None Include="Scripts\Post-Deployment\CT\172To173.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
