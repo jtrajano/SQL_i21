@@ -53,13 +53,12 @@ BEGIN
 	SELECT	@strIds	=	STUFF(															
 									(
 										SELECT	DISTINCT												
-												', ' +	LTRIM(intEntityContactId)
+												'|^|' +	LTRIM(intEntityContactId)
 										FROM	vyuCTEntityToContact 
 										WHERE	intEntityId = @intEntityId
 										AND		ISNULL(strEmail,'') <> ''
-										AND		strEmailDistributionOption like '%Contracts%'
 										FOR XML PATH('')
-									),1,2, ''
+									),1,3, ''
 								)
 				
 	FROM	vyuCTEntityToContact CH
