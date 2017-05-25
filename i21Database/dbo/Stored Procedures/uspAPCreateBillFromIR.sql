@@ -551,8 +551,7 @@ BEGIN
 															THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) 
 																		   THEN E1.dblCashPrice 
 																		   ELSE B.dblUnitCost 
-																	  END / ISNULL(A.intSubCurrencyCents,1)  * (ABS(B.dblOpenReceive - B.dblBillQty)
-																		 * (CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6))/ CAST(ISNULL(ItemWeightUOM.dblUnitQty ,1) AS DECIMAL(18,6))))  * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+																	  END / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 															WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
 															THEN CAST(ABS(B.dblOpenReceive - B.dblBillQty) 
 																		* 
@@ -568,8 +567,7 @@ BEGIN
 															THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) 
 																		   THEN E1.dblCashPrice 
 																		   ELSE B.dblUnitCost 
-																	  END * (ABS(B.dblOpenReceive - B.dblBillQty) 
-																		  * (CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6))/ CAST(ISNULL(ItemWeightUOM.dblUnitQty ,1) AS DECIMAL(18,6))))  * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+																	  END * B.dblNet  * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 															WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 															THEN CAST(ABS(B.dblOpenReceive - B.dblBillQty)
 																		* CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  
