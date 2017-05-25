@@ -7,3 +7,6 @@
     CONSTRAINT [FK_tblCFExportTaxMapping_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
 );
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFExportTaxMapping_UniqueExportTaxMapping
+	ON tblCFExportTaxMapping (strExportTaxMapping);

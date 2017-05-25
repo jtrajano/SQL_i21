@@ -9,3 +9,6 @@
     CONSTRAINT [PK_tblCFDiscountSchedule] PRIMARY KEY CLUSTERED ([intDiscountScheduleId] ASC)
 );
 
+GO 
+CREATE UNIQUE NONCLUSTERED INDEX tblCFDiscountSchedule_UniqueDiscountSchedule
+	ON tblCFDiscountSchedule (strDiscountSchedule);

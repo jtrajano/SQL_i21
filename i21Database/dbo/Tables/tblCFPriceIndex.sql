@@ -7,9 +7,11 @@
 );
 
 
-
-
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFPriceIndex_intPriceIndexId]
     ON [dbo].[tblCFPriceIndex]([intPriceIndexId] ASC);
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFPriceIndex_UniquePriceIndex
+	ON tblCFPriceIndex (strPriceIndex);
 

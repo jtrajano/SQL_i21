@@ -14,4 +14,6 @@ GO
 CREATE UNIQUE NONCLUSTERED INDEX tblCFCardType_UniqueNetworkCardType
 	ON tblCFCardType (intNetworkId,strCardType);
 
-
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFCardType_UniqueCardType
+	ON tblCFCardType (strCardType);
