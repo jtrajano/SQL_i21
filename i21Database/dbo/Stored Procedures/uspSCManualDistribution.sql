@@ -392,7 +392,7 @@ END
 				[intOwnershipType] [INT],
 				UNIQUE ([intInventoryReceiptItemId])
 			);
-			INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId,intOwnershipType) SELECT intInventoryReceiptItemId,intOrderId,intOwnershipType FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
+			INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId,intOwnershipType) SELECT intInventoryReceiptItemId,intOrderId,intOwnershipType FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId  AND dblUnitCost > 0
 
 			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 			FOR
