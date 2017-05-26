@@ -86,7 +86,6 @@ BEGIN TRY
 
 	DECLARE  @QueryString AS VARCHAR(MAX)
 			,@Columns AS VARCHAR(MAX)
-			,@intId AS VARCHAR(100)
 			
 	SET @Columns =	(CASE 
 						WHEN @GroupingOption = 0 THEN '[intId]'
@@ -107,12 +106,19 @@ BEGIN TRY
 						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]'
 					END)
 					
-	SET @intId = (CASE WHEN @GroupingOption = 0 THEN '' ELSE '[intId],' END)				
 				
-	SET @QueryString = 'INSERT INTO #EntriesForProcessing( ' + @intId + @Columns + ', [ysnForInsert]) SELECT ' + @intId + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) = 0 GROUP BY ' + @intId + @Columns
+	IF @GroupingOption > 0
+		SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], ' +  @Columns + ', [ysnForInsert]) SELECT MIN([intId]), ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) = 0 GROUP BY ' + @Columns
+	ELSE
+		SET @QueryString = 'INSERT INTO #EntriesForProcessing(' +  @Columns + ', [ysnForInsert]) SELECT ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) = 0 GROUP BY ' + @Columns
+
 	EXECUTE(@QueryString);
 
-	SET @QueryString = 'INSERT INTO #EntriesForProcessing(' + @intId + ' [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT ' + @intId + ' [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY ' + @intId + ' [intInvoiceId], [intInvoiceDetailId],' + @Columns
+	IF @GroupingOption > 0
+		SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT [intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY [intId], [intInvoiceId], [intInvoiceDetailId],' + @Columns
+	ELSE
+		SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], [intInvoiceId], [intInvoiceDetailId], [ysnForUpdate]) SELECT DISTINCT [intId], [intInvoiceId], [intInvoiceDetailId], 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY [intId], [intInvoiceId], [intInvoiceDetailId]'
+
 	EXECUTE(@QueryString);
 
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
@@ -432,26 +438,12 @@ BEGIN
 		@InvoiceEntries IE
 	INNER JOIN
 		#EntriesForProcessing EFP WITH (NOLOCK)
-			ON (IE.[intId] = EFP.[intId] OR @GroupingOption > 0)
-			AND (IE.[intEntityCustomerId] = EFP.[intEntityCustomerId] OR (EFP.[intEntityCustomerId] IS NULL AND @GroupingOption < 1))
-			AND (IE.[intSourceId] = EFP.[intSourceId] OR (EFP.[intSourceId] IS NULL AND (@GroupingOption < 2 OR IE.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
-			AND (IE.[intCompanyLocationId] = EFP.[intCompanyLocationId] OR (EFP.[intCompanyLocationId] IS NULL AND @GroupingOption < 3))
-			AND (ISNULL(IE.[intCurrencyId],0) = ISNULL(EFP.[intCurrencyId],0) OR (EFP.[intCurrencyId] IS NULL AND @GroupingOption < 4))
-			AND (CAST(IE.[dtmDate] AS DATE) = EFP.[dtmDate] OR (EFP.[dtmDate] IS NULL AND @GroupingOption < 5))
-			AND (ISNULL(IE.[intTermId],0) = ISNULL(EFP.[intTermId],0) OR (EFP.[intTermId] IS NULL AND @GroupingOption < 6))		
-			AND (ISNULL(IE.[intShipViaId],0) = ISNULL(EFP.[intShipViaId],0) OR (EFP.[intShipViaId] IS NULL AND @GroupingOption < 7))
-			AND (ISNULL(IE.[intEntitySalespersonId],0) = ISNULL(EFP.[intEntitySalespersonId],0) OR (EFP.[intEntitySalespersonId] IS NULL AND @GroupingOption < 8))
-			AND (ISNULL(IE.[strPONumber],'') = ISNULL(EFP.[strPONumber],'') OR (EFP.[strPONumber] IS NULL AND @GroupingOption < 9))		
-			AND (ISNULL(IE.[strBOLNumber],'') = ISNULL(EFP.[strBOLNumber],'') OR (EFP.[strBOLNumber] IS NULL AND @GroupingOption < 10))	
-			AND (ISNULL(IE.[strComments],'') = ISNULL(EFP.[strComments],'') OR (EFP.[strComments] IS NULL AND @GroupingOption < 11))
-			AND (ISNULL(IE.[intAccountId],0) = ISNULL(EFP.[intAccountId],0) OR (EFP.[intAccountId] IS NULL AND @GroupingOption < 12))
-			AND (ISNULL(IE.[intFreightTermId],0) = ISNULL(EFP.[intFreightTermId],0) OR (EFP.[intFreightTermId] IS NULL AND @GroupingOption < 13))
-			AND (ISNULL(IE.[intPaymentMethodId],0) = ISNULL(EFP.[intPaymentMethodId],0) OR (EFP.[intPaymentMethodId] IS NULL AND @GroupingOption < 14))			
-			AND (ISNULL(IE.[strInvoiceOriginId],'') = ISNULL(EFP.[strInvoiceOriginId],'') OR (EFP.[strInvoiceOriginId] IS NULL AND @GroupingOption < 15))
+			ON IE.[intId] = EFP.[intId]
 	WHERE
 		ISNULL(EFP.[ysnForInsert],0) = 1
 	ORDER BY
 		[intId]
+
 			
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoices]
@@ -484,9 +476,19 @@ BEGIN
 			
 	IF (EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId AND ISNULL([ysnSuccess],0) = 1 AND ISNULL([ysnHeader],0) = 1 ) AND @GroupingOption > 0)
 	BEGIN
+
+		UPDATE EFP
+		SET EFP.[intInvoiceId] = IL.[intInvoiceId]
+		FROM
+			#EntriesForProcessing EFP
+		INNER JOIN
+			(SELECT [intId], [intInvoiceId], [ysnSuccess], [ysnHeader] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) IL
+				ON EFP.[intId] = IL.[intId]
+				AND ISNULL(IL.[ysnHeader], 0) = 1
+				AND ISNULL(IL.[ysnSuccess], 0) = 1		
+			
 		
 		DECLARE @LineItems InvoiceStagingTable
-		DELETE FROM @LineItems
 		INSERT INTO @LineItems
 			([intId]
 			,[strTransactionType]
@@ -624,7 +626,7 @@ BEGIN
 			,[intDestinationGradeId]
 			,[intDestinationWeightId])
 		SELECT
-			 [intId]								= IL.[intId]
+			 [intId]								= ITG.[intId]
 			,[strTransactionType]					= ARI.[strTransactionType]
 			,[strType]								= ARI.[strType]
 			,[strSourceTransaction]					= ITG.[strSourceTransaction]
@@ -762,9 +764,23 @@ BEGIN
 		FROM
 			@InvoiceEntries ITG
 		INNER JOIN
-			(SELECT [intId], [intInvoiceId], [ysnSuccess] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId)  IL
-				ON ITG.[intId] = IL.[intId]
-				AND IL.[ysnSuccess] = 1
+			#EntriesForProcessing EFP WITH (NOLOCK)
+				ON (ISNULL(ITG.[intId], 0) = ISNULL(EFP.[intId], 0) OR @GroupingOption > 0)
+				AND (ISNULL(ITG.[intEntityCustomerId], 0) = ISNULL(EFP.[intEntityCustomerId], 0) OR (EFP.[intEntityCustomerId] IS NULL AND @GroupingOption < 1))
+				AND (ISNULL(ITG.[intSourceId], 0) = ISNULL(EFP.[intSourceId], 0) OR (EFP.[intSourceId] IS NULL AND (@GroupingOption < 2 OR ITG.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+				AND (ISNULL(ITG.[intCompanyLocationId], 0) = ISNULL(EFP.[intCompanyLocationId], 0) OR (EFP.[intCompanyLocationId] IS NULL AND @GroupingOption < 3))
+				AND (ISNULL(ITG.[intCurrencyId],0) = ISNULL(EFP.[intCurrencyId],0) OR (EFP.[intCurrencyId] IS NULL AND @GroupingOption < 4))
+				AND (CAST(ISNULL(ITG.[dtmDate], @DateNow) AS DATE) = CAST(ISNULL(EFP.[dtmDate], @DateNow) AS DATE) OR (EFP.[dtmDate] IS NULL AND @GroupingOption < 5))
+				AND (ISNULL(ITG.[intTermId],0) = ISNULL(EFP.[intTermId],0) OR (EFP.[intTermId] IS NULL AND @GroupingOption < 6))        
+				AND (ISNULL(ITG.[intShipViaId],0) = ISNULL(EFP.[intShipViaId],0) OR (EFP.[intShipViaId] IS NULL AND @GroupingOption < 7))
+				AND (ISNULL(ITG.[intEntitySalespersonId],0) = ISNULL(EFP.[intEntitySalespersonId],0) OR (EFP.[intEntitySalespersonId] IS NULL AND @GroupingOption < 8))
+				AND (ISNULL(ITG.[strPONumber],'') = ISNULL(EFP.[strPONumber],'') OR (EFP.[strPONumber] IS NULL AND @GroupingOption < 9))        
+				AND (ISNULL(ITG.[strBOLNumber],'') = ISNULL(EFP.[strBOLNumber],'') OR (EFP.[strBOLNumber] IS NULL AND @GroupingOption < 10))    
+				AND (ISNULL(ITG.[strComments],'') = ISNULL(EFP.[strComments],'') OR (EFP.[strComments] IS NULL AND @GroupingOption < 11))
+				AND (ISNULL(ITG.[intAccountId],0) = ISNULL(EFP.[intAccountId],0) OR (EFP.[intAccountId] IS NULL AND @GroupingOption < 12))
+				AND (ISNULL(ITG.[intFreightTermId],0) = ISNULL(EFP.[intFreightTermId],0) OR (EFP.[intFreightTermId] IS NULL AND @GroupingOption < 13))
+				AND (ISNULL(ITG.[intPaymentMethodId],0) = ISNULL(EFP.[intPaymentMethodId],0) OR (EFP.[intPaymentMethodId] IS NULL AND @GroupingOption < 14))            
+				AND (ISNULL(ITG.[strInvoiceOriginId],'') = ISNULL(EFP.[strInvoiceOriginId],'') OR (EFP.[strInvoiceOriginId] IS NULL AND @GroupingOption < 15))
 		INNER JOIN
 			(SELECT
 				 [strTransactionType]
@@ -809,7 +825,10 @@ BEGIN
 				,[intTruckDriverId]
 				,[intTruckDriverReferenceId]
 			 FROM tblARInvoice WITH (NOLOCK)) ARI
-				ON IL.[intInvoiceId] = ARI.[intInvoiceId] 
+				ON EFP.[intInvoiceId] = ARI.[intInvoiceId] 
+			 WHERE
+				ISNULL(EFP.[ysnForInsert],0) = 1
+
 
 		EXEC [dbo].[uspARAddItemToInvoices]
 			 @InvoiceEntries	= @LineItems
@@ -900,7 +919,7 @@ BEGIN
 			ARIILD.[intIntegrationLogId] = @IntegrationLogId
 
 
-		EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
+		EXEC	[dbo].[uspARProcessTaxDetailsForLineItems]
 					 @TaxDetails			= @TaxDetails
 					,@IntegrationLogId		= @IntegrationLogId
 					,@UserId				= @UserId
