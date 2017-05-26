@@ -232,6 +232,17 @@ compLoc.intCompanyLocationId
 ,ISNULL(deferredPayableId.[strAccountId], '') as strDeferredPayableId
 ,ISNULL(pettyCash.[strAccountId], '') as strPettyCash
 ,ISNULL(deferredRevenueId.[strAccountId], '') as strDeferredRevenueId
+,ISNULL(blendProductionDockDoorUnit.[strName], '') as strBlendProductionDockDoorUnit
+,ISNULL(blendProductionStagingUnit.[strName], '') as strBlendProductionStagingUnit
+,ISNULL(defaultCarrier.[strName], '') as strMFDefaultCarrier
+,ISNULL(defaultBlendProductionLocation.[strName], '') as strDefaultBlendProductionLocation
+,ISNULL(defaultStatusForPreSanitizedLot.[strSecondaryStatus], '') as strDefaultStatusForPreSanitizedLot
+,ISNULL(defaultInboundDockDoorUnit.[strName], '') as strDefaultInboundDockDoorUnit
+,ISNULL(historicalStagingTicketLocation.[strName], '') as strHistoricalStagingTicketLocation
+,ISNULL(productAlertOwner.[strName], '') as strProductAlertOwner
+,ISNULL(sanitizationDockDoorUnit.[strName], '') as strSanitizationDockDoorUnit
+,ISNULL(sanitizationStagingUnit.[strName], '') as strSanitizationStagingUnit
+,ISNULL(sanitizationStorageUnit.[strName], '') as strSanitizationStorageUnit
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
 LEFT JOIN tblCMBankAccount bankAccount ON compLoc.intCashAccount = bankAccount.intGLAccountId
@@ -266,3 +277,14 @@ LEFT JOIN tblGLAccount undepositedFundsId ON compLoc.intUndepositedFundsId = und
 LEFT JOIN tblGLAccount deferredPayableId ON compLoc.intDeferredPayableId = deferredPayableId.intAccountId
 LEFT JOIN tblGLAccount pettyCash ON compLoc.intPettyCash = pettyCash.intAccountId
 LEFT JOIN tblGLAccount deferredRevenueId ON compLoc.intDeferredRevenueId = deferredRevenueId.intAccountId
+LEFT JOIN tblICStorageLocation blendProductionDockDoorUnit ON compLoc.intBlendProductionDockDoorUnitId = blendProductionDockDoorUnit.intStorageLocationId
+LEFT JOIN tblICStorageLocation blendProductionStagingUnit ON compLoc.intBlendProductionStagingUnitId = blendProductionStagingUnit.intStorageLocationId
+LEFT JOIN tblEMEntity defaultCarrier ON compLoc.intDefaultCarrierId = defaultCarrier.intEntityId
+LEFT JOIN tblICStorageLocation defaultBlendProductionLocation ON compLoc.intDefaultBlendProductionLocationId = defaultBlendProductionLocation.intStorageLocationId
+LEFT JOIN tblICLotStatus defaultStatusForPreSanitizedLot ON compLoc.intDefaultStatusForPreSanitizedLotId = defaultStatusForPreSanitizedLot.intLotStatusId
+LEFT JOIN tblICStorageLocation defaultInboundDockDoorUnit ON compLoc.intDefaultInboundDockDoorUnitId = defaultInboundDockDoorUnit.intStorageLocationId
+LEFT JOIN tblICStorageLocation historicalStagingTicketLocation ON compLoc.intHistoricalStagingTicketLocationId = historicalStagingTicketLocation.intStorageLocationId
+LEFT JOIN tblEMEntity productAlertOwner ON compLoc.intProductAlertOwnerId = productAlertOwner.intEntityId
+LEFT JOIN tblICStorageLocation sanitizationDockDoorUnit ON compLoc.intSanitizationDockDoorUnitId = sanitizationDockDoorUnit.intStorageLocationId
+LEFT JOIN tblICStorageLocation sanitizationStagingUnit ON compLoc.intSanitizationStagingUnitId = sanitizationStagingUnit.intStorageLocationId
+LEFT JOIN tblICStorageLocation sanitizationStorageUnit ON compLoc.intSanitizationStorageUnitId = sanitizationStorageUnit.intStorageLocationId
