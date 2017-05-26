@@ -190,6 +190,7 @@ BEGIN
 					   ,[dblCalculatedLowerTolerance]
 					   ,[dblShrinkage]
 					   ,[ysnScaled]
+					   ,[intConsumptionMethodId]
 					   ,[ysnYearValidationRequired]
 					   ,[ysnMinorIngredient]
 					   ,[ysnOutputItemMandatory]
