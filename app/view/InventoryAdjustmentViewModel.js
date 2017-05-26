@@ -846,10 +846,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 9) {
-                return 'Storage Location <span style="color:red">*</span>';
+                return 'Storage Unit <span style="color:red">*</span>';
             }
             else {
-                return 'Storage Location';
+                return 'Storage Unit';
             }
         },
 
