@@ -912,7 +912,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             include: 'tblICInventoryReceiptInspections,' +
             'vyuICInventoryReceiptLookUp,' +
             'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
-            /*'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +*/
+            'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
             'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
             'tblICInventoryReceiptItems.tblICUnitMeasure,' +
             'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge,' +
@@ -1014,6 +1014,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         return win.context;
     },
+
+    // afterSave: function(me, win, batch, options) {
+    //     var current = me.getViewModel().get('current');
+    //     var grid = win.down("#grdLotTracking");
+    //     grid.setSelection(current.tblICInventoryReceiptItems().data.items[0])
+    // },
 
     createTransaction: function (config, action) {
         var me = this,
@@ -4593,14 +4599,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
 
                 if (!current.phantom && !current.dirty) {
-                    if(current.tblICInventoryReceiptItemLots().data.items.length === 0) {
-                        win.down("#grdLotTracking").setLoading("Loading lots...");
-                        current.tblICInventoryReceiptItemLots().load({
-                            callback: function(records, operation, success) {
-                                win.down("#grdLotTracking").setLoading(false);
-                            }
-                        });
-                    }
+                    win.down("#grdLotTracking").setLoading("Loading lots...");
+                    current.tblICInventoryReceiptItemLots().load({
+                        callback: function(records, operation, success) {
+                            win.down("#grdLotTracking").setLoading(false);
+                        }
+                    });
                 }
             }
             else {
