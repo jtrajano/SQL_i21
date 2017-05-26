@@ -652,10 +652,12 @@ BEGIN
 								WHEN @strTransactionForm = 'Invoice' THEN 
 									'Cost of Goods'
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
-									CASE WHEN EXISTS (SELECT 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId) THEN 
-											'Inventory'
-										ELSE 
-											'Inventory In-Transit'
+									CASE	WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 1) THEN 
+												'Inventory In-Transit'
+											WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 0) THEN 
+												'Inventory'
+											ELSE 
+												NULL 
 									END 
 								WHEN @strTransactionForm IN ('Consume', 'Produce') THEN 
 									'Work in Progress'																		
