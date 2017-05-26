@@ -95,8 +95,8 @@ BEGIN TRY
 		,@intToStorageLocationId
 		,@intItemId
 		,@intLotId
-		,Case When @intWeightUOMId is NULL Then @dblSplitAndPickQty Else @dblSplitAndPickWeight End
-		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
+		,Case When @intWeightUOMId is NULL Then @dblSplitAndPickQty Else @dblSplitAndPickQty End
+		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intItemUOMId End
 		,Case When @intWeightUOMId is NULL Then @dblSplitAndPickQty Else @dblSplitAndPickWeight End
 		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
 		,Case When @intWeightUOMId is NULL Then 1 Else @dblWeightPerQty End

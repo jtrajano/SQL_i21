@@ -14,6 +14,8 @@ BEGIN
 					l.dblQty,
 					l.dblWeight,
 					iu.intItemUOMId [PrimaryUOMKey], 
+					l.intWeightUOMId,
+					wum.strUnitMeasure AS strWeightUnitMeasure,
 					um.strUnitMeasure, 
 					l.dtmExpiryDate ExpiryDate, 
 					ls.strPrimaryStatus PrimaryStatusCode, 
@@ -27,6 +29,8 @@ BEGIN
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
 	JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
+	LEFT JOIN tblICItemUOM wu ON wu.intItemUOMId = l.intWeightUOMId 
+	LEFT JOIN tblICUnitMeasure wum ON wum.intUnitMeasureId = wu.intUnitMeasureId
 	LEFT JOIN tblICLotStatus ls ON ls.intLotStatusId = l.intLotStatusId
 	LEFT JOIN tblSMUserSecurity us ON us.intEntityUserSecurityId = l.intCreatedUserId
 	WHERE l.intLotId = @intLotKey
