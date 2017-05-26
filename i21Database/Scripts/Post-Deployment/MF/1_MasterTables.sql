@@ -2443,3 +2443,7 @@ UPDATE tblMFCompanyPreference
 SET ysnNotifyInventoryShortOnCreateWorkOrder = 0,ysnNotifyInventoryShortOnReleaseWorkOrder=0
 WHERE ysnNotifyInventoryShortOnCreateWorkOrder IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET ysnSetDefaultQtyOnHandheld = 1
+WHERE ysnSetDefaultQtyOnHandheld IS NULL
+GO
