@@ -11,14 +11,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF      
       
 DECLARE @idoc int       
-Declare @intAssignFuturesToContractHeaderId int      
-
-Declare @intContractHeaderId int     
-Declare @intContractDetailId  int      
-Declare @dtmMatchDate datetime      
-Declare @intFutOptTransactionId int      
-Declare @dblAssignedLots int     
-Declare @dblHedgedLots NUMERIC(18,6)
+Declare @intAssignFuturesToContractHeaderId int           
 DECLARE @ErrMsg nvarchar(max)       
     
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml        
@@ -72,6 +65,8 @@ END
     
 SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();      
 ---------------Matched Record Insert ----------------    
+
+print 1
    INSERT INTO tblRKAssignFuturesToContractSummary    
   (     
  	intAssignFuturesToContractHeaderId,
@@ -104,7 +99,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	dtmMatchDate datetime,
 	intFutOptTransactionId int,
 	dblAssignedLots numeric(16,10),
-	intHedgedLots NUMERIC(18,6),
+	intHedgedLots numeric(16,10),
 	ysnIsHedged bit 
  )          
        
