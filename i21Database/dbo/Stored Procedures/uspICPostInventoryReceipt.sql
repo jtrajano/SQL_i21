@@ -673,11 +673,6 @@ BEGIN
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
-				IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-				BEGIN 
-					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				END
-
 				-- Do the inventory valuation
 				EXEC	@intReturnValue = dbo.uspICPostCosting  
 						@CompanyOwnedItemsForPost  
@@ -686,6 +681,26 @@ BEGIN
 						,@intEntityUserSecurityId
 
 				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+				IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+				BEGIN 
+					-- Change the contra-account to In-Transit. 
+					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					
+					-- Assign the Source Location Id. 
+					UPDATE	t
+					SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
+					FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
+								ON t.intItemId = UDT.intItemId
+								AND t.intItemLocationId = UDT.intItemLocationId
+								AND t.intItemUOMId = UDT.intItemUOMId
+								AND t.dblQty = UDT.dblQty
+								AND t.intTransactionId = UDT.intTransactionId
+								AND t.intTransactionDetailId = UDT.intTransactionDetailId
+								AND t.strTransactionId = UDT.strTransactionId
+					WHERE	t.dblQty > 0 
+							AND UDT.intInTransitSourceLocationId IS NOT NULL 
+				END
 				
 				-- Create the GL entries specific for Inventory Receipt/Return 
 				INSERT INTO @GLEntries (

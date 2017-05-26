@@ -46,10 +46,27 @@ SELECT	Query.intItemId
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
-					intItemId, intItemLocationId, intTransactionTypeId
-			FROM	dbo.tblICInventoryTransaction t 
-			WHERE	t.strBatchId = @strBatchId
-					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+					intItemId
+					, intItemLocationId 
+					, intTransactionTypeId
+			FROM	(
+				SELECT	DISTINCT 
+						intItemId
+						, intItemLocationId 
+						, intTransactionTypeId
+				FROM	dbo.tblICInventoryTransaction t 
+				WHERE	t.strBatchId = @strBatchId
+						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+				UNION ALL 
+				SELECT	DISTINCT 
+						intItemId
+						, intInTransitSourceLocationId 
+						, intTransactionTypeId
+				FROM	dbo.tblICInventoryTransaction t 
+				WHERE	t.strBatchId = @strBatchId
+						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+						AND t.intInTransitSourceLocationId IS NOT NULL 
+			) InnerQuery
 		) Query
 
 -- Validate the GL Accounts
@@ -211,6 +228,7 @@ WITH ForGLEntries_CTE (
 	dtmDate
 	,intItemId
 	,intItemLocationId
+	,intInTransitSourceLocationId
 	,intTransactionId
 	,strTransactionId
 	,dblQty
@@ -234,7 +252,8 @@ AS
 (
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,t.intItemLocationId 
+			,t.intInTransitSourceLocationId
 			,t.intTransactionId
 			,t.strTransactionId
 			,t.dblQty
@@ -403,7 +422,7 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ISNULL(ForGLEntries_CTE.intInTransitSourceLocationId, ForGLEntries_CTE.intItemLocationId) = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
