@@ -33,9 +33,12 @@
 	[intSourceId]						INT NULL,
 	[strSourceId]						NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPost]							BIT NULL,
+	[ysnRecap]							BIT DEFAULT ((0)) NOT NULL,
 	[ysnUpdateAvailableDiscount]		BIT NULL,
 	[ysnRecomputeTax]					BIT NULL,
 	[ysnInsert]							BIT DEFAULT ((0)) NOT NULL,
 	[ysnHeader]							BIT DEFAULT ((0)) NOT NULL,
-	[ysnSuccess]						BIT DEFAULT ((0)) NOT NULL
+	[ysnSuccess]						BIT DEFAULT ((0)) NOT NULL,
+	[ysnPosted]							BIT DEFAULT ((0)) NOT NULL,
+	[ysnUnPosted]						BIT DEFAULT ((0)) NOT NULL
 )

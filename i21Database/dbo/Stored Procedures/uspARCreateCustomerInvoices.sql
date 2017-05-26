@@ -1017,6 +1017,7 @@ USING
 		,[strSourceId]					= ITG.[strSourceId]
 		,[ysnPost]						= ITG.[ysnPost]
 		,[ysnUpdateAvailableDiscount]	= ITG.[ysnUpdateAvailableDiscount]
+		,[ysnRecap]						= ITG.[ysnRecap]
 	FROM	
 		@InvoicesToGenerate ITG --WITH (NOLOCK)
 	INNER JOIN
@@ -1266,6 +1267,7 @@ VALUES(
 			,1										--[ysnInsert]
 			,1										--[ysnHeader]
 			,1										--[ysnSuccess]
+			,Source.[ysnRecap]						--[ysnRecap]
 		INTO @IntegrationLog(
 			 [intIntegrationLogId]
 			,[dtmDate]
@@ -1301,6 +1303,7 @@ VALUES(
 			,[ysnInsert]
 			,[ysnHeader]
 			,[ysnSuccess]
+			,[ysnRecap]
 		);	
 	
 	IF ISNULL(@IntegrationLogId, 0) <> 0
