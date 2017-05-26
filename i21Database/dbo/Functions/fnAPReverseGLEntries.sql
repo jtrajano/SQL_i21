@@ -110,9 +110,9 @@ BEGIN
 		,[strTransactionForm]
 		,[strModuleName]
 		,[intConcurrencyId]
-		,[dblDebitForeign]           
+		,[dblDebitForeign] =  [dblCreditForeign]  -- (Debit -> Credit)   
 		,[dblDebitReport]            
-		,[dblCreditForeign]          
+		,[dblCreditForeign] = [dblDebitForeign]   -- (Debit <- Credit)          
 		,[dblCreditReport]           
 		,[dblReportingRate]          
 		,[dblForeignRate]  
