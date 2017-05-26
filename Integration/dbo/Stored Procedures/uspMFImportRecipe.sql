@@ -14,7 +14,7 @@ BEGIN
 	DECLARE @cnt INT = 1
 	DECLARE @SQLCMD NVARCHAR(3000)
 	DECLARE @EntityId int
-	SET @EntityId = ISNULL((SELECT  intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @UserId),@UserId)
+	SET @EntityId = ISNULL((SELECT  intEntityId FROM tblSMUserSecurity WHERE intEntityId = @UserId),@UserId)
 
 	DECLARE @ysnAG BIT = 0
     DECLARE @ysnPT BIT = 0
@@ -190,6 +190,7 @@ BEGIN
 					   ,[dblCalculatedLowerTolerance]
 					   ,[dblShrinkage]
 					   ,[ysnScaled]
+					   ,[intConsumptionMethodId]
 					   ,[ysnYearValidationRequired]
 					   ,[ysnMinorIngredient]
 					   ,[ysnOutputItemMandatory]
@@ -216,6 +217,7 @@ BEGIN
 					   ,FRMI.ptfrm_ingr_qty_'+CAST(@cnt AS NVARCHAR)+'
 					   ,0  --[dblShrinkage]
 					   ,1  --[ysnScaled]
+					   ,(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
 					   ,0  --[ysnYearValidationRequired]
 					   ,0  --[ysnMinorIngredient]
 					   ,0  --[ysnOutputItemMandatory]
