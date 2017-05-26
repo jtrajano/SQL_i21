@@ -1723,7 +1723,7 @@ namespace iRely.Inventory.Model
     {
         public int? intKey { get; set; }
         public int? intLocationId { get; set; }
-        public int? intEntityVendorId { get; set; }
+        public int? intEntityId { get; set; }
         public string strVendorId { get; set; }
         public string strVendorName { get; set; }
         public string strReceiptType { get; set; }

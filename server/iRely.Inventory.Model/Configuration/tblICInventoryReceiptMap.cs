@@ -767,7 +767,7 @@ namespace iRely.Inventory.Model
             this.ToTable("vyuICGetReceiptAddPurchaseOrder");
             this.Property(t => t.intKey).HasColumnName("intKey");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
-            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
             this.Property(t => t.strVendorName).HasColumnName("strVendorName");
             this.Property(t => t.strReceiptType).HasColumnName("strReceiptType");

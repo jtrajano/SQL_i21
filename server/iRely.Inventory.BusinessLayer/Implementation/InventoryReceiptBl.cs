@@ -693,7 +693,7 @@ namespace iRely.Inventory.BusinessLayer
             {
                 // Get the Purchase Orders
                 var query = _db.GetQuery<vyuICGetReceiptAddPurchaseOrder>()
-                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityId == VendorId)
                     .Filter(param, true);
 
                 var sorts = new List<SearchSort>();
