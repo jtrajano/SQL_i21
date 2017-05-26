@@ -25,27 +25,22 @@ DECLARE @TRAN_TYPE NVARCHAR(25) = 'Dividends'
 DECLARE @totalRecords INT
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @error NVARCHAR(200)
+DECLARE @batchId NVARCHAR(40)
+
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CREATE GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
-
---=====================================================================================================================================
--- 	UPDATE DIVIDENDS TABLE
----------------------------------------------------------------------------------------------------------------------------------------
-
-	UPDATE tblPATDividends 
-	   SET ysnPosted = ISNULL(@ysnPosted,0)
-	  FROM tblPATDividends R
-	 WHERE R.intDividendId = @intDividendId
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 
 IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
-		SELECT * FROM dbo.fnPATCreateDividendGLEntries(@intDividendId, @intUserId, @intAPClearingId)
+		SELECT * FROM dbo.fnPATCreateDividendGLEntries(@intDividendId, @batchId, @intUserId, @intAPClearingId)
 END
 ELSE
 BEGIN
@@ -71,6 +66,15 @@ BEGIN
 			AND strCode=N'PAT' 
 			AND strTransactionForm=N'Dividend'
 END
+
+--=====================================================================================================================================
+-- 	UPDATE DIVIDENDS TABLE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+	UPDATE tblPATDividends 
+	   SET ysnPosted = ISNULL(@ysnPosted,0)
+	  FROM tblPATDividends R
+	 WHERE R.intDividendId = @intDividendId
 
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
