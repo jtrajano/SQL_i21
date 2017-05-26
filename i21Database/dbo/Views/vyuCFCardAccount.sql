@@ -21,8 +21,8 @@ SELECT   A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountSchedu
                          Cus.ysnActive AS EXPR13, Cus.intSalespersonId AS EXPR14, Cus.intCurrencyId, Cus.intTermsId, Cus.intShipViaId, Cus.strShipToLocationName, Cus.strShipToAddress, 
                          Cus.strShipToCity, Cus.strShipToState, Cus.strShipToZipCode, Cus.strShipToCountry, Cus.strBillToLocationName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState,
                           Cus.strBillToZipCode, Cus.strBillToCountry, I.strInvoiceCycle, 
-						  (select top 1 strEmailDistributionOption from vyuARCustomerContacts where intEntityId = A.intCustomerId) AS strEmailDistributionOption, 
-						  (select top 1 strEmail from vyuARCustomerContacts where intEntityId = A.intCustomerId) AS strEmail 
+						  (select top 1 strEmailDistributionOption from vyuARCustomerContacts where intEntityId = A.intCustomerId AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '') AS strEmailDistributionOption, 
+						  (select top 1 strEmail from vyuARCustomerContacts where intEntityId = A.intCustomerId AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '') AS strEmail 
 FROM         dbo.tblCFAccount AS A LEFT JOIN
                          dbo.tblCFCard AS C ON A.intAccountId = C.intAccountId LEFT OUTER JOIN
                          dbo.tblCFNetwork AS N ON N.intNetworkId = C.intNetworkId LEFT OUTER JOIN
