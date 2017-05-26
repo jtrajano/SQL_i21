@@ -38,6 +38,7 @@ SET @batchIdUsed = @batchId;
 			T.intTransferType,
 			TD.intTransferorId,
 			TD.strEquityType,
+			TD.intCustomerEquityId,
 			TD.intFiscalYearId,
 			TD.intPatronageCategoryId,
 			TD.intRefundTypeId,
@@ -211,7 +212,7 @@ SET @batchIdUsed = @batchId;
 		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
 		FROM tblPATCustomerEquity CE
 		INNER JOIN #tempTransferDetails AS tempTD
-			ON CE.intCustomerId = tempTD.intTransferorId AND CE.intFiscalYearId = tempTD.intFiscalYearId AND CE.intRefundTypeId = tempTD.intRefundTypeId AND tempTD.intTransferType = 4;
+			ON CE.intCustomerEquityId = tempTD.intCustomerEquityId AND tempTD.intTransferType = 4;
 	END
 
 	IF ExISTS(SELECT 1 FROM #tempTransferDetails WHERE intTransferType = 5)
