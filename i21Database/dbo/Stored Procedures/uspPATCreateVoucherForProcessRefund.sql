@@ -75,6 +75,7 @@ BEGIN
 	DECLARE @dblServiceFee NUMERIC(18,6);
 	DECLARE @dblCashRefund NUMERIC(18,6);
 	DECLARE @dbl1099Amount NUMERIC(18,6);
+	DECLARE @batchId AS NVARCHAR(40);
 
 	DECLARE @refundProcessed AS Id;
 	DECLARE @totalRecords AS INT = 0;
@@ -145,8 +146,11 @@ BEGIN
 			DELETE FROM @voucherId;
 		END
 
+		IF(@batchId IS NULL)
+			EXEC uspSMGetStartingNumber 3, @batchId OUT
+
 		EXEC [dbo].[uspAPPostBill]
-			@batchId = @intCreatedBillId,
+			@batchId = @batchId,
 			@billBatchId = NULL,
 			@transactionType = NULL,
 			@post = 1,
