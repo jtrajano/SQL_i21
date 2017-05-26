@@ -63,6 +63,7 @@ END
 	DECLARE @dblEquityPay NUMERIC(18,6);
 	DECLARE @strVenderOrderNumber NVARCHAR(MAX);
 	DECLARE @intCreatedBillId INT;
+	DECLARE @batchId AS NVARCHAR(40);
 
 	DECLARE @equityPayments AS Id;
 	DECLARE @totalRecords AS INT = 0;
@@ -111,8 +112,11 @@ END
 			DELETE FROM @voucherId;
 		END
 
+		IF(@batchId IS NULL)
+			EXEC uspSMGetStartingNumber 3, @batchId OUT
+
 		EXEC [dbo].[uspAPPostBill]
-			@batchId = @intCreatedBillId,
+			@batchId = @batchId,
 			@billBatchId = NULL,
 			@transactionType = NULL,
 			@post = 1,

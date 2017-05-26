@@ -42,6 +42,7 @@ BEGIN TRANSACTION
 	DECLARE @intCreatedBillId INT;
 	DECLARE @dividendCustomerIds AS Id;
 	DECLARE @totalRecords AS INT = 0;
+	DECLARE @batchId AS NVARCHAR(40);
 
 	DECLARE @voucherId as Id;
 
@@ -86,9 +87,12 @@ BEGIN TRY
 			EXEC uspAPUpdateVoucherTotal @voucherId;
 			DELETE FROM @voucherId;
 		END
+		
+		IF(@batchId IS NULL)
+			EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 		EXEC [dbo].[uspAPPostBill]
-			@batchId = @intCreatedBillId,
+			@batchId = @batchId,
 			@billBatchId = NULL,
 			@transactionType = NULL,
 			@post = 1,

@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnPATCreateDividendGLEntries]
 (
 	@transactionIds NVARCHAR(MAX),
+	@batchId NVARCHAR(40),
 	@intUserId INT,
 	@apClearing	INT
 )
@@ -55,7 +56,7 @@ BEGIN
 	--UNDISTRIBUTED EQUITY
 	SELECT	DISTINCT
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchID]					=	'',
+		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	D.intDividendsGLAccount,
 		[dblDebit]						=	ROUND(B.dblDividendAmount,2),
 		[dblCredit]						=	0,
@@ -68,7 +69,7 @@ BEGIN
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmProcessDate,
-		[strJournalLineDescription]		=	'Posted Dividend GL',
+		[strJournalLineDescription]		=	'Dividend GL',
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
@@ -98,20 +99,20 @@ BEGIN
 	--AP Clearing
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchID]					=	'',
+		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	@apClearing, 
 		[dblDebit]						=	0,
 		[dblCredit]						=	ROUND(B.dblDividendAmount,2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	'Posted AP Clearing',
+		[strDescription]				=	'Posted Dividends GL',
 		[strCode]						=	'PAT',
 		[strReference]					=	A.strDividendNo,
 		[intCurrencyId]					=	0,
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmProcessDate,
-		[strJournalLineDescription]		=	'Posted AP Clearing',
+		[strJournalLineDescription]		=	'AP Clearing',
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
