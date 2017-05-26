@@ -1103,6 +1103,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Load Contract'
                                                                             },
                                                                             {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colOrderUOM',
+                                                                                width: 100,
+                                                                                dataIndex: 'strDescription',
+                                                                                text: 'Order UOM'
+                                                                            },
+                                                                            {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
                                                                                 hidden: true,
@@ -1122,13 +1129,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 dataIndex: 'dblQtyOrdered',
                                                                                 text: 'Order Quantity',
                                                                                 format: '0,000.##'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'gridcolumn',
-                                                                                itemId: 'colOrderUOM',
-                                                                                width: 100,
-                                                                                dataIndex: 'strDescription',
-                                                                                text: 'Order UOM'
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
