@@ -753,9 +753,28 @@ namespace iRely.Inventory.BusinessLayer
             else
             {
                 context.AddNew<tblICItemLocation>(fc);
+                CreateDefaultPricing(fc);
             }
 
             return fc;
+        }
+
+        private void CreateDefaultPricing(tblICItemLocation il)
+        {
+            tblICItemPricing fc = new tblICItemPricing()
+            {
+                strPricingMethod = "None",
+                dblLastCost = 0,
+                dblStandardCost = 0,
+                dblAverageCost = 0,
+                dblEndMonthCost = 0,
+                dblMSRPPrice = 0,
+                dblSalePrice = 0
+            };
+
+            fc.intItemId = il.intItemId;
+            fc.intItemLocationId = il.intItemLocationId;
+            context.AddNew<tblICItemPricing>(fc);
         }
 
         private class RadiantItemTypeCode

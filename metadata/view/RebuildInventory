@@ -260,13 +260,13 @@
                                     "    dataIndex: 'strType',",
                                     "    dataType: 'string',",
                                     "    text: 'Type',",
-                                    "    flex: 1",
+                                    "    width: 100",
                                     "},",
                                     "{",
                                     "    dataIndex: 'strDescription',",
                                     "    dataType: 'string',",
                                     "    text: 'Description',",
-                                    "    flex: 1",
+                                    "    flex: 2",
                                     "}]"
                                 ],
                                 "designer|createAlias": "gridcombobox",
@@ -275,6 +275,7 @@
                                 "itemId": "cboItem",
                                 "layout|anchor": "100%",
                                 "maxWidth": null,
+                                "pickerWidth": 600,
                                 "publishes": [
                                     "value"
                                 ],
@@ -283,13 +284,19 @@
                             },
                             "name": "MyComboBox2",
                             "configAlternates": {
-                                "columns": "object"
+                                "columns": "object",
+                                "pickerWidth": "number"
                             },
                             "designerId": "02c6fa80-5101-4d17-bac4-03cbcfc3adc2",
                             "customConfigs": [
                                 {
                                     "group": "(Custom Properties)",
                                     "name": "columns",
+                                    "type": "string"
+                                },
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "pickerWidth",
                                     "type": "string"
                                 }
                             ]

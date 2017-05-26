@@ -665,6 +665,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
             this.Property(t => t.strAccountId).HasColumnName("strAccountId");
             this.Property(t => t.strAccountType).HasColumnName("strAccountType");
+            this.Property(t => t.strAccountDescription).HasColumnName("strAccountDescription");
         }
     }
 

@@ -434,7 +434,7 @@ Ext.define('Inventory.view.Category', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                headerDrillDownText: 'Open Tax Class',
+                                                                                headerDrillDownText: 'Open',
                                                                                 headerDrillDownClick: 'onTaxClassHeaderClick',
                                                                                 itemId: 'colTaxClass',
                                                                                 minWidth: 95,
