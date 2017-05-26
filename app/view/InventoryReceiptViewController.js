@@ -1140,14 +1140,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         win.down("#txtWeightLossMsgValue").setValue("");
 
         var today = new Date();
-        var record = Ext.create('Inventory.model.Receipt');
+        var newRecord = Ext.create('Inventory.model.Receipt');
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
         var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intReceiptSourceType');
         var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
 
         if (defaultCurrency){
-            record.set('intCurrencyId', defaultCurrency);
+            newRecord.set('intCurrencyId', defaultCurrency);
             Ext.create('i21.store.CurrencyBuffered', {
                 storeId: 'icReceiptCurrency',
                 autoLoad: {
@@ -1159,16 +1159,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                     ],
                     params: {
-                        columns: 'strCurrency:'
+                        columns: 'strCurrency:intSubCurrencyCent:'
                     },
                     callback: function(records, operation, success){
-                        var companyLocation; 
+                        var record; 
                         if (records && records.length > 0) {
-                            companyLocation = records[0];
+                            record = records[0];
                         }
 
-                        if(success && companyLocation){
-                            record.set('strCurrency', companyLocation.get('strCurrency'));
+                        if(success && record){
+                            newRecord.set('strCurrency', record.get('strCurrency'));
+                            var subCurrencyCents = record.get('intSubCurrencyCent');
+                            subCurrencyCents = Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1; 
+                            newRecord.set('intSubCurrencyCents', subCurrencyCents);
                         }
                     }
                 }
@@ -1176,30 +1179,56 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }  
 
         if (defaultReceiptType !== null) {
-            record.set('strReceiptType', defaultReceiptType);
+            newRecord.set('strReceiptType', defaultReceiptType);
         }
         else {
-            record.set('strReceiptType', 'Purchase Order');
+            newRecord.set('strReceiptType', 'Purchase Order');
         }
 
         if (defaultSourceType !== null) {
-            record.set('intSourceType', defaultSourceType);
+            newRecord.set('intSourceType', defaultSourceType);
         }
         else {
-            record.set('intSourceType', 0);
+            newRecord.set('intSourceType', 0);
         }
 
-        if (defaultLocation)
-            record.set('intLocationId', defaultLocation);
+        if (defaultLocation){
+            newRecord.set('intLocationId', defaultLocation);
+            Ext.create('i21.store.CompanyLocationBuffered', {
+                storeId: 'icReceiptCompanyLocation',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intCompanyLocationId',
+                            value: defaultLocation,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'strLocationName:intCompanyLocationId:'
+                    },
+                    callback: function(records, operation, success){
+                        var record; 
+                        if (records && records.length > 0) {
+                            record = records[0];
+                        }
+
+                        if(success && record){
+                            newRecord.set('strLocationName', record.get('strLocationName'));
+                        }
+                    }
+                }
+            });            
+        }            
 
         if (iRely.config.Security.EntityId > 0)
-            record.set('intReceiverId', iRely.config.Security.EntityId);
+            newRecord.set('intReceiverId', iRely.config.Security.EntityId);
             
-        record.set('dtmReceiptDate', today);
-        record.set('intBlanketRelease', 0);
-        record.set('ysnPosted', false);        
+        newRecord.set('dtmReceiptDate', today);
+        newRecord.set('intBlanketRelease', 0);
+        newRecord.set('ysnPosted', false);        
         config.viewModel.set('locationFromTransferOrder', null);
-        action(record);
+        action(newRecord);
     },
 
     onLotCreateRecord: function (config, action) {
@@ -1411,11 +1440,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            current.set('intCurrencyId', records[0].get('intCurrencyId'));
+            // If Vendor has its own Currency, use it. Otherwise, stick to the default currency. 
+            var vendorCurrency = records[0].get('intCurrencyId');
+            if (vendorCurrency){
+                current.set('intCurrencyId', vendorCurrency);
 
-            var subCurrencyCents = records[0].get('intSubCurrencyCent');
-            subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
-            current.set('intSubCurrencyCents', subCurrencyCents);
+                var subCurrencyCents = records[0].get('intSubCurrencyCent');
+                subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
+                current.set('intSubCurrencyCents', subCurrencyCents);
+            }            
 
             current.set('intShipFromId', null);
             current.set('intShipViaId', null);
@@ -1426,11 +1459,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var vendorLocation = records[0].getDefaultLocation();
             if (vendorLocation) {
                 current.set('intShipViaId', vendorLocation.get('intShipViaId'));
-                //current.set('intTaxGroupId', vendorLocation.get('intTaxGroupId'));
-            }
-
-            if (iRely.Functions.isEmpty(current.get('intCurrencyId'))) {
-                current.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
             }
         }
 
