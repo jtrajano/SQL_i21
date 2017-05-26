@@ -8,8 +8,9 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intInventoryShipmentId INT
-		,@xmlDocumentId INT
+	DECLARE @xmlDocumentId INT
+		,@strOrderManifestId NVARCHAR(MAX)
+		,@dblLotQty NUMERIC(38, 20)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -41,9 +42,13 @@ BEGIN TRY
 			,[datatype] NVARCHAR(50)
 			)
 
-	SELECT @intInventoryShipmentId = [from]
+	SELECT @strOrderManifestId = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'intInventoryShipmentId'
+	WHERE [fieldname] = 'intOrderManifestId'
+
+	SELECT @dblLotQty = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'dblLotQty'
 
 	SELECT LTRIM(RTRIM(CASE 
 					WHEN ISNULL(CL.strLocationName, '') = ''
@@ -103,13 +108,18 @@ BEGIN TRY
 		,I.strItemNo AS strStyle
 		,'(00) 3 0012511 000130720 2' AS strBarCodeLabel -- Check with Prem
 		,'00000846430018142227' AS strBarCode -- Check with Prem
-	FROM tblICInventoryShipment S
+	FROM tblMFOrderManifest OM
+	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
+	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intShipFromLocationId
 	JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = S.intShipToLocationId
 	JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentId = S.intInventoryShipmentId
 	JOIN tblICItem I ON I.intItemId = SI.intItemId
-	LEFT JOIN tblSMShipVia SV ON SV.intEntityId = S.intShipViaId
-	WHERE S.intInventoryShipmentId = @intInventoryShipmentId
+	LEFT JOIN tblSMShipVia SV ON SV.intEntityShipViaId = S.intShipViaId
+	WHERE OM.intOrderManifestId IN (
+			SELECT *
+			FROM dbo.fnSplitString(@strOrderManifestId, '^')
+			)
 END TRY
 
 BEGIN CATCH
