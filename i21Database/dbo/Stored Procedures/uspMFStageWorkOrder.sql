@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrder] (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrder] (@strXML NVARCHAR(MAX), @intWorkOrderInputLotId INT=NULL OUTPUT)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -51,7 +51,6 @@ BEGIN TRY
 		,@intBusinessShiftId INT
 		,@intManufacturingCellId INT
 		,@strInventoryTracking NVARCHAR(50)
-		,@intWorkOrderInputLotId INT
 		,@intProductionStagingId INT
 		,@intProductionStageLocationId INT
 		,@intCategoryId INT
