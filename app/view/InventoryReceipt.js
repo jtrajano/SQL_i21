@@ -1988,9 +1988,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colLotStorageLocation',
-                                                                                width: 95,
+                                                                                width: 100,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Storage Location',
+                                                                                text: 'Storage Unit',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',
                                                                                     columns: [
