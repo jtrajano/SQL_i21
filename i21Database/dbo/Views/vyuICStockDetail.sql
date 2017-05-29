@@ -98,10 +98,10 @@ FROM
 		AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 
 	LEFT JOIN tblICStorageLocation StorageLocation 
-		ON StorageLocation.intStorageLocationId = ItemLocation.intStorageLocationId 
+		ON StorageLocation.intStorageLocationId = ItemStockUOM.intStorageLocationId 
 
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
-		ON ItemLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
+		ON ItemStockUOM.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
 
 	LEFT JOIN tblICCategory Category 
 		ON Category.intCategoryId = Item.intCategoryId
