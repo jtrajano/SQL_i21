@@ -5253,6 +5253,7 @@
     <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
     <Build Include="dbo\Views\vyuSMDocument.sql" />
     <None Include="Scripts\Post-Deployment\IC\PopulateLotContainerNoAndCondition.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
