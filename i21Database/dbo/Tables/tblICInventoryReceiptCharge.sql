@@ -36,3 +36,10 @@
 	--CONSTRAINT [FK_tblICInventoryReceiptCharge_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId])
 	CONSTRAINT [FK_tblICInventoryReceiptCharge_tblSMCurrencyExchangeRateType] FOREIGN KEY ([intForexRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]), 
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptCharge]
+	ON [dbo].[tblICInventoryReceiptCharge]([intInventoryReceiptChargeId] ASC)
+	INCLUDE ([intInventoryReceiptId]);
+
+GO
