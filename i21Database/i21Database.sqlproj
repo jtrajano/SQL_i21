@@ -5249,6 +5249,8 @@
     <None Include="Scripts\Post-Deployment\IC\PopulateLotContainerNoAndCondition.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDuplicateDiscountSchedule.sql" />
+    <Build Include="dbo\Tables\tblMFCustomFieldValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveConsumeCustomFields.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
