@@ -5252,6 +5252,7 @@
     <Build Include="dbo\Views\vyuSMDocument.sql" />
     <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
