@@ -115,7 +115,7 @@ BEGIN TRY
 	JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = S.intShipToLocationId
 	JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentId = S.intInventoryShipmentId
 	JOIN tblICItem I ON I.intItemId = SI.intItemId
-	LEFT JOIN tblSMShipVia SV ON SV.intEntityShipViaId = S.intShipViaId
+	LEFT JOIN tblSMShipVia SV ON SV.intEntityId = S.intShipViaId
 	WHERE OM.intOrderManifestId IN (
 			SELECT *
 			FROM dbo.fnSplitString(@strOrderManifestId, '^')
