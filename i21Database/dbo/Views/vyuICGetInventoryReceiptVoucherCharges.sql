@@ -91,9 +91,9 @@ FROM	tblICInventoryReceipt Receipt
 		) receiptAndVoucheredCharges
 		OUTER APPLY (
 			SELECT	TOP 1 
-					b.strBillId
-					,b.intBillId
-					,b.dtmBillDate
+					--b.strBillId
+					--,b.intBillId
+					b.dtmBillDate
 			FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 						ON b.intBillId = bd.intBillId
 			WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
@@ -112,7 +112,7 @@ FROM	tblICInventoryReceipt Receipt
 								WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 										AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 										AND b.ysnPosted = 1
-								GROUP BY b.intBillId
+								--GROUP BY b.intBillId
 								FOR xml path('')
 							)
 						, 1
@@ -131,7 +131,7 @@ FROM	tblICInventoryReceipt Receipt
 							WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 									AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 									AND b.ysnPosted = 1
-							GROUP BY b.strBillId
+							--GROUP BY b.strBillId
 							FOR xml path('')
 						)
 					, 1
