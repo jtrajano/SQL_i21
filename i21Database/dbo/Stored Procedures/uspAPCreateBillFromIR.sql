@@ -85,15 +85,20 @@ SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [i
 --Get the company location of the user to get the default ap account else get from preference
 SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @userLocation)
 
-----try to get from Gl Account
---IF @APAccount IS NULL
---	SET @APAccount = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountCategoryId = 1)
-
---IF @APAccount IS NULL OR @APAccount <= 0
---BEGIN
---	RAISERROR('Please setup default AP Account', 16, 1);
---	GOTO DONE
---END
+--This will validate the negative transaction from Scale
+SELECT @totalReceiptAmount = dbo.[fnAPGetReceiptTotal] (@receiptIds)
+IF (@totalReceiptAmount <= 0)
+BEGIN
+	DECLARE @type NVARCHAR(50);
+	SET @type =  (SELECT TOP 1 intSourceType FROM #tmpReceiptData WHERE intInventoryReceiptId IN (@receiptIds)) 
+	IF(@type = 1) --SCALE
+	BEGIN
+		RETURN; 
+	END
+	ELSE   
+	RAISERROR('Cannot create Voucher with negative amount.', 16, 1);
+	GOTO Post_Exit           
+END
 
 --Make sure all items were not yet billed.
 IF NOT EXISTS(
