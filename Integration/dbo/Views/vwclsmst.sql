@@ -13,14 +13,14 @@ BEGIN
 		CREATE VIEW [dbo].[vwclsmst]
 		AS
 			SELECT
-			vwcls_desc				=CAST(agcls_desc AS CHAR(20))		 		
+			vwcls_desc				=CAST(agcls_desc AS CHAR(20))	COLLATE Latin1_General_CI_AS   	  		
 			,vwcls_sls_acct_no		=agcls_sls_acct_no	
 			,vwcls_pur_acct_no		=agcls_pur_acct_no	
 			,vwcls_var_acct_no		=agcls_var_acct_no	
 			,vwcls_inv_acct_no		=agcls_inv_acct_no	
 			,vwcls_beg_inv_acct_no	=agcls_beg_inv_acct_no	
 			,vwcls_end_inv_acct_no	=agcls_end_inv_acct_no	
-			,vwcls_cd =agcls_cd
+			,vwcls_cd =agcls_cd COLLATE Latin1_General_CI_AS   	  		
 			,A4GLIdentity	= CAST(A4GLIdentity   AS INT)
 			FROM agclsmst
 		')
@@ -35,14 +35,14 @@ BEGIN
 		CREATE VIEW [dbo].[vwclsmst]
 			AS
 			SELECT
-			vwcls_desc				=CAST(ptcls_desc AS CHAR(20))		 		
+			vwcls_desc				=CAST(ptcls_desc AS CHAR(20))	COLLATE Latin1_General_CI_AS   	
 			,vwcls_sls_acct_no		=ptcls_sls_acct_no	
 			,vwcls_pur_acct_no		=ptcls_pur_acct_no	
 			,vwcls_var_acct_no		=ptcls_var_acct_no	
 			,vwcls_inv_acct_no		=ptcls_inv_acct_no	
 			,vwcls_beg_inv_acct_no	=ptcls_beg_inv_acct_no	
 			,vwcls_end_inv_acct_no	=ptcls_end_inv_acct_no	
-			,vwcls_cd				=ptcls_class
+			,vwcls_cd				=ptcls_class COLLATE Latin1_General_CI_AS   	  		
 			,A4GLIdentity			=CAST(A4GLIdentity   AS INT)
 			FROM ptclsmst
 	')
