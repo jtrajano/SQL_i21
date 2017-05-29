@@ -7,7 +7,7 @@
 */
 CREATE PROCEDURE uspCMCheckPrint_QueuePrintJobs
 	@intBankAccountId INT = NULL,
-	@strTransactionId NVARCHAR(40) = NULL,
+	@strTransactionIds NVARCHAR(max) = NULL,
 	@strBatchId NVARCHAR(20) = NULL,
 	@intTransactionType INT,
 	@intUserId	INT = NULL
@@ -61,7 +61,7 @@ DECLARE -- Constant variables for bank account types:
 		,@intCheckNoLength AS INT = 8
 
 -- Clean the parameters
-SELECT	@strTransactionId = CASE WHEN LTRIM(RTRIM(@strTransactionId)) = '' THEN NULL ELSE @strTransactionId END
+SELECT	@strTransactionIds = CASE WHEN LTRIM(RTRIM(@strTransactionIds)) = '' THEN NULL ELSE @strTransactionIds END
 		,@strBatchId = CASE WHEN LTRIM(RTRIM(@strBatchId)) = '' THEN NULL ELSE @strBatchId END
 		,@intTransactionType = ISNULL(@intTransactionType, @MISC_CHECKS)
 
@@ -105,7 +105,7 @@ SELECT	intBankAccountId	= F.intBankAccountId
 		,strReason			= NULL
 FROM	dbo.tblCMBankTransaction F
 WHERE	F.intBankAccountId = @intBankAccountId
-		AND F.strTransactionId = ISNULL(@strTransactionId, F.strTransactionId)
+		AND F.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 		AND ISNULL(F.strLink, '') = ISNULL(@strBatchId, ISNULL(F.strLink, ''))
 		AND F.intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT, @PAYCHECK)
 		AND F.ysnPosted = 1
@@ -197,35 +197,7 @@ BEGIN
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
 
--- From here, temp print job table is now complete with information it needs to queue the print job. 
--- The system can now queue the print job. 
-INSERT INTO tblCMCheckPrintJobSpool(
-		intBankAccountId
-		,intTransactionId
-		,strTransactionId
-		,intBankTransactionTypeId
-		,strBatchId
-		,strCheckNo
-		,dtmPrintJobCreated
-		,dtmCheckPrinted
-		,intCreatedUserId
-		,ysnFail
-		,strReason
-)
-SELECT
-		intBankAccountId
-		,intTransactionId
-		,strTransactionId
-		,intBankTransactionTypeId
-		,strBatchId
-		,strCheckNo
-		,dtmPrintJobCreated
-		,dtmCheckPrinted
-		,intCreatedUserId
-		,ysnFail
-		,strReason
-FROM	#tmpPrintJobSpoolTable
-IF @@ERROR <> 0 GOTO _ROLLBACK
+
 
 -- Update the check numbers in the bank transaction screen. Use the check number from the print spool table. 
 UPDATE	tblCMBankTransaction
@@ -233,13 +205,6 @@ SET		strReferenceNo = TMP.strCheckNo
 FROM	tblCMBankTransaction f INNER JOIN #tmpPrintJobSpoolTable TMP
 			ON f.intBankAccountId = TMP.intBankAccountId
 			AND f.intTransactionId = TMP.intTransactionId
-
--- Retrieve the highest check number entered for the print queue. 
---SET @strNextCheckNumber = NULL 
---SELECT	TOP 1 
---		@strNextCheckNumber = MAX(dbo.fnAddZeroPrefixes(strCheckNo, @intCheckNoLength))
---FROM	#tmpPrintJobSpoolTable
---WHERE	ISNUMERIC(strCheckNo) = 1
 
 --Retrieve the next check number from the check number audit
 DECLARE @strNextCheckNumberForBankAccount AS NVARCHAR(20)

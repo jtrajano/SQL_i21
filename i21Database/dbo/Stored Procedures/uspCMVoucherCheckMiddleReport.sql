@@ -57,7 +57,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
   
 -- Declare the variables.  
 DECLARE @intBankAccountId AS INT
-		,@strTransactionId AS NVARCHAR(40)
+		,@strTransactionId AS NVARCHAR(max)
 		,@strBatchId AS NVARCHAR(40)
   
 -- Declare the variables for the XML parameter  
@@ -67,8 +67,8 @@ DECLARE @xmlDocumentId AS INT
 DECLARE @temp_xml_table TABLE (  
  [fieldname] NVARCHAR(50)  
  ,condition NVARCHAR(20)        
- ,[from] NVARCHAR(50)  
- ,[to] NVARCHAR(50)  
+ ,[from] NVARCHAR(max)  
+ ,[to] NVARCHAR(max)  
  ,[join] NVARCHAR(10)  
  ,[begingroup] NVARCHAR(50)  
  ,[endgroup] NVARCHAR(50)  
@@ -85,8 +85,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (  
  [fieldname] nvarchar(50)  
  , condition nvarchar(20)  
- , [from] nvarchar(50)  
- , [to] nvarchar(50)  
+ , [from] nvarchar(max)  
+ , [to] nvarchar(max)  
  , [join] nvarchar(10)  
  , [begingroup] nvarchar(50)  
  , [endgroup] nvarchar(50)  
@@ -131,7 +131,7 @@ SELECT	CHK.dtmDate
 		,CHK.strMemo
 		,CHK.strTransactionId
 		,CHK.intTransactionId
-		,PRINTSPOOL.strBatchId
+		--,PRINTSPOOL.strBatchId
 		,CHK.intBankAccountId
 		,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = CHK.intCurrencyId)
 		
@@ -182,9 +182,10 @@ SELECT	CHK.dtmDate
 		,CHK.intBankTransactionTypeId
 		--Use to display the MICR
 		,BNKACCNT.ysnCheckEnableMICRPrint		
-FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
-			ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
-			AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
+FROM	dbo.tblCMBankTransaction CHK 
+			--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
+			--ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
+			--AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
 		INNER JOIN tblCMBankAccount BNKACCNT
 			ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
 		INNER JOIN tblCMBank BNK
@@ -199,7 +200,6 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 		LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 WHERE	CHK.intBankAccountId = @intBankAccountId
-		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
-		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
+		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
+		--AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
 ORDER BY CHK.strReferenceNo ASC
-

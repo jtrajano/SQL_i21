@@ -3,6 +3,7 @@
 */ 
 CREATE PROCEDURE uspCMCheckPrint_GetCheckOverflow
 	@intBankAccountId INT = NULL,
+	@strTransactionIds NVARCHAR(MAX) = NULL,
 	@ysnCheckOverflow INT = NULL OUTPUT 
 AS
 
@@ -43,8 +44,8 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum			
 WHERE	CHK.intBankAccountId = @intBankAccountId
-		AND CHK.strTransactionId = CHK.strTransactionId
-		AND PRINTSPOOL.strBatchId =  PRINTSPOOL.strBatchId
+		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+		--AND PRINTSPOOL.strBatchId =  PRINTSPOOL.strBatchId
 		AND (SELECT COUNT(intPaymentId) FROM tblAPPaymentDetail WHERE intPaymentId = PYMT.intPaymentId) > 10
 		
 
