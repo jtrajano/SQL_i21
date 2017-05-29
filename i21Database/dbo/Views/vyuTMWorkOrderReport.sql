@@ -73,7 +73,7 @@ SELECT
 										CUS.vwcus_termdescription
 									END) COLLATE Latin1_General_CI_AS
 	
-	,strSiteAddress = REPLACE(STE.strSiteAddress,CHAR(13),' ') + ', ' + RTRIM(strCity) + ', ' + RTRIM(strState) + ', ' + RTRIM(strZipCode) 
+	,strSiteAddress = REPLACE(STE.strSiteAddress,CHAR(13),' ') + ', ' + RTRIM(STE.strCity) + ', ' + RTRIM(STE.strState) + ', ' + RTRIM(STE.strZipCode) 
 	,strSiteInstruction = STE.strInstruction
 	,dtmDateCreated = DATEADD(DAY, DATEDIFF(DAY, 0, WRK.dtmDateCreated), 0)
 	,dtmDateScheduled = WRK.dtmDateScheduled
@@ -82,6 +82,8 @@ SELECT
 	,strPerformerId = PRF.strEntityNo
 	,C.strWorkStatus
 	,Z.strCompanyName
+	,loc.strLocationName
+	,CAT.strWorkOrderCategory
 FROM tblTMCustomer CST 
 INNER JOIN vyuTMCustomerEntityView CUS 
 	ON CST.intCustomerNumber = CUS.A4GLIdentity 
@@ -95,6 +97,10 @@ LEFT JOIN tblEMEntity PRF
 	ON WRK.intPerformerID = PRF.intEntityId
 LEFT JOIN tblSMTerm B
 	ON STE.intDeliveryTermID = B.intTermID
+LEFT JOIN tblSMCompanyLocation loc
+	ON STE.intLocationId = loc.intCompanyLocationId
+LEFT JOIN tblTMWorkOrderCategory CAT
+	ON WRK.intWorkOrderCategoryId = CAT.intWorkOrderCategoryId
 ,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 ,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) A 
 WHERE STE.ysnActive = 1  AND CUS.vwcus_active_yn = 'Y' 
