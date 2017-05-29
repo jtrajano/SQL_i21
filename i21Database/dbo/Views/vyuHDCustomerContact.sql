@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuHDCustomerContact]
-	AS 
+	AS
 		select
 		  intContactId = ec.[intEntityId]
 		  ,intCustomerId = c.[intEntityId]
@@ -22,10 +22,10 @@
 		  ,ec.imgPhoto
 		  ,ysnBillable = c.ysnHDBillableSupport
 		  ,strEntityType = (select top 1 et.strType from tblEMEntityType et where et.intEntityId = c.[intEntityId] and et.strType in ('Customer','Prospect'))
-		  ,strProjectionProduct = (select top 1 strProduct from tblHDTicketProduct where intProductId = cpv.intProductId)
-		  ,strProjectionVersionNo = (select top 1 strVersionNo from tblHDVersion where intVersionId = cpv.intVersionId)
-		  ,strProjectionModule = (select top 1 strModule from tblHDModule where intModuleId = cpv.intModuleId)
-		  ,intTicketGroupId = (select top 1 intTicketGroupId from tblHDModule where intModuleId = cpv.intModuleId)
+		  ,strProjectionProduct = (select top 1 tblHDTicketProduct.strProduct from tblHDTicketProduct where tblHDTicketProduct.intTicketProductId = cpv.intProductId)
+		  ,strProjectionVersionNo = (select top 1 tblHDVersion.strVersionNo from tblHDVersion where tblHDVersion.intVersionId = cpv.intVersionId)
+		  ,strProjectionModule = (select top 1 tblHDModule.strModule from tblHDModule where tblHDModule.intModuleId = cpv.intModuleId)
+		  ,intTicketGroupId = (select top 1 tblHDModule.intTicketGroupId from tblHDModule where tblHDModule.intModuleId = cpv.intModuleId)
 		from
 			tblARCustomer c
 		  inner join tblEMEntityToContact etc on etc.intEntityId = c.[intEntityId]
