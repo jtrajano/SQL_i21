@@ -5265,6 +5265,7 @@
     <Build Include="dbo\Tables\tblMFCustomerLabelType.sql" />
     <Build Include="dbo\Views\vyuSCProductionEvidenceReportView.sql" />
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
+    <Build Include="dbo\Functions\fnAPGetReceiptTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
