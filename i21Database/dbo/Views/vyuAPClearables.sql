@@ -53,6 +53,7 @@ SELECT DISTINCT
 					  ELSE 
 						  (CASE
 							WHEN Receipt.dblQtyToReceive = 0 THEN 0
+							WHEN Bill.dblQtyReceived > 0 THEN CAST(Bill.dblDetailTotal AS DECIMAL (18,2))
 							ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
 								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
 						  END)END)                    
@@ -80,7 +81,7 @@ FROM vyuICGetInventoryReceiptItem Receipt
 				SELECT 
 					intInventoryReceiptItemId,
 					SUM(dblQtyReceived) AS dblQtyReceived,
-					SUM(A.dblTotal)		AS dblDetailTotal
+					SUM(A.dblTotal)	+  SUM(A.dblTax) AS dblDetailTotal
 				FROM dbo.tblAPBillDetail A
 				WHERE Header.intBillId = A.intBillId AND A.intInventoryReceiptChargeId IS NULL
 				GROUP BY intInventoryReceiptItemId
