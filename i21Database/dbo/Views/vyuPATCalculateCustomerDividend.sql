@@ -9,6 +9,7 @@ SELECT CS.intCustomerStockId,
 	CS.dtmIssueDate,
 	SC.dblParValue,
 	CS.dblSharesNo,
+	CS.ysnPosted,
 	SC.intDividendsPerShare
 	FROM tblPATStockClassification SC
 INNER JOIN tblPATCustomerStock CS
