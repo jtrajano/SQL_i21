@@ -376,6 +376,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             record.set('intTransferredById', app.EntityId);
         record.set('dtmTransferDate', today);
         record.set('intStatusId', 1);
+        record.set('strStatus', 'Open');
         action(record);
     },
 
