@@ -15,6 +15,7 @@ SELECT SO.intSalesOrderId
 						   END 
 	 , strOrderType				= ISNULL(SO.strType, 'Standard')
      , strCustomerName			= E.strName
+	 , strCustomerNumber		= C.strCustomerNumber
 	 , strLocationName			= L.strLocationName
 	 , dtmDate					= SO.dtmDate
 	 , strCurrency				= CUR.strCurrency
