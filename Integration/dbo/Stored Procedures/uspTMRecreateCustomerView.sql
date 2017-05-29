@@ -110,7 +110,7 @@ BEGIN
 				,vwcus_avg_days_pay  = CAST(ISNULL(A.agcus_avg_days_pay,0) AS INT) 
 				,vwcus_avg_days_no_ivcs = CAST(ISNULL(A.agcus_avg_days_no_ivcs,0) AS INT)
 				,vwcus_last_stmt_rev_dt = ISNULL(A.agcus_last_stmt_rev_dt,0)  
-				,vwcus_country   = ISNULL(A.agcus_country,'''')  
+				,vwcus_country   = ISNULL(A.agcus_country,'''')  COLLATE Latin1_General_CI_AS
 				,vwcus_termdescription  = ISNULL(C.agtrm_desc,'''')
 				,vwcus_tax_ynp   = ISNULL(A.agcus_tax_ynp,'''')  
 				,vwcus_tax_state  = ISNULL(A.agcus_tax_state,'''')  
@@ -260,7 +260,7 @@ BEGIN
 				,vwcus_avg_days_pay  = CAST(ISNULL(A.ptcus_avg_days_pay,0) AS INT) 
 				,vwcus_avg_days_no_ivcs = CAST(ISNULL(A.ptcus_avg_days_no_ivcs,0) AS INT)  
 				,vwcus_last_stmt_rev_dt = ISNULL(A.ptcus_last_stmnt_rev_dt,0)  
-				,vwcus_country   = CAST('''' as char(3))  
+				,vwcus_country   = CAST('''' as char(3))  COLLATE Latin1_General_CI_AS
 				,vwcus_termdescription  = ISNULL((select top 1 pttrm_desc from pttrmmst where pttrm_code = A.ptcus_terms_code),'''')
 				,vwcus_tax_ynp   = CAST('''' as char(1))  
 				,vwcus_tax_state  = CAST('''' as char(2))  
@@ -381,7 +381,7 @@ BEGIN
 				,vwcus_avg_days_pay = 0
 				,vwcus_avg_days_no_ivcs = 0
 				,vwcus_last_stmt_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastStatementDate) AS NVARCHAR(4)) + RIGHT(''00'' + CAST(MONTH(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)  + RIGHT(''00'' + CAST(DAY(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)) AS INT),0) 
-				,vwcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)  
+				,vwcus_country = Loc.strCountry COLLATE Latin1_General_CI_AS  
 				,vwcus_termdescription = (SELECT strTerm FROM tblSMTerm WHERE intTermID = Loc.intTermsId)
 				,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END   
 				,vwcus_tax_state = ''''  
