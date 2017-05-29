@@ -5254,6 +5254,7 @@
     <Build Include="dbo\Views\vyuSMDocument.sql" />
     <None Include="Scripts\Post-Deployment\IC\PopulateLotContainerNoAndCondition.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
