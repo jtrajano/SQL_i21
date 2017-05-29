@@ -344,7 +344,7 @@
                                                                         "labelWidth": 105,
                                                                         "layout|flex": 1.4,
                                                                         "margin": null,
-                                                                        "valueField": "intCompanyLocationId"
+                                                                        "valueField": "strLocationName"
                                                                     },
                                                                     "name": "MyComboBox44",
                                                                     "configAlternates": {
@@ -376,7 +376,7 @@
                                                                         "columns": [
                                                                             "[",
                                                                             "\t{",
-                                                                            "\t\tdataIndex: 'intEntityVendorId',",
+                                                                            "\t\tdataIndex: 'intEntityId',",
                                                                             "\t\tdataType: 'numeric',",
                                                                             "\t\thidden: true",
                                                                             "\t},",
@@ -404,7 +404,7 @@
                                                                         "layout|flex": 1,
                                                                         "lookUpField": true,
                                                                         "margin": "0 5",
-                                                                        "valueField": "intEntityVendorId"
+                                                                        "valueField": "strName"
                                                                     },
                                                                     "name": "MyComboBox1",
                                                                     "configAlternates": {
@@ -499,7 +499,7 @@
                                                                 "labelWidth": 105,
                                                                 "layout|flex": null,
                                                                 "margin": "0 5 5 0",
-                                                                "valueField": "intItemUOMId"
+                                                                "valueField": "strUnitMeasure"
                                                             },
                                                             "name": "MyComboBox23",
                                                             "configAlternates": {
@@ -608,7 +608,7 @@
                                                                         "fieldLabel": "Storage Location",
                                                                         "itemId": "cboSubLocation",
                                                                         "layout|flex": 1,
-                                                                        "valueField": "intCompanyLocationSubLocationId"
+                                                                        "valueField": "strSubLocationName"
                                                                     },
                                                                     "name": "MyComboBox18",
                                                                     "configAlternates": {
@@ -661,7 +661,7 @@
                                                                         "labelWidth": 98,
                                                                         "layout|flex": 1,
                                                                         "margin": "0 0 0 5",
-                                                                        "valueField": "intStorageLocationId"
+                                                                        "valueField": "strName"
                                                                     },
                                                                     "name": "MyComboBox17",
                                                                     "configAlternates": {
@@ -726,7 +726,7 @@
                                                                 "fieldLabel": "Purchase UOM",
                                                                 "itemId": "cboReceiveUom",
                                                                 "layout|flex": 1,
-                                                                "valueField": "intItemUOMId"
+                                                                "valueField": "strUnitMeasure"
                                                             },
                                                             "name": "MyComboBox26",
                                                             "configAlternates": {
@@ -850,7 +850,7 @@
                                                                                 "itemId": "cboFamily",
                                                                                 "labelWidth": 105,
                                                                                 "layout|flex": null,
-                                                                                "valueField": "intSubcategoryId"
+                                                                                "valueField": "strFamily"
                                                                             },
                                                                             "name": "MyComboBox30",
                                                                             "configAlternates": {
@@ -907,7 +907,7 @@
                                                                                 "itemId": "cboClass",
                                                                                 "labelWidth": 105,
                                                                                 "layout|flex": null,
-                                                                                "valueField": "intSubcategoryId"
+                                                                                "valueField": "strSubcategoryId"
                                                                             },
                                                                             "name": "MyComboBox31",
                                                                             "configAlternates": {
@@ -971,7 +971,7 @@
                                                                                 "itemId": "cboProductCode",
                                                                                 "labelWidth": 105,
                                                                                 "layout|flex": null,
-                                                                                "valueField": "intStoreNo"
+                                                                                "valueField": "strItemTypeCode"
                                                                             },
                                                                             "name": "MyComboBox14",
                                                                             "configAlternates": {
@@ -1182,7 +1182,7 @@
                                                                                     "]"
                                                                                 ],
                                                                                 "designer|createAlias": "gridcombobox",
-                                                                                "displayField": "intPromoSalesId",
+                                                                                "displayField": "intPromoSalesListId",
                                                                                 "enableDrillDown": true,
                                                                                 "fieldLabel": "Promotion Item",
                                                                                 "itemId": "cboMixMatchCode",
@@ -2059,7 +2059,7 @@
                                                                 "itemId": "cboInventoryGroupField",
                                                                 "labelWidth": 140,
                                                                 "layout|flex": null,
-                                                                "valueField": "intCountGroupId"
+                                                                "valueField": "strCountGroup"
                                                             },
                                                             "name": "MyComboBox3",
                                                             "configAlternates": {
@@ -2189,7 +2189,7 @@
                         "itemId": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging119",
+                    "name": "statusbarpaging1",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
