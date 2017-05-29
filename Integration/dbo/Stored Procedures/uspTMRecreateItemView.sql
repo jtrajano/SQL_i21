@@ -49,8 +49,8 @@ BEGIN
 					AS  
 					SELECT  
 					vwitm_no = agitm_no  COLLATE Latin1_General_CI_AS
-					,vwitm_loc_no = agitm_loc_no  
-					,vwitm_class = agitm_class  
+					,vwitm_loc_no = agitm_loc_no  COLLATE Latin1_General_CI_AS
+					,vwitm_class = agitm_class  COLLATE Latin1_General_CI_AS
 					,vwitm_search = agitm_search  
 					,vwitm_desc = RTRIM(ISNULL(agitm_desc,'''')) COLLATE Latin1_General_CI_AS
 					,vwitm_un_desc = CAST(agitm_un_desc AS CHAR(10))  
@@ -85,8 +85,8 @@ BEGIN
 					AS  
 					SELECT  
 					vwitm_no = CAST(ptitm_itm_no AS CHAR(13)) COLLATE Latin1_General_CI_AS   
-					,vwitm_loc_no = ptitm_loc_no  
-					,vwitm_class = ptitm_class  
+					,vwitm_loc_no = ptitm_loc_no  COLLATE Latin1_General_CI_AS
+					,vwitm_class = ptitm_class  COLLATE Latin1_General_CI_AS
 					,vwitm_search = CAST(''''  AS CHAR(13))    
 					,vwitm_desc = RTRIM(ISNULL(CAST(ptitm_desc AS CHAR(33)),'''')) COLLATE Latin1_General_CI_AS
 					,vwitm_un_desc = CAST(ptitm_unit  AS CHAR(10))  
