@@ -21,11 +21,13 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         helpURL: '/display/DOC/How+to+Setup+Item+Location',
         binding: {
             cboLocation: {
-                value: '{current.intLocationId}',
+                value: '{current.strLocationName}',
                 store: '{location}'
             },
             cboDefaultVendor: {
-                value: '{current.intVendorId}',
+                value: '{current.strVendorName}',
+                origUpdateField: 'intVendorId',
+                origValueField: 'intEntityId',
                 store: '{vendor}'
             },
             cboCostingMethod: {
@@ -34,7 +36,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             },
             txtDescription: '{current.strDescription}',
             cboSubLocation: {
-                value: '{current.intSubLocationId}',
+                value: '{current.strSubLocationName}',
+                origValueField: 'intCompanyLocationSubLocationId',
+                origUpdateField: 'intSubLocationId',
                 store: '{subLocation}',
                 defaultFilters: [{
                     column: 'intCompanyLocationId',
@@ -47,7 +51,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 }]
             },
             cboStorageLocation: {
-                value: '{current.intStorageLocationId}',
+                value: '{current.strStorageLocationName}',
+                origValueField: 'intStorageLocationId',
+                origUpdateField: 'intStorageLocationId',
                 store: '{storageLocation}',
                 defaultFilters: [{
                     column: 'intLocationId',
@@ -60,7 +66,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 }]
             },
             cboIssueUom: {
-                value: '{current.intIssueUOMId}',
+                value: '{current.strIssueUOM}',
+                origValueField: 'intItemUOMId',
+                origUpdateField: 'intIssueUOMId',
                 store: '{issueUOM}',
                 defaultFilters: [{
                     column: 'intItemId',
@@ -68,7 +76,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 }]
             },
             cboReceiveUom: {
-                value: '{current.intReceiveUOMId}',
+                value: '{current.strReceiveUOM}',
+                origValueField: 'intItemUOMId',
+                origUpdateField: 'intReceiveUOMId',
                 store: '{receiveUOM}',
                 defaultFilters: [{
                     column: 'intItemId',
@@ -81,7 +91,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 }]
             },
             cboFamily: {
-                value: '{current.intFamilyId}',
+                value: '{current.strFamily}',
+                origValueField: 'intSubcategoryId',
+                origUpdateField: 'intFamilyId',
                 store: '{family}',
                 defaultFilters: [{
                     column: 'strSubcategoryType',
@@ -90,7 +102,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 }]
             },
             cboClass: {
-                value: '{current.intClassId}',
+                value: '{current.strClass}',
+                origValueField: 'intSubCategoryId',
+                origUpdateField: 'intClassId',
                 store: '{class}',
                 defaultFilters: [{
                     column: 'strSubcategoryType',
@@ -116,7 +130,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             chkTaxFlag4: '{current.ysnTaxFlag4}',
             chkPromotionalItem: '{current.ysnPromotionalItem}',
             cboMixMatchCode: {
-                value: '{current.intMixMatchId}',
+                value: '{current.intPromoSalesListId}',
+                origValueField: 'intPromoSalesListId',
+                origUpdateField: 'intMixMatchId',
                 store: '{mixMatchCode}'
             },
             chkDepositRequired: '{current.ysnDepositRequired}',
@@ -171,7 +187,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{counteds}'
             },
             cboInventoryGroupField: {
-                value: '{current.intCountGroupId}',
+                value: '{current.strCountGroup}',
+                origUpdateField: 'intCountGroupId',
+                origValueField: 'intCountGroupId',
                 store: '{countGroup}'
             },
             chkCountedDaily: '{current.ysnCountedDaily}'
@@ -188,6 +206,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             window : win,
             store  : store,
             binding: me.config.binding,
+            include: 'vyuICGetItemLocation',
             createRecord: {
                 fn: me.createRecord,
                 scope: me

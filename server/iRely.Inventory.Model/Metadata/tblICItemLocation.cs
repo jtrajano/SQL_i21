@@ -72,6 +72,66 @@ namespace iRely.Inventory.Model
         public bool? ysnCountedDaily { get; set; }
         public int? intSort { get; set; }
 
+        private string _countGroup;
+        [NotMapped]
+        public string strCountGroup
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_countGroup))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strCountGroup;
+                    else
+                        return null;
+                else
+                    return _countGroup;
+            }
+            set
+            {
+                _countGroup = value;
+            }
+        }
+
+        private string _promotionItem;
+        [NotMapped]
+        public string strPromoItemListId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_promotionItem))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strPromoItemListId;
+                    else
+                        return null;
+                else
+                    return _promotionItem;
+            }
+            set
+            {
+                _promotionItem = value;
+            }
+        }
+
+        private string _class;
+        [NotMapped]
+        public string strClass
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_class))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strClass;
+                    else
+                        return null;
+                else
+                    return _class;
+            }
+            set
+            {
+                _class = value;
+            }
+        }
+
         private string _location;
         [NotMapped]
         public string strLocationName
@@ -145,6 +205,47 @@ namespace iRely.Inventory.Model
                 _vendor = value;
             }
         }
+
+        private string _vendorName;
+        [NotMapped]
+        public string strVendorName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorName))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strVendorName;
+                    else
+                        return null;
+                else
+                    return _vendorName;
+            }
+            set
+            {
+                _vendorName = value;
+            }
+        }
+
+        private string _family;
+        [NotMapped]
+        public string strFamily
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_family))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strFamily;
+                    else
+                        return null;
+                else
+                    return _family;
+            }
+            set
+            {
+                _family = value;
+            }
+        }
+
         private string _subLocationName;
         [NotMapped]
         public string strSubLocationName
@@ -164,7 +265,67 @@ namespace iRely.Inventory.Model
                 _subLocationName = value;
             }
         }
-        
+
+        private string _storageLocationName;
+        [NotMapped]
+        public string strStorageLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_storageLocationName))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strStorageLocationName;
+                    else
+                        return null;
+                else
+                    return _storageLocationName;
+            }
+            set
+            {
+                _storageLocationName = value;
+            }
+        }
+
+        private string _issueUom;
+        [NotMapped]
+        public string strIssueUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_issueUom))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strIssueUOM;
+                    else
+                        return null;
+                else
+                    return _issueUom;
+            }
+            set
+            {
+                _issueUom = value;
+            }
+        }
+
+        private string _receiveUom;
+        [NotMapped]
+        public string strReceiveUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_receiveUom))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strReceiveUOM;
+                    else
+                        return null;
+                else
+                    return _receiveUom;
+            }
+            set
+            {
+                _receiveUom = value;
+            }
+        }
+
         public tblICItem tblICItem { get; set; }
         public vyuICGetItemLocation vyuICGetItemLocation { get; set; }
                 
