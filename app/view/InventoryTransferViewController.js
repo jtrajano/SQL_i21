@@ -368,7 +368,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         record.set('intSourceType', 0);
         if (app.DefaultLocation > 0){
             record.set('intFromLocationId', app.DefaultLocation);
+            record.set('strFromLocation', app.DefaultLocationName);
             record.set('intToLocationId', app.DefaultLocation);
+            record.set('strToLocation', app.DefaultLocationName);
         }
         if (app.EntityId > 0)
             record.set('intTransferredById', app.EntityId);
