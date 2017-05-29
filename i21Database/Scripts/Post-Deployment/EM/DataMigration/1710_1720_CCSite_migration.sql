@@ -15,7 +15,7 @@ BEGIN
 
 	UPDATE a SET 
 
-			a.intVendorDefaultId = b.intDealerSiteId,
+			a.intVendorDefaultId = b.intVendorDefaultId,
 			a.intAccountId = b.intAccountId,
 			a.intFeeExpenseAccountId = b.intFeeExpenseAccountId,
 			a.ysnPostNetToArCustomer = b.ysnPostNetToArCustomer,
