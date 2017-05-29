@@ -27,7 +27,8 @@ gulp.task('reload', ['publish', 'js'], function () {
     // });
     
     browserSync.init({
-        proxy: "http://localhost/17.2/i21/debug.html"
+        // proxy: "http://localhost/17.2/i21/debug.html"
+        proxy: "http://localhost/17.2/i21"
     });
 
     gulp.watch('app/**/*.{js,css}', ['js-watch']);
