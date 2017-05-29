@@ -48,13 +48,13 @@ BEGIN
 					CREATE VIEW [dbo].[vwcntmst]
 					AS
 					SELECT
-						vwcnt_cus_no=agcnt_cus_no
+						vwcnt_cus_no=agcnt_cus_no COLLATE Latin1_General_CI_AS
 						,vwcnt_cnt_no= agcnt_cnt_no
 						,vwcnt_line_no= CAST(agcnt_line_no AS INT)
-						,vwcnt_alt_cus=agcnt_alt_cus
-						,vwcnt_itm_or_cls=agcnt_itm_or_cls
-						,vwcnt_loc_no=agcnt_loc_no
-						,vwcnt_alt_cnt_no=agcnt_alt_cnt_no
+						,vwcnt_alt_cus=agcnt_alt_cus COLLATE Latin1_General_CI_AS
+						,vwcnt_itm_or_cls=agcnt_itm_or_cls COLLATE Latin1_General_CI_AS
+						,vwcnt_loc_no=agcnt_loc_no COLLATE Latin1_General_CI_AS
+						,vwcnt_alt_cnt_no=agcnt_alt_cnt_no COLLATE Latin1_General_CI_AS
 						,vwcnt_amt_orig=agcnt_amt_orig
 						,vwcnt_amt_bal=agcnt_amt_bal
 						,vwcnt_due_rev_dt= (CASE WHEN agcnt_due_rev_dt = 0 THEN NULL 
@@ -91,13 +91,13 @@ BEGIN
 					CREATE VIEW [dbo].[vwcntmst]
 					AS
 					SELECT
-						vwcnt_cus_no=ptcnt_cus_no
+						vwcnt_cus_no=ptcnt_cus_no COLLATE Latin1_General_CI_AS
 						,vwcnt_cnt_no= CAST(ptcnt_cnt_no AS CHAR(8))  
 						,vwcnt_line_no= CAST(ptcnt_line_no AS INT)
-						,vwcnt_alt_cus=ptcnt_alt_cus_no
-						,vwcnt_itm_or_cls=CAST(ptcnt_itm_or_cls AS CHAR(13))  
-						,vwcnt_loc_no=ptcnt_loc_no
-						,vwcnt_alt_cnt_no=CAST(ptcnt_alt_cnt_no AS CHAR(8)) 
+						,vwcnt_alt_cus=ptcnt_alt_cus_no COLLATE Latin1_General_CI_AS
+						,vwcnt_itm_or_cls=CAST(ptcnt_itm_or_cls AS CHAR(13))  COLLATE Latin1_General_CI_AS
+						,vwcnt_loc_no=ptcnt_loc_no COLLATE Latin1_General_CI_AS
+						,vwcnt_alt_cnt_no=CAST(ptcnt_alt_cnt_no AS CHAR(8))  COLLATE Latin1_General_CI_AS
 						,vwcnt_amt_orig=ptcnt_amt_orig
 						,vwcnt_amt_bal= ptcnt_amt_bal
 						
@@ -119,7 +119,7 @@ BEGIN
 						,vwcnt_lc4_yn =ptcnt_lc4_yn
 						,vwcnt_lc5_yn =ptcnt_lc5_yn
 						,vwcnt_lc6_yn =ptcnt_lc6_yn
-						,vwcnt_ppd_yndm =ptcnt_prepaid_ynd
+						,vwcnt_ppd_yndm =ptcnt_prepaid_ynd COLLATE Latin1_General_CI_AS
 						,vwcnt_un_prc=CAST(ptcnt_un_prc AS DECIMAL(18,6))  
 						,vwcnt_prc_lvl = ptcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
@@ -138,12 +138,12 @@ BEGIN
 			CREATE VIEW [dbo].[vwcntmst]
 			AS
 			SELECT
-				vwcnt_cus_no=C.strEntityNo 
+				vwcnt_cus_no=C.strEntityNo COLLATE Latin1_General_CI_AS
 				,vwcnt_cnt_no= A.strContractNumber
 				,vwcnt_line_no= B.intContractSeq
-				,vwcnt_alt_cus= ''''
-				,vwcnt_itm_or_cls= E.strItemNo
-				,vwcnt_loc_no= F.strLocationName
+				,vwcnt_alt_cus= '''' COLLATE Latin1_General_CI_AS
+				,vwcnt_itm_or_cls= E.strItemNo COLLATE Latin1_General_CI_AS
+				,vwcnt_loc_no= F.strLocationName COLLATE Latin1_General_CI_AS
 				,vwcnt_alt_cnt_no=''''
 				,vwcnt_amt_orig= ISNULL(B.dblCashPrice,0.0) * ISNULL(B.dblOriginalQty,0.0)
 				,vwcnt_amt_bal= ISNULL(B.dblBalance,0.0) * ISNULL(B.dblCashPrice,0.0)
@@ -160,7 +160,7 @@ BEGIN
 				,vwcnt_ppd_yndm = (CASE 
 										WHEN ISNULL(H.ysnPrepaid,0) = 1 THEN ''Y'' 
 										ELSE ''N''
-									END)
+									END) COLLATE Latin1_General_CI_AS
 						  	
 				,vwcnt_un_prc= ISNULL(B.dblCashPrice,0.0)
 				,vwcnt_prc_lvl = ''''
