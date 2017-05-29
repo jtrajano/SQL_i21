@@ -5239,6 +5239,7 @@
     <None Include="Scripts\Post-Deployment\IC\PopulateLotContainerNoAndCondition.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddInvoicesTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
