@@ -375,34 +375,49 @@ BEGIN
 	--================================================
 	IF(@Checking = 1)
 	BEGIN
-		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
+		IF @ysnAG = 1 
 		 BEGIN
-		 --Check first on agivcmst
-			SELECT @Total = COUNT(agivc_ivc_no)  
-				FROM agivcmst
-			LEFT JOIN tblARInvoice ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
-			WHERE tblARInvoice.strInvoiceOriginId IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
-			AND (
-					((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
-					OR
-					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-				)
+			IF (@Posted = 1) AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
+				BEGIN
+					--Check first on agivcmst
+					SELECT @Total = COUNT(agivc_ivc_no)  
+					FROM agivcmst
+					LEFT JOIN tblARInvoice ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+					WHERE tblARInvoice.strInvoiceOriginId IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
+					AND (
+							((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+							OR
+							((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+						)
+				END
+			ELSE IF (@Posted = 0) AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agordmst')
+				BEGIN
+					SELECT @Total = ISNULL(@Total, 0) + COUNT(agord_ivc_no)
+					FROM agordmst
+					WHERE (
+							((CASE WHEN ISDATE(agord_ord_rev_dt) = 1 THEN CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+							OR
+							((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+						  )
+				END
 		 END
 
-		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
-		 BEGIN
-		--Check first on ptivcmst
-			SELECT @Total = COUNT(ptivc_invc_no)  
-				FROM ptivcmst
-			LEFT JOIN tblARInvoice ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
-			WHERE tblARInvoice.strInvoiceOriginId IS NULL AND ptivcmst.ptivc_invc_no = UPPER(ptivcmst.ptivc_invc_no) COLLATE Latin1_General_CS_AS
-			AND (
-					((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
-					OR
-					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-				)
-
-			IF EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst')
+		IF @ysnPT = 1
+		BEGIN			
+			IF (@Posted = 1) AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
+				BEGIN
+					--Check first on ptivcmst
+					SELECT @Total = COUNT(ptivc_invc_no)  
+						FROM ptivcmst
+					LEFT JOIN tblARInvoice ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+					WHERE tblARInvoice.strInvoiceOriginId IS NULL AND ptivcmst.ptivc_invc_no = UPPER(ptivcmst.ptivc_invc_no) COLLATE Latin1_General_CS_AS
+					AND (
+							((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+							OR
+							((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+						)
+				END
+			ELSE IF (@Posted = 0) AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst')
 				BEGIN
 					SELECT @Total = ISNULL(@Total, 0) + COUNT(pttic_ivc_no)
 					FROM ptticmst
@@ -417,6 +432,3 @@ BEGIN
 	END
 		
 END	
-
-
-
