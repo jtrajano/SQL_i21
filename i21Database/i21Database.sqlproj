@@ -5251,6 +5251,7 @@
     <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
     <Build Include="dbo\Views\vyuSMDocument.sql" />
     <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
