@@ -5248,6 +5248,7 @@
     <Build Include="dbo\Views\vyuMFGetAvailableStorageLocation.sql" />
     <None Include="Scripts\Post-Deployment\IC\PopulateLotContainerNoAndCondition.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDuplicateDiscountSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
