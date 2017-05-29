@@ -113,7 +113,7 @@ SELECT DISTINCT
 	, Bill.intBillId 
 	, strBillId = ISNULL(Bill.strBillId, 'New Voucher')
 	, dblAmountPaid = 0
-	, (ISNULL(dblAmount,0) * -1 ) + ISNULL(dblTax,0)  AS dblTotal
+	, (ISNULL(dblAmount,0) * -1 ) + (ISNULL(dblTax,0) * -1) AS dblTotal
 	, ISNULL(CASE 
 		WHEN Bill.intTransactionType != 1 AND Bill.dblDetailTotal > 0 
 		THEN Bill.dblDetailTotal 
@@ -133,7 +133,7 @@ SELECT DISTINCT
 	,-1 AS dblQtyToReceive
 	,dblQtyVouchered = ABS(ISNULL(Bill.dblQtyReceived,ISNULL(CASE WHEN dblAmountBilled <> 0 THEN 1 ELSE 0 END,0))) * -1
 	,CASE WHEN Bill.dblQtyReceived <> 0 THEN 0 ELSE -1 END AS dblQtyToVoucher 
-	, dblAmountToVoucher = CAST(( (ISNULL(dblAmount,0)* -1) + ISNULL(dblTax,0)) AS DECIMAL (18,2)) 
+	, dblAmountToVoucher = CAST(( (ISNULL(dblAmount,0)* -1) + (ISNULL(dblTax,0)* -1)) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
 FROM tblICInventoryReceiptCharge ReceiptCharge
