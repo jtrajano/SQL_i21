@@ -1,4 +1,4 @@
-﻿print('/*******************  BEGIN Update NULL dblQtyShipped in tblSOSalesOrderDetail with zero  *******************/')
+﻿print('/*******************  BEGIN Update tblARCustomer Total AR Balance  *******************/')
 GO
 
 EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = NULL
