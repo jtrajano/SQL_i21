@@ -5260,6 +5260,7 @@
     <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetReceiving.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShipped.sql" />
+    <Build Include="dbo\Views\vyuEMEntityGroupApproverUsage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
