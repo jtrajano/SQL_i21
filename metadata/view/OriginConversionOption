@@ -11,6 +11,9 @@
         "height": 2404,
         "layout": null,
         "minWidth": 765,
+        "requires": [
+            "Inventory.Utils"
+        ],
         "width": 716
     },
     "name": "MyContainer12",

@@ -24,7 +24,8 @@ Ext.define('Inventory.view.OriginConversionOption', {
         'Ext.menu.Menu',
         'Ext.menu.Separator',
         'Ext.form.Label',
-        'Ext.form.field.ComboBox'
+        'Ext.form.field.ComboBox',
+        'Inventory.Utils'
     ],
 
     height: 2404,
