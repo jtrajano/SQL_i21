@@ -54,7 +54,7 @@ BEGIN
 						,strItemNo = vwcnt_itm_or_cls COLLATE Latin1_General_CI_AS 
 					FROM vwcntmst A
 					INNER JOIN vwcusmst B
-						ON A.vwcnt_cus_no = B.vwcus_key
+						ON A.vwcnt_cus_no COLLATE Latin1_General_CI_AS  = B.vwcus_key COLLATE Latin1_General_CI_AS 
 					INNER JOIN tblTMCustomer C
 						ON B.A4GLIdentity = C.intCustomerNumber
 					WHERE CAST (A.vwcnt_due_rev_dt as datetime)>= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
