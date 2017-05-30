@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetPMUsage
 AS
-SELECT DISTINCT Convert(char, W.dtmPlannedDate,101) [Dump Date]
+SELECT DISTINCT Convert(CHAR, W.dtmPlannedDate, 101) [Dump Date]
 	,I.strItemNo [Product]
 	,I.strDescription [Product Description]
 	,(
@@ -19,6 +19,7 @@ SELECT DISTINCT Convert(char, W.dtmPlannedDate,101) [Dump Date]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intWorkOrderId = W.intWorkOrderId
 	AND intSequenceNo <> 9999
+	AND W.intStatusId = 13
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = WC.intItemIssuedUOMId
 JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
