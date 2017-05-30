@@ -5255,6 +5255,7 @@
     <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
     <Build Include="dbo\Views\vyuICStockDetail.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
+    <Build Include="dbo\Views\vyuEMEntityGroupApproverUsage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
