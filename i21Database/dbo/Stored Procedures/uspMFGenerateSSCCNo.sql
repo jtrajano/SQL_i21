@@ -9,7 +9,7 @@ BEGIN
 		,@intCustomerLabelTypeId INT
 		,@strPackageType NVARCHAR(1)
 		,@strManufacturerCode NVARCHAR(50)
-		,@intBatchId INT
+		,@strBatchId NVARCHAR(50)
 		,@strSSCCNo NVARCHAR(50)
 	DECLARE @strCheckString VARCHAR(8000)
 		,@intOdd INT
@@ -40,13 +40,13 @@ BEGIN
 
 	WHILE @intOrderManifestId IS NOT NULL
 	BEGIN
-		IF @intCustomerLabelTypeId = 1
+		IF @intCustomerLabelTypeId = 1 -- Pallet Label
 		BEGIN
 			SELECT @strSSCCNo = strSSCCNo
 			FROM tblMFOrderManifest
 			WHERE intOrderManifestId = @intOrderManifestId
 
-			IF @strSSCCNo IS NOT NULL
+			IF ISNULL(@strSSCCNo, '') <> ''
 			BEGIN
 				CONTINUE
 			END
@@ -61,9 +61,10 @@ BEGIN
 					,@intBlendRequirementId = NULL
 					,@intPatternCode = 118
 					,@ysnProposed = 0
-					,@strPatternString = @intBatchId OUTPUT
+					,@strPatternString = @strBatchId OUTPUT
 
-				SELECT @strCheckString = @strPackageType + @strManufacturerCode + Ltrim(@intBatchId)
+				--SELECT @strCheckString = @strPackageType + @strManufacturerCode + Ltrim(@strBatchId)
+				SELECT @strCheckString = @strManufacturerCode + Ltrim(@strBatchId) -- Will be 16 digit (Eg: 0718908 562723189)
 
 				DELETE
 				FROM @strSplitString
@@ -131,14 +132,17 @@ BEGIN
 
 				SELECT @intCheckDigit = (@intOdd + @intEven) % 10
 
-				SELECT @strSSCCNo = '(00)-' + @strPackageType + @strManufacturerCode + Ltrim(@intBatchId) + Ltrim(@intCheckDigit)
+				IF @intCheckDigit > 0
+					SELECT @intCheckDigit = 10 - @intCheckDigit
+
+				SELECT @strSSCCNo = '(00)-' + @strPackageType + @strManufacturerCode + Ltrim(@strBatchId) + Ltrim(@intCheckDigit)
 
 				UPDATE tblMFOrderManifest
 				SET strSSCCNo = @strSSCCNo
 				WHERE intOrderManifestId = @intOrderManifestId
 			END
 		END
-		ELSE IF @intCustomerLabelTypeId = 2
+		ELSE IF @intCustomerLabelTypeId = 2 -- Case Label
 		BEGIN
 			WHILE @intNoOfLabel > 0
 			BEGIN
@@ -151,9 +155,10 @@ BEGIN
 					,@intBlendRequirementId = NULL
 					,@intPatternCode = 118
 					,@ysnProposed = 0
-					,@strPatternString = @intBatchId OUTPUT
+					,@strPatternString = @strBatchId OUTPUT
 
-				SELECT @strCheckString = @strPackageType + @strManufacturerCode + Ltrim(@intBatchId)
+				--SELECT @strCheckString = @strPackageType + @strManufacturerCode + Ltrim(@strBatchId)
+				SELECT @strCheckString = @strManufacturerCode + Ltrim(@strBatchId) -- Will be 16 digit (Eg: 0718908 562723189)
 
 				DELETE
 				FROM @strSplitString
@@ -221,7 +226,10 @@ BEGIN
 
 				SELECT @intCheckDigit = (@intOdd + @intEven) % 10
 
-				SELECT @strSSCCNo = '(00)-' + @strPackageType + @strManufacturerCode + Ltrim(@intBatchId) + Ltrim(@intCheckDigit)
+				IF @intCheckDigit > 0
+					SELECT @intCheckDigit = 10 - @intCheckDigit
+
+				SELECT @strSSCCNo = '(00)-' + @strPackageType + @strManufacturerCode + Ltrim(@strBatchId) + Ltrim(@intCheckDigit)
 
 				UPDATE tblMFOrderManifest
 				SET strSSCCNo = IsNULL(strSSCCNo, '') + CASE 
@@ -234,9 +242,9 @@ BEGIN
 				SELECT @intNoOfLabel = @intNoOfLabel - 1
 			END
 		END
-	END
 
-	SELECT @intOrderManifestId = min(intOrderManifestId)
-	FROM @tblMFGenerateSSNo
-	WHERE intOrderManifestId > @intOrderManifestId
+		SELECT @intOrderManifestId = min(intOrderManifestId)
+		FROM @tblMFGenerateSSNo
+		WHERE intOrderManifestId > @intOrderManifestId
+	END
 END
