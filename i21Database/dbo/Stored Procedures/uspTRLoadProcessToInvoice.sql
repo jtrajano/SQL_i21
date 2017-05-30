@@ -1142,8 +1142,11 @@ BEGIN TRY
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
 
+	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
+
 	EXEC [dbo].[uspARProcessInvoices]
 			 @InvoiceEntries	= @EntriesForInvoice
+			,@LineItemTaxEntries= @TaxDetails
 			,@UserId			= @intUserId
 			,@GroupingOption	= 8
 			,@RaiseError		= 1
