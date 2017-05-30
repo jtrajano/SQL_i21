@@ -2,7 +2,6 @@
 (
 	@transactionIds NVARCHAR(MAX),
 	@intUserId INT,
-	@apClearing	INT,
 	@batchId NVARCHAR(40)
 )
 RETURNS @returntable TABLE
@@ -60,17 +59,17 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intUndistributedEquityId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	ROUND(B.dblEquityRefund,2),
+		[dblCredit]						=	ROUND(B.dblEquityRefund, 2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strRefundNo,
+		[strDescription]				=	'Undistributed Equity',
 		[strCode]						=	'PAT',
 		[strReference]					=	A.strRefundNo,
 		[intCurrencyId]					=	0,
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	'Posted Undistributed Equity',
+		[dtmTransactionDate]			=	A.dtmRefundDate,
+		[strJournalLineDescription]		=	'Undistributed Equity',
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
@@ -99,19 +98,19 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	@apClearing, 
+		[intAccountId]					=	E.intAPClearingGLAccount, 
 		[dblDebit]						=	0,
-		[dblCredit]						=	ROUND(B.dblCashRefund,2),
+		[dblCredit]						=	ROUND(B.dblCashRefund,2) + ROUND(A.dblServiceFee, 2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strRefundNo,
+		[strDescription]				=	'AP Clearing',
 		[strCode]						=	'PAT',
 		[strReference]					=	A.strRefundNo,
 		[intCurrencyId]					=	0,
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	'Posted Cash Refund',
+		[dtmTransactionDate]			=	A.dtmRefundDate,
+		[strJournalLineDescription]		=	'AP Clearing',
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
@@ -134,6 +133,7 @@ BEGIN
 				ON A.intRefundId = B.intRefundId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
+			CROSS JOIN tblPATCompanyPreference E
 	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnEligibleRefund = 1
 	UNION ALL
 	--GENERAL RESERVE
@@ -145,14 +145,14 @@ BEGIN
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strRefundNo,
+		[strDescription]				=	'General Reserve',
 		[strCode]						=	'PAT',
 		[strReference]					=	A.strRefundNo,
 		[intCurrencyId]					=	0,
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	'Posted Refund Amount',
+		[dtmTransactionDate]			=	A.dtmRefundDate,
+		[strJournalLineDescription]		=	'General Reserve',
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
@@ -175,6 +175,48 @@ BEGIN
 				ON A.intRefundId = B.intRefundId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
+	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnEligibleRefund = 1
+	UNION ALL
+	--SERVICE FEE INCOME
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	E.intServiceFeeIncomeId,
+		[dblDebit]						=	ROUND(A.dblServiceFee, 2),
+		[dblCredit]						=	0,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	'Service Fee Income',
+		[strCode]						=	'PAT',
+		[strReference]					=	A.strRefundNo,
+		[intCurrencyId]					=	0,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmRefundDate,
+		[strJournalLineDescription]		=	'Service Fee Income',
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strRefundNo, 
+		[intTransactionId]				=	A.intRefundId, 
+		[strTransactionType]			=	'Service Fee',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL,
+		[intConcurrencyId]				=	1
+	FROM	[dbo].tblPATRefund A
+			INNER JOIN tblPATRefundCustomer B
+				ON A.intRefundId = B.intRefundId
+			INNER JOIN tblPATRefundRate D
+				ON B.intRefundTypeId = D.intRefundTypeId
+			CROSS JOIN tblPATCompanyPreference E
 	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnEligibleRefund = 1
 
 	RETURN
