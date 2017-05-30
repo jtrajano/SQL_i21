@@ -41,6 +41,7 @@ BEGIN TRY
 	DECLARE @strApprovalBase NVARCHAR(50)
 	DECLARE @strContainerNumber NVARCHAR(100)
 	DECLARE @strLotAlias NVARCHAR(50)
+		,@strWarehouseRefNo NVARCHAR(50)
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -87,6 +88,17 @@ BEGIN TRY
 	FROM tblICItem
 	WHERE intItemId = @intSampleItemId
 
+	SELECT @strLotNumber = strLotNumber
+	FROM tblICLot
+	WHERE intLotId = @intProductValueId
+
+	SELECT @strWarehouseRefNo = strWarehouseRefNo
+	FROM dbo.tblICInventoryReceiptItemLot RIL
+	JOIN dbo.tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	JOIN dbo.tblICLot L ON L.intLotId = RIL.intLotId
+	WHERE L.strLotNumber = @strLotNumber
+
 	IF @ysnRequireCustomerApproval = 1
 		AND @intProductTypeId = 6
 		AND @intSampleControlPointId = 14
@@ -104,7 +116,8 @@ BEGIN TRY
 		UPDATE LI
 		SET intBondStatusId = @intLotStatusId
 		FROM dbo.tblICParentLot AS PL
-		JOIN dbo.tblICLot AS L ON PL.intParentLotId = L.intParentLotId AND L.ysnProduced =0
+		JOIN dbo.tblICLot AS L ON PL.intParentLotId = L.intParentLotId
+			AND L.ysnProduced = 0
 			AND PL.intParentLotId = @intProductValueId
 		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
 	END
@@ -128,73 +141,29 @@ BEGIN TRY
 			WHERE intLotId = @intProductValueId
 		END
 	END
+	ELSE IF @ysnRequireCustomerApproval = 1
+		AND @intSampleControlPointId = 14
+		AND @strApprovalBase = 'Warehouse Ref No'
+	BEGIN
+		IF @strWarehouseRefNo <> ''
+		BEGIN
+			UPDATE LI
+			SET intBondStatusId = @intLotStatusId
+			FROM dbo.tblICLot AS L
+			JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
+			JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+			JOIN dbo.tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+			JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+			WHERE R.strWarehouseRefNo = @strWarehouseRefNo
+		END
+		ELSE
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET intBondStatusId = @intLotStatusId
+			WHERE intLotId = @intProductValueId
+		END
+	END
 
-	-- Wholesome Sweetener -- JIRA QC-240
-	--IF @ysnRequireCustomerApproval = 1
-	--BEGIN
-	--	IF (
-	--			@intProductTypeId = 6
-	--			OR @intProductTypeId = 11
-	--			) -- Lot / Parent Lot
-	--	BEGIN
-	--		DECLARE @intCustomsApprovalSampleCount INT
-	--		DECLARE @intOtherControlPointSampleCount INT
-	--		DECLARE @intBondedApprovalLotStatusId INT
-	--		SELECT @intCustomsApprovalSampleCount = COUNT(intSampleId)
-	--		FROM tblQMSample S
-	--		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
-	--		WHERE S.intProductTypeId = @intProductTypeId
-	--			AND S.intProductValueId = @intProductValueId
-	--			AND S.intSampleId <> @intSampleId
-	--			AND S.intSampleStatusId IN (
-	--				3
-	--				,4
-	--				)
-	--			AND ST.intControlPointId = 14 -- Customs Approval Sample
-	--		SELECT @intOtherControlPointSampleCount = COUNT(intSampleId)
-	--		FROM tblQMSample S
-	--		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
-	--		WHERE S.intProductTypeId = @intProductTypeId
-	--			AND S.intProductValueId = @intProductValueId
-	--			AND S.intSampleId <> @intSampleId
-	--			AND S.intSampleStatusId IN (
-	--				3
-	--				,4
-	--				)
-	--			AND ST.intControlPointId <> 14 -- Customs Approval Sample
-	--		-- If No Customs approval sample is available and current sample is not customs approval, take lot status from bonded status
-	--		-- If Customs approval sample taken on second time (Some other Sample taken), take lot status from bonded status
-	--		IF (
-	--				@intCustomsApprovalSampleCount = 0
-	--				AND @intSampleControlPointId <> 14
-	--				)
-	--			OR (
-	--				@intOtherControlPointSampleCount > 0
-	--				AND @intSampleControlPointId = 14
-	--				)
-	--		BEGIN
-	--			DECLARE @intProductId INT
-	--			SELECT TOP 1 @intProductId = intProductId
-	--			FROM tblQMTestResult
-	--			WHERE intSampleId = @intSampleId
-	--			SELECT @intBondedApprovalLotStatusId = intBondedApprovalLotStatusId
-	--			FROM tblQMProduct
-	--			WHERE intProductId = @intProductId
-	--			IF @intBondedApprovalLotStatusId IS NULL
-	--			BEGIN
-	--				RAISERROR (
-	--						'Bonded Approval Lot Status is not configured in the quality template.'
-	--						,16
-	--						,1
-	--						)
-	--			END
-	--			ELSE
-	--			BEGIN
-	--				SET @intLotStatusId = @intBondedApprovalLotStatusId
-	--			END
-	--		END
-	--	END
-	--END
 	SELECT TOP 1 @intUserSampleApproval = ISNULL(intUserSampleApproval, 0)
 	FROM tblQMCompanyPreference
 
@@ -323,6 +292,30 @@ BEGIN TRY
 				,intLotStatusId
 			FROM tblICLot
 			WHERE intParentLotId = @intProductValueId
+		END
+		ELSE IF @strApprovalBase = 'Warehouse Ref No'
+		BEGIN
+			INSERT INTO @LotData (
+				intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+				)
+			SELECT L.intLotId
+				,L.strLotNumber
+				,L.intItemId
+				,L.intLocationId
+				,L.intSubLocationId
+				,L.intStorageLocationId
+				,L.intLotStatusId
+			FROM tblICLot L
+			JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+			JOIN dbo.tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+			JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+			WHERE R.strWarehouseRefNo = @strWarehouseRefNo
 		END
 		ELSE IF @strApprovalBase = 'Container'
 		BEGIN
