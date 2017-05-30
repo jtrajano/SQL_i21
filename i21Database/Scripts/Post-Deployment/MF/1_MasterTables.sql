@@ -2447,3 +2447,32 @@ UPDATE tblMFCompanyPreference
 SET ysnSetDefaultQtyOnHandheld = 1
 WHERE ysnSetDefaultQtyOnHandheld IS NULL
 GO
+
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblMFCustomerLabelType
+		WHERE intCustomerLabelTypeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFCustomerLabelType (
+		intCustomerLabelTypeId
+		,strLabelType
+		)
+	SELECT 1
+		,'Pallet Label'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblMFCustomerLabelType
+		WHERE intCustomerLabelTypeId = 2
+		)
+BEGIN
+	INSERT INTO tblMFCustomerLabelType (
+		intCustomerLabelTypeId
+		,strLabelType
+		)
+	SELECT 2
+		,'Case Label'
+END

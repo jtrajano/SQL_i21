@@ -5,6 +5,7 @@
 		,[intOrderHeaderId] INT NOT NULL
 		,[intLotId] INT NULL
 		,[strManifestItemNote] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strSSCCNo nvarchar(MAX) COLLATE Latin1_General_CI_AS NULL
 		,[intLastUpdateId] INT
 		,[dtmLastUpdateOn] DATETIME DEFAULT GETDATE()
 		

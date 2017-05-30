@@ -5261,6 +5261,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetReceiving.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShipped.sql" />
     <Build Include="dbo\Views\vyuEMEntityGroupApproverUsage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateSSCCNo.sql" />
+    <Build Include="dbo\Tables\tblMFCustomerLabelType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
