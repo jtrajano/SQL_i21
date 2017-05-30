@@ -367,6 +367,9 @@ INSERT INTO @temp_statement_table(
 	, intInvoiceId
 	, dblBalance
 	, dblPayment
+	, strFullAddress
+	, strCompanyAddress
+	, strCompanyName
 )
 SELECT DISTINCT
 	  STATEMENTFORWARD.intEntityCustomerId
@@ -379,6 +382,9 @@ SELECT DISTINCT
 	, 1
 	, ISNULL(BALANCEFORWARD.dblTotalAR, 0)
 	, 0
+	, STATEMENTFORWARD.strFullAddress
+	, STATEMENTFORWARD.strCompanyAddress
+	, STATEMENTFORWARD.strCompanyName
 FROM @temp_statement_table STATEMENTFORWARD
 	LEFT JOIN @temp_balanceforward_table BALANCEFORWARD ON STATEMENTFORWARD.intEntityCustomerId = BALANCEFORWARD.intEntityCustomerId	
 
