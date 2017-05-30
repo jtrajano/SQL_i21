@@ -82,7 +82,7 @@ namespace iRely.Inventory.BusinessLayer
                         // Clear the receipt per charge records. Let the Receipt posting re-create it. 
                         await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICDeleteChargePerItemOnShipmentSave @intShipmentNo",
-                            new SqlParameter("intShipmentId", shipment.intInventoryShipmentId)
+                            new SqlParameter("intShipmentNo", shipment.intInventoryShipmentId)
                         );
 
                         // Log the original detail records. 
