@@ -21,6 +21,7 @@ BEGIN
 	INSERT INTO @tblMFGenerateSSNo
 	SELECT *
 	FROM dbo.fnSplitString(@strOrderManifestId, '^')
+	WHERE Item <> ''
 
 	SELECT @intOrderManifestId = min(intOrderManifestId)
 	FROM @tblMFGenerateSSNo
@@ -48,6 +49,10 @@ BEGIN
 
 			IF ISNULL(@strSSCCNo, '') <> ''
 			BEGIN
+				SELECT @intOrderManifestId = min(intOrderManifestId)
+				FROM @tblMFGenerateSSNo
+				WHERE intOrderManifestId > @intOrderManifestId
+
 				CONTINUE
 			END
 			ELSE
@@ -124,11 +129,11 @@ BEGIN
 
 				SELECT @intOdd = SUM(convert(INT, SUBSTRING(@strCheckString, intChar, 1))) * 3
 				FROM @strSplitString
-				WHERE intChar % 2 = 0
+				WHERE intChar % 2 <> 0
 
 				SELECT @intEven = SUM(Convert(INT, SUBSTRING(@strCheckString, intChar, 1)))
 				FROM @strSplitString
-				WHERE intChar % 2 <> 0
+				WHERE intChar % 2 = 0
 
 				SELECT @intCheckDigit = (@intOdd + @intEven) % 10
 
