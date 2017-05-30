@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetRMUsageByLot
 AS
-SELECT DISTINCT Convert(char,WI.dtmProductionDate,101) [Dump Date]
+SELECT DISTINCT Convert(CHAR, WI.dtmProductionDate, 101) [Dump Date]
 	,I.strItemNo [Product]
 	,I.strDescription [Product Description]
 	,(
@@ -19,6 +19,8 @@ SELECT DISTINCT Convert(char,WI.dtmProductionDate,101) [Dump Date]
 	,UM.strUnitMeasure [Weight UOM]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
+	AND WI.ysnConsumptionReversed = 0
+	AND W.intStatusId = 13
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WI.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
@@ -29,7 +31,7 @@ JOIN dbo.tblICLot IL ON IL.intLotId = WI.intLotId
 JOIN dbo.tblICParentLot IPL ON IPL.intParentLotId = IL.intParentLotId
 JOIN dbo.tblICItem I1 ON I1.intItemId = IL.intItemId
 JOIN dbo.tblICCategory C ON C.intCategoryId = I1.intCategoryId
-WHERE C.strCategoryCode Not IN (
+WHERE C.strCategoryCode NOT IN (
 		SELECT PA.strAttributeValue
 		FROM tblMFManufacturingProcessAttribute PA
 		WHERE PA.intManufacturingProcessId = W.intManufacturingProcessId
