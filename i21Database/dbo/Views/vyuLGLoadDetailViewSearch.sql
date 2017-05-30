@@ -204,6 +204,10 @@ SELECT   Load.intLoadId
 		,strSCompanyLocation = SCL.strLocationName
 		,ICI.strContractItemNo
 		,ICI.strContractItemName
+		,PDetail.intPricingTypeId AS intPPricingTypeId
+		,PTP.strPricingType AS strPPricingType
+		,SDetail.intPricingTypeId AS intSPricingTypeId
+		,PTS.strPricingType AS strSPricingType
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
@@ -229,6 +233,8 @@ LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = Load.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
+LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
+LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId]	= Load.intDispatcherId
 LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LoadDetail.intPickLotDetailId
