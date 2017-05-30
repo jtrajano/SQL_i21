@@ -966,7 +966,7 @@ BEGIN
 						RETURN 0;
 					END CATCH
 				END
-					
+				DELETE FROM #EntriesForProcessing WHERE intId = @ForDetailId
 		END		
 	END
 
@@ -1094,7 +1094,7 @@ BEGIN TRY
 			,@EntityCustomerId				= [intEntityCustomerId]
 			,@CompanyLocationId				= [intCompanyLocationId]
 			,@AccountId						= [intAccountId] 
-			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurrency]([intEntityCustomerId]))
+			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurreny]([intEntityCustomerId]))
 			,@TermId						= [intTermId]
 			,@Date							= CAST([dtmDate] AS DATE)
 			,@DueDate						= [dtmDueDate]
