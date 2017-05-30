@@ -5263,6 +5263,7 @@
     <Build Include="dbo\Views\vyuEMEntityGroupApproverUsage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateSSCCNo.sql" />
     <Build Include="dbo\Tables\tblMFCustomerLabelType.sql" />
+    <Build Include="dbo\Views\vyuSCProductionEvidenceReportView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
