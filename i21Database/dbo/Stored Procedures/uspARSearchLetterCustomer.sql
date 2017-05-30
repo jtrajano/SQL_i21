@@ -34,13 +34,13 @@ FROM
 SET NOCOUNT OFF;
 
 DECLARE @temp_aging_table TABLE(
-	 [strInvoiceNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	 [strCustomerName]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	,[strCustomerNumber]		NVARCHAR(15)	COLLATE Latin1_General_CI_AS
+	,[strInvoiceNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	,[strRecordNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
-	,[intInvoiceId]				INT
-	,[strCustomerName]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	,[intInvoiceId]				INT	
 	,[strBOLNumber]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS
-	,[intEntityCustomerId]		INT
-	,[strCustomerNumber]		NVARCHAR(15)	COLLATE Latin1_General_CI_AS			
+	,[intEntityCustomerId]		INT				
 	,[dblCreditLimit]			NUMERIC(18,6)
 	,[dblTotalAR]				NUMERIC(18,6)
 	,[dblFuture]				NUMERIC(18,6)
@@ -67,220 +67,220 @@ DECLARE @temp_availablecustomer_table TABLE(
 	[intEntityCustomerId]		INT 
 )
 
-INSERT INTO 
-	@temp_aging_table
-EXEC uspARCollectionOverdueDetailReport NULL, NULL, NULL  
+IF @strLetterName <> 'Service Charge Invoices Letter'
+BEGIN
+	INSERT INTO @temp_aging_table
+	EXEC uspARCollectionOverdueDetailReport NULL, NULL  
 
+	DELETE FROM @temp_aging_table
+	WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WITH (NOLOCK) WHERE strType IN ('CF Tran'))
 
-DELETE FROM @temp_aging_table
-WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WITH (NOLOCK) WHERE strType IN ('CF Tran'))
-
-DELETE FROM tblARCollectionOverdueDetail
-INSERT INTO tblARCollectionOverdueDetail
-(
-	intCompanyLocationId		 
-	,strCompanyName				 
-	,strCompanyAddress			 
-	,strCompanyPhone			 
-	,intEntityCustomerId		 
-	,strCustomerNumber			 
-	,strCustomerName			 
-	,strCustomerAddress			 
-	,strCustomerPhone			 
-	,strAccountNumber			 
-	,intInvoiceId				 
-	,strInvoiceNumber			 
-	,strBOLNumber				 
-	,dblCreditLimit				 
-	,intTermId					 
-	,strTerm					 
-	,dblTotalAR					 
-	,dblFuture					 
-	,dbl0Days					 
-	,dbl10Days					 
-	,dbl30Days					 
-	,dbl60Days					 
-	,dbl90Days					 
-	,dbl120Days					 
-	,dbl121Days					 
-	,dblTotalDue				 
-	,dblAmountPaid				 
-	,dblInvoiceTotal			 		 
-	,dblCredits					 	
-	,dblPrepaids				 	
-	,dtmDate					 
-	,dtmDueDate					 
-)
-SELECT intCompanyLocationId		=	@intCompanyLocationId
-	, strCompanyName			=	@strCompanyName
-	, strCompanyAddress			=	@strCompanyAddress
-	, strCompanyPhone			=	@strCompanyPhone
-	, intEntityCustomerId		=	 Aging.intEntityCustomerId
-	, strCustomerNumber			=	 Aging.strCustomerName
- 	, strCustomerName			=	Cus.strName
-	, strCustomerAddress		=	[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, Cus.strName, NULL)
-	, strCustomerPhone			=	EnPhoneNo.strPhone 
-	, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WITH (NOLOCK) WHERE intEntityCustomerId = Cus.intEntityCustomerId) 
-	, intInvoiceId				=	Aging.intInvoiceId	
-	, strInvoiceNumber			=	Aging.strInvoiceNumber		 
-	, strBOLNumber				=	Aging.strBOLNumber
-	, dblCreditLimit			=	Aging.dblCreditLimit				 
-	, intTermId					=	Cus.intTermsId			 
-	, strTerm					=	Cus.strTerm			 
-	, dblTotalAR				=	Aging.dblTotalAR	 
-	, dblFuture					=	Aging.dblFuture	 					 
-	, dbl0Days					=	Aging.dbl0Days	 					 
-	, dbl10Days					=	Aging.dbl10Days	 					 
-	, dbl30Days					=	Aging.dbl30Days	 					 
-	, dbl60Days					=	Aging.dbl60Days	 					 
-	, dbl90Days					=	Aging.dbl90Days	 				 
-	, dbl120Days				=	Aging.dbl120Days	 					 
-	, dbl121Days				=	Aging.dbl121Days	 					 
-	, dblTotalDue				=	Aging.dblTotalDue	 			 
-	, dblAmountPaid				=	Aging.dblAmountPaid				 
-	, dblInvoiceTotal			=	Aging.dblInvoiceTotal		 
-	, dblCredits				=	Aging.dblCredits						 	
-	, dblPrepaids				=	Aging.dblPrepaids					 	
-	, dtmDate					=	Aging.dtmDate						 
-	, dtmDueDate				=	Aging.dtmDueDate		 
-FROM 
+	DELETE FROM tblARCollectionOverdueDetail
+	INSERT INTO tblARCollectionOverdueDetail
 	(
-	SELECT 
-		* 
+		intCompanyLocationId		 
+		,strCompanyName				 
+		,strCompanyAddress			 
+		,strCompanyPhone			 
+		,intEntityCustomerId		 
+		,strCustomerNumber			 
+		,strCustomerName			 
+		,strCustomerAddress			 
+		,strCustomerPhone			 
+		,strAccountNumber			 
+		,intInvoiceId				 
+		,strInvoiceNumber			 
+		,strBOLNumber				 
+		,dblCreditLimit				 
+		,intTermId					 
+		,strTerm					 
+		,dblTotalAR					 
+		,dblFuture					 
+		,dbl0Days					 
+		,dbl10Days					 
+		,dbl30Days					 
+		,dbl60Days					 
+		,dbl90Days					 
+		,dbl120Days					 
+		,dbl121Days					 
+		,dblTotalDue				 
+		,dblAmountPaid				 
+		,dblInvoiceTotal			 		 
+		,dblCredits					 	
+		,dblPrepaids				 	
+		,dtmDate					 
+		,dtmDueDate					 
+	)
+	SELECT intCompanyLocationId		=	@intCompanyLocationId
+		, strCompanyName			=	@strCompanyName
+		, strCompanyAddress			=	@strCompanyAddress
+		, strCompanyPhone			=	@strCompanyPhone
+		, intEntityCustomerId		=	 Aging.intEntityCustomerId
+		, strCustomerNumber			=	 Aging.strCustomerName
+ 		, strCustomerName			=	Cus.strName
+		, strCustomerAddress		=	[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, Cus.strName, NULL)
+		, strCustomerPhone			=	EnPhoneNo.strPhone 
+		, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WITH (NOLOCK) WHERE intEntityCustomerId = Cus.intEntityCustomerId) 
+		, intInvoiceId				=	Aging.intInvoiceId	
+		, strInvoiceNumber			=	Aging.strInvoiceNumber		 
+		, strBOLNumber				=	Aging.strBOLNumber
+		, dblCreditLimit			=	Aging.dblCreditLimit				 
+		, intTermId					=	Cus.intTermsId			 
+		, strTerm					=	Cus.strTerm			 
+		, dblTotalAR				=	Aging.dblTotalAR	 
+		, dblFuture					=	Aging.dblFuture	 					 
+		, dbl0Days					=	Aging.dbl0Days	 					 
+		, dbl10Days					=	Aging.dbl10Days	 					 
+		, dbl30Days					=	Aging.dbl30Days	 					 
+		, dbl60Days					=	Aging.dbl60Days	 					 
+		, dbl90Days					=	Aging.dbl90Days	 				 
+		, dbl120Days				=	Aging.dbl120Days	 					 
+		, dbl121Days				=	Aging.dbl121Days	 					 
+		, dblTotalDue				=	Aging.dblTotalDue	 			 
+		, dblAmountPaid				=	Aging.dblAmountPaid				 
+		, dblInvoiceTotal			=	Aging.dblInvoiceTotal		 
+		, dblCredits				=	Aging.dblCredits						 	
+		, dblPrepaids				=	Aging.dblPrepaids					 	
+		, dtmDate					=	Aging.dtmDate						 
+		, dtmDueDate				=	Aging.dtmDueDate		 
 	FROM 
-		@temp_aging_table 
-	WHERE 
-		intInvoiceId NOT IN (SELECT 
-								intInvoiceId 
-							FROM 
-								tblARInvoice WITH (NOLOCK)
-							WHERE 
-								strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') AND ysnPaid = 1) 
-	)  Aging
-INNER JOIN (
-			SELECT 
-				ARC.intEntityCustomerId
-				, strCustomerNumber					= ISNULL(ARC.strCustomerNumber, EME.strEntityNo)
-				, EME.strName
-				, BillToLoc.strBillToAddress
-				, BillToLoc.strBillToCity
-				, BillToLoc.strBillToCountry
-				, BillToLoc.strBillToLocationName
-				, BillToLoc.strBillToState
-				, BillToLoc.strBillToZipCode
-				, ARC.intTermsId
-				, ARC.strTerm
-			FROM 
-				(SELECT 
-					intEntityCustomerId, 
-					strCustomerNumber, 
-					intBillToId,		
-					ARC.intTermsId,
-					SMT.strTerm								
+		(
+		SELECT 
+			* 
+		FROM 
+			@temp_aging_table 
+		WHERE 
+			intInvoiceId NOT IN (SELECT 
+									intInvoiceId 
+								FROM 
+									tblARInvoice WITH (NOLOCK)
+								WHERE 
+									strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') AND ysnPaid = 1) 
+		)  Aging
+	INNER JOIN (
+				SELECT 
+					ARC.intEntityCustomerId
+					, strCustomerNumber					= ISNULL(ARC.strCustomerNumber, EME.strEntityNo)
+					, EME.strName
+					, BillToLoc.strBillToAddress
+					, BillToLoc.strBillToCity
+					, BillToLoc.strBillToCountry
+					, BillToLoc.strBillToLocationName
+					, BillToLoc.strBillToState
+					, BillToLoc.strBillToZipCode
+					, ARC.intTermsId
+					, ARC.strTerm
 				FROM 
-					tblARCustomer ARC WITH (NOLOCK)
-				INNER JOIN (
-							SELECT 
-								intTermID,
-								strTerm 
-							FROM 
-								tblSMTerm WITH (NOLOCK)) SMT ON ARC.intTermsId = SMT.intTermID ) ARC
-				INNER JOIN (
-							SELECT 
-								intEntityId, 
-								strEntityNo, 
-								strName								 
-							FROM 
-								tblEMEntity WITH (NOLOCK)
-							) EME ON ARC.intEntityCustomerId = EME.intEntityId
-				LEFT JOIN (
-							SELECT 
-								Loc.intEntityId, 
-								Loc.intEntityLocationId,
-								Loc.intTermsId,
-								SMT.strTerm																
-							FROM 
-								tblEMEntityLocation Loc WITH (NOLOCK)
-							INNER JOIN (
-										SELECT 
-											intTermID,
-											strTerm 
-										FROM 
-											tblSMTerm WITH (NOLOCK)) SMT ON Loc.intTermsId = SMT.intTermID
-							WHERE ysnDefaultLocation = 1
-							) EMEL ON ARC.intEntityCustomerId = EMEL.intEntityId
-				LEFT JOIN (
-							SELECT 
-								intEntityId, 
-								intEntityLocationId,
-								strBillToAddress		= strAddress,
-								strBillToCity			= strCity,
-								strBillToLocationName	= strLocationName,
-								strBillToCountry		= strCountry,
-								strBillToState			= strState,
-								strBillToZipCode		= strZipCode
-							FROM 
-								tblEMEntityLocation WITH (NOLOCK)
-							) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
-			) Cus ON Aging.intEntityCustomerId = Cus.intEntityCustomerId
-INNER JOIN (
-			SELECT 
-				intEntityId
-					, [intEntityContactId]
-					, ysnDefaultContact 
-			FROM 
-				[tblEMEntityToContact] WITH (NOLOCK)
-			WHERE 
-				ysnDefaultContact = 1) CusToCon ON Aging.intEntityCustomerId = CusToCon.intEntityId  
- LEFT JOIN (
-			SELECT 
-				intEntityId
-				, strPhone 
-			FROM 
-				tblEMEntityPhoneNumber WITH (NOLOCK)) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
+					(SELECT 
+						intEntityCustomerId, 
+						strCustomerNumber, 
+						intBillToId,		
+						ARC.intTermsId,
+						SMT.strTerm								
+					FROM 
+						tblARCustomer ARC WITH (NOLOCK)
+					INNER JOIN (
+								SELECT 
+									intTermID,
+									strTerm 
+								FROM 
+									tblSMTerm WITH (NOLOCK)) SMT ON ARC.intTermsId = SMT.intTermID ) ARC
+					INNER JOIN (
+								SELECT 
+									intEntityId, 
+									strEntityNo, 
+									strName								 
+								FROM 
+									tblEMEntity WITH (NOLOCK)
+								) EME ON ARC.intEntityCustomerId = EME.intEntityId
+					LEFT JOIN (
+								SELECT 
+									Loc.intEntityId, 
+									Loc.intEntityLocationId,
+									Loc.intTermsId,
+									SMT.strTerm																
+								FROM 
+									tblEMEntityLocation Loc WITH (NOLOCK)
+								INNER JOIN (
+											SELECT 
+												intTermID,
+												strTerm 
+											FROM 
+												tblSMTerm WITH (NOLOCK)) SMT ON Loc.intTermsId = SMT.intTermID
+								WHERE ysnDefaultLocation = 1
+								) EMEL ON ARC.intEntityCustomerId = EMEL.intEntityId
+					LEFT JOIN (
+								SELECT 
+									intEntityId, 
+									intEntityLocationId,
+									strBillToAddress		= strAddress,
+									strBillToCity			= strCity,
+									strBillToLocationName	= strLocationName,
+									strBillToCountry		= strCountry,
+									strBillToState			= strState,
+									strBillToZipCode		= strZipCode
+								FROM 
+									tblEMEntityLocation WITH (NOLOCK)
+								) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
+				) Cus ON Aging.intEntityCustomerId = Cus.intEntityCustomerId
+	INNER JOIN (
+				SELECT 
+					intEntityId
+						, [intEntityContactId]
+						, ysnDefaultContact 
+				FROM 
+					[tblEMEntityToContact] WITH (NOLOCK)
+				WHERE 
+					ysnDefaultContact = 1) CusToCon ON Aging.intEntityCustomerId = CusToCon.intEntityId  
+	 LEFT JOIN (
+				SELECT 
+					intEntityId
+					, strPhone 
+				FROM 
+					tblEMEntityPhoneNumber WITH (NOLOCK)) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
 			
-DELETE FROM tblARCollectionOverdue				
-INSERT INTO tblARCollectionOverdue
-(
-	intEntityCustomerId 				 
-	,dblCreditLimitSum	  				 
-	,dblTotalARSum 						 
-	,dblFutureSum 				 
-	,dbl0DaysSum 						 
-	,dbl10DaysSum 					 
-	,dbl30DaysSum  						 
-	,dbl60DaysSum 					 
-	,dbl90DaysSum 						 
-	,dbl120DaysSum  						 
-	,dbl121DaysSum 						 
-	,dblTotalDueSum 				 
-	,dblAmountPaidSum  					 
-	,dblInvoiceTotalSum	 			 		 
-	,dblCreditsSum 					 	
-	,dblPrepaidsSum  	
-)
-SELECT 			 
-	intEntityCustomerId 				 
-	,dblCreditLimitSum		= SUM(dblCreditLimit) 				 
-	,dblTotalARSum			= SUM(dblTotalAR) 						 
-	,dblFutureSum			= SUM(dblFuture) 						 
-	,dbl0DaysSum			= SUM(dbl0Days) 						 
-	,dbl10DaysSum			= SUM(dbl10Days) 						 
-	,dbl30DaysSum			= SUM(dbl30Days) 						 
-	,dbl60DaysSum			= SUM(dbl60Days) 						 
-	,dbl90DaysSum			= SUM(dbl90Days) 						 
-	,dbl120DaysSum			= SUM(dbl120Days) 						 
-	,dbl121DaysSum			= SUM(dbl121Days) 						 
-	,dblTotalDueSum			= SUM(dblTotalDue) 					 
-	,dblAmountPaidSum		= SUM(dblAmountPaid) 					 
-	,dblInvoiceTotalSum		= SUM(dblInvoiceTotal) 				 		 
-	,dblCreditsSum			= SUM(dblCredits) 						 	
-	,dblPrepaidsSum			= SUM(dblPrepaids) 					 	
-FROM 
-	@temp_aging_table
-GROUP BY 
-	intEntityCustomerId
-
+	DELETE FROM tblARCollectionOverdue				
+	INSERT INTO tblARCollectionOverdue
+	(
+		intEntityCustomerId 				 
+		,dblCreditLimitSum	  				 
+		,dblTotalARSum 						 
+		,dblFutureSum 				 
+		,dbl0DaysSum 						 
+		,dbl10DaysSum 					 
+		,dbl30DaysSum  						 
+		,dbl60DaysSum 					 
+		,dbl90DaysSum 						 
+		,dbl120DaysSum  						 
+		,dbl121DaysSum 						 
+		,dblTotalDueSum 				 
+		,dblAmountPaidSum  					 
+		,dblInvoiceTotalSum	 			 		 
+		,dblCreditsSum 					 	
+		,dblPrepaidsSum  	
+	)
+	SELECT 			 
+		intEntityCustomerId 				 
+		,dblCreditLimitSum		= SUM(dblCreditLimit) 				 
+		,dblTotalARSum			= SUM(dblTotalAR) 						 
+		,dblFutureSum			= SUM(dblFuture) 						 
+		,dbl0DaysSum			= SUM(dbl0Days) 						 
+		,dbl10DaysSum			= SUM(dbl10Days) 						 
+		,dbl30DaysSum			= SUM(dbl30Days) 						 
+		,dbl60DaysSum			= SUM(dbl60Days) 						 
+		,dbl90DaysSum			= SUM(dbl90Days) 						 
+		,dbl120DaysSum			= SUM(dbl120Days) 						 
+		,dbl121DaysSum			= SUM(dbl121Days) 						 
+		,dblTotalDueSum			= SUM(dblTotalDue) 					 
+		,dblAmountPaidSum		= SUM(dblAmountPaid) 					 
+		,dblInvoiceTotalSum		= SUM(dblInvoiceTotal) 				 		 
+		,dblCreditsSum			= SUM(dblCredits) 						 	
+		,dblPrepaidsSum			= SUM(dblPrepaids) 					 	
+	FROM 
+		@temp_aging_table
+	GROUP BY 
+		intEntityCustomerId
+END
 	
 IF @strLetterName = 'Recent Overdue Collection Letter'
 BEGIN
@@ -993,37 +993,21 @@ END
 ELSE IF  @strLetterName = 'Service Charge Invoices Letter'
 BEGIN
 	SET NOCOUNT ON;
-	SELECT DISTINCT intEntityCustomerId
-		, strCustomerNumber
-		, strCustomerName 
-	FROM 
-		(SELECT
-			intEntityCustomerId,
-			strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-			strCustomerName
-		 FROM 
-			(SELECT 
-				intEntityId,
-				strEntityNo,
-				strCustomerName		= strName
-			FROM 
-				tblEMEntity WITH (NOLOCK)) EME
-			INNER JOIN (SELECT 
-							ARC.intEntityCustomerId
-							, ARC.strCustomerNumber
-						FROM 
-							tblARCustomer ARC WITH (NOLOCK)
-						INNER JOIN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										tblARInvoice WITH (NOLOCK)
-									WHERE 
-										strType = 'Service Charge') TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
-						 WHERE
-							ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
-		) Cus		
-	ORDER BY 
-		strCustomerName
+	SELECT I.intEntityCustomerId
+		 , CUST.strCustomerNumber
+		 , CUST.strCustomerName
+	FROM dbo.tblARInvoice I WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityCustomerId
+					 , strCustomerNumber
+					 , strCustomerName  = strName
+				FROM dbo.vyuARCustomer WITH (NOLOCK)
+				WHERE ysnActive = 1
+	) CUST ON I.intEntityCustomerId = CUST.intEntityCustomerId	 
+	WHERE I.strType = 'Service Charge'
+	GROUP BY I.intEntityCustomerId
+		   , CUST.strCustomerNumber
+		   , CUST.strCustomerName
+	ORDER BY CUST.strCustomerName
 	SET NOCOUNT OFF;	
 END
 
