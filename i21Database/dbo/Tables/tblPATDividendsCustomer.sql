@@ -11,5 +11,6 @@
 	[intBillId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATDividendsCustomer] PRIMARY KEY ([intDividendCustomerId]), 
-    CONSTRAINT [FK_tblPATDividendsCustomer_tblPATDividends] FOREIGN KEY ([intDividendId]) REFERENCES [tblPATDividends]([intDividendId])
+    CONSTRAINT [FK_tblPATDividendsCustomer_tblPATDividends] FOREIGN KEY ([intDividendId]) REFERENCES [tblPATDividends]([intDividendId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPATDividendsCustomer_tblAPBill] FOREIGN KEY (intBillId) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL
 )
