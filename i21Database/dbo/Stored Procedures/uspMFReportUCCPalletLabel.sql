@@ -10,7 +10,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @xmlDocumentId INT
 		,@strOrderManifestId NVARCHAR(MAX)
-		,@dblLotQty NUMERIC(38, 20)
+		,@intNoOfLabel INT
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -46,12 +46,12 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intOrderManifestId'
 
-	SELECT @dblLotQty = [from]
+	SELECT @intNoOfLabel = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'dblLotQty'
+	WHERE [fieldname] = 'intNoOfLabel'
 
 	EXEC dbo.uspMFGenerateSSCCNo @strOrderManifestId = @strOrderManifestId
-		,@intNoOfLabel = @dblLotQty
+		,@intNoOfLabel = @intNoOfLabel
 
 	SELECT LTRIM(RTRIM(CASE 
 					WHEN ISNULL(CL.strLocationName, '') = ''
