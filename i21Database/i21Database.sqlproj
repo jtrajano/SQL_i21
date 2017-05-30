@@ -5243,6 +5243,8 @@
     <Build Include="dbo\Tables\tblMFCustomFieldValue.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveConsumeCustomFields.sql" />
     <Build Include="dbo\Functions\fnAPGetReceiptTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetReceiving.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShipped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

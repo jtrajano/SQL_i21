@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetProduction
 AS
-SELECT Convert(char,WP.dtmProductionDate,101) AS [Production Date]
+SELECT Convert(CHAR, WP.dtmProductionDate, 101) AS [Production Date]
 	,I.strItemNo AS Item
 	,I.strDescription AS Description
 	,W.strWorkOrderNo AS [Work Order #]
@@ -12,6 +12,7 @@ SELECT Convert(char,WP.dtmProductionDate,101) AS [Production Date]
 	,UM.strUnitMeasure AS [Weight UOM]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
+	AND W.intStatusId = 13
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WP.intLotId
 JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
