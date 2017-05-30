@@ -5254,6 +5254,7 @@
     <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
     <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
     <Build Include="dbo\Views\vyuICStockDetail.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
