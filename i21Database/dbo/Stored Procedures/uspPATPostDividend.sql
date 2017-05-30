@@ -2,7 +2,6 @@
 	@intDividendId INT = NULL,
 	@ysnPosted BIT = NULL,
 	@intUserId INT = NULL,
-	@intAPClearingId INT = NULL,
 	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
 	@success BIT = 0 OUTPUT 
@@ -20,13 +19,12 @@ SET ANSI_WARNINGS OFF
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage'
-DECLARE @SCREEN_NAME NVARCHAR(25) = 'Dividends'
-DECLARE @TRAN_TYPE NVARCHAR(25) = 'Dividends'
+DECLARE @TRAN_TYPE NVARCHAR(25) = 'Dividend'
 DECLARE @totalRecords INT
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @error NVARCHAR(200)
 DECLARE @batchId NVARCHAR(40)
-
+DECLARE @intAPClearingId AS INT;
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 BEGIN TRANSACTION
@@ -36,6 +34,8 @@ BEGIN TRANSACTION
 IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
+
+SELECT TOP 1 @intAPClearingId = intAPClearingGLAccount FROM tblPATCompanyPreference;
 
 IF ISNULL(@ysnPosted,0) = 1
 BEGIN
@@ -63,8 +63,8 @@ BEGIN
 	
 	UPDATE tblGLDetail SET ysnIsUnposted = 1
 		WHERE intTransactionId = @intDividendId 
-			AND strCode=N'PAT' 
-			AND strTransactionForm=N'Dividend'
+			AND strModuleName = @MODULE_NAME
+			AND strTransactionForm = @TRAN_TYPE
 END
 
 --=====================================================================================================================================
@@ -88,7 +88,6 @@ Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
 	SET @successfulCount = @totalRecords
-	GOTO Post_Cleanup
 	GOTO Post_Exit
 
 Post_Rollback:
@@ -96,10 +95,6 @@ Post_Rollback:
 	SET @success = 0
 	GOTO Post_Exit
 
-Post_Cleanup:
-	--DELETE FROM tblGLTest
-	--FROM tblGLPostRecap A
-	--INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 Post_Exit:
 
 END
