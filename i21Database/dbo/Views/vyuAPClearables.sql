@@ -47,14 +47,18 @@ SELECT DISTINCT
 					  THEN
 						  (CASE
 							WHEN Receipt.dblQtyToReceive = 0 THEN 0
-							ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
-								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
+							ELSE ISNULL(CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) -
+								 totalVouchered.dblTotalVouchered AS DECIMAL (18,2)), CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
+								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2)))
 						  END) *-1
 					  ELSE 
 						  (CASE
 							WHEN Receipt.dblQtyToReceive = 0 THEN 0
-							ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
-								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
+							ELSE 
+								 
+								 ISNULL(CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) -
+								 totalVouchered.dblTotalVouchered AS DECIMAL (18,2)), CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
+								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2)))
 						  END)END)                    
 	,0 AS dblChargeAmount	
 	,Receipt.strContainer
@@ -104,6 +108,13 @@ FROM vyuICGetInventoryReceiptItem Receipt
 				WHERE A.intInventoryReceiptChargeId IS NULL AND A.intInventoryReceiptItemId = Receipt.intInventoryReceiptItemId
 				GROUP BY intInventoryReceiptItemId 
 	) totalRcvdQty	
+	OUTER APPLY (
+				SELECT 
+					SUM(dblTotal) + SUM(A.dblTax) AS dblTotalVouchered
+				FROM dbo.tblAPBillDetail A
+				WHERE A.intInventoryReceiptChargeId IS NULL AND A.intInventoryReceiptItemId = Receipt.intInventoryReceiptItemId
+				GROUP BY intInventoryReceiptItemId 
+	) totalVouchered	
 WHERE Receipt.ysnPosted = 1 AND ((Receipt.dblQtyToReceive - ISNULL(totalRcvdQty.totalReceivedQty,Receipt.dblBillQty)) != 0 OR  (CASE WHEN Receipt.dblQtyToReceive = 0  THEN 0  
 																										ELSE (ISNULL(Receipt.dblLineTotal,0)/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(totalRcvdQty.totalReceivedQty,Receipt.dblBillQty))END) != 0)
 																										--AND Receipt.strReceiptNumber = 'INVRCT-4604'
