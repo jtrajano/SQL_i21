@@ -50,6 +50,9 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'dblLotQty'
 
+	EXEC dbo.uspMFGenerateSSCCNo @strOrderManifestId = @strOrderManifestId
+		,@intNoOfLabel = @dblLotQty
+
 	SELECT LTRIM(RTRIM(CASE 
 					WHEN ISNULL(CL.strLocationName, '') = ''
 						THEN ''
@@ -106,8 +109,8 @@ BEGIN TRY
 		,I.strGTIN AS strDPCI
 		,I.intInnerUnits AS intCasePack
 		,I.strItemNo AS strStyle
-		,'(00) 3 0012511 000130720 2' AS strBarCodeLabel -- Check with Prem
-		,'00000846430018142227' AS strBarCode -- Check with Prem
+		,OM.strSSCCNo AS strBarCodeLabel -- Check with Prem
+		,OM.strSSCCNo AS strBarCode -- Check with Prem
 	FROM tblMFOrderManifest OM
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo

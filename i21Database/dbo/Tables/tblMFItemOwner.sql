@@ -4,7 +4,10 @@
 	,intItemId INT NULL
 	,intOwnerId INT NOT NULL
 	,intReceivedLife INT
-
+	,intCustomerLabelTypeId int NULL
+	,strPackageType nvarchar(1) COLLATE Latin1_General_CI_AS NULL
+	,strManufacturerCode nvarchar(50)COLLATE Latin1_General_CI_AS NULL
+	,ysnAllowPartialPallet bit CONSTRAINT [DF_tblMFItemOwner_ysnAllowPartialPallet] Default 1
 	,intCreatedUserId [int] NULL
 	,dtmCreated [datetime] NULL CONSTRAINT [DF_tblMFItemOwner_dtmCreated] DEFAULT GetDate()
 	,intLastModifiedUserId [int] NULL
@@ -14,4 +17,5 @@
 	,CONSTRAINT [AK_tblMFItemOwner_intItemId_intOwnerId] UNIQUE ([intItemId],[intOwnerId])
 	,CONSTRAINT FK_tblMFItemOwner_tblICItem FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFItemOwner_tblEMEntity FOREIGN KEY (intOwnerId) REFERENCES tblEMEntity(intEntityId)
+	,CONSTRAINT FK_tblMFItemOwner_tblMFCustomerLabelType FOREIGN KEY (intCustomerLabelTypeId) REFERENCES tblMFCustomerLabelType(intCustomerLabelTypeId)
 	)
