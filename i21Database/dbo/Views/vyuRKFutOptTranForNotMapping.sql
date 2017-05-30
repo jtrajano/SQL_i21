@@ -1,4 +1,4 @@
-﻿CREATE View vyuRKFutOptTranForNotMapping
+﻿CREATE VIEW vyuRKFutOptTranForNotMapping
 
 AS  
 SELECT 	ft.intFutOptTransactionId,fom.dblContractSize,strCurrencyExchangeRateType,strBook,strSubBook,fm.dtmFirstNoticeDate,fm.dtmLastTradingDate
@@ -17,6 +17,7 @@ fm.strFutureMonth strFutureMonthYearWOSymbol,
 		ch.strContractNumber strContractNumber
 		,frm.strFutureMonth strRollingMonth, ft.intRollingMonthId,
 		CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  then 'Exchange Traded' else 'OTC' end as strSelectedInstrumentType,intAssignedLots as intAssignedLots
+		,b.strBankName,ba.strBankAccountNo
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].[vyuRKGetAssignedLots] AS al ON ft.[intFutOptTransactionId] = al.[intFutOptTransactionId]
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
