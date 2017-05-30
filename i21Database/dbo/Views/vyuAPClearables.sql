@@ -40,22 +40,22 @@ SELECT DISTINCT
 							 THEN ISNULL(Bill.dblQtyReceived,ISNULL(Receipt.dblBillQty,0)) *-1
 							 ELSE ISNULL(Bill.dblQtyReceived,ISNULL(Receipt.dblBillQty,0)) END)
 	,dblQtyToVoucher = (CASE WHEN Receipt.strReceiptType = 'Inventory Return' 
-							 THEN (Receipt.dblQtyToReceive - ISNULL(Bill.dblQtyReceived,0)) *-1
-							 ELSE (Receipt.dblQtyToReceive - ISNULL(Bill.dblQtyReceived,0)) END) 
+							 THEN (Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) *-1
+							 ELSE (Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) END) 
 	,dblAmountToVoucher =
 					  (CASE WHEN Receipt.strReceiptType = 'Inventory Return' 
 					  THEN
 						  (CASE
 							WHEN Receipt.dblQtyToReceive = 0 THEN 0
 							ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
-								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Bill.dblQtyReceived,Receipt.dblBillQty)) AS DECIMAL (18,2))
+								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
 						  END) *-1
 					  ELSE 
 						  (CASE
 							WHEN Receipt.dblQtyToReceive = 0 THEN 0
 							WHEN Bill.dblQtyReceived > 0 THEN CAST(Bill.dblDetailTotal AS DECIMAL (18,2))
 							ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
-								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Bill.dblQtyReceived,Receipt.dblBillQty)) AS DECIMAL (18,2))
+								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
 						  END)END)                    
 	,0 AS dblChargeAmount	
 	,Receipt.strContainer
@@ -107,7 +107,7 @@ FROM vyuICGetInventoryReceiptItem Receipt
 	) totalRcvdQty	
 WHERE Receipt.ysnPosted = 1 AND ((Receipt.dblQtyToReceive - ISNULL(totalRcvdQty.totalReceivedQty,Receipt.dblBillQty)) != 0 OR  (CASE WHEN Receipt.dblQtyToReceive = 0  THEN 0  
 																										ELSE (ISNULL(Receipt.dblLineTotal,0)/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(totalRcvdQty.totalReceivedQty,Receipt.dblBillQty))END) != 0)
-																										--AND Receipt.strReceiptNumber = 'RTN-25'
+																										--AND Receipt.strReceiptNumber = 'INVRCT-4604'
 UNION ALL																									
 --QUERY FOR RECEIPT VENDOR PRICE DOWN WITH CHARGES
 SELECT DISTINCT
