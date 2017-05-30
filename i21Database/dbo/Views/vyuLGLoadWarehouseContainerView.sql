@@ -6,6 +6,16 @@ SELECT   L.intLoadId
 		,L.dtmBLDate
 		,L.dtmScheduledDate
 		,L.strExternalLoadNumber
+		,L.strMVessel
+		,L.strMVoyageNumber
+		,L.strFVessel
+		,L.strFVoyageNumber
+		,L.strOriginPort
+		,L.strDestinationPort
+		,L.strShippingMode
+		,L.dtmETAPOD
+		,L.dtmETAPOL
+		,L.dtmETSPOL
 
 		,LD.intLoadDetailId
 		,strCustomerFax = CEN.strFax
@@ -48,6 +58,7 @@ SELECT   L.intLoadId
 		,CLSL.strSubLocationName
 		,WRMH.strServiceContractNo
 		,CLSLV.intEntityId 
+		,ShippingLine.strName as strShippingLine
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
@@ -66,4 +77,5 @@ LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intDispatcherId
+LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 WHERE L.intShipmentType = 1
