@@ -5387,6 +5387,7 @@
     <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\25_ApprovalHistory.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
