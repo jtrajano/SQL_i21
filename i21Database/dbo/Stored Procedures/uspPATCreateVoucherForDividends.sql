@@ -3,7 +3,6 @@
 	@intUserId INT,
 	@ysnPosted BIT,
 	@dividendsCustomer NVARCHAR(MAX),
-	@intAPClearingId INT = 0,
 	@successfulCount INT = 0 OUTPUT,
 	@strErrorMessage NVARCHAR(MAX) = NULL OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
@@ -17,20 +16,49 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+
+	CREATE TABLE #tempDivCust(
+		intDividendId INT,
+		strDividendNo NVARCHAR(50),
+		intDividendCustomerId INT,
+		intCustomerId INT,
+		dblDividendAmount NUMERIC(18,6),
+		dblLessFWT NUMERIC(18,6),
+		dblCheckAmount NUMERIC(18,6)
+	);
+
 BEGIN TRANSACTION
 
-	SELECT	D.intDividendId,
-			D.strDividendNo,
-			DC.intDividendCustomerId,
-			DC.intCustomerId,
-			DC.dblDividendAmount,
-			DC.dblLessFWT,
-			DC.dblCheckAmount
-		INTO #tempDivCust 
-		FROM tblPATDividends D
-	INNER JOIN tblPATDividendsCustomer DC
-		ON DC.intDividendId = D.intDividendId
-	WHERE DC.intDividendCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@dividendsCustomer)) AND DC.dblDividendAmount <> 0
+	IF(@dividendsCustomer = 'all')
+	BEGIN
+		INSERT INTO #tempDivCust 
+		SELECT	D.intDividendId,
+				D.strDividendNo,
+				DC.intDividendCustomerId,
+				DC.intCustomerId,
+				DC.dblDividendAmount,
+				DC.dblLessFWT,
+				DC.dblCheckAmount
+			FROM tblPATDividends D
+		INNER JOIN tblPATDividendsCustomer DC
+			ON DC.intDividendId = D.intDividendId
+		WHERE D.intDividendId = @intDividendId AND DC.dblDividendAmount <> 0
+	END
+	ELSE
+	BEGIN
+		INSERT INTO #tempDivCust
+		SELECT	D.intDividendId,
+				D.strDividendNo,
+				DC.intDividendCustomerId,
+				DC.intCustomerId,
+				DC.dblDividendAmount,
+				DC.dblLessFWT,
+				DC.dblCheckAmount
+			FROM tblPATDividends D
+		INNER JOIN tblPATDividendsCustomer DC
+			ON DC.intDividendId = D.intDividendId
+		WHERE DC.intDividendCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@dividendsCustomer)) AND DC.dblDividendAmount <> 0
+	END
 
 	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
 	DECLARE @dtmDate DATETIME = GETDATE();
@@ -43,12 +71,15 @@ BEGIN TRANSACTION
 	DECLARE @dividendCustomerIds AS Id;
 	DECLARE @totalRecords AS INT = 0;
 	DECLARE @batchId AS NVARCHAR(40);
+	DECLARE @intAPClearingId AS INT;
 
 	DECLARE @voucherId as Id;
 
 	INSERT INTO @dividendCustomerIds
 	SELECT intDividendCustomerId FROM #tempDivCust
 BEGIN TRY
+
+	SELECT TOP 1 @intAPClearingId = intAPClearingGLAccount FROM tblPATCompanyPreference;
 
 	WHILE EXISTS(SELECT 1 FROM @dividendCustomerIds)
 	BEGIN
@@ -112,8 +143,6 @@ BEGIN TRY
 
 		SET @totalRecords = @totalRecords + 1;
 	END
-
-	UPDATE tblPATDividends SET ysnVoucherProcessed = 1 WHERE intDividendId = @intDividendId
 	
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
