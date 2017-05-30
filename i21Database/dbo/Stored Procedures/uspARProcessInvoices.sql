@@ -961,7 +961,7 @@ BEGIN
 						RETURN 0;
 					END CATCH
 				END
-					
+				DELETE FROM #EntriesForProcessing WHERE intId = @ForDetailId
 		END		
 	END
 
