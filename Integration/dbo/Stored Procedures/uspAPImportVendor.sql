@@ -96,7 +96,7 @@ BEGIN
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
 		LEFT JOIN tblSMTerm H
-			on C.intTermsId = H.intTermID
+			on B.intTermsId = H.intTermID
 		LEFT JOIN tblEMEntityPhoneNumber I
 			ON D.intEntityId = I.intEntityId
 		WHERE ssvndmst.ssvnd_vnd_no =  SUBSTRING(@VendorId, 1, 10)
@@ -179,7 +179,7 @@ BEGIN
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
 		LEFT JOIN tblSMTerm H
-			on C.intTermsId = H.intTermID
+			on B.intTermsId = H.intTermID
 		LEFT JOIN tblEMEntityPhoneNumber I
 			on D.intEntityId = I.intEntityId
 		WHERE B.strVendorId = @VendorId
