@@ -51,7 +51,7 @@ BEGIN
 				CREATE VIEW [dbo].[vwcusmst]  
 				AS  
 				SELECT  
-				vwcus_key    = A.agcus_key    
+				vwcus_key    = A.agcus_key   COLLATE Latin1_General_CI_AS 
 				,vwcus_last_name =			(CASE WHEN (ISNULL(A.agcus_co_per_ind_cp,'''') = ''P'') 
 													THEN RTRIM(CAST(ISNULL(A.agcus_last_name,'''') AS CHAR(25))) 
 													ELSE 
@@ -176,7 +176,7 @@ BEGIN
 				CREATE VIEW [dbo].[vwcusmst]  
 				AS  
 				SELECT  
-				vwcus_key    = ISNULL(A.ptcus_cus_no,'''')    
+				vwcus_key    = ISNULL(A.ptcus_cus_no,'''')    COLLATE Latin1_General_CI_AS
 				,vwcus_last_name =			(CASE WHEN (ISNULL(A.ptcus_co_per_ind_cp,'''') = ''P'') 
 													THEN RTRIM(CAST(ISNULL(A.ptcus_last_name,'''') AS CHAR(25))) 
 													ELSE 
