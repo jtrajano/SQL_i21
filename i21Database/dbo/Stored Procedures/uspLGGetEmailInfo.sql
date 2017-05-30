@@ -79,6 +79,7 @@ BEGIN
 		SET @body += 'Please see your shipping instruction in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
+		SET @body += '#SIGNATURE#'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -117,6 +118,7 @@ BEGIN
 		SET @body += 'Please see your insurance letter in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
+		SET @body += '#SIGNATURE#'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -157,6 +159,7 @@ BEGIN
 		SET @body += 'Please see your delivery order in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
+		SET @body += '#SIGNATURE#'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -197,6 +200,7 @@ BEGIN
 		SET @body += 'Please see your shipping advice in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
+		SET @body += '#SIGNATURE#'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -252,6 +256,7 @@ BEGIN
         SET @body += 'Please see your "' + @strInstoreLetterName + '"  in the attachments tab. <br><br>'
         SET @body += 'Thank you for your business. <br><br>'
         SET @body += 'Sincerely, <br><br>'
+		SET @body += '#SIGNATURE#'
         SET @body += '</html>'
         SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -292,6 +297,7 @@ BEGIN
 		SET @body += 'Please see your carrier shipment order in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
+		SET @body += '#SIGNATURE#'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
