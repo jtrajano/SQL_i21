@@ -43,6 +43,15 @@ SELECT	@intEntityId = [intEntityId]
 FROM	dbo.tblSMUserSecurity 
 WHERE	[intEntityId] = @intUserId
 
+
+-- Validate the user id. 
+IF @intEntityId IS NULL 
+BEGIN 
+	-- 'Receiver id is invalid. It must be a User type Entity.'
+	EXEC uspICRaiseError 80180;
+	GOTO _Exit;
+END 
+
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 BEGIN 
