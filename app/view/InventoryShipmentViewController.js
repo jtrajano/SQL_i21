@@ -1571,6 +1571,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var win = button.up('window');
         var current = win.viewModel.data.current;
 
+        button.disable();
         if (current) {
             if(current.get('intOrderType') === 3) { //'Transfer Order'
                 iRely.Functions.showErrorDialog('Invalid order type. An invoice is not applicable on transfer orders.');
@@ -1606,11 +1607,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         };
                         iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice successfully processed. Do you want to view this Invoice?', buttonAction);
                     }
+                    button.enable();
                 },
                 function(failureResponse) {
                     var jsonData = Ext.decode(failureResponse.responseText);
                     var message = jsonData.message; 
                     iRely.Functions.showErrorDialog(message.statusText);
+                    button.enable();
                 }
             );
         }
