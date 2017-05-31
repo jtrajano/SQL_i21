@@ -1,4 +1,4 @@
-﻿PRINT N'***** BEGIN INSERT STATIC TRANSFER TYPES (PATRONAGE) *****'
+﻿PRINT N'***** BEGIN Insert Static Transfer Types (Patronage) *****'
 GO
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS where [TABLE_NAME] = 'tblPATTransferType')
 BEGIN
@@ -38,4 +38,4 @@ BEGIN
 		UPDATE [dbo].[tblPATTransferType] SET intTransferType = 7 WHERE strTransferType = N'Transfer Volume between Customers'
 END
 GO
-PRINT N'***** END INSERT STATIC TRANSFER TYPES (PATRONAGE) *****'
+PRINT N'***** END Insert Static Transfer Types (Patronage) *****'

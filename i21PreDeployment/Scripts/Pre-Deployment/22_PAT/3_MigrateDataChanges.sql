@@ -1,4 +1,4 @@
-﻿PRINT N'*****BEGIN  Change Transfer Type from string to int (Patronage)*****'
+﻿PRINT N'***** BEGIN  Change Transfer Type from string to int (Patronage) *****'
 
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = N'tblPATTransfer')
 BEGIN
@@ -13,4 +13,4 @@ BEGIN
 	END
 END
 
-PRINT N'*****END Change Transfer Type from string to int (Patronage)*****'
+PRINT N'***** END Change Transfer Type from string to int (Patronage) *****'
