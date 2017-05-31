@@ -1141,7 +1141,7 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Statement FormNo')
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 118
+	SELECT	[intStartingNumberId]	= 119
 			,[strTransactionType]	= N'SSCC Label Serial No'
 			,[strPrefix]			= N'L '
 			,[intNumber]			= 1

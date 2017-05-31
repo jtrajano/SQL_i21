@@ -64,7 +64,7 @@ BEGIN
 					,@intLocationId = NULL
 					,@intOrderTypeId = NULL
 					,@intBlendRequirementId = NULL
-					,@intPatternCode = 118
+					,@intPatternCode = 119
 					,@ysnProposed = 0
 					,@strPatternString = @strBatchId OUTPUT
 
@@ -158,7 +158,7 @@ BEGIN
 					,@intLocationId = NULL
 					,@intOrderTypeId = NULL
 					,@intBlendRequirementId = NULL
-					,@intPatternCode = 118
+					,@intPatternCode = 119
 					,@ysnProposed = 0
 					,@strPatternString = @strBatchId OUTPUT
 
