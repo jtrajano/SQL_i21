@@ -238,6 +238,31 @@ BEGIN
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND GLD.intAccountCategoryId IN (1, 2, 5)
 
+		--VALIDATE EXPENSE ACCOUNT USED IF ACTIVE DETAIL
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'Expense Account used to this Voucher is Inactive.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN vyuGLAccountDetail GLD ON B.intAccountId = GLD.intAccountId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND GLD.ysnActive = 0
+
+		--VALIDATE EXPENSE ACCOUNT USED IF ACTIVE HEADER
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'Account used to this Voucher is Inactive.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+			INNER JOIN vyuGLAccountDetail GLD ON A.intAccountId = GLD.intAccountId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND GLD.ysnActive = 0
+			
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
 		--COMPARE THE CASH PRICE
 		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
