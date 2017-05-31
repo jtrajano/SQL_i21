@@ -96,7 +96,7 @@ CREATE NONCLUSTERED INDEX [IX_intBillId]
     ON [dbo].[tblAPBill]([intBillId] ASC)
 	INCLUDE (strBillId, intEntityVendorId, dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]);
 GO
---CREATE NONCLUSTERED INDEX [IX_intVendorId]
---    ON [dbo].[tblAPBill]([intEntityVendorId] ASC)
---	INCLUDE ([intBillId], dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]) --WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) --ON [PRIMARY]
---GO
+CREATE NONCLUSTERED INDEX [IX_intVendorId]
+    ON [dbo].[tblAPBill]([intEntityVendorId] ASC)
+	INCLUDE ([intBillId], dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
