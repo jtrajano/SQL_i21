@@ -5267,6 +5267,7 @@
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
     <Build Include="dbo\Functions\fnAPGetReceiptTotal.sql" />
     <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
+    <Build Include="dbo\Views\vyuMFOrderDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
