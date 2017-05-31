@@ -1,4 +1,4 @@
-var env = 'dev';
+var env = 'prod';
 var src = './app';
 var dest_prod = '../../../artifacts/17.2/Inventory/app';
 var dest_dev = '../../../artifacts/17.2/Inventory/debug/app';

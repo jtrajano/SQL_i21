@@ -1213,6 +1213,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                         if(success && record){
                             newRecord.set('strLocationName', record.get('strLocationName'));
+                            newRecord.set('intLocationId', record.get('intCompanyLocationId'));
                         }
                     }
                 }
