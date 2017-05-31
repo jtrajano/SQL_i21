@@ -64,11 +64,10 @@ BEGIN
 					,@intLocationId = NULL
 					,@intOrderTypeId = NULL
 					,@intBlendRequirementId = NULL
-					,@intPatternCode = 118
+					,@intPatternCode = 119
 					,@ysnProposed = 0
 					,@strPatternString = @strBatchId OUTPUT
 
-				--SELECT @strCheckString = @strPackageType + @strManufacturerCode + Ltrim(@strBatchId)
 				SELECT @strCheckString = @strManufacturerCode + Ltrim(@strBatchId) -- Will be 16 digit (Eg: 0718908 562723189)
 
 				DELETE
@@ -140,7 +139,7 @@ BEGIN
 				IF @intCheckDigit > 0
 					SELECT @intCheckDigit = 10 - @intCheckDigit
 
-				SELECT @strSSCCNo = '(00)-' + @strPackageType + @strManufacturerCode + Ltrim(@strBatchId) + Ltrim(@intCheckDigit)
+				SELECT @strSSCCNo = '(00) ' + @strPackageType + ' ' + @strManufacturerCode + ' ' + LTRIM(@strBatchId) + ' ' + LTRIM(@intCheckDigit)
 
 				UPDATE tblMFOrderManifest
 				SET strSSCCNo = @strSSCCNo
@@ -158,11 +157,10 @@ BEGIN
 					,@intLocationId = NULL
 					,@intOrderTypeId = NULL
 					,@intBlendRequirementId = NULL
-					,@intPatternCode = 118
+					,@intPatternCode = 119
 					,@ysnProposed = 0
 					,@strPatternString = @strBatchId OUTPUT
 
-				--SELECT @strCheckString = @strPackageType + @strManufacturerCode + Ltrim(@strBatchId)
 				SELECT @strCheckString = @strManufacturerCode + Ltrim(@strBatchId) -- Will be 16 digit (Eg: 0718908 562723189)
 
 				DELETE
@@ -234,7 +232,7 @@ BEGIN
 				IF @intCheckDigit > 0
 					SELECT @intCheckDigit = 10 - @intCheckDigit
 
-				SELECT @strSSCCNo = '(00)-' + @strPackageType + @strManufacturerCode + Ltrim(@strBatchId) + Ltrim(@intCheckDigit)
+				SELECT @strSSCCNo = '(00) ' + @strPackageType + ' ' + @strManufacturerCode + ' ' + LTRIM(@strBatchId) + ' ' + LTRIM(@intCheckDigit)
 
 				UPDATE tblMFOrderManifest
 				SET strSSCCNo = IsNULL(strSSCCNo, '') + CASE 
