@@ -1144,7 +1144,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 119
 			,[strTransactionType]	= N'SSCC Label Serial No'
-			,[strPrefix]			= N'L '
+			,[strPrefix]			= N''
 			,[intNumber]			= 1
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
