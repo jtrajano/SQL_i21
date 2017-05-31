@@ -1,4 +1,4 @@
-﻿PRINT N'***** BEGIN CREATE STATIC TABLE FOR TRANSFER TYPES (PATRONAGE) *****'
+﻿PRINT N'***** BEGIN Create Static Table for Transfer Types (Patronage) *****'
 GO
 IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATTransferType')
 BEGIN
@@ -11,4 +11,4 @@ BEGIN
 	)
 END
 GO
-PRINT N'***** END CREATE STATIC TABLE FOR TRANSFER TYPES (PATRONAGE) *****'
+PRINT N'***** END Create Static Table for Transfer Types (Patronage) *****'

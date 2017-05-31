@@ -159,6 +159,7 @@
 :r .\22_PAT\1_StaticTable.sql
 :r .\22_PAT\2_AddTransferType.sql
 :r .\22_PAT\3_MigrateDataChanges.sql
+:r .\22_PAT\4_DefaultBillId.sql
 
 --EM
 
