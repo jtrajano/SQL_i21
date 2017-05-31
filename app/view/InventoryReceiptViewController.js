@@ -1006,11 +1006,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         var colOrderNumber = grdInventoryReceipt.columns[0];
-        colOrderNumber.renderer = function (value, opt, record) {
-            if (record.intInventoryReceipt.get('strReceiptType') === 'Purchase Order')
-                return '<a style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration=\'none\'" onMouseOver="this.style.textDecoration=\'underline\'" href="javascript:void(0);">' + value + '</a>';
-            return value;
-        };
+        var colSourceNumber = grdInventoryReceipt.columns[1];
+        colOrderNumber.renderer = this.onRenderNumRef;
+        colSourceNumber.renderer = this.onRenderNumRef;
 
         return win.context;
     },
@@ -6707,12 +6705,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onRenderNumRef: function (value, opt, record) {
+        var rt = record.intInventoryReceipt.get('strReceiptType');
+        var st = record.intInventoryReceipt.get('intSourceType');
+        if (rt === 'Purchase Order' || rt === 'Purchase Contract' || rt === 'Scale' || rt === 'Inbound Shipment' || rt === 'Transfer Order' || (rt === 'Direct' && st === 3))
+            return '<a style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration=\'none\'" onMouseOver="this.style.textDecoration=\'underline\'" href="javascript:void(0);">' + value + '</a>';
+        return value;
+    },
+
     onItemCellClick: function (view, cell, cellIndex, record, row, rowIndex, e) {
         var linkClicked = (e.target.tagName == 'A');
         var clickedDataIndex =
             view.panel.headerCt.getHeaderAtIndex(cellIndex).dataIndex;
 
-        if (linkClicked && clickedDataIndex == 'strOrderNumber') {
+        if (linkClicked && (clickedDataIndex == 'strOrderNumber' || clickedDataIndex === 'strSourceNumber')) {
             var win = view.up('window');
             var me = win.controller;
             var vm = win.getViewModel();
@@ -6725,7 +6731,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (vm.data.current.phantom === true) {
                 win.context.data.saveRecord({
                     successFn: function (batch, eOpts) {
-                        me.openPurchaseOrder(win, record);
+                        me.openOrderItem(win, record, clickedDataIndex === 'strOrderNumber');
                         return;
                     }
                 });
@@ -6733,7 +6739,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             else {
                 win.context.data.validator.validateRecord({ window: win }, function (valid) {
                     if (valid) {
-                        me.openPurchaseOrder(win, record);
+                        me.openOrderItem(win, record, clickedDataIndex === 'strOrderNumber');
                         return;
                     }
                 });
@@ -6741,18 +6747,64 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    openPurchaseOrder: function (win, record) {
-        var screenName = 'AccountsPayable.view.PurchaseOrder';
-        iRely.Functions.openScreen(screenName, {
-            action: 'view',
-            filters: [
-                {
-                    column: 'intPurchaseId',
-                    value: record.get('intOrderId'),
-                    condition: 'eq'
-                }
-            ]
-        });
+    openOrderItem: function (win, record, isOrder) {
+        var orderScreen = [
+            {
+                screen: 'AccountsPayable.view.PurchaseOrder',
+                orderType: 'PurchaseOrder',
+                keyColumn: 'intPurchaseId',
+                cellColumn: 'intOrderId'
+            },
+            {
+                screen: 'ContractManagement.view.Contract',
+                orderType: 'Purchase Contract',
+                keyColumn: 'intContractHeaderId',
+                cellColumn: 'intOrderId',
+                source: [
+                    { type: 1, screen: 'Grain.view.ManuallyDistributeTickets', keyColumn: 'intTicketId', cellColumn: 'intSourceId' }, //Scale
+                    { type: 2, screen: 'Logistics.view.ShipmentSchedule', keyColumn: 'strLoadNumber', cellColumn: 'strSourceNumber' }, //Inbound Shipment
+                    { type: 3, screen: 'Transport.view.Transport', keyColumn: 'intTransportId', cellColumn: 'intSourceId' }, //Transport
+                    { type: 4, screen: 'Grain.view.Storage', keyColumn: 'intCustomerStorageId', cellColumn: 'intSourceId' }, //Settle Storage
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryTransfer',
+                orderType: 'Transfer Order',
+                keyColumn: 'intInventoryTransferId',
+                cellColumn: 'intOrderId'
+            },
+            {
+                screen: 'Inventory.view.InventoryTransfer',
+                orderType: 'Direct',
+                keyColumn: 'intInventoryTransferId',
+                cellColumn: 'intOrderId',
+                source: [
+                    { type: 3, screen: 'Transports.view.TransportLoads', keyColumn: 'strTransaction', cellColumn: 'strSourceNumber' }, //Transport
+                ]
+            }
+        ];
+
+        var orderType = record.intInventoryReceipt.get('strReceiptType');
+        var sourceType = record.intInventoryReceipt.get('intSourceType');
+
+        var order = _.findWhere(orderScreen, { orderType: orderType });
+        if(order.source && !isOrder) {
+            var source = _.findWhere(order.source, { type: sourceType });
+            order = source ? source : order;
+        }
+
+        if(order) {
+            iRely.Functions.openScreen(order.screen, { 
+                action: 'view', 
+                filters: [ 
+                    { 
+                        column: order.keyColumn,
+                        value: record.get(order.cellColumn), 
+                        condition: 'eq' 
+                    }
+                ]
+            });
+        }
     },
 
     onCurrencyBeforeSelect: function(field, record){
