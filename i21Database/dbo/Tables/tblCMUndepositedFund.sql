@@ -18,6 +18,8 @@
 	[strNotificationStatus]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnCommitted]				BIT NULL,
 	[intBankFileAuditId]		INT NULL,
+	[ysnHold]					BIT NOT NULL DEFAULT ((0)),
+	[strHoldReason]				NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
     [intLastModifiedUserId]		INT NULL,
     [dtmLastModified]			DATETIME NULL,
     [intConcurrencyId]			INT DEFAULT 1 NOT NULL,
