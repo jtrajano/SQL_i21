@@ -160,6 +160,33 @@ BEGIN
 				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 			END
 		END
+		ELSE IF (UPPER(@Condition) = 'GREATER THAN')
+		BEGIN
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+			END
+			ELSE
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+			END
+		END
+		ELSE IF (UPPER(@Condition) = 'LESS THAN')
+		BEGIN
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+			END
+			ELSE
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+			END
+		END
+		
 
 		SET @From = ''
 		SET @To = ''
