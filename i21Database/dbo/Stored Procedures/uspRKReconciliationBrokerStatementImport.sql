@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKReconciliationBrokerStatementImport
+﻿CREATE PROC [dbo].[uspRKReconciliationBrokerStatementImport]
      @dtmFilledDate datetime,
      @intFutureMarketId   int,
      @intCommodityId      int ,
@@ -13,10 +13,9 @@ AS
 --       @intCommodityId      int =7,
 --       @intBrokerId  int =1443,
 --       @intBorkerageAccountId     int=2,
---       @intReconciliationBrokerStatementHeaderIdOut int  
---       ,@strStatus nvarchar(50)  
+--       @intReconciliationBrokerStatementHeaderIdOut int,  
+--       @strStatus nvarchar(50)  
     
-   
 BEGIN TRY
 
 DECLARE @strDateTimeFormat nvarchar(50)
@@ -109,16 +108,15 @@ FROM (SELECT e.strName,strAccountNumber,fm.strFutMarketName,
                when f.intInstrumentTypeId =2 then  'Options' 
        end as strInstrumentType,
               strCommodityCode, l.strLocationName,
-              en.strName strSalesPersionId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,fmon.strFutureMonth,dblPrice,strReference,strStatus,
+              strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,fmon.strFutureMonth,dblPrice,strReference,strStatus,
               dtmFilledDate
 FROM tblRKFutOptTransaction f
-join tblEMEntity e on e.intEntityId=f.intEntityId and f.intInstrumentTypeId = 1
-join tblRKBrokerageAccount ba on ba.intBrokerageAccountId=f.intBrokerageAccountId
+join tblEMEntity e on e.intEntityId=f.intEntityId
+join tblRKBrokerageAccount ba on ba.intBrokerageAccountId=f.intBrokerageAccountId and f.intInstrumentTypeId = 1
 join tblRKFutureMarket fm on fm.intFutureMarketId=f.intFutureMarketId
 join tblICCommodity c on c.intCommodityId=f.intCommodityId
 JOIN tblSMCompanyLocation l on l.intCompanyLocationId=f.intLocationId
 JOIN tblSMCurrency cur on cur.intCurrencyID=f.intCurrencyId
-JOIN tblEMEntity en on en.intEntityId=intTraderId
 JOIN tblRKFuturesMonth fmon on fmon.intFutureMonthId=f.intFutureMonthId
 WHERE 
 f.intFutureMarketId=@intFutureMarketId and f.intCommodityId=@intCommodityId and f.intEntityId = @intBrokerId 
@@ -127,10 +125,7 @@ and f.intBrokerageAccountId=case when isnull(@intBorkerageAccountId,0)=0 then f.
 and
 isnull(f.ysnFreezed,0) = 0
 )t
-GROUP BY strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
-strSalesPersionId,strCurrency,strBrokerTradeNo,strBuySell,strFutureMonth,dblPrice,strReference,strStatus,dtmFilledDate
-order by strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
-         
+GROUP BY strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice         
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
 SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,t.intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
           t.ImportId,'Success'
