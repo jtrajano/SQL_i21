@@ -1398,7 +1398,7 @@ IF (@total = 0)
 EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
 		,@OtherCharges
-		,@intEntityId;
+		,@intUserId;
 
 -- Update the Inventory Receipt Key to the Transaction Table
 UPDATE	SC
