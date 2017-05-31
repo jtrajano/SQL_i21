@@ -23,8 +23,10 @@ BEGIN
 			AND intItemLocationId = @intItemLocationId
 
 	RETURN (
-		CASE	WHEN @dblTotalQty <> 0 THEN 
+		CASE	WHEN @dblTotalQty <> 0 AND @dblTotalInventoryValue > 0 THEN 
 					dbo.fnDivide(@dblTotalInventoryValue, @dblTotalQty) 
+				WHEN @dblTotalInventoryValue <= 0 THEN 
+					NULL 
 				ELSE 
 					NULL 
 		END 	
