@@ -22,6 +22,7 @@ UPDATE A
 	,A.dblAmountDue = A.dblTotal
 	,A.dblPayment = 0
 	,A.strBillId = @debitMemoRecordNum
+	,A.strReference = null
 FROM tblAPBill A
 WHERE A.intBillId = @createdReversal
 
