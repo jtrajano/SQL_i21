@@ -57,6 +57,7 @@ INSERT INTO tblCMUndepositedFund (
 		,dblAmount
 		,strName
 		,strSourceSystem
+		,strPaymentMethod
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -75,6 +76,7 @@ SELECT	@intBankAccountId
 		,dblAmount = ABS(v.aptrx_net_amt)
 		,strName = v.aptrx_name COLLATE Latin1_General_CI_AS
 		,strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
+		,strPaymentMethod = 'Origin'
 		,intCreatedUserId = @intUserId
 		,dtmCreated = GETDATE()
 		,intLastModifiedUserId = @intUserId
@@ -102,6 +104,7 @@ UNION SELECT DISTINCT
 	dblAmount,
 	strName,
 	strSourceSystem,
+	strPaymentMethod,
 	intCreatedUserId = @intUserId,
 	dtmCreated = GETDATE(),
 	intLastModifiedUserId = @intUserId,

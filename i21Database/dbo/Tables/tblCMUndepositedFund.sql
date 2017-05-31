@@ -8,6 +8,7 @@
 	[strName]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblAmount]					DECIMAL (18, 6) DEFAULT 0 NOT NULL,
 	[strSourceSystem]			NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+	[strPaymentMethod]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intBankDepositId]			INT NULL,
     [intCreatedUserId]			INT NULL,
     [dtmCreated]				DATETIME NULL,
