@@ -109,9 +109,12 @@ BEGIN TRY
 		,I.strGTIN AS strDPCI
 		,I.intInnerUnits AS intCasePack
 		,I.strItemNo AS strStyle
-		,OM.strSSCCNo AS strBarCodeLabel -- Check with Prem
-		,OM.strSSCCNo AS strBarCode -- Check with Prem
+		--,OM.strSSCCNo AS strBarCodeLabel
+		--,OM.strSSCCNo AS strBarCode
+		,BarCode.Item AS strBarCodeLabel
+		,BarCode.Item AS strBarCode
 	FROM tblMFOrderManifest OM
+	CROSS APPLY dbo.fnSplitString(OM.strSSCCNo, ',') BarCode
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intShipFromLocationId
