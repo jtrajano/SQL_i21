@@ -91,7 +91,7 @@ BEGIN TRY
 			,intItemId					= SC.intItemId
 			,intItemLocationId			= SC.intProcessingLocationId
 			,intItemUOMId				= SC.intItemUOMIdTo
-			,intGrossNetUOMId			= 0
+			,intGrossNetUOMId			= NULL
 			,intCostUOMId				= SC.intItemUOMIdTo
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
