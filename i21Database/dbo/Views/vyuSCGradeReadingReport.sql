@@ -13,5 +13,5 @@ GR.intDiscountScheduleCodeId
 , QM.intTicketId 
 , (SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 FROM tblGRDiscountScheduleCode GR 
-LEFT JOIN tblICItem IC on GR.intItemId = IC.intItemId 
-LEFT JOIN tblQMTicketDiscount QM on QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+INNER JOIN tblICItem IC on GR.intItemId = IC.intItemId 
+INNER JOIN tblQMTicketDiscount QM on QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId AND QM.strSourceType='Scale'

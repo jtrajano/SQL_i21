@@ -93,37 +93,35 @@
 	tblSCListTicketTypes.strTicketType,
 	tblSMCompanyLocation.strLocationName,
 	tblSMCompanyLocationSubLocation.strSubLocationName, 
-	tblSCScaleSetup.strStationShortDescription,
-	tblSCScaleSetup.strWeightDescription,
 	tblEMEntitySplit.strSplitNumber,
-	tblSCTicketPool.strTicketPool, tblGRDiscountId.strDiscountId,
 	tblGRStorageScheduleRule.strScheduleId,
 	ICCommodity.strCommodityCode,
 	tblICStorageLocation.strDescription,
 	tblICInventoryReceipt.intInventoryReceiptId,
 	tblICInventoryReceipt.strReceiptNumber,
 	tblICInventoryReceipt.dtmReceiptDate,
+	vyuEMSearchShipVia.strName AS strHaulerName,
+	QM.strDiscountCode,
+	QM.dblGradeReading,
 	(SELECT strCompanyName FROM tblSMCompanySetup) AS strCompanyName,
 	(SELECT strAddress FROM tblSMCompanySetup) AS strCompanyAddress,
 	(SELECT strPhone FROM tblSMCompanySetup) AS strCompanyPhone,
 	(SELECT strCity FROM tblSMCompanySetup) AS strCompanyCity,
 	(SELECT strCountry FROM tblSMCompanySetup) AS strCompanyCountry,
-	vyuEMSearchShipVia.strName AS strHaulerName,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
   FROM tblSCTicket SC
   LEFT JOIN tblICCommodity ICCommodity ON ICCommodity.intCommodityId = SC.intCommodityId
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
-  LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = SC.intEntityId
+  LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = SC.intEntityId AND EMLocation.ysnDefaultLocation = 1
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
   LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = SC.intSplitId
-  LEFT JOIN tblSCScaleSetup tblSCScaleSetup on tblSCScaleSetup.intScaleSetupId = SC.intScaleSetupId
   LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intProcessingLocationId
+  LEFT JOIN tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation on tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationId
   LEFT JOIN tblSCListTicketTypes tblSCListTicketTypes on (tblSCListTicketTypes.intTicketType = SC.intTicketType AND tblSCListTicketTypes.strInOutIndicator = SC.strInOutFlag)
   LEFT JOIN tblGRStorageType tblGRStorageType on tblGRStorageType.strStorageTypeCode = SC.strDistributionOption
-  LEFT JOIN tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation on tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationId
-  LEFT JOIN tblSCTicketPool tblSCTicketPool on tblSCTicketPool.intTicketPoolId = SC.intTicketPoolId
   LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SC.intDiscountId
-  LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
+  LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
   LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
+  LEFT JOIN vyuSCGradeReadingReport QM ON QM.intTicketId = SC.intTicketId AND QM.strDiscountCode LIKE '%Moisture%'
   WHERE SC.strTicketStatus = 'C' AND SC.intEntityId > 0
