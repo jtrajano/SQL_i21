@@ -64,18 +64,25 @@ BEGIN
 		,[dblQuantity]			= ARGIC.[dblQuantity] 
 		,[dblUnitQuantity]		= ARGIC.[dblUnitQty] 
 		,[intConcurrencyId]		= 1
-	FROM
-		tblARInvoiceDetail ARID
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	INNER JOIN
-		vyuARGetItemComponents ARGIC
-			ON ARID.[intItemId] = ARGIC.[intItemId] 
+	FROM dbo.tblARInvoiceDetail ARID WITH (NOLOCK)
+	INNER JOIN (SELECT intInvoiceId
+					 , intCompanyLocationId
+				FROM dbo.tblARInvoice WITH (NOLOCK)
+	) ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+	INNER JOIN (SELECT intItemId
+					 , intCompanyLocationId
+					 , intComponentItemId
+					 , strType
+					 , intItemUnitMeasureId
+					 , dblQuantity
+					 , dblUnitQty
+				FROM dbo.vyuARGetItemComponents WITH (NOLOCK)
+	) ARGIC ON ARID.[intItemId] = ARGIC.[intItemId] 
 			AND ARI.[intCompanyLocationId] = ARGIC.[intCompanyLocationId]
-	INNER JOIN
-		tblICItem ICI
-			ON ARID.[intItemId] = ICI.[intItemId]
+	INNER JOIN (SELECT intItemId
+					 , ysnListBundleSeparately
+				FROM dbo.tblICItem WITH (NOLOCK)
+	) ICI ON ARID.[intItemId] = ICI.[intItemId]
 	WHERE 
 		ARI.[intInvoiceId] = @InvoiceId
 		AND ARID.[intInvoiceDetailId] NOT IN (SELECT [intTransactionDetailId] FROM tblARTransactionDetail WHERE [intTransactionId] = @InvoiceId)
@@ -102,22 +109,31 @@ BEGIN
 		,[dblQuantity]			= ARGIC.[dblQuantity] 
 		,[dblUnitQuantity]		= ARGIC.[dblUnitQty] 
 		,[intConcurrencyId]		= 1
-	FROM
-		tblARInvoiceDetail ARID
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	INNER JOIN
-		vyuARGetItemComponents ARGIC
-			ON ARID.[intItemId] = ARGIC.[intItemId] 
+	FROM dbo.tblARInvoiceDetail ARID WITH (NOLOCK)
+	INNER JOIN (SELECT intInvoiceId
+					 , intCompanyLocationId
+				FROM dbo.tblARInvoice WITH (NOLOCK)
+	) ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+	INNER JOIN (SELECT intComponentItemId
+					 , intItemId
+					 , intCompanyLocationId
+					 , strType
+					 , intItemUnitMeasureId
+					 , dblQuantity
+					 , dblUnitQty
+				FROM dbo.vyuARGetItemComponents WITH (NOLOCK)
+	) ARGIC ON ARID.[intItemId] = ARGIC.[intItemId] 
 			AND ARI.[intCompanyLocationId] = ARGIC.[intCompanyLocationId]
-	INNER JOIN
-		tblARTransactionDetail ARTD
-			ON ARID.[intInvoiceDetailId] = ARTD.[intTransactionDetailId] 
+	INNER JOIN (SELECT intTransactionDetailId
+					 , intTransactionId
+					 , intItemId
+				FROM dbo.tblARTransactionDetail WITH (NOLOCK)
+	) ARTD ON ARID.[intInvoiceDetailId] = ARTD.[intTransactionDetailId] 
 			AND ARID.[intInvoiceId] = ARTD.[intTransactionId]
-	INNER JOIN
-		tblICItem ICI
-			ON ARID.[intItemId] = ICI.[intItemId]
+	INNER JOIN (SELECT intItemId
+					 , ysnListBundleSeparately
+				FROM dbo.tblICItem WITH (NOLOCK)
+	) ICI ON ARID.[intItemId] = ICI.[intItemId]
 	WHERE 
 		ARI.[intInvoiceId] = @InvoiceId
 		AND ARID.[intItemId] <> ARTD.[intItemId]
