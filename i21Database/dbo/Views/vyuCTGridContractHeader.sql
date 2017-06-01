@@ -48,6 +48,8 @@ AS
 			NM.strFutureMonthYear,
 			NM.strMarketUnitMeasure,
 			NM.dblMarketContractSize,
+			NM.intMarketCurrencyId,
+			NM.strMarketCurrency,
 			NM.strCommodityAttributeId,
 			NM.intEntityDefaultLocationId,
 			NM.intPositionNoOfDays
