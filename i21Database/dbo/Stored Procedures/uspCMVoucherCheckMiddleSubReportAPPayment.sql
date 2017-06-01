@@ -158,14 +158,8 @@ SELECT  TOP 10 * FROM(
 						THEN preBILL.dblTotal * -1
 						ELSE preBILL.dblTotal
 						END
-			,dblDiscount = CASE WHEN prePYMTDetail.dblDiscount <> 0 
-						THEN prePYMTDetail.dblDiscount 
-						ELSE  prePYMTDetail.dblInterest 
-						END
-			,dblNet = CASE WHEN preBILL.intTransactionType = 3
-						THEN prePYMTDetail.dblPayment * -1
-						ELSE prePYMTDetail.dblPayment
-						END
+			,dblDiscount = preBILL.dblDiscount
+			,dblNet = preBILL.dblTotal * -1
 			--,CONTRACTHEADER.strContractNumber
 			--,strPPDType = CASE WHEN BILLDETAIL.intPrepayTypeId = 3
 			--			THEN 'Percentage'
@@ -178,19 +172,18 @@ SELECT  TOP 10 * FROM(
 			,preBILL.intTransactionType
 			--,ITEM.strItemNo
 			--,ITEM.strDescription
-			,prePYMTDetail.intPaymentDetailId
-	FROM	[dbo].[tblAPAppliedPrepaidAndDebit] PreAndDeb INNER JOIN [dbo].[tblAPBill] preBILL
-				ON preBILL.intBillId = PreAndDeb.intTransactionId
-		INNER JOIN [dbo].[tblAPPaymentDetail] prePYMTDetail
-				ON preBILL.intBillId = prePYMTDetail.intBillId
-		INNER JOIN [dbo].[tblAPBill] BILL
-				ON PreAndDeb.intBillId = BILL.intBillId
-		INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
-				ON BILL.intBillId = PYMTDetail.intBillId
+			,PYMTDetail.intPaymentDetailId
+	FROM	[dbo].[tblCMBankTransaction] F
 		INNER JOIN [dbo].[tblAPPayment] PYMT
-				ON PYMTDetail.intPaymentId = PYMT.intPaymentId
-		INNER JOIN [dbo].[tblCMBankTransaction] F
-				ON PYMT.strPaymentRecordNum = F.strTransactionId
+			ON PYMT.strPaymentRecordNum = F.strTransactionId
+		INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
+			ON PYMTDetail.intPaymentId = PYMT.intPaymentId
+		INNER JOIN [dbo].[tblAPBill] BILL
+			ON BILL.intBillId = PYMTDetail.intBillId
+		INNER JOIN [dbo].[tblAPAppliedPrepaidAndDebit] PreAndDeb 
+			ON PreAndDeb.intBillId = BILL.intBillId
+		INNER JOIN [dbo].[tblAPBill] preBILL
+				ON preBILL.intBillId = PreAndDeb.intTransactionId
 		WHERE  PreAndDeb.ysnApplied = 1 AND 
 				F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
 
