@@ -111,6 +111,8 @@ SELECT 	 SQ.intContractDetailId
 		 END	AS ysnQtyReceived
 		,SQ.dblAppliedQty
 		,CD.strRemark
+		,CH.dtmCreated
+		,CD.dtmUpdatedAvailabilityDate
 
 	FROM 		vyuCTContractSequence			 	SQ			
 	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId
