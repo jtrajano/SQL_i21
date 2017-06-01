@@ -41,7 +41,6 @@ DocProject/Help/html
 *.DS_Store
 ehthumbs.db
 ext
-*.exe
 *.exp
 [Ee]xport
 *.gpState
