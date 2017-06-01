@@ -1272,6 +1272,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 					--INSERT AR CUSTOMER SPECIAL PRICE
 					EXEC uspARImportCustomerSpecialPrice @originCustomer
+					
+					--INSERT AR CUSTOMER SPECIAL PRICE
+					EXEC uspARImportPTTaxExemption @originCustomer
 
 					COMMIT TRANSACTION
 					
