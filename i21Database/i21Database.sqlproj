@@ -5272,6 +5272,7 @@
     <Build Include="dbo\Stored Procedures\uspGLDeleteAccount.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
     <Build Include="dbo\Views\vyuRKPnLContractDetailView.sql" />
+    <Build Include="dbo\Tables\tblSMScreenReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
