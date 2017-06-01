@@ -742,7 +742,7 @@ BEGIN
 						,[dblForeignRate]
 						,[strRateType]
 				)
-				EXEC	@intReturnValue = uspICCreateReceiptGLEntries
+				EXEC	@intReturnValue = uspICCreateReturnGLEntries
 						@strBatchId 
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@intEntityUserSecurityId
