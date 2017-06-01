@@ -2,6 +2,7 @@
 AS
 SELECT
 	TC.intTimecardId
+	,TC.intEntityEmployeeId
 	,TC.dtmDate
 	,EM.strEntityNo
 	,EM.strName
@@ -49,6 +50,7 @@ SELECT
 						   * dblOvertimeHours)
 				AS NUMERIC (18, 6))
 	,PC.strPaycheckId
+	,TC.intConcurrencyId
 FROM 
 	tblPRTimecard TC
 	LEFT JOIN tblEMEntity EM 
