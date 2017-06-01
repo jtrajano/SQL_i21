@@ -238,11 +238,7 @@ END
 GO
 IF EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode IN ('DEF','CNT','SPT','SPL','HLD','LOD'))
 BEGIN
-	UPDATE tblSCTicket set intStorageScheduleTypeId = GR.intStorageScheduleTypeId FROM tblSCTicket SC LEFT JOIN tblGRStorageType GR ON SC.strDistributionOption = GR.strStorageTypeCode
-	WHERE GR.intStorageScheduleTypeId < 0
-
-	UPDATE tblSCTicket set intStorageScheduleTypeId = GR.intStorageScheduleTypeId FROM tblSCDistributionOption SC LEFT JOIN tblGRStorageType GR ON SC.strDistributionOption = GR.strStorageTypeCode
-	WHERE GR.intStorageScheduleTypeId < 0
+	UPDATE tblSCTicket set intStorageScheduleTypeId = (SELECT GR.intStorageScheduleTypeId FROM tblGRStorageType GR WHERE GR.strStorageTypeCode = strDistributionOption) WHERE intStorageScheduleTypeId < 0
 END
 GO
 IF EXISTS(SELECT 1 FROM tblGRDiscountScheduleCode WHERE intStorageTypeId IS NULL)
