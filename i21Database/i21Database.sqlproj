@@ -5268,6 +5268,7 @@
     <Build Include="dbo\Functions\fnAPGetReceiptTotal.sql" />
     <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
     <Build Include="dbo\Views\vyuMFOrderDetail.sql" />
+    <Build Include="dbo\Tables\tblETGPSCoordinates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
