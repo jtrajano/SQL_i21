@@ -3,37 +3,37 @@ GO
 BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATDividendsCustomer' AND  [COLUMN_NAME] = 'intBillId')
 	BEGIN
-		UPDATE tblPATDividendsCustomer
+		EXEC('UPDATE tblPATDividendsCustomer
 		SET intBillId = NULL
-		WHERE intBillId = 0
+		WHERE intBillId = 0')
 	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATEquityPaySummary' AND  [COLUMN_NAME] = 'intBillId')
 	BEGIN
-		UPDATE tblPATEquityPaySummary
+		EXEC('UPDATE tblPATEquityPaySummary
 		SET intBillId = NULL
-		WHERE intBillId = 0
+		WHERE intBillId = 0')
 	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATRefundCustomer' AND  [COLUMN_NAME] = 'intBillId')
 	BEGIN
-		UPDATE tblPATRefundCustomer
+		EXEC('UPDATE tblPATRefundCustomer
 		SET intBillId = NULL
-		WHERE intBillId = 0
+		WHERE intBillId = 0')
 	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATCustomerStock' AND  [COLUMN_NAME] = 'intBillId')
 	BEGIN
-		UPDATE tblPATCustomerStock
+		EXEC('UPDATE tblPATCustomerStock
 		SET intBillId = NULL
-		WHERE intBillId = 0
+		WHERE intBillId = 0')
 	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATCustomerStock' AND  [COLUMN_NAME] = 'intInvoiceId')
 	BEGIN
-		UPDATE tblPATCustomerStock
+		EXEC('UPDATE tblPATCustomerStock
 		SET intInvoiceId = NULL
-		WHERE intInvoiceId = 0
+		WHERE intInvoiceId = 0')
 	END
 END
 GO
