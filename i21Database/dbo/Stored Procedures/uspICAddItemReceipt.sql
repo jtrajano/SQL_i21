@@ -1878,6 +1878,14 @@ BEGIN
 				@inventoryReceiptId
 		END 
 
+		-- Validate the receipt total. Do not allow negative receipt total. 
+		IF (dbo.fnICGetReceiptTotal(@inventoryReceiptId) < 0) 
+		BEGIN
+			-- Unable to create the Inventory Receipt. The receipt total is going to be negative.
+			EXEC uspICRaiseError 80182;
+			GOTO _Exit_With_Rollback;
+		END
+
 		-- Log successful inserts. 
 		INSERT INTO #tmpAddItemReceiptResult (
 			intSourceId

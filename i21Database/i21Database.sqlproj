@@ -5261,6 +5261,7 @@
     <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
     <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
+    <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

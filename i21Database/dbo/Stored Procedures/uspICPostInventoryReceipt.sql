@@ -388,6 +388,14 @@ BEGIN
 			
 	END 
 
+	-- Validate the receipt total. Do not allow negative receipt total. 
+	IF (dbo.fnICGetReceiptTotal(@intTransactionId) < 0) AND ISNULL(@ysnRecap, 0) = 0
+	BEGIN
+		-- Unable to Post {Receipt Number}. The Inventory Receipt total is negative.
+		EXEC uspICRaiseError 80181, @strTransactionId;
+		GOTO With_Rollback_Exit;
+	END
+
 	-- Get company owned items to post. 
 	BEGIN 
 		INSERT INTO @ItemsForPost (  
