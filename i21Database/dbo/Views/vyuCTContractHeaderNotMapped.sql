@@ -61,6 +61,8 @@ AS
 						REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') strFutureMonthYear,
 						U6.strUnitMeasure			AS	strMarketUnitMeasure,
 						MA.dblContractSize			AS	dblMarketContractSize,
+						MA.intCurrencyId			AS	intMarketCurrencyId,
+						CR.strCurrency				AS	strMarketCurrency,
 						CA.strCommodityAttributeId,
 						EY.intDefaultLocationId		AS	intEntityDefaultLocationId,
 						PO.intNoOfDays				AS	intPositionNoOfDays
@@ -102,6 +104,7 @@ AS
 				JOIN	tblICUnitMeasure					U5	ON	U5.intUnitMeasureId					=		CH.intLoadCategoryUnitMeasureId		LEFT
 				JOIN	tblICUnitMeasure					U6	ON	U6.intUnitMeasureId					=		MA.intUnitMeasureId					LEFT
 				
+				JOIN	tblSMCurrency						CR	ON	CR.intCurrencyID					=		MA.intCurrencyId					LEFT
 				JOIN	tblSMCompanyLocationPricingLevel	PL	ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId LEFT
 				JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId			LEFT
 				JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
