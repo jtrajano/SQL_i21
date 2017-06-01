@@ -17,11 +17,15 @@ BEGIN
 		  , @newShipToId		INT
 		  , @newBillToId		INT
 		  , @customerId			INT
+		  , @intInvoiceIdLocal 	INT
+		  , @intUserIdLocal		INT
 
 	SET @dtmDate = GETDATE()
+	SET @intInvoiceIdLocal = @intInvoiceId
+	SET @intUserIdLocal = @intUserId
 
 	SELECT @intSplitId = intSplitId, @customerId = intEntityCustomerId
-	FROM tblARInvoice WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceId
+	FROM tblARInvoice WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceIdLocal
 
 	INSERT INTO @splitDetails(intSplitDetailId, intEntityId, dblSplitPercent)
 	SELECT intSplitDetailId, intEntityId, dblSplitPercent FROM [tblEMEntitySplitDetail]  WITH (NOLOCK) WHERE intSplitId = @intSplitId
@@ -42,7 +46,7 @@ BEGIN
 					GOTO UPDATE_CURRENT_INVOICE;
 				END
 
-			EXEC dbo.uspARSplitInvoice @intInvoiceId, @dtmDate, @intUserId, @intSplitDetailId, @newInvoiceNumber OUT
+			EXEC dbo.uspARSplitInvoice @intInvoiceIdLocal, @dtmDate, @intUserIdLocal, @intSplitDetailId, @newInvoiceNumber OUT
 
 			IF ISNULL(@newInvoiceNumber, '') <> ''
 				BEGIN
@@ -96,13 +100,13 @@ BEGIN
 	  , dblInvoiceTotal     = dblInvoiceTotal * @dblSplitPercent
 	  , dblTax				= dblTax * @dblSplitPercent
 	  , dblSplitPercent		= ISNULL(@dblSplitPercent, 1)
-	WHERE intInvoiceId = @intInvoiceId
+	WHERE intInvoiceId = @intInvoiceIdLocal
 		
 	INSERT INTO @InvoiceDetails
-	SELECT intInvoiceDetailId FROM tblARInvoiceDetail  WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceId
+	SELECT intInvoiceDetailId FROM tblARInvoiceDetail  WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceIdLocal
 
 	DECLARE @TransactionType varchar(20)
-	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice  WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceId)
+	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice  WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceIdLocal)
 
 	WHILE EXISTS(SELECT NULL FROM @InvoiceDetails)
 		BEGIN
@@ -131,5 +135,5 @@ BEGIN
 			DELETE FROM @InvoiceDetails WHERE intInvoiceDetailId = @intInvoiceDetailId
 		END
 	
-	SELECT @invoicesToAdd = ISNULL(@invoicesToAdd, '') + CONVERT(NVARCHAR(20), @intInvoiceId)	
+	SELECT @invoicesToAdd = ISNULL(@invoicesToAdd, '') + CONVERT(NVARCHAR(20), @intInvoiceIdLocal)	
 END
