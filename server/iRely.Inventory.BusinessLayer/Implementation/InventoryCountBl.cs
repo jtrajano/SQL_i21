@@ -20,6 +20,7 @@ namespace iRely.Inventory.BusinessLayer
             : base(db)
         {
             _db = db;
+            _db.ContextManager.Database.CommandTimeout = 120000;
         }
         #endregion
 
