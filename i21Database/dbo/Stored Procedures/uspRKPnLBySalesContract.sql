@@ -11,17 +11,19 @@ SELECT  sa.strSequenceNumber,
 		dv.strItemNo,
 		dv.strEntityName,
 		isnull(dv.dblDetailQuantity,0) as dblDetailQuantity,
-		isnull(sa.dblAllocatedQty,0) dblAllocatedQty,
-		isnull(dblTotal,0) dblInvoiceQty,		
 		dvp.dblBasis dblPurchaseBasis,
 		dv.dblBasis dblSaleBasis,
+		isnull(sa.dblAllocatedQty,0) dblAllocatedQty,
+		isnull(dblTotal,0) dblInvoiceQty,						
 		(SELECT sum(isnull(pc.dblAmount,0)) from vyuCTContractCostEnquiryCost pc where pc.intContractDetailId=ad.intPContractDetailId) dblPurchaseCost,
 		(SELECT sum(isnull(sc.dblAmount,0)) from vyuCTContractCostEnquiryCost sc where sc.intContractDetailId=ad.intSContractDetailId) dblSaleCost,
 		0.0 as dblEstimatedProfit,
-		0.0 as dblActualProfit,sa.intContractDetailId
+		0.0 as dblActualProfit,
+		dv.intContractDetailId
 FROM vyuCTContStsAllocation sa
 JOIN tblLGAllocationDetail ad on ad.intPContractDetailId=sa.intContractDetailId
-JOIN vyuCTContractDetailView dv on dv.intContractDetailId=ad.intSContractDetailId 
-JOIN vyuCTContractDetailView dvp on dvp.intContractDetailId=ad.intPContractDetailId 
+JOIN vyuRKPnLContractDetailView dv on dv.intContractDetailId=ad.intSContractDetailId 
+JOIN vyuRKPnLContractDetailView dvp on dvp.intContractDetailId=ad.intPContractDetailId 
 LEFT JOIN vyuCTContStsVendorInvoice vi on vi.intContractDetailId=ad.intPContractDetailId
-WHERE  sa.strContractType='Sale') t
+WHERE  sa.strContractType='Sale'
+) t

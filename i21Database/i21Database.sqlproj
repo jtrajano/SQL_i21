@@ -5271,6 +5271,7 @@
     <Build Include="dbo\Tables\tblETGPSCoordinates.sql" />
     <Build Include="dbo\Stored Procedures\uspGLDeleteAccount.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
+    <Build Include="dbo\Views\vyuRKPnLContractDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
