@@ -194,6 +194,8 @@ BEGIN
 		WHEN @msgId = 80178 THEN 'Fiscal month is already closed for %s module. Please open the fiscal month for %d to continue.'
 		WHEN @msgId = 80179 THEN 'Item: %s'
 		WHEN @msgId = 80180 THEN 'Receiver id is invalid. It must be a User type Entity.'
+		WHEN @msgId = 80181 THEN 'Unable to Post %s. The total is negative.'
+		WHEN @msgId = 80182 THEN 'Unable to create the Inventory Receipt. The total is going to be negative.'
 	END 
 
 	RETURN @msg
