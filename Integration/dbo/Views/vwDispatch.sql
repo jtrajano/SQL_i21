@@ -17,9 +17,9 @@ BEGIN
 		AS
 		SELECT
 		DispatchID = A.intDispatchID,
-		CustomerNumber = H.vwcus_key + '' '' + CASE H.vwcus_co_per_ind_cp
-				WHEN ''C'' THEN RTRIM(H.vwcus_last_name) + H.vwcus_first_name
-				ELSE RTRIM(H.vwcus_last_name) + '','' + H.vwcus_first_name
+		CustomerNumber = H.vwcus_key COLLATE Latin1_General_CI_AS + '' '' + CASE H.vwcus_co_per_ind_cp COLLATE Latin1_General_CI_AS
+				WHEN ''C'' THEN RTRIM(H.vwcus_last_name) COLLATE Latin1_General_CI_AS + H.vwcus_first_name COLLATE Latin1_General_CI_AS
+				ELSE RTRIM(H.vwcus_last_name) COLLATE Latin1_General_CI_AS + '','' + H.vwcus_first_name COLLATE Latin1_General_CI_AS
 				END,
 		CustomerName = 
 				CASE H.vwcus_co_per_ind_cp
@@ -75,9 +75,9 @@ BEGIN
 				AS
 				SELECT
 				DispatchID = A.intDispatchID,
-				CustomerNumber = H.vwcus_key + '' '' + CASE H.vwcus_co_per_ind_cp
-						WHEN ''C'' THEN RTRIM(H.vwcus_last_name) + H.vwcus_first_name
-						ELSE RTRIM(H.vwcus_last_name) + '','' + H.vwcus_first_name
+				CustomerNumber = H.vwcus_key COLLATE Latin1_General_CI_AS + '' '' + CASE H.vwcus_co_per_ind_cp COLLATE Latin1_General_CI_AS
+						WHEN ''C'' THEN RTRIM(H.vwcus_last_name) COLLATE Latin1_General_CI_AS + H.vwcus_first_name COLLATE Latin1_General_CI_AS
+						ELSE RTRIM(H.vwcus_last_name) COLLATE Latin1_General_CI_AS + '','' + H.vwcus_first_name COLLATE Latin1_General_CI_AS
 						END,
 				CustomerName = 
 						CASE H.vwcus_co_per_ind_cp
