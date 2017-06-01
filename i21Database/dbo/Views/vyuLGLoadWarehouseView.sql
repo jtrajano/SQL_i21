@@ -39,6 +39,39 @@ SELECT LW.intLoadWarehouseId
 	  ,SL.strName AS strStorageLocationName
 	  ,CLSLV.intEntityId 
 	  ,ShippingLine.strName AS strShippingLine
+	  ,CASE L.intShipmentStatus
+			WHEN 1
+				THEN 'Scheduled'
+			WHEN 2
+				THEN 'Dispatched'
+			WHEN 3
+				THEN 'Inbound transit'
+			WHEN 4
+				THEN 'Received'
+			WHEN 5
+				THEN 'Outbound transit'
+			WHEN 6
+				THEN 'Delivered'
+			WHEN 7
+				THEN 'Instruction created'
+			WHEN 8
+				THEN 'Partial Shipment Created'
+			WHEN 9
+				THEN 'Full Shipment Created'
+			WHEN 10
+				THEN 'Cancelled'
+			ELSE ''
+			END COLLATE Latin1_General_CI_AS AS strShipmentStatus
+		,L.intShipmentType
+		,CASE L.intShipmentType
+		WHEN 1
+			THEN 'Shipment'
+		WHEN 2
+			THEN 'Shipping Instructions'
+		WHEN 3
+			THEN 'Vessel Nomination'
+		ELSE ''
+		END COLLATE Latin1_General_CI_AS AS strShipmentType
 FROM tblLGLoadWarehouse LW
 JOIN tblLGLoad L ON L.intLoadId = LW.intLoadId
 JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
