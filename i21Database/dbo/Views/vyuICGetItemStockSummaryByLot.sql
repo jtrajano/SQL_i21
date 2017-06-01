@@ -72,16 +72,29 @@ FROM (
 		GROUP BY intItemId, intItemLocationId, intItemUOMId
 
 		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intItemUOMId
-			, intLotId
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryLot
+		
+		-- SELECT intItemId
+		-- 	, intItemLocationId
+		-- 	, intSubLocationId
+		-- 	, intStorageLocationId
+		-- 	, intItemUOMId
+		-- 	, intLotId
+		-- 	, SUM(dblStockIn)
+		-- 	, SUM(dblStockOut)
+		-- 	, SUM(dblStockIn) - SUM(dblStockOut)
+		-- FROM tblICInventoryLot
+		-- GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId
+		SELECT
+			intItemId,
+			intItemLocationId,
+			intSubLocationId,
+			intStorageLocationId,
+			intItemUOMId,
+			intLotId,
+			SUM(dblQty),
+			0,
+			SUM(dblQty)
+		FROM tblICLot lot
 		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId
 
 		UNION ALL
