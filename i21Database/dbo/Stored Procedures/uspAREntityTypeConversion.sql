@@ -48,7 +48,7 @@
 
 			END
 
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE strType = 'Prospect' AND intEntityId = @EntityId)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE strType = 'Customer' AND intEntityId = @EntityId)
 			BEGIN
 				INSERT INTO tblEMEntityType (intEntityId, strType, intConcurrencyId)
 				SELECT @EntityId, 'Customer', 0		
@@ -57,5 +57,30 @@
 			SET @OutputMessage = 'success'
 		END
 	END
+	ELSE IF @FromType = 'prospect' AND @ToType = 'lead'
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE intEntityId = @EntityId AND strType = 'Prospect' )
+		BEGIN
+			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'prospect'
+			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'customer'
 
+
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARLead WHERE intEntityId = @EntityId)
+			BEGIN
+
+				INSERT INTO tblARLead(intEntityId)
+				SELECT @EntityId
+
+			END
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE strType = 'Lead' AND intEntityId = @EntityId)
+			BEGIN
+				INSERT INTO tblEMEntityType (intEntityId, strType, intConcurrencyId)
+				SELECT @EntityId, 'Lead', 0		
+			END
+
+			SET @OutputMessage = 'success'
+		END
+	END
 		SELECT @OutputMessage
