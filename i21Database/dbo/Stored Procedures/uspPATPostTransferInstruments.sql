@@ -193,7 +193,7 @@ SET @batchIdUsed = @batchId;
 		BEGIN
 			DECLARE @certificateNo NVARCHAR(MAX);
 			SET @certificateNo = (SELECT TOP 1 strCertificateNo FROM #tempTransferDetails tempTD INNER JOIN tblPATCustomerStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo);
-			IF (@certificateNo = NULL)
+			IF (@certificateNo = '' OR @certificateNo IS NULL)
 			BEGIN
 				INSERT INTO tblPATCustomerStock(intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
 				SELECT intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
