@@ -82,8 +82,8 @@
       <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=17.1.6337.16415, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\iRely.Common.17.1.6337.16415\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=17.1.6353.8413, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\iRely.Common.17.1.6353.8413\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
@@ -303,11 +303,11 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
+  <!--To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.-->
   <Target Name="BeforeBuild">
+    <Exec Command="&quot;$(SolutionDir)\NuGet&quot; update &quot;$(ProjectDir)packages.config&quot; -Id iRely.Common -Safe" />
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <!--<Target Name="AfterBuild">
+  </Target>-->
 </Project>
