@@ -5257,6 +5257,7 @@
     <Build Include="dbo\Tables\tblMFCustomerLabelType.sql" />
     <Build Include="dbo\Views\vyuMFOrderDetail.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBillOfLadingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
