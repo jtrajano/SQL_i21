@@ -5249,6 +5249,7 @@
     <Build Include="dbo\Tables\tblMFCustomerLabelType.sql" />
     <Build Include="dbo\Views\vyuMFOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLDeleteAccount.sql" />
+    <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
