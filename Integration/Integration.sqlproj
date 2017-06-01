@@ -411,5 +411,7 @@
     <Build Include="dbo\Tables\tblARagordmst.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" />
     <None Include="Scripts\TM\CheckOriginTableAndTMPreference.sql" />
+    <None Include="Scripts\GL\1b_FlagCOACrossReferenceAccountsFromOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
   </ItemGroup>
 </Project>
