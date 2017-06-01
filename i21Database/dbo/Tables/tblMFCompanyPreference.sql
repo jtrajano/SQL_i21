@@ -39,5 +39,8 @@
 	ysnNotifyInventoryShortOnCreateWorkOrder BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnNotifyInventoryShortOnCreateWorkOrder] DEFAULT 0, 
 	ysnNotifyInventoryShortOnReleaseWorkOrder BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnNotifyInventoryShortOnReleaseWorkOrder] DEFAULT 0, 
 	ysnSetDefaultQtyOnHandheld BIT,
+	ysnEnableStagingBOL BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnEnableStagingBOL] DEFAULT 0,
+	strBOLReportName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
