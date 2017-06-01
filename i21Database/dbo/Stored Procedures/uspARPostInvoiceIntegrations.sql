@@ -14,108 +14,79 @@ SET ANSI_WARNINGS OFF
 DECLARE @UserEntityID INT
 		,@actionType AS NVARCHAR(50)
 		,@ForDelete BIT = 0
+		,@intTransactionId INT
+		,@intUserId INT
+		,@ysnPost BIT
 --THIS IS A HICCUP		
-
-SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId) 
-SELECT @actionType = CASE WHEN @post = 1 THEN 'Posted'  ELSE 'Unposted' END 
-SELECT @ForDelete = CASE WHEN @post = 1 THEN 0 ELSE 1 END
+SET @intTransactionId = @TransactionId
+SET @intUserId = @userId
+SET @ysnPost = @post
+SET @UserEntityID = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WITH (NOLOCK) WHERE intEntityId = @intUserId), @intUserId) 
+SELECT @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted'  ELSE 'Unposted' END 
+SELECT @ForDelete = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 
 -- Get the details from the invoice 
 BEGIN 
 	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
-	INSERT INTO @ItemsFromInvoice 
-	--(
-	--	-- Header
-	--	 [intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[intEntityCustomerId]
-	--	,[dtmDate]
-	--	,[intCurrencyId]
-	--	,[intCompanyLocationId]
-	--	,[intDistributionHeaderId]
-
-	--	-- Detail 
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strItemNo]
-	--	,[strItemDescription]
-	--	,[intSCInvoiceId]
-	--	,[strSCInvoiceNumber]
-	--	,[intItemUOMId]
-	--	,[dblQtyOrdered]
-	--	,[dblQtyShipped]
-	--	,[dblDiscount]
-	--	,[dblPrice]
-	--	,[dblTotalTax]
-	--	,[dblTotal]
-	--	,[intServiceChargeAccountId]
-	--	,[intInventoryShipmentItemId]
-	--	,[intSalesOrderDetailId]
-	--	,[intShipmentPurchaseSalesContractId]	
-	--	,[intSiteId]
-	--	,[strBillingBy]
-	--	,[dblPercentFull]
-	--	,[dblNewMeterReading]
-	--	,[dblPreviousMeterReading]
-	--	,[dblConversionFactor]
-	--	,[intPerformerId]
-	--	,[intContractHeaderId]
-	--	,[strContractNumber]
-	--	,[strMaintenanceType]
-	--	,[strFrequency]
-	--	,[dtmMaintenanceDate]
-	--	,[dblMaintenanceAmount]
-	--	,[dblLicenseAmount]
-	--	,[intContractDetailId]
-	--	,[intTicketId]
-	--	,[ysnLeaseBilling]
-
-	--)
-	EXEC dbo.[uspARGetItemsFromInvoice]
-			@intInvoiceId = @TransactionId
+	INSERT INTO @ItemsFromInvoice 	
+	EXEC dbo.[uspARGetItemsFromInvoice] @intInvoiceId = @intTransactionId
 
 	-- Change quantity to negative if doing a post. Otherwise, it should be the same value if doing an unpost. 
-	UPDATE @ItemsFromInvoice
-		SET [dblQtyShipped] = [dblQtyShipped] * CASE WHEN @post = 1 THEN 1 ELSE -1 END 
+	UPDATE @ItemsFromInvoice SET [dblQtyShipped] = [dblQtyShipped] * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
 END
 
 --Contracts
-EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
+EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @intUserId
 
 --Prepaids
 
-EXEC dbo.[uspARUpdatePrepaymentAndCreditMemo] @TransactionId, @post
+EXEC dbo.[uspARUpdatePrepaymentAndCreditMemo] @intTransactionId, @ysnPost
 
 UPDATE ARID
 SET
 	ARID.dblContractBalance = CTCD.dblBalance
 FROM
-	dbo.tblARInvoiceDetail ARID
+	(SELECT intInvoiceId, dblContractBalance, intContractDetailId FROM dbo.tblARInvoiceDetail WITH (NOLOCK) ) ARID
 INNER JOIN
-	dbo.tblCTContractDetail  CTCD
+	(SELECT intContractDetailId, dblBalance FROM dbo.tblCTContractDetail WITH (NOLOCK))  CTCD
 	ON ARID.intContractDetailId = CTCD.intContractDetailId
 WHERE 
-	ARID.dblContractBalance <> CTCD.dblBalance
-	AND ARID.intInvoiceId = @TransactionId
+	ARID.intInvoiceId = @intTransactionId
+	AND ARID.dblContractBalance <> CTCD.dblBalance
 
---Committed QUatities
-EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
+--Sales Order Status 
+EXEC dbo.[uspARUpdateSOStatusFromInvoice] @intTransactionId, @ForDelete
+
+--Committed QUatities - should call [[uspARUpdateSOStatusFromInvoice]] first
+EXEC dbo.[uspARUpdateCommitted] @intTransactionId, @ysnPost, @intUserId, 1
 
 --Reserved QUatities
-EXEC dbo.[uspARUpdateReservedStock] @TransactionId, @post, @userId, 1
+EXEC dbo.[uspARUpdateReservedStock] @intTransactionId, 0, @intUserId, 1, @ysnPost
 
 --In Transit Outbound Quantities 
-EXEC dbo.[uspARUpdateInTransit] @TransactionId, @post, 0
-
---Sales Order Status
-EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete
+EXEC dbo.[uspARUpdateInTransit] @intTransactionId, @ysnPost, 0
 
 DECLARE	@EntityCustomerId INT
+		,@LoadId INT
 
-SELECT TOP 1 @EntityCustomerId = intEntityCustomerId FROM tblARInvoice WHERE intInvoiceId = @TransactionId
+SELECT TOP 1 
+	@EntityCustomerId	= intEntityCustomerId
+	,@LoadId			= intLoadId
+FROM
+	tblARInvoice WITH (NOLOCK)
+WHERE
+	intInvoiceId = @intTransactionId
 
 --Update Total AR
-EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @TransactionId, @CustomerId = @EntityCustomerId
+EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @intTransactionId, @CustomerId = @EntityCustomerId
+
+
+--Update LG - Load Shipment
+EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost]
+	@InvoiceId	= @intTransactionId
+	,@Post		= @ysnPost
+	,@LoadId	= @LoadId
+	,@UserId	= @intUserId
 
 --Patronage
 DECLARE	@successfulCount INT
@@ -125,15 +96,15 @@ DECLARE	@successfulCount INT
 
 EXEC [dbo].[uspPATInvoiceToCustomerVolume]
 	 @intEntityCustomerId	= @EntityCustomerId
-	,@intInvoiceId			= @TransactionId
-	,@ysnPosted				= @post
+	,@intInvoiceId			= @intTransactionId
+	,@ysnPosted				= @ysnPost
 	,@successfulCount		= @successfulCount OUTPUT
 	,@invalidCount			= @invalidCount OUTPUT
 	,@success				= @success OUTPUT
 
 --Audit Log          
 EXEC dbo.uspSMAuditLog 
-	 @keyValue			= @TransactionId					-- Primary Key Value of the Invoice. 
+	 @keyValue			= @intTransactionId					-- Primary Key Value of the Invoice. 
 	,@screenName		= 'AccountsReceivable.view.Invoice'	-- Screen Namespace
 	,@entityId			= @UserEntityID						-- Entity Id.
 	,@actionType		= @actionType						-- Action Type

@@ -17,14 +17,18 @@ BEGIN
 		  , @newShipToId		INT
 		  , @newBillToId		INT
 		  , @customerId			INT
+		  , @intInvoiceIdLocal 	INT
+		  , @intUserIdLocal		INT
 
 	SET @dtmDate = GETDATE()
+	SET @intInvoiceIdLocal = @intInvoiceId
+	SET @intUserIdLocal = @intUserId
 
 	SELECT @intSplitId = intSplitId, @customerId = intEntityCustomerId
-	FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
+	FROM tblARInvoice WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceIdLocal
 
 	INSERT INTO @splitDetails(intSplitDetailId, intEntityId, dblSplitPercent)
-	SELECT intSplitDetailId, intEntityId, dblSplitPercent FROM [tblEMEntitySplitDetail] WHERE intSplitId = @intSplitId
+	SELECT intSplitDetailId, intEntityId, dblSplitPercent FROM [tblEMEntitySplitDetail]  WITH (NOLOCK) WHERE intSplitId = @intSplitId
 
 	WHILE EXISTS(SELECT NULL FROM @splitDetails)
 		BEGIN
@@ -42,20 +46,20 @@ BEGIN
 					GOTO UPDATE_CURRENT_INVOICE;
 				END
 
-			EXEC dbo.uspARSplitInvoice @intInvoiceId, @dtmDate, @intUserId, @intSplitDetailId, @newInvoiceNumber OUT
+			EXEC dbo.uspARSplitInvoice @intInvoiceIdLocal, @dtmDate, @intUserIdLocal, @intSplitDetailId, @newInvoiceNumber OUT
 
 			IF ISNULL(@newInvoiceNumber, '') <> ''
 				BEGIN
 					SELECT @newInvoiceId	= intInvoiceId
 					     , @newCustomerId	= intEntityCustomerId 
-					FROM tblARInvoice 
+					FROM tblARInvoice  WITH (NOLOCK)
 					WHERE strInvoiceNumber = @newInvoiceNumber
 
 					SELECT @newShipToId = intShipToId
 					     , @newBillToId = intBillToId
 						 , @newTermId	= intTermsId 
-					FROM vyuARCustomerSearch 
-					WHERE [intEntityId] = @newCustomerId
+					FROM vyuARCustomerSearch  WITH (NOLOCK)
+					WHERE intEntityId = @newCustomerId
 
 					UPDATE tblARInvoice
 					SET intShipToLocationId	= @newShipToId
@@ -73,14 +77,14 @@ BEGIN
 	UPDATE_CURRENT_INVOICE:
 	SELECT @intSplitEntityId = intEntityId
 		 , @dblSplitPercent = dblSplitPercent/100 
-	FROM [tblEMEntitySplitDetail] 
+	FROM [tblEMEntitySplitDetail]  WITH (NOLOCK)
 	WHERE intSplitDetailId = @intSplitDetailId
 
 	SELECT @newShipToId = intShipToId
 		 , @newBillToId = intBillToId
 		 , @newTermId	= intTermsId 
-	FROM vyuARCustomerSearch 
-	WHERE [intEntityId] = @intSplitEntityId
+	FROM vyuARCustomerSearch  WITH (NOLOCK)
+	WHERE intEntityId = @intSplitEntityId
 
 	UPDATE tblARInvoice 
 	SET ysnSplitted			= 1
@@ -95,13 +99,14 @@ BEGIN
 	  , dblInvoiceSubtotal  = dblInvoiceSubtotal * @dblSplitPercent
 	  , dblInvoiceTotal     = dblInvoiceTotal * @dblSplitPercent
 	  , dblTax				= dblTax * @dblSplitPercent
-	WHERE intInvoiceId = @intInvoiceId
+	  --, dblSplitPercent		= ISNULL(@dblSplitPercent, 1)
+	WHERE intInvoiceId = @intInvoiceIdLocal
 		
 	INSERT INTO @InvoiceDetails
-	SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId
+	SELECT intInvoiceDetailId FROM tblARInvoiceDetail  WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceIdLocal
 
 	DECLARE @TransactionType varchar(20)
-	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
+	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice  WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceIdLocal)
 
 	WHILE EXISTS(SELECT NULL FROM @InvoiceDetails)
 		BEGIN
@@ -130,5 +135,5 @@ BEGIN
 			DELETE FROM @InvoiceDetails WHERE intInvoiceDetailId = @intInvoiceDetailId
 		END
 	
-	SELECT @invoicesToAdd = ISNULL(@invoicesToAdd, '') + CONVERT(NVARCHAR(20), @intInvoiceId)	
+	SELECT @invoicesToAdd = ISNULL(@invoicesToAdd, '') + CONVERT(NVARCHAR(20), @intInvoiceIdLocal)	
 END
