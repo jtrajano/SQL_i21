@@ -2476,3 +2476,14 @@ BEGIN
 	SELECT 2
 		,'Case Label'
 END
+
+GO
+UPDATE tblMFCompanyPreference
+SET ysnEnableStagingBOL = 0
+WHERE ysnEnableStagingBOL IS NULL
+GO
+GO
+UPDATE tblMFCompanyPreference
+SET strBOLReportName = 'BOLReport'
+WHERE strBOLReportName IS NULL
+GO
