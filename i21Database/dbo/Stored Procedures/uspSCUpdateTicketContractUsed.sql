@@ -21,14 +21,21 @@ BEGIN TRY
 		VALUES(@intTicketId,@intContractDetailId,@dblScheduleQty)
 	END
 	IF(ISNULL(@ysnStorage,0) = 0)
+		BEGIN
+			UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
+			UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
+			, intContractSequence = CT.intContractSeq
+			, strContractLocation = CT.strLocationName
+			, dblScheduleQty = @dblScheduleQty
+			, dblUnitPrice = CT.dblFutures
+			, dblUnitBasis = CT.dblBasis
+			FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
+			WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId
+		END
+	ELSE
 	BEGIN
 		UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
-		UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-		, intContractSequence = CT.intContractSeq
-		, strContractLocation = CT.strLocationName
-		, dblScheduleQty = @dblScheduleQty
-		, dblUnitPrice = CT.dblFutures
-		, dblUnitBasis = CT.dblBasis
+		UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber , intContractSequence = CT.intContractSeq, strContractLocation = CT.strLocationName
 		FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
 		WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId
 	END
