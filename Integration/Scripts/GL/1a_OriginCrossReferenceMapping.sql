@@ -1,1 +1,3 @@
-﻿EXEC dbo.uspGLInsertOriginCrossReferenceMapping
+﻿GO
+EXEC dbo.uspGLInsertOriginCrossReferenceMapping
+GO

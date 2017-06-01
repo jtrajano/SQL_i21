@@ -14,6 +14,7 @@ Post-Deployment Script Template
 
 --General Ledger
 :r "..\Scripts\GL\1a_OriginCrossReferenceMapping.sql"
+:r "..\Scripts\GL\1b_FlagCOACrossReferenceAccountsFromOrigin.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
 :r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
 :r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"

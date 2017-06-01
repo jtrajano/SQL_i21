@@ -412,5 +412,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" />
     <None Include="Scripts\TM\CheckOriginTableAndTMPreference.sql" />
     <Build Include="dbo\Tables\tblAPapivcmst.sql" />
+    <None Include="Scripts\GL\1b_FlagCOACrossReferenceAccountsFromOrigin.sql" />
   </ItemGroup>
 </Project>
