@@ -20,7 +20,8 @@ AS
 				) AS dblNetWeight,
 				RI.intWeightUOMId intItemUOMId,
 				IM.strUnitMeasure,
-				SL.strSubLocationName
+				SL.strSubLocationName,
+				IR.intInventoryReceiptId
 				
 		FROM	tblICInventoryReceiptItemLot	RL
 		JOIN	tblICInventoryReceiptItem		RI	ON	RI.intInventoryReceiptItemId		=	RL.intInventoryReceiptItemId
@@ -48,8 +49,9 @@ AS
 				) AS dblNetWeight,
 				RI.intWeightUOMId intItemUOMId,
 				IM.strUnitMeasure,
-				SL.strSubLocationName
-				
+				SL.strSubLocationName,
+				IR.intInventoryReceiptId
+
 		FROM	tblICInventoryReceiptItemLot	RL
 		JOIN	tblICInventoryReceiptItem		RI	ON	RI.intInventoryReceiptItemId		=	RL.intInventoryReceiptItemId
 		JOIN	tblICInventoryReceipt			IR	ON	IR.intInventoryReceiptId			=	RI.intInventoryReceiptId 
