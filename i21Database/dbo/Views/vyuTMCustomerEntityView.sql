@@ -18,7 +18,7 @@ SELECT
 	,vwcus_contact = SUBSTRING((Con.strName),1,20) 
 	,vwcus_comments = SUBSTRING(Con.strInternalNotes,1,30) 
 	,vwcus_slsmn_id = (SELECT strSalespersonId FROM tblARSalesperson WHERE [intEntityId] = Cus.intSalespersonId)
-	,vwcus_terms_cd = Loc.intTermsId
+	,vwcus_terms_cd = T.intTermsId
 	,vwcus_prc_lvl = CAST(0 AS INT)
 	,vwcus_stmt_fmt =	CASE WHEN Cus.strStatementFormat = 'Open Item' THEN 'O'
 							WHEN Cus.strStatementFormat = 'Balance Forward' THEN 'B' 
@@ -58,7 +58,7 @@ SELECT
 	,vwcus_avg_days_no_ivcs = 0
 	,vwcus_last_stmt_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastStatementDate) AS NVARCHAR(4)) + RIGHT('00' + CAST(MONTH(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)  + RIGHT('00' + CAST(DAY(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)) AS INT),0) 
 	,vwcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '' END)  
-	,vwcus_termdescription = (SELECT strTerm FROM tblSMTerm WHERE intTermID = Loc.intTermsId)
+	,vwcus_termdescription = (SELECT strTerm FROM tblSMTerm WHERE intTermID = T.intTermsId)
 	,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN 'Y' ELSE 'N' END   
 	,vwcus_tax_state = ''  
 	,A4GLIdentity = Ent.intEntityId
@@ -75,7 +75,7 @@ SELECT
 	,strFullCustomerName = Ent.strName
 	,intCustomerPricingLevel = Cus.intCompanyLocationPricingLevelId
 	,strCustomerContactEmail = Con.strEmail
-	,intCustomerDeliveryTermId = Loc.intTermsId
+	,intCustomerDeliveryTermId = T.intTermsId
 	,dtmLastInvoiceRevisedDate = (SELECT TOP 1 dtmDate FROM tblARInvoice WHERE intEntityId = Ent.intEntityId AND strTransactionType = 'Invoice' ORDER BY dtmDate DESC)
 	,dtmLastPaymentRevisedDate = CI.dtmLastPaymentDate
 	,dtmLastStatementRevDate = CI.dtmLastStatementDate
@@ -105,6 +105,6 @@ LEFT JOIN tblEMEntityPhoneNumber E
 LEFT JOIN tblEMEntityMobileNumber F
 	ON Con.intEntityId = F.intEntityId   
 LEFT JOIN tblSMTerm T
-	ON Loc.intTermsId = T.intTermID
+	ON Cus.intTermsId = T.intTermID
 
 GO
