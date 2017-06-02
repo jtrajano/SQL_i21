@@ -2,7 +2,8 @@ var Harness = Siesta.Harness.Browser.ExtJS,
     version = Math.floor(Math.random() * 9999) + 1,
     commonIC = 'Common/CommonIC.js?v='+version,
     commonICST = 'Common/CommonICSmokeTest.js?v='+version,
-    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version;
+    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version,
+    commonGL = '../../GeneralLedger/test-ui/Common/commonGL.js?v='+version
 
 
 var _url = window.location.hash,
@@ -19,8 +20,8 @@ if(_url.indexOf('version=TF') < 1) {
         defaultTimeout: 300000,
         waitForTimeout: 300000,
         maintainViewportSize: true,
-        viewportHeight: 1200,
-        viewportWidth: 1800,
+        viewportHeight: 950,
+        viewportWidth: 1450,
         preload: [
             functionalTest
         ]
@@ -33,65 +34,9 @@ if(_url.indexOf('version=TF') < 1) {
 
     Harness.start(
 
-        { group: 'PreSetup',
-            items: [
-                {
-                    url: 'PreSetup/UsersLocation.js?v='+version,
-                    title: 'UserLocation',
-                    preload: [
-                        functionalTest,
-                        commonIC
-                    ]
-                },
-                {
-                    url: 'PreSetup/StorageLocation.js?v='+version,
-                    title: 'StorageLocation',
-                    preload: [
-                        functionalTest,
-                        commonIC
-                    ]
-                },
-                {
-                    url: 'PreSetup/Items.js?v='+version,
-                    title: 'Items',
-                    preload: [
-                        functionalTest,
-                        commonIC
-                    ]
-                }
-
-            ]
-        },
-
         { group: 'SmokeTesting',
             items: [
-                {
-                    url: 'SmokeTesting/ICOpenScreens.js?v='+version,
-                    title: 'ICOpenScreens',
-                    preload: [
-                        functionalTest,
-                        commonIC,
-                        commonICST
-                    ]
-                },
-                {
-                    url: 'SmokeTesting/ICAddMaintenance.js?v='+version,
-                    title: 'ICAddMaintenance',
-                    preload: [
-                        functionalTest,
-                        commonIC,
-                        commonICST
-                    ]
-                },
-                {
-                    url: 'SmokeTesting/ICAddTransactions.js?v='+version,
-                    title: 'ICAddTransactions',
-                    preload: [
-                        functionalTest,
-                        commonIC,
-                        commonICST
-                    ]
-                },
+
                 {
                     url: 'SmokeTesting/ICSmokeTests.js?v='+version,
                     title: 'ICSmokeTests',
@@ -101,7 +46,6 @@ if(_url.indexOf('version=TF') < 1) {
                         commonICST
                     ]
                 }
-
             ]
         },
 
@@ -115,7 +59,8 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/Item/AddInventory.js?v='+version,
                             title: 'AddInventory',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         },
 
@@ -123,7 +68,8 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/Item/DeleteInventory.js?v='+version,
                             title: 'DeleteInventory',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -135,14 +81,16 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/Commodity/AddCommodity.js?v='+version,
                             title: 'AddCommodity',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         },
                         {
                             url: 'CRUDScripts/Commodity/DeleteCommodity.js?v='+version,
                             title: 'DeleteCommodity',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -151,7 +99,7 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'Category',
                     items: [
                         {
-                            url: 'CRUDScripts/Category/17xAddCategory.js?v='+version,
+                            url: 'CRUDScripts/Category/AddCategory.js?v='+version,
                             title: 'AddCategory',
                             preload: [
                                 functionalTest
@@ -161,7 +109,8 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/Category/DeleteCategory.js?v='+version,
                             title: 'DeleteCategory',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -170,17 +119,11 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FuelCategory',
                     items: [
                         {
-                            url: 'CRUDScripts/FuelCategory/AddFuelCategory.js?v='+version,
-                            title: 'AddFuelCategory',
+                            url: 'CRUDScripts/FuelCategory/AddAndDeleteFuelCategory.js?v='+version,
+                            title: 'AddAndDeleteFuelCategory',
                             preload: [
-                                functionalTest
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FuelCategory/DeleteFuelCategory.js?v='+version,
-                            title: 'DeleteFuelCategory',
-                            preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -189,17 +132,11 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FeedStock',
                     items: [
                         {
-                            url: 'CRUDScripts/FeedStock/AddFeedStock.js?v='+version,
-                            title: 'AddFeedStock',
+                            url: 'CRUDScripts/FeedStock/AddAndDeleteFeedStock.js?v='+version,
+                            title: 'AddAndDeleteFeedStock',
                             preload: [
-                                functionalTest
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FeedStock/DeleteFeedStock.js?v='+version,
-                            title: 'DeleteFeedStock',
-                            preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -211,14 +148,16 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/FuelCode/AddFuelCode.js?v='+version,
                             title: 'AddFuelCode',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         },
                         {
                             url: 'CRUDScripts/FuelCode/DeleteFuelCode.js?v='+version,
                             title: 'DeleteFuelCode',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -230,14 +169,16 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/ProductionProcess/AddProductionProcess.js?v='+version,
                             title: 'AddProductionProcess',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         },
                         {
                             url: 'CRUDScripts/ProductionProcess/DeleteProductionProcess.js?v='+version,
                             title: 'DeleteProductionProcess',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -249,14 +190,16 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/FeedStockUOM/AddFeedStockUOM.js?v='+version,
                             title: 'AddFeedStockUOM',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         },
                         {
                             url: 'CRUDScripts/FeedStockUOM/DeleteFeedStockUOM.js?v='+version,
                             title: 'DeleteFeedStockUOM',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -268,14 +211,16 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/FuelType/AddFuelType.js?v='+version,
                             title: 'AddFuelType',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         },
                         {
                             url: 'CRUDScripts/FuelType/DeleteFuelType.js?v='+version,
                             title: 'DeleteFuelType',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -288,7 +233,8 @@ if(_url.indexOf('version=TF') < 1) {
                             title: 'AddInventoryUOM',
 
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         },
                         {
@@ -296,7 +242,8 @@ if(_url.indexOf('version=TF') < 1) {
                             title: 'DeleteInventoryUOM',
 
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -308,14 +255,16 @@ if(_url.indexOf('version=TF') < 1) {
                             url: 'CRUDScripts/StorageLocation/AddStorageLocation.js?v='+version,
                             title: 'AddStorageLocation',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         },
                         {
                             url: 'CRUDScripts/StorageLocation/DeleteStorageLocation.js?v='+version,
                             title: 'DeleteStorageLocation',
                             preload: [
-                                functionalTest
+                                functionalTest,
+                                commonIC
                             ]
                         }
                     ]
@@ -323,14 +272,7 @@ if(_url.indexOf('version=TF') < 1) {
 
                 { group: 'InventoryReceipt',
                     items: [
-                        {
-                            url: 'CRUDScripts/InventoryReceipt/PreSetup.js?v='+version,
-                            title: 'PreSetup',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
+
                         {
                             url: 'CRUDScripts/InventoryReceipt/AddInventoryReceipt.js?v='+version,
                             title: 'AddInventoryReceipt',
@@ -354,14 +296,6 @@ if(_url.indexOf('version=TF') < 1) {
                     items: [
 
                         {
-                            url: 'CRUDScripts/InventoryShipment/PreSetup.js?v='+version,
-                            title: 'PreSetup',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
                             url: 'CRUDScripts/InventoryShipment/AddInventoryShipment.js?v='+version,
                             title: 'AddInventoryShipment',
                             preload: [
@@ -382,6 +316,7 @@ if(_url.indexOf('version=TF') < 1) {
 
                 { group: 'InventoryTransfer',
                     items: [
+
                         {
                             url: 'CRUDScripts/InventoryTransfer/AddInventoryTransfer.js?v='+version,
                             title: 'AddInventoryTransfer',
@@ -446,16 +381,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'StorageMeasurementReading',
                     items: [
                         {
-                            url: 'CRUDScripts/StorageMeasurementReading/AddSMR.js?v='+version,
-                            title: 'AddSMR',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/StorageMeasurementReading/DeleteSMR.js?v='+version,
-                            title: 'DeleteSMR',
+                            url: 'CRUDScripts/StorageMeasurementReading/AddAndDeleteSMR.js?v='+version,
+                            title: 'AddAndDeleteSMR',
                             preload: [
                                 functionalTest,
                                 commonIC
@@ -505,6 +432,15 @@ if(_url.indexOf('version=TF') < 1) {
                                 group: 'DirectInventoryReceipt',
                                 items: [
                                     {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/PreSetup.js?v=' + version,
+                                        title: 'PreSetup',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    },
+                                    {
                                         url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR1-2.js?v=' + version,
                                         title: 'DirectIR-Scen.1-2',
                                         preload: [
@@ -514,8 +450,53 @@ if(_url.indexOf('version=TF') < 1) {
                                         ]
                                     },
                                     {
-                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR3-7.js?v=' + version,
-                                        title: 'DirectIR-Scen.3-7',
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR3-5.js?v=' + version,
+                                        title: 'DirectIR-Scen.3-5',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    },
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR6-7.js?v=' + version,
+                                        title: 'DirectIR-Scen.6-7',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    },
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR8-9.js?v=' + version,
+                                        title: 'DirectIR-Scen.8-9',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    },
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR10-11.js?v=' + version,
+                                        title: 'DirectIR-Scen.10-11',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    },
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR12-13.js?v=' + version,
+                                        title: 'DirectIR-Scen.12-13',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    },
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR14-15.js?v=' + version,
+                                        title: 'DirectIR-Scen.14-15',
                                         preload: [
                                             functionalTest,
                                             commonIC
@@ -524,7 +505,23 @@ if(_url.indexOf('version=TF') < 1) {
                                     }
 
                                 ]
+                            },
+
+                            {
+                                group: 'PurchaseOrderInventoryReceipt',
+                                items: [
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/PurchaseOrderInventoryReceipt/AddOrdersPurchaseOrders.js?v=' + version,
+                                        title: 'AddOrdersPurchaseOrders',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    }
+                                ]
                             }
+
 
                         ]
 
@@ -638,6 +635,42 @@ if(_url.indexOf('version=TF') < 1) {
                                 commonIC
 
                             ]
+                        },
+                        {
+                            url: 'BusinessDomain/StockChecking/IRCheckStockS1.js?v=' + version,
+                            title: 'IRCheckStockS1',
+                            preload: [
+                                functionalTest,
+                                commonIC
+
+                            ]
+                        },
+                        {
+                            url: 'BusinessDomain/StockChecking/IRCheckStockS2.js?v=' + version,
+                            title: 'IRCheckStockS2',
+                            preload: [
+                                functionalTest,
+                                commonIC
+
+                            ]
+                        },
+                        {
+                            url: 'BusinessDomain/StockChecking/IRCheckStockS3.js?v=' + version,
+                            title: 'IRCheckStockS3',
+                            preload: [
+                                functionalTest,
+                                commonIC
+
+                            ]
+                        },
+                        {
+                            url: 'BusinessDomain/StockChecking/IRCheckStockS4.js?v=' + version,
+                            title: 'IRCheckStockS4',
+                            preload: [
+                                functionalTest,
+                                commonIC
+
+                            ]
                         }
 
                     ]
@@ -736,6 +769,55 @@ if(_url.indexOf('version=TF') < 1) {
                             ]
                         }
                     ]
+                },
+
+                {
+                    group: 'TaxesAndCharges',
+                    items: [
+                        {
+                            url: 'BusinessDomain/TaxesAndCharges/TaxesAndChargesSetup.js?v=' + version,
+                            title: 'TaxesAndChargesSetup',
+                            preload: [
+                                functionalTest,
+                                commonIC,
+                                commonGL
+                            ]
+                        },
+                        {
+                            url: 'BusinessDomain/TaxesAndCharges/IRTaxesAndChargesCheckOffIsN-S1.js?v=' + version,
+                            title: 'IRTaxesAndChargesCheckOffIsN-S1',
+                            preload: [
+                                functionalTest,
+                                commonIC,
+                                commonGL
+                            ]
+                        },
+                        {
+                            url: 'BusinessDomain/TaxesAndCharges/IRTaxesAndChargesCheckOffIsY.js?v=' + version,
+                            title: 'IRTaxesAndChargesCheckOffIsY',
+                            preload: [
+                                functionalTest,
+                                commonIC,
+                                commonGL
+                            ]
+                        }
+                    ]
+                },
+
+                {
+                    group: 'MultiCurrency',
+                    items: [
+                        {
+                            url: 'BusinessDomain/MultiCurrency/MultiCurrencySetup.js?v=' + version,
+                            title: 'MultiCurrencySetup',
+                            preload: [
+                                functionalTest,
+                                commonIC,
+                                commonGL
+                            ]
+                        }
+
+                    ]
                 }
 
 
@@ -764,7 +846,7 @@ else{
         pauseBetweenTests: 1000,
         defaultTimeout: 300000,
         waitForTimeout: 300000,
-        viewportHeight: 1200,
+        viewportHeight: 1100,
         viewportWidth: 1800,
         maintainViewportSize: true,
         autoRun: true,

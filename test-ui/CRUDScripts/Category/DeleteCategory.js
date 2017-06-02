@@ -1,27 +1,49 @@
 StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
-        //region Scenario 1: Delete Unused Category
+        /*====================================== Scenario 1: Delete Unused Category ======================================*/
+        //region
         .displayText('=====  Scenario 1: Delete Unused Category =====')
-        .displayText('=====  Create Category to Delete =====')
         .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded()
         .clickMenuScreen('Categories','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('iccategory')
-        .enterData('Text Field','CategoryCode','Delete - Category 1')
-        .enterData('Text Field','Description','Test Inventory Category')
-        .selectComboBoxRowNumber('InventoryType',2,0)
-        .selectComboBoxRowNumber('CostingMethod',1,0)
-        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
-        .clickButton('Save')
-        .clickButton('Close')
+        .filterGridRecords('Search', 'FilterGrid', 'Delete - Category 1')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-        .doubleClickSearchRowValue('Delete - Category 1', 1)
-        .waitUntilLoaded('iccategory')
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //region
+                    .displayText('=====  Create Category to Delete =====')
+                    .clickButton('New')
+                    .waitUntilLoaded('')
+                    .waitUntilLoaded('')
+                    .enterData('Text Field','CategoryCode','Delete - Category 1')
+                    .enterData('Text Field','Description','Test Inventory Category')
+                    .selectComboBoxRowNumber('InventoryType',2,0)
+                    .selectComboBoxRowNumber('CostingMethod',1,0)
+                    .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
+                    .clickButton('Save')
+                    .clickButton('Close')
+
+                    .doubleClickSearchRowValue('Delete - Category 1', 1)
+                    .waitUntilLoaded('iccategory')
+                    .clickButton('Delete')
+                    .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
+                    .clickMessageBoxButton('yes')
+                    .waitUntilLoaded('')
+                    .clearTextFilter('FilterGrid')
+
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
         .clearTextFilter('FilterGrid')
         .displayText('=====  Scenario 1: Delete Unused Category Done=====')
         //endregion
@@ -43,49 +65,6 @@ StartTest (function (t) {
         .clearTextFilter('FilterGrid')
         .displayText('=====  Scenario 2: Delete Used Category Done=====')
         //endregion
-
-        //region Scenario 3: Delete Multiple UnUsed Category
-        .displayText('=====  Scenario 3: Delete Multiple UnUsed Category =====')
-        .selectSearchRowNumber([77,78,79,80,81,82,83,84])
-        .clickButton('OpenSelected')
-        .waitUntilLoaded('iccategory')
-        .waitUntilLoaded()
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
-        .displayText('=====  Scenario 3: Delete Multiple UnUsed Category Done=====')
-        //endregion
-
-
 
 
         .done();

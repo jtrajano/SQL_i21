@@ -1,156 +1,287 @@
 StartTest (function (t) {
+    var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
-        //region Scenario 1. Create Direct Inventory Shipment for Non Lotted Item then Delete IS
-        //Receive Items for Stock
+        //region
+        .displayText('===== Pre-setup =====')
+        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
+        .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
+        .clickMenuFolder('System Manager','Folder')
+        .clickMenuScreen('Users','Screen')
+        .waitUntilLoaded()
+        .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+        .waitUntilLoaded('ementity')
+        .waitUntilLoaded()
+        .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
+        .clickTab('User')
+        .waitUntilLoaded()
+        .clickTab('User Roles')
+
+        .waitUntilLoaded()
+        .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+        .waitUntilLoaded()
+
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Location already exists.')
+                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+
+                    .displayText('Location is not yet existing.')
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .clickMessageBoxButton('no')
+                    .waitUntilLoaded()
+                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+                    .waitUntilLoaded('ementity')
+                    .clickTab('User')
+                    .waitUntilLoaded()
+                    .clickTab('User Roles')
+                    .waitUntilLoaded()
+                    .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 'Dummy','strLocationName', '0002 - Indianapolis','strLocationName', 1)
+                    .selectGridComboBoxBottomRowValue('UserRoleCompanyLocationRolePermission', 'strUserRole', 'ADMIN', 'strUserRole', 1)
+                    .clickTab('Detail')
+                    .waitUntilLoaded()
+                    .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
+                    .clickButton('Save')
+                    .waitUntilLoaded()
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+                    .waitUntilLoaded('ementity')
+                    .clickTab('User')
+                    .waitUntilLoaded()
+                    .clickTab('User Roles')
+                    .waitUntilLoaded()
+                    .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Location already exists.')
+                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() != 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .clickMessageBoxButton('no')
+                    .waitUntilLoaded()
+                    .clickMenuFolder('System Manager','Folder')
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+
+        /*====================================== Add Storage Location for Indianapolis======================================*/
+        .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded()
+        .clickMenuScreen('Storage Locations','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('===== Scenario 1: Add New Storage Location. =====')
+                    .clickMenuScreen('Storage Locations','Screen')
+                    .clickButton('New')
+                    .waitUntilLoaded('icstorageunit')
+                    .enterData('Text Field','Name','Indy Storage')
+                    .enterData('Text Field','Description','Indy Storage')
+                    .selectComboBoxRowNumber('UnitType',6,0)
+                    .selectComboBoxRowNumber('Location',2,0)
+                    .selectComboBoxRowNumber('SubLocation',1,0)
+                    .selectComboBoxRowNumber('ParentUnit',1,0)
+                    .enterData('Text Field','Aisle','Test Aisle - 01')
+                    .clickCheckBox('AllowConsume', true)
+                    .clickCheckBox('AllowMultipleItems', true)
+                    .clickCheckBox('AllowMultipleLots', true)
+                    .clickCheckBox('CycleCounted', true)
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickMenuFolder('Inventory','Folder')
+        /*====================================== Add Category ======================================*/
+        //region
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Categories','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'IS - Category - 01')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Category already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //Add Category
+                    .displayText('===== Scenario 4: Add Category =====')
+                    .clickMenuFolder('Inventory','Folder')
+                    .addFunction(function(next){
+                        commonIC.addCategory (t,next, 'IS - Category - 01', 'Test Category Description', 2)
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+
+        /*====================================== Add Commodity ======================================*/
+
+        .clickMenuScreen('Commodities','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'IS - Commodity - 01')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Commodity already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickMenuFolder('Inventory','Folder')
+                    //Add Commodity
+                    .displayText('===== Scenario 6: Add Commodity =====')
+                    .addFunction(function(next){
+                        commonIC.addCommodity (t,next, 'IS - Commodity - 01', 'Test Commodity Description')
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+
+        /*====================================== Add Lotted Item ======================================*/
+        .clickMenuScreen('Items','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'DISLTI - 02')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Item already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickMenuFolder('Inventory','Folder')
+                    .displayText('===== Scenario 5: Add Lotted Item =====')
+                    .addFunction(function(next){
+                        commonIC.addInventoryItem
+                        (t,next,
+                            'DISLTI - 02'
+                            , 'Test Lotted Item Description'
+                            , 'IS - Category - 01'
+                            , 'IS - Commodity - 01'
+                            , 3
+                            , 'LB'
+                            , 'LB'
+                            , 10
+                            , 10
+                            , 40
+                        )
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+
+        /*====================================== Add Non Lotted Item ======================================*/
+        .clickMenuScreen('Items','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'DISNLTI - 02')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Item already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickMenuFolder('Inventory','Folder')
+                    .displayText('===== Scenario 6: Add Non Lotted Item =====')
+                    .addFunction(function(next){
+                        commonIC.addInventoryItem
+                        (t,next,
+                            'DISNLTI - 02'
+                            , 'Test Non Lotted Item Description'
+                            , 'IS - Category - 01'
+                            , 'IS - Commodity - 01'
+                            , 4
+                            , 'LB'
+                            , 'LB'
+                            , 10
+                            , 10
+                            , 40
+                        )
+                    })
+                    .waitUntilLoaded('')
+                    .clickMenuFolder('Inventory','Folder')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Pre-setup done =====')
+        //endregion
+
+
+        //Adding Stock to Items
+        .displayText('===== Adding Stocks to Created items =====')
+        .addFunction(function(next){
+            commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'DISNLTI - 02','LB', 1000, 10)
+        })
+
+        .addFunction(function(next){
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'DISLTI - 02','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
+        .waitUntilLoaded()
+        .displayText('===== Adding Stocks to Created Done =====')
+        .displayText('===== Pre-setup done =====')
+        
+        
+        
+        
+
         .displayText('=====  Scenario 1. Create Direct Inventory Shipment  for Non Lotted Item then Delete IS =====')
-        //Create NON Lotted Item.
-        .displayText('===== Pre setup: Items for Delete Inventory Shipment Script =====')
         .displayText('===== Creating Non Lotted Item =====')
         .clickMenuFolder('Inventory','Folder')
-        .clickMenuScreen('Items','Screen')
-        .clickButton('New')
-        .enterData('Text Field','ItemNo','SNLTI - 13')
-        .enterData('Text Field','Description','Non Lotted for Delete IR')
-        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',3,0)
-        .verifyData('Combo Box','Tracking','Item Level')
-
-        .displayText('===== Setup Item UOM=====')
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure',0, 'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .waitUntilLoaded('')
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
-        .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '56')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')
-
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Setup')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-        .waitUntilLoaded()
-
-        .clickTab('Pricing')
-        .waitUntilLoaded('')
-        .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
-        .enterGridData('Pricing', 1, 'dblLastCost', '10')
-        .enterGridData('Pricing', 1, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
-        .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
-
-        .clickButton('Save')
-        .waitUntilLoaded()
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .displayText('===== None Lotted Item Created =====')
-
-        //Create inventory Receipt for Stock
-        .displayText('=====  Creating Direct Inventory Receipt for SNLTI - 13 for Stock=====')
-        .clickMenuScreen('Inventory Receipts','Screen')
-        .waitUntilLoaded()
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryreceipt')
-        .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','SNLTI - 13','strItemNo')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-        .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colGross', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colNet', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '10000')
-
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblGrossWgt').text;
-            if (total == 'Gross: 1,000.00') {
-                t.ok(true, 'Gross is correct.');
-            }
-            else {
-                t.ok(false, 'Gross is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblNetWgt').text;
-            if (total == 'Net: 1,000.00') {
-                t.ok(true, 'Net is correct.');
-            }
-            else {
-                t.ok(false, 'Net is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-            if (total == 'Total: 10,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
-
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '10000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '10000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',2000)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .displayText('=====  Creating Direct Inventory Receipt for SNLTI - 13 Done=====')
-
-        //Check Stock of the Item
-        .displayText('=====  Checking Item Stock =====')
-        .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
-        .clickTab('Stock')
-        .waitUntilLoaded()
-        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-        .verifyGridData('Stock', 1, 'colStockOnOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockInTransitInbound', '0')
-        .verifyGridData('Stock', 1, 'colStockOnHand', '1000')
-        .verifyGridData('Stock', 1, 'colStockInTransitOutbound', '0')
-        .verifyGridData('Stock', 1, 'colStockBackOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockCommitted', '0')
-        .verifyGridData('Stock', 1, 'colStockOnStorage', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedPurchase', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedSale', '0')
-        .verifyGridData('Stock', 1, 'colStockReserved', '0')
-        .verifyGridData('Stock', 1, 'colStockAvailable', '1000')
-        .displayText('=====  Item Stock Checking Done =====')
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clearTextFilter('FilterGrid')
-        .waitUntilLoaded()
-
-
         // Create Inventory Shipment
         .displayText('=====   Creeate Direct IS for Non Lotted Item  =====')
         .clickMenuScreen('Inventory Shipments','Screen')
@@ -163,10 +294,8 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ShipFromAddress', '0001 - Fort Wayne', 'ShipFromAddress',1)
         .selectComboBoxRowNumber('ShipToAddress',1,0)
 
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo','SNLTI - 13','strItemNo')
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('InventoryShipment', 1, 'colQuantity', '100')
-
+        .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo','DISNLTI - 02','strItemNo')
+        .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', 100, 'LB')
         .verifyGridData('InventoryShipment', 1, 'colUnitPrice', '14')
         .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
         .verifyGridData('InventoryShipment', 1, 'colSubLocation', 'Raw Station')
@@ -181,7 +310,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -208,13 +337,17 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Direct', 'strOrderType', 1)
         .waitUntilLoaded()
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
+        .clickTab('Post Preview')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colDebit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
@@ -228,7 +361,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -255,7 +388,7 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Direct', 'strOrderType', 1)
         .waitUntilLoaded()
-        .clickButton('Ship')
+        .clickButton('Unpost')
         .waitUntilLoaded()
         .clickButton('Close')
         .waitUntilLoaded()
@@ -263,7 +396,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -300,7 +433,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -328,168 +461,8 @@ StartTest (function (t) {
 
 
         //region Scenario 2. Create Direct Inventory Shipment for Lotted Item then Delete IS
-        //Receive Items for Stock
-        .displayText('=====  Scenario 1. Create Direct Inventory Shipment for Lotted Item then Delete IS =====')
-        //Create Lotted Item.
-        .displayText('===== Pre setup: Items for Delete Inventory Shipment Script =====')
-        .displayText('===== Creating Lotted Item =====')
+        .displayText('=====  Scenario 2. Create Direct Inventory Shipment for Lotted Item then Delete IS =====')
         .clickMenuFolder('Inventory','Folder')
-        .clickMenuScreen('Items','Screen')
-        .clickButton('New')
-        .enterData('Text Field','ItemNo','SLTI - 13')
-        .enterData('Text Field','Description','Lotted for Delete IR')
-        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',1,0)
-        .verifyData('Combo Box','Tracking','Lot Level')
-
-        .displayText('===== Setup Item UOM=====')
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure',0, 'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .waitUntilLoaded('')
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
-        .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '56')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '55.1156')
-
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Setup')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-        .waitUntilLoaded()
-
-        .clickTab('Pricing')
-        .waitUntilLoaded('')
-        .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
-        .enterGridData('Pricing', 1, 'dblLastCost', '10')
-        .enterGridData('Pricing', 1, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
-        .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
-
-        .clickButton('Save')
-        .waitUntilLoaded()
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .displayText('===== Lotted Item Created =====')
-
-
-        //Create inventory Receipt for Stock
-        .displayText('=====  Creating Direct Inventory Receipt for SLTI - 13 =====')
-        .clickMenuScreen('Inventory Receipts','Screen')
-        .waitUntilLoaded()
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryreceipt')
-        .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','SLTI - 13','strItemNo')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-        .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colGross', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colNet', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '10000')
-        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
-        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
-
-        .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('LotTracking', 1, 'colLotQuantity', '1000')
-        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '1000')
-        .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
-        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '1000')
-        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
-        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
-
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblGrossWgt').text;
-            if (total == 'Gross: 1,000.00') {
-                t.ok(true, 'Gross is correct.');
-            }
-            else {
-                t.ok(false, 'Gross is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblNetWgt').text;
-            if (total == 'Net: 1,000.00') {
-                t.ok(true, 'Net is correct.');
-            }
-            else {
-                t.ok(false, 'Net is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-            if (total == 'Total: 10,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
-
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '10000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '10000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',2000)
-        .addResult('Successfully Posted',2000)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .displayText('===== Create Direct Inventory Receipt for Lotted Item=====')
-
-        //Check Stock of the Item
-        .displayText('=====  Checking Item Stock =====')
-        .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SLTI - 13', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
-        .clickTab('Stock')
-        .waitUntilLoaded()
-        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-        .verifyGridData('Stock', 1, 'colStockOnOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockInTransitInbound', '0')
-        .verifyGridData('Stock', 1, 'colStockOnHand', '1000')
-        .verifyGridData('Stock', 1, 'colStockInTransitOutbound', '0')
-        .verifyGridData('Stock', 1, 'colStockBackOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockCommitted', '0')
-        .verifyGridData('Stock', 1, 'colStockOnStorage', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedPurchase', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedSale', '0')
-        .verifyGridData('Stock', 1, 'colStockReserved', '0')
-        .verifyGridData('Stock', 1, 'colStockAvailable', '1000')
-        .displayText('=====  Item Stock Checking Done =====')
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clearTextFilter('FilterGrid')
-        .waitUntilLoaded()
-
-
         // Create Inventory Shipment
         .displayText('=====   Creeate Direct IS for Non Lotted Item  =====')
         .clickMenuScreen('Inventory Shipments','Screen')
@@ -502,9 +475,8 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ShipFromAddress', '0001 - Fort Wayne', 'ShipFromAddress',1)
         .selectComboBoxRowNumber('ShipToAddress',1,0)
 
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo','SLTI - 13','strItemNo')
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('InventoryShipment', 1, 'colQuantity', '100')
+        .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo','DISLTI - 02','strItemNo')
+        .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', 100, 'LB')
 
         .verifyGridData('InventoryShipment', 1, 'colUnitPrice', '14')
         .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
@@ -529,7 +501,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -556,13 +528,17 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Direct', 'strOrderType', 1)
         .waitUntilLoaded()
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
+        .clickTab('Post Preview')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colDebit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
@@ -576,7 +552,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -603,15 +579,16 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Direct', 'strOrderType', 1)
         .waitUntilLoaded()
-        .clickButton('Ship')
+        .clickButton('Unpost')
         .waitUntilLoaded()
         .clickButton('Close')
+        .waitUntilLoaded()
         .waitUntilLoaded()
 
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -648,7 +625,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -669,14 +646,16 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
+        .waitUntilLoaded()
         .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded()
         .displayText('===== Create Direct Inventory Shipment  for Non Lotted Item then Delete IS Done=====')
         //endregion
 
 
         //region Scenario 3. Create Sales Order IR for Non Lotted Item "Ship Button" then Delete IS
         .displayText('===== Scenario 3. Create Sales Order IR for Non Lotted Item then Delete the IR."Ship Button" then Delete IS =====')
-        .clickMenuFolder('Sales','Folder')
+        .clickMenuFolder('Sales (Accounts Receivable)','Folder')
         .clickMenuScreen('Sales Orders','Screen')
         .waitUntilLoaded()
         .clickButton('New')
@@ -684,7 +663,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
         .enterData('Text Field','BOLNo','Test BOL - 01')
         .selectComboBoxRowValue('FreightTerm', 'Truck', 'FreightTerm',1)
-        .selectGridComboBoxRowValue('SalesOrder',1,'strItemNo','SNLTI - 13','strItemNo')
+        .selectGridComboBoxRowValue('SalesOrder',1,'strItemNo','DISNLTI - 02','strItemNo')
         .addResult('Item Selected',1500)
         .enterGridData('SalesOrder', 1, 'colOrdered', '100')
         .verifyGridData('SalesOrder', 1, 'colPrice', '14')
@@ -695,14 +674,14 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .addResult('Sales Order Saved',1500)
         .clickButton('Close')
-        .clickMenuFolder('Sales','Folder')
+        .clickMenuFolder('Sales (Accounts Receivable)','Folder')
         .waitUntilLoaded('')
 
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -727,10 +706,13 @@ StartTest (function (t) {
         .waitUntilLoaded()
 
         //Ship SO to IS
-        .clickMenuFolder('Sales','Folder')
+        .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+        .clickMenuScreen('Sales Orders','Screen')
+        .waitUntilLoaded()
         .clickMenuScreen('Sales Orders','Screen')
         .waitUntilLoaded()
         .doubleClickSearchRowValue('ABC Trucking', 'strCustomerName', 1)
+        .waitUntilLoaded()
         .waitUntilLoaded()
         .clickButton('Ship')
         .addResult('Clicked Ship Button',3000)
@@ -748,8 +730,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','FreightTerms','Truck')
         .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName','Raw Station','strSubLocationName')
         .selectGridComboBoxRowValue('InventoryShipment',1,'strStorageLocationName','RM Storage','strStorageLocationName')
-        .verifyGridData('InventoryShipment', 1, 'colItemNumber', 'SNLTI - 13')
-        .verifyGridData('InventoryShipment', 1, 'colUOM', 'LB')
+        .verifyGridData('InventoryShipment', 1, 'colItemNumber', 'DISNLTI - 02')
         .verifyGridData('InventoryShipment', 1, 'colUnitPrice', '14')
         .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
         .verifyGridData('InventoryShipment', 1, 'colLineTotal', '1400')
@@ -757,14 +738,14 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded('')
-        .clickMenuFolder('Sales','Folder')
+        .clickMenuFolder('Sales (Accounts Receivable)','Folder')
         .waitUntilLoaded()
 
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -791,13 +772,17 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Sales Order', 'strOrderType', 1)
         .waitUntilLoaded()
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
+        .clickTab('Post Preview')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colDebit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
@@ -808,7 +793,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -835,7 +820,7 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Sales Order', 'strOrderType', 1)
         .waitUntilLoaded()
-        .clickButton('Ship')
+        .clickButton('Unpost')
         .waitUntilLoaded()
         .clickButton('Close')
         .waitUntilLoaded()
@@ -843,7 +828,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -879,7 +864,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -921,8 +906,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ShipFromAddress', '0001 - Fort Wayne', 'ShipFromAddress',1)
         .selectComboBoxRowNumber('ShipToAddress',1,0)
 
-        .verifyGridData('InventoryShipment', 1, 'colItemNumber', 'SNLTI - 13')
-        .verifyGridData('InventoryShipment', 1, 'colUOM', 'LB')
+        .verifyGridData('InventoryShipment', 1, 'colItemNumber', 'DISNLTI - 02')
         .verifyGridData('InventoryShipment', 1, 'colUnitPrice', '14')
         .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
         .verifyGridData('InventoryShipment', 1, 'colLineTotal', '1400')
@@ -937,7 +921,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -964,13 +948,17 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Sales Order', 'strOrderType', 1)
         .waitUntilLoaded()
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
+        .clickTab('Post Preview')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colDebit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
@@ -981,7 +969,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -1008,7 +996,7 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Sales Order', 'strOrderType', 1)
         .waitUntilLoaded()
-        .clickButton('Ship')
+        .clickButton('Unpost')
         .waitUntilLoaded()
         .clickButton('Close')
         .waitUntilLoaded()
@@ -1016,7 +1004,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -1052,7 +1040,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DISNLTI - 02', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -1076,240 +1064,6 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         //endregion
 
-
-        //region Scenario 5. Create Sales Contract IR for Non Lotted Item "Add Orders Button" then Delete IS
-        .displayText('=====  Scenario 5. Create Sales Contract IR for Non Lotted Item "Add Orders Button" then Delete IS =====')
-        .clickMenuFolder('Contract Management','Folder')
-        .clickMenuScreen('Contracts','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('ctcontract')
-        .selectComboBoxRowValue('Type', 'Sale', 'Type',1)
-        .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
-        .enterData('Text Field','Quantity','100')
-        .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
-        .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
-        .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
-        .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
-        .clickButton('AddDetail')
-        .waitUntilLoaded('ctcontractsequence')
-        .addFunction (function (next){
-        var date = new Date().toLocaleDateString();
-        new iRely.FunctionalTest().start(t, next)
-            .enterData('Date Field','EndDate', date, 0, 10)
-            .done();
-         })
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'SNLTI - 13', 'Item',1)
-        .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
-        .verifyData('Text Field','NetWeight','100.0000')
-        .verifyData('Combo Box','PricingType','Cash')
-        .verifyData('Combo Box','PriceCurrency','USD')
-        .verifyData('Combo Box','CashPriceUOM','LB')
-        .enterData('Text Field','CashPrice','14')
-        .clickButton('Save')
-        .waitUntilLoaded('ctcontract')
-        .clickButton('Save')
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .clickMenuFolder('Contract Management','Folder')
-
-        //Check Stock of the Item
-        .displayText('=====  Checking Item Stock =====')
-        .clickMenuFolder('Inventory','Folder')
-        .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
-        .clickTab('Stock')
-        .waitUntilLoaded()
-        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-        .verifyGridData('Stock', 1, 'colStockOnOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockInTransitInbound', '0')
-        .verifyGridData('Stock', 1, 'colStockOnHand', '1000')
-        .verifyGridData('Stock', 1, 'colStockInTransitOutbound', '0')
-        .verifyGridData('Stock', 1, 'colStockBackOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockCommitted', '100')
-        .verifyGridData('Stock', 1, 'colStockOnStorage', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedPurchase', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedSale', '0')
-        .verifyGridData('Stock', 1, 'colStockReserved', '0')
-        .verifyGridData('Stock', 1, 'colStockAvailable', '1000')
-        .displayText('=====  Item Stock Checking Done =====')
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clearTextFilter('FilterGrid')
-        .waitUntilLoaded()
-
-        //Save IS
-        .clickMenuScreen('Inventory Shipments','Screen')
-        .waitUntilLoaded()
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryshipment')
-        .selectComboBoxRowNumber('OrderType',1,0)
-        .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .waitUntilLoaded()
-        .selectSearchRowNumber(1)
-        .clickButton('OpenSelected')
-        .waitUntilLoaded('icinventoryshipment')
-        .selectComboBoxRowValue('FreightTerms', 'Truck', 'FreightTerms',1)
-        .selectComboBoxRowValue('ShipFromAddress', '0001 - Fort Wayne', 'ShipFromAddress',1)
-        .selectComboBoxRowNumber('ShipToAddress',1,0)
-
-        .verifyGridData('InventoryShipment', 1, 'colItemNumber', 'SNLTI - 13')
-        .verifyGridData('InventoryShipment', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryShipment', 1, 'colUnitPrice', '14')
-        .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
-        .verifyGridData('InventoryShipment', 1, 'colLineTotal', '1400')
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName','Raw Station','strSubLocationName')
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strStorageLocationName','RM Storage','strStorageLocationName')
-        .clickButton('Save')
-        .waitUntilLoaded()
-        .clickButton('Close')
-        .waitUntilLoaded()
-
-        //Check Stock of the Item
-        .displayText('=====  Checking Item Stock =====')
-        .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
-        .clickTab('Stock')
-        .waitUntilLoaded()
-        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-        .verifyGridData('Stock', 1, 'colStockOnOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockInTransitInbound', '0')
-        .verifyGridData('Stock', 1, 'colStockOnHand', '1000')
-        .verifyGridData('Stock', 1, 'colStockInTransitOutbound', '0')
-        .verifyGridData('Stock', 1, 'colStockBackOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockCommitted', '100')
-        .verifyGridData('Stock', 1, 'colStockOnStorage', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedPurchase', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedSale', '0')
-        .verifyGridData('Stock', 1, 'colStockReserved', '100')
-        .verifyGridData('Stock', 1, 'colStockAvailable', '900')
-        .displayText('=====  Item Stock Checking Done =====')
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clearTextFilter('FilterGrid')
-        .waitUntilLoaded()
-
-        //Post Inventory Shipment
-        .clickMenuScreen('Inventory Shipments','Screen')
-        .waitUntilLoaded()
-        .doubleClickSearchRowValue('Sales Contract', 'strOrderType', 1)
-        .waitUntilLoaded()
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',1500)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-
-        //Check Stock of the Item
-        .displayText('=====  Checking Item Stock =====')
-        .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
-        .clickTab('Stock')
-        .waitUntilLoaded()
-        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-        .verifyGridData('Stock', 1, 'colStockOnOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockInTransitInbound', '0')
-        .verifyGridData('Stock', 1, 'colStockOnHand', '900')
-        .verifyGridData('Stock', 1, 'colStockInTransitOutbound', '100')
-        .verifyGridData('Stock', 1, 'colStockBackOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockCommitted', '100')
-        .verifyGridData('Stock', 1, 'colStockOnStorage', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedPurchase', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedSale', '0')
-        .verifyGridData('Stock', 1, 'colStockReserved', '0')
-        .verifyGridData('Stock', 1, 'colStockAvailable', '900')
-        .displayText('=====  Item Stock Checking Done =====')
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clearTextFilter('FilterGrid')
-        .waitUntilLoaded()
-
-        //UnPost Inventory Shipment
-        .clickMenuScreen('Inventory Shipments','Screen')
-        .waitUntilLoaded()
-        .doubleClickSearchRowValue('Sales Contract', 'strOrderType', 1)
-        .waitUntilLoaded()
-        .clickButton('Ship')
-        .waitUntilLoaded()
-        .clickButton('Close')
-        .waitUntilLoaded()
-
-        //Check Stock of the Item
-        .displayText('=====  Checking Item Stock =====')
-        .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
-        .clickTab('Stock')
-        .waitUntilLoaded()
-        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-        .verifyGridData('Stock', 1, 'colStockOnOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockInTransitInbound', '0')
-        .verifyGridData('Stock', 1, 'colStockOnHand', '1000')
-        .verifyGridData('Stock', 1, 'colStockInTransitOutbound', '0')
-        .verifyGridData('Stock', 1, 'colStockBackOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockCommitted', '100')
-        .verifyGridData('Stock', 1, 'colStockOnStorage', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedPurchase', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedSale', '0')
-        .verifyGridData('Stock', 1, 'colStockReserved', '100')
-        .verifyGridData('Stock', 1, 'colStockAvailable', '900')
-        .displayText('=====  Item Stock Checking Done =====')
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clearTextFilter('FilterGrid')
-        .waitUntilLoaded()
-
-        //Delete Inventory Shipment
-        .clickMenuScreen('Inventory Shipments','Screen')
-        .waitUntilLoaded()
-        .doubleClickSearchRowValue('Sales Contract', 'strOrderType', 1)
-        .waitUntilLoaded()
-        .clickButton('Delete')
-        .waitUntilLoaded()
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded()
-
-        //Check Stock of the Item
-        .displayText('=====  Checking Item Stock =====')
-        .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('SNLTI - 13', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
-        .clickTab('Stock')
-        .waitUntilLoaded()
-        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-        .verifyGridData('Stock', 1, 'colStockOnOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockInTransitInbound', '0')
-        .verifyGridData('Stock', 1, 'colStockOnHand', '1000')
-        .verifyGridData('Stock', 1, 'colStockInTransitOutbound', '0')
-        .verifyGridData('Stock', 1, 'colStockBackOrder', '0')
-        .verifyGridData('Stock', 1, 'colStockCommitted', '100')
-        .verifyGridData('Stock', 1, 'colStockOnStorage', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedPurchase', '0')
-        .verifyGridData('Stock', 1, 'colStockConsignedSale', '0')
-        .verifyGridData('Stock', 1, 'colStockReserved', '0')
-        .verifyGridData('Stock', 1, 'colStockAvailable', '1000')
-        .displayText('=====  Item Stock Checking Done =====')
-        .clickButton('Close')
-        .waitUntilLoaded()
-        .clearTextFilter('FilterGrid')
-        .waitUntilLoaded()
-        .clickMenuFolder('Inventory','Folder')
-        .displayText('===== Create Sales Contract IR for Non Lotted Item "Add Orders Button" then Delete IS Done =====')
-        //endregion
 
 
         .done();

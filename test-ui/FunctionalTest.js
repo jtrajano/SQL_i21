@@ -2131,7 +2131,7 @@ Ext.define('iRely.FunctionalTest', {
             var t = this,
                 win = Ext.WindowManager.getActive();
             if (win) {
-                var grid = item.editingPlugin ? item : win.down('#grd'+item + [RETURN]);
+                var grid = item.editingPlugin ? item : win.down('#grd'+item);
                 if (grid) {
                     if(row > 0) row = row - 1;
                     if(index > 0) index = index - 1;
@@ -2162,7 +2162,7 @@ Ext.define('iRely.FunctionalTest', {
                         }
 
                         if (plugin.activeEditor) {
-                            me.logEvent('Entering combobox data on ' + item + ' grid' );
+                            me.logEvent('Entering combobox data on ' + item + ' grid');
 
                             var editor = plugin.activeEditor,
                                 els = (function() {
@@ -5527,6 +5527,70 @@ Ext.define('iRely.FunctionalTest', {
                     if (tab){
                         var tabPanel = win.down('tabpanel').items.items[tab];
                         filterGrid = tabPanel.down('#txt'+item);
+                    }
+
+                    if (filterGrid) {
+                        t.chain([
+                            {
+                                action: 'click',
+                                target: filterGrid
+                            },
+                            function(next) {
+                                t.selectText(filterGrid, 0, 20);
+                                next();
+                            },
+                            function(next) {
+                                t.type(filterGrid, filter, next);
+                            },
+                            function(next) {
+                                t.type(filterGrid, '[RETURN]', next);
+                            },
+                            next
+                        ]);
+                    } else {
+                        me.logFailed(item + ' Filter field is not found');
+                        next();
+                    }
+                } else {
+                    me.logFailed(grid + ' Grid is not found');
+                    next();
+                }
+            } else {
+                me.logFailed('No active screen');
+                next();
+            }
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    filterGridRecords2: function(grid, item, filter, tab) {
+        var me = this,
+            chain = this.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+
+            me.logEvent('Searching For Record:' + filter);
+
+            if(tab > 0) tab = tab - 1;
+
+            if (win) {
+                var grd = win.down('#grd'+grid);
+
+                if (tab){
+                    var tabPanel = win.down('tabpanel').items.items[tab];
+                    grd = tabPanel.down(grid);
+                }
+
+                if (grd) {
+                    var filterGrid = win.down('#cbo'+item);
+
+                    if (tab){
+                        var tabPanel = win.down('tabpanel').items.items[tab];
+                        filterGrid = tabPanel.down('#cbo'+item);
                     }
 
                     if (filterGrid) {
