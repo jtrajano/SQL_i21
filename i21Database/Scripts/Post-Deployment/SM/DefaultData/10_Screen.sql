@@ -323,6 +323,149 @@ GO
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
         VALUES (N'', N'Contract', N'ContractManagement.view.Contract', N'Contract Management', N'tblCTContractHeader', 1, 1, 1, 0)
 	END	
+
+
+	--Entity New Screens
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityCustomer', N'EntityCustomer', N'AccountsReceivable.view.EntityCustomer', N'AccountsReceivable', N'tblARCustomer', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblARCustomer',
+			strScreenId = N'EntityCustomer',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityProspect')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityProspect', N'EntityProspect', N'AccountsReceivable.view.EntityProspect', N'AccountsReceivable', N'tblARCustomer', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblARCustomer',
+			strScreenId = N'EntityProspect',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'AccountsReceivable.view.EntityProspect'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntitySalesperson')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntitySalesperson', N'EntitySalesperson', N'AccountsReceivable.view.EntitySalesperson', N'AccountsReceivable', N'tblARSalesperson', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblARSalesperson',
+			strScreenId = N'EntitySalesperson',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'AccountsReceivable.view.EntitySalesperson'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityLead')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityLead', N'EntityLead', N'AccountsReceivable.view.EntityLead', N'AccountsReceivable', N'tblARLead', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblARLead',
+			strScreenId = N'EntityLead',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'AccountsReceivable.view.EntityLead'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Payroll.view.EntityEmployee')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityEmployee', N'EntityEmployee', N'Payroll.view.EntityEmployee', N'Payroll', N'tblPREmployee', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblPREmployee',
+			strScreenId = N'EntityEmployee',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'Payroll.view.EntityEmployee'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.EntityShipVia')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityShipVia', N'EntityShipVia', N'i21.view.EntityShipVia', N'i21', N'tblSMShipVia', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblSMShipVia',
+			strScreenId = N'EntityShipVia',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'i21.view.EntityShipVia'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.EntityUser')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityUser', N'EntityUser', N'i21.view.EntityUser', N'i21', N'tblSMUserSecurity', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblSMUserSecurity',
+			strScreenId = N'EntityUser',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'i21.view.EntityUser'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityVendor', N'EntityVendor', N'AccountsPayable.view.EntityVendor', N'AccountsPayable', N'tblAPVendor', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblAPVendor',
+			strScreenId = N'EntityVendor',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'AccountsPayable.view.EntityVendor'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EntityManagement.view.EntityDirect')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityDirect', N'EntityDirect', N'EntityManagement.view.EntityDirect', N'EntityManagement', N'tblEMEntity', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblEMEntity',
+			strScreenId = N'EntityDirect',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'EntityManagement.view.EntityDirect'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EntityManagement.view.EntityVeterinary')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'EntityVeterinary', N'EntityVeterinary', N'EntityManagement.view.EntityVeterinary', N'EntityManagement', N'tblVTVeterinary', 1, 0, 0, 0)
+        END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblVTVeterinary',
+			strScreenId = N'EntityVeterinary',				
+			ysnCustomTab = 1
+		WHERE strNamespace = 'EntityManagement.view.EntityVeterinary'
+	END
+	--Entity New Screens
 	
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
