@@ -133,7 +133,7 @@ BEGIN TRY
 				,Shipment.strVessel
 				,Shipment.strSealNumber
 				,ISNULL(@strCustomCustomerPO, '') AS strCustomCustomerPO
-			FROM vyuICGetInventoryShipment Shipment
+			FROM vyuICGetInventoryShipmentBillOfLading Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 			LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
