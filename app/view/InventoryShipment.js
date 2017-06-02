@@ -2326,9 +2326,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'tabPostPreview'
-                                        },
-                                        listeners: {
-                                            show: 'onPnlRecapBeforeShow'
                                         }
                                     },
                                     {
