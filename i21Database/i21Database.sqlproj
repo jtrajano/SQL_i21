@@ -5251,6 +5251,7 @@
     <Build Include="dbo\Stored Procedures\uspGLDeleteAccount.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBillOfLadingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

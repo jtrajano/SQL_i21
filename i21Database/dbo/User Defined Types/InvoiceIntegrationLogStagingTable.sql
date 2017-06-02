@@ -36,7 +36,7 @@
 	[ysnRecap]							BIT DEFAULT ((0)) NULL,
 	[ysnUpdateAvailableDiscount]		BIT NULL,
 	[ysnRecomputeTax]					BIT NULL,
-	[ysnInsert]							BIT DEFAULT ((0)) NOT NULL,
+	[ysnInsert]							BIT NULL,
 	[ysnHeader]							BIT DEFAULT ((0)) NOT NULL,
 	[ysnSuccess]						BIT DEFAULT ((0)) NOT NULL,
 	[ysnPosted]							BIT DEFAULT ((0)) NULL,
