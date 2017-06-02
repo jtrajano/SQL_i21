@@ -1187,69 +1187,72 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onAfterPost: function (success, message) {
-        var me = this;
-        var win = me.view;
-
-        if (success === true) {
-            win.context.data.load();
+    onPostOrUnPostClick: function (button, e, eOpts) {
+        if (button){
+            button.disable();
         }
         else {
-            iRely.Functions.showCustomDialog(
-                iRely.Functions.dialogType.ERROR,
-                iRely.Functions.dialogButtonType.OK,
-                message,
-                function () {
-                    message = message ? message : '';
-
-                    var outdatedStock;
-
-                    outdatedStock = message.indexOf('The stock on hand is outdated for');
-                    if (outdatedStock == -1) {
-                        outdatedStock = message.indexOf('The lot expiry dates are outdated for');
-                    }
-
-                    if (outdatedStock !== -1) {
-                        win.context.data.load();
-                    }
-                }
-            );
-        }
-    },
-
-    onPostOrUnPostClick: function (button, e, eOpts) {
-        var me = this;
-        var win = button.up('window');
-        var context = win.context;
-
-        var doPost = function () {
-            var strAdjustmentNo = win.viewModel.data.current.get('strAdjustmentNo');
-            var posted = win.viewModel.data.current.get('ysnPosted');
-
-            var options = {
-                postURL: '../Inventory/api/InventoryAdjustment/PostTransaction',
-                strTransactionId: strAdjustmentNo,
-                isPost: !posted,
-                isRecap: false,
-                callback: me.onAfterPost,
-                scope: me
-            };
-
-            CashManagement.common.BusinessRules.callPostRequest(options);
-        };
-
-        // If there is no data change, do the post.
-        if (!context.data.hasChanges()) {
-            doPost();
             return;
         }
 
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        if (!current){
+            button.enable();
+            return;
+        }
+
+        var doPost = function (){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryAdjustment/PostTransaction',
+                params:{
+                    strTransactionId: current.get('strAdjustmentNo'),
+                    isPost: current.get('ysnPosted') ? false : true,
+                    isRecap: false
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    win.context.data.load();
+                    button.enable();
+                }
+                ,function(failureResponse) {
+                    var responseText = Ext.decode(failureResponse.responseText);
+                    var message = responseText ? responseText.message : {}; 
+                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the adjustment.';
+
+                    iRely.Functions.showCustomDialog(
+                        iRely.Functions.dialogType.ERROR,
+                        iRely.Functions.dialogButtonType.OK,
+                        statusText,
+                        function () {
+                            if (statusText.indexOf('The stock on hand is outdated for') || statusText.indexOf('The lot expiry dates are outdated for')){
+                                win.context.data.load();
+                            }
+                        }
+                    );
+                    button.enable();
+                }
+            )
+        };        
+
         // Save has data changes first before doing the post.
-        context.data.saveRecord({
-            successFn: function () {
-                doPost();
-            }
-        });
+        if (context.data.hasChanges()) {            
+            context.data.saveRecord({
+                successFn: function () {
+                    doPost();
+                }
+            });
+        }
+        // Otherwise, simply post the transaction 
+        else {
+            doPost();            
+        }
+
     },
 
     onRecapClick: function (button, e, eOpts) {

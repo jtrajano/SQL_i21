@@ -46,41 +46,22 @@ namespace iRely.Inventory.WebApi
         {
             var result = _bl.PostReceive(receipt, receipt.isRecap);
 
-            if (result.HasError)
+            var httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;
+            return Request.CreateResponse(httpStatusCode, new
             {
-                return Request.CreateResponse(HttpStatusCode.Conflict, new
+                data = new
                 {
-                    data = new
-                    {
-                        strBatchId = result.strBatchId,
-                        strTransactionId = receipt.strTransactionId
-                    },
-                    success = false,
-                    message = new
-                    {
-                        statusText = result.Exception.Message,
-                        status = result.Exception.Error,
-                        button = result.Exception.Button.ToString()
-                    }
-                });
-            }
-            else {
-                return Request.CreateResponse(HttpStatusCode.Accepted, new
+                    strBatchId = result.strBatchId,
+                    strTransactionId = receipt.strTransactionId
+                },
+                success = result.HasError ? false : true,
+                message = new
                 {
-                    data = new
-                    {
-                        strBatchId = result.strBatchId,
-                        strTransactionId = receipt.strTransactionId
-                    },
-                    success = true,
-                    message = new
-                    {
-                        statusText = result.Exception.Message,
-                        status = result.Exception.Error,
-                        button = result.Exception.Button.ToString()
-                    }
-                });
-            }            
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
         }
 
         [HttpPost]
@@ -316,12 +297,10 @@ namespace iRely.Inventory.WebApi
             int? inventoryReturnId = null;
             var result = _bl.ReturnReceipt(id, out inventoryReturnId);
 
-            var httpStatusCode = HttpStatusCode.OK;
-            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
-
+            var httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.OK;
             return Request.CreateResponse(httpStatusCode, new
             {
-                success = !result.HasError,
+                success = result.HasError ? false : true,
                 message = new
                 {
                     InventoryReturnId = inventoryReturnId,

@@ -27,10 +27,14 @@ namespace iRely.Inventory.WebApi
         {
             var result = _bl.PostTransaction(transfer, transfer.isRecap);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            var httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;
+            return Request.CreateResponse(httpStatusCode, new
             {
-                data = transfer,
-                success = !result.HasError,
+                data = new
+                {
+                    strTransactionId = transfer.strTransactionId
+                },
+                success = result.HasError ? false : true,
                 message = new
                 {
                     statusText = result.Exception.Message,
