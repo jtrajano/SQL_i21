@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE uspMFGenerateSSCCNo (
 	@strOrderManifestId NVARCHAR(MAX)
 	,@intNoOfLabel INT = 1
+	,@intCustomerLabelTypeId INT
 	)
 AS
 BEGIN
 	DECLARE @intOrderManifestId INT
 		,@intEntityCustomerId INT
-		,@intCustomerLabelTypeId INT
 		,@strPackageType NVARCHAR(1)
 		,@strManufacturerCode NVARCHAR(50)
 		,@strBatchId NVARCHAR(50)
@@ -32,12 +32,19 @@ BEGIN
 	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
 	WHERE intOrderManifestId = @intOrderManifestId
 
-	SELECT TOP 1 @intCustomerLabelTypeId = intCustomerLabelTypeId
-		,@strPackageType = strPackageType
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblMFItemOwner
+			WHERE intOwnerId = @intEntityCustomerId
+				AND intCustomerLabelTypeId = @intCustomerLabelTypeId
+			)
+		RETURN
+
+	SELECT TOP 1 @strPackageType = strPackageType
 		,@strManufacturerCode = strManufacturerCode
 	FROM tblMFItemOwner
 	WHERE intOwnerId = @intEntityCustomerId
-		AND intCustomerLabelTypeId IS NOT NULL
+		AND intCustomerLabelTypeId = @intCustomerLabelTypeId
 
 	WHILE @intOrderManifestId IS NOT NULL
 	BEGIN
@@ -50,6 +57,11 @@ BEGIN
 
 			IF ISNULL(@strSSCCNo, '') <> ''
 			BEGIN
+				UPDATE tblMFOrderManifestLabel
+				SET ysnPrinted = 0
+				WHERE intOrderManifestId = @intOrderManifestId
+					AND intCustomerLabelTypeId = @intCustomerLabelTypeId
+
 				SELECT @intOrderManifestId = MIN(intOrderManifestId)
 				FROM @tblMFGenerateSSNo
 				WHERE intOrderManifestId > @intOrderManifestId
