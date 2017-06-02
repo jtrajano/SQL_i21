@@ -80,6 +80,7 @@
 	[intCommodityId] INT NULL,
 	[intDiscountId] INT NULL,
 	[intContractId] INT NULL,
+	[intContractCostId] INT NULL,
     [intDiscountLocationId] INT NULL,
 	[intItemId] INT NULL,
 	[intEntityId] INT NULL,
@@ -102,6 +103,7 @@
     [intInventoryShipmentId] INT NULL, 
 	[dblScheduleQty] DECIMAL(13, 6) NULL,
 	[dblConvertedUOMQty] NUMERIC(38, 20) NULL,
+	[dblContractCostConvertedUOM] NUMERIC(38, 20) NULL,
 	[intItemUOMIdFrom] INT NULL, 
 	[intItemUOMIdTo] INT NULL,
 	[intTicketTypeId] INT NULL,
@@ -989,3 +991,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'strCostMethod'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Freight converted units in contract cost',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'dblContractCostConvertedUOM'
+	GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Contract cost id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intContractCostId'
