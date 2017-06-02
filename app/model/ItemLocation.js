@@ -103,7 +103,9 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'strLocationName', type: 'string'},
         { name: 'strVendorId', type: 'string'},
         { name: 'strCategory', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strProductCode', type: 'string'}
+
     ],
 
     validators: [

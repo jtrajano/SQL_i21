@@ -326,6 +326,26 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _productCode;
+        [NotMapped]
+        public string strProductCode 
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_productCode))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strProductCode;
+                    else
+                        return null;
+                else
+                    return _productCode;
+            }
+            set
+            {
+                _productCode = value;
+            }
+        }
+
         public tblICItem tblICItem { get; set; }
         public vyuICGetItemLocation vyuICGetItemLocation { get; set; }
                 
