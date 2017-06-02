@@ -109,20 +109,27 @@ BEGIN TRY
 		,I.strGTIN AS strDPCI
 		,I.intInnerUnits AS intCasePack
 		,I.strItemNo AS strStyle
-		--,OM.strSSCCNo AS strBarCodeLabel
-		--,OM.strSSCCNo AS strBarCode
-		,BarCode.Item AS strBarCodeLabel
-		,BarCode.Item AS strBarCode
+		,OML.strSSCCNo AS strBarCodeLabel
+		,OML.strSSCCNo AS strBarCode
 	FROM tblMFOrderManifest OM
-	CROSS APPLY dbo.fnSplitString(OM.strSSCCNo, ',') BarCode
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intShipFromLocationId
 	JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = S.intShipToLocationId
 	JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentId = S.intInventoryShipmentId
 	JOIN tblICItem I ON I.intItemId = SI.intItemId
+	JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
+		AND OML.ysnPrinted = 0
 	LEFT JOIN tblSMShipVia SV ON SV.intEntityShipViaId = S.intShipViaId
 	WHERE OM.intOrderManifestId IN (
+			SELECT *
+			FROM dbo.fnSplitString(@strOrderManifestId, '^')
+			)
+
+	UPDATE tblMFOrderManifestLabel
+	SET ysnPrinted = 1
+	WHERE ysnPrinted = 0
+		AND intOrderManifestId IN (
 			SELECT *
 			FROM dbo.fnSplitString(@strOrderManifestId, '^')
 			)

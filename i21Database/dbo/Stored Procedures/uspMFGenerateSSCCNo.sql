@@ -32,7 +32,7 @@ BEGIN
 	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
 	WHERE intOrderManifestId = @intOrderManifestId
 
-	SELECT @intCustomerLabelTypeId = intCustomerLabelTypeId
+	SELECT TOP 1 @intCustomerLabelTypeId = intCustomerLabelTypeId
 		,@strPackageType = strPackageType
 		,@strManufacturerCode = strManufacturerCode
 	FROM tblMFItemOwner
@@ -44,12 +44,13 @@ BEGIN
 		IF @intCustomerLabelTypeId = 1 -- Pallet Label
 		BEGIN
 			SELECT @strSSCCNo = strSSCCNo
-			FROM tblMFOrderManifest
+			FROM tblMFOrderManifestLabel
 			WHERE intOrderManifestId = @intOrderManifestId
+				AND intCustomerLabelTypeId = @intCustomerLabelTypeId
 
 			IF ISNULL(@strSSCCNo, '') <> ''
 			BEGIN
-				SELECT @intOrderManifestId = min(intOrderManifestId)
+				SELECT @intOrderManifestId = MIN(intOrderManifestId)
 				FROM @tblMFGenerateSSNo
 				WHERE intOrderManifestId > @intOrderManifestId
 
@@ -126,11 +127,11 @@ BEGIN
 						,(0)
 					) d(intChar)
 
-				SELECT @intOdd = SUM(convert(INT, SUBSTRING(@strCheckString, intChar, 1))) * 3
+				SELECT @intOdd = SUM(CONVERT(INT, SUBSTRING(@strCheckString, intChar, 1))) * 3
 				FROM @strSplitString
 				WHERE intChar % 2 <> 0
 
-				SELECT @intEven = SUM(Convert(INT, SUBSTRING(@strCheckString, intChar, 1)))
+				SELECT @intEven = SUM(CONVERT(INT, SUBSTRING(@strCheckString, intChar, 1)))
 				FROM @strSplitString
 				WHERE intChar % 2 = 0
 
@@ -141,9 +142,20 @@ BEGIN
 
 				SELECT @strSSCCNo = '(00) ' + @strPackageType + ' ' + @strManufacturerCode + ' ' + LTRIM(@strBatchId) + ' ' + LTRIM(@intCheckDigit)
 
-				UPDATE tblMFOrderManifest
-				SET strSSCCNo = @strSSCCNo
-				WHERE intOrderManifestId = @intOrderManifestId
+				INSERT INTO tblMFOrderManifestLabel (
+					intConcurrencyId
+					,intOrderManifestId
+					,intCustomerLabelTypeId
+					,strSSCCNo
+					,ysnPrinted
+					)
+				VALUES (
+					1
+					,@intOrderManifestId
+					,@intCustomerLabelTypeId
+					,@strSSCCNo
+					,0
+					)
 			END
 		END
 		ELSE IF @intCustomerLabelTypeId = 2 -- Case Label
@@ -219,11 +231,11 @@ BEGIN
 						,(0)
 					) d(intChar)
 
-				SELECT @intOdd = SUM(convert(INT, SUBSTRING(@strCheckString, intChar, 1))) * 3
+				SELECT @intOdd = SUM(CONVERT(INT, SUBSTRING(@strCheckString, intChar, 1))) * 3
 				FROM @strSplitString
 				WHERE intChar % 2 = 0
 
-				SELECT @intEven = SUM(Convert(INT, SUBSTRING(@strCheckString, intChar, 1)))
+				SELECT @intEven = SUM(CONVERT(INT, SUBSTRING(@strCheckString, intChar, 1)))
 				FROM @strSplitString
 				WHERE intChar % 2 <> 0
 
@@ -234,19 +246,26 @@ BEGIN
 
 				SELECT @strSSCCNo = '(00) ' + @strPackageType + ' ' + @strManufacturerCode + ' ' + LTRIM(@strBatchId) + ' ' + LTRIM(@intCheckDigit)
 
-				UPDATE tblMFOrderManifest
-				SET strSSCCNo = IsNULL(strSSCCNo, '') + CASE 
-						WHEN strSSCCNo IS NULL
-							THEN ''
-						ELSE ','
-						END + @strSSCCNo
-				WHERE intOrderManifestId = @intOrderManifestId
+				INSERT INTO tblMFOrderManifestLabel (
+					intConcurrencyId
+					,intOrderManifestId
+					,intCustomerLabelTypeId
+					,strSSCCNo
+					,ysnPrinted
+					)
+				VALUES (
+					1
+					,@intOrderManifestId
+					,@intCustomerLabelTypeId
+					,@strSSCCNo
+					,0
+					)
 
 				SELECT @intNoOfLabel = @intNoOfLabel - 1
 			END
 		END
 
-		SELECT @intOrderManifestId = min(intOrderManifestId)
+		SELECT @intOrderManifestId = MIN(intOrderManifestId)
 		FROM @tblMFGenerateSSNo
 		WHERE intOrderManifestId > @intOrderManifestId
 	END
