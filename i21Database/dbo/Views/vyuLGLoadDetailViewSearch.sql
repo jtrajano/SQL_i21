@@ -15,6 +15,9 @@ SELECT   Load.intLoadId
 		,Load.intDispatcherId
         ,Load.strExternalLoadNumber
 		,Load.strExternalShipmentNumber
+		,Load.dtmETAPOD
+		,Load.dtmETAPOL
+		,Load.dtmETSPOL
         ,strType = CASE WHEN Load.intPurchaseSale = 1 THEN 
 						'Inbound' 
 						ELSE 
@@ -109,6 +112,7 @@ SELECT   Load.intLoadId
 
 		,strPContractNumber = PHeader.strContractNumber
 		,intPContractSeq = PDetail.intContractSeq
+		,strPERPPONumber = PDetail.strERPPONumber
 		,ysnPLoad = PHeader.ysnLoad
 		,ysnBundle = CONVERT(BIT,CASE Item.strType 
 					 WHEN 'Bundle' THEN 1
@@ -119,6 +123,7 @@ SELECT   Load.intLoadId
 		,intSContractHeaderId = SHeader.intContractHeaderId
         ,strSContractNumber = SHeader.strContractNumber
         ,intSContractSeq = SDetail.intContractSeq
+		,strSERPPONumber = SDetail.strERPPONumber
 		,ysnSLoad = SHeader.ysnLoad
 
         ,strSLocationName = SCL.strLocationName

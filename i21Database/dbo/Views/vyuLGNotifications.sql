@@ -38,13 +38,19 @@ FROM (
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE CD.dblQuantity - (
 				ISNULL((
-						SELECT SUM(dblQuantity)
-						FROM tblLGLoadDetail LOADDetail
+						SELECT SUM(ISNULL(LOADDetail.dblQuantity,0))
+						FROM tblLGLoadDetail LOADDetail 
+						JOIN tblLGLoad LOAD ON LOAD.intLoadId = LOADDetail.intLoadId
 						WHERE LOADDetail.intPContractDetailId = CD.intContractDetailId
+						AND LOAD.intShipmentType = 2
 						), 0)
 				) > 0
 			AND CH.intContractTypeId = 1
 			AND CD.intContractStatusId <> 3
+			AND CD.intContractDetailId NOT IN ((SELECT COD.intContractDetailId FROM tblLGLoad L
+												JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+												JOIN tblCTContractDetail COD ON COD.intContractDetailId = LD.intPContractDetailId
+												WHERE L.intShipmentType = 1))
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment < EV.intDaysToRemind
