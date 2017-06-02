@@ -5387,6 +5387,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionsPricingHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddInvoicesTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

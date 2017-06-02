@@ -13,7 +13,7 @@
 	[intSourceId]					INT												NULL,
 	[strSourceId]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[ysnPost]						BIT												NULL,
-	[ysnInsert]						BIT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_ysnInsert] DEFAULT ((0)) NOT NULL,
+	[ysnInsert]						BIT												NULL,
 	[ysnHeader]						BIT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_ysnHeader] DEFAULT ((0)) NOT NULL,
 	[ysnSuccess]					BIT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_ysnSuccess] DEFAULT ((0)) NOT NULL,
 	[ysnPosted]						BIT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_ysnPosted] DEFAULT ((0)) NULL,
