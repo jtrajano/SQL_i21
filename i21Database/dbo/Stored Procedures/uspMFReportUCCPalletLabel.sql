@@ -11,6 +11,9 @@ BEGIN TRY
 	DECLARE @xmlDocumentId INT
 		,@strOrderManifestId NVARCHAR(MAX)
 		,@intNoOfLabel INT
+		,@intInventoryShipmentId INT
+		,@strCustomCustomerPO NVARCHAR(50)
+		,@intCustomerLabelTypeId INT
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -50,8 +53,33 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intNoOfLabel'
 
+	SELECT @intCustomerLabelTypeId = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'intCustomerLabelTypeId'
+
 	EXEC dbo.uspMFGenerateSSCCNo @strOrderManifestId = @strOrderManifestId
 		,@intNoOfLabel = @intNoOfLabel
+		,@intCustomerLabelTypeId = @intCustomerLabelTypeId
+
+	SELECT TOP 1 @intInventoryShipmentId = intInventoryShipmentId
+	FROM tblMFOrderManifest OM
+	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
+	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
+	WHERE OM.intOrderManifestId IN (
+			SELECT *
+			FROM dbo.fnSplitString(@strOrderManifestId, '^')
+			)
+
+	-- Taking 'Customer PO No' value from custom tab
+	SELECT @strCustomCustomerPO = FV.strValue
+	FROM tblSMTabRow TR
+	JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+	JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+		AND LOWER(TD.strControlName) = 'customer po no'
+	JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+	JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+		AND S.strNamespace = 'Inventory.view.InventoryShipment'
+	WHERE T.intRecordId = @intInventoryShipmentId
 
 	SELECT LTRIM(RTRIM(CASE 
 					WHEN ISNULL(CL.strLocationName, '') = ''
@@ -105,7 +133,7 @@ BEGIN TRY
 					END)) AS strToShipment
 		,EL.strZipCode AS strShipToZipCode
 		,SV.strShipVia AS strCarrier
-		,S.strReferenceNumber AS strPONumber
+		,@strCustomCustomerPO AS strPONumber
 		,I.strGTIN AS strDPCI
 		,I.intInnerUnits AS intCasePack
 		,I.strItemNo AS strStyle
