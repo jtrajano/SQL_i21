@@ -516,9 +516,12 @@ namespace iRely.Inventory.BusinessLayer
             param.sort = sorts;
 
             var data = await query.ExecuteProjection(param, "intInventoryReceiptId").ToListAsync();
-            var countDistinctUOM = await query.Select(q => q.strUnitMeasure).Distinct().CountAsync();
 
-            param.aggregates = countDistinctUOM == 1? param.aggregates : param.aggregates.Replace("dblQtyToReceive|sum:", "");
+            // Remove Qty to Receive and Unit Cost in the aggregrates because each item can have its own UOM. This means, total becomes irrelevant. 
+            if (param != null && param.aggregates != null) {
+                param.aggregates = param.aggregates.Replace("dblQtyToReceive|sum:", "");
+                param.aggregates = param.aggregates.Replace("dblUnitCost|sum:", "");
+            }                       
 
             return new SearchResult()
             {
