@@ -8,6 +8,7 @@
 	,strPackageType nvarchar(1) COLLATE Latin1_General_CI_AS NULL
 	,strManufacturerCode nvarchar(50)COLLATE Latin1_General_CI_AS NULL
 	,ysnAllowPartialPallet bit CONSTRAINT [DF_tblMFItemOwner_ysnAllowPartialPallet] Default 1
+	,strReportName nvarchar(50)COLLATE Latin1_General_CI_AS NULL
 	,intCreatedUserId [int] NULL
 	,dtmCreated [datetime] NULL CONSTRAINT [DF_tblMFItemOwner_dtmCreated] DEFAULT GetDate()
 	,intLastModifiedUserId [int] NULL
