@@ -15,7 +15,7 @@ Ext.define('Inventory.store.ItemStockSummaryByLot', {
         me.callParent([Ext.apply({
             model: 'Inventory.model.ItemStockSummary',
             storeId: 'ItemStockSummaryByLot',
-            pageSize: 1000000,
+            pageSize: 50,
             batchActions: true,
             remoteFilter: true,
             remoteSort: true,

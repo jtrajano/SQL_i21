@@ -13,20 +13,20 @@ Ext.define('Inventory.model.InventoryCountDetail', {
     fields: [
         { name: 'intInventoryCountDetailId', type: 'int' },
         { name: 'intInventoryCountId', type: 'int',
-            reference: {
-                type: 'Inventory.model.InventoryCount',
-                inverse: {
-                    role: 'tblICInventoryCountDetails',
-                    storeConfig: {
-                        complete: true,
-                        sortOnLoad: true,
-                        sorters: {
-                            direction: 'DESC',
-                            property: 'intSort'
-                        }
-                    }
-                }
-            }
+            // reference: {
+            //     type: 'Inventory.model.InventoryCount',
+            //     inverse: {
+            //         role: 'tblICInventoryCountDetails',
+            //         storeConfig: {
+            //             complete: true,
+            //             sortOnLoad: true,
+            //             sorters: {
+            //                 direction: 'DESC',
+            //                 property: 'intSort'
+            //             }
+            //         }
+            //     }
+            // }
         },
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intItemLocationId', type: 'int', allowNull: true },

@@ -403,6 +403,7 @@
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUOMController.cs" />
     <Compile Include="Controllers\CompanyPreferenceController.cs" />
+    <Compile Include="Controllers\InventoryCountDetailController.cs" />
     <Compile Include="Controllers\InventoryReceiptChargeTaxController.cs" />
     <Compile Include="Controllers\ImportDataController.cs" />
     <Compile Include="Controllers\InventoryReceiptItemLotController.cs" />
@@ -670,10 +671,10 @@
   </ProjectExtensions>
   <!--To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.-->
-  <Target Name="BeforeBuild">
+  <!-- <Target Name="BeforeBuild">
     <Exec Command="&quot;$(SolutionDir)\NuGet&quot; update &quot;$(ProjectDir)packages.config&quot; -Id iRely.Common -Safe" />
     <Exec Command="&quot;$(SolutionDir)\NuGet&quot; update &quot;$(ProjectDir)packages.config&quot; -Id iRely.Reports.Helper -Safe" />
-  </Target>
+  </Target> -->
   <!--<Target Name="AfterBuild">
   </Target>-->
   <Target Name="AfterPackage" AfterTargets="CopyAllFilesToSingleFolderForPackage" />

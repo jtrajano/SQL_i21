@@ -197,6 +197,7 @@
     <Compile Include="Implementation\CommodityUOMBl.cs" />
     <Compile Include="Implementation\CompanyPreferenceBl.cs" />
     <Compile Include="Implementation\CategoryTaxBl.cs" />
+    <Compile Include="Implementation\InventoryCountDetailBl.cs" />
     <Compile Include="Implementation\InventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Implementation\ItemSubLocationBl.cs" />
     <Compile Include="Implementation\M2MComputationBl.cs" />
@@ -231,6 +232,7 @@
     <Compile Include="Implementation\StorageUnitTypeBl.cs" />
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
+    <Compile Include="Interface\IInventoryCountDetailBl.cs" />
     <Compile Include="Interface\IInventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Interface\IItemSubLocationBl.cs" />
     <Compile Include="Interface\IM2MComputationBl.cs" />
@@ -332,9 +334,9 @@
   <Import Project="..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets')" />
   <!--To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.-->
-  <Target Name="BeforeBuild">
+<!--   <Target Name="BeforeBuild">
     <Exec Command="&quot;$(SolutionDir)\NuGet&quot; update &quot;$(ProjectDir)packages.config&quot; -Id iRely.Common -Safe" />
-  </Target>
+  </Target> -->
   <!--<Target Name="AfterBuild">
   </Target>-->
 </Project>

@@ -14,7 +14,7 @@ Ext.define('Inventory.Utils', {
             if (!options.method)
                 options.method = "get";
             /* Inserts or overrides the Authorization header key-value pair when method is 'POST'. */
-            if (options.method.toLowerCase() === "post") {
+            if (options.method.toLowerCase() === "post" || options.method.toLowerCase() === "put") {
                 if (!options.headers)
                     options.headers = {};
                 options.headers.Authorization = iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId);
