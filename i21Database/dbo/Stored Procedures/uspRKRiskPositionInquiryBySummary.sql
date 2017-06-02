@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKRiskPositionInquiryBySummary]  
+﻿create PROC [dbo].[uspRKRiskPositionInquiryBySummary]  
         @intCommodityId INTEGER,  
         @intCompanyLocationId INTEGER,  
         @intFutureMarketId INTEGER,  
@@ -79,7 +79,8 @@ DECLARE @dtmCurrentDate datetime
 SET @dtmCurrentDate = getdate()
 
 INSERT INTO @RollCost(strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId,dblNoOfLot,dblQuantity,dblWtAvgOpenLongPosition,strTradeNo,intFutOptTransactionHeaderId)
-SELECT strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId,dblNoOfLot,dblQuantity,dblWtAvgOpenLongPosition,strInternalTradeNo,intFutOptTransactionHeaderId FROM  vyuRKRollCost 
+SELECT strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId,dblNoOfLot,dblQuantity,dblWtAvgOpenLongPosition,strInternalTradeNo,intFutOptTransactionHeaderId 
+FROM  vyuRKRollCost  WHERE intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId
 
 
 --To Purchase Value
@@ -522,12 +523,12 @@ dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFina
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 
-SELECT 10 intRowNumber,'Futures Required',Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract)/sum(dblNoOfLot) over() as dblNoOfContract,
+SELECT 10 intRowNumber,'Futures Required',Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblQuantity)/sum(dblNoOfLot) over( partition by strFutureMonth) as dblNoOfContract,
 strTradeNo,getdate() TransactionDate,null,null,dblNoOfLot, dblQuantity,10,null,intFutOptTransactionHeaderId FROM  
 (  
 SELECT DISTINCT 'Terminal position (Avg Long Price)' as Selection,'Avg Long Price' as PriceStatus,  
   ft.strFutureMonth, 'Avg Long Price' as strAccountNumber,
-   dblWtAvgOpenLongPosition as dblNoOfContract,dblNoOfLot, dblQuantity,strTradeNo,intFutOptTransactionHeaderId
+   dblWtAvgOpenLongPosition as dblNoOfContract,dblNoOfLot,dblQuantity*dblNoOfLot dblQuantity,strTradeNo,intFutOptTransactionHeaderId
 FROM @RollCost ft
 WHERE  ft.intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId and CONVERT(DATETIME,'01 '+ ft.strFutureMonth) >= CONVERT(DATETIME,'01 '+ @strParamFutureMonth))t  
  
@@ -545,3 +546,5 @@ SELECT intRowNumber ,strGroup,Selection ,
                            intOrderByHeading ,
                            intContractHeaderId ,
                            intFutOptTransactionHeaderId  from @ListFinal order by intRowNumber, CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+                           
+
