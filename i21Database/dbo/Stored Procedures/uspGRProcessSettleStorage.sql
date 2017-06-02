@@ -1292,7 +1292,7 @@ BEGIN TRY
 			
 			UPDATE	tblAPBill 
 			SET		strVendorOrderNumber = 'STR-'+@strStorageTicketNumber+'/'+strBillId
-					,dblTotal = (SELECT ROUND(SUM(bd.dblTotal),2) FROM tblAPBillDetail bd WHERE bd.intBillId = @intBillId)
+					,dblTotal = (SELECT ROUND(SUM(bd.dblTotal) + SUM(bd.dblTax),2) FROM tblAPBillDetail bd WHERE bd.intBillId = @intBillId)
 			WHERE	intBillId = @intBillId
 
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
