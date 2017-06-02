@@ -4063,9 +4063,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Customer', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Customer', N'Activity', N'Screen', N'EntityManagement.view.Entity', N'small-menu-activity', 1, 0, 0, 1, NULL, 1)
+	VALUES (N'Customer', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Customer', N'Activity', N'Screen', N'AccountsReceivable.view.EntityCustomer', N'small-menu-activity', 1, 0, 0, 1, NULL, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'EntityManagement.view.Entity' WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsReceivable.view.EntityCustomer' WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 
 DECLARE @CustomerMenuId INT
 SELECT  @CustomerMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
@@ -4083,9 +4083,9 @@ INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@AccountsPayablePare
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vendor' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Vendor', N'Accounts Payable', @AccountsPayableParentMenuId, N'Vendor', N'Activity', N'Screen', N'EntityManagement.view.Entity', N'small-menu-activity', 1, 0, 0, 1, NULL, 1)
+	VALUES (N'Vendor', N'Accounts Payable', @AccountsPayableParentMenuId, N'Vendor', N'Activity', N'Screen', N'AccountsPayable.view.EntityVendor', N'small-menu-activity', 1, 0, 0, 1, NULL, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'EntityManagement.view.Entity' WHERE strMenuName = 'Vendor' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.EntityVendor' WHERE strMenuName = 'Vendor' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
 DECLARE @VendorMenuId INT
 SELECT  @VendorMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
