@@ -4880,21 +4880,6 @@
                                     },
                                     "name": "TabConfig16",
                                     "designerId": "9655a910-861f-4660-b4ff-ee174fc51ba9"
-                                },
-                                {
-                                    "type": "viewcontrollereventbinding",
-                                    "reference": {
-                                        "name": "listeners",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fn": "onPnlRecapBeforeShow",
-                                        "name": "show",
-                                        "scope": "me"
-                                    },
-                                    "name": "onPnlRecapBeforeShow",
-                                    "designerId": "882f73eb-013c-4611-8ca9-a61f10a57dd6"
                                 }
                             ]
                         },

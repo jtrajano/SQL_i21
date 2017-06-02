@@ -7753,21 +7753,6 @@
                                     },
                                     "name": "TabConfig22",
                                     "designerId": "2e1a54f8-d74b-43e5-9017-4e23a917622a"
-                                },
-                                {
-                                    "type": "viewcontrollereventbinding",
-                                    "reference": {
-                                        "name": "listeners",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fn": "onPnlRecapBeforeShow",
-                                        "name": "show",
-                                        "scope": "me"
-                                    },
-                                    "name": "onPnlRecapBeforeShow",
-                                    "designerId": "f2374048-36c4-4921-ae2e-f69d1098dd04"
                                 }
                             ]
                         },
