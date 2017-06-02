@@ -113,7 +113,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 }]
             },
             cboProductCode: {
-                value: '{current.intProductCodeId}',
+                value: '{current.strProductCode}',
+                origValueField: 'strRegProdCode',
+                origUpdateField: 'strProductCode',
                 store: '{productCode}',
                 defaultFilters: [{
                     column: 'intCompanyLocationId',
@@ -130,9 +132,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             chkTaxFlag4: '{current.ysnTaxFlag4}',
             chkPromotionalItem: '{current.ysnPromotionalItem}',
             cboMixMatchCode: {
-                value: '{current.intPromoSalesListId}',
-                origValueField: 'intPromoSalesListId',
-                origUpdateField: 'intMixMatchId',
+                value: '{current.strPromoItemListId}',
+                origValueField: 'strPromoSalesDescription',
+                origUpdateField: 'strPromoItemListId',
                 store: '{mixMatchCode}'
             },
             chkDepositRequired: '{current.ysnDepositRequired}',
@@ -431,10 +433,62 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
+            var record = records ? records[0] : {};
+            current.set('intLocationId', record.get('intCompanyLocationId'));
             current.set('intSubLocationId', null);
             current.set('intStorageLocationId', null);
         }
     },
+
+    onDefaultVendorSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intVendorId', record.get('intEntityId'));
+        }
+    },
+
+    onSubLocationSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
+        }
+    },    
+
+    onStorageLocationSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intStorageLocationId', record.get('intStorageLocationId'));
+        }
+    },   
+
+    onIssueUOMSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intIssueUOMId', record.get('intItemUOMId'));
+        }
+    },     
+
+    onReceiveUOMSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intReceiveUOMId', record.get('intItemUOMId'));
+        }
+    },         
    
     onCostingMethodSelect: function(combo, records)
     {
@@ -468,6 +522,57 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         );
     },
 
+    onFamilySelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intFamilyId', record.get('intSubcategoryId'));
+        }
+    },    
+
+    onClassSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intClassId', record.get('intSubcategoryId'));
+        }
+    },           
+
+    onCountGroupSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intCountGroupId', record.get('intCountGroupId'));
+        }
+    },    
+
+    onPromotionItemSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intMixMatchId', record.get('intPromoSalesListId'));
+        }
+    },       
+
+    onProductCodeSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var record = records ? records[0] : {};
+            current.set('intProductCodeId', record.get('intRegProdId'));
+            current.set('strProductCode', record.get('strRegProdCode'));
+        }
+    },       
+
     init: function(application) {
         this.control({
             "#cboLocation": {
@@ -475,28 +580,44 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 select: this.onLocationSelect
             },
             "#cboDefaultVendor": {
-                drilldown: this.onVendorDrilldown
+                drilldown: this.onVendorDrilldown,
+                select: this.onDefaultVendorSelect
+            },
+            "#cboSubLocation": {
+                select: this.onSubLocationSelect
             },
             "#cboStorageLocation": {
-                drilldown: this.onStorageLocationDrilldown
+                drilldown: this.onStorageLocationDrilldown,
+                select: this.onStorageLocationSelect
+            },
+            "#cboIssueUom": {
+                select: this.onIssueUOMSelect 
+            },
+            "#cboReceiveUom": {
+                select: this.onReceiveUOMSelect
             },
             "#cboFamily": {
-                drilldown: this.onSubCategoryDrilldown
+                drilldown: this.onSubCategoryDrilldown,
+                select: this.onFamilySelect
             },
             "#cboClass": {
-                drilldown: this.onSubCategoryDrilldown
+                drilldown: this.onSubCategoryDrilldown,
+                select: this.onClassSelect
             },
             "#cboProductCode": {
-                drilldown: this.onProductCodeDrilldown
+                drilldown: this.onProductCodeDrilldown,
+                select: this.onProductCodeSelect
             },
             "#cboMixMatchCode": {
-                drilldown: this.onPromotionalDrilldown
+                drilldown: this.onPromotionalDrilldown,
+                select: this.onPromotionItemSelect
             },
             "#cboDepositPLU": {
                 drilldown: this.onDepositPLUDrilldown
             },
             "#cboInventoryGroupField": {
-                drilldown: this.onCountGroupDrilldown
+                drilldown: this.onCountGroupDrilldown,
+                select: this.onCountGroupSelect
             },
             "#cboCostingMethod": {
                 select: this.onCostingMethodSelect

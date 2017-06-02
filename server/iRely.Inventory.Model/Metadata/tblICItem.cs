@@ -913,6 +913,7 @@ namespace iRely.Inventory.Model
         public bool? ysnCountedDaily { get; set; }
         public bool? ysnLockedInventory { get; set; }
         public int? intSort { get; set; }
+        public string strProductCode { get; set; }
 
         public tblICItemLocation tblICItemLocation { get; set; }
         public tblSTSubcategoryRegProd tblSTSubcategoryRegProd { get; set; }
