@@ -5,8 +5,12 @@ SELECT L.intLoadId
 	,L.intHaulerEntityId
 	,L.strLoadNumber
 	,L.strExternalLoadNumber
+	,L.strExternalShipmentNumber
 	,L.strTruckNo
 	,L.strBLNumber
+	,L.dtmETAPOD
+	,L.dtmETAPOL
+	,L.dtmETSPOL
 	,strSourceType = CASE L.intSourceType
 		WHEN 1
 			THEN 'None'
