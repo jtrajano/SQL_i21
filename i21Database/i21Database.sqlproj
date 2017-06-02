@@ -5262,7 +5262,7 @@
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
     <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
-    <Build Include="dbo\Views\vyuRKPnLContractDetailView.sql" />
+<!--     <Build Include="dbo\Views\vyuRKPnLContractDetailView.sql" /> -->
     <Build Include="dbo\Tables\tblSMScreenReport.sql" />
   </ItemGroup>
   <ItemGroup>
