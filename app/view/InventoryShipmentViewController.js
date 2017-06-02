@@ -1568,10 +1568,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     },
 
     onInvoiceClick: function(button, e, eOpts) {
+        if (button){
+            button.disable();
+        }
+        else {
+            return;
+        }
+
         var win = button.up('window');
         var current = win.viewModel.data.current;
-
-        button.disable();
+        
         if (current) {
             if(current.get('intOrderType') === 3) { //'Transfer Order'
                 iRely.Functions.showErrorDialog('Invalid order type. An invoice is not applicable on transfer orders.');
@@ -3085,20 +3091,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         iRely.Functions.openScreen('i21.view.Currency', { viewConfig: { modal: true } });
     },   
 
-    onPnlRecapBeforeShow: function(component, eOpts){
-        // var me = this;
-        // var win = component.up('window');
-
-        // me.doPostPreview(win);
-    }, 
-
     onPostClick: function(button, e, eOpts) {
+        if (button){
+            button.disable();
+        }
+        else {
+            return;
+        }
+
         var me = this;
         var win = button.up('window');
         var context = win.context;
         var currentRecord = win.viewModel.data.current;
         var tabInventoryShipment = win.down('#tabInventoryShipment');
-        var activeTab = tabInventoryShipment.getActiveTab();
+        var activeTab = tabInventoryShipment.getActiveTab();       
 
         var doPost = function (){
             var current = currentRecord; 
@@ -3123,10 +3129,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         };
                         me.doPostPreview(win, cfg);
                     }                     
+                    button.enable();
                 }
                 ,function(failureResponse) {
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    me.onAfterShip(false, jsonData.message.statusText);
+                    var responseText = Ext.decode(failureResponse.responseText);
+                    var message = responseText ? responseText.message : {}; 
+                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the shipment.';
+
+                    me.onAfterShip(false, statusText);
+                    button.enable();
                 }
             )
         };    

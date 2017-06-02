@@ -2780,230 +2780,196 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    // onShowOtherChargesClick: function (button, e, eOpts) {
-    //     var win = button.up('window');
-    //     var context = win.context;
-    //     var current = win.viewModel.data.current;
-
-    //     var doPost = function () {
-    //         if (current) {
-    //             Ext.Ajax.request({
-    //                 timeout: 120000,
-    //                 url: '../Inventory/api/InventoryReceipt/showOtherCharges?id=' + current.get('intInventoryReceiptId'),
-    //                 method: 'post',
-    //                 success: function (response) {
-    //                     var jsonData = Ext.decode(response.responseText);
-    //                     if (!jsonData.success) {
-    //                         iRely.Functions.showErrorDialog(jsonData.message.statusText);
-    //                     }
-    //                     else {
-    //                         context.configuration.paging.store.load();
-    //                     }
-    //                 },
-    //                 failure: function (response) {
-    //                     var jsonData = Ext.decode(response.responseText);
-    //                     iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-    //                 }
-    //             });
-    //         }
-    //     };
-
-    //     // If there is no data change, do the post.
-    //     if (!context.data.hasChanges()) {
-    //         doPost();
-    //         return;
-    //     }
-
-    //     // Save has data changes first before doing the post.
-    //     context.data.saveRecord({
-    //         successFn: function () {
-    //             doPost();
-    //         }
-    //     });
-
-
-    // },
-
     onVoucherClick: function (button, e, eOpts) {
+        var btnVoucher = button;
+        if (btnVoucher){
+            btnVoucher.disable();
+        }
+        else {            
+            return;
+        }
+
+        var me = this;
         var win = button.up('window'),
-            current = win.viewModel.data.current,
-            me = this,
-            receiptItems = current.tblICInventoryReceiptItems(),
-            countReceiptItems = receiptItems.getRange().length,
-            countPerLine = 0,
-            countItemsToProcess = 0;
-        countItemsWithZeroCost = 0;
+            current = win.viewModel.data.current;
 
-        if (current) {
-            Ext.Array.each(receiptItems.data.items, function (item) {
-                if (!item.dummy) {
-                    countPerLine++;
+        if (!current){
+            btnVoucher.enable();
+            return; // exit immediately. 
+        }
 
-                    if (item.get('dblUnitCost') == 0) {
-                        countItemsWithZeroCost++;
-                    }
-                    else {
-                        countItemsToProcess++;
-                    }
+        var receiptItems = current.tblICInventoryReceiptItems(),
+            countItemsToProcess = 0,       
+            countItemsWithZeroCost = 0;        
 
-                    if (countPerLine == countReceiptItems - 1) {
-                        var buttonAction = function (button) {
-                            if (button == 'yes') {
-                                // Create Voucher for receipt containing items with cost and ignore items with zero cost
-                                me.receiptToVoucherClick(current, button, win);
-                            }
+        var processReceiptToVoucher = function (receiptId, callback) {
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryReceipt/ProcessBill',
+                params: {
+                    id: receiptId
+                },
+                method: 'get'
+            })
+            .subscribe(
+                function (successResponse) {
+                    var responseText = Ext.decode(successResponse.responseText);
+                    //callback(jsonData);
+                    var buttonAction = function (button) {
+                        if (button === 'yes') {
+                            iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                                filters: [
+                                    {
+                                        column: 'intBillId',
+                                        value: responseText.message.BillId
+                                    }
+                                ],
+                                action: 'view',
+                                showAddReceipt: false
+                            });
+                            win.close();
                         }
+                    };
+                    iRely.Functions.showCustomDialog('question', 'yesno', 'Voucher successfully processed. Do you want to view it?', buttonAction);
+                    btnVoucher.enable();
+                }
+                , function (failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    var message = jsonData.message;
+                    iRely.Functions.showErrorDialog(message.statusText);
+                    btnVoucher.enable();
+                }
+            );
+        };
 
-                        if (countItemsToProcess > 0) {
-                            if (countItemsWithZeroCost > 0) {
-                                iRely.Functions.showCustomDialog('question', 'yesno', 'Items with zero cost will not be processed to voucher. Continue?', buttonAction);
-                            }
-                            else {
-                                // Create voucher for receipt containing cost for all items
-                                me.receiptToVoucherClick(current, button, win);
-                            }
-                        }
+        // Loop thru the items. See if there are any zero cost items. 
+        Ext.Array.each(receiptItems.data.items, function (item) {
+            if (!item.dummy) {
+                countItemsToProcess++;
 
-                        if (countItemsToProcess == 0 && countItemsWithZeroCost > 0) {
-                            iRely.Functions.showCustomDialog('information', 'ok', 'Cannot process voucher for items with zero cost.');
-                        }
+                if (item.get('dblUnitCost') == 0) {
+                    countItemsWithZeroCost++;
+                    return false; // Zero cost found, break from the loop. 
+                }
+            }
+        });
+
+        if (countItemsToProcess > 0) {
+            // If there are zero cost in the receipt, tell the user that it will not be included in the voucher. Yes will continue. No answer will stop the process. 
+            if (countItemsWithZeroCost > 0) {
+                var buttonActionOnZeroCost = function (button) {
+                    if (button == 'yes') {
+                        // Create Voucher for receipt. Ignore items with zero cost. 
+                        processReceiptToVoucher(current.get('intInventoryReceiptId'));
                     }
                 }
-            });
-        }
+
+                iRely.Functions.showCustomDialog('question', 'yesno', 'Items with zero cost will not be processed to voucher. Do you want to continue?', buttonActionOnZeroCost);
+            }
+            else {
+                // Create voucher for receipt containing cost for all items
+                processReceiptToVoucher(current.get('intInventoryReceiptId'));
+            }
+        } 
+        else {
+            btnVoucher.enable();
+        }           
     },
 
     onDebitMemoClick: function (button, e, eOpts) {
+        var btnDebitMemo = button;
+        if (btnDebitMemo){
+            btnDebitMemo.disable();
+        }
+        else {            
+            return;
+        }
+
+        var me = this;
         var win = button.up('window'),
-            current = win.viewModel.data.current,
-            me = this,
-            receiptItems = current.tblICInventoryReceiptItems(),
+            current = win.viewModel.data.current;
+
+        if (!current){
+            btnDebitMemo.enable();
+            return; // exit immediately. 
+        }
+
+        var receiptItems = current.tblICInventoryReceiptItems(),
             countReceiptItems = receiptItems.getRange().length,
             countPerLine = 0,
             countItemsToProcess = 0;
-        countItemsWithZeroCost = 0;
+            countItemsWithZeroCost = 0;
 
-        if (current) {
-            Ext.Array.each(receiptItems.data.items, function (item) {
-                if (!item.dummy) {
-                    countPerLine++;
-
-                    if (item.get('dblUnitCost') == 0) {
-                        countItemsWithZeroCost++;
-                    }
-                    else {
-                        countItemsToProcess++;
-                    }
-
-                    if (countPerLine == countReceiptItems - 1) {
-                        var buttonAction = function (button) {
-                            if (button == 'yes') {
-                                // Create Voucher for receipt containing items with cost and ignore items with zero cost
-                                me.receiptToDebitMemoClick(current, button, win);
-                            }
-                        }
-
-                        if (countItemsToProcess > 0) {
-                            if (countItemsWithZeroCost > 0) {
-                                iRely.Functions.showCustomDialog('question', 'yesno', 'Items with zero cost will not be processed to debit memo. Continue?', buttonAction);
-                            }
-                            else {
-                                // Create voucher for receipt containing cost for all items
-                                me.receiptToDebitMemoClick(current, button, win);
-                            }
-                        }
-
-                        if (countItemsToProcess == 0 && countItemsWithZeroCost > 0) {
-                            iRely.Functions.showCustomDialog('information', 'ok', 'Cannot process debit memo for items with zero cost.');
-                        }
-                    }
-                }
-            });
-        }
-    },
-
-    processReceiptToVoucher: function (receiptId, callback) {
-        ic.utils.ajax({
-            url: '../Inventory/api/InventoryReceipt/ProcessBill',
-            params: {
-                id: receiptId
-            },
-            method: 'get'
-        })
+        var processReceiptToDebitMemo = function (receiptId) {
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryReceipt/ProcessBill',
+                params: {
+                    id: receiptId
+                },
+                method: 'get'
+            })
             .subscribe(
-            function (successResponse) {
-                var jsonData = Ext.decode(successResponse.responseText);
-                callback(jsonData);
-            }
-            , function (failureResponse) {
-                var jsonData = Ext.decode(failureResponse.responseText);
-                var message = jsonData.message;
-                iRely.Functions.showErrorDialog(message.statusText);
-            }
-            );
-    },
-
-    processReceiptToDebitMemo: function (receiptId, callback) {
-        ic.utils.ajax({
-            url: '../Inventory/api/InventoryReceipt/ProcessBill',
-            params: {
-                id: receiptId
-            },
-            method: 'get'
-        })
-            .subscribe(
-            function (successResponse) {
-                var jsonData = Ext.decode(successResponse.responseText);
-                callback(jsonData);
-            }
-            , function (failureResponse) {
-                var jsonData = Ext.decode(failureResponse.responseText);
-                var message = jsonData.message;
-                iRely.Functions.showErrorDialog(message.statusText);
-            }
-            );
-    },
-
-    receiptToVoucherClick: function (receipt, button, win) {
-        this.processReceiptToVoucher(receipt.get('intInventoryReceiptId'), function (data) {
-            var buttonAction = function (button) {
-                if (button === 'yes') {
-                    iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
-                        filters: [
-                            {
-                                column: 'intBillId',
-                                value: data.message.BillId
-                            }
-                        ],
-                        action: 'view',
-                        showAddReceipt: false
-                    });
-                    win.close();
+                function (successResponse) {
+                    var responseText = Ext.decode(successResponse.responseText);
+                    var buttonAction = function (button) {
+                        if (button === 'yes') {
+                            iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                                filters: [
+                                    {
+                                        column: 'intBillId',
+                                        value: responseText.message.BillId
+                                    }
+                                ],
+                                action: 'view',
+                                showAddReceipt: false
+                            });
+                            win.close();
+                        }
+                    };
+                    iRely.Functions.showCustomDialog('question', 'yesno', 'Debit Memo successfully processed. Do you want to view it?', buttonAction);
+                    btnDebitMemo.enable();
                 }
-            };
-            iRely.Functions.showCustomDialog('question', 'yesno', 'Voucher successfully processed. Do you want to view it?', buttonAction);
-        });
-    },
-
-    receiptToDebitMemoClick: function (receipt, button, win) {
-        this.processReceiptToDebitMemo(receipt.get('intInventoryReceiptId'), function (data) {
-            var buttonAction = function (button) {
-                if (button === 'yes') {
-                    iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
-                        filters: [
-                            {
-                                column: 'intBillId',
-                                value: data.message.BillIds
-                            }
-                        ],
-                        action: 'view',
-                        showAddReceipt: false
-                    });
-                    win.close();
+                , function (failureResponse) {
+                    var responseText = Ext.decode(failureResponse.responseText);
+                    var message = responseText ? responseText.message : {}; 
+                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the inventory return.';
+                    iRely.Functions.showErrorDialog(message.statusText);
+                    btnDebitMemo.enable();
                 }
-            };
-            iRely.Functions.showCustomDialog('question', 'yesno', 'Debit Memo successfully processed. Do you want to view it?', buttonAction);
-        });
+            );
+        };
+
+        // Loop thru the items. See if there are any zero cost items. 
+        Ext.Array.each(receiptItems.data.items, function (item) {
+            if (!item.dummy) {
+                countItemsToProcess++;
+
+                if (item.get('dblUnitCost') == 0) {
+                    countItemsWithZeroCost++;
+                    return false; // Zero cost found, break from the loop. 
+                }
+            }
+        });        
+
+        if (countItemsToProcess > 0) {
+            // If there are zero cost in the returns, tell the user that it will not be included in the debit memo. Yes will continue. No answer will stop the process. 
+            if (countItemsWithZeroCost > 0) {
+                var buttonActionOnZeroCost = function (button) {
+                    if (button == 'yes') {
+                        // Create Debit Memo for returns. Ignore items with zero cost. 
+                        processReceiptToDebitMemo(current.get('intInventoryReceiptId'));
+                    }
+                }
+
+                iRely.Functions.showCustomDialog('question', 'yesno', 'Items with zero cost will not be processed to debit memo. Do you want to continue?', buttonActionOnZeroCost);
+            }
+            else {
+                // Create debit memo for returns. 
+                processReceiptToDebitMemo(current.get('intInventoryReceiptId'));
+            }
+        } 
+        else {
+            btnVoucher.enable();
+        }          
     },
 
     onVendorClick: function (button, e, eOpts) {
@@ -6360,60 +6326,73 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    processReceiptToReturn: function (receiptId, callback) {
-        ic.utils.ajax({
-            url: '../Inventory/api/InventoryReceipt/ReturnReceipt',
-            params: {
-                id: receiptId
-            },
-            method: 'get'
-        })
-            .subscribe(
-            function (successResponse) {
-                var jsonData = Ext.decode(successResponse.responseText);
-                callback(jsonData);
-            }
-            , function (failureResponse) {
-                var jsonData = Ext.decode(failureResponse.responseText);
-                var message = jsonData.message;
-                iRely.Functions.showErrorDialog(message.statusText);
-            }
-            );
-    },
-
-    receiptToReturnClick: function (receipt, button, win) {
-        this.processReceiptToReturn(
-            receipt.get('intInventoryReceiptId'),
-            function (data) {
-                var buttonAction = function (button) {
-                    if (button === 'yes') {
-                        iRely.Functions.openScreen('Inventory.view.InventoryReceipt', {
-                            filters: [
-                                {
-                                    column: 'intReceiptId',
-                                    value: data.message.InventoryReturnId
-                                }
-                            ],
-                            action: 'view'
-                        });
-                        win.close();
-                    }
-                };
-                iRely.Functions.showCustomDialog('question', 'yesno', 'Inventory Return successfully created. Do you want to view it?', buttonAction);
-            }
-        );
-    },
-
     onReturnClick: function (button, e, eOpts) {
+        var btnReturn = button;
+        if (btnReturn){
+            btnReturn.disable();
+        }
+        else {
+            return;
+        }
+
         var win = button.up('window'),
             current = win.viewModel.data.current,
             me = this;
 
-        if (!current) return;
+        if (!current) {
+            btnReturn.enable();
+            return;
+        }
 
-        var buttonAction = function (button) {
+        var processReceiptToReturn = function () {
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryReceipt/ReturnReceipt',
+                params: {
+                    id: current.get('intInventoryReceiptId')
+                },
+                method: 'get'
+            })
+            .subscribe(
+                function (successResponse) {
+                    var responseText = Ext.decode(successResponse.responseText);
+                    var message = responseText ? responseText.message : {}; 
+                    var InventoryReturnId = message.InventoryReturnId;
+
+                    if (InventoryReturnId){
+                        var buttonActionViewReturn = function (button) {
+                            if (button === 'yes') {
+                                iRely.Functions.openScreen('Inventory.view.InventoryReceipt', {
+                                    filters: [
+                                        {
+                                            column: 'intReceiptId',
+                                            value: InventoryReturnId
+                                        }
+                                    ],
+                                    action: 'view'
+                                });
+                                win.close();
+                            }
+                        };
+                        iRely.Functions.showCustomDialog('question', 'yesno', 'Inventory Return successfully created. Do you want to view it?', buttonActionViewReturn);
+                    }
+                    btnReturn.enable();
+                }
+                , function (failureResponse) {
+                    var responseText = Ext.decode(failureResponse.responseText);
+                    var message = responseText ? responseText.message : {}; 
+                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while creating the inventory return.';
+                    iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, statusText);
+                    btnReturn.enable();
+                }
+            );
+        };
+
+        var buttonActionDoReturn = function (button) {
             if (button == 'yes') {
-                me.receiptToReturnClick(current, button, win);
+                processReceiptToReturn();
+            }
+            else {
+                btnReturn.enable();
             }
         }
 
@@ -6425,16 +6404,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             method: 'get'
         })
-            .subscribe(
+        .subscribe(
             function (successResponse) {
                 // var jsonData = Ext.decode(successResponse.responseText);
-                iRely.Functions.showCustomDialog('question', 'yesno', 'Do you want to return this inventory receipt?', buttonAction);
+                iRely.Functions.showCustomDialog('question', 'yesno', 'Do you want to return this inventory receipt?', buttonActionDoReturn);                
             }
             , function (failureResponse) {
-                var jsonData = Ext.decode(failureResponse.responseText);
-                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                var responseText = Ext.decode(failureResponse.responseText);
+                var message = responseText ? responseText.message : {}; 
+                var statusText = message ? message.statusText : 'Oh no! Something went wrong while trying to check if receipt can be returned.';
+                iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, statusText);
+                btnReturn.enable();
             }
-            );
+        );
     },
 
     onSpecialKeyTab: function (component, e, eOpts) {
@@ -6458,19 +6440,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onPnlRecapBeforeShow: function (component, eOpts) {
-        // var me = this;
-        // var win = component.up('window');
-
-        // me.doPostPreview(win);
-    },
-
     onReceiveClick: function (button, e, eOpts) {
+        if (button){
+            button.disable();
+        }
+        else {
+            return;
+        }
+
         var me = this;
         var win = button.up('window');
-        var context = win.context;
         var currentRecord = win.viewModel.data.current;
-        var btnPost = win.down('#btnPost');
+        
+        if (!currentRecord){
+            button.enable();
+            return; 
+        }
+        
+        var context = win.context;
         var pnlLotTracking = win.down('#pnlLotTracking');
         var grdInventoryReceipt = win.down('#grdInventoryReceipt');
         var tabInventoryReceipt = win.down('#tabInventoryReceipt');
@@ -6478,6 +6465,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         //Hide Lot Grid
         pnlLotTracking.setVisible(false);
+
         //Deselect all rows in Item Grid
         grdInventoryReceipt.getSelectionModel().deselectAll();
 
@@ -6492,7 +6480,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 method: 'post'
             })
-                .subscribe(
+            .subscribe(
                 function (successResponse) {
                     me.onAfterReceive(true);
                     // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
@@ -6503,80 +6491,84 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         };
                         me.doPostPreview(win, cfg);
                     }
+                    button.enable();
                 }
                 , function (failureResponse) {
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    me.onAfterReceive(false, jsonData.message.statusText);
+                    var responseText = Ext.decode(failureResponse.responseText);
+                    var message = responseText ? responseText.message : {}; 
+                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the inventory receipt.';
+
+                    me.onAfterReceive(false, statusText);
+                    button.enable();
                 }
-                )
+            )
         };
 
-        if (currentRecord) {
-            var buttonAction = function (button) {
-                if (button === 'yes') {
-                    // If there is no data change, do the post.
-                    if (!context.data.hasChanges()) {
-                        // Calculate the other charge if record is not yet posted. 
-                        if (currentRecord && currentRecord.get('ysnPosted') == false){
-                            me.doOtherChargeCalculate(
-                                win
-                                ,doPost                       
-                            );
-                        }
-                        // Otherwise, simply do the post. 
-                        else {
-                            doPost();
-                        }
-                        return;
+        var buttonAction = function (button) {
+            if (button === 'yes') {
+                // If there is no data change, do the post.
+                if (!context.data.hasChanges()) {
+                    // Calculate the other charge if record is not yet posted. 
+                    if (currentRecord && currentRecord.get('ysnPosted') == false){
+                        me.doOtherChargeCalculate(
+                            win
+                            ,doPost                       
+                        );
                     }
-
-                    // Save has data changes first before doing the post.
-                    context.data.saveRecord({
-                        successFn: function () {
-                            me.doOtherChargeCalculate(
-                                win
-                                , doPost
-                            );
-                        }
-                    });
+                    // Otherwise, simply do the post. 
+                    else {
+                        doPost();
+                    }
+                    return;
                 }
-            }
 
-            var ReceivedGrossDiscrepancyItems = '';
-
-            if (currentRecord.tblICInventoryReceiptItems()) {
-                Ext.Array.each(currentRecord.tblICInventoryReceiptItems().data.items, function (row) {
-                    if (!row.dummy) {
-                        //If there is Gross, check if the value is equivalent to Received Quantity
-                        if (row.get('intWeightUOMId') !== null) {
-
-                            var dblGross = row.get('dblGross');
-                            var dblNet = row.get('dblNet');
-
-                            dblGross = Ext.isNumeric(dblGross) ? dblGross : 0.00;
-                            dblNet = Ext.isNumeric(dblNet) ? dblNet : 0.00;
-
-                            if (dblGross < dblNet) {
-                                ReceivedGrossDiscrepancyItems = ReceivedGrossDiscrepancyItems + row.get('strItemNo') + '<br/>'
-                            }
-                        }
-
+                // Save has data changes first before doing the post.
+                context.data.saveRecord({
+                    successFn: function () {
+                        me.doOtherChargeCalculate(
+                            win
+                            , doPost
+                        );
                     }
                 });
             }
-
-            if (ReceivedGrossDiscrepancyItems !== '' && button.text === 'Post') {
-                iRely.Functions.showCustomDialog(
-                    'question',
-                    'yesno',
-                    'The Gross is less than Net on the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?',
-                    buttonAction
-                );
-            }
-            else {
-                buttonAction('yes');
-            }
         }
+
+        var ReceivedGrossDiscrepancyItems = '';
+
+        if (currentRecord.tblICInventoryReceiptItems()) {
+            Ext.Array.each(currentRecord.tblICInventoryReceiptItems().data.items, function (row) {
+                if (!row.dummy) {
+                    //If there is Gross, check if the value is equivalent to Received Quantity
+                    if (row.get('intWeightUOMId') !== null) {
+
+                        var dblGross = row.get('dblGross');
+                        var dblNet = row.get('dblNet');
+
+                        dblGross = Ext.isNumeric(dblGross) ? dblGross : 0.00;
+                        dblNet = Ext.isNumeric(dblNet) ? dblNet : 0.00;
+
+                        if (dblGross < dblNet) {
+                            ReceivedGrossDiscrepancyItems = ReceivedGrossDiscrepancyItems + row.get('strItemNo') + '<br/>'
+                        }
+                    }
+
+                }
+            });
+        }
+
+        if (ReceivedGrossDiscrepancyItems !== '' && button.text === 'Post') {
+            iRely.Functions.showCustomDialog(
+                'question',
+                'yesno',
+                'The Gross is less than Net on the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?',
+                buttonAction
+            );
+        }
+        else {
+            buttonAction('yes');
+        }
+
     },
 
     onItemForexRateTypeChange: function (control, newForexRateType, oldValue, eOpts) {

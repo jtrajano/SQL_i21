@@ -28,10 +28,14 @@ namespace iRely.Inventory.WebApi
         {
             var result = _bl.PostTransaction(adjustment, adjustment.isRecap);
             
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            var httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;
+            return Request.CreateResponse(httpStatusCode, new
             {
-                data = adjustment,
-                success = !result.HasError,
+                data = new
+                {
+                    strTransactionId = adjustment.strTransactionId
+                },
+                success = result.HasError ? false : true,
                 message = new
                 {
                     statusText = result.Exception.Message,
@@ -39,6 +43,7 @@ namespace iRely.Inventory.WebApi
                     button = result.Exception.Button.ToString()
                 }
             });
+
         }
 
         [HttpGet]

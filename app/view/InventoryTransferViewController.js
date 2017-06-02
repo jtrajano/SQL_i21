@@ -603,38 +603,62 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
     },
 
     onPostClick: function(button, e, eOpts) {
-        var me = this;
-        var win = button.up('window');
-        var context = win.context;
-
-        var doPost = function() {
-            var strTransferNo = win.viewModel.data.current.get('strTransferNo');
-            var posted = win.viewModel.data.current.get('ysnPosted');
-
-            var options = {
-                postURL             : '../Inventory/api/InventoryTransfer/PostTransaction',
-                strTransactionId    : strTransferNo,
-                isPost              : !posted,
-                isRecap             : false,
-                callback            : me.onAfterReceive,
-                scope               : me
-            };
-
-            CashManagement.common.BusinessRules.callPostRequest(options);
-        };
-
-        // If there is no data change, do the post.
-        if (!context.data.hasChanges()){
-            doPost();
+        if (button){
+            button.disable();
+        }
+        else {
             return;
         }
 
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        if (!current){
+            button.enable();
+            return;
+        }        
+
+        var doPost = function (){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryTransfer/PostTransaction',
+                params:{
+                    strTransactionId: current.get('strTransferNo'),
+                    isPost: current.get('ysnPosted') ? false : true,
+                    isRecap: false
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    win.context.data.load();
+                    button.enable();
+                }
+                ,function(failureResponse) {
+                    var responseText = Ext.decode(failureResponse.responseText);
+                    var message = responseText ? responseText.message : {}; 
+                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the transfer.';
+
+                    iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, statusText);
+                    button.enable();
+                }
+            )
+        };           
+
         // Save has data changes first before doing the post.
-        context.data.saveRecord({
-            successFn: function() {
-                doPost();
-            }
-        });
+        if (context.data.hasChanges()){            
+            context.data.saveRecord({
+                successFn: function() {
+                    doPost();
+                }
+            });
+        }
+        // Otherwise, simply post the transaction. 
+        else {
+            doPost();
+        }
+
     },
 
     onRecapClick: function(button, e, eOpts) {
@@ -698,20 +722,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 doRecap(button, win.viewModel.data.current);
             }
         });
-    },
-
-    onAfterReceive: function(success, message) {
-        if (success === true) {
-            var me = this;
-            var win = me.view;
-            win.context.data.load();
-        }
-        else {
-            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
-        }
-    },
-
-    
+    }, 
 
     onItemHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
