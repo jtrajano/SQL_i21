@@ -5274,6 +5274,7 @@
     <Build Include="dbo\Views\vyuRKPnLContractDetailView.sql" />
     <Build Include="dbo\Tables\tblSMScreenReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBillOfLadingReport.sql" />
+    <Build Include="dbo\Tables\tblMFOrderManifestLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
