@@ -11,6 +11,7 @@ BEGIN TRY
 	--DECLARE @intPickListId INT
 	--DECLARE @intCompanyLocationId INT
 	DECLARE @dblAlternateLotQty NUMERIC(38, 20)
+	DECLARE @dtmAlternateLotExpiryDate DATETIME
 	--DECLARE @dblReservedLotQtyForPickList NUMERIC(38, 20)
 	--DECLARE @dblAlternateLotReservedQty NUMERIC(38, 20)
 	--DECLARE @dblAlternateLotAvailableQty NUMERIC(38, 20)
@@ -18,6 +19,8 @@ BEGIN TRY
 	--DECLARE @strBlendProductionStagingLocation NVARCHAR(100)
 	--DECLARE @strKitStagingArea NVARCHAR(100)
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @intItemId INT
+	DECLARE @intAlternateItemId INT
 	DECLARE @intLotStatusId INT
 		,@intBondStatusId INT
 		,@strPrimaryStatus NVARCHAR(50)
@@ -46,6 +49,9 @@ BEGIN TRY
 	--JOIN tblICStorageLocation sl ON sl.intStorageLocationId = mpa.strAttributeValue
 	--WHERE a.strAttributeName = 'Kit Staging Location'
 	--	AND intManufacturingProcessId = 1
+
+
+
 	IF ISNULL(@dblAlternateLotQty, 0) <= 0
 	BEGIN
 		SET @strErrMsg = 'QTY NOT AVAILABLE FOR LOT ' + @strAlternateLotNo + ' ON LOCATION ' + @strLotSourceLocation + '.'
@@ -66,13 +72,49 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @intLotStatusId = intLotStatusId
+	SELECT @intLotStatusId = intLotStatusId,
+		   @intAlternateItemId = intItemId,
+		   @dtmAlternateLotExpiryDate = dtmExpiryDate
 	FROM tblICLot
 	WHERE intLotId = @intAlternateLotId
+
+	SELECT @intItemId = intItemId 
+	FROM tblICLot 
+	WHERE intLotId = @intLotId
 
 	SELECT @strPrimaryStatus = strPrimaryStatus
 	FROM tblICLotStatus
 	WHERE intLotStatusId = @intLotStatusId
+
+	IF(@intItemId <> @intAlternateItemId)
+	BEGIN
+		RAISERROR (
+				'ALTERNATE LOT BELONGS TO A DIFFERENT ITEM. CANNOT CONTINUE.'
+				,16
+				,1
+				)
+	END
+	
+	IF (@dtmAlternateLotExpiryDate < GETDATE())
+	BEGIN
+		RAISERROR (
+				'SCANNED LOT HAS EXPIRED.'
+				,16
+				,1
+				)
+	END
+
+	IF EXISTS((SELECT 1 FROM tblMFTask WHERE intLotId = @intAlternateLotId))
+	BEGIN
+	IF (@intLotId <> @intAlternateLotId)
+		BEGIN
+			RAISERROR (
+				'SCANNED LOT IS ASSOCIATED WITH A DIFFERENT TASK. CANNOT CONTINUE'
+				,16
+				,1
+				)
+		END
+	END
 
 	IF (@strPrimaryStatus <> 'Active')
 	BEGIN
