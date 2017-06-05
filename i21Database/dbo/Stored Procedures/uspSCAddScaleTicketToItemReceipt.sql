@@ -1123,7 +1123,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 			END
 	END
 
-SELECT @checkContract = COUNT(intContractDetailId) FROM @ReceiptStagingTable WHERE intContractDetailId != 0;
+SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptType = 'Purchase Contract';
 IF(@checkContract > 0)
 	UPDATE @ReceiptStagingTable SET strReceiptType = 'Purchase Contract'
 
