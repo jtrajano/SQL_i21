@@ -2046,13 +2046,7 @@ BEGIN
 																				dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
 																				, ISNULL(ReceiptItem.dblNet, 0)
 																			)
-																			,
-																			CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN 
-																						dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity)
-																					-- Calculate the Net Qty
-																					ELSE 
-																						ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
-																			END 
+																			,ISNULL(AggregrateItemLots.dblTotalWeight, 1) 
 																		)
 															END 
 
@@ -2120,6 +2114,18 @@ BEGIN
 						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
 							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 							AND ReceiptItemLot.intLotId = RebuilInvTrans.intLotId 
+						OUTER APPLY (
+							SELECT  dblTotalWeight = SUM(
+										CASE	WHEN  ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+													ISNULL(dbo.fnCalculateQtyBetweenUOM(ril.intItemUnitMeasureId, ri.intWeightUOMId, ril.dblQuantity), 0) 
+												ELSE 
+													ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0)
+										END 
+									)
+							FROM	tblICInventoryReceiptItem ri INNER JOIN tblICInventoryReceiptItemLot ril
+										ON ri.intInventoryReceiptItemId = ril.intInventoryReceiptItemId
+							WHERE	ri.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+						) AggregrateItemLots						
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuilInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
