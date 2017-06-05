@@ -5254,6 +5254,7 @@
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCalculateFreightUnit.sql" />
     <Build Include="dbo\Tables\tblMFOrderManifestLabel.sql" />
+    <None Include="Scripts\Post-Deployment\EM\040_UpdateEmailDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
