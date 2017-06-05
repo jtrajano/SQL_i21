@@ -279,4 +279,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\21_PR\4_1710_to_1720.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\12_EM\22_UpdateNullPaymentMethodVendor.sql" />
+  </ItemGroup>
 </Project>
