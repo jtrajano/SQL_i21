@@ -570,6 +570,7 @@ WHERE
 	ICIS.intInventoryShipmentId = @ShipmentId
 	AND ICISI.intOrderId IS NULL
 	AND ICISI.intLineNo IS NULL
+	AND ICIS.strShipmentNumber NOT IN (SELECT strTransactionNumber FROM vyuARShippedItems WHERE strTransactionNumber = @ShipmentNumber)
 
 SELECT * INTO #TempTable
 FROM @UnsortedEntriesForInvoice
