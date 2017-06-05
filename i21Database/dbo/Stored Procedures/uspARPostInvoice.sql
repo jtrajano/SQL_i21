@@ -1697,14 +1697,12 @@ END CATCH
 				INNER JOIN 
 					tblARPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
-						AND ISNULL(A.ysnPosted,0) = 1
 				INNER JOIN 
 					tblARInvoice C
 						ON B.intInvoiceId = C.intInvoiceId
 				INNER JOIN 
 					@PostInvoiceData D
 						ON C.intInvoiceId = D.intInvoiceId
-				WHERE A.ysnPosted = 1
 
 				--Invoice with created Bank Deposit
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
