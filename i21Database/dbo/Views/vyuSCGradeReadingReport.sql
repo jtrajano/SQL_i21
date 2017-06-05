@@ -10,7 +10,8 @@ GR.intDiscountScheduleCodeId
 , QM.dblDiscountAmount
 , QM.dblShrinkPercent
 , QM.strShrinkWhat
-, QM.intTicketId 
+, QM.intTicketId
+, GR.ysnDryingDiscount
 , (SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 FROM tblGRDiscountScheduleCode GR 
 LEFT JOIN tblICItem IC on GR.intItemId = IC.intItemId 
