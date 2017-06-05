@@ -5276,6 +5276,7 @@
     <Build Include="dbo\Stored Procedures\uspMFBillOfLadingReport.sql" />
     <Build Include="dbo\Tables\tblMFOrderManifestLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
+    <None Include="Scripts\Post-Deployment\EM\040_UpdateEmailDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

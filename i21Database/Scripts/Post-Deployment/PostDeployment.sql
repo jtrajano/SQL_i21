@@ -332,6 +332,7 @@ print 'BEGIN POST DEPLOYMENT'
 --START KEEP FROM 1710-1720
 :r .\EM\DataMigration\1710_1720_CCSite_migration.sql
 --END KEEP FROM 1710-1720
+:r .\EM\040_UpdateEmailDistribution.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
