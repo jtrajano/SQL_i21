@@ -5275,6 +5275,7 @@
     <Build Include="dbo\Tables\tblSMScreenReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBillOfLadingReport.sql" />
     <Build Include="dbo\Tables\tblMFOrderManifestLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
