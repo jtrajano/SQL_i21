@@ -529,13 +529,7 @@ BEGIN
 																dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
 																, ISNULL(DetailItem.dblNet, 0)
 															)
-															,
-															CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
-																		dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
-																	-- Calculate the Net Qty
-																	ELSE 
-																		ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-															END 
+															,ISNULL(AggregrateItemLots.dblTotalWeight, 1) 
 														)
 											END 
 
@@ -594,6 +588,18 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+				OUTER APPLY (
+					SELECT  dblTotalWeight = SUM(
+								CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+											ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+										ELSE 
+											ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+								END 
+							)
+					FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+								ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+					WHERE	ReceiptItem.intInventoryReceiptItemId = DetailItem.intInventoryReceiptItemId
+				) AggregrateItemLots
 				LEFT JOIN dbo.tblICItemUOM ItemUOM 
 					ON ItemUOM.intItemUOMId = DetailItem.intUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM LotItemUOM
@@ -886,13 +892,7 @@ BEGIN
 																dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
 																, ISNULL(DetailItem.dblNet, 0)
 															)
-															,
-															CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
-																		dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
-																	-- Calculate the Net Qty
-																	ELSE 
-																		ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-															END 
+															,ISNULL(AggregrateItemLots.dblTotalWeight, 1) 
 														)
 											END 
 
@@ -950,6 +950,18 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+				OUTER APPLY (
+					SELECT  dblTotalWeight = SUM(
+								CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+											ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+										ELSE 
+											ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+								END 
+							)
+					FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+								ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+					WHERE	ReceiptItem.intInventoryReceiptItemId = DetailItem.intInventoryReceiptItemId
+				) AggregrateItemLots
 				LEFT JOIN dbo.tblICItemUOM ItemUOM 
 					ON ItemUOM.intItemUOMId = DetailItem.intUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM LotItemUOM
