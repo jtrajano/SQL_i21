@@ -19,7 +19,8 @@ SELECT
 	A.dblTax,
 	B1.strName,
 	F.strUserName AS strUserId,
-	G.strLocationName AS strUserLocation
+	G.strLocationName AS strUserLocation,
+	A.ysnPosted
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
