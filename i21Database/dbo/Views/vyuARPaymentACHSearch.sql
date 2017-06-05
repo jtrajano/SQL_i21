@@ -1,6 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuARPaymentACHSearch]
 AS 
-SELECT P.* FROM vyuARPaymentSearch P
-	INNER JOIN tblCMUndepositedFund UF ON UF.intSourceTransactionId = P.intPaymentId
+SELECT P.* 
+FROM vyuARPaymentSearch P WITH (NOLOCK)
+	LEFT JOIN (SELECT intSourceTransactionId
+					, intBankDepositId
+		       FROM dbo.tblCMUndepositedFund WITH (NOLOCK)
+	) UF ON UF.intSourceTransactionId = P.intPaymentId
 WHERE P.strPaymentMethod = 'ACH' 
-  AND ISNULL(UF.ysnCommitted, 0) = 0
+  AND UF.intBankDepositId IS NULL

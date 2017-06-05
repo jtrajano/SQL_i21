@@ -2830,30 +2830,6 @@ IF @raiseError = 0
 
 					DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
 				END
-			
-			--Process ACH Payments
-			IF @post = 1
-				BEGIN
-					DECLARE @tblACHPayments TABLE (intPaymentId INT)
-					DECLARE @intACHPaymentMethodId INT
-
-					SELECT TOP 1 @intACHPaymentMethodId = intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'ACH'
-
-					INSERT INTO @tblACHPayments
-					SELECT ACH.intPaymentId FROM @ARReceivablePostData ACH 
-						INNER JOIN tblARPayment P ON ACH.intPaymentId = P.intPaymentId AND P.intPaymentMethodId = @intACHPaymentMethodId
-
-					WHILE EXISTS (SELECT NULL FROM @tblACHPayments)
-						BEGIN
-							DECLARE @paymentIdACH INT
-
-							SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
-
-							EXEC dbo.uspARProcessACHPayments @paymentIdACH, @userId
-
-							DELETE FROM @tblACHPayments WHERE intPaymentId = @paymentIdACH				
-						END
-				END
 		END	
 RETURN 1;
 
