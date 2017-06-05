@@ -648,7 +648,9 @@ Ext.define('Inventory.view.ItemViewController', {
             txtAmount: '{current.dblAmount}',
             cboCostUOM: {
                 readOnly: '{checkPerUnitCostMethod}',
-                value: '{current.intCostUOMId}',
+                value: '{current.strCostUOM}',
+                origValueField: 'strUnitMeasure',
+                origUpdateField: 'strCostUOM',
                 store: '{costUOM}',
                 defaultFilters: [{
                     column: 'intItemId',
@@ -3847,6 +3849,18 @@ Ext.define('Inventory.view.ItemViewController', {
     //     }
     // },
 
+    onCostUOMSelect: function(combo, records) {
+        if (!combo || !records || records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current){
+            current.set('intCostUOMId', records[0].get('intItemUOMId'));
+        }
+    },    
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4055,6 +4069,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#grdContractItem": {
                 selectionchange: this.onContractItemSelectionChange
+            },
+            "#cboCostUOM": {
+                select: this.onCostUOMSelect
             }
         });
 

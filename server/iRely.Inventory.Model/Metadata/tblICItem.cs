@@ -531,6 +531,27 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _costUOM;
+
+        [NotMapped]
+        public string strCostUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_costUOM))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strCostUOM;
+                    else
+                        return null;
+                else
+                    return _costUOM;
+            }
+            set
+            {
+                _costUOM = value;
+            }
+        }
+
         public vyuICGetCompactItem vyuICGetCompactItem { get; set; }
 
         public tblICManufacturer tblICManufacturer { get; set; }
