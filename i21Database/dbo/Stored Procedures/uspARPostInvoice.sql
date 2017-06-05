@@ -1697,7 +1697,6 @@ END CATCH
 				INNER JOIN 
 					tblARPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
-						AND ISNULL(A.ysnPosted,0) = 1
 				INNER JOIN 
 					tblARInvoice C
 						ON B.intInvoiceId = C.intInvoiceId
