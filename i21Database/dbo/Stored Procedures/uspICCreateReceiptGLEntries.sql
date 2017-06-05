@@ -270,7 +270,7 @@ AS
 			,t.dblForexRate	
 			,i.strItemNo
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
-			,dblLineTotal = CASE WHEN t.dblQty < 0 THEN -ri.dblLineTotal ELSE ri.dblLineTotal END 
+			,dblLineTotal = t.dblQty * t.dblCost
 			,dblAddOnCostFromOtherCharge = 
 				CASE 
 					WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
@@ -358,24 +358,43 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		--CROSS APPLY dbo.fnGetDebit(
+		--	ISNULL(dblLineTotal, 0)
+		--) DebitForeign
+		--CROSS APPLY dbo.fnGetCredit(
+		--	ISNULL(dblLineTotal, 0) 			
+		--) CreditForeign
+		--CROSS APPLY dbo.fnGetDebitFunctional(
+		--	ISNULL(dblLineTotal, 0)	
+		--	,ForGLEntries_CTE.intCurrencyId
+		--	,@intFunctionalCurrencyId
+		--	,ForGLEntries_CTE.dblForexRate
+		--) Debit
+		--CROSS APPLY dbo.fnGetCreditFunctional(
+		--	ISNULL(dblLineTotal, 0) 			
+		--	,ForGLEntries_CTE.intCurrencyId
+		--	,@intFunctionalCurrencyId
+		--	,ForGLEntries_CTE.dblForexRate
+		--) Credit
+
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)
-		) DebitForeign
+		) Debit
 		CROSS APPLY dbo.fnGetCredit(
 			ISNULL(dblLineTotal, 0) 			
-		) CreditForeign
-		CROSS APPLY dbo.fnGetDebitFunctional(
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
 			ISNULL(dblLineTotal, 0)	
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) Debit
-		CROSS APPLY dbo.fnGetCreditFunctional(
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
 			ISNULL(dblLineTotal, 0) 			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) Credit
+		) CreditForeign 
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
@@ -426,24 +445,43 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+		--CROSS APPLY dbo.fnGetDebit(
+		--	ISNULL(dblLineTotal, 0)			
+		--) DebitForeign
+		--CROSS APPLY dbo.fnGetCredit(
+		--	ISNULL(dblLineTotal, 0) 			
+		--) CreditForeign
+		--CROSS APPLY dbo.fnGetDebitFunctional(
+		--	ISNULL(dblLineTotal, 0)			
+		--	,ForGLEntries_CTE.intCurrencyId
+		--	,@intFunctionalCurrencyId
+		--	,ForGLEntries_CTE.dblForexRate
+		--) Debit
+		--CROSS APPLY dbo.fnGetCreditFunctional(
+		--	ISNULL(dblLineTotal, 0) 			
+		--	,ForGLEntries_CTE.intCurrencyId
+		--	,@intFunctionalCurrencyId
+		--	,ForGLEntries_CTE.dblForexRate
+		--) Credit
+
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)			
-		) DebitForeign
+		) Debit
 		CROSS APPLY dbo.fnGetCredit(
 			ISNULL(dblLineTotal, 0) 			
-		) CreditForeign
-		CROSS APPLY dbo.fnGetDebitFunctional(
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
 			ISNULL(dblLineTotal, 0)			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) Debit
-		CROSS APPLY dbo.fnGetCreditFunctional(
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
 			ISNULL(dblLineTotal, 0) 			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) Credit
+		) CreditForeign
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
