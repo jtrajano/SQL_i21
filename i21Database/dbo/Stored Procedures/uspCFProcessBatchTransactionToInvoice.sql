@@ -355,6 +355,10 @@ END
 
 	DECLARE @intCreatedRecordKey INT
 	DECLARE @intCreatedInvoiceId INT
+
+	DECLARE @transactionDate		DATETIME
+	DECLARE @intCardId				INT
+
 	SET @SuccessfulCount = 0;
 
 	IF (@ErrorMessage IS NULL)
@@ -381,6 +385,24 @@ END
 						WHERE intTransactionId = (SELECT intTransactionId 
 													FROM tblARInvoice 
 													WHERE intInvoiceId = @intCreatedInvoiceId)
+
+						SELECT TOP 1 
+						@transactionDate = dtmTransactionDate,
+						@intCardId = intCardId
+						FROM tblCFTransaction where intTransactionId = (SELECT TOP 1 intTransactionId 
+																		FROM tblARInvoice 
+																		WHERE intInvoiceId = @intCreatedInvoiceId)
+
+
+					   IF (@Post = 1)
+						BEGIN
+							UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND ( dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
+						END
+						ELSE
+						BEGIN
+							select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
+							UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
+						END
 				
 						DELETE FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
 
@@ -407,6 +429,7 @@ END
 						WHERE intTransactionId = (SELECT intTransactionId 
 													FROM tblARInvoice 
 													WHERE intInvoiceId = @intCreatedInvoiceId)
+
 				
 						DELETE FROM #tmpCreatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
 
@@ -420,6 +443,8 @@ END
 			IF (@ErrorMessage IS NULL AND @UpdatedIvoices IS NOT NULL)
 			BEGIN
 			
+				
+
 				IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
 				BEGIN
 					SELECT * INTO #tmpUpdatedInvoice
@@ -439,6 +464,26 @@ END
 						WHERE intTransactionId = (SELECT intTransactionId 
 													FROM tblARInvoice 
 													WHERE intInvoiceId = @intCreatedInvoiceId)
+
+						
+						SELECT TOP 1 
+						@transactionDate = dtmTransactionDate,
+						@intCardId = intCardId
+						FROM tblCFTransaction where intTransactionId = (SELECT TOP 1 intTransactionId 
+																		FROM tblARInvoice 
+																		WHERE intInvoiceId = @intCreatedInvoiceId)
+
+
+					   IF (@Post = 1)
+						BEGIN
+							UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND (dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
+						END
+						ELSE
+						BEGIN
+							select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
+							UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
+						END
+
 				
 						DELETE FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
 
