@@ -41,7 +41,10 @@ BEGIN
 							 Z.intItemId
 							,Z.intEntityCustomerId
 							,Z.intLocationId
-							,NULL /*--@ItemUOMId*/
+							,(SELECT intIssueUOMId 
+                                                FROM tblICItemLocation
+                                                WHERE intItemId = Z.intItemId
+                                                AND intLocationId = Z.intLocationId) /*--@ItemUOMId*/
 							,NULL /*--@CurrencyId*/
 							,Z.dtmRequestedDate
 							,Z.dblQuantity
