@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessACHPayments]
-	@intPaymentId	INT,
-	@intUserId		INT
+	@strPaymentIds		NVARCHAR(MAX),
+	@intBankAccountId	INT,
+	@intUserId			INT,
+	@intBankDepositId   INT = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -9,8 +11,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-DECLARE @intBankAccountId INT
-      , @strTransactionId NVARCHAR(100)
+DECLARE @tblACHPayments TABLE (
+			intPaymentId		INT
+		  , intCurrencyId		INT
+		  , intAccountId		INT
+		  , intEntityCustomerId	INT
+		  , dblAmountPaid		NUMERIC(18, 6)
+		)
+
+DECLARE @strTransactionId NVARCHAR(100)
 	  , @STARTING_NUMBER_BANK_DEPOSIT AS NVARCHAR(100) = 'Bank Deposit'
 	  , @BankTransaction BankTransactionTable
 	  , @BankTransactionDetail BankTransactionDetailTable
@@ -18,7 +27,48 @@ DECLARE @intBankAccountId INT
 	  , @intEntityId INT
 	  , @intMessageId INT
 
-SELECT TOP 1 @intBankAccountId = intBankAccountId, @intEntityId = intEntityCustomerId FROM tblARPayment WHERE intPaymentId = @intPaymentId
+IF ISNULL(@strPaymentIds, '') != ''
+	BEGIN
+		INSERT INTO @tblACHPayments
+		SELECT intPaymentId
+			 , intCurrencyId
+			 , intAccountId
+			 , intEntityCustomerId
+			 , dblAmountPaid
+		FROM dbo.tblARPayment P WITH (NOLOCK)
+			INNER JOIN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strPaymentIds) 
+						WHERE ISNULL(intID, 0) <> 0
+			) PAYMENT ON P.intPaymentId = PAYMENT.intID
+			INNER JOIN (SELECT intPaymentMethodID
+							 , strPaymentMethod 
+						FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
+			) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
+			    AND PM.strPaymentMethod = 'ACH'
+		WHERE P.ysnPosted = 1
+	END
+ELSE
+	BEGIN
+		RAISERROR('No ACH Payments to process.', 16, 1)
+		RETURN;
+	END
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM @tblACHPayments)
+	BEGIN
+		RAISERROR('No ACH Payments to process.', 16, 1)
+		RETURN;
+	END
+
+IF ISNULL(@intBankAccountId, 0) = 0
+	BEGIN
+		RAISERROR('Bank Account is required when processing ACH Payments.', 16, 1)
+		RETURN;
+	END
+
+IF ISNULL(@intUserId, 0) = 0
+	BEGIN
+		RAISERROR('User is required when processing ACH Payments.', 16, 1)
+		RETURN;
+	END
 
 EXEC dbo.uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId, @intUserId
 
@@ -46,16 +96,21 @@ SELECT
 	,[intCurrencyId]				= P.intCurrencyId
 	,[intBankTransactionTypeId]		= 1
 	,[dtmDate]						= GETDATE()
-	,[dblAmount]					= UF.dblAmount
+	,[dblAmount]					= SUM(UF.dblAmount)
 	,[strMemo]						= 'AR ACH'
 	,[intCompanyLocationId]			= UF.intLocationId
-FROM tblCMUndepositedFund UF
-	INNER JOIN tblARPayment P ON UF.intSourceTransactionId = P.intPaymentId
-WHERE UF.intSourceTransactionId = @intPaymentId 
+FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
+	CROSS APPLY (
+		SELECT TOP 1 * FROM @tblACHPayments
+		WHERE UF.intSourceTransactionId = intPaymentId
+	) P
+GROUP BY UF.intBankAccountId
+	   , P.intCurrencyId
+	   , UF.intLocationId
 
 --Payment Detail
 INSERT INTO @BankTransactionDetail(
-		[intTransactionId]
+	  [intTransactionId]
 	, [intUndepositedFundId]
 	, [dtmDate]
 	, [intGLAccountId]
@@ -64,21 +119,27 @@ INSERT INTO @BankTransactionDetail(
 	, [dblCredit]
 	, [intEntityId])
 SELECT 
-		[intTransactionId]	= 0
+	  [intTransactionId]	= 0
 	, [intUndepositedFundId] = UF.intUndepositedFundId
 	, [dtmDate]				= UF.dtmDate
-	, [intGLAccountId]		= P.intAccountId
-	, [strDescription]		= GL.strDescription
+	, [intGLAccountId]		= PAYMENTS.intAccountId
+	, [strDescription]		= PAYMENTS.strDescription
 	, [dblDebit]			= 0
-	, [dblCredit]			= ISNULL(P.dblAmountPaid, 0)
-	, [intEntityId]			= @intEntityId
-FROM tblCMUndepositedFund UF
-	INNER JOIN tblARPayment P ON UF.intSourceTransactionId = P.intPaymentId
-	LEFT JOIN tblGLAccount GL ON P.intAccountId = GL.intAccountId
-WHERE P.intPaymentId = @intPaymentId
+	, [dblCredit]			= ISNULL(PAYMENTS.dblAmountPaid, 0)
+	, [intEntityId]			= PAYMENTS.intEntityCustomerId
+FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
+	CROSS APPLY (
+		SELECT P.*
+			 , GL.strDescription 
+		FROM @tblACHPayments P
+			LEFT JOIN (SELECT intAccountId
+							, strDescription 
+					   FROM dbo.tblGLAccount WITH (NOLOCK)
+			) GL ON GL.intAccountId = P.intPaymentId
+		WHERE UF.intSourceTransactionId = intPaymentId
+	) PAYMENTS
 
-EXEC [dbo].[uspCMCreateBankTransactionEntries]
-			@BankTransactionEntries = @BankTransaction
-			, @BankTransactionDetailEntries = @BankTransactionDetail
+SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
 
+EXEC [dbo].[uspCMCreateBankTransactionEntries] @BankTransactionEntries = @BankTransaction, @BankTransactionDetailEntries = @BankTransactionDetail, @intTransactionId = @intBankDepositId OUT
 EXEC dbo.uspCMPostBankDeposit 1, 0, @strTransactionId, NULL, @intUserId, @intEntityId, @ysnSuccess OUT, @intMessageId OUT
