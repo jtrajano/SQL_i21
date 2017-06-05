@@ -222,6 +222,7 @@ BEGIN
 		,[ysnPrice]
 	)
 	SELECT
+	DISTINCT
 	[intOrderType]						= SE.intOrderType
 	,[intSourceType]					= SE.intSourceType
 	,[intEntityCustomerId]				= SE.intEntityCustomerId
