@@ -48,6 +48,11 @@ BEGIN
 
 	WHILE @intOrderManifestId IS NOT NULL
 	BEGIN
+		SELECT @intOdd = NULL
+			,@intEven = NULL
+			,@intCheckDigit = NULL
+			,@strSSCCNo = ''
+
 		IF @intCustomerLabelTypeId = 1 -- Pallet Label
 		BEGIN
 			SELECT @strSSCCNo = strSSCCNo
