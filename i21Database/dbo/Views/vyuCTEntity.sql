@@ -10,7 +10,8 @@ AS
 			L.strZipCode		AS strEntityZipCode,
 			L.strCountry		AS strEntityCountry,
 			T.strPhone			AS strEntityPhone,
-			E.intDefaultLocationId,
+			L.intEntityLocationId	AS	 intDefaultLocationId,
+			L.strLocationName	AS	strDefaultLocation,
 			CASE	WHEN Y.strType = 'Vendor' THEN V.ysnPymtCtrlActive 
 					WHEN Y.strType = 'Customer' THEN U.ysnActive
 					ELSE CAST(1 AS BIT)

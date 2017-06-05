@@ -64,7 +64,8 @@ AS
 						MA.intCurrencyId			AS	intMarketCurrencyId,
 						CR.strCurrency				AS	strMarketCurrency,
 						CA.strCommodityAttributeId,
-						EY.intDefaultLocationId		AS	intEntityDefaultLocationId,
+						EL.intEntityLocationId		AS	intEntityDefaultLocationId,
+						EL.strLocationName			AS	strEntityDefaultLocation,
 						PO.intNoOfDays				AS	intPositionNoOfDays
 
 				FROM	tblCTContractHeader					CH	
@@ -74,7 +75,9 @@ AS
 				JOIN	tblEMEntity							CN	ON	CN.intEntityId						=		CH.intEntityContactId				LEFT
 				JOIN	tblEMEntity							PR	ON	PR.intEntityId						=		CH.intProducerId					LEFT
 				JOIN	tblEMEntity							CU	ON	CU.intEntityId						=		CH.intCounterPartyId				LEFT
-				
+				JOIN	tblEMEntityLocation					EL	ON	EL.intEntityId						=		CH.intEntityId 
+																AND EL.ysnDefaultLocation				=		1
+
 				JOIN	tblICCommodity						CY	ON	CY.intCommodityId					=		CH.intCommodityId					LEFT
 				JOIN	tblCTPosition						PO	ON	PO.intPositionId					=		CH.intPositionId					LEFT	
 				JOIN	tblCTWeightGrade					W1	ON	W1.intWeightGradeId					=		CH.intGradeId						LEFT

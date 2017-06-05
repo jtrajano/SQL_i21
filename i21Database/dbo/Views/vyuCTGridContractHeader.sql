@@ -52,6 +52,7 @@ AS
 			NM.strMarketCurrency,
 			NM.strCommodityAttributeId,
 			NM.intEntityDefaultLocationId,
+			NM.strEntityDefaultLocation,
 			NM.intPositionNoOfDays
 
 	FROM	tblCTContractHeader				CH
