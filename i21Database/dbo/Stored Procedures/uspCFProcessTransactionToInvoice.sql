@@ -26,6 +26,8 @@ DECLARE @strItemTermDiscountBy NVARCHAR(MAX)
 
 DECLARE @companyConfigTermId	INT = NULL
 DECLARE @invalid				BIT = 0
+DECLARE @transactionDate		DATETIME
+DECLARE @intCardId				INT
 
 SELECT TOP 1 @companyConfigTermId = intTermsCode FROM tblCFCompanyPreference
 IF(ISNULL(@companyConfigTermId,0) = 0)
@@ -38,7 +40,11 @@ BEGIN
 END
 
 
-SELECT TOP 1 @invalid = ysnInvalid FROM tblCFTransaction where intTransactionId = @TransactionId
+SELECT TOP 1 
+@invalid = ysnInvalid, 
+@transactionDate = dtmTransactionDate,
+@intCardId = intCardId
+FROM tblCFTransaction where intTransactionId = @TransactionId
 IF(@invalid = 1)
 BEGIN
 	SET @ErrorMessage = 'Unable to post invalid transaction'
@@ -375,6 +381,17 @@ BEGIN
 	SET intInvoiceId = @CreatedIvoices,
 		ysnPosted = @Post 
 	WHERE intTransactionId = @TransactionId
+
+	IF (@Post = 1)
+	BEGIN
+		UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND ( dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
+	END
+	ELSE
+	BEGIN
+		select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
+		UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
+	END
+
 END
 
 IF (@UpdatedIvoices IS NOT NULL AND @ErrorMessage IS NULL)
@@ -382,4 +399,16 @@ BEGIN
 	UPDATE tblCFTransaction 
 	SET ysnPosted = @Post 
 	WHERE intTransactionId = @TransactionId 
+
+
+	IF (@Post = 1)
+	BEGIN
+		UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND ( dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
+	END
+	ELSE
+	BEGIN
+		select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
+		UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
+	END
+
 END
