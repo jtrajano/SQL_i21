@@ -57,8 +57,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strCalculationMethod]	=	Taxes.strCalculationMethod, 
 		[dblRate]				=	Taxes.dblRate, 
 		[intAccountId]			=	Taxes.intTaxAccountId, 
-		[dblTax]				=	Taxes.dblTax, 
-		[dblAdjustedTax]		=	Taxes.dblAdjustedTax, 
+		[dblTax]				=	CASE WHEN D.ysnPrice = 1 THEN Taxes.dblTax * -1 ELSE Taxes.dblTax END, 
+		[dblAdjustedTax]		=	CASE WHEN D.ysnPrice = 1 THEN Taxes.dblAdjustedTax * -1 ELSE Taxes.dblAdjustedTax END, 
 		[ysnTaxAdjusted]		=	Taxes.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	Taxes.ysnSeparateOnInvoice, 
 		[ysnCheckOffTax]		=	Taxes.ysnCheckoffTax
