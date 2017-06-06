@@ -204,13 +204,13 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				(SELECT TCS.*
 						,dblHours = CONVERT(NUMERIC(18, 2),
 							CASE WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftStart AND dtmTimeOut < dtmShiftEnd) THEN
-								CAST(DATEDIFF(MI, dtmShiftStart, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+									CAST(DATEDIFF(MI, dtmShiftStart, dtmTimeOut) AS NUMERIC(18, 6)) / 60
 								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut > dtmShiftEnd) THEN
-								CAST(DATEDIFF(MI, dtmTimeIn, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
-								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut < dtmShiftEnd) THEN
-								CAST(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+									CAST(DATEDIFF(MI, dtmTimeIn, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+								WHEN (dtmTimeIn >= dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut <= dtmShiftEnd) THEN
+									CAST(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) AS NUMERIC(18, 6)) / 60
 								WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftEnd) THEN
-								CAST(DATEDIFF(MI, dtmShiftStart, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+									CAST(DATEDIFF(MI, dtmShiftStart, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
 								ELSE 0
 						END)
 					FROM
@@ -255,13 +255,13 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 					WHERE 
 						CONVERT(NUMERIC(18, 2),
 							CASE WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftStart AND dtmTimeOut < dtmShiftEnd) THEN
-								CAST(DATEDIFF(MI, dtmShiftStart, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+									CAST(DATEDIFF(MI, dtmShiftStart, dtmTimeOut) AS NUMERIC(18, 6)) / 60
 								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut > dtmShiftEnd) THEN
-								CAST(DATEDIFF(MI, dtmTimeIn, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
-								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut < dtmShiftEnd) THEN
-								CAST(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+									CAST(DATEDIFF(MI, dtmTimeIn, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+								WHEN (dtmTimeIn >= dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut <= dtmShiftEnd) THEN
+									CAST(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) AS NUMERIC(18, 6)) / 60
 								WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftEnd) THEN
-								CAST(DATEDIFF(MI, dtmShiftStart, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+									CAST(DATEDIFF(MI, dtmShiftStart, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
 								ELSE 0
 						END) > 0
 					) SHIFTHOURS
@@ -311,13 +311,13 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 							CONVERT(NUMERIC(18, 2),
 								CASE WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftStart AND dtmTimeOut < dtmShiftEnd) THEN
 									CAST(DATEDIFF(MI, dtmShiftStart, dtmTimeOut) AS NUMERIC(18, 6)) / 60
-									WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut > dtmShiftEnd) THEN
+								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut > dtmShiftEnd) THEN
 									CAST(DATEDIFF(MI, dtmTimeIn, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
-									WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut < dtmShiftEnd) THEN
+								WHEN (dtmTimeIn >= dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut <= dtmShiftEnd) THEN
 									CAST(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) AS NUMERIC(18, 6)) / 60
-									WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftEnd) THEN
+								WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftEnd) THEN
 									CAST(DATEDIFF(MI, dtmShiftStart, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
-									ELSE 0
+								ELSE 0
 							END) > 0
 						GROUP BY intTimecardId
 					) MAXRATE
