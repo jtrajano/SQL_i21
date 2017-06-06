@@ -28,7 +28,7 @@ FROM	dbo.tblCMBankTransaction CHK
 		INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 		--INNER JOIN tblSCTicket TICKET ON INVRCPTITEM.intSourceId = TICKET.intTicketId			
-WHERE	CHK.intBankAccountId = 3
+WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = CHK.strTransactionId
 		AND INVRCPTITEM.intSourceId IS NOT NULL
 
@@ -44,7 +44,7 @@ FROM	dbo.tblCMBankTransaction CHK
 		INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
 		INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
 		INNER JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
-		WHERE	CHK.intBankAccountId = 3
+		WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = CHK.strTransactionId
 )
 BEGIN
