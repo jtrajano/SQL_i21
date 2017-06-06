@@ -645,10 +645,10 @@ BEGIN
 	BillDtl.dblQtyOrdered as Net,
 	UOM.strUnitMeasure,
 	BillDtl.dblTotal,
-	BillDtl.dblTax,
+	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId),0) as dblTax,
 	CNTRCT.strContractNumber,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
