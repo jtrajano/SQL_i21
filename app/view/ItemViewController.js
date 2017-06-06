@@ -2068,10 +2068,10 @@ Ext.define('Inventory.view.ItemViewController', {
 
     getDefaultUOMFromCommodity: function(win) {
         var vm = win.getViewModel();
-        var cboCommodity = win.down('#cboCommodity');
-        var intCommodityId = cboCommodity.getValue();
+        var current = win.viewModel.data.current;
+        var intCommodityId = current ? current.get('intCommodityId') : null;
 
-        if (!iRely.Functions.isEmpty(intCommodityId)) {
+        if (intCommodityId) {
             var commodity = vm.storeInfo.commodityList.findRecord('intCommodityId', intCommodityId);
             if (commodity) {
                 var uoms = commodity.data.tblICCommodityUnitMeasures;

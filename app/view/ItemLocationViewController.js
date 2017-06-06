@@ -258,17 +258,85 @@ Ext.define('Inventory.view.ItemLocationViewController', {
 
     createRecord: function(config, action) {
         var me = this;
-        var record = Ext.create('Inventory.model.ItemLocation');
-        record.set('intItemId', me.intItemId);
-        if (app.DefaultLocation > 0)
-            record.set('intLocationId', app.DefaultLocation);
-        record.set('intCostingMethod', 1);
-        record.set('intAllowNegativeInventory', 3);
-        if (iRely.Functions.isEmpty(me.defaultUOM) === false) {
-            record.set('intIssueUOMId', me.defaultUOM.intItemUOMId);
-            record.set('intReceiveUOMId', me.defaultUOM.intItemUOMId);
+        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+
+        var newRecord = Ext.create('Inventory.model.ItemLocation');
+        newRecord.set('intItemId', me.intItemId);
+
+        // Set the default company location. 
+        if (defaultLocation){
+            newRecord.set('intLocationId', defaultLocation);
+
+            // Get the display value for the company location. 
+            Ext.create('i21.store.CompanyLocationBuffered', {
+                storeId: 'icItemLocationCompanyLocation',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intCompanyLocationId',
+                            value: defaultLocation,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'strLocationName:intCompanyLocationId:'
+                    },
+                    callback: function(records, operation, success){
+                        var record; 
+                        if (records && records.length > 0) {
+                            record = records[0];
+                        }
+
+                        if(success && record){
+                            newRecord.set('strLocationName', record.get('strLocationName'));
+                            newRecord.set('intLocationId', record.get('intCompanyLocationId'));
+                        }
+                    }
+                }
+            });            
+        }  
+
+        // Set the default Issue and Receive UOM
+        if (me.defaultUOM && me.defaultUOM.intItemUOMId) {
+            newRecord.set('intIssueUOMId', me.defaultUOM.intItemUOMId);
+            newRecord.set('intReceiveUOMId', me.defaultUOM.intItemUOMId);
+            
+            // Get the display value. 
+            Ext.create('Inventory.store.BufferedItemUnitMeasure', {
+                storeId: 'icItemLocationUOM',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intItemUOMId',
+                            value: me.defaultUOM.intItemUOMId,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'strUnitMeasure:intItemUOMId:'
+                    },
+                    callback: function(records, operation, success){
+                        var record; 
+                        if (records && records.length > 0) {
+                            record = records[0];
+                        }
+
+                        if(success && record){
+                            newRecord.set('intIssueUOMId', record.get('intItemUOMId'));
+                            newRecord.set('intReceiveUOMId', record.get('intItemUOMId'));
+                            newRecord.set('strIssueUOM', record.get('strUnitMeasure'));
+                            newRecord.set('strReceiveUOM', record.get('strUnitMeasure'));
+                            
+                        }
+                    }
+                }
+            }); 
         }
-        action(record);
+
+        newRecord.set('intCostingMethod', 1); // Default Costing method is AVG. 
+        newRecord.set('intAllowNegativeInventory', 3); // Default to 'No'. 
+
+        action(newRecord);
     },
 
     onVendorDrilldown: function(combo) {
