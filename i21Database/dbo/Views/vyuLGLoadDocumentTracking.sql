@@ -221,6 +221,8 @@ SELECT CH.strContractNumber
 	,LDOC.dtmReceivedDate
 	,DOC.strDocumentName
 	,LDOC.strDocumentNo
+	,LD.dblQuantity
+	,LOAD.ysnInvoice
 FROM tblLGLoad LOAD
 JOIN tblLGLoadDetail LD ON LOAD.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = (
