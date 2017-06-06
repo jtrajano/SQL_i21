@@ -5280,6 +5280,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetConsolidateWarning.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertItemRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertSiteRecord.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
