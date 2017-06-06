@@ -602,21 +602,21 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
     },
 
-    onPostClick: function(button, e, eOpts) {
-        if (button){
-            button.disable();
+    onPostClick: function(btnPost, e, eOpts) {
+        if (btnPost){
+            btnPost.disable();
         }
         else {
             return;
         }
 
         var me = this;
-        var win = button.up('window');
+        var win = btnPost.up('window');
         var context = win.context;
         var current = win.viewModel.data.current;
 
         if (!current){
-            button.enable();
+            btnPost.enable();
             return;
         }        
 
@@ -633,7 +633,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             .subscribe(
                 function(successResponse) {
                     win.context.data.load();
-                    button.enable();
+                    btnPost.enable();
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
@@ -641,24 +641,31 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the transfer.';
 
                     iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, statusText);
-                    button.enable();
+                    btnPost.enable();
                 }
             )
         };           
 
-        // Save has data changes first before doing the post.
-        if (context.data.hasChanges()){            
-            context.data.saveRecord({
-                successFn: function() {
-                    doPost();
+        // Save any unsaved data first before doing the post. 
+        if (context.data.hasChanges()) {
+            context.data.validator.validateRecord({ window: win }, function(valid) {
+                // If records are valid, continue with the save. 
+                if (valid){
+                    context.data.saveRecord({
+                        successFn: function () {
+                            doPost();             
+                        }
+                    });
                 }
-            });
+                // If records are invalid, re-enable the post button. 
+                else {
+                    btnPost.enable();
+                }
+            });            
         }
-        // Otherwise, simply post the transaction. 
         else {
             doPost();
         }
-
     },
 
     onRecapClick: function(button, e, eOpts) {
