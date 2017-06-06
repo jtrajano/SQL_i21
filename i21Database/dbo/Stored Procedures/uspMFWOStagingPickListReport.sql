@@ -1,28 +1,27 @@
-﻿CREATE PROCEDURE uspMFWOStagingPickListReport
-			@xmlParam NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE uspMFWOStagingPickListReport @xmlParam NVARCHAR(MAX) = NULL
 AS
 BEGIN
-	DECLARE @intOrderHeaderId			INT
-		   ,@idoc						INT
-	DECLARE @strCompanyName				NVARCHAR(100),
-			@strCompanyAddress			NVARCHAR(100),
-			@strContactName				NVARCHAR(50),
-			@strCounty					NVARCHAR(25),
-			@strCity					NVARCHAR(25),
-			@strState					NVARCHAR(50),
-			@strZip						NVARCHAR(12),
-			@strCountry					NVARCHAR(25),
-			@strPhone					NVARCHAR(50),
-			@strInventoryShipmentNo		NVARCHAR(100),
-			@intInventoryShipmentId		INT,
-			@strShipmentPickListNotes	NVARCHAR(MAX) = '',
-			@intCustomerEntityId		INT
-						
+	DECLARE @intOrderHeaderId INT
+		,@idoc INT
+	DECLARE @strCompanyName NVARCHAR(100)
+		,@strCompanyAddress NVARCHAR(100)
+		,@strContactName NVARCHAR(50)
+		,@strCounty NVARCHAR(25)
+		,@strCity NVARCHAR(25)
+		,@strState NVARCHAR(50)
+		,@strZip NVARCHAR(12)
+		,@strCountry NVARCHAR(25)
+		,@strPhone NVARCHAR(50)
+		,@strInventoryShipmentNo NVARCHAR(100)
+		,@intInventoryShipmentId INT
+		,@strShipmentPickListNotes NVARCHAR(MAX) = ''
+		,@intCustomerEntityId INT
+
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
 	DECLARE @temp_xml_table TABLE (
-		 [fieldname] NVARCHAR(50)
+		[fieldname] NVARCHAR(50)
 		,[condition] NVARCHAR(20)
 		,[from] NVARCHAR(50)
 		,[to] NVARCHAR(50)
@@ -51,32 +50,33 @@ BEGIN
 	SELECT @intOrderHeaderId = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intOrderHeaderId'
-	
+
 	SELECT @strInventoryShipmentNo = strReferenceNo
 	FROM tblMFOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
-	SELECT @intInventoryShipmentId = intInventoryShipmentId,
-		   @intCustomerEntityId = intEntityCustomerId
+	SELECT @intInventoryShipmentId = intInventoryShipmentId
+		,@intCustomerEntityId = intEntityCustomerId
 	FROM tblICInventoryShipment
 	WHERE strShipmentNumber = @strInventoryShipmentNo
 
-	IF ISNULL(@intCustomerEntityId,0) <> 0 
+	IF ISNULL(@intCustomerEntityId, 0) <> 0
 	BEGIN
-		SELECT TOP 1 @strShipmentPickListNotes = Replace(Replace(CONVERT(VarChar(max), blbMessage),'<p>',''),'</p>','') FROM tblSMDocumentMaintenance DM
+		SELECT TOP 1 @strShipmentPickListNotes = Replace(Replace(CONVERT(VARCHAR(max), blbMessage), '<p>', ''), '</p>', '')
+		FROM tblSMDocumentMaintenance DM
 		JOIN tblSMDocumentMaintenanceMessage DMM ON DM.intDocumentMaintenanceId = DMM.intDocumentMaintenanceId
 		WHERE intEntityCustomerId = @intCustomerEntityId
 	END
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
-			,@strCompanyAddress = strAddress
-			,@strContactName = strContactName
-			,@strCounty = strCounty
-			,@strCity = strCity
-			,@strState = strState
-			,@strZip = strZip
-			,@strCountry = strCountry
-			,@strPhone = strPhone
+		,@strCompanyAddress = strAddress
+		,@strContactName = strContactName
+		,@strCounty = strCounty
+		,@strCity = strCity
+		,@strState = strState
+		,@strZip = strZip
+		,@strCountry = strCountry
+		,@strPhone = strPhone
 	FROM tblSMCompanySetup
 
 	SELECT I.intItemId
@@ -108,6 +108,8 @@ BEGIN
 		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
 		,US.strUserName AS strAssignedTo
 		,@strShipmentPickListNotes AS strShipmentPickListNotes
+		,OH.strReferenceNo
+		,OH.strComment AS strInstruction
 	FROM tblMFOrderHeader OH
 	JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
 	JOIN tblMFTaskType TT ON TT.intTaskTypeId = T.intTaskTypeId
