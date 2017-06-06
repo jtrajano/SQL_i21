@@ -102,7 +102,7 @@ SET @totalChargesCount = (SELECT COUNT(*) FROM dbo.#tmpReceiptChargeData
 							WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)
 							AND ISNULL(dblAmountBilled,0) < dblAmount)
 
-SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId);
+SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId);
 
 --Get the company location of the user to get the default ap account else get from preference
 SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @userLocation)
@@ -598,7 +598,7 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 		LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
-		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON D1.intEntityVendorId = @vendorId
+		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityVendorId = @vendorId
 		LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
 		OUTER APPLY (
 			SELECT 
