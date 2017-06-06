@@ -232,6 +232,18 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
+--Check if the header date is less than detail date
+IF EXISTS (
+	SELECT TOP 1 * FROM tblCMBankTransaction A
+	INNER JOIN  tblCMBankTransactionDetail B ON A.intTransactionId = B.intTransactionId
+	WHERE strTransactionId = @strTransactionId
+	AND A.dtmDate < B.dtmDate
+)
+BEGIN
+	RAISERROR('Date must be equal or greater than detail date.', 11, 1)
+	GOTO Post_Rollback
+END
+
 --=====================================================================================================================================
 -- 	PROCESSING OF THE UNDEPOSITED FUNDS
 ---------------------------------------------------------------------------------------------------------------------------------------
