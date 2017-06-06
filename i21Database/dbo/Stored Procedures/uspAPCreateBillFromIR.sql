@@ -684,7 +684,7 @@ BEGIN
 				[intPODetailId]				=	NULL,
 				[dblQtyOrdered]				=	A.dblOrderQty,
 				[dblQtyReceived]			=	A.dblQuantityToBill,
-				[dblTax]					=	(CASE WHEN C.ysnPrice = 1 AND A.dblTax > 0 THEN ISNULL(A.dblTax,0) * -1 ELSE ISNULL(A.dblTax,0) END), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN AND NOT CHECK OFF (OR NEGATIVE AMOUNT)
+				[dblTax]					=	(CASE WHEN C.ysnPrice = 1 THEN ISNULL(A.dblTax,0) * -1 ELSE ISNULL(A.dblTax,0) END), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN AND NOT CHECK OFF (OR NEGATIVE AMOUNT)
 				[dblForexRate]				=	ISNULL(A.dblForexRate,0),
 				[intForexRateTypeId]		=   A.intForexRateTypeId,
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
@@ -876,7 +876,7 @@ BEGIN
 						[dblQtyOrdered]				=	A.dblOrderQty,
 						[dblQtyReceived]			=	A.dblQuantityToBill,
 						[dblTax]					=	(CASE WHEN ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
-																WHEN ysnCheckoffTax = 1 AND A.dblTax > 0 THEN A.dblTax * -1
+																WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
 															ELSE ISNULL(A.dblTax,0) END),
 						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
@@ -1013,8 +1013,8 @@ BEGIN
 		[strCalculationMethod]	=	A.strCalculationMethod, 
 		[dblRate]				=	A.dblRate, 
 		[intAccountId]			=	A.intTaxAccountId, 
-		[dblTax]				=	CASE WHEN ysnCheckoffTax = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE A.dblTax END,
-		[dblAdjustedTax]		=	CASE WHEN ysnCheckoffTax = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE A.dblTax END,
+		[dblTax]				=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
+		[dblAdjustedTax]		=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
 		--[dblTax]				=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
 		--									!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 
 		--									THEN  (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE ABS(A.dblTax) END) 
