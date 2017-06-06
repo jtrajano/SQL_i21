@@ -525,8 +525,8 @@ BEGIN
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
