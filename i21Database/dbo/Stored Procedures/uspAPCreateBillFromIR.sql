@@ -291,7 +291,7 @@ BEGIN
 	--WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
 	
 	--SET @totalReceiptAmount = @totalLineItem + @totalCharges;
-
+	--validate contract basis, do not allow to create receipt from contract basis
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM #tmpReceiptData A
 		INNER JOIN #tmpReceiptDetailData B ON A.intInventoryReceiptId = B.intInventoryReceiptId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -1013,20 +1013,20 @@ BEGIN
 		[strCalculationMethod]	=	A.strCalculationMethod, 
 		[dblRate]				=	A.dblRate, 
 		[intAccountId]			=	A.intTaxAccountId, 
-		[dblTax]				=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
-		[dblAdjustedTax]		=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
-		--[dblTax]				=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
-		--									!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 
-		--									THEN  (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE ABS(A.dblTax) END) 
-		--								  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
-		--								!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 
-		--									THEN A.dblTax * -1
-		--									-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-		--									ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE A.dblTax END) END), 
-		--[dblAdjustedTax]		=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN (CASE WHEN B.ysnPrice = 1  AND A.dblTax > 0  THEN A.dblTax  ELSE ABS(dblAdjustedTax) END) 
-		--								  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN dblAdjustedTax * -1
-		--									-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-		--									ELSE (CASE WHEN B.ysnPrice = 1 AND dblAdjustedTax > 0 THEN dblAdjustedTax * -1  ELSE dblAdjustedTax END) END), 
+		--[dblTax]				=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
+		--[dblAdjustedTax]		=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
+		[dblTax]				=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
+											!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 
+											THEN  (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE ABS(A.dblTax) END) 
+										  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
+										!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 
+											THEN A.dblTax * -1
+											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE A.dblTax END) END), 
+		[dblAdjustedTax]		=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN (CASE WHEN B.ysnPrice = 1  AND A.dblTax > 0  THEN A.dblTax  ELSE ABS(dblAdjustedTax) END) 
+										  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN dblAdjustedTax * -1
+											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											ELSE (CASE WHEN B.ysnPrice = 1 AND dblAdjustedTax > 0 THEN dblAdjustedTax * -1  ELSE dblAdjustedTax END) END), 
 		[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	0, 
 		[ysnCheckOffTax]		=	A.ysnCheckoffTax
