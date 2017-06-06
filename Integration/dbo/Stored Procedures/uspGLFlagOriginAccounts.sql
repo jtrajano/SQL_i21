@@ -1,7 +1,4 @@
 ﻿GO
-
-
-
 	EXEC('
 		IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLFlagOriginAccounts'' and type = ''P'') 
 			DROP PROCEDURE [dbo].[uspGLFlagOriginAccounts];
@@ -24,4 +21,4 @@
 		SET ysnOrigin = 1
 		FROM tblGLCOACrossReference d
 		JOIN c ON d.intLegacyReferenceId = c.A4GLIdentity')
-		GO
+GO
