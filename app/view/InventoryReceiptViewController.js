@@ -1443,6 +1443,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var vendorCurrency = records[0].get('intCurrencyId');
             if (vendorCurrency){
                 current.set('intCurrencyId', vendorCurrency);
+                current.set('strCurrency', records[0].get('strCurrency'));
 
                 var subCurrencyCents = records[0].get('intSubCurrencyCent');
                 subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;

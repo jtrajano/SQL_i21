@@ -305,7 +305,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 dataType: 'numeric',
                                                                 text: 'Default Location Id',
                                                                 hidden: true
-                                                            }
+                                                            },
+                                                            {
+                                                                dataIndex: 'strCurrency',
+                                                                dataType: 'string',
+                                                                text: 'Currency',
+                                                                hidden: true
+                                                            },
                                                         ],
                                                         enableDrillDown: true,
                                                         lookUpField: true,
