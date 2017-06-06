@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessACHPayments]
-	@strPaymentIds		NVARCHAR(MAX),
-	@intBankAccountId	INT,
-	@intUserId			INT,
-	@intBankDepositId   INT = NULL OUTPUT
+	@strPaymentIds			NVARCHAR(MAX),
+	@intBankAccountId		INT,
+	@intUserId				INT,
+	@strNewTransactionId	NVARCHAR(100) = '' OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -141,5 +141,7 @@ FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 
 SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
 
-EXEC [dbo].[uspCMCreateBankTransactionEntries] @BankTransactionEntries = @BankTransaction, @BankTransactionDetailEntries = @BankTransactionDetail, @intTransactionId = @intBankDepositId OUT
+EXEC dbo.uspCMCreateBankTransactionEntries @BankTransactionEntries = @BankTransaction, @BankTransactionDetailEntries = @BankTransactionDetail
 EXEC dbo.uspCMPostBankDeposit 1, 0, @strTransactionId, NULL, @intUserId, @intEntityId, @ysnSuccess OUT, @intMessageId OUT
+
+SET @strNewTransactionId = @strTransactionId
