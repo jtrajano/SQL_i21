@@ -14,7 +14,7 @@ BEGIN
 	DECLARE @cnt INT = 1
 	DECLARE @SQLCMD NVARCHAR(3000)
 	DECLARE @EntityId int
-	SET @EntityId = ISNULL((SELECT  intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @UserId),@UserId)
+	SET @EntityId = ISNULL((SELECT  intEntityId FROM tblSMUserSecurity WHERE intEntityId = @UserId),@UserId)
 
 	DECLARE @ysnAG BIT = 0
     DECLARE @ysnPT BIT = 0
