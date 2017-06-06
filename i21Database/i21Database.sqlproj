@@ -5256,6 +5256,7 @@
     <Build Include="dbo\Tables\tblMFOrderManifestLabel.sql" />
     <None Include="Scripts\Post-Deployment\EM\040_UpdateEmailDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabel.sql" />
+    <Build Include="dbo\Views\vyuRKGetInvoicedQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
