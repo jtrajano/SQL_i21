@@ -6,6 +6,7 @@
 	[PostRemind_BeforeAfter] NVARCHAR(10)  COLLATE Latin1_General_CI_AS NULL,
 	[PostRemind_Days] INT NULL,
 	[OriginConversion_OffsetAccountId] INT NULL,
+	[ysnConsolidatingParent] [bit] NULL,
 	[intDefaultVisibleOldAccountSystemId] INT NULL
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
