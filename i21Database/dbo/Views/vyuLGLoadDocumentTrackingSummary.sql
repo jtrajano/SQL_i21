@@ -8,6 +8,7 @@ SELECT DT.strContractNumber
 	,DT.dtmScheduledDate
 	,DT.dtmETAPOD AS dtmETAPODSA
 	,SI.dtmETAPOD AS dtmETAPODSI
+	,intDaysToETAPOD
 	,(
 		SELECT COUNT(*)
 		FROM vyuLGLoadDocumentTracking T
@@ -43,6 +44,9 @@ SELECT DT.strContractNumber
 			THEN 'Y'
 		ELSE 'N'
 		END strDocumentsReceived
+	,DT.dblQuantity
+	,DT.ysnInvoice
+	,CASE WHEN ISNULL(DT.ysnInvoice,0) = 0 THEN 'No' ELSE 'Yes' END strInvoice
 FROM vyuLGLoadDocumentTracking DT
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = DT.intContractHeaderId
 JOIN tblLGLoad L ON L.intLoadId = DT.intLoadId
@@ -60,3 +64,6 @@ GROUP BY DT.strContractNumber
 	,DT.dtmETAPOD
 	,SI.dtmETAPOD
 	,L.intLoadId
+	,DT.dblQuantity
+	,DT.ysnInvoice
+	,intDaysToETAPOD
