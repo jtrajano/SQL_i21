@@ -5278,6 +5278,8 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
     <None Include="Scripts\Post-Deployment\EM\040_UpdateEmailDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetConsolidateWarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
