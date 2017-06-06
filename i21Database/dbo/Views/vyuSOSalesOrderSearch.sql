@@ -38,90 +38,74 @@ SELECT
 	,strLostQuoteComment	= SO.strLostQuoteComment
 	,ysnRecurring			= SO.ysnRecurring
 	,intEntityContactId		= SO.intEntityContactId
-	,strContactName			= (SELECT TOP 1 strName FROM vyuEMEntityContact WHERE intEntityContactId = SO.intEntityContactId)
-	,ysnHasEmailSetup		= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + SO.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	,strContactName			= EC.strName
+	,ysnHasEmailSetup		= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrency			= SMC.strCurrency
 	,strCurrencyDescription	= SMC.strDescription
-FROM         
-	(SELECT intSalesOrderId
-			,strSalesOrderNumber
-			,strTransactionType
-			,strType
-			,strOrderStatus
-			,intTermId
-			,intAccountId
-			,dtmDate
-			,dtmDueDate
-			,ysnProcessed
-			,dblSalesOrderTotal
-			,dblDiscount
-			,dblAmountDue
-			,dblPayment
-			,intCompanyLocationId
-			,intCurrencyId
-			,intQuoteTemplateId
-			,ysnPreliminaryQuote
-			,intOrderedById
-			,intSplitId
-			,intEntitySalespersonId
-			,strLostQuoteCompetitor
-			,strLostQuoteReason
-			,strLostQuoteComment
-			,ysnRecurring
-			,intEntityContactId
-			,intEntityCustomerId
-	 FROM dbo.tblSOSalesOrder) AS SO 
-LEFT OUTER JOIN
-	(SELECT [intEntityId]
-			,strCustomerNumber
-	 FROM 
-		dbo.tblARCustomer) AS CUS ON SO.[intEntityCustomerId] = CUS.[intEntityId] 
-LEFT OUTER JOIN
-	(SELECT intEntityId,
-			strName,
-			strEntityNo
-	 FROM dbo.tblEMEntity) AS NTT ON CUS.[intEntityId] = NTT.intEntityId 
-LEFT OUTER JOIN
-	(SELECT intTermID,
-			strTerm
-	 FROM 
-		dbo.tblSMTerm) AS TERM ON SO.intTermId = TERM.intTermID 
-LEFT OUTER JOIN
-	(SELECT intCompanyLocationId
-			,strLocationName 
-	 FROM 
-		dbo.tblSMCompanyLocation) AS CL ON SO.intCompanyLocationId  = CL.intCompanyLocationId 
-LEFT OUTER JOIN
-	(SELECT intQuoteTemplateId,
+FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
+LEFT OUTER JOIN (
+	 SELECT intEntityId
+		  , strCustomerNumber
+	 FROM dbo.tblARCustomer WITH (NOLOCK)
+) CUS ON SO.[intEntityCustomerId] = CUS.[intEntityId] 
+LEFT OUTER JOIN (
+	 SELECT intEntityId
+		  , strName
+		  , strEntityNo
+	 FROM dbo.tblEMEntity WITH (NOLOCK)
+) NTT ON CUS.[intEntityId] = NTT.intEntityId 
+LEFT OUTER JOIN (
+	 SELECT intTermID
+		  , strTerm
+	 FROM dbo.tblSMTerm WITH (NOLOCK)
+) TERM ON SO.intTermId = TERM.intTermID 
+LEFT OUTER JOIN (
+	 SELECT intCompanyLocationId
+		  , strLocationName 
+	 FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+) CL ON SO.intCompanyLocationId  = CL.intCompanyLocationId 
+LEFT OUTER JOIN (
+	 SELECT intQuoteTemplateId,
 			strTemplateName
-	 FROM 
-		dbo.tblARQuoteTemplate) AS QT ON SO.intQuoteTemplateId = QT.intQuoteTemplateId 
-LEFT OUTER JOIN
-	(SELECT intSplitId
-			,strSplitNumber
-	 FROM 
-		dbo.[tblEMEntitySplit]) AS ES ON SO.intSplitId = ES.intSplitId 
-LEFT OUTER JOIN
-	(SELECT intEntityId 
-			,strName
-	 FROM 
-		dbo.tblEMEntity) AS OE ON SO.intOrderedById = OE.intEntityId 
-LEFT OUTER JOIN
-	((SELECT [intEntityId] 
-				, strSalespersonId				
-	  FROM 
-		dbo.tblARSalesperson) AS SP 
-	  INNER JOIN 
-		(SELECT intEntityId 
-				,strName
-		 FROM 
-			tblEMEntity) ESP ON SP.[intEntityId] = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.[intEntityId]
-LEFT OUTER JOIN 
-	(SELECT intCurrencyID, 
+	 FROM dbo.tblARQuoteTemplate WITH (NOLOCK)
+) QT ON SO.intQuoteTemplateId = QT.intQuoteTemplateId 
+LEFT OUTER JOIN (
+	 SELECT intSplitId
+		  , strSplitNumber
+	 FROM dbo.tblEMEntitySplit WITH (NOLOCK)
+) ES ON SO.intSplitId = ES.intSplitId 
+LEFT OUTER JOIN (
+	 SELECT intEntityId 
+		  , strName
+	 FROM dbo.tblEMEntity WITH (NOLOCK)
+) OE ON SO.intOrderedById = OE.intEntityId 
+LEFT OUTER JOIN (
+	  (SELECT intEntityId
+		   , strSalespersonId				
+	  FROM dbo.tblARSalesperson WITH (NOLOCK)
+	  ) AS SP 
+	  INNER JOIN (SELECT intEntityId 
+				       , strName
+				  FROM dbo.tblEMEntity WITH (NOLOCK) 
+				  ) ESP ON SP.intEntityId = ESP.intEntityId
+) ON SO.intEntitySalespersonId = SP.intEntityId
+LEFT OUTER JOIN (
+	SELECT intCurrencyID, 
 			strCurrency, 
 			strDescription 
-	FROM 
-		tblSMCurrency) SMC ON SO.intCurrencyId = SMC.intCurrencyID
-
-
- 
+	FROM dbo.tblSMCurrency  WITH (NOLOCK) 
+) SMC ON SO.intCurrencyId = SMC.intCurrencyID
+OUTER APPLY (
+	SELECT TOP 1 strName
+			   , strEmail
+			   , intEntityContactId 
+	FROM dbo.vyuEMEntityContact WITH (NOLOCK) 
+	WHERE SO.intEntityContactId = intEntityContactId
+) EC
+OUTER APPLY (
+	SELECT intEmailSetupCount = COUNT(*) 
+	FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
+	WHERE intCustomerEntityId = SO.intEntityCustomerId 
+	  AND ISNULL(strEmail, '') <> '' 
+	  AND strEmailDistributionOption LIKE '%' + SO.strTransactionType + '%'
+) EMAILSETUP
