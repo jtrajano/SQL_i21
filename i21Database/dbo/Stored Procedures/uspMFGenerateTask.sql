@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspMFGenerateTask @intOrderHeaderId INT
+﻿CREATE PROCEDURE uspMFGenerateTask 
+	 @intOrderHeaderId INT
 	,@intEntityUserSecurityId INT
 	,@ysnAllTasksNotGenerated BIT = 0 OUTPUT
 AS
@@ -147,30 +148,16 @@ BEGIN TRY
 			)
 
 		IF EXISTS (
-				SELECT *
-				FROM tblWHTask
+				SELECT 1
+				FROM tblMFTask
 				WHERE intOrderHeaderId = @intOrderHeaderId
-					AND ISNULL(intAssigneeId, 0) = 0
-					AND (
-						intTaskTypeId IN (
-							2
-							,7
-							,13
-							)
-						)
+					AND intTaskStateId NOT IN (3,4)
 				)
 		BEGIN
 			DELETE
-			FROM tblWHTask
+			FROM tblMFTask
 			WHERE intOrderHeaderId = @intOrderHeaderId
-				AND ISNULL(intAssigneeId, 0) = 0
-				AND (
-					intTaskTypeId IN (
-						2
-						,7
-						,13
-						)
-					)
+				AND intTaskStateId  NOT IN (3,4)
 		END
 
 		Update tblMFOrderDetail Set dblWeight=dblQty Where dblQty>0 and (dblWeight=0 or dblWeight is null)
@@ -193,16 +180,26 @@ BEGIN TRY
 			,oli.dblQty - ISNULL((
 					SELECT SUM(CASE 
 								WHEN t.intTaskTypeId = 13
-									THEN s.dblQty - t.dblQty
+									THEN l.dblQty - t.dblQty
 								ELSE t.dblQty
 								END)
-					FROM tblWHTask t
-					JOIN tblWHSKU s ON s.intSKUId = t.intSKUId
+					FROM tblMFTask t
+					JOIN tblICLot l ON l.intLotId = t.intLotId
 					WHERE t.intOrderHeaderId = oh.intOrderHeaderId
 						AND t.intItemId = oli.intItemId
 					), 0) dblRemainingLineItemQty
 			,oli.intItemUOMId
-			,oli.dblWeight
+			,oli.dblWeight- ISNULL((
+					SELECT SUM(CASE 
+								WHEN t.intTaskTypeId = 13
+									THEN l.dblWeight - t.dblWeight
+								ELSE t.dblWeight
+								END)
+					FROM tblMFTask t
+					JOIN tblICLot l ON l.intLotId = t.intLotId
+					WHERE t.intOrderHeaderId = oh.intOrderHeaderId
+						AND t.intItemId = oli.intItemId
+					), 0)
 			,oli.intWeightUOMId
 			,i.ysnStrictFIFO
 			,oli.intLotId
@@ -981,11 +978,7 @@ BEGIN TRY
 
 		IF @intTaskCount <= 0
 		BEGIN
-			RAISERROR (
-					'System was unable to generate task for one or more item(s).'
-					,16
-					,1
-					)
+			RAISERROR ('System was unable to generate task for one or more item(s).',16,1)
 		END
 	END
 	ELSE
@@ -1075,11 +1068,6 @@ BEGIN CATCH
 	BEGIN
 		SET @strErrMsg = @strErrMsg
 
-		RAISERROR (
-				@strErrMsg
-				,16
-				,1
-				,'WITH NOWAIT'
-				)
+		RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
 	END
 END CATCH
