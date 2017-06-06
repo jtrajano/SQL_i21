@@ -217,14 +217,11 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 					(SELECT
 						TC.intTimecardId, TC.dtmDate, TC.intEntityEmployeeId, TC.intEmployeeEarningId, EE.intTypeEarningId,
 						TC.intEmployeeDepartmentId,	DS.intShiftNo, TC.dtmTimeIn, TC.dtmTimeOut, D.strDifferentialPay
-						,dtmShiftStart = DATETIMEFROMPARTS(YEAR(dtmDate), MONTH(dtmDate), DAY(dtmDate), DATEPART(HH, dtmStart), DATEPART(MI, dtmStart), 
-											DATEPART(SS, dtmStart), DATEPART(MS, dtmStart))
+						,dtmShiftStart = DATEADD(HH, DATEPART(HH, dtmStart), DATEADD(MI, DATEPART(MI, dtmStart), DATEADD(SS, DATEPART(SS, dtmStart), DATEADD(MS, DATEPART(MS, dtmStart), dtmDate))))
 						,dtmShiftEnd = CASE WHEN (dtmStart > dtmEnd) THEN
-												DATETIMEFROMPARTS(YEAR(DATEADD(DD, 1, dtmDate)), MONTH(DATEADD(DD, 1, dtmDate)), DAY(DATEADD(DD, 1, dtmDate)), 
-												DATEPART(HH, dtmEnd), DATEPART(MI, dtmEnd), DATEPART(SS, dtmEnd), DATEPART(MS, dtmEnd))
+												DATEADD(HH, DATEPART(HH, dtmEnd), DATEADD(MI, DATEPART(MI, dtmEnd), DATEADD(SS, DATEPART(SS, dtmEnd), DATEADD(MS, DATEPART(MS, dtmEnd), DATEADD(DD, 1, dtmDate)))))
 											ELSE
-												DATETIMEFROMPARTS(YEAR(dtmDate), MONTH(dtmDate), DAY(dtmDate), 
-												DATEPART(HH, dtmEnd), DATEPART(MI, dtmEnd), DATEPART(SS, dtmEnd), DATEPART(MS, dtmEnd))
+												DATEADD(HH, DATEPART(HH, dtmEnd), DATEADD(MI, DATEPART(MI, dtmEnd), DATEADD(SS, DATEPART(SS, dtmEnd), DATEADD(MS, DATEPART(MS, dtmEnd), dtmDate))))
 											END
 						,dblRate = CONVERT(NUMERIC(18, 6),
 									CASE WHEN (strRateType = 'Per Hour') THEN
@@ -272,15 +269,12 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 						(SELECT
 							TC.intTimecardId, TC.dtmDate, TC.intEntityEmployeeId, TC.intEmployeeEarningId, EE.intTypeEarningId,
 							TC.intEmployeeDepartmentId,	DS.intShiftNo, TC.dtmTimeIn, TC.dtmTimeOut, D.strDifferentialPay
-							,dtmShiftStart = DATETIMEFROMPARTS(YEAR(dtmDate), MONTH(dtmDate), DAY(dtmDate), DATEPART(HH, dtmStart), DATEPART(MI, dtmStart), 
-												DATEPART(SS, dtmStart), DATEPART(MS, dtmStart))
+							,dtmShiftStart = DATEADD(HH, DATEPART(HH, dtmStart), DATEADD(MI, DATEPART(MI, dtmStart), DATEADD(SS, DATEPART(SS, dtmStart), DATEADD(MS, DATEPART(MS, dtmStart), dtmDate))))
 							,dtmShiftEnd = CASE WHEN (dtmStart > dtmEnd) THEN
-													DATETIMEFROMPARTS(YEAR(DATEADD(DD, 1, dtmDate)), MONTH(DATEADD(DD, 1, dtmDate)), DAY(DATEADD(DD, 1, dtmDate)), 
-													DATEPART(HH, dtmEnd), DATEPART(MI, dtmEnd), DATEPART(SS, dtmEnd), DATEPART(MS, dtmEnd))
-												ELSE
-													DATETIMEFROMPARTS(YEAR(dtmDate), MONTH(dtmDate), DAY(dtmDate), 
-													DATEPART(HH, dtmEnd), DATEPART(MI, dtmEnd), DATEPART(SS, dtmEnd), DATEPART(MS, dtmEnd))
-												END
+												DATEADD(HH, DATEPART(HH, dtmEnd), DATEADD(MI, DATEPART(MI, dtmEnd), DATEADD(SS, DATEPART(SS, dtmEnd), DATEADD(MS, DATEPART(MS, dtmEnd), DATEADD(DD, 1, dtmDate)))))
+											ELSE
+												DATEADD(HH, DATEPART(HH, dtmEnd), DATEADD(MI, DATEPART(MI, dtmEnd), DATEADD(SS, DATEPART(SS, dtmEnd), DATEADD(MS, DATEPART(MS, dtmEnd), dtmDate))))
+											END
 							,dblRate = CONVERT(NUMERIC(18, 6),
 										CASE WHEN (strRateType = 'Per Hour') THEN
 												DS.dblRate
