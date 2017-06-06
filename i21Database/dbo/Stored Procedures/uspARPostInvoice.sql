@@ -1184,6 +1184,7 @@ END CATCH
 					AND (ISNULL(D.intSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND A.strTransactionType = 'Debit Memo'
 					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+					AND D.intItemId IS NULL
 
 
                 --Sales Tax Account
