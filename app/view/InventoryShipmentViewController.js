@@ -3091,16 +3091,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         iRely.Functions.openScreen('i21.view.Currency', { viewConfig: { modal: true } });
     },   
 
-    onPostClick: function(button, e, eOpts) {
-        if (button){
-            button.disable();
+    onPostClick: function(btnPost, e, eOpts) {
+        if (btnPost){
+            btnPost.disable();
         }
         else {
             return;
         }
 
         var me = this;
-        var win = button.up('window');
+        var win = btnPost.up('window');
         var context = win.context;
         var currentRecord = win.viewModel.data.current;
         var tabInventoryShipment = win.down('#tabInventoryShipment');
@@ -3129,7 +3129,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         };
                         me.doPostPreview(win, cfg);
                     }                     
-                    button.enable();
+                    btnPost.enable();
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
@@ -3137,22 +3137,32 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the shipment.';
 
                     me.onAfterShip(false, statusText);
-                    button.enable();
+                    btnPost.enable();
                 }
             )
         };    
 
-        // If there is no data change, calculate the charge and do the recap. 
-        if (!context.data.hasChanges()) {
+        // Save any unsaved data first before doing the post. 
+        if (context.data.hasChanges()) {
+            context.data.validator.validateRecord({ window: win }, function(valid) {
+                // If records are valid, continue with the save. 
+                if (valid){
+                    context.data.saveRecord({
+                        successFn: function () {
+                            doPost();             
+                        }
+                    });
+                }
+                // If records are invalid, re-enable the post button. 
+                else {
+                    btnPost.enable();
+                }
+            });            
+        }
+        else {
             doPost();
         }
 
-        // Save has data changes first before anything else. 
-        context.data.saveRecord({
-            successFn: function () {
-                doPost();             
-            }
-        });
     },    
 
     onItemValidateEdit: function (editor, context, eOpts) {

@@ -6441,20 +6441,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onReceiveClick: function (button, e, eOpts) {
-        if (button){
-            button.disable();
+    onReceiveClick: function (btnPost, e, eOpts) {
+        if (btnPost){
+            btnPost.disable();
         }
         else {
             return;
         }
 
         var me = this;
-        var win = button.up('window');
+        var win = btnPost.up('window');
         var currentRecord = win.viewModel.data.current;
         
         if (!currentRecord){
-            button.enable();
+            btnPost.enable();
             return; 
         }
         
@@ -6492,7 +6492,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         };
                         me.doPostPreview(win, cfg);
                     }
-                    button.enable();
+                    btnPost.enable();
                 }
                 , function (failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
@@ -6500,15 +6500,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the inventory receipt.';
 
                     me.onAfterReceive(false, statusText);
-                    button.enable();
+                    btnPost.enable();
                 }
             )
         };
 
         var buttonAction = function (button) {
             if (button === 'yes') {
-                // If there is no data change, do the post.
-                if (!context.data.hasChanges()) {
+                //  Save the data changes first. After saving calculate the other charges and do the post. 
+                if (context.data.hasChanges()) {                    
+                    context.data.validator.validateRecord({ window: win }, function(valid) {
+                        // If records are valid, continue with the save. 
+                        if (valid){
+                            context.data.saveRecord({
+                                successFn: function () {
+                                    me.doOtherChargeCalculate(
+                                        win
+                                        , doPost
+                                    );
+                                }
+                            });                    
+                        }
+                        // If records are invalid, re-enable the post button. 
+                        else {
+                            btnPost.enable();
+                        }
+                    });
+                }
+                // If there is no data change, then calculate the other charges and do the post. 
+                else {
                     // Calculate the other charge if record is not yet posted. 
                     if (currentRecord && currentRecord.get('ysnPosted') == false){
                         me.doOtherChargeCalculate(
@@ -6520,18 +6540,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     else {
                         doPost();
                     }
-                    return;
                 }
-
-                // Save has data changes first before doing the post.
-                context.data.saveRecord({
-                    successFn: function () {
-                        me.doOtherChargeCalculate(
-                            win
-                            , doPost
-                        );
-                    }
-                });
             }
         }
 

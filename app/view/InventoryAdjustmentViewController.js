@@ -1187,21 +1187,21 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onPostOrUnPostClick: function (button, e, eOpts) {
-        if (button){
-            button.disable();
+    onPostOrUnPostClick: function (btnPost, e, eOpts) {
+        if (btnPost){
+            btnPost.disable();
         }
         else {
             return;
         }
 
         var me = this;
-        var win = button.up('window');
+        var win = btnPost.up('window');
         var context = win.context;
         var current = win.viewModel.data.current;
 
         if (!current){
-            button.enable();
+            btnPost.enable();
             return;
         }
 
@@ -1218,7 +1218,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             .subscribe(
                 function(successResponse) {
                     win.context.data.load();
-                    button.enable();
+                    btnPost.enable();
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
@@ -1235,24 +1235,31 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             }
                         }
                     );
-                    button.enable();
+                    btnPost.enable();
                 }
             )
         };        
 
-        // Save has data changes first before doing the post.
-        if (context.data.hasChanges()) {            
-            context.data.saveRecord({
-                successFn: function () {
-                    doPost();
+        // Save any unsaved data first before doing the post. 
+        if (context.data.hasChanges()) {
+            context.data.validator.validateRecord({ window: win }, function(valid) {
+                // If records are valid, continue with the save. 
+                if (valid){
+                    context.data.saveRecord({
+                        successFn: function () {
+                            doPost();             
+                        }
+                    });
                 }
-            });
+                // If records are invalid, re-enable the post button. 
+                else {
+                    btnPost.enable();
+                }
+            });            
         }
-        // Otherwise, simply post the transaction 
         else {
-            doPost();            
+            doPost();
         }
-
     },
 
     onRecapClick: function (button, e, eOpts) {
