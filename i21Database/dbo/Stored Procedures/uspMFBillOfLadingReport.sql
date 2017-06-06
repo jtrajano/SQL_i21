@@ -36,6 +36,7 @@ BEGIN TRY
 			,'' AS 'strVessel'
 			,'' AS 'strSealNumber'
 			,'' AS 'strCustomCustomerPO'
+			,'' AS 'intPalletsCount'
 
 		RETURN
 	END
@@ -103,6 +104,8 @@ BEGIN TRY
 		WHERE T.intRecordId = @intInventoryShipmentId
 
 		SELECT *
+			,COUNT(1) OVER () AS intPalletsCount
+		--,SUM(CEILING(dblQty / intCasesPerPallet)) OVER () AS intPalletsCount
 		FROM (
 			SELECT Shipment.intInventoryShipmentId
 				,Shipment.strShipmentNumber
@@ -133,8 +136,17 @@ BEGIN TRY
 				,Shipment.strVessel
 				,Shipment.strSealNumber
 				,ISNULL(@strCustomCustomerPO, '') AS strCustomCustomerPO
+			--,(
+			--	CASE 
+			--		WHEN ISNULL((Item.intLayerPerPallet * Item.intUnitPerLayer), 0) = 0
+			--			THEN 1
+			--		ELSE (Item.intLayerPerPallet * Item.intUnitPerLayer)
+			--		END
+			--	) AS intCasesPerPallet
 			FROM vyuICGetInventoryShipmentBillOfLading Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+			--LEFT JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
+			--LEFT JOIN tblICItem Item ON Item.intItemId = SI.intItemId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 			LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
 			LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId
