@@ -5282,6 +5282,7 @@
     <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertItemRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertSiteRecord.sql" />
+    <Build Include="dbo\Views\vyuRKGetInvoicedQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
