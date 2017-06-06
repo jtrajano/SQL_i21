@@ -414,6 +414,6 @@
     <Build Include="dbo\Tables\tblAPapivcmst.sql" />
     <None Include="Scripts\GL\1b_FlagCOACrossReferenceAccountsFromOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLFlagOriginAccounts.sql" />
+    <None Include="dbo\Stored Procedures\uspGLFlagOriginAccounts.sql" />
   </ItemGroup>
 </Project>
