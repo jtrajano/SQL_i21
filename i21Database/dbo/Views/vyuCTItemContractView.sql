@@ -20,7 +20,7 @@ AS
 			RY.strCountry strOrigin,
 			CL.strLocationName,
 			CL.intCompanyLocationId AS	intLocationId,
-			IM.strStatus,
+			ISNULL(IC.strStatus,IM.strStatus) strStatus,
 			IM.intProductTypeId,
 			CA.intPurchasingGroupId,
 			PG.strName	AS	strPurchasingGroup
