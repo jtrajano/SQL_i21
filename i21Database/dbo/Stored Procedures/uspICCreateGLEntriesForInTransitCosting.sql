@@ -5,6 +5,7 @@
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	--,@intContraInventory_ItemLocationId AS INT = NULL 
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -55,6 +56,7 @@ FROM	(
 			FROM	dbo.tblICInventoryTransaction t 
 			WHERE	t.strBatchId = @strBatchId
 					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 		) Query
 
 -- Validate the GL Accounts
@@ -124,6 +126,7 @@ BEGIN
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 						AND t.intItemId = Item.intItemId
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
+						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 			)
 	
 	IF @intItemId IS NOT NULL 
@@ -171,6 +174,7 @@ FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionTyp
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 WHERE	t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 ;
 
 -- Get the functional currency
@@ -224,6 +228,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			AND t.intFobPointId IS NOT NULL 	
+			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 

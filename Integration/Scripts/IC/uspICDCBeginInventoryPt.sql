@@ -7,9 +7,9 @@ CREATE PROCEDURE [dbo].[uspICDCBeginInventoryPt]
 --   Then adjustment posting need to be done in i21 application, which will update the onhand units of inventory.
 --   So here we do not directly update the onhand units from ptitmmst origin table into i21 item tblICItem table, rather we update 
 --   i21 table tblICInventoryAdjustment from ptitmmst table and then adjustment posting is done which updates tblICItem table. ** 
- @adjLoc NVARCHAR(3),	
- @adjdt  DATETIME , 
- @intEntityUserSecurityId AS INT
+ @adjLoc NVARCHAR(3) = NULL,	
+ @adjdt  DATETIME  = NULL, 
+ @intEntityUserSecurityId AS INT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -36,6 +36,8 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
 
+SET @adjdt = ISNULL(GETDATE(),@adjdt)
+
 -- Create the Adjustment header and detail record. 
 BEGIN 
 	--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
@@ -43,26 +45,75 @@ BEGIN
 
 	select @strAvgLast = ptctl_sa_lst_or_avg_cost from ptctlmst where ptctl_key = 1
 
-	INSERT INTO [dbo].[tblICInventoryAdjustment](
-		intLocationId
-		, dtmAdjustmentDate
-		, intAdjustmentType
-		, strAdjustmentNo
-		, strDescription
-		, ysnPosted
-		, intEntityId
-		, intConcurrencyId
-	)
-	VALUES (
-		(SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc)
-		, @adjdt
-		, @ADJUSTMENT_TYPE_QuantityChange
-		, @strAdjustmentNo
-		, 'Begin Inventory imported by iRely'
-		, 0
-		, @intEntityUserSecurityId
-		, 1
-	)
+	IF ( @adjLoc IS NULL or @adjLoc = '')
+	BEGIN	
+		DECLARE loc_cursor CURSOR
+		FOR
+		SELECT ptloc_loc_no	FROM   ptlocmst
+
+		OPEN loc_cursor
+
+		FETCH NEXT
+		FROM loc_cursor
+		INTO @adjLoc
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			INSERT INTO [dbo].[tblICInventoryAdjustment](
+				intLocationId
+				, dtmAdjustmentDate
+				, intAdjustmentType
+				, strAdjustmentNo
+				, strDescription
+				, ysnPosted
+				, intEntityId
+				, intConcurrencyId
+			)
+			VALUES (
+				(SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc)
+				, @adjdt
+				, @ADJUSTMENT_TYPE_QuantityChange
+				, @strAdjustmentNo
+				, 'Begin Inventory imported by iRely'
+				, 0
+				, @intEntityUserSecurityId
+				, 1
+			)
+
+			FETCH NEXT
+			FROM loc_cursor
+			INTO @adjLoc
+
+		END
+		CLOSE loc_cursor
+
+		DEALLOCATE loc_cursor
+	END
+	ELSE
+	BEGIN 
+			INSERT INTO [dbo].[tblICInventoryAdjustment](
+				intLocationId
+				, dtmAdjustmentDate
+				, intAdjustmentType
+				, strAdjustmentNo
+				, strDescription
+				, ysnPosted
+				, intEntityId
+				, intConcurrencyId
+			)
+			VALUES (
+				(SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc)
+				, @adjdt
+				, @ADJUSTMENT_TYPE_QuantityChange
+				, @strAdjustmentNo
+				, 'Begin Inventory imported by iRely'
+				, 0
+				, @intEntityUserSecurityId
+				, 1
+			)
+	END
+	
+
 
 	SELECT @intAdjustmentNo = @@IDENTITY
 

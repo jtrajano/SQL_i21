@@ -689,7 +689,7 @@ BEGIN
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
-				AND dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
+				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
 
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative

@@ -19,7 +19,7 @@ SELECT
 	,intForexRateType			= si.intForexRateTypeId
 	,strForexRateType			= ex.strCurrencyExchangeRateType
 	,dblForexRate				= si.dblForexRate
-	,dblHistoricAmount			= CAST(NULL AS NUMERIC(18, 6))
+	,dblHistoricAmount			= ISNULL(si.dblQuantity, 0) * ISNULL(si.dblUnitPrice, 0) * si.dblForexRate
 	,dblNewForexRate			= 0 --Calcuate By GL
 	,dblNewAmount				= 0 --Calcuate By GL
 	,dblUnrealizedDebitGain		= 0 --Calcuate By GL
@@ -40,5 +40,8 @@ FROM tblICInventoryShipment s
 	LEFT JOIN tblARInvoiceDetail id ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
 		AND id.intItemId = si.intItemId
 	LEFT JOIN tblARInvoice iv ON iv.intInvoiceId = id.intInvoiceId
-WHERE s.ysnPosted = 1
+WHERE 
+	s.ysnPosted = 1
 	AND id.intInvoiceId IS NULL
+	AND s.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+	AND 1 = 0 -- Do now show any records for Shipment Items. Shipments are posted against cost and the cost are always in functional currency. It is not converted to any foreign currency. So this means, there is nothing to revalue. 

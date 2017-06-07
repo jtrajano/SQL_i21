@@ -28,6 +28,8 @@ DECLARE @batchId NVARCHAR(40);
 DECLARE @isGLSucces AS BIT = 0;
 DECLARE @intCreatedId INT;
 
+DECLARE @voucherId as Id;
+
 CREATE TABLE #tempValidateTable (
 	[strError] [NVARCHAR](MAX),
 	[strTransactionType] [NVARCHAR](50),
@@ -238,6 +240,19 @@ BEGIN
 
 			UPDATE tblPATCustomerStock SET intBillId = @intCreatedId WHERE intCustomerStockId = @intCustomerStockId
 
+			IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedId))
+			BEGIN
+				INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedId;
+
+				EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
+
+				UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+				UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+
+				EXEC uspAPUpdateVoucherTotal @voucherId;
+				DELETE FROM @voucherId;
+			END
+
 			EXEC [dbo].[uspAPPostBill]
 				@batchId = @intCreatedId,
 				@billBatchId = NULL,
@@ -397,7 +412,7 @@ BEGIN
 				,[dblMaintenanceAmount]					= NULL
 				,[dblLicenseAmount]						= NULL
 				,[intTaxGroupId]						= NULL
-				,[ysnRecomputeTax]						= 1
+				,[ysnRecomputeTax]						= 0
 				,[intSCInvoiceId]						= NULL
 				,[strSCInvoiceNumber]					= ''
 				,[intInventoryShipmentItemId]			= NULL
@@ -428,7 +443,7 @@ BEGIN
 			CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
 			WHERE CS.intCustomerStockId = @intCustomerStockId
 
-			EXEC uspARProcessInvoices 
+			EXEC [dbo].[uspARProcessInvoices]
 				@InvoiceEntries = @EntriesForInvoice,
 				@UserId = @intUserId,
 				@GroupingOption = 11,
@@ -441,6 +456,39 @@ BEGIN
 		END
 		ELSE
 		BEGIN
+			BEGIN TRY
+
+				SET ANSI_WARNINGS ON;
+				DECLARE @invoiceIds AS NVARCHAR(MAX);
+				SELECT @invoiceIds = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intInvoiceId)  FROM #tempCustomerStock 
+				FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
+				SET ANSI_WARNINGS OFF;
+
+				EXEC [dbo].[uspARPostInvoice]
+					@batchId			= NULL,
+					@post				= 0,
+					@recap				= 0,
+					@param				= @invoiceIds,
+					@userId				= @intUserId,
+					@beginDate			= NULL,
+					@endDate			= NULL,
+					@beginTransaction	= NULL,
+					@endTransaction		= NULL,
+					@exclude			= NULL,
+					@successfulCount	= @successfulCount OUTPUT,
+					@invalidCount		= @invalidCount OUTPUT,
+					@success			= @success OUTPUT,
+					@batchIdUsed		= @batchIdUsed OUTPUT,
+					@transType			= N'all',
+					@raiseError			= @error
+
+			END TRY
+			BEGIN CATCH
+				RAISERROR(@error,16,1);
+				GOTO Post_Rollback;
+			END CATCH
+
+
 			DELETE FROM tblARInvoice WHERE intInvoiceId IN (SELECT intInvoiceId FROM #tempCustomerStock) AND ysnPaid <> 1;
 			UPDATE tblPATCustomerStock SET intInvoiceId = null WHERE intCustomerStockId = @intCustomerStockId;
 		END

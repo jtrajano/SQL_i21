@@ -129,9 +129,8 @@ Begin
 	--PO Create
 	If @strMesssageType='PORDCR1'
 	Begin
-		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=@strRefNo AND intContractTypeId=1
 
-		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq),@intContractHeaderId=intContractHeaderId From tblCTContractDetail Where intContractDetailId=@strTrackingNo
 
 		If @strStatus IN (52,53) --Success
 		Begin
@@ -177,9 +176,8 @@ Begin
 	--PO Update
 	If @strMesssageType='PORDCH'
 	Begin
-		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=@strRefNo AND intContractTypeId=1
 
-		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq),@intContractHeaderId=intContractHeaderId From tblCTContractDetail Where intContractDetailId=@strTrackingNo
 
 		If @strStatus IN (52,53) --Success
 		Begin

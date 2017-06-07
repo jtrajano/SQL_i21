@@ -1,77 +1,31 @@
 ﻿CREATE VIEW [dbo].[vyuARTaxReport]
 AS
-SELECT TC.intTaxCodeId
-	 , TC.strTaxAgency
-	 , TC.strTaxCode
-	 , TC.intTaxClassId
-	 , CL.strTaxClass
-	 , TC.strCountry
-	 , TC.strState
-	 , TC.strCounty
-	 , TC.strCity
-	 , TC.intSalesTaxAccountId
-	 , SalesTaxAccount = SA.strAccountId
-	 , TC.intPurchaseTaxAccountId
-	 , PurchaseTaxAccount = ISNULL(PA.strAccountId, '')
-	 , IDT.strCalculationMethod
-	 , IDT.dblRate
-	 , I.intInvoiceId
-	 , I.intEntityCustomerId
+SELECT I.intEntityCustomerId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , C.strCustomerNumber
-	 , E.strName
-	 , dblUnitPrice     = (SELECT TOP 1 ISNULL(dblPrice, 0) AS dblPrice FROM tblARInvoiceDetail IID 
-									LEFT JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId AND IID.dblTotalTax > 0
-							WHERE intInvoiceId = I.intInvoiceId)
-	 , strCompanyName	= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
-	 , intItemId        = (SELECT TOP 1 IID.intItemId FROM tblARInvoiceDetail IID 
-									LEFT JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId AND IID.dblTotalTax > 0			
-							WHERE intInvoiceId = I.intInvoiceId)
-	 , strItemNo        = (SELECT TOP 1 ICI.strItemNo FROM tblARInvoiceDetail IID 
-									LEFT JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId AND IID.dblTotalTax > 0
-									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
-							WHERE intInvoiceId = I.intInvoiceId)
-	 , dblQtyShipped	= (SELECT TOP 1 dblQtyShipped FROM tblARInvoiceDetail IID 
-									LEFT JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId AND IID.dblTotalTax > 0
-							WHERE intInvoiceId = I.intInvoiceId)
-	 , intCategoryId    = (SELECT TOP 1 ICI.intCategoryId FROM tblARInvoiceDetail IID 
-									LEFT JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId AND IID.dblTotalTax > 0
-									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
-							WHERE intInvoiceId = I.intInvoiceId)
-	 , strItemCategory  = (SELECT TOP 1 ICC.strCategoryCode FROM tblARInvoiceDetail IID 
-									LEFT JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId AND IID.dblTotalTax > 0
-									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
-									LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
-							WHERE intInvoiceId = I.intInvoiceId)
+	 , C.strName	 
+	 , strCompanyName			= COMPANY.strCompanyName
+	 , strCompanyAddress		= COMPANY.strCompanyAddress
+	 , intCurrencyId			= I.intCurrencyId
+	 , strCurrency				= SMC.strCurrency
+	 , strCurrencyDescription	= SMC.strDescription
+	 , TAXDETAIL.*
 	 , dblTaxDifference = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN SUM(IDT.dblAdjustedTax - IDT.dblTax) * -1 
-								ELSE SUM(IDT.dblAdjustedTax - IDT.dblTax) 
+								THEN (TAXDETAIL.dblTotalAdjustedTax - TAXDETAIL.dblTotalTax) * -1 
+								ELSE (TAXDETAIL.dblTotalAdjustedTax - TAXDETAIL.dblTotalTax) 
 						  END
 	 , dblTaxAmount     = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN SUM(IDT.dblAdjustedTax) * -1 
-								ELSE SUM(IDT.dblAdjustedTax)
+								THEN TAXDETAIL.dblTotalAdjustedTax * -1 
+								ELSE TAXDETAIL.dblTotalAdjustedTax
 						  END
 	 , dblNonTaxable    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId) * -1 
-								ELSE (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId) 
+								THEN NONTAXABLE.dblNonTaxable * -1 
+								ELSE NONTAXABLE.dblNonTaxable 
 						  END
 	 , dblTaxable       = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') 
-								THEN (SELECT ISNULL(SUM(Taxable), 0)
-										FROM 
-										(
-										SELECT ISNULL(SUM(dblTotal), 0) Taxable FROM tblARInvoiceDetail WHERE intInvoiceId IN (Select intInvoiceId FROM tblARInvoice WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId)
-										UNION ALL
-										SELECT ISNULL(SUM(dblTotal), 0) Taxable FROM tblARInvoiceDetail WHERE intInvoiceId IN (Select intInvoiceId FROM tblARInvoice WHERE dblTotalTax < 0 AND intInvoiceId = I.intInvoiceId)
-										) ABC) * -1 
-								ELSE (SELECT ISNULL(SUM(Taxable), 0)
-										FROM 
-										(
-										SELECT ISNULL(SUM(dblTotal), 0) Taxable FROM tblARInvoiceDetail WHERE intInvoiceId IN (Select intInvoiceId FROM tblARInvoice WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId)
-										UNION ALL
-										SELECT ISNULL(SUM(dblTotal), 0) Taxable FROM tblARInvoiceDetail WHERE intInvoiceId IN (Select intInvoiceId FROM tblARInvoice WHERE dblTotalTax < 0 AND intInvoiceId = I.intInvoiceId)
-										) ABC) 
+								THEN TAXABLE.dblTaxable * -1
+								ELSE TAXABLE.dblTaxable
 						  END
 	 , dblTotalSales    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
 								THEN I.dblInvoiceTotal * -1 
@@ -81,50 +35,117 @@ SELECT TC.intTaxCodeId
 								THEN ISNULL(I.dblTax, 0) * -1 
 								ELSE ISNULL(I.dblTax, 0)
 						  END
-	 ,intCurrencyId				= I.intCurrencyId
-	 ,strCurrency				= SMC.strCurrency
-	 ,strCurrencyDescription	= SMC.strDescription
-FROM tblSMTaxCode TC
-	LEFT OUTER JOIN (SELECT intTaxClassId, strTaxClass FROM tblSMTaxClass) CL ON TC.intTaxClassId = CL.intTaxClassId
-	LEFT OUTER JOIN (SELECT intAccountId, strAccountId FROM tblGLAccount) SA ON TC.intSalesTaxAccountId = SA.intAccountId 
-	LEFT OUTER JOIN (SELECT intAccountId, strAccountId FROM tblGLAccount) PA ON TC.intPurchaseTaxAccountId = PA.intAccountId
-	LEFT OUTER JOIN (SELECT intInvoiceDetailId, intTaxCodeId, strCalculationMethod, dblRate, dblAdjustedTax, dblTax FROM tblARInvoiceDetailTax) IDT ON TC.intTaxCodeId = IDT.intTaxCodeId 
-	INNER JOIN (SELECT intInvoiceId, intInvoiceDetailId FROM tblARInvoiceDetail) ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
-	INNER JOIN (SELECT intInvoiceId, strInvoiceNumber, dtmDate, intEntityCustomerId, ysnPosted, intCurrencyId, dblTax, strTransactionType, dblInvoiceTotal, ysnPaid FROM tblARInvoice) I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1
-	INNER JOIN (SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer) C ON I.intEntityCustomerId = C.intEntityCustomerId
-	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
-	LEFT OUTER JOIN 
-		(SELECT intCurrencyID, 
-				strCurrency, 
-				strDescription 
-		FROM 
-			tblSMCurrency) SMC ON I.intCurrencyId = SMC.intCurrencyID	
-GROUP BY
-	 TC.intTaxCodeId
-	,TC.strTaxAgency
-	,TC.strTaxCode
-	,TC.intTaxClassId
-	,CL.strTaxClass
-	,TC.strCountry
-	,TC.strState
-	,TC.strCounty
-	,TC.strCity
-	,TC.intSalesTaxAccountId
-	,SA.strAccountId
-	,TC.intPurchaseTaxAccountId
-	,ISNULL(PA.strAccountId, '')
-	,I.intInvoiceId
-	,I.intEntityCustomerId
-	,I.strInvoiceNumber
-	,I.dtmDate
-	,C.strCustomerNumber
-	,E.strName	
-	,I.dblInvoiceTotal
-	,I.ysnPaid
-	,I.dblTax
-	,I.strTransactionType
-	,IDT.strCalculationMethod
-	,IDT.dblRate
-	,I.intCurrencyId
-	,SMC.strCurrency
-	,SMC.strDescription  
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+INNER JOIN (SELECT TC.intTaxCodeId
+				 , TC.strTaxAgency
+				 , TC.strTaxCode
+				 , TC.intTaxClassId
+				 , CL.strTaxClass
+				 , TC.strCountry
+				 , TC.strState
+				 , TC.strCounty
+				 , TC.strCity
+				 , TC.intSalesTaxAccountId
+				 , SalesTaxAccount		= SA.strAccountId
+				 , TC.intPurchaseTaxAccountId
+				 , PurchaseTaxAccount	= ISNULL(PA.strAccountId, '')
+				 , IDT.strCalculationMethod
+				 , IDT.dblRate
+				 , ID.intInvoiceId				 
+				 , intItemId			= ITEMDETAIL.intItemId
+				 , strItemNo			= ITEMDETAIL.strItemNo
+				 , dblUnitPrice			= ID.dblPrice
+				 , dblQtyShipped		= ID.dblQtyShipped
+				 , intCategoryId		= ITEMDETAIL.intCategoryId
+				 , strItemCategory		= ITEMDETAIL.strCategoryCode
+				 , IDT.dblAdjustedTax	 				 				 
+				 , IDT.dblTax
+				 , dblTotalAdjustedTax  = SUM(IDT.dblAdjustedTax)
+				 , dblTotalTax			= SUM(IDT.dblTax)
+			FROM dbo.tblSMTaxCode TC WITH (NOLOCK)
+			LEFT OUTER JOIN (SELECT intTaxClassId
+									, strTaxClass 
+								FROM dbo.tblSMTaxClass WITH (NOLOCK)
+			) CL ON TC.intTaxClassId = CL.intTaxClassId
+			LEFT OUTER JOIN (SELECT intAccountId
+									, strAccountId 
+								FROM dbo.tblGLAccount WITH (NOLOCK)
+			) SA ON TC.intSalesTaxAccountId = SA.intAccountId 
+			LEFT OUTER JOIN (SELECT intAccountId
+									, strAccountId 
+								FROM dbo.tblGLAccount WITH (NOLOCK)
+			) PA ON TC.intPurchaseTaxAccountId = PA.intAccountId
+			LEFT OUTER JOIN (SELECT intInvoiceDetailId
+									, intTaxCodeId
+									, strCalculationMethod
+									, dblRate
+									, dblAdjustedTax
+									, dblTax 
+								FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
+			) IDT ON TC.intTaxCodeId = IDT.intTaxCodeId 
+			INNER JOIN (SELECT intInvoiceId
+								, intItemId
+								, intInvoiceDetailId
+								, dblPrice
+								, dblQtyShipped
+						FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+			) ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId	
+			OUTER APPLY (SELECT TOP 1 intItemId
+									, ICI.intCategoryId
+									, strItemNo
+									, strCategoryCode
+							FROM dbo.tblICItem ICI WITH (NOLOCK)
+							LEFT JOIN (SELECT intCategoryId
+											, strCategoryCode 
+									FROM dbo.tblICCategory WITH (NOLOCK)
+							) ICC ON ICI.intCategoryId = ICC.intCategoryId
+							WHERE ID.intItemId = ICI.intItemId) ITEMDETAIL	
+			GROUP BY
+				 TC.intTaxCodeId
+				,TC.strTaxAgency
+				,TC.strTaxCode
+				,TC.intTaxClassId
+				,CL.strTaxClass
+				,TC.strCountry
+				,TC.strState
+				,TC.strCounty
+				,TC.strCity
+				,TC.intSalesTaxAccountId
+				,SA.strAccountId
+				,TC.intPurchaseTaxAccountId
+				,ISNULL(PA.strAccountId, '')	
+				,IDT.strCalculationMethod
+				,IDT.dblRate
+				,IDT.dblAdjustedTax
+				,IDT.dblTax
+				,ITEMDETAIL.intItemId
+				,ID.dblPrice
+				,ID.dblQtyShipped
+				,ID.intInvoiceId
+				,ITEMDETAIL.strItemNo
+				,ITEMDETAIL.intCategoryId
+				,ITEMDETAIL.strCategoryCode
+) TAXDETAIL ON I.intInvoiceId = TAXDETAIL.intInvoiceId
+LEFT OUTER JOIN (SELECT intEntityId
+				      , strCustomerNumber
+				      , strName
+				 FROM dbo.vyuARCustomer WITH (NOLOCK)
+) C ON I.intEntityCustomerId = C.intEntityId	
+LEFT OUTER JOIN (SELECT intCurrencyID
+						, strCurrency
+						, strDescription 
+				 FROM dbo.tblSMCurrency WITH (NOLOCK)
+) SMC ON I.intCurrencyId = SMC.intCurrencyID
+OUTER APPLY (SELECT TOP 1 strCompanyName
+						, strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+			 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY
+OUTER APPLY (SELECT dblNonTaxable = ISNULL(SUM(dblTotal), 0) 
+				 FROM dbo.tblARInvoiceDetail WITH (NOLOCK) 
+				 WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId
+) NONTAXABLE
+OUTER APPLY (SELECT dblTaxable = ISNULL(SUM(dblTotal), 0) 
+			 FROM dbo.tblARInvoiceDetail WITH (NOLOCK) 
+			 WHERE dblTotalTax <> 0 AND intInvoiceId = I.intInvoiceId
+) TAXABLE
+WHERE I.ysnPosted = 1	

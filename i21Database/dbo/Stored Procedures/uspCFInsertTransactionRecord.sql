@@ -138,7 +138,7 @@ BEGIN
 	DECLARE @ysnInvalid					BIT	= 0
 	DECLARE @ysnPosted					BIT = 0
 	DECLARE @ysnCreditCardUsed			BIT	= 0
-	DECLARE @intParticipantNo			INT = 0
+	DECLARE @strParticipantNo			NVARCHAR(MAX)
 	DECLARE @strNetworkType				NVARCHAR(MAX)
 	DECLARE @intNetworkLocation			INT = 0
 	DECLARE @intDupTransCount			INT = 0
@@ -195,7 +195,7 @@ BEGIN
 		BEGIN
 			SELECT TOP 1
 			 @intNetworkId			= intNetworkId 
-			,@intParticipantNo		= strParticipant
+			,@strParticipantNo		= strParticipant
 			,@strNetworkType		= strNetworkType	
 			,@intForeignCustomerId	= intCustomerId
 			,@strNetworkType		= strNetworkType
@@ -207,7 +207,7 @@ BEGIN
 		BEGIN
 			SELECT TOP 1
 			 @intNetworkId			= intNetworkId 
-			,@intParticipantNo		= strParticipant
+			,@strParticipantNo		= strParticipant
 			,@strNetworkType		= strNetworkType	
 			,@intForeignCustomerId	= intCustomerId
 			,@strNetworkType		= strNetworkType
@@ -218,18 +218,35 @@ BEGIN
 
 	IF(@strNetworkType = 'PacPride')
 	BEGIN
+
+		DECLARE @intMatchSellingHost INT = 0
+		DECLARE @intMatchBuyingHost  INT = 0
+
+
+		SET @strParticipantNo = REPLACE(@strParticipantNo,' ', '')
+		SET @strParticipantNo = RTRIM(LTRIM(@strParticipantNo))
+
+
+		select @intMatchSellingHost = Count(*) from fnCFSplitString(@strParticipantNo,',') where Record = @intSellingHost
+		select @intMatchBuyingHost = Count(*) from fnCFSplitString(@strParticipantNo,',') where Record = @intBuyingHost
+		
+
+
 		-----------TRANSACTION TYPE-----------
-		IF(@intSellingHost = @intParticipantNo AND @intBuyingHost = @intParticipantNo)
+		--IF(@intSellingHost = @strParticipantNo AND @intBuyingHost = @strParticipantNo)
+		IF(@intMatchSellingHost > 0 AND @intMatchBuyingHost > 0)
 		BEGIN
 			SET @strTransactionType = 'Local/Network'
 		END
-		ELSE IF (@intSellingHost = @intParticipantNo AND @intBuyingHost != @intParticipantNo)
+		--ELSE IF (@intSellingHost = @strParticipantNo AND @intBuyingHost != @strParticipantNo)
+		ELSE IF (@intMatchSellingHost > 0 AND @intMatchBuyingHost = 0)
 		BEGIN
 			SET @strTransactionType = 'Foreign Sale'
 			SET @dblOriginalGrossPrice = @dblTransferCost
 			--SET @intCustomerId = @intForeignCustomerId
 		END
-		ELSE IF (@intBuyingHost = @intParticipantNo AND @intSellingHost != @intParticipantNo)
+		--ELSE IF (@intBuyingHost = @strParticipantNo AND @intSellingHost != @strParticipantNo)
+		ELSE IF (@intMatchBuyingHost > 0 AND @intMatchSellingHost = 0)
 		BEGIN
 			SET @strTransactionType = (CASE @strPPSiteType 
 										WHEN 'N' 
@@ -238,7 +255,8 @@ BEGIN
 											THEN 'Extended Remote'
 									  END)
 		END
-		ELSE IF (@intBuyingHost != @intParticipantNo AND @intSellingHost != @intParticipantNo)
+		--ELSE IF (@intBuyingHost != @strParticipantNo AND @intSellingHost != @strParticipantNo)
+		ELSE IF (@intMatchBuyingHost = 0 AND @intMatchSellingHost = 0)
 		BEGIN
 			SET @strTransactionType = (CASE @strPPSiteType 
 										WHEN 'N' 

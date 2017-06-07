@@ -160,6 +160,33 @@ BEGIN
 				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 			END
 		END
+		ELSE IF (UPPER(@Condition) = 'GREATER THAN')
+		BEGIN
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+			END
+			ELSE
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+			END
+		END
+		ELSE IF (UPPER(@Condition) = 'LESS THAN')
+		BEGIN
+			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber')
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+			END
+			ELSE
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+			END
+		END
+		
 
 		SET @From = ''
 		SET @To = ''
@@ -233,7 +260,9 @@ BEGIN
 			 ,intConcurrencyId			INT
 			 ,ysnAllowEFT				BIT
 			 ,ysnActive					BIT
-			 ,ysnEnergyTrac				BIT
+			 ,ysnEnergyTrac				BIT		
+			 ,strDiscountSchedule		NVARCHAR(100)	
+			 ,ysnShowOnCFInvoice		BIT
 			 ,dblQuantity				NUMERIC(18,6)
 			 ,dblTotalQuantity			NUMERIC(18,6)
 			 ,dblDiscountRate			NUMERIC(18,6)
@@ -275,7 +304,9 @@ BEGIN
 			 ,intConcurrencyId			INT
 			 ,ysnAllowEFT				BIT
 			 ,ysnActive					BIT
-			 ,ysnEnergyTrac				BIT
+			 ,ysnEnergyTrac				BIT	
+			 ,strDiscountSchedule		NVARCHAR(100)	
+			 ,ysnShowOnCFInvoice		BIT
 			 ,dblQuantity				NUMERIC(18,6)
 			 ,dblTotalQuantity			NUMERIC(18,6)
 			 ,dblDiscountRate			NUMERIC(18,6)
@@ -317,7 +348,9 @@ BEGIN
 			 ,intConcurrencyId				INT
 			 ,ysnAllowEFT					BIT
 			 ,ysnActive						BIT
-			 ,ysnEnergyTrac					BIT
+			 ,ysnEnergyTrac					BIT	
+			 ,strDiscountSchedule		    NVARCHAR(100)	
+			 ,ysnShowOnCFInvoice		    BIT
 			 ,dblQuantity					NUMERIC(18,6)
 			 ,dblTotalQuantity				NUMERIC(18,6)
 			 ,dblDiscountRate				NUMERIC(18,6)
@@ -422,6 +455,8 @@ BEGIN
 				,dtmDueDate		
 				,dtmTransactionDate
 				,dtmPostedDate		
+				,strDiscountSchedule
+				,ysnShowOnCFInvoice
 			)
 			SELECT 
 				 intAccountId			
@@ -467,6 +502,8 @@ BEGIN
 				,dtmDueDate		
 				,dtmTransactionDate
 				,dtmPostedDate		
+				,strDiscountSchedule
+				,ysnShowOnCFInvoice
 			FROM ##tmpInvoiceDiscount as cfInvoice
 			WHERE intCustomerGroupId = @intDistinctDiscountLoop
 
@@ -533,6 +570,8 @@ BEGIN
 				,dtmDueDate		
 				,dtmTransactionDate
 				,dtmPostedDate		
+				,strDiscountSchedule
+				,ysnShowOnCFInvoice
 			)
 			SELECT 
 				 intAccountId				
@@ -578,6 +617,8 @@ BEGIN
 				,dtmDueDate		
 				,dtmTransactionDate
 				,dtmPostedDate		
+				,strDiscountSchedule
+				,ysnShowOnCFInvoice
 			FROM ##tmpInvoiceDiscount as cfInvoice
 			WHERE intAccountId = @intDistinctDiscountLoop AND intCustomerGroupId = 0
 			END
@@ -653,6 +694,8 @@ BEGIN
 				,dblAccountTotalAmount		
 				,dblAccountTotalDiscount
 				,dblAccountTotalLessDiscount	
+				,strDiscountSchedule
+				,ysnShowOnCFInvoice
 			)
 			SELECT 
 				 intAccountId				
@@ -695,6 +738,8 @@ BEGIN
 				,@totalAccountAmount		
 				,@totalAccountDiscount				
 				,@totalAccountAmountLessDiscount
+				,strDiscountSchedule
+				,ysnShowOnCFInvoice
 			FROM @tblCFGroupVolumeTemp as cfGroupVolumeDiscount
 			WHERE intAccountId = @intDistinctDiscountLoop
 
@@ -765,6 +810,8 @@ BEGIN
 				,dblAccountTotalAmount		
 				,dblAccountTotalDiscount
 				,dblAccountTotalLessDiscount	
+				,strDiscountSchedule
+				,ysnShowOnCFInvoice
 			)
 			SELECT 
 				 intAccountId			
@@ -807,6 +854,8 @@ BEGIN
 				,@totalAccountAmount		
 				,@totalAccountDiscount				
 				,@totalAccountAmountLessDiscount
+				,strDiscountSchedule
+				,ysnShowOnCFInvoice
 			FROM @tblCFAccountVolumeTemp as cfAccountVolumeDiscount
 			WHERE intAccountId = @intDistinctDiscountLoop
 
@@ -848,7 +897,9 @@ BEGIN
 			,dblDiscountEP
 			,dblAPR
 			,intAccountId
-			,intTransactionId)
+			,intTransactionId
+			,strDiscountSchedule
+			,ysnShowOnCFInvoice)
 		SELECT 
 			 intSalesPersonId
 			,intTermID
@@ -873,6 +924,8 @@ BEGIN
 			,dblAPR
 			,intAccountId
 			,intTransactionId
+			,strDiscountSchedule
+			,ysnShowOnCFInvoice
 	    FROM ##tblCFInvoiceDiscount' + @endWhereClause) 
 
 		--EXEC('SELECT * FROM ##tblCFInvoiceDiscount ' + @endWhereClause) 

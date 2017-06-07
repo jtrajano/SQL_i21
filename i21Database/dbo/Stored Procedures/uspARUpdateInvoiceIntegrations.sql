@@ -3,28 +3,39 @@
 	,@ForDelete		BIT = 0    
 	,@UserId		INT = NULL     
 AS  
-  
+
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
+ 
+DECLARE @intInvoiceId INT
+	  , @intUserId    INT
+	  , @ysnForDelete BIT
 
-DECLARE @Ids AS Id
-INSERT INTO @Ids(intId) SELECT @InvoiceId
-EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @TransactionType	= 1
+SET @intInvoiceId = @InvoiceId
+SET @intUserId = @UserId
+SET @ysnForDelete = @ForDelete
 
-EXEC dbo.[uspARUpdatePricingHistory] 2, @InvoiceId, @UserId
-EXEC dbo.[uspARUpdateSOStatusFromInvoice] @InvoiceId, @ForDelete
-EXEC dbo.[uspARUpdateItemComponent] @InvoiceId, 0
-EXEC dbo.[uspARUpdateReservedStock] @InvoiceId, @ForDelete, @UserId, 0
-EXEC dbo.[uspARUpdateItemComponent] @InvoiceId, 1
---AR-4579
---EXEC dbo.[uspARUpdateContractOnInvoice] @InvoiceId, @ForDelete, @UserId
-EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @InvoiceId, @ForDelete, @UserId
-EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @InvoiceId, @ForDelete, @UserId
-EXEC dbo.[uspARUpdateCommitted] @InvoiceId, @ForDelete, @UserId, 0
+IF (@intInvoiceId IS NULL)
+	BEGIN
+		SET @ysnForDelete = 0
+	END
+ELSE
+	BEGIN
+		SET @ysnForDelete = 1
+	END
 
-DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
+EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
+EXEC dbo.[uspARUpdateSOStatusFromInvoice] @intInvoiceId, @ysnForDelete
+EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 0
+EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ysnForDelete, @intUserId, 0
+EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 1
+EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ysnForDelete, @intUserId
+EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ysnForDelete, @intUserId
+EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ysnForDelete, @intUserId, 0
+
+DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
 GO

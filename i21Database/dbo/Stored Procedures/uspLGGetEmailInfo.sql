@@ -62,13 +62,14 @@ BEGIN
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
 
+
 		SELECT @strIds = STUFF((
-					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
+					SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
 					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
-					), 1, 2, '')
+					), 1, 3, '')
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
@@ -101,13 +102,14 @@ BEGIN
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
 
+
 		SELECT @strIds = STUFF((
-					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
+					SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
 					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
-					), 1, 2, '')
+					), 1, 3, '')
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
@@ -142,13 +144,14 @@ BEGIN
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
 
+
 		SELECT @strIds = STUFF((
-					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
+					SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
 					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
-					), 1, 2, '')
+					), 1, 3, '')
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
@@ -183,13 +186,14 @@ BEGIN
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
 
+
 		SELECT @strIds = STUFF((
-					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
+					SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
 					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
-					), 1, 2, '')
+					), 1, 3, '')
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
@@ -239,13 +243,14 @@ BEGIN
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
 
+
 		SELECT @strIds = STUFF((
-					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
+					SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
 					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
-					), 1, 2, '')
+					), 1, 3, '')
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
@@ -281,12 +286,12 @@ BEGIN
 		WHERE intEntityId = @intEntityId
 
 		SELECT @strIds = STUFF((
-					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
+					SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
 					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
-					), 1, 2, '')
+					), 1, 3, '')
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 

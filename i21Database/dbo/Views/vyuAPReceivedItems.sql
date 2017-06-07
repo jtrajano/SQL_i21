@@ -459,7 +459,8 @@ FROM
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
-		,[dblTax]									=	ISNULL((CASE WHEN A.intEntityVendorId != IR.intEntityVendorId AND IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) ELSE A.dblTax END),0)
+		,[dblTax]									=	ISNULL((CASE WHEN A.intEntityVendorId != IR.intEntityVendorId AND IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
+																	 ELSE (CASE WHEN A.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE A.dblTax END ) END),0) -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
 		,[dblRate]									=	ISNULL(A.dblForexRate,0)
 		,[strRateType]								=	RT.strCurrencyExchangeRateType
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
@@ -481,8 +482,8 @@ FROM
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
 		,[intShipmentId]							=	0      
 		,[intLoadDetailId]							=	NULL
-  		,[intUnitMeasureId]							=	NULL
-		,[strUOM]									=	NULL
+  		,[intUnitMeasureId]							=	A.intCostUnitMeasureId
+		,[strUOM]									=	A.strCostUnitMeasure
 		,[intWeightUOMId]							=	NULL
 		,[intCostUOMId]								=	A.intCostUnitMeasureId
 		,[dblNetWeight]								=	0      
@@ -523,6 +524,7 @@ FROM
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
 	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
+	
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -959,7 +961,7 @@ FROM
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
 		,[intShipmentId]							=	A.intInventoryShipmentId     
 		,[intShipmentContractQtyId]					=	NULL
-  		,[intUnitMeasureId]							=	NULL
+  		,[intUnitMeasureId]							=	A.intCostUnitMeasureId
 		,[strUOM]									=	NULL
 		,[intWeightUOMId]							=	NULL
 		,[intCostUOMId]								=	A.intCostUnitMeasureId

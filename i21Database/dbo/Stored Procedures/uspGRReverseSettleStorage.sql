@@ -46,6 +46,11 @@ BEGIN TRY
 			SELECT @intContractDetailId = intContractDetailId
 			FROM   vyuCTContractDetailView
 			WHERE  intContractHeaderId = @intContractHeaderId
+			
+			SELECT @Quantity = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,@Quantity)
+							   FROM tblGRCustomerStorage CS
+							   JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+							   WHERE intCustomerStorageId = @SourceNumberId
 
 			EXEC uspCTUpdateSequenceQuantityUsingUOM 
 				 @intContractDetailId = @intContractDetailId

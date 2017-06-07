@@ -69,6 +69,7 @@ INSERT INTO @ShipmentEntries(
 		, dtmArrivalTime
 		, dtmDeliveredDate
 		, dtmFreeTime
+		, strFreeTime
 		, strReceivedBy
 		, strComment
 		, intCurrencyId
@@ -119,6 +120,7 @@ SELECT
 		, dtmArrivalTime
 		, dtmDeliveredDate
 		, dtmFreeTime
+		, strFreeTime
 		, strReceivedBy
 		, strComment
 		, intCurrencyId
@@ -259,7 +261,8 @@ DECLARE @Header TABLE (
 	intFreightTermId INT NOT NULL,
 	intBaseId INT NOT NULL,
 	strSourceScreenName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-	intCurrencyId INT NULL
+	intCurrencyId INT NULL,
+	strReferenceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
 -- Get Headers
@@ -281,6 +284,7 @@ INSERT INTO @Header(
 		, intFreightTermId
 		, strSourceScreenName
 		, intCurrencyId
+		, strReferenceNumber
 )
 SELECT 
 		h.intId
@@ -293,6 +297,7 @@ SELECT
 		, se.intFreightTermId
 		, se.strSourceScreenName
 		, se.intCurrencyId
+		, se.strReferenceNumber 
 FROM	@ShipmentEntries se INNER JOIN headers h 
 		ON h.intId = se.intId
 	
@@ -338,6 +343,7 @@ DECLARE @intId INT
 		, @intBaseId INT
 		, @strSourceScreenName NVARCHAR(100)
 		, @intCurrencyId INT
+		, @strReferenceNumber NVARCHAR(50) 
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR 
@@ -353,6 +359,7 @@ FOR
 		, intBaseId
 		, strSourceScreenName
 		, intCurrencyId
+		, strReferenceNumber 
 	FROM @Header
 
 OPEN cur
@@ -369,6 +376,7 @@ FETCH NEXT FROM cur INTO
 	, @intBaseId
 	, @strSourceScreenName
 	, @intCurrencyId
+	, @strReferenceNumber
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -387,6 +395,7 @@ BEGIN
 		, intFreightTermId
 		, strBOLNumber
 		, intCurrencyId
+		, strReferenceNumber
 	)
 	VALUES(
 		@ShipmentNumber
@@ -399,6 +408,7 @@ BEGIN
 		, @intFreightTermId
 		, ''
 		, ISNULL(@intCurrencyId, @intFunctionalCurrencyId)
+		, @strReferenceNumber
 	)
 
 	-- Get Inserted Shipment ID
@@ -445,6 +455,7 @@ BEGIN
 		, @intBaseId
 		, @strSourceScreenName
 		, @intCurrencyId
+		, @strReferenceNumber
 END
 
 CLOSE cur

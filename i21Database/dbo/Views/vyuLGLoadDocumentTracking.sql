@@ -220,6 +220,7 @@ SELECT CH.strContractNumber
 	,LDOC.ysnReceived
 	,LDOC.dtmReceivedDate
 	,DOC.strDocumentName
+	,LDOC.strDocumentNo
 FROM tblLGLoad LOAD
 JOIN tblLGLoadDetail LD ON LOAD.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = (
@@ -251,3 +252,4 @@ LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = LOAD.intEquipmentType
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId] = LOAD.intDispatcherId
 LEFT JOIN tblCTPosition P ON LOAD.intPositionId = P.intPositionId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId
+WHERE LOAD.intShipmentType = 1

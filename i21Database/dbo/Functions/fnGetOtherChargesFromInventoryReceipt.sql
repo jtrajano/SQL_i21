@@ -1,4 +1,4 @@
-﻿-- This function returns the cost per lot item. 
+﻿-- This function returns the total allocated other charge per 
 CREATE FUNCTION [dbo].[fnGetOtherChargesFromInventoryReceipt] ( 
 	@intInventoryReceiptItemId AS INT
 )

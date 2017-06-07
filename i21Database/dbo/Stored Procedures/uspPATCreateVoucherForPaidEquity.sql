@@ -69,7 +69,8 @@ END
 
 	INSERT INTO @equityPayments
 	SELECT intEquityPaySummaryId FROM #tempEquityPayments
-
+	
+	DECLARE @voucherId AS Id;
 
 	BEGIN TRY 
 	WHILE EXISTS(SELECT 1 FROM @equityPayments)
@@ -98,14 +99,16 @@ END
 
 		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
 		BEGIN
-			DECLARE @voucherId AS Id;
-			INSERT INTO @voucherId SELECT intBillId FROM tblAPBillDetail where intBillId = @intCreatedBillId;
+			INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedBillId;
 
-			DELETE FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intId FROM @voucherId);
-			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intId FROM @voucherId);
-			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intId FROM @voucherId);
+			EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
 
-			EXEC uspAPUpdateVoucherTotal @voucherId
+			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+
+			EXEC [dbo].[uspAPUpdateVoucherTotal] @voucherId;
+
+			DELETE FROM @voucherId;
 		END
 
 		EXEC [dbo].[uspAPPostBill]

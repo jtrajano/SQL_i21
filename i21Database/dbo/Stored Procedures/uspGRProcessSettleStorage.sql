@@ -22,8 +22,7 @@ BEGIN TRY
 	DECLARE @SettleStorageKey INT
 	
 	DECLARE @intCustomerStorageId INT
-	DECLARE @dblStorageUnits DECIMAL(24, 10)
-	DECLARE @dblNegativeStorageUnits DECIMAL(24, 10)
+	DECLARE @dblStorageUnits DECIMAL(24, 10)	
 	DECLARE @dblOpenBalance DECIMAL(24, 10)
 	DECLARE @strStorageTicketNumber NVARCHAR(50)
 	DECLARE @intCompanyLocationId INT
@@ -39,7 +38,7 @@ BEGIN TRY
 	DECLARE @intContractDetailId INT
 	DECLARE @intContractHeaderId INT
 	DECLARE @dblContractUnits DECIMAL(24, 10)
-	DECLARE @dblNegativeContractUnits DECIMAL(24, 10)
+	DECLARE @dblUnitsForContract DECIMAL(24, 10)
 	DECLARE @strContractNumber NVARCHAR(50)
 	DECLARE @ContractEntityId INT
 	DECLARE @dblAvailableQty DECIMAL(24, 10)
@@ -86,6 +85,9 @@ BEGIN TRY
 	DECLARE @intShipFromId INT
 	DECLARE @dblUOMQty NUMERIC(38,20)
 	DECLARE @detailCreated AS Id
+
+	DECLARE @dblUnitsToReduce DECIMAL(24, 10)	
+	DECLARE @intInventoryItemStockUOMId INT
 
 	SET @dtmDate = GETDATE()
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference
@@ -163,7 +165,7 @@ BEGIN TRY
 
 	SELECT @UserName = strUserName
 	FROM tblSMUserSecurity
-	WHERE intEntityUserSecurityId = @UserKey --Another Hiccup
+	WHERE intEntityUserSecurityId = @UserKey 
 
 	INSERT INTO @SettleStorage 
 	(
@@ -260,6 +262,8 @@ BEGIN TRY
 	FROM	tblICCommodityUnitMeasure a 
 	JOIN	tblICItem b ON b.intCommodityId = a.intCommodityId
 	WHERE	b.intItemId = @ItemId AND a.ysnStockUnit = 1
+	
+	SELECT @intInventoryItemStockUOMId=intItemUOMId FROM tblICItemStockUOM Where intItemId=@ItemId
 
 	IF @intUnitMeasureId IS NULL
 	BEGIN
@@ -314,6 +318,8 @@ BEGIN TRY
 	SET @dblDPStorageUnits = NULL
 	SET @DPContractHeaderId = NULL
 	SET @ContractDetailId = NULL
+	SET @dblUnitsToReduce = NULL
+	
 
 	WHILE @SettleStorageKey > 0
 	BEGIN
@@ -420,13 +426,15 @@ BEGIN TRY
 				,NULL intContractHeaderId
 				,NULL intContractDetailId
 				,@dblStorageUnits dblUnits
-				,(ISNULL(QM.dblDiscountPaid, 0) - ISNULL(QM.dblDiscountDue, 0)) AS dblCashPrice
+				, dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,ISNULL(QM.dblDiscountPaid, 0))
+				- dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,ISNULL(QM.dblDiscountDue, 0)) AS dblCashPrice				
 				,DItem.intItemId
 				,DItem.strItemNo
 				,3
 				,0 AS IsProcessed
 				,QM.intTicketDiscountId
 			FROM tblGRCustomerStorage CS
+			JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
 			LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId AND QM.strSourceType = 'Storage'
 			JOIN tblGRDiscountScheduleCode a ON a.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 			JOIN tblICItem DItem ON DItem.intItemId = a.intItemId
@@ -497,7 +505,7 @@ BEGIN TRY
 			SET @strContractType = NULL
 			SET @dblCashPrice = NULL
 			SET @intContractHeaderId = NULL
-			SET @dblNegativeContractUnits = NULL
+			SET @dblUnitsForContract = NULL
 
 			WHILE @SettleContractKey > 0
 			BEGIN
@@ -518,7 +526,15 @@ BEGIN TRY
 
 				IF @dblStorageUnits <= @dblContractUnits
 				BEGIN
-					SET @dblNegativeStorageUnits = - @dblStorageUnits
+					
+					SELECT @dblUnitsToReduce = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,@dblStorageUnits)
+											   FROM tblGRCustomerStorage CS
+											   JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+											   WHERE intCustomerStorageId = @intCustomerStorageId
+
+					SELECT	@dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@intSourceItemUOMId,intItemUOMId,@dblStorageUnits) 
+					FROM	tblCTContractDetail 
+					WHERE	intContractDetailId = @intContractDetailId
 
 					UPDATE @SettleContract
 					SET dblContractUnits = dblContractUnits - @dblStorageUnits
@@ -530,15 +546,18 @@ BEGIN TRY
 
 					EXEC uspCTUpdateSequenceBalance
 						@intContractDetailId	=	@intContractDetailId,
-						@dblQuantityToUpdate	=	@dblStorageUnits,
+						@dblQuantityToUpdate	=	@dblUnitsForContract,
 						@intUserId				=	@UserKey,
 						@intExternalId			=	@intCustomerStorageId,
 						@strScreenName			=	'Settle Storage' 
 					
+					
+
 					UPDATE tblGRCustomerStorage
-					SET dblOpenBalance = dblOpenBalance - @dblStorageUnits
+					SET dblOpenBalance = dblOpenBalance - @dblUnitsToReduce
 					WHERE intCustomerStorageId = @intCustomerStorageId
 					
+
 					--CREATE History For Storage Ticket
 					INSERT INTO [dbo].[tblGRStorageHistory] 
 					(
@@ -562,7 +581,7 @@ BEGIN TRY
 						,@intCustomerStorageId
 						,NULL
 						,@intContractHeaderId
-						,@dblStorageUnits
+						,@dblUnitsToReduce
 						,GETDATE()
 						,'Settlement'
 						,@UserName
@@ -604,7 +623,7 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					SET @dblNegativeStorageUnits = - @dblContractUnits
+					--SET @dblNegativeStorageUnits = - @dblContractUnits
 
 					UPDATE @SettleContract
 					SET dblContractUnits = dblContractUnits - @dblContractUnits
@@ -613,16 +632,25 @@ BEGIN TRY
 					UPDATE @SettleStorage
 					SET dblRemainingUnits = dblRemainingUnits-@dblContractUnits
 					WHERE intSettleStorageKey = @SettleStorageKey
+					
+					SELECT @dblUnitsToReduce=dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,@dblContractUnits)
+											 FROM tblGRCustomerStorage CS
+											 JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+											 WHERE intCustomerStorageId = @intCustomerStorageId
+					
+					SELECT	@dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@intSourceItemUOMId,intItemUOMId,@dblContractUnits) 
+					FROM	tblCTContractDetail 
+					WHERE	intContractDetailId = @intContractDetailId
 
 					EXEC uspCTUpdateSequenceBalance
 						 @intContractDetailId	=	@intContractDetailId,
-						 @dblQuantityToUpdate	=	@dblContractUnits,
+						 @dblQuantityToUpdate	=	@dblUnitsForContract,
 						 @intUserId				=	@UserKey,
 						 @intExternalId			=	@intCustomerStorageId,
 						 @strScreenName			=	'Settle Storage' 
 
 					UPDATE tblGRCustomerStorage
-					SET dblOpenBalance = dblOpenBalance - @dblContractUnits
+					SET dblOpenBalance = dblOpenBalance - @dblUnitsToReduce
 					WHERE intCustomerStorageId = @intCustomerStorageId
 
 					INSERT INTO [dbo].[tblGRStorageHistory] 
@@ -647,7 +675,7 @@ BEGIN TRY
 						,@intCustomerStorageId
 						,NULL
 						,@intContractHeaderId
-						,@dblContractUnits
+						,@dblUnitsToReduce
 						,GETDATE()
 						,'Settlement'
 						,@UserName
@@ -706,8 +734,13 @@ BEGIN TRY
 				SET dblRemainingUnits = dblRemainingUnits -@dblStorageUnits
 				WHERE intSettleStorageKey = @SettleStorageKey
 
+				SELECT @dblUnitsToReduce=dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,@dblStorageUnits)
+										 FROM tblGRCustomerStorage CS
+										 JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+										 WHERE intCustomerStorageId = @intCustomerStorageId
+
 				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @dblStorageUnits
+				SET dblOpenBalance = dblOpenBalance - @dblUnitsToReduce
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
 				--CREATE History For Storage Ticket
@@ -732,7 +765,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,@dblStorageUnits
+					,@dblUnitsToReduce
 					,GETDATE()
 					,'Settlement'
 					,@UserName
@@ -778,8 +811,13 @@ BEGIN TRY
 				SET dblRemainingUnits = dblRemainingUnits - @dblSpotUnits
 				WHERE intSettleStorageKey = @SettleStorageKey
 
+				SELECT @dblUnitsToReduce=dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,@dblSpotUnits)
+										 FROM tblGRCustomerStorage CS
+										 JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+										 WHERE intCustomerStorageId = @intCustomerStorageId
+
 				UPDATE tblGRCustomerStorage
-				SET dblOpenBalance = dblOpenBalance - @dblSpotUnits
+				SET dblOpenBalance = dblOpenBalance - @dblUnitsToReduce
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
 				--CREATE History For Storage Ticket
@@ -804,7 +842,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,@dblSpotUnits
+					,@dblUnitsToReduce
 					,GETDATE()
 					,'Settlement'
 					,@UserName
@@ -916,9 +954,9 @@ BEGIN TRY
 		SELECT  
 			intItemId = SV.[intItemId]
 			,intItemLocationId = @intItemLocationId	
-			,intItemUOMId = @intSourceItemUOMId
+			,intItemUOMId = @intInventoryItemStockUOMId
 			,dtmDate = GETDATE() 
-			,dblQty = -SV.[dblUnits]
+			,dblQty = - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 			,dblUOMQty = @dblUOMQty
 			,dblCost = CASE WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice] ELSE 0 END
 			,dblSalesPrice = 0.00
@@ -933,7 +971,8 @@ BEGIN TRY
 			,ysnIsStorage = 1
 		FROM @SettleVoucherCreate SV 
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
-		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId --AND St.ysnDPOwnedType = 0
+		JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1 
+		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId
 		WHERE   SV.intCustomerStorageId=@intCustomerStorageId 
 				AND SV.intItemSort = 1 
 				AND SV.IsProcessed = 0 
@@ -963,9 +1002,9 @@ BEGIN TRY
 		SELECT  
 			 intItemId = SV.[intItemId]
 			,intItemLocationId = @intItemLocationId	
-			,intItemUOMId = @intSourceItemUOMId
+			,intItemUOMId = @intInventoryItemStockUOMId
 			,dtmDate = GETDATE() 
-			,dblQty = SV.[dblUnits]
+			,dblQty = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 			,dblUOMQty = @dblUOMQty
 			,dblCost = CASE WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice] ELSE 0 END
 			,dblSalesPrice = 0.00
@@ -980,7 +1019,8 @@ BEGIN TRY
 			,ysnIsStorage = 0
 		FROM	@SettleVoucherCreate SV 
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
-		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId  --AND St.ysnDPOwnedType = 1
+		JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1 
+		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId
 		WHERE	SV.intCustomerStorageId=@intCustomerStorageId 
 				AND SV.intItemSort = 1 
 				AND SV.IsProcessed = 0 
@@ -1185,7 +1225,9 @@ BEGIN TRY
 					,bd.dblQtyOrdered  = CASE WHEN SV.intItemSort = 1 THEN @dblUnits ELSE  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END END 
 					,bd.dblQtyReceived = CASE WHEN SV.intItemSort = 1 THEN @dblUnits ELSE  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END END 
 					,bd.dblTotal = ROUND(ISNULL(@dblUnits, 0) * SV.[dblCashPrice], 2) 
-					,bd.intInventoryReceiptItemId = NULL -- and disconnect the IR from the Voucher to avoid double cost-adjustment. 					
+					,bd.intInventoryReceiptItemId = NULL -- and disconnect the IR from the Voucher to avoid double cost-adjustment.
+					,bd.intUnitOfMeasureId = @intSourceItemUOMId
+					,bd.intCostUOMId = @intSourceItemUOMId 					
 			FROM	tblAPBill b 
 			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
 			JOIN @SettleVoucherCreate SV  ON SV.intItemId=bd.intItemId
@@ -1227,11 +1269,11 @@ BEGIN TRY
 			,intItemId = SV.intItemId
 			,intContractHeaderId = NULL
 			,intContractDetailId = NULL
-			,dblTotal = @dblUnits * SV.dblCashPrice 					
+			,dblTotal = ROUND(@dblUnits * SV.dblCashPrice,2) 					
 			,dblQtyOrdered =  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END
 			,dblQtyReceived = CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END			
 			,dblRate = 0
-			,dblCost = @dblUnits * SV.dblCashPrice
+			,dblCost = ABS(@dblUnits * SV.dblCashPrice)
 			,intCurrencyId = @intCurrencyId
 			FROM   @SettleVoucherCreate SV
 			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort <> 1
@@ -1257,7 +1299,7 @@ BEGIN TRY
 			
 			UPDATE	tblAPBill 
 			SET		strVendorOrderNumber = 'STR-'+@strStorageTicketNumber+'/'+strBillId
-					,dblTotal = (SELECT SUM(bd.dblTotal) FROM tblAPBillDetail bd WHERE bd.intBillId = @intBillId)
+					,dblTotal = (SELECT ROUND(SUM(bd.dblTotal) + SUM(bd.dblTax),2) FROM tblAPBillDetail bd WHERE bd.intBillId = @intBillId)
 			WHERE	intBillId = @intBillId
 
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	

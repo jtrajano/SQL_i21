@@ -9,6 +9,7 @@ SELECT CS.intCustomerStockId,
 	CS.dtmIssueDate,
 	SC.dblParValue,
 	CS.dblSharesNo,
+	CS.ysnPosted,
 	SC.intDividendsPerShare
 	FROM tblPATStockClassification SC
 INNER JOIN tblPATCustomerStock CS
@@ -17,3 +18,4 @@ INNER JOIN tblEMEntity ENT
 	ON ENT.intEntityId = CS.intCustomerPatronId
 INNER JOIN tblARCustomer ARC
 	ON ARC.intEntityCustomerId = ENT.intEntityId
+WHERE CS.strActivityStatus = 'Open'

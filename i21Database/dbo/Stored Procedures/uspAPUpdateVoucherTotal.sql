@@ -23,7 +23,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	--UPDATE DETAIL TOTAL
 	UPDATE A
-		SET A.dblTotal = (A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100))
+		SET A.dblTotal = CAST((A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL (18,2)) 
 	FROM tblAPBillDetail A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 
@@ -39,9 +39,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	--UPDATE HEADER TOTAL
 	UPDATE A
-		SET A.dblTotal = (DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment
-		,A.dblSubtotal = (DetailTotal.dblTotal)
-		,A.dblAmountDue = (DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment
+		SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
+		,A.dblSubtotal = CAST((DetailTotal.dblTotal)  AS DECIMAL(18,2)) 
+		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (

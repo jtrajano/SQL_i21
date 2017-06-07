@@ -56,6 +56,7 @@ IF ISNULL(@ysnPost, 0) = 0
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Transaction:
 
+DECLARE @ErrorMessage NVARCHAR(MAX)
 DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 
@@ -211,7 +212,15 @@ IF ISNULL(@ysnRecap, 0) = 0
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
 
 		
-		EXEC uspGLBookEntries @GLEntries, @ysnPost
+		BEGIN TRY
+			EXEC uspGLBookEntries @GLEntries, @ysnPost
+		END TRY
+		BEGIN CATCH		
+			SET @ErrorMessage  = ERROR_MESSAGE()
+			RAISERROR(@ErrorMessage, 11, 1)
+
+			IF @@ERROR <> 0	GOTO Post_Rollback;
+		END CATCH
 		
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;

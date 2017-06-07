@@ -295,7 +295,7 @@ IF ISNULL(@RaiseError,0) = 0
 --		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
 --		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 --		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
---		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional Invoice' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
+--		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 --		,@EntityId						= [intEntityId]
 --		,@ResetDetails					= [ysnResetDetails]
 --		,@Recap							= [ysnRecap]
@@ -399,7 +399,7 @@ IF ISNULL(@RaiseError,0) = 0
 --						SET @SourceColumn = 'intMeterReadingId'
 --						SET @SourceTable = 'tblMBMeterReading' 
 --					END
---				IF ISNULL(@SourceTransaction,'') = 'Provisional Invoice'
+--				IF ISNULL(@SourceTransaction,'') = 'Provisional'
 --					BEGIN
 --						SET @SourceColumn = 'intInvoiceId'
 --						SET @SourceTable = 'tblARInvoice'
@@ -410,7 +410,7 @@ IF ISNULL(@RaiseError,0) = 0
 --						SET @SourceTable = 'tblICInventoryShipment'
 --					END		
 
---				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment')
+--				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional', 'Inventory Shipment')
 --					BEGIN
 --						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 --					END
@@ -776,7 +776,7 @@ IF ISNULL(@RaiseError,0) = 0
 --		[ysnProcessed] = 1
 --	WHERE
 --		[intInvoiceId] IN (SELECT [intSourceId] FROM @InvoiceEntries WHERE [intId] IN (SELECT [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1 AND [ysnProcessed] = 1))
---		AND [strType] = 'Provisional Invoice'
+--		AND [strType] = 'Provisional'
 
 --END TRY
 --BEGIN CATCH
@@ -933,7 +933,7 @@ IF ISNULL(@RaiseError,0) = 0
 --						SET @SourceColumn = 'intMeterReadingId'
 --						SET @SourceTable = 'tblMBMeterReading' 
 --					END
---			IF ISNULL(@SourceTransaction,'') = 'Provisional Invoice'
+--			IF ISNULL(@SourceTransaction,'') = 'Provisional'
 --				BEGIN
 --					SET @SourceColumn = 'intInvoiceId'
 --					SET @SourceTable = 'tblARInvoice'
@@ -945,7 +945,7 @@ IF ISNULL(@RaiseError,0) = 0
 --						SET @SourceTable = 'tblICInventoryShipment'
 --					END
 
---			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment')
+--			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional', 'Inventory Shipment')
 --				BEGIN
 --					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 --				END
@@ -965,7 +965,7 @@ IF ISNULL(@RaiseError,0) = 0
 --			[tblARInvoice]
 --		SET 
 --			 [strTransactionType]		= CASE WHEN ISNULL(@TransactionType, '') NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment') THEN [tblARInvoice].[strTransactionType] ELSE @TransactionType END
---			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store') THEN [tblARInvoice].[strType] ELSE @Type END
+--			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store') THEN [tblARInvoice].[strType] ELSE @Type END
 --			,[intEntityCustomerId]		= @EntityCustomerId
 --			,[intCompanyLocationId]		= @CompanyLocationId
 --			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])

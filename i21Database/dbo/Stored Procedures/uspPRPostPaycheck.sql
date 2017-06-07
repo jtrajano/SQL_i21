@@ -172,7 +172,7 @@ BEGIN
 				ON A.intEmployeeEarningId = B.intEmployeeEarningId
 		LEFT JOIN tblPRDepartment C 
 	ON A.intEmployeeDepartmentId = C.intDepartmentId
-	WHERE A.dblTotal > 0 AND A.strCalculationType <> 'Fringe Benefit'
+	WHERE A.dblTotal <> 0 AND A.strCalculationType <> 'Fringe Benefit'
 	AND intPaycheckId = @intPaycheckId
 		
 	--Place Earning to Temporary Table to Validate Earning GL Distribution
@@ -292,8 +292,8 @@ BEGIN
 		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= E.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = E.intAccountId)
-		,[dblDebit]					= E.dblAmount
-		,[dblCredit]				= 0
+		,[dblDebit]					= CASE WHEN (E.dblAmount > 0) THEN E.dblAmount ELSE 0 END
+		,[dblCredit]				= CASE WHEN (E.dblAmount < 0) THEN ABS(E.dblAmount) ELSE 0 END
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
 		,[intCreatedUserId]			= @intCreatedEntityId

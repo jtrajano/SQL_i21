@@ -29,6 +29,7 @@
 	dtmArrivalTime DATETIME NULL,
 	dtmDeliveredDate DATETIME NULL,
 	dtmFreeTime DATETIME NULL,
+	strFreeTime NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strReceivedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strComment NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	intCurrencyId INT NULL,

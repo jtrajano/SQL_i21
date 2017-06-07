@@ -115,7 +115,7 @@ SELECT DISTINCT
 	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, (CASE WHEN VST.intTaxGroupId > 0 THEN VST.intTaxGroupId
 																													  WHEN CL.intTaxGroupId  > 0 THEN CL.intTaxGroupId 
 																													  WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0) Taxes
-	WHERE Taxes.intTaxCodeId IS NOT NULL																													
+	WHERE Taxes.intTaxCodeId IS NOT NULL AND Taxes.intTaxCodeId = D.intTaxCodeId																														
 UNION ALL
 --INVENTORY CHARGES
 SELECT DISTINCT
@@ -130,12 +130,15 @@ SELECT DISTINCT
 		[strCalculationMethod]		= A.strCalculationMethod COLLATE Latin1_General_CI_AS,
 		[dblRate]					= A.dblRate,
 		[intAccountId]				= A.intTaxAccountId,
+											-- 3RD PARTY WILL ALWAYS BE POSSITVE UNLESS CHECKOFF      
 		[dblTax]					= (CASE WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
-											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 THEN A.dblTax * -1
-											ELSE A.dblTax END),
+											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 AND A.dblTax > 0 THEN A.dblTax * -1
+											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN  A.dblTax * -1 ELSE A.dblTax END) END),
 		[dblAdjustedTax]			= (CASE WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 0 THEN ABS(A.dblAdjustedTax) 
-											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 THEN A.dblAdjustedTax * -1
-											ELSE A.dblAdjustedTax END) ,
+											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 AND A.dblTax > 0 THEN A.dblAdjustedTax * -1
+											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblAdjustedTax > 0 THEN  A.dblAdjustedTax * -1 ELSE A.dblAdjustedTax END) END) ,
 		[ysnTaxAdjusted]			= A.ysnTaxAdjusted,
 		[ysnSeparateOnBill]			= 'false',
 		[ysnCheckOffTax]			= A.ysnCheckoffTax,

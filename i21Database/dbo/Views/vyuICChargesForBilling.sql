@@ -11,23 +11,17 @@ SELECT
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
 	,[dblOrderQty]								=	CASE 
-														--WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
-														--	THEN -1 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
 															THEN -1
 														ELSE 1 
 													END 
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	CASE 
-														--WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
-														--	THEN -1 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
 															THEN -1
 														ELSE 1 
 													END 
 	,[dblQuantityToBill]						=	CASE 
-														--WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the qty if it is an Inventory Return. 
-														--	THEN -1 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
 															THEN -1
 														ELSE 1 
@@ -38,13 +32,6 @@ SELECT
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN (ABS(ReceiptCharge.dblAmount) * 100) ELSE ABS(ReceiptCharge.dblAmount) END
 	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0) 
-													--CASE 
-													--	WHEN Receipt.strReceiptType = 'Inventory Return'  -- Negate the tax if it is an Inventory Return. 
-													--		THEN -ISNULL(ReceiptCharge.dblTax,0)
-													--	ELSE 
-													--		ISNULL(ReceiptCharge.dblTax,0) 
-													--END 
-
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
 																OtherChargeExpense.intAccountId 
@@ -87,7 +74,7 @@ SELECT
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
-	,[intCurrencyId]							= ISNULL(ReceiptCharge.intCurrencyId,Receipt.intCurrencyId)
+	,[intCurrencyId]							= vReceiptCharge.intCurrencyId 
 	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
@@ -99,18 +86,24 @@ SELECT
 	,[strReceiptType]							= Receipt.strReceiptType
 	,intForexRateTypeId							= ReceiptCharge.intForexRateTypeId
 	,dblForexRate								= ReceiptCharge.dblForexRate
-FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
+	,[ysnPrice]									= ReceiptCharge.ysnPrice
+	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
+FROM 
+	tblICInventoryReceiptCharge ReceiptCharge  INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
-	INNER JOIN tblICInventoryReceipt Receipt
+
+	INNER JOIN tblICInventoryReceipt Receipt 
 		ON ReceiptCharge.intInventoryReceiptId = Receipt.intInventoryReceiptId
+
 	INNER JOIN (
 		tblAPVendor Vendor INNER JOIN tblEMEntity Entity
 			ON Vendor.intEntityVendorId = Entity.intEntityId
 	) 
-		ON Vendor.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId,  Receipt.intEntityVendorId) 
+		ON Vendor.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
+	
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
-		AND ItemLocation.intLocationId = Receipt.intLocationId
+		AND ItemLocation.intLocationId = Receipt.intLocationId	
 	
 	INNER JOIN vyuICGetInventoryReceiptCharge vReceiptCharge
 		ON ReceiptCharge.intInventoryReceiptChargeId = vReceiptCharge.intInventoryReceiptChargeId
@@ -129,6 +122,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblICUnitMeasure CostUOM 
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
+
 	OUTER APPLY (
 		SELECT TOP 1
 			A.intInventoryReceiptItemId
@@ -237,6 +231,8 @@ SELECT
 	,[strReceiptType]							= Receipt.strReceiptType
 	,intForexRateTypeId							= ReceiptCharge.intForexRateTypeId
 	,dblForexRate								= ReceiptCharge.dblForexRate
+	,[ysnPrice]									= ReceiptCharge.ysnPrice
+	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -281,7 +277,6 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
 
-WHERE	--ReceiptCharge.ysnAccrue = 1 
-		ReceiptCharge.ysnPrice = 1
+WHERE	ReceiptCharge.ysnPrice = 1
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
 		AND ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0

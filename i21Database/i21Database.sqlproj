@@ -5193,6 +5193,26 @@
     <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAddScaleOperator.sql" />
     <Build Include="dbo\Tables\tblSCScaleOperator.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntries.sql" />
+    <Build Include="dbo\Functions\fnGetAddCostFromInventoryReceiptCharges.sql" />
+    <Build Include="dbo\Functions\fnFormatMessage.sql" />
+    <Build Include="dbo\Views\vyuAPQuickVoucherSearch.sql" />
+    <Build Include="dbo\Views\vyuARServiceChargeInvoiceReport.sql" />
+    <Build Include="dbo\Functions\fnARFormatLetterAddress.sql" />
+    <Build Include="dbo\Tables\tblICSearchShipmentInvoice.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipmentInvoiceItems.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipmentInvoicePriceCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPopulateShipmentInvoice.sql" />
+    <Build Include="dbo\Views\vyuICShipmentInvoice2.sql" />
+    <Build Include="dbo\Tables\tblAPPaymentDetailDeleted.sql" />
+    <Build Include="dbo\Tables\tblSMScreenReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeletePatronageTaxes.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
+    <Build Include="dbo\Views\vyuLGContarctWithoutShippingAdvice.sql" />
+    <Build Include="dbo\Views\vyuICStockDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportBondedPalletTag.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportUCCPalletLabel.sql" />
+    <Build Include="dbo\Views\vyuSMDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5334,6 +5354,9 @@
     <Build Include="dbo\Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
     <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\30_FixAmountsForCashTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\25_ApprovalHistory.sql" />
+    <Build Include="dbo\Views\vyuSCGradeReadingReport.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

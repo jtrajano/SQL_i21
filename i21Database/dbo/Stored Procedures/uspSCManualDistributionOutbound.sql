@@ -323,7 +323,7 @@ OPEN intListCursor;
 							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblDPContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
-							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblDPContractUnits;
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblDPContractUnits, @ysnIsStorage;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
 					END;

@@ -274,6 +274,22 @@ GO
 			WHERE strNamespace = 'Inventory.view.InventoryReceipt'
 		END
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryShipment')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
+            VALUES (N'InventoryShipment', N'Inventory Shipment', N'Inventory.view.InventoryShipment', N'Inventory', N'tblICInventoryShipment', 1, 1, 1, 0)
+        END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET strTableName = N'tblICInventoryShipment',
+				strScreenId = N'InventoryShipment',
+				ysnApproval = 1, 
+				ysnCustomTab = 1,
+				ysnActivity = 1
+			WHERE strNamespace = 'Inventory.view.InventoryShipment'
+		END
+
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Item')
     BEGIN
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])

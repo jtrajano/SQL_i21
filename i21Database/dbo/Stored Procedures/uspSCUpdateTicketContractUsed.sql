@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCUpdateTicketContractUsed]
 	@intTicketId INT,
 	@intContractDetailId INT,
-	@dblScheduleQty DECIMAL(13,5),
+	@dblScheduleQty DECIMAL(38,20),
 	@ysnStorage int = null
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -26,10 +26,11 @@ BEGIN TRY
 		UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
 		, intContractSequence = CT.intContractSeq
 		, strContractLocation = CT.strLocationName
-		, dblScheduleQty = CT.dblScheduleQty
+		, dblScheduleQty = @dblScheduleQty
 		, dblUnitPrice = CT.dblFutures
 		, dblUnitBasis = CT.dblBasis
-		FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId
+		FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
+		WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId
 	END
 END TRY
 BEGIN CATCH

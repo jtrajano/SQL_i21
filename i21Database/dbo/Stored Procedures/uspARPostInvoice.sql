@@ -921,6 +921,156 @@ END CATCH
 					(ISNULL(Acct.intGeneralAccountId,0) = 0 OR GLA.intAccountId IS NULL)
 					AND ISNULL(I.strType,'') IN ('Non-Inventory','Service')
 					AND ISNULL(I.strType,'') <> 'Comment'
+
+				--Software - Maintenance Type				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Type of item - ' + I.strItemNo + ' is not valid.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') NOT IN ('License/Maintenance', 'Maintenance Only', 'SaaS', 'License Only')
+					
+				--Software - Maintenance Frequency				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Frequency of item - ' + I.strItemNo + ' is not valid.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+					AND ISNULL(D.strFrequency, '') NOT IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					
+				--Software - Maintenance Date				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Start Date of item - ' + I.strItemNo + ' is required.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND D.dtmMaintenanceDate IS NULL
+
+
+				--Software - License Amount
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The License Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblLicenseAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License Only')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ISNULL(D.dblLicenseAmount, @ZeroDecimal) <> ISNULL(D.dblPrice, @ZeroDecimal)
+
+				--Software - Maintenance Amount				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblMaintenanceAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('Maintenance Only', 'SaaS')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ISNULL(D.dblMaintenanceAmount, @ZeroDecimal) <> ISNULL(D.dblPrice, @ZeroDecimal)
+
+
+				--Software - Maintenance Amount + License				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Amount + License Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblMaintenanceAmount, dblLicenseAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ((ISNULL(D.dblMaintenanceAmount, @ZeroDecimal) + ISNULL(D.dblLicenseAmount, @ZeroDecimal)) <> ISNULL(D.dblPrice, @ZeroDecimal))
+
 					
 				--Software - Maintenance Sales				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1581,7 +1731,7 @@ END CATCH
 					@batchId,
 					C.intInvoiceId
 				FROM
-					(SELECT intPaymentId, strRecordNumber FROM tblARPayment WITH (NOLOCK)) A
+					(SELECT intPaymentId, strRecordNumber FROM tblARPayment WITH (NOLOCK) WHERE ysnPosted = 1) A
 				INNER JOIN 
 					(SELECT intPaymentId, intInvoiceId FROM tblARPaymentDetail WITH (NOLOCK)) B 
 						ON A.intPaymentId = B.intPaymentId						
@@ -2381,6 +2531,7 @@ IF @post = 1
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
 				AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND (B.dblTotal <> 0 OR B.dblQtyShipped <> 0)
 
 			--CREDIT Software -- License
 			UNION ALL 
@@ -3788,7 +3939,7 @@ IF @post = 1
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
 			WHERE				
-				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
+				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND (Detail.dblTotal <> 0 OR Detail.dblQtyShipped <> 0)) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
@@ -4322,11 +4473,11 @@ IF @recap = 1
 				INNER JOIN 
 				(SELECT intAccountId, strDescription FROM tblGLAccount) GLA ON GLPR.intAccountId = GLPR.intAccountId
 				WHERE
-					ISNULL(GLPR.strDescription, '') = ''
+					(ISNULL(GLPR.strDescription, '') = '' OR (GLPR.strDescription = 'Thank you for your business!'))
 					AND GLPR.strBatchId = @tmpBatchId
 		) ABC ON tblGLPostRecap.intAccountId = ABC.intAccountId
 		WHERE 
-			ISNULL(tblGLPostRecap.strDescription, '') = ''
+			((ISNULL(tblGLPostRecap.strDescription, '') = '') OR  (tblGLPostRecap.strDescription = 'Thank you for your business!'))
 			AND tblGLPostRecap.strBatchId = @tmpBatchId
 
 		--EXEC uspGLPostRecap @GLEntries, @UserEntityID 

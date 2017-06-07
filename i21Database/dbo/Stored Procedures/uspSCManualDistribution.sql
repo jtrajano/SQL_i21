@@ -21,20 +21,20 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @strDistributionOption NVARCHAR(50) = NULL
 
-DECLARE @dblRemainingUnits AS DECIMAL (13,3)
+DECLARE @dblRemainingUnits AS NUMERIC(38, 20)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @intLoadId INT
-DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
+DECLARE @dblTicketFreightRate AS DECIMAL (9, 6)
 DECLARE @intScaleStationId AS INT
 DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnIsStorage AS BIT
 DECLARE @intLoadContractId AS INT
-DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
+DECLARE @dblLoadScheduledUnits AS NUMERIC(38, 20)
 DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
@@ -48,7 +48,11 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@invalidCount AS INT
 		,@success AS INT
 		,@batchIdUsed AS INT
-		,@recapId AS INT;
+		,@recapId AS INT
+		,@dblTotal AS DECIMAL(18,6)
+		,@returnValue AS BIT
+		,@requireApproval AS BIT
+		,@intLocationId AS INT;
 
 BEGIN
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
@@ -75,7 +79,7 @@ BEGIN TRY
 DECLARE @intId INT;
 DECLARE @ysnDPStorage AS BIT;
 DECLARE @intLoopContractId INT;
-DECLARE @dblLoopContractUnits NUMERIC(12,4);
+DECLARE @dblLoopContractUnits NUMERIC(38, 20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId
@@ -322,7 +326,7 @@ OPEN intListCursor;
 							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
-							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits;
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @ysnIsStorage;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
 					END;
@@ -406,8 +410,17 @@ END
 				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
 				BEGIN
 					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
-					SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
-					IF ISNULL(@intBillId , 0) != 0
+					SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
+					
+					EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+					@type = N'AccountsPayable.view.Voucher',
+					@transactionEntityId = @intEntityId,
+					@currentUserEntityId = @intUserId,
+					@locationId = @intLocationId,
+					@amount = @dblTotal,
+					@requireApproval = @requireApproval OUTPUT
+
+					IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
 					BEGIN
 						EXEC [dbo].[uspAPPostBill]
 						@post = 1

@@ -79,6 +79,8 @@ BEGIN
 	DECLARE @refundProcessed AS Id;
 	DECLARE @totalRecords AS INT = 0;
 
+	DECLARE @voucherId as Id;
+
 	INSERT INTO @refundProcessed
 	SELECT intRefundCustomerId FROM #tempRefundCustomer
 
@@ -129,6 +131,19 @@ BEGIN
 
 		UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 0, dbl1099 = ROUND(@dbl1099Amount, 2) WHERE intBillId = @intCreatedBillId;
 		UPDATE tblPATRefundCustomer SET intBillId = @intCreatedBillId WHERE intRefundCustomerId = @intRefundCustomerId;
+
+		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
+		BEGIN
+			INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedBillId;
+
+			EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
+
+			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+
+			EXEC uspAPUpdateVoucherTotal @voucherId;
+			DELETE FROM @voucherId;
+		END
 
 		EXEC [dbo].[uspAPPostBill]
 			@batchId = @intCreatedBillId,
