@@ -1106,9 +1106,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var me = this;
         var win = button.up('window');
         var context = win.context;
-        
+        var store = win.down("#grdPhysicalCount").store;
         var currentCountItems = win.viewModel.data.current;
-        var countDetail = currentCountItems.tblICInventoryCountDetails().data.items;
+        var countDetail = store.data.items;
         var countItemsToPost = 0;  
         var countItemsNotPosted = 0;
         var itemIndex = 0; 
@@ -1137,7 +1137,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 return;
             }
             else {
-                Ext.Array.each(currentCountItems.tblICInventoryCountDetails().data.items, function (item) {
+                Ext.Array.each(countDetail, function (item) {
                         
                     itemIndex++;
                         
