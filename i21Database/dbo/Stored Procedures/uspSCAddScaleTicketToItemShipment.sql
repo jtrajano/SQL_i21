@@ -300,7 +300,7 @@ BEGIN
 	SELECT	
 	[intOrderType]						= SE.intOrderType
 	,[intSourceType]					= SE.intSourceType
-	,[intEntityCustomerId]				= NULL
+	,[intEntityCustomerId]				= SE.intEntityCustomerId
 	,[dtmShipDate]						= SE.dtmShipDate
 	,[intShipFromLocationId]			= SE.intShipFromLocationId
 	,[intShipToLocationId]				= SE.intShipToLocationId
@@ -321,8 +321,8 @@ BEGIN
 											END
 											WHEN IC.strCostMethod = 'Amount' THEN 0
 										END
-	,[intCostUOMId]						= @intTicketItemUOMId
-	,[intOtherChargeEntityVendorId]		= SE.intEntityCustomerId
+	,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(SCSetup.intDefaultFeeItemId, @intTicketItemUOMId)
+	,[intOtherChargeEntityVendorId]		= NULL
 	,[dblAmount]						= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 0
 											WHEN IC.strCostMethod = 'Amount' THEN 
