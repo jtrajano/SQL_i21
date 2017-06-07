@@ -34,4 +34,3 @@ LEFT JOIN tblSMTerm Term ON Term.intTermID = EntityLocation.intTermsId
 LEFT JOIN tblSMPaymentMethod F ON F.intPaymentMethodID = Vendor.intPaymentMethodId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = VendorDefault.intCompanyLocationId
 LEFT JOIN vyuCMBankAccount BankAccount ON VendorDefault.intBankAccountId = BankAccount.intBankAccountId
---LEFT JOIN tblCMBankAccount BankAccount ON VendorDefault.intBankAccountId = BankAccount.intBankAccountId
