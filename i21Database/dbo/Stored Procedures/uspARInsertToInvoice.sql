@@ -443,8 +443,8 @@ SELECT TOP 1
 		@EntityContactId		=	intEntityContactId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
-EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
-EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
+EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', 'Header', @SoftwareComment OUT
+EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', 'Header', @InvoiceComment OUT
 
 IF EXISTS (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN

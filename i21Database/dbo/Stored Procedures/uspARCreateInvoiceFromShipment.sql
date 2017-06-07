@@ -85,7 +85,7 @@ WHERE ICIS.intInventoryShipmentId = @ShipmentId
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN
-		EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComments OUT
+		EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', 'Header', @InvoiceComments OUT
 
 		SET @Comments = ISNULL(@InvoiceComments,'') + ' ' + ISNULL(@SalesOrderComments, '')
 	END

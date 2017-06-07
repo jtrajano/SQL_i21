@@ -147,6 +147,7 @@ IF ISNULL(@Comment, '') = ''
 					@intEntityCustomerId = @EntityCustomerId,
 					@strTransactionType = @TransactionType,
 					@strType = @Type,
+					@strHeaderFooter = 'Header',
 					@strDefaultComment = @Comment OUTPUT,
 					@DocumentMaintenanceId = @DocumentMaintenanceId
 	END

@@ -18,7 +18,7 @@ AS
 			@intServiceChargeId		INT,
 			@intServiceChargeIdByCB INT
 
-	EXEC [dbo].[uspARGetDefaultComment] @intCompanyLocationId, @intEntityCustomerId, 'Invoice', 'Service Charge', @newComment OUT
+	EXEC [dbo].[uspARGetDefaultComment] @intCompanyLocationId, @intEntityCustomerId, 'Invoice', 'Service Charge', 'Header', @newComment OUT
 
 	SELECT @dblInvoiceTotal    = SUM(dblTotalAmount)
 	FROM @tblTypeServiceCharge
