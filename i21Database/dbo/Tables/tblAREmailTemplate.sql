@@ -15,6 +15,6 @@
     [ysnDefault] BIT NOT NULL DEFAULT 0, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
     [intEntityId] INT NULL,
-    CONSTRAINT [FK_tblAREmailTemplate_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+    CONSTRAINT [FK_tblAREmailTemplate_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
 	CONSTRAINT [FK_tblAREmailTemplate_tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId)
 )

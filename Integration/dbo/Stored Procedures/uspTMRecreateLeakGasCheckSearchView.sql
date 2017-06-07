@@ -130,7 +130,7 @@ BEGIN
 				INNER JOIN tblTMDevice I
 					ON H.intDeviceId = I.intDeviceId
 				INNER JOIN tblARCustomer L
-					ON B.intEntityId = L.intEntityCustomerId
+					ON B.intEntityId = L.intEntityId
 				LEFT JOIN tblTMTankType J
 					ON I.intTankTypeId = J.intTankTypeId
 				LEFT JOIN tblTMDeviceType K

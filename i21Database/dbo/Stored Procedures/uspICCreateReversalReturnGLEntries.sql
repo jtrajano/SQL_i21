@@ -20,9 +20,9 @@ DECLARE @GLAccounts AS dbo.ItemGLAccount;
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
 		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
-		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Inventory Adjustment'  --'Auto-Variance'
+		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Inventory Adjustment' -- 'Auto-Variance'
 
-		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Inventory Adjustment'  -- 'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
+		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Inventory Adjustment' -- 'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
 		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' -- 'Revalue WIP' -- As per Ajith, we should not add another category. Thus, I'm diverting it to reuse 'Work In Progress'. 
 
 -- Create the variables for the internal transaction types used by costing. 
@@ -62,6 +62,7 @@ END
 -- Check for missing Auto Variance Account Id
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemId AS INT
+DECLARE @strLocationName AS NVARCHAR(50)
 
 IF EXISTS (
 	SELECT	TOP 1 1 
@@ -84,11 +85,21 @@ BEGIN
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intAutoNegativeId IS NULL 				 			
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Auto_Negative;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Auto_Negative;
 		RETURN;
 	END 
 END 

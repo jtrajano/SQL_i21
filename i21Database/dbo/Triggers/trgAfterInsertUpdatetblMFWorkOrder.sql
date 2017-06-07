@@ -26,14 +26,6 @@ DECLARE @dtmCurrentDate DATETIME
 	,@ysnNotifyInventoryShortOnReleaseWorkOrder BIT
 	,@ysnNotifyInventoryShortOnCreateWorkOrder BIT
 
-	DECLARE @tblSubstituteItem TABLE (
-		intItemRecordId INT Identity(1, 1)
-		,intItemId INT
-		,intSubstituteItemId INT
-		,dblSubstituteRatio NUMERIC(18, 6)
-		,dblMaxSubstituteRatio NUMERIC(18, 6)
-		)
-
 SELECT @intWorkOrderId = intWorkOrderId
 	,@intStatusId = intStatusId
 	,@intUserId = intLastModifiedUserId
@@ -160,39 +152,11 @@ WHERE ri.intRecipeItemTypeId = 1
 				AND DATEPART(dy, ri.dtmValidTo)
 			)
 		)
-	AND ri.intConsumptionMethodId <> 4
+	AND ri.intConsumptionMethodId IN (
+		1
+		,2
+		)
 	AND r.intItemId = @intItemId
-
-	INSERT INTO @tblSubstituteItem (
-			intItemId
-			,intSubstituteItemId
-			,dblSubstituteRatio
-			,dblMaxSubstituteRatio
-			)
-		SELECT ri.intItemId
-			,rs.intSubstituteItemId
-			,dblSubstituteRatio
-			,dblMaxSubstituteRatio
-		FROM dbo.tblMFRecipe r
-		JOIN dbo.tblMFRecipeItem ri ON r.intRecipeId =ri.intRecipeId
-		JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
-			AND r.ysnActive = 1
-			AND r.intLocationId = @intLocationId
-			AND r.intItemId = @intItemId
-		WHERE ri.intRecipeItemTypeId = 1
-			AND (
-				(
-					ri.ysnYearValidationRequired = 1
-					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
-						AND ri.dtmValidTo
-					)
-				OR (
-					ri.ysnYearValidationRequired = 0
-					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-						AND DATEPART(dy, ri.dtmValidTo)
-					)
-				)
-			AND ri.intConsumptionMethodId <> 4
 
 DECLARE @tblMFAvlQty TABLE (
 	intItemId INT
@@ -214,38 +178,6 @@ SELECT I.intItemId
 	,IsNULL(L.intWeightUOMId, L.intItemUOMId)
 FROM @tblMFItem I
 LEFT JOIN dbo.tblICLot L ON L.intItemId = I.intItemId
-JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
-	AND R.strInternalCode = 'STOCK'
-JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
-	AND BS.strPrimaryStatus = 'Active'
-JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-	AND LS.strPrimaryStatus = 'Active'
-	AND L.intLotStatusId = 1
-	AND L.dtmExpiryDate > GetDate()
-GROUP BY I.intItemId
-	,IsNULL(L.intWeightUOMId, L.intItemUOMId)
-
-	DECLARE @tblMFAvlSubQty TABLE (
-	intItemId INT
-	,dblQuantity DECIMAL(38, 20)
-	,intItemUOMId INT
-	)
-	INSERT INTO @tblMFAvlSubQty (
-	intItemId
-	,dblQuantity
-	,intItemUOMId
-	)
-SELECT I.intItemId
-	,IsNULL(sum(CASE 
-				WHEN L.intWeightUOMId IS NULL
-					THEN L.dblQty
-				ELSE L.dblWeight
-				END), 0)
-	,IsNULL(L.intWeightUOMId, L.intItemUOMId)
-FROM @tblSubstituteItem I
-LEFT JOIN dbo.tblICLot L ON L.intItemId = I.intSubstituteItemId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 	AND R.strInternalCode = 'STOCK'

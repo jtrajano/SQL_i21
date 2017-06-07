@@ -11,5 +11,5 @@ FROM tblPATCustomerEquity CE
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = CE.intCustomerId
 INNER JOIN tblAPVendor APV
-	ON APV.intEntityVendorId = CE.intCustomerId
+	ON APV.[intEntityId] = CE.intCustomerId
 CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) CompLoc

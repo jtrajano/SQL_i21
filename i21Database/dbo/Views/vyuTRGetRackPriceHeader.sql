@@ -5,7 +5,7 @@ SELECT RackPriceHeader.intRackPriceHeaderId
 	, RackPriceHeader.intSupplyPointId
 	, Vendor.strVendorId
 	, strVendorName = Vendor.strName
-	, Vendor.intEntityVendorId
+	, Vendor.intEntityId AS intEntityVendorId
 	, EntityLocation.strLocationName
 	, EntityLocation.intEntityLocationId
 	, RackPriceHeader.dtmEffectiveDateTime
@@ -13,4 +13,4 @@ SELECT RackPriceHeader.intRackPriceHeaderId
 FROM tblTRRackPriceHeader RackPriceHeader
 LEFT JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intSupplyPointId = RackPriceHeader.intSupplyPointId
 LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = SupplyPoint.intEntityLocationId
-LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = SupplyPoint.intEntityVendorId
+LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityId = SupplyPoint.intEntityVendorId

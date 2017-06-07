@@ -17,6 +17,7 @@ DECLARE @intBlenderId int
 DECLARE @strBlenderName NVARCHAR(50)
 DECLARE @dblBlenderCapacity NUMERIC(18,6)
 DECLARE @intDefaultCellId INT
+DECLARE @strDefaultCellName NVARCHAR(50)
 DECLARE @dblDensity Numeric(18,6)
 DECLARE @dblBlenderSize Numeric(18,6)
 DECLARE @strItemNo NVARCHAR(50)
@@ -28,11 +29,24 @@ Select @dblDensity=Case When ISNULL(dblDensity,0)=0 then 1.0 Else dblDensity End
 @strItemNo=strItemNo,@intPackTypeId=intPackTypeId
 From tblICItem Where intItemId=@intItemId
 
+If ISNULL(@intPackTypeId,0)=0
+	Begin
+		Set @strErrMsg='Pack Type is not configured for item ' + @strItemNo + '.'
+		RaisError(@strErrMsg,16,1)
+	End
+
+--Get Default Mfg. Cell
+SELECT @intDefaultCellId=b.intManufacturingCellId,@strDefaultCellName=mc.strCellName FROM tblICItemFactory a 
+JOIN tblICItemFactoryManufacturingCell b ON a.intItemFactoryId=b.intItemFactoryId 
+JOIN tblMFManufacturingCell mc ON b.intManufacturingCellId=mc.intManufacturingCellId
+WHERE a.intItemId=@intItemId AND a.intFactoryId=@intLocationId AND b.ysnDefault=1
+
 --Get Default Belnder/Machine
-Select TOP 1 @intBlenderId=a.intMachineId,@strBlenderName=b.strName 
-From tblMFItemMachine a Join tblMFMachine b on a.intMachineId=b.intMachineId 
-Where a.intItemId=@intItemId and a.intLocationId=@intLocationId 
-ORDER BY a.ysnDefault DESC
+Select TOP 1 @intBlenderId=m.intMachineId,@strBlenderName=m.strName,@dblBlenderCapacity=ISNULL(mp.dblMachineCapacity,0)
+From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
+Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
+Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
+Where mc.intManufacturingCellId=@intDefaultCellId
 
 If @intBlenderId is null
 	Begin
@@ -40,36 +54,11 @@ If @intBlenderId is null
 		RaisError(@strErrMsg,16,1)
 	End
 
-If ISNULL(@intPackTypeId,0)=0
-	Begin
-		Set @strErrMsg='Pack Type is not configured for item ' + @strItemNo + '.'
-		RaisError(@strErrMsg,16,1)
-	End
-Else
-	Select @strPackName=strPackName from tblMFPackType Where intPackTypeId=@intPackTypeId
-
-If Not Exists(Select 1 FROM tblMFMachinePackType
-WHERE intMachineId=@intBlenderId And intPackTypeId=@intPackTypeId)
-Begin
-	Set @strErrMsg='Pack Type ' + '''' + @strPackName + '''' + ' is not configured for machine ' + '''' + @strBlenderName + '''' 
-	+ '. Pack Type for Item ' + @strItemNo + ' and machine ' + '''' + @strBlenderName + '''' + ' should be same.'
-	RaisError(@strErrMsg,16,1)
-End
-Else
-	SELECT TOP 1 @dblBlenderCapacity=ISNULL(dblMachineCapacity,0) 
-	FROM tblMFMachinePackType a 
-	WHERE a.intMachineId=@intBlenderId And intPackTypeId=@intPackTypeId
-
 If @dblBlenderCapacity=0
 Begin
 	Set @strErrMsg='Machine capacity is 0 for ' + '''' + @strBlenderName + '''' + '.'
 	RaisError(@strErrMsg,16,1)
 End
-
---Get Default Mfg. Cell
-SELECT @intDefaultCellId=b.intManufacturingCellId FROM tblICItemFactory a 
-JOIN tblICItemFactoryManufacturingCell b ON a.intItemFactoryId=b.intItemFactoryId 
-WHERE a.intItemId=@intItemId AND a.intFactoryId=@intLocationId AND b.ysnDefault=1
 
 Set @dblBlenderSize=@dblDensity * @dblBlenderCapacity
 
@@ -92,7 +81,8 @@ Set @dblBlenderSize=@dblDensity * @dblBlenderCapacity
 	@strBlenderName AS strDefaultBlender,
 	@dblBlenderSize AS dblBlenderSize,
 	ROUND(bd.dblQuantity/CASE WHEN @dblBlenderSize = 0 THEN 1 ELSE @dblBlenderSize END,3) dblEstNoOfBlendSheet,
-	@intDefaultCellId AS intDefaultCellId
+	@intDefaultCellId AS intDefaultCellId,
+	@strDefaultCellName AS strDefaultCellName
  FROM tblMFBlendDemand bd
  JOIN tblICItem i ON bd.intItemId=i.intItemId AND bd.intLocationId=@intLocationId
  JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.ysnStockUnit=1

@@ -67,6 +67,9 @@ SELECT C.intManufacturingCellId
 	,W.intCountStatusId
 	,I.intLayerPerPallet
 	,I.intUnitPerLayer
+	,csl.strSubLocationName
+	,cs.strName AS strCustomerName
+	,d.strName AS strDepartmentName
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
@@ -80,9 +83,9 @@ LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 	AND R.intLocationId = C.intLocationId
 	AND R.ysnActive = 1
-JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = W.intCreatedUserId
-JOIN dbo.tblSMUserSecurity SS ON SS.[intEntityUserSecurityId] = W.intSupervisorId
-JOIN dbo.tblSMUserSecurity LM ON LM.[intEntityUserSecurityId] = W.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
+JOIN dbo.tblSMUserSecurity SS ON SS.[intEntityId] = W.intSupervisorId
+JOIN dbo.tblSMUserSecurity LM ON LM.[intEntityId] = W.intLastModifiedUserId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
 LEFT JOIN dbo.tblMFWorkOrder PW ON PW.intWorkOrderId = W.intParentWorkOrderId
 LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
@@ -94,3 +97,6 @@ LEFT JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 		WHERE S.intScheduleId = SW.intScheduleId
 			AND S.ysnStandard = 1
 		)
+LEFT JOIN tblSMCompanyLocationSubLocation csl on W.intSubLocationId=csl.intCompanyLocationSubLocationId
+LEFT JOIN vyuARCustomer cs on W.intCustomerId=cs.intEntityId
+LEFT JOIN tblMFDepartment d on W.intDepartmentId=d.intDepartmentId

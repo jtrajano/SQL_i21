@@ -54,7 +54,7 @@ BEGIN
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = W.intPhysicalItemUOMId
 	JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
-	JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = W.intCreatedUserId
+	JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
 	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId

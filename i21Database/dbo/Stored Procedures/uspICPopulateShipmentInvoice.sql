@@ -85,11 +85,11 @@ BEGIN
 			,shipmentItem.strItemUOM
 			,shipmentItem.intItemUOMId	
 	FROM	tblARCustomer customer INNER JOIN tblEMEntity entity
-				ON entity.intEntityId = customer.intEntityCustomerId
+				ON entity.intEntityId = customer.intEntityId
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryShipmentInvoiceItems items
-				WHERE	items.intEntityCustomerId = customer.intEntityCustomerId
+				WHERE	items.intEntityCustomerId = customer.intEntityId
 			) shipmentItem
 
 	-- Insert the price down charges (against the receipt vendor)
@@ -128,10 +128,10 @@ BEGIN
 			,strItemUOM = NULL 
 			,intItemUOMId = NULL 
 	FROM	tblARCustomer customer INNER JOIN tblEMEntity entity
-				ON entity.intEntityId = customer.intEntityCustomerId
+				ON entity.intEntityId = customer.intEntityId
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryShipmentInvoicePriceCharges items
-				WHERE	items.intEntityCustomerId = customer.intEntityCustomerId
+				WHERE	items.intEntityCustomerId = customer.intEntityId
 			) shipmentCharge
 END 

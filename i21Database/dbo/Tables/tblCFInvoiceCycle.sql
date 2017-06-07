@@ -6,3 +6,6 @@
     CONSTRAINT [PK_tblCFInvoiceCycle] PRIMARY KEY CLUSTERED ([intInvoiceCycleId] ASC)
 );
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFInvoiceCycle_UniqueInvoiceCycle
+	ON tblCFInvoiceCycle (strInvoiceCycle);

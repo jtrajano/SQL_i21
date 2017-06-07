@@ -35,13 +35,13 @@ BEGIN
 	--TODO Allow Multi Vendor
 	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
 
-	SELECT TOP 1 @vendorId = C.[intEntityVendorId] 
+	SELECT TOP 1 @vendorId = C.[intEntityId] 
 			,@location = A.intShipToId
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
-			ON A.[intEntityVendorId] = C.[intEntityVendorId]
+			ON A.[intEntityVendorId] = C.[intEntityId]
 
 	IF EXISTS(SELECT 1 FROM tblAPPayment A INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 				INNER JOIN tblCMBankTransaction D ON A.strPaymentRecordNum = D.strTransactionId
@@ -76,7 +76,7 @@ BEGIN
 
 		IF @location IS NULL
 		BEGIN
-			SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId) --USER USER LOCATION
+			SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId) --USER USER LOCATION
 		END
 
 		SELECT @intGLBankAccountId = A.intCashAccount 

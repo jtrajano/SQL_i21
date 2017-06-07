@@ -132,7 +132,7 @@ BEGIN
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
 			LEFT JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 			CROSS APPLY
 			(
 				SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
@@ -196,7 +196,7 @@ BEGIN
 	FROM tblAPBill A
 	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
-	LEFT JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityVendorId
+	LEFT JOIN tblAPVendor D ON C.intEntityVendorId = D.[intEntityId]
 	CROSS APPLY
 			(
 				SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency 
@@ -290,7 +290,7 @@ BEGIN
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
 			LEFT JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblICInventoryReceiptItem E
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
@@ -386,7 +386,7 @@ BEGIN
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
 			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblICItemLocation ItemLoc
 				ON A.intShipToId = ItemLoc.intLocationId AND B.intItemId = ItemLoc.intItemId
 			LEFT JOIN tblICInventoryReceiptItem E
@@ -489,7 +489,7 @@ BEGIN
 			INNER JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblICInventoryReceiptCharge D
 				ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
 			--LEFT JOIN tblICInventoryReceiptItem E
@@ -564,14 +564,14 @@ BEGIN
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
 			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 			INNER JOIN tblICItem B2
 				ON B.intItemId = B2.intItemId
-			LEFT JOIN tblICItemLocation loc
+			INNER JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			LEFT JOIN tblICItem F
 				ON B.intItemId = F.intItemId

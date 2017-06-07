@@ -20,7 +20,7 @@ WITH Refund AS (
 		INNER JOIN tblEMEntity EN
 			ON EN.intEntityId = RCus.intCustomerId
 		INNER JOIN tblARCustomer ARC
-			ON ARC.intEntityCustomerId = RCus.intCustomerId
+			ON ARC.[intEntityId] = RCus.intCustomerId
 		INNER JOIN tblPATRefundCategory RCatPCat
 			ON RCatPCat.intRefundCustomerId = RCus.intRefundCustomerId
 		INNER JOIN tblPATRefundRate RR

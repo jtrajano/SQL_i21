@@ -10,5 +10,5 @@ SELECT FPReading.intFuelPointReadingId
 	, FPReading.dtmDate
 	, FPReading.intSort
 FROM tblMBFuelPointReading FPReading
-LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = FPReading.intEntityCustomerId
+LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = FPReading.intEntityCustomerId
 LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = FPReading.intEntityLocationId

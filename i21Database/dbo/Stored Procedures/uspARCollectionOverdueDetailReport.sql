@@ -598,12 +598,12 @@ AND A.intPaymentId		 = B.intPaymentId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 
-LEFT JOIN (SELECT intEntityCustomerId
+LEFT JOIN (SELECT intEntityId
 				 , dblCreditLimit 
 			FROM dbo.tblARCustomer WITH (NOLOCK)
-) C ON AGING.intEntityCustomerId = C.intEntityCustomerId
+) C ON AGING.intEntityCustomerId = C.intEntityId
 LEFT JOIN (SELECT intEntityId
 			     , strName
 				 , strEntityNo 
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-) E ON C.intEntityCustomerId = E.intEntityId
+) E ON C.intEntityId = E.intEntityId

@@ -8,6 +8,12 @@ CREATE TABLE [dbo].[tblFRArchive] (
 	[dtmAsOfDate]		DATETIME NULL,
 	[dtmDateCreated]	DATETIME DEFAULT (getdate()) NULL,
 	[strGUID]			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	[strStatus]			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	[strType]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
+	[intRowId]			INT NULL,
+	[intColumnId]		INT NULL,
+	[intRowConcurrencyId]		INT NULL,
+	[intColumnConcurrencyId]	INT NULL,
 	[intEntityId]		INT NULL,
 	[intConcurrencyId]	INT NOT NULL,
     CONSTRAINT [PK_tblFRArchive] PRIMARY KEY CLUSTERED ([intArchiveId] ASC)

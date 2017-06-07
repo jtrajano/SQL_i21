@@ -23,7 +23,7 @@ If @ysnParentLot=0
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Left Join tblICItemUOM iu1 on l.intWeightUOMId=iu1.intItemUOMId
 	Left Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
-	Left Join vyuAPVendor v on rh.intEntityVendorId=v.intEntityVendorId
+	Left Join vyuAPVendor v on rh.intEntityVendorId=v.[intEntityId]
 	Where l.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)
 
 If @ysnParentLot=1
@@ -41,5 +41,5 @@ If @ysnParentLot=1
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Left Join tblICItemUOM iu1 on l.intWeightUOMId=iu1.intItemUOMId
 	Left Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
-	Left Join vyuAPVendor v on rh.intEntityVendorId=v.intEntityVendorId
+	Left Join vyuAPVendor v on rh.intEntityVendorId=v.[intEntityId]
 	Where l.intParentLotId=@intLotId

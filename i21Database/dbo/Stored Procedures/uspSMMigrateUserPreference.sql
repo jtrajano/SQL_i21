@@ -18,7 +18,7 @@ BEGIN
 				, CAST(ISNULL(OriginScreensLimit, 0) AS INT) AS intOriginScreensLimit
 				, CAST(AllowUserSelfPost AS BIT) AS ysnAllowUserSelfPost
 				, CAST(ISNULL(isShowReminderList, 0) AS BIT) AS ysnisShowReminderList
-		FROM (SELECT sec.intEntityUserSecurityId entityId--pref.intUserID userId
+		FROM (SELECT sec.[intEntityId] entityId--pref.intUserID userId
 				, pref.strPreference colName
 				, pref.strValue colVal
 				FROM tblSMPreferences pref
@@ -37,7 +37,7 @@ BEGIN
 			SELECT intUserSecurityIdOld
 			FROM dbo.tblSMUserPreference Preference
 			INNER JOIN dbo.tblSMUserSecurity UserSecurity 
-			ON Preference.intEntityUserSecurityId = UserSecurity.intEntityUserSecurityId
+			ON Preference.intEntityUserSecurityId = UserSecurity.[intEntityId]
 		)
 		AND strPreference IN ('OriginScreensLimit', 'AllowUserSelfPost', 'isShowReminderList')
 

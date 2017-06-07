@@ -17,5 +17,5 @@ Select DISTINCT 'Receipt' AS strTransactionName,rh.intInventoryReceiptId,rh.strR
 @strUOM AS strUOM,
 rh.dtmReceiptDate AS dtmTransactionDate,v.strName AS strVendor,'R' AS strType
 from tblICInventoryReceipt rh
-Left Join vyuAPVendor v on rh.intEntityVendorId=v.intEntityVendorId
+Left Join vyuAPVendor v on rh.intEntityVendorId=v.[intEntityId]
 Where rh.intInventoryReceiptId=@intInventoryReceiptId

@@ -39,16 +39,6 @@ BEGIN
 	--SELECT	@intReferenceNumber = [from]
 	--FROM	@temp_xml_table   
 	--WHERE	[fieldname] = 'intReferenceNumber' 
-DECLARE @ysnLoadNumber BIT
-IF EXISTS(SELECT 1 FROM tblLGLoad WHERE strLoadNumber = @xmlParam)
-BEGIN
-	SET @ysnLoadNumber = 1
-END
-ELSE 
-BEGIN
-	SET @ysnLoadNumber = 0
-END
-
 SELECT DISTINCT LC.strContainerNumber,
 		LV.strBLNumber,
 		LC.strMarks,
@@ -178,8 +168,7 @@ SELECT DISTINCT LC.strContainerNumber,
 		LC.dblGrossWt AS dblContainerGrossWt,
 		LC.dblNetWt AS dblContainerNetWt,
 		LC.dblTareWt AS dblContainerTareWt,
-		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq,
-		CD.strCommodityCode
+		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq
 FROM vyuLGLoadDetailView LDV
 JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
@@ -320,8 +309,7 @@ SELECT DISTINCT LC.strContainerNumber,
 		(LC.dblGrossWt/LC.dblQuantity)*LDCL.dblQuantity AS dblContainerGrossWt,
 		(LC.dblNetWt/LC.dblQuantity)*LDCL.dblQuantity AS dblContainerNetWt,
 		(LC.dblTareWt/LC.dblQuantity)*LDCL.dblQuantity AS dblContainerTareWt,
-		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq,
-		CD.strCommodityCode
+		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq
 FROM vyuLGLoadDetailView LDV
 JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
@@ -329,10 +317,6 @@ JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = LDV.intPContractDetailId
-WHERE LW.intLoadWarehouseId = CASE 
-		WHEN @ysnLoadNumber = 1
-			THEN 0
-		ELSE @xmlParam
-		END
+WHERE LW.strDeliveryNoticeNumber = @xmlParam	
 
 END

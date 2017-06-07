@@ -17,7 +17,7 @@ SELECT	DISTINCT
 		ISNULL(APB.strReference, '') AS strDescription,
 		APB.dtmDate
 FROM dbo.tblAPBill APB
-INNER JOIN dbo.tblSMUserSecurity US ON APB.intEntityId = US.[intEntityUserSecurityId]
+INNER JOIN dbo.tblSMUserSecurity US ON APB.intEntityId = US.[intEntityId]
 WHERE 
 	ISNULL(ysnPosted, 0) = 0 AND 
 	APB.intTransactionType NOT IN (6,8,2) AND				   --Will not show BillTemplate and Voucher Over Payment and Prepayment
@@ -37,5 +37,5 @@ SELECT DISTINCT
 FROM dbo.tblAPPayment APP
 INNER JOIN dbo.tblAPPaymentDetail APD ON APP.intPaymentId = APD.intPaymentId
 INNER JOIN dbo.tblSMPaymentMethod SMP ON APP.intPaymentMethodId = SMP.intPaymentMethodID
-INNER JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = APP.intEntityId
+INNER JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = APP.intEntityId
 WHERE APP.ysnPosted = 0 AND APP.strPaymentInfo NOT LIKE '%Voided%'

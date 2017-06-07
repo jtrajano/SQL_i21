@@ -10,5 +10,5 @@
     [intConcurrencyId]				INT				NOT NULL,
 	CONSTRAINT [FK_tblSMDocumentTypeFieldValue_tblSMDocumentTypeField] FOREIGN KEY ([intDocumentTypeFieldId]) REFERENCES [dbo].[tblSMDocumentTypeField] ([intDocumentTypeFieldId]),
 	CONSTRAINT [FK_tblSMDocumentTypeFieldValue_tblSMDocument] FOREIGN KEY ([intDocumentId]) REFERENCES [dbo].[tblSMDocument] ([intDocumentId]) ON DELETE CASCADE,
-    CONSTRAINT [PK_dbo.tblSMDocumentTypeValue] PRIMARY KEY CLUSTERED ([intDocumentTypeFieldValueId] ASC) -- FRM-4808
+    CONSTRAINT [PK_dbo.tblSMDocumentTypeValue] PRIMARY KEY CLUSTERED ([intDocumentTypeFieldId] ASC)
 );

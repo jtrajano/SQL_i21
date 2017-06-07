@@ -67,7 +67,7 @@ AS
 		LEFT JOIN (tblICItemUOM B2 INNER JOIN tblICUnitMeasure B3 
 			ON B2.intUnitMeasureId = B3.intUnitMeasureId) ON (CASE WHEN B.dblNetWeight > 0 THEN B.intWeightUOMId WHEN B.intCostUOMId > 0 THEN B.intCostUOMId ELSE B.intUnitOfMeasureId END) =		B2.intItemUOMId
 		INNER JOIN (tblAPVendor M INNER JOIN tblEMEntity M2 
-			ON M.intEntityVendorId = M2.intEntityId LEFT JOIN tblGLAccount M3 ON M.intGLAccountExpenseId = M3.intAccountId) ON A.intEntityVendorId = M.intEntityVendorId
+			ON M.[intEntityId] = M2.intEntityId LEFT JOIN tblGLAccount M3 ON M.intGLAccountExpenseId = M3.intAccountId) ON A.intEntityVendorId = M.[intEntityId]
 		LEFT JOIN tblGLAccount GLA
 			ON GLA.intAccountId = B.intAccountId
 		LEFT JOIN tblICInventoryReceiptItem C2 

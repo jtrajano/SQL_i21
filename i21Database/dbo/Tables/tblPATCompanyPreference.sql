@@ -7,8 +7,6 @@
 	[dblCutoffAmount] NUMERIC(18, 6) NULL,
 	[strCutoffTo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[strPayOnGrain] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
-	[strPrintCheck] NVARCHAR(2) COLLATE Latin1_General_CI_AS NULL,
-	[intPaymentItemId] INT NULL,
 	[dblMinimumDividends] NUMERIC(18, 6) NULL,
 	[ysnProRatedDividends] BIT NULL,
 	[dtmCutoffDate] DATETIME NULL,

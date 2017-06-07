@@ -42,7 +42,7 @@ BEGIN TRY
 	FROM tblWHSKU
 	WHERE intSKUId = @intSKUId
 
-	SELECT @intLastUpdateById = intEntityUserSecurityId
+	SELECT @intLastUpdateById = [intEntityId]
 	FROM tblSMUserSecurity
 	WHERE strUserName = @strUserName
 

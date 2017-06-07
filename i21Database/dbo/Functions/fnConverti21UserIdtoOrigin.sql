@@ -9,7 +9,7 @@ DECLARE @strUserId AS CHAR(16)
 SELECT TOP 1 
 		@strUserId = UPPER(CAST(strUserName AS CHAR(16)))
 FROM	tblSMUserSecurity
-WHERE	[intEntityUserSecurityId] = @intUserId
+WHERE	[intEntityId] = @intUserId
 
 RETURN @strUserId
 		

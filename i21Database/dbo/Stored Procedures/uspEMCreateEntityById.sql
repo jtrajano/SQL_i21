@@ -37,7 +37,7 @@ BEGIN
 
 	if @Type = 'Vendor'
 	begin
-		INSERT into tblAPVendor(intEntityVendorId, strVendorId, intVendorType, ysnWithholding, dblCreditLimit)
+		INSERT into tblAPVendor([intEntityId], strVendorId, intVendorType, ysnWithholding, dblCreditLimit)
 		SELECT @EntityId, @Id, 0, 0, 0
 	end
 

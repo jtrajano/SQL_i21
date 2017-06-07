@@ -85,9 +85,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intEntityVendorId] = @VendorId
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
@@ -109,9 +109,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intEntityVendorId] = @VendorId
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
@@ -132,9 +132,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intEntityVendorId] = @VendorId
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
@@ -154,9 +154,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
@@ -178,9 +178,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
@@ -201,9 +201,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
@@ -224,9 +224,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intItemId] = @ItemId
 		AND ST.[intCategoryId] = @ItemCategoryId
@@ -248,9 +248,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intEntityVendorId] = @VendorId
 		AND ISNULL(ST.[intEntityCustomerLocationId],0) = 0
@@ -270,9 +270,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
@@ -292,9 +292,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intItemId] = @ItemId
 		AND ISNULL(ST.[intEntityVendorId],0) = 0
@@ -315,9 +315,9 @@ BEGIN
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+			ON ST.[intEntityCustomerId] = C.[intEntityId]
 	WHERE
-			C.[intEntityCustomerId] = @CustomerId
+			C.[intEntityId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intCategoryId] = @ItemCategoryId
 		AND ISNULL(ST.[intEntityVendorId],0) = 0
@@ -340,9 +340,9 @@ BEGIN
 		tblARCustomer C
 	INNER JOIN
 		[tblEMEntityLocation] EL
-			ON C.[intEntityCustomerId] = EL.[intEntityId] 
+			ON C.[intEntityId] = EL.[intEntityId] 
 	WHERE
-		C.[intEntityCustomerId] = @CustomerId
+		C.[intEntityId] = @CustomerId
 		AND EL.[intEntityLocationId] = @CustomerLocationId
 
 	IF ISNULL(@TaxGroupId,0) <> 0 AND (@FOB = 'destination' OR LEN(@FOB) < 1)

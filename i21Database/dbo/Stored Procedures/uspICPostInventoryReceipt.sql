@@ -302,7 +302,7 @@ END
 -- Get the next batch number
 BEGIN 
 	SET @strBatchId = NULL 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId  
 	IF @@ERROR <> 0 GOTO Post_Exit;
 END
 
@@ -387,6 +387,14 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			
 	END 
+
+	-- Validate the receipt total. Do not allow negative receipt total. 
+	IF (dbo.fnICGetReceiptTotal(@intTransactionId) < 0) AND ISNULL(@ysnRecap, 0) = 0
+	BEGIN
+		-- Unable to Post {Receipt Number}. The Inventory Receipt total is negative.
+		EXEC uspICRaiseError 80181, @strTransactionId;
+		GOTO With_Rollback_Exit;
+	END
 
 	-- Get company owned items to post. 
 	BEGIN 
@@ -521,13 +529,7 @@ BEGIN
 																dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
 																, ISNULL(DetailItem.dblNet, 0)
 															)
-															,
-															CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
-																		dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
-																	-- Calculate the Net Qty
-																	ELSE 
-																		ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-															END 
+															,ISNULL(AggregrateItemLots.dblTotalWeight, 1) 
 														)
 											END 
 
@@ -586,6 +588,18 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+				OUTER APPLY (
+					SELECT  dblTotalWeight = SUM(
+								CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+											ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+										ELSE 
+											ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+								END 
+							)
+					FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+								ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+					WHERE	ReceiptItem.intInventoryReceiptItemId = DetailItem.intInventoryReceiptItemId
+				) AggregrateItemLots
 				LEFT JOIN dbo.tblICItemUOM ItemUOM 
 					ON ItemUOM.intItemUOMId = DetailItem.intUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM LotItemUOM
@@ -673,11 +687,6 @@ BEGIN
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
-				IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-				BEGIN 
-					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				END
-
 				-- Do the inventory valuation
 				EXEC	@intReturnValue = dbo.uspICPostCosting  
 						@CompanyOwnedItemsForPost  
@@ -686,6 +695,26 @@ BEGIN
 						,@intEntityUserSecurityId
 
 				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+				IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+				BEGIN 
+					-- Change the contra-account to In-Transit. 
+					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					
+					-- Assign the Source Location Id. 
+					UPDATE	t
+					SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
+					FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
+								ON t.intItemId = UDT.intItemId
+								AND t.intItemLocationId = UDT.intItemLocationId
+								AND t.intItemUOMId = UDT.intItemUOMId
+								AND t.dblQty = UDT.dblQty
+								AND t.intTransactionId = UDT.intTransactionId
+								AND t.intTransactionDetailId = UDT.intTransactionDetailId
+								AND t.strTransactionId = UDT.strTransactionId
+					WHERE	t.dblQty > 0 
+							AND UDT.intInTransitSourceLocationId IS NOT NULL 
+				END
 				
 				-- Create the GL entries specific for Inventory Receipt/Return 
 				INSERT INTO @GLEntries (
@@ -863,13 +892,7 @@ BEGIN
 																dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
 																, ISNULL(DetailItem.dblNet, 0)
 															)
-															,
-															CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
-																		dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
-																	-- Calculate the Net Qty
-																	ELSE 
-																		ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-															END 
+															,ISNULL(AggregrateItemLots.dblTotalWeight, 1) 
 														)
 											END 
 
@@ -927,6 +950,18 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+				OUTER APPLY (
+					SELECT  dblTotalWeight = SUM(
+								CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+											ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+										ELSE 
+											ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+								END 
+							)
+					FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+								ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+					WHERE	ReceiptItem.intInventoryReceiptItemId = DetailItem.intInventoryReceiptItemId
+				) AggregrateItemLots
 				LEFT JOIN dbo.tblICItemUOM ItemUOM 
 					ON ItemUOM.intItemUOMId = DetailItem.intUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM LotItemUOM

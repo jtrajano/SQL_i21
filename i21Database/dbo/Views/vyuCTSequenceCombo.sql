@@ -9,9 +9,12 @@ AS
 			CH.strContractNumber,
 			CD.intItemId,
 			CD.intCompanyLocationId,
-			CL.strLocationName
+			CL.strLocationName,
+			CH.intCommodityId,
+			CO.strCommodityCode
 
 	FROM	tblCTContractDetail		CD	
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItem				IM	ON	IM.intItemId			=	CD.intItemId			LEFT
-	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId	=	CD.intCompanyLocationId
+	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId	=	CD.intCompanyLocationId	LEFT
+	JOIN	tblICCommodity			CO	ON	CO.intCommodityId		=	CH.intCommodityId

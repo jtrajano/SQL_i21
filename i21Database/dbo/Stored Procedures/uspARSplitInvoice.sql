@@ -19,14 +19,14 @@ BEGIN
 		  , @errorMsg				NVARCHAR(500)
 
 	SET @ZeroDecimal	= 0.000000
-	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WITH (NOLOCK)  WHERE [intEntityUserSecurityId] = @UserId), 0)
+	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), 0)
 	SET @InvoiceDate	= ISNULL(@InvoiceDate, CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GETDATE()))))
 
 	IF ISNULL(@SplitDetailId, 0) > 0 
 		BEGIN
 			SELECT @intSplitEntityId = intEntityId
 			      ,@dblSplitPercent = dblSplitPercent/100
-			FROM [tblEMEntitySplitDetail] WITH (NOLOCK)
+			FROM [tblEMEntitySplitDetail] 
 			WHERE intSplitDetailId = @SplitDetailId
 		END
 
@@ -46,7 +46,7 @@ BEGIN
 		  @InvoiceType			= strType
 		, @TransactionType		= strTransactionType
 		, @DistributionHeaderId	= ISNULL(intDistributionHeaderId, intLoadDistributionHeaderId)
-	FROM tblARInvoice WITH (NOLOCK)
+	FROM tblARInvoice
 	WHERE intInvoiceId = @InvoiceId
 	
 	--VALIDATE INVOICE TYPES
@@ -114,7 +114,6 @@ BEGIN
 		,ysnPosted
 		,ysnPaid
 		,ysnSplitted
-		,dblSplitPercent 
 		,intFreightTermId
 		,strDeliverPickup 
 		,intShipToLocationId
@@ -156,7 +155,7 @@ BEGIN
 		,strTransactionType
 		,strType
 		,intPaymentMethodId
-		,strComments + ' Split: ' + strInvoiceNumber
+		,strComments + ' DUP: ' + strInvoiceNumber
 		,strFooterComments
 		,intAccountId
 		,intSplitId
@@ -164,7 +163,6 @@ BEGIN
 		,0
 		,0
 		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN 1 ELSE 0 END
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN ISNULL(@dblSplitPercent,1) ELSE 1 END
 		,intFreightTermId
 		,strDeliverPickup 
 		,intShipToLocationId
@@ -185,7 +183,7 @@ BEGIN
 		,0
 		,@EntityId
 	FROM 
-		tblARInvoice WITH (NOLOCK)
+		tblARInvoice
 	WHERE
 		intInvoiceId = @InvoiceId
 				
@@ -198,7 +196,7 @@ BEGIN
 	SELECT 	
 		 [intInvoiceDetailId]
 	FROM
-		tblARInvoiceDetail WITH (NOLOCK)
+		tblARInvoiceDetail
 	WHERE
 		[intInvoiceId] = @InvoiceId
 	ORDER BY
@@ -330,7 +328,7 @@ BEGIN
 								,[dblSubCurrencyRate]
 								,1
 							FROM
-								tblARInvoiceDetail WITH (NOLOCK)
+								tblARInvoiceDetail
 							WHERE
 								[intInvoiceDetailId] = @InvoiceDetailId
 												
@@ -369,7 +367,7 @@ BEGIN
 								,[ysnTaxExempt]
 								,[strNotes] 
 								,1
-							FROM tblARInvoiceDetailTax WITH (NOLOCK)
+							FROM tblARInvoiceDetailTax 
 							WHERE intInvoiceDetailId = @InvoiceDetailId
 				END
 			ELSE
@@ -407,7 +405,7 @@ BEGIN
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
 						,@ItemSubCurrencyId				= [dblSubCurrencyRate]
 					FROM
-						tblARInvoiceDetail WITH (NOLOCK)
+						tblARInvoiceDetail
 					WHERE
 						[intInvoiceDetailId] = @InvoiceDetailId
 

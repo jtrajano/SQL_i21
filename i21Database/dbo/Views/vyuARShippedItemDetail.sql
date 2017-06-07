@@ -90,4 +90,4 @@ LEFT OUTER JOIN
 		ON ARCC.[intTermId] = SMT.[intTermID]	
 LEFT OUTER JOIN
 	tblSMShipVia SMSV
-		ON ARCC.[intShipViaId] = SMSV.[intEntityShipViaId]
+		ON ARCC.[intShipViaId] = SMSV.[intEntityId]

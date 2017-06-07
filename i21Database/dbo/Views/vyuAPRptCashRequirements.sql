@@ -2,7 +2,7 @@
 WITH SCHEMABINDING
 AS
 SELECT
-		APV.intEntityVendorId,
+		APV.[intEntityId],
 		APV.strVendorId,
 		ISNULL(APV.strVendorId, '') + ' - ' + isnull(E.strName,'''') as strVendorIdName,
 		--dbo.tblAPPayment.dtmDatePaid,
@@ -17,13 +17,13 @@ SELECT
 		APP.dblAmountPaid
 	FROM dbo.tblAPVendor APV
 	INNER JOIN dbo.tblAPPayment APP
-		ON APP.intEntityVendorId = APV.intEntityVendorId
+		ON APP.intEntityVendorId = APV.[intEntityId]
 	INNER JOIN dbo.tblAPPaymentDetail APPD
 		ON APP.intPaymentId = APPD.intPaymentId
 	INNER JOIN dbo.tblAPBill APB
 		ON APB.intBillId = APPD.intBillId
 	LEFT JOIN dbo.tblEMEntity E
-		ON E.intEntityId = APV.intEntityVendorId
+		ON E.intEntityId = APV.[intEntityId]
 	WHERE 
 			APB.ysnForApproval != 1														   --Will not show For Approval Bills
 		AND APB.ysnPosted = 1 OR (APB.dtmApprovalDate IS NOT NULL AND APB.ysnApproved = 1) --Will not show Rejected approval bills but show old Posted Transactions.

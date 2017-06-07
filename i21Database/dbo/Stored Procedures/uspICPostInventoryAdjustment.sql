@@ -56,6 +56,7 @@ BEGIN
 			,@ysnTransactionPostedFlag AS BIT
 			,@strAdjustmentDescription AS NVARCHAR(255) 
 			,@adjustmentType AS INT
+			,@intLocationId AS INT 
 
   
 	SELECT TOP 1   
@@ -65,6 +66,7 @@ BEGIN
 			,@intCreatedEntityId = intEntityId
 			,@adjustmentType = intAdjustmentType
 			,@strAdjustmentDescription = strDescription
+			,@intLocationId = intLocationId 
 	FROM	dbo.tblICInventoryAdjustment
 	WHERE	strAdjustmentNo = @strTransactionId  
 END  
@@ -142,7 +144,7 @@ BEGIN
 END
 
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId
 IF @@ERROR <> 0 GOTO Post_Exit    
 
 -- Determine if Adjustment requires costing and GL entries. 

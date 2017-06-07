@@ -43,13 +43,13 @@ IF RTRIM(LTRIM(@strCompanyLocationLocal)) = ''
 	SET @strCompanyLocationLocal = NULL;
 
 WITH SALESPERSON AS (
-    SELECT intEntitySalespersonId
+    SELECT SP.intEntityId
 	     , strName
-	FROM dbo.tblARSalesperson WITH (NOLOCK) 
+	FROM dbo.tblARSalesperson SP WITH (NOLOCK) 
 	INNER JOIN (SELECT intEntityId
 					 , strName 
 			   FROM dbo.tblEMEntity WITH (NOLOCK)			   			   
-	) ES ON intEntitySalespersonId = ES.intEntityId
+	) ES ON SP.intEntityId = ES.intEntityId
 ),
 COMPANYLOCATION AS (
 	SELECT intCompanyLocationId
@@ -138,7 +138,7 @@ POSTEDINVOICES AS (
 		 , dtmPostDate
 		 , strTransactionType
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
-		LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+		LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 		LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 	WHERE ysnPosted = 1
 		AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
@@ -222,7 +222,7 @@ FROM
       , dblAvailableCredit		= 0
 	  , dblPrepayments			= 0
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -256,7 +256,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN INVOICETOTALPAYMENT PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId	
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -290,7 +290,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId 
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -363,7 +363,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN ARPAYMENTDETAILS ARPD ON I.intInvoiceId = ARPD.intInvoiceId
 	LEFT JOIN APPAYMENTDETAILS APPD ON I.intInvoiceId = APPD.intInvoiceId
 	LEFT JOIN PREPAIDSINVOICES PC ON I.intInvoiceId = PC.intInvoiceId
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -393,10 +393,10 @@ SELECT dtmPostDate			= NULL
     , dblAvailableCredit	= 0 
 	, dblPrepayments		= 0
 FROM tblARCustomerBudget CB	
-	LEFT JOIN (SELECT intEntityCustomerId
+	LEFT JOIN (SELECT intEntityId
 					, ysnCustomerBudgetTieBudget
 			   FROM tblARCustomer 
-	) CUST ON CB.intEntityCustomerId = CUST.intEntityCustomerId
+	) CUST ON CB.intEntityCustomerId = CUST.intEntityId
 WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND CB.dblAmountPaid < CB.dblBudgetAmount 
 	AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
@@ -439,7 +439,7 @@ FROM
       , dblAvailableCredit	= 0
 	  , dblPrepayments		= 0
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -467,7 +467,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN INVOICETOTALPAYMENT PD ON I.intInvoiceId = PD.intInvoiceId 
 	LEFT JOIN PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -494,7 +494,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId 
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -553,7 +553,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN ARPAYMENTDETAILS ARPD ON I.intInvoiceId = ARPD.intInvoiceId
 	LEFT JOIN APPAYMENTDETAILS APPD ON I.intInvoiceId = APPD.intInvoiceId
 	LEFT JOIN PREPAIDSINVOICES PC ON I.intInvoiceId = PC.intInvoiceId
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted  = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -576,10 +576,10 @@ SELECT intInvoiceId			= CB.intCustomerBudgetId
      , dblAvailableCredit	= 0
 	 , dblPrepayments		= 0
 FROM tblARCustomerBudget CB	
-	LEFT JOIN (SELECT intEntityCustomerId
+	LEFT JOIN (SELECT intEntityId
 					, ysnCustomerBudgetTieBudget
 			   FROM tblARCustomer 
-	) CUST ON CB.intEntityCustomerId = CUST.intEntityCustomerId
+	) CUST ON CB.intEntityCustomerId = CUST.intEntityId
 WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND CB.dblAmountPaid < CB.dblBudgetAmount 
 	AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
@@ -599,14 +599,14 @@ WHERE
 	OR ISNULL(@intEntityCustomerIdLocal, 0) = 0
 GROUP BY A.intEntityCustomerId) AS AGING
 
-LEFT JOIN (SELECT intEntityCustomerId
+LEFT JOIN (SELECT intEntityId
 				 , dblCreditLimit 
 			FROM dbo.tblARCustomer WITH (NOLOCK)
-) C ON AGING.intEntityCustomerId = C.intEntityCustomerId
+) C ON AGING.intEntityCustomerId = C.intEntityId
 LEFT JOIN (SELECT intEntityId
 			     , strName
 				 , strEntityNo 
 			FROM tblEMEntity WITH (NOLOCK)
-) E ON C.intEntityCustomerId = E.intEntityId
+) E ON C.intEntityId = E.intEntityId
 WHERE ISNULL(AGING.intEntityCustomerId, 0) > 0
 ORDER BY strCustomerName

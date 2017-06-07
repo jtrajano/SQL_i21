@@ -81,7 +81,7 @@ BEGIN
    SET @intCompanyLocationId = NULL
 END;	
 
-SELECT @EntityId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId;
+SELECT @EntityId = [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @intUserId;
 
 DISABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
 
@@ -194,7 +194,7 @@ JOIN @temp TE ON TE.Customer		= IE.intEntityCustomerId
 			 AND TE.Comments		= IE.strComments
 			 AND TE.PurchaseOrder	= IE.strPurchaseOrder	  
 INNER JOIN tblARCustomer AC
-		ON IE.[intEntityCustomerId] = AC.[intEntityCustomerId]
+		ON IE.[intEntityCustomerId] = AC.[intEntityId]
 LEFT OUTER JOIN (SELECT [intEntityLocationId]
 					  , [intEntityId] 
 					  , [strCountry]
@@ -204,7 +204,7 @@ LEFT OUTER JOIN (SELECT [intEntityLocationId]
 					  , [intShipViaId]
 					FROM [tblEMEntityLocation]
 					WHERE ysnDefaultLocation = 1 ) EL
-						ON AC.[intEntityCustomerId] = EL.[intEntityId]
+						ON AC.[intEntityId] = EL.[intEntityId]
 LEFT OUTER JOIN [tblEMEntityLocation] SL
 		ON IE.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN [tblEMEntityLocation] BL
@@ -274,7 +274,7 @@ JOIN @temp TE ON TE.Customer		= IE.intEntityCustomerId
 	         AND TE.Comments		= IE.strComments
 	         AND TE.PurchaseOrder	= IE.strPurchaseOrder	  
 INNER JOIN tblARCustomer AC
-		ON IE.[intEntityCustomerId] = AC.[intEntityCustomerId]
+		ON IE.[intEntityCustomerId] = AC.[intEntityId]
 LEFT OUTER JOIN
 				(	SELECT
 						[intEntityLocationId]
@@ -289,7 +289,7 @@ LEFT OUTER JOIN
 					WHERE
 						ysnDefaultLocation = 1
 				) EL
-					ON AC.[intEntityCustomerId] = EL.[intEntityId]
+					ON AC.[intEntityId] = EL.[intEntityId]
 LEFT OUTER JOIN [tblEMEntityLocation] SL
 		ON IE.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN [tblEMEntityLocation] BL

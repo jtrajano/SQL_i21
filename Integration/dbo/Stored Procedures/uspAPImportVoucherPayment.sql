@@ -127,7 +127,7 @@ SELECT DISTINCT
 									WHEN E.apchk_chk_amt = 0 THEN @debitmemosandpayments
 								END,
 	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
-	[intEntityVendorId]		= B.intEntityVendorId,
+	[intEntityVendorId]		= B.intEntityId,
 	[strPaymentInfo]		= A.apivc_chk_no,
 	[strNotes]				= NULL,
 	[dtmDatePaid]			= CASE WHEN ISDATE(A.apivc_chk_rev_dt) = 1 
@@ -171,7 +171,7 @@ SELECT
 									WHEN ISNULL(E.apchk_chk_amt, A.apivc_net_amt) = 0 THEN @debitmemosandpayments
 								END,
 	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
-	[intEntityVendorId]		= B.intEntityVendorId,
+	[intEntityVendorId]		= B.intEntityId,
 	[strPaymentInfo]		= A.apivc_chk_no,
 	[strNotes]				= NULL,
 	[dtmDatePaid]			= CASE WHEN ISDATE(A.apivc_chk_rev_dt) = 1 
@@ -259,7 +259,7 @@ SELECT
 									WHEN ISNULL(E.apchk_chk_amt,0) = 0 THEN @debitmemosandpayments
 								END,
 	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
-	[intEntityVendorId]		= B.intEntityVendorId,
+	[intEntityVendorId]		= B.intEntityId,
 	[strPaymentInfo]		= E.apchk_chk_no,
 	[strNotes]				= NULL,
 	[dtmDatePaid]			= CASE WHEN ISDATE(E.apchk_rev_dt) = 1 
@@ -462,15 +462,15 @@ VALUES
 --UPDATE Bank Transaction
 UPDATE tblCMBankTransaction
 SET strTransactionId = B.strPaymentRecordNum,
-	intPayeeId = C.intEntityVendorId
+	intPayeeId = C.intEntityId
 FROM tblCMBankTransaction A
 INNER JOIN tblAPPayment B
 	ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
 	AND A.dtmDate = B.dtmDatePaid
 	AND A.intBankAccountId = B.intBankAccountId
 	AND A.strReferenceNo = B.strPaymentInfo
-INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.intEntityId)
-	ON B.intEntityVendorId = C.intEntityVendorId 
+INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityId = D.intEntityId)
+	ON B.intEntityVendorId = C.intEntityId 
 	--AND A.strPayee = D.strName
 WHERE A.strSourceSystem IN ('AP','CW')
 AND A.strTransactionId <> B.strPaymentRecordNum

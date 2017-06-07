@@ -26,7 +26,7 @@
 
     CONSTRAINT [PK_tblAPVendorTaxException]					PRIMARY KEY CLUSTERED ([intAPVendorTaxExceptionId] ASC),
 
-	CONSTRAINT [FK_tblAPVendorTaxException_tblAPVendor]		FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]),
+	CONSTRAINT [FK_tblAPVendorTaxException_tblAPVendor]		FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityId]),
 
 	CONSTRAINT FK_ttblAPVendorTaxExceptiontblEMEntityLocation FOREIGN KEY (intEntityVendorLocationId) REFERENCES [tblEMEntityLocation]([intEntityLocationId])
 )

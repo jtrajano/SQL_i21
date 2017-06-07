@@ -53,10 +53,10 @@ INNER JOIN (SELECT intEntityId
 			     , strName 
 		    FROM dbo.tblEMEntity WITH (NOLOCK)
 ) E ON P.intEntityCustomerId = E.intEntityId
-LEFT OUTER JOIN (SELECT intEntityCustomerId
+LEFT OUTER JOIN (SELECT intEntityId
 					 ,  strCustomerNumber 
 				 FROM dbo.tblARCustomer WITH (NOLOCK)
-) C ON E.intEntityId = C.intEntityCustomerId
+) C ON E.intEntityId = C.intEntityId
 LEFT OUTER JOIN (SELECT intBankAccountId
 					  , strBankAccountNo 
 				 FROM dbo.tblCMBankAccount WITH (NOLOCK)

@@ -87,11 +87,11 @@ BEGIN
 			,receiptItem.intCostUOMId
 			,receiptItem.strCostUOM
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
-				ON entity.intEntityId = vendor.intEntityVendorId
+				ON entity.intEntityId = vendor.[intEntityId]
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherItems items
-				WHERE	items.intEntityVendorId = vendor.intEntityVendorId
+				WHERE	items.intEntityVendorId = vendor.intEntityId
 			) receiptItem
 
 	-- Insert the price down charges (against the receipt vendor)
@@ -131,11 +131,11 @@ BEGIN
 			,intCostUOMId = CAST(NULL AS INT)
 			,strCostUOM = CAST(NULL AS NVARCHAR(50)) 
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
-				ON entity.intEntityId = vendor.intEntityVendorId
+				ON entity.intEntityId = vendor.intEntityId
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherPriceCharges prices
-				WHERE	prices.intEntityVendorId = vendor.intEntityVendorId
+				WHERE	prices.intEntityVendorId = vendor.intEntityId
 			) receiptPriceCharges
 
 	-- Insert the accrue other charges. 
@@ -175,10 +175,10 @@ BEGIN
 			,intCostUOMId = CAST(NULL AS INT)
 			,strCostUOM = CAST(NULL AS NVARCHAR(50)) 
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
-				ON entity.intEntityId = vendor.intEntityVendorId
+				ON entity.intEntityId = vendor.[intEntityId]
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherCharges charges
-				WHERE	charges.intEntityVendorId = vendor.intEntityVendorId
+				WHERE	charges.intEntityVendorId = vendor.intEntityId
 			) receiptCharges
 END 

@@ -27,9 +27,9 @@ BEGIN
 				tblARCustomer C 
 			INNER JOIN 
 				tblARCustomerBudget CB 
-					ON C.intEntityCustomerId = CB.intEntityCustomerId
+					ON C.[intEntityId] = CB.intEntityCustomerId
 			WHERE 
-				C.intEntityCustomerId = @customerId
+				C.[intEntityId] = @customerId
 				AND (CB.ysnUsedBudget = 0 OR CB.dblBudgetAmount <> 0.0000000)
 				AND (ISNULL(@datePaid, GETDATE()) >= CB.dtmBudgetDate AND ISNULL(@datePaid, GETDATE()) < DATEADD(MONTH, 1, CB.dtmBudgetDate))
 			ORDER BY
@@ -43,9 +43,9 @@ BEGIN
 				tblARCustomer C 
 			INNER JOIN 
 				tblARCustomerBudget CB 
-					ON C.intEntityCustomerId = CB.intEntityCustomerId
+					ON C.[intEntityId] = CB.intEntityCustomerId
 			WHERE 
-				C.intEntityCustomerId = @customerId
+				C.[intEntityId] = @customerId
 				AND CB.dblAmountPaid <> 0.0000000
 				AND (ISNULL(@datePaid, GETDATE()) >= CB.dtmBudgetDate AND ISNULL(@datePaid, GETDATE()) < DATEADD(MONTH, 1, CB.dtmBudgetDate))
 			ORDER BY

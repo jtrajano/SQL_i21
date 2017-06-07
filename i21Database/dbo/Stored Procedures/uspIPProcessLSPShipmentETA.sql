@@ -40,7 +40,7 @@ Begin
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)
 
-		Select TOP 1 @intEntityId=intEntityVendorId From tblAPVendor 
+		Select TOP 1 @intEntityId=[intEntityId] From tblAPVendor 
 		Where strVendorAccountNum=(Select strWarehouseVendorAccNo From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 
 		If @dtmETA IS NULL

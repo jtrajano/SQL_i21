@@ -86,8 +86,8 @@ FROM (
 		,[ysnPosted] = L.ysnPosted
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	JOIN tblARCustomer ARC ON LD.intCustomerEntityId = ARC.intEntityCustomerId
-	JOIN tblEMEntity EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+	JOIN tblARCustomer ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
+	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
 	LEFT JOIN tblICItem ICI ON LWS.intItemId = ICI.intItemId

@@ -26,7 +26,7 @@
     [ysnUseOriginIntegration] BIT NOT NULL DEFAULT 1, 
     [strCSVPath] NVARCHAR(500)  COLLATE Latin1_General_CI_AS NULL DEFAULT '', 
     [ysnOriginToi21TMData] BIT NOT NULL DEFAULT 0, 
-    [strLeaseBillingIncentiveCalculation] NVARCHAR(25) NOT NULL DEFAULT N'Current Season', 
+    [strLeaseBillingIncentiveCalculation] NVARCHAR(25) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT N'Current Season', 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 

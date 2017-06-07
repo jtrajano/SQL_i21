@@ -15,7 +15,7 @@ BEGIN
 			,D.intContractId
 			,intItemId = ISNULL(D.intSubstituteProductID,D.intProductID)
 			,dblQuantity = CASE WHEN ISNULL(D.dblMinimumQuantity,0) = 0 THEN D.dblQuantity ELSE D.dblMinimumQuantity END
-			,C.intEntityCustomerId
+			,intEntityCustomerId = C.intEntityId
 			,A.intLocationId
 			,D.dtmRequestedDate
 			,intTaxGroupId = CASE WHEN A.ysnTaxable = 1 THEN A.intTaxStateID ELSE NULL END
@@ -26,7 +26,7 @@ BEGIN
 		INNER JOIN tblTMCustomer B
 			ON A.intCustomerID = B.intCustomerID
 		INNER JOIN tblARCustomer C
-			ON B.intCustomerNumber = C.intEntityCustomerId
+			ON B.intCustomerNumber = C.intEntityId
 		INNER JOIN tblTMDispatch D 
 			ON A.intSiteID = D.intSiteID 
 		INNER JOIN tblSMTerm E

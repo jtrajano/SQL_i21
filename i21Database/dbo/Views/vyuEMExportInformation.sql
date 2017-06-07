@@ -7,9 +7,9 @@
 	,ent_no			= a.strEntityNo
 	,name			= a.strName
 	,website		= a.strWebsite
-	,type			= case when e.intEntityVendorId is not null then 'vendor,' else '' end + 
-						case when f.intEntityCustomerId is not null then 'customer,' else '' end + 
-						case when g.intEntitySalespersonId is not null then 'salesperson,' else '' end
+	,type			= case when e.[intEntityId] is not null then 'vendor,' else '' end + 
+						case when f.[intEntityId] is not null then 'customer,' else '' end + 
+						case when g.[intEntityId] is not null then 'salesperson,' else '' end
 	--Contact
 	,con_name		= c.strName
 	,con_phone		= l.strPhone--c.strPhone
@@ -61,15 +61,15 @@
 	join [tblEMEntityLocation] d
 		on d.intEntityId = a.intEntityId and ysnDefaultLocation = 1
 	left join tblAPVendor e
-		on e.intEntityVendorId = a.intEntityId
+		on e.[intEntityId] = a.intEntityId
 	left join tblARCustomer f
-		on f.intEntityCustomerId = a.intEntityId
+		on f.[intEntityId] = a.intEntityId
 	left join tblARSalesperson g
-		on g.intEntitySalespersonId = a.intEntityId
+		on g.[intEntityId] = a.intEntityId
 	left join tblSMTerm h
 		on d.intTermsId = h.intTermID
 	left join tblARSalesperson i
-		on f.intSalespersonId = i.intEntitySalespersonId
+		on f.intSalespersonId = i.[intEntityId]
 	left join tblGLAccount j
 		on e.intGLAccountExpenseId = j.intAccountId
 	left join tblSMCompanyLocation k

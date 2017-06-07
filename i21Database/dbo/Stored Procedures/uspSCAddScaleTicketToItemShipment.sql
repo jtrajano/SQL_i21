@@ -173,7 +173,7 @@ BEGIN
 		INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
-		LEFT JOIN tblARCustomer AR ON AR.intEntityCustomerId = SC.intEntityId
+		LEFT JOIN tblARCustomer AR ON AR.intEntityId = SC.intEntityId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 END 
 
@@ -296,7 +296,7 @@ BEGIN
 	SELECT	
 	[intOrderType]						= SE.intOrderType
 	,[intSourceType]					= SE.intSourceType
-	,[intEntityCustomerId]				= SE.intEntityCustomerId
+	,[intEntityCustomerId]				= NULL
 	,[dtmShipDate]						= SE.dtmShipDate
 	,[intShipFromLocationId]			= SE.intShipFromLocationId
 	,[intShipToLocationId]				= SE.intShipToLocationId

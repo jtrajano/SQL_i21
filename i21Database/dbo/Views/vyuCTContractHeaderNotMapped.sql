@@ -19,27 +19,101 @@ AS
 
 						dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intLoadUOMId,CH.intCommodityUOMId,1)	AS	dblCommodityUOMConversionFactor,
 						dbo.fnCTGetPrepaidIds(CH.intContractHeaderId) strPrepaidIds,
-						CY.ysnExchangeTraded,
+						
 						EY.strName					AS	strEntityName,
-						PO.strPosition,
-						W1.strWeightGradeDesc		AS	strGrade,
-						W2.strWeightGradeDesc		AS	strWeight,
-						TM.strTerm,
-						CB.strINCOLocationType,
-						U2.strUnitMeasure			AS	strCommodityUOM,
-						CB.strContractBasis,
-						CM.intUnitMeasureId
+						SP.strName					AS	strSalesperson,
+						CN.strName					AS	strContact,
+						PR.strName					AS	strProducer,
+						CU.strName					AS	strCounterParty,
 
-				FROM	tblCTContractHeader			CH	
-				JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CH.intEntityId			LEFT
-				JOIN	tblICCommodity				CY	ON	CY.intCommodityId			=	CH.intCommodityId		LEFT
-				JOIN	tblCTPriceFixation			PF	ON	CH.intContractHeaderId		=	PF.intContractHeaderId 
-														AND CH.ysnMultiplePriceFixation = 1							LEFT
-				JOIN	tblCTPosition				PO	ON	PO.intPositionId			=	CH.intPositionId		LEFT	
-				JOIN	tblCTWeightGrade			W1	ON	W1.intWeightGradeId			=	CH.intGradeId			LEFT
-				JOIN	tblCTWeightGrade			W2	ON	W2.intWeightGradeId			=	CH.intWeightId			LEFT
-				JOIN	tblSMTerm					TM	ON	TM.intTermID				=	CH.intTermId			LEFT
-				JOIN	tblCTContractBasis			CB	ON	CB.intContractBasisId		=	CH.intContractBasisId	LEFT
-				JOIN	tblICCommodityUnitMeasure	CM	ON	CM.intCommodityUnitMeasureId=	CH.intCommodityUOMId	LEFT	
-				JOIN	tblICUnitMeasure			U2	ON	U2.intUnitMeasureId			=	CM.intUnitMeasureId		
+						AN.strName					AS	strAssociationName,
+						CB.strContractBasis,						
+						CB.strDescription			AS	strContractBasisDescription,		
+						CB.strINCOLocationType,						
+						CM.intUnitMeasureId,						
+						CO.strCountry,						
+						CP.strContractPlan,						
+						CY.strCommodityCode,						
+						CY.strDescription			AS	strCommodityDescription,		
+						CY.ysnExchangeTraded,												
+						IB.strDescription			AS	strInsuranceByDescription,		
+						IB.strInsuranceBy,						
+						IT.strDescription			AS	strInvoiceTypeDescription,		
+						IT.strInvoiceType,						
+						PL.strPricingLevelName,						
+						PO.strPosition,						
+						PT.strPricingType,						
+						TM.strTerm,						
+						TM.strTermCode,						
+						TP.strContractType,						
+						TX.strTextCode,						
+						U2.strUnitMeasure			AS	strCommodityUOM,		
+						U3.strUnitMeasure			AS	strLoadUnitMeasure,		
+						U4.strUnitMeasure			AS	strCategoryUnitMeasure,		
+						U5.strUnitMeasure			AS	strLoadCategoryUnitMeasure,		
+						W1.strWeightGradeDesc		AS	strGrade,			
+						W2.strWeightGradeDesc		AS	strWeight,			
+						YR.strCropYear,					
+						SL.strSubLocationName,
+						CT.strCity					AS	strINCOLocation,
+						AB.strCity					AS	strArbitration,
+						MA.strFutMarketName			AS	strFutureMarket,
+						REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') strFutureMonthYear,
+						U6.strUnitMeasure			AS	strMarketUnitMeasure,
+						MA.dblContractSize			AS	dblMarketContractSize,
+						MA.intCurrencyId			AS	intMarketCurrencyId,
+						CR.strCurrency				AS	strMarketCurrency,
+						CA.strCommodityAttributeId,
+						EL.intEntityLocationId		AS	intEntityDefaultLocationId,
+						EL.strLocationName			AS	strEntityDefaultLocation,
+						PO.intNoOfDays				AS	intPositionNoOfDays
+
+				FROM	tblCTContractHeader					CH	
+				
+				JOIN	tblEMEntity							EY	ON	EY.intEntityId						=		CH.intEntityId						LEFT
+				JOIN	tblEMEntity							SP	ON	SP.intEntityId						=		CH.intSalespersonId					LEFT				
+				JOIN	tblEMEntity							CN	ON	CN.intEntityId						=		CH.intEntityContactId				LEFT
+				JOIN	tblEMEntity							PR	ON	PR.intEntityId						=		CH.intProducerId					LEFT
+				JOIN	tblEMEntity							CU	ON	CU.intEntityId						=		CH.intCounterPartyId				LEFT
+				JOIN	tblEMEntityLocation					EL	ON	EL.intEntityId						=		CH.intEntityId 
+																AND EL.ysnDefaultLocation				=		1
+
+				JOIN	tblICCommodity						CY	ON	CY.intCommodityId					=		CH.intCommodityId					LEFT
+				JOIN	tblCTPosition						PO	ON	PO.intPositionId					=		CH.intPositionId					LEFT	
+				JOIN	tblCTWeightGrade					W1	ON	W1.intWeightGradeId					=		CH.intGradeId						LEFT
+				JOIN	tblCTWeightGrade					W2	ON	W2.intWeightGradeId					=		CH.intWeightId						LEFT
+				JOIN	tblSMTerm							TM	ON	TM.intTermID						=		CH.intTermId						LEFT
+				JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=		CH.intContractBasisId				LEFT
+				JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId				LEFT
+				JOIN	tblCTAssociation					AN	ON	AN.intAssociationId					=		CH.intAssociationId					LEFT
+				JOIN	tblCTContractText					TX	ON	TX.intContractTextId				=		CH.intContractTextId				LEFT
+			  --JOIN	tblCTApprovalBasis					AB	ON	AB.intApprovalBasisId				=		CH.intApprovalBasisId				LEFT
+				JOIN	tblCTInsuranceBy					IB	ON	IB.intInsuranceById					=		CH.intInsuranceById					LEFT
+				JOIN	tblCTInvoiceType					IT	ON	IT.intInvoiceTypeId					=		CH.intInvoiceTypeId					LEFT
+				JOIN	tblSMCountry						CO	ON	CO.intCountryID						=		CH.intCountryId						LEFT
+				JOIN	tblSMCity							CT	ON	CT.intCityId						=		CH.intINCOLocationTypeId			LEFT
+				JOIN	tblSMCity							AB	ON	AB.intCityId						=		CH.intArbitrationId					LEFT
+				JOIN	tblCTPricingType					PT	ON	PT.intPricingTypeId					=		CH.intPricingTypeId					LEFT
+				JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId				=		CH.intFutureMarketId				LEFT
+				JOIN	tblRKFuturesMonth					MO	ON	MO.intFutureMonthId					=		CH.intFutureMonthId					LEFT
+				JOIN	tblRKCommodityMarketMapping			CA	ON	CA.intFutureMarketId				=		CH.intFutureMarketId					
+																AND	CA.intCommodityId					=		CH.intCommodityId					LEFT
+
+				JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
+				JOIN	tblICCommodityUnitMeasure			CL	ON	CL.intCommodityUnitMeasureId		=		CH.intLoadUOMId						LEFT
+				JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					LEFT
+				JOIN	tblICUnitMeasure					U3	ON	U3.intUnitMeasureId					=		CL.intUnitMeasureId					LEFT
+				JOIN	tblICUnitMeasure					U4	ON	U4.intUnitMeasureId					=		CH.intCategoryUnitMeasureId			LEFT
+				JOIN	tblICUnitMeasure					U5	ON	U5.intUnitMeasureId					=		CH.intLoadCategoryUnitMeasureId		LEFT
+				JOIN	tblICUnitMeasure					U6	ON	U6.intUnitMeasureId					=		MA.intUnitMeasureId					LEFT
+				
+				JOIN	tblSMCurrency						CR	ON	CR.intCurrencyID					=		MA.intCurrencyId					LEFT
+				JOIN	tblSMCompanyLocationPricingLevel	PL	ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId LEFT
+				JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId			LEFT
+				JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
+				JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId					LEFT
+				
+
+				JOIN	tblCTPriceFixation					PF	ON	CH.intContractHeaderId				=		PF.intContractHeaderId 
+																AND CH.ysnMultiplePriceFixation			=		1							
 			)t

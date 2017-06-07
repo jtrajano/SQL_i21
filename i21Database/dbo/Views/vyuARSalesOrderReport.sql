@@ -15,6 +15,7 @@ SELECT SO.intSalesOrderId
 						   END 
 	 , strOrderType				= ISNULL(SO.strType, 'Standard')
      , strCustomerName			= E.strName
+	 , strCustomerNumber		= C.strCustomerNumber
 	 , strLocationName			= L.strLocationName
 	 , dtmDate					= SO.dtmDate
 	 , strCurrency				= CUR.strCurrency
@@ -90,13 +91,13 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblCTContractDetail CD ON SD.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblMFRecipe MFR ON SD.intRecipeId = MFR.intRecipeId) ON SO.intSalesOrderId = SD.intSalesOrderId
 LEFT JOIN (tblARCustomer C 
-	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId) ON C.[intEntityId] = SO.intEntityCustomerId
 LEFT JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
-	INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
+	INNER JOIN tblEMEntity ESP ON SP.[intEntityId] = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.[intEntityId]
 LEFT JOIN (tblSMShipVia SV
-	INNER JOIN tblEMEntity ESV ON SV.intEntityShipViaId = ESV.intEntityId) ON SO.intShipViaId = SV.intEntityShipViaId
+	INNER JOIN tblEMEntity ESV ON SV.[intEntityId] = ESV.intEntityId) ON SO.intShipViaId = SV.[intEntityId]
 LEFT JOIN tblSMTerm T ON SO.intTermId = T.intTermID
 LEFT JOIN tblEMEntity EOB ON SO.intOrderedById = EOB.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON SO.intFreightTermId = FT.intFreightTermId

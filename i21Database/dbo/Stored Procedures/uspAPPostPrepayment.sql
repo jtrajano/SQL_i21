@@ -189,8 +189,8 @@ BEGIN
 			[intCurrencyID] = A.intCurrencyId,
 			[dblExchangeRate] = 0,
 			[dtmDate] = A.dtmDatePaid,
-			[strPayee] = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityVendorId),
-			[intPayeeId] = B.intEntityVendorId,
+			[strPayee] = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.[intEntityId]),
+			[intPayeeId] = B.[intEntityId],
 			[strAddress] = '',
 			[strZipCode] = '',
 			[strCity] = '',
@@ -214,7 +214,7 @@ BEGIN
 			[intConcurrencyId] = 1
 			FROM tblAPPayment A
 				INNER JOIN tblAPVendor B
-					ON A.intEntityVendorId = B.intEntityVendorId
+					ON A.intEntityVendorId = B.[intEntityId]
 				--LEFT JOIN tblSMPaymentMethod C ON A.intPaymentMethodId = C.intPaymentMethodID
 			WHERE A.intPaymentId IN (@prepaymentId)
 			--AND C.strPaymentMethod = 'Check'

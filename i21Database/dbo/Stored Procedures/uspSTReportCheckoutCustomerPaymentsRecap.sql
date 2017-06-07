@@ -11,7 +11,7 @@ BEGIN TRY
 	
     select B.strCustomerNumber, A.strName, A.intInvoice,A.dblAmount ,A.strComment ,A.strType, A.strCheckNo,
 	SUM(case when A.strType = 'P' then A.dblAmount  else 0 end) over() as TotalCash, SUM(case when A.strType <> 'P' then A.dblAmount else 0 end) over() as TotalOther
-	from tblSTCheckoutCustomerPayments A JOIN tblARCustomer B ON B.intEntityCustomerId = A.intCustomerId  
+	from tblSTCheckoutCustomerPayments A JOIN tblARCustomer B ON B.[intEntityId] = A.intCustomerId  
 	where A.intCheckoutId = @intCheckoutId
     
 END TRY

@@ -18,9 +18,9 @@ DECLARE @ErrorState INT;
 DECLARE @intEntityId int;
 BEGIN TRY
 
-SELECT	@intEntityId = intEntityUserSecurityId --this is a hiccup
-FROM	dbo.tblSMUserSecurity 
-WHERE	intEntityUserSecurityId = @intUserId --this also
+SELECT	@intEntityId = intEntityId --this is a hiccup
+FROM	tblSMUserSecurity 
+WHERE	intEntityId = @intUserId --this also
 
 if @ysnPostOrUnPost = 0 and @ysnRecap = 0
     BEGIN

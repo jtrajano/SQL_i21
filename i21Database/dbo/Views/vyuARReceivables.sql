@@ -18,10 +18,10 @@ FROM
 	tblARInvoice I
 INNER JOIN
 	tblARCustomer C
-		ON C.[intEntityCustomerId] = I.[intEntityCustomerId]
+		ON C.[intEntityId] = I.[intEntityCustomerId]
 INNER JOIN 
 	tblEMEntity E 
-		ON C.[intEntityCustomerId] = E.[intEntityId]
+		ON C.[intEntityId] = E.[intEntityId]
 WHERE
 	I.[ysnPosted] = 1
 
@@ -45,10 +45,10 @@ FROM
 	tblARPayment  P
 INNER JOIN
 	tblARCustomer C
-		ON P.[intEntityCustomerId] = C.[intEntityCustomerId] 
+		ON P.[intEntityCustomerId] = C.[intEntityId] 
 INNER JOIN
 	tblEMEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId] 			
+		ON C.[intEntityId] = E.[intEntityId] 			
 LEFT JOIN 
 	tblARPaymentDetail PD
 		ON P.[intPaymentId] = PD.[intPaymentId]

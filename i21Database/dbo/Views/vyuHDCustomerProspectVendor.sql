@@ -38,5 +38,5 @@
 				left join tblEMEntityType h on h.intEntityId = a.intEntityId and h.strType = 'Partner'
 				left join tblEMEntityType i on i.intEntityId = a.intEntityId and i.strType = 'Employee'
 			where
-				a.intEntityId in (select b.intEntityVendorId from tblAPVendor b union select c.intEntityCustomerId from tblARCustomer c)
+				a.intEntityId in (select b.[intEntityId] from tblAPVendor b union select c.[intEntityId] from tblARCustomer c)
 		) as result

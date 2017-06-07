@@ -22,7 +22,7 @@ BEGIN
 	--);
 	--INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
-	SELECT TOP 1 @userLocation = intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId;
+	SELECT TOP 1 @userLocation = intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId;
 	IF (@userLocation IS NOT NULL AND @userLocation > 0)
 	BEGIN
 		SELECT TOP 1
@@ -108,7 +108,7 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A 
 		INNER JOIN tblAPVendor B
-			ON A.intEntityVendorId = B.intEntityVendorId
+			ON A.intEntityVendorId = B.[intEntityId]
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND @WithholdAccount IS NULL
 		 AND B.ysnWithholding = 1
@@ -137,7 +137,7 @@ BEGIN
 			INNER JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest)--fully paid
 		AND B.dblDiscount <> 0
@@ -159,7 +159,7 @@ BEGIN
 			INNER JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) --fully paid
 		AND B.dblInterest <> 0

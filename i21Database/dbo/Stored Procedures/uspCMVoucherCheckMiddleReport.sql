@@ -116,7 +116,7 @@ SELECT	CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
 		,strPayee = CASE
-					WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.intEntityVendorId) > 0 THEN
+					WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
 						CHK.strPayee + ' ' + (STUFF( (SELECT ' and ' + strName 
                              FROM tblAPVendorLien LIEN
 							 INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
@@ -192,11 +192,11 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR
-			ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
+			ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
 		LEFT JOIN tblEMEntity ENTITY
-			ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
+			ON VENDOR.[intEntityId] = ENTITY.intEntityId
 		LEFT JOIN [tblEMEntityLocation] LOCATION
-			ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 		LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)

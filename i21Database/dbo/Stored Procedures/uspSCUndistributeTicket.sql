@@ -167,16 +167,15 @@ BEGIN TRY
 		
 		--Audit Log
 		
-		SET @jsonData = 'Updated - Record:' + CAST(@intTicketId AS NVARCHAR(MAX)) + '","keyValue":"' + CAST(@intTicketId AS NVARCHAR(MAX)) + ''          
 		EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
-			,@screenName		= 'Grain.view.ScaleViewController'	-- Screen Namespace
+			,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
 			,@entityId			= @intUserId						-- Entity Id.
 			,@actionType		= 'Updated'							-- Action Type
 			,@changeDescription	= 'Ticket Status'					-- Description
 			,@fromValue			= 'Completed'						-- Previous Value
 			,@toValue			= 'Reopened'						-- New Value
-			,@details			= @jsonData;
+			,@details			= '';
 
 		IF ISNULL(@intLoadDetailId,0) > 0
 		BEGIN

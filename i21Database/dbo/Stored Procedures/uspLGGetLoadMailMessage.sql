@@ -98,7 +98,7 @@ BEGIN
 	FROM		vyuLGLoadDetailView L
 	LEFT JOIN		tblEMEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
 	LEFT JOIN		tblEMEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
-	LEFT JOIN		tblSMUserSecurity	Dispatcher On				Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
+	LEFT JOIN		tblSMUserSecurity	Dispatcher On				Dispatcher.[intEntityId] = L.intDispatcherId
 	WHERE L.[strLoadNumber] = @strLoadNumber
 
 	Insert into @LoadDetailTable

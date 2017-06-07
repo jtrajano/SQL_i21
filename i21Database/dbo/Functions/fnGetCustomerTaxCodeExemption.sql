@@ -38,10 +38,10 @@ BEGIN
 	IF @IsCustomerSiteTaxable IS NULL
 		BEGIN
 			--Customer
-			IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
+			IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1) AND @DisregardExemptionSetup <> 1
 				SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
-			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
+			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 				BEGIN
 					INSERT INTO @returntable
 					SELECT 
@@ -89,9 +89,10 @@ BEGIN
 	WHERE 
 		SMTGCE.intCategoryId = @ItemCategoryId
 		AND SMTGC.[intTaxCodeId] = @TaxCodeId
-		AND SMTGC.[intTaxGroupId] = @TaxGroupId		
+		AND SMTGC.[intTaxGroupId] = @TaxGroupId
+		AND @DisregardExemptionSetup <> 1
 
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
@@ -117,7 +118,8 @@ BEGIN
 						WHERE 
 							ICI.intItemId = @ItemId
 							AND ICC.intCategoryId = @ItemCategoryId
-							AND ICCT.intTaxClassId = @TaxClassId							
+							AND ICCT.intTaxClassId = @TaxClassId
+							AND @DisregardExemptionSetup <> 1
 					)
 		AND ISNULL(@ItemId,0) <> 0
 	BEGIN
@@ -126,7 +128,7 @@ BEGIN
 		SET @InvalidSetup = 1
 	END
 		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 --AND @DisregardExemptionSetup <> 1
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
@@ -177,7 +179,8 @@ BEGIN
 		tblCFVehicle CFV
 			ON TE.[intVehicleId] = CFV.[intVehicleId] 
 	WHERE
-		TE.[intEntityCustomerId] = @CustomerId		
+		TE.[intEntityCustomerId] = @CustomerId
+		AND @DisregardExemptionSetup <> 1
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(TE.[dtmStartDate], @TransactionDate) AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 		AND (ISNULL(TE.[intEntityCustomerLocationId], 0) = 0 OR TE.[intEntityCustomerLocationId] = @ShipToLocationId)
 		AND (ISNULL(TE.[intItemId], 0) = 0 OR TE.[intItemId] = @ItemId)
@@ -210,7 +213,7 @@ BEGIN
 		,ISNULL(TE.[dtmEndDate], @TransactionDate) DESC
 		
 		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
@@ -231,7 +234,7 @@ BEGIN
 		AND	ISNULL(TC.[intSalesTaxAccountId],0) = 0	
 			
 				
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
@@ -240,12 +243,7 @@ BEGIN
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
-		END
-		
-	SET @TaxCodeExemption = NULL
-	SET @ExemptionPercent = 0.00000
-	SET @TaxExempt = 0
-	SET @InvalidSetup = 0				
+		END					
 	
 	INSERT INTO @returntable
 	SELECT 

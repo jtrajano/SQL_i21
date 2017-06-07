@@ -89,8 +89,8 @@ FROM (
 	JOIN tblLGLoadStorageCost LSC ON LSC.intLoadId = L.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LSC.intLoadDetailLotId = LDL.intLoadDetailLotId
 	JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
-	JOIN tblARCustomer ARC ON LD.intCustomerEntityId = ARC.intEntityCustomerId
-	JOIN tblEMEntity EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+	JOIN tblARCustomer ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
+	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN [tblSMCompanyLocation] SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]

@@ -18,7 +18,7 @@ BEGIN TRY
 
 	SELECT @strUserName=strUserName
 	FROM tblSMUserSecurity
-	WHERE [intEntityUserSecurityId] = @intUserId
+	WHERE [intEntityId] = @intUserId
 
 	SELECT @strType= CASE 
 							 WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 

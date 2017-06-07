@@ -5,7 +5,7 @@
 			UPDATE dbo.tblSMRecurringTransaction
 			SET strResponsibleUser = CASE WHEN LEN(LTRIM(RTRIM(strResponsibleUser))) = 0 THEN strFullName ELSE strResponsibleUser END
 			FROM dbo.tblSMRecurringTransaction
-			INNER JOIN dbo.tblSMUserSecurity ON  dbo.tblSMRecurringTransaction.intUserId = dbo.tblSMUserSecurity.intEntityUserSecurityId
+			INNER JOIN dbo.tblSMUserSecurity ON  dbo.tblSMRecurringTransaction.intUserId = dbo.tblSMUserSecurity.intEntityId
 		')
 	END
 GO
@@ -54,12 +54,12 @@ GO
 
 GO
 	/* DELETE TAXABLE BY OTHER TAXES */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Delete Taxable By Other Taxes - Tax Class')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Delete Taxable By Other Taxes - Tax Class')
 	BEGIN
 		UPDATE tblSMTaxCode SET strTaxableByOtherTaxes = NULL
 		
-		PRINT N'ADD LOG TO tblMigrationLog'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		PRINT N'ADD LOG TO tblSMMigrationLog'
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Delete Taxable By Other Taxes - Tax Class', 'Delete Taxable By Other Taxes - Tax Class', GETDATE())
 	END
 
@@ -166,7 +166,7 @@ GO
 	UPDATE tblSMHomePanelDashboard SET strPanelName = 'Notifications' WHERE strPanelName = 'Alerts'
 GO
 	/* ARRANGE USER ROLE MENUS */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu')
 	BEGIN
 		UPDATE RoleMenu SET intSort = MasterMenu.intSort
 		FROM tblSMUserRoleMenu RoleMenu
@@ -174,12 +174,12 @@ GO
 		WHERE intParentMenuID = 0 AND ysnIsLegacy = 0
 		
 		PRINT N'ARRANGE USER ROLE MENUS'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Arrange User Role Menus - Role Menu', 'Arrange User Role Menus - Role Menu', GETDATE())
 	END
 
 	/* ARRANGE SYSTEM MANAGER MENUS */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (System Manager)')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (System Manager)')
 	BEGIN
 		UPDATE RoleMenu SET intSort = MasterMenu.intSort
 		FROM tblSMUserRoleMenu RoleMenu
@@ -187,12 +187,12 @@ GO
 		WHERE intParentMenuID IN (1, 13)
 		
 		PRINT N'ARRANGE USER ROLE MENUS'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (System Manager)', 'Arrange User Role Menus - Role Menu (System Manager)', GETDATE())
 	END
 
 	/* ARRANGE USER ROLE MENUS SCREENS */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (Screens)')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (Screens)')
 	BEGIN
 		UPDATE RoleMenu SET intSort = ISNULL(MasterMenu.intSort, 0)
 		FROM tblSMUserRoleMenu RoleMenu
@@ -200,7 +200,7 @@ GO
 		WHERE intParentMenuID <> 0 AND ysnIsLegacy = 0
 
 		PRINT N'ARRANGE USER ROLE MENUS (Screens)'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Screens)', 'Arrange User Role Menus - Role Menu (Screens)', GETDATE())
 	END
 
@@ -243,7 +243,7 @@ GO
 GO
 	UPDATE tblSMActivity SET strFilter = NULL WHERE strType = 'Email' AND (strFilter = '' OR strFilter = 'null')
 GO
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Fix Payroll Menu')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Fix Payroll Menu')
 	BEGIN
 
 		UPDATE RoleMenu SET intSort = MasterMenu.intSort
@@ -251,8 +251,8 @@ GO
 		INNER JOIN tblSMMasterMenu MasterMenu ON RoleMenu.intMenuId = MasterMenu.intMenuID
 		WHERE strModuleName = 'Payroll' AND ysnIsLegacy = 0
 
-		PRINT N'ADD LOG TO tblMigrationLog'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		PRINT N'ADD LOG TO tblSMMigrationLog'
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Fix Payroll Menu', 'Fix Payroll Menu', GETDATE())
 
 	END

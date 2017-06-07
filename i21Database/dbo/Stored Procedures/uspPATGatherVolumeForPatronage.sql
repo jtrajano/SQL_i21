@@ -30,7 +30,7 @@ SET ANSI_WARNINGS OFF
 	IF(@type = 1)
 	BEGIN
 			INSERT INTO #tempPatronageVolumes
-			SELECT	intCustomerPatronId = AB.intEntityVendorId,
+			SELECT	intCustomerPatronId = ARC.intEntityId,
 			IC.intPatronageCategoryId,
 			ysnPosted = @post,
 			FY.intFiscalYearId,
@@ -40,7 +40,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblAPBillDetail ABD
 					ON ABD.intBillId = AB.intBillId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityCustomerId = AB.intEntityVendorId AND ARC.strStockStatus != ''
+					ON ARC.intEntityId = AB.intEntityId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItem IC
 					ON IC.intItemId = ABD.intItemId
 			INNER JOIN tblPATPatronageCategory PC
@@ -48,7 +48,7 @@ SET ANSI_WARNINGS OFF
 			CROSS APPLY tblGLFiscalYear FY
 			WHERE AB.intBillId IN (SELECT intID FROM #tempTransactionIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
 				AND IC.intPatronageCategoryId IS NOT NULL
-			GROUP BY	AB.intEntityVendorId,
+			GROUP BY	ARC.intEntityId,
 						IC.intPatronageCategoryId,
 						FY.intFiscalYearId,
 						AB.ysnPosted
@@ -56,7 +56,7 @@ SET ANSI_WARNINGS OFF
 	ELSE IF(@type = 2)
 	BEGIN
 			INSERT INTO #tempPatronageVolumes
-			SELECT	intCustomerPatronId = AR.intEntityCustomerId,
+			SELECT	intCustomerPatronId = ARC.intEntityId,
 				IC.intPatronageCategoryId,
 				ysnPosted = @post,
 				FY.intFiscalYearId,
@@ -66,7 +66,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblARInvoiceDetail ARD
 					ON ARD.intInvoiceId = AR.intInvoiceId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityCustomerId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
+					ON ARC.intEntityId = AR.intEntityId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItem IC
 					ON IC.intItemId = ARD.intItemId
 			INNER JOIN tblICItemUOM ICU
@@ -77,7 +77,7 @@ SET ANSI_WARNINGS OFF
 			CROSS APPLY tblGLFiscalYear FY
 			WHERE AR.intInvoiceId IN (SELECT intID FROM #tempTransactionIds) AND AR.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
 				   AND IC.intPatronageCategoryId IS NOT NULL
-				   GROUP BY AR.intEntityCustomerId,
+				   GROUP BY ARC.intEntityId,
 					   IC.intPatronageCategoryId,
 					   FY.intFiscalYearId,
 					   AR.ysnPosted
@@ -91,7 +91,7 @@ SET ANSI_WARNINGS OFF
 	BEGIN TRANSACTION
 
 	UPDATE tblARCustomer SET dtmLastActivityDate = GETDATE() 
-	WHERE intEntityCustomerId IN (SELECT intCustomerPatronId FROM #tempPatronageVolumes)
+	WHERE intEntityId IN (SELECT intCustomerPatronId FROM #tempPatronageVolumes)
 
 	BEGIN TRY
 	MERGE tblPATCustomerVolume AS PAT

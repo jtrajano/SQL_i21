@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetItemLocation]
+CREATE VIEW [dbo].[vyuICGetItemLocation]
 	AS 
 
 SELECT ItemLocation.intItemLocationId
@@ -33,7 +33,7 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.intClassId
 	, strClass = Class.strSubcategoryId
 	, ItemLocation.intProductCodeId
-	--, ProductCode.strRegProdCode
+	, strProductCode = ProductCode.strRegProdCode
 	, ItemLocation.strPassportFuelId1
 	, ItemLocation.strPassportFuelId2
 	, ItemLocation.strPassportFuelId3
@@ -89,17 +89,17 @@ FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
 	
-	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = ItemLocation.intVendorId
+	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = ItemLocation.intVendorId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ItemLocation.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemLocation.intStorageLocationId
 	LEFT JOIN vyuICGetItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
 	LEFT JOIN vyuICGetItemUOM IssueUOM ON IssueUOM.intItemUOMId = ItemLocation.intIssueUOMId
 	LEFT JOIN tblSTSubcategory Family ON Family.intSubcategoryId = ItemLocation.intFamilyId
 	LEFT JOIN tblSTSubcategory Class ON Class.intSubcategoryId = ItemLocation.intClassId
-	--LEFT JOIN tblSTSubcategoryRegProd ProductCode ON ProductCode.intStoreId = ItemLocation.intProductCodeId
+	LEFT JOIN tblSTSubcategoryRegProd ProductCode ON ProductCode.intRegProdId = ItemLocation.intProductCodeId
 	LEFT JOIN tblSTPromotionItemList MixMatch ON MixMatch.intPromoItemListId = ItemLocation.intMixMatchId
 	LEFT JOIN vyuICGetItemUOM DepositPLU ON DepositPLU.intItemUOMId = ItemLocation.intDepositPLUId
 	LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = ItemLocation.intFreightMethodId
-	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = ItemLocation.intShipViaId
+	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.[intEntityId] = ItemLocation.intShipViaId
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = ItemLocation.intCountGroupId
 	LEFT JOIN tblSTRadiantItemTypeCode ItemTypeCode ON ItemTypeCode.intRadiantItemTypeCodeId = ItemLocation.intItemTypeCode

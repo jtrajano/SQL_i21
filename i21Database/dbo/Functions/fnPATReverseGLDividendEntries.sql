@@ -47,6 +47,8 @@ BEGIN
 	);
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 	
+	DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage'
+	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Dividend'
 
 	INSERT INTO @returntable(
 		[strTransactionId]
@@ -92,7 +94,7 @@ BEGIN
 		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
 		,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
 		,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
-		,[strDescription]
+		,'Unposted Dividend GL'
 		,[strCode]
 		,[strReference]
 		,[intCurrencyId]
@@ -113,11 +115,13 @@ BEGIN
 		,[dblCreditReport]           
 		,[dblReportingRate]          
 		,[dblForeignRate]
-		,NULL  
+		,NULL
 		,[intEntityId] = @intUserId
 	FROM	tblGLDetail 
 	WHERE	intTransactionId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND ysnIsUnposted = 0
+	AND strModuleName = @MODULE_NAME
+	AND strTransactionForm = @SCREEN_NAME
 	ORDER BY intGLDetailId
 	
 	RETURN 

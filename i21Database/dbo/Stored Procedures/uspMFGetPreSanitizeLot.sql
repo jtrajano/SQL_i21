@@ -51,7 +51,7 @@ BEGIN
 		,U.strUnitMeasure
 		,L.intItemUOMId
 	FROM dbo.tblICLot L
-	JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = L.intCreatedEntityId
+	JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = L.intCreatedEntityId
 	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		AND L.dblQty > 0
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId

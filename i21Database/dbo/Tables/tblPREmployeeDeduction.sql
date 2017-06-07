@@ -16,7 +16,7 @@
     [intConcurrencyId]       INT             DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPREmployeeDeduction] PRIMARY KEY CLUSTERED ([intEmployeeDeductionId] ASC),
     CONSTRAINT [FK_tblPREmployeeDeduction_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblPREmployeeDeduction_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeDeduction_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [dbo].[tblPRTypeDeduction] ([intTypeDeductionId])
 );
 

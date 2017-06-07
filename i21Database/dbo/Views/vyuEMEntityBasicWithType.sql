@@ -28,7 +28,7 @@
 		intEntityContactId = d.intEntityContactId
 from vyuEMEntityType a
 	left join tblAPVendor b 
-		on a.intEntityId = b.intEntityVendorId
+		on a.intEntityId = b.[intEntityId]
 	join tblEMEntity c
 		on a.intEntityId = c.intEntityId
 	join tblEMEntityToContact d

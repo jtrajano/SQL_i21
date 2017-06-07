@@ -99,13 +99,13 @@ LEFT JOIN (tblARInvoiceDetail ID
 	LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblMFRecipe MFR ON ID.intRecipeId = MFR.intRecipeId) ON INV.intInvoiceId = ID.intInvoiceId	
 INNER JOIN (tblARCustomer C 
-	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId) ON C.[intEntityId] = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON INV.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
-	INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON INV.intEntitySalespersonId = SP.intEntitySalespersonId
+	INNER JOIN tblEMEntity ESP ON SP.[intEntityId] = ESP.intEntityId) ON INV.intEntitySalespersonId = SP.[intEntityId]
 LEFT JOIN (tblSMShipVia SV 
-	INNER JOIN tblEMEntity ESV ON SV.intEntityShipViaId = ESV.intEntityId) ON INV.intShipViaId = SV.intEntityShipViaId
+	INNER JOIN tblEMEntity ESV ON SV.[intEntityId] = ESV.intEntityId) ON INV.intShipViaId = SV.[intEntityId]
 INNER JOIN tblSMTerm T ON INV.intTermId = T.intTermID
 LEFT JOIN tblSMFreightTerms FT ON INV.intFreightTermId = FT.intFreightTermId
 

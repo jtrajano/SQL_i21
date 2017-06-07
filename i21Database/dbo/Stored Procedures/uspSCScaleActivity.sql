@@ -54,8 +54,8 @@ AS strTicketType
 FROM tblSCTicket T
 JOIN tblSCTicketType TT ON (SELECT intTicketTypeId FROM tblSCListTicketTypes WHERE intTicketTypeId = TT.intListTicketTypeId) =T.intTicketType
 LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId=T.intProcessingLocationId
-LEFT JOIN tblARCustomer ARC ON ARC.intEntityCustomerId=T.intCustomerId
-LEFT JOIN tblEMEntity en ON en.intEntityId=ARC.intEntityCustomerId
+LEFT JOIN tblARCustomer ARC ON ARC.[intEntityId]=T.intCustomerId
+LEFT JOIN tblEMEntity en ON en.intEntityId=ARC.[intEntityId]
 LEFT JOIN tblICItem TI ON TI.intItemId=T.intItemId
 WHERE 
 CONVERT(NVARCHAR,T.dtmTicketDateTime,101)

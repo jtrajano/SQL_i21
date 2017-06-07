@@ -55,7 +55,7 @@ BEGIN
 		,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
 	FROM tblCCSiteHeader ccSiteHeader
 	INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
-	LEFT JOIN tblAPVendor apVendor ON apVendor.intEntityVendorId =  ccVendorDefault.intVendorId
+	LEFT JOIN tblAPVendor apVendor ON apVendor.[intEntityId] =  ccVendorDefault.intVendorId
 	WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId 
 		AND ccSiteHeader.strApType = 'Cash Deposited'
 

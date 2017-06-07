@@ -26,7 +26,7 @@
     CONSTRAINT [PK_tblICInventoryShipmentCharge] PRIMARY KEY ([intInventoryShipmentChargeId]), 
     CONSTRAINT [FK_tblICInventoryShipmentCharge_tblICItem] FOREIGN KEY ([intChargeId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICInventoryShipmentCharge_tblICItemLocation] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
-    CONSTRAINT [FK_tblICInventoryShipmentCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
+    CONSTRAINT [FK_tblICInventoryShipmentCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryShipmentCharge_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
     CONSTRAINT [FK_tblICInventoryShipmentCharge_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblICInventoryShipmentCharge_tblSMCurrencyExchangeRateType] FOREIGN KEY ([intForexRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])

@@ -50,8 +50,8 @@ AS
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
-	JOIN tblAPVendor ARC ON LC.intVendorId = ARC.intEntityVendorId
-	JOIN tblEMEntity EME ON ARC.intEntityVendorId = EME.[intEntityId]
+	JOIN tblAPVendor ARC ON LC.intVendorId = ARC.[intEntityId]
+	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LC.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN [tblSMCompanyLocation] SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]

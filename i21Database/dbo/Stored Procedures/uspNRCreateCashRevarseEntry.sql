@@ -9,9 +9,9 @@ BEGIN
 	FROM dbo.tblNRNoteTransaction Where intNoteTransId = @intNoteTransId
 	SELECT @strParam = strTransComments FROM dbo.tblNRNoteTransaction Where strCheckNumber = @strCheckNumber AND intNoteTransTypeId = 4 AND dblTransAmount = (@dblTransAmount * (-1))
 	
-	SELECT @intEntityId = C.intEntityCustomerId	
+	SELECT @intEntityId = C.[intEntityId]	
 		From dbo.tblNRNote N
-		JOIN dbo.tblARCustomer C On N.intCustomerId = C.intEntityCustomerId
+		JOIN dbo.tblARCustomer C On N.intCustomerId = C.[intEntityId]
 		Where N.intNoteId = @intNoteId
 		
 	--SET @strParam = '1,2,3,4,5'

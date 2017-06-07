@@ -23,8 +23,8 @@ FROM (
 		,C.strName
 		,intEntityApproverId = Approver.intApproverId
 	FROM dbo.tblPOPurchase A
-		INNER JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.intEntityVendorId = C.intEntityId)
-		ON A.intEntityVendorId = B.intEntityVendorId
+		INNER JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+		ON A.intEntityVendorId = B.[intEntityId]
 		OUTER APPLY (
 			SELECT intApproverId FROM [dbo].[fnPOGetNextApprover](A.intPurchaseId)
 		) Approver

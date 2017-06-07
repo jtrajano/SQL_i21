@@ -14,7 +14,7 @@
 	[ysnPrice] BIT NULL DEFAULT ((0)),
 	CONSTRAINT [PK_tblICInventoryShipmentChargePerItem] PRIMARY KEY ([intInventoryShipmentChargePerItemId]), 
 	CONSTRAINT [FK_tblICInventoryShipmentChargePerItem_tblICInventoryShipmentItem] FOREIGN KEY ([intInventoryShipmentItemId]) REFERENCES [tblICInventoryShipmentItem]([intInventoryShipmentItemId]) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblICInventoryShipmentChargePerItem_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+	CONSTRAINT [FK_tblICInventoryShipmentChargePerItem_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]),
 	CONSTRAINT [FK_tblICInventoryShipmentChargePerItem_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [tblCTContractHeader]([intContractHeaderId])
 )
 GO

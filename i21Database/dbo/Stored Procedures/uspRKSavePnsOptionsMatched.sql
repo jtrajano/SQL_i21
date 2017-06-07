@@ -228,14 +228,14 @@ SELECT @mRowNumber=MIN(RowNumber) FROM @tblExercisedAssignedDetail
 WHILE @mRowNumber IS NOT NULL    
 BEGIN  
 	
-	INSERT INTO tblRKFutOptTransactionHeader  
-	VALUES (1)  
-	SELECT @NewFutOptTransactionHeaderId = SCOPE_IDENTITY();  
-
    DECLARE @intOptionsPnSExercisedAssignedId int  
    
    SELECT @strExercisedAssignedNo=isnull(max(convert(int,strTranNo)),0)+1 from tblRKOptionsPnSExercisedAssigned     
    SELECT @intFutOptTransactionId=intFutOptTransactionId,@intLots=intLots,@dtmTranDate=dtmTranDate,@ysnAssigned=ysnAssigned FROM @tblExercisedAssignedDetail WHERE RowNumber=@mRowNumber    
+
+   	INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId,dtmTransactionDate,intSelectedInstrumentTypeId,strSelectedInstrumentType)  
+	VALUES (1,@dtmTranDate,1,'Exchange Traded')  
+	SELECT @NewFutOptTransactionHeaderId = SCOPE_IDENTITY();  
 
   INSERT INTO tblRKOptionsPnSExercisedAssigned  
   (   

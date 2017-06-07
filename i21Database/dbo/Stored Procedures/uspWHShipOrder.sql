@@ -56,7 +56,7 @@ BEGIN TRY
 	IF @intLocalTran = 1
 		BEGIN TRANSACTION
 		
-	SELECT @intEntityUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @intEntityUserId = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strUserName
 
 	SELECT @intComapnyLocationId = ISNULL(a.intCompanyLocationId, 0)
 	FROM tblWHOrderHeader h

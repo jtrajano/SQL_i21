@@ -47,10 +47,10 @@ INNER JOIN (SELECT intDocumentMaintenanceId
 				 , ysnScaleTicket 
 			FROM dbo.tblSMDocumentMaintenanceMessage WITH (NOLOCK)
 ) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
-LEFT JOIN (SELECT intEntityCustomerId
+LEFT JOIN (SELECT intEntityId
 				, strCustomerNumber 
 		   FROM dbo.tblARCustomer WITH (NOLOCK)
-) C ON A.intEntityCustomerId = C.intEntityCustomerId
+) C ON A.intEntityCustomerId = C.intEntityId
 LEFT JOIN (SELECT intCompanyLocationId
 				, strLocationName 
 		   FROM dbo.tblSMCompanyLocation WITH (NOLOCK)

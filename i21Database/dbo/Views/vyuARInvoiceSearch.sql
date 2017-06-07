@@ -5,7 +5,7 @@ SELECT
 	,strInvoiceNumber				= I.strInvoiceNumber
 	,strCustomerName				= CE.strName
 	,strCustomerNumber				= C.strCustomerNumber
-	,intEntityCustomerId			= C.intEntityCustomerId
+	,intEntityCustomerId			= C.intEntityId
 	,strTransactionType				= I.strTransactionType
 	,strType						= ISNULL(I.strType, 'Standard')
 	,strPONumber					= I.strPONumber
@@ -61,13 +61,13 @@ FROM (SELECT strType, [intEntityCustomerId], intCompanyLocationId, intTermId, in
 		ysnProcessed, ysnRecurring, ysnForgiven, ysnCalculated, dblInvoiceTotal, dblDiscount, dblDiscountAvailable, dblInterest, dblAmountDue, dblPayment, dblInvoiceSubtotal, dblShipping, dblTax
 	 FROM dbo.tblARInvoice WITH (NOLOCK)) AS I 
 INNER JOIN
-	(SELECT [intEntityCustomerId], strCustomerNumber FROM dbo.tblARCustomer WITH (NOLOCK)) AS C 
-		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
+	(SELECT intEntityId, strCustomerNumber FROM dbo.tblARCustomer WITH (NOLOCK)) AS C 
+		ON I.[intEntityCustomerId] = C.intEntityId 
 INNER JOIN
 	(SELECT intEntityId,
 			strName
 	 FROM 
-		dbo.tblEMEntity WITH (NOLOCK)) AS CE ON C.[intEntityCustomerId] = CE.intEntityId 
+		dbo.tblEMEntity WITH (NOLOCK)) AS CE ON C.intEntityId = CE.intEntityId 
 LEFT OUTER JOIN
 	(SELECT intTermID,
 			strTerm
@@ -84,10 +84,10 @@ LEFT OUTER JOIN
 	 FROM 
 		dbo.tblSMPaymentMethod WITH (NOLOCK)) AS P ON I.intPaymentMethodId = P.intPaymentMethodID
 LEFT OUTER JOIN
-	(SELECT intEntityShipViaId,
+	(SELECT intEntityId,
 			strShipVia
 	 FROM 
-		dbo.tblSMShipVia WITH (NOLOCK)) AS SV ON I.intShipViaId = SV.[intEntityShipViaId]
+		dbo.tblSMShipVia WITH (NOLOCK)) AS SV ON I.intShipViaId = SV.intEntityId
 LEFT OUTER JOIN
 	(SELECT intEntityId,
 			strName

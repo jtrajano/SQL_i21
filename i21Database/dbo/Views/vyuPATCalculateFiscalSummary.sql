@@ -34,7 +34,7 @@ SELECT		Total.intFiscalYear,
 				INNER JOIN tblPATRefundRate RR
 						ON RR.intRefundTypeId = RRD.intRefundTypeId
 				INNER JOIN tblARCustomer ARC
-						ON ARC.intEntityCustomerId = B.intCustomerPatronId
+						ON ARC.[intEntityId] = B.intCustomerPatronId
 				CROSS APPLY ComPref
 				WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 				GROUP BY	B.intCustomerPatronId,
@@ -47,9 +47,9 @@ SELECT		Total.intFiscalYear,
 	INNER JOIN tblPATRefundRate RR
              ON RR.intRefundTypeId = Total.intRefundTypeId
 	INNER JOIN tblAPVendor APV
-		ON APV.intEntityVendorId = Total.intCustomerPatronId
+		ON APV.[intEntityId] = Total.intCustomerPatronId
 	INNER JOIN tblARCustomer AC
-			 ON AC.intEntityCustomerId = Total.intCustomerPatronId
+			 ON AC.[intEntityId] = Total.intCustomerPatronId
 	CROSS APPLY ComPref
 	CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) CompLoc
 	GROUP BY Total.intFiscalYear,

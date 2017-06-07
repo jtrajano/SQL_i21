@@ -322,7 +322,7 @@ INSERTDATE:
 			,GETDATE()
 		FROM vyuLGLoadView L
 		LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
-		LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
+		LEFT JOIN tblAPVendor V ON V.[intEntityId] = E.intEntityId
 		WHERE intLoadId = @intLoadId
 
 		SELECT @intLoadStdId = SCOPE_IDENTITY()

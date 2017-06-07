@@ -39,6 +39,9 @@ AS
 		,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 		,dblCustomerBalance = ISNULL(K.dblTotalDue, 0.0)
 		,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
+		,intFillMethodId = B.intFillMethodId
+		,strFillMethod = L.strFillMethod
+		,ysnHold = B.ysnOnHold
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID
@@ -53,10 +56,12 @@ AS
 	LEFT JOIN tblEMEntity G
 		ON A.intDriverID = G.intEntityId
 	LEFT JOIN tblSMUserSecurity H
-		ON A.intUserID = H.[intEntityUserSecurityId]
+		ON A.intUserID = H.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation I
 		ON B.intLocationId = I.intCompanyLocationId
 	LEFT JOIN vyuARCustomerInquiryReport K
 		ON D.intEntityId = K.intEntityCustomerId
+	LEFT JOIN tblTMFillMethod L
+		ON B.intFillMethodId = L.intFillMethodId
 	WHERE ISNULL(A.strOrderNumber,'') <> ''
 GO

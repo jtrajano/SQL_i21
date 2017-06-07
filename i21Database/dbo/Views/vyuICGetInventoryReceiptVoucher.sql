@@ -26,7 +26,7 @@ SELECT
 	,currency.strCurrency
 FROM	tblICInventoryReceipt r  
 		LEFT JOIN vyuAPVendor vendor
-			ON vendor.intEntityVendorId = r.intEntityVendorId
+			ON vendor.[intEntityId] = r.intEntityVendorId
 		LEFT JOIN tblSMCompanyLocation c
 			ON c.intCompanyLocationId = r.intLocationId
 		LEFT JOIN tblSMCurrency currency

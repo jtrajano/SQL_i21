@@ -5,7 +5,7 @@ FROM (
 	SELECT A.dtmDate
 		,A.dtmDueDate
 		,B.strVendorId
-		,B.[intEntityVendorId]
+		,B.[intEntityId]
 		,A.intBillId
 		,A.strBillId
 		,A.strVendorOrderNumber
@@ -43,8 +43,8 @@ FROM (
 		) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A ON A.intBillId = tmpAgingSummaryTotal.intBillId
 	LEFT JOIN (
-		dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityVendorId] = C.intEntityId
-		) ON B.[intEntityVendorId] = A.[intEntityVendorId]
+		dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId
+		) ON B.[intEntityId] = A.[intEntityVendorId]
 	LEFT JOIN dbo.tblGLAccount D ON A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0

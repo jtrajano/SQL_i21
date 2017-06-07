@@ -70,6 +70,10 @@ BEGIN
 				,A.dblTotalCapacity
 				,A.ysnTaxable
 				,strTaxGroup = Q.vwlcl_tax_state
+				,strDeviceOwnership = J.strOwnership
+				,A.strZipCode
+				,strGlobalJulianCalendar = R.strDescription
+				,intCustomerEntityId = B.intCustomerNumber
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -88,6 +92,7 @@ BEGIN
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
+									,Y.strOwnership
 								FROM tblTMSiteDevice Z
 								INNER JOIN tblTMDevice Y
 									ON Z.intDeviceId = Y.intDeviceId
@@ -102,6 +107,8 @@ BEGIN
 					ON A.intRouteId = P.intRouteId
 				LEFT JOIN vwlclmst Q
 					ON A.intTaxStateID = Q.A4GLIdentity
+				LEFT JOIN tblTMGlobalJulianCalendar R
+					ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 				
 		')
 	END
@@ -147,17 +154,21 @@ BEGIN
 				,A.dblTotalCapacity
 				,A.ysnTaxable
 				,Q.strTaxGroup
+				,strDeviceOwnership = J.strOwnership
+				,A.strZipCode
+				,strGlobalJulianCalendar = R.strDescription
+				,intCustomerEntityId = B.intCustomerNumber
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
 				INNER JOIN tblEMEntity C
 					ON B.intCustomerNumber = C.intEntityId
 				INNER JOIN tblARCustomer D
-					ON C.intEntityId = D.intEntityCustomerId
+					ON C.intEntityId = D.intEntityId
 				LEFT JOIN tblSMCompanyLocation E
 					ON A.intLocationId = E.intCompanyLocationId
 				INNER JOIN [tblEMEntityToContact] F
-					ON D.intEntityCustomerId = F.intEntityId 
+					ON D.intEntityId = F.intEntityId 
 						and F.ysnDefaultContact = 1
 				INNER JOIN tblEMEntity G 
 					ON F.intEntityContactId = G.intEntityId
@@ -174,6 +185,7 @@ BEGIN
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
+									,Y.strOwnership
 								FROM tblTMSiteDevice Z
 								INNER JOIN tblTMDevice Y
 									ON Z.intDeviceId = Y.intDeviceId
@@ -190,6 +202,8 @@ BEGIN
 					ON A.intTaxStateID = Q.intTaxGroupId
 				LEFT JOIN tblEMEntityPhoneNumber EP
 					ON G.intEntityId = EP.intEntityId  
+				LEFT JOIN tblTMGlobalJulianCalendar R
+					ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 				WHERE ISNULL(D.ysnActive,0) = 1
 		')
 	END

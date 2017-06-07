@@ -103,7 +103,7 @@ DECLARE @Contacts TABLE
 
 			BEGIN -- Create entity record for Contacts
 
-				select @intEntityId = intEntityCustomerId from tblARCustomer where strCustomerNumber = @sscon_cus_no				
+				select @intEntityId = intEntityId from tblARCustomer where strCustomerNumber = @sscon_cus_no				
 			
 			END
 
@@ -179,7 +179,7 @@ DECLARE @Contacts TABLE
 				declare @CustomerNo nvarchar(max), @intEntityCustomerId int
 
 				select top 1 @CustomerNo = sscon_cus_no from @Contacts where id = @id
-				select top 1 @intEntityCustomerId = intEntityCustomerId from tblARCustomer where strCustomerNumber = @CustomerNo 
+				select top 1 @intEntityCustomerId = intEntityId from tblARCustomer where strCustomerNumber = @CustomerNo 
 
 				insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
 				select @intEntityId, @intContactId, 0, 0

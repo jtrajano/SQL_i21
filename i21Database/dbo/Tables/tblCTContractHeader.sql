@@ -3,6 +3,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractTypeId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
+	[intCounterPartyId] [int] NULL,
 	[intEntityContactId] [int] NULL,
 	[intContractPlanId] [int],
 	[intCommodityId] [int] NULL,
@@ -11,6 +12,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmContractDate] [datetime] NOT NULL,
 	[strCustomerContract] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
+	[strCPContract] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDeferPayDate] [datetime] NULL,
 	[dblDeferPayRate] [numeric](18, 6) NULL,
 	[intContractTextId] [int] NULL,
@@ -73,8 +75,9 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intProducerId] FOREIGN KEY ([intProducerId]) REFERENCES tblEMEntity ([intEntityId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intCounterPartyId] FOREIGN KEY (intCounterPartyId) REFERENCES tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intEntityId_intEntityContactId] FOREIGN KEY ([intEntityContactId]) REFERENCES tblEMEntity ([intEntityId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblARSalesperson_intSalespersonId] FOREIGN KEY([intSalespersonId])REFERENCES [tblARSalesperson] ([intEntitySalespersonId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intSalespersonId] FOREIGN KEY([intSalespersonId])REFERENCES tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTContractText_intContractTextId] FOREIGN KEY([intContractTextId])REFERENCES [tblCTContractText] ([intContractTextId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTCropYear_intCropYearId] FOREIGN KEY([intCropYearId])REFERENCES [tblCTCropYear] ([intCropYearId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTWeightGrade_intWeightGradeId_intGradeId] FOREIGN KEY([intGradeId])REFERENCES [tblCTWeightGrade] ([intWeightGradeId]),
@@ -96,7 +99,11 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intLoadCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intLoadCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTContractPlan_intContractPlanId] FOREIGN KEY([intContractPlanId])REFERENCES [tblCTContractPlan] ([intContractPlanId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intArbitrationId_intCityId] FOREIGN KEY ([intArbitrationId]) REFERENCES [tblSMCity]([intCityId])
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCity_intArbitrationId_intCityId] FOREIGN KEY ([intArbitrationId]) REFERENCES [tblSMCity]([intCityId]),
+
+	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY (intFutureMarketId) REFERENCES tblRKFutureMarket(intFutureMarketId),
+	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMonth_intFutureMonthId] FOREIGN KEY (intFutureMonthId) REFERENCES tblRKFuturesMonth(intFutureMonthId),
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCountry_intCountryId] FOREIGN KEY (intCountryId) REFERENCES tblSMCountry(intCountryID)
 )
 
 GO

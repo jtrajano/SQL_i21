@@ -38,7 +38,7 @@ BEGIN
 			
 
 			--check and update begin date
-			SELECT TOP 1 @dtmBeginBudgetDate = dtmBudgetBeginDate FROM tblARCustomer WHERE intEntityCustomerId = @intEntityCustomerId 
+			SELECT TOP 1 @dtmBeginBudgetDate = dtmBudgetBeginDate FROM tblARCustomer WHERE [intEntityId] = @intEntityCustomerId 
 			IF(@dtmBeginBudgetDate IS NOT NULL)
 			BEGIN
 				SET @dtmBeginDate =  DATEADD(YEAR,1,@dtmBeginBudgetDate)

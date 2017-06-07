@@ -2,7 +2,7 @@
 AS
 
 SELECT
-	 AC.[intEntityCustomerId]
+	 AC.[intEntityId]
 	,AC.[strCustomerNumber]
 	,TMS.[intSiteID]
 	,TMS.[intSiteNumber]
@@ -32,7 +32,7 @@ INNER JOIN
 		ON TMS.[intCustomerID] = TMC.[intCustomerID]
 INNER JOIN
 	tblARCustomer AC
-		ON TMC.[intCustomerNumber] = AC.[intEntityCustomerId]
+		ON TMC.[intCustomerNumber] = AC.[intEntityId]
 --LEFT OUTER JOIN
 --	(
 --		SELECT TOP 1

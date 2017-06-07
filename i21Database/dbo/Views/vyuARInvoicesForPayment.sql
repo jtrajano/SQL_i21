@@ -110,16 +110,16 @@ FROM
 		INNER JOIN
 			(SELECT 
 				strCustomerNumber,
-				intEntityCustomerId,
+				[intEntityId],
 				intPaymentMethodId
 			 FROM 
-				dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
+				dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId] 
 		INNER JOIN
 			(SELECT	
 				intEntityId,
 				strName
 			 FROM
-				dbo.tblEMEntity) AS CE ON ARC.[intEntityCustomerId] = CE.intEntityId 
+				dbo.tblEMEntity) AS CE ON ARC.[intEntityId] = CE.intEntityId 
 		LEFT OUTER JOIN
 			(SELECT 
 				intPaymentMethodID,
@@ -201,17 +201,17 @@ FROM
 				AND EMET.[strType] = 'Customer'	
 		INNER JOIN
 			(SELECT 				
-				intEntityVendorId,
+				[intEntityId],
 				intPaymentMethodId,
 				strVendorId
 			 FROM 
-				dbo.tblAPVendor) AS APV ON APV.[intEntityVendorId] = APB.[intEntityVendorId] 
+				dbo.tblAPVendor) AS APV ON APV.[intEntityId] = APB.[intEntityVendorId] 
 		INNER JOIN
 			(SELECT	
 				intEntityId,
 				strName
 			 FROM
-				dbo.tblEMEntity) AS CE ON APV.[intEntityVendorId] = CE.intEntityId 	
+				dbo.tblEMEntity) AS CE ON APV.[intEntityId] = CE.intEntityId 	
 		LEFT OUTER JOIN
 			(SELECT 
 				intPaymentMethodID,

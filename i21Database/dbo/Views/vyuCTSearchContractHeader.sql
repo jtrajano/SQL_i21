@@ -34,7 +34,8 @@ SELECT	CH.intContractHeaderId,
 		CH.dblQuantityPerLoad,
 		CH.ysnCategory,
 		CH.ysnMultiplePriceFixation,
-
+		CH.strCPContract,
+		
 		PR.strName AS strProducer,
 		ES.strName AS strSalesperson,
 		CY.strDescription			AS	strCommodityDescription,
@@ -62,13 +63,15 @@ SELECT	CH.intContractHeaderId,
 		YR.strCropYear,
 		dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses,
 		CS.intUnitMeasureId AS intStockCommodityUnitMeasureId,
-		U1.strUnitMeasure AS strStockCommodityUnitMeasure
+		U1.strUnitMeasure AS strStockCommodityUnitMeasure,
+		PY.strName AS strCounterParty
 
 FROM	tblCTContractHeader					CH	
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
 JOIN	tblEMEntity							EY	ON	EY.intEntityId						=		CH.intEntityId						LEFT
 JOIN	tblEMEntity							PR	ON	PR.intEntityId						=		CH.intProducerId					LEFT
 JOIN	tblEMEntity							ES	ON	ES.intEntityId						=		CH.intSalespersonId					LEFT
+JOIN	tblEMEntity							PY	ON	PY.intEntityId						=		CH.intCounterPartyId				LEFT
 JOIN	tblICCommodityUnitMeasure			CS	ON	CS.intCommodityId					=		CH.intCommodityId				
 												AND	CS.ysnStockUnit						=		1									LEFT
 JOIN	tblICUnitMeasure					U1	ON	U1.intUnitMeasureId					=		CS.intUnitMeasureId					LEFT

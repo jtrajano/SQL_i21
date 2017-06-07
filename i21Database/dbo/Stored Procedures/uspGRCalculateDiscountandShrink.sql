@@ -35,13 +35,13 @@ BEGIN TRY
 		  ,@dblMaximumValue=DSC.dblMaximumValue
 		  ,@ysnZeroIsValid=DSC.ysnZeroIsValid
 		  ,@intDiscountCalculationOptionId=DSC.intDiscountCalculationOptionId
-		  ,@strCalculationDiscountOption=DCOD.strDisplayField
+		  ,@strCalculationDiscountOption=DCOD.strDiscountCalculationOption
 		  ,@strDiscountChargeType=DSC.strDiscountChargeType
 		  ,@intShrinkCalculationOptionId=DSC.intShrinkCalculationOptionId
-		  ,@strCalculationShrinkOption=DCOS.strDisplayField 
+		  ,@strCalculationShrinkOption=DCOS.strShrinkCalculationOption
 	 FROM tblGRDiscountScheduleCode DSC 
-	 JOIN tblGRDiscountCalculationOption DCOD ON DCOD.intValueFieldId=DSC.intDiscountCalculationOptionId
-	 JOIN tblGRDiscountCalculationOption DCOS ON DCOS.intValueFieldId=DSC.intShrinkCalculationOptionId  
+	 JOIN tblGRDiscountCalculationOption DCOD ON DCOD.intDiscountCalculationOptionId=DSC.intDiscountCalculationOptionId
+	 JOIN tblGRShrinkCalculationOption DCOS ON DCOS.intShrinkCalculationOptionId=DSC.intShrinkCalculationOptionId  
 	 WHERE intDiscountScheduleCodeId=@intDiscountScheduleCodeId
 	
 	IF ((@dblReading < @dblMinimumValue OR @dblReading > @dblMaximumValue) AND (@ysnZeroIsValid=0)) OR ((@dblReading > 0) AND (@ysnZeroIsValid=1) AND (@dblReading < @dblMinimumValue OR @dblReading > @dblMaximumValue))

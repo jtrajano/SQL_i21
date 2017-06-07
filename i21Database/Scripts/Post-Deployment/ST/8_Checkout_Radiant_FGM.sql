@@ -1,11 +1,13 @@
 ﻿
 GO
 DECLARE @intImportFileHeaderId INT
+DECLARE @strRadiantName as nvarchar(250) = 'Radiant - FGM'
+
 
 --START IF EXISTS
-IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = 'Radiant - FGM')
+IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strRadiantName)
 BEGIN
-	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = 'Radiant - FGM'
+	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strRadiantName
 
 	--DELETE FROM dbo.tblSMXMLTagAttribute
 	DELETE TA
@@ -23,7 +25,7 @@ END
 
 --START IF NOT EXISTS
 --HEADER
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = 'Radiant - FGM')
+IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = @strRadiantName)
 BEGIN
 INSERT INTO [dbo].[tblSMImportFileHeader]
            ([strLayoutTitle]			,[strFileType]    ,[strFieldDelimiter]	,[strXMLType]
@@ -34,7 +36,7 @@ INSERT INTO [dbo].[tblSMImportFileHeader]
 END
 --END IF NOT EXISTS
 
-SELECT @intImportFileHeaderId = intImportFileHeaderId FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = 'Radiant - FGM'
+SELECT @intImportFileHeaderId = intImportFileHeaderId FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = @strRadiantName
 
 --LEVEL 1
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'NAXML-MovementReport' AND intLevel = 1
@@ -437,7 +439,7 @@ BEGIN
 END
 
 --LEVEL 26
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FGMPositionSummary' AND intLevel = 26
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FGMSalesTotals' AND intLevel = 26
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -447,13 +449,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,26
-			   ,2			 				,'FGMPositionSummary'		   ,'tblSTPriceBookStaging'
+			   ,2			 				,'FGMSalesTotals'		       ,'tblSTPriceBookStaging'
 			   ,NULL		 			    ,'Header'					   ,24
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 27
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FuelPositionID' AND intLevel = 27
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FuelGradeSalesVolume' AND intLevel = 27
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -463,13 +465,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,27
-			   ,1			 				,'FuelPositionID'		       ,'tblSTPriceBookStaging'
+			   ,1			 				,'FuelGradeSalesVolume'		   ,'tblSTPriceBookStaging'
 			   ,NULL		 			    ,NULL						   ,26
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 28
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FGMNonResettableTotal' AND intLevel = 28
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FuelGradeSalesAmount' AND intLevel = 28
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -479,13 +481,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,28
-			   ,2			 				,'FGMNonResettableTotal'	   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,'Header'					   ,26
+			   ,2			 				,'FuelGradeSalesAmount'	       ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL					       ,26
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 29
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FuelGradeNonResettableTotalVolume' AND intLevel = 29
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'PumpTestAmount' AND intLevel = 29
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -495,13 +497,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]						,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL								,29
-			   ,1			 				,'FuelGradeNonResettableTotalVolume','tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL								,28
+			   ,3			 				,'PumpTestAmount'                   ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL								,26
 			   ,NULL					    ,1									,1)
 END
 
 --LEVEL 30
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FuelGradeNonResettableTotalAmount' AND intLevel = 30
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'PumpTestVolume' AND intLevel = 30
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -511,13 +513,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]						,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL								,30
-			   ,2			 				,'FuelGradeNonResettableTotalAmount','tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL								,28
+			   ,4			 				,'PumpTestVolume'                   ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL								,26
 			   ,NULL					    ,1									,1)
 END
 
 --LEVEL 31
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FGMPriceTierSummary' AND intLevel = 31
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'TaxExemptSalesVolume' AND intLevel = 31
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -527,13 +529,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,31
-			   ,3			 				,'FGMPriceTierSummary'		   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,'Header'					   ,26
+			   ,5			 				,'TaxExemptSalesVolume'		   ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL					       ,26
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 32
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'PriceTierCode' AND intLevel = 32
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'DiscountAmount' AND intLevel = 32
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -543,13 +545,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,32
-			   ,1			 				,'PriceTierCode'			   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,31
+			   ,6			 				,'DiscountAmount'			   ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL						   ,26
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 33
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FGMOutsideSalesSummary' AND intLevel = 33
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'DiscountCount' AND intLevel = 33
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -559,13 +561,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,33
-			   ,2			 				,'FGMOutsideSalesSummary'	   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,'Header'					   ,31
+			   ,7			 				,'DiscountCount'	           ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL					       ,26
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 34
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'OutsideSalesFlag' AND intLevel = 34
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'DispenserDiscountAmount' AND intLevel = 34
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -575,13 +577,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,34
-			   ,1			 				,'OutsideSalesFlag'			   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,33
+			   ,8			 				,'DispenserDiscountAmount'	   ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL						   ,26
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 35
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FGMSalesTotals' AND intLevel = 35
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'DispenserDiscountCount' AND intLevel = 35
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -591,155 +593,10 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,35
-			   ,2			 				,'FGMSalesTotals'			   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,'Header'					   ,33
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 36
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FuelGradeSalesVolume' AND intLevel = 36
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,36
-			   ,1			 				,'FuelGradeSalesVolume'		   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 37
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'FuelGradeSalesAmount' AND intLevel = 37
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,37
-			   ,2			 				,'FuelGradeSalesAmount'		   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 38
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'PumpTestAmount' AND intLevel = 38
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,38
-			   ,3			 				,'PumpTestAmount'		       ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 39
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'PumpTestVolume' AND intLevel = 39
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,39
-			   ,4			 				,'PumpTestVolume'		       ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 40
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'TaxExemptSalesVolume' AND intLevel = 40
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,40
-			   ,5			 				,'TaxExemptSalesVolume'		   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 41
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'DiscountAmount' AND intLevel = 41
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,41
-			   ,6			 				,'DiscountAmount'		       ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 42
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'DiscountCount' AND intLevel = 42
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,42
-			   ,7			 				,'DiscountCount'		       ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 43
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'DispenserDiscountAmount' AND intLevel = 43
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,43
-			   ,8			 				,'DispenserDiscountAmount'	   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
-			   ,NULL					    ,1							   ,1)
-END
-
---LEVEL 44
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'DispenserDiscountCount' AND intLevel = 44
-AND intImportFileHeaderId = @intImportFileHeaderId)
-BEGIN
-		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
-			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
-			   ,[strColumnName]				,[strDataType]				   ,[intLength]
-			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileHeaderId		,NULL						   ,44
 			   ,9			 				,'DispenserDiscountCount'	   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,35
+			   ,NULL		 			    ,NULL					       ,26
 			   ,NULL					    ,1							   ,1)
 END
-
 
 DECLARE @intImportFileColumnDetailId INT
 
@@ -772,24 +629,6 @@ BEGIN
 			   (@intImportFileColumnDetailId	,2						   ,'xmlns'
 			   ,NULL							,NULL					   ,'http://www.naxml.org/POSBO/Vocabulary/2003-10-16'
 			   ,1							    ,1)
-
-END
-
---LEVEL 34, Attributes(1x)
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId 
-AND intLevel = 34 AND strXMLTag = 'OutsideSalesFlag'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'value' AND intSequence = 1
-AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
-BEGIN
-
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-			   ([intImportFileColumnDetailId]	,[intSequence]			   ,[strTagAttribute]
-			   ,[strTable]					   ,[strColumnName]			   ,[strDefaultValue]
-			   ,[ysnActive]					   ,[intConcurrencyId])
-		 VALUES
-			   (@intImportFileColumnDetailId	,1						   ,'value'
-			   ,NULL							,NULL					   ,'NULL'
-			   ,1							   ,1)
 
 END
 GO

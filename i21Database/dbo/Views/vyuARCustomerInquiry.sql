@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerInquiry]
 AS 
-SELECT C.intEntityCustomerId
+SELECT C.intEntityId
 	 , strCustomerName				= E.strName
 	 , CI.strTerm
 	 , C.strCustomerNumber
@@ -43,7 +43,7 @@ FROM dbo.tblARCustomer C WITH (NOLOCK)
 LEFT JOIN (SELECT intEntityId
 				, strName 
 		   FROM dbo.tblEMEntity WITH (NOLOCK)
-) E ON C.intEntityCustomerId = E.intEntityId
+) E ON C.intEntityId = E.intEntityId
 LEFT JOIN (SELECT intEntityId
 				, strAddress
 				, strLocationName
@@ -53,12 +53,12 @@ LEFT JOIN (SELECT intEntityId
 				, strCountry
 		   FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 		   WHERE ysnDefaultLocation = 1
-) LOCATION ON C.intEntityCustomerId = LOCATION.intEntityId
+) LOCATION ON C.intEntityId = LOCATION.intEntityId
 LEFT JOIN (SELECT intEntityId
 				, intEntityContactId
 		   FROM dbo.tblEMEntityToContact WITH (NOLOCK)
 		   WHERE ysnDefaultContact = 1
-) ETC ON C.intEntityCustomerId = ETC.intEntityId
+) ETC ON C.intEntityId = ETC.intEntityId
 LEFT JOIN (SELECT intEntityId
 				, strPhone2
 		   FROM dbo.tblEMEntity WITH (NOLOCK)
@@ -68,4 +68,4 @@ LEFT JOIN (SELECT intEntityId
 		   FROM dbo.tblEMEntityPhoneNumber WITH (NOLOCK)
 ) CONTACT2 ON ETC.intEntityContactId = CONTACT2.intEntityId
 LEFT JOIN dbo.vyuARCustomerInquiryReport CI WITH (NOLOCK)
-	ON C.intEntityCustomerId = CI.intEntityCustomerId
+	ON C.intEntityId = CI.intEntityCustomerId

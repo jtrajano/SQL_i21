@@ -48,6 +48,8 @@ SELECT
 	,ysnLeakCheckRequired = TMO.ysnLeakCheckRequired
 	,dblPercentLeft = TMO.dblSiteEstimatedPercentLeft
 	,dblARBalance = TMO.dblCustomerBalance
+	,strFillMethod = TMO.strFillMethod
+	,ysnHold = TMO.ysnHold
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
@@ -101,6 +103,8 @@ SELECT
 	,ysnLeakCheckRequired = Cast(0 as Bit)
 	,dblPercentLeft = 0.0
 	,dblARBalance = 0.0
+	,strFillMethod = ''
+	,ysnHold = Cast(0 as Bit)
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
@@ -156,6 +160,8 @@ SELECT
 	,ysnLeakCheckRequired = Cast(0 as Bit)
 	,dblPercentLeft = 0.0
 	,dblARBalance = 0.0
+	,strFillMethod = ''
+	,ysnHold = Cast(0 as Bit)
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
@@ -199,7 +205,7 @@ SELECT
 	,dblToLongitude = TMO.dblLongitude
 	,dblToLatitude = TMO.dblLatitude
 	,strOrderStatus = NULL
-	,strDriver = NULL
+	,strDriver = TMO.strDriverName COLLATE Latin1_General_CI_AS
 	,strItemNo = NULL
 	,dblQuantity = NULL
 	,strCustomerReference = ''
@@ -211,6 +217,8 @@ SELECT
 	,ysnLeakCheckRequired = Cast(0 as Bit)
 	,dblPercentLeft = 0.0
 	,dblARBalance = 0.0
+	,strFillMethod = ''
+	,ysnHold = Cast(0 as Bit)
 
 FROM vyuTMCustomerConsumptionSiteInfo TMO WHERE TMO.ysnActive = 1
 
@@ -262,6 +270,8 @@ SELECT
 	,ysnLeakCheckRequired = Cast(0 as Bit)
 	,dblPercentLeft = 0.0
 	,dblARBalance = 0.0
+	,strFillMethod = ''
+	,ysnHold = Cast(0 as Bit)
 
 FROM tblEMEntityLocation EL
 JOIN vyuEMEntity EN ON EN.intEntityId = EL.intEntityId

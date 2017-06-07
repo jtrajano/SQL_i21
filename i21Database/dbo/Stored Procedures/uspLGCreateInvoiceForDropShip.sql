@@ -252,7 +252,7 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblARInvoiceDetail ID ON ID.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
-	LEFT JOIN tblARCustomer C ON C.intEntityCustomerId = LD.intCustomerEntityId
+	LEFT JOIN tblARCustomer C ON C.[intEntityId] = LD.intCustomerEntityId
 	LEFT OUTER JOIN (
 		SELECT [intEntityLocationId]
 			,[strLocationName]
@@ -266,7 +266,7 @@ BEGIN
 			,[intShipViaId]
 		FROM [tblEMEntityLocation]
 		WHERE ysnDefaultLocation = 1
-		) EL ON C.intEntityCustomerId = EL.intEntityId
+		) EL ON C.[intEntityId] = EL.intEntityId
 	LEFT OUTER JOIN [tblEMEntityLocation] SL1 ON C.intShipToId = SL1.intEntityLocationId
 	LEFT OUTER JOIN [tblEMEntityLocation] BL1 ON C.intShipToId = BL1.intEntityLocationId
 	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId

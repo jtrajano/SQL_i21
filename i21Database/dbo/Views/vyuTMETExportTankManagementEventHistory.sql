@@ -22,7 +22,7 @@ INNER JOIN (SELECT
 				,Cus.ysnActive
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
-				ON Ent.intEntityId = Cus.intEntityCustomerId) D
+				ON Ent.intEntityId = Cus.[intEntityId]) D
 	ON D.intEntityId =C.intCustomerNumber
 LEFT JOIN tblTMEventType E
 	ON E.intEventTypeID=A.intEventTypeID

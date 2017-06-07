@@ -104,7 +104,7 @@ SELECT DISTINCT
 		[ysnCheckOffTax]			= Taxes.ysnCheckoffTax,
 		[strTaxCode]				= D.strTaxCode
 	FROM vyuICShipmentChargesForBilling A
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 	INNER JOIN dbo.tblICItem I ON I.intItemId = A.intItemId
 	LEFT JOIN dbo.tblEMEntityLocation EL ON A.intEntityVendorId = EL.intEntityId AND D1.intShipFromId = EL.intEntityLocationId
 	LEFT JOIN dbo.tblAPVendorSpecialTax VST ON VST.intEntityVendorId = A.intEntityVendorId
@@ -115,7 +115,7 @@ SELECT DISTINCT
 	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, (CASE WHEN VST.intTaxGroupId > 0 THEN VST.intTaxGroupId
 																													  WHEN CL.intTaxGroupId  > 0 THEN CL.intTaxGroupId 
 																													  WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0) Taxes
-	WHERE Taxes.intTaxCodeId IS NOT NULL AND Taxes.intTaxCodeId = D.intTaxCodeId																														
+	WHERE Taxes.intTaxCodeId IS NOT NULL																													
 UNION ALL
 --INVENTORY CHARGES
 SELECT DISTINCT
@@ -132,13 +132,13 @@ SELECT DISTINCT
 		[intAccountId]				= A.intTaxAccountId,
 											-- 3RD PARTY WILL ALWAYS BE POSSITVE UNLESS CHECKOFF      
 		[dblTax]					= (CASE WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
-											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 AND A.dblTax > 0 THEN A.dblTax * -1
+											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 THEN A.dblTax * -1
 											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-											ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN  A.dblTax * -1 ELSE A.dblTax END) END),
+											ELSE (CASE WHEN B.ysnPrice = 1 THEN  A.dblTax * -1 ELSE A.dblTax END) END),
 		[dblAdjustedTax]			= (CASE WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 0 THEN ABS(A.dblAdjustedTax) 
-											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 AND A.dblTax > 0 THEN A.dblAdjustedTax * -1
+											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 THEN A.dblAdjustedTax * -1
 											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-											ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblAdjustedTax > 0 THEN  A.dblAdjustedTax * -1 ELSE A.dblAdjustedTax END) END) ,
+											ELSE (CASE WHEN B.ysnPrice = 1 THEN  A.dblAdjustedTax * -1 ELSE A.dblAdjustedTax END) END) ,
 		[ysnTaxAdjusted]			= A.ysnTaxAdjusted,
 		[ysnSeparateOnBill]			= 'false',
 		[ysnCheckOffTax]			= A.ysnCheckoffTax,

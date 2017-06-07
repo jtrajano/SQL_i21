@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetItemStock]
+CREATE VIEW [dbo].[vyuICGetItemStock]
 AS 
 
 SELECT 
@@ -118,7 +118,9 @@ SELECT
 	Item.intTonnageTaxUOMId,
 	strTonnageTaxUOM = TonnageUOM.strUnitMeasure,
 	Item.intModuleId,
-	m.strModule
+	m.strModule,
+	Item.ysnUseWeighScales
+
 FROM	
 	tblICItem Item 
 	LEFT JOIN (
@@ -171,7 +173,7 @@ FROM
 		ON Grade.intCommodityAttributeId = Item.intGradeId
 
 	LEFT JOIN tblAPVendor v
-		ON v.intEntityVendorId = ItemLocation.intVendorId
+		ON v.[intEntityId] = ItemLocation.intVendorId
 
 	LEFT JOIN tblICUnitMeasure TonnageUOM 
 		ON TonnageUOM.intUnitMeasureId = Item.intTonnageTaxUOMId

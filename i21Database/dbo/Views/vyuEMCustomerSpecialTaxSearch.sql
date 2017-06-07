@@ -22,7 +22,7 @@
 			on cus_location.intEntityId = special_tax.intEntityCustomerId
 				and special_tax.intEntityCustomerLocationId = cus_location.intEntityLocationId
 		left join tblAPVendor vend 
-			on vend.intEntityVendorId = special_tax.intEntityVendorId
+			on vend.[intEntityId] = special_tax.intEntityVendorId
 		left join tblICItem item
 			on item.intItemId = special_tax.intItemId
 		left join tblICCategory category

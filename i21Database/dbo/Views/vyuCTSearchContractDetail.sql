@@ -103,12 +103,12 @@ AS
 
 	JOIN	tblICItemContract				IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT
 	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
-	JOIN	tblSMShipVia					SV	ON	SV.intEntityShipViaId		=	CD.intShipViaId				LEFT
+	JOIN	tblSMShipVia					SV	ON	SV.[intEntityId]		=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
 	JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
 	JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId			=	CD.intRailGradeId			LEFT
 	JOIN	tblRKFutureMarket				FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
-	JOIN	tblAPVendor						VR	ON	VR.intEntityVendorId		=	CD.intBillTo				LEFT
+	JOIN	tblAPVendor						VR	ON	VR.[intEntityId]		=	CD.intBillTo				LEFT
 	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
 	JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
 	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId			LEFT
@@ -117,7 +117,8 @@ AS
 	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
-	JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	IM.intOriginId				LEFT
+	JOIN	tblICCommodityAttribute			EO	ON	EO.intCommodityAttributeId	=	IM.intOriginId				LEFT
+	JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	EO.intCountryID				LEFT
 	JOIN	tblSMCountry					IG	ON	IG.intCountryID				=	IC.intCountryId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= CD.intSubLocationId 	LEFT
 	JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId

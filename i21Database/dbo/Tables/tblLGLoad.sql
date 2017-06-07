@@ -127,9 +127,9 @@ CONSTRAINT [FK_tblLGLoad_tblEMEntity_intHaulerEntityId] FOREIGN KEY ([intHaulerE
 
 CONSTRAINT [FK_tblLGLoad_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]), 
 CONSTRAINT [FK_tblLGLoad_tblLGGenerateLoad_intGenerateLoadId] FOREIGN KEY ([intGenerateLoadId]) REFERENCES [tblLGGenerateLoad]([intGenerateLoadId]) ON DELETE CASCADE,
-CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
+CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
 CONSTRAINT [FK_tblLGLoad_tblEMEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES tblEMEntity([intEntityId]),
-CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intDispatcherId] FOREIGN KEY ([intDispatcherId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
+CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intDispatcherId] FOREIGN KEY ([intDispatcherId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
 CONSTRAINT [FK_tblLGLoad_tblTRLoadHeader_intLoadHeaderId] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [tblTRLoadHeader]([intLoadHeaderId]),
 
 CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intWeightUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

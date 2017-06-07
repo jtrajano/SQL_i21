@@ -165,11 +165,8 @@ BEGIN
 			,[dblItemTermDiscount]
 			,[intTaxId]
 			,[dblPrice]
-			,[dblBasePrice]
 			,[dblTotalTax]
-			,[dblBaseTotalTax]
 			,[dblTotal]
-			,[dblBaseTotal]
 			,[strComments]
 			,[intAccountId]
 			,[intCOGSAccountId]
@@ -180,10 +177,8 @@ BEGIN
 			,[strMaintenanceType]
 			,[strFrequency]
 	        ,[dtmMaintenanceDate]
-			,[dblMaintenanceAmount]
-	        ,[dblBaseMaintenanceAmount]
-			,[dblLicenseAmount]
-	        ,[dblBaseLicenseAmount]
+	        ,[dblMaintenanceAmount]
+	        ,[dblLicenseAmount]
 			,[intContractHeaderId]
 			,[intTaxGroupId]
 			,[intContractDetailId]
@@ -192,9 +187,7 @@ BEGIN
 			,[dblOriginalItemWeight]
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
-			,[strVFDDocumentNumber]
-			,[intCurrencyExchangeRateTypeId]
-			,[dblCurrencyExchangeRate])
+			,[strVFDDocumentNumber])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -207,11 +200,8 @@ BEGIN
 			,[dblItemTermDiscount]
 			,[intTaxId]
 			,[dblPrice]
-			,[dblBasePrice]
 			,[dblTotalTax]
-			,[dblBaseTotalTax]
 			,[dblTotal]
-			,[dblBaseTotal]
 			,[strComments]
 			,[intAccountId]
 			,[intCOGSAccountId]
@@ -223,9 +213,7 @@ BEGIN
 			,[strFrequency]
 	        ,[dtmMaintenanceDate]
 	        ,[dblMaintenanceAmount]
-			,[dblBaseMaintenanceAmount]
 	        ,[dblLicenseAmount]
-			,[dblBaseLicenseAmount]
 			,NULL
 			,[intTaxGroupId]
 			,NULL
@@ -235,8 +223,6 @@ BEGIN
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
 			,[strVFDDocumentNumber]
-			,[intCurrencyExchangeRateTypeId]
-			,[dblCurrencyExchangeRate]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 
@@ -254,7 +240,6 @@ BEGIN
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
-			,[dblBaseAdjustedTax]
 			,[dblExemptionPercent]
 			,[ysnTaxExempt]
 			,[ysnTaxAdjusted]
@@ -273,7 +258,6 @@ BEGIN
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
-			,[dblBaseAdjustedTax]
 			,[dblExemptionPercent]
 			,[ysnTaxExempt]
 			,[ysnTaxAdjusted]

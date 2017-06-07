@@ -16,6 +16,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	
 	[intItemContractId] INT NULL,
 	[intItemId] [int] NULL,
+	[strItemSpecification] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intCategoryId] INT NULL,
 	[dblQuantity] [numeric](18, 6) NOT NULL,
 	[intItemUOMId] [int] NULL,	
@@ -47,6 +48,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intCurrencyId] [int] NULL,
 	[intPriceItemUOMId]  INT NULL, 
 	[dblNoOfLots] NUMERIC(18, 6) NULL,
+	[dtmLCDate] DATETIME,
+	[dtmLastPricingDate] DATETIME,
 		
 	[intMarketZoneId] [int] NULL,
 	[intDiscountTypeId] [int] NULL ,
@@ -140,9 +143,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMFreightTerms_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEMEntity_intShipViaId_intEntityId] FOREIGN KEY ([intShipViaId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblAPVendor_intVendorId] FOREIGN KEY ([intBillTo]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEMEntity_intEntityId_intVendorId] FOREIGN KEY ([intBillTo]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountSchedule_intDiscountScheduleId] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [tblGRDiscountSchedule]([intDiscountScheduleId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] FOREIGN KEY ([intDiscountScheduleCodeId]) REFERENCES [tblGRDiscountScheduleCode]([intDiscountScheduleCodeId]),
@@ -154,6 +157,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationCityId_intCityId] FOREIGN KEY ([intDestinationCityId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntity_intShippingLineId_intEntityId] FOREIGN KEY ([intShippingLineId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEMEntity_intProducerId_intEntityId] FOREIGN KEY (intProducerId) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
@@ -163,6 +167,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId] FOREIGN KEY ([intPriceItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intAdjItemUOMId_intItemUOMId] FOREIGN KEY ([intAdjItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intNetWeightUOMId_intItemUOMId] FOREIGN KEY ([intNetWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intFXPriceUOMId_intItemUOMId] FOREIGN KEY (intFXPriceUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intCategoryUOMId] FOREIGN KEY([intCategoryUOMId])REFERENCES [tblICCategoryUOM] ([intCategoryUOMId]),
 	
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intInvoiceCurrencyId_intCurrencyId] FOREIGN KEY ([intInvoiceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
@@ -173,7 +178,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRateType_intRateTypeId_intCurrencyExchangeRateId] FOREIGN KEY (intRateTypeId) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblSMPurchasingGroup_intPurchasingGroupId] FOREIGN KEY ([intPurchasingGroupId]) REFERENCES [tblSMPurchasingGroup]([intPurchasingGroupId])
+	CONSTRAINT [FK_tblCTContractDetail_tblSMPurchasingGroup_intPurchasingGroupId] FOREIGN KEY ([intPurchasingGroupId]) REFERENCES [tblSMPurchasingGroup]([intPurchasingGroupId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY (intSubLocationId) REFERENCES tblSMCompanyLocationSubLocation(intCompanyLocationSubLocationId),
+	CONSTRAINT [FK_tblCTContractDetail_tblICStorageLocation_intStorageLocationId] FOREIGN KEY (intStorageLocationId) REFERENCES tblICStorageLocation(intStorageLocationId)
 ) 
 
 GO

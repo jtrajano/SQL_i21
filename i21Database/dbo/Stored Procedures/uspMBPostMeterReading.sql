@@ -18,7 +18,7 @@ SET ANSI_WARNINGS OFF
 BEGIN
 
 	DECLARE @UserEntityId INT
-	SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), @UserId)
+	SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), @UserId)
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
@@ -182,7 +182,7 @@ BEGIN
 		,[intMeterReadingId]					= @TransactionId
 	FROM vyuMBGetMeterReadingDetail MRDetail
 	LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
-	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MRDetail.intEntityCustomerId
+	LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
 	LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MRDetail.intEntityLocationId AND MRDetail.intEntityCustomerId = EntityLocation.intEntityId
 	WHERE MRDetail.intMeterReadingId = @TransactionId
 	GROUP BY MRDetail.intMeterReadingId

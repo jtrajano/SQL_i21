@@ -30,9 +30,16 @@
     CONSTRAINT [PK_tblICInventoryReceiptCharge] PRIMARY KEY ([intInventoryReceiptChargeId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICItem] FOREIGN KEY ([intChargeId]) REFERENCES [tblICItem]([intItemId]), 
-    CONSTRAINT [FK_tblICInventoryReceiptCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
+    CONSTRAINT [FK_tblICInventoryReceiptCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICItemUOM] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	--CONSTRAINT [FK_tblICInventoryReceiptCharge_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId])
 	CONSTRAINT [FK_tblICInventoryReceiptCharge_tblSMCurrencyExchangeRateType] FOREIGN KEY ([intForexRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]), 
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptCharge]
+	ON [dbo].[tblICInventoryReceiptCharge]([intInventoryReceiptChargeId] ASC)
+	INCLUDE ([intInventoryReceiptId]);
+
+GO

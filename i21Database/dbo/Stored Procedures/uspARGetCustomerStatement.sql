@@ -37,7 +37,7 @@ FROM
 	tblARInvoice I
 INNER JOIN
 	vyuARCustomer C
-		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
+		ON I.[intEntityCustomerId] = C.[intEntityId] 
 WHERE
 	I.[ysnPosted] = 1
 	AND I.[ysnPaid] = 0

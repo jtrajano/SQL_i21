@@ -17,7 +17,8 @@ AS
 			CO.strCommodityCode,
 			OG.strCountry AS strOrigin,
 			CA.intPurchasingGroupId,
-			IM.intProductTypeId
+			IM.intProductTypeId,
+			PG.strName	AS	strPurchasingGroup
 
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT
@@ -25,5 +26,6 @@ AS
 	JOIN	tblICCommodity			CO	ON	CO.intCommodityId			=	IM.intCommodityId	LEFT
 	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId
 										AND	CA.strType					=	'Origin'			LEFT
-	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
+	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		LEFT
+	JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material','Bundle')

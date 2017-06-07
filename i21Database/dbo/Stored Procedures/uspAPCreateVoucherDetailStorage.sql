@@ -48,8 +48,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM @voucherDetailStorage A
 	INNER JOIN tblICItem A2 ON A.intItemId = A2.intItemId
 	CROSS APPLY tblAPBill B
-	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
-	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
+	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
+	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'General'
 	WHERE B.intBillId = @voucherId

@@ -89,16 +89,19 @@ FROM	tblICInventoryReceipt Receipt
 			WHERE	rc.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					AND rc.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 		) receiptAndVoucheredCharges
-		OUTER APPLY (
+		OUTER APPLY (					
 			SELECT	TOP 1 
-					b.strBillId
-					,b.intBillId
-					,b.dtmBillDate
-			FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-						ON b.intBillId = bd.intBillId
-			WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+					b.dtmBillDate
+			FROM	tblAPBill b CROSS APPLY (
+						SELECT	TOP  5
+								bb.intBillId
+						FROM	tblAPBill bb INNER JOIN tblAPBillDetail bd
+									ON bb.intBillId = bd.intBillId
+						WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+								AND bb.ysnPosted = 1
+					) chargeVouchers
+			WHERE	b.intBillId = chargeVouchers.intBillId 
 					AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
-					AND b.ysnPosted = 1
 			ORDER BY b.intBillId DESC 
 		) topVoucher
 		OUTER APPLY (
@@ -106,14 +109,17 @@ FROM	tblICInventoryReceipt Receipt
 				LTRIM(
 					STUFF(
 							' ' + (
-								SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
-								FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-											ON b.intBillId = bd.intBillId
-								WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+								SELECT	CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+								FROM	tblAPBill b CROSS APPLY (
+											SELECT	bb.intBillId
+											FROM	tblAPBill bb INNER JOIN tblAPBillDetail bd
+														ON bb.intBillId = bd.intBillId
+											WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+													AND bb.ysnPosted = 1
+										) chargeVouchers
+								WHERE	b.intBillId = chargeVouchers.intBillId 
 										AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
-										AND b.ysnPosted = 1
-								GROUP BY b.intBillId
-								FOR xml path('')
+								FOR XML PATH('')
 							)
 						, 1
 						, 1
@@ -125,19 +131,22 @@ FROM	tblICInventoryReceipt Receipt
 			SELECT strVoucherIds = 
 				STUFF(
 						(
-							SELECT  ', ' + b.strBillId
-							FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-										ON b.intBillId = bd.intBillId
-							WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+							SELECT	', ' + b.strBillId
+							FROM	tblAPBill b CROSS APPLY (
+										SELECT	bb.intBillId
+										FROM	tblAPBill bb INNER JOIN tblAPBillDetail bd
+													ON bb.intBillId = bd.intBillId
+										WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+												AND bb.ysnPosted = 1
+									) chargeVouchers
+							WHERE	b.intBillId = chargeVouchers.intBillId 
 									AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
-									AND b.ysnPosted = 1
-							GROUP BY b.strBillId
-							FOR xml path('')
+							FOR XML PATH('')
 						)
 					, 1
 					, 1
 					, ''
 				)
-		) allLinkedVoucherId  
+		) allLinkedVoucherId   
 WHERE	Receipt.ysnPosted = 1
 		AND ReceiptCharge.ysnAccrue = 1 

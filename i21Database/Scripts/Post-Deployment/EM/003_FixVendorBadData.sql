@@ -5,12 +5,12 @@ begin
 	exec('update b set b.ysnDefaultContact = 1
 	from tblAPVendor a
 		join tblEMEntityToContact b
-			on a.intEntityVendorId = b.intEntityId 			
+			on a.intEntityId = b.intEntityId 			
 		where a.intDefaultContactId <> b.intEntityContactId 
 			and a.intDefaultContactId is not null
 			and (select count(intEntityId)  
 				from tblEMEntityToContact 
-					where intEntityId = a.intEntityVendorId 
+					where intEntityId = a.intEntityId 
 						and ysnDefaultContact = 1
 						group by intEntityId ) is null')
 	EXEC(

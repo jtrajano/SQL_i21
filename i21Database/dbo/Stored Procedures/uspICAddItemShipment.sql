@@ -226,9 +226,21 @@ SELECT	intOrderType
 FROM @ItemLots
 
 -- Get the entity id
-SELECT	@intEntityId = intEntityUserSecurityId
+SELECT	@intEntityId = [intEntityId]
 FROM	dbo.tblSMUserSecurity 
-WHERE	intEntityUserSecurityId = @intUserId
+WHERE	[intEntityId] = @intUserId
+
+-- Get the functional currency and default Forex Rate Type Id 
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	DECLARE @intDefaultForexRateTypeId AS INT 
+	 
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+
+	SELECT	TOP 1 
+			@intDefaultForexRateTypeId = intInventoryRateTypeId 
+	FROM	tblSMMultiCurrency
+END 
 
 -- Get the functional currency and default Forex Rate Type Id 
 BEGIN 
@@ -381,7 +393,7 @@ FETCH NEXT FROM cur INTO
 WHILE @@FETCH_STATUS = 0
 BEGIN
 	-- Generate Starting Number
-	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT
+	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT, @intShipFromLocationId
 	
 	-- Insert New Shipment
 	INSERT INTO tblICInventoryShipment(

@@ -14,6 +14,7 @@ DECLARE @strReceiptNumber AS NVARCHAR(50)
 		,@ysnPosted AS BIT 
 		,@strReceiptType AS NVARCHAR(50)
 		,@intReturnValue AS INT
+		,@intLocationId AS INT
 
 -- Validate if the Inventory Receipt exists   
 IF @intReceiptId IS NULL  
@@ -27,6 +28,7 @@ SELECT TOP 1
 		@strReceiptNumber = r.strReceiptNumber
 		,@ysnPosted = r.ysnPosted
 		,@strReceiptType = r.strReceiptType 
+		,@intLocationId = r.intLocationId
 FROM	tblICInventoryReceipt r
 WHERE	r.intInventoryReceiptId = @intReceiptId
 
@@ -59,7 +61,7 @@ BEGIN
 			,@receiptType AS NVARCHAR(50) = 'Inventory Return'
 			,@STARTING_NUMBER_BATCH AS INT = 107
 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strInventoryReturnId OUTPUT  
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strInventoryReturnId OUTPUT, @intLocationId
 END 
 
 SET @intInventoryReturnId = NULL
@@ -206,7 +208,7 @@ BEGIN
 			,ri.intStorageLocationId
 			,ri.intOwnershipType
 			,ri.dblOrderQty
-			,dblBillQty = 0 
+			,ri.dblBillQty
 			,dblOpenReceive = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
 			,ri.intLoadReceive
 			,ri.dblReceived
@@ -230,11 +232,31 @@ BEGIN
 				--)
 				,ri.dblUnitRetail
 			,ri.ysnSubCurrency
-			,ri.dblLineTotal
+			,dblLineTotal = 			
+				CASE WHEN ISNULL(ri.dblQtyReturned, 0) <> 0 THEN -- Recompute the line total since it is a partial return. 
+						ROUND(
+							CASE 
+								WHEN ri.intWeightUOMId IS NOT NULL THEN 
+									(ISNULL(ri.dblNet, 0) - ISNULL(ri.dblNetReturned, 0))
+									* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intWeightUOMId, ri.dblUnitCost) 
+								ELSE 
+									(ISNULL(ri.dblOpenReceive, 0) - ISNULL(ri.dblQtyReturned, 0))
+									* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intUnitMeasureId, ri.dblUnitCost) 			
+							END 
+							/ CASE WHEN ISNULL(r.intSubCurrencyCents, 0) <= 0 THEN 1 ELSE r.intSubCurrencyCents END 
+							, 2
+						)
+					ELSE 
+						ri.dblLineTotal 
+				END 					
 			,ri.intGradeId
 			,ri.dblGross
 			,dblNet = ri.dblNet - ISNULL(ri.dblNetReturned, 0) 
-			,ri.dblTax
+			,dblTax = 
+				CASE 
+					WHEN ISNULL(ri.dblQtyReturned, 0) <> 0 THEN 0 -- Recompute the tax because this is a partial return. 
+					ELSE ri.dblTax 
+				END 
 			,ri.intDiscountSchedule
 			,ri.ysnExported
 			,ri.dtmExportedDate
@@ -332,6 +354,63 @@ BEGIN
 	WHERE	r.intInventoryReceiptId = @intInventoryReturnId
 END 
 
+DECLARE @isPartialReturn AS BIT = 0 
+SELECT	TOP 1 
+		@isPartialReturn = 1 
+FROM	tblICInventoryReceiptItem 
+WHERE	intInventoryReceiptId = @intReceiptId 
+		AND ISNULL(dblQtyReturned, 0) <> 0
+
+-- Copy the taxes from the original if doing a full return. 
+IF (@isPartialReturn = 0)
+BEGIN 
+	INSERT INTO tblICInventoryReceiptItemTax (
+			intInventoryReceiptItemId
+			,intTaxGroupId
+			,intTaxCodeId
+			,intTaxClassId
+			,strTaxableByOtherTaxes
+			,strCalculationMethod
+			,dblRate
+			,dblTax
+			,dblAdjustedTax
+			,intTaxAccountId
+			,ysnTaxAdjusted
+			,ysnSeparateOnInvoice
+			,ysnCheckoffTax
+			,strTaxCode
+			,intSort
+			,intConcurrencyId	
+	)
+	SELECT	
+			ri.intInventoryReceiptItemId
+			,tx.intTaxGroupId
+			,tx.intTaxCodeId
+			,tx.intTaxClassId
+			,tx.strTaxableByOtherTaxes
+			,tx.strCalculationMethod
+			,tx.dblRate
+			,tx.dblTax
+			,tx.dblAdjustedTax
+			,tx.intTaxAccountId
+			,tx.ysnTaxAdjusted
+			,tx.ysnSeparateOnInvoice
+			,tx.ysnCheckoffTax
+			,tx.strTaxCode
+			,tx.intSort
+			,intConcurrencyId = 1
+	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			INNER JOIN tblICInventoryReceiptItemTax tx
+				ON tx.intInventoryReceiptItemId = ri.intSourceInventoryReceiptItemId
+	WHERE	r.intInventoryReceiptId = @intInventoryReturnId
+END 
+-- If it is a partial return, recalculate the taxes. 
+ELSE 
+BEGIN
+	EXEC uspICCalculateReceiptTax @intInventoryReturnId
+END 
+
 -- Copy the charges of the receipt to the return transaction if the other charge is part of the inventory cost. 
 BEGIN 
 	INSERT INTO tblICInventoryReceiptCharge (
@@ -395,49 +474,24 @@ BEGIN
 			AND c.ysnInventoryCost = 1 
 END 
 
--- Create the taxes
+-- Recalculate the other charges. 
 BEGIN 
-	INSERT INTO tblICInventoryReceiptItemTax (
-			intInventoryReceiptItemId
-			,intTaxGroupId
-			,intTaxCodeId
-			,intTaxClassId
-			,strTaxableByOtherTaxes
-			,strCalculationMethod
-			,dblRate
-			,dblTax
-			,dblAdjustedTax
-			,intTaxAccountId
-			,ysnTaxAdjusted
-			,ysnSeparateOnInvoice
-			,ysnCheckoffTax
-			,strTaxCode
-			,intSort
-			,intConcurrencyId	
-	)
-	SELECT	
-			ri.intInventoryReceiptItemId
-			,tx.intTaxGroupId
-			,tx.intTaxCodeId
-			,tx.intTaxClassId
-			,tx.strTaxableByOtherTaxes
-			,tx.strCalculationMethod
-			,tx.dblRate
-			,tx.dblTax
-			,tx.dblAdjustedTax
-			,tx.intTaxAccountId
-			,tx.ysnTaxAdjusted
-			,tx.ysnSeparateOnInvoice
-			,tx.ysnCheckoffTax
-			,tx.strTaxCode
-			,tx.intSort
-			,intConcurrencyId = 1
-	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			INNER JOIN tblICInventoryReceiptItemTax tx
-				ON tx.intInventoryReceiptItemId = ri.intSourceInventoryReceiptItemId
-	WHERE	r.intInventoryReceiptId = @intInventoryReturnId
-END 
+	-- Calculate the other charges. 
+	EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
+		@intInventoryReturnId			
+
+	-- Calculate the surcharges
+	EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
+		@intInventoryReturnId
+			
+	-- Allocate the other charges and surcharges. 
+	EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+		@intInventoryReturnId		
+				
+	-- Calculate Other Charges Taxes
+	EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
+		@intInventoryReturnId
+END
 
 -- Update the returned qty
 BEGIN 

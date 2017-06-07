@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetInventoryReceiptVoucher2]
+CREATE VIEW [dbo].[vyuICGetInventoryReceiptVoucher2]
 AS 
 
 SELECT		

@@ -66,6 +66,8 @@ AS
 			CH.strStockCommodityUnitMeasure,
 			CH.strProducer,
 			CH.strSalesperson,
+			CH.strCPContract,
+			CH.strCounterParty,
 			ISNULL(TR.ysnOnceApproved,0) AS ysnApproved
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT

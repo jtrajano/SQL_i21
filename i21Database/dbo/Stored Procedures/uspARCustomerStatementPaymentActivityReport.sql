@@ -204,7 +204,7 @@ INSERT INTO @temp_aging_table
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
-(SELECT intEntityCustomerId	= C.intEntityCustomerId
+(SELECT intEntityCustomerId	= C.intEntityId
 	  , C.strCustomerNumber
 	  , strCustomerName		= C.strName
 	  , C.dblCreditLimit
@@ -223,16 +223,16 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
 	  , dblBalance			= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
 	  , strSalespersonName  = ESP.strName
-	  , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
+	  , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= [dbo].fnARFormatCustomerAddress('''', '''', C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	  , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	  , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
 	  , dblARBalance		= CUST.dblARBalance
 FROM vyuARCustomer C
-	INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
-	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
-	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId
+	INNER JOIN tblARCustomer CUST ON C.intEntityId = CUST.intEntityId
+	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityId = CC.intCustomerEntityId AND ysnDefaultContact = 1
+	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityId
 		AND I.ysnPosted  = 1		
 		AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
 		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +' 
@@ -249,7 +249,7 @@ FROM vyuARCustomer C
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	LEFT JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 	LEFT JOIN tblEMEntity ESP ON C.intSalespersonId = ESP.intEntityId	
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId	
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntityId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntityId	
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 ) MainQuery'
 
@@ -264,7 +264,7 @@ EXEC sp_executesql @query
 IF @ysnIncludeBudget = 1
     BEGIN
         SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
-            'SELECT intEntityCustomerId         = C.intEntityCustomerId 
+            'SELECT intEntityCustomerId         = C.intEntityId 
 			      , strCustomerNumber           = C.strCustomerNumber
 				  , strCustomerName             = C.strName
 				  , dblCreditLimit              = C.dblCreditLimit
@@ -283,15 +283,15 @@ IF @ysnIncludeBudget = 1
 				  , dblPayment					= dblAmountPaid
 				  , dblBalance					= dblBudgetAmount - dblAmountPaid
 				  , strSalespersonName			= NULL
-				  , strAccountStatusCode		= dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
+				  , strAccountStatusCode		= dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= CUST.dblARBalance
             FROM tblARCustomerBudget CB
-                INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId
-                INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId    
+                INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityId
+                INNER JOIN tblARCustomer CUST ON C.intEntityId = CUST.intEntityId    
             WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
               AND CB.dblAmountPaid < CB.dblBudgetAmount'
 
@@ -446,7 +446,7 @@ BEGIN
 	INNER JOIN @temp_aging_table AS AGINGREPORT 
 		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 	INNER JOIN tblARCustomer CUSTOMER 
-		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityId
 	WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
 	AND STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
@@ -492,7 +492,7 @@ BEGIN
 	INNER JOIN @temp_aging_table AS AGINGREPORT 
 		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 	INNER JOIN tblARCustomer CUSTOMER 
-		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityId
 	INNER JOIN (SELECT 
 					intInvoiceId
 					, strInvoiceNumber
@@ -503,7 +503,7 @@ BEGIN
 	WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
 	AND STATEMENTREPORT.intInvoiceId IN (SELECT intInvoiceId FROM @temp_cf_table)) ABC 
 	INNER JOIN 
-		(SELECT intEntityCustomerId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+		(SELECT intEntityId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityId
 END
 
 ELSE
@@ -548,7 +548,7 @@ BEGIN
 	INNER JOIN @temp_aging_table AS AGINGREPORT 
 		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 	INNER JOIN tblARCustomer CUSTOMER 
-		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityId
 	WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
 	AND STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
@@ -594,7 +594,7 @@ BEGIN
 	INNER JOIN @temp_aging_table AS AGINGREPORT 
 		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 	INNER JOIN tblARCustomer CUSTOMER 
-		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityId
 	INNER JOIN (SELECT 
 					intInvoiceId
 					, strInvoiceNumber

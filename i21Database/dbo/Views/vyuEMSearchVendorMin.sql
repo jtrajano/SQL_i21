@@ -6,6 +6,6 @@
 		b.ysnTransportTerminal
 		from vyuEMEntityType a
 			join tblAPVendor b
-				on a.intEntityId = b.intEntityVendorId	
+				on a.intEntityId = b.[intEntityId]	
 
 	where Vendor = 1

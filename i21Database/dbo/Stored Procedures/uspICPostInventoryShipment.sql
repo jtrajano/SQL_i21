@@ -60,6 +60,7 @@ BEGIN
 			,@ysnAllowUserSelfPost AS BIT   
 			,@ysnTransactionPostedFlag AS BIT  
 			,@intFobPointId AS INT 
+			,@intLocationId AS INT
   
 	SELECT TOP 1   
 			@intTransactionId = s.intInventoryShipmentId
@@ -67,6 +68,7 @@ BEGIN
 			,@dtmDate = s.dtmShipDate
 			,@intCreatedEntityId = s.intEntityId  
 			,@intFobPointId = fp.intFobPointId
+			,@intLocationId = s.intShipFromLocationId
 	FROM	dbo.tblICInventoryShipment s LEFT JOIN tblSMFreightTerms ft
 				ON s.intFreightTermId = ft.intFreightTermId
 			LEFT JOIN tblICFobPoint fp
@@ -310,7 +312,7 @@ END
 -- Get the next batch number
 BEGIN 
 	SET @strBatchId = NULL 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId   
 	IF @@ERROR <> 0 GOTO Post_Exit    
 END 
 

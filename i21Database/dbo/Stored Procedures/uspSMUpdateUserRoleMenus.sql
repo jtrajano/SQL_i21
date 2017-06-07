@@ -17,7 +17,7 @@ DECLARE @isContact BIT
 BEGIN TRANSACTION
 
 -- Transfer affected User Securities to temporary list
-SELECT [intEntityUserSecurityId]
+SELECT [intEntityId]
 INTO #tmpUserSecurities
 FROM tblSMUserSecurity
 WHERE intUserRoleID = @UserRoleID

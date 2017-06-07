@@ -46,8 +46,8 @@ BEGIN
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.ptstm_itm_no  COLLATE Latin1_General_CI_AS
 	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId
 	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL 
-				   AND IVC.strInvoiceOriginId <> ''	AND STM.ptstm_tax_key is not null
-				   and ptstm_itm_no not in (select strOrgItemNo from tblSMTaxXRef)
+				   AND IVC.strInvoiceOriginId COLLATE Latin1_General_CI_AS  <> ''	AND STM.ptstm_tax_key is not null
+				   and ptstm_itm_no not in (select strOrgItemNo COLLATE Latin1_General_CI_AS from tblSMTaxXRef)
 
 	------------------------------------------------------------------------------------------------------------------------------------------
 	---** INSERT SET TAX DETAILS **---
@@ -706,8 +706,8 @@ BEGIN
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.ptstm_itm_no  COLLATE Latin1_General_CI_AS
 	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId
 	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL 
-				   AND IVC.strInvoiceOriginId <> ''	AND STM.ptstm_tax_key is null
-				   and ptstm_itm_no not in (select strOrgItemNo from tblSMTaxXRef)			  
+				   AND IVC.strInvoiceOriginId COLLATE Latin1_General_CI_AS  <> '' AND STM.ptstm_tax_key is null
+				   and ptstm_itm_no not in (select strOrgItemNo COLLATE Latin1_General_CI_AS from tblSMTaxXRef)			  
 	-----------------------------------------------------------------------------------------------------------------------			   			   			  		   
 
 	---** INSERT SET TAX DETAILS **---
@@ -1384,7 +1384,7 @@ BEGIN
 	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.ptstm_itm_no  COLLATE Latin1_General_CI_AS
 	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND IVC.strInvoiceOriginId <> ''	
-	and ptstm_itm_no in (select strOrgItemNo from tblSMTaxXRef)
+	and ptstm_itm_no in (select strOrgItemNo COLLATE Latin1_General_CI_AS  from tblSMTaxXRef)
 
 	--------------------------------------------------------------------------------------------------------------------------------------
 	---** INSERT SET TAX DETAILS **---

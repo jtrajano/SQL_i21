@@ -6,7 +6,7 @@ SELECT
 	A.strName, 
 	A.strWebsite,
 	A.strInternalNotes,
-	B.[intEntityVendorId],
+	--B.[intEntityId],
 	B.intCurrencyId,
 	B.intGLAccountExpenseId,
 	D.intEntityId AS intDefaultContactId,
@@ -49,7 +49,7 @@ SELECT
 	D.strPhone2,
 	D.strTitle,
 	E.strCurrency,
-	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.[intEntityVendorId] = B.[intEntityVendorId]) 
+	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.[intEntityVendorId] = B.[intEntityId]) 
 						THEN 1 ELSE 0 END) AS BIT),
 	B.intApprovalListId,
 	C.intFreightTermId,
@@ -69,12 +69,12 @@ SELECT
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
-		ON A.intEntityId = B.[intEntityVendorId]
+		ON A.intEntityId = B.[intEntityId]
 	INNER JOIN tblEMEntityType EntType
-		ON EntType.intEntityId = B.intEntityVendorId
+		ON EntType.intEntityId = B.[intEntityId]
 			AND EntType.strType = 'Vendor'
 	INNER JOIN dbo.[tblEMEntityLocation] C
-		ON B.intEntityVendorId = C.intEntityId and C.ysnDefaultLocation = 1
+		ON B.[intEntityId] = C.intEntityId and C.ysnDefaultLocation = 1
 	--INNER JOIN (dbo.tblEMEntityContact D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
 	--	ON B.intDefaultContactId = D.[intEntityContactId]
 	INNER JOIN dbo.[tblEMEntityToContact] G

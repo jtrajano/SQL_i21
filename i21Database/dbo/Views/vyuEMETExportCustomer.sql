@@ -37,10 +37,10 @@
  	FROM tblEMEntity AS Entity  
 		INNER JOIN tblEMEntityType as EntType
 			ON Entity.intEntityId = EntType.intEntityId and EntType.strType = 'Customer'
-		INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]  and Cus.ysnActive = 1
-		INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1  
+		INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]  and Cus.ysnActive = 1
+		INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1  
 		LEFT JOIN tblEMEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]  
-		LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.intEntityCustomerId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1  
+		LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.[intEntityId] = Loc.intEntityId AND Loc.ysnDefaultLocation = 1  
 		LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId  
 		LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
 		LEFT JOIN tblSMTerm as SMTerm ON SMTerm.intTermID = Loc.intTermsId

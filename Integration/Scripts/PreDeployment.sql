@@ -35,6 +35,7 @@
 :r "..\dbo\Views\vyuGLPTDrillDownDifference.sql"
 :r "..\dbo\Views\vyuGLtblGLIjemstDifference.sql"
 :r "..\dbo\Views\vyuGLglhstmstDifference.sql"
+:r "..\dbo\Stored Procedures\uspGLSyncGLACTMST.sql"
 
 
 -- FINANCIAL REPORT DESIGNER
@@ -227,6 +228,9 @@
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
+
+--MANUFACTURING RECIPE
+:r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
 
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 

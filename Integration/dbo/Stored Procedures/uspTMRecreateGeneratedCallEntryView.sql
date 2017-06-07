@@ -70,6 +70,9 @@ BEGIN
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,dblCustomerBalance = ISNULL(D.dblFutureCurrent, 0.0)
 				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
+				,intFillMethodId = B.intFillMethodId
+				,strFillMethod = L.strFillMethod
+				,ysnHold = B.ysnOnHold
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -84,11 +87,13 @@ BEGIN
 			LEFT JOIN vwslsmst G
 				ON A.intDriverID = G.A4GLIdentity
 			LEFT JOIN tblSMUserSecurity H
-				ON A.intUserID = H.intEntityUserSecurityId
+				ON A.intUserID = H.intEntityId
 			LEFT JOIN vwlocmst I
 				ON B.intLocationId = I.A4GLIdentity
 			LEFT JOIN tblSMCompanyLocation J
 				ON I.vwloc_loc_no  COLLATE Latin1_General_CI_AS = J.strLocationNumber
+			LEFT JOIN tblTMFillMethod L
+				ON B.intFillMethodId = L.intFillMethodId
 			WHERE J.intCompanyLocationId IS NOT NULL
 				AND ISNULL(A.strOrderNumber,'''') <> ''''
 		')
@@ -137,6 +142,9 @@ BEGIN
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,dblCustomerBalance = ISNULL(K.dblTotalDue, 0.0)
 				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
+				,intFillMethodId = B.intFillMethodId
+				,strFillMethod = L.strFillMethod
+				,ysnHold = B.ysnOnHold
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -151,11 +159,13 @@ BEGIN
 			LEFT JOIN tblEMEntity G
 				ON A.intDriverID = G.intEntityId
 			LEFT JOIN tblSMUserSecurity H
-				ON A.intUserID = H.intEntityUserSecurityId
+				ON A.intUserID = H.intEntityId
 			LEFT JOIN tblSMCompanyLocation I
 				ON B.intLocationId = I.intCompanyLocationId
 			LEFT JOIN vyuARCustomerInquiryReport K
 				ON D.intEntityId = K.intEntityCustomerId
+			LEFT JOIN tblTMFillMethod L
+				ON B.intFillMethodId = L.intFillMethodId
 			WHERE ISNULL(A.strOrderNumber,'''') <> ''''
 		')
 	END

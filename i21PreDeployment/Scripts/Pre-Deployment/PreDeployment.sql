@@ -31,8 +31,6 @@
 
 -- CM
 :r .\2_CM\1_CM.sql
-:r .\2_CM\2_1410_to_1420.sql
-:r .\2_CM\3_1420_to_1430.sql
 
 -- DB
 :r .\3_DB\1_1340_to_1410.sql
@@ -51,9 +49,6 @@
 :r .\4_SM\9_DropTblSMAlternateApproverGroup.sql
 :r .\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql
 
--- CM
-:r .\5_CM\1_DropTriggers.sql
-
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
 :r .\6_GL\2_1430_to_1440.sql
@@ -67,6 +62,7 @@
 :r .\7_AR\4_InvoicePaymentMethodCleanUp.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql
 :r .\7_AR\6_PaymentDetailInvoiceCleanUp.sql
+:r .\7_AR\7_CompanyPreferenceCleanUp.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql
@@ -80,7 +76,7 @@
 :r .\8_AP\UpdatePaymentMethod.sql
 :r .\8_AP\Update1099BillDetailData.sql
 :r .\8_AP\UpdateVoucherCurrency.SQL
---:r .\8_AP\tblAPapivcmst.sql
+:r .\8_AP\tblAPapivcmst.sql
 --:r .\8_AP\UpdateBillToReceiptAssociation.sql
 
 --:r .\8_AP\UpdateMissingPaymentInfo.sql
@@ -99,17 +95,8 @@
 :r .\10_RPT\1_1430_to_1430.sql
 
 -- IC
-:r .\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql
-:r .\11_IC\Remove_Duplicate_Storage_Unit_Type.sql
---:r .\11_IC\01_Delete_Charges_No_Shipment.sql
-:r .\11_IC\Rename_IC_Database_Objects.sql 
-:r .\11_IC\Remove_Unused_Shipment_Charges.sql
-:r .\11_IC\Clean_Cost_Bucket_Indexes.sql
-:r .\11_IC\Update_M2M_Computation_Setup.sql
-:r .\11_IC\Rename_tblICItemOwner_Fields.sql
-:r .\11_IC\Clean_Valuation_Indexes.sql
-:r .\11_IC\Relink_Line_Of_Business.sql
-:r .\11_IC\Remove_Unused_Shipment_Item_Fields.sql 
+:r .\11_IC\Remove_Accounts_With_Deleted_Category.sql
+:r .\11_IC\Update_Item_Commodity_Origin_Keys.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
@@ -144,7 +131,6 @@
 :r .\13_RK\01_DropTableScript.sql
 
 --CT
-:r .\14_CT\01_Make_Column_Null.sql
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql
@@ -160,7 +146,6 @@
 :r .\18_IU\1_DataCleanUp.sql
 
 --MF
-:r .\19_MF\01_Recipe_UOM_Update.sql
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
@@ -168,11 +153,13 @@
 --PR
 :r .\21_PR\1_1620_to_1630.sql
 :r .\21_PR\2_1630_to_1640.sql
+--:r .\21_PR\2_1710_to_1720.sql
 
 --PAT
 :r .\22_PAT\1_StaticTable.sql
 :r .\22_PAT\2_AddTransferType.sql
 :r .\22_PAT\3_MigrateDataChanges.sql
+:r .\22_PAT\4_DefaultBillId.sql
 
 --EM
 

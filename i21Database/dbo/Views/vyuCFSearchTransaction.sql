@@ -11,7 +11,7 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
                          tblCFTransactionTax_1.dblTaxOriginalAmount, ctContracts.strContractNumber, cfTransaction.strPriceMethod, cfTransaction.strPriceBasis, cfTransaction.dblTransferCost, 
                          ISNULL(CASE WHEN cfTransaction.strTransactionType = 'Local/Network' THEN CASE WHEN cfTransaction.ysnPosted = 1 THEN cfTransNetPrice.dblCalculatedAmount - arSalesAnalysisReport.dblUnitCost
                           ELSE cfTransNetPrice.dblCalculatedAmount - cfItem.dblAverageCost END ELSE cfTransGrossPrice.dblCalculatedAmount - cfTransaction.dblTransferCost END, 0) 
-                         AS dblMargin, cfCard.intEntityCustomerId, cfTransaction.dtmInvoiceDate, cfTransaction.strInvoiceReportNumber
+                         AS dblMargin, cfCard.[intEntityId], cfTransaction.dtmInvoiceDate, cfTransaction.strInvoiceReportNumber
 FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                          dbo.tblARInvoice AS arInvoice ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId LEFT OUTER JOIN
                          dbo.vyuARSalesAnalysisReport AS arSalesAnalysisReport ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId 
@@ -32,11 +32,11 @@ FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                                                          dbo.vyuICGetItemPricing AS iciItemPricing ON cfiItem.intARItemId = iciItemPricing.intItemId AND iciItemLocation.intLocationId = iciItemPricing.intLocationId AND 
                                                          iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId AND iciItemLocation.intIssueUOMId = iciItemPricing.intUnitMeasureId) AS cfItem ON 
                          cfTransaction.intProductId = cfItem.intItemId LEFT OUTER JOIN
-                             (SELECT   cfiAccount.intAccountId, cfiCustomer.strName, cfiCustomer.strCustomerNumber, cfiCustomer.intEntityCustomerId, cfiCard.intCardId, cfiCard.strCardNumber, 
+                             (SELECT   cfiAccount.intAccountId, cfiCustomer.strName, cfiCustomer.strCustomerNumber, cfiCustomer.[intEntityId], cfiCard.intCardId, cfiCard.strCardNumber, 
                                                          cfiCard.strCardDescription
                                 FROM         dbo.tblCFAccount AS cfiAccount INNER JOIN
                                                          dbo.tblCFCard AS cfiCard ON cfiCard.intAccountId = cfiAccount.intAccountId INNER JOIN
-                                                         dbo.vyuCFCustomerEntity AS cfiCustomer ON cfiCustomer.intEntityCustomerId = cfiAccount.intCustomerId) AS cfCard ON 
+                                                         dbo.vyuCFCustomerEntity AS cfiCustomer ON cfiCustomer.[intEntityId] = cfiAccount.intCustomerId) AS cfCard ON 
                          cfTransaction.intCardId = cfCard.intCardId LEFT OUTER JOIN
                              (SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                 FROM         dbo.tblCFTransactionPrice
@@ -52,3 +52,13 @@ FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                                 GROUP BY intTransactionId) AS tblCFTransactionTax_1 ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId LEFT OUTER JOIN
                          dbo.tblCTContractHeader AS ctContracts ON cfTransaction.intContractId = ctContracts.intContractHeaderId
 GO
+
+
+
+GO
+
+
+
+GO
+
+

@@ -5,6 +5,9 @@ BEGIN
 EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportSubLedger'' and type = ''P'')
 			DROP PROCEDURE [dbo].[uspGLImportSubLedger];')
 
+EXEC('IF EXISTS (SELECT top 1 1 FROM INFORMATION_SCHEMA.VIEWS where TABLE_NAME = ''vyuAPOriginCCDTransaction'')
+			DROP VIEW vyuAPOriginCCDTransaction;')
+
 EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     	( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
     	AS

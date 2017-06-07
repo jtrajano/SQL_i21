@@ -132,6 +132,8 @@ Begin
 
 		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq),@intContractHeaderId=intContractHeaderId From tblCTContractDetail Where intContractDetailId=@strTrackingNo
 
+		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+
 		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
@@ -178,6 +180,8 @@ Begin
 	Begin
 
 		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq),@intContractHeaderId=intContractHeaderId From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+
+		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
 
 		If @strStatus IN (52,53) --Success
 		Begin

@@ -1837,7 +1837,7 @@ exec('
 			tblEMEntityToContact.intEntityContactId
 		from tblARSalesperson, tblEMEntityToContact
 		where
-			tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+			tblEMEntityToContact.intEntityId = tblARSalesperson.intEntityId
 		)
 	');
 
@@ -1850,7 +1850,7 @@ begin
 					tblEMEntityToContact.intEntityContactId
 				from tblARSalesperson, tblEMEntityToContact
 				where
-					tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+					tblEMEntityToContact.intEntityId = tblARSalesperson.intEntityId
 				)
 		');
 end
@@ -1864,7 +1864,7 @@ begin
 					tblEMEntityToContact.intEntityContactId
 				from tblARSalesperson, tblEMEntityToContact
 				where
-					tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+					tblEMEntityToContact.intEntityId = tblARSalesperson.intEntityId
 				)
 		');
 end

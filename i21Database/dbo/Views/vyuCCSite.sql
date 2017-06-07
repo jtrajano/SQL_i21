@@ -30,9 +30,9 @@ FROM
 	LEFT JOIN dbo.tblSMPaymentMethod D
 	    ON D.intPaymentMethodID = C.intPaymentMethodId
     LEFT JOIN dbo.tblARCustomer F
-	    ON F.intEntityCustomerId = C.intCustomerId
+	    ON F.[intEntityId] = C.intCustomerId
 	LEFT JOIN dbo.tblEMEntity H
-	    ON H.intEntityId = F.intEntityCustomerId
+	    ON H.intEntityId = F.[intEntityId]
 	INNER JOIN dbo.tblEMEntityToContact I 
 		ON I.intEntityId = H.intEntityId AND I.ysnDefaultContact = 1
 	INNER JOIN dbo.tblEMEntity J 
@@ -66,9 +66,9 @@ FROM
     LEFT JOIN dbo.tblSMPaymentMethod D
 	    ON D.intPaymentMethodID = C.intPaymentMethodId
     LEFT JOIN dbo.tblARCustomer F
-	    ON F.intEntityCustomerId = C.intCustomerId
+	    ON F.[intEntityId] = C.intCustomerId
 	LEFT JOIN dbo.tblEMEntity H
-	    ON H.intEntityId = F.intEntityCustomerId
+	    ON H.intEntityId = F.[intEntityId]
 	INNER JOIN dbo.tblEMEntityToContact I 
 		ON I.intEntityId = H.intEntityId AND I.ysnDefaultContact = 1
 	INNER JOIN dbo.tblEMEntity J 

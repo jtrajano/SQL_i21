@@ -1,12 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuAPRptAPTransactionByGLAccount]
 AS
 	SELECT
-	 APV.intEntityVendorId
+	 APV.[intEntityId]
 	,strMainCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)  
 	,APB.intTransactionType AS intTransactionId
-	,APV.strVendorId + ' - ' + (SELECT strName FROM tblEMEntity WHERE intEntityId = APV.intEntityVendorId) AS strVendorID
+	,APV.strVendorId + ' - ' + (SELECT strName FROM tblEMEntity WHERE intEntityId = APV.[intEntityId]) AS strVendorID
     ,ISNULL(APV.strVendorId, '') + ' - ' + isnull(E.strName,'''') as strVendorIdName 
-	,strCompanyName = ( SELECT strName FROM tblEMEntity WHERE intEntityId = APV.intEntityVendorId)
+	,strCompanyName = ( SELECT strName FROM tblEMEntity WHERE intEntityId = APV.[intEntityId])
 	,APB.strVendorOrderNumber 
 	,APB.strVendorOrderNumber AS strInvoiceNumber
 	,APB.intBillId
@@ -58,9 +58,9 @@ AS
 	FROM  tblAPBill APB
 	INNER JOIN dbo.tblAPBillDetail APD ON APB.intBillId = APD.intBillId
 	INNER JOIN tblAPVendor APV
-		ON APB.intEntityVendorId = APV.intEntityVendorId
+		ON APB.intEntityVendorId = APV.[intEntityId]
 	LEFT JOIN dbo.tblEMEntity E
-		ON E.intEntityId = APV.intEntityVendorId
+		ON E.intEntityId = APV.[intEntityId]
 	WHERE 
 			APB.ysnForApproval != 1														   --Will not show For Approval Bills
 		AND APB.ysnPosted = 1 OR (APB.dtmApprovalDate IS NOT NULL AND APB.ysnApproved = 1) --Will not show Rejected approval bills but show old Posted Transactions.

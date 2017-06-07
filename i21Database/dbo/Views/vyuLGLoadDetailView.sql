@@ -21,6 +21,7 @@ SELECT LoadDetail.intLoadDetailId
 	, strWeightItemUOM = WeightUOM.strUnitMeasure
 	, LoadDetail.intVendorEntityId
 	, dblItemUOMCF = ItemUOM.dblUnitQty
+	, intContractTypeId = CASE WHEN Load.intPurchaseSale IN (1,3) THEN 1 ELSE 2 END
 
 -- Vendor Info
 	, strVendor = VEN.strName
@@ -244,7 +245,7 @@ LEFT JOIN tblSMCurrency	CYS ON CYS.intCurrencyID = CUS.intMainCurrencyId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
-LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId
+LEFT JOIN tblSMUserSecurity US ON US.intEntityId	= Load.intDispatcherId
 LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PHeader.intWeightId
 LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SHeader.intWeightId
 LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId

@@ -21,7 +21,7 @@ BEGIN
 		WHEN @msgId = 80005 THEN 'Please specify the lot numbers for %s.'
 		WHEN @msgId = 80006 THEN 'The Qty to Receive for %s is %f. Total Lot Quantity is %f. The difference is %f.'
 		WHEN @msgId = 80007 THEN 'Not enough stocks for %s. Reserved stocks is %f while On Hand Qty is %f.'
-		WHEN @msgId = 80008 THEN '%s is missing a GL account setup for %s account category.'
+		WHEN @msgId = 80008 THEN '%s at %s is missing a GL account setup for %s account category.'
 		WHEN @msgId = 80009 THEN 'Unable to generate the serial lot number for %s.'
 		WHEN @msgId = 80010 THEN 'Failed to process the lot number for %s. It may have been used on a different sub-location or storage location.'
 		WHEN @msgId = 80011 THEN 'Lot %s exists in %s. Cannot retrieve in %s. Change the receiving UOM to %s or create a new lot.'
@@ -193,6 +193,9 @@ BEGIN
 		WHEN @msgId = 80177 THEN 'Fiscal month is already closed. Please open the fiscal month for %d to continue.'
 		WHEN @msgId = 80178 THEN 'Fiscal month is already closed for %s module. Please open the fiscal month for %d to continue.'
 		WHEN @msgId = 80179 THEN 'Item: %s'
+		WHEN @msgId = 80180 THEN 'Receiver id is invalid. It must be a User type Entity.'
+		WHEN @msgId = 80181 THEN 'Unable to Post %s. The total is negative.'
+		WHEN @msgId = 80182 THEN 'Unable to create the Inventory Receipt. The total is going to be negative.'
 	END 
 
 	RETURN @msg

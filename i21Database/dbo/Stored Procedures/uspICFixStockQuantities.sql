@@ -981,3 +981,56 @@ BEGIN
 		)
 	;
 END 
+
+--------------------------------------
+--Update the Reservation
+--------------------------------------
+BEGIN 
+	DECLARE @FixStockReservation AS ItemReservationTableType
+
+	UPDATE	s
+	SET		dblUnitReserved = 0 
+	FROM	tblICItemStock s 
+
+	UPDATE	s
+	SET		dblUnitReserved = 0 
+	FROM	tblICItemStockUOM s
+			
+	INSERT INTO @FixStockReservation (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			,intSubLocationId
+			,intStorageLocationId	
+	)
+	SELECT	intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,SUM(dblQty)
+			,intTransactionId
+			,strTransactionId
+			,intInventoryTransactionType
+			,intSubLocationId
+			,intStorageLocationId	 
+	FROM	tblICStockReservation r 
+	WHERE	r.ysnPosted = 0 
+	GROUP BY intItemId
+			, intItemLocationId
+			, intItemUOMId
+			, intLotId
+			, intTransactionId
+			, strTransactionId
+			, intInventoryTransactionType
+			, intSubLocationId
+			, intStorageLocationId
+
+	-- Call this SP to increase the reserved qty. 
+	EXEC dbo.uspICIncreaseReservedQty
+		@FixStockReservation
+END 

@@ -20,7 +20,7 @@
 	[dtmLastModified] [datetime] NULL DEFAULT GetDate(),
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFRecipeGuide_intConcurrencyId] DEFAULT 0, 
 	CONSTRAINT [PK_tblMFRecipeGuide_intRecipeGuideId] PRIMARY KEY ([intRecipeGuideId]),
-	CONSTRAINT [FK_tblMFRecipeGuide_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]),
+	CONSTRAINT [FK_tblMFRecipeGuide_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityId]),
 	CONSTRAINT [FK_tblMFRecipeGuide_tblEMEntityFarm_intFarmFieldId_intFarmId] FOREIGN KEY ([intFarmId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblMFRecipeGuide_tblEMEntityFarm_intFarmFieldId_intFieldId] FOREIGN KEY ([intFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblMFRecipeGuide_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspGLPostRecap
+﻿CREATE PROCEDURE uspGLPostRecap
 	@RecapTable RecapTableType READONLY 
 	,@intEntityUserSecurityId AS INT = NULL 
 AS

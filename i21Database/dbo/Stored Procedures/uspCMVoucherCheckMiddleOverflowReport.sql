@@ -146,11 +146,11 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR
-			ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
+			ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
 		LEFT JOIN tblEMEntity ENTITY
-			ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
+			ON VENDOR.[intEntityId] = ENTITY.intEntityId
 		LEFT JOIN [tblEMEntityLocation] LOCATION
-			ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
 		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)

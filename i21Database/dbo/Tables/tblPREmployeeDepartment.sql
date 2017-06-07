@@ -6,7 +6,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	CONSTRAINT [PK_tblPREmployeeDepartment] PRIMARY KEY ([intEmployeeDepartmentId]),
-	CONSTRAINT [FK_tblPREmployeeDepartment_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [tblPREmployee]([intEntityEmployeeId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPREmployeeDepartment_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [tblPREmployee]([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPREmployeeDepartment_tblPRDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId])
 )
 

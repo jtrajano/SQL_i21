@@ -135,8 +135,8 @@ BEGIN TRY
 		INNER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId
 			ON tblICInventoryReceipt.intShipFromId = tblTRSupplyPoint.intEntityLocationId
 		FULL OUTER JOIN tblSMShipVia
-		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId = tblEMEntity_Transporter.intEntityId
-			ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityShipViaId
+		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityId = tblEMEntity_Transporter.intEntityId
+			ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityId
 		CROSS JOIN tblSMCompanySetup 
 		WHERE tblTFReportingComponent.intReportingComponentId = @RCId
 			AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)

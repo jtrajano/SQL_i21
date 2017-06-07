@@ -22,7 +22,7 @@ AS
 	IF OBJECT_ID('tempdb..#tmpSecPol') IS NOT NULL
 		EXEC('DROP TABLE #tmpSecPol')
 
-	select top 1 * into #tmpSecPol from tblSMSecurityPolicy where intSecurityPolicyId in (select top 1 intSecurityPolicyId from tblSMUserSecurity where intEntityUserSecurityId = @userId)
+	select top 1 * into #tmpSecPol from tblSMSecurityPolicy where intSecurityPolicyId in (select top 1 intSecurityPolicyId from tblSMUserSecurity where [intEntityId] = @userId)
 
 
 	--check per character definition (if this is a numeric, special character, upper case, lower case)

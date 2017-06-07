@@ -43,9 +43,9 @@ Begin
 			RaisError('Invalid Delivery No.',16,1)
 
 		If Exists (Select 1 From tblSMUserSecurity Where strUserName='irelyadmin')
-			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity Where strUserName='irelyadmin'
+			Select TOP 1 @intUserId=[intEntityId] From tblSMUserSecurity Where strUserName='irelyadmin'
 		Else
-			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity
+			Select TOP 1 @intUserId=[intEntityId] From tblSMUserSecurity
 
 		Select @intLoadId=intLoadId From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
 		If ISNULL(@intLoadId,0)=0
@@ -62,7 +62,7 @@ Begin
 			@dtmReceiptDate,v.intCurrencyId,@intUserId,0,0,el.intEntityLocationId,l.strBLNumber,@intUserId,@intUserId
 			From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
 			Join tblLGLoadDetail ld on ld.intItemId=i.intItemId AND ld.strExternalShipmentItemNumber=ri.strDeliveryItemNo
-			Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
+			Join vyuAPVendor v on ld.intVendorEntityId=v.[intEntityId]
 			Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
 			Join tblLGLoad l on l.intLoadId=ld.intLoadId AND l.intLoadId=@intLoadId
 			Where ri.intStageReceiptId=@intMinRowNo
@@ -83,7 +83,7 @@ Begin
 			Join tblLGLoadDetail ld on ld.intItemId=i.intItemId
 			Join tblSMCompanyLocationSubLocation csl on ri.strSubLocation=csl.strSubLocationName AND csl.intCompanyLocationId=@intLocationId
 			Join tblICStorageLocation sl on ri.strStorageLocation=sl.strName AND sl.intSubLocationId=csl.intCompanyLocationSubLocationId
-			Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
+			Join vyuAPVendor v on ld.intVendorEntityId=v.[intEntityId]
 			Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
 			Join tblCTContractDetail ct on ld.intPContractDetailId=ct.intContractDetailId
 			Join tblLGLoad l on l.intLoadId=ld.intLoadId
@@ -109,7 +109,7 @@ Begin
 			If @dtmDate is null
 				Set @dtmDate =  GETUTCDATE()
 
-			Select TOP 1 @intEntityId=intEntityVendorId From tblAPVendor 
+			Select TOP 1 @intEntityId=[intEntityId] From tblAPVendor 
 			Where strVendorAccountNum=(Select strWarehouseVendorAccNo From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 
 			Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)

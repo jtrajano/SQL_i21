@@ -50,7 +50,7 @@ BEGIN
 
 			IF @blnSwitchOrigini21 = 1
 			BEGIN
-				SELECT @strCustomerNumber = strCustomerNumber FROM dbo.tblARCustomer Where intEntityCustomerId = @intCustomerId
+				SELECT @strCustomerNumber = strCustomerNumber FROM dbo.tblARCustomer Where intEntityId = @intCustomerId
 				SELECT @strRevDate = CONVERT(varchar, GETDATE(), 112)
 				SELECT @strRevTime = CONVERT(varchar, GETDATE(), 114)
 				SET @strRevTime = REPLACE(@strRevTime,'':'','''')
@@ -162,7 +162,7 @@ BEGIN
 				--******  To be changed when real payment method added  CAST(@strPayType As Int)
 				SET @intLocationId = CAST(@strInvoiceLocation As Int)
 								
-				Select @intEntityId = intEntityUserSecurityId from dbo.tblSMUserSecurity Where intEntityUserSecurityId = CAST(@strUserID As Int)
+				Select @intEntityId = intEntityId from dbo.tblSMUserSecurity Where intEntityId = CAST(@strUserID As Int)
 				
 				Select @intInvoiceId = intInvoiceId, @intTermId = intTermId, @intAccountId = intAccountId, @dblDiscount = dblDiscount
 				, @dblPayment = dblInvoiceTotal 

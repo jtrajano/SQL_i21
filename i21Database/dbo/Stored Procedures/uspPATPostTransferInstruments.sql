@@ -38,6 +38,7 @@ SET @batchIdUsed = @batchId;
 			T.intTransferType,
 			TD.intTransferorId,
 			TD.strEquityType,
+			TD.intCustomerEquityId,
 			TD.intFiscalYearId,
 			TD.intPatronageCategoryId,
 			TD.intRefundTypeId,
@@ -190,9 +191,20 @@ SET @batchIdUsed = @batchId;
 		---------------------  TRANSFER EQUITY TO STOCK ---------------------------------
 		IF(@ysnPosted = 1)
 		BEGIN
-			INSERT INTO tblPATCustomerStock(intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
-			SELECT intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
-			FROM #tempTransferDetails WHERE intTransferType = 4;
+			DECLARE @certificateNo NVARCHAR(MAX);
+			SET @certificateNo = (SELECT TOP 1 strCertificateNo FROM #tempTransferDetails tempTD INNER JOIN tblPATCustomerStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo);
+			IF (@certificateNo = '' OR @certificateNo IS NULL)
+			BEGIN
+				INSERT INTO tblPATCustomerStock(intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
+				SELECT intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
+				FROM #tempTransferDetails WHERE intTransferType = 4;
+			END
+			ELSE
+			BEGIN
+				SET @error = @certificateNo + ' already exists.';
+				RAISERROR(@error, 16, 1);
+				GOTO Post_Rollback;
+			END
 		END
 		ELSE
 		BEGIN
@@ -211,7 +223,7 @@ SET @batchIdUsed = @batchId;
 		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
 		FROM tblPATCustomerEquity CE
 		INNER JOIN #tempTransferDetails AS tempTD
-			ON CE.intCustomerId = tempTD.intTransferorId AND CE.intFiscalYearId = tempTD.intFiscalYearId AND CE.intRefundTypeId = tempTD.intRefundTypeId AND tempTD.intTransferType = 4;
+			ON CE.intCustomerEquityId = tempTD.intCustomerEquityId AND tempTD.intTransferType = 4;
 	END
 
 	IF ExISTS(SELECT 1 FROM #tempTransferDetails WHERE intTransferType = 5)

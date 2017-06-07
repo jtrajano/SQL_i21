@@ -15,6 +15,12 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[ysnAdditionalCost] [bit] NULL,
 	[ysnBasis] [bit] NULL,
 
+	[strAPAR] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strPayToReceiveFrom] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[dtmDueDate] DATETIME,
+	[strReferenceNo] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+	[strRemarks] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+
 	CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
 	CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractCost_tblEMEntity_intVendorId_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [tblEMEntity](intEntityId),

@@ -364,11 +364,11 @@ SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost buck
 EXEC sp_addmessage 80071,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80072) EXEC sp_dropmessage 80072, 'us_english'	
-SET @strmessage = 'Lot merge of %s is not allowed because it will be merged to the same lot number, location, sub location, and storage location.'
+SET @strmessage = 'Lot merge of %s is not allowed because it will be merged to the same lot number, location, storage location, and storage unit.'
 EXEC sp_addmessage 80072,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80073) EXEC sp_dropmessage 80073, 'us_english'	
-SET @strmessage = 'Split Lot for %s is not allowed because it will be a split to the same lot number, location, sub location, and storage location.'
+SET @strmessage = 'Split Lot for %s is not allowed because it will be a split to the same lot number, location, storage location, and storage unit.'
 EXEC sp_addmessage 80073,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80074) EXEC sp_dropmessage 80074, 'us_english'	
@@ -380,7 +380,7 @@ SET @strmessage = 'Item %s is invalid. It must be lot tracked.'
 EXEC sp_addmessage 80075,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80076) EXEC sp_dropmessage 80076, 'us_english'	
-SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
+SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, storage location, and storage unit.'
 EXEC sp_addmessage 80076,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80077) EXEC sp_dropmessage 80077, 'us_english'	
@@ -424,7 +424,7 @@ SET @strmessage = 'Cannot post this Inventory Receipt. The transfer order "%s" w
 EXEC sp_addmessage 80086,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80087) EXEC sp_dropmessage 80087, 'us_english'	
-SET @strmessage = 'The sub location and storage location in %s does not match.' -- 'Line item and Lot storage location is not under %s.'
+SET @strmessage = 'The storage location and storage unit in %s does not match.' -- 'Line item and Lot storage location is not under %s.'
 EXEC sp_addmessage 80087,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80088) EXEC sp_dropmessage 80088, 'us_english'	
@@ -464,11 +464,11 @@ SET @strmessage = 'Check the date on the transaction. As of %s, there is no stoc
 EXEC sp_addmessage 80096,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80097) EXEC sp_dropmessage 80097, 'us_english'	
-SET @strmessage = 'Sub Location is invalid or missing for item %s.'
+SET @strmessage = 'Storage Location is invalid or missing for item %s.'
 EXEC sp_addmessage 80097,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80098) EXEC sp_dropmessage 80098, 'us_english'	
-SET @strmessage = 'Storage Location is invalid for item %s.'
+SET @strmessage = 'Storage Unit is invalid for item %s.'
 EXEC sp_addmessage 80098,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80099) EXEC sp_dropmessage 80099, 'us_english'	
@@ -693,11 +693,11 @@ SET @strmessage = 'Item Id is invalid or missing for lot %s.'
 EXEC sp_addmessage 80153,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80154) EXEC sp_dropmessage 80154, 'us_english'	
-SET @strmessage = 'Sub Location is invalid or missing for lot %s.'
+SET @strmessage = 'Storage Location is invalid or missing for lot %s.'
 EXEC sp_addmessage 80154,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80155) EXEC sp_dropmessage 80155, 'us_english'	
-SET @strmessage = 'Storage Location is invalid or missing for lot %s.'
+SET @strmessage = 'Storage Unit is invalid or missing for lot %s.'
 EXEC sp_addmessage 80155,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80156) EXEC sp_dropmessage 80156, 'us_english'	

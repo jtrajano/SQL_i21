@@ -58,6 +58,13 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2
 
+		-- Receipt Types
+		,@RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
+		,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
+		,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
+
+
 -- Create a snapshot of the gl values
 BEGIN
 	EXEC uspICCreateGLSnapshotOnRebuildInventoryValuation
@@ -347,6 +354,7 @@ BEGIN
 			,id2 = CAST(0 AS INT) 
 			,intItemId
 			,intItemLocationId
+			,intInTransitSourceLocationId
 			,intItemUOMId
 			,intSubLocationId
 			,intStorageLocationId
@@ -388,6 +396,7 @@ BEGIN
 				,intInventoryTransactionId
 				,intItemId
 				,intItemLocationId
+				,intInTransitSourceLocationId
 				,intItemUOMId
 				,intSubLocationId
 				,intStorageLocationId
@@ -434,6 +443,7 @@ BEGIN
 				,intInventoryTransactionId
 				,intItemId
 				,intItemLocationId
+				,intInTransitSourceLocationId
 				,intItemUOMId
 				,intSubLocationId
 				,intStorageLocationId
@@ -637,17 +647,17 @@ BEGIN
 									'Inventory Adjustment'
 								WHEN @strTransactionForm = 'Inventory Receipt' THEN 
 									'AP Clearing'
-								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId LIKE 'SI%' THEN 
+								WHEN @strTransactionForm = 'Inventory Shipment' THEN 
 									'Cost of Goods'
-								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId NOT LIKE 'SI%' THEN 
-									'Inventory In-Transit'
-								WHEN @strTransactionForm = 'Invoice' AND @strTransactionId LIKE 'SI%' THEN 
+								WHEN @strTransactionForm = 'Invoice' THEN 
 									'Cost of Goods'
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
-									CASE WHEN EXISTS (SELECT 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND strTransferType = 'Location to Location') THEN 
-											NULL
-										ELSE 
-											'Inventory In-Transit'
+									CASE	WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 1) THEN 
+												'Inventory In-Transit'
+											WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 0) THEN 
+												'Inventory'
+											ELSE 
+												NULL 
 									END 
 								WHEN @strTransactionForm IN ('Consume', 'Produce') THEN 
 									'Work in Progress'																		
@@ -1972,6 +1982,7 @@ BEGIN
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
+						,intInTransitSourceLocationId
 						,intItemUOMId  
 						,dtmDate  
 						,dblQty  
@@ -1993,6 +2004,7 @@ BEGIN
 				)
 				SELECT 	RebuilInvTrans.intItemId  
 						,RebuilInvTrans.intItemLocationId 
+						,RebuilInvTrans.intInTransitSourceLocationId 
 						,RebuilInvTrans.intItemUOMId  
 						,RebuilInvTrans.dtmDate  
 						,RebuilInvTrans.dblQty  
@@ -2034,13 +2046,7 @@ BEGIN
 																				dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
 																				, ISNULL(ReceiptItem.dblNet, 0)
 																			)
-																			,
-																			CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN 
-																						dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity)
-																					-- Calculate the Net Qty
-																					ELSE 
-																						ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
-																			END 
+																			,ISNULL(AggregrateItemLots.dblTotalWeight, 1) 
 																		)
 															END 
 
@@ -2108,6 +2114,18 @@ BEGIN
 						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
 							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 							AND ReceiptItemLot.intLotId = RebuilInvTrans.intLotId 
+						OUTER APPLY (
+							SELECT  dblTotalWeight = SUM(
+										CASE	WHEN  ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+													ISNULL(dbo.fnCalculateQtyBetweenUOM(ril.intItemUnitMeasureId, ri.intWeightUOMId, ril.dblQuantity), 0) 
+												ELSE 
+													ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0)
+										END 
+									)
+							FROM	tblICInventoryReceiptItem ri INNER JOIN tblICInventoryReceiptItemLot ril
+										ON ri.intInventoryReceiptItemId = ril.intInventoryReceiptItemId
+							WHERE	ri.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+						) AggregrateItemLots						
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuilInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
@@ -2123,6 +2141,27 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+
+
+				IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptNumber = @strTransactionId AND strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER)
+				BEGIN 
+					-- Change the contra-account to In-Transit. 
+					SET @strAccountToCounterInventory = 'Inventory In-Transit'
+					
+					-- Re-Assign the Source Location Id. 
+					UPDATE	t
+					SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
+					FROM	tblICInventoryTransaction t INNER JOIN @ItemsToPost UDT
+								ON t.intItemId = UDT.intItemId
+								AND t.intItemLocationId = UDT.intItemLocationId
+								AND t.intItemUOMId = UDT.intItemUOMId
+								AND t.dblQty = UDT.dblQty
+								AND t.intTransactionId = UDT.intTransactionId
+								AND t.intTransactionDetailId = UDT.intTransactionDetailId
+								AND t.strTransactionId = UDT.strTransactionId
+					WHERE	t.dblQty > 0 
+							AND UDT.intInTransitSourceLocationId IS NOT NULL 
+				END
 
 				-- Clear the GL entries 
 				DELETE FROM @GLEntries
@@ -2387,13 +2426,13 @@ BEGIN
 					,@ItemsToPost
 			END 
 
-			-- Re-create the Post g/l entries (except for Cost Adjustments, Inventory Shipment, Invoice, and Credit Memo)
+			-- Re-create the Post g/l entries (except for Cost Adjustments, Inventory Shipment, Invoice, and Credit Memo) AND Contra-Account is NOT NULL 
 			IF EXISTS (
 				SELECT	TOP 1 1 
 				FROM	tblICInventoryTransactionType 
 				WHERE	intTransactionTypeId = @intTransactionTypeId 
 						AND strName NOT IN ('Cost Adjustment', 'Inventory Shipment', 'Invoice', 'Inventory Receipt', 'Inventory Return')
-			)
+			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 
 				-- Clear the GL entries 
 				DELETE FROM @GLEntries

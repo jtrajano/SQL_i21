@@ -528,6 +528,7 @@ BEGIN
 							,ysnWillCallLeakCheckRequired
 							,intInvoiceId
 							,dblWillCallPercentLeft
+							,dblWillCallOriginalPercentLeft
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
@@ -580,6 +581,7 @@ BEGIN
 							,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 							,intInvoiceId = B.intInvoiceId
 							,dblWillCallPercentLeft = G.dblPercentLeft
+							,dblWillCallOriginalPercentLeft = G.dblOriginalPercentLeft
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -723,6 +725,7 @@ BEGIN
 						,ysnWillCallLeakCheckRequired
 						,intInvoiceId
 						,dblWillCallPercentLeft
+						,dblWillCallOriginalPercentLeft
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -789,6 +792,7 @@ BEGIN
 						,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 						,intInvoiceId = B.intInvoiceId
 						,dblWillCallPercentLeft = G.dblPercentLeft
+						,dblWillCallOriginalPercentLeft = G.dblOriginalPercentLeft
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -952,7 +956,8 @@ BEGIN
 							,[ysnLockPrice]				
 							,[intRouteId]				
 							,[ysnReceived]				
-							,[ysnLeakCheckRequired]		
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]		
 						)	
 						SELECT TOP 1 
 							[intDispatchId]				= [intDispatchID]
@@ -993,7 +998,8 @@ BEGIN
 							,[ysnLockPrice]				
 							,[intRouteId]				
 							,[ysnReceived]				
-							,[ysnLeakCheckRequired]		
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
 					END
@@ -1092,6 +1098,7 @@ BEGIN
 			,ysnWillCallLeakCheckRequired
 			,intInvoiceId
 			,dblWillCallPercentLeft
+			,dblWillCallOriginalPercentLeft
 		)
 		SELECT TOP 1
 			strInvoiceNumber = C.strInvoiceNumber
@@ -1147,6 +1154,7 @@ BEGIN
 			,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 			,intInvoiceId = B.intInvoiceId
 			,dblWillCallPercentLeft = G.dblPercentLeft
+			,dblWillCallOriginalPercentLeft = G.dblOriginalPercentLeft
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId

@@ -47,6 +47,7 @@ AS
 	)
 	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
 	      , @dblMinimumSC		NUMERIC(18, 6) = 0
+		  , @dblMinFinanceSC    NUMERIC(18, 6) = 0
 
 	--VALIDATION
 	IF ISNULL(@arAccountId, 0) = 0
@@ -79,14 +80,14 @@ AS
 	IF (@customerIds = '')
 		BEGIN
 			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId) 
-			SELECT E.intEntityCustomerId, C.intServiceChargeId, C.intTermsId FROM vyuARCustomerSearch E
-				INNER JOIN tblARCustomer C ON E.intEntityCustomerId = C.intEntityCustomerId
+			SELECT E.[intEntityId], C.intServiceChargeId, C.intTermsId FROM vyuARCustomerSearch E
+				INNER JOIN tblARCustomer C ON E.[intEntityId] = C.[intEntityId]
 				WHERE E.ysnActive = 1 AND ISNULL(C.intServiceChargeId, 0) <> 0
 		END
 	ELSE
 		BEGIN
 			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId)
-			SELECT intEntityCustomerId, intServiceChargeId, intTermsId FROM tblARCustomer WHERE intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
+			SELECT [intEntityId], intServiceChargeId, intTermsId FROM tblARCustomer WHERE [intEntityId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
 		END
 
 	--GET SELECTED STATUS CODES
@@ -140,15 +141,25 @@ AS
 						 								THEN
 						 									CASE WHEN SC.dblServiceChargeAPR > 0
 						 										THEN
-						 											CASE WHEN SC.dblMinimumCharge > ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
-																																							THEN I.dtmDueDate 
-																																							ELSE I.dtmCalculated 
-																																						 END, ISNULL(PAYMENTDATE.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
+																	--MIN. CHARGE > INVOICE AMOUNT = MIN. CHARGE
+						 											CASE WHEN SC.dblMinimumCharge > 
+																			--MIN. FINANCE CHARGE BAL > INVOICE AMOUNT DUE = 0
+																			CASE WHEN ISNULL(SC.dblMinimumFinanceCharge, 0) > I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)
+																				 THEN 0
+																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+																																				 THEN I.dtmDueDate 
+																																				 ELSE I.dtmCalculated 
+																																			END, ISNULL(PAYMENTDATE.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
+																			END
 						 		  										THEN SC.dblMinimumCharge
-						 		  										ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
-																																	  THEN I.dtmDueDate 
-																																	  ELSE I.dtmCalculated 
-																																   END, ISNULL(PAYMENTDATE.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))
+						 		  										ELSE 
+																			CASE WHEN ISNULL(SC.dblMinimumFinanceCharge, 0) > I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)
+																				 THEN 0
+																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+																																				 THEN I.dtmDueDate 
+																																				 ELSE I.dtmCalculated 
+																																			END, ISNULL(PAYMENTDATE.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
+																			END
 						 											END
 						 										ELSE 0
 						 									END
@@ -156,7 +167,7 @@ AS
 						 									SC.dblPercentage
 						 							END
 							FROM tblARInvoice I
-								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
+								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.[intEntityId]
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
 								LEFT JOIN (SELECT PD.intInvoiceId
 												, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
@@ -190,8 +201,10 @@ AS
 							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
 
 							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
-							SELECT TOP 1 @dblMinimumSC = dblMinimumCharge FROM tblARCustomer C 
-								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.intEntityCustomerId = @entityId
+							SELECT TOP 1 @dblMinimumSC = ISNULL(dblMinimumCharge, 0)
+									   , @dblMinFinanceSC = ISNULL(dblMinimumFinanceCharge, 0)
+							FROM tblARCustomer C 
+								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.[intEntityId] = @entityId
 			
 							IF ISNULL(@dblTotalAR, 0) > 0
 								BEGIN
@@ -213,7 +226,7 @@ AS
 																			SC.dblPercentage
 						 											END
 									FROM @temp_aging_table AGING
-										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
+										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.[intEntityId]
 										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
 									WHERE AGING.intEntityCustomerId = @entityId
 								END					
@@ -233,9 +246,17 @@ AS
 								 						THEN
 								 							CASE WHEN dblServiceChargeAPR > 0
 								 								THEN
-								 									CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate) * CB.dblBudgetAmount
-								 											THEN dblMinimumCharge
-								 											ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate) * CB.dblBudgetAmount)
+								 									CASE WHEN dblMinimumCharge > 
+																			CASE WHEN ISNULL(dblMinimumFinanceCharge, 0) > CB.dblBudgetAmount
+																				 THEN 0
+																				 ELSE ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate) * CB.dblBudgetAmount
+																			END
+								 										 THEN dblMinimumCharge
+								 										 ELSE 
+																			CASE WHEN ISNULL(dblMinimumFinanceCharge, 0) > CB.dblBudgetAmount
+																				 THEN 0
+																				 ELSE ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate) * CB.dblBudgetAmount
+																			END
 								 									END
 								 								ELSE 0
 								 							END
@@ -243,7 +264,7 @@ AS
 								 							dblPercentage
 								 					END
 							FROM tblARCustomerBudget CB
-								INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId	
+								INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.[intEntityId]	
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
 								INNER JOIN [tblEMEntityLocation] EL ON CB.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1	
 							WHERE CB.intEntityCustomerId = @entityId
@@ -277,7 +298,18 @@ AS
 								 , 'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
 								 , NULL
 								 , AVG(dblAmountDue)
-								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > AVG(dblTotalAmount) THEN @dblMinimumSC ELSE AVG(dblTotalAmount) END
+								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > 
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > AVG(dblAmountDue)
+												 THEN 0
+												 ELSE AVG(dblTotalAmount)
+											END
+										THEN @dblMinimumSC 
+										ELSE 
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > AVG(dblAmountDue)
+												 THEN 0
+												 ELSE AVG(dblTotalAmount)
+											END
+								   END
 							FROM @tempTblTypeServiceCharge 
 								GROUP BY intEntityCustomerId 
 								HAVING AVG(dblAmountDue) > @zeroDecimal 

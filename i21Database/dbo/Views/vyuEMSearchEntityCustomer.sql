@@ -15,7 +15,7 @@
 		c.ysnActive
 	from tblEMEntity b			
 		join tblARCustomer c
-			on c.intEntityCustomerId =b.intEntityId --and c.ysnActive = 1
+			on c.[intEntityId] =b.intEntityId --and c.ysnActive = 1
 		join vyuEMEntityType d
 			on d.intEntityId = b.intEntityId and Customer = 1
 		left join [tblEMEntityLocation] e  

@@ -13,5 +13,5 @@ Join tblICItem i on ri.intItemId=i.intItemId
 Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 Left Join tblICItemUOM iu on ri.intUnitMeasureId=iu.intItemUOMId
 Left Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-Left Join vyuAPVendor v on rh.intEntityVendorId=v.intEntityVendorId
+Left Join vyuAPVendor v on rh.intEntityVendorId=v.[intEntityId]
 Where ri.intOrderId=@intContractId

@@ -65,7 +65,7 @@ BEGIN TRY
 
 			SELECT @intUserRoleID = intUserRoleID
 			FROM tblSMUserSecurity
-			WHERE intEntityUserSecurityId = @intUserId
+			WHERE [intEntityId] = @intUserId
 
 			IF NOT EXISTS (
 					SELECT 1

@@ -12,9 +12,12 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 
 		SELECT	i21.intBankAccountId
 				,i21.intBankId
+				,strBankName = (SELECT strBankName FROM dbo.tblCMBank WHERE intBankId = i21.intBankId)
 				,i21.ysnActive
 				,i21.intGLAccountId
+				,strGLAccountId = (SELECT strAccountId FROM dbo.tblGLAccount WHERE intAccountId = i21.intGLAccountId)
 				,i21.intCurrencyId
+				,strCurrency = (SELECT strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = i21.intCurrencyId)
 				,i21.intBankAccountType
 				,i21.strContact
 				,i21.strBankAccountHolder
@@ -41,8 +44,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intBackupCheckEndingNo
 				,i21.intEFTNextNo
 				,i21.intBankStatementImportId
+				,strBankStatementFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intBankStatementImportId)
 				,i21.intEFTBankFileFormatId
+				,strACHFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intEFTBankFileFormatId)
 				,i21.intPositivePayBankFileFormatId
+				,strPositivePayFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intPositivePayBankFileFormatId)
 				,i21.strEFTCompanyId
 				,i21.strEFTBankName
 				,i21.strMICRDescription
@@ -410,10 +416,10 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,apcbk_ach_company_id		= NULL
 					,apcbk_ach_bankname			= NULL
 					,apcbk_gl_cash				= dbo.fnGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
-					,apcbk_gl_ap				= NULL
-					,apcbk_gl_disc				= NULL
-					,apcbk_gl_wthhld			= NULL
-					,apcbk_gl_curr				= 0
+					,apcbk_gl_ap				= (SELECT TOP 1 apcbk_gl_ap FROM apcbkmst)
+					,apcbk_gl_disc				= (SELECT TOP 1 apcbk_gl_disc FROM apcbkmst)
+					,apcbk_gl_wthhld			= (SELECT TOP 1 apcbk_gl_wthhld FROM apcbkmst)
+					,apcbk_gl_curr				= (SELECT TOP 1 apcbk_gl_curr FROM apcbkmst)
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
 					,apcbk_user_id				= dbo.fnConverti21UserIdtoOrigin(i.intCreatedUserId)
@@ -647,10 +653,10 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,apcbk_ach_company_id		= NULL
 					,apcbk_ach_bankname			= NULL
 					,apcbk_gl_cash				= dbo.fnGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
-					,apcbk_gl_ap				= NULL
-					,apcbk_gl_disc				= NULL
-					,apcbk_gl_wthhld			= NULL
-					,apcbk_gl_curr				= 0
+					,apcbk_gl_ap				= (SELECT TOP 1 apcbk_gl_ap FROM apcbkmst)
+					,apcbk_gl_disc				= (SELECT TOP 1 apcbk_gl_disc FROM apcbkmst)
+					,apcbk_gl_wthhld			= (SELECT TOP 1 apcbk_gl_wthhld FROM apcbkmst)
+					,apcbk_gl_curr				= (SELECT TOP 1 apcbk_gl_curr FROM apcbkmst)
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
 					,apcbk_user_id				= dbo.fnConverti21UserIdtoOrigin(i.intLastModifiedUserId)

@@ -26,7 +26,7 @@
 			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
 		from
 			tblEMEntity
-			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblEMEntity.intEntityId
+			left outer join tblARSalesperson on tblARSalesperson.[intEntityId] = tblEMEntity.intEntityId
 			
 			left outer join tblSMCompanySetup on 1 = 1
 

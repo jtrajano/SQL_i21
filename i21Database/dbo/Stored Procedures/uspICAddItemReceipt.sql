@@ -36,11 +36,21 @@ DECLARE @inventoryReceiptId AS INT
 		,@strSourceId AS NVARCHAR(50)
 		,@strSourceScreenName AS NVARCHAR(50)
 		,@strReceiptNumber AS NVARCHAR(50)
+		,@intLocationId AS INT 
 		
 -- Get the entity id
-SELECT	@intEntityId = intEntityUserSecurityId
+SELECT	@intEntityId = [intEntityId]
 FROM	dbo.tblSMUserSecurity 
-WHERE	intEntityUserSecurityId = @intUserId
+WHERE	[intEntityId] = @intUserId
+
+
+-- Validate the user id. 
+IF @intEntityId IS NULL 
+BEGIN 
+	-- 'Receiver id is invalid. It must be a User type Entity.'
+	EXEC uspICRaiseError 80180;
+	GOTO _Exit;
+END 
 
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
@@ -173,6 +183,7 @@ BEGIN
 		
 		SET @receiptNumber = NULL 
 		SET @inventoryReceiptId = NULL 
+		SET @intLocationId = NULL 
 
 		------------------------------------------
 		----- Validate Receipt Header Fields -----
@@ -242,7 +253,7 @@ BEGIN
 		WHERE RawHeaderData.intId = @intId
 
 
-		IF @valueShipViaId > 0 AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE intEntityShipViaId = @valueShipViaId)
+		IF @valueShipViaId > 0 AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE [intEntityId] = @valueShipViaId)
 			BEGIN
 				DECLARE @valueShipViaIdStr NVARCHAR(50)
 				SET @valueShipViaIdStr = CAST(@valueShipViaId AS NVARCHAR(50))
@@ -285,6 +296,7 @@ BEGIN
 		SELECT	@inventoryReceiptId = RawData.intInventoryReceiptId
 				,@strSourceScreenName = RawData.strSourceScreenName
 				,@strSourceId = RawData.strSourceId
+				,@intLocationId = RawData.intLocationId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -312,7 +324,7 @@ BEGIN
 			-- Generate the receipt starting number
 			-- If @receiptNumber IS NULL, uspSMGetStartingNumber will throw an error. 
 			-- Error is 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
-			EXEC dbo.uspSMGetStartingNumber @startingNumberId_InventoryReceipt, @receiptNumber OUTPUT 
+			EXEC dbo.uspSMGetStartingNumber @startingNumberId_InventoryReceipt, @receiptNumber OUTPUT, @intLocationId
 			IF @@ERROR <> 0 OR @receiptNumber IS NULL GOTO _BreakLoop;
 		END 
 		
@@ -366,7 +378,7 @@ BEGIN
 				,dtmReceiveTime			= NULL 
 				,dblActualTempReading	= NULL 
 				,intConcurrencyId		= 1
-				,intEntityId			= (SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
+				,intEntityId			= (SELECT TOP 1 [intEntityId] FROM dbo.tblSMUserSecurity WHERE [intEntityId] = @intUserId)
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
 				,strActualCostId		= IntegrationData.strActualCostId
@@ -440,7 +452,7 @@ BEGIN
 				/*dtmReceiveTime*/				,NULL 
 				/*dblActualTempReading*/		,NULL 
 				/*intConcurrencyId*/			,1
-				/*intEntityId*/					,(SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
+				/*intEntityId*/					,(SELECT TOP 1 [intEntityId] FROM dbo.tblSMUserSecurity WHERE [intEntityId] = @intUserId)
 				/*intCreatedUserId*/			,@intUserId
 				/*ysnPosted*/					,0
 				/*strActualCostId*/				,IntegrationData.strActualCostId
@@ -841,7 +853,6 @@ BEGIN
 					ON LogisticsView.intLoadDetailId = RawData.intSourceId
 					AND RawData.strReceiptType = 'Purchase Contract'
 					AND RawData.intSourceType = 2
-					AND RawData.intContainerId = LogisticsView.intLoadContainerId
 
 				-- 5. Transport Loads (New tables)
 				LEFT JOIN vyuTRGetLoadReceipt TransportView 
@@ -921,9 +932,9 @@ BEGIN
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData LEFT JOIN tblSMShipVia shipVia 
-					ON shipVia.intEntityShipViaId = RawData.intShipViaId
+					ON shipVia.[intEntityId] = RawData.intShipViaId
 		WHERE	RawData.intShipViaId IS NOT NULL 
-				AND shipVia.intEntityShipViaId IS NULL 
+				AND shipVia.[intEntityId] IS NULL 
 
 		IF @valueChargeId IS NOT NULL
 		BEGIN
@@ -1186,210 +1197,9 @@ BEGIN
 
 		WHERE RawHeaderData.intId = @intId
 
-		-- Add taxes into the receipt. 
-		BEGIN
-			DECLARE	@ItemId				INT
-					,@LocationId		INT
-					,@TransactionDate	DATETIME
-					,@TransactionType	NVARCHAR(20) = 'Purchase'
-					,@EntityId			INT	
-					,@TaxMasterId		INT	
-					,@InventoryReceiptItemId INT
-					,@ShipFromId		INT 
-					,@TaxGroupId		INT
-					,@FreightTermId		INT
-
-			DECLARE @Taxes AS TABLE (
-				--id						INT
-				--,intInvoiceDetailId		INT
-				intTransactionDetailTaxId	INT
-				,intTransactionDetailId	INT
-				,intTaxGroupId			INT 
-				,intTaxCodeId			INT
-				,intTaxClassId			INT
-				,strTaxableByOtherTaxes NVARCHAR (MAX) 
-				,strCalculationMethod	NVARCHAR(50)
-				,dblRate				NUMERIC(18,6)
-				,dblTax					NUMERIC(18,6)
-				,dblAdjustedTax			NUMERIC(18,6)
-				,intTaxAccountId		INT
-				,ysnSeparateOnInvoice	BIT
-				,ysnCheckoffTax			BIT
-				,strTaxCode				NVARCHAR(50)
-				,ysnTaxExempt			BIT
-				,[ysnInvalidSetup]		BIT
-				,[strTaxGroup]			NVARCHAR(100)
-				,[strNotes]				NVARCHAR(500)
-			)
-
-			-- Create the cursor
-			DECLARE loopReceiptItems CURSOR LOCAL FAST_FORWARD
-			FOR 
-			SELECT  ReceiptItem.intItemId
-					,Receipt.intLocationId
-					,Receipt.dtmReceiptDate
-					,Receipt.intEntityVendorId
-					,ReceiptItem.intInventoryReceiptItemId
-					,Receipt.intShipFromId
-					,ReceiptItem.intTaxGroupId
-					,Receipt.intFreightTermId 
-			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-			WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
-					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Storage -- Do not compute tax if item ownership is Storage. 
-
-			OPEN loopReceiptItems;
-
-			-- Initial fetch attempt
-			FETCH NEXT FROM loopReceiptItems INTO 
-				@ItemId
-				,@LocationId
-				,@TransactionDate
-				,@EntityId
-				,@InventoryReceiptItemId
-				,@ShipFromId
-				,@TaxGroupId
-				,@FreightTermId
-
-			WHILE @@FETCH_STATUS = 0
-			BEGIN 
-				-- Clear the contents of the table variable.
-				DELETE FROM @Taxes
-
-				-- Get the taxes from uspSMGetItemTaxes
-				INSERT INTO @Taxes (
-					--id
-					--,intInvoiceDetailId
-					intTransactionDetailTaxId
-					,intTransactionDetailId
-					,intTaxGroupId
-					,intTaxCodeId
-					,intTaxClassId
-					,strTaxableByOtherTaxes
-					,strCalculationMethod
-					,dblRate
-					,dblTax
-					,dblAdjustedTax
-					,intTaxAccountId
-					,ysnSeparateOnInvoice
-					,ysnCheckoffTax
-					,strTaxCode
-					,ysnTaxExempt
-					,[ysnInvalidSetup]
-					,[strTaxGroup]
-					,[strNotes]
-				)
-				EXEC dbo.uspSMGetItemTaxes
-					 @ItemId				= @ItemId
-					,@LocationId			= @LocationId
-					,@TransactionDate		= @TransactionDate
-					,@TransactionType		= @TransactionType
-					,@EntityId				= @EntityId
-					,@TaxGroupId			= @TaxGroupId
-					,@BillShipToLocationId	= @ShipFromId
-					,@IncludeExemptedCodes	= NULL
-					,@SiteId				= NULL
-					,@FreightTermId			= @FreightTermId
-
-
-				DECLARE	@Amount	NUMERIC(38,20) 
-						,@Qty	NUMERIC(38,20)
-				-- Fields used in the calculation of the taxes
-
-				SELECT TOP 1
-				 -- Use 1 to compute Line Total and Taxes based on Quantity, 2 to compute based on Net, and null to compute based on default setup (If Gross/Net UOM is available, compute based on Net, else based on Quantity)
-					 @Amount = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-										 dbo.fnMultiply(
-											 dbo.fnDivide(
-												 ISNULL(dblUnitCost, 0) 
-												 ,ISNULL(Receipt.intSubCurrencyCents, 1) 
-											 )
-											 ,dbo.fnDivide(
-												  GrossNetUOM.dblUnitQty
-												  ,CostUOM.dblUnitQty 
-											 )
-										 )
-									ELSE 
-										 dbo.fnMultiply(
-											 dbo.fnDivide(
-												 ISNULL(dblUnitCost, 0) 
-												 ,ISNULL(Receipt.intSubCurrencyCents, 1) 
-											 )
-											 ,dbo.fnDivide(
-												  ReceiveUOM.dblUnitQty
-												  ,CostUOM.dblUnitQty 
-											 )
-										)																	
-								END 
-					,@Qty	 = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-										ReceiptItem.dblNet 
-									ELSE 
-										ReceiptItem.dblOpenReceive 
-								END 
-
-				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-						LEFT JOIN dbo.tblICItemUOM ReceiveUOM 
-							ON ReceiveUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
-						LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
-							ON GrossNetUOM.intItemUOMId = ReceiptItem.intWeightUOMId
-						LEFT JOIN dbo.tblICItemUOM CostUOM
-							ON CostUOM.intItemUOMId = ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId) 	
-				WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
-						AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
-
-				-- Compute Taxes
-				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
-				INSERT INTO dbo.tblICInventoryReceiptItemTax (
-					[intInventoryReceiptItemId]
-					,[intTaxGroupId]
-					,[intTaxCodeId]
-					,[intTaxClassId]
-					,[strTaxableByOtherTaxes]
-					,[strCalculationMethod]
-					,[dblRate]
-					,[dblTax]
-					,[dblAdjustedTax]
-					,[intTaxAccountId]
-					,[ysnTaxAdjusted]
-					,[ysnSeparateOnInvoice]
-					,[ysnCheckoffTax]
-					,[strTaxCode]
-					,[intSort]
-					,[intConcurrencyId]				
-				)
-				SELECT 	[intInventoryReceiptItemId]		= @InventoryReceiptItemId
-						,[intTaxGroupId]				= [intTaxGroupId]
-						,[intTaxCodeId]					= [intTaxCodeId]
-						,[intTaxClassId]				= [intTaxClassId]
-						,[strTaxableByOtherTaxes]		= [strTaxableByOtherTaxes]
-						,[strCalculationMethod]			= [strCalculationMethod]
-						,[dblRate]						= [dblRate]
-						,[dblTax]						= [dblTax]
-						,[dblAdjustedTax]				= [dblAdjustedTax]
-						,[intTaxAccountId]				= [intTaxAccountId]
-						,[ysnTaxAdjusted]				= [ysnTaxAdjusted]
-						,[ysnSeparateOnInvoice]			= [ysnSeparateOnInvoice]
-						,[ysnCheckoffTax]				= [ysnCheckoffTax]
-						,[strTaxCode]					= [strTaxCode]
-						,[intSort]						= 1
-						,[intConcurrencyId]				= 1
-				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0)
-								
-				-- Get the next item. 
-				FETCH NEXT FROM loopReceiptItems INTO 
-					@ItemId
-					,@LocationId
-					,@TransactionDate
-					,@EntityId
-					,@InventoryReceiptItemId
-					,@ShipFromId
-					,@TaxGroupId
-					,@FreightTermId
-			END 
-
-			CLOSE loopReceiptItems;
-			DEALLOCATE loopReceiptItems;
+		-- Add the taxes into the receipt. 
+		BEGIN 
+			EXEC [uspICCalculateReceiptTax] @inventoryReceiptId
 		END 
 		
 		-- Add lot/s to receipt item if @LotEntries contains a value
@@ -1483,7 +1293,7 @@ BEGIN
 
 						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 						FROM @LotEntries ItemLot
-						WHERE ItemLot.intShipViaId > 0 AND ItemLot.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
+						WHERE ItemLot.intShipViaId > 0 AND ItemLot.intShipViaId NOT IN (SELECT [intEntityId] FROM tblSMShipVia)
 
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
@@ -1866,6 +1676,14 @@ BEGIN
 			EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
 				@inventoryReceiptId
 		END 
+
+		-- Validate the receipt total. Do not allow negative receipt total. 
+		IF (dbo.fnICGetReceiptTotal(@inventoryReceiptId) < 0) 
+		BEGIN
+			-- Unable to create the Inventory Receipt. The receipt total is going to be negative.
+			EXEC uspICRaiseError 80182;
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Log successful inserts. 
 		INSERT INTO #tmpAddItemReceiptResult (

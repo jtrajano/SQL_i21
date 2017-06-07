@@ -18,7 +18,7 @@ BEGIN
 			BEGIN
 				Update
 					a set
-					a.intUserId = b.intEntityUserSecurityId
+					a.intUserId = b.[intEntityId]
 				from
 					tblDBPanel a, tblSMUserSecurity b
 				where
@@ -34,7 +34,7 @@ BEGIN
 			BEGIN
 				Update
 					a set
-					a.intUserId = b.intEntityUserSecurityId
+					a.intUserId = b.[intEntityId]
 				from
 					tblDBPanelAccess a, tblSMUserSecurity b
 				where
@@ -50,7 +50,7 @@ BEGIN
 			BEGIN
 				Update
 					a set
-					a.intUserId = b.intEntityUserSecurityId
+					a.intUserId = b.[intEntityId]
 					,a.strUserName = b.strUserName
 				from
 					tblDBPanelColumn a, tblSMUserSecurity b
@@ -67,7 +67,7 @@ BEGIN
 			BEGIN
 				Update
 					a set
-					a.intUserId = b.intEntityUserSecurityId
+					a.intUserId = b.[intEntityId]
 				from
 					tblDBPanelFormat a, tblSMUserSecurity b
 				where
@@ -83,7 +83,7 @@ BEGIN
 			BEGIN
 				Update
 					a set
-					a.intUserId = b.intEntityUserSecurityId
+					a.intUserId = b.[intEntityId]
 				from
 					tblDBPanelTab a, tblSMUserSecurity b
 				where
@@ -99,7 +99,7 @@ BEGIN
 			BEGIN
 				Update
 					a set
-					a.intUserId = b.intEntityUserSecurityId
+					a.intUserId = b.[intEntityId]
 				from
 					tblDBPanelUser a, tblSMUserSecurity b
 				where
@@ -117,7 +117,7 @@ BEGIN
 
 				Update
 					a set
-					a.intEntityUserSecurityId = b.intEntityUserSecurityId
+					a.intEntityUserSecurityId = b.[intEntityId]
 				from
 					tblDBUserPreference a, tblSMUserSecurity b
 				where

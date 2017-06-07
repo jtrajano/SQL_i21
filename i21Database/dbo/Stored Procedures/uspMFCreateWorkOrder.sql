@@ -308,7 +308,7 @@ BEGIN TRY
 
 	SELECT @strUserName = strUserName
 	FROM tblSMUserSecurity
-	WHERE intEntityUserSecurityId = @intUserId
+	WHERE [intEntityId] = @intUserId
 
 	--EXEC dbo.uspSMGetStartingNumber 75
 	--	,@strBOLNo OUTPUT

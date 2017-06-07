@@ -8,3 +8,6 @@
     CONSTRAINT [PK_tblCFProductAuth_1] PRIMARY KEY CLUSTERED ([intProductAuthId] ASC)
 );
 
+GO 
+CREATE UNIQUE NONCLUSTERED INDEX tblCFProductAuth_UniqueNetworkGroupNo
+	ON tblCFProductAuth (intNetworkId,strNetworkGroupNumber);

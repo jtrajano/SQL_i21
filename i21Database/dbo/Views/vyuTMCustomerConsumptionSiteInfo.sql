@@ -20,6 +20,10 @@ AS
 		,strSiteComment = B.strComment
 		,strSiteInstruction = B.strInstruction
 		,B.ysnActive
+		,strDriverNumber = J.strEntityNo
+		,strDriverName = J.strName
+		,B.intRouteId 
+		,strRoute = K.strRouteId
 	FROM tblTMSite B
 	INNER JOIN tblTMCustomer C
 		ON B.intCustomerID = C.intCustomerID
@@ -27,4 +31,8 @@ AS
 		ON C.intCustomerNumber = D.intEntityId
 	LEFT JOIN tblSMCompanyLocation I
 		ON B.intLocationId = I.intCompanyLocationId
+	LEFT JOIN tblEMEntity J
+		ON B.intDriverID = J.intEntityId
+	LEFT JOIN tblTMRoute K
+		ON B.intRouteId = K.intRouteId
 GO

@@ -95,7 +95,7 @@ BEGIN TRY
 
 		SELECT @strUserName = strUserName
 		FROM dbo.tblSMUserSecurity
-		WHERE [intEntityUserSecurityId] = @intUserSecurityID
+		WHERE [intEntityId] = @intUserSecurityID
 
 		RAISERROR (
 				'The cycle count for this run is already started by ''%s'' on ''%s''. you cannot continue. The current run already cyclecounted by another user. you cannot continue.'

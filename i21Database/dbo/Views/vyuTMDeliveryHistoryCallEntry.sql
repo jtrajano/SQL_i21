@@ -50,7 +50,7 @@ AS
 	LEFT JOIN tblEMEntity G
 		ON A.intWillCallDriverId = G.intEntityId
 	LEFT JOIN tblSMUserSecurity H
-		ON A.intWillCallUserId = H.[intEntityUserSecurityId]
+		ON A.intWillCallUserId = H.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation I
 		ON B.intLocationId = I.intCompanyLocationId
 GO

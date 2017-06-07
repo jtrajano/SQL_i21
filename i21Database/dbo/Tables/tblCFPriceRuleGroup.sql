@@ -6,3 +6,6 @@
     CONSTRAINT [PK_tblCFPriceRuleGroup] PRIMARY KEY CLUSTERED ([intPriceRuleGroupId] ASC)
 );
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFPriceRuleGroup_UniquePriceGroup
+	ON tblCFPriceRuleGroup (strPriceGroup);

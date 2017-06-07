@@ -7,7 +7,7 @@ Update
 SET
 	 intShipViaId = NULL
 WHERE
-	intShipViaId NOT IN (SELECT [intEntityShipViaId] FROM tblSMShipVia)
+	intShipViaId NOT IN (SELECT [intEntityId] FROM tblSMShipVia)
 
 
 GO
@@ -22,7 +22,7 @@ Update
 SET
 	 intShipViaId = NULL
 WHERE
-	intShipViaId NOT IN (SELECT [intEntityShipViaId] FROM tblSMShipVia)
+	intShipViaId NOT IN (SELECT [intEntityId] FROM tblSMShipVia)
 
 
 GO

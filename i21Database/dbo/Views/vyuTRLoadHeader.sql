@@ -37,15 +37,23 @@ SELECT TL.intLoadHeaderId
 	, strInventoryTransferNo = Transfer.strTransferNo
 	, intInvoiceId = ''
 	, strInvoiceNo = NULL
+	, strLoadNumber = isnull(b.strExternalLoadNumber, b.strLoadNumber)
+	, strShipVia = c.strName
+	, strSeller = d.strName
+	, strStateName = e.strStateName
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
-LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = TR.intTerminalId
+LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityVendorId] = TR.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = TR.intSupplyPointId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = TR.intCompanyLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = TR.intItemId
-LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.intEntitySalespersonId = TL.intDriverId
+LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.[intEntityId] = TL.intDriverId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = TR.intInventoryReceiptId
 LEFT JOIN tblICInventoryTransfer Transfer ON Transfer.intInventoryTransferId = TR.intInventoryTransferId
+left join tblLGLoad b on b.intLoadId = TL.intLoadId
+left join tblEMEntity c on c.intEntityId = TL.intShipViaId
+left join tblEMEntity d on d.intEntityId = TL.intSellerId
+left join tblTRState e on e.intStateId = TL.intStateId
 
 UNION ALL
 SELECT TL.intLoadHeaderId
@@ -81,15 +89,23 @@ SELECT TL.intLoadHeaderId
 	, strInventoryTransferNo = Receipts.strTransferNo
 	, Invoice.intInvoiceId
 	, strInvoiceNo = Invoice.strInvoiceNumber
+	, strLoadNumber = isnull(b.strExternalLoadNumber, b.strLoadNumber)
+	, strShipVia = c.strName
+	, strSeller = d.strName
+	, strStateName = e.strStateName
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.intEntitySalespersonId = TL.intDriverId
+LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.[intEntityId] = TL.intDriverId
 LEFT JOIN tblICItem Item ON Item.intItemId = DD.intItemId
 LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DH.intInvoiceId
 LEFT JOIN vyuEMEntity CS ON CS.intEntityId = DH.intEntityCustomerId AND CS.strType = 'Customer'
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
 LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = DH.intCompanyLocationId
+left join tblLGLoad b on b.intLoadId = TL.intLoadId
+left join tblEMEntity c on c.intEntityId = TL.intShipViaId
+left join tblEMEntity d on d.intEntityId = TL.intSellerId
+left join tblTRState e on e.intStateId = TL.intStateId
 LEFT JOIN(
 	SELECT DISTINCT intLoadDistributionDetailId
 		, STUFF(

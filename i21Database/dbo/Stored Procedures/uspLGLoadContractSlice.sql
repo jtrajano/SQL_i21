@@ -205,7 +205,7 @@ BEGIN TRY
 				,GETDATE()
 			FROM vyuLGLoadView L
 			LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
-			LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
+			LEFT JOIN tblAPVendor V ON V.[intEntityId] = E.intEntityId
 			WHERE intLoadId = @intOrgLoadId
 
 			SELECT @intLoadStgId = SCOPE_IDENTITY()
@@ -366,38 +366,25 @@ BEGIN TRY
 	END
 
 	UPDATE L
-	SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CASE 
-					WHEN ISNULL(CTCQ.dblBulkQuantity, 0) = 0
-						THEN LD.dblNet
-					ELSE CTCQ.dblBulkQuantity
-					END, LD.dblNet))
+	SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CTCQ.dblBulkQuantity, LD.dblNet))
 	FROM tblCTContractDetail CD
 	JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
 	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 	LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
-	LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId
-		AND IC.intItemContractId = CD.intItemContractId
-	LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId, I.intOriginId)
-		AND I.intCommodityId = CA.intCommodityId
+	LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId  AND IC.intItemContractId = CD.intItemContractId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId,I.intOriginId)  AND I.intCommodityId = CA.intCommodityId
 	LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
 		AND CTCQ.intContainerTypeId = CT.intContainerTypeId
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 
-
 	UPDATE CD
-	SET intNumberOfContainers = CEILING(CD.dblNetWeight / ISNULL(CASE 
-					WHEN ISNULL(CTCQ.dblBulkQuantity, 0) = 0
-						THEN CD.dblNetWeight
-					ELSE CTCQ.dblBulkQuantity
-					END, CD.dblNetWeight))
+	SET intNumberOfContainers = CEILING(CD.dblNetWeight / ISNULL(CTCQ.dblBulkQuantity, CD.dblNetWeight))
 	FROM tblCTContractDetail CD
 	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CD.intContainerTypeId
 	LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
-	LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId
-		AND IC.intItemContractId = CD.intItemContractId
-	LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId, I.intOriginId)
-		AND I.intCommodityId = CA.intCommodityId
+	LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId  AND IC.intItemContractId = CD.intItemContractId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId,I.intOriginId)  AND I.intCommodityId = CA.intCommodityId
 	LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
 		AND CTCQ.intContainerTypeId = CT.intContainerTypeId
 	WHERE CD.intContractHeaderId = @intContractHeaderId

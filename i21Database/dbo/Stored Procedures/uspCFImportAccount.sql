@@ -168,7 +168,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 				AND cfact_cus_no COLLATE Latin1_General_CI_AS NOT IN (  select strCustomerNumber 
 																	from tblCFAccount cfAcct
 																	INNER JOIN tblARCustomer arAcct
-																	on cfAcct.intCustomerId = arAcct.intEntityCustomerId) 
+																	on cfAcct.intCustomerId = arAcct.[intEntityId]) 
 
 		-- DUPLICATE OR NOT IN CUSTOMERS LIST--
 		INSERT INTO tblCFImportResult(
@@ -219,7 +219,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 		WHERE cfact_cus_no COLLATE Latin1_General_CI_AS IN (  select strCustomerNumber 
 		from tblCFAccount cfAcct
 		INNER JOIN tblARCustomer arAcct
-		on cfAcct.intCustomerId = arAcct.intEntityCustomerId) 
+		on cfAcct.intCustomerId = arAcct.[intEntityId]) 
 		-- DUPLICATE OR NOT IN CUSTOMERS LIST--
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfactmst))
@@ -239,7 +239,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 					@intLastModifiedUserId = 0,
 					@dtmLastModified = CONVERT(VARCHAR(10), GETDATE(), 120),
 
-					@intCustomerId = (SELECT TOP 1 intEntityCustomerId 
+					@intCustomerId = (SELECT TOP 1 [intEntityId] 
 									  FROM tblARCustomer 
 									  WHERE strCustomerNumber = RTRIM(LTRIM(cfact_cus_no)) COLLATE Latin1_General_CI_AS),
 
@@ -251,7 +251,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 											  FROM tblCFDiscountSchedule 
 											  WHERE strDiscountSchedule = RTRIM(LTRIM(cfact_dsc_schd)) COLLATE Latin1_General_CI_AS),
 
-					@intSalesPersonId = (SELECT TOP 1 intEntitySalespersonId 
+					@intSalesPersonId = (SELECT TOP 1 [intEntityId] 
 										 FROM tblARSalesperson 
 										 WHERE strSalespersonId = RTRIM(LTRIM(cfact_sls_id)) COLLATE Latin1_General_CI_AS),
 

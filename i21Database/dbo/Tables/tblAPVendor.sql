@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblAPVendor] (
-    [intEntityVendorId]               INT            NOT NULL,
+    [intEntityId]               INT            NOT NULL,
 	--[intEntityVendorId]				INT				IDENTITY (1, 1) NOT NULL, 
     [intDefaultLocationId]       INT            NULL,
     [intDefaultContactId]        INT            NULL,
@@ -45,8 +45,8 @@
 	[intStoreStoreId] INT NULL,--
 
 	--store
-    CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityVendorId] ASC),
-    CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
+    CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
+    CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
     --CONSTRAINT [UK_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC),
 	--CONSTRAINT [UK_intVendorId] UNIQUE NONCLUSTERED ([intEntityVendorId] ASC),
 	--CONSTRAINT [FK_tblAPVendor_tblEMEntity] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblEMEntity]([intEntityId]),
@@ -68,7 +68,7 @@ GO
 ALTER TABLE [dbo].[tblAPVendor] CHECK CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId];
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
-    ON [dbo].[tblAPVendor]([intEntityVendorId] ASC, [strVendorId] ASC)
+    ON [dbo].[tblAPVendor]([intEntityId] ASC, [strVendorId] ASC)
 	WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 
 GO

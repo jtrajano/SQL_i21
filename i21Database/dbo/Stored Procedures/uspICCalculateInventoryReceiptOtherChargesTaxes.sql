@@ -113,14 +113,16 @@ BEGIN
 					,@SiteId				= NULL
 					,@FreightTermId			= @FreightTermId
 
-
+				-- Fields used in the calculation of the taxes
 				DECLARE	@Amount	NUMERIC(38,20) 
 						,@Qty	NUMERIC(38,20)
-				-- Fields used in the calculation of the taxes
-
+				
+				-- Get the taxable amount and qty from the charges. 
 				SELECT TOP 1
-						 @Amount = Charge.dblAmount
-						,@Qty	 = 1
+						-- Note: Do not compute tax if it can't be converted to voucher. Zero out the amount and Qty so that tax will be zero too. 
+						-- Charges with Accrue = false and Price = false does not create vouchers. 
+						 @Amount = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN Charge.dblAmount ELSE 0 END 
+						,@Qty	 = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN 1 ELSE 0 END 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 							ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId

@@ -101,7 +101,7 @@ BEGIN
 	IF ISNULL(@userId, 0) > 0
 	SELECT TOP 1 
 		@shipTo = (CASE WHEN ISNULL(@shipToId,0) > 0 THEN @shipToId ELSE intCompanyLocationId END)
-	FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId
+	FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 
 	SELECT 
 		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE B.intTermsId END),
@@ -117,9 +117,9 @@ BEGIN
 		@shipFromState = B.strState,
 		@shipFromZipCode = B.strZipCode
 	FROM tblAPVendor A
-	LEFT JOIN [tblEMEntityLocation] B ON A.intEntityVendorId = B.intEntityId
-	LEFT JOIN [tblEMEntityToContact] C ON A.intEntityVendorId = C.intEntityId 
-	WHERE A.intEntityVendorId= @vendorId 
+	LEFT JOIN [tblEMEntityLocation] B ON A.[intEntityId] = B.intEntityId
+	LEFT JOIN [tblEMEntityToContact] C ON A.[intEntityId] = C.intEntityId 
+	WHERE A.[intEntityId]= @vendorId 
 	AND 1 = (CASE WHEN @shipFrom IS NOT NULL THEN 
 					(CASE WHEN B.intEntityLocationId = @shipFrom THEN 1 ELSE 0 END)
 				ELSE (CASE WHEN B.ysnDefaultLocation = 1 THEN 1 ELSE 0 END) END)

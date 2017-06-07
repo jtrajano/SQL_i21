@@ -31,15 +31,15 @@
 		'1' as id
 		from tblARCustomer a
 			join vyuEMEntityType b
-				on a.intEntityCustomerId = b.intEntityId
+				on a.[intEntityId] = b.intEntityId
 			join tblEMEntity bb
-				on a.intEntityCustomerId = bb.intEntityId
+				on a.[intEntityId] = bb.intEntityId
 			join tblEMEntityLocation c
-				on a.intEntityCustomerId = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
+				on a.[intEntityId] = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
 			join tblSMCompanyLocation d
 				on c.intWarehouseId = d.intCompanyLocationId and d.intTaxGroupId is not null
 			join tblARCustomerTaxingTaxException e
-				on e.intEntityCustomerId = a.intEntityCustomerId and e.intItemId is not null and e.intCategoryId is not null
+				on e.intEntityCustomerId = a.[intEntityId] and e.intItemId is not null and e.intCategoryId is not null
 			join tblICItem f
 				on e.intItemId = f.intItemId
 			--join tblETExportFilterItem g
@@ -62,15 +62,15 @@
 		'2' as id
 		from tblARCustomer a
 			join vyuEMEntityType b
-				on a.intEntityCustomerId = b.intEntityId
+				on a.[intEntityId] = b.intEntityId
 			join tblEMEntity bb
-				on a.intEntityCustomerId = bb.intEntityId
+				on a.[intEntityId] = bb.intEntityId
 			join tblEMEntityLocation c
-				on a.intEntityCustomerId = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
+				on a.[intEntityId] = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
 			join tblSMCompanyLocation d
 				on c.intWarehouseId = d.intCompanyLocationId and d.intTaxGroupId is not null
 			join tblARCustomerTaxingTaxException e
-				on e.intEntityCustomerId = a.intEntityCustomerId and e.intCategoryId is not null and e.intItemId is null
+				on e.intEntityCustomerId = a.[intEntityId] and e.intCategoryId is not null and e.intItemId is null
 			join tblICItem f
 				on f.intCategoryId = e.intCategoryId
 			--join tblETExportFilterItem g
@@ -89,15 +89,15 @@
 		'3' as id
 		from tblARCustomer a
 			join vyuEMEntityType b
-				on a.intEntityCustomerId = b.intEntityId
+				on a.[intEntityId] = b.intEntityId
 			join tblEMEntity bb
-				on a.intEntityCustomerId = bb.intEntityId
+				on a.[intEntityId] = bb.intEntityId
 			join tblEMEntityLocation c
-				on a.intEntityCustomerId = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
+				on a.[intEntityId] = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
 			join tblSMCompanyLocation d
 				on c.intWarehouseId = d.intCompanyLocationId and d.intTaxGroupId is not null
 			join tblARCustomerTaxingTaxException e
-				on e.intEntityCustomerId = a.intEntityCustomerId and e.intCategoryId is null and e.intItemId is null
+				on e.intEntityCustomerId = a.[intEntityId] and e.intCategoryId is null and e.intItemId is null
 			left join tblETExportFilterItem f
 				on e.intItemId is null and e.intCategoryId is null
 			left join tblICItem g

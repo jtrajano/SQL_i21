@@ -7,3 +7,6 @@
     CONSTRAINT [PK_tblCFFeeProfle] PRIMARY KEY CLUSTERED ([intFeeProfileId] ASC)
 );
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFFeeProfile_UniqueFeeProfile
+	ON tblCFFeeProfile (strFeeProfileId);

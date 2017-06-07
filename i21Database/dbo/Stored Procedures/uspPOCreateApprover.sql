@@ -18,7 +18,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 SELECT
 	@approverListId = ISNULL(A.intApprovalListId, C.intApprovalListId)
 FROM tblAPVendor A
-INNER JOIN tblPOPurchase B ON A.intEntityVendorId = B.intEntityVendorId
+INNER JOIN tblPOPurchase B ON A.[intEntityId] = B.intEntityVendorId
 OUTER APPLY tblAPCompanyPreference C
 WHERE B.intPurchaseId = @poId AND B.ysnForApproval = 1
 

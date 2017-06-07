@@ -87,6 +87,6 @@ LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLoca
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
 LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = Config.intSellerId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLocationId AND SP.intEntityVendorId = LG.intVendorEntityId
-LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = LG.intCustomerEntityId
+LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = LG.intCustomerEntityId
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
 WHERE ISNULL(LG.ysnDispatched, 0) = 1

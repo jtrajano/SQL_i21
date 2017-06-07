@@ -78,7 +78,7 @@ From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId=@intMinV
 
 Select @strAccountNo AS strInfo1,@strVendorName AS strInfo2
 
-Select @intEntityId=intEntityVendorId From tblAPVendor Where strVendorAccountNum=@strAccountNo
+Select @intEntityId=[intEntityId] From tblAPVendor Where strVendorAccountNum=@strAccountNo
 Select @intTermId=intTermID From tblSMTerm Where strTermCode=@strTerm
 Select @intCurrencyId=intCurrencyID From tblSMCurrency Where strCurrency=@strCurrency
 
@@ -141,7 +141,7 @@ Begin
 	Update tblEMEntity set intDefaultLocationId=@intEntityLocationId Where intEntityId=@intEntityId
 
 	--Vendor
-	Insert Into tblAPVendor(intEntityVendorId,intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit,strVendorAccountNum,intTermsId)
+	Insert Into tblAPVendor([intEntityId],intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit,strVendorAccountNum,intTermsId)
 	Select @intEntityId,@intCurrencyId,@strEntityNo,1,strTaxNo,@intEntityLocationId,@intEntityLocationId,strFLOId,0,0,0.0,strAccountNo,@intTermId
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
@@ -191,14 +191,14 @@ Begin --Update
 	If @ysnDeleted=1
 		Begin
 			Update tblEMEntity Set ysnActive=0 Where intEntityId=@intEntityId
-			Update tblAPVendor Set ysnPymtCtrlActive=0,ysnDeleted=1 Where intEntityVendorId=@intEntityId
+			Update tblAPVendor Set ysnPymtCtrlActive=0,ysnDeleted=1 Where [intEntityId]=@intEntityId
 
 			GOTO MOVE_TO_ARCHIVE
 		End
 	Else			
 		Begin
 			Update tblEMEntity Set ysnActive=1 Where intEntityId=@intEntityId
-			Update tblAPVendor Set ysnPymtCtrlActive=1,ysnDeleted=0 Where intEntityVendorId=@intEntityId
+			Update tblAPVendor Set ysnPymtCtrlActive=1,ysnDeleted=0 Where [intEntityId]=@intEntityId
 		End
 
 	Select TOP 1 @intEntityLocationId=intEntityLocationId From tblEMEntityLocation Where intEntityId=@intEntityId
@@ -237,7 +237,7 @@ Begin --Update
 	If ISNULL(@strTerm,'/')<>'/'
 		Begin
 			Update tblEMEntityLocation Set intTermsId=@intTermId Where intEntityLocationId=@intEntityLocationId
-			Update tblAPVendor Set intTermsId=@intTermId Where intEntityVendorId=@intEntityId
+			Update tblAPVendor Set intTermsId=@intTermId Where [intEntityId]=@intEntityId
 
 			--available to term list
 			If not exists(Select 1 From tblAPVendorTerm Where intEntityVendorId=@intEntityId AND intTermId=@intTermId)
@@ -251,13 +251,13 @@ Begin --Update
 
 	--Vendor table update
 	If ISNULL(@strCurrency,'/')<>'/'
-		Update tblAPVendor Set intCurrencyId=@intCurrencyId Where intEntityVendorId=@intEntityId
+		Update tblAPVendor Set intCurrencyId=@intCurrencyId Where [intEntityId]=@intEntityId
 
 	If ISNULL(@strFLOId,'/')<>'/'
-		Update tblAPVendor Set strFLOId=@strFLOId Where intEntityVendorId=@intEntityId
+		Update tblAPVendor Set strFLOId=@strFLOId Where [intEntityId]=@intEntityId
 
 	If ISNULL(@strTaxNo,'/')<>'/'
-		Update tblAPVendor Set strTaxNumber=@strTaxNo Where intEntityVendorId=@intEntityId
+		Update tblAPVendor Set strTaxNumber=@strTaxNo Where [intEntityId]=@intEntityId
 
 	--Update Phone
 	Select @intEntityContactId=intEntityId From tblEMEntity Where strName=(Select TOP 1 ISNULL([strFirstName],'') + ' ' + ISNULL([strLastName],'')

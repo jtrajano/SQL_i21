@@ -42,12 +42,14 @@ BEGIN
 	DECLARE @intCreatedEntityId AS INT  
 	DECLARE @ysnAllowUserSelfPost AS BIT   
 	DECLARE @ysnTransactionPostedFlag AS BIT  
+	DECLARE @intLocationId AS INT 
   
 	SELECT TOP 1   
 			@intTransactionId = intBuildAssemblyId
 			,@ysnTransactionPostedFlag = ysnPosted
 			,@dtmDate = dtmBuildDate
 			,@intCreatedEntityId = intEntityId
+			,@intLocationId = intLocationId 
 	FROM	dbo.tblICBuildAssembly
 	WHERE	strBuildNo = @strTransactionId
 END  
@@ -113,7 +115,7 @@ BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
 
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intTransactionId, @intLocationId
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  

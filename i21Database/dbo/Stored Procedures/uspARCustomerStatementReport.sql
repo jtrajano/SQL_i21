@@ -212,7 +212,7 @@ END
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
-	 , C.intEntityCustomerId
+	 , intEntityCustomerId = C.intEntityId
 	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
 	 , I.dtmPostDate
 	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
@@ -223,14 +223,14 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 						THEN I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0)
 						ELSE 0
 					END
-	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityCustomerId, I.dtmDate), 0)
+	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityId, I.dtmDate), 0)
 	 , dblRunningBalance = SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 	 , C.strCustomerNumber
 	 , strDisplayName = CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(CC.strCheckPayeeName, C.strName) END
 	 , strName = C.strName
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
-	 , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
+	 , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
 	 , CL.strLocationName
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
@@ -238,9 +238,9 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
 	 , dblARBalance = CUST.dblARBalance
 	FROM vyuARCustomer C
-	INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
-	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
-	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId
+	INNER JOIN tblARCustomer CUST ON C.intEntityId = CUST.intEntityId
+	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityId = CC.intEntityId AND ysnDefaultContact = 1
+	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityId
 		AND I.ysnPosted  = 1		
 		AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
 		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +' 
@@ -277,7 +277,7 @@ IF @ysnIncludeBudget = 1
 		SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
 			'SELECT strReferenceNumber			= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
 				  , strTransactionType			= ''Customer Budget''
-				  , intEntityCustomerId			= C.intEntityCustomerId
+				  , intEntityCustomerId			= C.intEntityId
 				  , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate))
 				  , dtmDate						= dtmBudgetDate
 				  , intDaysDue					= DATEDIFF(DAY, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateTo)
@@ -286,7 +286,7 @@ IF @ysnIncludeBudget = 1
 				  , dblAmountDue				= dblBudgetAmount - dblAmountPaid
 				  , dblPastDue					= dblBudgetAmount - dblAmountPaid
 				  , dblMonthlyBudget			= dblBudgetAmount
-				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityCustomerId ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityId ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 				  , strCustomerNumber			= C.strCustomerNumber
 				  , strDisplayName				= C.strDisplayName
 				  , strName						= C.strName
@@ -300,8 +300,8 @@ IF @ysnIncludeBudget = 1
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= CUST.dblARBalance
 			FROM tblARCustomerBudget CB
-				INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId
-				INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId	
+				INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityId
+				INNER JOIN tblARCustomer CUST ON C.intEntityId = CUST.intEntityId	
 			WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
 			  AND CB.dblAmountPaid < CB.dblBudgetAmount'
 
@@ -505,10 +505,10 @@ BEGIN
 	INNER JOIN @temp_aging_table AS AGINGREPORT
 		ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 	INNER JOIN tblARCustomer CUSTOMER 
-		ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+		ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityId
 	WHERE (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)) ABC 
 	INNER JOIN 
-		(SELECT intEntityCustomerId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+		(SELECT intEntityId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityId
 END
 ELSE  
 	BEGIN
@@ -602,7 +602,6 @@ ELSE
 	INNER JOIN @temp_aging_table AS AGINGREPORT
 		ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 	INNER JOIN tblARCustomer CUSTOMER 
-		ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+		ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityId
 	WHERE (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
 END
- 

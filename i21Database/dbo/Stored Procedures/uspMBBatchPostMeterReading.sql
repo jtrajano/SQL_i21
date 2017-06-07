@@ -20,7 +20,7 @@ SET ANSI_WARNINGS OFF
 BEGIN
 	
 	DECLARE @UserEntityId INT
-	SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), @UserId)
+	SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), @UserId)
 
 	SELECT DISTINCT RecordKey = intMeterReadingId INTO #tmpMeterReadings FROM vyuMBGetMeterReading WHERE ysnPosted = 0
 
@@ -198,7 +198,7 @@ BEGIN
 			,[intMeterReadingId]					= @intRecordKey
 		FROM vyuMBGetMeterReadingDetail MRDetail
 		LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
-		LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MRDetail.intEntityCustomerId
+		LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
 		WHERE MRDetail.intMeterReadingId = @intRecordKey
 		GROUP BY MRDetail.intMeterReadingId
 			, MRDetail.strTransactionId

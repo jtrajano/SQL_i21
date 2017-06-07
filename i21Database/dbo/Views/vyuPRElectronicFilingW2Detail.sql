@@ -107,7 +107,7 @@ SELECT
 	,W2.strLocality
 FROM
 	tblPREmployeeW2 W2
-	INNER JOIN tblPREmployee EMP ON W2.intEntityEmployeeId = EMP.intEntityEmployeeId
-	INNER JOIN tblEMEntity ENT ON ENT.intEntityId = EMP.intEntityEmployeeId
+	INNER JOIN tblPREmployee EMP ON W2.intEntityEmployeeId = EMP.[intEntityId]
+	INNER JOIN tblEMEntity ENT ON ENT.intEntityId = EMP.[intEntityId]
 	INNER JOIN tblEMEntityLocation ENL ON ENT.intEntityId = ENL.intEntityId AND ENL.ysnDefaultLocation = 1
 GO

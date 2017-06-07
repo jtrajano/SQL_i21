@@ -230,6 +230,6 @@ LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = LOAD.intContainerType
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = LOAD.intTicketId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = LOAD.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = LOAD.intEquipmentTypeId
-LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId] = LOAD.intDispatcherId
+LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = LOAD.intDispatcherId
 LEFT JOIN tblCTPosition P ON LOAD.intPositionId = P.intPositionId
 LEFT JOIN tblLGLoad LOADSI ON LOADSI.intLoadId = LOAD.intLoadShippingInstructionId

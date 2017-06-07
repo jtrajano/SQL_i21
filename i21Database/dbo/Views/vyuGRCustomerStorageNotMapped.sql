@@ -13,7 +13,9 @@ SELECT
 ,ISNULL(CS.intCompanyLocationSubLocationId,0) intCompanyLocationSubLocationId
 ,ISNULL(SLOC.strSubLocationName,'') strSubLocationName
 ,CS.intDiscountScheduleId
-,DS.strDiscountDescription 
+,DS.strDiscountDescription
+,CS.intStorageScheduleId
+,SR.strScheduleId 
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
 JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = CS.intCompanyLocationId  

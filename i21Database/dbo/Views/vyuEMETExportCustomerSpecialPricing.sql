@@ -9,17 +9,17 @@
 
 	from tblARCustomerSpecialPrice a
 		join tblARCustomer b
-			on a.intEntityCustomerId = b.intEntityCustomerId
+			on a.intEntityCustomerId = b.[intEntityId]
 		join tblEMEntity z
 			on a.intEntityCustomerId = z.intEntityId
 		join tblEMEntityLocation d
-			on d.intEntityId = b.intEntityCustomerId and d.ysnDefaultLocation = 1
+			on d.intEntityId = b.[intEntityId] and d.ysnDefaultLocation = 1
 		left join vyuICGetItemPricing e
 			on e.intItemId = a.intItemId
 			 and e.intLocationId = d.intWarehouseId 
 		Cross apply dbo.fnARGetCustomerPricingDetails(
 			a.intItemId,
-			b.intEntityCustomerId,
+			b.[intEntityId],
 			d.intWarehouseId,
 			e.intItemUOMId,
 			cast(GetDate() as date),
@@ -47,11 +47,11 @@
 
 	from tblARCustomerSpecialPrice a
 		join tblARCustomer b
-			on a.intEntityCustomerId = b.intEntityCustomerId  and a.intItemId is null 
+			on a.intEntityCustomerId = b.[intEntityId]  and a.intItemId is null 
 		join tblEMEntity z
 			on a.intEntityCustomerId = z.intEntityId
 		join tblEMEntityLocation d
-			on d.intEntityId = b.intEntityCustomerId and d.ysnDefaultLocation = 1
+			on d.intEntityId = b.[intEntityId] and d.ysnDefaultLocation = 1
 		left join tblICCategory e
 			on e.intCategoryId= a.intCategoryId
 		left join tblICItem f
@@ -61,7 +61,7 @@
 			 and g.intLocationId = d.intWarehouseId
 		Cross apply dbo.[fnARGetItemPricingDetails](
 			g.intItemId,
-			b.intEntityCustomerId,
+			b.[intEntityId],
 			d.intWarehouseId,
 			g.intItemUOMId,
 			(SELECT TOP 1 intDefaultCountryId FROM tblSMCompanyPreference),

@@ -112,7 +112,7 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 				,@intAccountId							   = ISNULL((SELECT cfAcct.intAccountId 
 																    FROM tblCFAccount cfAcct
 																    INNER JOIN tblARCustomer arAcct
-																    ON cfAcct.intCustomerId = arAcct.intEntityCustomerId
+																    ON cfAcct.intCustomerId = arAcct.[intEntityId]
 																    WHERE arAcct.strCustomerNumber = LTRIM(RTRIM(cfcus_ar_cus_no))
 																    COLLATE Latin1_General_CI_AS),0)
 				--,@strCardForOwnUse						   = LTRIM(RTRIM())

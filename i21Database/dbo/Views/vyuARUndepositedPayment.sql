@@ -13,13 +13,13 @@ SELECT
 FROM 
 	tblARPayment A
 INNER JOIN tblARCustomer B
-		ON A.[intEntityCustomerId] = B.[intEntityCustomerId]
+		ON A.[intEntityCustomerId] = B.[intEntityId]
 INNER JOIN
 	vyuGLAccountDetail GL
 		ON A.intAccountId = GL.intAccountId  
 INNER JOIN
 	tblEMEntity E
-		ON B.intEntityCustomerId = E.intEntityId 
+		ON B.[intEntityId] = E.intEntityId 
 LEFT OUTER JOIN
 	tblCMUndepositedFund CM
 		ON 	A.intPaymentId = CM.intSourceTransactionId 
@@ -50,13 +50,13 @@ SELECT
 FROM 
 	tblARInvoice A
 INNER JOIN tblARCustomer B
-		ON A.[intEntityCustomerId] = B.[intEntityCustomerId]
+		ON A.[intEntityCustomerId] = B.[intEntityId]
 INNER JOIN
 	vyuGLAccountDetail GL
 		ON A.intAccountId = GL.intAccountId  
 INNER JOIN
 	tblEMEntity E
-		ON B.intEntityCustomerId = E.intEntityId 
+		ON B.[intEntityId] = E.intEntityId 
 LEFT OUTER JOIN
 	tblCMUndepositedFund CM
 		ON 	A.intInvoiceId = CM.intSourceTransactionId 

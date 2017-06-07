@@ -102,7 +102,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@ShipDate						= D.dtmDate		
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
 					,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])				
-					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN (SELECT TOP 1 intEntitySalespersonId FROM tblARSalesperson WHERE intEntityId = CONVERT(INT, D.strSalespersonNumber)) END
+					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN (SELECT TOP 1 [intEntityId] FROM tblARSalesperson WHERE intEntityId = CONVERT(INT, D.strSalespersonNumber)) END
 					,@TransactionType				= 'Invoice'
 					,@Type							= 'Tank Delivery'
 					,@Comment						= D.strTransactionNumber
@@ -180,14 +180,14 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		ELSE IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 			BEGIN
 				SELECT 
-					  @EntityCustomerId				= C.intEntityCustomerId
+					  @EntityCustomerId				= C.[intEntityId]
 					, @CustomerNumber				= C.strCustomerNumber
 					, @Date							= ILD.dtmDate
 					, @PostDate						= NULL
 					, @ShipDate						= ILD.dtmShipDate
 					, @CompanyLocationId			= CL.intCompanyLocationId
 					, @EntityId						= ISNULL(@UserEntityId, IL.intEntityId)
-					, @EntitySalespersonId			= SP.intEntitySalespersonId
+					, @EntitySalespersonId			= SP.[intEntityId]
 					, @TermId						= C.intTermsId
 					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId)
 					, @TransactionType				= ILD.strTransactionType
@@ -223,9 +223,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				LEFT JOIN
 					(tblARCustomer C
 						INNER JOIN tblEMEntity EC
-							ON C.intEntityCustomerId = EC.intEntityId
+							ON C.[intEntityId] = EC.intEntityId
 						INNER JOIN tblEMEntityLocation EL
-							ON C.intEntityCustomerId = EL.intEntityId
+							ON C.[intEntityId] = EL.intEntityId
 							AND EL.ysnDefaultLocation = 1)
 						ON ILD.strCustomerNumber = EC.strEntityNo
 				LEFT JOIN
@@ -234,7 +234,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				LEFT JOIN
 					(tblARSalesperson SP 
 						INNER JOIN tblEMEntity ESP
-							ON SP.intEntitySalespersonId = ESP.intEntityId)
+							ON SP.[intEntityId] = ESP.intEntityId)
 						ON ILD.strSalespersonNumber = ESP.strEntityNo
 				LEFT JOIN
 					tblICItem ICI
@@ -271,7 +271,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
 					,@EntityId						= ISNULL(@UserEntityId, H.intEntityId)
 					,@TermId						= CASE WHEN ISNULL(D.strTerms, '') <> '' THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = D.strTerms) ELSE 0 END
-					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 intEntitySalespersonId FROM tblARSalesperson SP INNER JOIN tblEMEntity E ON SP.intEntitySalespersonId = E.intEntityId WHERE E.strEntityNo = D.strSalespersonNumber) ELSE 0 END
+					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 SP.[intEntityId] FROM tblARSalesperson SP INNER JOIN tblEMEntity E ON SP.[intEntityId] = E.intEntityId WHERE E.strEntityNo = D.strSalespersonNumber) ELSE 0 END
 					,@DueDate						= D.dtmDueDate		
 					,@ShipDate						= D.dtmShipDate
 					,@PostDate						= D.dtmPostDate 
@@ -282,7 +282,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@PONumber						= D.strPONumber
 					,@BOLNumber						= D.strBOLNumber
 					,@FreightTermId					= CASE WHEN ISNULL(D.strFreightTerm, '') <> '' THEN (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = D.strFreightTerm) ELSE 0 END
-					,@ShipViaId						= CASE WHEN ISNULL(D.strShipVia, '') <> '' THEN (SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia WHERE strShipVia = D.strShipVia)	ELSE 0 END
+					,@ShipViaId						= CASE WHEN ISNULL(D.strShipVia, '') <> '' THEN (SELECT TOP 1 [intEntityId] FROM tblSMShipVia WHERE strShipVia = D.strShipVia)	ELSE 0 END
 					,@DiscountAmount				= ISNULL(D.dblDiscount, @ZeroDecimal)
 					,@DiscountPercentage			= (CASE WHEN ISNULL(D.dblDiscount, @ZeroDecimal) > 0 
 															THEN (1 - ((ABS(D.dblTotal) - ISNULL(D.dblDiscount, @ZeroDecimal)) / ABS(D.dblTotal))) * 100
@@ -326,7 +326,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
 		ELSE IF @TermId = 0 AND @IsTank = 0
 			BEGIN
-				SELECT TOP 1 @TermId = intTermsId FROM [tblARCustomer] WHERE intEntityCustomerId = @EntityCustomerId  
+				SELECT TOP 1 @TermId = intTermsId FROM [tblARCustomer] WHERE [intEntityId] = @EntityCustomerId  
 				IF ISNULL(@TermId, 0) = 0
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The customer provided doesn''t have default terms. '				
 			END
@@ -344,7 +344,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		IF @EntitySalespersonId IS NULL
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Salesperson provided does not exists. '
 		ELSE IF @EntitySalespersonId = 0
-			SELECT TOP 1 @EntitySalespersonId = intSalespersonId FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId
+			SELECT TOP 1 @EntitySalespersonId = intSalespersonId FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId
 
 		IF @TaxGroupId IS NULL
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 
@@ -379,7 +379,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s location costing method should be either FIFO or LIFO.'
 			END
 
-		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityCustomerId = @EntityCustomerId
+		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE [intEntityId] = @EntityCustomerId
 
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
 			BEGIN TRY

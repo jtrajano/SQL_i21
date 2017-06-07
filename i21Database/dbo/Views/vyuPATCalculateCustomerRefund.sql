@@ -49,9 +49,9 @@ SELECT	Total.intCustomerId,
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 		) Total
 	INNER JOIN tblARCustomer AC
-			ON AC.intEntityCustomerId = Total.intCustomerId
+			ON AC.[intEntityId] = Total.intCustomerId
 	INNER JOIN tblAPVendor APV
-			ON APV.intEntityVendorId = Total.intCustomerId
+			ON APV.[intEntityId] = Total.intCustomerId
 	LEFT JOIN tblSMTaxCode TC
 			ON TC.intTaxCodeId = AC.intTaxCodeId
 	INNER JOIN tblEMEntity ENT

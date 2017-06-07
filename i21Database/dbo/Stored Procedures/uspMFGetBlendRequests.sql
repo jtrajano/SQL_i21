@@ -11,7 +11,7 @@ If @intWorkOrderId=0
 	Select a.intBlendRequirementId,a.strDemandNo,a.intItemId,b.strItemNo,b.strDescription,(a.dblQuantity - ISNULL(a.dblIssuedQty,0)) dblQuantity,
 	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,
 	a.intManufacturingCellId AS intManufacturingCellId,
-	a.intMachineId,a.dblBlenderSize,g.dblStandardCost 
+	a.intMachineId,a.dblBlenderSize,g.dblStandardCost,mc.strCellName 
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
 	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 
@@ -19,6 +19,7 @@ If @intWorkOrderId=0
 	Left Join tblMFRecipe e on a.intItemId=e.intItemId And a.intLocationId=e.intLocationId And e.ysnActive=1 
 	Left Join tblICItemLocation f on b.intItemId=f.intItemId and f.intLocationId=a.intLocationId
 	Left Join tblICItemPricing g on g.intItemId=b.intItemId And g.intItemLocationId=f.intItemLocationId
+	Left Join tblMFManufacturingCell mc on a.intManufacturingCellId=mc.intManufacturingCellId
 	Where a.intStatusId=1
 
 --Positive means WorkOrderId

@@ -116,7 +116,7 @@ SET @intCFAccount = (SELECT TOP 1 intGLAccountId FROM tblCFCompanyPreference WHE
 DECLARE @UserEntityID			INT
 	,@AllowOtherUserToPost		BIT
 
-SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
+SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserEntityID)
 
 SET @recapId = '1'
@@ -618,7 +618,23 @@ SET @batchIdUsed = @batchId
 					ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(D.dblBaseInterest,0.00)) - ISNULL(D.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - D.dblBasePayment),0) <> 0
 					AND  (@GainLossAccount IS NULL OR @GainLossAccount = 0)
 					AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((D.dblPayment - D.dblInterest) + D.dblDiscount)	
-					
+
+				--Validate Bank Account for ACH Payment Method
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'Bank Account is required for payment with ACH payment method!'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				WHERE A.strPaymentMethod = 'ACH' AND ISNULL(intBankAccountId, 0) = 0 
+
 				--+overpayment
 				INSERT INTO
 					@AROverpayment
@@ -1455,7 +1471,7 @@ IF @post = 1
 				ON A.intPaymentMethodId = PM.intPaymentMethodID
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1499,7 +1515,7 @@ IF @post = 1
 			tblARPayment A 
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@AROverpayment P
 				ON A.intPaymentId = P.intPaymentId
@@ -1545,7 +1561,7 @@ IF @post = 1
 			tblARPayment A
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			tblSMCompanyLocation SMCL
 				ON A.intLocationId = SMCL.intCompanyLocationId 
@@ -1598,7 +1614,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1664,7 +1680,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1737,7 +1753,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN 
 			tblARCustomer C 
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1804,7 +1820,7 @@ IF @post = 1
 				ON B.intPaymentId = A.intPaymentId
 		INNER JOIN 
 			tblARCustomer C 
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			tblARInvoice I
 				ON B.intInvoiceId = I.intInvoiceId
@@ -1874,7 +1890,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1940,7 +1956,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId

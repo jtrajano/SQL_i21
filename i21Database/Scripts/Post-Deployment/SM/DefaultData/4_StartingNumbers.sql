@@ -765,13 +765,13 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 81
-			,[strTransactionType]	= N'Provisional'
+			,[strTransactionType]	= N'Provisional Invoice'
 			,[strPrefix]			= N'PI-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Provisional')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Provisional Invoice')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 82
@@ -1123,6 +1123,16 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 117
+			,[strTransactionType]	= N'Truck Billing Payment'
+			,[strPrefix]			= N'TBP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Energy Trac'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Truck Billing Payment')
+
+	UNION ALL
+	SELECT	 [intStartingNumberId]	= 118
 			,[strTransactionType]	= N'Storage Statement FormNo'
 			,[strPrefix]			= N'L '
 			,[intNumber]			= 1
@@ -1130,6 +1140,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Statement FormNo')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 119
+			,[strTransactionType]	= N'SSCC Label Serial No'
+			,[strPrefix]			= N'L '
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'SSCC Label Serial No')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

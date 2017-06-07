@@ -26,9 +26,9 @@ SELECT DistHeader.intLoadDistributionHeaderId
 	, Invoice.strInvoiceNumber
 FROM tblTRLoadDistributionHeader DistHeader
 LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = DistHeader.intLoadHeaderId
-LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = DistHeader.intEntityCustomerId
+LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = DistHeader.intEntityCustomerId
 LEFT JOIN tblEMEntityLocation ShipTo ON ShipTo.intEntityLocationId = DistHeader.intShipToLocationId
 LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = ShipTo.intTaxGroupId
 LEFT JOIN tblSMCompanyLocation CompanyLocation ON CompanyLocation.intCompanyLocationId = DistHeader.intCompanyLocationId
-LEFT JOIN vyuEMSalesperson Salesperson ON Salesperson.intEntitySalespersonId = DistHeader.intEntitySalespersonId
+LEFT JOIN vyuEMSalesperson Salesperson ON Salesperson.intEntityId = DistHeader.intEntitySalespersonId
 LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DistHeader.intInvoiceId

@@ -64,8 +64,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
 	INNER JOIN tblPOPurchase C ON B.intPurchaseId = C.intPurchaseId
 	LEFT JOIN tblICItemLocation B2 ON B.intItemId = B2.intItemId AND B2.intLocationId = C.intShipToId
-	INNER JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityVendorId
-	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
+	INNER JOIN tblAPVendor D ON C.intEntityVendorId = D.[intEntityId]
+	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	WHERE B.dblQtyOrdered != B.dblQtyReceived --EXCLUDE FULLY BILLED PURCHASE DETAIL ITEM
 

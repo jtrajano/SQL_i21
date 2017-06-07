@@ -7,7 +7,7 @@ BEGIN
 
 	select @ScreenId = intScreenId from tblSMScreen where strScreenName ='Voucher'
 	INSERT INTO tblEMEntityRequireApprovalFor(intEntityId, intApprovalListId, intScreenId, intConcurrencyId)
-	select intEntityVendorId, intApprovalListId, @ScreenId, 1 from tblAPVendor where intApprovalListId is not null and intEntityVendorId not in (select intEntityId from tblEMEntityRequireApprovalFor )
+	select [intEntityId], intApprovalListId, @ScreenId, 1 from tblAPVendor where intApprovalListId is not null and [intEntityId] not in (select intEntityId from tblEMEntityRequireApprovalFor )
 
 
 

@@ -84,7 +84,7 @@ BEGIN
 		INNER JOIN tblAPVendor B
 			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = SUBSTRING(B.strVendorId, 1, 10) COLLATE Latin1_General_CI_AS
 		INNER JOIN tblEMEntity A
-			ON A.intEntityId = B.intEntityVendorId
+			ON A.intEntityId = B.intEntityId
 		INNER JOIN tblEMEntityLocation C
 			ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 		INNER JOIN tblEMEntityToContact G
@@ -96,7 +96,7 @@ BEGIN
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
 		LEFT JOIN tblSMTerm H
-			on C.intTermsId = H.intTermID
+			on B.intTermsId = H.intTermID
 		LEFT JOIN tblEMEntityPhoneNumber I
 			ON D.intEntityId = I.intEntityId
 		WHERE ssvndmst.ssvnd_vnd_no =  SUBSTRING(@VendorId, 1, 10)
@@ -167,7 +167,7 @@ BEGIN
 		FROM
 			tblEMEntity A
 		INNER JOIN tblAPVendor B
-			ON A.intEntityId = B.intEntityVendorId
+			ON A.intEntityId = B.intEntityId
 		INNER JOIN tblEMEntityLocation C		
 			ON  A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 		INNER JOIN tblEMEntityToContact G
@@ -179,7 +179,7 @@ BEGIN
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
 		LEFT JOIN tblSMTerm H
-			on C.intTermsId = H.intTermID
+			on B.intTermsId = H.intTermID
 		LEFT JOIN tblEMEntityPhoneNumber I
 			on D.intEntityId = I.intEntityId
 		WHERE B.strVendorId = @VendorId
@@ -531,15 +531,21 @@ BEGIN
 
 		
 
-		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, 1)
+		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation], [strCheckPayeeName])
+		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, 1, @strName)
 
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
 
-		INSERT [dbo].[tblAPVendor]	([intEntityVendorId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [dblCreditLimit], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
+		IF ISNULL(@ysnPymtCtrlEFTActive, 0) = 1
+		BEGIN
+			SET @ysnPymtCtrlActive = 1
+		END
+
+		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [dblCreditLimit], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
 		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, ISNULL(@intPaymentMethodId,0), @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @dblCreditLimit, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
 
+		INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId) VALUES (@EntityId, @intTermsId)
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
 		
@@ -606,7 +612,9 @@ BEGIN
 		 [intShipViaId], 
 		 [intTermsId], 
 		 [intWarehouseId], 
-		 [ysnDefaultLocation])
+		 [ysnDefaultLocation], 
+		 [strCheckPayeeName]
+		 )
 		select 				
 					ENT.intEntityId, 
 					SUBSTRING ( 
@@ -636,7 +644,8 @@ BEGIN
 															AND intDayofMonthDue = ssvnd_terms_cutoff_day)
 											ELSE (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') END,
 					NULL,
-					0
+					0,
+					@strName
 	 from ssvndmst  
 	 inner join tblEMEntity ENT on ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId

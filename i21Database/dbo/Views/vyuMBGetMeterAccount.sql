@@ -27,7 +27,7 @@ SELECT MA.intMeterAccountId
 	, EntityLocation.intTaxGroupId
 	, MA.intSort
 FROM tblMBMeterAccount MA
-LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MA.intEntityCustomerId
+LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MA.intEntityCustomerId
 LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MA.intEntityLocationId
 LEFT JOIN tblSMTerm Term ON Term.intTermID = MA.intTermId
 LEFT JOIN tblMBConsignmentGroup ConGroup ON ConGroup.intConsignmentGroupId = MA.intConsignmentGroupId

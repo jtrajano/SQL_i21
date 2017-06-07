@@ -131,7 +131,7 @@ SELECT 	 SQ.intContractDetailId
 	LEFT JOIN 	tblICStorageLocation			 	SL	ON	SL.intStorageLocationId				=	CD.intStorageLocationId
 	LEFT JOIN 	tblCTContractStatus				 	CS	ON	CS.intContractStatusId				=	SQ.intContractStatusId
 	LEFT JOIN 	tblSMFreightTerms				 	FT	ON	FT.intFreightTermId					=	CD.intFreightTermId
-	LEFT JOIN 	tblSMShipVia					 	SV	ON	SV.[intEntityShipViaId]				=	CD.intShipViaId
+	LEFT JOIN 	tblSMShipVia					 	SV	ON	SV.intEntityId						=	CD.intShipViaId
 	LEFT JOIN 	tblEMEntity						 	ES	ON	ES.intEntityId						=	CD.intShippingLineId
 	LEFT JOIN 	tblEMEntity						 	EP	ON	EP.intEntityId						=	CD.intShipperId
 	LEFT JOIN 	tblSMPurchasingGroup			 	PG	ON	PG.intPurchasingGroupId				=	CD.intPurchasingGroupId

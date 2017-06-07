@@ -28,7 +28,7 @@ BEGIN
 
 			IF @blnSwitchOrigini21 = 1
 			BEGIN
-				SELECT @strCustomerNumber = strCustomerNumber FROM dbo.tblARCustomer Where intEntityCustomerId = @intCustomerId
+				SELECT @strCustomerNumber = strCustomerNumber FROM dbo.tblARCustomer Where intEntityId = @intCustomerId
 				
 				IF @strOriginSystem = ''PT''
 				BEGIN

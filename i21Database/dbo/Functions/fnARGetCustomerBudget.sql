@@ -9,8 +9,8 @@ BEGIN
 
 	SELECT @customerBudget = dblBudgetAmount 
 	FROM tblARCustomer C INNER JOIN tblARCustomerBudget CB 
-		ON C.intEntityCustomerId = CB.intEntityCustomerId
-	WHERE C.intEntityCustomerId = @entityCustomerId
+		ON C.[intEntityId] = CB.intEntityCustomerId
+	WHERE C.[intEntityId] = @entityCustomerId
 	AND @budgetDate BETWEEN CB.dtmBudgetDate AND DATEADD(MONTH, 1, CB.dtmBudgetDate)
 
 	RETURN ISNULL(@customerBudget, 0.000000)

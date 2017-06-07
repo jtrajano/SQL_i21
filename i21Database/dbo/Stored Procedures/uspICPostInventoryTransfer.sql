@@ -52,6 +52,7 @@ BEGIN
 			,@ysnShipmentRequired AS BIT
 			,@intTransactionType AS INT 
 			,@strGLDescription AS NVARCHAR(255)
+			,@intLocationId AS INT
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryTransferId
@@ -60,6 +61,7 @@ BEGIN
 			,@intCreatedEntityId = intEntityId
 			,@ysnShipmentRequired = ISNULL(ysnShipmentRequired, 0)
 			,@strGLDescription = strDescription
+			,@intLocationId = intFromLocationId
 	FROM	dbo.tblICInventoryTransfer
 	WHERE	strTransferNo = @strTransactionId
 END  
@@ -224,7 +226,7 @@ BEGIN
 END
 
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  

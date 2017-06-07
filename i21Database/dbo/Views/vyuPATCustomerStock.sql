@@ -2,7 +2,7 @@
 	AS
 SELECT	CS.intCustomerStockId,
 		CS.intCustomerPatronId,
-		C.strName AS strCustomerPatronId,
+		C.strName,
 		CS.intStockId,
 		PC.strStockName,
 		CS.strCertificateNo,
@@ -24,18 +24,18 @@ SELECT	CS.intCustomerStockId,
 		ysnPosted = CASE WHEN ISNULL(CS.ysnPosted, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 		ysnRetiredPosted = CASE WHEN ISNULL(CS.ysnRetiredPosted, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 		CS.intConcurrencyId
-FROM tblPATCustomerStock CS
-INNER JOIN tblEMEntity C
-	ON C.intEntityId = CS.intCustomerPatronId
-INNER JOIN tblPATStockClassification PC
-	ON PC.intStockId = CS.intStockId
-LEFT OUTER JOIN tblEMEntity CT
-	ON CT.intEntityId = CS.intTransferredFrom
-LEFT OUTER JOIN tblAPBill APB
-	ON APB.intBillId = CS.intBillId
-LEFT OUTER JOIN tblARInvoice ARI
-	ON ARI.intInvoiceId = CS.intInvoiceId
-LEFT OUTER JOIN (SELECT A.strPaymentInfo, B.intBillId, A.dtmDatePaid, B.dblPayment FROM tblAPPayment A INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId) APPAY
-	ON APPAY.intBillId = CS.intBillId
-LEFT OUTER JOIN (SELECT A.strPaymentInfo, B.intInvoiceId, A.dtmDatePaid, B.dblPayment FROM tblARPayment A INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId) ARPAY
-	ON ARPAY.intInvoiceId = CS.intInvoiceId
+	FROM tblPATCustomerStock CS
+	INNER JOIN tblEMEntity C
+		ON C.intEntityId = CS.intCustomerPatronId
+	INNER JOIN tblPATStockClassification PC
+		ON PC.intStockId = CS.intStockId
+	LEFT OUTER JOIN tblEMEntity CT
+		ON CT.intEntityId = CS.intTransferredFrom
+	LEFT OUTER JOIN tblAPBill APB
+		ON APB.intBillId = CS.intBillId
+	LEFT OUTER JOIN tblARInvoice ARI
+		ON ARI.intInvoiceId = CS.intInvoiceId
+	LEFT OUTER JOIN (SELECT A.strPaymentInfo, B.intBillId, A.dtmDatePaid, B.dblPayment FROM tblAPPayment A INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId) APPAY
+		ON APPAY.intBillId = CS.intBillId
+	LEFT OUTER JOIN (SELECT A.strPaymentInfo, B.intInvoiceId, A.dtmDatePaid, B.dblPayment FROM tblARPayment A INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId) ARPAY
+		ON ARPAY.intInvoiceId = CS.intInvoiceId

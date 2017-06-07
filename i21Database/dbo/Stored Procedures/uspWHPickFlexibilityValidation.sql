@@ -230,7 +230,7 @@ BEGIN TRY
 
 		SELECT @strUserName = strUserName
 		FROM tblSMUserSecurity
-		WHERE intEntityUserSecurityId = @intUserId
+		WHERE [intEntityId] = @intUserId
 
 		--EXECUTE [dbo].[GetErrorMessage] 900209, NULL, @strUserName, @strErrMsg OUTPUT    
 		RAISERROR ('The scanned container is already sanitized. Please select a pre-sanitized container.', 16, 1)

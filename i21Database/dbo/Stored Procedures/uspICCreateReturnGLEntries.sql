@@ -75,6 +75,7 @@ FROM	(
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemId AS INT 
+DECLARE @strLocationName AS NVARCHAR(50)
 
 -- Check for missing Inventory Account Id
 BEGIN 
@@ -85,10 +86,20 @@ BEGIN
 				ON Item.intItemId = ItemGLAccount.intItemId
 	WHERE	ItemGLAccount.intInventoryId IS NULL 
 
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intInventoryId IS NULL 			
+
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Inventory;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Inventory;
 		RETURN -1;
 	END 
 END 
@@ -109,11 +120,21 @@ BEGIN
 				ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 			
 			AND ExemptedList.intTransactionTypeId IS NULL 
-			
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intContraInventoryId IS NULL 				
+
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_ContraInventory;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_ContraInventory;
 		RETURN -1;
 	END 
 END 
@@ -130,12 +151,22 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	dbo.tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
-	WHERE	ItemGLAccount.intCOGSId IS NULL 			
+	WHERE	ItemGLAccount.intCOGSId IS NULL
+	
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intCOGSId IS NULL 				 			
 			
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Cost_of_Goods;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Cost_of_Goods;
 		RETURN -1;
 	END 
 END 
@@ -162,11 +193,21 @@ BEGIN
 						AND t.intItemId = Item.intItemId
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
 			)
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intAutoNegativeId IS NULL 				 			
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Auto_Variance;
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Auto_Variance;
 		RETURN -1;
 	END 
 END 

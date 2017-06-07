@@ -197,7 +197,7 @@ BEGIN TRY
 			WHERE intManufacturingCellId = @intManufacturingCellId
 
 			RAISERROR (
-					'%s is not taken for the line %s. Please take the sample and then start the work order'
+					'%s has failed the quality test. Cannot proceed further.'
 					,11
 					,1
 					,@strSampleTypeName
@@ -228,12 +228,88 @@ BEGIN TRY
 			WHERE intManufacturingCellId = @intManufacturingCellId
 
 			RAISERROR (
-					'%s is not taken for the line %s. Please take the sample and then start the work order'
+					'%s has failed the quality test. Cannot proceed further.'
 					,11
 					,1
 					,@strSampleTypeName
 					,@strCellName
 					)
+		END
+
+		SELECT @strWIPSampleMandatory = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 84
+
+		IF @strWIPSampleMandatory = 'True'
+		BEGIN
+		SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
+
+			SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+				,@dtmSampleCreated = S.dtmCreated
+			FROM tblQMSample S
+			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+			WHERE S.intProductTypeId = 12
+				AND S.intProductValueId = @intWorkOrderId
+				AND ST.intControlPointId = 11--WIP Sample
+			ORDER BY S.dtmLastModified DESC
+
+			if @intSampleStatusId is null
+			Select @intSampleStatusId=0
+
+
+			IF @intSampleStatusId<>3
+			BEGIN
+				Select @strSampleTypeName =strSampleTypeName 
+				from tblQMSampleType
+				Where intControlPointId = 11
+
+				SELECT @strCellName = strCellName
+				FROM tblMFManufacturingCell
+				WHERE intManufacturingCellId = @intManufacturingCellId
+
+				RAISERROR (
+						'%s is not taken for the line %s. Please take the sample and then start the work order'
+						,11
+						,1
+						,@strSampleTypeName
+						,@strCellName
+						)
+			END
+
+			SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
+
+			SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+				,@dtmSampleCreated = S.dtmCreated
+			FROM tblQMSample S
+			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+			WHERE S.intProductTypeId = 12
+				AND S.intProductValueId = @intWorkOrderId
+				AND ST.intControlPointId = 12 --WIP Sample
+			ORDER BY S.dtmLastModified DESC
+
+			if @intSampleStatusId is null
+			Select @intSampleStatusId=0
+
+
+			IF @intSampleStatusId<>3
+			BEGIN
+				Select @strSampleTypeName =strSampleTypeName 
+				from tblQMSampleType
+				Where intControlPointId = 12
+
+				SELECT @strCellName = strCellName
+				FROM tblMFManufacturingCell
+				WHERE intManufacturingCellId = @intManufacturingCellId
+
+				RAISERROR (
+						'%s is not taken for the line %s. Please take the sample and then start the work order'
+						,11
+						,1
+						,@strSampleTypeName,@strCellName
+						)
+			END
 		END
 	END
 

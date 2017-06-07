@@ -5,6 +5,7 @@ SELECT
 	,LDCL.intLoadId
 	,LDCL.intLoadDetailContainerLinkId
 	,LC.intLoadContainerId
+	,intContractTypeId = CASE WHEN L.intPurchaseSale IN (1,3) THEN 1 ELSE 2 END
 	,L.intPurchaseSale
 	,L.strLoadNumber
 	,LD.intPSubLocationId
@@ -108,6 +109,8 @@ SELECT
 	,L.ysnPosted
 	,SL.intStorageLocationId
 	,SL.strName AS strStorageLocationName
+	,PCLSL.strSubLocationName AS strPSubLocationName
+	,SCLSL.strSubLocationName AS strSSubLocationName
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
@@ -129,3 +132,5 @@ LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLoca
 LEFT JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = LW.intSubLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LD.intSSubLocationId

@@ -161,6 +161,9 @@ GO
 GO
 	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLMIGRATIONLOG')
 		EXEC('UPDATE tblMigrationLog SET strEvent = ''Migrate All Entity Roles - tblEMEntityToContact'', strDescription = ''Migrate All Entity Roles - tblEMEntityToContact'' WHERE strEvent = ''Migrate All Entity Roles - tblEntityToContact'' AND strDescription = ''Migrate All Entity Roles - tblEntityToContact''')
+	
+	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMMIGRATIONLOG')
+		EXEC('UPDATE tblSMMigrationLog SET strEvent = ''Migrate All Entity Roles - tblEMEntityToContact'', strDescription = ''Migrate All Entity Roles - tblEMEntityToContact'' WHERE strEvent = ''Migrate All Entity Roles - tblEntityToContact'' AND strDescription = ''Migrate All Entity Roles - tblEntityToContact''')
 GO
 	/* UPDATE EMPTY STRING TO NULL strLocationNumber */
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE UPPER(COLUMN_NAME) = 'STRLOCATIONNUMBER' and UPPER(TABLE_NAME) = 'TBLSMCOMPANYLOCATION')

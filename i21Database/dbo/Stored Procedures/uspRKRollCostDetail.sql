@@ -121,4 +121,3 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 		WHERE intSelectedInstrumentTypeId=1  AND intInstrumentTypeId=1 and fm.strFutureMonth=@strFutureMonth
 		and convert(datetime,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFromDate and @dtmToDate )t where intOpenContract >0
 		order by strFutureMonth
-

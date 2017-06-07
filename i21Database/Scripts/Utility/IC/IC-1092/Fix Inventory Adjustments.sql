@@ -56,9 +56,9 @@ BEGIN TRY
 		IF ISNULL(@ysnPosted, 0) = 0
 		BEGIN
 			-- Get the user security id
-			SELECT	@intUserId = [intEntityUserSecurityId]
+			SELECT	@intUserId = [intEntityId]
 			FROM	tblSMUserSecurity
-			WHERE	[intEntityUserSecurityId] = @intEntityId
+			WHERE	[intEntityId] = @intEntityId
 
 			-- 2. Get the batch id of the unposted record. 
 			BEGIN 

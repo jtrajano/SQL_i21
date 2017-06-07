@@ -108,6 +108,7 @@
     [dtmEndOfDayDate] DATETIME NULL, 
     [intEndOfDayShiftNo] INT NULL, 
 	[intTaxGroupId] int NULL,
+	[strDepartment] nvarchar(max),
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 

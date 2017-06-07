@@ -29,7 +29,7 @@ BEGIN
 				[intBillId]			=	A.intBillId
 			FROM tblAPBill A
 			INNER JOIN tblAPVendor B
-				ON A.intEntityVendorId = B.intEntityVendorId
+				ON A.intEntityVendorId = B.intEntityId
 			INNER JOIN (tblAPaptrxmst C2 INNER JOIN apeglmst C 
 						ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 						AND C2.aptrx_vnd_no = C.apegl_vnd_no)

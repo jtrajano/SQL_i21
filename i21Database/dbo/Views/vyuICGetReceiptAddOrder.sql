@@ -1,11 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuICGetReceiptAddOrder]
 AS
 
-SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intLineNo) AS INT)
+SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], intLineNo) AS INT)
 , * FROM (
 	SELECT 	
 		intLocationId
-		, intEntityVendorId
+		, [intEntityId]
 		, strVendorId
 		, strVendorName = strName
 		, strReceiptType = 'Purchase Order'

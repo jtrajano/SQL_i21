@@ -83,7 +83,7 @@ BEGIN
 		set @VendorId = null
 		set @EntityId  = null
 		select top 1 @id = id,@VendorId = sscon_vnd_no from @Contacts
-		SELECT TOP 1 @EntityId = intEntityVendorId FROM tblAPVendor where strVendorId = @VendorId;
+		SELECT TOP 1 @EntityId = intEntityId FROM tblAPVendor where strVendorId = @VendorId;
 		
 		if @EntityId is not null
 		BEGIN

@@ -65,19 +65,21 @@
 	[ysnDeleted] BIT NULL DEFAULT 0 ,
 	[ysnReadyForPayment] BIT NULL DEFAULT 0 ,
 	[ysnRecurring] BIT NULL DEFAULT 0 ,
+	[ysnExported] BIT NULL DEFAULT 0 ,
 	[ysnForApprovalSubmitted] BIT NOT NULL DEFAULT 0 ,
 	[dtmDateDeleted] DATETIME NULL,
+	[dtmExportedDate] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo_tblEMEntity_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEMEntity(intEntityId),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor([intEntityVendorId]),
+	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor([intEntityId]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMCompanyLocation_intShipToId] FOREIGN KEY (intShipToId) REFERENCES tblSMCompanyLocation(intCompanyLocationId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntityLocation_intShipFromId] FOREIGN KEY (intShipFromId) REFERENCES [tblEMEntityLocation](intEntityLocationId),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipViaId) REFERENCES tblSMShipVia(intEntityShipViaId),
+	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipViaId) REFERENCES tblSMShipVia([intEntityId]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMCurrency_intCurrencyID] FOREIGN KEY (intCurrencyId) REFERENCES tblSMCurrency(intCurrencyID),
 	--CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntityContact_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId)
@@ -88,8 +90,13 @@ CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
 GO
 CREATE NONCLUSTERED INDEX [IX_strBillId]
     ON [dbo].[tblAPBill]([strBillId] ASC)
-	INCLUDE (intBillId, intEntityVendorId);
+	INCLUDE (intBillId, intEntityVendorId, dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]);
+GO
+CREATE NONCLUSTERED INDEX [IX_intBillId]
+    ON [dbo].[tblAPBill]([intBillId] ASC)
+	INCLUDE (strBillId, intEntityVendorId, dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]);
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPBill]([intEntityVendorId] ASC)
-	INCLUDE ([intBillId], [strVendorOrderNumber], [intAccountId]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	INCLUDE ([intBillId], dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO

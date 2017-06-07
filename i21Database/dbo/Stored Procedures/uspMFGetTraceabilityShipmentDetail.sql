@@ -15,5 +15,5 @@ Select 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumb
 @strUOM AS strUOM,
 sh.dtmShipDate AS dtmTransactionDate,c.strName ,'S' AS strType
 from tblICInventoryShipment sh 
-Left Join vyuARCustomer c on sh.intEntityCustomerId=c.intEntityCustomerId
+Left Join vyuARCustomer c on sh.intEntityCustomerId=c.[intEntityId]
 Where sh.intInventoryShipmentId=@intInventoryShipmentId

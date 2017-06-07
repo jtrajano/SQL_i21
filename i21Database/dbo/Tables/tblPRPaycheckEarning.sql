@@ -3,7 +3,7 @@
 	[intPaycheckId] INT NOT NULL,
 	[intEmployeeEarningId] INT NULL,
 	[intTypeEarningId] INT NULL,
-	[strCalculationType] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
+	[strCalculationType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dblHours] [numeric](18, 6) NULL,
 	[dblAmount] [numeric](18, 6) NULL,
 	[dblTotal] [numeric](18, 6) NULL,

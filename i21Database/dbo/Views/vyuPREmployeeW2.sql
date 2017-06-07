@@ -50,8 +50,8 @@ SELECT
 	,[W2].strLocality			/* box 20 */
 FROM
 	tblPREmployeeW2 [W2]
-	INNER JOIN tblPREmployee [EMP] ON [W2].intEntityEmployeeId = [EMP].intEntityEmployeeId
-	INNER JOIN tblEMEntity [EM] ON [EM].intEntityId = [EMP].intEntityEmployeeId
+	INNER JOIN tblPREmployee [EMP] ON [W2].intEntityEmployeeId = [EMP].[intEntityId]
+	INNER JOIN tblEMEntity [EM] ON [EM].intEntityId = [EMP].[intEntityId]
 	INNER JOIN tblEMEntityLocation [EML] ON [EM].intEntityId = [EML].intEntityId AND [EML].ysnDefaultLocation = 1
 	OUTER APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) [COM]
 GO

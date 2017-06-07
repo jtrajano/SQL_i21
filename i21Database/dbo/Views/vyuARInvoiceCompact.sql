@@ -5,7 +5,7 @@ SELECT
 	,strInvoiceNumber				= ARI.strInvoiceNumber
 	,strCustomerName				= CE.strName
 	,strCustomerNumber				= ARC.strCustomerNumber
-	,intEntityCustomerId			= ARC.intEntityCustomerId
+	,intEntityCustomerId			= ARC.[intEntityId]
 	,strTransactionType				= ARI.strTransactionType
 	,strType						= ISNULL(ARI.strType, 'Standard')	
 	,dtmDate						= ARI.dtmDate
@@ -93,17 +93,17 @@ FROM
 INNER JOIN
 	(SELECT 
 		strCustomerNumber,
-		intEntityCustomerId,
+		[intEntityId],
 		intPaymentMethodId
 	 FROM 
-		dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
+		dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId] 
 LEFT OUTER JOIN
 	(SELECT
 		intEntityId,
 		intEntityContactId,
 		ysnDefaultContact
 	FROM 
-		dbo.[tblEMEntityToContact]) AS EC ON ARC.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
+		dbo.[tblEMEntityToContact]) AS EC ON ARC.[intEntityId] = EC.intEntityId AND EC.ysnDefaultContact = 1
 LEFT OUTER JOIN
 	(SELECT 
 		intEntityId,
@@ -115,7 +115,7 @@ INNER JOIN
 		intEntityId,
 		strName
 	 FROM
-		dbo.tblEMEntity) AS CE ON ARC.[intEntityCustomerId] = CE.intEntityId 
+		dbo.tblEMEntity) AS CE ON ARC.[intEntityId] = CE.intEntityId 
 LEFT OUTER JOIN
 	(SELECT 
 		intTermID,

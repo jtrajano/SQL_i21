@@ -20,7 +20,7 @@ Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on shi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.intEntityCustomerId
+		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.[intEntityId]
 		Where shl.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)
 
 	If @ysnParentLot=1
@@ -36,5 +36,5 @@ Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on shi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.intEntityCustomerId
+		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.[intEntityId]
 		Where l.intParentLotId=@intLotId

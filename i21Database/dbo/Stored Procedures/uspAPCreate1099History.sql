@@ -67,7 +67,7 @@ ELSE IF @form1099 = 2
 BEGIN
 	INSERT INTO #tmp1099History
 	SELECT
-		[intEntityVendorId]	=	A.intEntityVendorId, 
+		[intEntityVendorId]	=	A.[intEntityId], 
 		[intYear]			=	A.intYear, 
 		[int1099Form]		=	@form1099,
 		[ysnPrinted]		=	CAST(1 AS BIT), 
@@ -84,7 +84,7 @@ BEGIN
 	(
 		SELECT TOP 1 * FROM tblAP1099History B
 		WHERE A.intYear = B.intYear AND B.int1099Form = 2
-		AND B.intEntityVendorId = A.intEntityVendorId
+		AND B.intEntityVendorId = A.[intEntityId]
 		ORDER BY B.dtmDatePrinted DESC
 	) History
 	WHERE 
@@ -100,7 +100,7 @@ ELSE IF @form1099 = 3
 BEGIN
 	INSERT INTO #tmp1099History
 	SELECT
-		[intEntityVendorId]	=	A.intEntityVendorId, 
+		[intEntityVendorId]	=	A.[intEntityId], 
 		[intYear]			=	A.intYear, 
 		[int1099Form]		=	@form1099,
 		[ysnPrinted]		=	CAST(1 AS BIT), 
@@ -117,7 +117,7 @@ BEGIN
 	(
 		SELECT TOP 1 * FROM tblAP1099History B
 		WHERE A.intYear = B.intYear AND B.int1099Form = 3
-		AND B.intEntityVendorId = A.intEntityVendorId
+		AND B.intEntityVendorId = A.[intEntityId]
 		ORDER BY B.dtmDatePrinted DESC
 	) History
 	WHERE 

@@ -26,7 +26,7 @@ INNER JOIN (SELECT
 				,Cus.ysnActive
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
-				ON Ent.intEntityId = Cus.intEntityCustomerId) D
+				ON Ent.intEntityId = Cus.[intEntityId]) D
 	ON C.intCustomerNumber = D.intEntityId
 UNION ALL
 SELECT
@@ -56,5 +56,5 @@ INNER JOIN (SELECT
 				,Cus.ysnActive
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
-				ON Ent.intEntityId = Cus.intEntityCustomerId) E
+				ON Ent.intEntityId = Cus.[intEntityId]) E
 	ON D.intCustomerNumber = E.intEntityId

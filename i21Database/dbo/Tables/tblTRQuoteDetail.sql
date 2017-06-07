@@ -22,10 +22,10 @@
 	CONSTRAINT [PK_tblTRQuoteDetail] PRIMARY KEY ([intQuoteDetailId]),	
 	CONSTRAINT [FK_tblTRQuoteDetail_tblTRQuoteHeader_intQuoteHeaderId] FOREIGN KEY ([intQuoteHeaderId]) REFERENCES [dbo].[tblTRQuoteHeader] ([intQuoteHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRQuoteDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
-	CONSTRAINT [FK_tblTRQuoteDetail_tblAPVendor_intTerminalId] FOREIGN KEY ([intTerminalId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]),
+	CONSTRAINT [FK_tblTRQuoteDetail_tblAPVendor_intTerminalId] FOREIGN KEY ([intTerminalId]) REFERENCES [dbo].[tblAPVendor] (intEntityId),
     CONSTRAINT [FK_tblTRQuoteDetail_tblTRSupplyPoint_intSupplyPointId] FOREIGN KEY ([intSupplyPointId]) REFERENCES [dbo].[tblTRSupplyPoint] ([intSupplyPointId]),
 	CONSTRAINT [FK_tblTRQuoteDetail_tblEMEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblTRQuoteDetail_tblARCustomerSpecialPrice_intSpecialPriceId] FOREIGN KEY ([intSpecialPriceId]) REFERENCES [dbo].[tblARCustomerSpecialPrice] ([intSpecialPriceId]), 
     CONSTRAINT [FK_tblTRQuoteDetail_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]), 
-    CONSTRAINT [FK_tblTRQuoteDetail_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId])
+    CONSTRAINT [FK_tblTRQuoteDetail_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia](intEntityId)
 )

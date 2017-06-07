@@ -19,5 +19,5 @@ SELECT Detail.intBulkPlantFreightId
 FROM tblTRBulkPlantFreight Detail
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Detail.intCompanyLocationId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Detail.intCategoryId
-LEFT JOIN vyuEMSearchShipVia ShipVia ON ShipVia.intEntityShipViaId = Detail.intShipViaId
+LEFT JOIN vyuEMSearchShipVia ShipVia ON ShipVia.intEntityId = Detail.intShipViaId
 LEFT JOIN tblEMEntityTariffType Tariff ON Tariff.intEntityTariffTypeId = Detail.intEntityTariffTypeId

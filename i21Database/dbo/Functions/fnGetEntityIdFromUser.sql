@@ -8,8 +8,8 @@ BEGIN
 
 	DECLARE @EntityId INT
 	
-	SELECT TOP 1 @EntityId = [intEntityUserSecurityId] FROM tblSMUserSecurity
-	WHERE [intEntityUserSecurityId] = @intUserSecurityId
+	SELECT TOP 1 @EntityId = [intEntityId] FROM tblSMUserSecurity
+	WHERE [intEntityId] = @intUserSecurityId
 
 	RETURN @EntityId
 	

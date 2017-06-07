@@ -151,7 +151,7 @@ BEGIN
 		SELECT @intAccountId = CFAcc.intAccountId
 		FROM tblARCustomer as ARCus
 		INNER JOIN tblCFAccount as CFAcc
-		ON ARCus.intEntityCustomerId = CFAcc.intCustomerId
+		ON ARCus.[intEntityId] = CFAcc.intCustomerId
 		WHERE strCustomerNumber = @strAccountId
 		IF (@intAccountId = 0)
 		BEGIN

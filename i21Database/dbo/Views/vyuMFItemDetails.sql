@@ -56,7 +56,7 @@ SELECT I.strItemNo
 	,ISNULL(UM.strUnitMeasure, UM1.strUnitMeasure) AS strUOM
 	,C.strCategoryCode
 	,E.strName AS strItemOwner
-	,AC.intEntityCustomerId AS intItemOwnerId
+	,AC.[intEntityId] AS intItemOwnerId
 	,CONVERT(NVARCHAR, 1) AS strAutoManual
 FROM tblICItem I
 JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId --AND ysnWarehouseTracked = 1
@@ -64,8 +64,8 @@ LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = I.intWeightUOMId
 LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 LEFT JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItemOwner IO ON IO.intItemId = I.intItemId
-LEFT JOIN tblARCustomer AC ON AC.intEntityCustomerId = IO.intOwnerId
-LEFT JOIN tblEMEntity E ON E.intEntityId = AC.intEntityCustomerId
+LEFT JOIN tblARCustomer AC ON AC.[intEntityId] = IO.intOwnerId
+LEFT JOIN tblEMEntity E ON E.intEntityId = AC.[intEntityId]
 WHERE IU.ysnStockUnit = 1
 
 UNION ALL
@@ -134,7 +134,7 @@ SELECT DISTINCT I.strItemNo
 	,ISNULL(U.strUnitMeasure, UM1.strUnitMeasure) AS strUOM
 	,C.strCategoryCode
 	,E.strName AS strItemOwner
-	,AC.intEntityCustomerId AS intItemOwnerId
+	,AC.[intEntityId] AS intItemOwnerId
 	,CONVERT(NVARCHAR, 2) AS strAutoManual
 FROM dbo.tblMFRecipe R
 JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
@@ -148,7 +148,7 @@ JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId --AND ysnWarehouseTracked = 1
 LEFT JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItemOwner IO ON IO.intItemId = I.intItemId
-LEFT JOIN tblARCustomer AC ON AC.intEntityCustomerId = IO.intOwnerId
-LEFT JOIN tblEMEntity E ON E.intEntityId = AC.intEntityCustomerId
+LEFT JOIN tblARCustomer AC ON AC.[intEntityId] = IO.intOwnerId
+LEFT JOIN tblEMEntity E ON E.intEntityId = AC.[intEntityId]
 LEFT JOIN tblICItemUOM IU1 ON IU1.intItemId = SI.intSubstituteItemId
 	AND IU1.intUnitMeasureId = IU.intUnitMeasureId

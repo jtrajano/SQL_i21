@@ -154,23 +154,23 @@ BEGIN
 			,strCustomerCity = E.strCity
 			,strCustomerState = E.strState
 			,strCustomerZip = E.strZipCode
-			,intEntityCustomerId = B.intEntityCustomerId
+			,intEntityCustomerId = B.intEntityId
 			,dblBudget = B.dblMonthlyBudget
 			,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
 			,blbLetterBody = H.blbMessage 
 			,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
-			,intDeliveryTermId = D.intTermsId
+			,intDeliveryTermId = B.intTermsId
 		FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, tblARCustomer B
 		INNER JOIN tblEMEntity C
-			ON B.intEntityCustomerId = C.intEntityId
+			ON B.intEntityId = C.intEntityId
 		INNER JOIN tblTMCustomer F
 			ON C.intEntityId = F.intCustomerNumber
 		INNER JOIN tblTMSite G
 			ON F.intCustomerID = G.intCustomerID
 		INNER JOIN tblARCustomer D
-			ON C.intEntityId = D.intEntityCustomerId
+			ON C.intEntityId = D.intEntityId
 		INNER JOIN tblEMEntityLocation E
-			ON D.intEntityCustomerId = E.intEntityId
+			ON D.intEntityId = E.intEntityId
 				AND ysnDefaultLocation = 1
 		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') H
 		' + @strWhereClause

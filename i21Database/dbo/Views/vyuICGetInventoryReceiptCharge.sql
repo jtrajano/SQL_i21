@@ -37,7 +37,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ReceiptCharge.intChargeId
-	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = ReceiptCharge.intEntityVendorId
+	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = ReceiptCharge.intEntityVendorId
 	LEFT JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ReceiptCharge.intContractId	
 	LEFT JOIN tblSMTaxGroup SMTaxGroup ON SMTaxGroup.intTaxGroupId = ReceiptCharge.intTaxGroupId
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId

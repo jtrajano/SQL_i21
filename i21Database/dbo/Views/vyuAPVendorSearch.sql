@@ -2,8 +2,8 @@
 	AS 
 
 SELECT 
-	a.intEntityVendorId,
-	b.intEntityId,
+	a.[intEntityId],
+	--b.intEntityId,
 	isnull(a.strVendorAccountNum,'') strVendorAccountNum,
 	isnull(i.strPaymentMethod, '') strPaymentMethod,
 	isnull(g.strTerm, '') strTerm,
@@ -57,7 +57,7 @@ SELECT
 	---
 	FROM tblAPVendor a
 	join tblEMEntity b
-		on b.intEntityId = a.intEntityVendorId
+		on b.intEntityId = a.[intEntityId]
 	join tblEMEntityType etype
 		on etype.intEntityId = b.intEntityId and strType = 'Vendor'
 	join [tblEMEntityToContact] c
@@ -66,7 +66,7 @@ SELECT
 	join tblEMEntity d
 		on c.intEntityContactId = d.intEntityId
 	join [tblEMEntityLocation] e
-		on e.intEntityId = a.intEntityVendorId
+		on e.intEntityId = a.[intEntityId]
 			and e.ysnDefaultLocation = 1
 	left join tblSMApprovalList f
 		on f.intApprovalListId = a.intApprovalListId
@@ -82,7 +82,7 @@ SELECT
 	left join tblSMCurrency ab
 		on ab.intCurrencyID = a.intCurrencyId
 	left join tblSMShipVia ac
-		on ac.intEntityShipViaId = e.intShipViaId
+		on ac.[intEntityId] = e.intShipViaId
 	left join tblEMEntityLocation ad
 		on ad.intEntityLocationId = a.intBillToId
 	left join tblEMEntityLocation ae

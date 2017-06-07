@@ -1,6 +1,6 @@
 ﻿--tblGRDiscountCalculationOption
 GO
-IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDisplayField = 'Net Weight')
+IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDiscountCalculationOption = 'Net Weight')
 BEGIN
 	INSERT INTO tblGRDiscountCalculationOption
 	SELECT 1,'Net Weight',1	
@@ -8,7 +8,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDisplayField = 'Wet Weight')
+IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDiscountCalculationOption = 'Wet Weight')
 BEGIN
 	INSERT INTO tblGRDiscountCalculationOption
 	SELECT 2,'Wet Weight',1	
@@ -16,7 +16,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDisplayField = 'Gross Weight')
+IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDiscountCalculationOption = 'Gross Weight')
 BEGIN
 	INSERT INTO tblGRDiscountCalculationOption
 	SELECT 3,'Gross Weight',1	
@@ -25,7 +25,7 @@ GO
 
 --tblGRShrinkCalculationOption
 GO
-IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Net Weight')
+IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strShrinkCalculationOption = 'Net Weight')
 BEGIN
 	INSERT INTO tblGRShrinkCalculationOption
 	SELECT 1,'Net Weight',1	
@@ -33,18 +33,18 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Wet Weight')
+IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strShrinkCalculationOption = 'Wet Weight')
 BEGIN
 	INSERT INTO tblGRShrinkCalculationOption
 	SELECT 2,'Wet Weight',1	
 END
 GO
-IF EXISTS(SELECT 1 FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink')
+IF EXISTS(SELECT 1 FROM tblGRShrinkCalculationOption WHERE strShrinkCalculationOption = 'Price Shrink')
 BEGIN
-	UPDATE tblGRShrinkCalculationOption SET strDisplayField = 'Gross Weight' WHERE strDisplayField = 'Price Shrink'	
+	UPDATE tblGRShrinkCalculationOption SET strShrinkCalculationOption = 'Gross Weight' WHERE strShrinkCalculationOption = 'Price Shrink'	
 END
 GO
-IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Gross Weight')
+IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strShrinkCalculationOption = 'Gross Weight')
 BEGIN
 	INSERT INTO tblGRShrinkCalculationOption
 	SELECT 3,'Gross Weight',1	

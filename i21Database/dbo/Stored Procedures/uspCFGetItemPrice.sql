@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
+﻿
+
+
+CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
 
  @CFItemId				INT    
 ,@CFCustomerId			INT     

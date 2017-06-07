@@ -54,7 +54,7 @@ FROM
 					,DATEPART(QQ, PC.dtmPayDate) intQuarter 
 					FROM tblPRPaycheck PC
 			INNER JOIN vyuPRPaycheckYTD PCYTD ON PC.intPaycheckId = PCYTD.intPaycheckId) tblPRPaycheck
-      ON tblPREmployee.intEntityEmployeeId = tblPRPaycheck.intEntityEmployeeId)
+      ON tblPREmployee.[intEntityId] = tblPRPaycheck.intEntityEmployeeId)
 	INNER JOIN vyuPRPaycheckTax ON tblPRPaycheck.intPaycheckId = vyuPRPaycheckTax.intPaycheckId
 								AND tblPRPaycheck.intYear = YEAR(vyuPRPaycheckTax.dtmPayDate)
 								AND tblPRPaycheck.intQuarter = DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate)

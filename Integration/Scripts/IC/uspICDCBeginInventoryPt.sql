@@ -40,8 +40,11 @@ SET @adjdt = ISNULL(GETDATE(),@adjdt)
 
 -- Create the Adjustment header and detail record. 
 BEGIN 
+	DECLARE @intLocationId AS INT 
+	SELECT TOP 1 @intLocationId = intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc
+
 	--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
-	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
+	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT, @intLocationId
 
 	select @strAvgLast = ptctl_sa_lst_or_avg_cost from ptctlmst where ptctl_key = 1
 
@@ -112,8 +115,6 @@ BEGIN
 				, 1
 			)
 	END
-	
-
 
 	SELECT @intAdjustmentNo = @@IDENTITY
 
@@ -206,7 +207,6 @@ END
 -- Rebuild the G/L Summary for that day. 
 BEGIN 
 	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
-
 	INSERT INTO tblGLSummary(
 		intCompanyId
 		,intAccountId

@@ -46,15 +46,33 @@ SELECT	Query.intItemId
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
-					intItemId, intItemLocationId, intTransactionTypeId
-			FROM	dbo.tblICInventoryTransaction t 
-			WHERE	t.strBatchId = @strBatchId
-					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+					intItemId
+					, intItemLocationId 
+					, intTransactionTypeId
+			FROM	(
+				SELECT	DISTINCT 
+						intItemId
+						, intItemLocationId 
+						, intTransactionTypeId
+				FROM	dbo.tblICInventoryTransaction t 
+				WHERE	t.strBatchId = @strBatchId
+						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+				UNION ALL 
+				SELECT	DISTINCT 
+						intItemId
+						, intInTransitSourceLocationId 
+						, intTransactionTypeId
+				FROM	dbo.tblICInventoryTransaction t 
+				WHERE	t.strBatchId = @strBatchId
+						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+						AND t.intInTransitSourceLocationId IS NOT NULL 
+			) InnerQuery
 		) Query
 
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemId AS INT 
+DECLARE @strLocationName AS NVARCHAR(50)
 
 -- Check for missing Inventory Account Id
 BEGIN 
@@ -65,10 +83,20 @@ BEGIN
 				ON Item.intItemId = ItemGLAccount.intItemId
 	WHERE	ItemGLAccount.intInventoryId IS NULL 
 
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intInventoryId IS NULL 
+
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Inventory;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Inventory;
 		RETURN -1;
 	END 
 END 
@@ -89,11 +117,21 @@ BEGIN
 				ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 			
 			AND ExemptedList.intTransactionTypeId IS NULL 
-			
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intContraInventoryId IS NULL 			
+
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_ContraInventory;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_ContraInventory;
 		RETURN -1;
 	END 
 END 
@@ -120,11 +158,21 @@ BEGIN
 						AND t.intItemId = Item.intItemId
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
 			)
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intAutoNegativeId IS NULL 			
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Auto_Variance;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Auto_Variance;
 		RETURN -1;
 	END 
 END 
@@ -180,6 +228,7 @@ WITH ForGLEntries_CTE (
 	dtmDate
 	,intItemId
 	,intItemLocationId
+	,intInTransitSourceLocationId
 	,intTransactionId
 	,strTransactionId
 	,dblQty
@@ -203,7 +252,8 @@ AS
 (
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,t.intItemLocationId 
+			,t.intInTransitSourceLocationId
 			,t.intTransactionId
 			,t.strTransactionId
 			,t.dblQty
@@ -220,7 +270,7 @@ AS
 			,t.dblForexRate	
 			,i.strItemNo
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
-			,dblLineTotal = CASE WHEN t.dblQty < 0 THEN -ri.dblLineTotal ELSE ri.dblLineTotal END 
+			,dblLineTotal = t.dblQty * t.dblCost
 			,dblAddOnCostFromOtherCharge = 
 				CASE 
 					WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
@@ -308,24 +358,43 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		--CROSS APPLY dbo.fnGetDebit(
+		--	ISNULL(dblLineTotal, 0)
+		--) DebitForeign
+		--CROSS APPLY dbo.fnGetCredit(
+		--	ISNULL(dblLineTotal, 0) 			
+		--) CreditForeign
+		--CROSS APPLY dbo.fnGetDebitFunctional(
+		--	ISNULL(dblLineTotal, 0)	
+		--	,ForGLEntries_CTE.intCurrencyId
+		--	,@intFunctionalCurrencyId
+		--	,ForGLEntries_CTE.dblForexRate
+		--) Debit
+		--CROSS APPLY dbo.fnGetCreditFunctional(
+		--	ISNULL(dblLineTotal, 0) 			
+		--	,ForGLEntries_CTE.intCurrencyId
+		--	,@intFunctionalCurrencyId
+		--	,ForGLEntries_CTE.dblForexRate
+		--) Credit
+
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)
-		) DebitForeign
+		) Debit
 		CROSS APPLY dbo.fnGetCredit(
 			ISNULL(dblLineTotal, 0) 			
-		) CreditForeign
-		CROSS APPLY dbo.fnGetDebitFunctional(
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
 			ISNULL(dblLineTotal, 0)	
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) Debit
-		CROSS APPLY dbo.fnGetCreditFunctional(
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
 			ISNULL(dblLineTotal, 0) 			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) Credit
+		) CreditForeign 
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
@@ -372,28 +441,47 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ISNULL(ForGLEntries_CTE.intInTransitSourceLocationId, ForGLEntries_CTE.intItemLocationId) = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+		--CROSS APPLY dbo.fnGetDebit(
+		--	ISNULL(dblLineTotal, 0)			
+		--) DebitForeign
+		--CROSS APPLY dbo.fnGetCredit(
+		--	ISNULL(dblLineTotal, 0) 			
+		--) CreditForeign
+		--CROSS APPLY dbo.fnGetDebitFunctional(
+		--	ISNULL(dblLineTotal, 0)			
+		--	,ForGLEntries_CTE.intCurrencyId
+		--	,@intFunctionalCurrencyId
+		--	,ForGLEntries_CTE.dblForexRate
+		--) Debit
+		--CROSS APPLY dbo.fnGetCreditFunctional(
+		--	ISNULL(dblLineTotal, 0) 			
+		--	,ForGLEntries_CTE.intCurrencyId
+		--	,@intFunctionalCurrencyId
+		--	,ForGLEntries_CTE.dblForexRate
+		--) Credit
+
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)			
-		) DebitForeign
+		) Debit
 		CROSS APPLY dbo.fnGetCredit(
 			ISNULL(dblLineTotal, 0) 			
-		) CreditForeign
-		CROSS APPLY dbo.fnGetDebitFunctional(
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
 			ISNULL(dblLineTotal, 0)			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) Debit
-		CROSS APPLY dbo.fnGetCreditFunctional(
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
 			ISNULL(dblLineTotal, 0) 			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) Credit
+		) CreditForeign
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (

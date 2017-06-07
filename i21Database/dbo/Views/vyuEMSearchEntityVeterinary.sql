@@ -18,7 +18,7 @@
         join vyuEMEntityType b
             on b.intEntityId = a.intEntityId and b.Veterinary = 1
         join tblVTVeterinary c
-            on c.intEntityVeterinaryId= a.intEntityId
+            on c.[intEntityId]= a.intEntityId
         left join [tblEMEntityLocation] e  
             on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
         left join [tblEMEntityToContact] f  

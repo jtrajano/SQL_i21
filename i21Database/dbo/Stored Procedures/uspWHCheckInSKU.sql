@@ -68,7 +68,7 @@ BEGIN TRY
 	SET @strErrMsg = ''
 	SET @ysnValidateSKU=0  
 	
-	SELECT @intUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @intUserId = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strUserName
 	
 	IF EXISTS (
 			SELECT m.intItemId

@@ -2,7 +2,6 @@
 	@intRefundId INT = NULL,
 	@ysnPosted BIT = NULL,
 	@intUserId INT = NULL,
-	@intAPClearingId INT = NULL,
 	@intFiscalYearId INT = NULL,
 	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
@@ -118,7 +117,7 @@ DECLARE @intAdjustmentId INT
 IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId, @batchId)
+	SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @batchId)
 
 ----------------------------------------------------------------------------------
 

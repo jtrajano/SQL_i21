@@ -40,8 +40,11 @@ SET @adjdt = ISNULL(GETDATE(),@adjdt)
 
 -- Create the Adjustment header and detail record. 
 BEGIN 
+	DECLARE @intLocationId AS INT 
+	SELECT TOP 1 @intLocationId = intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc
+
 	--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
-	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
+	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT, @intLocationId
 
 	select @strAvgLast = agctl_sa_cost_ind from agctlmst where agctl_key = 1
 
@@ -112,8 +115,6 @@ BEGIN
 				, 1
 			)
 	END
-	
-
 
 	SELECT @intAdjustmentNo = @@IDENTITY
 

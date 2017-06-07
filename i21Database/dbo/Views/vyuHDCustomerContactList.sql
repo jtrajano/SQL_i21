@@ -10,7 +10,7 @@
 			  ,el.strLocationName
 			  ,el.strTimezone
 			  ,intContactId = ec.[intEntityId]
-			  ,intCustomerId = c.[intEntityCustomerId]
+			  ,intCustomerId = c.[intEntityId]
 			  ,ysnActiveContact = ec.ysnActive
 			  ,strMobile = ''
 			  ,intConcurrencyId = 1
@@ -24,8 +24,8 @@
 			  ,strComapny = null
 			from
 			  tblARCustomer c
-			  inner join tblEMEntity e on e.intEntityId = c.[intEntityCustomerId]
-			  inner join tblEMEntityToContact etc on etc.intEntityId = c.intEntityCustomerId
+			  inner join tblEMEntity e on e.intEntityId = c.[intEntityId]
+			  inner join tblEMEntityToContact etc on etc.intEntityId = c.[intEntityId]
 			  inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 			  left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
 			  inner join tblEMEntityToContact etcc on etcc.intEntityContactId = ec.intEntityId

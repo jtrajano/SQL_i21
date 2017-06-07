@@ -182,7 +182,7 @@ BEGIN
 			LEFT JOIN tblEMEntity B
 				ON A.intEntityCustomerId = B.intEntityId
 			INNER JOIN tblARCustomer C
-				ON B.intEntityId = C.intEntityCustomerId
+				ON B.intEntityId = C.intEntityId
 		')
 	END
 END

@@ -7,7 +7,7 @@ BEGIN
 DECLARE @intUserId AS INT 
 
 SELECT TOP 1 
-		@intUserId = [intEntityUserSecurityId]
+		@intUserId = [intEntityId]
 FROM	tblSMUserSecurity
 WHERE	strUserName = LTRIM(RTRIM(@user_id)) 
 

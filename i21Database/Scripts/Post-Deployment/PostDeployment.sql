@@ -41,7 +41,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\21_CommentMigration.sql
 :r .\SM\DefaultData\22_TypeValue.sql
 :r .\SM\DefaultData\23_ApproverConfigurationApprovalFor.sql
-:r .\SM\DefaultData\25_DocumentSource.sql
 :r .\SM\DefaultData\25_ApprovalHistory.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
@@ -132,7 +131,7 @@ print 'BEGIN POST DEPLOYMENT'
 --:r "..\..\..\Integration\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r ".\TM\2_DataTransferAndCorrection.sql" 
---:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateLeaseSearchView.sql"
@@ -155,6 +154,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1c_AccountGroup.sql
 :r .\GL\DefaultData\1d_RemoveDuplicateCOGSales_AccountGroup.sql
 :r .\GL\DefaultData\1e_AccountCategory.sql
+:r .\GL\DefaultData\1e_AccountCategoryMaintenance.sql
 :r .\GL\DefaultData\1f_AccountTemplate.sql
 :r .\GL\DefaultData\1g_AccountSegmentTemplate.sql
 :r .\GL\DefaultData\1h_AccountRange.sql
@@ -180,11 +180,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\2_DataImportStatus.sql
 :r .\CM\3_PopulateSourceSystemData.sql
 :r .\CM\4_DataFix.sql
-:r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPayment.sql
-:r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPaymentOverflow.sql
-:r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportCMChecks.sql
-:r .\CM\Reports\CheckVoucherMiddle.sql
-:r .\CM\Reports\CheckVoucherMiddleOverflow.sql
 
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql
@@ -216,9 +211,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
-:r .\AR\DefaultData\28_UpdateBaseAmounts.sql
-:r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
-:r .\AR\DefaultData\30_FixAmountsForCashTransaction.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -244,22 +236,16 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\MigrateVouchersForApproval.sql
 :r .\AP\MigratePOForApprovals.sql
 :r .\AP\UpdateVoucherDetail1099.sql
-:r .\AP\UpdateAmountSign.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
-:r .\IC\02_MaterialNMFC.sql 
 :r .\IC\03_DefaultData.sql 
 :r .\IC\04_CostingMethods.sql 
 :r .\IC\05_LotStatus.sql
 :r .\IC\07_Status.sql
 :r .\IC\08_InventoryTransactionPostingIntegration.sql
 :r .\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql
-:r .\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql
 :r .\IC\15_InventoryCostAdjustmentTypes.sql
-:r .\IC\16_Fix_Allow_Negative_Stock_Option.sql
-:r .\IC\17_Update_Blank_Description_tblICItem.sql
-:r .\IC\1620_to_1630.sql
 :r .\IC\18_FOBPointTypes.sql
 :r .\IC\19_M2MComputations.sql
 
@@ -274,8 +260,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
-:R .\CT\2_DataMigration.sql
-:R .\CT\3_Miscellaneous.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -288,7 +272,6 @@ print 'BEGIN POST DEPLOYMENT'
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql
-:R .\MF\3_Pattern.sql
 
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
@@ -355,6 +338,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\037_DefaultDataLocationPayee.sql
 :r .\EM\038_UpdateEncryptionUsed.sql
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
+--START KEEP FROM 1710-1720
+:r .\EM\DataMigration\1710_1720_CCSite_migration.sql
+--END KEEP FROM 1710-1720
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
@@ -371,21 +357,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\10_Checkout_Commander_Translog.sql
 
 -- Motor Fuel Tax
---:r .\TF\DefaultData\_TaxAuthority.sql
---:r .\TF\DefaultData\_Frequency.sql
---:r .\TF\DefaultData\_ReportingComponent.sql
---:r .\TF\DefaultData\_ProductCode.sql
---:r .\TF\DefaultData\_ConfigurationType.sql
---:r .\TF\DefaultData\_ConfigurationTemplate.sql
---:r .\TF\DefaultData\_OriginDestinationState.sql
---:r .\TF\DefaultData\_TaxCategory.sql
---:r .\TF\DefaultData\_ScheduleFieldTemplate.sql
---:r .\TF\DefaultData\_TaxReportSProc.sql
---:r .\TF\DefaultData\_TaxReportTemplate.sql
---:r .\TF\DefaultData\_TerminalControlNumber.sql
---:r .\TF\DefaultData\_IntegrationSystem.sql
---:r .\TF\DefaultData\_TaxCriteria.sql
---:r .\TF\DefaultData\_CompanyPreference.sql
 :r .\TF\DefaultData\00_Cleanup.sql
 :r .\TF\DefaultData\01_TaxAuthority.sql
 :r .\TF\DefaultData\IN_Indiana.sql

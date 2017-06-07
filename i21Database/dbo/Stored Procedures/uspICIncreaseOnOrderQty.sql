@@ -39,11 +39,21 @@ INTO	dbo.tblICItemStock
 WITH	(HOLDLOCK) 
 AS		ItemStock	
 USING (
-		SELECT	intItemId
-				,intItemLocationId
-				,Aggregrate_OnOrderQty = SUM(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0))					
-		FROM	@ItemsToIncreaseOnOrder
-		GROUP BY intItemId, intItemLocationId
+		SELECT	o.intItemId
+				,o.intItemLocationId
+				,Aggregrate_OnOrderQty = SUM(dbo.fnCalculateQtyBetweenUOM(o.intItemUOMId, StockUOM.intItemUOMId, o.dblQty)) 
+		FROM	@ItemsToIncreaseOnOrder o  
+				CROSS APPLY (
+					SELECT	TOP 1 
+							intItemUOMId
+							,dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = o.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM
+		GROUP BY 
+			o.intItemId
+			, o.intItemLocationId
 ) AS Source_Query  
 	ON ItemStock.intItemId = Source_Query.intItemId
 	AND ItemStock.intItemLocationId = Source_Query.intItemLocationId
@@ -91,6 +101,30 @@ USING (
 				,Aggregrate_OnOrderQty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseOnOrder
 		GROUP BY intItemId, intItemLocationId, intItemUOMId, intSubLocationId, intStorageLocationId
+		-- Convert the On Order Qty to the Stock UOM before adding it into tblICItemStockUOM
+		UNION ALL 
+		SELECT	o.intItemId
+				,o.intItemLocationId
+				,StockUOM.intItemUOMId 
+				,o.intSubLocationId
+				,o.intStorageLocationId
+				,Aggregrate_OnOrderQty = SUM(dbo.fnCalculateQtyBetweenUOM(o.intItemUOMId, StockUOM.intItemUOMId, o.dblQty))  
+		FROM	@ItemsToIncreaseOnOrder o
+				CROSS APPLY (
+					SELECT	TOP 1 
+							intItemUOMId
+							,dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = o.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM
+		WHERE	o.intItemUOMId <> StockUOM.intItemUOMId 
+		GROUP BY 
+			o.intItemId
+			, o.intItemLocationId
+			, StockUOM.intItemUOMId 
+			, o.intSubLocationId
+			, o.intStorageLocationId
 ) AS Source_Query  
 	ON ItemStockUOM.intItemId = Source_Query.intItemId
 	AND ItemStockUOM.intItemLocationId = Source_Query.intItemLocationId

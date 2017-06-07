@@ -48,7 +48,7 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 	
-	SELECT @intUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName --this is a hiccup
+	SELECT @intUserId = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strUserName --this is a hiccup
 
 	SELECT @dblWeightPerUnit = dblWeightPerQty, @intWeightPerUnitUOMId = iu.intUnitMeasureId
 	FROM tblICLot l 

@@ -122,7 +122,7 @@ SELECT
 										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
 									END
 		,intLocationId				= SC.intProcessingLocationId
-		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityVendorId = @intEntityId)
+		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
@@ -156,15 +156,15 @@ SELECT
 		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
 		,dblQty						= LI.dblQty
-		,dblCost					= LI.dblCost
+		,dblCost					= CASE
+										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(SC.intCommodityId,SC.intProcessingLocationId,SC.dtmTicketDateTime,2,LI.dblCost),0)
+										ELSE LI.dblCost
+									END
 		,dblExchangeRate			= 1 -- Need to check this
 		,intLotId					= NULL --No LOTS from scale
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
-		,ysnIsStorage				= CASE 
-										WHEN CNT.intPricingTypeId = 2 THEN 1
-										ELSE LI.ysnIsStorage
-									  END
+		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
@@ -1304,11 +1304,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 															END
 						,[intCostUOMId]						= ContractCost.intItemUOMId
 						,[intOtherChargeEntityVendorId]		= CASE 
-																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityId = RE.intShipViaId) = 'Vendor' THEN 
 																	RE.intEntityVendorId
-																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityId = RE.intShipViaId) = 'Internal' THEN 
 																	NULL
-																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityId = RE.intShipViaId) = 'Other' THEN 
 																	RE.intShipViaId
 															  END
 						,[dblAmount]						= CASE
@@ -1398,7 +1398,7 @@ IF (@total = 0)
 EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
 		,@OtherCharges
-		,@intEntityId;
+		,@intUserId;
 
 -- Update the Inventory Receipt Key to the Transaction Table
 UPDATE	SC

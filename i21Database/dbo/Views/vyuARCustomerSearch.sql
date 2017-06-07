@@ -2,7 +2,7 @@
 AS
 SELECT     
  Entity.intEntityId
-,Cus.[intEntityCustomerId]
+
 ,Entity.strName
 ,strCustomerNumber= case when Cus.strCustomerNumber = '' then Entity.strEntityNo else Cus.strCustomerNumber end 
 ,Con.strPhone
@@ -44,18 +44,19 @@ SELECT
 ,Cus.dblARBalance
 ,Cus.dtmLastActivityDate
 ,Cus.strStockStatus
-,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.intEntityCustomerId) = 1 then 1 else 0 end as bit)
+,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.[intEntityId]) = 1 then 1 else 0 end as bit)
 ,CusToCon.intEntityContactId
 ,Cus.ysnIncludeEntityName
-,Cus.strStatementFormat
+,strTerm 
 FROM tblEMEntity as Entity
-INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
-LEFT JOIN [tblEMEntityToContact] as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
+INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
+LEFT JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
 --LEFT JOIN tblEMEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
 LEFT JOIN tblEMEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]
-LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.intEntityCustomerId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
+LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.[intEntityId] = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId
 LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
-LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.intEntitySalespersonId
-LEFT JOIN tblEMEntity T on S.intEntitySalespersonId = T.intEntityId
+LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.[intEntityId]
+LEFT JOIN tblEMEntity T on S.[intEntityId] = T.intEntityId
 LEFT JOIN tblSMTaxGroup Tax ON Loc.intTaxGroupId = Tax.intTaxGroupId
+LEFT JOIN tblSMTerm Term on Cus.intTermsId = Term.intTermID

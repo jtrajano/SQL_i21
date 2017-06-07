@@ -2,7 +2,7 @@
 AS
 SELECT
 	 [intInventoryReceiptId]					=	ReceiptCharge.intInventoryReceiptId
-	,[intEntityVendorId]						=	Vendor.intEntityVendorId
+	,[intEntityVendorId]						=	Vendor.[intEntityId]
 	,[dtmDate]									=	Receipt.dtmReceiptDate
 	,[strReference]								=	Receipt.strVendorRefNo
 	,[strSourceNumber]							=	Receipt.strReceiptNumber
@@ -97,10 +97,9 @@ FROM
 
 	INNER JOIN (
 		tblAPVendor Vendor INNER JOIN tblEMEntity Entity
-			ON Vendor.intEntityVendorId = Entity.intEntityId
+			ON Vendor.[intEntityId] = Entity.intEntityId
 	) 
-		ON Vendor.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
-	
+		ON Vendor.[intEntityId] = ISNULL(ReceiptCharge.intEntityVendorId,  Receipt.intEntityVendorId) 
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Receipt.intLocationId	
@@ -144,7 +143,7 @@ WHERE	ReceiptCharge.ysnAccrue = 1
 UNION ALL 
 SELECT
 	 [intInventoryReceiptId]					=	ReceiptCharge.intInventoryReceiptId
-	,[intEntityVendorId]						=	Vendor.intEntityVendorId
+	,[intEntityVendorId]						=	Vendor.[intEntityId]
 	,[dtmDate]									=	Receipt.dtmReceiptDate
 	,[strReference]								=	Receipt.strVendorRefNo
 	,[strSourceNumber]							=	Receipt.strReceiptNumber
@@ -240,9 +239,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 		ON ReceiptCharge.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	INNER JOIN (
 		tblAPVendor Vendor INNER JOIN tblEMEntity Entity
-			ON Vendor.intEntityVendorId = Entity.intEntityId
+			ON Vendor.[intEntityId] = Entity.intEntityId
 	) 
-		ON Vendor.intEntityVendorId = Receipt.intEntityVendorId
+		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Receipt.intLocationId

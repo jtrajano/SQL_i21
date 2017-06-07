@@ -25,8 +25,7 @@ BEGIN TRY
 			@xmlDocumentId			INT,
 			@strPrefix              Nvarchar(100),
 			@intNumber				INT,
-			@strFormNumber			NVARCHAR(100),
-			@IsNewMode				BIT=0
+			@strFormNumber			NVARCHAR(100)
 						
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -80,26 +79,23 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strFormNumber'
 		
-	IF ISNULL(@intEntityId,0) >0 AND ISNULL(@intItemId,0) >0 AND ISNULL(@intStorageTypeId,0) >0 AND ISNULL(@intStorageScheduleId,0) >0
+	IF @intEntityId IS NULL
 	BEGIN
-		SET @IsNewMode=1
-		SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
-		SELECT @strStorageType=strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId=@intStorageTypeId
-		SELECT @strLicenseNumber=[strLicenseNumber] FROM [tblGRCompanyPreference]
-		--SELECT @strPrefix=[strPrefix],@intNumber=intNumber+1 FROM tblSMStartingNumber WHERE [strTransactionType] = N'Storage Statement FormNo'
-		--SET @strPrefix=NULL
-		SET @intNumber = 0
-	END
-	ELSE
-	BEGIN
-		
+	
 		SELECT @intEntityId=intEntityId,@intItemId=intItemId,@intStorageTypeId=intStorageTypeId,@intStorageScheduleId=intStorageScheduleId
 		FROM tblGRCustomerStorage Where intCustomerStorageId=(SELECT Top 1 intCustomerStorageId FROM tblGRStorageStatement WHERE strFormNumber=@strFormNumber)
 		SELECT Top 1 @strLicenseNumber=strLicenceNumber FROM tblGRStorageStatement WHERE strFormNumber=@strFormNumber
 		SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
 		SELECT @strStorageType=strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId=@intStorageTypeId
-		--SET @strPrefix=NULL
-		 SET @intNumber=1
+		SET @strPrefix=NULL
+		SET @intNumber=0
+	END
+	ELSE
+	BEGIN
+		SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
+		SELECT @strStorageType=strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId=@intStorageTypeId
+		SELECT @strLicenseNumber=[strLicenseNumber] FROM [tblGRCompanyPreference]
+		SELECT @strPrefix=[strPrefix],@intNumber=intNumber+1 FROM tblSMStartingNumber WHERE [strTransactionType]	= N'Storage Statement FormNo'
 	END
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
@@ -127,10 +123,10 @@ BEGIN TRY
 		@strItemNo AS strItemNo,			
 		@strStorageType AS strStorageType,			
 		@strLicenseNumber AS strLicenseNumber,			
-		CASE WHEN @IsNewMode=1 THEN @intEntityId ELSE 0 END AS intEntityId,
-		CASE WHEN @IsNewMode=1 THEN @intItemId ELSE 0 END  AS intItemId,
-		CASE WHEN @IsNewMode=1 THEN @intStorageTypeId ELSE 0 END AS intStorageTypeId,
-		CASE WHEN @IsNewMode=1 THEN @intStorageScheduleId ELSE 0 END  AS intStorageScheduleId,
+		@intEntityId AS intEntityId,
+		@intItemId AS intItemId,
+		@intStorageTypeId AS intStorageTypeId,
+		@intStorageScheduleId AS intStorageScheduleId,
 		@strFormNumber AS strFormNumber,
 		@strPrefix AS strPrefix,
 		@intNumber AS intNumber

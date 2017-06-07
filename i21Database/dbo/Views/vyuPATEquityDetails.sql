@@ -19,7 +19,7 @@ INNER JOIN tblEMEntity ENT
 INNER JOIN tblGLFiscalYear FY
 		ON FY.intFiscalYearId = CE.intFiscalYearId
 INNER JOIN tblARCustomer AR
-		ON AR.intEntityCustomerId = CE.intCustomerId
+		ON AR.[intEntityId] = CE.intCustomerId
 LEFT JOIN tblSMTaxCode TC
 		ON TC.intTaxCodeId = AR.intTaxCodeId
 		WHERE CE.dblEquity <> 0

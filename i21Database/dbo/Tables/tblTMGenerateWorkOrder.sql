@@ -13,7 +13,7 @@
     [strRouteIds] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strLocationIds] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblTMGenerateWorkOrder] PRIMARY KEY CLUSTERED ([intGenerateWorkOrderId] ASC),
-	CONSTRAINT [FK_tblTMGenerateWorkOrder_tblSMUserSecurity] FOREIGN KEY([intUserId]) REFERENCES [dbo].[tblSMUserSecurity] ([intEntityUserSecurityId])
+	CONSTRAINT [FK_tblTMGenerateWorkOrder_tblSMUserSecurity] FOREIGN KEY([intUserId]) REFERENCES [dbo].[tblSMUserSecurity] ([intEntityId])
 );
 
 

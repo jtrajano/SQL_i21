@@ -99,7 +99,7 @@ BEGIN
 			INNER JOIN tblEMEntity C
 				ON B.intCustomerNumber = C.intEntityId
 			INNER JOIN tblARCustomer D 
-				ON C.intEntityId = D.intEntityCustomerId
+				ON C.intEntityId = D.intEntityId
 			INNER JOIN tblTMDispatch E
 				ON A.intSiteID = E.intSiteID
 			INNER JOIN tblICItem F

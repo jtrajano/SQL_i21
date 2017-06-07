@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblPREmployee](
-	[intEntityEmployeeId]	[int] NOT NULL,
+	[intEntityId]	[int] NOT NULL,
 	[strEmployeeId] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strType] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[strFirstName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
@@ -39,13 +39,13 @@
 	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
 	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityEmployeeId]),
-    CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEntityEmployeeId]),
+	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
+    CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEntityId]),
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
-	CONSTRAINT [FK_tblPREmployee_tblEMEntity] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPREmployee_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId]),
-	CONSTRAINT [FK_tblPREmployee_tblSMuserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
+	CONSTRAINT [FK_tblPREmployee_tblSMuserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
 ) ON [PRIMARY]
 GO
 
@@ -322,7 +322,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intEntityEmployeeId'
+    @level2name = N'intEntityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Statutory Employee',

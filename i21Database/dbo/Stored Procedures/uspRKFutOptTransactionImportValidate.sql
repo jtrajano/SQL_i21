@@ -1,9 +1,8 @@
 ﻿CREATE PROC uspRKFutOptTransactionImportValidate
 AS
 BEGIN TRY
-DECLARE @tblRKFutOptTransactionHeaderId int 
-DECLARE @ErrMsg nvarchar(Max)
 
+DECLARE @ErrMsg nvarchar(Max)
 DECLARE @mRowNumber INT
 DECLARE @strName NVARCHAR(50)
 DECLARE @strAccountNumber NVARCHAR(50)

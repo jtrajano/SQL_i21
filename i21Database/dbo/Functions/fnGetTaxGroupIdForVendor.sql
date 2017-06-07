@@ -69,9 +69,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intTaxEntityVendorId] = @VendorId
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
@@ -93,9 +93,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intTaxEntityVendorId] = @VendorId
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
@@ -116,9 +116,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intTaxEntityVendorId] = @VendorId
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
@@ -138,9 +138,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
@@ -162,9 +162,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
@@ -185,9 +185,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
@@ -208,9 +208,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intEntityVendorLocationId],0) = 0
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
@@ -232,9 +232,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intTaxEntityVendorId] = @VendorId
 		AND ISNULL(ST.[intEntityVendorLocationId],0) = 0
@@ -254,9 +254,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
@@ -276,9 +276,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intItemId] = @ItemId
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
@@ -299,9 +299,9 @@ BEGIN
 		tblAPVendorSpecialTax ST
 	INNER JOIN
 		tblAPVendor V
-			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+			ON ST.[intEntityVendorId] = V.[intEntityId]
 	WHERE
-			V.[intEntityVendorId] = @VendorId
+			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intCategoryId] = @ItemCategoryId
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
@@ -336,9 +336,9 @@ BEGIN
 		tblAPVendor P
 	INNER JOIN
 		[tblEMEntityLocation] EL
-			ON P.[intEntityVendorId] = EL.[intEntityId] 
+			ON P.[intEntityId] = EL.[intEntityId] 
 	WHERE
-		P.[intEntityVendorId] = @VendorId
+		P.[intEntityId] = @VendorId
 		AND EL.[intEntityLocationId] = @VendorLocationId
 
 	IF ISNULL(@TaxGroupId,0) <> 0 AND (@FOB = 'origin' OR LEN(@FOB) < 1)

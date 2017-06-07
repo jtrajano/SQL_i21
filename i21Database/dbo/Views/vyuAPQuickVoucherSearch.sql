@@ -21,6 +21,6 @@ SELECT
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
-		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
-		ON A.[intEntityVendorId] = B.[intEntityVendorId]
+		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityId] = B1.intEntityId)
+		ON A.[intEntityVendorId] = B.[intEntityId]
 	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId

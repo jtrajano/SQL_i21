@@ -6,10 +6,10 @@ UPDATE
 	tblARInvoice
 SET
 	tblARInvoice.intEntitySalespersonId = (	SELECT TOP 1 intSalespersonId FROM tblARCustomer 
-											WHERE	tblARCustomer.intEntityCustomerId = tblARInvoice.intEntityCustomerId
-													AND tblARCustomer.intSalespersonId IN (SELECT DISTINCT intEntitySalespersonId FROM tblARSalesperson))
+											WHERE	tblARCustomer.[intEntityId] = tblARInvoice.intEntityCustomerId
+													AND tblARCustomer.intSalespersonId IN (SELECT DISTINCT [intEntityId] FROM tblARSalesperson))
 WHERE
-	tblARInvoice.intEntitySalespersonId NOT IN (SELECT DISTINCT intEntitySalespersonId FROM tblARSalesperson)
+	tblARInvoice.intEntitySalespersonId NOT IN (SELECT DISTINCT [intEntityId] FROM tblARSalesperson)
 
 GO
 print('/*******************  END Update Salesperson in tblARInvoice  *******************/')
@@ -22,10 +22,10 @@ UPDATE
 	tblSOSalesOrder
 SET
 	tblSOSalesOrder.intEntitySalespersonId = (	SELECT TOP 1 intSalespersonId FROM tblARCustomer 
-												WHERE	tblARCustomer.intEntityCustomerId = tblSOSalesOrder.intEntityCustomerId
-														AND tblARCustomer.intSalespersonId IN (SELECT DISTINCT intEntitySalespersonId FROM tblARSalesperson))
+												WHERE	tblARCustomer.[intEntityId] = tblSOSalesOrder.intEntityCustomerId
+														AND tblARCustomer.intSalespersonId IN (SELECT DISTINCT [intEntityId] FROM tblARSalesperson))
 WHERE
-	tblSOSalesOrder.intEntitySalespersonId NOT IN (SELECT DISTINCT intEntitySalespersonId FROM tblARSalesperson)
+	tblSOSalesOrder.intEntitySalespersonId NOT IN (SELECT DISTINCT [intEntityId] FROM tblARSalesperson)
 
 
 GO

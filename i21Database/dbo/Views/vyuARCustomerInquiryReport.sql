@@ -29,14 +29,14 @@ SELECT
 , dblThru					= 0.000000
 , dblPendingInvoice			= (SELECT ISNULL(SUM(CASE WHEN strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0))))
 , dblPendingPayment			= (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0)
-, dblCreditLimit			= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = CAR.intEntityCustomerId)
+, dblCreditLimit			= (SELECT dblCreditLimit FROM tblARCustomer WHERE [intEntityId] = CAR.intEntityCustomerId)
 , dblNextPaymentAmount		= ISNULL(CB.dblBudgetAmount, 0.000000)
 , dblAmountPastDue			= (SELECT ISNULL(SUM(dblBudgetAmount),0.000000) FROM tblARCustomerBudget WHERE intEntityCustomerId = CAR.intEntityCustomerId AND dtmBudgetDate < GETDATE())
 , intRemainingBudgetPeriods	= (SELECT ISNULL(COUNT(*), 0) FROM tblARCustomerBudget WHERE intEntityCustomerId = CAR.intEntityCustomerId AND dtmBudgetDate >= GETDATE())
 , strBudgetStatus			= CASE WHEN 1 = 1 THEN 'Past Due' ELSE 'Current' END
-, strTerm					= (SELECT TOP 1 strTerm FROM vyuARCustomer C INNER JOIN tblSMTerm T ON C.intTermsId = T.intTermID WHERE intEntityCustomerId = CAR.intEntityCustomerId)
+, strTerm					= (SELECT TOP 1 strTerm FROM vyuARCustomer C INNER JOIN tblSMTerm T ON C.intTermsId = T.intTermID WHERE [intEntityId] = CAR.intEntityCustomerId)
 , strContact				= (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
-									FROM vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1 WHERE C.intEntityCustomerId = CAR.intEntityCustomerId)
+									FROM vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.[intEntityId] = CC.[intEntityId] AND ysnDefaultContact = 1 WHERE C.[intEntityId] = CAR.intEntityCustomerId)
 , strCompanyName			= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 , strCompanyAddress			= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
 FROM vyuARCustomerAgingReport CAR

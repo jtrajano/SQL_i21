@@ -7,7 +7,7 @@ BEGIN
  BEGIN 
 	 SELECT cl.strLocationName FactoryLocation,  -- + ' - ' + ISNULL(clsl.strSubLocationName,'') FactoryLocation,  
 	  smus.strUserName UserName, 
-	  smus.intEntityUserSecurityId UserKey, 
+	  smus.[intEntityId] UserKey, 
 	  'Admin' UserGroupName,  
 	  cl.intCompanyLocationId FactoryKey,  
 	  cl.strLocationName FactoryName,  
@@ -36,7 +36,7 @@ BEGIN
  BEGIN
  	  SELECT cl.strLocationName FactoryLocation, -- + ' - ' + ISNULL(clsl.strSubLocationName,'') FactoryLocation,  
 	  smus.strUserName UserName,  
-  	  smus.intEntityUserSecurityId UserKey, 
+  	  smus.[intEntityId] UserKey, 
 	  'Admin' UserGroupName,  
 	  cl.intCompanyLocationId FactoryKey,  
 	  cl.strLocationName FactoryName,  

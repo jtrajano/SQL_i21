@@ -177,12 +177,12 @@ AS
 	JOIN	tblICItemContract				IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT
 	JOIN	tblSMCountry					CG	ON	CG.intCountryID				=	IC.intCountryId				LEFT
 	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
-	JOIN	tblSMShipVia					SV	ON	SV.[intEntityShipViaId]		=	CD.intShipViaId				LEFT
+	JOIN	tblSMShipVia					SV	ON	SV.[intEntityId]		=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
 	JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
 	JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId			=	CD.intRailGradeId			LEFT
 	JOIN	tblRKFutureMarket				FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
-	JOIN	tblAPVendor						VR	ON	VR.[intEntityVendorId]		=	CD.intBillTo				LEFT
+	JOIN	tblAPVendor						VR	ON	VR.[intEntityId]		=	CD.intBillTo				LEFT
 	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
 	JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
 	JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID			=	CU.intMainCurrencyId		LEFT

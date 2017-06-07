@@ -12,14 +12,14 @@ BEGIN
 			UPDATE A
 				SET A.strPONumber = C.aptrx_pur_ord_no
 			FROM tblAPBill A
-					INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
+					INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityId
 					INNER JOIN tblAPaptrxmst C ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C.aptrx_ivc_no
 											AND B.strVendorId COLLATE Latin1_General_CS_AS = C.aptrx_vnd_no
 
 			UPDATE A
 				SET A.strPONumber = C.apivc_pur_ord_no
 			FROM tblAPBill A
-					INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
+					INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityId
 					INNER JOIN apivcmst C ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C.apivc_ivc_no
 											AND B.strVendorId COLLATE Latin1_General_CS_AS = C.apivc_vnd_no
 

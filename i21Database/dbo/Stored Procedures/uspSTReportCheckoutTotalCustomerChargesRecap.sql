@@ -67,7 +67,7 @@ BEGIN TRY
     C.intShiftNo as ShiftNo,B.strCustomerNumber,A.strName, A.intInvoice,A.dblAmount,A.strComment ,A.strType,
     SUM(case when A.strType = 'F' then A.dblAmount  else 0 end) over() as TotalFinanceCharges,
 	SUM(case when A.strType <> 'F' then A.dblAmount else 0 end) over() as TotalRegularCharges	 
-	from tblSTCheckoutCustomerCharges A	JOIN tblARCustomer B ON B.intEntityCustomerId = A.intCustomerId  
+	from tblSTCheckoutCustomerCharges A	JOIN tblARCustomer B ON B.[intEntityId] = A.intCustomerId  
 	JOIN tblSTCheckoutHeader C ON C.intCheckoutId = A.intCheckoutId JOIN tblSTStore D ON C.intStoreId = D.intStoreId
 	where A.intCheckoutId = @intCheckoutId
 

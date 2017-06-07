@@ -54,8 +54,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intTaxGroupId]					=	A.[intTaxGroupId]					
 	FROM @voucherNonInvDetails A
 	CROSS APPLY tblAPBill B
-	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
-	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
+	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
+	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
 	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND B.intShipToId = C.intLocationId
 	LEFT JOIN vyuICGetItemAccount C2 ON C.intItemId = C2.intItemId AND C2.strAccountCategory = 'General'
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory

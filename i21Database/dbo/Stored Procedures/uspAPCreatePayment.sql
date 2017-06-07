@@ -63,7 +63,7 @@ BEGIN
 	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
 
 	SELECT 
-		TOP 1 @vendorId = C.[intEntityVendorId] 
+		TOP 1 @vendorId = C.[intEntityId] 
 		,@vendorWithhold = C.ysnWithholding
 		,@location = A.intShipToId
 		,@paymentMethodId = CASE WHEN @paymentMethodId IS NULL THEN C.intPaymentMethodId ELSE @paymentMethodId END
@@ -71,7 +71,7 @@ BEGIN
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
-			ON A.[intEntityVendorId] = C.[intEntityVendorId]
+			ON A.[intEntityVendorId] = C.[intEntityId]
 
 	--VALIDATION
 	--Make sure there is user to use
@@ -83,7 +83,7 @@ BEGIN
 
 	IF @location IS NULL
 	BEGIN
-		SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId)
+		SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId)
 		IF @location IS NULL
 		BEGIN
 			RAISERROR('Location setup is missing.', 16, 1);
@@ -166,7 +166,7 @@ BEGIN
 			,@withholdPercent = B.dblWithholdPercent
 		 FROM tblSMUserSecurity A 
 		INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
-				WHERE A.[intEntityUserSecurityId] = @userId
+				WHERE A.[intEntityId] = @userId
 		IF (@withHoldAccount IS NULL)
 		BEGIN
 			RAISERROR('This vendor enables withholding but there is no setup of withhold account.',16,1);
@@ -237,7 +237,7 @@ BEGIN
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
-		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
+		[dblAmountDue]	= (A.dblAmountDue - A.dblDiscount - A.dblPayment + A.dblInterest),
 		[dblPayment]	= CAST((CASE WHEN ISNULL(@paymentDetail,0) = 0 THEN A.dblAmountDue - A.dblDiscount ELSE @paymentDetail END) AS DECIMAL(18,2)),
 		[dblInterest]	= A.dblInterest, --TODO
 		[dblTotal]		= A.dblTotal

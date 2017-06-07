@@ -22,8 +22,8 @@
 			tblHDTicketHoursWorked hw
 			inner join tblHDTicket t on t.intTicketId = hw.intTicketId
 			left outer join tblARCustomer c on c.strCustomerNumber = t.strCustomerNumber
-			left outer join tblEMEntity e on e.intEntityId = c.[intEntityCustomerId]
+			left outer join tblEMEntity e on e.intEntityId = c.[intEntityId]
 			left outer join tblEMEntity ec on ec.intEntityId = t.intCustomerContactId
 			left outer join tblHDJobCode jc on jc.intJobCodeId = hw.intJobCodeId
-			left outer join tblSMUserSecurity us on us.[intEntityUserSecurityId] = hw.intAgentId
+			left outer join tblSMUserSecurity us on us.[intEntityId] = hw.intAgentId
 		where (case when hw.ysnBilled is null then 0 else hw.ysnBilled end) <> 1

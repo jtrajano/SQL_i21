@@ -1052,15 +1052,15 @@ INNER JOIN
 	tblARCustomer C 
 	INNER JOIN 
 		tblEMEntity E 
-			ON C.intEntityCustomerId = E.intEntityId
-	) ON SAR.intEntityCustomerId = C.intEntityCustomerId
+			ON C.intEntityId = E.intEntityId
+	) ON SAR.intEntityCustomerId = C.intEntityId
 LEFT JOIN 
 	(
 	tblARSalesperson SP 
 	INNER JOIN
 		tblEMEntity ESP 
-			ON SP.intEntitySalespersonId = ESP.intEntityId
-	) ON SAR.intEntitySalespersonId = SP.intEntitySalespersonId	
+			ON SP.intEntityId = ESP.intEntityId
+	) ON SAR.intEntitySalespersonId = SP.intEntityId	
 LEFT JOIN 
 	(
 	tblICItem IC 

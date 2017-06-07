@@ -62,7 +62,7 @@ SELECT
 	,[strDestinationWeight]		= CustCon.[strDestinationWeight]
 
 FROM [vyuARCustomerContract] CustCon
-INNER JOIN [vyuARCustomerSearch] ARC ON CustCon.intEntityCustomerId = ARC.intEntityCustomerId
+INNER JOIN [vyuARCustomerSearch] ARC ON CustCon.intEntityCustomerId = ARC.[intEntityId]
 WHERE CustCon.intCurrencyId = (SELECT TOP 1 ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID) [intCurrencyID]
 								FROM tblCTContractDetail CTD 
 									INNER JOIN tblSMCurrency SMC

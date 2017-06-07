@@ -253,3 +253,12 @@ BEGIN
 	
 	print 'remove orphan transaction tax'
 END
+
+
+
+IF EXISTS(SELECT * FROM sys.indexes WHERE name = 'tblCFSite_UniqueNetworkSiteName' AND object_id = OBJECT_ID('tblCFSite'))
+BEGIN
+	print 'drop tblCFSite_UniqueNetworkSiteName index'
+	DROP INDEX tblCFSite_UniqueNetworkSiteName ON tblCFSite
+	print 'drop tblCFSite_UniqueNetworkSiteName index'
+END

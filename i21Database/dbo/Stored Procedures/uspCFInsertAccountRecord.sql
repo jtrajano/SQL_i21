@@ -131,7 +131,7 @@ BEGIN
 	--			      DUPLICATE ACCOUNT NUMBER			   --
 	---------------------------------------------------------
 	--Customer
-	SELECT @intCustomerId = intEntityCustomerId 
+	SELECT @intCustomerId = [intEntityId] 
 	FROM tblARCustomer 
 	WHERE strCustomerNumber = @strCustomerId
 	
@@ -200,17 +200,17 @@ BEGIN
 	END
 
 	--Sales Person
-	SELECT @intSalesPersonId = intEntityId  
+	SELECT @intSalesPersonId = S.intEntityId  
 	FROM tblEMEntity E
 	INNER JOIN tblARSalesperson S
-	ON E.intEntityId = S.intEntitySalespersonId
+	ON E.intEntityId = S.[intEntityId]
 	WHERE E.strName = @strSalesPersonId
 	IF (@strSalesPersonId != '')
 	BEGIN
-		SELECT @intSalesPersonId = intEntityId  
+		SELECT @intSalesPersonId = S.intEntityId  
 		FROM tblEMEntity E
 		INNER JOIN tblARSalesperson S
-		ON E.intEntityId = S.intEntitySalespersonId
+		ON E.intEntityId = S.[intEntityId]
 		WHERE E.strName = @strSalesPersonId
 		IF (@intSalesPersonId = 0)
 		BEGIN

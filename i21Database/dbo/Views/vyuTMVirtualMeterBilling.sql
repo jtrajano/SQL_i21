@@ -28,7 +28,7 @@ LEFT JOIN tblSMCompanyLocation D
 LEFT JOIN tblICItem E  
  ON A.intProduct = E.intItemId  
 INNER JOIN tblARCustomer F  
- ON F.intEntityCustomerId = C.intEntityId  
+ ON F.[intEntityId] = C.intEntityId  
 WHERE F.ysnActive = 1  
  AND A.ysnActive = 1  
  AND A.strBillingBy = 'Virtual Meter'  

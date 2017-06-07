@@ -124,6 +124,7 @@ FROM	(
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemId AS INT 
+DECLARE @strLocationName AS NVARCHAR(50)
 
 -- Check for missing Inventory Account Id
 BEGIN 
@@ -134,10 +135,20 @@ BEGIN
 				ON Item.intItemId = ItemGLAccount.intItemId
 	WHERE	ItemGLAccount.intInventoryId IS NULL 
 
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intInventoryId IS NULL 
+
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Inventory;
+		-- {Item} in Location is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Inventory;
 		RETURN -1;
 	END 
 END 
@@ -165,11 +176,21 @@ BEGIN
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 				AND TRANS.intItemId = Item.intItemId
 	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intAutoNegativeId IS NULL 
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Auto_Variance;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Auto_Variance;
 		RETURN -1;
 	END 
 END 
@@ -199,11 +220,21 @@ BEGIN
 				AND TRANS.intItemId = Item.intItemId
 	WHERE	ItemGLAccount.intCostAdjustment IS NULL 
 			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intCostAdjustment IS NULL 
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Cost Adjustment} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Cost_Adjustment;
+		-- {Item} in {Location} is missing a GL account setup for {Cost Adjustment} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Cost_Adjustment;
 		RETURN -1;
 	END 
 END 
@@ -228,10 +259,20 @@ BEGIN
 				ON Item.intItemId = ItemGLAccount.intItemId
 	WHERE	ItemGLAccount.intRevalueSoldId IS NULL 
 	
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intRevalueSoldId IS NULL 
+
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Cost Adjustment} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Revalue_Sold;
+		-- {Item} in {Location} is missing a GL account setup for {Cost Adjustment} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Revalue_Sold;
 		RETURN -1;
 	END 
 END 
@@ -254,11 +295,21 @@ BEGIN
 	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
 	WHERE	ItemGLAccount.intRevalueInTransit IS NULL 
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intRevalueInTransit IS NULL 
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Cost Adjustment} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Revalue_Shipment;
+		-- {Item} in {Location} is missing a GL account setup for {Cost Adjustment} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Revalue_Shipment;
 		RETURN -1;
 	END 
 END 

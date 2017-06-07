@@ -17,7 +17,7 @@
 			and tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
 			and tblEMEntityToContact.intEntityId = tblEMEntity.intEntityId
 			and tblEMEntityToContact.ysnDefaultContact = 1
-			and tblARCustomer.intEntityCustomerId = tblEMEntity.intEntityId
+			and tblARCustomer.[intEntityId] = tblEMEntity.intEntityId
 		group by
 			tblSOSalesOrder.intEntityCustomerId
 			,tblEMEntity.strName

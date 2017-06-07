@@ -21,6 +21,10 @@
 		,dblTotalContractOrderedUnits
 		,dblRemainingContractAmountUnits
 		,dblTotalOrderAndContractUnits = (overall.dblSalesOrderTotalShipUnits + overall.dblSalesOrderTotalUnShipUnits + overall.dblRemainingContractAmountUnits)
+
+		,strCategory
+		,strItem
+		,strContact
 	from
 	(
 		select
@@ -42,13 +46,17 @@
 			,dblTotalContractAmountUnits
 			,dblTotalContractOrderedUnits
 			,dblRemainingContractAmountUnits
+
+			,strCategory
+			,strItem
+			,strContact
 		from
 		(
 		select
 			tblSOSalesOrder.intEntityCustomerId
-			,tblEMEntity.strName
+			,strName = '('+ltrim(rtrim(tblEMEntity.strEntityNo))+') ' + tblEMEntity.strName
 			,intDate = convert(int,convert(nvarchar(8),tblSOSalesOrder.dtmDate,112))
-			,tblEMEntityToContact.intEntityContactId
+			,intEntityContactId = tblSOSalesOrder.intEntityContactId
 			,tblARCustomer.intSalespersonId
 			,dblSalesOrderTotal = sum(case when tblSOSalesOrderDetail.dblTotal < 1 then 0 else tblSOSalesOrderDetail.dblTotal end)
 			,dblSalesOrderTotalShip = sum(
@@ -71,32 +79,37 @@
 			,dblTotalContractAmountUnits = 0
 			,dblTotalContractOrderedUnits = 0
 			,dblRemainingContractAmountUnits = 0
+			,strCategory = tblSOSalesOrder.strType
+			,strItem = tblICItem.strItemNo
+			,strContact = (select top 1 strName from tblEMEntity where intEntityId = tblSOSalesOrder.intEntityContactId)
 		from
 			tblSOSalesOrder
 			,tblSOSalesOrderDetail
+			,tblICItem
 			,tblEMEntity
-			,tblEMEntityToContact
 			,tblARCustomer
 		where
 			tblSOSalesOrder.strTransactionType = 'Order'
 			and tblSOSalesOrderDetail.intSalesOrderId = tblSOSalesOrder.intSalesOrderId
+			and tblICItem.intItemId = tblSOSalesOrderDetail.intItemId
 			and tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
-			and tblEMEntityToContact.intEntityId = tblEMEntity.intEntityId
-			and tblEMEntityToContact.ysnDefaultContact = 1
-			and tblARCustomer.intEntityCustomerId = tblEMEntity.intEntityId
+			and tblARCustomer.intEntityId = tblEMEntity.intEntityId
 		group by
 			tblSOSalesOrder.intEntityCustomerId
 			,tblEMEntity.strName
+			,tblEMEntity.strEntityNo
 			,tblSOSalesOrder.dtmDate
-			,tblEMEntityToContact.intEntityContactId
 			,tblARCustomer.intSalespersonId
 			,tblSOSalesOrderDetail.dblQtyShipped
 			,tblSOSalesOrderDetail.dblQtyOrdered
+			,tblSOSalesOrder.strType
+			,tblICItem.strItemNo
+			,tblSOSalesOrder.intEntityContactId
 		) as salesorders
 
 		union all
 
-select
+		select
 			contracts.intEntityCustomerId
 			,contracts.strName
 			,contracts.intDate
@@ -116,11 +129,14 @@ select
 			,dblTotalContractOrderedUnits = (case when contracts.dblTotalContractOrderedUnits is null then 0 else contracts.dblTotalContractOrderedUnits end)
 			,dblRemainingContractAmountUnits = (contracts.dblTotalContractAmountUnits - (case when contracts.dblTotalContractOrderedUnits is null then 0 else contracts.dblTotalContractOrderedUnits end))
 
+			,strCategory
+			,strItem
+			,strContact
 		from
 		(
 			select
 				intEntityCustomerId = c.intEntityId
-				,strName = c.strName
+				,strName = '('+ltrim(rtrim(c.strEntityNo))+') ' + c.strName
 				,intDate = convert(int,convert(nvarchar(8),b.dtmContractDate,112))
 				,intEntityContactId = b.intEntityContactId
 				,f.intSalespersonId
@@ -134,21 +150,31 @@ select
 				,dblSalesOrderTotalUnShipUnits = 0
 				,dblTotalContractAmountUnits = sum(a.dblQuantity)
 				,dblTotalContractOrderedUnits = (select sum(case when e.dblQtyOrdered < 1 then 0 else e.dblQtyOrdered end) from tblSOSalesOrderDetail e where e.intContractHeaderId = b.intContractHeaderId)
+				,strCategory = g.strCommodityCode
+				,strItem = h.strItemNo
+				,strContact = (select top 1 strName from tblEMEntity where intEntityId = b.intEntityContactId)
 			from
 				tblCTContractDetail a
 				,tblCTContractHeader b
+				,tblICCommodity g
+				,tblICItem h
 				,tblEMEntity c
 				,tblARCustomer f
 			where
 				b.intContractHeaderId = a.intContractHeaderId
+				and g.intCommodityId = b.intCommodityId
+				and h.intItemId = a.intItemId
 				and c.intEntityId = b.intEntityId
-				and f.intEntityCustomerId = c.intEntityId
+				and f.intEntityId = c.intEntityId
 			group by
 				c.intEntityId
 				,c.strName
+				,c.strEntityNo
 				,f.intSalespersonId
 				,b.dtmContractDate
 				,b.intContractHeaderId
+				,g.strCommodityCode
+				,h.strItemNo
 				,b.intEntityContactId
 		) as contracts
 	) as overall

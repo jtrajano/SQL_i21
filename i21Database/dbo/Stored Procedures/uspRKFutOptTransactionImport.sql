@@ -22,7 +22,8 @@ select @strInternalTradeNo=isnull(intNumber,0)-1 from tblSMStartingNumber where 
 BEGIN TRAN
 IF NOT EXISTS(SELECT intFutOptTransactionId FROM tblRKFutOptTransactionImport_ErrLog)
 BEGIN
-INSERT INTO tblRKFutOptTransactionHeader values (1)
+INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId,dtmTransactionDate,intSelectedInstrumentTypeId,strSelectedInstrumentType) 
+		VALUES (1,getdate(),1,'Exchange Traded')
 SELECT @intFutOptTransactionHeaderId = scope_Identity()
 
 SELECT * INTO #temp FROM(

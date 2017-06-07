@@ -5,27 +5,27 @@ AS
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Vendor')
 	BEGIN
-		UPDATE tblAPVendor SET ysnPymtCtrlActive = 0 WHERE intEntityVendorId = @Id
+		UPDATE tblAPVendor SET ysnPymtCtrlActive = 0 WHERE [intEntityId] = @Id
 	END	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Customer')
 	BEGIN	
-		UPDATE tblARCustomer SET ysnActive= 0 WHERE intEntityCustomerId = @Id
+		UPDATE tblARCustomer SET ysnActive= 0 WHERE [intEntityId] = @Id
 	END	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Salesperson')
 	BEGIN	
-		UPDATE tblARSalesperson SET ysnActive= 0 WHERE intEntitySalespersonId = @Id
+		UPDATE tblARSalesperson SET ysnActive= 0 WHERE [intEntityId] = @Id
 	END	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'User')
 	BEGIN	
-		UPDATE tblSMUserSecurity SET ysnDisabled = 1 WHERE intEntityUserSecurityId = @Id
+		UPDATE tblSMUserSecurity SET ysnDisabled = 1 WHERE [intEntityId] = @Id
 	END	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Employee')
 	BEGIN	
-		UPDATE tblPREmployee SET ysnActive= 0 WHERE intEntityEmployeeId = @Id
+		UPDATE tblPREmployee SET ysnActive= 0 WHERE [intEntityId] = @Id
 	END	
 
 	UPDATE a set a.ysnActive = 0

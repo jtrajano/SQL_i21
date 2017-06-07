@@ -17,7 +17,7 @@ SELECT
 	,TC.ysnApproved
 	,strApprovedUserId = USA.strUserName
 	,TC.dtmApproved
-	,ysnProcessed = CASE WHEN (TC.intPaycheckId IS NOT NULL OR TC.intPayGroupDetailId IS NOT NULL) THEN 1 ELSE 0 END
+	,ysnProcessed = CAST(CASE WHEN (TC.intPaycheckId IS NOT NULL OR TC.intPayGroupDetailId IS NOT NULL) THEN 1 ELSE 0 END AS BIT)
 	,strProcessedUserId = USP.strUserName
 	,TC.dtmProcessed
 	,dblRegularRate = CASE WHEN (TC.intPaycheckId IS NOT NULL) THEN ISNULL(PE.dblAmount, EE.dblRateAmount)
@@ -54,9 +54,9 @@ FROM
 	LEFT JOIN tblEMEntity EM 
 		ON EM.intEntityId = TC.intEntityEmployeeId
 	LEFT JOIN tblSMUserSecurity USA
-		ON USA.intEntityUserSecurityId = TC.intApprovedUserId
+		ON USA.[intEntityId] = TC.intApprovedUserId
 	LEFT JOIN tblSMUserSecurity USP
-		ON USP.intEntityUserSecurityId = TC.intProcessedUserId
+		ON USP.[intEntityId] = TC.intProcessedUserId
 	LEFT JOIN tblPRPaycheck PC
 		ON TC.intPaycheckId = PC.intPaycheckId
 	LEFT JOIN tblPRPayGroupDetail PGD

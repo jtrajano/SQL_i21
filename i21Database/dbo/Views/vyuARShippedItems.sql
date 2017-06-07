@@ -34,7 +34,7 @@ COMPANYLOCATION AS (
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ),
 CUSTOMER AS (
-	SELECT intEntityCustomerId
+	SELECT intEntityId
 		 , intCurrencyId
 	FROM dbo.tblARCustomer WITH (NOLOCK)
 ),
@@ -49,7 +49,7 @@ TERM AS (
 	FROM dbo.tblSMTerm WITH (NOLOCK)
 ),
 SHIPVIA AS (
-	SELECT intEntityShipViaId
+	SELECT intEntityId
 		 , strShipVia
 	FROM dbo.tblSMShipVia WITH (NOLOCK)
 ),
@@ -221,7 +221,7 @@ SELECT
 	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
+	,[intEntityShipViaId]				= S.intEntityId 
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= NULL
 	,[strCustomerReference]				= NULL
@@ -262,12 +262,12 @@ SELECT
 FROM SALESORDER SO
 INNER JOIN SALESORDERDETAIL SOD ON SO.[intSalesOrderId] = SOD.[intSalesOrderId] 
 INNER JOIN ITEM I ON SOD.[intItemId] = I.[intItemId] AND (dbo.fnIsStockTrackingItem(I.[intItemId]) = 0 OR ISNULL(strLotTracking, 'No') = 'No')
-INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
-INNER JOIN ENTITY E ON C.[intEntityCustomerId] = E.[intEntityId]
+INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.intEntityId 
+INNER JOIN ENTITY E ON C.intEntityId = E.[intEntityId]
 LEFT OUTER JOIN CUSTOMERCONTRACT ARCR ON SOD.[intContractHeaderId] = ARCR.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCR.[intContractDetailId]
 LEFT JOIN ENTITY ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN TERM T ON SO.[intTermId] = T.[intTermID] 
-LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.intEntityId 
 LEFT OUTER JOIN STORAGELOCATION SL ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
 LEFT JOIN ITEMUOM IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
 LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
@@ -347,7 +347,7 @@ SELECT
 	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId]
+	,[intEntityShipViaId]				= S.intEntityId
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= NULL
 	,[strCustomerReference]				= NULL
@@ -387,12 +387,12 @@ SELECT
 	,[strSubCurrency]					= SMC.[strCurrency]
 FROM SALESORDER SO
 INNER JOIN SALESORDERDETAIL SOD ON SO.[intSalesOrderId] = SOD.[intSalesOrderId] AND intItemId IS NULL AND strItemDescription <> ''
-INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
-INNER JOIN ENTITY E ON C.[intEntityCustomerId] = E.[intEntityId] 
+INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.intEntityId 
+INNER JOIN ENTITY E ON C.intEntityId = E.[intEntityId] 
 LEFT OUTER JOIN CUSTOMERCONTRACT ARCC ON SOD.[intContractHeaderId] = ARCC.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCC.[intContractDetailId]
 LEFT JOIN ENTITY ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN TERM T ON SO.[intTermId] = T.[intTermID] 
-LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.intEntityId 
 LEFT OUTER JOIN STORAGELOCATION SL ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
 LEFT JOIN ITEMUOM IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
 LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
@@ -468,7 +468,7 @@ SELECT
 	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
+	,[intEntityShipViaId]				= S.intEntityId 
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= SCALETICKET.[strTicketNumber]
 	,[strCustomerReference]				= SCALETICKET.[strCustomerReference]
@@ -508,12 +508,12 @@ SELECT
 	,[strSubCurrency]					= SMC.[strCurrency]
 FROM SALESORDER SO
 INNER JOIN SALESORDERDETAIL SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
-INNER JOIN CUSTOMER C ON SO.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN CUSTOMER C ON SO.intEntityCustomerId = C.intEntityId
 LEFT OUTER JOIN CUSTOMERCONTRACT ARCC ON SOD.[intContractHeaderId] = ARCC.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCC.[intContractDetailId]
-INNER JOIN ENTITY E ON C.[intEntityCustomerId] = E.[intEntityId]
+INNER JOIN ENTITY E ON C.intEntityId = E.[intEntityId]
 LEFT JOIN ENTITY ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId] 
 LEFT OUTER JOIN TERM T ON SO.[intTermId] = T.[intTermID] 
-LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.[intEntityShipViaId]
+LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.intEntityId
 INNER JOIN ITEM I ON SOD.[intItemId] = I.[intItemId]
 LEFT JOIN ITEMUOM IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
 LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]		
@@ -817,7 +817,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN CUSTOMERCONTRACT ARCC ON ICISI.[intLineNo] = ARCC.[intContractDetailId] AND ICIS.[intOrderType] = 1
 LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ICISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
 LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
-INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.intEntityId
 INNER JOIN ITEM ICI ON ICISI.[intItemId] = ICI.[intItemId]
 LEFT JOIN ITEMUOM ICIU ON ICISI.[intItemUOMId] = ICIU.[intItemUOMId] 
 LEFT JOIN ITEMUNITMEASURE ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]	
@@ -825,7 +825,7 @@ LEFT JOIN ITEMUOM ICIU1 ON ICISI.[intItemUOMId] = ICIU1.[intItemUOMId]
 LEFT JOIN ITEMUNITMEASURE ICUM1 ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]
 LEFT JOIN ITEMUOM ICUM3 ON ICISI.[intWeightUOMId] = ICUM3.[intItemUOMId]				
 LEFT JOIN ITEMUNITMEASURE ICIU2 ON ICUM3.[intUnitMeasureId] = ICIU2.[intUnitMeasureId]					
-INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+INNER JOIN ENTITY EME ON ARC.intEntityId = EME.[intEntityId]
 LEFT OUTER JOIN STORAGELOCATION ICSL ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId]		
@@ -965,11 +965,11 @@ LEFT OUTER JOIN
 		 FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI 
 			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 LEFT OUTER JOIN CUSTOMERCONTRACT ARCC ON ICISC.[intContractId] = ARCC.[intContractHeaderId]
-INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.intEntityId
 INNER JOIN ITEM ICI ON ICISC.[intChargeId] = ICI.[intItemId]
 LEFT JOIN ITEMUOM ICIU ON ICISC.[intCostUOMId] = ICIU.[intItemUOMId] 
 LEFT JOIN ITEMUNITMEASURE ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
-INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+INNER JOIN ENTITY EME ON ARC.intEntityId = EME.[intEntityId]
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 		[intInventoryShipmentChargeId]	
@@ -1038,7 +1038,7 @@ SELECT
 	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
+	,[intEntityShipViaId]				= S.intEntityId 
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= NULL
 	,[strCustomerReference]				= NULL
@@ -1080,11 +1080,11 @@ FROM SALESORDER SO
 CROSS APPLY
 	[dbo].[fnMFGetInvoiceChargesByShipment](0,SO.[intSalesOrderId]) MFG
 INNER JOIN ITEM I ON MFG.[intItemId] = I.[intItemId]
-INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
-INNER JOIN ENTITY E ON C.[intEntityCustomerId] = E.[intEntityId]
+INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.intEntityId 
+INNER JOIN ENTITY E ON C.intEntityId = E.[intEntityId]
 LEFT JOIN ENTITY ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN TERM T ON SO.[intTermId] = T.[intTermID] 
-LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.intEntityId 
 LEFT JOIN ITEMUOM IU ON MFG.[intItemUOMId] = IU.[intItemUOMId]
 LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
 LEFT OUTER JOIN COMPANYLOCATION CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
@@ -1235,11 +1235,11 @@ INNER JOIN
 		ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]		 
 LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ICISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
 LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
-INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.intEntityId
 INNER JOIN ITEM ICI ON MFG.[intItemId] = ICI.[intItemId]
 LEFT JOIN ITEMUOM ICIU ON MFG.[intItemUOMId] = ICIU.[intItemUOMId] 
 LEFT JOIN ITEMUNITMEASURE ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
-INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]			
+INNER JOIN ENTITY EME ON ARC.intEntityId = EME.[intEntityId]			
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 		[intRecipeItemId],
@@ -1373,7 +1373,7 @@ JOIN (SELECT intLoadId,
 			intPContractDetailId,
 			dblQuantity
 	  FROM tblLGLoadDetail WITH (NOLOCK)) LD ON L.intLoadId  = LD.intLoadId
-INNER JOIN CUSTOMER ARC ON LD.intCustomerEntityId = ARC.intEntityCustomerId
+INNER JOIN CUSTOMER ARC ON LD.intCustomerEntityId = ARC.intEntityId
 INNER JOIN ITEM ICI ON LD.intItemId = ICI.intItemId
 LEFT JOIN (SELECT intLoadDetailId,
 			intLotId,
@@ -1393,7 +1393,7 @@ LEFT JOIN ITEMUOM ICIU1 ON LD.intItemUOMId = ICIU1.intItemUOMId
 LEFT JOIN ITEMUNITMEASURE ICUM1 ON ICIU1.intUnitMeasureId = ICUM1.intUnitMeasureId
 LEFT JOIN ITEMUOM ICUM3 ON LD.intWeightItemUOMId = ICUM3.intItemUOMId
 LEFT JOIN ITEMUNITMEASURE ICIU2 ON ICUM3.intUnitMeasureId = ICIU2.intUnitMeasureId
-INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+INNER JOIN ENTITY EME ON ARC.intEntityId = EME.[intEntityId]
 LEFT OUTER JOIN 
 	(SELECT [intInventoryShipmentItemId],
 		[intRecipeItemId],

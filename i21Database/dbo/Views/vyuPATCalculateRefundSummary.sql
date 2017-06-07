@@ -29,13 +29,13 @@ WITH Refunds AS (
 				INNER JOIN tblPATRefundRate RR
 						ON RR.intRefundTypeId = RRD.intRefundTypeId
 				INNER JOIN tblARCustomer AC
-						ON AC.intEntityCustomerId = B.intCustomerPatronId
+						ON AC.[intEntityId] = B.intCustomerPatronId
 				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.intFiscalYear = B.intFiscalYear AND B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 					) Total
 			INNER JOIN tblPATRefundRate RR
 					ON RR.intRefundTypeId = Total.intRefundTypeId
 			INNER JOIN tblARCustomer AC
-					ON AC.intEntityCustomerId = Total.intCustomerId
+					ON AC.[intEntityId] = Total.intCustomerId
 			CROSS APPLY tblPATCompanyPreference ComPref
 			GROUP BY RR.intRefundTypeId,
 			RR.strRefundType,

@@ -15,4 +15,4 @@ SELECT
 	D.strUserName AS strUserId
 FROM dbo.tblAPBillBatch A
 		INNER JOIN dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
-		LEFT JOIN dbo.tblSMUserSecurity D ON A.intEntityId = D.[intEntityUserSecurityId]
+		LEFT JOIN dbo.tblSMUserSecurity D ON A.intEntityId = D.[intEntityId]

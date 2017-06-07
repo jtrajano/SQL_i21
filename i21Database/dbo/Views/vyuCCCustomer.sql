@@ -14,8 +14,8 @@ SELECT A.intSiteId,
 	   C.strName AS strCustomerName
 FROM dbo.tblCCSite AS A
 	INNER JOIN dbo.tblARCustomer AS B
-		ON B.intEntityCustomerId = A.intCustomerId
+		ON B.[intEntityId] = A.intCustomerId
 	INNER JOIN dbo.tblEMEntity AS C
-		ON C.intEntityId = B.intEntityCustomerId
+		ON C.intEntityId = B.[intEntityId]
 	LEFT OUTER JOIN dbo.[tblEMEntityLocation] AS D
-		ON D.intEntityLocationId = B.intEntityCustomerId AND D.ysnDefaultLocation = 1
+		ON D.intEntityLocationId = B.[intEntityId] AND D.ysnDefaultLocation = 1

@@ -28,8 +28,8 @@ SELECT CC.intCycleCountSessionId
 	JOIN dbo.tblMFProcessCycleCountSession CS on CS.intCycleCountSessionId=CC.intCycleCountSessionId
 	JOIN dbo.tblMFMachine M ON M.intMachineId = CC.intMachineId
 	JOIN dbo.tblICItem I ON I.intItemId = CC.intItemId
-	JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = CC.intCreatedUserId
-	JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = CC.intCreatedUserId
+	JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = CC.intCreatedUserId
+	JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityId] = CC.intCreatedUserId
 	JOIN dbo.tblSMCompanyLocationSubLocation SL on SL.intCompanyLocationSubLocationId =M.intSubLocationId
 	JOIN dbo.tblICStorageLocation SL1 on SL1.intStorageLocationId=CC.intProductionStagingLocationId 
 	WHERE CS.intWorkOrderId=@intWorkOrderId

@@ -89,7 +89,7 @@ INNER JOIN (SELECT
 				,Trm.strTerm
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
-				ON Ent.intEntityId = Cus.intEntityCustomerId
+				ON Ent.intEntityId = Cus.[intEntityId]
 			INNER JOIN [tblEMEntityLocation] Loc 
 				ON Ent.intEntityId = Loc.intEntityId 
 					and Loc.ysnDefaultLocation = 1

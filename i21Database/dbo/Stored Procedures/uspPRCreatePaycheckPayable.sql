@@ -67,7 +67,7 @@ DECLARE @intStartingNumberId INT
 DECLARE @intAPAccount INT = NULL
 SELECT @intAPAccount = intAPAccount FROM tblSMCompanyLocation 
 WHERE intCompanyLocationId = (SELECT TOP 1 intCompanyLocationId 
-								FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId)
+								FROM tblSMUserSecurity WHERE [intEntityId] = @intUserId)
 
 IF (@intAPAccount IS NULL)
 BEGIN
@@ -209,8 +209,8 @@ BEGIN
 				AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
 			GROUP BY TD.intVendorId, PD.intExpenseAccountId, PD.intAccountId, TD.strDeduction, PD.strPaidBy
 		) A
-		INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
-		INNER JOIN tblEMEntity C ON B.intEntityVendorId = C.intEntityId
+		INNER JOIN tblAPVendor B ON A.intVendorId = B.[intEntityId]
+		INNER JOIN tblEMEntity C ON B.[intEntityId] = C.intEntityId
 		LEFT JOIN tblAP1099Category D ON C.str1099Type = D.strCategory
 
 	/* Update Voucher Total */

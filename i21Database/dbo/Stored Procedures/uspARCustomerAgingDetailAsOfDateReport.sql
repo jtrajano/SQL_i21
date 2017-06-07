@@ -34,13 +34,13 @@ IF RTRIM(LTRIM(@strSourceTransactionLocal)) = ''
     SET @strSourceTransactionLocal = NULL;
 
 WITH SALESPERSON AS (
-    SELECT intEntitySalespersonId
+    SELECT SP.intEntityId
 	     , ES.strName
-	FROM dbo.tblARSalesperson WITH (NOLOCK) 
+	FROM dbo.tblARSalesperson SP WITH (NOLOCK) 
 	LEFT JOIN (SELECT intEntityId
 					, strName 
 			   FROM dbo.tblEMEntity WITH (NOLOCK)
-	) ES ON intEntitySalespersonId = ES.intEntityId
+	) ES ON SP.intEntityId = ES.intEntityId
 ),
 ARPOSTEDPAYMENT AS (
 	SELECT intPaymentId
@@ -162,7 +162,7 @@ FROM
 	, dblAvailableCredit = 0
 	, dblPrepayments     = 0
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted = 1
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
   AND I.strTransactionType IN ('Invoice', 'Debit Memo')
@@ -205,7 +205,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 			   WHERE ysnApplied = 1
 			   GROUP BY intPrepaymentId
 	) PC ON I.intInvoiceId = PC.intPrepaymentId	
-	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
@@ -249,7 +249,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 			WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId
 	) PC ON I.intInvoiceId = PC.intPrepaymentId 
-	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType = 'Customer Prepayment'
@@ -306,7 +306,7 @@ FROM dbo.tblARPayment P WITH (NOLOCK)
 				AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 	) I ON PD.intInvoiceId = I.intInvoiceId				
 	   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))				
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')  
@@ -380,7 +380,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 				WHERE ysnApplied = 1
 				GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber
 	 ) PC ON I.intInvoiceId = PC.intInvoiceId
-	 LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	 LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 
@@ -432,7 +432,7 @@ FROM
 	  , dblAvailableCredit	= 0
 	  , dblPrepayments		= 0
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
@@ -466,7 +466,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 			   WHERE ysnApplied = 1
 			   GROUP BY intPrepaymentId
 	) PC ON I.intInvoiceId = PC.intPrepaymentId
-	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
@@ -501,7 +501,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 			   WHERE ysnApplied = 1
 			   GROUP BY intPrepaymentId
 	) PC ON I.intInvoiceId = PC.intPrepaymentId 
-	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType = 'Customer Prepayment'
@@ -547,7 +547,7 @@ FROM dbo.tblARPayment P WITH (NOLOCK)
 				AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 	) I ON PD.intInvoiceId = I.intInvoiceId
 	   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
-    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE P.ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
   AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
@@ -617,7 +617,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 			   WHERE ysnApplied = 1
 			   GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber
 	) PC ON I.intInvoiceId = PC.intInvoiceId
-	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 
@@ -636,12 +636,12 @@ AND A.intPaymentId		 = B.intPaymentId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 
-LEFT JOIN (SELECT intEntityCustomerId
+LEFT JOIN (SELECT intEntityId
 				 , dblCreditLimit 
 			FROM dbo.tblARCustomer WITH (NOLOCK)
-) C ON AGING.intEntityCustomerId = C.intEntityCustomerId
+) C ON AGING.intEntityCustomerId = C.intEntityId
 LEFT JOIN (SELECT intEntityId
 			     , strName
 				 , strEntityNo 
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-) E ON C.intEntityCustomerId = E.intEntityId
+) E ON C.intEntityId = E.intEntityId

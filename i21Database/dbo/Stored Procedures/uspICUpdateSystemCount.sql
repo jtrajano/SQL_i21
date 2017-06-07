@@ -30,14 +30,6 @@ WHERE c.intImportFlagInternal = 1
 
 -- Cleanup
 -- Delete invalid details
-DELETE d
-FROM tblICInventoryCountDetail d
-	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
-WHERE c.intImportFlagInternal = 1
-	AND (d.intItemUOMId IS NULL
-	OR d.intItemLocationId IS NULL
-	OR d.intItemId IS NULL)
-
 -- Delete empty headers
 DELETE c
 FROM tblICInventoryCount c
@@ -60,7 +52,7 @@ FETCH NEXT FROM cur INTO @Id
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-	SELECT @Prefix = strPrefix + CAST(intNumber AS NVARCHAR(50))
+	SELECT @Prefix = strPrefix + CAST(intNumber + 1 AS NVARCHAR(50))
 	FROM tblSMStartingNumber
 	WHERE strTransactionType = 'Inventory Count'
 
@@ -134,15 +126,11 @@ FROM tblICInventoryCountDetail d
 	INNER JOIN tblICItem Item ON Item.intItemId = d.intItemId
 			AND Item.strLotTracking <> 'No'
 WHERE c.intImportFlagInternal = 1
-	AND d.intItemUOMId IS NOT NULL
-	AND d.intItemLocationId IS NOT NULL
-	AND d.intItemId IS NOT NULL
-	AND d.strAutoCreatedLotNumber IS NOT NULL
 
 IF EXISTS(SELECT * FROM @Lots)
 BEGIN
 	EXEC dbo.uspICCreateUpdateLotNumber @Lots, 1, 1, 0
-	
+
 	UPDATE	countDetail
 	SET	intLotId = LotNumbers.intLotId
 	FROM tblICInventoryCountDetail countDetail

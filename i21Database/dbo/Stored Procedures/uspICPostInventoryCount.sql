@@ -49,6 +49,7 @@ BEGIN
 			,@ysnTransactionPostedFlag AS BIT
 			,@strCountDescription AS NVARCHAR(255)
 			,@InventoryCount_TransactionType INT = 23
+			,@intLocationId AS INT 
 
   
 	SELECT TOP 1   
@@ -57,6 +58,7 @@ BEGIN
 			,@dtmDate = dtmCountDate
 			,@intCreatedEntityId = intEntityId
 			,@strCountDescription = strDescription
+			,@intLocationId = intLocationId
 	FROM	dbo.tblICInventoryCount
 	WHERE	strCountNo = @strTransactionId  
 END  
@@ -131,7 +133,7 @@ IF @ItemNo IS NOT NULL
 		GOTO Post_Exit  
 	END
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId
 IF @@ERROR <> 0 GOTO Post_Exit    
 
 --------------------------------------------------------------------------------------------  

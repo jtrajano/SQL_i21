@@ -26,9 +26,3 @@
     [ysnShowOnCFInvoice]          BIT             NULL
 );
 
-
-
-
-
-
-

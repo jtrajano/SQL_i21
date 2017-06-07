@@ -16,19 +16,19 @@ BEGIN
 		GOTO ExitHere
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblAPVendor where strVendorId = @Identification  AND intEntityVendorId != @EntityId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblAPVendor where strVendorId = @Identification  AND [intEntityId] != @EntityId)
 	BEGIN
 		Set @Message = 'Entity No already exists as Vendor'
 		GOTO ExitHere
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblARCustomer where strCustomerNumber = @Identification AND intEntityCustomerId != @EntityId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblARCustomer where strCustomerNumber = @Identification AND [intEntityId] != @EntityId)
 	BEGIN
 		Set @Message = 'Entity No already exists as Customer'
 		GOTO ExitHere
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblARSalesperson where strSalespersonId = @Identification AND intEntitySalespersonId != @EntityId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblARSalesperson where strSalespersonId = @Identification AND [intEntityId] != @EntityId)
 	BEGIN
 		Set @Message = 'Entity No already exists as Salesperson'
 		GOTO ExitHere

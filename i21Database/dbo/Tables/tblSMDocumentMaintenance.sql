@@ -11,7 +11,7 @@
 	[ysnCopyAll]			BIT NOT NULL DEFAULT 0,
     [intConcurrencyId]		INT NOT NULL DEFAULT ((0)),
 	CONSTRAINT [PK_tblSMDocumentMaintenance_intDocumentId] PRIMARY KEY CLUSTERED ([intDocumentMaintenanceId] ASC),
-	CONSTRAINT [FK_tblSMDocumentMaintenance_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+	CONSTRAINT [FK_tblSMDocumentMaintenance_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
 	CONSTRAINT [FK_tblSMDocumentMaintenance_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]), 
     CONSTRAINT [FK_tblSMDocumentMaintenance_tblSMLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblSMLineOfBusiness]([intLineOfBusinessId]),
     CONSTRAINT [AK_tblSMDocumentMaintenance_strCode] UNIQUE ([strCode])

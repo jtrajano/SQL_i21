@@ -1,22 +1,22 @@
 ﻿GO
 
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
-BEGIN
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPOriginCCDTransaction')
 	DROP VIEW vyuAPOriginCCDTransaction
+GO
 
-	EXEC ('
+BEGIN
+EXEC ('
 	CREATE VIEW [dbo].[vyuAPOriginCCDTransaction]
 	AS
 	
 	WITH APOriginCCDTransaction AS (
 	SELECT			DISTINCT
-					[intEntityVendorId]		=	D.intEntityVendorId, 
+					[intEntityId]		=	D.intEntityId, 
 					[strVendorOrderNumber] 	=	(CASE WHEN DuplicateData.apivc_ivc_no IS NOT NULL
 														THEN dbo.fnTrim(A.apivc_ivc_no) + ''-DUP'' 
 														ELSE A.apivc_ivc_no END),
 					[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation 
-													WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor 
+													WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
 														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt''))
 				FROM apivcmst A
 					LEFT JOIN apcbkmst B
@@ -24,12 +24,12 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAP
 					INNER JOIN tblAPVendor D
 						ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 					LEFT JOIN tblEMEntityLocation loc
-						ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
+						ON D.intEntityId = loc.intEntityId AND loc.ysnDefaultLocation = 1
 					OUTER APPLY (
 						SELECT E.* FROM apivcmst E
 						WHERE EXISTS(
 							SELECT 1 FROM tblAPBill F
-							INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityVendorId
+							INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityId
 							WHERE E.apivc_ivc_no = F.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 							AND E.apivc_vnd_no = G.strVendorId COLLATE Latin1_General_CS_AS
 						)
@@ -55,4 +55,3 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAP
 		WHERE intBillId IS NULL
 		')
 END
-GO

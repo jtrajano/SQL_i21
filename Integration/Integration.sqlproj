@@ -227,6 +227,7 @@
     <None Include="dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspCMImportValidations.sql" />
     <None Include="dbo\Stored Procedures\uspGLImportOriginCOA.sql" />
+    <None Include="dbo\Stored Procedures\uspGLSyncGLACTMST.sql" />
     <None Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <None Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
     <None Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />

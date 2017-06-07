@@ -1,5 +1,5 @@
-﻿CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceAndUnitTB] 
-(	
+CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceAndUnitTB]
+(
 	@strAccountId NVARCHAR(100),
 	@dtmDate DATETIME,
 	@intGLDetailId INT =-1
@@ -39,7 +39,7 @@ BEGIN
 		IF @intGLDetailId  = -1
 			INSERT  @tbl
 			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance,SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
-		
+
 			FROM tblGLAccount A
 				LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 				LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId

@@ -556,16 +556,16 @@ AND A.dblPrepayments	 = B.dblPrepayments
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0
 
 GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId) AS AGING
-LEFT JOIN (SELECT intEntityCustomerId
+LEFT JOIN (SELECT intEntityId
 				 , intShipToId
 				 , intBillToId
 				 , dblCreditLimit
 			FROM dbo.tblARCustomer WITH (NOLOCK)
-) C ON AGING.intEntityCustomerId = C.intEntityCustomerId
+) C ON AGING.intEntityCustomerId = C.intEntityId
 LEFT JOIN (SELECT intEntityId
 				 , strName
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-) E ON E.intEntityId = C.intEntityCustomerId
+) E ON E.intEntityId = C.intEntityId
 LEFT JOIN (SELECT intInvoiceId
 				, intShipToLocationId
 				, intBillToLocationId
@@ -622,7 +622,7 @@ LEFT JOIN (SELECT intEntityLocationId
 				, strCountry
 		   FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 ) DEFAULTSHIPTO ON C.intShipToId = DEFAULTSHIPTO.intEntityLocationId 
-			   AND C.intEntityCustomerId = DEFAULTSHIPTO.intEntityId
+			   AND C.intEntityId = DEFAULTSHIPTO.intEntityId
 LEFT JOIN (SELECT intEntityLocationId
 			    , intEntityId
 				, strLocationName
@@ -633,5 +633,5 @@ LEFT JOIN (SELECT intEntityLocationId
 				, strCountry
 		   FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 ) DEFAULTBILLTO ON C.intBillToId = DEFAULTBILLTO.intEntityLocationId 
-			   AND C.intEntityCustomerId = DEFAULTBILLTO.intEntityId
+			   AND C.intEntityId = DEFAULTBILLTO.intEntityId
 WHERE ISNULL(INVOICE.ysnPaid, 0) = 0

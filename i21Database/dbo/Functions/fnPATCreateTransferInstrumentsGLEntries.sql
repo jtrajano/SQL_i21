@@ -179,7 +179,7 @@ BEGIN
 		INNER JOIN tblPATTransferType C ON
 			C.intTransferType = A.intTransferType
 		INNER JOIN tblARCustomer D
-			ON D.intEntityCustomerId = B.intTransferorId
+			ON D.[intEntityId] = B.intTransferorId
 		CROSS JOIN tblPATCompanyPreference ComPref
 		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 4
 		UNION ALL

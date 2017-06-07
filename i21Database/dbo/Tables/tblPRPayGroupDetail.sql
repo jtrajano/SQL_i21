@@ -18,7 +18,7 @@
     [intConcurrencyId]			INT             DEFAULT ((1)) NULL,
 	CONSTRAINT [PK_tblPRPayGroupDetail] PRIMARY KEY CLUSTERED ([intPayGroupDetailId] ASC),
 	CONSTRAINT [FK_tblPRPayGroupDetail_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [dbo].[tblPRPayGroup] ([intPayGroupId]),
-	CONSTRAINT [FK_tblPRPayGroupDetail_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]),
+	CONSTRAINT [FK_tblPRPayGroupDetail_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityId]),
 	CONSTRAINT [FK_tblPRPayGroupDetail_tblPREmployeeEarning] FOREIGN KEY ([intEmployeeEarningId]) REFERENCES [dbo].[tblPREmployeeEarning] ([intEmployeeEarningId]),
 	CONSTRAINT [FK_tblPRPayGroupDetail_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [dbo].[tblPRTypeEarning] ([intTypeEarningId]),
 	CONSTRAINT [FK_tblPRPayGroupDetail_tblPRDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId]),

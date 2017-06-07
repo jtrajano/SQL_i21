@@ -17,7 +17,7 @@
 	[strOverCreditLimit] [nvarchar](10) COLLATE Latin1_General_CI_AS   NOT NULL CONSTRAINT [DF_tblTMGenerateOrder_strOverCreditLimit]  DEFAULT (N'Include'),
 	[strBudgetCustomers] [nvarchar](10) COLLATE Latin1_General_CI_AS   NOT NULL CONSTRAINT [DF_tblTMGenerateOrder_strBudgetCustomers]  DEFAULT (N'Include'),
     CONSTRAINT [PK_tblTMGenerateOrder] PRIMARY KEY CLUSTERED ([intGenerateOrderId] ASC),
-	CONSTRAINT [FK_tblTMGenerateOrder_tblSMUserSecurity] FOREIGN KEY([intUserId]) REFERENCES [dbo].[tblSMUserSecurity] ([intEntityUserSecurityId])
+	CONSTRAINT [FK_tblTMGenerateOrder_tblSMUserSecurity] FOREIGN KEY([intUserId]) REFERENCES [dbo].[tblSMUserSecurity] ([intEntityId])
 );
 
 

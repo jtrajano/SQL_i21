@@ -31,7 +31,7 @@ BEGIN
 		SELECT D.intBillId, D.strBillId, D.strVendorOrderNumber
 		, A.apivc_ivc_no, E.intBankAccountId
 		, E.intGLAccountId, A.apivc_trans_type
-		, C.intEntityVendorId
+		, C.intEntityId
 		, A.apivc_chk_no
 		, D.intTransactionType, D.dtmDate, D.dtmDueDate, A.apivc_due_rev_dt, A.apivc_chk_rev_dt 
 		INTO ##OriginChecks

@@ -25,7 +25,7 @@ LEFT JOIN (SELECT
 				,Cus.ysnActive
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
-				ON Ent.intEntityId = Cus.intEntityCustomerId) E
+				ON Ent.intEntityId = Cus.[intEntityId]) E
 	ON E.intEntityId = D.intCustomerNumber
 LEFT JOIN tblTMApplianceType F
 	ON F.intApplianceTypeID = A.intApplianceTypeID

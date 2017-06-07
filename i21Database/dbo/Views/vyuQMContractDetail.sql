@@ -9,6 +9,7 @@ SELECT CD.intContractDetailId
 	,CH.strContractNumber
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber
 	,CH.intEntityId
+	,E.strName AS strPartyName
 	,CH.strCustomerContract
 	,CAST(CASE 
 			WHEN IM.strType = 'Bundle'
@@ -31,9 +32,11 @@ SELECT CD.intContractDetailId
 	,ISNULL(S.ysnFinalApproval, 'false') AS ysnFinalApproval
 	,CD.intContractStatusId
 	,ISNULL(CD.strERPPONumber, '') AS strERPPONumber
+	,CH.intContractTypeId
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId

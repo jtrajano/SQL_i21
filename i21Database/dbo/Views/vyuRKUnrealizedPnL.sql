@@ -40,7 +40,7 @@ SELECT  intFutOptTransactionId,
  JOIN tblRKBrokerageAccount acc on acc.intBrokerageAccountId=ot.intBrokerageAccountId  
  JOIN tblICCommodity icc on icc.intCommodityId=ot.intCommodityId  
  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=ot.intLocationId  
- JOIN tblARSalesperson sp on sp.intEntitySalespersonId= ot.intTraderId  
+ JOIN tblARSalesperson sp on sp.[intEntityId]= ot.intTraderId  
  JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId

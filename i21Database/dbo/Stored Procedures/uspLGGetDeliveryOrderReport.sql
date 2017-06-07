@@ -160,7 +160,7 @@ BEGIN
 			END AS strCustomerLocationCityStateZip
 		  ,(SELECT AC.strFLOId
 			FROM tblARCustomer AC
-			WHERE AC.intEntityCustomerId= EM.intEntityId
+			WHERE AC.[intEntityId]= EM.intEntityId
 			) strFLOId		  
 		  ,(SELECT ETCN.strName
 			FROM tblEMEntity EM1 

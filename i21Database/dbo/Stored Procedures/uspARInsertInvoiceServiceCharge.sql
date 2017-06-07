@@ -24,7 +24,7 @@ AS
 	FROM @tblTypeServiceCharge
 
 	IF ISNULL(@intCurrencyId, 0) = 0
-		SELECT TOP 1 @intCurrencyId = intCurrencyId FROM tblARCustomer WHERE intEntityCustomerId = @intEntityCustomerId
+		SELECT TOP 1 @intCurrencyId = intCurrencyId FROM tblARCustomer WHERE [intEntityId] = @intEntityCustomerId
 
 	DECLARE @tempServiceChargeTable TABLE (
 		 [intServiceChargeId]	INT
@@ -141,7 +141,7 @@ AS
 				,[strBillToCountry]
 				,@newComment
 			FROM vyuARCustomerSearch
-				WHERE intEntityCustomerId = @intEntityCustomerId
+				WHERE [intEntityId] = @intEntityCustomerId
 
 			--INSERT INVOICE DETAILS
 			SET @NewInvoiceId = SCOPE_IDENTITY()

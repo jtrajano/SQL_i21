@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMGetItemTaxes]
-	 @ItemId					INT
+	 @ItemId					INT				= NULL
 	,@LocationId				INT
 	,@TransactionDate			DATETIME
 	,@TransactionType			NVARCHAR(20) -- Purchase/Sale

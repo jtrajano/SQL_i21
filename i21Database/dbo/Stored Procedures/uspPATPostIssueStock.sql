@@ -28,6 +28,8 @@ DECLARE @batchId NVARCHAR(40);
 DECLARE @isGLSucces AS BIT = 0;
 DECLARE @intCreatedId INT;
 
+DECLARE @batchId2 AS NVARCHAR(40);
+
 DECLARE @voucherId as Id;
 
 CREATE TABLE #tempValidateTable (
@@ -202,9 +204,13 @@ BEGIN CATCH
 END CATCH
 
 
+
+
 IF(@isGLSucces = 1)
 BEGIN
 
+	IF(@batchId2 IS NULL)
+		EXEC uspSMGetStartingNumber 3, @batchId2 OUT
 
 	--------------------- RETIRED STOCKS ------------------	
 	IF(@ysnRetired = 1)
@@ -254,7 +260,7 @@ BEGIN
 			END
 
 			EXEC [dbo].[uspAPPostBill]
-				@batchId = @intCreatedId,
+				@batchId = @batchId2,
 				@billBatchId = NULL,
 				@transactionType = NULL,
 				@post = 1,
@@ -439,7 +445,7 @@ BEGIN
 
 			FROM tblPATCustomerStock CS
 			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityCustomerId = CS.intCustomerPatronId
+				ON ARC.[intEntityId] = CS.intCustomerPatronId
 			CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
 			WHERE CS.intCustomerStockId = @intCustomerStockId
 

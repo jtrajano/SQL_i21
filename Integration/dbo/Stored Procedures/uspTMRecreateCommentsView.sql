@@ -155,7 +155,7 @@ BEGIN
 						,intConcurrencyId = 0
 					FROM tblEMEntityMessage A
 					INNER JOIN tblARCustomer B
-						ON A.intEntityId = B.intEntityCustomerId
+						ON A.intEntityId = B.intEntityId
 		')
 	END
 END

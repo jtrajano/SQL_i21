@@ -56,7 +56,7 @@ BEGIN TRY
 	FROM tblSMCompanyLocation
 	WHERE intCompanyLocationId = @intCompanyLocationId
 	
-	SELECT @intUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @intUserId = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strUserName
 
 	--SELECT @ysnLifeTimeUnitMonthEndOfMonth=SettingValue  
 	--FROM dbo.iMake_AppSetting S  

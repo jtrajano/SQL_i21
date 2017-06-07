@@ -32,7 +32,7 @@ FROM tblMFRecipe R
 	LEFT JOIN vyuARItemUOM UOM ON R.[intItemUOMId] = UOM.intItemUOMId
 	LEFT JOIN tblSMCompanyLocation L ON R.intLocationId = L.intCompanyLocationId
 	LEFT JOIN tblMFManufacturingProcess MP ON R.intManufacturingProcessId = MP.intManufacturingProcessId
-	LEFT JOIN (vyuARCustomer C INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON R.intCustomerId = C.intEntityCustomerId
+	LEFT JOIN (vyuARCustomer C INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId) ON R.intCustomerId = C.[intEntityId]
 WHERE R.ysnActive = 1
 GROUP BY R.intRecipeId
      , R.intItemId

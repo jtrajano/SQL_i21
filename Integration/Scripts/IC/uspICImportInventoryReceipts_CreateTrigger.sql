@@ -23,18 +23,19 @@ EXEC ('
 	DECLARE @ReceiptNumber NVARCHAR(50)
 	DECLARE @intMaxCount INT = 0
 	DECLARE @intStartingNumberId INT = 0
+	DECLARE @intLocationId INT 
 
 	INSERT INTO @inserted
 	SELECT intInventoryReceiptId FROM INSERTED ORDER BY intInventoryReceiptId
 	WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 	BEGIN
 		SET @intStartingNumberId = 23	
-		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId  FROM @inserted
+		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId, @intLocationId = intLocationId  FROM @inserted
 		SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
 		FROM tblSMStartingNumber 
 		WHERE strTransactionType = ''Inventory Receipt''
 		
-		EXEC uspSMGetStartingNumber @intStartingNumberId, @ReceiptNumber OUT	
+		EXEC uspSMGetStartingNumber @intStartingNumberId, @ReceiptNumber OUT, @intLocationId
 	
 		IF(@ReceiptNumber IS NOT NULL)
 		BEGIN
@@ -51,7 +52,7 @@ EXEC ('
 				SET		intNumber = @intMaxCount + 1 
 				WHERE	intStartingNumberId = @intStartingNumberId
 
-				EXEC uspSMGetStartingNumber @intStartingNumberId, @ReceiptNumber OUT				
+				EXEC uspSMGetStartingNumber @intStartingNumberId, @ReceiptNumber OUT, @intLocationId				
 			END
 
 			UPDATE	tblICInventoryReceipt

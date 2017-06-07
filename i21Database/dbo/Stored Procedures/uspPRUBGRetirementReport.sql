@@ -86,7 +86,7 @@ SELECT DISTINCT
  ,EMP.strFirstName
  ,EMP.strMiddleName
  ,strPayType = LEFT(EMP.strType, 1)
- ,strPayClass = CASE WHEN (EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning ER1 WHERE intEntityEmployeeId = EMP.intEntityEmployeeId AND ER1.strCalculationType = 'Hourly Rate'))
+ ,strPayClass = CASE WHEN (EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning ER1 WHERE intEntityEmployeeId = EMP.[intEntityId] AND ER1.strCalculationType = 'Hourly Rate'))
 					 THEN 'H'
 					 ELSE 'S' END
  ,dtmTerminated = EMP.dtmTerminated
@@ -145,6 +145,6 @@ FROM
 	GROUP BY
 		PC.intEntityEmployeeId
 		,YEAR(PC.dtmPayDate)) [PC]
-	ON EMP.intEntityEmployeeId = PC.intEntityEmployeeId
+	ON EMP.[intEntityId] = PC.intEntityEmployeeId
 WHERE 
 	EMP.strEmployeeId BETWEEN @strBeginEmployeeNo AND @strEndEmployeeNo

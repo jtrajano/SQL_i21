@@ -10,7 +10,7 @@ BEGIN TRY
     select B.strCustomerNumber,A.strName, A.intInvoice,A.dblAmount,A.strComment ,A.strType,
     SUM(case when A.strType = 'F' then A.dblAmount  else 0 end) over() as TotalFinanceCharges,
 	SUM(case when A.strType <> 'F' then A.dblAmount else 0 end) over() as TotalRegularCharges	 
-	from tblSTCheckoutCustomerCharges A	JOIN tblARCustomer B ON B.intEntityCustomerId = A.intCustomerId  
+	from tblSTCheckoutCustomerCharges A	JOIN tblARCustomer B ON B.[intEntityId] = A.intCustomerId  
 	where A.intCheckoutId = @intCheckoutId
 
 END TRY

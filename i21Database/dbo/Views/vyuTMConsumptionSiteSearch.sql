@@ -46,17 +46,21 @@ AS
 	,A.dblTotalCapacity
 	,A.ysnTaxable
 	,Q.strTaxGroup
+	,strDeviceOwnership = J.strOwnership
+	,A.strZipCode
+	,strGlobalJulianCalendar = R.strDescription
+	,intCustomerEntityId = B.intCustomerNumber
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
 	INNER JOIN tblEMEntity C
 		ON B.intCustomerNumber = C.intEntityId
 	INNER JOIN tblARCustomer D
-		ON C.intEntityId = D.intEntityCustomerId
+		ON C.intEntityId = D.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation E
 		ON A.intLocationId = E.intCompanyLocationId
 	INNER JOIN [tblEMEntityToContact] F
-		ON D.intEntityCustomerId = F.intEntityId 
+		ON D.[intEntityId] = F.intEntityId 
 			and F.ysnDefaultContact = 1
 	INNER JOIN tblEMEntity G 
 		ON F.intEntityContactId = G.intEntityId
@@ -73,6 +77,7 @@ AS
 	LEFT JOIN (
 					SELECT Y.strSerialNumber 
 						,Z.intSiteID
+						,Y.strOwnership
 					FROM tblTMSiteDevice Z
 					INNER JOIN tblTMDevice Y
 						ON Z.intDeviceId = Y.intDeviceId
@@ -89,5 +94,7 @@ AS
 		ON A.intTaxStateID = Q.intTaxGroupId
 	LEFT JOIN tblEMEntityPhoneNumber EP
 		ON G.intEntityId = EP.intEntityId  
+	LEFT JOIN tblTMGlobalJulianCalendar R
+		ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 	WHERE ISNULL(D.ysnActive,0) = 1
 GO

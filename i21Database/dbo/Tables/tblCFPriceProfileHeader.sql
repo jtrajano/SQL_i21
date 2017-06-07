@@ -15,3 +15,6 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblCFPriceProfileHeader_intPriceProfileHeaderId]
     ON [dbo].[tblCFPriceProfileHeader]([intPriceProfileHeaderId] ASC);
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFPriceProfileHeader_UniquePriceProfile
+	ON tblCFPriceProfileHeader (strPriceProfile);
