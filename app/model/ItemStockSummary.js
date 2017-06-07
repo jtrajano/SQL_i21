@@ -37,6 +37,8 @@ Ext.define('Inventory.model.ItemStockSummary', {
         { name: 'dblOnHand', type: 'float' },
         { name: 'dblConversionFactor', type: 'float' },
         { name: 'dblLastCost', type: 'float' },
-        { name: 'dblTotalCost', type: 'float' }
+        { name: 'dblTotalCost', type: 'float' },
+        { name: 'dblSystemCount', type: 'float' },
+        { name: 'dblPhysicalCount', type: 'float' }
     ]
 });

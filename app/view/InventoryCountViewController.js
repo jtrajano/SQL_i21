@@ -8,66 +8,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     ],
 
     config: {
-        searchConfig: {
-            title: 'Search Inventory Count',
-            type: 'Inventory.InventoryCount',
-            api: {
-                read: '../Inventory/api/InventoryCount/Search'
-            },
-            columns: [
-                {dataIndex: 'intInventoryCountId', text: "Count Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strCountNo', text: 'Count No', flex: 1, dataType: 'string'},
-                {dataIndex: 'strLocationName', text: 'Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strCategory', text: 'Category', flex: 1, dataType: 'string'},
-                {dataIndex: 'strCommodity', text: 'Commodity', flex: 1, dataType: 'string'},
-                {dataIndex: 'strCountGroup', text: 'Count Group', flex: 1, dataType: 'string'},
-                {dataIndex: 'dtmCountDate', text: 'Count Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string'}
-            ],
-            buttons: [
-                {
-                    text: 'Items',
-                    itemId: 'btnItem',
-                    clickHandler: 'onItemClick',
-                    width: 80
-                },
-                {
-                    text: 'Categories',
-                    itemId: 'btnCategory',
-                    clickHandler: 'onCategoryClick',
-                    width: 100
-                },
-                {
-                    text: 'Commodities',
-                    itemId: 'btnCommodity',
-                    clickHandler: 'onCommodityClick',
-                    width: 100
-                },
-                {
-                    text: 'Locations',
-                    itemId: 'btnLocation',
-                    clickHandler: 'onLocationClick',
-                    width: 100
-                },
-                {
-                    text: 'Storage Locations',
-                    itemId: 'btnStorageLocation',
-                    clickHandler: 'onStorageLocationClick',
-                    width: 110
-                },
-                {
-                    text: 'Count Group',
-                    itemId: 'btnCountGroup',
-                    clickHandler: 'onCountGroupClick',
-                    width: 80
-                }
-            ]
-        },
         binding: {
             bind: {
                 title: 'Inventory Count - {current.strCountNo}'
+            },
+            cboPageSize: {
+                hidden: true,
+                value: '{pageSize}',
+                store: '{pageSize}'
             },
             btnDelete: {
                 disabled: '{disableBtnDelete}'
@@ -77,11 +25,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             btnUndo: {
                 disabled: '{current.ysnPosted}'
-            },
-            cboPageSize: {
-                hidden: true,
-                value: '{pageSize}',
-                store: '{pagesize}'
             },
             btnPrintCountSheets: {
                 hidden: '{checkPrintCountSheet}'
@@ -113,25 +56,32 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
 
             cboLocation: {
-                value: '{current.intLocationId}',
+                value: '{current.strLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intLocationId',
                 store: '{location}'
             },
             cboCategory: {
-                value: '{current.intCategoryId}',
+                value: '{current.strCategory}',
+                origValueField: 'intCategoryId',
                 store: '{category}'
             },
             cboCommodity: {
-                value: '{current.intCommodityId}',
+                value: '{current.strCommodity}',
+                origValueField: 'intCommodityId',
                 store: '{commodity}'
             },
             cboCountGroup: {
-                value: '{current.intCountGroupId}',
+                value: '{current.strCountGroup}',
+                origValueField: 'intCountGroupId',
                 store: '{countGroup}'
             },
             dtpCountDate: '{current.dtmCountDate}',
             txtCountNumber: '{current.strCountNo}',
             cboSubLocation: {
-                value: '{current.intSubLocationId}',
+                value: '{current.strSubLocation}',
+                origValueField: 'intCompanyLocationSubLocationId',
+                origUpdateField: 'intSubLocationId',
                 store: '{subLocation}',
                 defaultFilters: [
                     {
@@ -147,7 +97,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 ]
             },
             cboStorageLocation: {
-                value: '{current.intStorageLocationId}',
+                value: '{current.strStorageLocation}',
+                origValueField: 'intStorageLocationId',
                 store: '{storageLocation}',
                 defaultFilters: [
                     {
@@ -397,25 +348,25 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             store = Ext.create('Inventory.store.InventoryCount', { pageSize: 1 }),
             grdPhysicalCount = win.down('#grdPhysicalCount');
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
             enableActivity: true,
             onPageChange: me.onPageChange,
             enableAttachment: true,
-            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+            attachment: Ext.create('iRely.attachment.Manager', {
                 type: 'Inventory.InventoryCount',
                 window: win
             }),
             createTransaction: Ext.bind(me.createTransaction, me),
-            // include: 'tblICInventoryCountDetails.vyuICGetInventoryCountDetail',
+            include: 'vyuICGetInventoryCount',
             onSaveClick: me.saveAndPokeGrid(win, grdPhysicalCount),
             createRecord: me.createRecord,
             binding: me.config.binding,
             // details: [
             //     {
             //         key: 'tblICInventoryCountDetails',
-            //         component: Ext.create('iRely.mvvm.grid.Manager', {
+            //         component: Ext.create('iRely.grid.Manager', {
             //             grid: grdPhysicalCount,
             //             deleteButton: win.down('#btnRemove'),
             //             createRecord: me.createLineItemRecord
@@ -724,7 +675,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             }
         });
 
-        var component = Ext.create('iRely.mvvm.grid.Manager', {
+        var component = Ext.create('iRely.grid.Manager', {
             grid: grdPhysicalCount,
             deleteButton: win.down('#btnRemove'),
             createRecord: me.createLineItemRecord
