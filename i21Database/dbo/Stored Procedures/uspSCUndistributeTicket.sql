@@ -152,7 +152,8 @@ BEGIN TRY
 									@accrueLicense		= 0,
 									@raiseError			= 1
 							END
-							EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+							IF ISNULL(@intInvoiceId, 0) > 0
+								EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 							EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
 							EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 							EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
