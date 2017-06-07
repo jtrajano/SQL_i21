@@ -5283,6 +5283,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertItemRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertSiteRecord.sql" />
     <Build Include="dbo\Views\vyuRKGetInvoicedQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCalculateFreightUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
