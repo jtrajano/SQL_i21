@@ -2,21 +2,21 @@
 AS
 
 Select 
-CH.intCommodityUnitMeasureId,
+CH.intCommodityUOMId intCommodityUnitMeasureId,
 CL.strLocationName,
-CH.strCommodityDescription,
+CY.strDescription strCommodityDescription,
 CU.intMainCurrencyId,
 CU.intCent,
 CD.dblQuantity AS	dblDetailQuantity,
 CH.intContractTypeId,
 CH.intContractHeaderId,
-CH.strContractType,
+TP.strContractType strContractType,
 CH.strContractNumber,
-CH.strEntityName,
+EY.strEntityName strEntityName,
 CH.intEntityId,	
-CH.strCommodityCode,
+CY.strCommodityCode,
 CH.intCommodityId,
-CH.strPosition,
+PO.strPosition strPosition,
 CH.dtmContractDate,	
 CH.intContractBasisId,
 CD.intContractSeq,
@@ -65,14 +65,19 @@ CASE	WHEN	CD.intPricingTypeId = 2
 		ELSE	''
 END		AS strPricingStatus
 
-FROM	vyuCTContractHeaderView			CH	
+FROM	tblCTContractHeader			CH	
 	JOIN	tblCTContractDetail				CD	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		and intContractStatusId not in(2,3,6) 
+	JOIN	tblICCommodity					CY	ON	CY.intCommodityId					=		CH.intCommodityId	
+	JOIN	tblCTContractType				TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
+	JOIN	vyuCTEntity						EY	ON	EY.intEntityId						=		CH.intEntityId			AND
+														EY.strEntityType					=		(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+	JOIN	tblCTPosition					PO	ON	PO.intPositionId					=		CH.intPositionId
 	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				
 	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId 
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			
 	JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId					
-	JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT	
-	JOIN	tblRKFutureMarket				FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
-	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId					
-	LEFT	JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId	
+	JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId			
+	LEFT JOIN	tblRKFutureMarket				FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		
+	LEFT JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId					
+	LEFT JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId	
