@@ -22,6 +22,12 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
             _db.ContextManager.Database.CommandTimeout = 120000;
         }
+
+        public IRepository GetRepository()
+        {
+            return this._db;
+        }
+
         #endregion
 
         public override async Task<SearchResult> Search(GetParameter param)
@@ -156,6 +162,18 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
+        public async Task<GetObjectResult> GetItemStockSummaryByLotNonPaged(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockSummaryByLot>()
+                    .Filter(param);
+
+            return new GetObjectResult()
+            {
+                data = await query.AsNoTracking().ToListAsync(),
+                total = await query.CountAsync()
+            };
+        }
+
         public async Task<SearchResult> GetItemStockSummaryByLot(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockSummaryByLot>()

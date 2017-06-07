@@ -85,8 +85,8 @@
       <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=17.1.6353.8413, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\iRely.Common.17.1.6353.8413\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=17.1.6367.2889, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\iRely.Common.17.1.6367.2889\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
@@ -197,6 +197,7 @@
     <Compile Include="Implementation\CommodityUOMBl.cs" />
     <Compile Include="Implementation\CompanyPreferenceBl.cs" />
     <Compile Include="Implementation\CategoryTaxBl.cs" />
+    <Compile Include="Implementation\InventoryCountDetailBl.cs" />
     <Compile Include="Implementation\InventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Implementation\ItemSubLocationBl.cs" />
     <Compile Include="Implementation\M2MComputationBl.cs" />
@@ -231,6 +232,7 @@
     <Compile Include="Implementation\StorageUnitTypeBl.cs" />
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
+    <Compile Include="Interface\IInventoryCountDetailBl.cs" />
     <Compile Include="Interface\IInventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Interface\IItemSubLocationBl.cs" />
     <Compile Include="Interface\IM2MComputationBl.cs" />
