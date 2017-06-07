@@ -1,8 +1,7 @@
-﻿	CREATE VIEW [dbo].[vyuARCustomerSearch]
+﻿CREATE VIEW [dbo].[vyuARCustomerSearch]
 AS
 SELECT     
  Entity.intEntityId
-
 ,Entity.strName
 ,strCustomerNumber= case when Cus.strCustomerNumber = '' then Entity.strEntityNo else Cus.strCustomerNumber end 
 ,Con.strPhone
@@ -48,10 +47,11 @@ SELECT
 ,CusToCon.intEntityContactId
 ,Cus.ysnIncludeEntityName
 ,strTerm 
+,Cus.strStatementFormat
+,Cus.strAccountNumber
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 LEFT JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
---LEFT JOIN tblEMEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
 LEFT JOIN tblEMEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]
 LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.[intEntityId] = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId
