@@ -32,6 +32,7 @@ SELECT
 	, ItemStock.dblStockIn
 	, ItemStock.dblStockOut
 	, ItemStock.dblOnHand
+	, dblSystemCount = dblOnHand
 	, dblConversionFactor = ItemUOM.dblUnitQty
 	, ItemPricing.dblLastCost
 	, dblTotalCost = ItemStock.dblOnHand * ItemUOM.dblUnitQty * ItemPricing.dblLastCost
