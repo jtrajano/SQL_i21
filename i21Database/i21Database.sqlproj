@@ -5258,6 +5258,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabel.sql" />
     <Build Include="dbo\Views\vyuRKGetInvoicedQty.sql" />
     <Build Include="dbo\Tables\tblTRState.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateInventoryCountDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
