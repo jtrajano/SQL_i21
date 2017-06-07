@@ -287,15 +287,21 @@ GO
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} closed.',
                 [strQuery]          =        N'select intApprovalId from tblSMApprovalHistory
-												where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0',
+												where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0
+												and intEntityId not in (
+													select intEntityContactId from  tblEMEntityToContact where ysnPortalAccess = 1
+												)',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Closed',
                 [intSort]           =        13
     END
 	ELSE
 	BEGIN
 		UPDATE [tblSMReminderList]
-		SET	[strQuery] =        N'select intApprovalId from tblSMApprovalHistory
-								where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0'
+		SET	[strQuery]				=        N'select intApprovalId from tblSMApprovalHistory
+												where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0
+												and intEntityId not in (
+													select intEntityContactId from  tblEMEntityToContact where ysnPortalAccess = 1
+												)'
 		WHERE [strReminder] = N'Closed' AND [strType] = N'Transaction'
 	END    
   
@@ -327,15 +333,21 @@ GO
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} rejected.',
                 [strQuery]          =        N'select * from tblSMApprovalHistory
-												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0',
+												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0
+												and intEntityId not in (
+													select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1
+												)',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
                 [intSort]           =        15
     END
 	ELSE
 		BEGIN
 			UPDATE [tblSMReminderList]
-			SET	[strQuery] = N'select * from tblSMApprovalHistory
-							where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0'
+			SET	[strQuery]			=		N'select * from tblSMApprovalHistory
+												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0
+												and intEntityId not in (
+													select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1
+												)'
 			WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction' 
 		END
 
