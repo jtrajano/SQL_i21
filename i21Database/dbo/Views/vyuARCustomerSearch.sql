@@ -48,6 +48,7 @@ SELECT
 ,CusToCon.intEntityContactId
 ,Cus.ysnIncludeEntityName
 ,Cus.strStatementFormat
+,Cus.strAccountNumber
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN [tblEMEntityToContact] as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
