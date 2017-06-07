@@ -44,6 +44,7 @@ namespace iRely.Inventory.BusinessLayer
                     dblFranchisePercent = p.dblFranchisePercent,
                     intSort = p.intSort,
                     strCountry = p.tblSMCountry.strCountry,
+                    strStatus = p.strStatus,
                     intConcurrencyId = p.intConcurrencyId
                 })
                 .Filter(param, true);

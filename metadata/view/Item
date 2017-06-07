@@ -475,7 +475,7 @@
                                                         "itemId": "cboManufacturer",
                                                         "layout|flex": null,
                                                         "tabIndex": null,
-                                                        "valueField": "strManufacturer"
+                                                        "valueField": "intManufacturerId"
                                                     },
                                                     "name": "MyComboBox3",
                                                     "configAlternates": {
@@ -558,7 +558,7 @@
                                                         "itemId": "cboCommodity",
                                                         "layout|flex": null,
                                                         "tabIndex": null,
-                                                        "valueField": "strCommodityCode"
+                                                        "valueField": "intCommodityId"
                                                     },
                                                     "name": "MyComboBox37",
                                                     "configAlternates": {
@@ -595,22 +595,6 @@
                                                     },
                                                     "name": "MyComboBox6",
                                                     "designerId": "3a43a43f-e0cb-4c25-8d07-ede2f4b76de2"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Use Weigh Scales",
-                                                        "itemId": "chkUseWeighScales",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyCheckbox42",
-                                                    "designerId": "8539225c-1091-471f-bd3d-d3df859c6be2"
                                                 }
                                             ]
                                         },
@@ -672,7 +656,7 @@
                                                         "layout|margins": null,
                                                         "margin": null,
                                                         "tabIndex": null,
-                                                        "valueField": "strBrandCode"
+                                                        "valueField": "intBrandId"
                                                     },
                                                     "name": "MyComboBox4",
                                                     "configAlternates": {
@@ -940,7 +924,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter112",
                                                     "designerId": "52f90830-2c84-4dba-9ab6-9ab530dad629",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1905,7 +1889,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter129",
+                                                                    "name": "filter113",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2414,7 +2398,7 @@
                                                         "layout|flex": 2,
                                                         "margin": "0 0 0 10",
                                                         "padding": null,
-                                                        "title": "Storage Locations"
+                                                        "title": "Sub Locations"
                                                     },
                                                     "name": "MyGridPanel18",
                                                     "configAlternates": {
@@ -2484,7 +2468,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "itemId": "colsubSubLocationName",
-                                                                "text": "Storage Location",
+                                                                "text": "Sub Location",
                                                                 "width": 244
                                                             },
                                                             "name": "MyColumn81",
@@ -2503,7 +2487,7 @@
                                                                             "    {",
                                                                             "        dataIndex: 'intCompanyLocationSubLocationId',",
                                                                             "        dataType: 'numeric',",
-                                                                            "        text: 'Storage Location Id',",
+                                                                            "        text: 'Sub Location Id',",
                                                                             "        hidden: true",
                                                                             "    },",
                                                                             "    {",
@@ -2515,7 +2499,7 @@
                                                                             "    {",
                                                                             "        dataIndex: 'strSubLocationName',",
                                                                             "        dataType: 'string',",
-                                                                            "        text: 'Storage Location Name',",
+                                                                            "        text: 'Sub Location Name',",
                                                                             "        flex: 1",
                                                                             "    },",
                                                                             "    {",
@@ -2573,7 +2557,7 @@
                                                                 "dataIndex": "intSubLocationId",
                                                                 "hidden": true,
                                                                 "itemId": "colsubSubLocationId",
-                                                                "text": "Storage Location Id"
+                                                                "text": "Sub Location Id"
                                                             },
                                                             "name": "MyColumn82",
                                                             "designerId": "07c05b42-b3ef-49c7-9df9-f44886fc6ec7"
@@ -2963,7 +2947,7 @@
                                                                         "itemId": "cboFuelCategory",
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null,
-                                                                        "valueField": "strRinFuelCategoryCode"
+                                                                        "valueField": "intRinFuelCategoryId"
                                                                     },
                                                                     "name": "MyComboBox13",
                                                                     "configAlternates": {
@@ -3236,13 +3220,13 @@
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strDescription",
+                                                                        "displayField": "strTagNumber",
                                                                         "enableDrillDown": "true",
                                                                         "fieldLabel": "Medication Tag",
                                                                         "itemId": "cboMedicationTag",
                                                                         "labelWidth": 115,
                                                                         "layout|flex": null,
-                                                                        "valueField": "strDescription"
+                                                                        "valueField": "intTagId"
                                                                     },
                                                                     "name": "MyComboBox15",
                                                                     "configAlternates": {
@@ -3293,13 +3277,13 @@
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strDescription",
+                                                                        "displayField": "strTagNumber",
                                                                         "enableDrillDown": "true",
                                                                         "fieldLabel": "Ingredient Tag",
                                                                         "itemId": "cboIngredientTag",
                                                                         "labelWidth": 115,
                                                                         "layout|flex": null,
-                                                                        "valueField": "strDescription"
+                                                                        "valueField": "intTagId"
                                                                     },
                                                                     "name": "MyComboBox16",
                                                                     "configAlternates": {
@@ -3398,7 +3382,7 @@
                                                                 "labelWidth": 125,
                                                                 "layout|flex": null,
                                                                 "lookUpField": true,
-                                                                "valueField": "strItemNo"
+                                                                "valueField": "intItemId"
                                                             },
                                                             "name": "MyComboBox17",
                                                             "configAlternates": {
@@ -3469,63 +3453,6 @@
                                                             },
                                                             "name": "MyCheckbox13",
                                                             "designerId": "f2b75f1a-d5ae-494e-a784-dccd15580568"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intTagId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Tag Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strTagNumber',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Tag Number',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strDescription',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Description',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "enableDrillDown": "true",
-                                                                "fieldLabel": "Hazmat Message",
-                                                                "itemId": "cboHazmat",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null,
-                                                                "valueField": "strDescription"
-                                                            },
-                                                            "name": "MyComboBox79",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "70e85511-8682-4cf7-bb8e-7542a92bc41b",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "enableDrillDown",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Checkbox",
@@ -3747,7 +3674,7 @@
                                                                 "itemId": "cboModule",
                                                                 "labelWidth": 125,
                                                                 "layout|flex": null,
-                                                                "valueField": "strModule"
+                                                                "valueField": "intModuleId"
                                                             },
                                                             "name": "MyComboBox89",
                                                             "configAlternates": {
@@ -4282,7 +4209,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter130",
+                                                                            "name": "filter114",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4485,7 +4412,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter131",
+                                                                            "name": "filter115",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6463,7 +6390,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter132",
+                                                                    "name": "filter116",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6760,7 +6687,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter133",
+                                                                    "name": "filter117",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7187,6 +7114,62 @@
                                                             ]
                                                         },
                                                         {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 1,
+                                                                "itemId": "colItemContractStatus",
+                                                                "text": "Status",
+                                                                "width": 80
+                                                            },
+                                                            "name": "MyColumn84",
+                                                            "designerId": "e11a7880-af75-4ca4-abf1-cac09ba06035",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strStatus',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Status',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strStatus",
+                                                                        "editable": false,
+                                                                        "itemId": "cboItemContractStatus",
+                                                                        "valueField": "strStatus"
+                                                                    },
+                                                                    "name": "MyComboBox92",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "16fc89bd-199f-4388-b46e-804c075e5903",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
                                                             "type": "Ext.grid.View",
                                                             "reference": {
                                                                 "name": "viewConfig",
@@ -7323,7 +7306,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter134",
+                                                                            "name": "filter118",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -7530,7 +7513,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter135",
+                                                                            "name": "filter119",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -7765,7 +7748,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter136",
+                                                                    "name": "filter120",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -8115,7 +8098,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter137",
+                                                                    "name": "filter121",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -9001,7 +8984,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter138",
+                                                                    "name": "filter122",
                                                                     "designerId": "49c3fb54-0e26-4ccf-ade0-359ab372f04f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -9537,7 +9520,7 @@
                                                                         "labelWidth": 116,
                                                                         "layout|flex": null,
                                                                         "padding": null,
-                                                                        "valueField": "strCategoryCode",
+                                                                        "valueField": "intPatronageCategoryId",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox8",
@@ -9596,7 +9579,7 @@
                                                                         "labelWidth": 116,
                                                                         "layout|flex": null,
                                                                         "padding": null,
-                                                                        "valueField": "strCategoryCode",
+                                                                        "valueField": "intPatronageCategoryId",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox18",
@@ -9738,7 +9721,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter139",
+                                                    "name": "filter123",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -10337,7 +10320,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter140",
+                                                                    "name": "filter124",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -11101,7 +11084,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter141",
+                                                                    "name": "filter125",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -11953,7 +11936,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter142",
+                                                    "name": "filter126",
                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12358,7 +12341,7 @@
                                                                 "fieldLabel": "Origin",
                                                                 "itemId": "cboOrigin",
                                                                 "layout|flex": null,
-                                                                "valueField": "strDescription"
+                                                                "valueField": "intCommodityAttributeId"
                                                             },
                                                             "name": "MyComboBox38",
                                                             "configAlternates": {
@@ -12408,7 +12391,7 @@
                                                                 "fieldLabel": "Product Type",
                                                                 "itemId": "cboProductType",
                                                                 "layout|flex": null,
-                                                                "valueField": "strDescription"
+                                                                "valueField": "intCommodityAttributeId"
                                                             },
                                                             "name": "MyComboBox39",
                                                             "configAlternates": {
@@ -12458,7 +12441,7 @@
                                                                 "fieldLabel": "Region",
                                                                 "itemId": "cboRegion",
                                                                 "layout|flex": null,
-                                                                "valueField": "strDescription"
+                                                                "valueField": "intCommodityAttributeId"
                                                             },
                                                             "name": "MyComboBox40",
                                                             "configAlternates": {
@@ -12508,7 +12491,7 @@
                                                                 "fieldLabel": "Season",
                                                                 "itemId": "cboSeason",
                                                                 "layout|flex": null,
-                                                                "valueField": "strDescription"
+                                                                "valueField": "intCommodityAttributeId"
                                                             },
                                                             "name": "MyComboBox41",
                                                             "configAlternates": {
@@ -12558,7 +12541,7 @@
                                                                 "fieldLabel": "Class",
                                                                 "itemId": "cboClass",
                                                                 "layout|flex": null,
-                                                                "valueField": "strDescription"
+                                                                "valueField": "intCommodityAttributeId"
                                                             },
                                                             "name": "MyComboBox42",
                                                             "configAlternates": {
@@ -12608,7 +12591,7 @@
                                                                 "fieldLabel": "Product Line",
                                                                 "itemId": "cboProductLine",
                                                                 "layout|flex": null,
-                                                                "valueField": "strDescription"
+                                                                "valueField": "intCommodityProductLineId"
                                                             },
                                                             "name": "MyComboBox43",
                                                             "configAlternates": {
@@ -12804,7 +12787,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter143",
+                                                                    "name": "filter127",
                                                                     "designerId": "74ebd405-7763-4163-a329-69eecae2fbea",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13204,7 +13187,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter144",
+                                                    "name": "filter128",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -13594,7 +13577,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter145",
+                                                    "name": "filter129",
                                                     "designerId": "336a12a5-7629-4f16-aedc-1c6511cd8165",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -13990,7 +13973,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter146",
+                                                    "name": "filter130",
                                                     "designerId": "49a9508d-505d-4de5-977b-f8ebc7227c15",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -14177,7 +14160,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter147",
+                                                    "name": "filter131",
                                                     "designerId": "6e3091f8-4c8b-4ab7-bb33-40607d9656f6",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -14660,7 +14643,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter148",
+                                                                    "name": "filter132",
                                                                     "designerId": "2bbc0808-5b40-4515-bf7e-466c3903a1c4",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -14883,7 +14866,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter149",
+                                                                    "name": "filter133",
                                                                     "designerId": "f1bbb210-cf31-4fe7-8040-6808d9375e23",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -15155,7 +15138,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter150",
+                                                                    "name": "filter134",
                                                                     "designerId": "49a6fdf8-831b-4540-9826-f339161f9600",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -15545,7 +15528,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging118",
+                    "name": "statusbarpaging13",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

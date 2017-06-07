@@ -59,6 +59,16 @@ Ext.define('Inventory.view.ItemViewModel', {
                 property: 'intM2MComputationId'
             },
         },
+        contractstatus: {
+            autoLoad: true,
+            data: [
+                { strStatus: 'Active' },
+                { strStatus: 'Discontinued' }
+            ],
+            fields: [
+                { name: 'strStatus' }
+            ]
+        },
         itemTypes: {
             autoLoad: true,
             data: [
@@ -951,6 +961,11 @@ Ext.define('Inventory.view.ItemViewModel', {
 //            else {
 //                return true;
 //            }
+        },
+        readOnlyContractItemStatus: function(get) {
+            var status = get('current.strStatus');
+            console.log(status);
+            return (status === 'Discontinued');
         },
         readOnlyCommodity: function (get) {
             //For Discount Item

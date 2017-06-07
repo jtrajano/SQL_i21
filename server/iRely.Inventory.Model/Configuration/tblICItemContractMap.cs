@@ -21,6 +21,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.strGradeType).HasColumnName("strGradeType");
             this.Property(t => t.strGarden).HasColumnName("strGarden");
+            this.Property(t => t.strStatus).HasColumnName("strStatus");
             this.Property(t => t.dblYieldPercent).HasColumnName("dblYieldPercent").HasPrecision(18, 6);
             this.Property(t => t.dblTolerancePercent).HasColumnName("dblTolerancePercent").HasPrecision(18, 6);
             this.Property(t => t.dblFranchisePercent).HasColumnName("dblFranchisePercent").HasPrecision(18, 6);
