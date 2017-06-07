@@ -24,6 +24,7 @@ Type the overview for the table here.
 		[dblYieldPercent] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblTolerancePercent] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblFranchisePercent] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[strStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT('Active'),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemContract] PRIMARY KEY ([intItemContractId]), 
