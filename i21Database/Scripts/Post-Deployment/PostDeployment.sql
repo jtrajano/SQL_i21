@@ -237,6 +237,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\15_InventoryCostAdjustmentTypes.sql
 :r .\IC\18_FOBPointTypes.sql
 :r .\IC\19_M2MComputations.sql
+:r .\IC\20_UpdateContractItemStatuses.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
 
 --Help Desk
