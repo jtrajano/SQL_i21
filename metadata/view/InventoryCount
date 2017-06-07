@@ -446,29 +446,22 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLocationName",
-                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Location",
                                                         "itemId": "cboLocation",
                                                         "labelWidth": 85,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strLocationName"
+                                                        "valueField": "intCompanyLocationId"
                                                     },
                                                     "name": "MyComboBox81",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "enableDrillDown": "boolean"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "741e242a-a3bf-4503-b574-04c2ce271306",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -504,29 +497,22 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strCategoryCode",
-                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Category",
                                                         "itemId": "cboCategory",
                                                         "labelWidth": 85,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strCategoryCode"
+                                                        "valueField": "intCategoryId"
                                                     },
                                                     "name": "MyComboBox83",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "enableDrillDown": "boolean"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "39ed00ed-74b7-4bc9-a789-d2be82619ac8",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -562,29 +548,22 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strCommodityCode",
-                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Commodity",
                                                         "itemId": "cboCommodity",
                                                         "labelWidth": 85,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strCommodityCode"
+                                                        "valueField": "intCommodityId"
                                                     },
                                                     "name": "MyComboBox84",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "enableDrillDown": "boolean"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "8301b7d7-7fc2-42b6-a12b-3705838fe31e",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -650,29 +629,22 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strCountGroup",
-                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Count Group",
                                                         "itemId": "cboCountGroup",
                                                         "labelWidth": 85,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strCountGroup"
+                                                        "valueField": "intCountGroupId"
                                                     },
                                                     "name": "MyComboBox85",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "enableDrillDown": "boolean"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "04129fc7-78ac-4e7f-aab9-870d64da27ce",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -758,7 +730,7 @@
                                                             "\t{",
                                                             "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Location Id',",
+                                                            "\t\ttext: 'Sub Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
@@ -770,7 +742,7 @@
                                                             "\t{",
                                                             "\t\tdataIndex: 'strSubLocationName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Location Name',",
+                                                            "\t\ttext: 'Sub Location Name',",
                                                             "\t\tflex: 1",
                                                             "\t},",
                                                             "\t{",
@@ -783,28 +755,21 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strSubLocationName",
-                                                        "enableDrillDown": true,
-                                                        "fieldLabel": "Storage Location",
+                                                        "fieldLabel": "Sub Location",
                                                         "itemId": "cboSubLocation",
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strSubLocationName"
+                                                        "valueField": "intCompanyLocationSubLocationId"
                                                     },
                                                     "name": "MyComboBox82",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "enableDrillDown": "boolean"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "dcb4e6f6-acf4-4cbd-986c-0c7c45fcc7e7",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -827,7 +792,7 @@
                                                             "\t{",
                                                             "\t\tdataIndex: 'strName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Unit',",
+                                                            "\t\ttext: 'Storage Location',",
                                                             "\t\tflex: 1",
                                                             "\t},",
                                                             "\t{",
@@ -840,28 +805,21 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strName",
-                                                        "enableDrillDown": true,
-                                                        "fieldLabel": "Storage Unit",
+                                                        "fieldLabel": "Storage Location",
                                                         "itemId": "cboStorageLocation",
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strName"
+                                                        "valueField": "intStorageLocationId"
                                                     },
                                                     "name": "MyComboBox",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "enableDrillDown": "boolean"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "f34d8016-47d1-47c7-97eb-1c664273aa6d",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -1199,9 +1157,123 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "container|padding": 2,
+                                                "dock": "top",
+                                                "itemId": "tlbSearchFilter"
+                                            },
+                                            "name": "MyToolbar16",
+                                            "designerId": "856bace9-9a5c-4f6c-a3a2-cc89b1793cc5",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "iconCls": "small-filter",
+                                                        "itemId": "btnSearchFilter",
+                                                        "layout|flex": null,
+                                                        "text": "Search"
+                                                    },
+                                                    "name": "MyButton55",
+                                                    "designerId": "ff6d0e58-5460-413c-a7c4-4520eed85b11",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.menu.Menu",
+                                                            "reference": {
+                                                                "name": "menu",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "bodyPadding": null,
+                                                                "itemId": "mnuSearchFilter",
+                                                                "width": 250
+                                                            },
+                                                            "name": "MyMenu",
+                                                            "designerId": "463c78a7-f39d-4d04-93b1-202ec0f576c0"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "emptyText": "Search",
+                                                        "fieldLabel": "Search Any Field",
+                                                        "hideLabel": true,
+                                                        "itemId": "txtSearchFilter",
+                                                        "layout|flex": null,
+                                                        "name": "query",
+                                                        "selectOnFocus": true
+                                                    },
+                                                    "name": "MyTextField47",
+                                                    "designerId": "d204c575-2725-4a6d-bd90-d9ac1b330b27",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.trigger.Trigger",
+                                                            "reference": {
+                                                                "name": "triggers",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "cls": "x-form-clear-trigger",
+                                                                "name": "mytrigger1"
+                                                            },
+                                                            "name": "MyTrigger1",
+                                                            "designerId": "2f2263db-79e0-465d-8a53-56bf37884ce2",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "fixedfunction",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|params": [
+                                                                            "field",
+                                                                            "trigger",
+                                                                            "e"
+                                                                        ],
+                                                                        "designer|viewControllerFn": null,
+                                                                        "fn": "handler",
+                                                                        "implHandler": [
+                                                                            "if(field.getValue() !== \"\") {",
+                                                                            "    var win = field.up('window');",
+                                                                            "    ic.count.loadDetails(this, win, win.context, true, null);",
+                                                                            "}",
+                                                                            "field.setValue(\"\");"
+                                                                        ]
+                                                                    },
+                                                                    "name": "handler",
+                                                                    "designerId": "4104beaa-ba32-42eb-b169-d85580cceebb"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.toolbar.Toolbar",
+                                            "reference": {
+                                                "name": "dockedItems",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "componentCls": "i21-toolbar-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
+                                                "hidden": true,
                                                 "itemId": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar37",
@@ -1251,9 +1323,10 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "itemId": "gridfilter",
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter118",
+                                                    "name": "filter135",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1269,25 +1342,11 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "headerDrillDownClick": "onHeaderItemDrillDown",
-                                                "headerDrillDownText": "Open",
                                                 "itemId": "colItem",
                                                 "text": "Item"
                                             },
                                             "name": "MyColumn6",
                                             "designerId": "bcc23027-7382-43e9-a224-fddf55b77c7a",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "headerDrillDownClick",
-                                                    "type": "string"
-                                                },
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "headerDrillDownText",
-                                                    "type": "string"
-                                                }
-                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1419,7 +1478,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colSubLocation",
-                                                "text": "Storage Location"
+                                                "text": "Sub Location"
                                             },
                                             "name": "MyColumn10",
                                             "designerId": "bb2f66a4-5d8e-4b4b-a5fd-e8ac9a7510e5",
@@ -1449,25 +1508,25 @@
                                                             "    {",
                                                             "\t\tdataIndex: 'intSubLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Location Id',",
+                                                            "\t\ttext: 'Sub Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strSubLocationName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Location',",
+                                                            "\t\ttext: 'Sub Location',",
                                                             "\t\tflex: 1",
                                                             "\t},    ",
                                                             "\t{",
                                                             "\t\tdataIndex: 'intStorageLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Unit Id',",
+                                                            "\t\ttext: 'Storage Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strStorageLocationName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Unit',",
+                                                            "\t\ttext: 'Storage Location',",
                                                             "\t\tflex: 1",
                                                             "\t},    ",
                                                             "\t{",
@@ -1521,7 +1580,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colStorageLocation",
-                                                "text": "Storage Unit"
+                                                "text": "Storage Location"
                                             },
                                             "name": "MyColumn",
                                             "designerId": "701caf49-e88d-40a5-9890-980259adc2c1",
@@ -1551,19 +1610,19 @@
                                                             "{",
                                                             "dataIndex: 'intSubLocationId',",
                                                             "dataType: 'numeric',",
-                                                            "text: 'Storage Location Id',",
+                                                            "text: 'Sub Location Id',",
                                                             "hidden: true",
                                                             "},",
                                                             "{",
                                                             "dataIndex: 'intStorageLocationId',",
                                                             "dataType: 'numeric',",
-                                                            "text: 'Storage Unit Id',",
+                                                            "text: 'Storage Location Id',",
                                                             "hidden: true",
                                                             "},",
                                                             "{",
                                                             "dataIndex: 'strStorageLocationName',",
                                                             "dataType: 'string',",
-                                                            "text: 'Storage Unit',",
+                                                            "text: 'Storage Location',",
                                                             "flex: 1",
                                                             "},  ",
                                                             "{",
@@ -1652,13 +1711,13 @@
                                                             "    {",
                                                             "\t\tdataIndex: 'intSubLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Location Id',",
+                                                            "\t\ttext: 'Sub Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "    {",
                                                             "\t\tdataIndex: 'intStorageLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Unit Id',",
+                                                            "\t\ttext: 'Storage Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "    {",
@@ -2125,6 +2184,44 @@
                                             },
                                             "name": "MyCellEditingPlugin",
                                             "designerId": "3ea574ee-f353-44cf-8a2a-c6e2bdb71da3"
+                                        },
+                                        {
+                                            "type": "Ext.toolbar.Paging",
+                                            "reference": {
+                                                "name": "dockedItems",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "displayInfo": true,
+                                                "dock": "bottom",
+                                                "itemId": "pgtCount",
+                                                "width": 360
+                                            },
+                                            "name": "MyPagingToolbar",
+                                            "designerId": "08dcbf32-400e-4a7f-817b-15663f1eeb22",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "displayField": "strRows",
+                                                        "editable": false,
+                                                        "fieldLabel": "Rows",
+                                                        "forceSelection": true,
+                                                        "itemId": "cboPageSize",
+                                                        "labelWidth": 30,
+                                                        "layout|flex": null,
+                                                        "valueField": "strRows"
+                                                    },
+                                                    "name": "MyComboBox90",
+                                                    "designerId": "56374de4-4feb-4a13-92a4-3b9be79a6fb2"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
@@ -2216,7 +2313,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging111",
+                    "name": "statusbarpaging14",
                     "designerId": "819ea614-6c35-4e6e-8d56-521d4ef1d53e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

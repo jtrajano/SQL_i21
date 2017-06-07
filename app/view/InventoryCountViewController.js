@@ -1,12 +1,70 @@
 Ext.define('Inventory.view.InventoryCountViewController', {
     extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventorycount',
+    alternateClassName: 'ic.count',
     requires: [
         'CashManagement.common.Text',
         'CashManagement.common.BusinessRules'
     ],
 
     config: {
+        searchConfig: {
+            title: 'Search Inventory Count',
+            type: 'Inventory.InventoryCount',
+            api: {
+                read: '../Inventory/api/InventoryCount/Search'
+            },
+            columns: [
+                {dataIndex: 'intInventoryCountId', text: "Count Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strCountNo', text: 'Count No', flex: 1, dataType: 'string'},
+                {dataIndex: 'strLocationName', text: 'Location', flex: 1, dataType: 'string'},
+                {dataIndex: 'strCategory', text: 'Category', flex: 1, dataType: 'string'},
+                {dataIndex: 'strCommodity', text: 'Commodity', flex: 1, dataType: 'string'},
+                {dataIndex: 'strCountGroup', text: 'Count Group', flex: 1, dataType: 'string'},
+                {dataIndex: 'dtmCountDate', text: 'Count Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                {dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string'},
+                {dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string'},
+                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string'}
+            ],
+            buttons: [
+                {
+                    text: 'Items',
+                    itemId: 'btnItem',
+                    clickHandler: 'onItemClick',
+                    width: 80
+                },
+                {
+                    text: 'Categories',
+                    itemId: 'btnCategory',
+                    clickHandler: 'onCategoryClick',
+                    width: 100
+                },
+                {
+                    text: 'Commodities',
+                    itemId: 'btnCommodity',
+                    clickHandler: 'onCommodityClick',
+                    width: 100
+                },
+                {
+                    text: 'Locations',
+                    itemId: 'btnLocation',
+                    clickHandler: 'onLocationClick',
+                    width: 100
+                },
+                {
+                    text: 'Storage Locations',
+                    itemId: 'btnStorageLocation',
+                    clickHandler: 'onStorageLocationClick',
+                    width: 110
+                },
+                {
+                    text: 'Count Group',
+                    itemId: 'btnCountGroup',
+                    clickHandler: 'onCountGroupClick',
+                    width: 80
+                }
+            ]
+        },
         binding: {
             bind: {
                 title: 'Inventory Count - {current.strCountNo}'
@@ -19,6 +77,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             btnUndo: {
                 disabled: '{current.ysnPosted}'
+            },
+            cboPageSize: {
+                hidden: true,
+                value: '{pageSize}',
+                store: '{pagesize}'
             },
             btnPrintCountSheets: {
                 hidden: '{checkPrintCountSheet}'
@@ -50,32 +113,25 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
 
             cboLocation: {
-                value: '{current.strLocation}',
-                origValueField: 'intCompanyLocationId',
-                origUpdateField: 'intLocationId',
+                value: '{current.intLocationId}',
                 store: '{location}'
             },
             cboCategory: {
-                value: '{current.strCategory}',
-                origValueField: 'intCategoryId',
+                value: '{current.intCategoryId}',
                 store: '{category}'
             },
             cboCommodity: {
-                value: '{current.strCommodity}',
-                origValueField: 'intCommodityId',
+                value: '{current.intCommodityId}',
                 store: '{commodity}'
             },
             cboCountGroup: {
-                value: '{current.strCountGroup}',
-                origValueField: 'intCountGroupId',
+                value: '{current.intCountGroupId}',
                 store: '{countGroup}'
             },
             dtpCountDate: '{current.dtmCountDate}',
             txtCountNumber: '{current.strCountNo}',
             cboSubLocation: {
-                value: '{current.strSubLocation}',
-                origValueField: 'intCompanyLocationSubLocationId',
-                origUpdateField: 'intSubLocationId',
+                value: '{current.intSubLocationId}',
                 store: '{subLocation}',
                 defaultFilters: [
                     {
@@ -91,8 +147,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 ]
             },
             cboStorageLocation: {
-                value: '{current.strStorageLocation}',
-                origValueField: 'intStorageLocationId',
+                value: '{current.intStorageLocationId}',
                 store: '{storageLocation}',
                 defaultFilters: [
                     {
@@ -342,31 +397,34 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             store = Ext.create('Inventory.store.InventoryCount', { pageSize: 1 }),
             grdPhysicalCount = win.down('#grdPhysicalCount');
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
             store: store,
             enableActivity: true,
+            onPageChange: me.onPageChange,
             enableAttachment: true,
-            attachment: Ext.create('iRely.attachment.Manager', {
+            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.InventoryCount',
                 window: win
             }),
             createTransaction: Ext.bind(me.createTransaction, me),
-            include: 'vyuICGetInventoryCount, tblICInventoryCountDetails.vyuICGetInventoryCountDetail',
+            // include: 'tblICInventoryCountDetails.vyuICGetInventoryCountDetail',
             onSaveClick: me.saveAndPokeGrid(win, grdPhysicalCount),
             createRecord: me.createRecord,
             binding: me.config.binding,
-            details: [
-                {
-                    key: 'tblICInventoryCountDetails',
-                    component: Ext.create('iRely.grid.Manager', {
-                        grid: grdPhysicalCount,
-                        deleteButton: win.down('#btnRemove'),
-                        createRecord: me.createLineItemRecord
-                    })
-                }
-            ]
+            // details: [
+            //     {
+            //         key: 'tblICInventoryCountDetails',
+            //         component: Ext.create('iRely.mvvm.grid.Manager', {
+            //             grid: grdPhysicalCount,
+            //             deleteButton: win.down('#btnRemove'),
+            //             createRecord: me.createLineItemRecord
+            //         })
+            //     }
+            // ]
         });
+
+        me.attachOnEditListener(win, grdPhysicalCount);
 
         return win.context;
     },
@@ -405,7 +463,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     ];
                 }
                 context.data.load({
-                    filters: config.filters
+                    filters: config.filters,
+                    callback: function(records, opts, success) {
+                        //ic.count.loadDetails(me, win, context, false);
+                    }
                 });
             }
         }
@@ -485,6 +546,195 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             current.set('ysnExternal', records[0].get('ysnExternal'));
         }
     },
+    statics: {
+        getFilter: function(current, filterKey) {
+            var filter = [];
+            if(!current) 
+                return filter;
+            
+            if(filterKey) {
+                filter.push({
+                    column: 'intInventoryCountId',
+                    value: current.get('intInventoryCountId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intLocationId'))) {
+                filter.push({
+                    column: 'intLocationId',
+                    value: current.get('intLocationId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
+                filter.push({
+                    column: 'intCategoryId',
+                    value: current.get('intCategoryId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
+                filter.push({
+                    column: 'intCommodityId',
+                    value: current.get('intCommodityId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intCountGroupId'))) {
+                filter.push({
+                    column: 'intCountGroupId',
+                    value: current.get('intCountGroupId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intSubLocationId'))) {
+                filter.push({
+                    column: 'intSubLocationId',
+                    value: current.get('intSubLocationId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intStorageLocationId'))) {
+                filter.push({
+                    column: 'intStorageLocationId',
+                    value: current.get('intStorageLocationId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if(current.get('ysnIncludeZeroOnHand') === false){
+                    filter.push({
+                    column: 'dblOnHand',
+                    value: 0,
+                    condition: 'gt',
+                    conjunction: 'and'
+                });
+            }
+
+            return filter;
+        },
+
+        loadDetails: function(me, win, context, showProgress, filters) {
+            if(showProgress)
+                win.setLoading('Loading Items...');
+            var current = win.viewModel.data.current;
+            var store = Ext.create('Inventory.store.BufferedInventoryCountDetail');
+            var grdPhysicalCount = win.down("#grdPhysicalCount");
+
+            var pagingtoolbar = win.down("#pgtCount");
+            var defaultFilter = ic.count.getFilter(current, true);
+            var filter = defaultFilter;
+            if(filters)
+                filter = filters;
+
+            store.proxy.extraParams = { filter: iRely.Functions.encodeFilters(filter) };
+            grdPhysicalCount.setStore(store);
+            grdPhysicalCount.down("#tlbGridOptions").hide();
+            win.down("#gridfilter").hide();
+            var defaultFilterText = win.down("#txtFilterGrid");
+            if(defaultFilterText)
+                defaultFilterText.hide();
+            
+            var tlbSearchFilter = win.down("#tlbSearchFilter");
+            var btnSearchFilter = tlbSearchFilter.down("#btnSearchFilter");
+            var mnuSearchFilter = btnSearchFilter.down("#mnuSearchFilter");
+            if(mnuSearchFilter.items.length === 0) {
+                Ext.each(grdPhysicalCount.columns, function(column){
+                    mnuSearchFilter.add({
+                        xtype: 'menucheckitem',
+                        text: column.text,
+                        itemId: column.name,
+                        dataIndex: column.dataIndex,
+                        checked: true
+                    });
+                });
+            }
+            pagingtoolbar.setStore(store);
+
+            store.load({
+                filters: filter,
+                params: {
+                    start: 0,
+                    limit: win.viewModel.data.pageSize
+                },
+                callback: function(records, opts, success) {
+                    win.setLoading(false);
+                }
+            });
+
+            
+        }
+    },
+
+    onSearchFilter: function(f, e) {
+        if(e.getKey() == e.ENTER){
+            var me = this;
+            var win = f.up('window');
+            var grdPhysicalCount = win.down("#grdPhysicalCount");
+            var tlbSearchFilter = win.down("#tlbSearchFilter");
+            var btnSearchFilter = tlbSearchFilter.down("#btnSearchFilter");
+            var mnuSearchFilter = btnSearchFilter.down("#mnuSearchFilter");
+
+            var filters = [];
+            var cols = _.filter(mnuSearchFilter.items.items, function(c) { return c.dataIndex !== '' && c.checked; });
+            if(!cols || cols.length <= 0)
+                return null;
+
+            var filterCol = "";
+            _.each(cols, function(c) { filterCol += c.dataIndex + "|^|"; });
+
+            var filter = {
+                column: filterCol,
+                value: f.value,
+                condition: 'ct',
+                conjunction: 'or'
+            };
+            if(f.value !== "")
+                filters.push(filter);
+            
+            filters = filters.concat(ic.count.getFilter(win.viewModel.data.current));
+            
+            ic.count.loadDetails(me, win, win.context, true, filters);    
+        }
+    },
+
+    onPageChange: function(pagingStatusBar, record, eOpts) {
+        var me = this;
+        var win = pagingStatusBar.up('window');
+        var current = win.viewModel.data.current;
+        var store = Ext.create('Inventory.store.BufferedInventoryCountDetail');
+        var grdPhysicalCount = win.down("#grdPhysicalCount");
+        var pagingtoolbar = win.down("#pgtCount");
+        
+        ic.count.loadDetails(me, win, win.context, true);
+    },
+
+    attachOnEditListener(win, grdPhysicalCount) {
+        var me = this;
+        var plugin = grdPhysicalCount.getPlugin('cepPhysicalCount');
+        plugin.on({
+            edit: function(editor, context, eOpts) {
+                grdPhysicalCount.store.save();
+            }
+        });
+
+        var component = Ext.create('iRely.mvvm.grid.Manager', {
+            grid: grdPhysicalCount,
+            deleteButton: win.down('#btnRemove'),
+            createRecord: me.createLineItemRecord
+        });
+    },
+
+    onRecountCheckChange: function(column, index, value, record) {
+        var store = record.store;
+        store.save();
+    },
 
     onFetchClick: function (button) {
         var win = button.up('window');
@@ -492,114 +742,178 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var current = vm.data.current;
         var itemList = vm.storeInfo.itemList;
         var data = win.context.data;
+        var me = this;
 
         if (!data) return;
         data.saveRecord({ callbackFn: function (batch, eOpts, success) {
+            win.setLoading(false);
             win.setLoading('Fetching Items...');
             if (itemList) {
-                var filter = [];
-                if (!iRely.Functions.isEmpty(current.get('intLocationId'))) {
-                    filter.push({
-                        column: 'intLocationId',
-                        value: current.get('intLocationId'),
-                        conjunction: 'and'
-                    });
-                }
-                
-                if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
-                    filter.push({
-                        column: 'intCategoryId',
-                        value: current.get('intCategoryId'),
-                        conjunction: 'and'
-                    });
-                }
-                
-                if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
-                    filter.push({
-                        column: 'intCommodityId',
-                        value: current.get('intCommodityId'),
-                        conjunction: 'and'
-                    });
-                }
-                
-                if (!iRely.Functions.isEmpty(current.get('intCountGroupId'))) {
-                    filter.push({
-                        column: 'intCountGroupId',
-                        value: current.get('intCountGroupId'),
-                        conjunction: 'and'
-                    });
-                }
-                
-                if (!iRely.Functions.isEmpty(current.get('intSubLocationId'))) {
-                    filter.push({
-                        column: 'intSubLocationId',
-                        value: current.get('intSubLocationId'),
-                        conjunction: 'and'
-                    });
-                }
-                
-                if (!iRely.Functions.isEmpty(current.get('intStorageLocationId'))) {
-                    filter.push({
-                        column: 'intStorageLocationId',
-                        value: current.get('intStorageLocationId'),
-                        conjunction: 'and'
-                    });
-                }
-               
-                if(current.get('ysnIncludeZeroOnHand') === false){
-                        filter.push({
-                        column: 'dblOnHand',
-                        value: 0,
-                        condition: 'gt',
-                        conjunction: 'and'
-                    });
-                }
-                
-                if (current.get('ysnCountByLots')) {
-                    itemList = vm.storeInfo.itemListByLot;
-                }
-
-                itemList.load({
-                    filters: filter,
-                    callback: function (records, eOpts, success) {
-                        if (success) {
-                            if (records) {
-                                current.tblICInventoryCountDetails().removeAll();
-                                var count = 1;
-                                Ext.Array.each(records, function (record) {
-                                    var newItem = Ext.create('Inventory.model.InventoryCountDetail', {
-                                        intItemId: record.get('intItemId'),
-                                        intItemLocationId: record.get('intItemLocationId'),
-                                        intSubLocationId: record.get('intSubLocationId'),
-                                        intStorageLocationId: record.get('intStorageLocationId'),
-                                        intLotId: record.get('intLotId'),
-                                        dblSystemCount: record.get('dblOnHand'),
-                                        dblLastCost: record.get('dblLastCost'),
-                                        strCountLine: current.get('strCountNo') + '-' + count,
-                                        intItemUOMId: record.get('intItemUOMId'),
-                                        ysnRecount: false,
-                                        intEntityUserSecurityId: iRely.config.Security.EntityId,
-
-                                        strItemNo: record.get('strItemNo'),
-                                        strItemDescription: record.get('strItemDescription'),
-                                        strLotTracking: record.get('strLotTracking'),
-                                        strCategory: record.get('strCategoryCode'),
-                                        strLocationName: record.get('strLocationName'),
-                                        strSubLocationName: record.get('strSubLocationName'),
-                                        strStorageLocationName: record.get('strStorageLocationName'),
-                                        strLotNumber: record.get('strLotNumber'),
-                                        strLotAlias: record.get('strLotAlias'),
-                                        strUnitMeasure: record.get('strUnitMeasure'),
-                                        strUserName: iRely.config.Security.UserName
-                                    });
-                                    current.tblICInventoryCountDetails().add(newItem);
-                                    count++;
-                                });
-                            }
-                        }
-                        win.setLoading(false);
+                var filter = ic.count.getFilter(current, true);
+                var params = [];
+                win.setLoading('Updating details...');
+                var rx = ic.utils.ajax({
+                    url: "../Inventory/api/InventoryCount/UpdateDetails",
+                    method: "PUT",
+                    params: {
+                        intInventoryCountId: current.get('intInventoryCountId'),
+                        intEntityUserSecurityId: iRely.config.Security.EntityId,
+                        strHeaderNo: current.get('strCountNo'),
+                        intLocationId: current.get('intLocationId'),
+                        intCategoryId: current.get('intCategoryId'),
+                        intCommodityId: current.get('intCommodityId'),
+                        intCountGroupId: current.get('intCountGroupId'),
+                        intSubLocationId: current.get('intSubLocationId'),
+                        intStorageLocationId: current.get('intStorageLocationId'),
+                        ysnIncludeZeroOnHand: current.get('ysnIncludeZeroOnHand'),
+                        ysnCountByLots: current.get('ysnCountByLots')
                     }
+                })
+                .subscribe(function(data) {
+                    win.setLoading('Loading Items...');
+                    ic.count.loadDetails(me, win, win.context, true);
+                }, function(failed) {
+                    win.setLoading(false);    
                 });
+                // if (current.get('ysnCountByLots')) {
+                //     //itemList = vm.storeInfo.itemListByLot;
+                //     win.setLoading('Updating details...');
+                //     var rx = ic.utils.ajax({
+                //         url: "../Inventory/api/InventoryCount/UpdateDetails",
+                //         method: "PUT",
+                //         params: {
+                //             intInventoryCountId: current.get('intInventoryCountId'),
+                //             intEntityUserSecurityId: iRely.config.Security.EntityId,
+                //             strHeaderNo: current.get('strCountNo'),
+                //             intLocationId: current.get('intLocationId'),
+                //             intCategoryId: current.get('intCategoryId'),
+                //             intCommodityId: current.get('intCommodityId'),
+                //             intCountGroupId: current.get('intCountGroupId'),
+                //             intSubLocationId: current.get('intSubLocationId'),
+                //             intStorageLocationId: current.get('intStorageLocationId'),
+                //             ysnIncludeZeroOnHand: current.get('ysnIncludeZeroOnHand')
+                //         }
+                //     })
+                //     .subscribe(function(data) {
+                //         win.setLoading('Loading Items...');
+                //         me.loadDetails(me, win, win.context, true);
+                //     }, function(failed) {
+                //         win.setLoading(false);    
+                //     });
+                // } else {
+                //     win.setLoading('Updating details...');
+                //     var rx = ic.utils.ajax({
+                //         url: "../Inventory/api/InventoryCount/UpdateDetails",
+                //         method: "PUT",
+                //         params: {
+                //             intInventoryCountId: current.get('intInventoryCountId'),
+                //             intEntityUserSecurityId: iRely.config.Security.EntityId,
+                //             strHeaderNo: current.get('strCountNo'),
+                //             intLocationId: current.get('intLocationId'),
+                //             intCategoryId: current.get('intCategoryId'),
+                //             intCommodityId: current.get('intCommodityId'),
+                //             intCountGroupId: current.get('intCountGroupId'),
+                //             intSubLocationId: current.get('intSubLocationId'),
+                //             intStorageLocationId: current.get('intStorageLocationId'),
+                //             ysnIncludeZeroOnHand: current.get('ysnIncludeZeroOnHand'),
+                //             ysnCountByLots: current.get('ysnCountByLots')
+                //         }
+                //     })
+                //     .subscribe(function(data) {
+                //         win.setLoading('Loading Items...');
+                //         me.loadDetails(me, win, win.context, true);
+                //     }, function(failed) {
+                //         win.setLoading(false);    
+                //     });
+                // }
+
+                
+
+                // var store = Ext.create('Inventory.store.ItemStockSummaryByLot');
+                // var grdPhysicalCount = win.down("#grdPhysicalCount");
+                // grdPhysicalCount.setStore(store);
+
+
+                // itemList.load({
+                //     filters: filter,
+                //     callback: function (records, eOpts, success) {
+                //         if (success) {
+                //             if (records) {
+                //                 current.tblICInventoryCountDetails().removeAll();
+                //                 var count = 1;
+                //                 Ext.Array.each(records, function (record) {
+                //                     var newItem = Ext.create('Inventory.model.InventoryCountDetail', {
+                //                         intItemId: record.get('intItemId'),
+                //                         intItemLocationId: record.get('intItemLocationId'),
+                //                         intSubLocationId: record.get('intSubLocationId'),
+                //                         intStorageLocationId: record.get('intStorageLocationId'),
+                //                         intLotId: record.get('intLotId'),
+                //                         dblSystemCount: record.get('dblOnHand'),
+                //                         dblLastCost: record.get('dblLastCost'),
+                //                         strCountLine: current.get('strCountNo') + '-' + count,
+                //                         intItemUOMId: record.get('intItemUOMId'),
+                //                         ysnRecount: false,
+                //                         intEntityUserSecurityId: iRely.config.Security.EntityId,
+
+                //                         strItemNo: record.get('strItemNo'),
+                //                         strItemDescription: record.get('strItemDescription'),
+                //                         strLotTracking: record.get('strLotTracking'),
+                //                         strCategory: record.get('strCategoryCode'),
+                //                         strLocationName: record.get('strLocationName'),
+                //                         strSubLocationName: record.get('strSubLocationName'),
+                //                         strStorageLocationName: record.get('strStorageLocationName'),
+                //                         strLotNumber: record.get('strLotNumber'),
+                //                         strLotAlias: record.get('strLotAlias'),
+                //                         strUnitMeasure: record.get('strUnitMeasure'),
+                //                         strUserName: iRely.config.Security.UserName
+                //                     });
+                //                     current.tblICInventoryCountDetails().add(newItem);
+                //                     count++;
+                //                 });
+                //             }
+                //         }
+                //         win.setLoading(false);
+                //     }
+                // });
+                // var rx = ic.utils.ajax({
+                //     url: store.proxy.api.read,
+                //     params: {
+                //         filter: iRely.Functions.encodeFilters(filter)
+                //     }
+                // })
+                // .subscribe(function(data) {
+                //     var json = JSON.parse(data.responseText);
+                //     store.loadData({ data: json });
+                //     var action = function(button) {
+                //         if(button === 'yes') {
+                //             ic.utils.ajax({
+                //                 url: "../Inventory/api/InventoryCount/UpdateDetails",
+                //                 method: 'PUT',
+                //                 data: json
+                //             }).subscribe(function(x) {
+                //                 console.log(x);
+                //             }, function(y) { console.log(y);});
+                //         }
+                //     };
+                //     iRely.Functions.showCustomDialog('question', 'yesno', 'Do you want to save this?', action);
+                // });
+               
+                // store.load({
+                //     filters: filter,
+                //     callback: function(records, opts, success) {
+                //         var action = function(button) {
+                //             if(button === 'yes') {
+                //                 ic.utils.ajax({
+                //                     url: "../Inventory/api/InventoryCount/UpdateDetails",
+                //                     method: 'PUT',
+                //                     data: records.data
+                //                 }).subscribe(function(x) {
+                //                     console.log(x);
+                //                 }, function(y) { console.log(y);});
+                //             }
+                //         };
+                //     }
+                // });
             }
         } });
     },
@@ -724,8 +1038,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
                         { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
-                        { dataIndex: 'strSubLocationName', text: 'Storage Location', dataType: 'string' },
-                        { dataIndex: 'strStorageLocationName', text: 'Storage Unit', dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
                         { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
                         { dataIndex: 'dblSystemCount', text: 'System Count', dataType: 'numeric' },
@@ -751,8 +1065,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
                         { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
-                        { dataIndex: 'strSubLocationName', text: 'Storage Location', dataType: 'string' },
-                        { dataIndex: 'strStorageLocationName', text: 'Storage Unit', dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
                         { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
                         { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
@@ -1108,6 +1422,30 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             }
         }
     },
+
+    onItemClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCategoryClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCommodityClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onLocationClick: function () {
+        iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onStorageLocationClick: function () {
+        iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCountGroupClick: function () {
+        iRely.Functions.openScreen('Inventory.view.InventoryCountGroup', { action: 'new', viewConfig: { modal: true }});
+    },
     
     onGrdPhysicalClick: function(view, record, cellIndex, e, eOpts) {
          var win = view.up('window');    
@@ -1127,7 +1465,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var win = button.up('window');
         var vm = win.getViewModel();
         var current = vm.data.current;
-
         // Save has data changes first before doing the post.
         win.context.data.saveRecord({
             callbackFn: function() { 
@@ -1217,108 +1554,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         }
     },
 
-    onLocationDrilldown: function (combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true } });
-        }
-        else {
-            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'LocationName');
-        }
-    },
-
-    onCategoryDrilldown: function (combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true } });
-        }
-        else {
-            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'Category');
-        }
-    },
-
-    onCommodityDrilldown: function (combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true } });
-        }
-        else {
-            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'Commodity');
-        }
-    },
-
-    onCountGroupDrilldown: function (combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.CountGroup', { action: 'new', viewConfig: { modal: true } });
-        }
-        else {
-            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'CountGroup');
-        }
-    },
-
-    onStorageLocationDrillDown: function(combo) {
-        if(!iRely.Functions.isEmpty(combo.getValue())) {
-            var win = combo.up('window');
-            var current = win.viewModel.data.current;
-
-            if (current) {
-                if (iRely.Functions.isEmpty(current.get('intLocationId'))) {
-                    iRely.Functions.showErrorDialog('Location must be specified.');
-                    return;
-                }
-                else {
-                    iRely.Functions.openScreen('i21.view.CompanyLocation', { 
-                        action: 'view',
-                        filters: [
-                            {
-                                 column: 'intCompanyLocationId',
-                                 value: current.get('intLocationId'),
-                                 conjunction: 'and'
-                            }  
-                        ],
-                        activeTab: 'Storage Location'
-                    });
-                }
-            }
-        }
-    },
-
-    onStorageUnitDrillDown: function(combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true } });
-        }
-        else {
-            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'StorageLocation');
-        }
-    },
-    
-    onHeaderItemDrillDown: function (menu, column) {
-        // var grid = column.initOwnerCt.grid; 
-        var grid = column.$initParent.grid;
-
-        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
-    },
-
     init: function (application) {
         this.control({
-            "#cboLocation": {
-                drillDown: this.onLocationDrilldown
-            },
-            "#cboCategory": {
-                drillDown: this.onCategoryDrilldown
-            },
-            "#cboCommodity": {
-                drillDown: this.onCommodityDrilldown
-            },
-            "#cboSubLocation": {
-                drillDown: this.onStorageLocationDrillDown
-            },
             "#cboUOM": {
                 select: this.onInventoryCountDetailSelect
             },
             "#cboCountGroup": {
-                select: this.onCountGroupSelect,
-                drillDown: this.onCountGroupDrilldown
-            },
-            "#cboStorageLocation": {
-                drillDown: this.onStorageUnitDrillDown
+                select: this.onCountGroupSelect
             },
             "#btnFetch": {
                 click: this.onFetchClick
@@ -1360,6 +1602,18 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#grdPhysicalCount": {
                 cellclick: this.onGrdPhysicalClick
+            },
+            "#colRecount": {
+                checkchange: this.onRecountCheckChange
+            },
+            "#txtSearchFilter": {
+                specialkey: this.onSearchFilter
+            },
+            "#cboPageSize": {
+                change: function(combo) {
+                    var win = combo.up('window');
+                    ic.count.loadDetails(this, win, win.context, true, ic.count.getFilter(win.viewModel.data.current));
+                }
             }
         });
     }

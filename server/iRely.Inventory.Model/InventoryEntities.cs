@@ -1,6 +1,7 @@
 ﻿using iRely.Common;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
@@ -15,8 +16,15 @@ namespace iRely.Inventory.Model
             Database.SetInitializer<InventoryEntities>(null);
         }
 
+        private static string GetConnectionString(bool prod)
+        {
+            if(prod) return Security.GetCompanyName();
+            return ConfigurationManager.ConnectionStrings["Development"].ConnectionString;
+            ;
+        }
+
         public InventoryEntities()
-            : base(Security.GetCompanyName())
+            : base(GetConnectionString(true))
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
