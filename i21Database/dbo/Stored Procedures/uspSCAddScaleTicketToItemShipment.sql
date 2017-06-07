@@ -256,8 +256,12 @@ BEGIN
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN 
 												CASE
-													WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
-													ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId) * -1)
+													WHEN SE.intOwnershipType = 2 THEN 0
+													WHEN SE.intOwnershipType = 1 THEN 
+													CASE
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
+														ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId) * -1)
+													END
 												END 
 											END
 	,[ysnAccrue]						= 0
@@ -325,7 +329,11 @@ BEGIN
 											WHEN IC.strCostMethod = 'Amount' THEN 
 											CASE
 												WHEN @ysnDeductFeesCusVen = 1 THEN SC.dblTicketFees
-												WHEN @ysnDeductFeesCusVen = 0 THEN (SC.dblTicketFees * -1)
+												WHEN @ysnDeductFeesCusVen = 0 THEN 
+												CASE
+													WHEN SE.intOwnershipType = 2 THEN 0
+													WHEN SE.intOwnershipType = 1 THEN (SC.dblTicketFees * -1)
+												END
 											END
 										END
 	,[ysnAccrue]						= 0
@@ -420,7 +428,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intEntityVendorId]				= LoadCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																		WHEN IC.strCostMethod = 'Amount' THEN ROUND (LoadCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(LoadCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, LoadCost.intItemUOMId), SC.dblGrossUnits), 2)
+																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN SE.intOwnershipType = 2 THEN 0
+																			WHEN SE.intOwnershipType = 1 THEN ROUND (LoadCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(LoadCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, LoadCost.intItemUOMId), SC.dblGrossUnits), 2)
+																		END
 																	END	
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
@@ -480,7 +492,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intEntityVendorId]				= LoadCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN LoadCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN LoadCost.strCostMethod = 'Amount' THEN LoadCost.dblRate
+																		WHEN LoadCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN SE.intOwnershipType = 2 THEN 0
+																			WHEN SE.intOwnershipType = 1 THEN LoadCost.dblRate
+																		END
 																	END	
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
@@ -539,7 +555,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intEntityVendorId]				= ContractCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																		WHEN IC.strCostMethod = 'Amount' THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN SE.intOwnershipType = 2 THEN 0
+																			WHEN SE.intOwnershipType = 1 THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																		END
 																	END	
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
@@ -598,7 +618,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intEntityVendorId]				= ContractCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN SE.intOwnershipType = 2 THEN 0
+																			WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
+																		END
 																	END	
 								,[ysnAccrue]						= ContractCost.ysnAccrue
 								,[ysnPrice]							= ContractCost.ysnPrice
@@ -659,7 +683,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intEntityVendorId]				= LoadCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN LoadCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN LoadCost.strCostMethod = 'Amount' THEN LoadCost.dblRate
+																		WHEN LoadCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN SE.intOwnershipType = 2 THEN 0
+																			WHEN SE.intOwnershipType = 1 THEN LoadCost.dblRate
+																		END
 																	END	
 								,[ysnAccrue]						= LoadCost.ysnAccrue
 								,[ysnPrice]							= LoadCost.ysnPrice
@@ -716,7 +744,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN LoadCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN LoadCost.strCostMethod = 'Amount' THEN LoadCost.dblRate
+																		WHEN LoadCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN SE.intOwnershipType = 2 THEN 0
+																			WHEN SE.intOwnershipType = 1 THEN LoadCost.dblRate
+																		END
 																	END	
 								,[ysnAccrue]						= LoadCost.ysnAccrue
 								,[ysnPrice]							= LoadCost.ysnPrice
@@ -775,7 +807,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intEntityVendorId]				= ContractCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN SE.intOwnershipType = 2 THEN 0
+																			WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
+																		END
 																	END	
 								,[ysnAccrue]						= ContractCost.ysnAccrue
 								,[ysnPrice]							= ContractCost.ysnPrice
@@ -831,7 +867,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intEntityVendorId]				= ContractCost.intVendorId
 								,[dblAmount]						=  CASE
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN SE.intOwnershipType = 2 THEN 0
+																			WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
+																		END
 																	END	
 								,[ysnAccrue]						= ContractCost.ysnAccrue
 								,[ysnPrice]							= ContractCost.ysnPrice
@@ -896,7 +936,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 																END
 						,[dblAmount]						=  CASE
 																WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																WHEN IC.strCostMethod = 'Amount' THEN ROUND (SC.dblFreightRate * SC.dblGrossUnits, 2)
+																WHEN IC.strCostMethod = 'Amount' THEN 
+																CASE
+																	WHEN SE.intOwnershipType = 2 THEN 0
+																	WHEN SE.intOwnershipType = 1 THEN ROUND (SC.dblFreightRate * SC.dblGrossUnits, 2)
+																END
 															END 
 						,[ysnAccrue]						= @ysnAccrue
 						,[ysnPrice]							= @ysnPrice
@@ -956,7 +1000,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intEntityVendorId]				= ContractCost.intVendorId
 						,[dblAmount]						=  CASE
 																WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																WHEN IC.strCostMethod = 'Amount' THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																WHEN IC.strCostMethod = 'Amount' THEN 
+																CASE
+																	WHEN SE.intOwnershipType = 2 THEN 0
+																	WHEN SE.intOwnershipType = 1 THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																END
 															END	
 						,[ysnAccrue]						= @ysnAccrue
 						,[ysnPrice]							= @ysnPrice
@@ -1017,7 +1065,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intEntityVendorId]				= ContractCost.intVendorId
 						,[dblAmount]						=  CASE
 																WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+																WHEN ContractCost.strCostMethod = 'Amount' THEN 
+																CASE
+																	WHEN SE.intOwnershipType = 2 THEN 0
+																	WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
+																END
 															END	
 						,[ysnAccrue]						= ContractCost.ysnAccrue
 						,[ysnPrice]							= ContractCost.ysnPrice
@@ -1073,7 +1125,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 				,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 				,[dblAmount]						=  CASE
 														WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-														WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+														WHEN ContractCost.strCostMethod = 'Amount' THEN
+														CASE
+															WHEN SE.intOwnershipType = 2 THEN 0
+															WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
+														END
 													END	
 				,[ysnAccrue]						= ContractCost.ysnAccrue
 				,[ysnPrice]							= ContractCost.ysnPrice
