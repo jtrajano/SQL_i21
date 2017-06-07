@@ -3151,6 +3151,30 @@ Ext.define('Inventory.view.Item', {
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colItemContractStatus',
+                                                                        width: 80,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Status',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'strStatus',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Status',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboItemContractStatus',
+                                                                            editable: false,
+                                                                            pickerWidth: 200,
+                                                                            displayField: 'strStatus',
+                                                                            valueField: 'strStatus'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {

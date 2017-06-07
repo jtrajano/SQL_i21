@@ -731,7 +731,14 @@ Ext.define('Inventory.view.ItemViewController', {
                 colContractYield: 'dblYieldPercent',
                 colContractTolerance: 'dblTolerancePercent',
                 colContractFranchise: 'dblFranchisePercent',
-                colContractItemNo: 'strContractItemNo'
+                colContractItemNo: 'strContractItemNo',
+                colItemContractStatus: {
+                    dataIndex: 'strStatus',
+                    editor: {
+                        readOnly: '{readOnlyContractItemStatus}',
+                        store: '{contractstatus}'
+                    }
+                }
             },
 
             grdDocumentAssociation: {
@@ -3861,6 +3868,19 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },    
 
+    onStatusSelect: function(combo, records, eOpts) {
+        var win = combo.up('window');
+        var viewModel = win.getViewModel();
+        var status = viewModel.get('current').get('strStatus');
+
+        if(status === 'Discontinued') {
+            var grid = win.down("#grdContractItem");
+            Ext.each(grid.store.data.items, function(record) {
+                record.set('strStatus', 'Discontinued');
+            });
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4072,7 +4092,10 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboCostUOM": {
                 select: this.onCostUOMSelect
-            }
+            },
+            "#cboStatus": {
+                select: this.onStatusSelect
+            },
         });
 
     }
