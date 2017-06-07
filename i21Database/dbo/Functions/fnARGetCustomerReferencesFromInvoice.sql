@@ -6,26 +6,14 @@ RETURNS NVARCHAR(MAX) AS
 BEGIN
 	DECLARE @strReferences NVARCHAR(MAX) = NULL
 
-	DECLARE @tmpTable TABLE(intTicketId INT)
-	INSERT INTO @tmpTable
-	SELECT intTicketId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND ISNULL(intTicketId, 0) > 0
+	SELECT @strReferences = COALESCE(@strReferences + ', ', '') + RTRIM(LTRIM(T.strCustomerReference))
+	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN (SELECT intTicketId
+						 , strCustomerReference 
+					FROM dbo.tblSCTicket WITH(NOLOCK)
+		) T ON ID.intTicketId = T.intTicketId
+	GROUP BY intInvoiceId, ID.intTicketId, T.strCustomerReference
+	HAVING ID.intInvoiceId = @intInvoiceId
 	
-	IF EXISTS(SELECT NULL FROM @tmpTable)
-		BEGIN
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @tmpTable)
-			BEGIN
-				DECLARE @intTicketId INT
-				
-				SELECT TOP 1 @intTicketId = intTicketId FROM @tmpTable ORDER BY intTicketId
-				
-				IF (SELECT COUNT(*) FROM @tmpTable) > 1
-					SELECT @strReferences = ISNULL(@strReferences, '') + strCustomerReference + ', ' FROM tblSCTicket WHERE intTicketId = @intTicketId
-				ELSE
-					SELECT @strReferences = ISNULL(@strReferences, '') + strCustomerReference FROM tblSCTicket WHERE intTicketId = @intTicketId
-
-				DELETE FROM @tmpTable WHERE intTicketId = @intTicketId
-			END
-		END
-
 	RETURN @strReferences
 END
