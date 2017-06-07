@@ -40,6 +40,11 @@ BEGIN
 		,@ysnPaddingZero BIT
 		,@ysnMaxSize BIT
 
+	IF OBJECT_ID('tempdb..##tblMFRecord') IS NOT NULL
+		DROP TABLE ##tblMFRecord
+
+	CREATE TABLE [dbo].##tblMFRecord ([strRecordName] NVARCHAR(50))
+
 	IF @dtmDate IS NULL
 		SET @dtmCurrentDate = GetDate()
 	ELSE
@@ -52,10 +57,9 @@ BEGIN
 		,intSubPatternSize INT
 		,strSubPatternTypeDetail NVARCHAR(MAX)
 		,strSubPatternFormat NVARCHAR(MAX)
-		,ysnPaddingZero bit
+		,ysnPaddingZero BIT
 		,ysnMaxSize BIT
 		)
-	DECLARE @tblMFRecord TABLE (strRecordName NVARCHAR(50))
 	DECLARE @tblMFFindPrimaryKeyColumn TABLE (
 		strTable_Qualifier NVARCHAR(50)
 		,strTable_Owner NVARCHAR(50)
@@ -122,8 +126,8 @@ BEGIN
 			,@intSubPatternSize = intSubPatternSize
 			,@strSubPatternTypeDetail = strSubPatternTypeDetail
 			,@strSubPatternFormat = strSubPatternFormat
-			,@ysnPaddingZero=IsNULL(ysnPaddingZero,1)
-			,@ysnMaxSize = IsNULL(ysnMaxSize,1)
+			,@ysnPaddingZero = IsNULL(ysnPaddingZero, 1)
+			,@ysnMaxSize = IsNULL(ysnMaxSize, 1)
 		FROM @tblMFPatternDetail
 		WHERE intRecordId = @intRecordId
 
@@ -217,21 +221,25 @@ BEGIN
 			DELETE
 			FROM @tblMFFindPrimaryKeyColumn
 
-			INSERT INTO @tblMFFindPrimaryKeyColumn (
-				strTable_Qualifier
-				,strTable_Owner
-				,strTable_Name
-				,strColumn_Name
-				,intKey_SQL
-				,strPK_Name
-				)
-			EXEC sp_pkeys @strTableName
-
-			SELECT @strPrimaryColumnName = strColumn_Name
-			FROM @tblMFFindPrimaryKeyColumn
+			--INSERT INTO @tblMFFindPrimaryKeyColumn (
+			--	strTable_Qualifier
+			--	,strTable_Owner
+			--	,strTable_Name
+			--	,strColumn_Name
+			--	,intKey_SQL
+			--	,strPK_Name
+			--	)
+			--EXEC sp_pkeys @strTableName
+			--SELECT @strPrimaryColumnName = strColumn_Name
+			--FROM @tblMFFindPrimaryKeyColumn
+			SELECT @strPrimaryColumnName = COLUMN_NAME
+			FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+			WHERE OBJECTPROPERTY(OBJECT_ID(CONSTRAINT_SCHEMA + '.' + QUOTENAME(CONSTRAINT_NAME)), 'IsPrimaryKey') = 1
+				AND TABLE_NAME = @strTableName
+				AND TABLE_SCHEMA = 'dbo'
 
 			DELETE
-			FROM @tblMFRecord
+			FROM ##tblMFRecord
 
 			IF @intShiftId IS NULL
 				AND @strTableName = 'tblMFShift'
@@ -271,23 +279,25 @@ BEGIN
 
 			SELECT @strSQL = 'Select ' + @strColumnName + ' From ' + @strTableName + ' Where ' + @strPrimaryColumnName + ' = ' + LTRIM(@intPrimaryColumnId)
 
-			INSERT INTO @tblMFRecord
-			EXEC (@strSQL)
+			DECLARE @a NVARCHAR(MAX) = 'INSERT INTO ##tblMFRecord ' + @strSQL
+
+			EXEC sp_executesql @a
 
 			SELECT @strValue = REPLACE(@strSubPatternFormat, '<?>', '''' + strRecordName + '''')
-			FROM @tblMFRecord
+			FROM ##tblMFRecord
 
 			DELETE
-			FROM @tblMFRecord
+			FROM ##tblMFRecord
 
 			IF @strValue IS NOT NULL
 			BEGIN
-				INSERT INTO @tblMFRecord
-				EXEC ('Select ' + @strValue)
+				SET @a = 'INSERT INTO ##tblMFRecord SELECT ' + @strValue
+
+				EXEC sp_executesql @a
 			END
 
 			SELECT @strPatternString = @strPatternString + strRecordName
-			FROM @tblMFRecord
+			FROM ##tblMFRecord
 		END
 
 		IF @intSubPatternTypeId = 6
@@ -321,7 +331,8 @@ BEGIN
 			BEGIN
 				SELECT @strSequence = 0
 
-				IF @ysnPaddingZero = 1 AND @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1))) > 0
+				IF @ysnPaddingZero = 1
+					AND @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1))) > 0
 				BEGIN
 					SELECT @strSequence = replicate('0', @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1)))) + convert(VARCHAR(32), (@strSequence + 1))
 				END
@@ -343,14 +354,19 @@ BEGIN
 						@intPatternId
 						,@strPatternString
 						,convert(INT, @strSequence)
-						,CASE WHEN @ysnMaxSize = 1 THEN 2147483647 ELSE cast(REPLICATE('9', @intSubPatternSize) AS INT) END
+						,CASE 
+							WHEN @ysnMaxSize = 1
+								THEN 2147483647
+							ELSE cast(REPLICATE('9', @intSubPatternSize) AS INT)
+							END
 						,0
 						)
 				END
 			END
 			ELSE
 			BEGIN
-				IF @ysnPaddingZero = 1 AND @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1))) > 0
+				IF @ysnPaddingZero = 1
+					AND @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1))) > 0
 				BEGIN
 					SELECT @strSequence = replicate('0', @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1)))) + convert(VARCHAR(32), (@strSequence + 1))
 				END
@@ -363,7 +379,11 @@ BEGIN
 				BEGIN
 					UPDATE dbo.tblMFPatternSequence
 					SET intSequenceNo = convert(INT, @strSequence)
-						,intMaximumSequence = CASE WHEN @ysnMaxSize = 1 THEN 2147483647 ELSE cast(REPLICATE('9', @intSubPatternSize) AS INT) END
+						,intMaximumSequence = CASE 
+							WHEN @ysnMaxSize = 1
+								THEN 2147483647
+							ELSE cast(REPLICATE('9', @intSubPatternSize) AS INT)
+							END
 					WHERE intPatternId = @intPatternId
 						AND strPatternSequence = @strPatternString
 				END
