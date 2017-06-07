@@ -37,6 +37,7 @@ SELECT TL.intLoadHeaderId
 	, strInventoryTransferNo = Transfer.strTransferNo
 	, intInvoiceId = ''
 	, strInvoiceNo = NULL
+	, strStateName = e.strStateName
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = TR.intTerminalId
@@ -46,6 +47,7 @@ LEFT JOIN tblICItem Item ON Item.intItemId = TR.intItemId
 LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.intEntitySalespersonId = TL.intDriverId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = TR.intInventoryReceiptId
 LEFT JOIN tblICInventoryTransfer Transfer ON Transfer.intInventoryTransferId = TR.intInventoryTransferId
+left join tblTRState e on e.intStateId = TL.intStateId
 
 UNION ALL
 SELECT TL.intLoadHeaderId
@@ -81,6 +83,7 @@ SELECT TL.intLoadHeaderId
 	, strInventoryTransferNo = Receipts.strTransferNo
 	, Invoice.intInvoiceId
 	, strInvoiceNo = Invoice.strInvoiceNumber
+	, strStateName = e.strStateName
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
@@ -90,6 +93,7 @@ LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DH.intInvoiceId
 LEFT JOIN vyuEMEntity CS ON CS.intEntityId = DH.intEntityCustomerId AND CS.strType = 'Customer'
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
 LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = DH.intCompanyLocationId
+left join tblTRState e on e.intStateId = TL.intStateId
 LEFT JOIN(
 	SELECT DISTINCT intLoadDistributionDetailId
 		, STUFF(
