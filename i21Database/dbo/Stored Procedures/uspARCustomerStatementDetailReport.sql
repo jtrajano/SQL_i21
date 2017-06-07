@@ -285,7 +285,7 @@ BEGIN
 	LEFT JOIN @temp_aging_table AS AGINGREPORT 
 	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId) ABC 
 	INNER JOIN 
-		(SELECT intEntityCustomerId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+		(SELECT intEntityId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
 END
   
 ELSE
