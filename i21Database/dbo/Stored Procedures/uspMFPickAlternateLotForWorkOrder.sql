@@ -11,11 +11,14 @@ BEGIN TRY
 	--DECLARE @intPickListId INT
 	--DECLARE @intCompanyLocationId INT
 	DECLARE @dblAlternateLotQty NUMERIC(38, 20)
+	DECLARE @dblAlternateLotWeight NUMERIC(38, 20)
 	DECLARE @dtmAlternateLotExpiryDate DATETIME
 	--DECLARE @dblReservedLotQtyForPickList NUMERIC(38, 20)
 	--DECLARE @dblAlternateLotReservedQty NUMERIC(38, 20)
 	--DECLARE @dblAlternateLotAvailableQty NUMERIC(38, 20)
 	DECLARE @intTransactionCount INT
+	DECLARE @dblRequiredTaskQty NUMERIC(18,6)
+	DECLARE @dblRequiredTaskWeight NUMERIC(18,6)
 	--DECLARE @strBlendProductionStagingLocation NVARCHAR(100)
 	--DECLARE @strKitStagingArea NVARCHAR(100)
 	DECLARE @strErrMsg NVARCHAR(MAX)
@@ -35,9 +38,14 @@ BEGIN TRY
 				THEN dblWeight
 			ELSE dblQty
 			END
+		,@dblAlternateLotWeight = dblWeight
 	FROM tblICLot
 	WHERE strLotNumber = @strAlternateLotNo
 		AND intStorageLocationId = @intStorageLocationId
+
+	SELECT @dblRequiredTaskWeight = dblWeight
+		  ,@dblRequiredTaskQty = dblQty
+	FROM tblMFTask WHERE intTaskId = @intTaskId
 
 	--SELECT @strBlendProductionStagingLocation = sl.strName
 	--FROM tblSMCompanyLocation cl
@@ -50,7 +58,12 @@ BEGIN TRY
 	--WHERE a.strAttributeName = 'Kit Staging Location'
 	--	AND intManufacturingProcessId = 1
 
+	IF(@dblAlternateLotQty > @dblRequiredTaskQty)
+	BEGIN
+		SET @strErrMsg = 'AVAILABLE QTY IN THE SCANNED LOT IS MORE THAN THE REQUIRED QTY. CANNOT CONTINUE.'
 
+		RAISERROR (@strErrMsg,16,1)
+	END
 
 	IF ISNULL(@dblAlternateLotQty, 0) <= 0
 	BEGIN
