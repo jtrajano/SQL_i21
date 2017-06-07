@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedInventoryCountDetail', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icbufferedinventorycountdetail',
 
     requires: [
@@ -8,14 +8,19 @@ Ext.define('Inventory.store.BufferedInventoryCountDetail', {
 
     model: 'Inventory.model.InventoryCountDetail',
     storeId: 'BufferedInventoryCountDetail',
-    pageSize: 50,
+    pageSize: 200,
     batchActions: true,
     remoteFilter: true,
+    // buffered: true,
+    // leadingBufferZone: 700,
     remoteSort: true,
     proxy: {
         type: 'rest',
         api: {
-            read: '../Inventory/api/InventoryCount/GetInventoryCountDetails'
+            create: '../Inventory/api/InventoryCountDetail/Post',
+            read: '../Inventory/api/InventoryCount/GetInventoryCountDetails',
+            update: '../Inventory/api/InventoryCountDetail/UpdateDetail',
+            destroy: '../Inventory/api/InventoryCountDetail/Delete',
         },
         reader: {
             type: 'json',

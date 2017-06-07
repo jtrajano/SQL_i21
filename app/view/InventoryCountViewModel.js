@@ -18,6 +18,10 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         'Inventory.store.BufferedItemStockUOMForAdjustmentView'
     ],
 
+    data: {
+        pageSize: 200
+    },
+
     stores: {
         location: {
             type: 'companylocationbuffered'
@@ -87,6 +91,28 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
         lot: {
             type: 'icbufferedlot'
+        },
+        pagesize: {
+            autoLoad: true,
+            data: [
+                {
+                    strRows: '50',
+                },
+                {
+                    strRows: '100',
+                },
+                {
+                    strRows: '200',
+                },
+                {
+                    strRows: '500',
+                }
+            ],
+            fields: [
+                {
+                    name: 'strRows'
+                }
+            ]    
         }
     },
 

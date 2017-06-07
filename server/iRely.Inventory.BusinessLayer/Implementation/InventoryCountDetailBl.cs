@@ -21,5 +21,10 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
             _db.ContextManager.Database.CommandTimeout = 120000;
         }
+
+        public IRepository GetRepository()
+        {
+            return this._db;
+        }
     }
 }

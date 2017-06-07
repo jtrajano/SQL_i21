@@ -27,6 +27,8 @@ Ext.define('Inventory.view.InventoryCount', {
         'Ext.form.field.Date',
         'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
+        'Ext.menu.Menu',
+        'Ext.form.trigger.Trigger',
         'Ext.grid.column.Number',
         'Ext.form.field.Number',
         'Ext.grid.column.Check',
@@ -552,7 +554,51 @@ Ext.define('Inventory.view.InventoryCount', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
+                                            itemId: 'tlbSearchFilter',
+                                            layout: {
+                                                type: 'hbox',
+                                                padding: 2
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    itemId: 'btnSearchFilter',
+                                                    iconCls: 'small-filter',
+                                                    text: 'Search',
+                                                    menu: {
+                                                        xtype: 'menu',
+                                                        itemId: 'mnuSearchFilter',
+                                                        width: 250
+                                                    }
+                                                },
+                                                {
+                                                    xtype: 'textfield',
+                                                    itemId: 'txtSearchFilter',
+                                                    fieldLabel: 'Search Any Field',
+                                                    hideLabel: true,
+                                                    name: 'query',
+                                                    emptyText: 'Search',
+                                                    selectOnFocus: true,
+                                                    triggers: {
+                                                        mytrigger1: {
+                                                            handler: function(field, trigger, e) {
+                                                                if(field.getValue() !== "") {
+                                                                    var win = field.up('window');
+                                                                    ic.count.loadDetails(this, win, win.context, true, null);
+                                                                }
+                                                                field.setValue("");
+                                                            },
+                                                            cls: 'x-form-clear-trigger'
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'toolbar',
+                                            dock: 'top',
                                             componentCls: 'i21-toolbar-grid',
+                                            hidden: true,
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -574,7 +620,27 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     text: 'Remove'
                                                 },
                                                 {
-                                                    xtype: 'filter1'
+                                                    xtype: 'filter1',
+                                                    itemId: 'gridfilter'
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'pagingtoolbar',
+                                            dock: 'bottom',
+                                            itemId: 'pgtCount',
+                                            width: 360,
+                                            displayInfo: true,
+                                            items: [
+                                                {
+                                                    xtype: 'combobox',
+                                                    itemId: 'cboPageSize',
+                                                    fieldLabel: 'Rows',
+                                                    labelWidth: 30,
+                                                    editable: false,
+                                                    displayField: 'strRows',
+                                                    forceSelection: true,
+                                                    valueField: 'strRows'
                                                 }
                                             ]
                                         }

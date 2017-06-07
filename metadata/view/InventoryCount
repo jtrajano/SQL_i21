@@ -1157,9 +1157,123 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "container|padding": 2,
+                                                "dock": "top",
+                                                "itemId": "tlbSearchFilter"
+                                            },
+                                            "name": "MyToolbar16",
+                                            "designerId": "856bace9-9a5c-4f6c-a3a2-cc89b1793cc5",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "iconCls": "small-filter",
+                                                        "itemId": "btnSearchFilter",
+                                                        "layout|flex": null,
+                                                        "text": "Search"
+                                                    },
+                                                    "name": "MyButton55",
+                                                    "designerId": "ff6d0e58-5460-413c-a7c4-4520eed85b11",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.menu.Menu",
+                                                            "reference": {
+                                                                "name": "menu",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "bodyPadding": null,
+                                                                "itemId": "mnuSearchFilter",
+                                                                "width": 250
+                                                            },
+                                                            "name": "MyMenu",
+                                                            "designerId": "463c78a7-f39d-4d04-93b1-202ec0f576c0"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "emptyText": "Search",
+                                                        "fieldLabel": "Search Any Field",
+                                                        "hideLabel": true,
+                                                        "itemId": "txtSearchFilter",
+                                                        "layout|flex": null,
+                                                        "name": "query",
+                                                        "selectOnFocus": true
+                                                    },
+                                                    "name": "MyTextField47",
+                                                    "designerId": "d204c575-2725-4a6d-bd90-d9ac1b330b27",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.trigger.Trigger",
+                                                            "reference": {
+                                                                "name": "triggers",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "cls": "x-form-clear-trigger",
+                                                                "name": "mytrigger1"
+                                                            },
+                                                            "name": "MyTrigger1",
+                                                            "designerId": "2f2263db-79e0-465d-8a53-56bf37884ce2",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "fixedfunction",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|params": [
+                                                                            "field",
+                                                                            "trigger",
+                                                                            "e"
+                                                                        ],
+                                                                        "designer|viewControllerFn": null,
+                                                                        "fn": "handler",
+                                                                        "implHandler": [
+                                                                            "if(field.getValue() !== \"\") {",
+                                                                            "    var win = field.up('window');",
+                                                                            "    ic.count.loadDetails(this, win, win.context, true, null);",
+                                                                            "}",
+                                                                            "field.setValue(\"\");"
+                                                                        ]
+                                                                    },
+                                                                    "name": "handler",
+                                                                    "designerId": "4104beaa-ba32-42eb-b169-d85580cceebb"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.toolbar.Toolbar",
+                                            "reference": {
+                                                "name": "dockedItems",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "componentCls": "i21-toolbar-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
+                                                "hidden": true,
                                                 "itemId": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar37",
@@ -1209,9 +1323,10 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "itemId": "gridfilter",
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter140",
+                                                    "name": "filter135",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2069,6 +2184,44 @@
                                             },
                                             "name": "MyCellEditingPlugin",
                                             "designerId": "3ea574ee-f353-44cf-8a2a-c6e2bdb71da3"
+                                        },
+                                        {
+                                            "type": "Ext.toolbar.Paging",
+                                            "reference": {
+                                                "name": "dockedItems",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "displayInfo": true,
+                                                "dock": "bottom",
+                                                "itemId": "pgtCount",
+                                                "width": 360
+                                            },
+                                            "name": "MyPagingToolbar",
+                                            "designerId": "08dcbf32-400e-4a7f-817b-15663f1eeb22",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "displayField": "strRows",
+                                                        "editable": false,
+                                                        "fieldLabel": "Rows",
+                                                        "forceSelection": true,
+                                                        "itemId": "cboPageSize",
+                                                        "labelWidth": 30,
+                                                        "layout|flex": null,
+                                                        "valueField": "strRows"
+                                                    },
+                                                    "name": "MyComboBox90",
+                                                    "designerId": "56374de4-4feb-4a13-92a4-3b9be79a6fb2"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
@@ -2160,7 +2313,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging14",
                     "designerId": "819ea614-6c35-4e6e-8d56-521d4ef1d53e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

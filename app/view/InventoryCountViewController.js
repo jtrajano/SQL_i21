@@ -1,6 +1,7 @@
 Ext.define('Inventory.view.InventoryCountViewController', {
     extend: 'Inventory.view.InventoryBaseViewController',
     alias: 'controller.icinventorycount',
+    alternateClassName: 'ic.count',
     requires: [
         'CashManagement.common.Text',
         'CashManagement.common.BusinessRules'
@@ -76,6 +77,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             btnUndo: {
                 disabled: '{current.ysnPosted}'
+            },
+            cboPageSize: {
+                hidden: true,
+                value: '{pageSize}',
+                store: '{pagesize}'
             },
             btnPrintCountSheets: {
                 hidden: '{checkPrintCountSheet}'
@@ -219,7 +225,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     drillDownClick: 'onViewItemDescription'
                 },
                 colCategory: {
-                    dataIndex: 'strCategoryCode',
+                    dataIndex: 'strCategory',
                     drillDownText: 'View Category',
                     drillDownClick: 'onViewCategory'
                 },
@@ -395,6 +401,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             window: win,
             store: store,
             enableActivity: true,
+            onPageChange: me.onPageChange,
             enableAttachment: true,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.InventoryCount',
@@ -416,6 +423,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             //     }
             // ]
         });
+
+        me.attachOnEditListener(win, grdPhysicalCount);
 
         return win.context;
     },
@@ -456,7 +465,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 context.data.load({
                     filters: config.filters,
                     callback: function(records, opts, success) {
-                        me.loadDetails(me, win, context, false);
+                        //ic.count.loadDetails(me, win, context, false);
                     }
                 });
             }
@@ -537,105 +546,194 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             current.set('ysnExternal', records[0].get('ysnExternal'));
         }
     },
-
-    getFilter: function(current, filterKey) {
-        var filter = [];
-        if(!current) 
-            return filter;
-        
-        if(filterKey) {
-            filter.push({
-                column: 'intInventoryCountId',
-                value: current.get('intInventoryCountId'),
-                conjunction: 'and'
-            });
-        }
-        
-        if (!iRely.Functions.isEmpty(current.get('intLocationId'))) {
-            filter.push({
-                column: 'intLocationId',
-                value: current.get('intLocationId'),
-                conjunction: 'and'
-            });
-        }
-        
-        if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
-            filter.push({
-                column: 'intCategoryId',
-                value: current.get('intCategoryId'),
-                conjunction: 'and'
-            });
-        }
-        
-        if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
-            filter.push({
-                column: 'intCommodityId',
-                value: current.get('intCommodityId'),
-                conjunction: 'and'
-            });
-        }
-        
-        if (!iRely.Functions.isEmpty(current.get('intCountGroupId'))) {
-            filter.push({
-                column: 'intCountGroupId',
-                value: current.get('intCountGroupId'),
-                conjunction: 'and'
-            });
-        }
-        
-        if (!iRely.Functions.isEmpty(current.get('intSubLocationId'))) {
-            filter.push({
-                column: 'intSubLocationId',
-                value: current.get('intSubLocationId'),
-                conjunction: 'and'
-            });
-        }
-        
-        if (!iRely.Functions.isEmpty(current.get('intStorageLocationId'))) {
-            filter.push({
-                column: 'intStorageLocationId',
-                value: current.get('intStorageLocationId'),
-                conjunction: 'and'
-            });
-        }
-        
-        if(current.get('ysnIncludeZeroOnHand') === false){
+    statics: {
+        getFilter: function(current, filterKey) {
+            var filter = [];
+            if(!current) 
+                return filter;
+            
+            if(filterKey) {
                 filter.push({
-                column: 'dblOnHand',
-                value: 0,
-                condition: 'gt',
-                conjunction: 'and'
-            });
-        }
+                    column: 'intInventoryCountId',
+                    value: current.get('intInventoryCountId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intLocationId'))) {
+                filter.push({
+                    column: 'intLocationId',
+                    value: current.get('intLocationId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
+                filter.push({
+                    column: 'intCategoryId',
+                    value: current.get('intCategoryId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
+                filter.push({
+                    column: 'intCommodityId',
+                    value: current.get('intCommodityId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intCountGroupId'))) {
+                filter.push({
+                    column: 'intCountGroupId',
+                    value: current.get('intCountGroupId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intSubLocationId'))) {
+                filter.push({
+                    column: 'intSubLocationId',
+                    value: current.get('intSubLocationId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if (!iRely.Functions.isEmpty(current.get('intStorageLocationId'))) {
+                filter.push({
+                    column: 'intStorageLocationId',
+                    value: current.get('intStorageLocationId'),
+                    conjunction: 'and'
+                });
+            }
+            
+            if(current.get('ysnIncludeZeroOnHand') === false){
+                    filter.push({
+                    column: 'dblOnHand',
+                    value: 0,
+                    condition: 'gt',
+                    conjunction: 'and'
+                });
+            }
 
-        return filter;
+            return filter;
+        },
+
+        loadDetails: function(me, win, context, showProgress, filters) {
+            if(showProgress)
+                win.setLoading('Loading Items...');
+            var current = win.viewModel.data.current;
+            var store = Ext.create('Inventory.store.BufferedInventoryCountDetail');
+            var grdPhysicalCount = win.down("#grdPhysicalCount");
+
+            var pagingtoolbar = win.down("#pgtCount");
+            var defaultFilter = ic.count.getFilter(current, true);
+            var filter = defaultFilter;
+            if(filters)
+                filter = filters;
+
+            store.proxy.extraParams = { filter: iRely.Functions.encodeFilters(filter) };
+            grdPhysicalCount.setStore(store);
+            grdPhysicalCount.down("#tlbGridOptions").hide();
+            win.down("#gridfilter").hide();
+            var defaultFilterText = win.down("#txtFilterGrid");
+            if(defaultFilterText)
+                defaultFilterText.hide();
+            
+            var tlbSearchFilter = win.down("#tlbSearchFilter");
+            var btnSearchFilter = tlbSearchFilter.down("#btnSearchFilter");
+            var mnuSearchFilter = btnSearchFilter.down("#mnuSearchFilter");
+            if(mnuSearchFilter.items.length === 0) {
+                Ext.each(grdPhysicalCount.columns, function(column){
+                    mnuSearchFilter.add({
+                        xtype: 'menucheckitem',
+                        text: column.text,
+                        itemId: column.name,
+                        dataIndex: column.dataIndex,
+                        checked: true
+                    });
+                });
+            }
+            pagingtoolbar.setStore(store);
+
+            store.load({
+                filters: filter,
+                params: {
+                    start: 0,
+                    limit: win.viewModel.data.pageSize
+                },
+                callback: function(records, opts, success) {
+                    win.setLoading(false);
+                }
+            });
+
+            
+        }
     },
 
-    loadDetails: function(me, win, context, showProgress) {
-        if(showProgress)
-            win.setLoading('Loading Items...');
+    onSearchFilter: function(f, e) {
+        if(e.getKey() == e.ENTER){
+            var me = this;
+            var win = f.up('window');
+            var grdPhysicalCount = win.down("#grdPhysicalCount");
+            var tlbSearchFilter = win.down("#tlbSearchFilter");
+            var btnSearchFilter = tlbSearchFilter.down("#btnSearchFilter");
+            var mnuSearchFilter = btnSearchFilter.down("#mnuSearchFilter");
+
+            var filters = [];
+            var cols = _.filter(mnuSearchFilter.items.items, function(c) { return c.dataIndex !== '' && c.checked; });
+            if(!cols || cols.length <= 0)
+                return null;
+
+            var filterCol = "";
+            _.each(cols, function(c) { filterCol += c.dataIndex + "|^|"; });
+
+            var filter = {
+                column: filterCol,
+                value: f.value,
+                condition: 'ct',
+                conjunction: 'or'
+            };
+            if(f.value !== "")
+                filters.push(filter);
+            
+            filters = filters.concat(ic.count.getFilter(win.viewModel.data.current));
+            
+            ic.count.loadDetails(me, win, win.context, true, filters);    
+        }
+    },
+
+    onPageChange: function(pagingStatusBar, record, eOpts) {
+        var me = this;
+        var win = pagingStatusBar.up('window');
         var current = win.viewModel.data.current;
         var store = Ext.create('Inventory.store.BufferedInventoryCountDetail');
         var grdPhysicalCount = win.down("#grdPhysicalCount");
-        store.on('datachanged', me.onStoreUpdate);
-
-        grdPhysicalCount.on('cellclick', function() { 
-            modified = _.filter(store.getData().map[1].value, function(r) { return r.dirty === true; });
-            grdPhysicalCount.reconfigure(store);
-        });
+        var pagingtoolbar = win.down("#pgtCount");
         
-        grdPhysicalCount.setStore(store);
-        store.load({
-            filters: me.getFilter(current, true),
-            callback: function(records, opts, success) {
-                win.setLoading(false);
-                console.log("Load Complete.");
+        ic.count.loadDetails(me, win, win.context, true);
+    },
+
+    attachOnEditListener(win, grdPhysicalCount) {
+        var me = this;
+        var plugin = grdPhysicalCount.getPlugin('cepPhysicalCount');
+        plugin.on({
+            edit: function(editor, context, eOpts) {
+                grdPhysicalCount.store.save();
             }
+        });
+
+        var component = Ext.create('iRely.mvvm.grid.Manager', {
+            grid: grdPhysicalCount,
+            deleteButton: win.down('#btnRemove'),
+            createRecord: me.createLineItemRecord
         });
     },
 
-    onStoreUpdate: function() {
-        console.log(arguments);
+    onRecountCheckChange: function(column, index, value, record) {
+        var store = record.store;
+        store.save();
     },
 
     onFetchClick: function (button) {
@@ -651,7 +749,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             win.setLoading(false);
             win.setLoading('Fetching Items...');
             if (itemList) {
-                var filter = me.getFilter(current, true);
+                var filter = ic.count.getFilter(current, true);
                 var params = [];
                 win.setLoading('Updating details...');
                 var rx = ic.utils.ajax({
@@ -673,7 +771,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 })
                 .subscribe(function(data) {
                     win.setLoading('Loading Items...');
-                    me.loadDetails(me, win, win.context, true);
+                    ic.count.loadDetails(me, win, win.context, true);
                 }, function(failed) {
                     win.setLoading(false);    
                 });
@@ -1504,6 +1602,18 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#grdPhysicalCount": {
                 cellclick: this.onGrdPhysicalClick
+            },
+            "#colRecount": {
+                checkchange: this.onRecountCheckChange
+            },
+            "#txtSearchFilter": {
+                specialkey: this.onSearchFilter
+            },
+            "#cboPageSize": {
+                change: function(combo) {
+                    var win = combo.up('window');
+                    ic.count.loadDetails(this, win, win.context, true, ic.count.getFilter(win.viewModel.data.current));
+                }
             }
         });
     }
