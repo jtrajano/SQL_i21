@@ -2543,17 +2543,23 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Sta
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSettings?showSearch=true', intSort = 5 WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Settle Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Settle Storage', N'Ticket Management', @TicketManagementParentMenuId, N'Settle Storage', N'Maintenance', N'Screen', N'Grain.view.SettleStorage?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.SettleStorage?showSearch=true', intSort = 6, strCategory = N'Maintenance' WHERE strMenuName = 'Settle Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Storage', N'Ticket Management', @TicketManagementParentMenuId, N'Storage', N'Maintenance', N'Screen', N'Grain.view.Storage?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
+	VALUES (N'Storage', N'Ticket Management', @TicketManagementParentMenuId, N'Storage', N'Maintenance', N'Screen', N'Grain.view.Storage?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.Storage?showSearch=true', intSort = 6, strCategory = N'Maintenance' WHERE strMenuName = 'Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.Storage?showSearch=true', intSort = 7, strCategory = N'Maintenance' WHERE strMenuName = 'Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'OffSite' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'OffSite', N'Ticket Management', @TicketManagementParentMenuId, N'OffSite', N'Maintenance', N'Screen', N'Grain.view.OffSite?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
+	VALUES (N'OffSite', N'Ticket Management', @TicketManagementParentMenuId, N'OffSite', N'Maintenance', N'Screen', N'Grain.view.OffSite?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.OffSite?showSearch=true', intSort = 7, strCategory = N'Maintenance' WHERE strMenuName = 'OffSite' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.OffSite?showSearch=true', intSort = 8, strCategory = N'Maintenance' WHERE strMenuName = 'OffSite' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
 
 --IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Tables' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId)
 --	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2571,9 +2577,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discounts' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Discounts', N'Ticket Management', @TicketManagementParentMenuId, N'Discounts', N'Maintenance', N'Screen', N'Grain.view.DiscountTable?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
+	VALUES (N'Discounts', N'Ticket Management', @TicketManagementParentMenuId, N'Discounts', N'Maintenance', N'Screen', N'Grain.view.DiscountTable?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
 ELSE 
-    UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.DiscountTable?showSearch=true', intSort = 8 WHERE strMenuName = 'Discounts' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
+    UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.DiscountTable?showSearch=true', intSort = 9 WHERE strMenuName = 'Discounts' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
