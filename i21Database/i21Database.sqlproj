@@ -5261,6 +5261,8 @@
     <Build Include="dbo\Tables\tblMFOrderManifestLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabel.sql" />
+    <Build Include="dbo\Tables\tblSMReportLabelDetail.sql" />
+    <Build Include="dbo\Tables\tblSMReportLabels.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
