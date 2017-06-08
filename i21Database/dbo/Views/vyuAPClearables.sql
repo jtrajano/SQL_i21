@@ -97,6 +97,7 @@ SELECT DISTINCT
 	, ''AS strContainer
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnAccrue = 1 AND ReceiptCharge.ysnPrice = 0
+										AND ReceiptCharge.intEntityVendorId = Receipt.intEntityVendorId
 LEFT JOIN vyuAPVendor Vendor
 			ON Vendor.intEntityVendorId = Receipt.intEntityVendorId
 	LEFT JOIN (
