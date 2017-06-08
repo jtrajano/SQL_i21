@@ -30,8 +30,9 @@ DELETE FROM @Ids
 INSERT INTO @Ids
 SELECT * FROM @InvoiceIds
 
-UPDATE @Ids SET [ysnPost] = 0
-EXEC dbo.[uspARUpdateLineItemsReservedStock] @Ids
+--- commented Temporarily --- for testing
+--UPDATE @Ids SET [ysnPost] = 0
+--EXEC dbo.[uspARUpdateLineItemsReservedStock] @Ids
 
 UPDATE @Ids SET [ysnForDelete] = 1
 EXEC dbo.[uspARUpdateLineItemsComponent] @Ids
@@ -46,8 +47,9 @@ EXEC dbo.[uspARUpdateInboundShipmentOnInvoices] @Ids
 
 EXEC dbo.[uspARUpdateProvisionalOnStandardInvoices] @Ids
 
-UPDATE @Ids SET [ysnFromPosting] = 0
-EXEC dbo.[uspARUpdateLineItemsCommitted] @Ids
+--- commented Temporarily --- for testing
+--UPDATE @Ids SET [ysnFromPosting] = 0
+--EXEC dbo.[uspARUpdateLineItemsCommitted] @Ids
 
 DELETE FROM ARTD
 FROM
