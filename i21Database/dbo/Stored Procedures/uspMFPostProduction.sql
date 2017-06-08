@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspMFPostProduction] 
+CREATE Procedure [dbo].[uspMFPostProduction] 
 	@ysnPost BIT = 0
 	,@ysnRecap BIT = 0
 	,@intWorkOrderId INT = NULL
@@ -125,6 +125,9 @@ BEGIN
 	SELECT @dblNewUnitCost=dblStandardCost
 	FROM dbo.tblICItemPricing
 	WHERE intItemId=@intItemId AND intItemLocationId=@intItemLocationId
+
+	If @dblNewUnitCost is null
+	Select @dblNewUnitCost=0
 END
 ELSE
 BEGIN
@@ -196,17 +199,17 @@ BEGIN
 	WHERE intItemId = @intItemId
 
 	IF @strLifeTimeType = 'Years'
-		SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, GetDate())
+		SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmProductionDate)
 	ELSE IF @strLifeTimeType = 'Months'
-		SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, GetDate())
+		SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmProductionDate)
 	ELSE IF @strLifeTimeType = 'Days'
-		SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, GetDate())
+		SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmProductionDate)
 	ELSE IF @strLifeTimeType = 'Hours'
-		SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, GetDate())
+		SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, @dtmProductionDate)
 	ELSE IF @strLifeTimeType = 'Minutes'
-		SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, GetDate())
+		SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmProductionDate)
 	ELSE
-		SET @dtmExpiryDate = DateAdd(yy, 1, GetDate())
+		SET @dtmExpiryDate = DateAdd(yy, 1, @dtmProductionDate)
 
 	INSERT INTO @ItemsThatNeedLotId (
 		intLotId

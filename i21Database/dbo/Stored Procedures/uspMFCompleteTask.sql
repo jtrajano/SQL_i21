@@ -45,13 +45,7 @@ BEGIN TRY
 		BEGIN
 			SELECT @intNewSubLocationId = SL.intSubLocationId
 				,@intNewStorageLocationId = T.intToStorageLocationId
-				,@dblMoveQty = T.dblPickQty / (
-					CASE 
-						WHEN T.dblWeightPerQty = 0
-							THEN 1
-						ELSE T.dblWeightPerQty
-						END
-					)
+				,@dblMoveQty = T.dblPickQty 
 				,@blnValidateLotReservation = 1
 				,@blnInventoryMove = 0
 				,@intLotId = intLotId
@@ -233,13 +227,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intNewSubLocationId = SL.intSubLocationId
 					,@intNewStorageLocationId = T.intToStorageLocationId
-					,@dblMoveQty = T.dblPickQty / (
-						CASE 
-							WHEN T.dblWeightPerQty = 0
-								THEN 1
-							ELSE T.dblWeightPerQty
-							END
-						)
+					,@dblMoveQty = T.dblPickQty 
 					,@blnValidateLotReservation = 1
 					,@blnInventoryMove = 0
 					,@intLotId = intLotId

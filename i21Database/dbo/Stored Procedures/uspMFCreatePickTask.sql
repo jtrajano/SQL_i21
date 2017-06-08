@@ -90,8 +90,8 @@ BEGIN TRY
 		,@intToStorageLocationId
 		,@intItemId
 		,@intLotId
-		,Case When @intWeightUOMId is NULL Then @dblLotQty Else @dblLotWeight End
-		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
+		,Case When @intWeightUOMId is NULL Then @dblLotQty Else @dblLotQty End
+		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intItemUOMId End
 		,Case When @intWeightUOMId is NULL Then @dblLotQty Else @dblLotWeight End
 		,Case When @intWeightUOMId is NULL Then @intItemUOMId Else @intWeightUOMId End
 		,Case When @intWeightUOMId is NULL Then 1 Else @dblWeightPerQty End

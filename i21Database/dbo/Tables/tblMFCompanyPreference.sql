@@ -41,6 +41,6 @@
 	ysnSetDefaultQtyOnHandheld BIT,
 	ysnEnableStagingBOL BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnEnableStagingBOL] DEFAULT 0,
 	strBOLReportName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-
+	ysnCycleCountByStockUnit BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnCycleCountByStockUnit] DEFAULT 0,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

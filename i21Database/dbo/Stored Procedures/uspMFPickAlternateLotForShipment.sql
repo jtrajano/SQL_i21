@@ -21,6 +21,8 @@ BEGIN TRY
 	DECLARE @intTaskId INT
 		,@intBondStatusId INT
 		,@strPrimaryStatus NVARCHAR(50)
+			DECLARE @dblRequiredTaskQty NUMERIC(18,6)
+	DECLARE @dblRequiredTaskWeight NUMERIC(18,6)
 
 	SELECT @intStorageLocationId = intStorageLocationId
 	FROM tblICStorageLocation
@@ -35,6 +37,17 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE strLotNumber = @strAlternateLotNo
 		AND intStorageLocationId = @intStorageLocationId
+
+	SELECT @dblRequiredTaskWeight = dblWeight
+		  ,@dblRequiredTaskQty = dblQty
+	FROM tblMFTask WHERE intTaskId = @intTaskId
+
+	IF(@dblAlternateLotQty > @dblRequiredTaskQty)
+	BEGIN
+		SET @strErrMsg = 'AVAILABLE QTY IN THE SCANNED LOT IS MORE THAN THE REQUIRED QTY. CANNOT CONTINUE.'
+
+		RAISERROR (@strErrMsg,16,1)
+	END
 
 	--SELECT @strBlendProductionStagingLocation = sl.strName
 	--FROM tblSMCompanyLocation cl
