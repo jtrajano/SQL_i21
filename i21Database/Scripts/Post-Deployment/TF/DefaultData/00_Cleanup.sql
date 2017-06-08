@@ -23,3 +23,78 @@ IF EXISTS(SELECT *
 
 GO
 
+DELETE FROM tblTFFilingPacket
+WHERE intReportingComponentId IN (
+		SELECT intReportingComponentId
+		FROM tblTFReportingComponent RC
+		LEFT JOIN (
+			SELECT DISTINCT strFormCode, strScheduleCode, strType
+			FROM tblTFReportingComponent
+			WHERE strFormCode != 'EDI'
+			GROUP BY strFormCode, strScheduleCode, strType
+			HAVING COUNT(*) > 1
+		) Dup ON Dup.strFormCode = RC.strFormCode
+			AND Dup.strScheduleCode = RC.strScheduleCode
+			AND Dup.strType = RC.strType
+		WHERE ISNULL(Dup.strFormCode, '') != ''
+			AND ISNULL(Dup.strScheduleCode, '') != ''
+			AND ISNULL(Dup.strType, '') != ''
+	) AND intReportingComponentId NOT IN (
+		SELECT intReportingComponentId = MIN(intReportingComponentId)
+		FROM tblTFReportingComponent RC
+		LEFT JOIN (
+			SELECT DISTINCT strFormCode, strScheduleCode, strType
+			FROM tblTFReportingComponent
+			WHERE strFormCode != 'EDI'
+			GROUP BY strFormCode, strScheduleCode, strType
+			HAVING COUNT(*) > 1
+		) Dup ON Dup.strFormCode = RC.strFormCode
+			AND Dup.strScheduleCode = RC.strScheduleCode
+			AND Dup.strType = RC.strType
+		WHERE ISNULL(Dup.strFormCode, '') != ''
+			AND ISNULL(Dup.strScheduleCode, '') != ''
+			AND ISNULL(Dup.strType, '') != ''
+		GROUP BY Dup.strFormCode
+			, Dup.strScheduleCode
+			, Dup.strType	
+	)
+
+GO
+
+DELETE FROM tblTFReportingComponent
+WHERE intReportingComponentId IN (
+		SELECT intReportingComponentId
+		FROM tblTFReportingComponent RC
+		LEFT JOIN (
+			SELECT DISTINCT strFormCode, strScheduleCode, strType
+			FROM tblTFReportingComponent
+			WHERE strFormCode != 'EDI'
+			GROUP BY strFormCode, strScheduleCode, strType
+			HAVING COUNT(*) > 1
+		) Dup ON Dup.strFormCode = RC.strFormCode
+			AND Dup.strScheduleCode = RC.strScheduleCode
+			AND Dup.strType = RC.strType
+		WHERE ISNULL(Dup.strFormCode, '') != ''
+			AND ISNULL(Dup.strScheduleCode, '') != ''
+			AND ISNULL(Dup.strType, '') != ''
+	) AND intReportingComponentId NOT IN (
+		SELECT intReportingComponentId = MIN(intReportingComponentId)
+		FROM tblTFReportingComponent RC
+		LEFT JOIN (
+			SELECT DISTINCT strFormCode, strScheduleCode, strType
+			FROM tblTFReportingComponent
+			WHERE strFormCode != 'EDI'
+			GROUP BY strFormCode, strScheduleCode, strType
+			HAVING COUNT(*) > 1
+		) Dup ON Dup.strFormCode = RC.strFormCode
+			AND Dup.strScheduleCode = RC.strScheduleCode
+			AND Dup.strType = RC.strType
+		WHERE ISNULL(Dup.strFormCode, '') != ''
+			AND ISNULL(Dup.strScheduleCode, '') != ''
+			AND ISNULL(Dup.strType, '') != ''
+		GROUP BY Dup.strFormCode
+			, Dup.strScheduleCode
+			, Dup.strType	
+	)
+
+GO
