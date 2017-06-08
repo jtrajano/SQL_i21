@@ -658,7 +658,7 @@ BEGIN
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
 			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.intEntityId
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
