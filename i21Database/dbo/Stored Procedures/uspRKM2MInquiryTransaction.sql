@@ -81,7 +81,7 @@ DECLARE @tblFinalDetail TABLE (
        ,ysnSubCurrency bit
        ,intMainCurrencyId int
        ,intCent int
-	   ,dtmPlannedAvailabilityDate datetime
+          ,dtmPlannedAvailabilityDate datetime
        )
 
 INSERT INTO @tblFinalDetail (intContractHeaderId,
@@ -136,7 +136,7 @@ convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dbl
     as dblOpenQty
   FROM
 (SELECT cd.intContractHeaderId, cd.intContractDetailId,
-					'Contract'+'('+LEFT(cd.strContractType,1)+')' as strContractOrInventoryType,
+                                  'Contract'+'('+LEFT(cd.strContractType,1)+')' as strContractOrInventoryType,
                   cd.strContractNumber +'-'+CONVERT(nvarchar,cd.intContractSeq) as strContractSeq,
                   cd.strEntityName strEntityName,
                   cd.intEntityId,
@@ -155,17 +155,15 @@ convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dbl
                   cd.strPricingStatus as strPriOrNotPriOrParPriced,
                   cd.intPricingTypeId,
                   cd.strPricingType,
-					dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,(CASE WHEN ffm.ysnExpired= 0 THEN cd.intFutureMonthId  ELSE (SELECT TOP 1  intFutureMonthId FROM tblRKFuturesMonth FuMo WHERE dtmFutureMonthsDate > (
+                                  dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,(CASE WHEN ffm.ysnExpired= 0 THEN cd.intFutureMonthId  ELSE (SELECT TOP 1  intFutureMonthId FROM tblRKFuturesMonth FuMo WHERE dtmFutureMonthsDate > (
                                         SELECT dtmFutureMonthsDate from tblRKFuturesMonth mo 
                                         WHERE mo.intFutureMonthId = cd.intFutureMonthId ) AND FuMo.ysnExpired = 0 
                                         AND FuMo.intFutureMarketId = cd.intFutureMarketId 
                                         ORDER BY intFutureMarketId,dtmFutureMonthsDate asc)
-					 end) ,@dtmSettlemntPriceDate) as dblFuturesClosingPrice1,
+                                  end) ,@dtmSettlemntPriceDate) as dblFuturesClosingPrice1,
                   isnull(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END,0) dblContractBasis,
                   (CASE WHEN cd.intPricingTypeId=1 THEN isnull(dblFutures,0)
-                  --(SELECT     (isnull(dblFutures,0)) 
-                  --      FROM tblCTContractDetail  cdv                         
-                  --      WHERE intPricingTypeId=1 and cdv.intContractStatusId not in(2,3,6) AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId) 
+                 
                   ELSE 
                   (SELECT avgLot/intTotLot FROM(
                         SELECT      sum(isnull(pfd.[dblNoOfLots],0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(pfd.[dblNoOfLots],0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
@@ -173,7 +171,7 @@ convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dbl
                         JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                         JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
                         and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId                        
-						where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId not in(2,3,6))t) end
+                                         where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId not in(2,3,6))t) end
                   ) as dblFutures ,                
                   
                   CASE WHEN cd.intPricingTypeId=6 then dblCashPrice else null end dblCash,
@@ -203,21 +201,21 @@ convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dbl
                                   WHEN strAdjustmentType = 'Reduce' then -sum(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,isnull(dc.dblRate,0))) 
                                   ELSE 0 END dblCosts,strAdjustmentType
             FROM vyuRKM2MContractCost dc 
-			    JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and cd.intContractBasisId=M2M.intContractBasisId
+                         JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and cd.intContractBasisId=M2M.intContractBasisId
                 JOIN tblICCommodityUnitMeasure cu1 on cd.intCommodityId=cu1.intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
                 JOIN tblICCommodityUnitMeasure cu on cd.intCommodityId=cu.intCommodityId and cu.intUnitMeasureId=@intPriceUOMId                           
                 WHERE  dc.intContractDetailId=cd.intContractDetailId
                 group by cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,strAdjustmentType)t ) dblCosts,   
          cd.dblBalance  as dblContractOriginalQty,
-		 SUM(iv.dblPurchaseContractShippedQty) over (Partition BY cd.intContractDetailId) as InTransQty,
-		 cur.ysnSubCurrency,cur.intMainCurrencyId,cur.intCent,cd.dtmPlannedAvailabilityDate
-		 ,cd.intCompanyLocationId,cd.intMarketZoneId,cd.intContractStatusId,dtmContractDate,
-		 ffm.ysnExpired
+              SUM(iv.dblPurchaseContractShippedQty) over (Partition BY cd.intContractDetailId) as InTransQty,
+              cur.ysnSubCurrency,cur.intMainCurrencyId,cur.intCent,cd.dtmPlannedAvailabilityDate
+              ,cd.intCompanyLocationId,cd.intMarketZoneId,cd.intContractStatusId,dtmContractDate,
+              ffm.ysnExpired
 FROM vyuRKM2MGetContractDetailView  cd
 JOIN tblICItem i on cd.intItemId= i.intItemId 
 JOIN tblSMCurrency cur on cur.intCurrencyID=cd.intCurrencyId 
-	and convert(datetime,convert(varchar, cd.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
-	and cd.intContractStatusId not in(2,3,6) and cd.intCommodityId= @intCommodityId and intContractStatusId not in(2,3,6) 
+       and convert(datetime,convert(varchar, cd.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
+       and cd.intContractStatusId not in(2,3,6) and cd.intCommodityId= @intCommodityId and intContractStatusId not in(2,3,6) 
 JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId
 JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId=@intQuantityUOMId
 JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityId and  cuc2.intUnitMeasureId  = @intPriceUOMId
@@ -229,7 +227,7 @@ WHERE  cd.intCommodityId= @intCommodityId
             AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
             AND isnull(cd.intMarketZoneId,0)= case when isnull(@intMarketZoneId,0)=0 then isnull(cd.intMarketZoneId,0) else @intMarketZoneId end
             AND intContractStatusId not in(2,3,6) and convert(datetime,convert(varchar, cd.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
-			)t 
+                     )t 
 )t where  isnull(dblOpenQty,0) >0 )t1 
 
 if isnull(@ysnIncludeInventoryM2M,0) = 1
@@ -296,7 +294,7 @@ convert(decimal(24,6),
                   cd.intCommodityId,
                   cd.strItemNo,
                   cd.intItemId as intItemId,
-				  ca.strDescription as strOrgin,
+                             ca.strDescription as strOrgin,
                   ca.intCommodityAttributeId intOriginId,
                   cd.strPosition, 
                   RIGHT(CONVERT(VARCHAR(8), dtmStartDate, 3), 5)+'-'+RIGHT(CONVERT(VARCHAR(8), dtmEndDate, 3), 5) AS strPeriod,
@@ -315,7 +313,7 @@ convert(decimal(24,6),
                         JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                         JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
                         and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId                        
-						where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId not in(2,3,6))t) end
+                                         where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId not in(2,3,6))t) end
                   ) as dblFutures ,             
                  
                   
@@ -352,7 +350,7 @@ convert(decimal(24,6),
                                   WHEN strAdjustmentType = 'Reduce' then -sum(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,isnull(dc.dblRate,0))) 
                                   ELSE 0 END dblCosts,strAdjustmentType
             FROM vyuRKM2MContractCost dc 
-				JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and cd.intContractBasisId=M2M.intContractBasisId
+                           JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and cd.intContractBasisId=M2M.intContractBasisId
                 JOIN tblICCommodityUnitMeasure cu1 on cd.intCommodityId=cu1.intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
                 JOIN tblICCommodityUnitMeasure cu on cd.intCommodityId=cu.intCommodityId and cu.intUnitMeasureId=@intPriceUOMId                           
                 WHERE  dc.intContractDetailId=cd.intContractDetailId
@@ -377,8 +375,8 @@ WHERE  cd.intCommodityId= @intCommodityId
             AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
             AND isnull(cd.intMarketZoneId,0)= case when isnull(@intMarketZoneId,0)=0 then isnull(cd.intMarketZoneId,0) else @intMarketZoneId end
             AND intContractStatusId not in(2,3,6) and convert(datetime,convert(varchar, cd.dtmContractDate, 101),101) 
-			<= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
-			)t 
+                     <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
+                     )t 
 )t1)t2 WHERE strContractOrInventoryType= case when @ysnIncludeInventoryM2M = 1 then 'Inventory (P)' else '' end 
 
 END
@@ -429,7 +427,7 @@ convert(decimal(24,6),
         (convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dblOpenQty1 else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when isnull(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,isnull(dblOpenQty1,0))end))
          -(isnull(convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dblContractPQty else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when isnull(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,isnull(dblContractPQty,0))end),0))
          as dblOpenQty,
-		 dblFuturePrice1 dblFuturesClosingPrice1
+              dblFuturePrice1 dblFuturesClosingPrice1
   FROM
 (SELECT  distinct  cd.intContractHeaderId,  cd.intContractDetailId,
                   'In-transit'+'(P)' as strContractOrInventoryType,
@@ -459,11 +457,11 @@ convert(decimal(24,6),
                   ELSE 
                   (SELECT avgLot/intTotLot FROM(
                         SELECT      sum(isnull(pfd.[dblNoOfLots],0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(pfd.[dblNoOfLots],0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
-                        FROM tblCTContractDetail  cdv
+                       FROM tblCTContractDetail  cdv
                         JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                         JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
                         and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId                        
-						where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId not in(2,3,6))t) end
+                                         where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId not in(2,3,6))t) end
                   ) as dblFutures  ,
                                
                   
@@ -485,7 +483,7 @@ convert(decimal(24,6),
                         AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8))  END else isnull(temp.strPeriodTo,'') end
                   ),0) AS dblMarketBasisUOM,                                                              
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturePrice1,
-				     convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,                           
+                                convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,                           
                   SUM(sri.dblOpenReceive) over (partition by cd.intContractDetailId) dblContractPQty,   
 
                   (select sum(cc.dblPurchaseContractShippedQty) from vyuRKPurchaseIntransitView cc where cc.intContractDetailId=cd.intContractDetailId)  dblOpenQty1,
@@ -498,7 +496,7 @@ convert(decimal(24,6),
                            WHEN strAdjustmentType = 'Reduce' then -sum(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,isnull(dc.dblRate,0))) 
                            ELSE 0 END dblCosts,strAdjustmentType
                      FROM vyuCTContractCostView dc 
-					 JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and cd.intContractBasisId=M2M.intContractBasisId
+                                   JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and cd.intContractBasisId=M2M.intContractBasisId
                      JOIN tblICCommodityUnitMeasure cu1 on cd.intCommodityId=cu1.intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
                      JOIN tblICCommodityUnitMeasure cu on cd.intCommodityId=cu.intCommodityId and cu.intUnitMeasureId=@intPriceUOMId                   
                      WHERE  dc.intContractDetailId=cd.intContractDetailId
@@ -602,7 +600,7 @@ SELECT  distinct  cd.intContractHeaderId,cd.intContractDetailId,
                         JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                         JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
                         and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId                        
-						where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId not in(2,3,6))t) end
+                                         where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId not in(2,3,6))t) end
                   ) as dblFutures ,
                                    
                   CASE WHEN cd.intPricingTypeId=6 then cd.dblCashPrice else null end dblCash,
@@ -635,7 +633,7 @@ SELECT  distinct  cd.intContractHeaderId,cd.intContractDetailId,
                                   WHEN strAdjustmentType = 'Reduce' then -sum(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,isnull(dc.dblRate,0))) 
                                   ELSE 0 END dblCosts,strAdjustmentType
             FROM vyuCTContractCostView dc 
-				JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and cd.intContractBasisId=M2M.intContractBasisId
+                           JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and cd.intContractBasisId=M2M.intContractBasisId
                 JOIN tblICCommodityUnitMeasure cu1 on cd.intCommodityId=cu1.intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
                 JOIN tblICCommodityUnitMeasure cu on cd.intCommodityId=cu.intCommodityId and cu.intUnitMeasureId=@intPriceUOMId                           
                 WHERE  dc.intContractDetailId=cd.intContractDetailId
@@ -785,9 +783,13 @@ END
 ELSE
 BEGIN
 SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
-              convert(decimal(24,6),(isnull(dblAdjustedContractPrice,0)-isnull(dblMarketPrice,0))*isnull(dblResult1,0)) dblResult,
+               convert(decimal(24,6),((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0))*isnull(dblResultBasis1,0))+
+                                                   case when isnull(dblFutures,0)=0 then 0 else 
+                       convert(decimal(24,6),((isnull(dblFutures,0)-isnull(dblFuturePrice,0))*isnull(dblMarketFuturesResult1,0))) end
+                                                    dblResult,
               convert(decimal(24,6),((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0))*isnull(dblResultBasis1,0)) dblResultBasis,
-              convert(decimal(24,6),((isnull(dblFutures,0)- isnull(dblFuturePrice,0))*isnull(dblMarketFuturesResult1,0))) dblMarketFuturesResult,
+              case when isnull(dblFutures,0)=0 then 0 else 
+                       convert(decimal(24,6),((isnull(dblFutures,0)-isnull(dblFuturePrice,0))*isnull(dblMarketFuturesResult1,0))) end dblMarketFuturesResult,
               case when strPricingType='Cash' THEN convert(decimal(24,6),(isnull(dblAdjustedContractPrice,0)-isnull(dblMarketPrice,0))*isnull(dblResult1,0))
               else null end as dblResultCash into #Temp   
  FROM(
@@ -902,3 +904,4 @@ dblCashPrice dblCashPrice,dblMarketPrice dblMarketPrice,dblResult dblResult,dblR
 dblMarketFuturesResult dblMarketFuturesResult,dblResultCash dblResultCash,
 dblContractBasis + dblFutures + dblCash dblContractPrice,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate FROM #Temp 
 WHERE strContractOrInventoryType  like '%(S)%' and dblOpenQty <> 0 )t ORDER BY intContractHeaderId DESC
+
