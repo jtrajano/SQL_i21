@@ -1,128 +1,105 @@
 ﻿CREATE VIEW [dbo].[vyuAPClearables]
 
 AS
-
---QUERY FOR MAIN VENDOR WITH CHARGES
-SELECT DISTINCT
-	  Receipt.dtmReceiptDate
-	, Receipt.strReceiptNumber
-	, Receipt.intInventoryReceiptId
-	, Receipt.strBillOfLading
-	, Receipt.strOrderNumber
-	, Bill.dtmDate
-	, Bill.intBillId 
-	, strBillId = ISNULL(Bill.strBillId, 'New Voucher')
-	, dblAmountPaid = 0
-	, Receipt.dblLineTotal + ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0) AS dblTotal
-	, CASE 
-		WHEN Bill.intTransactionType != 1 AND Bill.dblDetailTotal > 0 
-		THEN Bill.dblDetailTotal * -1 
-		ELSE Bill.dblDetailTotal 
-	  END AS dblAmountDue 
-	, dblVoucherAmount = ISNULL(Bill.dblDetailTotal,0) 
-	, dblWithheld = 0
-	, dblDiscount = 0 
-	, dblInterest = 0 
-	, Receipt.strVendorId 
-	, ISNULL(Receipt.strVendorId,'') + ' - ' + ISNULL(Receipt.strVendorName,'') as strVendorIdName 
-	, Bill.dtmDueDate
-	, Receipt.ysnPosted 
-	, Bill.ysnPaid
-	, Bill.strTerm
-	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	,Receipt.dblQtyToReceive
-	,dblQtyVouchered = ISNULL(Bill.dblQtyReceived,ISNULL(Receipt.dblBillQty,0))
-	,(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) dblQtyToVoucher
-	,dblAmountToVoucher =
-	  CASE
-		WHEN Receipt.dblQtyToReceive = 0
-		THEN 0
-		ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / (Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
-	  END
-	,0 AS dblChargeAmount	
-	,Receipt.strContainer
-FROM vyuICGetInventoryReceiptItem Receipt
-	LEFT JOIN (
-		SELECT DISTINCT 
-			  Header.strBillId
-			, Header.dtmBillDate
-			, Header.dtmDate
-			, Header.dtmDueDate
-			, Header.intBillId
-			, Header.dblAmountDue
-			, Header.intTransactionType
-			, Header.ysnPaid
-			, Detail.intInventoryReceiptItemId
-			, Detail.dblQtyReceived
-			, Detail.dblDetailTotal
-			, Header.dblTotal
-			, T.strTerm
-		FROM tblAPBill Header
-		LEFT JOIN dbo.tblSMTerm T  ON Header.intTermsId = T.intTermID
-		OUTER APPLY (
+--QUERY FOR MAIN VENDOR W/O CHARGES
+SELECT	DISTINCT	 
+			 dtmReceiptDate
+			,strReceiptNumber
+			,intInventoryReceiptId
+			,strBillOfLading	
+			,strOrderNumber
+			,dtmLastVoucherDate AS dtmDate
+			,0 AS intBillId --Bill.intBillId 
+			,strAllVouchers COLLATE Latin1_General_CI_AS AS strBillId 
+			,dblAmountPaid = 0
+			,dblTotal = ISNULL(dblReceiptLineTotal + dblReceiptTax,0)
+			,dblAmountDue = ISNULL(dblItemsPayable + dblTaxesPayable,0)
+			,dblVoucherAmount = CASE 
+								WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
+								ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE dblVoucherLineTotal END),0)
+								ELSE 0 END    
+			,dblWithheld = 0
+			,dblDiscount = 0 
+			,dblInterest = 0 
+			,vendor.strVendorId
+			,strVendorIdName = vendor.strVendorId + ' ' + entity.strName
+			,bill.dtmDueDate
+			,ysnPosted
+			,ysnPaid
+			,(CASE WHEN bill.ysnPosted = 1 THEN bill.strTerm ELSE '' END) AS strTerm
+			,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+			,dblQtyToReceive = dblReceiptQty
+			,dblQtyVouchered = CASE WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
+			,dblQtyToVoucher = dblOpenQty
+			,dblAmountToVoucher = CASE 
+									WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
+									ISNULL((dblReceiptLineTotal + dblReceiptTax) - (totalVouchered.dblTotal),0)
+									ELSE (dblReceiptLineTotal + dblReceiptTax)  END                                    
+			,dblChargeAmount = 0
+			,strContainer = strContainerNumber
+	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
+				ON entity.intEntityId = vendor.intEntityId
+			CROSS APPLY (
+				SELECT	* 
+				FROM	vyuICGetInventoryReceiptVoucherItems items
+				WHERE	items.intEntityVendorId = vendor.intEntityId
+			) receiptItem
+			OUTER APPLY (
+				SELECT strTerm,ysnPosted,ysnPaid,A.dtmDueDate FROM dbo.tblAPBill A 
+				INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+				INNER JOIN tblSMTerm C ON C.intTermID = A.intTermsId
+				WHERE 
+				B.intInventoryReceiptChargeId IS NULL AND B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+			) bill
+			OUTER APPLY (
 				SELECT 
-					intInventoryReceiptItemId,
-					SUM(dblQtyReceived) AS dblQtyReceived,
-					SUM(A.dblTotal)		AS dblDetailTotal
+					SUM(dblTotal) + SUM(dblTax) AS dblTotal
 				FROM dbo.tblAPBillDetail A
-				WHERE Header.intBillId = A.intBillId AND A.intInventoryReceiptChargeId IS NULL
-				GROUP BY intInventoryReceiptItemId
-			) Detail		
-		WHERE ISNULL(intInventoryReceiptItemId, '') <> '' 
-	) Bill ON Bill.intInventoryReceiptItemId = Receipt.intInventoryReceiptItemId
-	--RECEIPT TAXES
-	OUTER APPLY (
-		SELECT SUM(dblTax) AS dblTotalTax FROM dbo.tblICInventoryReceiptItemTax A 
-		WHERE A.intInventoryReceiptItemId = Receipt.intInventoryReceiptItemId
-	) ReceiptTaxes
-	--RECEIPT CHARGES EXCLUDE 3RD PARTY VENDOR
-	OUTER APPLY (
-		SELECT SUM(dblAmount) + SUM(dblTax) AS dblCharges FROM dbo.tblICInventoryReceiptCharge A 
-		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId AND A.intEntityVendorId IN (select [intEntityId] FROM tblAPVendor WHERE strVendorId = Receipt.strVendorId)
-	) ReceiptCharges
-	
-WHERE Receipt.ysnPosted = 1 AND ((Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) != 0 OR  (CASE WHEN Receipt.dblQtyToReceive = 0  THEN 0  
-																										ELSE (ISNULL(Receipt.dblLineTotal,0)/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0))END) != 0)
-																									--AND Receipt.strReceiptNumber = 'INVRCT-2495'
-UNION ALL  
---QUERY FOR 3RD PARTY VENDOR WITH CHARGES
+				WHERE A.intInventoryReceiptChargeId IS NULL AND A.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+				GROUP BY intInventoryReceiptItemId 
+			) totalVouchered
+WHERE ((dblReceiptQty - dblVoucherQty)) != 0 
+UNION ALL 
+
+--QUERY FOR RECEIPT VENDOR ACCRUE CHARGES
 SELECT DISTINCT
 	  Receipt.dtmReceiptDate
 	, Receipt.strReceiptNumber
 	, Receipt.intInventoryReceiptId
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
-	, Bill.dtmDate
-	, Bill.intBillId 
-	, strBillId = ISNULL(Bill.strBillId, 'New Voucher')
+	, dtmDate = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.dtmDate ELSE NULL END 
+	, 0 AS intBillId
+	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 	, dblAmountPaid = 0
-	, ISNULL(dblAmount,0) + ISNULL(dblTax,0) AS dblTotal
-	, CASE 
+	, dblTotal = (ISNULL(dblAmount,0)) + (ISNULL(dblTax,0)) 
+	, dblAmountDue = ISNULL(CASE 
 		WHEN Bill.intTransactionType != 1 AND Bill.dblDetailTotal > 0 
-		THEN Bill.dblDetailTotal * -1 
+		THEN Bill.dblDetailTotal 
 		ELSE Bill.dblDetailTotal 
-	  END AS dblAmountDue 
-	, dblVoucherAmount = ISNULL(Bill.dblDetailTotal,0)
+	  END,0)  
+	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) ELSE 0 END  
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
 	, Vendor.strVendorId 
-	, ISNULL(Vendor.strVendorId,'') + ' - ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
-	, Bill.strTerm
+	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	, 1 AS dblQtyToReceive
-	, 1 AS dblQtyVouchered
-	, 1 AS dblQtyToVoucher
-	, dblAmountToVoucher = CAST(( ISNULL(dblAmount,0) + ISNULL(dblTax,0) * 1) AS DECIMAL (18,2))
+	,dblQtyToReceive = 1 
+	,dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 1 ELSE 0 END 
+	,dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE 1 END 
+	,dblAmountToVoucher = CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
 FROM tblICInventoryReceiptCharge ReceiptCharge
-INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId and ReceiptCharge.intEntityVendorId NOT IN (Receipt.intEntityVendorId)
+INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnAccrue = 1 AND ReceiptCharge.ysnPrice = 0
+										AND ReceiptCharge.intEntityVendorId = Receipt.intEntityVendorId
 LEFT JOIN vyuAPVendor Vendor
-			ON Vendor.[intEntityId] = ReceiptCharge.intEntityVendorId
+			ON Vendor.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
@@ -133,6 +110,8 @@ LEFT JOIN vyuAPVendor Vendor
 			, Header.dblAmountDue
 			, Header.intTransactionType
 			, Header.ysnPaid
+			, Header.ysnPosted
+			, Header.intEntityVendorId
 			, Detail.intInventoryReceiptChargeId
 			, Detail.dblQtyReceived
 			, Detail.dblDetailTotal
@@ -144,67 +123,161 @@ LEFT JOIN vyuAPVendor Vendor
 				SELECT 
 					intInventoryReceiptChargeId,
 					SUM(dblQtyReceived) AS dblQtyReceived,
-					SUM(A.dblTotal)		AS dblDetailTotal
+					SUM(A.dblTotal)	+ SUM(A.dblTax) AS dblDetailTotal
+				FROM dbo.tblAPBillDetail A
+				WHERE Header.intBillId = A.intBillId AND A.intInventoryReceiptChargeId IS NOT NULL
+				GROUP BY intInventoryReceiptChargeId
+			) Detail		
+		WHERE ISNULL(intInventoryReceiptChargeId, '') <> ''
+	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId = Receipt.intEntityVendorId
+WHERE Receipt.ysnPosted = 1  
+	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
+																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
+UNION ALL																									
+--QUERY FOR RECEIPT VENDOR PRICE DOWN CHARGES
+SELECT DISTINCT
+	  Receipt.dtmReceiptDate
+	, Receipt.strReceiptNumber
+	, Receipt.intInventoryReceiptId
+	, Receipt.strBillOfLading
+	, '' AS strOrderNumber
+	, dtmDate = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.dtmDate ELSE NULL END 
+	, 0 AS intBillId
+	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
+	, dblAmountPaid = 0
+	, dblTotal = (ISNULL(dblAmount,0) * -1 ) + (ISNULL(dblTax,0) * -1) 
+	, ISNULL(CASE 
+		WHEN Bill.intTransactionType != 1 AND Bill.dblDetailTotal > 0 
+		THEN Bill.dblDetailTotal 
+		ELSE Bill.dblDetailTotal 
+	  END,0) AS dblAmountDue 
+	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) * -1 ELSE 0 END  
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0 
+	, Vendor.strVendorId 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, Bill.dtmDueDate
+	, Receipt.ysnPosted 
+	, Bill.ysnPaid
+	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
+	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	, dblQtyToReceive = -1 
+	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN -1 ELSE 0 END 
+	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE -1 END 
+	, dblAmountToVoucher = CAST(( (ISNULL(dblAmount,0)* -1) + (ISNULL(dblTax,0)* -1)) AS DECIMAL (18,2)) 
+	, 0 AS dblChargeAmount	
+	, ''AS strContainer
+FROM tblICInventoryReceiptCharge ReceiptCharge
+INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnPrice = 1
+LEFT JOIN vyuAPVendor Vendor
+			ON Vendor.intEntityId = Receipt.intEntityVendorId
+	LEFT JOIN (
+		SELECT DISTINCT 
+			  Header.strBillId
+			, Header.dtmBillDate
+			, Header.dtmDate
+			, Header.dtmDueDate
+			, Header.intBillId
+			, Header.dblAmountDue
+			, Header.intTransactionType
+			, Header.ysnPaid
+			, Header.ysnPosted
+			, Header.intEntityVendorId
+			, Detail.intInventoryReceiptChargeId
+			, Detail.dblQtyReceived
+			, Detail.dblDetailTotal
+			, Header.dblTotal
+			, T.strTerm
+		FROM tblAPBill Header
+		LEFT JOIN dbo.tblSMTerm T  ON Header.intTermsId = T.intTermID
+		OUTER APPLY (
+				SELECT 
+					intInventoryReceiptChargeId,
+					SUM(dblQtyReceived) AS dblQtyReceived,
+					SUM(A.dblTotal)	+ SUM(A.dblTax) AS dblDetailTotal
+				FROM dbo.tblAPBillDetail A
+				WHERE Header.intBillId = A.intBillId AND A.intInventoryReceiptChargeId IS NOT NULL
+				GROUP BY intInventoryReceiptChargeId
+			) Detail		
+		WHERE ISNULL(intInventoryReceiptChargeId, '') <> ''
+	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId = Receipt.intEntityVendorId
+WHERE Receipt.ysnPosted = 1 
+	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
+																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
+		
+UNION ALL  
+--QUERY FOR 3RD PARTY ACRUE VENDOR WITH CHARGES 
+SELECT DISTINCT
+	  Receipt.dtmReceiptDate
+	, Receipt.strReceiptNumber
+	, Receipt.intInventoryReceiptId
+	, Receipt.strBillOfLading
+	, '' AS strOrderNumber
+	, dtmDate = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.dtmDate ELSE NULL END 
+	, 0 AS intBillId
+	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
+	, dblAmountPaid = 0
+	, dblTotal = (ISNULL(dblAmount,0)) + (ISNULL(ReceiptCharge.dblTax,0)) 
+	, ISNULL(CASE 
+		WHEN Bill.intTransactionType != 1 AND Bill.dblDetailTotal > 0 
+		THEN Bill.dblDetailTotal + ISNULL(CASE WHEN ysnCheckoffTax > 0 THEN ReceiptCharge.dblTax ELSE ABS(ReceiptCharge.dblTax) END,0) * -1 
+		ELSE Bill.dblDetailTotal + ISNULL(CASE WHEN ysnCheckoffTax > 0 THEN ReceiptCharge.dblTax ELSE ABS(ReceiptCharge.dblTax) END,0) 
+	  END,0) AS dblAmountDue 
+	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) * -1 ELSE 0 END  
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0 
+	, Vendor.strVendorId 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, Bill.dtmDueDate
+	, Receipt.ysnPosted 
+	, Bill.ysnPaid
+	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
+	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	, dblQtyToReceive = 1
+	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 1 ELSE 0 END 
+	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE 1 END 
+	, dblAmountToVoucher =  CAST(((ISNULL(dblAmount,0)) + (ISNULL(ReceiptCharge.dblTax,0))) AS DECIMAL (18,2)) 
+	, 0 AS dblChargeAmount	
+	, ''AS strContainer
+FROM tblICInventoryReceiptCharge ReceiptCharge
+INNER JOIN tblICInventoryReceipt Receipt 
+	ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.intEntityVendorId NOT IN (Receipt.intEntityVendorId)
+LEFT JOIN dbo.tblICInventoryReceiptChargeTax ReceiptChargeTax 
+	ON ReceiptChargeTax.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+LEFT JOIN vyuAPVendor Vendor
+			ON Vendor.intEntityId = ReceiptCharge.intEntityVendorId
+	LEFT JOIN (
+		SELECT DISTINCT 
+			  Header.strBillId
+			, Header.dtmBillDate
+			, Header.dtmDate
+			, Header.dtmDueDate
+			, Header.intBillId
+			, Header.dblAmountDue
+			, Header.intTransactionType
+			, Header.ysnPaid
+			, Header.ysnPosted
+			, Header.intEntityVendorId
+			, Detail.intInventoryReceiptChargeId
+			, Detail.dblQtyReceived
+			, Detail.dblDetailTotal
+			, Header.dblTotal
+			, T.strTerm
+		FROM tblAPBill Header
+		LEFT JOIN dbo.tblSMTerm T  ON Header.intTermsId = T.intTermID
+		OUTER APPLY (
+				SELECT 
+					intInventoryReceiptChargeId,
+					SUM(dblQtyReceived) AS dblQtyReceived,
+					SUM(A.dblTotal)	+ SUM(A.dblTax) AS dblDetailTotal
 				FROM dbo.tblAPBillDetail A
 				WHERE Header.intBillId = A.intBillId AND A.intInventoryReceiptChargeId IS NOT NULL
 				GROUP BY intInventoryReceiptChargeId
 			) Detail		
 		WHERE ISNULL(intInventoryReceiptChargeId, '') <> '' 
-	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-
-	
-WHERE Receipt.ysnPosted = 1 
-	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT TOP 1 intInventoryReceiptChargeId FROM tblAPBillDetail A
-																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId where B.ysnPosted = 1)
-
-UNION ALL
-SELECT 
-	  Receipts.dtmReceiptDate
-	, Receipts.strReceiptNumber
-	, Receipts.intInventoryReceiptId
-	, '' AS strBillOfLading
-	, '' AS strOrderNumber
-	, A.dtmDatePaid AS dtmDate 
-	, B.intBillId
-	, C.strBillId 
-	, CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0 THEN B.dblPayment * -1 ELSE B.dblPayment END AS dblAmountPaid
-	, dblTotal = 0 
-	, dblAmountDue = 0 
-	, dblAmountToVoucher = 0
-	, dblWithheld = B.dblWithheld
-	, B.dblDiscount 
-	, B.dblInterest 
-	, D.strVendorId 
-	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
-	, C.dtmDueDate 
-	, C.ysnPosted 
-	, C.ysnPaid
-	, T.strTerm
-	, (SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	,0 AS dblQtyToReceive
-	,0 AS dblQtyVouchered
-	,0 AS dblQtyToVoucher
-	,0 AS dblAmountToVoucher
-	,0 AS dblChargeAmount
-	,'' AS strContainer
-FROM dbo.tblAPPayment  A
- LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
- LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
- LEFT JOIN dbo.tblSMTerm T  ON C.intTermsId = T.intTermID
- LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
-	ON A.[intEntityVendorId] = D.[intEntityId]
-OUTER APPLY (
-		SELECT DISTINCT 
-			IR.dtmReceiptDate,
-			IR.strReceiptNumber,
-			IR.intInventoryReceiptId,
-			IR.ysnPosted
-		FROM tblICInventoryReceipt IR
-			LEFT JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-			INNER JOIN dbo.tblAPBillDetail BD ON BD.intInventoryReceiptItemId  = IRI.intInventoryReceiptItemId
-		WHERE C.intBillId = BD.intBillId AND ISNULL(BD.intInventoryReceiptItemId, '') <> ''  
-	) Receipts
- WHERE A.ysnPosted = 1  
-	AND C.ysnPosted = 1
-	AND Receipts.ysnPosted = 1
-	AND ysnPaid = 0
+	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId NOT IN (Receipt.intEntityVendorId)
+WHERE Receipt.ysnPosted = 1 AND ReceiptCharge.ysnAccrue = 1
+	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
+																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
