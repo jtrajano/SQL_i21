@@ -100,7 +100,7 @@ BEGIN
 
 			LEFT JOIN tblICItemLocation il
 				ON il.intItemId = vd.intItemId
-				AND il.intLocationId = v.intShipToId
+				AND il.intLocationId = r.intLocationId 
 
 			LEFT JOIN tblICItemUOM qtyItemUOM
 				ON qtyItemUOM.intItemUOMId = vd.intUnitOfMeasureId
