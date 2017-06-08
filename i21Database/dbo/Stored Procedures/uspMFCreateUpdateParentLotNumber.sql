@@ -163,6 +163,20 @@ BEGIN
 		JOIN tblICLot L ON L.intLotId = LI.intLotId
 		WHERE L.strLotNumber = @strLotNumber
 
+		if @intBondStatusId is null and not exists(Select *from tblICLot L WHERE L.strLotNumber = @strLotNumber)
+		Begin
+			Select @intBondStatusId=
+					CASE 
+						WHEN @ysnRequireCustomerApproval = 1
+							THEN (
+									SELECT intBondStatusId
+									FROM tblMFCompanyPreference
+									)
+						ELSE NULL
+						END
+					
+		End
+
 		SELECT @ysnRequireCustomerApproval = ysnRequireCustomerApproval
 		FROM tblICItem
 		WHERE intItemId = @intItemId
@@ -199,16 +213,7 @@ BEGIN
 			,dtmReceiptDate
 			)
 		SELECT @intLotId
-			,IsNULL(@intBondStatusId, (
-					CASE 
-						WHEN @ysnRequireCustomerApproval = 1
-							THEN (
-									SELECT intBondStatusId
-									FROM tblMFCompanyPreference
-									)
-						ELSE NULL
-						END
-					))
+			,@intBondStatusId
 			,@intItemOwnerId
 			,@strVendorRefNo
 			,@strWarehouseRefNo
