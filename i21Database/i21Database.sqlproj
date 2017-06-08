@@ -5388,6 +5388,8 @@
     <Build Include="dbo\Stored Procedures\uspARAddInvoicesTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItems.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
