@@ -203,6 +203,7 @@ SELECT Shipment.intInventoryShipmentId
 		,OH.intOrderHeaderId
 		,OH.dtmCreatedOn AS dtmStagingOrderCreatedOn
 		,US.strUserName AS strStagingOrderCreatedBy
+		,OS.strOrderStatus
 FROM tblICInventoryShipment Shipment
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shipment.intShipFromLocationId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Shipment.intEntityCustomerId
@@ -213,4 +214,5 @@ LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipme
 LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
 LEFT JOIN tblMFOrderHeader OH ON OH.strReferenceNo = Shipment.strShipmentNumber
 LEFT JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = OH.intCreatedById
+LEFT JOIN tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 WHERE Shipment.ysnPosted = 0
