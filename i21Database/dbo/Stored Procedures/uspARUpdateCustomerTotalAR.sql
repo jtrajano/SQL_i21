@@ -1,11 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateCustomerTotalAR]
-	@InvoiceId	INT = NULL,
-	@CustomerId INT = NULL
 AS
 
-DECLARE @dateFrom   DATETIME
-	  , @dateTo		DATETIME
-DECLARE @customerTable TABLE(intEntityCustomerId INT, dblARBalance NUMERIC(18,6))
 DECLARE @temp_aging_table TABLE(	
 	 [strCustomerName]			NVARCHAR(100)
 	,[strEntityNo]				NVARCHAR(100)
@@ -27,10 +22,7 @@ DECLARE @temp_aging_table TABLE(
 	,[dtmAsOfDate]				DATETIME
 	,[strSalespersonName]		NVARCHAR(100)
 	,[strSourceTransaction]		NVARCHAR(100))
-
-SET @dateFrom = CAST(-53690 AS DATETIME)
-SET @dateTo = CAST(GETDATE() AS DATETIME)
-
+	
 INSERT INTO @temp_aging_table(
 	 [strCustomerName]			--= [strCustomerName]
 	,[strEntityNo]				--= [strEntityNo]
@@ -53,39 +45,12 @@ INSERT INTO @temp_aging_table(
 	,[strSalespersonName]		--= [strSalespersonName]
 	,[strSourceTransaction]		--= [strSourceTransaction]
 )
-EXEC uspARCustomerAgingAsOfDateReport @dateFrom, @dateTo, NULL, @CustomerId
+EXEC uspARCustomerAgingAsOfDateReport NULL, NULL, NULL, NULL
 
-IF ISNULL(@CustomerId, 0) <> 0 AND ISNULL(@InvoiceId, 0) <> 0 --AFTER POST INVOICE
-	BEGIN
-		SELECT TOP 1 @CustomerId = intEntityCustomerId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
-
-		INSERT INTO @customerTable (intEntityCustomerId, dblARBalance)
-		SELECT intEntityCustomerId, dblTotalAR FROM @temp_aging_table WHERE intEntityCustomerId = @CustomerId
-	END
-ELSE IF ISNULL(@CustomerId, 0) > 0 AND ISNULL(@InvoiceId, 0) = 0 --AFTER POST PAYMENT
-	BEGIN
-		INSERT INTO @customerTable (intEntityCustomerId, dblARBalance)
-		SELECT intEntityCustomerId, dblTotalAR FROM @temp_aging_table WHERE intEntityCustomerId = @CustomerId
-	END
-ELSE --DATAFIX FOR NEW DATABASE
-	BEGIN
-		INSERT INTO @customerTable (intEntityCustomerId, dblARBalance)
-		SELECT intEntityCustomerId, dblTotalAR FROM @temp_aging_table
-	END
-
-IF EXISTS(SELECT NULL FROM @customerTable)
-	BEGIN
-		WHILE EXISTS(SELECT NULL FROM @customerTable)
-			BEGIN
-				DECLARE @entityCustomerId INT,
-						@arBalance NUMERIC(18,6)
-
-				SELECT TOP 1 @entityCustomerId = intEntityCustomerId
-				           , @arBalance = ISNULL(dblARBalance, 0.000000) 
-				FROM @customerTable ORDER BY intEntityCustomerId
-
-				UPDATE tblARCustomer SET dblARBalance = @arBalance WHERE [intEntityId] = @entityCustomerId 
-
-				DELETE FROM @customerTable WHERE intEntityCustomerId = @entityCustomerId
-			END
-	END
+UPDATE CUSTOMER
+SET dblARBalance = AGING.dblTotalAR
+FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityCustomerId
+					 , dblTotalAR = ISNULL(dblTotalAR, 0)
+				FROM @temp_aging_table
+	) AGING ON CUSTOMER.intEntityId = AGING.intEntityCustomerId

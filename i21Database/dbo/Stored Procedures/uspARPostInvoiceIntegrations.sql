@@ -114,9 +114,6 @@ DECLARE	@EntityCustomerId INT
 
 SELECT TOP 1 @EntityCustomerId = intEntityCustomerId FROM tblARInvoice WHERE intInvoiceId = @TransactionId
 
---Update Total AR
-EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @TransactionId, @CustomerId = @EntityCustomerId
-
 --Patronage
 DECLARE	@successfulCount INT
 		,@invalidCount INT
