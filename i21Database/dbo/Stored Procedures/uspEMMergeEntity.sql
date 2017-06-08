@@ -85,7 +85,7 @@ BEGIN
 			if @curtype = 'Customer' or @curtype = 'Prospect'
 			begin
 				set @CurTableName = 'tblARCustomer'
-				set @CurTableKey = 'intEntityCustomerId'
+				set @CurTableKey = 'intEntityId'
 
 				insert into @avoidtable(strTable)
 				select 'tblARCustomerBudget'
@@ -100,7 +100,7 @@ BEGIN
 				if @PrimaryType = 'Vendor'
 				begin
 					INSERT INTO @EntityRelationShips(stment)
-					VALUES('update tblARCustomer set strCustomerNumber = (select top 1 strVendorId from tblAPVendor where intEntityVendorId = ' + @PrimaryKeyString + ' ) where intEntityCustomerId = ' + @PrimaryKeyString )
+					VALUES('update tblARCustomer set strCustomerNumber = (select top 1 strVendorId from tblAPVendor where intEntityId = ' + @PrimaryKeyString + ' ) where intEntityId = ' + @PrimaryKeyString )
 
 					insert into @avoidColumn(strColumn)
 					values('strCustomerNumber')
@@ -111,16 +111,16 @@ BEGIN
 			else if @curtype = 'Vendor'
 			begin
 				set @CurTableName = 'tblAPVendor'
-				set @CurTableKey = 'intEntityVendorId'
+				set @CurTableKey = 'intEntityId'
 
 				INSERT INTO @EntityRelationShips(stment)
-				VALUES('DELETE FROM tblAPImportedVendors where strVendorId in (select strVendorId from tblAPVendor where intEntityVendorId = ' + @CurMergeId + ' )')
+				VALUES('DELETE FROM tblAPImportedVendors where strVendorId in (select strVendorId from tblAPVendor where intEntityId = ' + @CurMergeId + ' )')
 
 				
 				if @PrimaryType = 'Customer'
 				begin
 					INSERT INTO @EntityRelationShips(stment)
-					VALUES('update tblAPVendor set strVendorId = (select top 1 strCustomerNumber from tblARCustomer where intEntityCustomerId = ' + @PrimaryKeyString + ' ) where intEntityVendorId = ' + @PrimaryKeyString )
+					VALUES('update tblAPVendor set strVendorId = (select top 1 strCustomerNumber from tblARCustomer where intEntityId = ' + @PrimaryKeyString + ' ) where intEntityId = ' + @PrimaryKeyString )
 					insert into @avoidColumn(strColumn)
 					values('strVendorId')
 					set @getAllColumn = 0
