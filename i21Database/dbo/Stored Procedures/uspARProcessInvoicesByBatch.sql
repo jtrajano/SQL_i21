@@ -171,11 +171,7 @@ DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 BEGIN TRY
 IF EXISTS(SELECT TOP 1 NULL FROM #EntriesForProcessing WITH (NOLOCK) WHERE ISNULL([ysnForInsert],0) = 1)
 BEGIN
-	DECLARE @NewSourceId INT = 0
-	
-	DECLARE @InvoicesForInsert	InvoiceStagingTable
-	
-					
+	DECLARE @InvoicesForInsert	InvoiceStagingTable			
 	INSERT INTO @InvoicesForInsert(
 		 [intId]
 		,[strTransactionType]
@@ -474,7 +470,7 @@ BEGIN
 		RETURN 0;
 	END CATCH	   
 			
-	IF (EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId AND ISNULL([ysnSuccess],0) = 1 AND ISNULL([ysnHeader],0) = 1 ) AND @GroupingOption > 0)
+	IF (EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId AND ISNULL([ysnSuccess],0) = 1 AND ISNULL([ysnHeader],0) = 1  AND ISNULL([ysnInsert], 0) = 1) AND @GroupingOption > 0)
 	BEGIN
 
 		UPDATE EFP
@@ -907,11 +903,12 @@ BEGIN
 		FROM
 			@LineItemTaxEntries  LITE
 		INNER JOIN
-			(SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId], [ysnInsert] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
 				ON LITE.[intTempDetailIdForTaxes] = ARIILD.[intTemporaryDetailIdForTax]
 				AND ISNULL(ARIILD.[ysnHeader], 0) = 0
 				AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
 				AND ISNULL(ARIILD.[intInvoiceDetailId], 0) <> 0
+				AND ISNULL(ARIILD.[ysnInsert], 0) = 1
 		INNER JOIN
 			(SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate] FROM @InvoicesForInsert) IFI
 				ON IFI. [intId] = ARIILD.[intId]
@@ -938,15 +935,15 @@ BEGIN
 			END		
 	END	
 
-	DECLARE @InvoiceIds InvoiceId	
-	DELETE FROM @InvoiceIds
+	DECLARE @InsertedInvoiceIds InvoiceId	
+	DELETE FROM @InsertedInvoiceIds
 
-	INSERT INTO @InvoiceIds(
-			[intHeaderId]
+	INSERT INTO @InsertedInvoiceIds(
+		 [intHeaderId]
 		,[ysnUpdateAvailableDiscountOnly]
 		,[intDetailId])
 	SELECT 
-			[intHeaderId]						= ARIILD.[intInvoiceId]
+		 [intHeaderId]						= ARIILD.[intInvoiceId]
 		,[ysnUpdateAvailableDiscountOnly]	= IFI.[ysnUpdateAvailableDiscount]
 		,[intDetailId]						= NULL
 		FROM
@@ -961,11 +958,11 @@ BEGIN
 
 
 	EXEC	[dbo].[uspARUpdateInvoicesIntegrations]
-				@InvoiceIds	= @InvoiceIds
+				@InvoiceIds	= @InsertedInvoiceIds
 				,@UserId		= @UserId
 
 
-	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @InvoiceIds
+	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @InsertedInvoiceIds
 		
 END
 
@@ -979,19 +976,12 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
---DECLARE	@successfulCount INT
---		,@invalidCount INT
---		,@success BIT
---		,@batchIdUsed NVARCHAR(40)
---		,@recapId NVARCHAR(250)
-
---DECLARE @TempInvoiceIdTable AS TABLE ([intInvoiceId] INT)
 
 ----UnPosting posted Invoices for update
 --BEGIN TRY
---	DECLARE @IdsForUnPosting VARCHAR(MAX)
---	DELETE FROM @TempInvoiceIdTable
---	INSERT INTO @TempInvoiceIdTable
+--	DECLARE @IdsForUnPosting InvoiceId
+
+--	INSERT INTO @IdsForUnPosting
 --	SELECT DISTINCT
 --		EFP.[intInvoiceId]
 --	FROM
@@ -1001,884 +991,224 @@ END CATCH
 --			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
 --	WHERE
 --		ISNULL(EFP.[ysnForUpdate],0) = 1
---		AND ISNULL(EFP.[ysnProcessed],0) = 0
 --		AND ISNULL(EFP.[intInvoiceId],0) <> 0
 --		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 0
 --		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
+--		AND ISNULL(EFP.[ysnRecap], 0) = 0
 
---	SELECT
---		@IdsForUnPosting = COALESCE(@IdsForUnPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
---	FROM
---		@TempInvoiceIdTable
+		
+--	--IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
+--		EXEC [dbo].[uspARPostInvoiceIntegration]
+--			 @BatchId			= NULL
+--			,@Post				= 0
+--			,@Recap				= 0
+--			,@UserId			= @UserId
+--			,@InvoiceIds		= @IdsForUnPosting
+--			,@IntegrationLogId	= @IntegrationLogId
+--			,@BeginDate			= NULL
+--			,@EndDate			= NULL
+--			,@BeginTransaction	= NULL
+--			,@EndTransaction	= NULL
+--			,@Exclude			= NULL
+--			,@TransType			= N'all'
+--			,@RaiseError		= @RaiseError
+
+--END TRY
+--BEGIN CATCH
+--	IF ISNULL(@RaiseError,0) = 0
+--		ROLLBACK TRANSACTION
+--	SET @ErrorMessage = ERROR_MESSAGE();
+--	IF ISNULL(@RaiseError,0) = 1
+--		RAISERROR(@ErrorMessage, 16, 1);
+--	RETURN 0;
+--END CATCH
+
+
+--UPDATE
+BEGIN TRY
+IF EXISTS(SELECT TOP 1 NULL FROM #EntriesForProcessing WITH (NOLOCK) WHERE ISNULL([ysnForInsert],0) = 0)
+BEGIN
+	DECLARE @InvoicesForUpdate	InvoiceStagingTable	
+	DELETE FROM @InvoicesForUpdate		
+	INSERT INTO @InvoicesForUpdate						
+	SELECT		 	
+		 *
+	FROM
+		@InvoiceEntries IE
+	INNER JOIN
+		#EntriesForProcessing EFP WITH (NOLOCK)
+			ON IE.[intId] = EFP.[intId]
+	WHERE
+		ISNULL(EFP.[ysnForInsert],0) = 0
+		AND ISNULL(IE.[intInvoiceId], 0) <> 0
+		AND ISNULL(IE.[intInvoiceDetailId], 0) <> 0
+	ORDER BY
+		[intId]
+
+			
+	BEGIN TRY		
+		EXEC [dbo].[uspARUpdateCustomerInvoices]
+			 	 @InvoiceEntries	= @InvoicesForUpdate
+				,@IntegrationLogId	= @IntegrationLogId
+				,@UserId			= @UserId
+				,@RaiseError		= @RaiseError
+				,@ErrorMessage		= @CurrentErrorMessage
+			
 	
+		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+			BEGIN
+				IF ISNULL(@RaiseError,0) = 0
+					ROLLBACK TRANSACTION
+				SET @ErrorMessage = @CurrentErrorMessage;
+				IF ISNULL(@RaiseError,0) = 1
+					RAISERROR(@ErrorMessage, 16, 1);
+				RETURN 0;
+			END
+	END TRY
+	BEGIN CATCH
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = ERROR_MESSAGE();
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END CATCH	   
+			
+	IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId AND ISNULL([ysnSuccess],0) = 1 AND ISNULL([ysnHeader],0) = 1 AND ISNULL([ysnInsert], 0) = 0)
+	BEGIN
+
+		DELETE FROM @TaxDetails
+		INSERT INTO @TaxDetails
+			([intId]
+			,[intDetailId]
+			,[intDetailTaxId]
+			,[intTaxGroupId]
+			,[intTaxCodeId]
+			,[intTaxClassId]
+			,[strTaxableByOtherTaxes]
+			,[strCalculationMethod]
+			,[dblRate]
+			,[intTaxAccountId]
+			,[dblTax]
+			,[dblAdjustedTax]
+			,[ysnTaxAdjusted]
+			,[ysnSeparateOnInvoice]
+			,[ysnCheckoffTax]
+			,[ysnTaxExempt]
+			,[strNotes]
+			,[intTempDetailIdForTaxes]
+			,[dblCurrencyExchangeRate]
+			,[ysnClearExisting]
+			,[strTransactionType]
+			,[strType]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[intHeaderId]
+			,[dtmDate])
+		SELECT
+			 [intId]						= ARIILD.[intId]
+			,[intDetailId]					= ARIILD.[intInvoiceDetailId]
+			,[intDetailTaxId]				= LITE.[intDetailTaxId]
+			,[intTaxGroupId]				= LITE.[intTaxGroupId]
+			,[intTaxCodeId]					= LITE.[intTaxCodeId]
+			,[intTaxClassId]				= LITE.[intTaxClassId]
+			,[strTaxableByOtherTaxes]		= LITE.[strTaxableByOtherTaxes]
+			,[strCalculationMethod]			= LITE.[strCalculationMethod]
+			,[dblRate]						= LITE.[dblRate]
+			,[intTaxAccountId]				= LITE.[intTaxAccountId]
+			,[dblTax]						= LITE.[dblTax]
+			,[dblAdjustedTax]				= LITE.[dblAdjustedTax]
+			,[ysnTaxAdjusted]				= LITE.[ysnTaxAdjusted]
+			,[ysnSeparateOnInvoice]			= LITE.[ysnSeparateOnInvoice]
+			,[ysnCheckoffTax]				= LITE.[ysnCheckoffTax]
+			,[ysnTaxExempt]					= LITE.[ysnTaxExempt]
+			,[strNotes]						= LITE.[strNotes]
+			,[intTempDetailIdForTaxes]		= LITE.[intTempDetailIdForTaxes]
+			,[dblCurrencyExchangeRate]		= ISNULL(IFI.[dblCurrencyExchangeRate], 1.000000)
+			,[ysnClearExisting]				= IFI.[ysnClearDetailTaxes]
+			,[strTransactionType]			= ARIILD.[strTransactionType]
+			,[strType]						= ARIILD.[strType]
+			,[strSourceTransaction]			= ARIILD.[strSourceTransaction]
+			,[intSourceId]					= ARIILD.[intSourceId]
+			,[strSourceId]					= ARIILD.[strSourceId]
+			,[intHeaderId]					= ARIILD.[intInvoiceId]
+			,[dtmDate]						= ISNULL(IFI.[dtmDate], @DateNow)
+		FROM
+			@LineItemTaxEntries  LITE
+		INNER JOIN
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId], [ysnInsert] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+				ON LITE.[intTempDetailIdForTaxes] = ARIILD.[intTemporaryDetailIdForTax]
+				AND ISNULL(ARIILD.[ysnHeader], 0) = 0
+				AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
+				AND ISNULL(ARIILD.[intInvoiceDetailId], 0) <> 0
+				AND ISNULL(ARIILD.[ysnInsert], 0) = 0
+		INNER JOIN
+			(SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate] FROM @InvoicesForInsert) IFI
+				ON IFI. [intId] = ARIILD.[intId]
+		WHERE
+			ARIILD.[intIntegrationLogId] = @IntegrationLogId
+
+
+		EXEC	[dbo].[uspARProcessTaxDetailsForLineItems]
+					 @TaxDetails			= @TaxDetails
+					,@IntegrationLogId		= @IntegrationLogId
+					,@UserId				= @UserId
+					,@ReComputeInvoices		= 0
+					,@RaiseError			= @RaiseError
+					,@ErrorMessage			= @CurrentErrorMessage OUTPUT
+
+		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+			BEGIN
+				IF ISNULL(@RaiseError,0) = 0
+					ROLLBACK TRANSACTION
+				SET @ErrorMessage = @CurrentErrorMessage;
+				IF ISNULL(@RaiseError,0) = 1
+					RAISERROR(@ErrorMessage, 16, 1);
+				RETURN 0;
+			END		
+	END	
+
+	DECLARE @UpdatedInvoiceIds InvoiceId	
+	DELETE FROM @UpdatedInvoiceIds
+
+	INSERT INTO @UpdatedInvoiceIds(
+		 [intHeaderId]
+		,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId])
+	SELECT 
+		 [intHeaderId]						= ARIILD.[intInvoiceId]
+		,[ysnUpdateAvailableDiscountOnly]	= IFI.[ysnUpdateAvailableDiscount]
+		,[intDetailId]						= NULL
+		FROM
+		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+		INNER JOIN
+		(SELECT [intId], [ysnUpdateAvailableDiscount] FROM @InvoicesForInsert) IFI
+			ON IFI. [intId] = ARIILD.[intId] 
+	WHERE
+			ISNULL(ARIILD.[ysnHeader], 0) = 1
+			AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
+			AND ISNULL(ARIILD.[intInvoiceId], 0) <> 0
+
+
+	EXEC	[dbo].[uspARUpdateInvoicesIntegrations]
+				@InvoiceIds	= @UpdatedInvoiceIds
+				,@UserId		= @UserId
+
+
+	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @UpdatedInvoiceIds
 		
---	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
---		EXEC [dbo].[uspARPostInvoice]
---			@batchId			= NULL,
---			@post				= 0,
---			@recap				= 0,
---			@param				= @IdsForUnPosting,
---			@userId				= @UserId,
---			@beginDate			= NULL,
---			@endDate			= NULL,
---			@beginTransaction	= NULL,
---			@endTransaction		= NULL,
---			@exclude			= NULL,
---			@successfulCount	= @successfulCount OUTPUT,
---			@invalidCount		= @invalidCount OUTPUT,
---			@success			= @success OUTPUT,
---			@batchIdUsed		= @batchIdUsed OUTPUT,
---			@recapId			= @recapId OUTPUT,
---			@transType			= N'all',
---			@raiseError			= @RaiseError
+END
 
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
-
-
-----UPDATE
---BEGIN TRY
---	WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND ISNULL([intInvoiceId],0) <> 0)
---	BEGIN
-			
---		DECLARE @ExistingInvoiceId INT		
---		SELECT @ExistingInvoiceId = [intInvoiceId] FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND ISNULL([intInvoiceId],0) <> 0 ORDER BY [intId]
-									
---		SELECT TOP 1
---			 @TransactionType				= [strTransactionType]
---			,@Type							= [strType]		 	
---			,@SourceTransaction				= [strSourceTransaction]
---			,@SourceId						= [intSourceId]
---			,@PeriodsToAccrue 				= [intPeriodsToAccrue]
---			,@SourceNumber					= [strSourceId]
---			,@InvoiceId						= [intInvoiceId]
---			,@EntityCustomerId				= [intEntityCustomerId]
---			,@CompanyLocationId				= [intCompanyLocationId]
---			,@AccountId						= [intAccountId] 
---			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurrency]([intEntityCustomerId]))
---			,@TermId						= [intTermId]
---			,@Date							= CAST([dtmDate] AS DATE)
---			,@DueDate						= [dtmDueDate]
---			,@ShipDate						= [dtmShipDate]
---			,@PostDate						= [dtmPostDate]
---			,@EntitySalespersonId			= [intEntitySalespersonId]
---			,@FreightTermId					= [intFreightTermId]
---			,@ShipViaId						= [intShipViaId]
---			,@PaymentMethodId				= [intPaymentMethodId]
---			,@InvoiceOriginId				= [strInvoiceOriginId]
---			,@PONumber						= [strPONumber]
---			,@BOLNumber						= [strBOLNumber]
---			,@DeliverPickup					= [strDeliverPickup]
---			,@Comment						= [strComments]
---			,@ShipToLocationId				= [intShipToLocationId]
---			,@BillToLocationId				= [intBillToLocationId]
---			,@Template						= [ysnTemplate]
---			,@Forgiven						= [ysnForgiven]
---			,@Calculated					= [ysnCalculated]
---			,@Splitted						= [ysnSplitted]
---			,@PaymentId						= [intPaymentId]
---			,@SplitId						= [intSplitId]			
---			,@LoadDistributionHeaderId		= [intLoadDistributionHeaderId]
---			,@ActualCostId					= [strActualCostId]
---			,@ShipmentId					= [intShipmentId]
---			,@TransactionId 				= [intTransactionId]
---			,@MeterReadingId				= [intMeterReadingId]
---			,@ContractHeaderId				= [intContractHeaderId] 
---			,@LoadId						= [intLoadId] 
---			,@OriginalInvoiceId				= [intOriginalInvoiceId]
---			,@EntityId						= [intEntityId]
---			,@TruckDriverId					= [intTruckDriverId]
---			,@TruckDriverReferenceId		= [intTruckDriverReferenceId]
---			,@ResetDetails					= [ysnResetDetails]
---			,@Recap							= [ysnRecap] 
---			,@Post							= [ysnPost]
---			,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
---		FROM
---			@InvoiceEntries
---		WHERE
---			ISNULL([intInvoiceId],0) = @ExistingInvoiceId
---		ORDER BY
---			[intId]
-
---		BEGIN TRY
---			IF ISNULL(@SourceTransaction,'') = 'Transport Load'
---				BEGIN
---					SET @SourceColumn = 'intLoadDistributionHeaderId'
---					SET @SourceTable = 'tblTRLoadDistributionHeader'
---				END
---			IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
---				BEGIN
---					SET @SourceColumn = 'intShipmentId'
---					SET @SourceTable = 'tblLGShipment'
---				END
---			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
---				BEGIN
---					SET @SourceColumn = 'intTransactionId'
---					SET @SourceTable = 'tblCFTransaction'
---				END
---			IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
---					BEGIN
---						SET @SourceColumn = 'intMeterReadingId'
---						SET @SourceTable = 'tblMBMeterReading' 
---					END
---			IF ISNULL(@SourceTransaction,'') = 'Provisional'
---				BEGIN
---					SET @SourceColumn = 'intInvoiceId'
---					SET @SourceTable = 'tblARInvoice'
---				END
-
---			IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
---					BEGIN
---						SET @SourceColumn = 'intInventoryShipmentId'
---						SET @SourceTable = 'tblICInventoryShipment'
---					END
-
---			IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
---					BEGIN
---						SET @SourceColumn = 'intContractHeaderId'
---						SET @SourceTable = 'tblCTContractHeader'
---					END	
-
---			IF ISNULL(@SourceTransaction,'') = 'Load Schedule'
---					BEGIN
---						SET @SourceColumn = 'intLoadId'
---						SET @SourceTable = 'tblLGLoad'
---					END
-
---			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
---				BEGIN
---					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
---				END
---		END TRY
---		BEGIN CATCH
---			IF ISNULL(@RaiseError,0) = 0
---				ROLLBACK TRANSACTION
---			SET @ErrorMessage = ERROR_MESSAGE();
---			IF ISNULL(@RaiseError,0) = 1
---				RAISERROR(@ErrorMessage, 16, 1);
---			RETURN 0;
---		END CATCH
-
---		SET @NewSourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
-			
---		UPDATE
---			[tblARInvoice]
---		SET 
---			 [strTransactionType]		= CASE WHEN ISNULL(@TransactionType, '') NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment') THEN [tblARInvoice].[strTransactionType] ELSE @TransactionType END
---			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling') THEN [tblARInvoice].[strType] ELSE @Type END
---			,[intEntityCustomerId]		= @EntityCustomerId
---			,[intCompanyLocationId]		= @CompanyLocationId
---			--,[intAccountId]				= @AccountId 
---			,[intCurrencyId]			= @CurrencyId
---			,[intTermId]				= ISNULL(@TermId, C.[intTermsId])
---			,[intSourceId] 				= @NewSourceId
---			,[intPeriodsToAccrue] 		= ISNULL(@PeriodsToAccrue,1)
---			,[dtmDate]					= @Date
---			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
---			,[dtmShipDate]				= @ShipDate
---			,[dtmPostDate]				= @PostDate
---			,[dblInvoiceSubtotal]		= @ZeroDecimal
---			,[dblShipping]				= @ZeroDecimal
---			,[dblTax]					= @ZeroDecimal
---			,[dblInvoiceTotal]			= @ZeroDecimal
---			,[dblDiscount]				= @ZeroDecimal
---			,[dblAmountDue]				= @ZeroDecimal
---			,[dblPayment]				= @ZeroDecimal
---			,[intEntitySalespersonId]	= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
---			,[intFreightTermId]			= @FreightTermId
---			,[intShipViaId]				= ISNULL(@ShipViaId, EL.[intShipViaId])
---			,[intPaymentMethodId]		= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
---			,[strInvoiceOriginId]		= @InvoiceOriginId
---			,[strPONumber]				= @PONumber
---			,[strBOLNumber]				= @BOLNumber
---			,[strDeliverPickup]			= @DeliverPickup
---			,[strComments]				= @Comment
---			,[intShipToLocationId]		= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
---			,[strShipToLocationName]	= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
---			,[strShipToAddress]			= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
---			,[strShipToCity]			= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
---			,[strShipToState]			= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
---			,[strShipToZipCode]			= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
---			,[strShipToCountry]			= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
---			,[intBillToLocationId]		= ISNULL(@BillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
---			,[strBillToLocationName]	= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
---			,[strBillToAddress]			= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
---			,[strBillToCity]			= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
---			,[strBillToState]			= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
---			,[strBillToZipCode]			= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
---			,[strBillToCountry]			= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
---			,[ysnRecurring]				= ISNULL(@Template,0)
---			,[ysnForgiven]				= ISNULL(@Forgiven,0)
---			,[ysnCalculated]			= ISNULL(@Calculated,0)
---			,[ysnSplitted]				= ISNULL(@Splitted,0)
---			,[intPaymentId]				= @PaymentId
---			,[intSplitId]				= @SplitId
---			,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId
---			,[strActualCostId]			= @ActualCostId
---			,[intShipmentId]			= @ShipmentId
---			,[intTransactionId]			= @TransactionId 
---			,[intMeterReadingId]		= @MeterReadingId
---			,[intContractHeaderId]		= @ContractHeaderId
---			,[intLoadId]				= @LoadId
---			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
---			,[intEntityId]				= @EntityId
---			,[intTruckDriverId]			= @TruckDriverId
---			,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
---			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
---		FROM
---			tblARCustomer C
---		LEFT OUTER JOIN
---						(	SELECT 
---								 [intEntityLocationId]
---								,[strLocationName]
---								,[strAddress]
---								,[intEntityId] 
---								,[strCountry]
---								,[strState]
---								,[strCity]
---								,[strZipCode]
---								,[intTermsId]
---								,[intShipViaId]
---							FROM 
---								[tblEMEntityLocation]
---							WHERE
---								ysnDefaultLocation = 1
---						) EL
---							ON C.[intEntityCustomerId] = EL.[intEntityId]
---		LEFT OUTER JOIN
---			[tblEMEntityLocation] SL
---				ON ISNULL(@ShipToLocationId, 0) <> 0
---				AND @ShipToLocationId = SL.intEntityLocationId
---		LEFT OUTER JOIN
---			[tblEMEntityLocation] SL1
---				ON C.intShipToId = SL1.intEntityLocationId
---		LEFT OUTER JOIN
---			[tblEMEntityLocation] BL
---				ON ISNULL(@BillToLocationId, 0) <> 0
---				AND @BillToLocationId = BL.intEntityLocationId		
---		LEFT OUTER JOIN
---			[tblEMEntityLocation] BL1
---				ON C.intShipToId = BL1.intEntityLocationId		
---		WHERE
---			[tblARInvoice].[intInvoiceId] = @ExistingInvoiceId
---			AND C.[intEntityCustomerId] = @EntityCustomerId
---			AND ISNULL(@UpdateAvailableDiscount, 0) = 0
-
-
---		IF ISNULL(@ExistingInvoiceId, 0) <> 0
---			BEGIN			
---				EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @ExistingInvoiceId
---			END	
-			
-
---		DECLARE @ForExistingDetailId INT
---				,@NewExistingDetailId INT			
---		--RESET Invoice Details						
---		IF (ISNULL(@ExistingInvoiceId, 0) <> 0 AND ISNULL(@ResetDetails,0) = 1)
---		BEGIN
---			DELETE FROM tblARInvoiceDetailTax 
---			WHERE [intInvoiceDetailId] IN (SELECT [intInvoiceDetailId] FROM tblARInvoiceDetail  WHERE [intInvoiceId] = @ExistingInvoiceId)
-			
---			DELETE FROM tblARInvoiceDetail
---			WHERE [intInvoiceId]  = @ExistingInvoiceId
-			
---			WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND [intInvoiceId] = @ExistingInvoiceId)
---			BEGIN
---				SELECT TOP 1 @ForExistingDetailId = [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND [intInvoiceId] = @ExistingInvoiceId ORDER BY [intId]
-				
---					SELECT TOP 1
---						 @ShipmentId					= [intShipmentId]		 	
---						,@ItemId						= [intItemId]
---						,@ItemPrepayTypeId				= [intPrepayTypeId]
---						,@ItemPrepayRate				= [dblPrepayRate]
---						,@Inventory						= [ysnInventory]
---						,@ItemDocumentNumber			= ISNULL([strDocumentNumber], @SourceNumber)
---						,@ItemDescription				= [strItemDescription]
---						,@OrderUOMId					= [intOrderUOMId]
---						,@ItemQtyOrdered				= [dblQtyOrdered]
---						,@ItemUOMId						= [intItemUOMId]
---						,@ItemQtyShipped				= [dblQtyShipped]
---						,@ItemDiscount					= [dblDiscount]
---						,@ItemPrice						= [dblPrice]
---						,@ItemPricing					= [strPricing] 
---						,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
---						,@RefreshPrice					= [ysnRefreshPrice]
---						,@ItemMaintenanceType			= [strMaintenanceType]
---						,@ItemFrequency					= [strFrequency]
---						,@ItemMaintenanceDate			= [dtmMaintenanceDate]
---						,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
---						,@ItemLicenseAmount				= [dblLicenseAmount]
---						,@ItemTaxGroupId				= [intTaxGroupId]
---						,@ItemStorageLocationId			= [intStorageLocationId]
---						,@ItemCompanyLocationSubLocationId	= [intCompanyLocationSubLocationId]
---						,@RecomputeTax					= [ysnRecomputeTax]
---						,@ItemSCInvoiceId				= [intSCInvoiceId]
---						,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
---						,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
---						,@ItemInventoryShipmentChargeId	= [intInventoryShipmentChargeId]
---						,@ItemShipmentNumber			= [strShipmentNumber]						
---						,@ItemRecipeItemId				= [intRecipeItemId]
---						,@ItemRecipeId					= [intRecipeId]
---						,@ItemSublocationId				= [intSubLocationId]
---						,@ItemCostTypeId				= [intCostTypeId]
---						,@ItemMarginById				= [intMarginById]
---						,@ItemCommentTypeId				= [intCommentTypeId]
---						,@ItemMargin					= [dblMargin]
---						,@ItemRecipeQty					= [dblRecipeQuantity]
---						,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
---						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
---						,@ContractHeaderId				= [intContractHeaderId]
---						,@ItemContractDetailId			= [intContractDetailId]
---						,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
---						,@ItemWeightUOMId				= [intItemWeightUOMId]
---						,@ItemWeight					= [dblItemWeight]
---						,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
---						,@ItemShipmentTareWt			= [dblShipmentTareWt]
---						,@ItemShipmentNetWt				= [dblShipmentNetWt]
---						,@ItemTicketId					= [intTicketId]
---						,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
---						,@ItemCustomerStorageId			= [intCustomerStorageId]
---						,@ItemSiteDetailId				= [intSiteDetailId]
---						,@ItemLoadDetailId				= [intLoadDetailId]
---						,@ItemLotId						= [intLotId]
---						,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
---						,@ItemSiteId					= [intSiteId]
---						,@ItemBillingBy					= [strBillingBy]
---						,@ItemPercentFull				= [dblPercentFull]
---						,@ItemNewMeterReading			= [dblNewMeterReading]
---						,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
---						,@ItemConversionFactor			= [dblConversionFactor]
---						,@ItemPerformerId				= [intPerformerId]
---						,@ItemLeaseBilling				= [ysnLeaseBilling]
---						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
---						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
---						,@ItemConversionAccountId		= [intConversionAccountId]
---						,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
---						,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
---						,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
---						,@ItemSubCurrencyId				= [intSubCurrencyId]
---						,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
---						,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
---						,@ItemDestinationGradeId		= [intDestinationGradeId]
---						,@ItemDestinationWeightId		= [intDestinationWeightId]
---						,@ItemSalesAccountId			= [intSalesAccountId]
---					FROM
---						@InvoiceEntries
---					WHERE
---						[intId] = @ForExistingDetailId
-						
---					BEGIN TRY
---						EXEC [dbo].[uspARAddItemToInvoice]
---							 @InvoiceId						= @ExistingInvoiceId	
---							,@ItemId						= @ItemId
---							,@ItemPrepayTypeId				= @ItemPrepayTypeId
---							,@ItemPrepayRate				= @ItemPrepayRate
---							,@ItemIsInventory				= @Inventory
---							,@NewInvoiceDetailId			= @NewExistingDetailId	OUTPUT 
---							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
---							,@RaiseError					= @RaiseError
---							,@ItemDocumentNumber			= @ItemDocumentNumber
---							,@ItemDescription				= @ItemDescription
---							,@OrderUOMId					= @OrderUOMId
---							,@ItemQtyOrdered				= @ItemQtyOrdered
---							,@ItemUOMId						= @ItemUOMId
---							,@ItemQtyShipped				= @ItemQtyShipped
---							,@ItemDiscount					= @ItemDiscount
---							,@ItemPrice						= @ItemPrice
---							,@ItemPricing					= @ItemPricing
---							,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
---							,@RefreshPrice					= @RefreshPrice
---							,@ItemMaintenanceType			= @ItemMaintenanceType
---							,@ItemFrequency					= @ItemFrequency
---							,@ItemMaintenanceDate			= @ItemMaintenanceDate
---							,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
---							,@ItemLicenseAmount				= @ItemLicenseAmount
---							,@ItemTaxGroupId				= @ItemTaxGroupId
---							,@ItemStorageLocationId			= @ItemStorageLocationId
---							,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId
---							,@RecomputeTax					= @RecomputeTax
---							,@ItemSCInvoiceId				= @ItemSCInvoiceId
---							,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
---							,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
---							,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
---							,@ItemShipmentNumber			= @ItemShipmentNumber
---							,@ItemRecipeItemId				= @ItemRecipeItemId
---							,@ItemRecipeId					= @ItemRecipeId
---							,@ItemSublocationId				= @ItemSublocationId
---							,@ItemCostTypeId				= @ItemCostTypeId
---							,@ItemMarginById				= @ItemMarginById
---							,@ItemCommentTypeId				= @ItemCommentTypeId
---							,@ItemMargin					= @ItemMargin
---							,@ItemRecipeQty					= @ItemRecipeQty							
---							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
---							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
---							,@ItemContractHeaderId			= @ContractHeaderId
---							,@ItemContractDetailId			= @ItemContractDetailId
---							,@ItemShipmentId				= @ShipmentId
---							,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
---							,@ItemTicketId					= @ItemTicketId
---							,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
---							,@ItemCustomerStorageId			= @ItemCustomerStorageId
---							,@ItemSiteDetailId				= @ItemSiteDetailId
---							,@ItemLoadDetailId				= @ItemLoadDetailId
---							,@ItemLotId						= @ItemLotId
---							,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
---							,@ItemSiteId					= @ItemSiteId
---							,@ItemBillingBy					= @ItemBillingBy
---							,@ItemPercentFull				= @ItemPercentFull
---							,@ItemNewMeterReading			= @ItemNewMeterReading
---							,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
---							,@ItemConversionFactor			= @ItemConversionFactor
---							,@ItemPerformerId				= @ItemPerformerId
---							,@ItemLeaseBilling				= @ItemLeaseBilling
---							,@ItemConversionAccountId		= @ItemConversionAccountId
---							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
---							,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
---							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
---							,@ItemSubCurrencyId				= @ItemSubCurrencyId
---							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
---							,@ItemWeightUOMId				= @ItemWeightUOMId
---							,@ItemWeight					= @ItemWeight
---							,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
---							,@ItemDestinationGradeId		= @ItemDestinationGradeId
---							,@ItemDestinationWeightId		= @ItemDestinationWeightId
---							,@ItemSalesAccountId			= @ItemSalesAccountId
-
---						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
---							BEGIN
---								IF ISNULL(@RaiseError,0) = 0
---									ROLLBACK TRANSACTION
---								SET @ErrorMessage = @CurrentErrorMessage;
---								IF ISNULL(@RaiseError,0) = 1
---									RAISERROR(@ErrorMessage, 16, 1);
---								RETURN 0;
---							END
---					END TRY
---					BEGIN CATCH
---						IF ISNULL(@RaiseError,0) = 0
---							ROLLBACK TRANSACTION
---						SET @ErrorMessage = ERROR_MESSAGE();
---						IF ISNULL(@RaiseError,0) = 1
---							RAISERROR(@ErrorMessage, 16, 1);
---						RETURN 0;
---					END CATCH
-
---					IF ISNULL(@NewExistingDetailId,0) <> 0					
---					BEGIN
---						UPDATE #EntriesForProcessing
---						SET
---							 [ysnProcessed]			= 1
---							,[intInvoiceDetailId]	= @NewExistingDetailId
---						WHERE
---							[intId] = @ForExistingDetailId
---					END
-					
---					IF ISNULL(@NewExistingDetailId,0) <> 0					
---					BEGIN															
---						BEGIN TRY
---							DELETE FROM @TaxDetails
---							INSERT INTO @TaxDetails
---								([intDetailId]
---								,[intDetailTaxId]
---								,[intTaxGroupId]
---								,[intTaxCodeId]
---								,[intTaxClassId]
---								,[strTaxableByOtherTaxes]
---								,[strCalculationMethod]
---								,[dblRate]
---								,[intTaxAccountId]
---								,[dblTax]
---								,[dblAdjustedTax]
---								,[ysnTaxAdjusted]
---								,[ysnSeparateOnInvoice]
---								,[ysnCheckoffTax]
---								,[ysnTaxExempt]
---								,[strNotes])
---							SELECT
---								 @NewDetailId
---								,[intDetailTaxId]
---								,[intTaxGroupId]
---								,[intTaxCodeId]
---								,[intTaxClassId]
---								,[strTaxableByOtherTaxes]
---								,[strCalculationMethod]
---								,[dblRate]
---								,[intTaxAccountId]
---								,[dblTax]
---								,[dblAdjustedTax]
---								,[ysnTaxAdjusted]
---								,[ysnSeparateOnInvoice]
---								,[ysnCheckoffTax]
---								,[ysnTaxExempt]
---								,[strNotes]
---							FROM
---								@LineItemTaxEntries
---							WHERE
---								[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
-						
---							EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
---										 @TaxDetails	= @TaxDetails
---										,@UserId		= @EntityId
---										,@ClearExisting	= @ClearDetailTaxes
---										,@RaiseError	= @RaiseError
---										,@ErrorMessage	= @CurrentErrorMessage OUTPUT
-
---							IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
---								BEGIN
---									IF ISNULL(@RaiseError,0) = 0
---										ROLLBACK TRANSACTION
---									SET @ErrorMessage = @CurrentErrorMessage;
---									IF ISNULL(@RaiseError,0) = 1
---										RAISERROR(@ErrorMessage, 16, 1);
---									RETURN 0;
---								END
---						END TRY
---						BEGIN CATCH
---							IF ISNULL(@RaiseError,0) = 0
---								ROLLBACK TRANSACTION
---							SET @ErrorMessage = ERROR_MESSAGE();
---							IF ISNULL(@RaiseError,0) = 1
---								RAISERROR(@ErrorMessage, 16, 1);
---							RETURN 0;
---						END CATCH
---					END				
-						
---			END
-			
---		END
-
---		--UPDATE Invoice Details						
---		IF (ISNULL(@ExistingInvoiceId, 0) <> 0 AND ISNULL(@ResetDetails,0) = 0)
---		BEGIN		
---			WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND [intInvoiceId] = @ExistingInvoiceId AND ISNULL([intInvoiceDetailId],0) <> 0)
---			BEGIN
---				SELECT TOP 1 @ForExistingDetailId = [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND [intInvoiceId] = @ExistingInvoiceId AND ISNULL([intInvoiceDetailId],0) <> 0 ORDER BY [intId]
-				
---				SELECT TOP 1
---					 @ShipmentId					= [intShipmentId]		 	
---					,@InvoiceDetailId				= [intInvoiceDetailId] 
---					,@ItemId						= [intItemId]
---					,@ItemPrepayTypeId				= [intPrepayTypeId]
---					,@ItemPrepayRate				= [dblPrepayRate]
---					,@Inventory						= [ysnInventory]
---					,@ItemDocumentNumber			= ISNULL([strDocumentNumber],@SourceNumber)
---					,@ItemDescription				= [strItemDescription]
---					,@OrderUOMId					= [intOrderUOMId]
---					,@ItemQtyOrdered				= [dblQtyOrdered]
---					,@ItemUOMId						= [intItemUOMId]
---					,@ItemQtyShipped				= [dblQtyShipped]
---					,@ItemDiscount					= [dblDiscount]
---					,@ItemPrice						= [dblPrice]
---					,@ItemPricing					= [strPricing] 
---					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
---					,@RefreshPrice					= [ysnRefreshPrice]
---					,@ItemMaintenanceType			= [strMaintenanceType]
---					,@ItemFrequency					= [strFrequency]
---					,@ItemMaintenanceDate			= [dtmMaintenanceDate]
---					,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
---					,@ItemLicenseAmount				= [dblLicenseAmount]
---					,@ItemTaxGroupId				= [intTaxGroupId]
---					,@ItemStorageLocationId			= @ItemStorageLocationId
---					,@ItemCompanyLocationSubLocationId	= [intCompanyLocationSubLocationId]
---					,@RecomputeTax					= [ysnRecomputeTax]
---					,@ItemSCInvoiceId				= [intSCInvoiceId]
---					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
---					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
---					,@ItemInventoryShipmentChargeId	= [intInventoryShipmentChargeId]
---					,@ItemShipmentNumber			= [strShipmentNumber]
---					,@ItemRecipeItemId				= [intRecipeItemId]	
---					,@ItemRecipeId					= [intRecipeId]
---					,@ItemSublocationId				= [intSubLocationId]
---					,@ItemCostTypeId				= [intCostTypeId]
---					,@ItemMarginById				= [intMarginById]
---					,@ItemCommentTypeId				= [intCommentTypeId]
---					,@ItemMargin					= [dblMargin]
---					,@ItemRecipeQty					= [dblRecipeQuantity]				
---					,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
---					,@ItemSalesOrderNumber			= [strSalesOrderNumber]
---					,@ContractHeaderId				= [intContractHeaderId]
---					,@ItemContractDetailId			= [intContractDetailId]
---					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
---					,@ItemWeightUOMId				= [intItemWeightUOMId]
---					,@ItemWeight					= [dblItemWeight]
---					,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
---					,@ItemShipmentTareWt			= [dblShipmentTareWt]
---					,@ItemShipmentNetWt				= [dblShipmentNetWt]
---					,@ItemTicketId					= [intTicketId]
---					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
---					,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
---					,@ItemCustomerStorageId			= [intCustomerStorageId]
---					,@ItemSiteDetailId				= [intSiteDetailId]
---					,@ItemLoadDetailId				= [intLoadDetailId]
---					,@ItemLotId						= [intLotId]
---					,@ItemSiteId					= [intSiteId]
---					,@ItemBillingBy					= [strBillingBy]
---					,@ItemPercentFull				= [dblPercentFull]
---					,@ItemNewMeterReading			= [dblNewMeterReading]
---					,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
---					,@ItemConversionFactor			= [dblConversionFactor]
---					,@ItemPerformerId				= [intPerformerId]
---					,@ItemLeaseBilling				= [ysnLeaseBilling]
---					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
---					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
---					,@ItemConversionAccountId		= [intConversionAccountId]
---					,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
---					,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
---					,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
---					,@ItemSubCurrencyId				= [intSubCurrencyId]
---					,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
---					,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
---					,@ItemDestinationGradeId		= [intDestinationGradeId]
---					,@ItemDestinationWeightId		= [intDestinationWeightId]
---				FROM
---					@InvoiceEntries
---				WHERE
---					[intId] = @ForExistingDetailId
-					
---				IF (ISNULL(@RefreshPrice,0) = 1 AND ISNULL(@UpdateAvailableDiscount, 0) = 0)
---					BEGIN
---						DECLARE @Pricing			NVARCHAR(250)				
---								,@ContractNumber	INT
---								,@ContractSeq		INT
---								,@InvoiceType		NVARCHAR(200)
-
---						BEGIN TRY
---						SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
---						EXEC dbo.[uspARGetItemPrice]  
---							 @ItemId					= @ItemId
---							,@CustomerId				= @EntityCustomerId
---							,@LocationId				= @CompanyLocationId
---							,@ItemUOMId					= @ItemUOMId
---							,@TransactionDate			= @Date
---							,@Quantity					= @ItemQtyShipped
---							,@Price						= @ItemPrice			OUTPUT
---							,@Pricing					= @Pricing				OUTPUT
---							,@ContractHeaderId			= @ContractHeaderId		OUTPUT
---							,@ContractDetailId			= @ItemContractDetailId	OUTPUT
---							,@ContractNumber			= @ContractNumber		OUTPUT
---							,@ContractSeq				= @ContractSeq			OUTPUT
---							,@TermDiscount				= @ItemTermDiscount		OUTPUT
---							,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT							
---							,@InvoiceType				= @InvoiceType
---							,@TermId					= @TermId
---						END TRY
---						BEGIN CATCH
---							SET @ErrorMessage = ERROR_MESSAGE();
---							IF ISNULL(@RaiseError,0) = 1
---								RAISERROR(@ErrorMessage, 16, 1);
---							RETURN 0;
---						END CATCH
---					END
-					
---				BEGIN TRY
---					UPDATE
---						[tblARInvoiceDetail]
---					SET	
---						 [intItemId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemId ELSE [intItemId] END
---						,[intPrepayTypeId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPrepayTypeId ELSE [intPrepayTypeId] END
---						,[dblPrepayRate]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPrepayRate ELSE [dblPrepayRate] END
---						,[strDocumentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDocumentNumber ELSE [strDocumentNumber] END
---						,[strItemDescription]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDescription ELSE [strItemDescription] END
---						,[intOrderUOMId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @OrderUOMId ELSE [intOrderUOMId] END
---						,[dblQtyOrdered]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemQtyOrdered ELSE [dblQtyOrdered] END
---						,[intItemUOMId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemUOMId ELSE [intItemUOMId] END
---						,[dblQtyShipped]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemQtyShipped ELSE [dblQtyShipped] END
---						,[dblDiscount]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDiscount ELSE [dblDiscount] END
---						,[dblItemTermDiscount]					= @ItemTermDiscount
---						,[strItemTermDiscountBy]				= @ItemTermDiscountBy
---						,[dblPrice]								= CASE WHEN @UpdateAvailableDiscount = 0 THEN 
---																		(CASE WHEN (ISNULL(@RefreshPrice,0) = 1) THEN @ItemPrice / ISNULL(@ItemSubCurrencyRate, 1) ELSE @ItemPrice END)
---																	ELSE
---																		[dblPrice]
---																  END
---						,[strPricing]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPricing ELSE [strPricing] END							
---						,[strVFDDocumentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVFDDocumentNumber ELSE [strVFDDocumentNumber] END
---						,[strMaintenanceType]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceType ELSE [strMaintenanceType] END
---						,[strFrequency]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemFrequency ELSE [strFrequency] END					
---						,[dtmMaintenanceDate]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceDate ELSE [dtmMaintenanceDate] END			
---						,[dblMaintenanceAmount]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceAmount ELSE [dblMaintenanceAmount] END			
---						,[dblLicenseAmount]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLicenseAmount ELSE [dblLicenseAmount] END				
---						,[intTaxGroupId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemTaxGroupId ELSE [intTaxGroupId] END				
---						,[intStorageLocationId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemStorageLocationId ELSE [intStorageLocationId] END				
---						,[intCompanyLocationSubLocationId]		= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCompanyLocationSubLocationId ELSE [intCompanyLocationSubLocationId] END				
---						,[intSCInvoiceId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSCInvoiceId ELSE [intSCInvoiceId] END					
---						,[strSCInvoiceNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSCInvoiceNumber ELSE [strSCInvoiceNumber] END				
---						,[intInventoryShipmentItemId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemInventoryShipmentItemId ELSE [intInventoryShipmentItemId] END			
---						,[intInventoryShipmentChargeId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemInventoryShipmentChargeId ELSE [intInventoryShipmentChargeId] END			
---						,[strShipmentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentNumber ELSE [strShipmentNumber] END	
---						,[intRecipeItemId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeItemId ELSE [intRecipeItemId] END
---						,[intRecipeId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeId ELSE [intRecipeId] END
---						,[intSubLocationId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSublocationId ELSE [intSubLocationId] END
---						,[intCostTypeId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCostTypeId ELSE [intCostTypeId] END
---						,[intMarginById]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMarginById ELSE [intMarginById] END
---						,[intCommentTypeId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCommentTypeId ELSE [intCommentTypeId] END
---						,[dblMargin]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMargin ELSE [dblMargin] END
---						,[dblRecipeQuantity]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeQty ELSE [dblRecipeQuantity] END									
---						,[intSalesOrderDetailId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSalesOrderDetailId ELSE [intSalesOrderDetailId] END			
---						,[strSalesOrderNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSalesOrderNumber ELSE [strSalesOrderNumber] END		
---						,[intContractHeaderId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ContractHeaderId ELSE [intContractHeaderId] END			
---						,[intContractDetailId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemContractDetailId ELSE [intContractDetailId] END			
---						,[intShipmentId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ShipmentId ELSE [intShipmentId] END			
---						,[intShipmentPurchaseSalesContractId]	= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentPurchaseSalesContractId ELSE [intShipmentPurchaseSalesContractId] END
---						,[intItemWeightUOMId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemWeightUOMId ELSE [intItemWeightUOMId] END
---						,[dblItemWeight]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemWeight ELSE [dblItemWeight] END
---						,[dblShipmentGrossWt]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentGrossWt ELSE [dblShipmentGrossWt] END
---						,[dblShipmentTareWt]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentTareWt ELSE [dblShipmentTareWt] END
---						,[dblShipmentNetWt]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentNetWt ELSE [dblShipmentNetWt] END
---						,[intTicketId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemTicketId ELSE [intTicketId] END
---						,[intTicketHoursWorkedId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemTicketHoursWorkedId ELSE [intTicketHoursWorkedId] END
---						,[intCustomerStorageId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCustomerStorageId ELSE [intCustomerStorageId] END
---						,[intSiteDetailId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteDetailId ELSE [intSiteDetailId] END
---						,[intLoadDetailId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLoadDetailId ELSE [intLoadDetailId] END
---						,[intLotId]								= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLotId ELSE [intLotId] END
---						,[intOriginalInvoiceDetailId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemOriginalInvoiceDetailId ELSE [intOriginalInvoiceDetailId] END
---						,[intSiteId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteId ELSE [intSiteId] END
---						,[strBillingBy]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemBillingBy ELSE [strBillingBy] END
---						,[dblPercentFull]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPercentFull ELSE [dblPercentFull] END
---						,[dblNewMeterReading]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemNewMeterReading ELSE [dblNewMeterReading] END
---						,[dblPreviousMeterReading]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPreviousMeterReading ELSE [dblPreviousMeterReading] END
---						,[dblConversionFactor]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemConversionFactor ELSE [dblConversionFactor] END
---						,[intPerformerId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPerformerId ELSE [intPerformerId] END
---						,[ysnLeaseBilling]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLeaseBilling ELSE [ysnLeaseBilling] END
---						,[ysnVirtualMeterReading]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVirtualMeterReading ELSE [ysnVirtualMeterReading] END
---						,[intConversionAccountId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemConversionAccountId ELSE [intConversionAccountId] END
---						,@ItemCurrencyExchangeRateTypeId		= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRateTypeId ELSE [intCurrencyExchangeRateTypeId] END
---						,@ItemCurrencyExchangeRateId			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRateId ELSE [intCurrencyExchangeRateId] END
---						,@ItemCurrencyExchangeRate				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRate ELSE [dblCurrencyExchangeRate] END
---						,@ItemSubCurrencyId						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyId ELSE [intSubCurrencyId] END
---						,@ItemSubCurrencyRate					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyRate ELSE [dblSubCurrencyRate] END
---						,[intConcurrencyId]						= [intConcurrencyId] + 1
---						,[intStorageScheduleTypeId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemStorageScheduleTypeId ELSE [intStorageScheduleTypeId] END
---						,[intDestinationGradeId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDestinationGradeId ELSE [intDestinationGradeId] END
---						,[intDestinationWeightId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDestinationWeightId ELSE [intDestinationWeightId] END
---					WHERE
---						[intInvoiceId] = @ExistingInvoiceId
---						AND [intInvoiceDetailId] = @InvoiceDetailId						
---				END TRY
---				BEGIN CATCH
---					IF ISNULL(@RaiseError,0) = 0
---						ROLLBACK TRANSACTION
---					SET @ErrorMessage = ERROR_MESSAGE();
---					IF ISNULL(@RaiseError,0) = 1
---						RAISERROR(@ErrorMessage, 16, 1);
---					RETURN 0;
---				END CATCH
-
-
-
---				BEGIN TRY
---					DELETE FROM @TaxDetails
---					INSERT INTO @TaxDetails
---						([intDetailId]
---						,[intDetailTaxId]
---						,[intTaxGroupId]
---						,[intTaxCodeId]
---						,[intTaxClassId]
---						,[strTaxableByOtherTaxes]
---						,[strCalculationMethod]
---						,[dblRate]
---						,[intTaxAccountId]
---						,[dblTax]
---						,[dblAdjustedTax]
---						,[ysnTaxAdjusted]
---						,[ysnSeparateOnInvoice]
---						,[ysnCheckoffTax]
---						,[ysnTaxExempt]
---						,[strNotes])
---					SELECT
---						 [intDetailId]
---						,[intDetailTaxId]
---						,[intTaxGroupId]
---						,[intTaxCodeId]
---						,[intTaxClassId]
---						,[strTaxableByOtherTaxes]
---						,[strCalculationMethod]
---						,[dblRate]
---						,[intTaxAccountId]
---						,[dblTax]
---						,[dblAdjustedTax]
---						,[ysnTaxAdjusted]
---						,[ysnSeparateOnInvoice]
---						,[ysnCheckoffTax]
---						,[ysnTaxExempt]
---						,[strNotes]
---					FROM
---						@LineItemTaxEntries
---					WHERE
---						[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
---						AND @UpdateAvailableDiscount = 0
-						
---					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
---									@TaxDetails	= @TaxDetails
---								,@UserId		= @EntityId
---								,@ClearExisting	= @ClearDetailTaxes
---								,@RaiseError	= @RaiseError
---								,@ErrorMessage	= @CurrentErrorMessage OUTPUT
-
---					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
---						BEGIN
---							IF ISNULL(@RaiseError,0) = 0
---								ROLLBACK TRANSACTION
---							SET @ErrorMessage = @CurrentErrorMessage;
---							IF ISNULL(@RaiseError,0) = 1
---								RAISERROR(@ErrorMessage, 16, 1);
---							RETURN 0;
---						END
---				END TRY
---				BEGIN CATCH
---					IF ISNULL(@RaiseError,0) = 0
---						ROLLBACK TRANSACTION
---					SET @ErrorMessage = ERROR_MESSAGE();
---					IF ISNULL(@RaiseError,0) = 1
---						RAISERROR(@ErrorMessage, 16, 1);
---					RETURN 0;
---				END CATCH
-		
-
-
---				UPDATE #EntriesForProcessing
---				SET
---					 [ysnProcessed]			= 1
---					,[intInvoiceDetailId]	= @NewExistingDetailId
---				WHERE
---					[intId] = @ForExistingDetailId
-			
-					
---			END
-			
---		END
-		
---		IF ISNULL(@ExistingInvoiceId, 0) <> 0
---			BEGIN			
---				EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @ExistingInvoiceId, @ForDelete = 0, @UserId = @EntityId	
---			END			
-			
---		UPDATE #EntriesForProcessing
---		SET
---			 [ysnProcessed]	= 1
---			,[ysnPost]		= @Post
---			,[ysnRecap] 	= @Recap
---		WHERE		
---			[intInvoiceId] = @ExistingInvoiceId
---			AND ISNULL([ysnForUpdate],0) = 1
-			
---	END
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 ----Re-Compute
 --BEGIN TRY
@@ -1906,105 +1236,41 @@ END CATCH
 --SET @batchIdUsed = ''
 
 		
-----Posting newly added Invoices
---DECLARE @IdsForPosting VARCHAR(MAX)
+------Posting newly added Invoices
 --BEGIN TRY
---	DELETE FROM @TempInvoiceIdTable
---	INSERT INTO @TempInvoiceIdTable
+--	DECLARE @IdsForPostingNew InvoiceId
+
+--	INSERT INTO @IdsForPostingNew
 --	SELECT DISTINCT
---		[intInvoiceId]
+--		EFP.[intInvoiceId]
 --	FROM
---		#EntriesForProcessing
+--		#EntriesForProcessing EFP
+--	INNER JOIN
+--		@InvoiceEntries IE
+--			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
 --	WHERE
---		ISNULL([ysnForInsert],0) = 1
---		AND ISNULL([ysnProcessed],0) = 1
---		AND ISNULL([intInvoiceId],0) <> 0
---		AND ISNULL([ysnPost],0) = 1
---		AND ISNULL([ysnRecap],0) <> 1	
+--		ISNULL(EFP.[ysnForInsert],0) = 1
+--		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+--		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 1
+--		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
+--		AND ISNULL(EFP.[ysnRecap], 0) = 0
+
 		
---	SELECT 
---		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
---	FROM
---		@TempInvoiceIdTable
-		
---	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
---		BEGIN		
---		EXEC [dbo].[uspARPostInvoice]
---			@batchId			= @BatchIdForNewPost,
---			@post				= 1,
---			@recap				= 0,
---			@param				= @IdsForPosting,
---			@userId				= @UserId,
---			@beginDate			= NULL,
---			@endDate			= NULL,
---			@beginTransaction	= NULL,
---			@endTransaction		= NULL,
---			@exclude			= NULL,
---			@successfulCount	= @successfulCount OUTPUT,
---			@invalidCount		= @invalidCount OUTPUT,
---			@success			= @success OUTPUT,
---			@batchIdUsed		= @batchIdUsed OUTPUT,
---			@recapId			= @recapId OUTPUT,
---			@transType			= N'all',
---			@raiseError			= @RaiseError
-
---			SET @BatchIdForNewPost = @batchIdUsed
---			SET @PostedNewCount = @successfulCount
---		END
-	
---	SET @IdsForPosting = ''
---	SET @batchIdUsed = ''	
---	SET @successfulCount = 0
-
-
---	DELETE FROM @TempInvoiceIdTable
---	INSERT INTO @TempInvoiceIdTable
---	SELECT DISTINCT
---		[intInvoiceId]
---	FROM
---		#EntriesForProcessing
---	WHERE
---		ISNULL([ysnForInsert],0) = 1
---		AND ISNULL([ysnProcessed],0) = 1
---		AND ISNULL([intInvoiceId],0) <> 0
---		AND ISNULL([ysnPost],0) = 1
---		AND ISNULL([ysnRecap],0) = 1	
-
---	SELECT
---		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
---	FROM
---		@TempInvoiceIdTable
-		
-		
---	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
---		BEGIN	
---		EXEC [dbo].[uspARPostInvoice]
---			@batchId			= @BatchIdForNewPostRecap,
---			@post				= 1,
---			@recap				= 1,
---			@param				= @IdsForPosting,
---			@userId				= @UserId,
---			@beginDate			= NULL,
---			@endDate			= NULL,
---			@beginTransaction	= NULL,
---			@endTransaction		= NULL,
---			@exclude			= NULL,
---			@successfulCount	= @successfulCount OUTPUT,
---			@invalidCount		= @invalidCount OUTPUT,
---			@success			= @success OUTPUT,
---			@batchIdUsed		= @batchIdUsed OUTPUT,
---			@recapId			= @recapId OUTPUT,
---			@transType			= N'all',
---			@raiseError			= @RaiseError	
-
---			SET @BatchIdForNewPostRecap = @batchIdUsed
---			SET @RecapNewCount = @successfulCount
---		END
-		
---	SET @IdsForPosting = ''
---	SET @batchIdUsed = ''	
---	SET @successfulCount = 0
-
+--	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
+--		EXEC [dbo].[uspARPostInvoiceIntegration]
+--			 @BatchId			= NULL
+--			,@Post				= 1
+--			,@Recap				= 0
+--			,@UserId			= @UserId
+--			,@InvoiceIds		= @IdsForPostingNew
+--			,@IntegrationLogId	= @IntegrationLogId
+--			,@BeginDate			= NULL
+--			,@EndDate			= NULL
+--			,@BeginTransaction	= NULL
+--			,@EndTransaction	= NULL
+--			,@Exclude			= NULL
+--			,@TransType			= N'all'
+--			,@RaiseError		= @RaiseError
 
 --END TRY
 --BEGIN CATCH
@@ -2016,57 +1282,99 @@ END CATCH
 --	RETURN 0;
 --END CATCH
 
-----Posting Updated Invoices
---DECLARE @IdsForPostingUpdated VARCHAR(MAX)
+
+----Posting newly added Invoices - Recap
 --BEGIN TRY
---	DELETE FROM @TempInvoiceIdTable
---	INSERT INTO @TempInvoiceIdTable
+--	DECLARE @IdsForPostingNewRecap InvoiceId
+
+--	INSERT INTO @IdsForPostingNewRecap
 --	SELECT DISTINCT
---		[intInvoiceId]
+--		EFP.[intInvoiceId]
 --	FROM
---		#EntriesForProcessing
+--		#EntriesForProcessing EFP
+--	INNER JOIN
+--		@InvoiceEntries IE
+--			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
 --	WHERE
---		ISNULL([ysnForUpdate],0) = 1
---		AND ISNULL([ysnProcessed],0) = 1
---		AND ISNULL([intInvoiceId],0) <> 0
---		AND ISNULL([ysnPost],0) = 1
---		AND ISNULL([ysnRecap],0) <> 1	
+--		ISNULL(EFP.[ysnForInsert],0) = 1
+--		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+--		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 1
+--		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
+--		AND ISNULL(EFP.[ysnRecap], 0) = 1
 
---	SELECT
---		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		
+--	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
+--		EXEC [dbo].[uspARPostInvoiceIntegration]
+--			 @BatchId			= NULL
+--			,@Post				= 1
+--			,@Recap				= 1
+--			,@UserId			= @UserId
+--			,@InvoiceIds		= @IdsForPostingNewRecap
+--			,@IntegrationLogId	= @IntegrationLogId
+--			,@BeginDate			= NULL
+--			,@EndDate			= NULL
+--			,@BeginTransaction	= NULL
+--			,@EndTransaction	= NULL
+--			,@Exclude			= NULL
+--			,@TransType			= N'all'
+--			,@RaiseError		= @RaiseError
+
+--END TRY
+--BEGIN CATCH
+--	IF ISNULL(@RaiseError,0) = 0
+--		ROLLBACK TRANSACTION
+--	SET @ErrorMessage = ERROR_MESSAGE();
+--	IF ISNULL(@RaiseError,0) = 1
+--		RAISERROR(@ErrorMessage, 16, 1);
+--	RETURN 0;
+--END CATCH
+
+------Posting Updated Invoices
+--BEGIN TRY
+--	DECLARE @IdsForPostingUpdate InvoiceId
+
+--	INSERT INTO @IdsForPostingUpdate
+--	SELECT DISTINCT
+--		EFP.[intInvoiceId]
 --	FROM
---		@TempInvoiceIdTable
-	
-		
-		
---	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
---		BEGIN			
---		EXEC [dbo].[uspARPostInvoice]
---			@batchId			= @BatchIdForExistingPost,
---			@post				= 1,
---			@recap				= 0,
---			@param				= @IdsForPostingUpdated,
---			@userId				= @UserId,
---			@beginDate			= NULL,
---			@endDate			= NULL,
---			@beginTransaction	= NULL,
---			@endTransaction		= NULL,
---			@exclude			= NULL,
---			@successfulCount	= @successfulCount OUTPUT,
---			@invalidCount		= @invalidCount OUTPUT,
---			@success			= @success OUTPUT,
---			@batchIdUsed		= @batchIdUsed OUTPUT,
---			@recapId			= @recapId OUTPUT,
---			@transType			= N'all',
---			@raiseError			= @RaiseError
+--		#EntriesForProcessing EFP
+--	INNER JOIN
+--		@InvoiceEntries IE
+--			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
+--	WHERE
+--		ISNULL(EFP.[ysnForUpdate],0) = 1
+--		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+--		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 1
+--		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
+--		AND ISNULL(EFP.[ysnRecap], 0) = 1
 
---			SET @BatchIdForExistingPost = @batchIdUsed
---			SET @PostedExistingCount  = @successfulCount
---		END
+		
+--	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
+--		EXEC [dbo].[uspARPostInvoiceIntegration]
+--			 @BatchId			= NULL
+--			,@Post				= 1
+--			,@Recap				= 0
+--			,@UserId			= @UserId
+--			,@InvoiceIds		= @IdsForPostingUpdate
+--			,@IntegrationLogId	= @IntegrationLogId
+--			,@BeginDate			= NULL
+--			,@EndDate			= NULL
+--			,@BeginTransaction	= NULL
+--			,@EndTransaction	= NULL
+--			,@Exclude			= NULL
+--			,@TransType			= N'all'
+--			,@RaiseError		= @RaiseError
 
---	SET @IdsForPostingUpdated = ''
---	SET @batchIdUsed = ''
---	SET @successfulCount = 0
+--END TRY
+--BEGIN CATCH
+--	IF ISNULL(@RaiseError,0) = 0
+--		ROLLBACK TRANSACTION
+--	SET @ErrorMessage = ERROR_MESSAGE();
+--	IF ISNULL(@RaiseError,0) = 1
+--		RAISERROR(@ErrorMessage, 16, 1);
+--	RETURN 0;
+--END CATCH
+
 
 
 --	DELETE FROM @TempInvoiceIdTable

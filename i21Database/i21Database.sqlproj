@@ -5259,6 +5259,8 @@
     <Build Include="dbo\Views\vyuRKGetInvoicedQty.sql" />
     <Build Include="dbo\Tables\tblTRState.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryCountDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
