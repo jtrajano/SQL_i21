@@ -88,17 +88,20 @@ WHERE
 	ARI.[ysnPosted] = 1
 	AND APPD.[dblPayment] <> @ZeroDecimal
 
-WHILE EXISTS (SELECT NULL FROM @CustomerIds)
-	BEGIN
-		DECLARE @customerId	INT
-
-		SELECT TOP 1 @customerId = intCustomerId FROM @CustomerIds
-
-		EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = @customerId
-
-		DELETE FROM @CustomerIds WHERE intCustomerId = @customerId
-	END
-
+--Update Customer's AR Balance
+UPDATE CUSTOMER
+SET dblARBalance = dblARBalance - (CASE WHEN @post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
+FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+INNER JOIN (SELECT intEntityCustomerId
+				 , dblTotalPayment = SUM(PD.dblPayment)
+			FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
+				INNER JOIN (SELECT intInvoiceId
+								 , intEntityCustomerId
+							FROM dbo.tblARInvoice WITH (NOLOCK)
+				) I ON PD.intInvoiceId = I.intInvoiceId
+			WHERE PD.intPaymentDetailId IN (SELECT intId FROM @PaymentDetailId)
+			GROUP BY intEntityCustomerId
+) PAYMENT ON CUSTOMER.intEntityCustomerId = PAYMENT.intEntityCustomerId
 
 SELECT
 	@InvoiceIds = COALESCE(@InvoiceIds + ',' ,'') + CAST(ARI.[intInvoiceId] AS NVARCHAR(250))

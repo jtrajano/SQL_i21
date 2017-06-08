@@ -4860,11 +4860,22 @@ IF @recap = 0
 					
 					SELECT TOP 1 @intInvoiceIntegractionId = intInvoiceId FROM @InvoiceToUpdate ORDER BY intInvoiceId
 
-						EXEC dbo.uspARPostInvoiceIntegrations @post, @intInvoiceIntegractionId, @userId
+					EXEC dbo.uspARPostInvoiceIntegrations @post, @intInvoiceIntegractionId, @userId
 								
 					DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 
 												
 				END
+
+			--UPDATE tblARCustomer.dblARBalance
+			UPDATE CUSTOMER
+			SET dblARBalance = dblARBalance + (CASE WHEN @post = 1 THEN ISNULL(dblTotalInvoice, 0) ELSE ISNULL(dblTotalInvoice, 0) * -1 END)
+			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+			INNER JOIN (SELECT intEntityCustomerId
+							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice, Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
+						FROM dbo.tblARInvoice WITH (NOLOCK)
+						WHERE intInvoiceId IN (SELECT intInvoiceId FROM @InvoiceToUpdate)
+						GROUP BY intEntityCustomerId
+			) INVOICE ON CUSTOMER.intEntityCustomerId = INVOICE.intEntityCustomerId
 
 		DELETE dbo.tblARPrepaidAndCredit  
 		FROM 
