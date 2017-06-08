@@ -70,6 +70,8 @@ BEGIN
 		,ysnSummaryByMiscellaneous = CAST(0 AS BIT)
 		,ysnSummaryByProduct	   = CAST(0 AS BIT)
 		,ysnSummaryByVehicle	   = CAST(0 AS BIT)
+		,ysnSummaryByCardProd	   = CAST(0 AS BIT)
+		,ysnSummaryByDeptCardProd  = CAST(0 AS BIT)
 		,ysnPrintTimeOnInvoices	   = CAST(0 AS BIT)
 		,ysnPrintTimeOnReports	   = CAST(0 AS BIT)
 		,strSiteCity			   = ''
@@ -452,7 +454,9 @@ BEGIN
 		,ysnSummaryByDepartment		
 		,ysnSummaryByMiscellaneous	
 		,ysnSummaryByProduct		
-		,ysnSummaryByVehicle		
+		,ysnSummaryByVehicle
+		,ysnSummaryByCardProd	 
+		,ysnSummaryByDeptCardProd		
 		,ysnPrintTimeOnInvoices		
 		,ysnPrintTimeOnReports		
 		,ysnInvalid					
@@ -531,7 +535,9 @@ BEGIN
 		,ysnSummaryByDepartment		
 		,ysnSummaryByMiscellaneous	
 		,ysnSummaryByProduct		
-		,ysnSummaryByVehicle		
+		,ysnSummaryByVehicle
+		,ysnSummaryByCardProd	 
+		,ysnSummaryByDeptCardProd		
 		,ysnPrintTimeOnInvoices		
 		,ysnPrintTimeOnReports		
 		,ysnInvalid					

@@ -1,8 +1,8 @@
-﻿CREATE VIEW dbo.vyuCFCardAccount
+﻿CREATE VIEW [dbo].[vyuCFCardAccount]
 AS
 SELECT   A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountScheduleId, A.intInvoiceCycle, A.intSalesPersonId, A.dtmBonusCommissionDate, 
                          A.dblBonusCommissionRate, A.dblRegularCommissionRate, A.ysnPrintTimeOnInvoices, A.ysnPrintTimeOnReports, A.intTermsCode, A.strBillingSite, A.strPrimarySortOptions, 
-                         A.strSecondarySortOptions, A.ysnSummaryByCard, A.ysnSummaryByVehicle, A.ysnSummaryByMiscellaneous, A.ysnSummaryByProduct, A.ysnSummaryByDepartment, 
+                         A.strSecondarySortOptions, A.ysnSummaryByCard, A.ysnSummaryByVehicle, A.ysnSummaryByMiscellaneous, A.ysnSummaryByProduct, A.ysnSummaryByDepartment, A.ysnSummaryByCardProd,A.ysnSummaryByDeptCardProd,
                          A.ysnVehicleRequire, A.intAccountStatusCodeId, A.strPrintRemittancePage, A.strInvoiceProgramName, A.intPriceRuleGroup, A.strPrintPricePerGallon, 
                          A.ysnPPTransferCostForRemote, A.ysnPPTransferCostForNetwork, A.ysnPrintMiscellaneous, A.intFeeProfileId, A.strPrintSiteAddress, A.dtmLastBillingCycleDate, 
                          A.intRemotePriceProfileId, A.intExtRemotePriceProfileId, A.intLocalPriceProfileId, A.intCreatedUserId, A.dtmCreated, A.intLastModifiedUserId, A.dtmLastModified, 
@@ -31,3 +31,5 @@ FROM         dbo.tblCFAccount AS A LEFT JOIN
                          dbo.tblCFInvoiceCycle AS I ON I.intInvoiceCycleId = A.intInvoiceCycle INNER JOIN
 						 dbo.tblEMEntity AS E ON E.intEntityId = A.intCustomerId
 GO
+
+

@@ -153,6 +153,8 @@ BEGIN TRY
 	,ysnSummaryByMiscellaneous
 	,ysnSummaryByProduct
 	,ysnSummaryByVehicle
+	,ysnSummaryByCardProd	 
+	,ysnSummaryByDeptCardProd
 	,ysnPrintTimeOnInvoices
 	,ysnPrintTimeOnReports
 	,ysnInvalid
@@ -275,6 +277,8 @@ BEGIN TRY
 	,ysnSummaryByMiscellaneous
 	,ysnSummaryByProduct
 	,ysnSummaryByVehicle
+	,ysnSummaryByCardProd	 
+	,ysnSummaryByDeptCardProd
 	,ysnPrintTimeOnInvoices
 	,ysnPrintTimeOnReports
 	,ysnInvalid

@@ -20,6 +20,8 @@
     [ysnSummaryByMiscellaneous]   BIT             NULL,
     [ysnSummaryByProduct]         BIT             NULL,
     [ysnSummaryByDepartment]      BIT             NULL,
+	[ysnSummaryByDeptCardProd]	  BIT			  NULL,
+	[ysnSummaryByCardProd]		  BIT			  NULL,
     [ysnVehicleRequire]           BIT             NULL,
     [intAccountStatusCodeId]      INT             NOT NULL,
     [strPrintRemittancePage]      NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,

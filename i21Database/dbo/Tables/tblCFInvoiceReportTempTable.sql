@@ -73,6 +73,8 @@
     [ysnSummaryByMiscellaneous]  BIT             NULL,
     [ysnSummaryByProduct]        BIT             NULL,
     [ysnSummaryByVehicle]        BIT             NULL,
+	[ysnSummaryByDeptCardProd]   BIT             NULL,
+	[ysnSummaryByCardProd]       BIT             NULL,
     [ysnPrintTimeOnInvoices]     BIT             NULL,
     [ysnPrintTimeOnReports]      BIT             NULL,
     [ysnInvalid]                 BIT             NULL,
