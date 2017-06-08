@@ -77,10 +77,6 @@ FROM
 WHERE
 	intInvoiceId = @intTransactionId
 
---Update Total AR
-EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @intTransactionId, @CustomerId = @EntityCustomerId
-
-
 --Update LG - Load Shipment
 EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost]
 	@InvoiceId	= @intTransactionId

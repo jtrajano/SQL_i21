@@ -2815,7 +2815,22 @@ IF @raiseError = 0
 			DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)			
 
 			INSERT INTO @tblPaymentsToUpdateBudget
-			SELECT intPaymentId FROM @ARReceivablePostData
+			SELECT DISTINCT intPaymentId FROM @ARReceivablePostData
+
+			--Update Customer's AR Balance
+			UPDATE CUSTOMER
+			SET dblARBalance = dblARBalance - (CASE WHEN @post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
+			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+			INNER JOIN (SELECT intEntityCustomerId
+							 , dblTotalPayment = SUM(PD.dblPayment)
+						FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+							INNER JOIN (SELECT intPaymentId
+											 , intEntityCustomerId
+										FROM dbo.tblARPayment WITH (NOLOCK)
+							) P ON PD.intPaymentId = P.intPaymentId
+						WHERE PD.intPaymentId IN (SELECT intPaymentId FROM @tblPaymentsToUpdateBudget)
+						GROUP BY intEntityCustomerId
+			) PAYMENT ON CUSTOMER.intEntityCustomerId = PAYMENT.intEntityCustomerId
 
 			--Update Customer's Budget 
 			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
@@ -2827,7 +2842,6 @@ IF @raiseError = 0
 					SELECT @customerId = intEntityCustomerId FROM tblARPayment WHERE intPaymentId = @paymentToUpdate
 			
 					EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @post
-					EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = @customerId
 
 					DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
 				END
