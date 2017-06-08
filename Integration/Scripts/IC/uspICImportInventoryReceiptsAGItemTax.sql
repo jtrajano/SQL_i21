@@ -19,7 +19,7 @@ BEGIN
 --drop table #purnotax1
 
 SELECT INV.intInventoryReceiptId, INV.strReceiptOriginId,PHS.agphs_line_no, agphs_itm_no,INV.intEntityVendorId,agphs_vnd_no, ITM.intItemId,ITM.intCategoryId,
-CAT.intTaxClassId,(select agphs_tax_st from agphsmst where agphs_ord_no = PHS.agphs_ord_no and agphs_line_no = 0) as agphs_tax_st, 
+CAT.intTaxClassId,(select agphs_tax_st from agphsmst where agphs_rcpt_seq = PHS.agphs_rcpt_seq and agphs_vnd_no = PHS.agphs_vnd_no and agphs_ord_no = PHS.agphs_ord_no and agphs_line_no = 0) as agphs_tax_st, 
 CASE WHEN (agphs_verified_yn = 'Y')THEN agphs_rcvd_set_rt ELSE agphs_invc_set_rt END as agphs_set_rt,
 CASE WHEN (agphs_verified_yn = 'Y')THEN agphs_rcvd_set_amt ELSE agphs_invc_set_amt END as agphs_set_amt, 
 CASE WHEN (agphs_verified_yn = 'Y')THEN agphs_rcvd_fet_rt ELSE agphs_invc_fet_rt END as agphs_rcvd_fet_rt, 
