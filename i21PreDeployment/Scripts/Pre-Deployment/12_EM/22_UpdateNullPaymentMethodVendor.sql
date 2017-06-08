@@ -1,9 +1,16 @@
 ﻿PRINT 'START UPDATE NULL PAYMENT METHOD VENDOR'
 
-IF EXISTS(SELECT TOP 1 1 FROM tblAPVendor WHERE intPaymentMethodId = 0 )
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendor' and [COLUMN_NAME] = 'intPaymentMethodId')
 BEGIN
-	PRINT 'EXECUTE'
-	UPDATE tblAPVendor SET intPaymentMethodId = NULL WHERE intPaymentMethodId = 0
+	EXEC('	
+			IF EXISTS(SELECT TOP 1 1 FROM tblAPVendor WHERE intPaymentMethodId = 0 )
+			BEGIN
+				PRINT ''EXECUTE''
+				UPDATE tblAPVendor SET intPaymentMethodId = NULL WHERE intPaymentMethodId = 0
+			END
+		')
 END
+
 
 PRINT 'END UPDATE NULL PAYMENT METHOD VENDOR'
