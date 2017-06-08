@@ -57,6 +57,7 @@
 
 
 -- AR
+:r .\7_AR\3_InvoiceSetDefaultContact.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql
 :r .\7_AR\6_PaymentDetailInvoiceCleanUp.sql
 :r .\7_AR\7_CompanyPreferenceCleanUp.sql
