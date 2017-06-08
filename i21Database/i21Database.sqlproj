@@ -5286,6 +5286,7 @@
     <Build Include="dbo\Stored Procedures\uspSCCalculateFreightUnit.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryCountDetails.sql" />
     <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
