@@ -964,7 +964,6 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         readOnlyContractItemStatus: function(get) {
             var status = get('current.strStatus');
-            console.log(status);
             return (status === 'Discontinued');
         },
         readOnlyCommodity: function (get) {
