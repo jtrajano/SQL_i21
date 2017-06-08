@@ -14,7 +14,7 @@ BEGIN
 					INNER JOIN dbo.tblEMEntity AS D 
 							ON C.[intEntityContactId] = D.[intEntityId] 
 					INNER JOIN tblARCustomer F
-						ON F.intEntityCustomerId = B.intEntityId
+						ON F.intEntityId = B.intEntityId
 				WHERE
 					B.intEntityId = @EntityCustomerId
 					AND C.ysnDefaultContact = 1
