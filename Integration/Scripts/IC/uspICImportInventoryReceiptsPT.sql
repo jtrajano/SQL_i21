@@ -78,7 +78,7 @@ BEGIN
 					,(select intEntityId from tblAPVendor where strVendorId = Vnd.strVendorPayToId)
 					,NULL--[intTransferorId]
 					,(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = PHS.ptphs_hdr_loc_no COLLATE Latin1_General_CI_AS)--[intLocationId]
-					,PHS.ptphs_ord_no --[strReceiptNumber]
+					,PHS.ptphs_ord_no+CAST(PHS.A4GLIdentity AS NVARCHAR) --[strReceiptNumber]
 					,(CASE WHEN ISDATE(ptphs_rct_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptphs_rct_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)--[dtmReceiptDate]
 					,(select intDefaultCurrencyId from tblSMCompanyPreference)--intCurrencyId
 					,1--[intSubCurrencyCents]
@@ -129,7 +129,6 @@ BEGIN
 				   ,[dblOpenReceive]
 				   ,[dblReceived]
 				   ,[intUnitMeasureId]
-				   ,[intCostUOMId]
 				   ,[dblUnitCost]
 				   ,[dblUnitRetail]
 				   ,[ysnSubCurrency]
@@ -152,8 +151,7 @@ BEGIN
 					ELSE DTL.ptphs_rcvd_un
 				  END-- [dblOpenReceive]
 				 ,0-- [dblReceived]
-				 ,isNull((select intUnitMeasureId from tblICUnitMeasure where strSymbol COLLATE Latin1_General_CI_AS = DTL.ptphs_un_desc COLLATE Latin1_General_CI_AS),intUnitMeasureId)-- [intUnitMeasureId] 
-				 ,isNull((select intUnitMeasureId from tblICUnitMeasure where strSymbol COLLATE Latin1_General_CI_AS = DTL.ptphs_un_desc COLLATE Latin1_General_CI_AS),intUnitMeasureId)-- [intCostUOMId]
+				 ,UOM.intItemUOMId-- [intUnitMeasureId] 
 				 ,CASE 
 					WHEN (DTL.ptphs_verified_yn = 'Y')
 					THEN DTL.ptphs_invc_un_cost
@@ -171,6 +169,8 @@ BEGIN
 			INNER JOIN tblICInventoryReceipt INV ON INV.strReceiptOriginId COLLATE Latin1_General_CI_AS = DTL.ptphs_ord_no COLLATE Latin1_General_CI_AS
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(DTL.ptphs_itm_no  COLLATE Latin1_General_CI_AS)
 			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId
+			INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+			AND UM.strSymbol COLLATE Latin1_General_CI_AS = DTL.ptphs_un_desc COLLATE Latin1_General_CI_AS			
 			WHERE DTL.ptphs_itm_no <> '*' and DTL.ptphs_line_no <> 0 and INV.ysnOrigin = 0
 			
 			EXEC [uspICImportInventoryReceiptsPTItemTax]
@@ -189,7 +189,8 @@ BEGIN
 			SELECT @Total = COUNT(ptphs_ord_no)  
 				FROM ptphsmst
 			LEFT JOIN tblICInventoryReceipt Inv ON ptphsmst.ptphs_ord_no COLLATE Latin1_General_CI_AS = Inv.strReceiptOriginId COLLATE Latin1_General_CI_AS
-			WHERE Inv.strReceiptOriginId IS NULL and ptphs_line_no = 0			   
+			INNER JOIN tblAPVendor Vnd ON  strVendorId COLLATE Latin1_General_CI_AS = ptphsmst.ptphs_vnd_no COLLATE Latin1_General_CI_AS
+			WHERE Inv.strReceiptNumber IS NULL and ptphs_line_no = 0			   
 			AND (
 					((CASE WHEN ISDATE(ptphs_rct_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptphs_rct_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
 					OR

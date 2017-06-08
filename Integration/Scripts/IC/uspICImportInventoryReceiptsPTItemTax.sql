@@ -19,7 +19,7 @@ BEGIN
 --drop table #purnotax1
 
 SELECT INV.intInventoryReceiptId, INV.strReceiptOriginId,PHS.ptphs_line_no, ptphs_itm_no,INV.intEntityVendorId,ptphs_vnd_no, ITM.intItemId,ITM.intCategoryId,
-CAT.intTaxClassId,(select ptphs_tax_st from ptphsmst where ptphs_ord_no = PHS.ptphs_ord_no and ptphs_line_no = 0) as ptphs_tax_st, 
+CAT.intTaxClassId,(select ptphs_tax_st from ptphsmst where ptphs_rcpt_seq = PHS.ptphs_rcpt_seq and ptphs_vnd_no = PHS.ptphs_vnd_no AND ptphs_ord_no = PHS.ptphs_ord_no and ptphs_line_no = 0) as ptphs_tax_st, 
 ptphs_rcvd_set_rt,ptphs_set_amt, ptphs_rcvd_fet_rt, ptphs_fet_amt,
 ptphs_rcvd_sst_rt,ptphs_sst_amt, ptphs_rcvd_lc1_rt, ptphs_lc1_amt,
 ptphs_rcvd_lc2_rt,ptphs_lc2_amt, ptphs_rcvd_lc3_rt, ptphs_lc3_amt,
