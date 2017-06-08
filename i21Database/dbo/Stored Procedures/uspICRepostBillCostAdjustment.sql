@@ -132,7 +132,7 @@ BEGIN
 			INNER JOIN tblICItem item 
 				ON B.intItemId = item.intItemId
 			INNER JOIN tblICItemLocation D
-				ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
+				ON D.intLocationId = E1.intLocationId AND D.intItemId = item.intItemId
 			LEFT JOIN tblICItemUOM itemUOM
 				ON itemUOM.intItemUOMId = ISNULL(B.intWeightUOMId, B.intUnitOfMeasureId)
 			LEFT JOIN tblICItemUOM voucherCostUOM
