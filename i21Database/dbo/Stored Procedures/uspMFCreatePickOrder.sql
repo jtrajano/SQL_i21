@@ -52,6 +52,7 @@ BEGIN TRY
 		,@intPMStageLocationId INT
 		,@intStagingLocationId INT
 		,@strPickByUpperToleranceQty NVARCHAR(50)
+		,@ysnPickRemainingQty bit
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -63,10 +64,12 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = x.intLocationId
 		,@intUserId = intUserId
+		,@ysnPickRemainingQty=ysnPickRemainingQty
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingProcessId INT
 			,intLocationId INT
 			,intUserId INT
+			,ysnPickRemainingQty Bit
 			) x
 
 	DECLARE @tblMFWorkOrder TABLE (
@@ -473,62 +476,66 @@ BEGIN TRY
 				)
 		GROUP BY OD1.intItemId
 
-		DECLARE @tblMFStagedQty TABLE (
-			intItemId INT
-			,dblStagedQty DECIMAL(38, 20)
-			)
+		If @ysnPickRemainingQty=1
+		Begin
 
-		INSERT INTO @tblMFStagedQty (
-			intItemId
-			,dblStagedQty
-			)
-		SELECT OD1.intItemId
-			,IsNULL(sum(CASE 
-						WHEN L.intWeightUOMId IS NULL
-							THEN L.dblQty
-						ELSE L.dblWeight
-						END), 0)
-		FROM @OrderDetail OD1
-		LEFT JOIN dbo.tblICLot L ON L.intItemId = OD1.intItemId
-		WHERE L.intStorageLocationId IN (
-				SELECT intStageLocationId
-				FROM @tblMFStageLocation
+			DECLARE @tblMFStagedQty TABLE (
+				intItemId INT
+				,dblStagedQty DECIMAL(38, 20)
 				)
-		GROUP BY OD1.intItemId
 
-		DECLARE @tblMFRemainingQty TABLE (
-			intItemId INT
-			,dblRemainingQty DECIMAL(38, 20)
-			)
+			INSERT INTO @tblMFStagedQty (
+				intItemId
+				,dblStagedQty
+				)
+			SELECT OD1.intItemId
+				,IsNULL(sum(CASE 
+							WHEN L.intWeightUOMId IS NULL
+								THEN L.dblQty
+							ELSE L.dblWeight
+							END), 0)
+			FROM @OrderDetail OD1
+			LEFT JOIN dbo.tblICLot L ON L.intItemId = OD1.intItemId
+			WHERE L.intStorageLocationId IN (
+					SELECT intStageLocationId
+					FROM @tblMFStageLocation
+					)
+			GROUP BY OD1.intItemId
 
-		INSERT INTO @tblMFRemainingQty (
-			intItemId
-			,dblRemainingQty
-			)
-		SELECT R.intItemId
-			,(
-				CASE 
-					WHEN IsNULL(dblStagedQty, 0) - IsNULL(dblRequiredQty, 0) > 0
-						THEN IsNULL(dblStagedQty, 0) - IsNULL(dblRequiredQty, 0)
-					ELSE 0
+			DECLARE @tblMFRemainingQty TABLE (
+				intItemId INT
+				,dblRemainingQty DECIMAL(38, 20)
+				)
+
+			INSERT INTO @tblMFRemainingQty (
+				intItemId
+				,dblRemainingQty
+				)
+			SELECT R.intItemId
+				,(
+					CASE 
+						WHEN IsNULL(dblStagedQty, 0) - IsNULL(dblRequiredQty, 0) > 0
+							THEN IsNULL(dblStagedQty, 0) - IsNULL(dblRequiredQty, 0)
+						ELSE 0
+						END
+					)
+			FROM @tblMFRequiredQty R
+			LEFT JOIN @tblMFStagedQty S ON S.intItemId = R.intItemId
+
+			UPDATE OD
+			SET dblQty = CASE 
+					WHEN dblQty - R.dblRemainingQty < 0
+						THEN 0
+					ELSE dblQty - R.dblRemainingQty
 					END
-				)
-		FROM @tblMFRequiredQty R
-		LEFT JOIN @tblMFStagedQty S ON S.intItemId = R.intItemId
-
-		UPDATE OD
-		SET dblQty = CASE 
-				WHEN dblQty - R.dblRemainingQty < 0
-					THEN 0
-				ELSE dblQty - R.dblRemainingQty
-				END
-			,dblWeight = CASE 
-				WHEN dblWeight - R.dblRemainingQty < 0
-					THEN 0
-				ELSE dblWeight - R.dblRemainingQty
-				END
-		FROM @OrderDetail OD
-		LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
+				,dblWeight = CASE 
+					WHEN dblWeight - R.dblRemainingQty < 0
+						THEN 0
+					ELSE dblWeight - R.dblRemainingQty
+					END
+			FROM @OrderDetail OD
+			LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
+		End
 
 		SELECT @intWorkOrderId = intWorkOrderId
 			,@intProductId = intItemId

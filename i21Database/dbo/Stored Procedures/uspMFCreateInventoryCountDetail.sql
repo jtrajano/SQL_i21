@@ -11,10 +11,14 @@ BEGIN
 	DECLARE @strLotNumber NVARCHAR(100)
 	DECLARE @dblLotQty NUMERIC(18,6)
 	DECLARE @dblLastCost NUMERIC(18,6)
+	DECLARE @dblLotWeight NUMERIC(18,6)
 	DECLARE @intLotItemLocationId INT
 	DECLARE @intItemId INT
 	DECLARE @intInventoryCountId INT
 	DECLARE @intItemUOMId INT
+	DECLARE @intCountItemUOMId int
+	DECLARE @intStockItemUOMId int
+			,@ysnCycleCountByStockUnit bit
 
 	SELECT @intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
@@ -29,7 +33,8 @@ BEGIN
 		   @intLotItemLocationId = intItemLocationId,
 		   @intItemId = intItemId,
 		   @dblLastCost = dblLastCost,
-		   @intItemUOMId = intItemUOMId
+		   @intItemUOMId = intItemUOMId,
+		   @dblLotWeight=dblWeight
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -74,9 +79,32 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		UPDATE tblICInventoryCountDetail
-		SET dblPhysicalCount = @dblPhysicalCount
+		Select @intStockItemUOMId=intItemUOMId from tblICItemUOM Where intItemId=@intItemId and ysnStockUnit =1
+		Select @intCountItemUOMId=intItemUOMId
+		From tblICInventoryCountDetail 
 		WHERE intLotId = @intLotId
 			AND intInventoryCountId = @intInventoryCountId
+
+		Select @ysnCycleCountByStockUnit=ysnCycleCountByStockUnit from tblMFCompanyPreference 
+
+		IF @ysnCycleCountByStockUnit is null
+		Begin
+			Select @ysnCycleCountByStockUnit=1
+		End
+
+		If @intCountItemUOMId=@intStockItemUOMId or @ysnCycleCountByStockUnit=0
+		Begin
+			UPDATE tblICInventoryCountDetail
+			SET dblPhysicalCount = @dblPhysicalCount
+			WHERE intLotId = @intLotId
+				AND intInventoryCountId = @intInventoryCountId
+		end
+		Else
+		Begin
+			UPDATE tblICInventoryCountDetail
+			SET dblPhysicalCount = @dblPhysicalCount,dblSystemCount =Case When @intStockItemUOMId=@intItemUOMId Then @dblLotQty Else @dblLotWeight End,intItemUOMId =@intStockItemUOMId
+			WHERE intLotId = @intLotId
+				AND intInventoryCountId = @intInventoryCountId
+		End
 	END
 END

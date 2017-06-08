@@ -382,15 +382,19 @@ BEGIN
 			WHERE strName = @strName
 				AND strEmail <> ''
 
-			IF @strEmail <> ''
-			BEGIN
-				EXEC @Result = msdb.dbo.sp_send_dbmail @recipients = @strEmail
-					,@copy_recipients = NULL
-					,@subject = @subject
-					,@body = @tableHTML
-					,@importance = 'High'
-					,@body_format = 'HTML'
-			END
+			--IF @strEmail <> ''
+			--BEGIN
+			--	Begin Try
+			--		EXEC @Result = msdb.dbo.sp_send_dbmail @recipients = @strEmail
+			--			,@copy_recipients = NULL
+			--			,@subject = @subject
+			--			,@body = @tableHTML
+			--			,@importance = 'High'
+			--			,@body_format = 'HTML'
+			--	End Try
+			--	Begin Catch
+			--	End Catch
+			--END
 		END
 	END TRY
 
