@@ -17,6 +17,7 @@ Ext.define('Inventory.controller.Inventory', {
         'GlobalComponentEngine.view.AdvanceSearchGrid',
         'iRely.container.ImageContainer',
         'iRely.grid.Manager',
+        'GeneralLedger.controller.Global',
         'GeneralLedger.controls.AccountComboBox',
         "Grain.controller.Grain"
     ],
@@ -112,7 +113,7 @@ Ext.define('Inventory.controller.Inventory', {
         //     url: '../Inventory/api/Item/GetEmpty',
         //     method: 'GET'
         // });
-
+        app.getController('GeneralLedger.controller.Global');
         this.companyPreferenceStore = Ext.create('Inventory.store.CompanyPreference');
         this.companyPreferenceStore.load();
     },
