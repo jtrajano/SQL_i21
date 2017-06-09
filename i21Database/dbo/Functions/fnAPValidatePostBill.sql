@@ -279,7 +279,7 @@ BEGIN
 			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 			WHERE B.intBillId = A.intBillId
 		) details
-		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND details.dblTotal < 0
 			
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
 		--COMPARE THE CASH PRICE
