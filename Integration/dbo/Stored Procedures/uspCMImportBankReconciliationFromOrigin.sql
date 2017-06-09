@@ -197,11 +197,17 @@ BEGIN
 						ON f.strCbkNo = ORIGIN.apcbk_no COLLATE Latin1_General_CI_AS
 			WHERE	f.intBankAccountId = @intBankAccountId
 
-			-- 2.8. Delete the bank account from the tmp table after processing it. 
+			-- 2.8. Calculate the Statement Ending Balance
+			-- Formula: dblStatementOpeningBalance - dblDebitCleared + dblCreditCleated = dblStatementEndingBalance
+			UPDATE tblCMBankReconciliation
+			SET dblStatementEndingBalance = dblStatementOpeningBalance - dblDebitCleared + dblCreditCleared
+			WHERE	intBankAccountId = @intBankAccountId
+
+			-- 2.9. Delete the bank account from the tmp table after processing it. 
 			DELETE FROM #tmpBankAccounts
 			WHERE intBankAccountId = @intBankAccountId
 	
-			-- 2.9. Drop the temp table. 
+			-- 2.10. Drop the temp table. 
 			IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID(''tempdb..#tmpClearedTransactions'')) DROP TABLE #tmpClearedTransactions
 		END
 
