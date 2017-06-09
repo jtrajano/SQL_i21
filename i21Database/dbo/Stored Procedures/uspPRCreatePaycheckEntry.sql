@@ -174,10 +174,13 @@ DECLARE @intPayGroupDetailId INT
 DECLARE @udtPRPaycheckEarningIn TABLE(intPaycheckEarningId INT)
 
 /* Insert Earnings to Temp Table for iteration */
-SELECT intPayGroupDetailId, intEmployeeEarningId
-INTO #tmpEarnings FROM tblPRPayGroupDetail 
+SELECT PGD.intPayGroupDetailId, PGD.intEmployeeEarningId
+INTO #tmpEarnings 
+FROM tblPRPayGroupDetail PGD
+LEFT JOIN tblPRPayGroup PG ON PGD.intPayGroupId = PG.intPayGroupId
 WHERE intEntityEmployeeId = @intEmployee
-	AND intPayGroupId IN (SELECT intPayGroupId FROM #tmpPayGroups)
+	AND PGD.intPayGroupId IN (SELECT intPayGroupId FROM #tmpPayGroups)
+	AND ISNULL(PGD.dtmDateFrom, PG.dtmBeginDate) >= PG.dtmBeginDate AND ISNULL(PGD.dtmDateFrom, PG.dtmBeginDate) <= PG.dtmEndDate
 
 /* Insert Pay Group Details for Deletion */
 SELECT intPayGroupDetailId INTO #tmpPayGroupDetail FROM #tmpEarnings
