@@ -5262,6 +5262,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetails.sql" />
     <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
+    <Build Include="dbo\Functions\fnMFConvertNumberToString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
