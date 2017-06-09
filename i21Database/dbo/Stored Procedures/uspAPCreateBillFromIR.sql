@@ -106,6 +106,16 @@ SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [i
 
 --Get the company location of the user to get the default ap account else get from preference
 SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @userLocation)
+----VALIDATE AP ACCOUNT SETUP
+--IF @APAccount IS NULL --NO DEFAULT AP ACCOUNT SETUP FOR LOCATION OF CURRENT USER
+--AND EXISTS(SELECT 1 FROM #tmpReceiptData receipts
+--				 INNER JOIN tblSMCompanyLocation loc ON receipts.intLocationId = loc.intCompanyLocationId
+--			WHERE NULLIF(loc.intAPAccount,0) IS NULL) --MAKE SURE ALL LOCATION SETUP FOR RECEIPT HAS DEFAULT AP ACCOUNT
+--BEGIN
+--	RAISERROR('Please set default AP Account on company location.', 16, 1);
+--	GOTO Post_Exit   
+--END
+				
 
 SELECT TOP 1 @receiptId = intInventoryReceiptId 
 FROM #tmpReceiptIds
@@ -118,12 +128,27 @@ BEGIN
 	SET @type =  (SELECT TOP 1 intSourceType FROM #tmpReceiptData WHERE intInventoryReceiptId IN (@receiptIds)) 
 	IF(@type = 1) --SCALE
 	BEGIN
-		RETURN; 
+		GOTO Post_Exit
+		--RETURN; 
 	END
 	ELSE   
 	RAISERROR('Cannot create Voucher with negative amount.', 16, 1);
 	GOTO Post_Exit           
 END
+
+--SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM #tmpReceiptData A
+--		INNER JOIN #tmpReceiptDetailData B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+--		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
+--		LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId)  ON E.intEntityId = A.intEntityVendorId 
+--																															AND E.intContractHeaderId = B.intOrderId 
+--																															AND E1.intContractDetailId = B.intLineNo 
+--		WHERE A.intInventoryReceiptId = @receiptId AND E1.intPricingTypeId = 2)
+
+--IF (@cashPrice = 0 OR @totalReceiptAmount = 0)
+--BEGIN
+--	RAISERROR('Cannot create Voucher with 0.00 amount.', 16, 1);
+--	GOTO Post_Exit
+--END
 
 --Make sure all items were not yet billed.
 IF NOT EXISTS(
@@ -147,6 +172,9 @@ BEGIN
 		EXEC uspICRaiseError 80111; 
 	END 
 END
+
+--CREATE HEADER RECORD FOR RECEIPT VENDOR
+
 --ELSE 
 --BEGIN
 --	DECLARE @availableQty INT;
@@ -732,17 +760,17 @@ BEGIN
 
 	BEGIN
 	
-	--UPDATE THE ACTUAL CHARGES FOR THE RECEIPT OF THE THIRD PARTY
+	--UPDATE THE ACTUAL CHARGES FOR THE RECEIPT
 	SET @totalChargesCount = (SELECT COUNT(*) FROM #tmpReceiptChargeData 
-								WHERE ISNULL(dblAmountBilled,0) < dblAmount AND intInventoryReceiptId = @receiptId
-								AND intEntityVendorId IS NOT NULL AND intEntityVendorId != @vendorId)
-	--CREATE VOUCHER AND DETAILS FOR THIRD PARTY
-	--LOOP ON ALL CHARGES TO FIND OUT IF THERE IS THIRD PARTY
+								WHERE ISNULL(dblAmountBilled,0) < dblAmount AND intInventoryReceiptId = @receiptId)
+
+	--CREATE VOUCHER AND DETAILS FOR CHARGES
+	--IN THIS PART, WE WILL ALSO CREATE CHARGES FOR THE RECEIPT VENDOR WHICH HAPPENS TO BE THE REMAINING ITEM TO VOUCHER
 	WHILE @chargeCounter != @totalChargesCount
 		BEGIN
 	       SELECT TOP(1) @intReceiptChargeId = intInventoryReceiptChargeId FROM #tmpReceiptChargeData 
 			WHERE intInventoryReceiptId = @receiptId
-			AND intEntityVendorId IS NOT NULL AND intEntityVendorId != @vendorId
+			AND intEntityVendorId IS NOT NULL --AND intEntityVendorId != @vendorId
 
 		   SELECT @intThirdPartyVendorId = (CASE WHEN (A.intEntityVendorId != ISNULL(B.intEntityVendorId,A.intEntityVendorId)) THEN B.intEntityVendorId ELSE A.intEntityVendorId END), 
 							   @ysnThirdPartyVendor = (CASE WHEN (A.intEntityVendorId != ISNULL(B.intEntityVendorId,A.intEntityVendorId)) THEN 1 ELSE 0 END),
@@ -757,7 +785,7 @@ BEGIN
 
 			--MAKE SURE VOUCHER WAS NOT CREATED YET			
 			IF NOT EXISTS(SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intThirdPartyVendorId)
-				AND @intThirdPartyVendorId IS NOT NULL AND @ysnThirdPartyVendor > 0
+				AND @intThirdPartyVendorId IS NOT NULL --AND @ysnThirdPartyVendor > 0
 			BEGIN
 				EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
 				
@@ -875,7 +903,7 @@ BEGIN
 						[intPODetailId]				=	NULL,
 						[dblQtyOrdered]				=	A.dblOrderQty,
 						[dblQtyReceived]			=	A.dblQuantityToBill,
-						[dblTax]					=	(CASE WHEN ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
+						[dblTax]					=	(CASE WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
 																WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
 															ELSE ISNULL(A.dblTax,0) END),
 						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
