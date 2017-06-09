@@ -141,13 +141,16 @@ BEGIN TRY
 		,OML.strSSCCNo AS strBarCode
 	FROM tblMFOrderManifest OM
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
+	JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
 	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intShipFromLocationId
 	JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = S.intShipToLocationId
 	JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentId = S.intInventoryShipmentId
 	JOIN tblICItem I ON I.intItemId = SI.intItemId
+		AND I.intItemId = OD.intItemId
 	JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
 		AND OML.ysnPrinted = 0
+		AND OML.intCustomerLabelTypeId = @intCustomerLabelTypeId
 	LEFT JOIN tblSMShipVia SV ON SV.intEntityId = S.intShipViaId
 	WHERE OM.intOrderManifestId IN (
 			SELECT *

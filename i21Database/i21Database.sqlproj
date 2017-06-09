@@ -5288,6 +5288,7 @@
     <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerDefaultContact.sql" />
     <Build Include="dbo\Stored Procedures\uspSMConsolidateMenu.sql" />
+    <Build Include="dbo\Functions\fnMFConvertNumberToString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
