@@ -657,8 +657,6 @@ BEGIN
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
 									CASE	WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 1) THEN 
 												'Inventory In-Transit'
-											--WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 0) THEN 
-											--	'Inventory'
 											ELSE 
 												NULL 
 									END 
