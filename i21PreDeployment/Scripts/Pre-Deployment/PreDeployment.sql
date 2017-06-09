@@ -48,6 +48,7 @@
 :r .\4_SM\8_TransactionManagement.sql
 :r .\4_SM\9_DropTblSMAlternateApproverGroup.sql
 :r .\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql
+:r .\4_SM\1730_PaymentMethod.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
