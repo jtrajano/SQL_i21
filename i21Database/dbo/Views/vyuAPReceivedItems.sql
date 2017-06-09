@@ -459,8 +459,8 @@ FROM
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
-		,[dblTax]									=	ISNULL((CASE WHEN A.intEntityVendorId != IR.intEntityVendorId AND IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
-																	 ELSE (CASE WHEN A.ysnPrice = 1 THEN A.dblTax * -1 ELSE A.dblTax END ) END),0) -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId AND IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
+																	 ELSE (CASE WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END ) END),0) -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
 		,[dblRate]									=	ISNULL(A.dblForexRate,0)
 		,[strRateType]								=	RT.strCurrencyExchangeRateType
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
