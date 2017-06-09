@@ -93,6 +93,7 @@ SELECT 	 SQ.intContractDetailId
 		,LV.strBLNumber
 		,LV.dblLoadQuantity
 		,LV.intShipmentType
+		,LV.strShipmentType
 		,LV.strContainerNumber
 		,LV.dtmStuffingDate
 		,LV.dtmETSPOL
@@ -113,6 +114,7 @@ SELECT 	 SQ.intContractDetailId
 		,CD.strRemark
 		,CH.dtmCreated
 		,CD.dtmUpdatedAvailabilityDate
+		,SQ.strLocationName
 
 	FROM 		vyuCTContractSequence			 	SQ			
 	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId
