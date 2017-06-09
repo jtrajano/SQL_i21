@@ -544,8 +544,10 @@ BEGIN
 
 		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [dblCreditLimit], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
 		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, ISNULL(@intPaymentMethodId,0), @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @dblCreditLimit, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
+					
+		if @intTermsId is not null and exists(select top 1 1 from tblSMTerm where intTermID = @intTermsId)
+			INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId) VALUES (@EntityId, @intTermsId)
 
-		INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId) VALUES (@EntityId, @intTermsId)
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
 		
