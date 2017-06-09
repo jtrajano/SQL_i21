@@ -770,7 +770,7 @@ BEGIN
 		BEGIN
 	       SELECT TOP(1) @intReceiptChargeId = intInventoryReceiptChargeId FROM #tmpReceiptChargeData 
 			WHERE intInventoryReceiptId = @receiptId
-			AND intEntityVendorId IS NOT NULL --AND intEntityVendorId != @vendorId
+			--AND intEntityVendorId IS NOT NULL --AND intEntityVendorId != @vendorId
 
 		   SELECT @intThirdPartyVendorId = (CASE WHEN (A.intEntityVendorId != ISNULL(B.intEntityVendorId,A.intEntityVendorId)) THEN B.intEntityVendorId ELSE A.intEntityVendorId END), 
 							   @ysnThirdPartyVendor = (CASE WHEN (A.intEntityVendorId != ISNULL(B.intEntityVendorId,A.intEntityVendorId)) THEN 1 ELSE 0 END),
@@ -911,7 +911,10 @@ BEGIN
 						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 						[intTaxGroupId]				=	NULL,
 						[intAccountId]				=	A.intAccountId,
-						[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
+						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
+						[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
+															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
+														END,
 						[dblCost]					=	ABS(A.dblUnitCost),
 						[dblOldCost]				=	NULL,
 						[dblClaimAmount]			=	0,
