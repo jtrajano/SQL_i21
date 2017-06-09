@@ -262,6 +262,22 @@ BEGIN
 			INNER JOIN vyuGLAccountDetail GLD ON A.intAccountId = GLD.intAccountId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND GLD.ysnActive = 0
+
+		--DO NOT POST NEGATIVE VOUCHER
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'Posting of negative voucher is not allowed.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+		CROSS APPLY (
+			SELECT
+				SUM(CASE WHEN A.intTransactionType != 1 THEN B.dblTotal * -1 ELSE B.dblTotal END) 
+					+ SUM(CASE WHEN A.intTransactionType != 1 THEN B.dblTax * -1 ELSE B.dblTax END)
+			FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId
+		) details
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 			
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
 		--COMPARE THE CASH PRICE
