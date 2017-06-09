@@ -35,6 +35,7 @@ SELECT
 	C.strTransactionNo,
 	E.strScreenName,
 	E.intScreenId,
+	A.intConcurrencyId,
 	F.strName AS strDocumentType
 FROM tblSMDocument A 
 	INNER JOIN FolderHeirarchy B ON A.intDocumentSourceFolderId = B.intDocumentSourceFolderId
