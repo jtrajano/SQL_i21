@@ -16,6 +16,7 @@ AS
 				,LD.dblQuantity
 				,LD.intPContractDetailId intContractDetailId
 				,LO.intShipmentType
+				,'Shipment' AS strShipmentType
 				,LO.dtmETAPOL
 				,LO.dtmETAPOD
 				,LO.dtmStuffingDate
@@ -50,6 +51,7 @@ AS
 			,SUM(dblQuantity)  dblLoadQuantity
 			,intContractDetailId
 			,intShipmentType
+			,strShipmentType
 			,strContainerNumber
 			,ysnDocsReceived
 			,dtmETAPOL
@@ -75,6 +77,7 @@ AS
 				,LD.dblQuantity 
 				,LD.intPContractDetailId intContractDetailId
 				,LO.intShipmentType
+				,'Shipping Instructions' AS strShipmentType
 				,LO.dtmETAPOL
 				,LO.dtmETAPOD
 				,LO.dtmStuffingDate
@@ -107,6 +110,7 @@ AS
 			,strBLNumber
 			,intContractDetailId
 			,intShipmentType
+			,strShipmentType
 			,strContainerNumber
 			,ysnDocsReceived
 			,dtmETAPOL
