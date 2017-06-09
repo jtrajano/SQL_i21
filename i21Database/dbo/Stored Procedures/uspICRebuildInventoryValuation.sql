@@ -352,6 +352,7 @@ BEGIN
 	-- Intialize #tmpICInventoryTransaction
 	SELECT	id = CAST(0 AS INT) 
 			,id2 = CAST(0 AS INT) 
+			,intSortByQty = CAST(0 AS INT)
 			,intItemId
 			,intItemLocationId
 			,intInTransitSourceLocationId
@@ -392,8 +393,9 @@ BEGIN
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
 		INSERT INTO #tmpICInventoryTransaction
-		SELECT	CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
-				,intInventoryTransactionId
+		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+				,id2 = intInventoryTransactionId
+				,intSortByQty = CASE WHEN dblQty > 0 THEN 1 ELSE 2 END 
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
@@ -433,14 +435,15 @@ BEGIN
 		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
 			ON dbo.#tmpICInventoryTransaction(dtmDate ASC, strBatchId ASC);
 
-		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [dblQty] DESC, [id] ASC, [id2] ASC);') 
+		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [intSortByQty] ASC, [id] ASC);') 
 
 	END
 	ELSE 
 	BEGIN 
 		INSERT INTO #tmpICInventoryTransaction
-		SELECT	CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
-				,intInventoryTransactionId
+		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+				,id2 = intInventoryTransactionId
+				,intSortByQty = CASE WHEN dblQty > 0 THEN 1 ELSE 2 END 
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
@@ -654,8 +657,6 @@ BEGIN
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
 									CASE	WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 1) THEN 
 												'Inventory In-Transit'
-											WHEN EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND intFromLocationId <> intToLocationId AND ISNULL(ysnShipmentRequired,0) = 0) THEN 
-												'Inventory'
 											ELSE 
 												NULL 
 									END 
@@ -1000,6 +1001,66 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
+
+				-- Create the GL entries if transfer is between company locations. 
+				-- Do not create the GL entries if transfer if within the same company location. 
+				IF EXISTS (
+					SELECT	TOP 1 1 
+					FROM	tblICInventoryTransfer 
+					WHERE	intInventoryTransferId = @intTransactionId 
+							AND strTransferNo = @strTransactionId 
+							AND intFromLocationId <> intToLocationId
+				)
+				BEGIN 
+					SET @intReturnId = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+					)			
+					EXEC @intReturnId = dbo.uspICCreateGLEntries
+						@strBatchId 
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,NULL 
+						,@intItemId-- This is only used when rebuilding the stocks. 								
+
+					IF @intReturnId <> 0 
+					BEGIN 
+						--PRINT 'Error found in uspICCreateGLEntries'
+						GOTO _EXIT_WITH_ERROR
+					END 
+				END
 			END	
 
 			-- Repost the following type of Inventory Adjustment:
@@ -1548,9 +1609,6 @@ BEGIN
 					,@strGLDescription
 					,@ItemsToPost
 
-				-- Empty the gl entries variable. 
-				DELETE FROM @GLEntries
-
 				SET @intReturnId = NULL 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
@@ -1808,9 +1866,6 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
-
-				-- Empty the gl entries variable. 
-				DELETE FROM @GLEntries
 
 				SET @intReturnId = NULL 
 				INSERT INTO @GLEntries (
@@ -2163,9 +2218,6 @@ BEGIN
 							AND UDT.intInTransitSourceLocationId IS NOT NULL 
 				END
 
-				-- Clear the GL entries 
-				DELETE FROM @GLEntries
-
 				SET @intReturnId = NULL 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
@@ -2426,17 +2478,14 @@ BEGIN
 					,@ItemsToPost
 			END 
 
-			-- Re-create the Post g/l entries (except for Cost Adjustments, Inventory Shipment, Invoice, and Credit Memo) AND Contra-Account is NOT NULL 
+			-- Re-create the Post g/l entries (except for Cost Adjustments, Inventory Shipment, Invoice, Credit Memo, 'Inventory Transfer') AND Contra-Account is NOT NULL 
 			IF EXISTS (
 				SELECT	TOP 1 1 
 				FROM	tblICInventoryTransactionType 
 				WHERE	intTransactionTypeId = @intTransactionTypeId 
-						AND strName NOT IN ('Cost Adjustment', 'Inventory Shipment', 'Invoice', 'Inventory Receipt', 'Inventory Return')
+						AND strName NOT IN ('Cost Adjustment', 'Inventory Shipment', 'Invoice', 'Inventory Receipt', 'Inventory Return', 'Inventory Transfer')
 			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 
-				-- Clear the GL entries 
-				DELETE FROM @GLEntries
-
 				SET @intReturnId = NULL 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
@@ -2521,6 +2570,9 @@ BEGIN
 				EXEC uspICRaiseError 80139, @strItemNo, @strTransactionId, @strBatchId, @strAccountToCounterInventory; 
 				GOTO _EXIT_WITH_ERROR
 			END 
+
+			-- Clear the GL entries for next transaction to repost
+			DELETE FROM @GLEntries
 		END 
 		
 		DELETE	FROM #tmpICInventoryTransaction
