@@ -25,7 +25,7 @@ BEGIN
 		SET ANSI_WARNINGS OFF
   
 		UPDATE	dbo.apcbkmst_origin
-		SET		apcbk_next_chk_no = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber,8) AS INT) + 1
+		SET		apcbk_next_chk_no = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber,8) AS INT)
 		FROM	dbo.apcbkmst_origin O INNER JOIN dbo.tblCMBankAccount f
 					ON f.strCbkNo = O.apcbk_no COLLATE Latin1_General_CI_AS
 		WHERE	f.intBankAccountId = @intBankAccountId
