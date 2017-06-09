@@ -13,6 +13,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 title: '{receiptTitle}'
             },
             dtmWhse: '{current.dtmLastFreeWhseDate}',
+            btnFetch: {
+                text: 'Update Cost from Contract'
+            },
             btnSave: {
                 disabled: '{isOriginOrPosted}'
             },
@@ -4981,7 +4984,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         this.showAddOrders(win);
     },
 
-    onFetchClicked: function (e) {
+    onFetchClicked: function(e) {
+        var me = this;
+        var answer = function(button) {
+            if(button === 'yes') {
+                me.updateCostFromContract();
+            }
+        };
+        
+        iRely.Functions.showCustomDialog(iRely.Functions.dialogType.WARNING,
+        iRely.Functions.dialogButtonType.YESNO, "This will overwrite existing costs and calculations. Do you want to continue?", answer);
+
+    },
+
+    updateCostFromContract: function () {
         Ext.MessageBox.show({
             title: "Fetch Costs from Contracts",
             msg: "Fetching other charges from contracts.",
@@ -5043,6 +5059,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             costs: _.filter(json.data[0].tblCTContractCosts, function(cost) { return !cost.ysnBasis; } )
                         }
                     };
+
                 }); 
 
                 return Rx.Observable.forkJoin(arx);
@@ -5052,7 +5069,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             })
             .subscribe(function (output) {
                 Ext.MessageBox.updateProgress(100, 'Calculating taxes...');
-                currentVM.tblICInventoryReceiptCharges().removeAll();
+                var g = win.down("#grdCharges").store.data.removeAll();
                 if(output && output.length > 0 && output[0].contract) {
                     var data = output[0];
                     _.each(data.contract.costs, function(cost) {
@@ -5079,7 +5096,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             strContractNumber: data.order.strOrderNumber
 
                         });
-                        currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);   
+                        currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge); 
                     });
                 }
 
