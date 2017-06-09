@@ -1562,8 +1562,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#cboPageSize": {
                 change: function(combo) {
-                    var win = combo.up('window');
-                    ic.count.loadDetails(this, win, win.context, true, ic.count.getFilter(win.viewModel.data.current));
+                    /* Seriously, don't do this shit! This causes the screen to send a server request twice!!*/
+                    //var win = combo.up('window');
+                    //ic.count.loadDetails(this, win, win.context, true, ic.count.getFilter(win.viewModel.data.current));
                 }
             }
         });
