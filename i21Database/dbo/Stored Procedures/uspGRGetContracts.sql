@@ -25,7 +25,7 @@ BEGIN TRY
 	,dblAvailableQtyInItemStockUOM
 	,dblBalanceInItemStockUOM  
     ,strContractType  
-    ,dblCashPrice
+    ,dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,'+LTRIM(@intUnitMeasureId)+',intPriceUnitMeasureId,dblCashPrice) dblCashPrice
 	,dblFutures   
     ,dtmStartDate  
     ,intContractSeq   
