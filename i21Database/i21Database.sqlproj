@@ -5251,7 +5251,7 @@
     <Build Include="dbo\Stored Procedures\uspGLDeleteAccount.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBillOfLadingReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoiceNew.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCalculateFreightUnit.sql" />
     <Build Include="dbo\Tables\tblMFOrderManifestLabel.sql" />
     <None Include="Scripts\Post-Deployment\EM\040_UpdateEmailDistribution.sql" />

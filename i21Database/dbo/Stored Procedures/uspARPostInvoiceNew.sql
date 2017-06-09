@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceIntegration]
+﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceNew]
      @BatchId			AS NVARCHAR(40)		= NULL
 	,@Post				AS BIT				= 0
 	,@Recap				AS BIT				= 0

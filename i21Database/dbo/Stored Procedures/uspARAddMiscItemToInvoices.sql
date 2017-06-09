@@ -24,7 +24,7 @@ INSERT INTO @ItemEntries SELECT * FROM @InvoiceEntries
 
 DECLARE @InvalidRecords AS TABLE (
 	 [intId]				INT
-	,[strErrorMessage]		NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
+	,[strMessage]			NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
 	,[strTransactionType]	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strType]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[strSourceTransaction]	NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
@@ -35,7 +35,7 @@ DECLARE @InvalidRecords AS TABLE (
 
 INSERT INTO @InvalidRecords(
 	 [intId]
-	,[strErrorMessage]		
+	,[strMessage]		
 	,[strTransactionType]
 	,[strType]
 	,[strSourceTransaction]
@@ -45,7 +45,7 @@ INSERT INTO @InvalidRecords(
 )
 SELECT
 	 [intId]				= IT.[intId]
-	,[strErrorMessage]		= 'Invoice does not exists!'
+	,[strMessage]			= 'Invoice does not exists!'
 	,[strTransactionType]	= IT.[strTransactionType]
 	,[strType]				= IT.[strType]
 	,[strSourceTransaction]	= IT.[strSourceTransaction]
@@ -61,7 +61,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= IT.[intId]
-	,[strErrorMessage]		= 'Invoice is already posted!'
+	,[strMessage]			= 'Invoice is already posted!'
 	,[strTransactionType]	= IT.[strTransactionType]
 	,[strType]				= IT.[strType]
 	,[strSourceTransaction]	= IT.[strSourceTransaction]
@@ -77,7 +77,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= IT.[intId]
-	,[strErrorMessage]		= 'The company location from the target Invoice does not exists!'
+	,[strMessage]			= 'The company location from the target Invoice does not exists!'
 	,[strTransactionType]	= IT.[strTransactionType]
 	,[strType]				= IT.[strType]
 	,[strSourceTransaction]	= IT.[strSourceTransaction]
@@ -93,7 +93,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= IT.[intId]
-	,[strErrorMessage]		= 'Invalid Conversion Account Id! Must be of type ''Asset'' and of category ''General''.'
+	,[strMessage]			= 'Invalid Conversion Account Id! Must be of type ''Asset'' and of category ''General''.'
 	,[strTransactionType]	= IT.[strTransactionType]
 	,[strType]				= IT.[strType]
 	,[strSourceTransaction]	= IT.[strSourceTransaction]
@@ -110,7 +110,7 @@ WHERE
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
-	SET @ErrorMessage = (SELECT TOP 1 [strErrorMessage] FROM @InvalidRecords ORDER BY [intId])
+	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM @InvalidRecords ORDER BY [intId])
 	RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END
@@ -131,7 +131,7 @@ INSERT INTO @IntegrationLog
 	,[dtmDate]
 	,[intEntityId]
 	,[intGroupingOption]
-	,[strErrorMessage]
+	,[strMessage]
 	,[strBatchIdForNewPost]
 	,[intPostedNewCount]
 	,[strBatchIdForNewPostRecap]
@@ -163,7 +163,7 @@ SELECT
 	,[dtmDate]								= @DateOnly
 	,[intEntityId]							= @UserId
 	,[intGroupingOption]					= 0
-	,[strErrorMessage]						= [strErrorMessage]
+	,[strMessage]							= [strMessage]
 	,[strBatchIdForNewPost]					= ''
 	,[intPostedNewCount]					= 0
 	,[strBatchIdForNewPostRecap]			= ''
@@ -507,79 +507,53 @@ VALUES(
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
 	,[intConcurrencyId]
-);
-	--OUTPUT  
-	--		@IntegrationLogId						--[intIntegrationLogId]
-	--		,@DateOnly								--[dtmDate]
-	--		,Source.[intEntityId]					--[intEntityId]
-	--		,0										--[intGroupingOption]
-	--		,'Line Item was successfully added.'	--[strErrorMessage]
-	--		,''										--[strBatchIdForNewPost]
-	--		,0										--[intPostedNewCount]
-	--		,''										--[strBatchIdForNewPostRecap]
-	--		,0										--[intRecapNewCount]
-	--		,''										--[strBatchIdForExistingPost]
-	--		,0										--[intPostedExistingCount]
-	--		,''										--[strBatchIdForExistingRecap]
-	--		,0										--[intRecapPostExistingCount]
-	--		,''										--[strBatchIdForExistingUnPost]
-	--		,0										--[intUnPostedExistingCount]
-	--		,''										--[strBatchIdForExistingUnPostRecap]
-	--		,0										--[intRecapUnPostedExistingCount]
-	--		,NULL									--[intIntegrationLogDetailId]
-	--		,INSERTED.[intInvoiceId]				--[intInvoiceId]
-	--		,INSERTED.[intInvoiceDetailId]			--[intInvoiceDetailId]
-	--		,Source.[intTempDetailIdForTaxes]		--[intTempDetailIdForTaxes]	
-	--		,Source.[intId]							--[intId]
-	--		,Source.[strTransactionType]			--[strTransactionType]
-	--		,Source.[strType]						--[strType]
-	--		,Source.[strSourceTransaction]			--[strSourceTransaction]
-	--		,Source.[intSourceId]					--[intSourceId]
-	--		,Source.[strSourceId]					--[strSourceId]
-	--		,Source.[ysnPost]						--[ysnPost]
-	--		,0										--[ysnUpdateAvailableDiscount]
-	--		,Source.[ysnRecomputeTax]				--[ysnRecomputeTax]
-	--		,1										--[ysnInsert]
-	--		,0										--[ysnHeader]
-	--		,1										--[ysnSuccess]
-	--	INTO @IntegrationLog(
-	--		 [intIntegrationLogId]
-	--		,[dtmDate]
-	--		,[intEntityId]
-	--		,[intGroupingOption]
-	--		,[strErrorMessage]
-	--		,[strBatchIdForNewPost]
-	--		,[intPostedNewCount]
-	--		,[strBatchIdForNewPostRecap]
-	--		,[intRecapNewCount]
-	--		,[strBatchIdForExistingPost]
-	--		,[intPostedExistingCount]
-	--		,[strBatchIdForExistingRecap]
-	--		,[intRecapPostExistingCount]
-	--		,[strBatchIdForExistingUnPost]
-	--		,[intUnPostedExistingCount]
-	--		,[strBatchIdForExistingUnPostRecap]
-	--		,[intRecapUnPostedExistingCount]
-	--		,[intIntegrationLogDetailId]
-	--		,[intInvoiceId]
-	--		,[intInvoiceDetailId]
-	--		,[intTemporaryDetailIdForTax]
-	--		,[intId]
-	--		,[strTransactionType]
-	--		,[strType]
-	--		,[strSourceTransaction]
-	--		,[intSourceId]
-	--		,[strSourceId]
-	--		,[ysnPost]
-	--		,[ysnUpdateAvailableDiscount]
-	--		,[ysnRecomputeTax]
-	--		,[ysnInsert]
-	--		,[ysnHeader]
-	--		,[ysnSuccess]
-	--	);					
+)
+OUTPUT  
+			@IntegrationLogId						--[intIntegrationLogId]
+			,INSERTED.[intInvoiceId]				--[intInvoiceId]
+			,INSERTED.[intInvoiceDetailId]			--[intInvoiceDetailId]
+			,Source.[intTempDetailIdForTaxes]		--[intTempDetailIdForTaxes]	
+			,Source.[intId]							--[intId]
+			,'Line Item was successfully added.'	--[strErrorMessage]
+			,Source.[strTransactionType]			--[strTransactionType]
+			,Source.[strType]						--[strType]
+			,Source.[strSourceTransaction]			--[strSourceTransaction]
+			,Source.[intSourceId]					--[intSourceId]
+			,Source.[strSourceId]					--[strSourceId]
+			,Source.[ysnPost]						--[ysnPost]
+			,0										--[ysnRecap]
+			,1										--[ysnInsert]
+			,0										--[ysnHeader]
+			,1										--[ysnSuccess]
+			,NULL									--[ysnPosted]
+			,NULL									--[ysnUnPosted]
+			,NULL									--[strBatchId]
+			,1										--[intConcurrencyId]
+		INTO tblARInvoiceIntegrationLogDetail(
+			[intIntegrationLogId]
+           ,[intInvoiceId]
+           ,[intInvoiceDetailId]
+           ,[intTemporaryDetailIdForTax]
+           ,[intId]
+           ,[strMessage]
+           ,[strTransactionType]
+           ,[strType]
+           ,[strSourceTransaction]
+           ,[intSourceId]
+           ,[strSourceId]
+           ,[ysnPost]
+           ,[ysnRecap]
+           ,[ysnInsert]
+           ,[ysnHeader]
+           ,[ysnSuccess]
+           ,[ysnPosted]
+           ,[ysnUnPosted]
+           ,[strBatchId]
+           ,[intConcurrencyId]
+		);
 
-	--IF ISNULL(@IntegrationLogId, 0) <> 0
-	--	EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
+	IF ISNULL(@IntegrationLogId, 0) <> 0
+		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 			
 END TRY
 BEGIN CATCH

@@ -29,7 +29,7 @@ SELECT * FROM @TaxDetails
 
 DECLARE @InvalidRecords AS TABLE (
 	 [intId]					INT
-	,[strErrorMessage]			NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
+	,[strMessage]				NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
 	,[strTransactionType]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strType]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[strSourceTransaction]		NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
@@ -42,7 +42,7 @@ DECLARE @InvalidRecords AS TABLE (
 
 INSERT INTO @InvalidRecords(
 	 [intId]
-	,[strErrorMessage]		
+	,[strMessage]		
 	,[strTransactionType]
 	,[strType]
 	,[strSourceTransaction]
@@ -54,7 +54,7 @@ INSERT INTO @InvalidRecords(
 )
 SELECT
 	 [intId]					= TD.[intId]
-	,[strErrorMessage]			= 'Invoice line(' + CAST(TD.[intDetailId] AS NVARCHAR(50)) + ') item does not exists!'
+	,[strMessage]				= 'Invoice line(' + CAST(TD.[intDetailId] AS NVARCHAR(50)) + ') item does not exists!'
 	,[strTransactionType]		= TD.[strTransactionType]
 	,[strType]					= TD.[strType]
 	,[strSourceTransaction]		= TD.[strSourceTransaction]
@@ -72,7 +72,7 @@ UNION ALL
 
 SELECT
 	 [intId]					= TD.[intId]
-	,[strErrorMessage]			= 'Tax Code(' + CAST(TD.[intTaxCodeId] AS NVARCHAR(50)) + ') does not exists!'
+	,[strMessage]				= 'Tax Code(' + CAST(TD.[intTaxCodeId] AS NVARCHAR(50)) + ') does not exists!'
 	,[strTransactionType]		= TD.[strTransactionType]
 	,[strType]					= TD.[strType]
 	,[strSourceTransaction]		= TD.[strSourceTransaction]
@@ -90,7 +90,7 @@ UNION ALL
 
 SELECT
 	 [intId]					= TD.[intId]
-	,[strErrorMessage]			= 'Tax Code(' + CAST(TD.[intTaxCodeId] AS NVARCHAR(50)) + ') does not have a Sales Account!'
+	,[strMessage]				= 'Tax Code(' + CAST(TD.[intTaxCodeId] AS NVARCHAR(50)) + ') does not have a Sales Account!'
 	,[strTransactionType]		= TD.[strTransactionType]
 	,[strType]					= TD.[strType]
 	,[strSourceTransaction]		= TD.[strSourceTransaction]
@@ -108,7 +108,7 @@ UNION ALL
 
 SELECT
 	 [intId]					= TD.[intId]
-	,[strErrorMessage]			= ISNULL(TD.[strCalculationMethod],'') + ' is not a valid calculation method!'
+	,[strMessage]				= ISNULL(TD.[strCalculationMethod],'') + ' is not a valid calculation method!'
 	,[strTransactionType]		= TD.[strTransactionType]
 	,[strType]					= TD.[strType]
 	,[strSourceTransaction]		= TD.[strSourceTransaction]
@@ -124,7 +124,7 @@ WHERE
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
-	SET @ErrorMessage = (SELECT TOP 1 [strErrorMessage] FROM @InvalidRecords ORDER BY [intId])
+	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM @InvalidRecords ORDER BY [intId])
 	RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END
@@ -143,7 +143,7 @@ INSERT INTO @IntegrationLog
 	,[dtmDate]
 	,[intEntityId]
 	,[intGroupingOption]
-	,[strErrorMessage]
+	,[strMessage]
 	,[strBatchIdForNewPost]
 	,[intPostedNewCount]
 	,[strBatchIdForNewPostRecap]
@@ -175,7 +175,7 @@ SELECT
 	,[dtmDate]								= @DateOnly
 	,[intEntityId]							= @UserId
 	,[intGroupingOption]					= 0
-	,[strErrorMessage]						= [strErrorMessage]
+	,[strMessage]							= [strMessage]
 	,[strBatchIdForNewPost]					= ''
 	,[intPostedNewCount]					= 0
 	,[strBatchIdForNewPostRecap]			= ''

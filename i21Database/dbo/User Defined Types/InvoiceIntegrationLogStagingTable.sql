@@ -5,7 +5,8 @@
 	[dtmDate]							DATETIME  NULL,
     [intEntityId]						INT NULL,
 	[intGroupingOption]					INT NULL,
-	[strErrorMessage]					NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strMessage]						NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strPostingMessage]					NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strBatchIdForNewPost]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intPostedNewCount]					INT NOT NULL DEFAULT ((0)),
 	[strBatchIdForNewPostRecap]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -41,5 +42,6 @@
 	[ysnSuccess]						BIT DEFAULT ((0)) NOT NULL,
 	[ysnPosted]							BIT DEFAULT ((0)) NULL,
 	[ysnUnPosted]						BIT DEFAULT ((0)) NULL,
+	[ysnAccrueLicense]					BIT DEFAULT ((0)) NULL,
 	[strBatchId]						NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 )
