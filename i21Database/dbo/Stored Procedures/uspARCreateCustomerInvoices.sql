@@ -297,7 +297,7 @@ FROM
 
 DECLARE @InvalidRecords AS TABLE (
 	 [intId]				INT
-	,[strErrorMessage]		NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
+	,[strMessage]			NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
 	,[strTransactionType]	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strType]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[strSourceTransaction]	NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
@@ -308,7 +308,7 @@ DECLARE @InvalidRecords AS TABLE (
 
 INSERT INTO @InvalidRecords(
 	 [intId]
-	,[strErrorMessage]		
+	,[strMessage]		
 	,[strTransactionType]
 	,[strType]
 	,[strSourceTransaction]
@@ -318,7 +318,7 @@ INSERT INTO @InvalidRecords(
 )
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strSourceTransaction] + ' does not exists!'
+	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -335,7 +335,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strSourceTransaction] + ' does not exists!'
+	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -352,7 +352,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strSourceTransaction] + ' does not exists!'
+	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -371,7 +371,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strSourceTransaction] + ' does not exists!'
+	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -388,7 +388,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strSourceTransaction] + ' does not exists!'
+	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -405,7 +405,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strSourceTransaction] + ' does not exists!'
+	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -422,7 +422,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strSourceTransaction] + ' does not exists!'
+	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -439,7 +439,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strSourceTransaction] + ' does not exists!'
+	,[strMessage]			= ITG.[strSourceTransaction] + ' does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -474,7 +474,7 @@ WHERE
 
 INSERT INTO @InvalidRecords(
 	 [intId]
-	,[strErrorMessage]		
+	,[strMessage]		
 	,[strTransactionType]
 	,[strType]
 	,[strSourceTransaction]
@@ -484,7 +484,7 @@ INSERT INTO @InvalidRecords(
 )
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The company location Id provided does not exists!'
+	,[strMessage]			= 'The company location Id provided does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -500,7 +500,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The company location provided is not active!'
+	,[strMessage]			= 'The company location provided is not active!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -516,7 +516,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strTransactionType] + ' is not a valid transaction type!'
+	,[strMessage]			= ITG.[strTransactionType] + ' is not a valid transaction type!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -532,7 +532,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= ITG.[strType] + ' is not a valid invoice type!'
+	,[strMessage]			= ITG.[strType] + ' is not a valid invoice type!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -548,7 +548,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The customer Id provided does not exists!'
+	,[strMessage]			= 'The customer Id provided does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -564,7 +564,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The customer provided is not active!'
+	,[strMessage]			= 'The customer provided is not active!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -581,7 +581,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The entity Id provided does not exists!'
+	,[strMessage]			= 'The entity Id provided does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -598,7 +598,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'Transaction with Invoice Number - ' + [strInvoiceOriginId] + ' is already existing.'
+	,[strMessage]			= 'Transaction with Invoice Number - ' + [strInvoiceOriginId] + ' is already existing.'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -656,7 +656,7 @@ WHERE
 
 INSERT INTO @InvalidRecords(
 	 [intId]
-	,[strErrorMessage]		
+	,[strMessage]		
 	,[strTransactionType]
 	,[strType]
 	,[strSourceTransaction]
@@ -666,7 +666,7 @@ INSERT INTO @InvalidRecords(
 )
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'There is no setup for AR Account in the Company Configuration.'
+	,[strMessage]			= 'There is no setup for AR Account in the Company Configuration.'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -684,7 +684,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The account id provided is not a valid account of category "AR Account".'
+	,[strMessage]			= 'The account id provided is not a valid account of category "AR Account".'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -702,7 +702,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'There is no Undeposited Funds account setup under Company Location - ' + SMCL.[strLocationName]
+	,[strMessage]			= 'There is no Undeposited Funds account setup under Company Location - ' + SMCL.[strLocationName]
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -723,7 +723,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The account id provided is not a valid account of category "Undeposited Funds".'
+	,[strMessage]			= 'The account id provided is not a valid account of category "Undeposited Funds".'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -744,7 +744,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'There is no Customer Prepaid account setup under Company Location - ' + SMCL.[strLocationName]
+	,[strMessage]			= 'There is no Customer Prepaid account setup under Company Location - ' + SMCL.[strLocationName]
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -764,7 +764,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The account id provided is not a valid account of category "Customer Prepayments".'
+	,[strMessage]			= 'The account id provided is not a valid account of category "Customer Prepayments".'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -785,7 +785,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'The currency Id provided does not exists!'
+	,[strMessage]			= 'The currency Id provided does not exists!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -802,7 +802,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'There is no setup for default currency in the Company Configuration.'
+	,[strMessage]			= 'There is no setup for default currency in the Company Configuration.'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -819,7 +819,7 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strErrorMessage]		= 'Customer has no Term setup!' 
+	,[strMessage]			= 'Customer has no Term setup!' 
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
@@ -839,7 +839,7 @@ WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
-	SET @ErrorMessage = (SELECT TOP 1 [strErrorMessage] FROM @InvalidRecords ORDER BY [intId])
+	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM @InvalidRecords ORDER BY [intId])
 	RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END
@@ -856,7 +856,7 @@ INSERT INTO @IntegrationLog
 	,[dtmDate]
 	,[intEntityId]
 	,[intGroupingOption]
-	,[strErrorMessage]
+	,[strMessage]
 	,[strBatchIdForNewPost]
 	,[intPostedNewCount]
 	,[strBatchIdForNewPostRecap]
@@ -887,7 +887,7 @@ SELECT
 	,[dtmDate]								= @DateOnly
 	,[intEntityId]							= @UserId
 	,[intGroupingOption]					= @GroupingOption
-	,[strErrorMessage]						= [strErrorMessage]
+	,[strMessage]							= [strMessage]
 	,[strBatchIdForNewPost]					= ''
 	,[intPostedNewCount]					= 0
 	,[strBatchIdForNewPostRecap]			= ''
@@ -1273,7 +1273,7 @@ VALUES(
 			,[dtmDate]
 			,[intEntityId]
 			,[intGroupingOption]
-			,[strErrorMessage]
+			,[strMessage]
 			,[strBatchIdForNewPost]
 			,[intPostedNewCount]
 			,[strBatchIdForNewPostRecap]

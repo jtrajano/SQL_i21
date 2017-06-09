@@ -21,7 +21,7 @@
 																	-- 15 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
 	,@RaiseError					BIT								= 0
 	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
-	,@LogId							INT								= 0				OUTPUT
+	,@LogId							INT								= NULL			OUTPUT
 	
 AS
 
@@ -977,51 +977,63 @@ BEGIN CATCH
 END CATCH
 
 
-----UnPosting posted Invoices for update
---BEGIN TRY
---	DECLARE @IdsForUnPosting InvoiceId
+--UnPosting posted Invoices for update
+BEGIN TRY
+	DECLARE @IdsForUnPosting InvoiceId
 
---	INSERT INTO @IdsForUnPosting
---	SELECT DISTINCT
---		EFP.[intInvoiceId]
---	FROM
---		#EntriesForProcessing EFP
---	INNER JOIN
---		@InvoiceEntries IE
---			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
---	WHERE
---		ISNULL(EFP.[ysnForUpdate],0) = 1
---		AND ISNULL(EFP.[intInvoiceId],0) <> 0
---		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 0
---		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
---		AND ISNULL(EFP.[ysnRecap], 0) = 0
+	INSERT INTO @IdsForUnPosting(
+		 [intHeaderId]
+		,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId]
+		,[ysnPost]
+		,[ysnAccrueLicense]
+		,[strTransactionType]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]						= EFP.[intInvoiceId]
+		,[ysnUpdateAvailableDiscountOnly]	= IE.[ysnUpdateAvailableDiscount] 
+		,[intDetailId]						= EFP.[intInvoiceDetailId] 
+		,[ysnPost]							= IE.[ysnPost] 
+		,[ysnAccrueLicense]					= IE.[ysnAccrueLicense]
+		,[strTransactionType]				= IE.[strTransactionType] 		
+	FROM
+		#EntriesForProcessing EFP
+	INNER JOIN
+		@InvoiceEntries IE
+			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
+	WHERE
+		ISNULL(EFP.[ysnForUpdate],0) = 1
+		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 0
+		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
+		AND ISNULL(EFP.[ysnRecap], 0) = 0
 
 		
---	--IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
---		EXEC [dbo].[uspARPostInvoiceIntegration]
---			 @BatchId			= NULL
---			,@Post				= 0
---			,@Recap				= 0
---			,@UserId			= @UserId
---			,@InvoiceIds		= @IdsForUnPosting
---			,@IntegrationLogId	= @IntegrationLogId
---			,@BeginDate			= NULL
---			,@EndDate			= NULL
---			,@BeginTransaction	= NULL
---			,@EndTransaction	= NULL
---			,@Exclude			= NULL
---			,@TransType			= N'all'
---			,@RaiseError		= @RaiseError
+	IF EXISTS(SELECT TOP 1 NULL FROM @IdsForUnPosting)
+		EXEC [dbo].[uspARPostInvoiceNew]
+			 @BatchId			= NULL
+			,@Post				= 0
+			,@Recap				= 0
+			,@UserId			= @UserId
+			,@InvoiceIds		= @IdsForUnPosting
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
 
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 
 --UPDATE
@@ -1255,336 +1267,307 @@ END CATCH
 --		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
 --		AND ISNULL(EFP.[ysnRecap], 0) = 0
 
-		
---	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
---		EXEC [dbo].[uspARPostInvoiceIntegration]
---			 @BatchId			= NULL
---			,@Post				= 1
---			,@Recap				= 0
---			,@UserId			= @UserId
---			,@InvoiceIds		= @IdsForPostingNew
---			,@IntegrationLogId	= @IntegrationLogId
---			,@BeginDate			= NULL
---			,@EndDate			= NULL
---			,@BeginTransaction	= NULL
---			,@EndTransaction	= NULL
---			,@Exclude			= NULL
---			,@TransType			= N'all'
---			,@RaiseError		= @RaiseError
+--Posting newly added Invoices
 
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
+--UnPosting posted Invoices for update
 
-
-----Posting newly added Invoices - Recap
---BEGIN TRY
---	DECLARE @IdsForPostingNewRecap InvoiceId
-
---	INSERT INTO @IdsForPostingNewRecap
---	SELECT DISTINCT
---		EFP.[intInvoiceId]
---	FROM
---		#EntriesForProcessing EFP
---	INNER JOIN
---		@InvoiceEntries IE
---			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
---	WHERE
---		ISNULL(EFP.[ysnForInsert],0) = 1
---		AND ISNULL(EFP.[intInvoiceId],0) <> 0
---		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 1
---		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
---		AND ISNULL(EFP.[ysnRecap], 0) = 1
+--Posting Newly Created Invoices
+BEGIN TRY
+	DECLARE @NewIdsForPosting InvoiceId
+	INSERT INTO @NewIdsForPosting(
+		 [intHeaderId]
+		,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId]
+		,[ysnPost]
+		,[ysnAccrueLicense]
+		,[strTransactionType]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]						= [intInvoiceId]
+		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount] 
+		,[intDetailId]						= [intInvoiceDetailId] 
+		,[ysnPost]							= [ysnPost] 
+		,[ysnAccrueLicense]					= [ysnAccrueLicense]
+		,[strTransactionType]				= [strTransactionType] 	
+	FROM
+		tblARInvoiceIntegrationLogDetail
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 0
 
 		
---	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
---		EXEC [dbo].[uspARPostInvoiceIntegration]
---			 @BatchId			= NULL
---			,@Post				= 1
---			,@Recap				= 1
---			,@UserId			= @UserId
---			,@InvoiceIds		= @IdsForPostingNewRecap
---			,@IntegrationLogId	= @IntegrationLogId
---			,@BeginDate			= NULL
---			,@EndDate			= NULL
---			,@BeginTransaction	= NULL
---			,@EndTransaction	= NULL
---			,@Exclude			= NULL
---			,@TransType			= N'all'
---			,@RaiseError		= @RaiseError
+	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPosting)
+		EXEC [dbo].[uspARPostInvoiceNew]
+			 @BatchId			= NULL
+			,@Post				= 1
+			,@Recap				= 0
+			,@UserId			= @UserId
+			,@InvoiceIds		= @NewIdsForPosting
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
 
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
-
-------Posting Updated Invoices
---BEGIN TRY
---	DECLARE @IdsForPostingUpdate InvoiceId
-
---	INSERT INTO @IdsForPostingUpdate
---	SELECT DISTINCT
---		EFP.[intInvoiceId]
---	FROM
---		#EntriesForProcessing EFP
---	INNER JOIN
---		@InvoiceEntries IE
---			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
---	WHERE
---		ISNULL(EFP.[ysnForUpdate],0) = 1
---		AND ISNULL(EFP.[intInvoiceId],0) <> 0
---		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 1
---		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
---		AND ISNULL(EFP.[ysnRecap], 0) = 1
+	DECLARE @NewIdsForPostingRecap InvoiceId
+	INSERT INTO @NewIdsForPostingRecap(
+		 [intHeaderId]
+		,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId]
+		,[ysnPost]
+		,[ysnAccrueLicense]
+		,[strTransactionType]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]						= [intInvoiceId]
+		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount] 
+		,[intDetailId]						= [intInvoiceDetailId] 
+		,[ysnPost]							= [ysnPost] 
+		,[ysnAccrueLicense]					= [ysnAccrueLicense]
+		,[strTransactionType]				= [strTransactionType] 	
+	FROM
+		tblARInvoiceIntegrationLogDetail
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 1
 
 		
---	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
---		EXEC [dbo].[uspARPostInvoiceIntegration]
---			 @BatchId			= NULL
---			,@Post				= 1
---			,@Recap				= 0
---			,@UserId			= @UserId
---			,@InvoiceIds		= @IdsForPostingUpdate
---			,@IntegrationLogId	= @IntegrationLogId
---			,@BeginDate			= NULL
---			,@EndDate			= NULL
---			,@BeginTransaction	= NULL
---			,@EndTransaction	= NULL
---			,@Exclude			= NULL
---			,@TransType			= N'all'
---			,@RaiseError		= @RaiseError
+	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPostingRecap)
+		EXEC [dbo].[uspARPostInvoiceNew]
+			 @BatchId			= NULL
+			,@Post				= 1
+			,@Recap				= 1
+			,@UserId			= @UserId
+			,@InvoiceIds		= @NewIdsForPostingRecap
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
-
-
-
---	DELETE FROM @TempInvoiceIdTable
---	INSERT INTO @TempInvoiceIdTable
---	SELECT DISTINCT
---		[intInvoiceId]
---	FROM
---		#EntriesForProcessing
---	WHERE
---		ISNULL([ysnForUpdate],0) = 1
---		AND ISNULL([ysnProcessed],0) = 1
---		AND ISNULL([intInvoiceId],0) <> 0
---		AND ISNULL([ysnPost],0) = 1
---		AND ISNULL([ysnRecap],0) = 1
-
---	SELECT
---		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
---	FROM
---		@TempInvoiceIdTable
-	
 		
+--Posting Updated Invoices
+BEGIN TRY
+	DECLARE @UpdatedIdsForPosting InvoiceId
+	INSERT INTO @UpdatedIdsForPosting(
+		 [intHeaderId]
+		,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId]
+		,[ysnPost]
+		,[ysnAccrueLicense]
+		,[strTransactionType]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]						= [intInvoiceId]
+		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount] 
+		,[intDetailId]						= [intInvoiceDetailId] 
+		,[ysnPost]							= [ysnPost] 
+		,[ysnAccrueLicense]					= [ysnAccrueLicense]
+		,[strTransactionType]				= [strTransactionType] 	
+	FROM
+		tblARInvoiceIntegrationLogDetail
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 0	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 0
+
 		
---	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
---		BEGIN			
---		EXEC [dbo].[uspARPostInvoice]
---			@batchId			= @BatchIdForExistingRecap,
---			@post				= 1,
---			@recap				= 1,
---			@param				= @IdsForPostingUpdated,
---			@userId				= @UserId,
---			@beginDate			= NULL,
---			@endDate			= NULL,
---			@beginTransaction	= NULL,
---			@endTransaction		= NULL,
---			@exclude			= NULL,
---			@successfulCount	= @successfulCount OUTPUT,
---			@invalidCount		= @invalidCount OUTPUT,
---			@success			= @success OUTPUT,
---			@batchIdUsed		= @batchIdUsed OUTPUT,
---			@recapId			= @recapId OUTPUT,
---			@transType			= N'all',
---			@raiseError			= @RaiseError
+	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPosting)
+		EXEC [dbo].[uspARPostInvoiceNew]
+			 @BatchId			= NULL
+			,@Post				= 1
+			,@Recap				= 0
+			,@UserId			= @UserId
+			,@InvoiceIds		= @UpdatedIdsForPosting
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
 
---			SET @BatchIdForExistingRecap = @batchIdUsed
---			SET @RecapPostExistingCount  = @successfulCount
---		END
+	DECLARE @UpdatedIdsForPostingRecap InvoiceId
+	INSERT INTO @UpdatedIdsForPostingRecap(
+		 [intHeaderId]
+		,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId]
+		,[ysnPost]
+		,[ysnAccrueLicense]
+		,[strTransactionType]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]						= [intInvoiceId]
+		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount] 
+		,[intDetailId]						= [intInvoiceDetailId] 
+		,[ysnPost]							= [ysnPost] 
+		,[ysnAccrueLicense]					= [ysnAccrueLicense]
+		,[strTransactionType]				= [strTransactionType] 	
+	FROM
+		tblARInvoiceIntegrationLogDetail
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 0	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 1
+
 		
---	SET @IdsForPostingUpdated = ''
---	SET @batchIdUsed = ''
---	SET @successfulCount = 0
+	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPostingRecap)
+		EXEC [dbo].[uspARPostInvoiceNew]
+			 @BatchId			= NULL
+			,@Post				= 1
+			,@Recap				= 1
+			,@UserId			= @UserId
+			,@InvoiceIds		= @UpdatedIdsForPostingRecap
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
+--UnPosting Updated Invoices
+BEGIN TRY
+	DECLARE @UpdatedIdsForUnPosting InvoiceId
+	INSERT INTO @UpdatedIdsForUnPosting(
+		 [intHeaderId]
+		,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId]
+		,[ysnPost]
+		,[ysnAccrueLicense]
+		,[strTransactionType]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]						= [intInvoiceId]
+		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount] 
+		,[intDetailId]						= [intInvoiceDetailId] 
+		,[ysnPost]							= [ysnPost] 
+		,[ysnAccrueLicense]					= [ysnAccrueLicense]
+		,[strTransactionType]				= [strTransactionType] 	
+	FROM
+		tblARInvoiceIntegrationLogDetail
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 0	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 0
 
-----UnPosting Updated Invoices
---DECLARE @IdsForUnPostingUpdated VARCHAR(MAX)
---BEGIN TRY
---	DELETE FROM @TempInvoiceIdTable
---	INSERT INTO @TempInvoiceIdTable
---	SELECT DISTINCT
---		[intInvoiceId]
---	FROM
---		#EntriesForProcessing
---	WHERE
---		ISNULL([ysnForUpdate],0) = 1
---		AND ISNULL([ysnProcessed],0) = 1
---		AND ISNULL([intInvoiceId],0) <> 0
---		AND [ysnPost] IS NOT NULL
---		AND [ysnPost] = 0
---		AND ISNULL([ysnRecap],0) <> 1
-			
---	SELECT
---		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
---	FROM
---		@TempInvoiceIdTable
-			
 		
---	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
---		BEGIN			
---		EXEC [dbo].[uspARPostInvoice]
---			@batchId			= @BatchIdForExistingUnPost,
---			@post				= 0,
---			@recap				= 0,
---			@param				= @IdsForUnPostingUpdated,
---			@userId				= @UserId,
---			@beginDate			= NULL,
---			@endDate			= NULL,
---			@beginTransaction	= NULL,
---			@endTransaction		= NULL,
---			@exclude			= NULL,
---			@successfulCount	= @successfulCount OUTPUT,
---			@invalidCount		= @invalidCount OUTPUT,
---			@success			= @success OUTPUT,
---			@batchIdUsed		= @batchIdUsed OUTPUT,
---			@recapId			= @recapId OUTPUT,
---			@transType			= N'all',
---			@raiseError			= @RaiseError
+	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPosting)
+		EXEC [dbo].[uspARPostInvoiceNew]
+			 @BatchId			= NULL
+			,@Post				= 0
+			,@Recap				= 0
+			,@UserId			= @UserId
+			,@InvoiceIds		= @UpdatedIdsForUnPosting
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
 
---			SET @BatchIdForExistingUnPost = @batchIdUsed
---			SET @UnPostedExistingCount = @successfulCount
---		END
+	DECLARE @UpdatedIdsForUnPostingRecap InvoiceId
+	INSERT INTO @UpdatedIdsForUnPostingRecap(
+		 [intHeaderId]
+		,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId]
+		,[ysnPost]
+		,[ysnAccrueLicense]
+		,[strTransactionType]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]						= [intInvoiceId]
+		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount] 
+		,[intDetailId]						= [intInvoiceDetailId] 
+		,[ysnPost]							= [ysnPost] 
+		,[ysnAccrueLicense]					= [ysnAccrueLicense]
+		,[strTransactionType]				= [strTransactionType] 	
+	FROM
+		tblARInvoiceIntegrationLogDetail
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 0	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 1
 
---	SET @IdsForUnPostingUpdated = ''
---	SET @batchIdUsed = ''
---	SET @successfulCount = 0
-
---	DELETE FROM @TempInvoiceIdTable
---	INSERT INTO @TempInvoiceIdTable
---	SELECT DISTINCT
---		[intInvoiceId]
---	FROM
---		#EntriesForProcessing
---	WHERE
---		ISNULL([ysnForUpdate],0) = 1
---		AND ISNULL([ysnProcessed],0) = 1
---		AND ISNULL([intInvoiceId],0) <> 0
---		AND [ysnPost] IS NOT NULL
---		AND [ysnPost] = 0
---		AND ISNULL([ysnRecap],0) = 1
-
---	SELECT
---		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
---	FROM
---		@TempInvoiceIdTable	
 		
-		
---	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
---		BEGIN			
---		EXEC [dbo].[uspARPostInvoice]
---			@batchId			= @BatchIdForExistingUnPostRecap,
---			@post				= 0,
---			@recap				= 1,
---			@param				= @IdsForUnPostingUpdated,
---			@userId				= @UserId,
---			@beginDate			= NULL,
---			@endDate			= NULL,
---			@beginTransaction	= NULL,
---			@endTransaction		= NULL,
---			@exclude			= NULL,
---			@successfulCount	= @successfulCount OUTPUT,
---			@invalidCount		= @invalidCount OUTPUT,
---			@success			= @success OUTPUT,
---			@batchIdUsed		= @batchIdUsed OUTPUT,
---			@recapId			= @recapId OUTPUT,
---			@transType			= N'all',
---			@raiseError			= @RaiseError
-
---			SET @BatchIdForExistingUnPostRecap = @batchIdUsed
---			SET @RecapUnPostedExistingCount = @successfulCount
---		END
-
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
-
-
---DECLARE @CreateIds VARCHAR(MAX)
---DELETE FROM @TempInvoiceIdTable
---INSERT INTO @TempInvoiceIdTable
---SELECT DISTINCT
---	[intInvoiceId]
---FROM
---	#EntriesForProcessing
---WHERE
---	ISNULL([ysnForInsert],0) = 1
---	AND ISNULL([ysnProcessed],0) = 1
---	AND ISNULL([intInvoiceId],0) <> 0
-
---SELECT
---	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
---FROM
---	@TempInvoiceIdTable
-
-	
---SET @CreatedIvoices = @CreateIds
-
-
---DECLARE @UpdatedIds VARCHAR(MAX)
---DELETE FROM @TempInvoiceIdTable
---INSERT INTO @TempInvoiceIdTable
---SELECT DISTINCT
---	[intInvoiceId]
---FROM
---	#EntriesForProcessing
---WHERE
---	ISNULL([ysnForUpdate],0) = 1
---	AND ISNULL([ysnProcessed],0) = 1
---	AND ISNULL([intInvoiceId],0) <> 0
-
---SELECT
---	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
---FROM
---	@TempInvoiceIdTable
-
-	
---SET @UpdatedIvoices = @UpdatedIds
-
+	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPostingRecap)
+		EXEC [dbo].[uspARPostInvoiceNew]
+			 @BatchId			= NULL
+			,@Post				= 0
+			,@Recap				= 1
+			,@UserId			= @UserId
+			,@InvoiceIds		= @UpdatedIdsForUnPostingRecap
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 
 IF ISNULL(@RaiseError,0) = 0

@@ -91,6 +91,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 																										-- If [ysnPost] = 0 > Existing posted Invoices will be unposted
 																										-- If [ysnPost] IS NULL > No action will be made
 	,[ysnUpdateAvailableDiscount]			BIT												NULL		-- If [ysnUpdateAvailableDiscount] = 1 > Updates existing Posted/Unposted Invoice Available Discount Amount
+	,[ysnAccrueLicense]						BIT												NULL		-- If [ysnAccrueLicense] = 1 > License amount will be accrued upon posting
 	,[ysnInsertDetail]						BIT												NULL		-- If [ysnInsertDetail] = 1 > Line Item details included in the UDT will also be inserted when uspARCreateCustomerInvoices is called
 
 	--Detail																																															
