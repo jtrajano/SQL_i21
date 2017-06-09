@@ -242,18 +242,6 @@ BEGIN
 	FROM	tblSMMultiCurrency
 END 
 
--- Get the functional currency and default Forex Rate Type Id 
-BEGIN 
-	DECLARE @intFunctionalCurrencyId AS INT
-	DECLARE @intDefaultForexRateTypeId AS INT 
-	 
-	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
-
-	SELECT	TOP 1 
-			@intDefaultForexRateTypeId = intInventoryRateTypeId 
-	FROM	tblSMMultiCurrency
-END 
-
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
 BEGIN 
