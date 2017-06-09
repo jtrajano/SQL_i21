@@ -243,6 +243,7 @@ compLoc.intCompanyLocationId
 ,ISNULL(sanitizationDockDoorUnit.[strName], '') as strSanitizationDockDoorUnit
 ,ISNULL(sanitizationStagingUnit.[strName], '') as strSanitizationStagingUnit
 ,ISNULL(sanitizationStorageUnit.[strName], '') as strSanitizationStorageUnit
+,ISNULL(taxGroup.[strTaxGroup], '') as strTaxGroup
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
 LEFT JOIN tblCMBankAccount bankAccount ON compLoc.intCashAccount = bankAccount.intGLAccountId
@@ -288,3 +289,4 @@ LEFT JOIN tblEMEntity productAlertOwner ON compLoc.intProductAlertOwnerId = prod
 LEFT JOIN tblICStorageLocation sanitizationDockDoorUnit ON compLoc.intSanitizationDockDoorUnitId = sanitizationDockDoorUnit.intStorageLocationId
 LEFT JOIN tblICStorageLocation sanitizationStagingUnit ON compLoc.intSanitizationStagingUnitId = sanitizationStagingUnit.intStorageLocationId
 LEFT JOIN tblICStorageLocation sanitizationStorageUnit ON compLoc.intSanitizationStorageUnitId = sanitizationStorageUnit.intStorageLocationId
+LEFT JOIN tblSMTaxGroup taxGroup ON compLoc.intTaxGroupId = taxGroup.intTaxGroupId
