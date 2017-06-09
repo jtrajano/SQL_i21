@@ -101,7 +101,7 @@ INNER JOIN (SELECT intEntityCustomerId
 				) I ON PD.intInvoiceId = I.intInvoiceId
 			WHERE PD.intPaymentDetailId IN (SELECT intId FROM @PaymentDetailId)
 			GROUP BY intEntityCustomerId
-) PAYMENT ON CUSTOMER.intEntityCustomerId = PAYMENT.intEntityCustomerId
+) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
 SELECT
 	@InvoiceIds = COALESCE(@InvoiceIds + ',' ,'') + CAST(ARI.[intInvoiceId] AS NVARCHAR(250))

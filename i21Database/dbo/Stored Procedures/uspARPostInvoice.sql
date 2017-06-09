@@ -4875,7 +4875,7 @@ IF @recap = 0
 						FROM dbo.tblARInvoice WITH (NOLOCK)
 						WHERE intInvoiceId IN (SELECT intInvoiceId FROM @InvoiceToUpdate)
 						GROUP BY intEntityCustomerId
-			) INVOICE ON CUSTOMER.intEntityCustomerId = INVOICE.intEntityCustomerId
+			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 
 		DELETE dbo.tblARPrepaidAndCredit  
 		FROM 

@@ -2801,7 +2801,7 @@ IF @raiseError = 0
 							) P ON PD.intPaymentId = P.intPaymentId
 						WHERE PD.intPaymentId IN (SELECT intPaymentId FROM @tblPaymentsToUpdateBudget)
 						GROUP BY intEntityCustomerId
-			) PAYMENT ON CUSTOMER.intEntityCustomerId = PAYMENT.intEntityCustomerId
+			) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
 			--Update Customer's Budget 
 			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
