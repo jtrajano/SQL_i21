@@ -5261,6 +5261,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryCountDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetails.sql" />
+    <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
