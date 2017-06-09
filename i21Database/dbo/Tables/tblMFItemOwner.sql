@@ -9,6 +9,15 @@
 	,strManufacturerCode nvarchar(50)COLLATE Latin1_General_CI_AS NULL
 	,ysnAllowPartialPallet bit CONSTRAINT [DF_tblMFItemOwner_ysnAllowPartialPallet] Default 1
 	,strReportName nvarchar(50)COLLATE Latin1_General_CI_AS NULL
+	,strGS1SpecialCode nvarchar(10)COLLATE Latin1_General_CI_AS NULL
+	,strFirstBarcodeStart nvarchar(10)COLLATE Latin1_General_CI_AS NULL
+	,strFirstBarcodeFollowGTIN nvarchar(10)COLLATE Latin1_General_CI_AS NULL
+	,strFirstBarcodeEnd nvarchar(10)COLLATE Latin1_General_CI_AS NULL
+	,strSecondBarcodeStart nvarchar(10)COLLATE Latin1_General_CI_AS NULL
+	,strSecondBarcodeFollowGrossWeight nvarchar(10)COLLATE Latin1_General_CI_AS NULL
+	,strSecondBarcodeEnd nvarchar(10)COLLATE Latin1_General_CI_AS NULL
+	,strThirdBarcodeStart nvarchar(10)COLLATE Latin1_General_CI_AS NULL
+
 	,intCreatedUserId [int] NULL
 	,dtmCreated [datetime] NULL CONSTRAINT [DF_tblMFItemOwner_dtmCreated] DEFAULT GetDate()
 	,intLastModifiedUserId [int] NULL

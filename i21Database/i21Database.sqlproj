@@ -5264,6 +5264,7 @@
     <Build Include="dbo\Tables\tblSMReportLabelDetail.sql" />
     <Build Include="dbo\Tables\tblSMReportLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspSMConsolidateMenu.sql" />
+    <Build Include="dbo\Functions\fnMFConvertNumberToString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
