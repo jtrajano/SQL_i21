@@ -219,6 +219,24 @@ BEGIN
 		SET @Condition = ''
 		SET @Fieldname = ''
 
+
+		DECLARE @ysnReprintInvoice NVARCHAR(MAX)
+		SELECT TOP 1
+			 @ysnReprintInvoice = [from]
+		FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
+
+		DECLARE @InvoiceDate NVARCHAR(MAX)
+		SELECT TOP 1
+			 @InvoiceDate = [from]
+		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
+
+
+		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
+		BEGIN
+			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strInvoiceReportNumber IS NOT NULL AND strInvoiceReportNumber != '''' )'
+		END
+
+
 		DECLARE @SQL NVARCHAR(MAX)
 
 		-----------------------------------

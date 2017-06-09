@@ -177,6 +177,24 @@ BEGIN
 		SET @Condition = ''
 		SET @Fieldname = ''
 
+
+		DECLARE @ysnReprintInvoice NVARCHAR(MAX)
+		SELECT TOP 1
+			 @ysnReprintInvoice = [from]
+		FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
+
+		DECLARE @InvoiceDate NVARCHAR(MAX)
+		SELECT TOP 1
+			 @InvoiceDate = [from]
+		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
+
+
+		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
+		BEGIN
+			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strUpdateInvoiceReportNumber IS NOT NULL AND strUpdateInvoiceReportNumber != '''' )'
+		END
+
+
 		EXEC('
 		INSERT INTO tblCFInvoiceSummaryTempTable
 		(

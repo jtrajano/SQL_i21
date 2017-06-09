@@ -1,6 +1,11 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿
+
+
+
+CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 SELECT   ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, arInv.intTransactionId, arInv.strCustomerNumber, cfTrans.dtmTransactionDate, 
+						DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate,
                          cfTrans.intOdometer, ISNULL
                              ((SELECT   TOP (1) intOdometer
                                  FROM         dbo.tblCFTransaction
