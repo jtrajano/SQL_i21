@@ -28,12 +28,19 @@ FROM (
 					FROM tblLGLoadDetail LOADDetail
 					WHERE LOADDetail.intPContractDetailId = CD.intContractDetailId
 					), 0) AS dblRemainingQty
+			,CL.strLocationName 
+			,IC.strContractItemNo
+			,IC.strContractItemName
+			,PT.strDescription AS strProductType
 			,'Contracts w/o shipping instruction' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE CD.dblQuantity - (
@@ -76,6 +83,10 @@ FROM (
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,dblRemainingQty = NULL
+			,CL.strLocationName 
+			,IC.strContractItemNo
+			,IC.strContractItemName
+			,PT.strDescription AS strProductType
 			,'Contracts w/o shipping advice' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -85,6 +96,9 @@ FROM (
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId NOT IN (
@@ -120,6 +134,10 @@ FROM (
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), GETDATE(), 101), CONVERT(NVARCHAR(100), L.dtmETAPOD, 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,dblRemainingQty = NULL
+			,CL.strLocationName 
+			,IC.strContractItemNo
+			,IC.strContractItemName
+			,PT.strDescription AS strProductType
 			,'Contracts w/o document' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -129,6 +147,9 @@ FROM (
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId NOT IN (
@@ -162,6 +183,10 @@ FROM (
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETAPOD, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,dblRemainingQty = NULL
+			,CL.strLocationName 
+			,IC.strContractItemNo
+			,IC.strContractItemName
+			,PT.strDescription AS strProductType
 			,'Contracts w/o weight claim' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -171,6 +196,9 @@ FROM (
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId NOT IN (
@@ -205,6 +233,10 @@ FROM (
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), WC.dtmActualWeighingDate, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,dblRemainingQty = NULL
+			,CL.strLocationName 
+			,IC.strContractItemNo
+			,IC.strContractItemName
+			,PT.strDescription AS strProductType
 			,'Weight claims w/o debit note' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -216,6 +248,9 @@ FROM (
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE ISNULL(WCD.intBillId, 0) = 0
@@ -246,6 +281,10 @@ FROM (
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,dblRemainingQty = NULL
+			,CL.strLocationName 
+			,IC.strContractItemNo
+			,IC.strContractItemName
+			,PT.strDescription AS strProductType
 			,'Contracts w/o 4C' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -255,6 +294,9 @@ FROM (
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 1)
@@ -285,6 +327,10 @@ FROM (
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,dblRemainingQty = NULL
+			,CL.strLocationName 
+			,IC.strContractItemNo
+			,IC.strContractItemName
+			,PT.strDescription AS strProductType
 			,'Contracts w/o TC' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -294,6 +340,9 @@ FROM (
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 0)
