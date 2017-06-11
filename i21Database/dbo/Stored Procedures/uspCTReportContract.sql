@@ -158,22 +158,30 @@ BEGIN TRY
 		SET @ysnFairtrade = 1
 	END
 
-	SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@intContractDetailId = intContractDetailId,@dtmApproved = dtmApproved 
-    FROM   tblCTApprovedContract 
-    WHERE  intContractHeaderId = @intContractHeaderId AND strApprovalType IN ('Contract Amendment ') AND ysnApproved = 1
-    ORDER BY intApprovedContractId DESC
+	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
-    FROM   tblCTApprovedContract 
-    WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId < @intLastApprovedContractId AND ysnApproved = 1
-    ORDER BY intApprovedContractId DESC
-
-	IF @intPrevApprovedContractId IS NOT NULL AND @intLastApprovedContractId IS NOT NULL
+	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
-		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved,
-		intContractBasisId,dtmPlannedAvailabilityDate,strOrigin,dblNetWeight,intNetWeightUOMId,
-		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID,ysnApproved,intCertificationId,intLoadingPortId', @strAmendedColumns OUTPUT
-	END
+		SELECT @intPrevApprovedContractId = NULL, @intLastApprovedContractId = NULL
+		SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@dtmApproved = dtmApproved 
+		FROM   tblCTApprovedContract 
+		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Contract Amendment ') AND ysnApproved = 1
+		ORDER BY intApprovedContractId DESC
+
+		SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
+		FROM   tblCTApprovedContract 
+		WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId < @intLastApprovedContractId AND ysnApproved = 1
+		ORDER BY intApprovedContractId DESC
+
+		IF @intPrevApprovedContractId IS NOT NULL AND @intLastApprovedContractId IS NOT NULL
+		BEGIN
+			EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved,
+			intContractBasisId,dtmPlannedAvailabilityDate,strOrigin,dblNetWeight,intNetWeightUOMId,
+			intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID,ysnApproved,intCertificationId,intLoadingPortId', @strAmendedColumns OUTPUT
+		END
+		 
+		 SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
+	 END
 
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
 	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
