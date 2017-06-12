@@ -17,15 +17,18 @@ DECLARE @tblACHPayments TABLE (
 		  , intAccountId		INT
 		  , intEntityCustomerId	INT
 		  , dblAmountPaid		NUMERIC(18, 6)
+		  , dtmDatePaid			DATETIME
 		)
 
-DECLARE @strTransactionId NVARCHAR(100)
-	  , @STARTING_NUMBER_BANK_DEPOSIT AS NVARCHAR(100) = 'Bank Deposit'
-	  , @BankTransaction BankTransactionTable
-	  , @BankTransactionDetail BankTransactionDetailTable
-	  , @ysnSuccess	BIT
-	  , @intEntityId INT
-	  , @intMessageId INT
+DECLARE @strTransactionId					NVARCHAR(100)
+	  , @STARTING_NUMBER_BANK_DEPOSIT AS	NVARCHAR(100) = 'Bank Deposit'
+	  , @BankTransaction					BankTransactionTable
+	  , @BankTransactionDetail				BankTransactionDetailTable
+	  , @ysnSuccess							BIT
+	  , @intEntityId						INT
+	  , @intMessageId						INT
+	  , @intNewTransactionId				INT = NULL
+	  , @strErrorMsg						NVARCHAR(MAX) = ''
 
 IF ISNULL(@strPaymentIds, '') != ''
 	BEGIN
@@ -35,6 +38,7 @@ IF ISNULL(@strPaymentIds, '') != ''
 			 , intAccountId
 			 , intEntityCustomerId
 			 , dblAmountPaid
+			 , dtmDatePaid
 		FROM dbo.tblARPayment P WITH (NOLOCK)
 			INNER JOIN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strPaymentIds) 
 						WHERE ISNULL(intID, 0) <> 0
@@ -69,6 +73,14 @@ IF ISNULL(@intUserId, 0) = 0
 		RAISERROR('User is required when processing ACH Payments.', 16, 1)
 		RETURN;
 	END
+
+IF EXISTS(SELECT NULL FROM @tblACHPayments WHERE dtmDatePaid > GETDATE())
+	BEGIN
+		RAISERROR('Unable to process, ACH Payment record/s should be less than or equal to date today.', 16, 1)
+		RETURN;
+	END
+
+BEGIN TRANSACTION
 
 EXEC dbo.uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId, @intUserId
 
@@ -141,7 +153,53 @@ FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 
 SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
 
-EXEC dbo.uspCMCreateBankTransactionEntries @BankTransactionEntries = @BankTransaction, @BankTransactionDetailEntries = @BankTransactionDetail
-EXEC dbo.uspCMPostBankDeposit 1, 0, @strTransactionId, NULL, @intUserId, @intEntityId, @ysnSuccess OUT, @intMessageId OUT
+BEGIN TRY
+	EXEC dbo.uspCMCreateBankTransactionEntries @BankTransactionEntries			= @BankTransaction
+											 , @BankTransactionDetailEntries	= @BankTransactionDetail
+											 , @intTransactionId				= @intNewTransactionId OUT
+	IF ISNULL(@intNewTransactionId, 0) > 0
+		COMMIT TRANSACTION
+	ELSE
+		BEGIN
+			ROLLBACK TRANSACTION
+			RAISERROR('Failed to Create Bank Transaction Entry', 11, 1)
+			RETURN;
+		END
+END TRY
+BEGIN CATCH
+	SELECT @strErrorMsg = ERROR_MESSAGE()
+	ROLLBACK TRANSACTION
+	RAISERROR(@strErrorMsg, 11, 1)
+	RETURN;
+END CATCH
 
-SET @strNewTransactionId = @strTransactionId
+BEGIN TRANSACTION
+
+BEGIN TRY
+	EXEC dbo.uspCMPostBankDeposit @ysnPost			= 1
+								, @ysnRecap			= 0
+								, @strTransactionId = @strTransactionId
+								, @strBatchId		= NULL
+								, @intUserId		= @intUserId
+								, @intEntityId		= @intEntityId
+								, @isSuccessful		= @ysnSuccess OUT
+								, @message_id		= @intMessageId OUT
+
+	IF ISNULL(@ysnSuccess, 0) = 1
+		BEGIN
+			COMMIT TRANSACTION
+			SET @strNewTransactionId = @strTransactionId
+		END
+	ELSE
+		BEGIN
+			SELECT @strErrorMsg = ERROR_MESSAGE()
+			ROLLBACK TRANSACTION
+			RAISERROR(@strErrorMsg, 11, 1)
+		END
+END TRY
+BEGIN CATCH
+	SELECT @strErrorMsg = ERROR_MESSAGE()
+	ROLLBACK TRANSACTION
+	RAISERROR(@strErrorMsg, 11, 1)
+	RETURN;
+END CATCH
