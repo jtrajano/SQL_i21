@@ -16,7 +16,7 @@ BEGIN
 	SELECT @totalCharges = ISNULL((SUM((CASE WHEN ysnPrice > 0 THEN dblUnitCost * -1 ELSE dblUnitCost END)) + ISNULL(SUM((CASE WHEN ysnPrice > 0 THEN dblTax * -1 ELSE dblTax END)),0.00)),0.00)
 	FROM vyuICChargesForBilling WHERE intInventoryReceiptId = @receiptId
 	
-	SELECT @totalLineItem =   SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0)
+	SELECT @totalLineItem =   ISNULL(SUM(A.dblLineTotal),0) + ISNULL(SUM(dblTax),0)
 	FROM dbo.tblICInventoryReceiptItem A 
 	WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
 	

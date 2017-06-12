@@ -119,10 +119,10 @@ SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompany
 
 SELECT TOP 1 @receiptId = intInventoryReceiptId 
 FROM #tmpReceiptIds
---This will validate the negative transaction from Scale
+--This will validate only the negative transaction from Scale
 SELECT @totalReceiptAmount = dbo.[fnAPGetReceiptTotal] (@receiptId)
 
-IF (@totalReceiptAmount <= 0)
+IF (@totalReceiptAmount < 0)
 BEGIN
 	DECLARE @type NVARCHAR(50);
 	SET @type =  (SELECT TOP 1 intSourceType FROM #tmpReceiptData WHERE intInventoryReceiptId IN (@receiptIds)) 
