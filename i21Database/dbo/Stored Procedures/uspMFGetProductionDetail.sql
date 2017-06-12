@@ -26,7 +26,8 @@ BEGIN
 				THEN U.strUnitMeasure
 			ELSE U1.strUnitMeasure
 			END AS strUnitMeasure
-		,W.dtmProductionDate As dtmCreated
+		,W.dtmProductionDate
+		,W.dtmCreated
 		,W.intCreatedUserId
 		,US.strUserName
 		,W.intWorkOrderId
