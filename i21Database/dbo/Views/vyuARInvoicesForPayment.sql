@@ -135,6 +135,7 @@ FROM
 				ON ARI.[intInvoiceId] = CFT.[intInvoiceId]				
 		WHERE
 			[ysnPosted] = 1
+			AND ((ARI.strType = 'Service Charge' AND ARI.ysnForgiven = 0) OR ((ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 1) OR (ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 0)))
 	
 	
 		UNION ALL
