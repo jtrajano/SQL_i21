@@ -372,6 +372,9 @@ BEGIN
 
 			INSERT INTO  @tblCFFilterIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
+
+			UPDATE tblCFTransaction SET strTempInvoiceReportNumber = strInvoiceReportNumber where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+
 			---------GET DISTINCT TRANSACTION ID---------
 		END
 
