@@ -18,6 +18,9 @@ BEGIN
 	DECLARE @intPayGroupId INT
 	DECLARE @dblOverrideHours NUMERIC(18, 6) = 0
 	DECLARE @ysnStandardHours BIT = 1
+	DECLARE @dtmDateFrom DATETIME
+	DECLARE @dtmDateTo DATETIME
+	DECLARE @intPayGroupDetailId INT
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpPayGroups)
 	BEGIN
@@ -25,9 +28,10 @@ BEGIN
 		
 		SELECT TOP 1 
 			@ysnStandardHours = ysnStandardHours,
-			@dblOverrideHours = dblHolidayHours
+			@dblOverrideHours = dblHolidayHours,
+			@dtmDateFrom = dtmBeginDate,
+			@dtmDateTo = dtmEndDate
 		FROM tblPRPayGroup 
-		
 		WHERE intPayGroupId = @intPayGroupId
 
 		INSERT INTO tblPRPayGroupDetail(
@@ -70,14 +74,16 @@ BEGIN
 						ELSE
 							dblRateAmount
 						END, 2)
-			,NULL
-			,NULL
+			,@dtmDateFrom
+			,@dtmDateTo
 			,intSort
 			,1
 		FROM tblPREmployeeEarning
 		WHERE intPayGroupId = @intPayGroupId
 			AND (ysnDefault = 1 OR dblDefaultHours > 0)
-			AND intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail WHERE intPayGroupId = @intPayGroupId)
+			AND intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail 
+												WHERE intPayGroupId = @intPayGroupId
+												AND dtmDateFrom <= ISNULL(@dtmDateFrom, dtmDateFrom) AND dtmDateTo >= ISNULL(@dtmDateTo, dtmDateTo))
 
 		DELETE FROM #tmpPayGroups WHERE intPayGroupId = @intPayGroupId
 	END
