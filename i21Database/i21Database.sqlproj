@@ -5269,6 +5269,7 @@
     <Build Include="dbo\Stored Procedures\uspPATUpdatePatronageEntities.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdatePatronageItem.sql" />
     <Build Include="dbo\Views\vyuPATEntityPatron.sql" />
+    <Build Include="dbo\Tables\tblSCCpeReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
