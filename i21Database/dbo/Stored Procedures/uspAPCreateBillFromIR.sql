@@ -102,7 +102,7 @@ SET @totalChargesCount = (SELECT COUNT(*) FROM dbo.#tmpReceiptChargeData
 							WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)
 							AND ISNULL(dblAmountBilled,0) < dblAmount)
 
-SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId);
+SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId);
 
 --Get the company location of the user to get the default ap account else get from preference
 SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @userLocation)
@@ -319,7 +319,7 @@ BEGIN
 	--WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
 	
 	--SET @totalReceiptAmount = @totalLineItem + @totalCharges;
-
+	--validate contract basis, do not allow to create receipt from contract basis
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM #tmpReceiptData A
 		INNER JOIN #tmpReceiptDetailData B ON A.intInventoryReceiptId = B.intInventoryReceiptId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -626,7 +626,7 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 		LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
-		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityVendorId = @vendorId
+		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON D1.intEntityVendorId = @vendorId
 		LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
 		OUTER APPLY (
 			SELECT 
@@ -904,7 +904,8 @@ BEGIN
 						[dblQtyOrdered]				=	A.dblOrderQty,
 						[dblQtyReceived]			=	A.dblQuantityToBill,
 						[dblTax]					=	(CASE WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
-																WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
+															 WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 1 THEN A.dblTax --IN THIS CASE IF IT TE TAX IS NEGATIVE, IT SHOULD RETAIN AS NEGATIVE
+															 WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
 															ELSE ISNULL(A.dblTax,0) END),
 						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
@@ -912,9 +913,9 @@ BEGIN
 						[intTaxGroupId]				=	NULL,
 						[intAccountId]				=	A.intAccountId,
 						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
-						[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
+						[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
-														END,
+														END, --3RD PARTY TOTAL WILL BE POSSTIVE / RECEIPT VENDOR PRICE = Y WILL BE NEGATIVE
 						[dblCost]					=	ABS(A.dblUnitCost),
 						[dblOldCost]				=	NULL,
 						[dblClaimAmount]			=	0,
@@ -1044,20 +1045,22 @@ BEGIN
 		[strCalculationMethod]	=	A.strCalculationMethod, 
 		[dblRate]				=	A.dblRate, 
 		[intAccountId]			=	A.intTaxAccountId, 
-		[dblTax]				=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
-		[dblAdjustedTax]		=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
+		[dblTax]				=	A.dblTax,
+		[dblAdjustedTax]		=	ISNULL(NULLIF(A.dblAdjustedTax,0), A.dblTax),
+		--[dblTax]				=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
+		--[dblAdjustedTax]		=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
 		--[dblTax]				=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
 		--									!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 
-		--									THEN  (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE ABS(A.dblTax) END) 
+		--									THEN  (CASE WHEN B.ysnPrice = 1 THEN A.dblTax * -1 ELSE ABS(A.dblTax) END) 
 		--								  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
 		--								!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 
 		--									THEN A.dblTax * -1
 		--									-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-		--									ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE A.dblTax END) END), 
+		--									ELSE (CASE WHEN B.ysnPrice = 1 THEN A.dblTax * -1 ELSE A.dblTax END) END), 
 		--[dblAdjustedTax]		=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN (CASE WHEN B.ysnPrice = 1  AND A.dblTax > 0  THEN A.dblTax  ELSE ABS(dblAdjustedTax) END) 
 		--								  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN dblAdjustedTax * -1
 		--									-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-		--									ELSE (CASE WHEN B.ysnPrice = 1 AND dblAdjustedTax > 0 THEN dblAdjustedTax * -1  ELSE dblAdjustedTax END) END), 
+		--									ELSE (CASE WHEN B.ysnPrice = 1 THEN dblAdjustedTax * -1  ELSE dblAdjustedTax END) END), 
 		[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	0, 
 		[ysnCheckOffTax]		=	A.ysnCheckoffTax
