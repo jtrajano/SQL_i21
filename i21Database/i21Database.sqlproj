@@ -5287,6 +5287,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryCountDetails.sql" />
     <Build Include="dbo\Functions\fnCalculateReceiptUnitCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSetMenuAvailability.sql" />
+    <Build Include="dbo\Views\vyuMFParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
