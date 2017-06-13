@@ -526,7 +526,11 @@ BEGIN
 		--[dblCredit]						=	(CASE WHEN B.dblOldCost IS NOT NULL THEN (CASE WHEN B.dblOldCost = 0 THEN 0 --AP-2458
 		--																				   ELSE CAST((Taxes.dblTotalTax - SUM(D.dblTax)) AS DECIMAL(18,2)) END) 
 		--										  ELSE 0 END),--COST ADJUSTMENT,  --AP-2792
-		[dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 AND charges.ysnPrice = 1 THEN SUM(D.dblTax * -1) * ISNULL(NULLIF(B.dblRate,0),1)
+		[dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
+													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN SUM(D.dblTax) * -1 
+															WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
+																THEN SUM(D.dblTax)
+													END) * ISNULL(NULLIF(B.dblRate,0),1) 
 											ELSE SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) END,
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -573,6 +577,8 @@ BEGIN
 				ON B.intBillDetailId = D.intBillDetailId
 			LEFT JOIN tblICInventoryReceiptCharge charges
 				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+			LEFT JOIN tblICInventoryReceipt receipts
+				ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 			INNER JOIN tblICItem B2
@@ -613,6 +619,8 @@ BEGIN
 	--,dblTotalTax
 	,charges.intInventoryReceiptChargeId
 	,charges.ysnPrice
+	,receipts.intEntityVendorId
+	,A.intEntityVendorId
 	,F.intItemId
 	,loc.intItemLocationId
 	,B.intInventoryReceiptItemId
@@ -622,7 +630,14 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
-		[dblDebit]						=	(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1),
+		[dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
+													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
+																	THEN (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * -1
+														WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
+															THEN (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax))
+													END) * ISNULL(NULLIF(B.dblRate,0),1) 
+											ELSE (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) END,
+		--[dblDebit]						=	(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -666,6 +681,10 @@ BEGIN
 				ON A.intEntityVendorId = C.intEntityId
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
+			LEFT JOIN tblICInventoryReceiptCharge charges
+				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+			LEFT JOIN tblICInventoryReceipt receipts
+				ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 			INNER JOIN tblICItem B2
@@ -688,6 +707,10 @@ BEGIN
 	,A.intTransactionType
 	,A.strBillId
 	,A.intBillId
+	,charges.intInventoryReceiptChargeId
+	,charges.ysnPrice
+	,receipts.intEntityVendorId
+	,A.intEntityVendorId
 	,B.dblRate
 	,G.strCurrencyExchangeRateType
 	,B.dblOldCost
