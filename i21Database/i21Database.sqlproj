@@ -5389,6 +5389,11 @@
     <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItems.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrualNew.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoiceNew.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoicesIntegrationsNew.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostSOStatusFromInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
