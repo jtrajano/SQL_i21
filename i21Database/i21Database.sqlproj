@@ -5451,4 +5451,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\24_OfflineMenu.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\1720_Statement_Footer_To_Report.sql" />
+  </ItemGroup>
 </Project>
