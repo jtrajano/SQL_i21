@@ -1,15 +1,16 @@
-﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceNew]
+﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceNew] 
      @BatchId			AS NVARCHAR(40)		= NULL
 	,@Post				AS BIT				= 0
 	,@Recap				AS BIT				= 0
 	,@UserId			AS INT				= NULL
 	,@InvoiceIds		AS InvoiceId		READONLY
-	,@IntegrationLogId	AS INT				= NULL
+	,@IntegrationLogId	AS INT
 	,@BeginDate			AS DATE				= NULL
 	,@EndDate			AS DATE				= NULL
 	,@BeginTransaction	AS NVARCHAR(50)		= NULL
 	,@EndTransaction	AS NVARCHAR(50)		= NULL
 	,@Exclude			AS NVARCHAR(MAX)	= NULL
+	,@BatchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
 	,@Success			AS BIT				= 0 OUTPUT
 	,@TransType			AS NVARCHAR(25)		= 'all'
 	,@RaiseError		AS BIT				= 0
@@ -39,6 +40,7 @@ DECLARE @PostInvoiceData TABLE  (
 	,[strTransactionType]	NVARCHAR(25) COLLATE Latin1_General_CI_AS
 	,[intEntityId]			INT
 	,[intPeriodsToAccrue]	INT
+	,[ysnAccrueLicense]		BIT
 	,UNIQUE (intInvoiceId)
 );
 
@@ -74,6 +76,7 @@ SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WITH (NOLOCK) WHERE intEntityUserSecurityId = @UserEntityID)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
+
 SET @Success = 1
 
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
@@ -81,7 +84,6 @@ DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
 SELECT @INVENTORY_SHIPMENT_TYPE = [intTransactionTypeId] FROM dbo.tblICInventoryTransactionType WITH (NOLOCK) WHERE [strName] = @SCREEN_NAME
 
 DECLARE @INVENTORY_INVOICE_TYPE AS INT = 33
-
 SELECT	@INVENTORY_INVOICE_TYPE = intTransactionTypeId 
 FROM	tblICInventoryTransactionType WITH (NOLOCK)
 WHERE	strName = @SCREEN_NAME
@@ -92,54 +94,43 @@ SET @ZeroDecimal = 0.000000
 -- Ensure @Post and @Recap is not NULL  
 SET @Post = ISNULL(@Post, 0)
 SET @Recap = ISNULL(@Recap, 0)
---SET @AccrueLicense = ISNULL(@AccrueLicense, 0)
  
 -- Get Transaction to Post
 IF (@TransType IS NULL OR RTRIM(LTRIM(@TransType)) = '')
 	SET @TransType = 'all'
 
-INSERT INTO @PostInvoiceData 
-SELECT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], ARI.[intPeriodsToAccrue] 
-FROM
-	dbo.tblARInvoice ARI WITH (NOLOCK) 
-WHERE EXISTS(SELECT NULL FROM @InvoiceIds DV WHERE DV.[intHeaderId] = ARI.[intInvoiceId])
-AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
-
 IF @IntegrationLogId IS NOT NULL
 	BEGIN
-		INSERT INTO @PostInvoiceData 
-		SELECT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], [intPeriodsToAccrue] 
-		FROM
-			dbo.tblARInvoice ARI WITH (NOLOCK) 
-		INNER JOIN
-			tblARInvoiceIntegrationLogDetail ARIILD
-				ON ARI.[intInvoiceId] = ARIILD.[intInvoiceId]
-				AND ARIILD.[ysnPost] IS NOT NULL 
-				AND ARIILD.[ysnPost] = 1
-				AND ARIILD.[ysnHeader] = 1
-				AND ARIILD.[intIntegrationLogId] = @IntegrationLogId
-		WHERE
-			NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
-			AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
+        INSERT INTO @PostInvoiceData 
+        SELECT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], ARI.[intPeriodsToAccrue], ARIILD.[ysnAccrueLicense]
+        FROM
+            dbo.tblARInvoice ARI WITH (NOLOCK) 
+        INNER JOIN
+            tblARInvoiceIntegrationLogDetail ARIILD
+                ON ARI.[intInvoiceId] = ARIILD.[intInvoiceId]
+                AND ARIILD.[ysnPost] IS NOT NULL 
+                AND ARIILD.[ysnPost] = 1
+                AND ARIILD.[ysnHeader] = 1
+                AND ARIILD.[intIntegrationLogId] = @IntegrationLogId
+        WHERE
+            NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+            AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
 	END
-
 
 IF(@BeginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
-		SELECT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], ARI.[intPeriodsToAccrue] FROM dbo.tblARInvoice ARI WITH (NOLOCK)
-		WHERE DATEADD(dd, DATEDIFF(dd, 0, ARI.[dtmDate]), 0) BETWEEN @BeginDate AND @EndDate
-		AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
-		AND NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+		SELECT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue], 0 FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @BeginDate AND @EndDate
+		AND (strTransactionType = @TransType OR @TransType = 'all')
 	END
 
 IF(@BeginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
-		SELECT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], ARI.[intPeriodsToAccrue] FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+		SELECT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue], 0 FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE intInvoiceId BETWEEN @BeginTransaction AND @EndTransaction
-		AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
-		AND NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+		AND (strTransactionType = @TransType OR @TransType = 'all')
 	END
 
 --Removed excluded Invoices to post/unpost
@@ -162,7 +153,7 @@ IF(@Exclude IS NOT NULL)
 IF(@BatchId IS NULL)
 	EXEC dbo.uspSMGetStartingNumber 3, @BatchId OUT
 
---SET @BatchIdUsed = @BatchId
+SET @BatchIdUsed = @BatchId
 
 
 --Process Split Invoice
@@ -195,7 +186,7 @@ BEGIN TRY
 					BEGIN
 						INSERT INTO @PostInvoiceData 
 												
-						SELECT ARI.[intInvoiceId], ARI.intCompanyLocationId, ARI.[strInvoiceNumber], ARI.strTransactionType, ARI.[intEntityId], ARI.[intPeriodsToAccrue]
+						SELECT ARI.[intInvoiceId], ARI.intCompanyLocationId, ARI.[strInvoiceNumber], ARI.strTransactionType, ARI.[intEntityId], ARI.[intPeriodsToAccrue], 0
 						FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 						WHERE ARI.[ysnPosted] = 0 
 							AND intInvoiceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd))
@@ -228,6 +219,19 @@ BEGIN CATCH
 			ROLLBACK TRANSACTION							
 			BEGIN TRANSACTION						
 			--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
+
+			UPDATE ILD
+			SET
+				ILD.[ysnPosted] = 0
+				,ILD.[strPostingMessage] = @ErrorMerssage
+			FROM
+				tblARInvoiceIntegrationLogDetail ILD
+			INNER JOIN
+				@PostInvoiceData PID
+					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+			WHERE
+				ILD.[intIntegrationLogId] = @IntegrationLogId 
+
 			COMMIT TRANSACTION
 		END						
 	IF @RaiseError = 1
@@ -236,133 +240,6 @@ BEGIN CATCH
 	GOTO Post_Exit
 END CATCH
 
-----Process Finished Good Items
---BEGIN TRY
---	IF @Recap = 0
---		BEGIN
---			DECLARE @FinishedGoodItems TABLE(intInvoiceDetailId		INT
---										   , intItemId				INT
---										   , dblQuantity			NUMERIC(18,6)
---										   , intItemUOMId			INT
---										   , intLocationId			INT
---										   , intSublocationId		INT
---										   , intStorageLocationId	INT)
-
---			INSERT INTO @FinishedGoodItems
---			SELECT ID.intInvoiceDetailId
---				 , ID.intItemId
---				 , ID.dblQtyShipped
---				 , ID.intItemUOMId
---				 , I.intCompanyLocationId
---				 , ICL.intSubLocationId
---				 , ID.intStorageLocationId 
---			FROM tblARInvoice I
---				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
---				INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
---				INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
---			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
---			AND ID.ysnBlended <> @Post
---			AND ICI.ysnAutoBlend = 1
---			AND ICI.strType = 'Finished Good'
-
---			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
---				BEGIN
---					DECLARE @intInvoiceDetailId		INT
---						  , @intItemId				INT
---						  , @dblQuantity			NUMERIC(18,6)
---						  , @dblMaxQuantity			NUMERIC(18,6) = 0
---						  , @intItemUOMId			INT
---						  , @intLocationId			INT
---						  , @intSublocationId		INT
---						  , @intStorageLocationId	INT
-			
---					SELECT TOP 1 
---						  @intInvoiceDetailId	= intInvoiceDetailId
---						, @intItemId			= intItemId
---						, @dblQuantity			= dblQuantity				
---						, @intItemUOMId			= intItemUOMId
---						, @intLocationId		= intLocationId
---						, @intSublocationId		= intSublocationId
---						, @intStorageLocationId	= intStorageLocationId
---					FROM @FinishedGoodItems 
-				  
---					BEGIN TRY
---					IF @Post = 1
---						BEGIN
---							EXEC dbo.uspMFAutoBlend
---								@intSalesOrderDetailId	= NULL,
---								@intInvoiceDetailId		= @intInvoiceDetailId,
---								@intItemId				= @intItemId,
---								@dblQtyToProduce		= @dblQuantity,
---								@intItemUOMId			= @intItemUOMId,
---								@intLocationId			= @intLocationId,
---								@intSubLocationId		= @intSublocationId,
---								@intStorageLocationId	= @intStorageLocationId,
---								@intUserId				= @UserId,
---								@dblMaxQtyToProduce		= @dblMaxQuantity OUT		
-
---							IF ISNULL(@dblMaxQuantity, 0) > 0
---								BEGIN
---									EXEC dbo.uspMFAutoBlend
---										@intSalesOrderDetailId	= NULL,
---										@intInvoiceDetailId		= @intInvoiceDetailId,
---										@intItemId				= @intItemId,
---										@dblQtyToProduce		= @dblMaxQuantity,
---										@intItemUOMId			= @intItemUOMId,
---										@intLocationId			= @intLocationId,
---										@intSubLocationId		= @intSublocationId,
---										@intStorageLocationId	= @intStorageLocationId,
---										@intUserId				= @UserId,
---										@dblMaxQtyToProduce		= @dblMaxQuantity OUT
---								END
---						END
---					ELSE
---						BEGIN
---							EXEC dbo.uspMFReverseAutoBlend
---								@intSalesOrderDetailId	= NULL,
---								@intInvoiceDetailId		= @intInvoiceDetailId,
---								@intUserId				= @UserId 
---						END						
---					END TRY
---					BEGIN CATCH
---						SELECT @ErrorMerssage = ERROR_MESSAGE()
---						IF @RaiseError = 0
---							BEGIN
---								IF (XACT_STATE()) = -1
---									ROLLBACK TRANSACTION							
---								BEGIN TRANSACTION						
---								EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
---								COMMIT TRANSACTION
---							END						
---						IF @RaiseError = 1
---							RAISERROR(@ErrorMerssage, 11, 1)
-		
---						GOTO Post_Exit
---					END CATCH
---					UPDATE tblARInvoiceDetail SET ysnBlended = @Post WHERE intInvoiceDetailId = @intInvoiceDetailId
-
---					DELETE FROM @FinishedGoodItems WHERE intInvoiceDetailId = @intInvoiceDetailId
---				END	
---		END	
---END TRY
---BEGIN CATCH
---	SELECT @ErrorMerssage = ERROR_MESSAGE()
---	IF @RaiseError = 0
---		BEGIN
---			IF (XACT_STATE()) = -1
---				ROLLBACK TRANSACTION							
---			BEGIN TRANSACTION						
---			EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
---			COMMIT TRANSACTION
---		END						
---	IF @RaiseError = 1
---		RAISERROR(@ErrorMerssage, 11, 1)
-		
---	GOTO Post_Exit
---END CATCH
-
-
---Process Grain Bank Items
 BEGIN TRY
 	IF @Recap = 0
 		BEGIN
@@ -455,6 +332,18 @@ BEGIN TRY
 									ROLLBACK TRANSACTION							
 								BEGIN TRANSACTION						
 								--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
+								UPDATE ILD
+								SET
+									ILD.[ysnPosted] = 0
+									,ILD.[strPostingMessage] = @ErrorMerssage
+								FROM
+									tblARInvoiceIntegrationLogDetail ILD
+								INNER JOIN
+									@PostInvoiceData PID
+										ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+								WHERE
+									ILD.[intIntegrationLogId] = @IntegrationLogId 
+
 								COMMIT TRANSACTION
 							END						
 						IF @RaiseError = 1
@@ -475,6 +364,18 @@ BEGIN CATCH
 				ROLLBACK TRANSACTION							
 			BEGIN TRANSACTION						
 			--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
+			UPDATE ILD
+			SET
+				ILD.[ysnPosted] = 0
+				,ILD.[strPostingMessage] = @ErrorMerssage
+			FROM
+				tblARInvoiceIntegrationLogDetail ILD
+			INNER JOIN
+				@PostInvoiceData PID
+					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+			WHERE
+				ILD.[intIntegrationLogId] = @IntegrationLogId 
+
 			COMMIT TRANSACTION
 		END						
 	IF @RaiseError = 1
@@ -1003,6 +904,84 @@ END CATCH
 					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
 					AND D.dtmMaintenanceDate IS NULL
+
+
+				--Software - License Amount
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The License Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@BatchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblLicenseAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License Only')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ISNULL(D.dblLicenseAmount, @ZeroDecimal) <> ISNULL(D.dblPrice, @ZeroDecimal)
+
+				--Software - Maintenance Amount				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@BatchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblMaintenanceAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('Maintenance Only', 'SaaS')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ISNULL(D.dblMaintenanceAmount, @ZeroDecimal) <> ISNULL(D.dblPrice, @ZeroDecimal)
+
+
+				--Software - Maintenance Amount + License				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Amount + License Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@BatchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblMaintenanceAmount, dblLicenseAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ((ISNULL(D.dblMaintenanceAmount, @ZeroDecimal) + ISNULL(D.dblLicenseAmount, @ZeroDecimal)) <> ISNULL(D.dblPrice, @ZeroDecimal))
+
 					
 				--Software - Maintenance Sales				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1639,6 +1618,17 @@ END CATCH
 							--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 							--SELECT @ErrorMerssage, @TransType, @param, @BatchId, 0							
 							--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param							
+							UPDATE ILD
+								SET
+									ILD.[ysnPosted] = 0
+									,ILD.[strPostingMessage] = @ErrorMerssage
+								FROM
+									tblARInvoiceIntegrationLogDetail ILD
+								INNER JOIN
+									@PostInvoiceData PID
+										ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+								WHERE
+									ILD.[intIntegrationLogId] = @IntegrationLogId 
 							COMMIT TRANSACTION
 							--COMMIT TRAN @TransactionName
 						END						
@@ -1663,7 +1653,7 @@ END CATCH
 					@BatchId,
 					C.intInvoiceId
 				FROM
-					(SELECT intPaymentId, strRecordNumber FROM tblARPayment WITH (NOLOCK) WHERE ysnPosted = 1) A
+					(SELECT intPaymentId, strRecordNumber FROM tblARPayment WITH (NOLOCK)) A
 				INNER JOIN 
 					(SELECT intPaymentId, intInvoiceId FROM tblARPaymentDetail WITH (NOLOCK)) B 
 						ON A.intPaymentId = B.intPaymentId						
@@ -1822,8 +1812,6 @@ END CATCH
 				FROM
 					@InvalidInvoiceData
 
-				--SET @InvalidCount = @totalInvalid
-
 				--DELETE Invalid Transaction From temp table
 				DELETE @PostInvoiceData
 					FROM @PostInvoiceData A
@@ -1961,6 +1949,17 @@ BEGIN TRY
 									ROLLBACK TRANSACTION							
 								BEGIN TRANSACTION						
 								--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
+								UPDATE ILD
+								SET
+									ILD.[ysnPosted] = 0
+									,ILD.[strPostingMessage] = @ErrorMerssage
+								FROM
+									tblARInvoiceIntegrationLogDetail ILD
+								INNER JOIN
+									@PostInvoiceData PID
+										ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+								WHERE
+									ILD.[intIntegrationLogId] = @IntegrationLogId
 								COMMIT TRANSACTION
 							END						
 						IF @RaiseError = 1
@@ -1984,6 +1983,17 @@ BEGIN CATCH
 				ROLLBACK TRANSACTION							
 			BEGIN TRANSACTION						
 			--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
+			UPDATE ILD
+			SET
+				ILD.[ysnPosted] = 0
+				,ILD.[strPostingMessage] = @ErrorMerssage
+			FROM
+				tblARInvoiceIntegrationLogDetail ILD
+			INNER JOIN
+				@PostInvoiceData PID
+					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+			WHERE
+				ILD.[intIntegrationLogId] = @IntegrationLogId
 			COMMIT TRANSACTION
 		END						
 	IF @RaiseError = 1
@@ -2018,9 +2028,9 @@ IF @Post = 1
 		
 		-- Accruals
 		BEGIN TRY 
-			DECLARE @Accruals AS Id
-			INSERT INTO @Accruals(intId)
-			SELECT IP.intInvoiceId 
+			DECLARE @Accruals AS InvoiceId
+			INSERT INTO @Accruals([intHeaderId], [ysnAccrueLicense])
+			SELECT IP.intInvoiceId, IP.ysnAccrueLicense  
 			FROM 
 				@PostInvoiceData IP 
 			WHERE ISNULL(IP.intPeriodsToAccrue,0) > 1
@@ -2059,7 +2069,7 @@ IF @Post = 1
 				,[dblForeignRate]
 				,[strRateType]
 			)
-			EXEC	dbo.uspARGenerateEntriesForAccrual  
+			EXEC	dbo.[uspARGenerateEntriesForAccrualNew]  
 						 @Invoices					= @Accruals
 						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
 						,@BatchId					= @BatchId
@@ -2068,7 +2078,6 @@ IF @Post = 1
 						,@UserEntityId				= @UserEntityID
 						,@ScreenName				= @SCREEN_NAME
 						,@ModuleName				= @MODULE_NAME
-						,@AccrueLicense				= 0 --@AccrueLicense
 
 		END TRY
 		BEGIN CATCH
@@ -2463,6 +2472,7 @@ IF @Post = 1
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
 				AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND (B.dblTotal <> 0 OR B.dblQtyShipped <> 0)
 
 			--CREDIT Software -- License
 			UNION ALL 
@@ -2473,13 +2483,11 @@ IF @Post = 1
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblBaseLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2487,13 +2495,11 @@ IF @Post = 1
 											  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2523,13 +2529,11 @@ IF @Post = 1
 				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2538,13 +2542,11 @@ IF @Post = 1
 				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2552,13 +2554,11 @@ IF @Post = 1
 											  END
 				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2567,13 +2567,11 @@ IF @Post = 1
 											  ELSE 0  END
 				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2595,7 +2593,7 @@ IF @Post = 1
 			LEFT JOIN 
 				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 
+				(SELECT intInvoiceId, ysnAccrueLicense FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 
 			LEFT OUTER JOIN 
 				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON B.intItemId = ICIS.intItemId  AND A.intCompanyLocationId = ICIS.intLocationId
 			LEFT OUTER JOIN
@@ -2612,8 +2610,7 @@ IF @Post = 1
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
 				AND ISNULL(I.strType,'') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
-				--AND (ISNULL(A.intPeriodsToAccrue,0) <= 1 OR ( ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(@AccrueLicense,0) = 0))
-				AND (ISNULL(A.intPeriodsToAccrue,0) <= 1 OR ( ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(0,0) = 0))
+				AND (ISNULL(A.intPeriodsToAccrue,0) <= 1 OR ( ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(P.ysnAccrueLicense,0) = 0))
 
 			--DEBIT Software -- License
 			UNION ALL 
@@ -2623,13 +2620,11 @@ IF @Post = 1
 				,intAccountId				= @DeferredRevenueAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblBaseLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2638,13 +2633,11 @@ IF @Post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblBaseLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2672,13 +2665,11 @@ IF @Post = 1
 				,intConcurrencyId			= 1
 				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2686,13 +2677,11 @@ IF @Post = 1
 											  ELSE 0  END
 				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2701,13 +2690,11 @@ IF @Post = 1
 				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2716,13 +2703,11 @@ IF @Post = 1
 				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													--ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															--[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @AccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND 0 = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND P.ysnAccrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2744,7 +2729,7 @@ IF @Post = 1
 			LEFT JOIN 
 				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
+				(SELECT intInvoiceId, ysnAccrueLicense FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
 				(SELECT intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) IST ON B.intItemId = IST.intItemId AND A.intCompanyLocationId = IST.intLocationId
 			LEFT OUTER JOIN 
@@ -2763,8 +2748,7 @@ IF @Post = 1
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
 				AND ISNULL(I.strType,'') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
-				--AND (ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(@AccrueLicense,0) = 0)
-				AND (ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(0,0) = 0)
+				AND (ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(P.ysnAccrueLicense,0) = 0)
 
 			--CREDIT Software -- Maintenance
 			UNION ALL 
@@ -4446,6 +4430,17 @@ IF @Recap = 1
 				BEGIN
 					BEGIN TRANSACTION
 					--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param		
+					UPDATE ILD
+					SET
+						ILD.[ysnPosted] = 0
+						,ILD.[strPostingMessage] = @ErrorMerssage
+					FROM
+						tblARInvoiceIntegrationLogDetail ILD
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+					WHERE
+						ILD.[intIntegrationLogId] = @IntegrationLogId
 					COMMIT TRANSACTION
 				END			
 			IF @RaiseError = 1
@@ -4680,23 +4675,35 @@ IF @Recap = 0
 		END CATCH
 			
 		BEGIN TRY			
-			DECLARE @InvoiceToUpdate TABLE (intInvoiceId INT);
+			DECLARE @InvoiceToUpdate AS InvoiceId;
 			
-			INSERT INTO @InvoiceToUpdate(intInvoiceId)
-			SELECT DISTINCT intInvoiceId FROM @PostInvoiceData
+			INSERT INTO @InvoiceToUpdate([intHeaderId], [ysnPost])
+			SELECT DISTINCT intInvoiceId, @Post FROM @PostInvoiceData
 				
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceToUpdate ORDER BY intInvoiceId)
-				BEGIN
+			--WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceToUpdate ORDER BY intInvoiceId)
+			--	BEGIN
 				
-					DECLARE @intInvoiceIntegractionId INT;
+			--		DECLARE @intInvoiceIntegractionId INT;
 					
-					SELECT TOP 1 @intInvoiceIntegractionId = intInvoiceId FROM @InvoiceToUpdate ORDER BY intInvoiceId
+			--		SELECT TOP 1 @intInvoiceIntegractionId = intInvoiceId FROM @InvoiceToUpdate ORDER BY intInvoiceId
 
-						EXEC dbo.uspARPostInvoiceIntegrations @Post, @intInvoiceIntegractionId, @UserId
+			--		EXEC dbo.uspARPostInvoiceIntegrations @Post, @intInvoiceIntegractionId, @UserId
 								
-					DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 
+			--		DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 
 												
-				END
+			--	END
+			EXEC [uspARPostInvoicesIntegrationsNew] @InvoiceIds = @InvoiceToUpdate, @UserId = @UserId 
+
+			--UPDATE tblARCustomer.dblARBalance
+			UPDATE CUSTOMER
+			SET dblARBalance = dblARBalance + (CASE WHEN @Post = 1 THEN ISNULL(dblTotalInvoice, 0) ELSE ISNULL(dblTotalInvoice, 0) * -1 END)
+			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+			INNER JOIN (SELECT intEntityCustomerId
+							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice, Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
+						FROM dbo.tblARInvoice WITH (NOLOCK)
+						WHERE intInvoiceId IN (SELECT [intHeaderId] FROM @InvoiceToUpdate)
+						GROUP BY intEntityCustomerId
+			) INVOICE ON CUSTOMER.intEntityCustomerId = INVOICE.intEntityCustomerId
 
 		DELETE dbo.tblARPrepaidAndCredit  
 		FROM 
@@ -4712,8 +4719,6 @@ IF @Recap = 0
 			
 	END
 	
---SET @SuccessfulCount = @totalRecords
---SET @InvalidCount = @totalInvalid	
 IF @RaiseError = 0
 	COMMIT TRANSACTION
 RETURN 1;
@@ -4801,6 +4806,17 @@ Do_Rollback:
 										
 			BEGIN TRANSACTION
 			--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param								
+			UPDATE ILD
+			SET
+				ILD.[ysnPosted] = 0
+				,ILD.[strPostingMessage] = @ErrorMerssage
+			FROM
+				tblARInvoiceIntegrationLogDetail ILD
+			INNER JOIN
+				@PostInvoiceData PID
+					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+			WHERE
+				ILD.[intIntegrationLogId] = @IntegrationLogId
 			COMMIT TRANSACTION			
 		END
 	IF @RaiseError = 1

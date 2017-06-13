@@ -16,7 +16,7 @@ BEGIN
 	
 	DECLARE @IdsForUpdate TABLE (intInvoiceId INT);
 	INSERT INTO @IdsForUpdate
-	SELECT [intHeaderId] FROM @InvoiceIds WHERE NOT (ISNULL([ysnFromPosting], 0 ) = 1 AND ISNULL([ysnPost], 0 ) = 0)
+	SELECT II.[intHeaderId] FROM @InvoiceIds II INNER JOIN (SELECT intInvoiceId, intTransactionId FROM tblARInvoice) ARI ON II.[intHeaderId] = ARI.[intInvoiceId] WHERE NOT (ISNULL(II.[ysnFromPosting], 0 ) = 1 AND ISNULL(II.[ysnPost], 0 ) = 0) AND ARI.[intTransactionId] IS NULL
 		
 	--AR-4146 TODO -- FOR IC - provide a version of [uspICCreateStockReservation] that can handle multiple transactions
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsForUpdate ORDER BY intInvoiceId)

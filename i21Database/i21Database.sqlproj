@@ -5264,6 +5264,10 @@
     <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
     <Build Include="dbo\Functions\fnMFConvertNumberToString.sql" />
     <Build Include="dbo\Functions\fnCalculateReceiptUnitCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrualNew.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoicesIntegrationsNew.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostSOStatusFromInvoices.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

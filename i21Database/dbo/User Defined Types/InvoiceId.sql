@@ -8,4 +8,5 @@
 	,[ysnPost]							BIT	NULL
 	,[ysnAccrueLicense]					BIT	NULL
 	,[strTransactionType]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnProcessed]						BIT	NULL
 )
