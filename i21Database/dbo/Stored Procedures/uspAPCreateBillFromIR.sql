@@ -904,7 +904,8 @@ BEGIN
 						[dblQtyOrdered]				=	A.dblOrderQty,
 						[dblQtyReceived]			=	A.dblQuantityToBill,
 						[dblTax]					=	(CASE WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
-																WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
+															 WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 1 THEN A.dblTax --IN THIS CASE IF IT TE TAX IS NEGATIVE, IT SHOULD RETAIN AS NEGATIVE
+															 WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
 															ELSE ISNULL(A.dblTax,0) END),
 						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
@@ -1044,20 +1045,22 @@ BEGIN
 		[strCalculationMethod]	=	A.strCalculationMethod, 
 		[dblRate]				=	A.dblRate, 
 		[intAccountId]			=	A.intTaxAccountId, 
+		[dblTax]				=	A.dblTax,
+		[dblAdjustedTax]		=	ISNULL(NULLIF(A.dblAdjustedTax,0), A.dblTax),
 		--[dblTax]				=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
 		--[dblAdjustedTax]		=	CASE WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END,
-		[dblTax]				=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
-											!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 
-											THEN  (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE ABS(A.dblTax) END) 
-										  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
-										!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 
-											THEN A.dblTax * -1
-											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-											ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE A.dblTax END) END), 
-		[dblAdjustedTax]		=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN (CASE WHEN B.ysnPrice = 1  AND A.dblTax > 0  THEN A.dblTax  ELSE ABS(dblAdjustedTax) END) 
-										  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN dblAdjustedTax * -1
-											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-											ELSE (CASE WHEN B.ysnPrice = 1 AND dblAdjustedTax > 0 THEN dblAdjustedTax * -1  ELSE dblAdjustedTax END) END), 
+		--[dblTax]				=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
+		--									!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 
+		--									THEN  (CASE WHEN B.ysnPrice = 1 THEN A.dblTax * -1 ELSE ABS(A.dblTax) END) 
+		--								  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) 
+		--								!= (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 
+		--									THEN A.dblTax * -1
+		--									-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+		--									ELSE (CASE WHEN B.ysnPrice = 1 THEN A.dblTax * -1 ELSE A.dblTax END) END), 
+		--[dblAdjustedTax]		=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN (CASE WHEN B.ysnPrice = 1  AND A.dblTax > 0  THEN A.dblTax  ELSE ABS(dblAdjustedTax) END) 
+		--								  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN dblAdjustedTax * -1
+		--									-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+		--									ELSE (CASE WHEN B.ysnPrice = 1 THEN dblAdjustedTax * -1  ELSE dblAdjustedTax END) END), 
 		[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	0, 
 		[ysnCheckOffTax]		=	A.ysnCheckoffTax
