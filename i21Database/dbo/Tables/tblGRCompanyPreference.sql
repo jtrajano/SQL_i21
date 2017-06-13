@@ -14,6 +14,7 @@
     [strGrainBankinUnitsorPounds] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [ysnCalculateGrainBankonADB] BIT NULL DEFAULT 1, 
     [ysnAllowGrainBankOverdraw] BIT NULL,
+	[ysnCanadianPrimaryElevatorReceipt] BIT NULL DEFAULT 0,
 	[intItemId] INT NULL, 
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
