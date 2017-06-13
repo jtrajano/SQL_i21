@@ -5813,7 +5813,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
             var countCharges = charges.getRange().length;
-            var lineCharge = 0;
 
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
@@ -5885,12 +5884,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 charge.set('intTaxGroupId', taxGroupId);
                                 charge.set('strTaxGroup', taxGroupName);
                             }
+                            
                             charge.set('dblTax', totalItemTax);
-                            lineCharge++;
-
-                            if (lineCharge === countCharges) {
-                                context.data.saveRecord();
-                            }
                         }
 
                          //get EntityIdId and BillShipToLocationId
