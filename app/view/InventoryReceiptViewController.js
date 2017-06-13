@@ -6365,7 +6365,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 iRely.Functions.openScreen('Inventory.view.InventoryReceipt', {
                                     filters: [
                                         {
-                                            column: 'intReceiptId',
+                                            column: 'intInventoryReceiptId',
                                             value: InventoryReturnId
                                         }
                                     ],
