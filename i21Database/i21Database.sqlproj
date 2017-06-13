@@ -5268,6 +5268,7 @@
     <Build Include="dbo\Stored Procedures\uspARPostInvoicesIntegrationsNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostSOStatusFromInvoices.sql" />
+    <Build Include="dbo\Views\vyuMFParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

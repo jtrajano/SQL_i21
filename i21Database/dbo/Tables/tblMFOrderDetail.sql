@@ -14,6 +14,7 @@
 		,[intUnitsPerLayer] INT
 		,[intLayersPerPallet] INT
 		,[intPreferenceId] INT
+		,[intParentLotId] INT
 		,[dtmProductionDate] DATETIME
 		,[intLineNo] INT
 		,[intSanitizationOrderDetailsId] INT
