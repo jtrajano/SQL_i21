@@ -25,7 +25,7 @@ strCustomerName,
 strCustomerNumber, 
 dblCreditLimit, 
 dblTotalDue AS dblTotalAR, 
-dbl10Days + dbl30Days + dbl60Days + dbl90Days + dbl91Days AS dblTotalDue, 
+dbl10Days + dbl30Days + dbl60Days + dbl90Days + dbl91Days + dblUnappliedCredits + dblPrepaids AS dblTotalDue, 
 CASE 
 WHEN ((dblTotalDue) - dblCreditLimit) <= 0 
 THEN 0 
