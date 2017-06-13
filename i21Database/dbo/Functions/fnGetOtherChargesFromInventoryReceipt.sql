@@ -32,15 +32,26 @@ BEGIN
 			AND ItemOtherCharges.ysnInventoryCost = 1
 
 	SELECT	@units = 
-					CASE	WHEN ReceiptItems.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItems.dblNet, 0)
-							ELSE ISNULL(ReceiptItems.dblOpenReceive, 0)
+					CASE	WHEN ri.intWeightUOMId IS NOT NULL THEN ISNULL(AggregrateItemLots.dblTotalNet, 0)
+							ELSE ISNULL(ri.dblOpenReceive, 0)
 					END 
-	FROM	dbo.tblICInventoryReceiptItem ReceiptItems 
-	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
+	FROM	dbo.tblICInventoryReceiptItem ri 
+			OUTER APPLY (
+				SELECT  dblTotalNet = SUM(
+							CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+										ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+									ELSE 
+										ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+							END 
+						)
+				FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+							ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+				WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+			) AggregrateItemLots
+	WHERE	ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
 
-	IF @units <> 0 
+	IF ISNULL(@units, 0) <> 0 
 		RETURN ISNULL(@totalOtherCharges / @units, 0);
 
-	RETURN 0
-	;
+	RETURN 0;
 END

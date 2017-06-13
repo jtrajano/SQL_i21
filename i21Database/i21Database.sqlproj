@@ -5263,6 +5263,7 @@
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetails.sql" />
     <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
     <Build Include="dbo\Functions\fnMFConvertNumberToString.sql" />
+    <Build Include="dbo\Functions\fnCalculateReceiptUnitCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

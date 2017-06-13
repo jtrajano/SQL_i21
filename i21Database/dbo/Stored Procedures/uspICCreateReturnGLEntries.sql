@@ -273,7 +273,7 @@ WITH ForGLEntries_CTE (
 )
 AS 
 (
-	-- regular inventory transaction 
+	-- regular inventory transaction
 	SELECT	t.dtmDate
 			,t.intItemId
 			,t.intItemLocationId
@@ -298,7 +298,8 @@ AS
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-	-- inventory return 
+
+	-- inventory return
 	UNION ALL 
 	SELECT	dtmDate	= r.dtmReceiptDate
 			,t.intItemId
@@ -333,8 +334,6 @@ AS
 			) ty
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
-
-
 	WHERE	rtn.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			AND rtn.intTransactionTypeId = @InventoryTransactionTypeId_InventoryAdjustmentQtyChange
