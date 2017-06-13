@@ -5270,6 +5270,7 @@
     <Build Include="dbo\Stored Procedures\uspPATUpdatePatronageItem.sql" />
     <Build Include="dbo\Views\vyuPATEntityPatron.sql" />
     <Build Include="dbo\Tables\tblSCCpeReceipt.sql" />
+    <Build Include="dbo\Views\vyuMFParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
