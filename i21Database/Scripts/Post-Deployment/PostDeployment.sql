@@ -46,6 +46,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
+:r .\SM\1720_Statement_Footer_To_Report.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
