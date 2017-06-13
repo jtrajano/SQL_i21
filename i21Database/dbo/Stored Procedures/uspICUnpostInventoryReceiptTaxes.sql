@@ -180,7 +180,7 @@ BEGIN
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptItem.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId		
 		
-		-- Charge taxes
+		-- Other Charge taxes for the Receipt Vendor. 
 		UNION ALL 
 		SELECT	dtmDate								= Receipt.dtmReceiptDate
 				,intItemId							= ReceiptCharge.intChargeId 
@@ -220,51 +220,51 @@ BEGIN
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
-		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId		
-				--AND ReceiptCharge.ysnAccrue = 1 -- Note: Tax is only available if there is a vendor entity (receipt vendor or 3rd party vendor). 
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId	
+				AND (ReceiptCharge.ysnAccrue = 1 OR ReceiptCharge.ysnPrice = 1) -- Note: Tax is only computed if ysnAccrue is Y or ysnPrice is Y. 
 		
-		---- Price Down Other Charge taxes
-		--UNION ALL 
-		--SELECT	dtmDate								= Receipt.dtmReceiptDate
-		--		,intItemId							= ReceiptCharge.intChargeId 
-		--		,intItemLocationId					= ItemLocation.intItemLocationId
-		--		,intTransactionId					= Receipt.intInventoryReceiptId				
-		--		,strTransactionId					= Receipt.strReceiptNumber
-		--		,intReceiptChargeTaxId				= ChargeTaxes.intInventoryReceiptChargeTaxId
-		--		,dblTax								= 
-		--											-- Negate the tax if it is an Inventory Return 
-		--											CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN
-		--													-(-ChargeTaxes.dblTax)
-		--												ELSE
-		--													-ChargeTaxes.dblTax 
-		--											END 
-		--		,intTransactionTypeId				= TransType.intTransactionTypeId
-		--		,intCurrencyId						= ReceiptCharge.intCurrencyId
-		--		,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 0)
-		--		,strInventoryTransactionTypeName	= TransType.strName
-		--		,strTransactionForm					= @strTransactionForm
-		--		,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-		--		,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 0)
-		--		,strRateType						= currencyRateType.strCurrencyExchangeRateType
-		--		,strItemNo							= item.strItemNo
-		--FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
-		--			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		--		INNER JOIN dbo.tblICItemLocation ItemLocation
-		--			ON ItemLocation.intItemId = ReceiptCharge.intChargeId
-		--			AND ItemLocation.intLocationId = Receipt.intLocationId		
-		--		INNER JOIN tblICItem item
-		--			ON item.intItemId = ReceiptCharge.intChargeId 				
-		--		INNER JOIN dbo.tblICInventoryReceiptChargeTax ChargeTaxes
-		--			ON ReceiptCharge.intInventoryReceiptChargeId = ChargeTaxes.intInventoryReceiptChargeId
-		--		INNER JOIN dbo.tblSMTaxCode TaxCode
-		--			ON TaxCode.intTaxCodeId = ChargeTaxes.intTaxCodeId
-		--		LEFT JOIN dbo.tblICInventoryTransactionType TransType
-		--			ON TransType.intTransactionTypeId = @intTransactionTypeId
-		--		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-		--			ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
-		--WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-		--		AND ReceiptCharge.ysnAccrue = 1 -- Note: Tax is only available if there is a vendor entity (receipt vendor or 3rd party vendor). 
-		--		AND ReceiptCharge.ysnPrice = 1 						
+		-- Price Down - Other Charge taxes. This tax is for the 3rd party vendor. 
+		UNION ALL 
+		SELECT	dtmDate								= Receipt.dtmReceiptDate
+				,intItemId							= ReceiptCharge.intChargeId 
+				,intItemLocationId					= ItemLocation.intItemLocationId
+				,intTransactionId					= Receipt.intInventoryReceiptId				
+				,strTransactionId					= Receipt.strReceiptNumber
+				,intReceiptChargeTaxId				= ChargeTaxes.intInventoryReceiptChargeTaxId
+				,dblTax								= 
+													-- Negate the tax if it is an Inventory Return 
+													CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN
+															-ChargeTaxes.dblTax
+														ELSE
+															ChargeTaxes.dblTax 
+													END 
+				,intTransactionTypeId				= TransType.intTransactionTypeId
+				,intCurrencyId						= ReceiptCharge.intCurrencyId
+				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 0)
+				,strInventoryTransactionTypeName	= TransType.strName
+				,strTransactionForm					= @strTransactionForm
+				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
+				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 0)
+				,strRateType						= currencyRateType.strCurrencyExchangeRateType
+				,strItemNo							= item.strItemNo
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
+					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+				INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemLocation.intItemId = ReceiptCharge.intChargeId
+					AND ItemLocation.intLocationId = Receipt.intLocationId		
+				INNER JOIN tblICItem item
+					ON item.intItemId = ReceiptCharge.intChargeId 				
+				INNER JOIN dbo.tblICInventoryReceiptChargeTax ChargeTaxes
+					ON ReceiptCharge.intInventoryReceiptChargeId = ChargeTaxes.intInventoryReceiptChargeId
+				INNER JOIN dbo.tblSMTaxCode TaxCode
+					ON TaxCode.intTaxCodeId = ChargeTaxes.intTaxCodeId
+				LEFT JOIN dbo.tblICInventoryTransactionType TransType
+					ON TransType.intTransactionTypeId = @intTransactionTypeId
+				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND ReceiptCharge.ysnAccrue = 1 
+				AND ReceiptCharge.ysnPrice = 1 					
 	)
 	
 	-------------------------------------------------------------------------------------------
