@@ -6,49 +6,58 @@ AS
 			Item.intOriginId, 
 			Country.strCountry as strItemOrigin,
 			CD.intItemId, 					
-			CD.strItemDescription,
-			CD.intContractBasisId,
-			CD.strContractBasis											AS strINCOTerm,
-			CD.dblDetailQuantity,
+			Item.strDescription as strItemDescription,
+			CH.intContractBasisId,
+			CB.strContractBasis	AS strINCOTerm,
+			CD.dblQuantity as dblDetailQuantity,
 			CD.intUnitMeasureId,
-			CD.strItemUOM as strUnitMeasure,
+			UOM.strUnitMeasure,
 			UOM.strUnitType,
 			CD.intPricingTypeId intPricingType,
 			CD.dblBasis,
-			CD.strCurrency												AS strBasisCurrency,
+			Curr.strCurrency AS strBasisCurrency,
 			CD.dtmStartDate,
 			CD.dtmEndDate,
-			IsNull((SELECT SUM (AD.dblPAllocatedQty) from tblLGAllocationDetail AD Group By AD.intPContractDetailId Having CD.intContractDetailId = AD.intPContractDetailId), 0) AS dblAllocatedQuantity,
-			IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId Having CD.intContractDetailId = R.intContractDetailId), 0) AS dblReservedQuantity,
-			CD.dblDetailQuantity - IsNull((SELECT SUM (AD.dblPAllocatedQty) from tblLGAllocationDetail AD Group By AD.intPContractDetailId Having CD.intContractDetailId = AD.intPContractDetailId), 0) - IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId Having CD.intContractDetailId = R.intContractDetailId), 0) AS dblOpenQuantity,
-			CD.dblDetailQuantity - IsNull((SELECT SUM (AD.dblPAllocatedQty) from tblLGAllocationDetail AD Group By AD.intPContractDetailId Having CD.intContractDetailId = AD.intPContractDetailId), 0) AS dblUnAllocatedQuantity,
-			CD.dblDetailQuantity - IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId Having CD.intContractDetailId = R.intContractDetailId), 0) AS dblUnReservedQuantity,
+			IsNull(ALD.dblPAllocatedQty, 0) AS dblAllocatedQuantity,
+			IsNull(R.dblPReservedQuantity, 0) AS dblReservedQuantity,
+			CD.dblQuantity - IsNull(ALD.dblPAllocatedQty, 0) - IsNull(R.dblPReservedQuantity, 0) AS dblOpenQuantity,
+			CD.dblQuantity - IsNull(ALD.dblPAllocatedQty, 0) AS dblUnAllocatedQuantity,
+			CD.dblQuantity - IsNull(R.dblPReservedQuantity, 0) AS dblUnReservedQuantity,
 
-			CD.intContractTypeId intPurchaseSale,
-			CD.intEntityId,
-			CD.strEntityName as strName,
-			CD.intDefaultLocationId as intEntityLocationId,
-			CD.strContractNumber,
-			CD.dtmContractDate,
-			CD.intCommodityId,
+			CH.intContractTypeId intPurchaseSale,
+			CH.intEntityId,
+			EN.strEntityName as strName,
+			EN.intDefaultLocationId as intEntityLocationId,
+			CH.strContractNumber,
+			CH.dtmContractDate,
+			CH.intCommodityId,
 			CD.intItemUOMId,
 			CD.intCompanyLocationId,
-			CASE WHEN CD.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
-			CD.strCommodityDescription as strCommodity,
-			CD.strLocationName,
+			CASE WHEN CH.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
+			Comm.strDescription as strCommodity,
+			CL.strLocationName,
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
-			CD.strPricingType,
+			PT.strPricingType,
 			CD.dblCashPrice,
 			CD.dblAdjustment,
 			CD.dblScheduleQty,
 			CD.dblBalance
 
-	FROM 	vyuCTContractDetailView 		CD
-	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
+	FROM tblCTContractDetail CD
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= CD.intCompanyLocationId
+	JOIN vyuCTEntity EN ON EN.intEntityId = CH.intEntityId AND EN.strEntityType	= (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+	JOIN tblICItem Item ON Item.intItemId = CD.intItemId
+	JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
+	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	JOIN tblSMCurrency Curr ON Curr.intCurrencyID = CD.intCurrencyId
+	JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+	JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 	LEFT JOIN tblSMCountry Country ON Country.intCountryID = Item.intOriginId
-	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CD.intUnitMeasureId
-	WHERE CD.dblDetailQuantity - IsNull((SELECT SUM (AD.dblPAllocatedQty) from tblLGAllocationDetail AD Group By AD.intPContractDetailId Having CD.intContractDetailId = AD.intPContractDetailId), 0) > 0
-	AND CD.intContractTypeId = 1
+	LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = CH.intCommodityId
+	LEFT JOIN (SELECT AD.intPContractDetailId, SUM(dblPAllocatedQty) dblPAllocatedQty FROM tblLGAllocationDetail AD GROUP BY AD.intPContractDetailId) ALD ON ALD.intPContractDetailId = CD.intContractDetailId
+	LEFT JOIN (SELECT R.intContractDetailId, SUM(dblReservedQuantity) dblPReservedQuantity FROM tblLGReservation R GROUP BY R.intContractDetailId) R ON R.intContractDetailId = CD.intContractDetailId
+	WHERE CD.dblQuantity - IsNull(ALD.dblPAllocatedQty, 0) > 0.0 AND CH.intContractTypeId = 1
 
 	UNION ALL
 
@@ -58,47 +67,55 @@ AS
 			Item.intOriginId, 
 			Country.strCountry as strItemOrigin,
 			CD.intItemId, 					
-			CD.strItemDescription,
-			CD.intContractBasisId,
-			CD.strContractBasis											AS strINCOTerm,
-			CD.dblDetailQuantity,
+			Item.strDescription as strItemDescription,
+			CH.intContractBasisId,
+			CB.strContractBasis	AS strINCOTerm,
+			CD.dblQuantity as dblDetailQuantity,
 			CD.intUnitMeasureId,
-			CD.strItemUOM as strUnitMeasure,
+			UOM.strUnitMeasure,
 			UOM.strUnitType,
 			CD.intPricingTypeId intPricingType,
 			CD.dblBasis,
-			CD.strCurrency												AS strBasisCurrency,
+			Curr.strCurrency AS strBasisCurrency,
 			CD.dtmStartDate,
 			CD.dtmEndDate,
-			IsNull((SELECT SUM (AD.dblSAllocatedQty) from tblLGAllocationDetail AD Group By AD.intSContractDetailId Having CD.intContractDetailId = AD.intSContractDetailId), 0) AS dblAllocatedQuantity,
-			IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId Having CD.intContractDetailId = R.intContractDetailId), 0) AS dblReservedQuantity,
-			CD.dblDetailQuantity - IsNull((SELECT SUM (AD.dblSAllocatedQty) from tblLGAllocationDetail AD Group By AD.intSContractDetailId Having CD.intContractDetailId = AD.intSContractDetailId), 0) - IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId Having CD.intContractDetailId = R.intContractDetailId), 0) AS dblOpenQuantity,
-			CD.dblDetailQuantity - IsNull((SELECT SUM (AD.dblSAllocatedQty) from tblLGAllocationDetail AD Group By AD.intSContractDetailId Having CD.intContractDetailId = AD.intSContractDetailId), 0) AS dblUnAllocatedQuantity,
-			CD.dblDetailQuantity - IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId Having CD.intContractDetailId = R.intContractDetailId), 0) AS dblUnReservedQuantity,
+			IsNull(ALD.dblSAllocatedQty, 0) AS dblAllocatedQuantity,
+			IsNull(R.dblSReservedQuantity, 0) AS dblReservedQuantity,
+			CD.dblQuantity - IsNull(ALD.dblSAllocatedQty, 0) - IsNull(R.dblSReservedQuantity, 0) AS dblOpenQuantity,
+			CD.dblQuantity - IsNull(ALD.dblSAllocatedQty, 0) AS dblUnAllocatedQuantity,
+			CD.dblQuantity - IsNull(R.dblSReservedQuantity, 0) AS dblUnReservedQuantity,
 
-			CD.intContractTypeId intPurchaseSale,
-			CD.intEntityId,
-			CD.strEntityName as strName,
-			CD.intDefaultLocationId as intEntityLocationId,
-			CD.strContractNumber,
-			CD.dtmContractDate,
-			CD.intCommodityId,
+			CH.intContractTypeId intPurchaseSale,
+			CH.intEntityId,
+			EN.strEntityName as strName,
+			EN.intDefaultLocationId as intEntityLocationId,
+			CH.strContractNumber,
+			CH.dtmContractDate,
+			CH.intCommodityId,
 			CD.intItemUOMId,
 			CD.intCompanyLocationId,
-			CASE WHEN CD.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
-			CD.strCommodityDescription as strCommodity,
-			CD.strLocationName,
-			CD.ysnAllowedToShow,
-			CD.strPricingType,
+			CASE WHEN CH.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
+			Comm.strDescription as strCommodity,
+			CL.strLocationName,
+			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
+			PT.strPricingType,
 			CD.dblCashPrice,
 			CD.dblAdjustment,
 			CD.dblScheduleQty,
 			CD.dblBalance
 
-	FROM 	vyuCTContractDetailView 		CD
-	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
+	FROM tblCTContractDetail CD
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= CD.intCompanyLocationId
+	JOIN vyuCTEntity EN ON EN.intEntityId = CH.intEntityId AND EN.strEntityType	= (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+	JOIN tblICItem Item ON Item.intItemId = CD.intItemId
+	JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
+	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	JOIN tblSMCurrency Curr ON Curr.intCurrencyID = CD.intCurrencyId
+	JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+	JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 	LEFT JOIN tblSMCountry Country ON Country.intCountryID = Item.intOriginId
-	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CD.intUnitMeasureId
-	WHERE CD.dblDetailQuantity - IsNull((SELECT SUM (AD.dblSAllocatedQty) from tblLGAllocationDetail AD Group By AD.intSContractDetailId Having CD.intContractDetailId = AD.intSContractDetailId), 0) > 0
-	AND CD.intContractTypeId = 2
-	
+	LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = CH.intCommodityId
+	LEFT JOIN (SELECT AD.intSContractDetailId, SUM(dblSAllocatedQty) dblSAllocatedQty FROM tblLGAllocationDetail AD GROUP BY AD.intSContractDetailId) ALD ON ALD.intSContractDetailId = CD.intContractDetailId
+	LEFT JOIN (SELECT R.intContractDetailId, SUM(dblReservedQuantity) dblSReservedQuantity FROM tblLGReservation R GROUP BY R.intContractDetailId) R ON R.intContractDetailId = CD.intContractDetailId
+	WHERE CD.dblQuantity - IsNull(ALD.dblSAllocatedQty, 0) > 0.0 AND CH.intContractTypeId = 2
