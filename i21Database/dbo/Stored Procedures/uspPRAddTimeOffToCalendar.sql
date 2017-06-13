@@ -61,6 +61,40 @@ SELECT @intTimeOffRequestId = @intTransactionId
 				ON EE.intEntityEmployeeId = PGD.intEntityEmployeeId
 				AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 			WHERE TOR.intTimeOffRequestId = @intTimeOffRequestId
+
+			UPDATE tblPRPayGroupDetail
+				SET tblPRPayGroupDetail.dblHoursToProcess = tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest,
+					dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
+								CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
+									CASE WHEN (tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest) < 0 THEN 0 ELSE tblPRPayGroupDetail.dblDefaultHours + TOR.dblRequest END * tblPRPayGroupDetail.dblAmount
+								ELSE
+									tblPRPayGroupDetail.dblAmount
+								END
+							WHEN (EL.strCalculationType = 'Hourly Rate') THEN
+								CASE WHEN (tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest) < 0 THEN 0 ELSE tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest END * tblPRPayGroupDetail.dblAmount
+							ELSE
+								tblPRPayGroupDetail.dblAmount
+							END
+			FROM
+				tblPREmployeeEarning EL
+				INNER JOIN tblPREmployeeEarning EE 
+					ON EL.intTypeEarningId = EE.intEmployeeEarningLinkId AND EL.intEntityEmployeeId = EE.intEntityEmployeeId
+				INNER JOIN tblPRTimeOffRequest TOR
+					ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
+						AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
+						AND EL.intPayGroupId IS NOT NULL
+			WHERE 
+				tblPRPayGroupDetail.intPayGroupDetailId = (SELECT TOP 1 intPayGroupDetailId FROM tblPRPayGroupDetail PGD 
+							INNER JOIN tblPREmployeeEarning EL
+								ON PGD.intEmployeeEarningId = EL.intEmployeeEarningId
+							INNER JOIN tblPREmployeeEarning EE 
+								ON EL.intTypeEarningId = EE.intEmployeeEarningLinkId AND EL.intEntityEmployeeId = EE.intEntityEmployeeId
+							INNER JOIN tblPRTimeOffRequest TOR
+								ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
+									AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
+									AND EL.intPayGroupId IS NOT NULL
+									AND PGD.dtmDateFrom <= ISNULL(TOR.dtmDateFrom, PGD.dtmDateFrom) AND PGD.dtmDateTo >= ISNULL(TOR.dtmDateFrom, PGD.dtmDateTo))
+
 		END
 	END
 	ELSE
@@ -122,11 +156,13 @@ SELECT @intTimeOffRequestId = @intTransactionId
 
 			EXEC uspSMAuditLog 'Payroll.view.TimeOffRequest', @intTransactionId, @intUserId, 'Posted to Calendar', '', '', ''
 		
+			/* If Time Off is setup to Deduct from Earning, create Pay Group Detail entry */
 			IF EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarning EE INNER JOIN tblPRTimeOffRequest TOR
 						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
 						WHERE EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId AND EE.intPayGroupId IS NOT NULL)
 			BEGIN
-				/* If Time Off is setup to Deduct from Earning, create Pay Group Detail entry */
+
+				/* Insert Pay Group Detail Entry for the Time Off */
 				INSERT INTO tblPRPayGroupDetail (
 					intPayGroupId
 					,intEntityEmployeeId
@@ -176,57 +212,93 @@ SELECT @intTimeOffRequestId = @intTransactionId
 					EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 					AND EE.intPayGroupId IS NOT NULL
 
-				INSERT INTO tblPRPayGroupDetail (
-					intPayGroupId
-					,intEntityEmployeeId
-					,intEmployeeEarningId
-					,intTypeEarningId
-					,intDepartmentId
-					,strCalculationType
-					,dblDefaultHours
-					,dblHoursToProcess
-					,dblAmount
-					,dblTotal
-					,dtmDateFrom
-					,dtmDateTo
-					,intSort
-					,intConcurrencyId
-				)
-				SELECT TOP 1 
-					EL.intPayGroupId
-					,TOR.intEntityEmployeeId
-					,EL.intEmployeeEarningId
-					,EL.intTypeEarningId
-					,TOR.intDepartmentId
-					,EL.strCalculationType
-					,EL.dblDefaultHours
-					,CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END
-					,EL.dblRateAmount
-					,dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
-									CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
+				/* Check if the corresponding Linked Earning to deduct exists in the Pay Group Detail */
+				DECLARE @intPayGroupDetail INT = NULL
+				SELECT TOP 1 @intPayGroupDetail = intPayGroupDetailId FROM tblPRPayGroupDetail PGD 
+							INNER JOIN tblPREmployeeEarning EL
+								ON PGD.intEmployeeEarningId = EL.intEmployeeEarningId
+							INNER JOIN tblPREmployeeEarning EE 
+								ON EL.intTypeEarningId = EE.intEmployeeEarningLinkId AND EL.intEntityEmployeeId = EE.intEntityEmployeeId
+							INNER JOIN tblPRTimeOffRequest TOR
+								ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
+									AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
+									AND EL.intPayGroupId IS NOT NULL
+									AND PGD.dtmDateFrom <= ISNULL(TOR.dtmDateFrom, PGD.dtmDateFrom) AND PGD.dtmDateTo >= ISNULL(TOR.dtmDateFrom, PGD.dtmDateTo)
+
+				IF (@intPayGroupDetail IS NULL)
+					INSERT INTO tblPRPayGroupDetail (
+						intPayGroupId
+						,intEntityEmployeeId
+						,intEmployeeEarningId
+						,intTypeEarningId
+						,intDepartmentId
+						,strCalculationType
+						,dblDefaultHours
+						,dblHoursToProcess
+						,dblAmount
+						,dblTotal
+						,dtmDateFrom
+						,dtmDateTo
+						,intSort
+						,intConcurrencyId
+					)
+					SELECT TOP 1 
+						EL.intPayGroupId
+						,TOR.intEntityEmployeeId
+						,EL.intEmployeeEarningId
+						,EL.intTypeEarningId
+						,TOR.intDepartmentId
+						,EL.strCalculationType
+						,EL.dblDefaultHours
+						,CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END
+						,EL.dblRateAmount
+						,dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
+										CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
+											CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END * EL.dblRateAmount
+										ELSE
+											EL.dblRateAmount
+										END
+									WHEN (EL.strCalculationType = 'Hourly Rate') THEN
 										CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END * EL.dblRateAmount
 									ELSE
 										EL.dblRateAmount
 									END
-								WHEN (EL.strCalculationType = 'Hourly Rate') THEN
-									CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END * EL.dblRateAmount
-								ELSE
-									EL.dblRateAmount
-								END
-					,TOR.dtmDateFrom
-					,TOR.dtmDateTo
-					,1
-					,1
-				FROM 
-					tblPREmployeeEarning EL
-					INNER JOIN tblPREmployeeEarning EE 
-						ON EL.intTypeEarningId = EE.intEmployeeEarningLinkId AND EL.intEntityEmployeeId = EE.intEntityEmployeeId
-					INNER JOIN tblPRTimeOffRequest TOR
-						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
-				WHERE 
-					EL.intPayGroupId IS NOT NULL
-					AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
-					AND (EL.dblDefaultHours - TOR.dblRequest) > 0
+						,TOR.dtmDateFrom
+						,TOR.dtmDateTo
+						,1
+						,1
+					FROM 
+						tblPREmployeeEarning EL
+						INNER JOIN tblPREmployeeEarning EE 
+							ON EL.intTypeEarningId = EE.intEmployeeEarningLinkId AND EL.intEntityEmployeeId = EE.intEntityEmployeeId
+						INNER JOIN tblPRTimeOffRequest TOR
+							ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
+								AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
+								AND EL.intPayGroupId IS NOT NULL
+				ELSE
+					UPDATE tblPRPayGroupDetail
+						SET tblPRPayGroupDetail.dblHoursToProcess = tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest,
+							dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
+										CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
+											CASE WHEN (tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest) < 0 THEN 0 ELSE tblPRPayGroupDetail.dblDefaultHours - TOR.dblRequest END * tblPRPayGroupDetail.dblAmount
+										ELSE
+											tblPRPayGroupDetail.dblAmount
+										END
+									WHEN (EL.strCalculationType = 'Hourly Rate') THEN
+										CASE WHEN (tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest) < 0 THEN 0 ELSE tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest END * tblPRPayGroupDetail.dblAmount
+									ELSE
+										tblPRPayGroupDetail.dblAmount
+									END
+					FROM
+						tblPREmployeeEarning EL
+						INNER JOIN tblPREmployeeEarning EE 
+							ON EL.intTypeEarningId = EE.intEmployeeEarningLinkId AND EL.intEntityEmployeeId = EE.intEntityEmployeeId
+						INNER JOIN tblPRTimeOffRequest TOR
+							ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
+								AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
+								AND EL.intPayGroupId IS NOT NULL
+					WHERE 
+						tblPRPayGroupDetail.intPayGroupDetailId = @intPayGroupDetail
 			END
 			ELSE
 			BEGIN
