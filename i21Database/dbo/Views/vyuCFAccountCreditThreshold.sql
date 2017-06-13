@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuCFAccountCreditThreshold]
 AS
 SELECT 
-mainQuery.intEntityCustomerId, 
+mainQuery.intEntityId, 
 mainQuery.strCustomerName, 
 mainQuery.strCustomerNumber,
 mainQuery.dblCreditLimit, 
@@ -20,7 +20,7 @@ WHEN (dblOverLimit > 0 AND dblTotalDue <= 0)
 
 FROM   (
 SELECT 
-intEntityCustomerId, 
+intEntityId, 
 strCustomerName, 
 strCustomerNumber, 
 dblCreditLimit, 
@@ -34,8 +34,8 @@ THEN ((dblTotalDue) - dblCreditLimit)
 END AS dblOverLimit
              
 			 FROM    dbo.vyuARCustomerInquiry) AS mainQuery INNER JOIN
-             dbo.tblARCustomer AS ARCust ON mainQuery.intEntityCustomerId = ARCust.intEntityCustomerId INNER JOIN
-             dbo.tblCFAccount AS CFAccnt ON mainQuery.intEntityCustomerId = CFAccnt.intCustomerId INNER JOIN
+             dbo.tblARCustomer AS ARCust ON mainQuery.intEntityId = ARCust.intEntityId INNER JOIN
+             dbo.tblCFAccount AS CFAccnt ON mainQuery.intEntityId = CFAccnt.intCustomerId INNER JOIN
                  (SELECT DISTINCT intAccountId
                   FROM dbo.tblCFCard
                   WHERE (ysnCardLocked = 0)) AS CFCard ON CFAccnt.intAccountId = CFCard.intAccountId
