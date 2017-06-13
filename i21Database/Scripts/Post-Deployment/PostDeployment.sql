@@ -218,7 +218,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\28_UpdateBaseAmounts.sql
 :r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
 :r .\AR\DefaultData\30_FixAmountsForCashTransaction.sql
-:r .\AR\DefaultData\31_UpdateInvoiceDefaultContact.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

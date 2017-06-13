@@ -64,6 +64,7 @@
 -- AR
 :r .\7_AR\1_1410_to_1420.sql
 :r .\7_AR\2_DropTableScript.sql
+:r .\7_AR\3_UpdateInvoiceDefaultContact.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql
 :r .\7_AR\6_PaymentDetailInvoiceCleanUp.sql
 
