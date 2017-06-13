@@ -664,6 +664,9 @@ BEGIN
 
 		EXEC uspAPUpdateVoucherDetailTax @billDetailIds
 		
+		--DELETE THE @billDetailIds ID TO AVOID DUPLICATE INSERTION OF BILLDETAIL ID
+		DELETE FROM @billDetailIds
+
 		--ADD CHARGES FOR MAIN VENDOR OR PRODUCER
 		IF(@totalChargesCount != 0)
 		BEGIN 
