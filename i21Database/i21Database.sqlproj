@@ -5266,6 +5266,9 @@
     <Build Include="dbo\Functions\fnMFConvertNumberToString.sql" />
     <Build Include="dbo\Functions\fnCalculateReceiptUnitCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSetMenuAvailability.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATUpdatePatronageEntities.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATUpdatePatronageItem.sql" />
+    <Build Include="dbo\Views\vyuPATEntityPatron.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
