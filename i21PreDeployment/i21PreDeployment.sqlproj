@@ -282,4 +282,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\12_EM\22_UpdateNullPaymentMethodVendor.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\3_UpdateInvoiceDefaultContact.sql" />
+  </ItemGroup>
 </Project>
