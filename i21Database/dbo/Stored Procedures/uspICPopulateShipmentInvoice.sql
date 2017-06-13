@@ -73,7 +73,7 @@ BEGIN
 			,dblInvoiceLineTotal = shipmentItem.dblInvoiceItemTotal
 			,dblShipmentTax = 0 
 			,dblInvoiceTax = 0 
-			,dblOpenQty = shipmentItem.dblInTransitQty
+			,dblOpenQty = ISNULL(shipmentItem.dblShipmentQty, 0) - ISNULL(shipmentItem.dblInvoiceQty, 0) --shipmentItem.dblInTransitQty
 			,dblItemsReceivable = shipmentItem.dblItemsReceivable
 			,dblTaxesReceivable = 0 
 			,shipmentItem.dtmLastInvoiceDate
