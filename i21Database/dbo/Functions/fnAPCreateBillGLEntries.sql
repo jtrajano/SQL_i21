@@ -526,7 +526,8 @@ BEGIN
 		--[dblCredit]						=	(CASE WHEN B.dblOldCost IS NOT NULL THEN (CASE WHEN B.dblOldCost = 0 THEN 0 --AP-2458
 		--																				   ELSE CAST((Taxes.dblTotalTax - SUM(D.dblTax)) AS DECIMAL(18,2)) END) 
 		--										  ELSE 0 END),--COST ADJUSTMENT,  --AP-2792
-		[dblDebit]						=	SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1),
+		[dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 AND charges.ysnPrice = 1 THEN SUM(D.dblTax * -1) * ISNULL(NULLIF(B.dblRate,0),1)
+											ELSE SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) END,
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -570,6 +571,8 @@ BEGIN
 				ON A.intEntityVendorId = C.intEntityVendorId
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
+			LEFT JOIN tblICInventoryReceiptCharge charges
+				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 			INNER JOIN tblICItem B2
@@ -608,6 +611,8 @@ BEGIN
 	,G.strCurrencyExchangeRateType
 	,B.dblOldCost
 	--,dblTotalTax
+	,charges.intInventoryReceiptChargeId
+	,charges.ysnPrice
 	,F.intItemId
 	,loc.intItemLocationId
 	,B.intInventoryReceiptItemId
