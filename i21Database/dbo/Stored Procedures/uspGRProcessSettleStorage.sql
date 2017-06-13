@@ -852,7 +852,7 @@ BEGIN TRY
 					,@dblSpotCashPrice
 				)
 
-				SET @dblSpotUnits = 0
+				
 
 				INSERT INTO @SettleVoucherCreate
 				(
@@ -880,6 +880,8 @@ BEGIN TRY
 					,@ItemDescription
 					,1
 					,0
+				
+				SET @dblSpotUnits = 0
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
@@ -1189,12 +1191,8 @@ BEGIN TRY
 		--Get IR id created from the Scale Ticket
 		BEGIN 
 			SELECT TOP 1 
-			@intReceiptId = r.intInventoryReceiptId
-			FROM	tblICInventoryReceipt r  
-			JOIN    tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId=r.intInventoryReceiptId
-			JOIN	tblSCTicket SC ON SC.intTicketId=ri.intSourceId	
-			JOIN    tblGRCustomerStorage CS ON CS.intTicketId=SC.intTicketId					
-			WHERE  r.intSourceType=1 AND CS.intCustomerStorageId = @intCustomerStorageId
+			@intReceiptId =intInventoryReceiptId FROM tblGRStorageHistory 
+			WHERE strType='FROM Scale' AND intCustomerStorageId = @intCustomerStorageId
 		END 
 
 		-- Create a new voucher 
