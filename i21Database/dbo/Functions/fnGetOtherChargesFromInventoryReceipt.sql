@@ -32,7 +32,7 @@ BEGIN
 			AND ItemOtherCharges.ysnInventoryCost = 1
 
 	SELECT	@units = 
-					CASE	WHEN ri.intWeightUOMId IS NOT NULL THEN ISNULL(AggregrateItemLots.dblTotalNet, 0)
+					CASE	WHEN ri.intWeightUOMId IS NOT NULL THEN ISNULL(AggregrateItemLots.dblTotalNet, ri.dblNet)
 							ELSE ISNULL(ri.dblOpenReceive, 0)
 					END 
 	FROM	dbo.tblICInventoryReceiptItem ri 
@@ -51,7 +51,7 @@ BEGIN
 	WHERE	ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 	IF ISNULL(@units, 0) <> 0 
-		RETURN ISNULL(@totalOtherCharges / @units, 0);
-
+		RETURN ISNULL(@totalOtherCharges, 0) / @units;
+		
 	RETURN 0;
 END
