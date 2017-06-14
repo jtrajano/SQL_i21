@@ -439,7 +439,6 @@ BEGIN
 		ISNULL(EFP.[ysnForInsert],0) = 1
 	ORDER BY
 		[intId]
-
 			
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoices]
@@ -941,15 +940,29 @@ BEGIN
 	INSERT INTO @InsertedInvoiceIds(
 		 [intHeaderId]
 		,[ysnUpdateAvailableDiscountOnly]
-		,[intDetailId])
-	SELECT 
+		,[intDetailId]
+		,[ysnForDelete]
+		,[ysnFromPosting]
+		,[ysnPost]
+		,[ysnAccrueLicense]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[ysnProcessed])
+	SELECT
 		 [intHeaderId]						= ARIILD.[intInvoiceId]
 		,[ysnUpdateAvailableDiscountOnly]	= IFI.[ysnUpdateAvailableDiscount]
 		,[intDetailId]						= NULL
+		,[ysnForDelete]						= 0
+		,[ysnFromPosting]					= 0
+		,[ysnPost]							= ARIILD.[ysnPost]
+		,[ysnAccrueLicense]					= ARIILD.[ysnAccrueLicense]
+		,[strTransactionType]				= ARIILD.[strTransactionType]
+		,[strSourceTransaction]				= IFI.[strSourceTransaction]
+		,[ysnProcessed]						= 0
 		FROM
-		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId], [strTransactionType], [ysnPost], [ysnAccrueLicense] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
 		INNER JOIN
-		(SELECT [intId], [ysnUpdateAvailableDiscount] FROM @InvoicesForInsert) IFI
+		(SELECT [intId], [ysnUpdateAvailableDiscount], [strSourceTransaction] FROM @InvoicesForInsert) IFI
 			ON IFI. [intId] = ARIILD.[intId] 
 	WHERE
 			ISNULL(ARIILD.[ysnHeader], 0) = 1
@@ -958,9 +971,8 @@ BEGIN
 
 
 	EXEC	[dbo].[uspARUpdateInvoicesIntegrations]
-				@InvoiceIds	= @InsertedInvoiceIds
-				,@UserId		= @UserId
-
+				 @InvoiceIds			= @InsertedInvoiceIds
+				,@UserId				= @UserId
 
 	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @InsertedInvoiceIds
 		
@@ -1222,54 +1234,7 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
-----Re-Compute
---BEGIN TRY
---	WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnRecomputed],0) = 0 AND ISNULL([ysnProcessed],0) = 1 AND ISNULL([intInvoiceId],0) <> 0)
---	BEGIN
---		SELECT TOP 1 @InvoiceId = [intInvoiceId], @Id = [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnRecomputed],0) = 0 AND ISNULL([ysnProcessed],0) = 1 AND ISNULL([intInvoiceId],0) <> 0 ORDER BY [intId]
---		--SELECT TOP 1 @RecomputeTax = ISNULL([ysnRecomputeTax],0), @UpdateAvailableDiscount = ISNULL([ysnUpdateAvailableDiscount],0) FROM @InvoiceEntries WHERE [intId] = @Id 
---		--IF @RecomputeTax = 1
---		--	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
---		--ELSE
---			EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId, @AvailableDiscountOnly = @UpdateAvailableDiscount
-						
---		UPDATE #EntriesForProcessing SET [ysnRecomputed] = 1 WHERE [intInvoiceId] = @InvoiceId
---	END	
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
 
---SET @batchIdUsed = ''
-
-		
-------Posting newly added Invoices
---BEGIN TRY
---	DECLARE @IdsForPostingNew InvoiceId
-
---	INSERT INTO @IdsForPostingNew
---	SELECT DISTINCT
---		EFP.[intInvoiceId]
---	FROM
---		#EntriesForProcessing EFP
---	INNER JOIN
---		@InvoiceEntries IE
---			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
---	WHERE
---		ISNULL(EFP.[ysnForInsert],0) = 1
---		AND ISNULL(EFP.[intInvoiceId],0) <> 0
---		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 1
---		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
---		AND ISNULL(EFP.[ysnRecap], 0) = 0
-
---Posting newly added Invoices
-
---UnPosting posted Invoices for update
 
 --Posting Newly Created Invoices
 BEGIN TRY
@@ -1290,7 +1255,7 @@ BEGIN TRY
 		,[ysnAccrueLicense]					= [ysnAccrueLicense]
 		,[strTransactionType]				= [strTransactionType] 	
 	FROM
-		tblARInvoiceIntegrationLogDetail
+		tblARInvoiceIntegrationLogDetail WITH (NOLOCK)
 	WHERE
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
@@ -1334,7 +1299,7 @@ BEGIN TRY
 		,[ysnAccrueLicense]					= [ysnAccrueLicense]
 		,[strTransactionType]				= [strTransactionType] 	
 	FROM
-		tblARInvoiceIntegrationLogDetail
+		tblARInvoiceIntegrationLogDetail WITH (NOLOCK)
 	WHERE
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
@@ -1390,7 +1355,7 @@ BEGIN TRY
 		,[ysnAccrueLicense]					= [ysnAccrueLicense]
 		,[strTransactionType]				= [strTransactionType] 	
 	FROM
-		tblARInvoiceIntegrationLogDetail
+		tblARInvoiceIntegrationLogDetail WITH (NOLOCK)
 	WHERE
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
@@ -1434,7 +1399,7 @@ BEGIN TRY
 		,[ysnAccrueLicense]					= [ysnAccrueLicense]
 		,[strTransactionType]				= [strTransactionType] 	
 	FROM
-		tblARInvoiceIntegrationLogDetail
+		tblARInvoiceIntegrationLogDetail WITH (NOLOCK)
 	WHERE
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
@@ -1489,7 +1454,7 @@ BEGIN TRY
 		,[ysnAccrueLicense]					= [ysnAccrueLicense]
 		,[strTransactionType]				= [strTransactionType] 	
 	FROM
-		tblARInvoiceIntegrationLogDetail
+		tblARInvoiceIntegrationLogDetail WITH (NOLOCK)
 	WHERE
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
@@ -1533,7 +1498,7 @@ BEGIN TRY
 		,[ysnAccrueLicense]					= [ysnAccrueLicense]
 		,[strTransactionType]				= [strTransactionType] 	
 	FROM
-		tblARInvoiceIntegrationLogDetail
+		tblARInvoiceIntegrationLogDetail WITH (NOLOCK)
 	WHERE
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1

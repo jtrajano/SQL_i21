@@ -9,6 +9,52 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
+DECLARE @IIDs AS InvoiceId
+DECLARE @InvoiceLog AuditLogStagingTable	
+
+IF EXISTS(SELECT NULL FROM @InvoiceIds WHERE [strSourceTransaction] IN ('Card Fueling Transaction','CF Tran','CF Invoice'))
+BEGIN
+	DELETE FROM @IIDs
+	INSERT INTO @IIDs SELECT * FROM @InvoiceIds WHERE [strSourceTransaction] IN ('Card Fueling Transaction','CF Tran','CF Invoice')
+
+	DELETE FROM @InvoiceLog
+
+	INSERT INTO @InvoiceLog(
+		 [strScreenName]
+		,[intKeyValueId]
+		,[intEntityId]
+		,[strActionType]
+		,[strDescription]
+		,[strActionIcon]
+		,[strChangeDescription]
+		,[strFromValue]
+		,[strToValue]
+		,[strDetails]
+	)
+	SELECT 
+		 [strScreenName]			= 'AccountsReceivable.view.Invoice'
+		,[intKeyValueId]			= ARI.[intInvoiceId]
+		,[intEntityId]				= @UserId
+		,[strActionType]			= CASE WHEN IL.[ysnPost] = 1 THEN 'Posted'  ELSE 'Unposted' END 
+		,[strDescription]			= ''
+		,[strActionIcon]			= NULL
+		,[strChangeDescription]		= ''
+		,[strFromValue]				= ''
+		,[strToValue]				= ARI.[strInvoiceNumber]
+		,[strDetails]				= NULL
+		FROM @IIDs IL
+	INNER JOIN
+		(SELECT [intInvoiceId], [strInvoiceNumber] FROM tblARInvoice) ARI
+			ON IL.[intHeaderId] = ARI.[intInvoiceId]
+
+		EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+END
+
+DELETE FROM @IIDs
+INSERT INTO @IIDs SELECT * FROM @InvoiceIds WHERE [strSourceTransaction] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM @IIDs)
+	RETURN 1
 
 --Contracts
 	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
@@ -67,7 +113,7 @@ SET ANSI_WARNINGS OFF
 	FROM
 		(SELECT [intInvoiceId] ,[strInvoiceNumber] ,[intEntityCustomerId] ,[dtmDate] ,[intCurrencyId] ,[intCompanyLocationId] ,[intDistributionHeaderId] ,[intTransactionId] FROM tblARInvoice WITH (NOLOCK)) I
 	INNER JOIN
-		@InvoiceIds IIDs
+		@IIDs IIDs
 			ON I.[intInvoiceId] = IIDs.[intHeaderId]
 	INNER JOIN
 		(SELECT intInvoiceId, [intInvoiceDetailId], [intItemId], [strItemDescription], [intSCInvoiceId], [strSCInvoiceNumber], [intItemUOMId], [dblQtyOrdered], [dblQtyShipped], [dblDiscount], 
@@ -96,37 +142,37 @@ INNER JOIN
 	(SELECT intContractDetailId, dblBalance FROM dbo.tblCTContractDetail WITH (NOLOCK))  CTCD
 	ON ARID.intContractDetailId = CTCD.intContractDetailId
 INNER JOIN
-	@InvoiceIds IIDs
+	@IIDs IIDs
 		ON ARID.[intInvoiceId] = IIDs.[intHeaderId]
 WHERE 
 	ARID.dblContractBalance <> CTCD.dblBalance
 
 
 --Prepaids
-EXEC dbo.[uspARUpdatePrepaymentsAndCreditMemos] @InvoiceIds = @InvoiceIds
+EXEC dbo.[uspARUpdatePrepaymentsAndCreditMemos] @InvoiceIds = @IIDs
 
 
 --Sales Order Status
-EXEC dbo.[uspARPostSOStatusFromInvoices] @InvoiceIds = @InvoiceIds
+EXEC dbo.[uspARPostSOStatusFromInvoices] @InvoiceIds = @IIDs
 
 --Committed
 --EXEC dbo.[uspARUpdateCommitted] @intTransactionId, @ysnPost, @intUserId, 1
 
 --Stock Reservation
---EXEC dbo.[uspARUpdateLineItemsReservedStock] @InvoiceIds = @InvoiceIds
+EXEC dbo.[uspARUpdateLineItemsReservedStock] @InvoiceIds = @IIDs
 
---In Transit Outbound Quantities 
+----In Transit Outbound Quantities 
 --EXEC dbo.[uspARUpdateInTransit] @intTransactionId, @ysnPost, 0
 
 
-----Update LG - Load Shipment
+------Update LG - Load Shipment
 --EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost]
 --	@InvoiceId	= @intTransactionId
 --	,@Post		= @ysnPost
 --	,@LoadId	= @LoadId
 --	,@UserId	= @intUserId
 
-----Patronage
+------Patronage
 --DECLARE	@successfulCount INT
 --		,@invalidCount INT
 --		,@success BIT
@@ -140,9 +186,8 @@ EXEC dbo.[uspARPostSOStatusFromInvoices] @InvoiceIds = @InvoiceIds
 --	,@invalidCount			= @invalidCount OUTPUT
 --	,@success				= @success OUTPUT
 
-DECLARE @InvoiceLog AuditLogStagingTable	
-DELETE FROM @InvoiceLog
 
+DELETE FROM @InvoiceLog
 INSERT INTO @InvoiceLog(
 	 [strScreenName]
 	,[intKeyValueId]
@@ -172,6 +217,7 @@ INNER JOIN
 		ON IL.[intHeaderId] = ARI.[intInvoiceId]
 
 	EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+
 
 
 GO

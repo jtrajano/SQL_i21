@@ -219,18 +219,20 @@ BEGIN CATCH
 			ROLLBACK TRANSACTION							
 			BEGIN TRANSACTION						
 			--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
-
 			UPDATE ILD
 			SET
-				ILD.[ysnPosted] = 0
-				,ILD.[strPostingMessage] = @ErrorMerssage
+				 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+				,ILD.[strPostingMessage]	= @ErrorMerssage
+				,ILD.[strBatchId]			= @BatchId
 			FROM
-				tblARInvoiceIntegrationLogDetail ILD
+				tblARInvoiceIntegrationLogDetail ILD  WITH (NOLOCK)
 			INNER JOIN
 				@PostInvoiceData PID
 					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 			WHERE
-				ILD.[intIntegrationLogId] = @IntegrationLogId 
+				ILD.[intIntegrationLogId] = @IntegrationLogId
+				AND ILD.[ysnPost] IS NOT NULL 
 
 			COMMIT TRANSACTION
 		END						
@@ -334,15 +336,18 @@ BEGIN TRY
 								--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
 								UPDATE ILD
 								SET
-									ILD.[ysnPosted] = 0
-									,ILD.[strPostingMessage] = @ErrorMerssage
+									 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+									,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+									,ILD.[strPostingMessage]	= @ErrorMerssage
+									,ILD.[strBatchId]			= @BatchId
 								FROM
-									tblARInvoiceIntegrationLogDetail ILD
+									tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 								INNER JOIN
 									@PostInvoiceData PID
 										ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 								WHERE
-									ILD.[intIntegrationLogId] = @IntegrationLogId 
+									ILD.[intIntegrationLogId] = @IntegrationLogId
+									AND ILD.[ysnPost] IS NOT NULL 
 
 								COMMIT TRANSACTION
 							END						
@@ -366,15 +371,18 @@ BEGIN CATCH
 			--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
 			UPDATE ILD
 			SET
-				ILD.[ysnPosted] = 0
-				,ILD.[strPostingMessage] = @ErrorMerssage
+				 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+				,ILD.[strPostingMessage]	= @ErrorMerssage
+				,ILD.[strBatchId]			= @BatchId
 			FROM
-				tblARInvoiceIntegrationLogDetail ILD
+				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
 				@PostInvoiceData PID
 					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 			WHERE
-				ILD.[intIntegrationLogId] = @IntegrationLogId 
+				ILD.[intIntegrationLogId] = @IntegrationLogId
+				AND ILD.[ysnPost] IS NOT NULL  
 
 			COMMIT TRANSACTION
 		END						
@@ -1617,18 +1625,24 @@ END CATCH
 							BEGIN TRANSACTION
 							--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 							--SELECT @ErrorMerssage, @TransType, @param, @BatchId, 0							
-							--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param							
+							--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param															
 							UPDATE ILD
-								SET
-									ILD.[ysnPosted] = 0
-									,ILD.[strPostingMessage] = @ErrorMerssage
-								FROM
-									tblARInvoiceIntegrationLogDetail ILD
-								INNER JOIN
-									@PostInvoiceData PID
-										ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-								WHERE
-									ILD.[intIntegrationLogId] = @IntegrationLogId 
+							SET
+								 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+								,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+								,ILD.[strPostingMessage]	= @ErrorMerssage
+								,ILD.[strBatchId]			= @BatchId
+							FROM
+								tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
+							INNER JOIN
+								@PostInvoiceData PID
+									ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+							WHERE
+								ILD.[intIntegrationLogId] = @IntegrationLogId
+								AND ILD.[ysnPost] IS NOT NULL
+									
+							
+
 							COMMIT TRANSACTION
 							--COMMIT TRAN @TransactionName
 						END						
@@ -1802,15 +1816,30 @@ END CATCH
 			BEGIN
 
 				--Insert Invalid Post transaction result
-				INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 	
-					strError
-					,strTransactionType
-					,strTransactionId
-					,strBatchNumber
-					,intTransactionId
+				--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				--SELECT 	
+				--	strError
+				--	,strTransactionType
+				--	,strTransactionId
+				--	,strBatchNumber
+				--	,intTransactionId
+				--FROM
+				--	@InvalidInvoiceData
+					
+				UPDATE ILD
+				SET
+					 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
+					,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
+					,ILD.[strPostingMessage]	= PID.[strError]
+					,ILD.[strBatchId]			= PID.[strBatchNumber]
 				FROM
-					@InvalidInvoiceData
+					tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
+				INNER JOIN
+					@InvalidInvoiceData PID
+						ON ILD.[intInvoiceId] = PID.[intTransactionId]
+				WHERE
+					ILD.[intIntegrationLogId] = @IntegrationLogId
+					AND ILD.[ysnPost] IS NOT NULL
 
 				--DELETE Invalid Transaction From temp table
 				DELETE @PostInvoiceData
@@ -1951,15 +1980,18 @@ BEGIN TRY
 								--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
 								UPDATE ILD
 								SET
-									ILD.[ysnPosted] = 0
-									,ILD.[strPostingMessage] = @ErrorMerssage
+									 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+									,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+									,ILD.[strPostingMessage]	= @ErrorMerssage
+									,ILD.[strBatchId]			= @BatchId
 								FROM
-									tblARInvoiceIntegrationLogDetail ILD
+									tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 								INNER JOIN
 									@PostInvoiceData PID
 										ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 								WHERE
 									ILD.[intIntegrationLogId] = @IntegrationLogId
+									AND ILD.[ysnPost] IS NOT NULL 
 								COMMIT TRANSACTION
 							END						
 						IF @RaiseError = 1
@@ -1985,15 +2017,18 @@ BEGIN CATCH
 			--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
 			UPDATE ILD
 			SET
-				ILD.[ysnPosted] = 0
-				,ILD.[strPostingMessage] = @ErrorMerssage
+				 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+				,ILD.[strPostingMessage]	= @ErrorMerssage
+				,ILD.[strBatchId]			= @BatchId
 			FROM
-				tblARInvoiceIntegrationLogDetail ILD
+				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
 				@PostInvoiceData PID
 					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 			WHERE
 				ILD.[intIntegrationLogId] = @IntegrationLogId
+				AND ILD.[ysnPost] IS NOT NULL 
 			COMMIT TRANSACTION
 		END						
 	IF @RaiseError = 1
@@ -2070,7 +2105,7 @@ IF @Post = 1
 				,[strRateType]
 			)
 			EXEC	dbo.[uspARGenerateEntriesForAccrualNew]  
-						 @Invoices					= @Accruals
+						 @InvoiceIds				= @Accruals
 						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
 						,@BatchId					= @BatchId
 						,@Code						= @CODE
@@ -4432,15 +4467,18 @@ IF @Recap = 1
 					--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param		
 					UPDATE ILD
 					SET
-						ILD.[ysnPosted] = 0
-						,ILD.[strPostingMessage] = @ErrorMerssage
+						 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+						,ILD.[strPostingMessage]	= @ErrorMerssage
+						,ILD.[strBatchId]			= @BatchId
 					FROM
-						tblARInvoiceIntegrationLogDetail ILD
+						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 					INNER JOIN
 						@PostInvoiceData PID
 							ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 					WHERE
 						ILD.[intIntegrationLogId] = @IntegrationLogId
+						AND ILD.[ysnPost] IS NOT NULL 
 					COMMIT TRANSACTION
 				END			
 			IF @RaiseError = 1
@@ -4494,17 +4532,32 @@ IF @Recap = 0
 						 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId 					
 
 					--Insert Successfully unposted transactions.
-					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT 
-						@PostSuccessfulMsg
-						,ARI.strTransactionType
-						,ARI.strInvoiceNumber
-						,@BatchId
-						,ARI.intInvoiceId
+					--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					--SELECT 
+					--	@PostSuccessfulMsg
+					--	,ARI.strTransactionType
+					--	,ARI.strInvoiceNumber
+					--	,@BatchId
+					--	,ARI.intInvoiceId
+					--FROM
+					--	(SELECT intInvoiceId FROM @PostInvoiceData ) PID
+					--INNER JOIN						
+					--	(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId
+						
+					UPDATE ILD
+					SET
+						 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+						,ILD.[strPostingMessage]	= @PostSuccessfulMsg
+						,ILD.[strBatchId]			= @BatchId
 					FROM
-						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
-					INNER JOIN						
-						(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId
+						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+					WHERE
+						ILD.[intIntegrationLogId] = @IntegrationLogId
+						AND ILD.[ysnPost] IS NOT NULL
 												
 					--Update tblHDTicketHoursWorked ysnBilled					
 					UPDATE HDTHW						
@@ -4599,18 +4652,33 @@ IF @Recap = 0
 							ON ARI.intInvoiceId = ARPD.intInvoiceId 
 
 					--Insert Successfully posted transactions.
-					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT 
-						@PostSuccessfulMsg
-						,ARI.strTransactionType
-						,ARI.strInvoiceNumber
-						,@BatchId
-						,ARI.intInvoiceId
+					--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					--SELECT 
+					--	@PostSuccessfulMsg
+					--	,ARI.strTransactionType
+					--	,ARI.strInvoiceNumber
+					--	,@BatchId
+					--	,ARI.intInvoiceId
+					--FROM
+					--	(SELECT intInvoiceId FROM @PostInvoiceData ) PID
+					--INNER JOIN						
+					--	(SELECT intInvoiceId, strTransactionType, strInvoiceNumber FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
+					--		ON PID.intInvoiceId = ARI.intInvoiceId
+							
+					UPDATE ILD
+					SET
+						 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+						,ILD.[strPostingMessage]	= @PostSuccessfulMsg
+						,ILD.[strBatchId]			= @BatchId
 					FROM
-						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
-					INNER JOIN						
-						(SELECT intInvoiceId, strTransactionType, strInvoiceNumber FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
-							ON PID.intInvoiceId = ARI.intInvoiceId
+						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+					WHERE
+						ILD.[intIntegrationLogId] = @IntegrationLogId
+						AND ILD.[ysnPost] IS NOT NULL
 					
 					--Update tblHDTicketHoursWorked ysnBilled					
 					UPDATE HDTHW						
@@ -4677,8 +4745,32 @@ IF @Recap = 0
 		BEGIN TRY			
 			DECLARE @InvoiceToUpdate AS InvoiceId;
 			
-			INSERT INTO @InvoiceToUpdate([intHeaderId], [ysnPost])
-			SELECT DISTINCT intInvoiceId, @Post FROM @PostInvoiceData
+			INSERT INTO @InvoiceToUpdate(		 [intHeaderId]
+				,[ysnUpdateAvailableDiscountOnly]
+				,[intDetailId]
+				,[ysnForDelete]
+				,[ysnFromPosting]
+				,[ysnPost]
+				,[ysnAccrueLicense]
+				,[strTransactionType]
+				,[strSourceTransaction]
+				,[ysnProcessed])
+			SELECT
+				 [intHeaderId]						= PID.[intInvoiceId]
+				,[ysnUpdateAvailableDiscountOnly]	= ARIILD.[ysnUpdateAvailableDiscount]
+				,[intDetailId]						= NULL
+				,[ysnForDelete]						= 0
+				,[ysnFromPosting]					= 1
+				,[ysnPost]							= @Post
+				,[ysnAccrueLicense]					= ARIILD.[ysnAccrueLicense]
+				,[strTransactionType]				= ARIILD.[strTransactionType]
+				,[strSourceTransaction]				= ARIILD.[strSourceTransaction]
+				,[ysnProcessed]						= 0
+			FROM 
+				@PostInvoiceData PID
+			INNER JOIN
+				(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId], [strTransactionType], [ysnPost], [ysnAccrueLicense], [strSourceTransaction], [ysnUpdateAvailableDiscount] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+					ON PID.[intInvoiceId] = ARIILD.[intInvoiceId]
 				
 			--WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceToUpdate ORDER BY intInvoiceId)
 			--	BEGIN
@@ -4808,15 +4900,18 @@ Do_Rollback:
 			--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param								
 			UPDATE ILD
 			SET
-				ILD.[ysnPosted] = 0
-				,ILD.[strPostingMessage] = @ErrorMerssage
+				 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+				,ILD.[strPostingMessage]	= @ErrorMerssage
+				,ILD.[strBatchId]			= @BatchId
 			FROM
-				tblARInvoiceIntegrationLogDetail ILD
+				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
 				@PostInvoiceData PID
 					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 			WHERE
 				ILD.[intIntegrationLogId] = @IntegrationLogId
+				AND ILD.[ysnPost] IS NOT NULL
 			COMMIT TRANSACTION			
 		END
 	IF @RaiseError = 1
