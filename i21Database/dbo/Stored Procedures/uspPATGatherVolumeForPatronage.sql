@@ -40,7 +40,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblAPBillDetail ABD
 					ON ABD.intBillId = AB.intBillId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityId = AB.intEntityId AND ARC.strStockStatus != ''
+					ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItem IC
 					ON IC.intItemId = ABD.intItemId
 			INNER JOIN tblPATPatronageCategory PC
@@ -66,7 +66,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblARInvoiceDetail ARD
 					ON ARD.intInvoiceId = AR.intInvoiceId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityId = AR.intEntityId AND ARC.strStockStatus != ''
+					ON ARC.intEntityId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItem IC
 					ON IC.intItemId = ARD.intItemId
 			INNER JOIN tblICItemUOM ICU
