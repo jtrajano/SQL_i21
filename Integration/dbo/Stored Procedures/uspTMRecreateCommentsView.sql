@@ -126,7 +126,7 @@ BEGIN
 			CREATE VIEW [dbo].[vwcmtmst]
 			AS
 			SELECT 
-						vwcmt_cus_no				=B.strCustomerNumber
+						vwcmt_cus_no				=C.strEntityNo
 						,vwcmt_com_typ				=A.strMessageType
 						,vwcmt_com_cd				=CAST(NULL AS CHAR(4))
 						,vwcmt_com_seq				=CAST('''' AS CHAR(2))  
@@ -156,6 +156,8 @@ BEGIN
 					FROM tblEMEntityMessage A
 					INNER JOIN tblARCustomer B
 						ON A.intEntityId = B.intEntityId
+					INNER JOIN tblEMEntity C
+						ON B.intEntityId = C.intEntityId
 		')
 	END
 END
