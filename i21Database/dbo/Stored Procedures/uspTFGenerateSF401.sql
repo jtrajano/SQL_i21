@@ -3,7 +3,7 @@
 @Guid NVARCHAR(250),
 @FormCodeParam NVARCHAR(MAX),
 @ScheduleCodeParam NVARCHAR(MAX),
-@Refresh NVARCHAR(5)
+@Refresh BIT
 
 AS
 
@@ -40,7 +40,7 @@ DECLARE @tblSchedule TABLE (
 		intId INT IDENTITY(1,1),
 		strSchedule NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		)
-IF @Refresh = 'true'
+IF @Refresh = 1
 		BEGIN
 			DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
 		END

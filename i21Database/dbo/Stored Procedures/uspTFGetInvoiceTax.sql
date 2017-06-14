@@ -140,7 +140,9 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxID
-				, strHeaderFederalTaxID)
+				, strHeaderFederalTaxID
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId, intProductCodeId DESC) AS intId
 				, *
 			FROM (
@@ -188,6 +190,8 @@ BEGIN TRY
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strFederalTaxID
+					, strTransactionType = 'Invoice'
+					, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 				FROM tblEMEntity AS Transporter
 				INNER JOIN tblSMShipVia ON Transporter.intEntityId = tblSMShipVia.intEntityShipViaId
 				INNER JOIN tblARInvoice ON tblSMShipVia.intEntityShipViaId = tblARInvoice.intShipViaId
@@ -272,7 +276,9 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxID
-				, strHeaderFederalTaxID)
+				, strHeaderFederalTaxID
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId, intProductCodeId DESC) AS intId
 				, *
 			FROM (
@@ -320,6 +326,8 @@ BEGIN TRY
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strFederalTaxID
+					, strTransactionType = 'Invoice'
+					, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 				FROM tblEMEntity AS tblEMEntity_Transporter
 				INNER JOIN tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.intEntityShipViaId
 				INNER JOIN tblARInvoice ON tblSMShipVia.intEntityShipViaId = tblARInvoice.intShipViaId
@@ -443,7 +451,9 @@ BEGIN TRY
 				, strHeaderZip
 				, strHeaderPhone
 				, strHeaderStateTaxID
-				, strHeaderFederalTaxID)
+				, strHeaderFederalTaxID
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 				, *
 			FROM (
@@ -491,6 +501,8 @@ BEGIN TRY
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strFederalTaxID
+					, strTransactionType = 'Transfer'
+					, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 				FROM  tblICInventoryTransferDetail 
 				INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId 
 				INNER JOIN tblICItemMotorFuelTax 
@@ -539,12 +551,7 @@ BEGIN TRY
 			WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM @tmpInvoiceTransaction)
 
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
-				, intTaxAuthorityId
-				, strTaxAuthority
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
-				, strType
 				, intProductCodeId
 				, strProductCode
 				, intItemId
@@ -583,14 +590,10 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
-				, leaf)
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT @Guid
-				, intTaxAuthorityId
-				, @TaxAuthorityCode
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
-				, strType
 				, intProductCode
 				, strProductCode
 				, intItemId
@@ -629,13 +632,11 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, @DateFrom
 				, @DateTo
-				, 1
+				, strTransactionType
+				, intTransactionNumberId
 			FROM @tmpInvoiceTransaction ORDER BY strProductCode
 		END
-		ELSE
-		BEGIN
-			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
-		END
+		
 		DELETE FROM @tmpInvoiceTransaction
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 	END
@@ -643,19 +644,19 @@ BEGIN TRY
 	IF(NOT EXISTS (SELECT TOP 1 1 FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid) AND @IsEdi = 0)
 	BEGIN
 		INSERT INTO tblTFTransaction (uniqTransactionGuid
-			, strFormCode
+			, intReportingComponentId
 			, strProductCode
 			, dtmDate
 			, dtmReportingPeriodBegin
 			, dtmReportingPeriodEnd
-			, leaf)
+			, strTransactionType)
 		VALUES (@Guid
-			, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId)
+			, @RCId
 			, 'No record found.'
 			, GETDATE()
 			, @DateFrom
 			, @DateTo
-			, 1)
+			, 'Invoice')
 	END
 
 	EXEC uspTFProcessBeforePreview @Guid = @Guid

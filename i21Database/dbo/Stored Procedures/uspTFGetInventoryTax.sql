@@ -94,6 +94,8 @@ BEGIN TRY
 				, intReportingComponentId
 				, strScheduleCode
 				, strType
+				, intItemId
+				, intProductCodeId
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
@@ -118,7 +120,9 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strDestinationState
-				, strTerminalControlNumber)
+				, strTerminalControlNumber
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId
 				, *
 			FROM (
@@ -128,6 +132,8 @@ BEGIN TRY
 				, RCPC.intReportingComponentId
 				, RCPC.strScheduleCode
 				, strType = RCPC.strReportingComponentType
+				, ReceiptItem.intItemId
+				, RCPC.intProductCodeId
 				, RCPC.strProductCode
 				, Receipt.strBillOfLading
 				, ReceiptItem.dblReceived
@@ -153,6 +159,8 @@ BEGIN TRY
 				, Origin.strState AS strOriginState
 				, Destination.strStateProvince
 				, TCN.strTerminalControlNumber
+				, strTransactionType = 'Receipt'
+				, intTransactionNumberId = ReceiptItem.intInventoryReceiptItemId
 			FROM tblTRSupplyPoint
 			INNER JOIN tblTFTerminalControlNumber TCN ON tblTRSupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
 			FULL OUTER JOIN tblEMEntityLocation Origin
@@ -197,6 +205,8 @@ BEGIN TRY
 				, intReportingComponentId
 				, strScheduleCode
 				, strType
+				, intItemId
+				, intProductCodeId
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
@@ -221,7 +231,9 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strDestinationState
-				, strTerminalControlNumber)
+				, strTerminalControlNumber
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId
 				, *
 			FROM (
@@ -231,6 +243,8 @@ BEGIN TRY
 				, RCPC.intReportingComponentId
 				, RCPC.strScheduleCode
 				, strType = RCPC.strReportingComponentType
+				, ReceiptItem.intItemId
+				, RCPC.intProductCodeId
 				, RCPC.strProductCode
 				, Receipt.strBillOfLading
 				, ReceiptItem.dblReceived
@@ -256,6 +270,8 @@ BEGIN TRY
 				, Origin.strState AS strOriginState
 				, Destination.strStateProvince
 				, TCN.strTerminalControlNumber
+				, strTransactionType = 'Receipt'
+				, intTransactionNumberId = ReceiptItem.intInventoryReceiptItemId
 			FROM tblTRSupplyPoint
 			INNER JOIN tblTFTerminalControlNumber TCN ON tblTRSupplyPoint.intTerminalControlNumberId = TCN.intTerminalControlNumberId
 			RIGHT OUTER JOIN tblSMTaxCode
@@ -360,12 +376,8 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
 				, intItemId
-				, intTaxAuthorityId
-				, strTaxAuthority
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
-				, strType
+				, intProductCodeId
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
@@ -397,15 +409,12 @@ BEGIN TRY
 				, strDestinationState
 				, strCustomerName
 				, strCustomerFederalTaxId
-				, leaf)
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT @Guid
-				, intInventoryReceiptItemId
-				, intTaxAuthorityId
-				, (SELECT strTaxAuthorityCode FROM tblTFTaxAuthority WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM @TFTransaction))
-				, strFormCode
+				, intItemId
 				, intReportingComponentId
-				, strScheduleCode
-				, strType
+				, intProductCodeId
 				, strProductCode
 				, strBillOfLading
 				, dblReceived
@@ -438,14 +447,11 @@ BEGIN TRY
 				, strDestinationState
 				, @CompanyName
 				, @CompanyEIN
-				, 1
+				, strTransactionType
+				, intTransactionNumberId
 			FROM @TFTransaction
 		END
-		ELSE
-		BEGIN
-			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
-		END
-
+		
 		DELETE FROM @TFTransaction
 		DELETE FROM #tmpRC WHERE @RCId = intReportingComponentId
 	END
@@ -455,19 +461,19 @@ BEGIN TRY
 	IF (NOT EXISTS(SELECT TOP 1 1 FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid) AND @IsEdi = 0)
 	BEGIN
 		INSERT INTO tblTFTransaction (uniqTransactionGuid
-			, strFormCode
+			, intReportingComponentId
 			, strProductCode
 			, dtmDate
 			, dtmReportingPeriodBegin
 			, dtmReportingPeriodEnd
-			, leaf)
+			, strTransactionType)
 		VALUES(@Guid
-			, (SELECT TOP 1 strFormCode FROM tblTFReportingComponent WHERE intReportingComponentId = @RCId)
+			, @RCId
 			, 'No record found.'
 			, GETDATE()
 			, @DateFrom
 			, @DateTo
-			, 1)
+			, 'Receipt')
 	END
 END TRY
 BEGIN CATCH

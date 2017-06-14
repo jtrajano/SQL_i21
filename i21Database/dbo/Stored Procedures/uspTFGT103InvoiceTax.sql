@@ -4,8 +4,8 @@
 @ReportingComponentId NVARCHAR(MAX),
 @DateFrom DATETIME,
 @DateTo DATETIME,
-@IsEdi NVARCHAR(10),
-@Refresh NVARCHAR(5)
+@IsEdi BIT,
+@Refresh BIT
 
 AS
 
@@ -51,7 +51,7 @@ BEGIN TRY
 	DECLARE @IncludeLocationState NVARCHAR(250)
 	DECLARE @ExcludeLocationState NVARCHAR(250)
 
-	IF (@Refresh = 'true')
+	IF (@Refresh = 1)
 	BEGIN
 		DELETE FROM tblTFTransaction
 	END
@@ -104,7 +104,9 @@ BEGIN TRY
 			, strHeaderZip
 			, strHeaderPhone
 			, strHeaderStateTaxID
-			, strHeaderFederalTaxID)
+			, strHeaderFederalTaxID
+			, strTransactionType
+			, intTransactionNumberId)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -147,6 +149,8 @@ BEGIN TRY
 			, tblSMCompanySetup.strPhone
 			, tblSMCompanySetup.strStateTaxID
 			, tblSMCompanySetup.strFederalTaxID
+			, strTransactionType = 'Invoice'
+			, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 		FROM tblTFProductCode
 		INNER JOIN tblSMTaxCode
 		INNER JOIN tblARInvoiceDetail
@@ -273,7 +277,9 @@ BEGIN TRY
 			, strHeaderStateTaxID
 			, strHeaderFederalTaxID
 			, dblTax
-			, dblTaxExempt)
+			, dblTaxExempt
+			, strTransactionType
+			, intTransactionNumberId)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -320,6 +326,8 @@ BEGIN TRY
 			, tblSMCompanySetup.strFederalTaxID
 			, (ISNULL(tblICInventoryTransferDetail.dblQuantity, 0) * @ConfigGUTRate) AS dblTax
 			, 0.000000 AS dblTaxExempt
+			, strTransactionType = 'Transfer'
+			, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 		FROM tblTFProductCode
 		INNER JOIN tblICInventoryTransferDetail
 		INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
@@ -357,12 +365,7 @@ BEGIN TRY
 		IF (@ReportingComponentId <> '')
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
-				, intTaxAuthorityId
-				, strTaxAuthority
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
-				, strType
 				, intProductCodeId
 				, strProductCode
 				, intItemId
@@ -403,14 +406,10 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
-				, leaf)
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT @Guid
-				, TRANS.intTaxAuthorityId
-				, strTaxAuthorityCode
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
-				, strType
 				, intProductCode
 				, strProductCode
 				, intItemId
@@ -451,39 +450,34 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, @DateFrom
 				, @DateTo
-				, 1
+				, strTransactionType
+				, intTransactionNumberId
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
 
 		END
-		ELSE
-		BEGIN
-			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
-		END
-
+		
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 	END
 
 	DROP TABLE #tmpRC
 
-	IF (NOT EXISTS(SELECT TOP 1 1 from @TFTransaction) AND @IsEdi = 'false')
+	IF (NOT EXISTS(SELECT TOP 1 1 from @TFTransaction) AND @IsEdi = 0)
 	BEGIN
 		INSERT INTO tblTFTransaction(uniqTransactionGuid
-			, intTaxAuthorityId
-			, strFormCode
+			, intReportingComponentId
 			, strProductCode
 			, dtmDate
 			, dtmReportingPeriodBegin
 			, dtmReportingPeriodEnd
-			, leaf)
+			, strTransactionType)
 		VALUES(@Guid
-			, 0
-			, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId)
+			, @RCId
 			, 'No record found.'
 			, GETDATE()
 			, @DateFrom
 			, @DateTo
-			, 1)
+			, 'Invoice')
 	END
 END TRY
 BEGIN CATCH

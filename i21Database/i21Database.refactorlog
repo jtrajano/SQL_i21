@@ -6020,4 +6020,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="114f8aba-6f3b-471c-8468-b69c501fb411" ChangeDateTime="06/05/2017 06:56:06">
+    <Property Name="ElementName" Value="[dbo].[tblTFException].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFException]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intExceptionId" />
+  </Operation>
 </Operations>

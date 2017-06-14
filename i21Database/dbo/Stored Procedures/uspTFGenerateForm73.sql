@@ -2,7 +2,7 @@
 	@Guid NVARCHAR(50),
 	@FormCodeParam NVARCHAR(MAX),
 	@ScheduleCodeParam NVARCHAR(MAX),
-	@Refresh NVARCHAR(5)
+	@Refresh BIT
 AS
 
 DECLARE @TFTransactionSummaryItem TFTransactionSummaryItem
@@ -39,7 +39,7 @@ DECLARE @tblSchedule TABLE (
 		intId INT IDENTITY(1,1),
 		strSchedule NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		)
-IF @Refresh = 'true'
+IF @Refresh = 1
 		BEGIN
 			DELETE FROM tblTFTransactionSummary
 		END
@@ -53,11 +53,11 @@ DECLARE @EIN NVARCHAR(50)
 DECLARE @FaxNumber NVARCHAR(50)
 
 SELECT TOP 1 @TA = intTaxAuthorityId, 
-			 @TACode = strTaxAuthority,
+			 @TACode = strTaxAuthorityCode,
 			 @DatePeriod = dtmReportingPeriodBegin,
 			 @DateBegin = dtmReportingPeriodBegin,
 			 @DateEnd = dtmReportingPeriodEnd
-		FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+		FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
 
 SET @NEIdNumber = (SELECT strConfiguration FROM tblTFReportingComponentConfiguration RCC 
 					  INNER JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
@@ -179,54 +179,54 @@ SELECT TOP 1 @EIN = strEin,
 				
 				IF (@ItemId = 'Form-73-Details-001')
 					BEGIN
-							SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-							SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-							SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+							SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+							SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+							SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 							--================================RC CONFIG
 							SET @ColumnD = '0.00'
 							SET @ColumnE = '0.00'
 							SET @ColumnF = '0.00'
 							--================================RC CONFIG END
-							SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-							SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+							SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+							SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 					END
 				IF (@ItemId = 'Form-73-Details-002')
 					BEGIN
-						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 							--================================RC CONFIG
 						SET @ColumnD = '0.00'
 						SET @ColumnE = '0.00'
 						SET @ColumnF = '0.00'
 							--================================RC CONFIG END
-						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 					
 					END
 				IF (@ItemId = 'Form-73-Details-002')
 					BEGIN
 					INSERT INTO @tblSchedule (strSchedule)
 					EXEC(@SchedQuery)
-						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 						--================================RC CONFIG
 						SET @ColumnD = '0.00'
 						SET @ColumnE = '0.00'
 						SET @ColumnF = '0.00'
 						--================================RC CONFIG END
-						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 						DELETE FROM @tblSchedule
 					END
 				ELSE IF (@ItemId = 'Form-73-Details-003')
 					BEGIN
-						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnD = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Undyed or Dyed Kerosene' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '5' AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '5' AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnD = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '5' AND strType = 'Undyed or Dyed Kerosene' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '5' AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '5' AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 					END
 				ELSE IF (@ItemId = 'Form-73-Details-004')
 					BEGIN
@@ -252,19 +252,19 @@ SELECT TOP 1 @EIN = strEin,
 								INSERT INTO @tblSchedule (strSchedule)
 								EXEC(@SchedQuery)
 
-								SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction 
+								SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction 
 								WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) 
 								AND strType = 'Gasoline / Gasohol / Ethanol' 
 								AND uniqTransactionGuid = @Guid 
 								AND strFormCode = @FormCodeParam)
 
-								SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction 
+								SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction 
 								WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) 
 								AND strType = 'Undyed Diesel / Biodiesel' 
 								AND uniqTransactionGuid = @Guid 
 								AND strFormCode = @FormCodeParam)
 								
-								SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction 
+								SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction 
 								WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) 
 								AND strType = 'Dyed Diesel / Biodiesel' 
 								AND uniqTransactionGuid = @Guid 
@@ -274,12 +274,12 @@ SELECT TOP 1 @EIN = strEin,
 								SET @ColumnE = '0.00'
 								SET @ColumnF = '0.00'
 								--================================RC CONFIG END
-								SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction 
+								SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction 
 								WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) 
 								AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid 
 								AND strFormCode = @FormCodeParam)
 
-								SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction 
+								SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction 
 								WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) 
 								AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid 
 								AND strFormCode = @FormCodeParam)
@@ -290,16 +290,16 @@ SELECT TOP 1 @EIN = strEin,
 					END
 				ELSE IF (@ItemId = 'Form-73-Details-007')
 					BEGIN
-						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '10' AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '10' AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '10' AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '10' AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '10' AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '10' AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 						--================================RC CONFIG
 						SET @ColumnD = '0.00'
 						SET @ColumnE = '0.00'
 						SET @ColumnF = '0.00'
 						--================================RC CONFIG END
-						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '10' AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '10' AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '10' AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '10' AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 					END
 				ELSE IF (@ItemId = 'Form-73-Details-008')
 					BEGIN
@@ -310,16 +310,16 @@ SELECT TOP 1 @EIN = strEin,
 					BEGIN
 								INSERT INTO @tblSchedule (strSchedule)
 								EXEC(@SchedQuery)
-								SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-								SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-								SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+								SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+								SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+								SET @ColumnC = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Dyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 								--================================RC CONFIG
 								SET @ColumnD = '0.00'
 								SET @ColumnE = '0.00'
 								SET @ColumnF = '0.00'
 								--================================RC CONFIG END
-								SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-								SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+								SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+								SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 								DELETE FROM @tblSchedule
 					
 					END
@@ -861,7 +861,7 @@ SELECT TOP 1 @EIN = strEin,
 			END
 			
 			DECLARE @isTransactionEmpty NVARCHAR(20)
-			SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+			SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 			IF(@isTransactionEmpty = 'No record found.')
 				BEGIN
 					UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam

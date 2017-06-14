@@ -29,6 +29,7 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
+		AND RC.intTaxAuthorityId = @TaxAuthorityId
 
 	UPDATE tblTFReportingComponentConfiguration
 	SET tblTFReportingComponentConfiguration.intMasterId = Source.intMasterId

@@ -2,7 +2,7 @@
 	@Guid NVARCHAR(250)
 	, @FormCodeParam NVARCHAR(MAX)
 	, @ScheduleCodeParam NVARCHAR(MAX)
-	, @Refresh NVARCHAR(5)
+	, @Refresh BIT
 
 AS
 
@@ -51,7 +51,7 @@ BEGIN TRY
 	DECLARE @tblSchedule TABLE (intId INT IDENTITY(1,1)
 		, strSchedule NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL)
 
-	IF @Refresh = 'true'
+	IF @Refresh = 1
 	BEGIN
 		DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
 	END
@@ -440,7 +440,7 @@ BEGIN TRY
 			INSERT INTO @tblSchedule (strSchedule)
 			EXEC(@SchedQuery)
 			DECLARE @TOTAL NUMERIC(18,2)
-			SET @TOTAL = (SELECT ISNULL(SUM(CONVERT(NUMERIC(18, 2), strConfiguration)), 0) FROM vyuTFGetReportingComponentConfiguration WHERE strFormCode = @FormCodeParam AND strScheduleCode = 'E-1') + (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+			SET @TOTAL = (SELECT ISNULL(SUM(CONVERT(NUMERIC(18, 2), strConfiguration)), 0) FROM vyuTFGetReportingComponentConfiguration WHERE strFormCode = @FormCodeParam AND strScheduleCode = 'E-1') + (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 			INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
 			VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 1, 'Details','Gasoline / Aviation Gasoline / Gasohol A', '',@TOTAL, @ItemDescription, CAST(GETDATE() AS DATE))
 			INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		

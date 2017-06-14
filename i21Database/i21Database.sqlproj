@@ -3915,7 +3915,6 @@
     <Build Include="dbo\Stored Procedures\uspTFGT103InvoiceTax.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMF360.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateGT103.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFDefault.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateSF401.sql" />
     <Build Include="dbo\Stored Procedures\uspTFSF401InvoiceTax.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
@@ -4150,7 +4149,6 @@
     <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
     <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFRefresh.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderDetailReport.sql" />
     <Build Include="dbo\Views\vyuEMBEExportCustomer.sql" />
@@ -5008,7 +5006,6 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherItems.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICPopulateReceiptVoucher.sql" />
-    <Build Include="dbo\Tables\tblTFTransactionException.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetail.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFReceiptItem.sql" />
@@ -5026,7 +5023,6 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentOriginState.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentProductCode.sql" />
     <Build Include="dbo\Views\vyuTFGetTransaction.sql" />
-    <Build Include="dbo\Views\vyuTFGetTransactionException.sql" />
     <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateForm73.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentAccountStatusCode.sql" />
@@ -5268,6 +5264,8 @@
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostSOStatusFromInvoices.sql" />
     <Build Include="dbo\Views\vyuMFParentLot.sql" />
+    <Build Include="dbo\Tables\tblTFException.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
