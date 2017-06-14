@@ -5,22 +5,14 @@
 	,@intTaskId INT
 AS
 BEGIN TRY
-	--DECLARE @strOrderLotNo NVARCHAR(50)
 	DECLARE @intAlternateLotId INT
 	DECLARE @intStorageLocationId INT
-	--DECLARE @intPickListId INT
-	--DECLARE @intCompanyLocationId INT
 	DECLARE @dblAlternateLotQty NUMERIC(38, 20)
 	DECLARE @dblAlternateLotWeight NUMERIC(38, 20)
 	DECLARE @dtmAlternateLotExpiryDate DATETIME
-	--DECLARE @dblReservedLotQtyForPickList NUMERIC(38, 20)
-	--DECLARE @dblAlternateLotReservedQty NUMERIC(38, 20)
-	--DECLARE @dblAlternateLotAvailableQty NUMERIC(38, 20)
 	DECLARE @intTransactionCount INT
-	DECLARE @dblRequiredTaskQty NUMERIC(18,6)
-	DECLARE @dblRequiredTaskWeight NUMERIC(18,6)
-	--DECLARE @strBlendProductionStagingLocation NVARCHAR(100)
-	--DECLARE @strKitStagingArea NVARCHAR(100)
+	DECLARE @dblRequiredTaskQty NUMERIC(18, 6)
+	DECLARE @dblRequiredTaskWeight NUMERIC(18, 6)
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @intItemId INT
 	DECLARE @intAlternateItemId INT
@@ -44,27 +36,15 @@ BEGIN TRY
 		AND intStorageLocationId = @intStorageLocationId
 
 	SELECT @dblRequiredTaskWeight = dblWeight
-		  ,@dblRequiredTaskQty = dblQty
-	FROM tblMFTask WHERE intTaskId = @intTaskId
+		,@dblRequiredTaskQty = dblQty
+	FROM tblMFTask
+	WHERE intTaskId = @intTaskId
 
-	--SELECT @strBlendProductionStagingLocation = sl.strName
-	--FROM tblSMCompanyLocation cl
-	--JOIN tblICStorageLocation sl ON cl.intBlendProductionStagingUnitId = sl.intStorageLocationId
-	--WHERE intCompanyLocationId = 1
-	--SELECT @strKitStagingArea = sl.strName
-	--FROM tblMFAttribute a
-	--JOIN tblMFManufacturingProcessAttribute mpa ON mpa.intAttributeId = a.intAttributeId
-	--JOIN tblICStorageLocation sl ON sl.intStorageLocationId = mpa.strAttributeValue
-	--WHERE a.strAttributeName = 'Kit Staging Location'
-	--	AND intManufacturingProcessId = 1
-
-	IF(@dblAlternateLotQty > @dblRequiredTaskQty)
-	BEGIN
-		SET @strErrMsg = 'AVAILABLE QTY IN THE SCANNED LOT IS MORE THAN THE REQUIRED QTY. CANNOT CONTINUE.'
-
-		RAISERROR (@strErrMsg,16,1)
-	END
-
+	--IF(@dblAlternateLotQty > @dblRequiredTaskQty)
+	--BEGIN
+	--	SET @strErrMsg = 'AVAILABLE QTY IN THE SCANNED LOT IS MORE THAN THE REQUIRED QTY. CANNOT CONTINUE.'
+	--	RAISERROR (@strErrMsg,16,1)
+	--END
 	IF ISNULL(@dblAlternateLotQty, 0) <= 0
 	BEGIN
 		SET @strErrMsg = 'QTY NOT AVAILABLE FOR LOT ' + @strAlternateLotNo + ' ON LOCATION ' + @strLotSourceLocation + '.'
@@ -85,21 +65,21 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @intLotStatusId = intLotStatusId,
-		   @intAlternateItemId = intItemId,
-		   @dtmAlternateLotExpiryDate = dtmExpiryDate
+	SELECT @intLotStatusId = intLotStatusId
+		,@intAlternateItemId = intItemId
+		,@dtmAlternateLotExpiryDate = dtmExpiryDate
 	FROM tblICLot
 	WHERE intLotId = @intAlternateLotId
 
-	SELECT @intItemId = intItemId 
-	FROM tblICLot 
+	SELECT @intItemId = intItemId
+	FROM tblICLot
 	WHERE intLotId = @intLotId
 
 	SELECT @strPrimaryStatus = strPrimaryStatus
 	FROM tblICLotStatus
 	WHERE intLotStatusId = @intLotStatusId
 
-	IF(@intItemId <> @intAlternateItemId)
+	IF (@intItemId <> @intAlternateItemId)
 	BEGIN
 		RAISERROR (
 				'ALTERNATE LOT BELONGS TO A DIFFERENT ITEM. CANNOT CONTINUE.'
@@ -107,7 +87,7 @@ BEGIN TRY
 				,1
 				)
 	END
-	
+
 	IF (@dtmAlternateLotExpiryDate < GETDATE())
 	BEGIN
 		RAISERROR (
@@ -117,15 +97,21 @@ BEGIN TRY
 				)
 	END
 
-	IF EXISTS((SELECT 1 FROM tblMFTask WHERE intLotId = @intAlternateLotId))
+	IF EXISTS (
+			(
+				SELECT 1
+				FROM tblMFTask
+				WHERE intLotId = @intAlternateLotId
+				)
+			)
 	BEGIN
-	IF (@intLotId <> @intAlternateLotId)
+		IF (@intLotId <> @intAlternateLotId)
 		BEGIN
 			RAISERROR (
-				'SCANNED LOT IS ASSOCIATED WITH A DIFFERENT TASK. CANNOT CONTINUE'
-				,16
-				,1
-				)
+					'SCANNED LOT IS ASSOCIATED WITH A DIFFERENT TASK. CANNOT CONTINUE'
+					,16
+					,1
+					)
 		END
 	END
 
@@ -153,18 +139,54 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	IF EXISTS (
-			SELECT 1
-			FROM tblMFTask
-			WHERE intLotId = @intLotId
-				AND intTaskId = @intTaskId
+	IF @intOrderHeaderId IS NOT NULL
+		AND EXISTS (
+			SELECT *
+			FROM tblMFOrderHeader
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intOrderTypeId = 1
 			)
+		AND EXISTS (
+				SELECT 1
+				FROM tblMFTask
+				WHERE intLotId = @intLotId
+					AND intTaskId = @intTaskId
+				)
 	BEGIN
+		DECLARE @dblPickQty NUMERIC(38, 20)
+			,@intPickItemUOMId INT
+
+		SELECT @dblPickQty = NULL
+			,@intPickItemUOMId = NULL
+
+		SELECT @dblPickQty = dblQty
+			,@intPickItemUOMId = intItemUOMId
+		FROM tblICLot
+		WHERE intLotId = @intAlternateLotId
+
 		UPDATE tblMFTask
 		SET intLotId = @intAlternateLotId
 			,intFromStorageLocationId = @intStorageLocationId
+			,dblPickQty = @dblPickQty
+			,intItemUOMId = @intPickItemUOMId
 		WHERE intLotId = @intLotId
 			AND intTaskId = @intTaskId
+	END
+	ELSE
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM tblMFTask
+				WHERE intLotId = @intLotId
+					AND intTaskId = @intTaskId
+				)
+		BEGIN
+			UPDATE tblMFTask
+			SET intLotId = @intAlternateLotId
+				,intFromStorageLocationId = @intStorageLocationId
+			WHERE intLotId = @intLotId
+				AND intTaskId = @intTaskId
+		END
 	END
 
 	COMMIT TRANSACTION

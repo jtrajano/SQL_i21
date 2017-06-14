@@ -42,12 +42,12 @@ BEGIN TRY
 		  ,@dblRequiredTaskQty = dblQty
 	FROM tblMFTask WHERE intTaskId = @intTaskId
 
-	IF(@dblAlternateLotQty > @dblRequiredTaskQty)
-	BEGIN
-		SET @strErrMsg = 'AVAILABLE QTY IN THE SCANNED LOT IS MORE THAN THE REQUIRED QTY. CANNOT CONTINUE.'
+	--IF(@dblAlternateLotQty > @dblRequiredTaskQty)
+	--BEGIN
+	--	SET @strErrMsg = 'AVAILABLE QTY IN THE SCANNED LOT IS MORE THAN THE REQUIRED QTY. CANNOT CONTINUE.'
 
-		RAISERROR (@strErrMsg,16,1)
-	END
+	--	RAISERROR (@strErrMsg,16,1)
+	--END
 
 	--SELECT @strBlendProductionStagingLocation = sl.strName
 	--FROM tblSMCompanyLocation cl

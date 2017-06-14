@@ -432,7 +432,7 @@ BEGIN TRY
 			FROM tblMFWorkOrderProducedLotTransaction PL
 			JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 			WHERE intWorkOrderId = @intWorkOrderId
-				AND PL.dblQuantity < 0
+				--AND PL.dblQuantity < 0
 
 			DELETE
 			FROM @ItemsForPost
@@ -732,6 +732,8 @@ BEGIN TRY
 	FROM dbo.tblMFOrderHeader OH
 	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = OH.intOrderHeaderId
 	WHERE SW.intWorkOrderId = @intWorkOrderId
+
+	Exec [dbo].[uspICPostStockReservation] @intTransactionId =@intWorkOrderId,@intTransactionTypeId=8,@ysnPosted=1
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

@@ -9,6 +9,8 @@ BEGIN TRY
 		,@intUserId INT
 		,@dtmCurrentDateTime DATETIME
 		,@intTransactionCount INT
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intInventoryTransactionType AS INT = 8
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -60,6 +62,11 @@ BEGIN TRY
 		,@intProductionStageLocationId INT
 		,@intProductionStagingId INT
 		,@strStagedLotNumber NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50)
+
+	SELECT @strWorkOrderNo = strWorkOrderNo
+	FROM dbo.tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @intLotId = intLotId
 		,@intInputItemId = intItemId
@@ -106,7 +113,7 @@ BEGIN TRY
 
 		SELECT @strNewLotNumber = strLotNumber
 			,@dblWeightPerQty = dblWeightPerQty
-			,@intItemUOMId=intItemUOMId
+			,@intItemUOMId = intItemUOMId
 		FROM dbo.tblICLot
 		WHERE intLotId = @intLotId
 
@@ -199,7 +206,7 @@ BEGIN TRY
 				,L.dtmDateCreated ASC
 		END
 
-		SELECT @dblAdjustByQuantity = - @dblNewWeight 
+		SELECT @dblAdjustByQuantity = - @dblNewWeight
 
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
 			-- Parameters for filtering:
@@ -253,6 +260,59 @@ BEGIN TRY
 	SET dblInputQuantity = dblInputQuantity - @dblNewWeight
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intItemId = @intInputItemId
+
+	SELECT @intLotId = NULL
+
+	SELECT TOP 1 @intLotId = intLotId
+	FROM tblICLot
+	WHERE strLotNumber = @strNewLotNumber
+		AND intStorageLocationId = @intNewStorageLocationId
+
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,@intInventoryTransactionType
+
+	INSERT INTO @ItemsToReserve (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		,dblQty
+		,intTransactionId
+		,strTransactionId
+		,intTransactionTypeId
+		)
+	SELECT intItemId = WI.intItemId
+		,intItemLocationId = IL.intItemLocationId
+		,intItemUOMId = WI.intItemIssuedUOMId
+		,intLotId = (
+			SELECT TOP 1 intLotId
+			FROM tblICLot L1
+			WHERE L1.strLotNumber = L.strLotNumber
+				AND L1.intStorageLocationId = @intStorageLocationId
+			)
+		,intSubLocationId = @intSubLocationId
+		,intStorageLocationId = @intStorageLocationId
+		,dblQty = SUM(WI.dblIssuedQuantity)
+		,intTransactionId = @intWorkOrderId
+		,strTransactionId = @strWorkOrderNo
+		,intTransactionTypeId = @intInventoryTransactionType
+	FROM tblMFWorkOrderInputLot WI
+	JOIN tblICItemLocation IL ON IL.intItemId = WI.intItemId
+		AND IL.intLocationId = @intLocationId
+		AND WI.ysnConsumptionReversed = 0
+	JOIN tblICLot L ON L.intLotId = WI.intLotId
+	WHERE intWorkOrderId = @intWorkOrderId
+	GROUP BY WI.intItemId
+		,IL.intItemLocationId
+		,WI.intItemIssuedUOMId
+		,L.strLotNumber
+
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,@intInventoryTransactionType
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
