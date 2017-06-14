@@ -5256,7 +5256,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGenerateSSCCNo.sql" />
     <Build Include="dbo\Tables\tblMFCustomerLabelType.sql" />
     <Build Include="dbo\Views\vyuMFOrderDetail.sql" />
-    <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBillOfLadingReport.sql" />
     <Build Include="dbo\Tables\tblMFOrderManifestLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
