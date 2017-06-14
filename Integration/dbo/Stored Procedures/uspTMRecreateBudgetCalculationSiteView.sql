@@ -20,19 +20,14 @@ BEGIN
 	)
 	BEGIN
 		EXEC ('
-			CREATE VIEW [dbo].[vyuTMBudgetCalculationSite]  
-			AS 
+				
+				CREATE VIEW [dbo].[vyuTMBudgetCalculationSite]  
+				AS 
+
 				SELECT 
-					strCustomerNumber = C.vwcus_key COLLATE Latin1_General_CI_AS 
-					,strCustomerName = (CASE WHEN C.vwcus_co_per_ind_cp = ''C''   
-											THEN  ISNULL(RTRIM(C.vwcus_last_name),'''') + ISNULL(RTRIM(C.vwcus_first_name),'''') + ISNULL(RTRIM(C.vwcus_mid_init),'''') + ISNULL(RTRIM(C.vwcus_name_suffix),'''')   
-											ELSE    
-												CASE WHEN C.vwcus_first_name IS NULL OR RTRIM(C.vwcus_first_name) = ''''  
-													THEN     ISNULL(RTRIM(C.vwcus_last_name),'''') + ISNULL(RTRIM(C.vwcus_name_suffix),'''')    
-													ELSE     ISNULL(RTRIM(C.vwcus_last_name),'''') + ISNULL(RTRIM(C.vwcus_name_suffix),'''') + '', '' + ISNULL(RTRIM(C.vwcus_first_name),'''') + ISNULL(RTRIM(C.vwcus_mid_init),'''')    
-												END   
-										END) COLLATE Latin1_General_CI_AS 
-					,strLocation = D.vwloc_loc_no COLLATE Latin1_General_CI_AS 
+					strCustomerNumber = C.vwcus_key COLLATE Latin1_General_CI_AS
+					,strCustomerName = C.strFullName COLLATE Latin1_General_CI_AS
+					,strLocation = D.vwloc_loc_no COLLATE Latin1_General_CI_AS
 					,intSiteNumber = A.intSiteNumber
 					,strSiteDescription  = A.strDescription
 					,strSiteAddress = A.strSiteAddress
@@ -41,9 +36,10 @@ BEGIN
 					,dblYTDGals2SeasonsAgo = ISNULL(J.dblTotalGallons,0.0)
 					,dblSiteBurnRate = A.dblBurnRate
 					,dblSiteEstimatedGallonsLeft = A.dblEstimatedGallonsLeft
-					,dblCurrentARBalance = C.vwcus_balance
+					,dblCurrentARBalance = CAST((ISNULL(C.vwcus_ar_per1,0.0) + ISNULL(C.vwcus_ar_per2,0.0) + ISNULL(C.vwcus_ar_per3,0.0) + ISNULL(C.vwcus_ar_per4,0.0) + ISNULL(C.vwcus_ar_per5,0.0) + ISNULL(C.vwcus_ar_future,0.0)) AS NUMERIC(18,6))
 					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= G.intBeginSummerMonth AND  MONTH(GETDATE()) < G.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0.0) ELSE ISNULL(A.dblWinterDailyUse,0) END)
 					,strSiteNumber = RIGHT(''0000'' + CAST(ISNULL(A.intSiteNumber,0)AS NVARCHAR(4)),4) 
+					,dblUnappliedCredits = ISNULL(C.vwcus_cred_reg,0.0) + ISNULL(C.vwcus_cred_ppd,0.0)
 					,E.*
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
@@ -77,8 +73,8 @@ BEGIN
 	ELSE
 	BEGIN
 		EXEC ('
-			CREATE VIEW [dbo].[vyuTMBudgetCalculationSite]  
-			AS 
+				CREATE VIEW [dbo].[vyuTMBudgetCalculationSite]  
+				AS 
 
 				SELECT 
 					strCustomerNumber = C.strEntityNo
@@ -92,9 +88,10 @@ BEGIN
 					,dblYTDGals2SeasonsAgo = ISNULL(J.dblTotalGallons,0.0)
 					,dblSiteBurnRate = A.dblBurnRate
 					,dblSiteEstimatedGallonsLeft = A.dblEstimatedGallonsLeft
-					,dblCurrentARBalance = CAST(ISNULL(F.dbl0Days,0.0) + (ISNULL(F.dbl10Days,0.0) + ISNULL(F.dbl30Days,0.0) + ISNULL(F.dbl60Days,0.0)+ ISNULL(F.dbl90Days,0.0) + ISNULL(F.dbl91Days,0.0) + ISNULL(F.dblFuture,0.0) - ISNULL(F.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
+					,dblCurrentARBalance = CAST(ISNULL(F.dbl0Days,0.0) + (ISNULL(F.dbl10Days,0.0) + ISNULL(F.dbl30Days,0.0) + ISNULL(F.dbl60Days,0.0)+ ISNULL(F.dbl90Days,0.0) + ISNULL(F.dbl91Days,0.0) + ISNULL(F.dblFuture,0.0)) AS NUMERIC(18,6))
 					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= G.intBeginSummerMonth AND  MONTH(GETDATE()) < G.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0.0) ELSE ISNULL(A.dblWinterDailyUse,0) END)
 					,strSiteNumber = RIGHT(''0000'' + CAST(ISNULL(A.intSiteNumber,0)AS NVARCHAR(4)),4) 
+					,dblUnappliedCredits = ISNULL(F.dblUnappliedCredits,0.0) + ISNULL(F.dblPrepaids,0.0)
 					,E.*
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
@@ -124,7 +121,9 @@ BEGIN
 					WHERE intSiteId = A.intSiteID
 						AND (intCurrentSeasonYear - 2) = intSeasonYear
 				)J
-			
+		
+		
+
 		')
 	END
 END

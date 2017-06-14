@@ -5,6 +5,7 @@
     [intItemId] INT NOT NULL, 
     [dblPrice] NUMERIC(18, 6) NOT NULL, 
     [intBudgetCalculationId] INT NOT NULL, 
+    [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL , 
     CONSTRAINT [PK_tblTMBudgetCalculationItemPricing] PRIMARY KEY CLUSTERED ([intBudgetCalculationItemPricingId] ASC),
 )
 
@@ -53,3 +54,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMBudgetCalculationItemPricing',
     @level2type = N'COLUMN',
     @level2name = N'intBudgetCalculationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMBudgetCalculationItemPricing',
+    @level2type = N'COLUMN',
+    @level2name = N'strItemNo'

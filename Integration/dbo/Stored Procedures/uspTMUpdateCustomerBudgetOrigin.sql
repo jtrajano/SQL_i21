@@ -37,7 +37,7 @@ BEGIN
 	SELECT 
 		D.A4GLIdentity
 		,dblBudget = SUM(ISNULL(A.dblEstimatedBudget,0.0))
-		INTO #tmpCustomerBudget
+	INTO #tmpCustomerBudget
 	FROM tblTMBudgetCalculationSite A
 	INNER JOIN tblTMSite B
 		ON A.intSiteId = B.intSiteID

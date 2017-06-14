@@ -23,10 +23,9 @@ BEGIN
 			AS 
 				SELECT
 					A.*
-					,strItemNumber = B.vwitm_desc
+					,strItemNumber = A.strItemNo
 				FROM dbo.tblTMBudgetCalculationItemPricing A
-				INNER JOIN vwitmmst B
-					ON A.intItemId = B.A4GLIdentity
+				
 			
 		')
 	END
