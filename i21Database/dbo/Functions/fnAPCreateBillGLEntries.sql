@@ -532,7 +532,7 @@ BEGIN
 															--WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
 																ELSE SUM(D.dblTax)
 													END) * ISNULL(NULLIF(B.dblRate,0),1) 
-											ELSE SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) END,
+											ELSE SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END) END,
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
