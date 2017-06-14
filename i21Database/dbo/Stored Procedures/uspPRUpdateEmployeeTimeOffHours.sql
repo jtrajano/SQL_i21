@@ -121,6 +121,26 @@ BEGIN
 			@intEmployeeId = [intEntityId]
 		FROM #tmpEmployees 
 		
+		--Reset Hours Used, Move Earned to Carryover
+		UPDATE tblPREmployeeTimeOff
+			SET dblHoursUsed = CASE WHEN (T.strAwardPeriod = 'Anniversary Date' AND GETDATE() >= T.dtmNextAward) THEN 0
+									WHEN (T.strAwardPeriod <> 'Anniversary Date' AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN 0
+									ELSE dblHoursUsed END
+				,dblHoursCarryover = CASE WHEN (T.strAwardPeriod = 'Anniversary Date' AND GETDATE() >= T.dtmNextAward) THEN 
+											CASE WHEN (dblHoursCarryover + dblHoursEarned < dblMaxCarryover) THEN dblHoursCarryover + dblHoursEarned
+											ELSE dblMaxCarryover END
+										  WHEN (T.strAwardPeriod <> 'Anniversary Date' AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN
+											CASE WHEN (dblHoursCarryover + dblHoursEarned < dblMaxCarryover) THEN dblHoursCarryover + dblHoursEarned
+											ELSE dblMaxCarryover END
+									ELSE dblHoursCarryover END
+				,dblHoursEarned = CASE WHEN (T.strAwardPeriod = 'Anniversary Date' AND GETDATE() >= T.dtmNextAward) THEN 0
+									WHEN (T.strAwardPeriod <> 'Anniversary Date' AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN 0
+									ELSE dblHoursEarned END
+		FROM #tmpEmployees T
+		WHERE T.[intEntityId] = @intEmployeeId
+			AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
+			AND intTypeTimeOffId = @intTypeTimeOffId
+
 		--Update Accrued Hours
 		UPDATE tblPREmployeeTimeOff
 			SET dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN T.dblAccruedHours ELSE 0 END
@@ -129,23 +149,6 @@ BEGIN
 		WHERE T.[intEntityId] = @intEmployeeId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 				AND intTypeTimeOffId = @intTypeTimeOffId
-
-		--Reset Hours Used
-		UPDATE tblPREmployeeTimeOff
-			SET dblHoursUsed = CASE WHEN (T.strAwardPeriod = 'Anniversary Date') 
-									THEN
-										CASE WHEN (GETDATE() >= T.dtmNextAward) 
-										THEN 0
-										ELSE dblHoursUsed END
-									ELSE	
-										CASE WHEN (YEAR(T.dtmLastAward) < YEAR(GETDATE())) 
-										THEN 0 
-										ELSE dblHoursUsed END
-									END
-		FROM #tmpEmployees T
-		WHERE T.[intEntityId] = @intEmployeeId
-			AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
-			AND intTypeTimeOffId = @intTypeTimeOffId
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
