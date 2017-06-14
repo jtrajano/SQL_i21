@@ -528,8 +528,8 @@ BEGIN
 		--										  ELSE 0 END),--COST ADJUSTMENT,  --AP-2792
 		[dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
 													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN SUM(D.dblTax) * -1 
-															WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
-																THEN SUM(D.dblTax)
+															--WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
+																ELSE SUM(D.dblTax)
 													END) * ISNULL(NULLIF(B.dblRate,0),1) 
 											ELSE SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) END,
 		[dblCredit]						=	0,
