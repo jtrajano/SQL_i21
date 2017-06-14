@@ -336,6 +336,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\DataMigration\1710_1720_CCSite_migration.sql
 --END KEEP FROM 1710-1720
 :r .\EM\040_UpdateEmailDistribution.sql
+:r .\EM\Data_Fix_From_1710_to_1720_Currency_Cus_Ven.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
