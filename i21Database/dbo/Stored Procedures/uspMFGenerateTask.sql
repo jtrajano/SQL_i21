@@ -342,7 +342,7 @@ BEGIN TRY
 				AND BS.strPrimaryStatus = 'Active'
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 			JOIN dbo.tblICItem I on I.intItemId=L.intItemId
-			WHERE L.intItemId = @intItemId
+			WHERE L.intItemId = @intItemId AND L.dblQty > 0
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.dtmDateCreated BETWEEN (
@@ -491,7 +491,7 @@ BEGIN TRY
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 			JOIN dbo.tblICItem I on I.intItemId=L.intItemId
-			WHERE L.intItemId = @intItemId
+			WHERE L.intItemId = @intItemId AND L.dblQty > 0
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND NOT EXISTS (
@@ -639,7 +639,7 @@ BEGIN TRY
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I on I.intItemId=L.intItemId
-				WHERE L.intItemId = @intItemId
+				WHERE L.intItemId = @intItemId AND L.dblQty > 0
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.dtmDateCreated BETWEEN (
@@ -780,7 +780,7 @@ BEGIN TRY
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I on I.intItemId=L.intItemId
-				WHERE L.intItemId = @intItemId
+				WHERE L.intItemId = @intItemId AND L.dblQty > 0
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND NOT EXISTS (

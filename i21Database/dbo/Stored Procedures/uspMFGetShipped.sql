@@ -4,8 +4,8 @@ SELECT InvS.strReferenceNumber
 		,InvS.dtmShipDate
 		,EL1.strAddress As strShipFromAddress
 		,EL1.strCity As strShipFromCity
-		,EL1.strState As strShipFromState
-		,EL1.strZipCode As strShipFromZipCode
+		,EL1.strStateProvince As strShipFromState
+		,EL1.strZipPostalCode As strShipFromZipCode
 		,EL1.strCountry As strShipFromCountry
 		,E.strName
 		,EL.strAddress As strShipToAddress
@@ -20,6 +20,7 @@ SELECT InvS.strReferenceNumber
 		,PL.strParentLotNumber
 		,InvSL.dblQuantityShipped dblQuantityShipped
 		,UM.strUnitMeasure
+		,Convert(nvarchar(50),(Select MAX(dtmCreated) from tblICInventoryTransaction IT Where IT.intLotId =L.intLotId and IT.intTransactionTypeId=5 and IT.ysnIsUnposted=0)) AS dtmPostedDate
 	FROM dbo.tblICInventoryShipment InvS
 	JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
 	JOIN dbo.tblICInventoryShipmentItemLot InvSL ON InvSL.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
@@ -30,4 +31,8 @@ SELECT InvS.strReferenceNumber
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 	JOIN dbo.tblEMEntityLocation EL on EL.intEntityLocationId=InvS.intShipToLocationId
-	JOIN dbo.tblEMEntityLocation EL1 on EL1.intEntityLocationId=InvS.intShipFromLocationId
+	JOIN dbo.tblSMCompanyLocation  EL1 on EL1.intCompanyLocationId=InvS.intShipFromLocationId
+	Where InvS.ysnPosted =1
+	Order by InvS.strShipmentNumber Desc
+
+		
