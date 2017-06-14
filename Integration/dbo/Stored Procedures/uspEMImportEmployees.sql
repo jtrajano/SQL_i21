@@ -261,7 +261,7 @@ BEGIN
                 @originEmployee		= premp_emp,
 				@dtmOrigHireDate	= case when premp_orig_hire_dt = 0 then null else premp_orig_hire_dt end,
 				@dtmLastHireDate	= case when premp_last_hire_dt = 0 then null else premp_last_hire_dt end,
-				@dtmBirthDate		= case when premp_last_hire_dt = 0 then null else premp_birth_dt end,
+				@dtmBirthDate		= case when premp_birth_dt = 0 then null else premp_birth_dt end,
 				@strSex				= CASE WHEN premp_sex = ''M'' THEN ''Male'' 
 										WHEN premp_sex = ''F'' THEN ''Female'' end ,
 				@strType			= Case when premp_employment = ''F'' then ''Full-Time''
@@ -394,6 +394,142 @@ BEGIN
 					join tblEMEntity c
 						on a.premp_emp COLLATE Latin1_General_CI_AS = c.strEntityNo COLLATE Latin1_General_CI_AS 
 							and c.strEntityNo = @originEmployee
+		--Direct Deposit Importing
+
+		DECLARE @Bank_code NVARCHAR(50)
+		DECLARE @Bank_name NVARCHAR(50)
+		DECLARE @Bank_amount decimal(18,9)
+		DECLARE @Bank_account nvarchar(50)
+		DECLARE @Bank_command nvarchar(max)
+		DECLARE @Bank_type nvarchar(50)
+		DECLARE @Bank_count INT		
+		DECLARE @i21_bank_id int
+		DECLARE @i21_bank_name nvarchar(500)
+
+		SET @Bank_count = 1
+
+		--this is for the personal bank setup
+		set @Bank_command = ''
+				SELECT TOP 1 
+					@Bank_code = premp_dir_dep_bank, 					
+					@Bank_account = premp_dir_dep_acct,
+					@Bank_type = premp_dd_acct_type_cs
+				FROM prempmst where premp_dir_dep_bank is not null
+					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + @originEmployee +  '''''' ''
+	
+		execute sp_executesql @Bank_command, N''@Bank_code NVARCHAR(50) output, @Bank_account nvarchar(50) output, @Bank_type nvarchar(50) output'', @Bank_code output, @Bank_account output, @Bank_type output 
+			
+			if @Bank_code is not null
+			BEGIN		
+				select @Bank_name = ssbnk_name from ssbnkmst where ssbnk_code = @Bank_code
+				
+				select @i21_bank_id = intBankId, 
+						@i21_bank_name = strBankName 
+				from tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@Bank_name))
+
+				if @i21_bank_id is not null
+				begin
+					SET @Bank_type = LTRIM(RTRIM(@Bank_type))
+					INSERT INTO tblEMEntityEFTInformation(
+						intEntityId, 
+						intBankId, 
+						strBankName, 
+						strAccountNumber, 
+						strAccountType,
+						strAccountClassification, 
+						dtmEffectiveDate,
+						ysnActive,
+						ysnPrenoteSent,
+						intConcurrencyId, 
+						ysnPrintNotifications,
+						dblAmount, 
+						intOrder,
+						ysnPullTaxSeparately,
+						ysnRefundBudgetCredits,
+						strDistributionType)
+					select top 1 
+						@EntityId,
+						@i21_bank_id,
+						@i21_bank_name,
+						@Bank_account,
+						CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
+							WHEN @Bank_type = ''S'' THEN ''Savings'' END,
+						''Personal'',
+						''1/1/2017'',
+						1,
+						1,
+						1, 0, 0, 0, 0 ,0, ''Remainder''
+				end
+
+			END
+
+			--this is for the personal bank setup
+
+		WHILE @Bank_count < 21
+		BEGIN
+			set @Bank_code = null
+			set @Bank_command = ''
+				SELECT TOP 1 
+					@Bank_code = premp_ded_dep_bank_'' + Cast(@Bank_count as nvarchar)+ '', 
+					@Bank_amount = premp_ded_amt_pct_'' + Cast(@Bank_count as nvarchar)+ '',
+					@Bank_account = premp_ded_ref_no_'' + Cast(@Bank_count as nvarchar)+ '',
+					@Bank_type = premp_ded_dd_acct_type_'' + Cast(@Bank_count as nvarchar)+ ''
+				FROM prempmst where premp_ded_dep_bank_'' + Cast(@Bank_count as nvarchar)+ '' is not null
+					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + @originEmployee +  '''''' ''
+
+
+			execute sp_executesql @Bank_command, N''@Bank_code NVARCHAR(50) output, @Bank_amount decimal(18,9) output, @Bank_account nvarchar(50) output, @Bank_type nvarchar(50) output'', @Bank_code output, @Bank_amount output, @Bank_account output, @Bank_type output 
+			
+			if @Bank_code is not null
+			BEGIN		
+				select @Bank_name = ssbnk_name from ssbnkmst where ssbnk_code = @Bank_code
+
+				select @i21_bank_id = intBankId, 
+						@i21_bank_name = strBankName 
+				from tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@Bank_name))
+
+				if @i21_bank_id is not null
+				begin
+					SET @Bank_type = LTRIM(RTRIM(@Bank_type))
+					INSERT INTO tblEMEntityEFTInformation(
+						intEntityId, 
+						intBankId, 
+						strBankName, 
+						strAccountNumber, 
+						strAccountType,
+						strAccountClassification, 
+						dtmEffectiveDate,
+						ysnActive,
+						ysnPrenoteSent,
+						intConcurrencyId, 
+						ysnPrintNotifications,
+						dblAmount, 
+						intOrder,
+						ysnPullTaxSeparately,
+						ysnRefundBudgetCredits,
+						strDistributionType)
+					select top 1 
+						@EntityId,
+						@i21_bank_id,
+						@i21_bank_name,
+						@Bank_account,
+						CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
+							WHEN @Bank_type = ''S'' THEN ''Savings'' END,
+						''Personal'',
+						''1/1/2017'',
+						1,
+						1,
+						1, 0, @Bank_amount, 1, 0 ,0, ''Fixed Amount''
+				end
+
+			END
+
+
+			SET @Bank_count = @Bank_count + 1
+		END
+
+
+		--Direct Deposit Importing
 
 		if(@strDepartment <> '''' )
 		begin
