@@ -156,15 +156,15 @@ SELECT
 		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
 		,dblQty						= LI.dblQty
-		,dblCost					= LI.dblCost
+		,dblCost					= CASE
+										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(SC.intCommodityId,SC.intProcessingLocationId,SC.dtmTicketDateTime,2,LI.dblCost),0)
+										ELSE LI.dblCost
+									END
 		,dblExchangeRate			= 1 -- Need to check this
 		,intLotId					= NULL --No LOTS from scale
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
-		,ysnIsStorage				= CASE 
-										WHEN CNT.intPricingTypeId = 2 THEN 1
-										ELSE LI.ysnIsStorage
-									  END
+		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
