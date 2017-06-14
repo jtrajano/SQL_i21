@@ -17,6 +17,8 @@ BEGIN
 	DELETE FROM @IIDs
 	INSERT INTO @IIDs SELECT * FROM @InvoiceIds WHERE [strSourceTransaction] IN ('Card Fueling Transaction','CF Tran','CF Invoice')
 
+	EXEC dbo.[uspARUpdatePrepaymentsAndCreditMemos] @InvoiceIds = @IIDs
+
 	DELETE FROM @InvoiceLog
 
 	INSERT INTO @InvoiceLog(

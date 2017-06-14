@@ -24,6 +24,6 @@
 	[ysnUpdateAvailableDiscount]		BIT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_ysnUpdateAvailableDiscountOnly] DEFAULT ((0)) NULL,	
 	[strBatchId]						NVARCHAR(20)   COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]					INT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-	CONSTRAINT [PK_tblARInvoiceIntegrationLogDetail_intIntegrationLogDetailId] PRIMARY KEY CLUSTERED ([intIntegrationLogDetailId] ASC),
-	CONSTRAINT [FK_tblARInvoiceIntegrationLogDetail_tblARInvoiceIntegrationLog] FOREIGN KEY ([intIntegrationLogId]) REFERENCES [dbo].[tblARInvoiceIntegrationLog] ([intIntegrationLogId]) ON DELETE CASCADE
+	CONSTRAINT [PK_tblARInvoiceIntegrationLogDetail_intIntegrationLogDetailId] PRIMARY KEY CLUSTERED ([intIntegrationLogDetailId] ASC)
+	--,CONSTRAINT [FK_tblARInvoiceIntegrationLogDetail_tblARInvoiceIntegrationLog] FOREIGN KEY ([intIntegrationLogId]) REFERENCES [dbo].[tblARInvoiceIntegrationLog] ([intIntegrationLogId]) ON DELETE CASCADE
 )
