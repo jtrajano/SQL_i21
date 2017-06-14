@@ -115,20 +115,20 @@ BEGIN TRY
 			ELSE dtmPlannedDate
 			END
 
-	IF EXISTS (
-			SELECT 1
-			FROM dbo.tblMFWorkOrder
-			WHERE intCountStatusId = 10
-				AND intWorkOrderId = @intPriorWorkOrderId
-			)
-		AND @intPriorWorkOrderId IS NOT NULL
-	BEGIN
-		RAISERROR (
-				'Production run(s) prior to the current run has not been trued up, True up the earlier runs and proceed.'
-				,11
-				,1
-				)
-	END
+	--IF EXISTS (
+	--		SELECT 1
+	--		FROM dbo.tblMFWorkOrder
+	--		WHERE intCountStatusId = 10
+	--			AND intWorkOrderId = @intPriorWorkOrderId
+	--		)
+	--	AND @intPriorWorkOrderId IS NOT NULL
+	--BEGIN
+	--	RAISERROR (
+	--			'Production run(s) prior to the current run has not been trued up, True up the earlier runs and proceed.'
+	--			,11
+	--			,1
+	--			)
+	--END
 	
 		IF EXISTS (
 			SELECT *

@@ -64,13 +64,14 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = x.intLocationId
 		,@intUserId = intUserId
-		,@ysnPickRemainingQty=ysnPickRemainingQty
+		,@ysnPickRemainingQty=IsNULL(ysnPickRemainingQty,1)
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingProcessId INT
 			,intLocationId INT
 			,intUserId INT
 			,ysnPickRemainingQty Bit
 			) x
+	Select @ysnPickRemainingQty=0
 
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT

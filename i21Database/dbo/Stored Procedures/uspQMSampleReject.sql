@@ -286,6 +286,7 @@ BEGIN TRY
 				,intLotStatusId
 			FROM tblICLot
 			WHERE intParentLotId = @intProductValueId
+			AND intItemId=@intSampleItemId
 		END
 		ELSE IF @strApprovalBase = 'Warehouse Ref No'
 		BEGIN

@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrder] (@strXML NVARCHAR(MAX), @intWorkOrderInputLotId INT=NULL OUTPUT)
+﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrder] (
+	@strXML NVARCHAR(MAX)
+	,@intWorkOrderInputLotId INT = NULL OUTPUT
+	)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -55,6 +58,8 @@ BEGIN TRY
 		,@intProductionStageLocationId INT
 		,@intCategoryId INT
 		,@intItemTypeId INT
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intInventoryTransactionType AS INT = 8
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -151,7 +156,6 @@ BEGIN TRY
 		FROM tblICLot
 		WHERE intLotId = @intInputLotId
 
-
 		IF @dblInputWeight > @dblWeight
 		BEGIN
 			IF @ysnExcessConsumptionAllowed = 0
@@ -161,9 +165,8 @@ BEGIN TRY
 						,14
 						,1
 						)
-			END 
+			END
 		END
-
 
 		IF @intInputLotId IS NULL
 			OR @intInputLotId = 0
@@ -186,9 +189,10 @@ BEGIN TRY
 		END
 	END
 
-	--SELECT TOP 1 @dtmPlannedDate = dtmPlannedDate
-	--FROM dbo.tblMFWorkOrder
-	--WHERE intWorkOrderId = @intWorkOrderId
+	SELECT TOP 1 --@dtmPlannedDate = dtmPlannedDate
+		@strWorkOrderNo = strWorkOrderNo
+	FROM dbo.tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	IF @intWorkOrderId IS NULL
 		OR @intWorkOrderId = 0
@@ -243,7 +247,8 @@ BEGIN TRY
 			END
 		,@intItemTypeId = (
 			CASE 
-				WHEN RS.intSubstituteItemId is not null and RS.intSubstituteItemId =@intInputItemId
+				WHEN RS.intSubstituteItemId IS NOT NULL
+					AND RS.intSubstituteItemId = @intInputItemId
 					THEN 3
 				ELSE 1
 				END
@@ -445,7 +450,7 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @dblAdjustByQuantity = @dblNewWeight - @dblWeight 
+			SELECT @dblAdjustByQuantity = @dblNewWeight - @dblWeight
 
 			EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 				-- Parameters for filtering:
@@ -637,7 +642,10 @@ BEGIN TRY
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intInputItemId
-				And intItemTypeId IN (1,3)
+				AND intItemTypeId IN (
+					1
+					,3
+					)
 			)
 	BEGIN
 		INSERT INTO tblMFProductionSummary (
@@ -679,8 +687,57 @@ BEGIN TRY
 		SET dblInputQuantity = dblInputQuantity + @dblInputWeight
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intInputItemId
-			And intItemTypeId IN (1,3)
+			AND intItemTypeId IN (
+				1
+				,3
+				)
 	END
+
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,@intInventoryTransactionType
+
+	INSERT INTO @ItemsToReserve (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		,dblQty
+		,intTransactionId
+		,strTransactionId
+		,intTransactionTypeId
+		)
+	SELECT intItemId = WI.intItemId
+		,intItemLocationId = IL.intItemLocationId
+		,intItemUOMId = WI.intItemIssuedUOMId
+		,intLotId = (
+			SELECT TOP 1 intLotId
+			FROM tblICLot L1
+			WHERE L1.strLotNumber = L.strLotNumber
+				AND L1.intStorageLocationId = @intConsumptionStorageLocationId
+			)
+		,intSubLocationId = @intConsumptionSubLocationId
+		,intStorageLocationId = @intConsumptionStorageLocationId
+		,dblQty = SUM(WI.dblIssuedQuantity)
+		,intTransactionId = @intWorkOrderId
+		,strTransactionId = @strWorkOrderNo
+		,intTransactionTypeId = @intInventoryTransactionType
+	FROM tblMFWorkOrderInputLot WI
+	JOIN tblICItemLocation IL ON IL.intItemId = WI.intItemId
+		AND IL.intLocationId = @intLocationId
+		AND WI.ysnConsumptionReversed = 0
+	JOIN tblICLot L ON L.intLotId = WI.intLotId
+	WHERE intWorkOrderId = @intWorkOrderId
+	GROUP BY WI.intItemId
+		,IL.intItemLocationId
+		,WI.intItemIssuedUOMId
+		,L.strLotNumber
+
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,@intInventoryTransactionType
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

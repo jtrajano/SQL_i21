@@ -22,6 +22,13 @@ BEGIN TRY
 		,@intYieldCostId INT
 		,@strYieldCostValue NVARCHAR(50)
 		,@intLocationId INT
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intInventoryTransactionType AS INT = 8
+		,@intInputItemId int
+		,@intProductionStageLocationId int
+		,@intProductionStagingId int
+		,@intConsumptionStorageLocationId int
+		,@intConsumptionSubLocationId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -96,9 +103,11 @@ BEGIN TRY
 			,@strCostAdjustmentBatchId
 			,@intUserId
 			,0
-
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
+		IF EXISTS(SELECT *FROM @GLEntries)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+		END
 	END
 
 	UPDATE tblMFWorkOrder
@@ -270,6 +279,91 @@ BEGIN TRY
 
 		DELETE FROM dbo.tblMFWorkOrderProducedLotTransaction WHERE intWorkOrderId=@intWorkOrderId
 	END
+	Select @intInputItemId=intItemId from tblMFWorkOrderInputLot Where intWorkOrderId =@intWorkOrderId 
+
+	SELECT @intProductionStageLocationId = intProductionStagingLocationId
+	FROM tblMFManufacturingProcessMachine
+	WHERE intManufacturingProcessId = @intManufacturingProcessId and @intProductionStageLocationId is not null
+	
+	IF @intProductionStageLocationId IS NULL
+	BEGIN
+		SELECT @intProductionStagingId = intAttributeId
+		FROM tblMFAttribute
+		WHERE strAttributeName = 'Production Staging Location'
+
+		SELECT @intProductionStageLocationId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = @intProductionStagingId
+	END
+
+
+	SELECT @intConsumptionStorageLocationId = CASE 
+			WHEN RI.intConsumptionMethodId = 1
+				THEN @intProductionStageLocationId
+			ELSE RI.intStorageLocationId
+			END
+	FROM dbo.tblMFWorkOrderRecipeItem RI
+	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND RI.intRecipeItemTypeId = 1
+		AND (
+			RI.intItemId = @intInputItemId
+			OR RS.intSubstituteItemId = @intInputItemId
+			)
+
+	SELECT @intConsumptionSubLocationId = intSubLocationId
+	FROM dbo.tblICStorageLocation
+	WHERE intStorageLocationId = @intConsumptionStorageLocationId
+
+
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,@intInventoryTransactionType
+
+	INSERT INTO @ItemsToReserve (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		,dblQty
+		,intTransactionId
+		,strTransactionId
+		,intTransactionTypeId
+		)
+	SELECT intItemId = WI.intItemId
+		,intItemLocationId = IL.intItemLocationId
+		,intItemUOMId = WI.intItemIssuedUOMId
+		,intLotId = (
+			SELECT TOP 1 intLotId
+			FROM tblICLot L1
+			WHERE L1.strLotNumber = L.strLotNumber
+				AND L1.intStorageLocationId = @intConsumptionStorageLocationId
+			)
+		,intSubLocationId = @intConsumptionSubLocationId
+		,intStorageLocationId = @intConsumptionStorageLocationId
+		,dblQty = SUM(WI.dblIssuedQuantity)
+		,intTransactionId = @intWorkOrderId
+		,strTransactionId = @strWorkOrderNo
+		,intTransactionTypeId = @intInventoryTransactionType
+	FROM tblMFWorkOrderInputLot WI
+	JOIN tblICItemLocation IL ON IL.intItemId = WI.intItemId
+		AND IL.intLocationId = @intLocationId
+		AND WI.ysnConsumptionReversed = 0
+	JOIN tblICLot L ON L.intLotId = WI.intLotId
+	WHERE intWorkOrderId = @intWorkOrderId
+	GROUP BY WI.intItemId
+		,IL.intItemLocationId
+		,WI.intItemIssuedUOMId
+		,L.strLotNumber
+
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,@intInventoryTransactionType
+
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
