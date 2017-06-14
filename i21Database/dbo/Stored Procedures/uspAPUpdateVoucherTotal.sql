@@ -42,6 +42,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 												END),0)	
 	FROM tblAPBillDetail A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
+	INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
 
 	--UPDATE PAYMENT
 	UPDATE A
