@@ -78,9 +78,9 @@ WHERE IRDetail.dblBillQty < IRDetail.dblOpenReceive
 
 IF OBJECT_ID('tempdb..#tmpReceiptChargeData') IS NOT NULL DROP TABLE #tmpReceiptChargeData
 SELECT charges.* INTO #tmpReceiptChargeData
-FROM tblICInventoryReceiptCharge charges
+FROM vyuICChargesForBilling charges
 INNER JOIN #tmpReceiptData receipts ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
-AND ISNULL(charges.dblAmountBilled,0) < charges.dblAmount
+--AND ISNULL(charges.dblAmountBilled,0) < charges.dblAmount
 
 --Commented, generate tax
 --IF OBJECT_ID('tempdb..#tmpReceiptDetailTaxData') IS NOT NULL DROP TABLE #tmpReceiptDetailTaxData
@@ -98,9 +98,9 @@ BEGIN
 	GOTO Post_Exit
 END
 
-SET @totalChargesCount = (SELECT COUNT(*) FROM dbo.#tmpReceiptChargeData 
-							WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)
-							AND ISNULL(dblAmountBilled,0) < dblAmount)
+SET @totalChargesCount = (SELECT COUNT(*) FROM vyuICChargesForBilling
+							WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds))
+							--AND ISNULL(dblAmountBilled,0) < dblAmount)
 
 SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId);
 
@@ -764,8 +764,8 @@ BEGIN
 	BEGIN
 	
 	--UPDATE THE ACTUAL CHARGES FOR THE RECEIPT
-	SET @totalChargesCount = (SELECT COUNT(*) FROM #tmpReceiptChargeData 
-								WHERE ISNULL(dblAmountBilled,0) < dblAmount AND intInventoryReceiptId = @receiptId)
+	SET @totalChargesCount = (SELECT COUNT(*) FROM vyuICChargesForBilling 
+								WHERE intInventoryReceiptId = @receiptId) --AND ISNULL(dblAmountBilled,0) < dblAmount)
 
 	--CREATE VOUCHER AND DETAILS FOR CHARGES
 	--IN THIS PART, WE WILL ALSO CREATE CHARGES FOR THE RECEIPT VENDOR WHICH HAPPENS TO BE THE REMAINING ITEM TO VOUCHER
@@ -782,7 +782,7 @@ BEGIN
 						INNER JOIN dbo.#tmpReceiptChargeData B ON  A.intInventoryReceiptId = B.intInventoryReceiptId 
 						WHERE intInventoryReceiptChargeId = @intReceiptChargeId 
 						AND A.intInventoryReceiptId = @receiptId
-						AND ISNULL(B.dblAmountBilled,0) < B.dblAmount
+						--AND ISNULL(B.dblAmountBilled,0) < B.dblAmount
 			
 			SET @chargeCounter = @chargeCounter + 1;
 
@@ -1072,7 +1072,7 @@ BEGIN
 	INNER JOIN dbo.tblAPBillDetail D ON D.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 	INNER JOIN dbo.tblAPBill E ON E.intBillId = D.intBillId
 	AND B.intInventoryReceiptId IN (@receiptId) AND D.intBillId  = @currentVoucher
-	AND ISNULL(B.dblAmountBilled,0) < B.dblAmount
+	--AND ISNULL(B.dblAmountBilled,0) < B.dblAmount
 	--END
 	DELETE FROM #tmpVouchersCreated WHERE intBillId = @currentVoucher
 END
