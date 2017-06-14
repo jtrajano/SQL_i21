@@ -36,7 +36,8 @@ SELECT 	 SQ.intContractDetailId
 		,PG.strName								AS strPurchasingGroup
 		,CT.strContainerType		
 		,CD.intNumberOfContainers			
-		,SQ.strItemNo						
+		,SQ.strItemNo				
+		,SQ.strItemDescription	
 		,PT.strDescription						AS strProductType
 		,CS.strContractStatus				
 		,(SQ.dblQuantity - SQ.dblBalance)		AS dblQtyShortClosed
@@ -121,7 +122,7 @@ SELECT 	 SQ.intContractDetailId
 	JOIN 		tblCTContractHeader				 	CH	ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
 	LEFT JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=	CH.intContractBasisId
 	LEFT JOIN	tblICItem						 	IM	ON	IM.intItemId						=	SQ.intItemId
-	LEFT JOIN 	tblEMEntity						 	PR	ON	PR.intEntityId						=	CH.intProducerId
+	LEFT JOIN 	tblEMEntity						 	PR	ON	PR.intEntityId						=	CD.intProducerId
 	LEFT JOIN 	tblSMCity						 	LP	ON	LP.intCityId						=	CD.intLoadingPortId
 	LEFT JOIN 	tblSMCity						 	DP	ON	DP.intCityId						=	CD.intDestinationPortId
 	LEFT JOIN 	tblSMCity						 	DC	ON	DC.intCityId						=	CD.intDestinationCityId

@@ -132,7 +132,7 @@ AS
 		FROM	Header CH
 		JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId
 		JOIN	tblSMScreen			SN	ON	SN.intScreenId	=	TN.intScreenId AND SN.strNamespace IN ('ContractManagement.view.Contract', 'ContractManagement.view.Amendments')
-		WHERE	ysnMailSent = 0 AND TN.ysnOnceApproved = 1
+		WHERE	ysnMailSent = 0 AND TN.ysnOnceApproved = 1 AND CH.intContractHeaderId IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 1)
 
 	)t
 
