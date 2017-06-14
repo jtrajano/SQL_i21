@@ -358,7 +358,9 @@ BEGIN TRY
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=tblFIFO.intCustomerStorageId
 			WHERE strItemType = 'Inventory'
         
-		IF @strSourceType <> 'Invoice'--Invoice Calls uspICPostStorage to Update Inventory.
+		--1.Invoice Calls uspICPostStorage to Update Inventory.
+		--2.GRN-616- Since Load Out Scale Ticket Update OnStore Inventory
+		IF @strSourceType NOT IN ('Invoice','InventoryShipment')
 		BEGIN
 			EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
 		END
