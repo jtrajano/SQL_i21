@@ -20,7 +20,7 @@ DECLARE @dblScaleBasisValue AS NUMERIC(18, 6)
 DECLARE @dblClosingPrice AS NUMERIC(18, 6)
 DECLARE @calculatedValue AS NUMERIC(18, 6)
 ---Scale Basis
-SELECT TOP 1 @dblScaleBasisValue= isnull(dblBasis,0)+@dblBasisCost,@intFutureMonthId=bd.intFutureMonthId,@intFutureMarketId=bd.intFutureMarketId  FROM tblRKM2MBasis b
+SELECT TOP 1 @dblScaleBasisValue= isnull(dblBasis,0),@intFutureMonthId=bd.intFutureMonthId,@intFutureMarketId=bd.intFutureMarketId  FROM tblRKM2MBasis b
 JOIN tblRKM2MGrainBasis bd on b.intM2MBasisId=bd.intM2MBasisId 
 WHERE  intCommodityId = @intCommodityId and strDeliveryMonth = @strSeqMonth	AND ISNULL(dblBasis,0) <> 0 
 	AND  intCompanyLocationId=@intCompanyLocationId 
@@ -32,7 +32,7 @@ SELECT @dblClosingPrice=dbo.fnRKGetLatestClosingPrice(@intFutureMarketId,@intFut
 If @intSequenceTypeId = 1
 	SET @calculatedValue = isnull(@dblScaleBasisValue,0)
 ELSE IF @intSequenceTypeId = 2
-	SET @calculatedValue = isnull(@dblClosingPrice,0)
+	SET @calculatedValue = isnull(@dblClosingPrice,0)+@dblBasisCost
 ELSE
 	SET @calculatedValue = isnull(@dblClosingPrice,0)+isnull(@dblScaleBasisValue,0)
 
