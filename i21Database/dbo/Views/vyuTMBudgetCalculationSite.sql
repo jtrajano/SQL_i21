@@ -18,6 +18,7 @@ SELECT
 	,dblCurrentARBalance = CAST(ISNULL(F.dbl0Days,0.0) + (ISNULL(F.dbl10Days,0.0) + ISNULL(F.dbl30Days,0.0) + ISNULL(F.dbl60Days,0.0)+ ISNULL(F.dbl90Days,0.0) + ISNULL(F.dbl91Days,0.0) + ISNULL(F.dblFuture,0.0) - ISNULL(F.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
 	,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= G.intBeginSummerMonth AND  MONTH(GETDATE()) < G.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0.0) ELSE ISNULL(A.dblWinterDailyUse,0) END)
 	,strSiteNumber = RIGHT('0000' + CAST(ISNULL(A.intSiteNumber,0)AS NVARCHAR(4)),4) 
+	,dblUnappliedCredits = ISNULL(F.dblUnappliedCredits,0.0) + ISNULL(F.dblPrepaids,0.0)
 	,E.*
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B

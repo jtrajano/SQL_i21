@@ -34,7 +34,11 @@ BEGIN
 		DECLARE @strPrintCompanyHeading NVARCHAR(1)
 		DECLARE @query NVARCHAR(MAX)
 		DECLARE @strStartMonth NVARCHAR(10)
+		DECLARE @ysnIsOriginIntegration BIT
 		
+
+		SELECT TOP 1 @ysnIsOriginIntegration = ysnUseOriginIntegration FROM tblTMPreferenceCompany
+
 		SET @strWhereClause = ''
 		
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -64,7 +68,14 @@ BEGIN
 		
 		IF(ISNULL(@strCustomerIds,'') != '')
 		BEGIN 
-			SET @strWhereClause = ' WHERE C.intEntityId IN (' + @strCustomerIds + ') '
+			IF(@ysnIsOriginIntegration = 1)
+			BEGIN
+				SET @strWhereClause = ' WHERE B.A4GLIdentity IN (' + @strCustomerIds + ') '
+			END
+			ELSE
+			BEGIN
+				SET @strWhereClause = ' WHERE B.intEntityId IN (' + @strCustomerIds + ') '
+			END
 		END
 		
 		---Location Ids Parameter	
@@ -91,11 +102,27 @@ BEGIN
 		BEGIN
 			IF (@strWhereClause = '')
 			BEGIN
-				SET @strWhereClause = ' WHERE (ISNULL(G.intDeliveryTermID,D.intTermsId)) IN (' + @strTermIds + ') '
+				IF(@ysnIsOriginIntegration = 1)
+				BEGIN
+					SET @strWhereClause = ' WHERE (ISNULL(G.intDeliveryTermID,I.A4GLIdentity)) IN (' + @strTermIds + ') '
+				END
+				ELSE
+				BEGIN
+					SET @strWhereClause = ' WHERE (ISNULL(G.intDeliveryTermID,B.intTermsId)) IN (' + @strTermIds + ') '
+				END
+				
 			END
 			ELSE
 			BEGIN
-				SET @strWhereClause = @strWhereClause + ' AND (ISNULL(G.intDeliveryTermID,D.intTermsId)) IN (' + @strTermIds + ') '
+				IF(@ysnIsOriginIntegration = 1)
+				BEGIN
+					SET @strWhereClause = @strWhereClause + ' AND (ISNULL(G.intDeliveryTermID,I.A4GLIdentity)) IN (' + @strTermIds + ') '
+				END
+				ELSE
+				BEGIN
+					SET @strWhereClause = @strWhereClause + ' AND (ISNULL(G.intDeliveryTermID,,B.intTermsId)) IN (' + @strTermIds + ') '
+				END
+				
 			END
 		END
 
@@ -107,22 +134,54 @@ BEGIN
 		BEGIN
 			IF (@strWhereClause = '')
 			BEGIN
-				SET @strWhereClause = ' WHERE MONTH(D.dtmBudgetBeginDate) = ' + @strStartMonth 
+				IF(@ysnIsOriginIntegration = 1)
+				BEGIN
+					SET @strWhereClause = ' WHERE B.vwcus_budget_beg_mm = ' + @strStartMonth 
+				END
+				ELSE
+				BEGIN
+					SET @strWhereClause = ' WHERE MONTH(B.dtmBudgetBeginDate) = ' + @strStartMonth 
+				END
+				
 			END
 			ELSE
 			BEGIN
-				SET @strWhereClause = @strWhereClause + ' AND MONTH(D.dtmBudgetBeginDate) =' + @strStartMonth 
+				IF(@ysnIsOriginIntegration = 1)
+				BEGIN
+					SET @strWhereClause = @strWhereClause + ' AND B.vwcus_budget_beg_mm =' + @strStartMonth 
+				END
+				ELSE
+				BEGIN
+					SET @strWhereClause = @strWhereClause + ' AND MONTH(B.dtmBudgetBeginDate) =' + @strStartMonth 
+				END
+				
 			END
 		END
 
 		--Budget Amount checking
 		IF (@strWhereClause = '')
 		BEGIN
-			SET @strWhereClause = ' WHERE ISNULL(D.dblMonthlyBudget,0) <> 0 ' 
+			IF(@ysnIsOriginIntegration = 1)
+			BEGIN
+				SET @strWhereClause = ' WHERE ISNULL(B.vwcus_budget_amt,0) <> 0 ' 
+			END
+			ELSE
+			BEGIN
+				SET @strWhereClause = ' WHERE ISNULL(B.dblMonthlyBudget,0) <> 0 ' 
+			END
+			
 		END
 		ELSE
 		BEGIN
-			SET @strWhereClause = @strWhereClause + ' AND ISNULL(D.dblMonthlyBudget,0) <> 0'
+			IF(@ysnIsOriginIntegration = 1)
+			BEGIN
+				SET @strWhereClause = @strWhereClause + ' AND ISNULL(B.vwcus_budget_amt,0) <> 0'
+			END
+			ELSE
+			BEGIN
+				SET @strWhereClause = @strWhereClause + ' AND ISNULL(B.dblMonthlyBudget,0) <> 0'
+			END
+			
 		END
 		
 		---@dtmFirstPaymentDue
@@ -141,38 +200,76 @@ BEGIN
 
 		SET @strPrintCompanyHeading = ISNULL(@strPrintCompanyHeading,'0')
 		
-		EXEC (
-		'
-		SELECT DISTINCT
-			strCompanyName = A.strCompanyName
-			,strCompanyAddress = A.strAddress
-			,strCompanyCity = A.strCity
-			,strCompanyState = A.strState 
-			,strCompanyZip = A.strZip
-			,strCustomerName = C.strName
-			,strCustomerAddress = E.strAddress
-			,strCustomerCity = E.strCity
-			,strCustomerState = E.strState
-			,strCustomerZip = E.strZipCode
-			,intEntityCustomerId = B.intEntityId
-			,dblBudget = B.dblMonthlyBudget
-			,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
-			,blbLetterBody = H.blbMessage 
-			,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
-			,intDeliveryTermId = B.intTermsId
-		FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, tblARCustomer B
-		INNER JOIN tblEMEntity C
-			ON B.intEntityId = C.intEntityId
-		INNER JOIN tblTMCustomer F
-			ON C.intEntityId = F.intCustomerNumber
-		INNER JOIN tblTMSite G
-			ON F.intCustomerID = G.intCustomerID
-		INNER JOIN tblEMEntityLocation E
-			ON D.intEntityId = E.intEntityId
-				AND ysnDefaultLocation = 1
-		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') H
-		' + @strWhereClause
-		)
+
+		IF(@ysnIsOriginIntegration = 1)
+		BEGIN
+			EXEC (
+				'
+				SELECT DISTINCT
+					strCompanyName = A.strCompanyName
+					,strCompanyAddress = A.strAddress
+					,strCompanyCity = A.strCity
+					,strCompanyState = A.strState 
+					,strCompanyZip = A.strZip
+					,strCustomerName = B.strFullName
+					,strCustomerAddress = RTRIM(B.strFormattedAddress)
+					,strCustomerCity = RTRIM(B.vwcus_city)
+					,strCustomerState = RTRIM(B.vwcus_state)
+					,strCustomerZip = RTRIM(B.vwcus_zip)
+					,intEntityCustomerId = B.A4GLIdentity
+					,dblBudget = B.vwcus_budget_amt
+					,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
+					,blbLetterBody = H.blbMessage 
+					,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
+					,intDeliveryTermId = I.A4GLIdentity
+				FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, 
+				vwcusmst B
+				INNER JOIN tblTMCustomer F
+					ON B.A4GLIdentity = F.intCustomerNumber
+				INNER JOIN tblTMSite G
+					ON F.intCustomerID = G.intCustomerID
+				INNER JOIN vwtrmmst I
+					ON B.vwcus_terms_cd = I.vwtrm_key_n
+				,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') H
+				' + @strWhereClause
+				)
+		END
+		ELSE
+		BEGIN
+			EXEC (
+				'
+				SELECT DISTINCT
+					strCompanyName = A.strCompanyName
+					,strCompanyAddress = A.strAddress
+					,strCompanyCity = A.strCity
+					,strCompanyState = A.strState 
+					,strCompanyZip = A.strZip
+					,strCustomerName = C.strName
+					,strCustomerAddress = E.strAddress
+					,strCustomerCity = E.strCity
+					,strCustomerState = E.strState
+					,strCustomerZip = E.strZipCode
+					,intEntityCustomerId = B.intEntityId
+					,dblBudget = B.dblMonthlyBudget
+					,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
+					,blbLetterBody = H.blbMessage 
+					,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
+					,intDeliveryTermId = B.intTermsId
+				FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, tblARCustomer B
+				INNER JOIN tblEMEntity C
+					ON B.intEntityId = C.intEntityId
+				INNER JOIN tblTMCustomer F
+					ON C.intEntityId = F.intCustomerNumber	
+				INNER JOIN tblTMSite G
+					ON F.intCustomerID = G.intCustomerID
+				INNER JOIN tblEMEntityLocation E
+					ON C.intEntityId = E.intEntityId
+						AND ysnDefaultLocation = 1
+				,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') H
+				' + @strWhereClause
+				)
+		END
+		
 	END
 END
 GO

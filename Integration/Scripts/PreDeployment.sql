@@ -156,7 +156,7 @@
 :r "..\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
---:r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" 
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenCallEntryView.sql"
@@ -193,6 +193,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateTMCustomerView.sql"
 
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
