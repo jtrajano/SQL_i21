@@ -240,7 +240,7 @@ BEGIN TRY
 	BEGIN
 			
 		EXEC [dbo].[uspARAddInvoicesTaxDetail]
-			 @TaxDetailItems		= @TaxesForInsert
+			 @TaxDetails		= @TaxesForInsert
 			,@RaiseError		= @RaiseError
 			,@ErrorMessage		= @ErrorMessage OUTPUT
 								
