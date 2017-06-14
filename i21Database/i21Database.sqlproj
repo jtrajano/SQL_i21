@@ -5249,7 +5249,6 @@
     <Build Include="dbo\Tables\tblMFCustomerLabelType.sql" />
     <Build Include="dbo\Views\vyuMFOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLDeleteAccount.sql" />
-    <Build Include="dbo\Functions\fnICGetReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBillOfLadingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceNew.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCalculateFreightUnit.sql" />
