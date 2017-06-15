@@ -22,6 +22,7 @@
 	[ysnUnPosted]						BIT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_ysnUnPosted] DEFAULT ((0)) NULL,	
 	[ysnAccrueLicense]					BIT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_ysnAccrueLicense] DEFAULT ((0)) NULL,	
 	[ysnUpdateAvailableDiscount]		BIT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_ysnUpdateAvailableDiscountOnly] DEFAULT ((0)) NULL,	
+	[strPostedTransactionId]			NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[strBatchId]						NVARCHAR(20)   COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]					INT CONSTRAINT [DF_tblARInvoiceIntegrationLogDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARInvoiceIntegrationLogDetail_intIntegrationLogDetailId] PRIMARY KEY CLUSTERED ([intIntegrationLogDetailId] ASC)

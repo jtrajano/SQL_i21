@@ -225,6 +225,7 @@ BEGIN CATCH
 				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 				,ILD.[strPostingMessage]	= @ErrorMerssage
 				,ILD.[strBatchId]			= @BatchId
+				,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 			FROM
 				tblARInvoiceIntegrationLogDetail ILD  WITH (NOLOCK)
 			INNER JOIN
@@ -340,6 +341,7 @@ BEGIN TRY
 									,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 									,ILD.[strPostingMessage]	= @ErrorMerssage
 									,ILD.[strBatchId]			= @BatchId
+									,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 								FROM
 									tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 								INNER JOIN
@@ -375,6 +377,7 @@ BEGIN CATCH
 				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 				,ILD.[strPostingMessage]	= @ErrorMerssage
 				,ILD.[strBatchId]			= @BatchId
+				,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 			FROM
 				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
@@ -1632,6 +1635,7 @@ END CATCH
 								,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 								,ILD.[strPostingMessage]	= @ErrorMerssage
 								,ILD.[strBatchId]			= @BatchId
+								,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 							FROM
 								tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 							INNER JOIN
@@ -1832,6 +1836,7 @@ END CATCH
 					,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
 					,ILD.[strPostingMessage]	= PID.[strError]
 					,ILD.[strBatchId]			= PID.[strBatchNumber]
+					,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 				FROM
 					tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 				INNER JOIN
@@ -1984,6 +1989,7 @@ BEGIN TRY
 									,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 									,ILD.[strPostingMessage]	= @ErrorMerssage
 									,ILD.[strBatchId]			= @BatchId
+									,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 								FROM
 									tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 								INNER JOIN
@@ -2021,6 +2027,7 @@ BEGIN CATCH
 				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 				,ILD.[strPostingMessage]	= @ErrorMerssage
 				,ILD.[strBatchId]			= @BatchId
+				,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 			FROM
 				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
@@ -4471,6 +4478,7 @@ IF @Recap = 1
 						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 						,ILD.[strPostingMessage]	= @ErrorMerssage
 						,ILD.[strBatchId]			= @BatchId
+						,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 					FROM
 						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 					INNER JOIN
@@ -4550,6 +4558,7 @@ IF @Recap = 0
 						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 						,ILD.[strPostingMessage]	= @PostSuccessfulMsg
 						,ILD.[strBatchId]			= @BatchId
+						,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 					FROM
 						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 					INNER JOIN
@@ -4671,6 +4680,7 @@ IF @Recap = 0
 						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 						,ILD.[strPostingMessage]	= @PostSuccessfulMsg
 						,ILD.[strBatchId]			= @BatchId
+						,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 					FROM
 						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 					INNER JOIN
@@ -4904,6 +4914,7 @@ Do_Rollback:
 				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 				,ILD.[strPostingMessage]	= @ErrorMerssage
 				,ILD.[strBatchId]			= @BatchId
+				,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
 			FROM
 				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
