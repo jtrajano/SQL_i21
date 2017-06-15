@@ -19,5 +19,9 @@ FROM
 	UNION ALL
 	SELECT intId as intResultId, strBatchNumber, intTransactionId, strTransactionId, strMessage, NULL, strTransactionType, NULL
 	FROM tblARPostResult
+	UNION ALL
+	SELECT intIntegrationLogDetailId as intResultId, strBatchId as strBatchNumber, intInvoiceId as intTransactionId, [strPostedTransactionId] as strTransactionId, strPostingMessage as strMessage, NULL, strTransactionType, NULL
+	FROM tblARInvoiceIntegrationLogDetail
+	WHERE ysnHeader = 1 AND ysnSuccess = 1 AND ysnPost IS NOT NULL AND (ysnPosted = 1 or ysnUnPosted = 1)
 ) BatchPostingResult	
 WHERE strDescription IS NOT NULL
