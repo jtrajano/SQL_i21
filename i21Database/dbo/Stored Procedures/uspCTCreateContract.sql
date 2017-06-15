@@ -115,7 +115,7 @@ BEGIN TRY
 				ysnPrinted			=	0,
 
 				intItemId			=	SC.intItemId,		intItemUOMId				=	SC.intItemUOMIdTo,
-				intContractSeq		=	1,					intStorageScheduleRuleId	=	SC.intStorageScheduleId,
+				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SC.intStorageScheduleId,SP.intStorageScheduleId),
 				dtmEndDate			=	CP.dtmDefEndDate,	intCompanyLocationId		=	SC.intProcessingLocationId, 
 				dblQuantity			=	0,					intContractStatusId			=	1,
 				dblBalance			=	0,					dtmStartDate				=	SC.dtmTicketDateTime,
@@ -128,9 +128,11 @@ BEGIN TRY
 		JOIN	tblICItem					IM	ON	IM.intItemId		=	SC.intItemId
 		JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId		=	SC.intItemUOMIdTo
 		JOIN	tblICCommodity				CM	ON	CM.intCommodityId	=	IM.intCommodityId
-		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CM.intCommodityId	AND 
-													CU.intUnitMeasureId =	QU.intUnitMeasureId
-		WHERE	intTicketId	= @intExternalId	
+		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CM.intCommodityId
+												AND	CU.intUnitMeasureId =	QU.intUnitMeasureId	LEFT 
+		JOIN	tblSCTicketSplit			SP	ON	SP.intTicketId		=	SC.intTicketId
+												AND	SP.intCustomerId	=	ISNULL(@intEntityId,SC.intEntityId)
+		WHERE	SC.intTicketId	= @intExternalId	
 
 		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
 		EXEC	@strContractNumber = uspCTGetStartingNumber @strStartingNumber
