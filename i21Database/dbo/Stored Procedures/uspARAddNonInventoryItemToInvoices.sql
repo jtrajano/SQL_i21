@@ -57,21 +57,21 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblARInvoice ARI WITH (NOLOCK) WHERE ARI.[intInvoiceId] = IT.[intInvoiceId])
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= IT.[intId]
-	,[strMessage]			= 'Invoice is already posted!'
-	,[strTransactionType]	= IT.[strTransactionType]
-	,[strType]				= IT.[strType]
-	,[strSourceTransaction]	= IT.[strSourceTransaction]
-	,[intSourceId]			= IT.[intSourceId]
-	,[strSourceId]			= IT.[strSourceId]
-	,[intInvoiceId]			= IT.[intInvoiceId]
-FROM
-	@ItemEntries IT
-WHERE
-	EXISTS(SELECT NULL FROM tblARInvoice ARI WITH (NOLOCK) WHERE ARI.[intInvoiceId] = IT.[intInvoiceId] AND ISNULL(ARI.[ysnPosted],0) = 1)
+--SELECT
+--	 [intId]				= IT.[intId]
+--	,[strMessage]			= 'Invoice is already posted!'
+--	,[strTransactionType]	= IT.[strTransactionType]
+--	,[strType]				= IT.[strType]
+--	,[strSourceTransaction]	= IT.[strSourceTransaction]
+--	,[intSourceId]			= IT.[intSourceId]
+--	,[strSourceId]			= IT.[strSourceId]
+--	,[intInvoiceId]			= IT.[intInvoiceId]
+--FROM
+--	@ItemEntries IT
+--WHERE
+--	EXISTS(SELECT NULL FROM tblARInvoice ARI WITH (NOLOCK) WHERE ARI.[intInvoiceId] = IT.[intInvoiceId] AND ISNULL(ARI.[ysnPosted],0) = 1)
 
 UNION ALL
 
