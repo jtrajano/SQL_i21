@@ -9,16 +9,25 @@ SET @strLayoutTitle = 'Pricebook Combo'
 IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 BEGIN
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
+  UPDATE [dbo].[tblSMImportFileHeader]
+  SET [strLayoutTitle] = 'Pricebook Combo'
+       ,[strFileType] = 'XML'
+       ,[strFieldDelimiter] = NULL
+       ,[strXMLType] = 'Outbound'
+       ,[strXMLInitiater] = '<?xml version="1.0"?>'
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 17
+  WHERE intImportFileHeaderId = @intImportFileHeaderId
 
-	--DELETE FROM dbo.tblSMXMLTagAttribute
-	DELETE TA
-	FROM dbo.tblSMXMLTagAttribute TA
-	JOIN dbo.tblSMImportFileColumnDetail IFC ON IFC.intImportFileColumnDetailId = TA.intImportFileColumnDetailId
-	WHERE IFC.intImportFileHeaderId = @intImportFileHeaderId
+----DELETE FROM dbo.tblSMXMLTagAttribute
+--DELETE TA
+--FROM dbo.tblSMXMLTagAttribute TA
+--JOIN dbo.tblSMImportFileColumnDetail IFC ON IFC.intImportFileColumnDetailId = TA.intImportFileColumnDetailId
+--WHERE IFC.intImportFileHeaderId = @intImportFileHeaderId
 
-	--DELETE FROM dbo.tblSMImportFileColumnDetail
-	DELETE FROM dbo.tblSMImportFileColumnDetail
-	WHERE intImportFileHeaderId = @intImportFileHeaderId
+----DELETE FROM dbo.tblSMImportFileColumnDetail
+--DELETE FROM dbo.tblSMImportFileColumnDetail
+--WHERE intImportFileHeaderId = @intImportFileHeaderId
 END
 ELSE IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 BEGIN
@@ -32,16 +41,16 @@ END
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
 
 --LEVEL 1
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'NAXML-MaintenanceRequest' AND intLevel = 1 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 1 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,1,NULL,'NAXML-MaintenanceRequest','tblSTstgComboSalesFile',NULL,NULL,0,NULL,1,3)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'NAXML-MaintenanceRequest' AND intLevel = 1 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 1 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1  AND strXMLTag = 'NAXML-MaintenanceRequest'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -59,16 +68,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 2
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'TransmissionHeader' AND intLevel = 2 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 2 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,2,1,'TransmissionHeader','tblSTstgComboSalesFile',NULL,'Header',1,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'TransmissionHeader' AND intLevel = 2 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 2 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 2  AND strXMLTag = 'TransmissionHeader'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 2
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -86,16 +95,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 3
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'StoreLocationID' AND intLevel = 3 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 3 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,3,1,'StoreLocationID','tblSTstgComboSalesFile','StoreLocationID',NULL,2,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'StoreLocationID' AND intLevel = 3 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 3 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 3  AND strXMLTag = 'StoreLocationID'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 3
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -113,16 +122,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 4
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'VendorName' AND intLevel = 4 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 4 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,4,2,'VendorName','tblSTstgComboSalesFile','VendorName',NULL,2,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'VendorName' AND intLevel = 4 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 4 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 4  AND strXMLTag = 'VendorName'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 4
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -140,16 +149,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 5
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'VendorModelVersion' AND intLevel = 5 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 5 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,5,3,'VendorModelVersion','tblSTstgComboSalesFile','VendorModelVersion',NULL,2,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'VendorModelVersion' AND intLevel = 5 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 5 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 5  AND strXMLTag = 'VendorModelVersion'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 5
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -167,16 +176,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 6
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboMaintenance' AND intLevel = 6 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 6 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,6,2,'ComboMaintenance','tblSTstgComboSalesFile',NULL,'Header',1,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboMaintenance' AND intLevel = 6 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 6 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 6  AND strXMLTag = 'ComboMaintenance'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 6
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -194,16 +203,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 7
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'TableAction' AND intLevel = 7 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 7 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,7,1,'TableAction',NULL,NULL,NULL,6,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'TableAction' AND intLevel = 7 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 7 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 7  AND strXMLTag = 'TableAction'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 7
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -221,16 +230,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 8
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'RecordAction' AND intLevel = 8 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 8 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,8,2,'RecordAction',NULL,NULL,NULL,6,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'RecordAction' AND intLevel = 8 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 8 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 8  AND strXMLTag = 'RecordAction'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 8
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -248,16 +257,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 9
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'CBTDetail' AND intLevel = 9 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 9 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,9,3,'CBTDetail','tblSTstgComboSalesFile',NULL,NULL,6,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'CBTDetail' AND intLevel = 9 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 9 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 9  AND strXMLTag = 'CBTDetail'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 9
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -275,16 +284,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 10
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'RecordAction' AND intLevel = 10 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 10 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,10,1,'RecordAction',NULL,NULL,NULL,9,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'RecordAction' AND intLevel = 10 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 10 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 10  AND strXMLTag = 'RecordAction'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 10
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -302,16 +311,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 11
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'Promotion' AND intLevel = 11 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 11 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,11,2,'Promotion','tblSTstgComboSalesFile',NULL,'Header',9,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'Promotion' AND intLevel = 11 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 11 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 11  AND strXMLTag = 'Promotion'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 11
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -329,16 +338,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 12
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'PromotionID' AND intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,12,1,'PromotionID','tblSTstgComboSalesFile','PromotionID',NULL,11,NULL,1,1)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'PromotionID' AND intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 12  AND strXMLTag = 'PromotionID'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 12
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -356,16 +365,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 13
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'SalesRestrictCode' AND intLevel = 13 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 13 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,13,3,'SalesRestrictCode','tblSTstgComboSalesFile','SalesRestrictCode',NULL,9,NULL,1,2)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'SalesRestrictCode' AND intLevel = 13 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 13 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 13  AND strXMLTag = 'SalesRestrictCode'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 13
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -383,16 +392,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 14
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'LinkCode' AND intLevel = 14 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 14 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,14,4,'LinkCode',NULL,NULL,NULL,9,NULL,1,3)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'LinkCode' AND intLevel = 14 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 14 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 14  AND strXMLTag = 'LinkCode'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 14
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -410,16 +419,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 15
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboDescription' AND intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,15,5,'ComboDescription','tblSTstgComboSalesFile','ComboDescription',NULL,9,NULL,1,2)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboDescription' AND intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 15  AND strXMLTag = 'ComboDescription'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 15
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -437,16 +446,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 16
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboList' AND intLevel = 16 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 16 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,16,6,'ComboList','tblSTstgComboSalesFile',NULL,'Header',9,NULL,1,2)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboList' AND intLevel = 16 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 16 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 16  AND strXMLTag = 'ComboList'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 16
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -464,16 +473,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 18
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboItemList' AND intLevel = 18 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 18 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,18,1,'ComboItemList','tblSTstgComboSalesFile',NULL,'Header',16,NULL,1,3)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboItemList' AND intLevel = 18 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 18 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 18  AND strXMLTag = 'ComboItemList'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 18
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -491,16 +500,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 19
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ItemListID' AND intLevel = 19 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 19 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,19,1,'ItemListID','tblSTstgComboSalesFile','ItemListID',NULL,18,NULL,1,3)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ItemListID' AND intLevel = 19 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 19 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 19  AND strXMLTag = 'ItemListID'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 19
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -518,16 +527,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 20
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboItemQuantity' AND intLevel = 20 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 20 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,20,2,'ComboItemQuantity','tblSTstgComboSalesFile','ComboItemQuantity',NULL,18,NULL,1,4)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboItemQuantity' AND intLevel = 20 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 20 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 20  AND strXMLTag = 'ComboItemQuantity'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 20
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -545,16 +554,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 21
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboItemUnitPrice' AND intLevel = 21 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 21 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,21,3,'ComboItemUnitPrice','tblSTstgComboSalesFile','ComboItemUnitPrice',NULL,18,NULL,1,3)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'ComboItemUnitPrice' AND intLevel = 21 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 21 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 21  AND strXMLTag = 'ComboItemUnitPrice'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 21
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -572,16 +581,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 22
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'StartDate' AND intLevel = 22 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 22 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,22,7,'StartDate','tblSTstgComboSalesFile','StartDate',NULL,9,NULL,1,2)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'StartDate' AND intLevel = 22 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 22 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 22  AND strXMLTag = 'StartDate'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 22
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -599,16 +608,16 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 23
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'StopDate' AND intLevel = 23 AND intImportFileHeaderId = @intImportFileHeaderId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 23 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileHeaderId,NULL,23,8,'StopDate','tblSTstgComboSalesFile','StopDate',NULL,9,NULL,1,2)
 END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'StopDate' AND intLevel = 23 AND intImportFileHeaderId = @intImportFileHeaderId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 23 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 23  AND strXMLTag = 'StopDate'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 23
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -625,20 +634,23 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
+--Delete Rows Not Included
+DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel NOT IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,23)
 
 
---LEVEL 1Attributes(5x)
+
+--LEVEL 1   Attributes(5x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 AND strXMLTag = 'NAXML-MaintenanceRequest'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns:radiant' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,1,'xmlns:radiant',NULL,NULL,'http://www.radiantsystems.com/NAXML-Extension',1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns:radiant' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns:radiant' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 1
@@ -651,17 +663,16 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 AND strXMLTag = 'NAXML-MaintenanceRequest'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns' AND intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,2,'xmlns',NULL,NULL,'http://www.naxml.org/POSBO/Vocabulary/2003-10-16',1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns' AND intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns' AND intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 2
@@ -674,17 +685,16 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 AND strXMLTag = 'NAXML-MaintenanceRequest'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'version' AND intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,3,'version',NULL,NULL,'3.4',1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'version' AND intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'version' AND intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 3
@@ -697,17 +707,16 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 AND strXMLTag = 'NAXML-MaintenanceRequest'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xsi:schemaLocation' AND intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,4,'xsi:schemaLocation',NULL,NULL,'http://www.radiantsystems.com/NAXML-Extension NAXML-RadiantExtension34.xsd',1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xsi:schemaLocation' AND intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xsi:schemaLocation' AND intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 4
@@ -720,17 +729,16 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 AND strXMLTag = 'NAXML-MaintenanceRequest'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns:xsi' AND intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,5,'xmlns:xsi',NULL,NULL,'http://www.w3.org/2001/XMLSchema-instance',1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns:xsi' AND intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'xmlns:xsi' AND intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 5
@@ -743,18 +751,22 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
---LEVEL 7Attributes(1x)
+--Delete Rows Not Included in LEVEL 1   Attributes(5x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3,4,5)
+
+
+--LEVEL 7   Attributes(1x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 7 AND strXMLTag = 'TableAction'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,1,'type','tblSTstgComboSalesFile','TableActionType',NULL,1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 1
@@ -767,18 +779,22 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
---LEVEL 8Attributes(1x)
+--Delete Rows Not Included in LEVEL 7   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 8   Attributes(1x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 8 AND strXMLTag = 'RecordAction'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,1,'type','tblSTstgComboSalesFile','RecordActionType',NULL,1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 1
@@ -791,18 +807,22 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
---LEVEL 10Attributes(1x)
+--Delete Rows Not Included in LEVEL 8   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 10   Attributes(1x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 10 AND strXMLTag = 'RecordAction'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,1,'type','tblSTstgComboSalesFile','CBTDetailRecordActionType',NULL,1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 1
@@ -815,18 +835,22 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
---LEVEL 14Attributes(1x)
+--Delete Rows Not Included in LEVEL 10   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 14   Attributes(1x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 14 AND strXMLTag = 'LinkCode'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,1,'type','tblSTstgComboSalesFile','LinkCodeType',NULL,1,1)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 1
@@ -839,18 +863,22 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
---LEVEL 20Attributes(1x)
+--Delete Rows Not Included in LEVEL 14   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 20   Attributes(1x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 20 AND strXMLTag = 'ComboItemQuantity'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'uom' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
       (@intImportFileColumnDetailId,1,'uom','tblSTstgComboSalesFile','ComboItemQuantityUOM',NULL,0,2)
 END
-IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'uom' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'uom' AND intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 1
@@ -863,3 +891,8 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
+--Delete Rows Not Included in LEVEL 20   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+GO
