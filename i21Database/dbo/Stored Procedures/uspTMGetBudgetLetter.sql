@@ -120,7 +120,7 @@ BEGIN
 				END
 				ELSE
 				BEGIN
-					SET @strWhereClause = @strWhereClause + ' AND (ISNULL(G.intDeliveryTermID,,B.intTermsId)) IN (' + @strTermIds + ') '
+					SET @strWhereClause = @strWhereClause + ' AND (ISNULL(G.intDeliveryTermID,B.intTermsId)) IN (' + @strTermIds + ') '
 				END
 				
 			END
