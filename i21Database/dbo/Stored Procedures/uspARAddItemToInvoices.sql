@@ -28,8 +28,9 @@ SELECT *
 FROM
 	@InvoiceEntries
 WHERE
-	ISNULL([ysnInventory],0) = 1
-	OR  [dbo].[fnIsStockTrackingItem]([intItemId]) = 1
+	--ISNULL([ysnInventory],0) = 1
+	--OR  
+	[dbo].[fnIsStockTrackingItem]([intItemId]) = 1
 
 IF EXISTS(SELECT TOP 1 NULL FROM @Inventory)
 BEGIN
@@ -69,7 +70,7 @@ SELECT *
 FROM
 	@InvoiceEntries
 WHERE
-	NOT	(ISNULL([ysnInventory],0) = 1 OR  [dbo].[fnIsStockTrackingItem]([intItemId]) = 1)
+	[dbo].[fnIsStockTrackingItem]([intItemId]) = 0
 	AND ISNULL([intItemId], 0) <> 0
 	AND ISNULL([intCommentTypeId], 0) = 0
 
@@ -112,7 +113,7 @@ SELECT *
 FROM
 	@InvoiceEntries
 WHERE
-	NOT	(ISNULL([ysnInventory],0) = 1 OR  [dbo].[fnIsStockTrackingItem]([intItemId]) = 1)
+	[dbo].[fnIsStockTrackingItem]([intItemId]) = 0
 	AND NOT (ISNULL([intItemId], 0) <> 0 AND ISNULL([intCommentTypeId], 0) = 0)
 	AND (LEN(RTRIM(LTRIM([strItemDescription]))) > 0 OR ISNULL([dblPrice], @ZeroDecimal) <> 0 )
 	AND ISNULL([intCommentTypeId], 0) IN (0,1,3)

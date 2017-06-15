@@ -477,7 +477,7 @@ BEGIN
 		FROM
 			#EntriesForProcessing EFP
 		INNER JOIN
-			(SELECT [intId], [intInvoiceId], [ysnSuccess], [ysnHeader] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) IL
+			(SELECT [intId], [intInvoiceId], [ysnSuccess], [ysnHeader] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) IL
 				ON EFP.[intId] = IL.[intId]
 				AND ISNULL(IL.[ysnHeader], 0) = 1
 				AND ISNULL(IL.[ysnSuccess], 0) = 1		
