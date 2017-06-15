@@ -217,6 +217,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[intContractDetailId] 
 				,[ysnAccrue]
 				,[ysnPrice]
+				,[ysnInventoryCost]
 		)
 		SELECT	
 		DISTINCT
@@ -281,6 +282,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 												WHEN QM.dblDiscountAmount < 0 THEN 0
 												WHEN QM.dblDiscountAmount > 0 THEN 1
 											END
+		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		FROM @ReceiptStagingTable RE
 		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
