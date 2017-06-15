@@ -5275,6 +5275,9 @@
     <Build Include="dbo\Views\vyuSCGradeReadingReport.sql" />
     <Build Include="dbo\Views\vyuSCProductionEvidenceReportView.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCalculateFreightUnit.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportCanadianPrimaryElevatorReceipt.sql" />
+    <Build Include="dbo\Functions\fnGRConvertDecimalPartToWords.sql" />
+    <Build Include="dbo\Functions\fnGRConvertNumberToWords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
