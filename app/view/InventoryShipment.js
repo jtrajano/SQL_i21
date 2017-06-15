@@ -377,7 +377,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
                                                                 displayField: 'strFreightTerm',
-                                                                valueField: 'intFreightTermId'
+                                                                valueField: 'strFreightTerm'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -424,7 +424,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
                                                                 displayField: 'strCurrency',
-                                                                valueField: 'intCurrencyID'
+                                                                valueField: 'strCurrency'
                                                             },
                                                             {
                                                                 xtype: 'textfield',
