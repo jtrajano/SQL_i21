@@ -9,16 +9,15 @@ SET @strLayoutTitle = 'Radiant - FGM'
 IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 BEGIN
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
-  UPDATE [dbo].[tblSMImportFileHeader]
-  SET [strLayoutTitle] = 'Radiant - FGM'
-       ,[strFileType] = 'XML'
-       ,[strFieldDelimiter] = NULL
-       ,[strXMLType] = 'Inbound'
-       ,[strXMLInitiater] = '<?xml version="1.0" encoding="utf-8"?>'
-       ,[ysnActive] = 1
-       ,[intConcurrencyId] = 6
-  WHERE intImportFileHeaderId = @intImportFileHeaderId
+	  --DELETE FROM dbo.tblSMXMLTagAttribute
+	DELETE TA
+	FROM dbo.tblSMXMLTagAttribute TA
+	JOIN dbo.tblSMImportFileColumnDetail IFC ON IFC.intImportFileColumnDetailId = TA.intImportFileColumnDetailId
+	WHERE IFC.intImportFileHeaderId = @intImportFileHeaderId
 
+	--DELETE FROM dbo.tblSMImportFileColumnDetail
+	DELETE FROM dbo.tblSMImportFileColumnDetail
+	WHERE intImportFileHeaderId = @intImportFileHeaderId
 END
 ELSE IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle)
 BEGIN
