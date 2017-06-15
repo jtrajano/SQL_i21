@@ -20,7 +20,7 @@ SET @CurrentDate = DATEADD(DAY, 0, DATEDIFF(DAY, 0, GETDATE()))
 
 SELECT 
 	 @Type = strType 
-	,@DiscountDay = ISNULL(intDiscountDay, 0)
+	,@DiscountDay = ISNULL(intDiscountDay, 1)
 	,@DiscountDate = ISNULL(dtmDiscountDate, @PaymentDate) 
 	,@DiscountEP = ISNULL(dblDiscountEP,0)
 FROM
@@ -28,6 +28,7 @@ FROM
 WHERE
 	intTermID = @TermId
 
+SET @DiscountDay = CASE WHEN @DiscountDay = 0 THEN 1 ELSE @DiscountDay END
 
 IF (@Type = 'Standard')
 	BEGIN
