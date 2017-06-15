@@ -5272,6 +5272,9 @@
     <Build Include="dbo\Views\vyuMFParentLot.sql" />
     <Build Include="dbo\Views\vyuDBActivePanel.sql" />
     <Build Include="dbo\Views\vyuDBActivePanelTab.sql" />
+    <Build Include="dbo\Views\vyuSCGradeReadingReport.sql" />
+    <Build Include="dbo\Views\vyuSCProductionEvidenceReportView.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCalculateFreightUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
