@@ -112,9 +112,7 @@ AS
 	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
 	JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
 	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId			LEFT
-	JOIN	tblICItemLocation				IL	ON	IL.intItemId				=	IM.intItemId				AND
-													IL.intLocationId			=	CD.intCompanyLocationId		LEFT
-	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
+	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	CD.intStorageLocationId		LEFT
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
 	JOIN	tblICCommodityAttribute			EO	ON	EO.intCommodityAttributeId	=	IM.intOriginId				LEFT
