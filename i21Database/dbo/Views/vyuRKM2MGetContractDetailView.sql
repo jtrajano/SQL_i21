@@ -70,14 +70,14 @@ FROM	tblCTContractHeader			CH
 	JOIN	tblICCommodity					CY	ON	CY.intCommodityId					=		CH.intCommodityId	
 	JOIN	tblCTContractType				TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
 	JOIN	vyuCTEntity						EY	ON	EY.intEntityId						=		CH.intEntityId			AND
-														EY.strEntityType					=		(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
-	JOIN	tblCTPosition					PO	ON	PO.intPositionId					=		CH.intPositionId
+														EY.strEntityType					=		(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	
 	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				
 	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId 
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			
 	JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId					
-	JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId			
+	JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId	
+	LEFT JOIN	tblCTPosition					PO	ON	PO.intPositionId					=		CH.intPositionId		
 	LEFT JOIN	tblRKFutureMarket				FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		
 	LEFT JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId					
 	LEFT JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId	
