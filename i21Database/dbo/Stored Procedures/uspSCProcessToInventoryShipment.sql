@@ -468,30 +468,30 @@ BEGIN TRY
 			BEGIN
 				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 
-				SELECT @dblQtyShipped = dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
+				--SELECT @dblQtyShipped = dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 				
-				IF ISNULL(@intInvoiceId , 0) != 0 AND ISNULL(@intDestinationWeightId,0) = 0 AND @dblQtyShipped > 0
-				BEGIN
-					EXEC dbo.uspARPostInvoice
-					@batchId			= NULL,
-					@post				= 1,
-					@recap				= 0,
-					@param				= @intInvoiceId,
-					@userId				= @intUserId,
-					@beginDate			= NULL,
-					@endDate			= NULL,
-					@beginTransaction	= NULL,
-					@endTransaction		= NULL,
-					@exclude			= NULL,
-					@successfulCount	= @successfulCount OUTPUT,
-					@invalidCount		= @invalidCount OUTPUT,
-					@success			= @success OUTPUT,
-					@batchIdUsed		= @batchIdUsed OUTPUT,
-					@recapId			= @recapId OUTPUT,
-					@transType			= N'all',
-					@accrueLicense		= 0,
-					@raiseError			= 1
-				END
+				--IF ISNULL(@intInvoiceId , 0) != 0 AND ISNULL(@intDestinationWeightId,0) = 0 AND @dblQtyShipped > 0
+				--BEGIN
+				--	EXEC dbo.uspARPostInvoice
+				--	@batchId			= NULL,
+				--	@post				= 1,
+				--	@recap				= 0,
+				--	@param				= @intInvoiceId,
+				--	@userId				= @intUserId,
+				--	@beginDate			= NULL,
+				--	@endDate			= NULL,
+				--	@beginTransaction	= NULL,
+				--	@endTransaction		= NULL,
+				--	@exclude			= NULL,
+				--	@successfulCount	= @successfulCount OUTPUT,
+				--	@invalidCount		= @invalidCount OUTPUT,
+				--	@success			= @success OUTPUT,
+				--	@batchIdUsed		= @batchIdUsed OUTPUT,
+				--	@recapId			= @recapId OUTPUT,
+				--	@transType			= N'all',
+				--	@accrueLicense		= 0,
+				--	@raiseError			= 1
+				--END
 			END
 		END
 	_Exit:
