@@ -466,7 +466,8 @@ BEGIN TRY
 			SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intShipmentOrderId; 
 			IF ISNULL(@InventoryShipmentId, 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1
 			BEGIN
-				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+				IF ISNULL(@intDestinationWeightId,0) = 0
+					EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 
 				--SELECT @dblQtyShipped = dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 				
