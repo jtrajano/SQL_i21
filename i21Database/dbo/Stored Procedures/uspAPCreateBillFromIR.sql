@@ -469,7 +469,7 @@ BEGIN
 				SELECT 
 					C.intTermsId
 				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
-				WHERE B.intEntityVendorId = @vendorId
+				WHERE B.intEntityId = @vendorId
 			) Terms
 			WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
@@ -626,7 +626,7 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 		LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
-		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityVendorId = @vendorId
+		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityId = @vendorId
 		LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
 		OUTER APPLY (
 			SELECT 
@@ -849,9 +849,9 @@ BEGIN
 						SELECT 
 								C.intTermsId
 						FROM	tblAPVendor B INNER JOIN tblEMEntityLocation C 
-									ON B.intEntityVendorId = C.intEntityId 
+									ON B.intEntityId = C.intEntityId 
 									AND C.ysnDefaultLocation = 1
-						WHERE	B.intEntityVendorId = @intThirdPartyVendorId
+						WHERE	B.intEntityId = @intThirdPartyVendorId
 					) Terms	
 					WHERE	A.intInventoryReceiptId = @receiptId 
 							AND A.ysnPosted = 1
