@@ -1717,6 +1717,9 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+        public bool? ysnBundleItem { get; set; }
+        public int? intBundledItemId { get; set; }
+        public string strBundledItemNo { get; set; }
     }
 
     public class vyuICGetReceiptAddPurchaseOrder
@@ -1779,6 +1782,9 @@ namespace iRely.Inventory.Model
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
         public string strForexRateType { get; set; }
+        public bool? ysnBundleItem { get; set; }
+        public int? intBundledItemId { get; set; }
+        public string strBundledItemNo { get; set; }
     }
 
     //public class vyuICGetInventoryReceiptVoucher
@@ -1839,6 +1845,9 @@ namespace iRely.Inventory.Model
         public int? intItemUOMId { get; set; }
         public string strCostUOM { get; set; }
         public int? intCostUOMId { get; set; }
+        public bool? ysnBundleItem { get; set; }
+        public int? intBundledItemId { get; set; }
+        public string strBundledItemNo { get; set; }
 
     }
 
@@ -1899,6 +1908,9 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+        public bool? ysnBundleItem { get; set; }
+        public int? intBundledItemId { get; set; }
+        public string strBundledItemNo { get; set; }
     }
 
     public class vyuICGetReceiptAddPurchaseContract
@@ -1961,6 +1973,9 @@ namespace iRely.Inventory.Model
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
         public string strForexRateType { get; set; }
+        public bool? ysnBundleItem { get; set; }
+        public int? intBundledItemId { get; set; }
+        public string strBundledItemNo { get; set; }
     }
 
     public class vyuICGetReceiptAddLGInboundShipment
@@ -2023,6 +2038,9 @@ namespace iRely.Inventory.Model
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
         public string strForexRateType { get; set; }
+        public bool? ysnBundleItem { get; set; }
+        public int? intBundledItemId { get; set; }
+        public string strBundledItemNo { get; set; }
     }
 
     public class tblICInventoryReceiptChargeTax : BaseEntity
