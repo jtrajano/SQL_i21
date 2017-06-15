@@ -232,7 +232,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intChargeId]						= IC.intItemId
 		,[intForexRateTypeId]				= RE.intForexRateTypeId
 		,[dblForexRate]						= RE.dblForexRate
-		,[ysnInventoryCost]					= 0
+		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 
@@ -282,7 +282,6 @@ WHERE SCTicket.intTicketId = @intTicketId
 												WHEN QM.dblDiscountAmount < 0 THEN 0
 												WHEN QM.dblDiscountAmount > 0 THEN 1
 											END
-		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		FROM @ReceiptStagingTable RE
 		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
