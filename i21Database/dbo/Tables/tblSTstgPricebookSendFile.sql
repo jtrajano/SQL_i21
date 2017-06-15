@@ -8,7 +8,7 @@
     [RecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[RecordActionEffectiveDate] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [ITTDetailRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [POSCodeFormatFormat] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [POSCodeFormat] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [POSCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [PosCodeModifierName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [PosCodeModifierValue] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
