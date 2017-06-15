@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATComputeEquityPaymentDetail]
 	@equityIds AS NVARCHAR(MAX) = NULL,
 	@customerId AS INT = NULL,
+	@qualified AS BIT = 0,
 	@distributionMethod AS INT = NULL, -- 1 = Equally to Each Year, 2 = To Oldest Year Onwards
 	@equityPayout AS NUMERIC(18,6) = NULL
 AS
@@ -49,8 +50,10 @@ SET ANSI_WARNINGS OFF
 	FROM tblPATCustomerEquity CE
 	INNER JOIN tblGLFiscalYear FY
 		ON FY.intFiscalYearId = CE.intFiscalYearId
-	WHERE CE.intCustomerEquityId IN (SELECT intTransactionId FROM @customerIdsTable) AND CE.intCustomerId = @customerId
-	ORDER BY dtmDateFrom ASC
+	INNER JOIN tblPATRefundRate RR
+		ON RR.intRefundTypeId = CE.intRefundTypeId
+	WHERE CE.intCustomerEquityId IN (SELECT intTransactionId FROM @customerIdsTable) AND CE.intCustomerId = @customerId AND RR.ysnQualified = @qualified
+	ORDER BY dtmDateFrom ASC;
 	
 
 	IF(@distributionMethod = 1)

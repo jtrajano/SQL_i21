@@ -3,6 +3,7 @@
 	[intEquityPaySummaryId] INT NOT NULL IDENTITY,
 	[intEquityPayId] INT NOT NULL,
 	[intCustomerPatronId] INT NOT NULL,
+	[ysnQualified] BIT NOT NULL,
 	[dblEquityAvailable] NUMERIC(18,6) NOT NULL,
 	[dblEquityPaid] NUMERIC(18,6) NOT NULL,
 	[dblFWT] NUMERIC(18,6) NOT NULL,

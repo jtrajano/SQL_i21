@@ -22,6 +22,7 @@ CREATE TABLE #tempEquityPayments(
 	[dtmPaymentDate] DATETIME,
 	[intEquityPaySummaryId] INT,
 	[intCustomerPatronId] INT,
+	[ysnQualified] BIT,
 	[dblEquityPaid] NUMERIC(18,6)
 )
 
@@ -35,6 +36,7 @@ BEGIN
 			EP.dtmPaymentDate,
 			EPS.intEquityPaySummaryId,
 			EPS.intCustomerPatronId,
+			EPS.ysnQualified,
 			EPS.dblEquityPaid
 	FROM tblPATEquityPay EP
 	INNER JOIN tblPATEquityPaySummary EPS
@@ -49,6 +51,7 @@ BEGIN
 			EP.dtmPaymentDate,
 			EPS.intEquityPaySummaryId,
 			EPS.intCustomerPatronId,
+			EPS.ysnQualified,
 			EPS.dblEquityPaid
 	FROM tblPATEquityPay EP
 	INNER JOIN tblPATEquityPaySummary EPS
@@ -64,6 +67,7 @@ END
 	DECLARE @strVenderOrderNumber NVARCHAR(MAX);
 	DECLARE @intCreatedBillId INT;
 	DECLARE @batchId AS NVARCHAR(40);
+	DECLARE @qualified BIT;
 
 	DECLARE @equityPayments AS Id;
 	DECLARE @totalRecords AS INT = 0;
@@ -80,6 +84,7 @@ END
 			@intEquityPaySummaryId = tEP.intEquityPaySummaryId,
 			@intCustomerPatronId = tEP.intCustomerPatronId,
 			@dblEquityPay = ROUND(tEP.dblEquityPaid,2),
+			@qualified = tEP.ysnQualified,
 			@strVenderOrderNumber = tEP.strPaymentNumber + '-' + CONVERT(NVARCHAR(MAX), tEP.intEquityPaySummaryId)
 		FROM @equityPayments dEP INNER JOIN #tempEquityPayments tEP ON tEP.intEquityPaySummaryId = dEP.intId
 
@@ -95,6 +100,11 @@ END
 			,@vendorOrderNumber = @strVenderOrderNumber
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT;
+
+		IF(@qualified = 0)
+		BEGIN
+			UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 1, dbl1099 = ROUND(@dblEquityPay, 2) WHERE intBillId = @intCreatedBillId;
+		END
 
 		UPDATE tblPATEquityPaySummary SET intBillId = @intCreatedBillId WHERE intEquityPaySummaryId = @intEquityPaySummaryId;
 
