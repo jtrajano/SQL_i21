@@ -18,6 +18,5 @@ SELECT intReportingComponentConfigurationId
 	, strLastIndexOf
 	, strSegment
 	, intConfigurationSequence
-	, RC.intTaxAuthorityId
 FROM tblTFReportingComponentConfiguration RCC
 LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
