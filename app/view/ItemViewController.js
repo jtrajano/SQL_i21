@@ -157,10 +157,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
-                colAllowPurchase: {
-                    disabled: '{readOnlyOnBundleItems}',
-                    dataIndex: 'ysnAllowPurchase'
-                },
+                colAllowPurchase: 'ysnAllowPurchase',
                 colConvertToStock: 'dblConvertToStock',
                 colConvertFromStock: 'dblConvertFromStock',
                 colDetailLength: 'dblLength',
