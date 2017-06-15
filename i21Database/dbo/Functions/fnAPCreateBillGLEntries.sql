@@ -532,7 +532,7 @@ BEGIN
 															--WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
 																ELSE SUM(D.dblTax)
 													END) * ISNULL(NULLIF(B.dblRate,0),1) 
-											ELSE SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END) END,
+											ELSE SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) END * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -637,7 +637,8 @@ BEGIN
 														WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
 															THEN (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax))
 													END) * ISNULL(NULLIF(B.dblRate,0),1) 
-											ELSE (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) END,
+											ELSE (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) END
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		--[dblDebit]						=	(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
