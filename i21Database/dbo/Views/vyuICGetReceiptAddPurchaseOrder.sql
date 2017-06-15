@@ -65,6 +65,9 @@ FROM (
 		, intForexRateTypeId = POView.intForexRateTypeId
 		, strForexRateType = currencyRateType.strCurrencyExchangeRateType
 		, dblForexRate = POView.dblForexRate
+		, ysnBundleItem = CAST(0 AS BIT)
+		, intBundledItemId = CAST(NULL AS INT)
+		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
