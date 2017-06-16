@@ -1754,7 +1754,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var vendorCostCfg = {
                 vendorId: vendorId,
                 itemId: itemId,
-                currencyId: transactionCurrencyId,
+                currencyId: transactionCurrencyId ? transactionCurrencyId : i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'),
                 vendorLocation: vendorLocation,
                 itemUOM: intItemUnitMeasureId,
                 validDate: dtmReceiptDate
