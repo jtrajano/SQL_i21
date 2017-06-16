@@ -891,7 +891,7 @@ BEGIN
 			,[strNotes]						= LITE.[strNotes]
 			,[intTempDetailIdForTaxes]		= LITE.[intTempDetailIdForTaxes]
 			,[dblCurrencyExchangeRate]		= ISNULL(IFI.[dblCurrencyExchangeRate], 1.000000)
-			,[ysnClearExisting]				= LITE.[ysnClearExisting]
+			,[ysnClearExisting]				= IFI.[ysnClearDetailTaxes]
 			,[strTransactionType]			= ARIILD.[strTransactionType]
 			,[strType]						= ARIILD.[strType]
 			,[strSourceTransaction]			= ARIILD.[strSourceTransaction]
@@ -1182,7 +1182,6 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
-		,[intTempDetailIdForTaxes]
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -1313,7 +1312,6 @@ BEGIN
 		,[intStorageScheduleTypeId]			= IE.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]			= IE.[intDestinationGradeId]
 		,[intDestinationWeightId]			= IE.[intDestinationWeightId]
-		,[intTempDetailIdForTaxes]			= IE.[intTempDetailIdForTaxes]
 	FROM
 		@InvoiceEntries IE
 	INNER JOIN
@@ -1414,7 +1412,7 @@ BEGIN
 			,[strNotes]						= LITE.[strNotes]
 			,[intTempDetailIdForTaxes]		= LITE.[intTempDetailIdForTaxes]
 			,[dblCurrencyExchangeRate]		= ISNULL(IFI.[dblCurrencyExchangeRate], 1.000000)
-			,[ysnClearExisting]				= LITE.[ysnClearExisting]
+			,[ysnClearExisting]				= IFI.[ysnClearDetailTaxes]
 			,[strTransactionType]			= ARIILD.[strTransactionType]
 			,[strType]						= ARIILD.[strType]
 			,[strSourceTransaction]			= ARIILD.[strSourceTransaction]
@@ -1432,7 +1430,7 @@ BEGIN
 				AND ISNULL(ARIILD.[intInvoiceDetailId], 0) <> 0
 				AND ISNULL(ARIILD.[ysnInsert], 0) = 0
 		INNER JOIN
-			(SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate] FROM @InvoicesForUpdate) IFI
+			(SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate] FROM @InvoicesForInsert) IFI
 				ON IFI. [intId] = ARIILD.[intId]
 		WHERE
 			ARIILD.[intIntegrationLogId] = @IntegrationLogId
