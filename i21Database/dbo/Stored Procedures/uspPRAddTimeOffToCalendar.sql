@@ -176,6 +176,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 					,dblTotal
 					,dtmDateFrom
 					,dtmDateTo
+					,intSource
 					,intSort
 					,intConcurrencyId
 				)
@@ -202,6 +203,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 								END
 					,TOR.dtmDateFrom
 					,TOR.dtmDateTo
+					,4
 					,1
 					,1
 				FROM 
@@ -214,6 +216,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 
 				/* Check if the corresponding Linked Earning to deduct exists in the Pay Group Detail */
 				DECLARE @intPayGroupDetail INT = NULL
+				DECLARE @intSource INT = 1
 				SELECT TOP 1 @intPayGroupDetail = intPayGroupDetailId FROM tblPRPayGroupDetail PGD 
 							INNER JOIN tblPREmployeeEarning EL
 								ON PGD.intEmployeeEarningId = EL.intEmployeeEarningId
@@ -224,6 +227,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 									AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 									AND EL.intPayGroupId IS NOT NULL
 									AND PGD.dtmDateFrom <= ISNULL(TOR.dtmDateFrom, PGD.dtmDateFrom) AND PGD.dtmDateTo >= ISNULL(TOR.dtmDateFrom, PGD.dtmDateTo)
+									AND intSource IN (0, 3)
 
 				IF (@intPayGroupDetail IS NULL)
 					INSERT INTO tblPRPayGroupDetail (
@@ -239,6 +243,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,dblTotal
 						,dtmDateFrom
 						,dtmDateTo
+						,intSource
 						,intSort
 						,intConcurrencyId
 					)
@@ -265,6 +270,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 									END
 						,TOR.dtmDateFrom
 						,TOR.dtmDateTo
+						,0
 						,1
 						,1
 					FROM 
@@ -298,7 +304,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 								AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 								AND EL.intPayGroupId IS NOT NULL
 					WHERE 
-						tblPRPayGroupDetail.intPayGroupDetailId = @intPayGroupDetail
+						tblPRPayGroupDetail.intPayGroupDetailId = @intPayGroupDetail AND tblPRPayGroupDetail.intSource = 0
 			END
 			ELSE
 			BEGIN
