@@ -124,7 +124,8 @@ BEGIN TRY
 				,Lot.strLotAlias
 				,ISNULL(ShipmentItemLot.dblLotQty, ISNULL(ShipmentItem.dblQtyToShip, 0)) AS dblQty
 				,ISNULL(ShipmentItemLot.strLotUOM, ShipmentItem.strUnitMeasure) AS strUOM
-				,ISNULL(ShipmentItemLot.dblNetWeight, 0) AS dblNetWeight
+				--,ISNULL(ShipmentItemLot.dblNetWeight, 0) AS dblNetWeight
+				,(ISNULL(ShipmentItemLot.dblLotQty, ISNULL(ShipmentItem.dblQtyToShip, 0)) * Item.dblWeight) AS dblNetWeight
 				,SUM(ShipmentItemLot.dblNetWeight) OVER () AS dblTotalWeight
 				,intWarehouseInstructionHeaderId = ISNULL(WarehouseInstruction.intWarehouseInstructionHeaderId, 0)
 				,Shipment.strCompanyName
@@ -145,8 +146,8 @@ BEGIN TRY
 			--	) AS intCasesPerPallet
 			FROM vyuICGetInventoryShipment Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-			--LEFT JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-			--LEFT JOIN tblICItem Item ON Item.intItemId = SI.intItemId
+			LEFT JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
+			LEFT JOIN tblICItem Item ON Item.intItemId = SI.intItemId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 			LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
 			LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId

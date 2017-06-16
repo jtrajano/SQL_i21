@@ -5271,6 +5271,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateILMG.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateILMS.sql" />
     <Build Include="dbo\Tables\tblTFOutputDesignerField.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
