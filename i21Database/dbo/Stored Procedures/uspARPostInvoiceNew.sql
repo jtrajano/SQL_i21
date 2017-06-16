@@ -44,6 +44,28 @@ DECLARE @PostInvoiceData TABLE  (
 	,UNIQUE (intInvoiceId)
 );
 
+INSERT INTO @PostInvoiceData(
+	 [intInvoiceId]
+	,[intCompanyLocationId]
+	,[strTransactionId]
+	,[strTransactionType]
+	,[intEntityId]
+	,[intPeriodsToAccrue]
+	,[ysnAccrueLicense]
+)
+SELECT
+	 [intInvoiceId]				= ARI.[intInvoiceId]
+	,[intCompanyLocationId]		= ARI.[intCompanyLocationId]
+	,[strTransactionId]			= ARI.[strInvoiceNumber]
+	,[strTransactionType]		= ARI.[strTransactionType]
+	,[intEntityId]				= ARI.[intEntityId]
+	,[intPeriodsToAccrue]		= ARI.[intPeriodsToAccrue]
+	,[ysnAccrueLicense]			= II.[ysnAccrueLicense]
+FROM
+	tblARInvoice ARI WITH (NOLOCK) 
+INNER JOIN @InvoiceIds II 
+	ON ARI.[intInvoiceId] = II.[intHeaderId] 
+
 DECLARE @InvalidInvoiceData TABLE  (
 	strError NVARCHAR(max),
 	strTransactionType NVARCHAR(50),
@@ -102,14 +124,14 @@ IF (@TransType IS NULL OR RTRIM(LTRIM(@TransType)) = '')
 IF @IntegrationLogId IS NOT NULL
 	BEGIN
         INSERT INTO @PostInvoiceData 
-        SELECT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], ARI.[intPeriodsToAccrue], ARIILD.[ysnAccrueLicense]
+        SELECT DISTINCT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], ARI.[intPeriodsToAccrue], ARIILD.[ysnAccrueLicense]
         FROM
             dbo.tblARInvoice ARI WITH (NOLOCK) 
         INNER JOIN
             tblARInvoiceIntegrationLogDetail ARIILD
                 ON ARI.[intInvoiceId] = ARIILD.[intInvoiceId]
                 AND ARIILD.[ysnPost] IS NOT NULL 
-                AND ARIILD.[ysnPost] = 1
+                AND ARIILD.[ysnPost] = @Post
                 AND ARIILD.[ysnHeader] = 1
                 AND ARIILD.[intIntegrationLogId] = @IntegrationLogId
         WHERE
@@ -120,7 +142,7 @@ IF @IntegrationLogId IS NOT NULL
 IF(@BeginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
-		SELECT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue], 0 FROM dbo.tblARInvoice WITH (NOLOCK)
+		SELECT DISTINCT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue], 0 FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @BeginDate AND @EndDate
 		AND (strTransactionType = @TransType OR @TransType = 'all')
 	END
@@ -128,7 +150,7 @@ IF(@BeginDate IS NOT NULL)
 IF(@BeginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
-		SELECT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue], 0 FROM dbo.tblARInvoice WITH (NOLOCK)
+		SELECT DISTINCT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue], 0 FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE intInvoiceId BETWEEN @BeginTransaction AND @EndTransaction
 		AND (strTransactionType = @TransType OR @TransType = 'all')
 	END
