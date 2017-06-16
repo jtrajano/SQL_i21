@@ -28,6 +28,8 @@ BEGIN
 	--[intOldAccountId],
 	[strOldAccountId],
 	[intAccountId],
+	[ysnInbound],
+	[ysnOutbound],
 	--[stri21AccountId], 
 	[intAccountSystemId],
 	[intConcurrencyId]
@@ -37,6 +39,8 @@ BEGIN
 	--intLegacyReferenceId,
 	strOldId,
 	inti21Id,
+	1,
+	0,
 	--stri21Id,
 	1,
 	1);
