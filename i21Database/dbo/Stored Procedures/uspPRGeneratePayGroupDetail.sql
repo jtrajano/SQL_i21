@@ -83,7 +83,7 @@ BEGIN
 			AND (ysnDefault = 1 OR dblDefaultHours > 0)
 			AND intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail 
 												WHERE intPayGroupId = @intPayGroupId
-												AND dtmDateFrom <= ISNULL(@dtmDateFrom, dtmDateFrom) AND dtmDateTo >= ISNULL(@dtmDateTo, dtmDateTo))
+												AND dtmDateFrom >= ISNULL(@dtmDateFrom, dtmDateFrom) AND dtmDateFrom <= ISNULL(@dtmDateTo, dtmDateTo))
 
 		DELETE FROM #tmpPayGroups WHERE intPayGroupId = @intPayGroupId
 	END
