@@ -107,6 +107,120 @@ SET IDENTITY_INSERT tblTFTaxAuthority OFF
 
 GO
 
+-- Output Designer Fields
+/*
+SELECT 'UNION ALL SELECT strColumnName = ''' + name + ''''
+, * FROM sys.columns
+WHERE object_id = object_id('vyuTFGetTransaction')
+	AND name NOT LIKE 'int%'
+	AND name NOT IN ('uniqTransactionGuid', 'ysnHasException', 'strExceptionType', 'ysnDeleted')
+*/
+SELECT *
+INTO #tmpFields
+FROM (
+-- Insert generated script here. Remove first instance of "UNION ALL "
+SELECT strColumnName = 'strTaxAuthorityCode'
+UNION ALL SELECT strColumnName = 'strFormCode'
+UNION ALL SELECT strColumnName = 'strFormName'
+UNION ALL SELECT strColumnName = 'strScheduleCode'
+UNION ALL SELECT strColumnName = 'strScheduleName'
+UNION ALL SELECT strColumnName = 'strProductCode'
+UNION ALL SELECT strColumnName = 'strProductCodeDescription'
+UNION ALL SELECT strColumnName = 'strTaxCode'
+UNION ALL SELECT strColumnName = 'strType'
+UNION ALL SELECT strColumnName = 'strDescription'
+UNION ALL SELECT strColumnName = 'strItemNo'
+UNION ALL SELECT strColumnName = 'strBillOfLading'
+UNION ALL SELECT strColumnName = 'dblReceived'
+UNION ALL SELECT strColumnName = 'dblGross'
+UNION ALL SELECT strColumnName = 'dblNet'
+UNION ALL SELECT strColumnName = 'dblBillQty'
+UNION ALL SELECT strColumnName = 'dblTax'
+UNION ALL SELECT strColumnName = 'dblTaxExempt'
+UNION ALL SELECT strColumnName = 'strInvoiceNumber'
+UNION ALL SELECT strColumnName = 'dblQtyShipped'
+UNION ALL SELECT strColumnName = 'strPONumber'
+UNION ALL SELECT strColumnName = 'strTerminalControlNumber'
+UNION ALL SELECT strColumnName = 'dtmDate'
+UNION ALL SELECT strColumnName = 'strShipToCity'
+UNION ALL SELECT strColumnName = 'strShipToState'
+UNION ALL SELECT strColumnName = 'strSupplierName'
+UNION ALL SELECT strColumnName = 'dtmLastRun'
+UNION ALL SELECT strColumnName = 'dtmReportingPeriodBegin'
+UNION ALL SELECT strColumnName = 'dtmReportingPeriodEnd'
+UNION ALL SELECT strColumnName = 'strLicenseNumber'
+UNION ALL SELECT strColumnName = 'strEmail'
+UNION ALL SELECT strColumnName = 'strFEINSSN'
+UNION ALL SELECT strColumnName = 'strCity'
+UNION ALL SELECT strColumnName = 'strState'
+UNION ALL SELECT strColumnName = 'strZipCode'
+UNION ALL SELECT strColumnName = 'strTelephoneNumber'
+UNION ALL SELECT strColumnName = 'strContactName'
+UNION ALL SELECT strColumnName = 'strShipVia'
+UNION ALL SELECT strColumnName = 'strTransporterName'
+UNION ALL SELECT strColumnName = 'strTransportationMode'
+UNION ALL SELECT strColumnName = 'strTransporterFederalTaxId'
+UNION ALL SELECT strColumnName = 'strTransporterLicense'
+UNION ALL SELECT strColumnName = 'strCustomerName'
+UNION ALL SELECT strColumnName = 'strCustomerFederalTaxId'
+UNION ALL SELECT strColumnName = 'strVendorName'
+UNION ALL SELECT strColumnName = 'strVendorFederalTaxId'
+UNION ALL SELECT strColumnName = 'strVendorLicenseNumber'
+UNION ALL SELECT strColumnName = 'strConsignorName'
+UNION ALL SELECT strColumnName = 'strConsignorFederalTaxId'
+UNION ALL SELECT strColumnName = 'strDestinationState'
+UNION ALL SELECT strColumnName = 'strDestinationCity'
+UNION ALL SELECT strColumnName = 'strDestinationTCN'
+UNION ALL SELECT strColumnName = 'strOriginState'
+UNION ALL SELECT strColumnName = 'strOriginCity'
+UNION ALL SELECT strColumnName = 'strOriginTCN'
+UNION ALL SELECT strColumnName = 'strFuelType'
+UNION ALL SELECT strColumnName = 'strTaxPayerName'
+UNION ALL SELECT strColumnName = 'strTaxPayerIdentificationNumber'
+UNION ALL SELECT strColumnName = 'strTaxPayerFEIN'
+UNION ALL SELECT strColumnName = 'strTaxPayerDBA'
+UNION ALL SELECT strColumnName = 'strTaxPayerAddress'
+UNION ALL SELECT strColumnName = 'strTransporterIdType'
+UNION ALL SELECT strColumnName = 'strVendorIdType'
+UNION ALL SELECT strColumnName = 'strCustomerIdType'
+UNION ALL SELECT strColumnName = 'strVendorInvoiceNumber'
+UNION ALL SELECT strColumnName = 'strCustomerLicenseNumber'
+UNION ALL SELECT strColumnName = 'strCustomerAccountStatusCode'
+UNION ALL SELECT strColumnName = 'strCustomerStreetAddress'
+UNION ALL SELECT strColumnName = 'strCustomerZipCode'
+UNION ALL SELECT strColumnName = 'strReportingComponentNote'
+UNION ALL SELECT strColumnName = 'strDiversionNumber'
+UNION ALL SELECT strColumnName = 'strDiversionOriginalDestinationState'
+UNION ALL SELECT strColumnName = 'strTransactionType'
+) tblPatch
+
+MERGE	
+INTO	tblTFOutputDesignerField 
+WITH	(HOLDLOCK) 
+AS		TARGET
+USING (
+	SELECT * FROM #tmpFields
+) AS SOURCE
+	ON TARGET.strColumnName COLLATE Latin1_General_CI_AS = SOURCE.strColumnName COLLATE Latin1_General_CI_AS
+
+WHEN MATCHED THEN 
+	UPDATE
+	SET strColumnName = SOURCE.strColumnName
+WHEN NOT MATCHED BY TARGET THEN 
+	INSERT (
+		strColumnName
+	)
+	VALUES (
+		SOURCE.strColumnName
+	)
+WHEN NOT MATCHED BY SOURCE THEN
+	DELETE;
+
+DROP TABLE #tmpFields
+
+GO
+
+
 -- Origin/Destination State
 /* Generate script for Origin/Destination States.
 select 'UNION ALL SELECT intOriginDestinationStateId = ' + CAST(intOriginDestinationStateId AS NVARCHAR(10))

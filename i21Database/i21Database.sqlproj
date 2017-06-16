@@ -2960,7 +2960,6 @@
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentField.sql" />
     <Build Include="dbo\Tables\tblTFTransaction.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionDetail.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionHeader.sql" />
@@ -2997,10 +2996,8 @@
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
@@ -5267,6 +5264,13 @@
     <Build Include="dbo\Tables\tblTFException.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateStagingTable.sql" />
     <None Include="Scripts\Post-Deployment\EM\Data_Fix_From_1710_to_1720_Currency_Cus_Ven.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthorityCustomerLicense.sql" />
+    <Build Include="dbo\Views\vyuTFGetTaxAuthorityCustomerLicense.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateRMFT5.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateRMFT5US.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateILMG.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateILMS.sql" />
+    <Build Include="dbo\Tables\tblTFOutputDesignerField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

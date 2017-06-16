@@ -6027,4 +6027,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intExceptionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="783382b2-c4dc-4c07-995e-f6c70a2e85ca" ChangeDateTime="06/14/2017 08:32:47">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxAuthorityCustomerLicense].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityCustomerLicense]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxAuthorityCustomerLicenseId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="200dbf60-450b-485a-9b19-beb70a5aba7b" ChangeDateTime="06/16/2017 00:02:10">
+    <Property Name="ElementName" Value="[dbo].[tblTFOutputDesignerField].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFOutputDesignerField]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intOutputDesignerFieldId" />
+  </Operation>
 </Operations>

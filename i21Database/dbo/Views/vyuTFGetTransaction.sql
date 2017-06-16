@@ -68,6 +68,17 @@ SELECT Trans.intTransactionId
 	, strTaxPayerFEIN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerFEIN ELSE Exception.strTaxPayerFEIN END
 	, strTaxPayerDBA = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerDBA ELSE Exception.strTaxPayerDBA END
 	, strTaxPayerAddress = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerAddress ELSE Exception.strTaxPayerAddress END
+	, strTransporterIdType = Trans.strTransporterIdType
+	, strVendorIdType = Trans.strVendorIdType
+	, strCustomerIdType = Trans.strCustomerIdType
+	, strVendorInvoiceNumber = Trans.strVendorInvoiceNumber
+	, strCustomerLicenseNumber = Trans.strCustomerLicenseNumber
+	, strCustomerAccountStatusCode = Trans.strCustomerAccountStatusCode
+	, strCustomerStreetAddress = Trans.strCustomerStreetAddress
+	, strCustomerZipCode = Trans.strCustomerZipCode
+	, strReportingComponentNote = Trans.strReportingComponentNote
+	, strDiversionNumber = Trans.strDiversionNumber
+	, strDiversionOriginalDestinationState = Trans.strDiversionOriginalDestinationState
 	, Trans.strTransactionType
 	, Trans.intTransactionNumberId
 	, Trans.intIntegrationError
@@ -153,6 +164,17 @@ SELECT intTransactionId = NULL
 	, Exception.strTaxPayerFEIN
 	, Exception.strTaxPayerDBA
 	, Exception.strTaxPayerAddress
+	, strTransporterIdType = NULL
+	, strVendorIdType = NULL
+	, strCustomerIdType = NULL
+	, strVendorInvoiceNumber = NULL
+	, strCustomerLicenseNumber = NULL
+	, strCustomerAccountStatusCode = NULL
+	, strCustomerStreetAddress = NULL
+	, strCustomerZipCode = NULL
+	, strReportingComponentNote = NULL
+	, strDiversionNumber = NULL
+	, strDiversionOriginalDestinationState = NULL
 	, Exception.strTransactionType
 	, Exception.intTransactionNumberId
 	, intIntegrationError = NULL

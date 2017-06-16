@@ -81,6 +81,17 @@ BEGIN TRY
 			, strOriginState
 			, strDestinationState
 			, strTerminalControlNumber
+			, strTransporterIdType
+			, strVendorIdType
+			, strCustomerIdType
+			, strVendorInvoiceNumber
+			, strCustomerLicenseNumber
+			, strCustomerAccountStatusCode
+			, strCustomerStreetAddress
+			, strCustomerZipCode
+			, strReportingComponentNote
+			, strDiversionNumber
+			, strDiversionOriginalDestinationState
 			, strTransactionType
 			, intTransactionNumberId)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId
@@ -121,6 +132,17 @@ BEGIN TRY
 			, tblEMEntityLocation.strState AS strOriginState
 			, tblSMCompanyLocation.strStateProvince AS strDestinationState
 			, tblTFTerminalControlNumber.strTerminalControlNumber
+			, strTransporterIdType = 'FEIN'
+			, strVendorIdType = 'FEIN'
+			, strCustomerIdType = 'FEIN'
+			, strVendorInvoiceNumber = NULL
+			, strCustomerLicenseNumber = NULL
+			, strCustomerAccountStatusCode = NULL
+			, strCustomerStreetAddress = NULL
+			, strCustomerZipCode = NULL
+			, strReportingComponentNote = tblTFReportingComponent.strNote
+			, strDiversionNumber = tblTRLoadHeader.strDiversionNumber
+			, strDiversionOriginalDestinationState = tblTRState.strStateAbbreviation
 			, strTransactionType = 'Receipt'
 			, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId
 		FROM tblTFProductCode
@@ -145,6 +167,11 @@ BEGIN TRY
 		FULL OUTER JOIN tblSMShipVia
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId = tblEMEntity_Transporter.intEntityId
 			ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityShipViaId
+		LEFT JOIN tblAPBillDetail ON tblAPBillDetail.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+		LEFT JOIN tblAPBill ON tblAPBill.intBillId = tblAPBillDetail.intBillId
+		LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
+		LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+		LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 		CROSS JOIN tblSMCompanySetup 
 		WHERE tblTFReportingComponent.intReportingComponentId = @RCId
 			AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
@@ -214,6 +241,17 @@ BEGIN TRY
 				, strDestinationState
 				, strCustomerName
 				, strCustomerFederalTaxId
+				, strTransporterIdType
+				, strVendorIdType
+				, strCustomerIdType
+				, strVendorInvoiceNumber
+				, strCustomerLicenseNumber
+				, strCustomerAccountStatusCode
+				, strCustomerStreetAddress
+				, strCustomerZipCode
+				, strReportingComponentNote
+				, strDiversionNumber
+				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId)
 			SELECT DISTINCT @Guid
@@ -245,6 +283,17 @@ BEGIN TRY
 				, strDestinationState
 				, @CompanyName
 				, @CompanyEIN
+				, strTransporterIdType
+				, strVendorIdType
+				, strCustomerIdType
+				, strVendorInvoiceNumber
+				, strCustomerLicenseNumber
+				, strCustomerAccountStatusCode
+				, strCustomerStreetAddress
+				, strCustomerZipCode
+				, strReportingComponentNote
+				, strDiversionNumber
+				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
 			FROM @TFTransaction TRANS
