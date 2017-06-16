@@ -184,11 +184,15 @@ BEGIN
 														END	
 			,[ysnInventoryCost]					= 0
 			,[intCostCurrencyId]				= ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
-			,[dblRate]							= CC.dblFX
+			,[dblRate]							= CC.dblRate
 			,[intCostUOMId]						= PD.intUnitOfMeasureId
 			,[intOtherChargeEntityVendorId]		= CC.intVendorId
 			,[strCostMethod]					= CC.strCostMethod
-			,[dblAmount]						= CC.dblRate
+			,[dblAmount]						= CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+																ELSE	ISNULL(CC.dblRate,0) 
+														END
 			,[ysnAccrue]						= CC.ysnAccrue
 			,[ysnPrice]							= CC.ysnPrice
 			,[intContractHeaderId]				= CD.intContractHeaderId
