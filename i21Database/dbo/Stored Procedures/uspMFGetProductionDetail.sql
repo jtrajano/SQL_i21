@@ -33,6 +33,8 @@ BEGIN
 		,W.intWorkOrderId
 		,SL.intStorageLocationId
 		,SL.strName AS strStorageLocationName
+		,ISNULL(W.intMachineId, 0) AS intMachineId
+		,ISNULL(M.strName, '') AS strMachineName
 		,W.ysnProductionReversed
 		,W.strReferenceNo
 		,C.intContainerId
@@ -57,6 +59,7 @@ BEGIN
 	JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 	JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = W.intCreatedUserId
 	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+	LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = W.intMachineId
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId
 	LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
