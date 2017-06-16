@@ -371,6 +371,7 @@ BEGIN TRY
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
 	WHERE HeaderDistItem.intLoadHeaderId = @intLoadHeaderId
 		AND ysnActive = 1
+		AND ISNULL(DistItem.strReceiptLink, '') = ''
 
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpBlendDistributionItems) AND @ysnRecap = 0
 	BEGIN
@@ -424,7 +425,7 @@ BEGIN TRY
 			DELETE FROM #tmpBlendDistributionItems WHERE intLoadDistributionDetailId = @DistributionItemId
 		END
 	END
-
+	
 	DROP TABLE #tmpBlendDistributionItems
 
 	--VALIDATE FREIGHT AND SURCHARGE ITEM
