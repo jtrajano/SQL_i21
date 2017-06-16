@@ -31,18 +31,63 @@ DECLARE
 
 	@intEntityId INT,
 	@CurrentShipmentId INT
+	
+IF NOT EXISTS (SELECT TOP 1 1 FROM @Entries)
+	GOTO _Exit;
 
--- Validate Entries
-IF EXISTS(
-	SELECT TOP 1 1
-	FROM @Entries e
-		INNER JOIN tblICItem i ON i.intItemId = e.intItemId
-	WHERE i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle', 'Kit')
-)
-BEGIN
-	EXEC uspICRaiseError 80163; 
-	GOTO _Exit
-END
+-- BEGIN VALIDATIONS
+BEGIN 
+	-- Validate the items. 
+	IF EXISTS(
+		SELECT TOP 1 1
+		FROM @Entries e
+			INNER JOIN tblICItem i ON i.intItemId = e.intItemId
+		WHERE i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle', 'Kit')
+	)
+	BEGIN
+		-- 'Shipment for non-inventory items are not allowed.'
+		EXEC uspICRaiseError 80163; 
+		GOTO _Exit
+	END
+
+	-- Validate Customer Id
+	BEGIN
+		DECLARE @id AS INT = 1
+		SELECT	TOP 1 
+				@id = e.intEntityId
+		FROM	@Entries shipment LEFT JOIN tblEMEntity e
+					ON shipment.intEntityCustomerId = e.intEntityId
+		WHERE	e.intEntityId IS NULL 
+
+		IF @id IS NULL 
+		BEGIN 
+			-- 'Invalid customer record.'
+			EXEC uspICRaiseError 80184;
+			GOTO _Exit;
+		END 
+	END
+	
+	-- Validate Freight Term Id
+	BEGIN
+		DECLARE @strCustomer AS NVARCHAR(50)
+		SELECT	TOP 1 
+				@strCustomer = e.strName
+		FROM	@Entries shipment INNER JOIN tblEMEntity e
+					ON shipment.intEntityCustomerId = e.intEntityId
+				LEFT JOIN tblSMFreightTerms f
+					ON f.intFreightTermId = shipment.intFreightTermId
+		WHERE	f.intFreightTermId IS NULL 		
+
+		IF @strCustomer IS NOT NULL 
+		BEGIN 
+			-- 'The Freight Terms for customer {Customer} is blank. Please add it at the Entity - Locations.'
+			EXEC uspICRaiseError 80183, @strCustomer;
+			GOTO _Exit;
+		END 
+	END
+END 
+-- END VALIDATIONS
+
 -- Insert Raw Data
 -- 1. Shipment Header and Items
 INSERT INTO @ShipmentEntries(
