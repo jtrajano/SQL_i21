@@ -720,7 +720,7 @@ BEGIN
 				[intForexRateTypeId]		=   A.intForexRateTypeId,
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 				[intTaxGroupId]				=	NULL,
-				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),
+				[intAccountId]				=	ISNULL([dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),CategoryAccount.intAccountId),
 				[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 														ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
 												END,
@@ -755,6 +755,19 @@ BEGIN
 				SELECT ysnPrice FROM #tmpReceiptChargeData RC
 				WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 			) C   
+			OUTER APPLY (
+				SELECT	TOP 1 
+						CategoryAccounts.intAccountId
+				FROM	dbo.tblICItem Item INNER JOIN dbo.tblICCategory Category
+							ON Item.intCategoryId = Category.intCategoryId
+						INNER JOIN tblICCategoryAccount CategoryAccounts
+							ON Category.intCategoryId = CategoryAccounts.intCategoryId
+						INNER JOIN dbo.tblGLAccountCategory AccntCategory
+							ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
+				WHERE	Item.intItemId = A.intItemId
+						AND AccntCategory.strAccountCategory = 'AP Clearing' 		
+						AND Item.strType <> 'Category'
+			) CategoryAccount
 			WHERE A.intInventoryReceiptId = @receiptId AND A.intEntityVendorId = @vendorId
 		END    
 
@@ -914,7 +927,7 @@ BEGIN
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
 						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 						[intTaxGroupId]				=	NULL,
-						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),
+						[intAccountId]				=	ISNULL([dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),CategoryAccount.intAccountId),
 						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
 						[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
@@ -951,6 +964,19 @@ BEGIN
 						SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax CT
 						WHERE CT.intInventoryReceiptChargeId = @intReceiptChargeId
 					) CT   
+					OUTER APPLY (
+						SELECT	TOP 1 
+								CategoryAccounts.intAccountId
+						FROM	dbo.tblICItem Item INNER JOIN dbo.tblICCategory Category
+									ON Item.intCategoryId = Category.intCategoryId
+								INNER JOIN tblICCategoryAccount CategoryAccounts
+									ON Category.intCategoryId = CategoryAccounts.intCategoryId
+								INNER JOIN dbo.tblGLAccountCategory AccntCategory
+									ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
+						WHERE	Item.intItemId = A.intItemId
+								AND AccntCategory.strAccountCategory = 'AP Clearing' 		
+								AND Item.strType <> 'Category'
+					) CategoryAccount
 					WHERE A.intInventoryReceiptChargeId = @intReceiptChargeId AND A.intEntityVendorId = @intThirdPartyVendorId                 
 			END
 			DELETE FROM #tmpReceiptChargeData WHERE intInventoryReceiptChargeId = @intReceiptChargeId
