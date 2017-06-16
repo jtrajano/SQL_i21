@@ -30,7 +30,6 @@ SELECT 'Storage Receivable'UNION
 SELECT 'Variance Account'UNION 
 SELECT 'Write-Off Sold'UNION 
 SELECT 'Sales Adv Account'UNION 
-SELECT 'Work In Progress' UNION 
 SELECT 'Auto-Variance' UNION
 SELECT 'Fee Expense'
 
