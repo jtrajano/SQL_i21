@@ -295,7 +295,8 @@ END
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[strNotes]
-						,[intTempDetailIdForTaxes])
+						,[intTempDetailIdForTaxes]
+						,[ysnClearExisting])
 					SELECT
 					[intDetailId]				= NULL
 					,[intTaxGroupId]			= NULL
@@ -313,6 +314,7 @@ END
 					,[ysnTaxExempt]				= 0
 					,[strNotes]					= ''
 					,[intTempDetailIdForTaxes]	= @strRecord
+					,[ysnClearExisting]			= 1
 					FROM 
 					tblCFTransaction cfTransaction
 					INNER JOIN tblCFTransactionTax cfTransactionTax

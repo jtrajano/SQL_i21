@@ -73,7 +73,7 @@ INSERT INTO @InvoicesToUpdate (
 	,[ysnUpdateAvailableDiscount]	
 )
 SELECT DISTINCT
-	 [intInvoiceId]						= [intInvoiceId]
+	 [intId]							= [intId]
 	,[strTransactionType]				= [strTransactionType]
 	,[strType]							= [strType]
 	,[strSourceTransaction]				= [strSourceTransaction]

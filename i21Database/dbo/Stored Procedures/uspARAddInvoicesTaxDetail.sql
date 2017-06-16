@@ -44,7 +44,7 @@ BEGIN TRY
 		,intSalesTaxAccountId	= CASE WHEN ISNULL(TD.[intTaxAccountId],0) <> 0 THEN TD.[intTaxAccountId] ELSE SMTC.[intSalesTaxAccountId] END
 		,dblTax					= ISNULL(TD.[dblTax], @ZeroDecimal)
 		,dblAdjustedTax			= ISNULL(TD.[dblAdjustedTax], ISNULL(TD.[dblTax], @ZeroDecimal))
-		,dblBaseAdjustedTax		= [dbo].fnRoundBanker(ISNULL(TD.[dblAdjustedTax], ISNULL(TD.[dblTax], @ZeroDecimal)) * TD.[dblAdjustedTax], [dbo].[fnARGetDefaultDecimal]())
+		,dblBaseAdjustedTax		= [dbo].fnRoundBanker(ISNULL(TD.[dblAdjustedTax], ISNULL(TD.[dblTax], @ZeroDecimal)) * (CASE WHEN ISNULL(TD.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE TD.[dblCurrencyExchangeRate] END), [dbo].[fnARGetDefaultDecimal]())
 		,ysnTaxAdjusted			= CASE WHEN ISNULL(TD.[ysnTaxAdjusted], 0) = 1 THEN ISNULL(TD.[ysnTaxAdjusted], 0) ELSE (CASE WHEN ISNULL(TD.[dblTax], @ZeroDecimal) <> ISNULL(TD.[dblAdjustedTax],0) THEN 1 ELSE 0 END) END
 		,ysnSeparateOnInvoice	= ISNULL(TD.[ysnSeparateOnInvoice], 0)
 		,ysnCheckoffTax			= ISNULL(TD.[ysnCheckoffTax], SMTC.[ysnCheckoffTax])
