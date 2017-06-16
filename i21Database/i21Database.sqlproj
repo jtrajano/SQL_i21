@@ -5290,6 +5290,7 @@
     <None Include="Scripts\Post-Deployment\EM\Data_Fix_From_1710_to_1720_Currency_Cus_Ven.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
     <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategoryMaintenance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
