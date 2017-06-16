@@ -22,10 +22,12 @@
 		  ,ec.imgPhoto
 		  ,ysnBillable = c.ysnHDBillableSupport
 		  ,strEntityType = (select top 1 et.strType from tblEMEntityType et where et.intEntityId = c.[intEntityId] and et.strType in ('Customer','Prospect'))
-		  ,strProjectionProduct = (select top 1 tblHDTicketProduct.strProduct from tblHDTicketProduct where tblHDTicketProduct.intTicketProductId = cpv.intProductId)
-		  ,strProjectionVersionNo = (select top 1 tblHDVersion.strVersionNo from tblHDVersion where tblHDVersion.intVersionId = cpv.intVersionId)
-		  ,strProjectionModule = (select top 1 tblHDModule.strModule from tblHDModule where tblHDModule.intModuleId = cpv.intModuleId)
-		  ,intTicketGroupId = (select top 1 tblHDModule.intTicketGroupId from tblHDModule where tblHDModule.intModuleId = cpv.intModuleId)
+		  ,strProjectionProduct = p.strProduct
+		  ,strProjectionVersionNo = v.strVersionNo
+		  ,strProjectionModule = m.strModule
+		  ,intTicketGroupId = m.intTicketGroupId
+		  ,intOwnerEntityId = ow.intEntityId
+		  ,strOwnerEntityName = ow.strName
 		from
 			tblARCustomer c
 		  inner join tblEMEntityToContact etc on etc.intEntityId = c.[intEntityId]
@@ -37,3 +39,8 @@
 		  left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
 		  left join tblEMEntityMobileNumber mob on ec.intEntityId = mob.intEntityId
 		  left join tblARCustomerProductVersion cpv on cpv.intCustomerId = c.intEntityId
+		  left join tblHDModule m on m.intModuleId = cpv.intModuleId
+		  left join tblHDVersion v on v.intVersionId = cpv.intVersionId
+		  left join tblHDTicketProduct p on p.intTicketProductId = cpv.intProductId
+		  left join tblHDGroupUserConfig gu on gu.intTicketGroupId = m.intTicketGroupId and gu.ysnOwner = convert(bit,1)
+		  left join tblEMEntity ow on ow.intEntityId = gu.intUserSecurityEntityId
