@@ -145,7 +145,7 @@ SELECT dtmDate					= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 , dblAvailableCredit		= 0
 	 , dblPrepayments			= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 FROM dbo.tblARInvoice I	WITH (NOLOCK)
-	LEFT JOIN (SELECT intPaymentId
+	INNER JOIN (SELECT intPaymentId
 	                , dtmDatePaid 
 			   FROM dbo.tblARPayment WITH (NOLOCK)
 			   WHERE ysnPosted = 1
@@ -405,7 +405,7 @@ SELECT I.strInvoiceNumber
 	  , dblAvailableCredit	= 0
 	  , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 FROM dbo.tblARInvoice I	WITH (NOLOCK)
-	LEFT JOIN (SELECT intPaymentId
+	INNER JOIN (SELECT intPaymentId
 					, dtmDatePaid
 			   FROM dbo.tblARPayment WITH (NOLOCK)
 			   WHERE ysnPosted = 1

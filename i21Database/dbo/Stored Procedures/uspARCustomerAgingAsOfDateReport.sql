@@ -287,7 +287,7 @@ SELECT dtmPostDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
      , dblAvailableCredit		= 0
 	 , dblPrepayments			= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-	LEFT JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
+	INNER JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId 
     LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
@@ -491,7 +491,7 @@ SELECT I.intInvoiceId
      , dblAvailableCredit	= 0
 	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-	LEFT JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
+	INNER JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId 
     LEFT JOIN SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
