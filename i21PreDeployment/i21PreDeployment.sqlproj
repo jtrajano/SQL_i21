@@ -318,4 +318,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\3_UpdateInvoiceDefaultContact.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\4_UpdateInvoicePaymentMethod.sql" />
+  </ItemGroup>
 </Project>

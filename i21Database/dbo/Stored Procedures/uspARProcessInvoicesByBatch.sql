@@ -83,7 +83,7 @@ BEGIN TRY
 		,[ysnRecap]						BIT												NULL
 		,[ysnPost]						BIT												NULL
 	)
-
+	
 	DECLARE  @QueryString AS VARCHAR(MAX)
 			,@Columns AS VARCHAR(MAX)
 			
@@ -115,10 +115,10 @@ BEGIN TRY
 	EXECUTE(@QueryString);
 
 	IF @GroupingOption > 0
-		SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT [intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY [intId], [intInvoiceId], [intInvoiceDetailId],' + @Columns
+		SET @QueryString = 'INSERT INTO #EntriesForProcessing ([intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT [intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', 1 FROM #TempInvoiceEntries  WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY [intId], [intInvoiceId], [intInvoiceDetailId],' + @Columns
 	ELSE
 		SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], [intInvoiceId], [intInvoiceDetailId], [ysnForUpdate]) SELECT DISTINCT [intId], [intInvoiceId], [intInvoiceDetailId], 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY [intId], [intInvoiceId], [intInvoiceDetailId]'
-
+	
 	EXECUTE(@QueryString);
 
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
@@ -468,7 +468,7 @@ BEGIN
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END CATCH	   
-			
+		
 	IF (EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId AND ISNULL([ysnSuccess],0) = 1 AND ISNULL([ysnHeader],0) = 1  AND ISNULL([ysnInsert], 0) = 1) AND @GroupingOption > 0)
 	BEGIN
 
@@ -1015,9 +1015,8 @@ BEGIN TRY
 			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
 	WHERE
 		ISNULL(EFP.[ysnForUpdate],0) = 1
+		AND ISNULL(IE.[ysnUnPostAndUpdate],0) = 1
 		AND ISNULL(EFP.[intInvoiceId],0) <> 0
-		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 0
-		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
 		AND ISNULL(EFP.[ysnRecap], 0) = 0
 
 		
@@ -1054,22 +1053,285 @@ IF EXISTS(SELECT TOP 1 NULL FROM #EntriesForProcessing WITH (NOLOCK) WHERE ISNUL
 BEGIN
 	DECLARE @InvoicesForUpdate	InvoiceStagingTable	
 	DELETE FROM @InvoicesForUpdate		
-	INSERT INTO @InvoicesForUpdate						
+
+	INSERT INTO @InvoicesForUpdate(
+		 [intId]
+		,[strTransactionType]
+		,[strType]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[intPeriodsToAccrue]
+		,[strSourceId]
+		,[intInvoiceId]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intAccountId]
+		,[intCurrencyId]
+		,[intTermId]
+		,[dtmDate]
+		,[dtmDueDate]
+		,[dtmShipDate]
+		,[dtmPostDate]
+		,[intEntitySalespersonId]
+		,[intFreightTermId]
+		,[intShipViaId]
+		,[intPaymentMethodId]
+		,[strInvoiceOriginId]
+		,[ysnUseOriginIdAsInvoiceNumber]
+		,[strPONumber]
+		,[strBOLNumber]
+		,[strDeliverPickup]
+		,[strComments]
+		,[intShipToLocationId]
+		,[intBillToLocationId]
+		,[ysnTemplate]
+		,[ysnForgiven]
+		,[ysnCalculated]
+		,[ysnSplitted]
+		,[intPaymentId]
+		,[intSplitId]
+		,[intLoadDistributionHeaderId]
+		,[strActualCostId]
+		,[intShipmentId]
+		,[intTransactionId]
+		,[intMeterReadingId]
+		,[intContractHeaderId]
+		,[intLoadId]
+		,[intOriginalInvoiceId]
+		,[intEntityId]
+		,[intTruckDriverId]
+		,[intTruckDriverReferenceId]
+		,[ysnResetDetails]
+		,[ysnRecap]
+		,[ysnPost]
+		,[ysnUpdateAvailableDiscount]
+		,[strImportFormat]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[intPrepayTypeId]
+		,[dblPrepayRate]
+		,[ysnInventory]
+		,[strDocumentNumber]
+		,[strItemDescription]
+		,[intOrderUOMId]
+		,[dblQtyOrdered]
+		,[intItemUOMId]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblItemTermDiscount]
+		,[strItemTermDiscountBy]
+		,[dblPrice]
+		,[strPricing]
+		,[strVFDDocumentNumber]
+		,[ysnRefreshPrice]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[dblLicenseAmount]
+		,[intTaxGroupId]
+		,[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]
+		,[ysnRecomputeTax]
+		,[intSCInvoiceId]
+		,[strSCInvoiceNumber]
+		,[intInventoryShipmentItemId]
+		,[intInventoryShipmentChargeId]
+		,[strShipmentNumber]
+		,[intRecipeItemId]
+		,[intRecipeId]
+		,[intSubLocationId]
+		,[intCostTypeId]
+		,[intMarginById]
+		,[intCommentTypeId]
+		,[dblMargin]
+		,[dblRecipeQuantity]
+		,[intSalesOrderDetailId]
+		,[strSalesOrderNumber]
+		,[intContractDetailId]
+		,[intShipmentPurchaseSalesContractId]
+		,[intItemWeightUOMId]
+		,[dblItemWeight]
+		,[dblShipmentGrossWt]
+		,[dblShipmentTareWt]
+		,[dblShipmentNetWt]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intCustomerStorageId]
+		,[intSiteDetailId]
+		,[intLoadDetailId]
+		,[intLotId]
+		,[intOriginalInvoiceDetailId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]
+		,[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]
+		,[intSubCurrencyId]
+		,[dblSubCurrencyRate]
+		,[ysnBlended]
+		,[intConversionAccountId]
+		,[intSalesAccountId]
+		,[intStorageScheduleTypeId]
+		,[intDestinationGradeId]
+		,[intDestinationWeightId]
+	)								
 	SELECT		 	
-		 *
+		 [intId]							= IE.[intId]
+		,[strTransactionType]				= IE.[strTransactionType]
+		,[strType]							= IE.[strType]
+		,[strSourceTransaction]				= IE.[strSourceTransaction]
+		,[intSourceId]						= IE.[intSourceId] -- dbo.[fnARValidateInvoiceSourceId]([strSourceTransaction], [intSourceId])
+		,[intPeriodsToAccrue]				= IE.[intPeriodsToAccrue] 
+		,[strSourceId]						= IE.[strSourceId]
+		,[intInvoiceId]						= IE.[intInvoiceId]
+		,[intEntityCustomerId]				= IE.[intEntityCustomerId]
+		,[intCompanyLocationId]				= IE.[intCompanyLocationId]
+		,[intAccountId]						= IE.[intAccountId]
+		,[intCurrencyId]					= IE.[intCurrencyId]
+		,[intTermId]						= IE.[intTermId]
+		,[dtmDate]							= CAST(ISNULL(IE.[dtmDate], @DateNow) AS DATE)
+		,[dtmDueDate]						= IE.[dtmDueDate]
+		,[dtmShipDate]						= CAST(ISNULL(IE.[dtmShipDate], @DateNow) AS DATE)
+		,[dtmPostDate]						= IE.[dtmPostDate]
+		,[intEntitySalespersonId]			= IE.[intEntitySalespersonId]
+		,[intFreightTermId]					= IE.[intFreightTermId]
+		,[intShipViaId]						= IE.[intShipViaId]
+		,[intPaymentMethodId]				= IE.[intPaymentMethodId]
+		,[strInvoiceOriginId]				= IE.[strInvoiceOriginId]
+		,[ysnUseOriginIdAsInvoiceNumber]	= IE.[ysnUseOriginIdAsInvoiceNumber]
+		,[strPONumber]						= IE.[strPONumber]
+		,[strBOLNumber]						= IE.[strBOLNumber]
+		,[strDeliverPickup]					= IE.[strDeliverPickup]
+		,[strComments]						= IE.[strComments]
+		,[intShipToLocationId]				= IE.[intShipToLocationId]
+		,[intBillToLocationId]				= IE.[intBillToLocationId]
+		,[ysnTemplate]						= IE.[ysnTemplate]
+		,[ysnForgiven]						= IE.[ysnForgiven]
+		,[ysnCalculated]					= IE.[ysnCalculated]
+		,[ysnSplitted]						= IE.[ysnSplitted]
+		,[intPaymentId]						= IE.[intPaymentId]
+		,[intSplitId]						= IE.[intSplitId]
+		,[intLoadDistributionHeaderId]		= IE.[intLoadDistributionHeaderId]
+		,[strActualCostId]					= IE.[strActualCostId]
+		,[intShipmentId]					= IE.[intShipmentId]
+		,[intTransactionId] 				= IE.[intTransactionId]
+		,[intMeterReadingId]				= IE.[intMeterReadingId]
+		,[intContractHeaderId]				= IE.[intContractHeaderId]
+		,[intLoadId]						= IE.[intLoadId]
+		,[intOriginalInvoiceId]				= IE.[intOriginalInvoiceId]
+		,[intEntityId]						= IE.[intEntityId]
+		,[intTruckDriverId]					= IE.[intTruckDriverId]
+		,[intTruckDriverReferenceId]		= IE.[intTruckDriverReferenceId]
+		,[ysnResetDetails]					= IE.[ysnResetDetails]
+		,[ysnRecap]							= IE.[ysnRecap]
+		,[ysnPost]							= IE.[ysnPost]
+		,[ysnUpdateAvailableDiscount]		= IE.[ysnUpdateAvailableDiscount]
+		,[strImportFormat]					= IE.[strImportFormat]
+
+		,[intInvoiceDetailId]				= IE.[intInvoiceDetailId]
+		,[intItemId]						= IE.[intItemId]
+		,[intPrepayTypeId] 					= IE.[intPrepayTypeId]
+		,[dblPrepayRate] 					= IE.[dblPrepayRate]
+		,[ysnInventory]						= IE.[ysnInventory]
+		,[strDocumentNumber]				= ISNULL(IE.[strDocumentNumber], IE.[strSourceId])
+		,[strItemDescription]				= IE.[strItemDescription]
+		,[intOrderUOMId]					= IE.[intOrderUOMId]
+		,[dblQtyOrdered]					= IE.[dblQtyOrdered]
+		,[intItemUOMId]						= IE.[intItemUOMId]
+		,[dblQtyShipped]					= IE.[dblQtyShipped]
+		,[dblDiscount]						= IE.[dblDiscount]
+		,[dblItemTermDiscount]				= IE.[dblItemTermDiscount]
+		,[strItemTermDiscountBy]			= IE.[strItemTermDiscountBy]
+		,[dblPrice]							= IE.[dblPrice]
+		,[strPricing]						= IE.[strPricing]
+		,[strVFDDocumentNumber]				= IE.[strVFDDocumentNumber]
+		,[ysnRefreshPrice]					= IE.[ysnRefreshPrice]
+		,[strMaintenanceType]				= IE.[strMaintenanceType]
+		,[strFrequency]						= IE.[strFrequency]
+		,[dtmMaintenanceDate]				= IE.[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]				= IE.[dblMaintenanceAmount]
+		,[dblLicenseAmount]					= IE.[dblLicenseAmount]
+		,[intTaxGroupId]					= IE.[intTaxGroupId]
+		,[intStorageLocationId]				= IE.[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]	= IE.[intCompanyLocationSubLocationId]
+		,[ysnRecomputeTax]					= IE.[ysnRecomputeTax]
+		,[intSCInvoiceId]					= IE.[intSCInvoiceId]
+		,[strSCInvoiceNumber]				= IE.[strSCInvoiceNumber]
+		,[intInventoryShipmentItemId]		= IE.[intInventoryShipmentItemId]
+		,[intInventoryShipmentChargeId]		= IE.[intInventoryShipmentChargeId]
+		,[strShipmentNumber]				= IE.[strShipmentNumber]
+		,[intRecipeItemId]					= IE.[intRecipeItemId]
+		,[intRecipeId]						= IE.[intRecipeId]
+		,[intSubLocationId]					= IE.[intSubLocationId]
+		,[intCostTypeId]					= IE.[intCostTypeId]
+		,[intMarginById]					= IE.[intMarginById]
+		,[intCommentTypeId]					= IE.[intCommentTypeId]
+		,[dblMargin]						= IE.[dblMargin]
+		,[dblRecipeQuantity]				= IE.[dblRecipeQuantity]
+		,[intSalesOrderDetailId]			= IE.[intSalesOrderDetailId]
+		,[strSalesOrderNumber]				= IE.[strSalesOrderNumber]
+		,[intContractDetailId]				= IE.[intContractDetailId]
+		,[intShipmentPurchaseSalesContractId] = IE.[intShipmentPurchaseSalesContractId]
+		,[intItemWeightUOMId]				= IE.[intItemWeightUOMId]
+		,[dblItemWeight]					= IE.[dblItemWeight]
+		,[dblShipmentGrossWt]				= IE.[dblShipmentGrossWt]
+		,[dblShipmentTareWt]				= IE.[dblShipmentTareWt]
+		,[dblShipmentNetWt]					= IE.[dblShipmentNetWt]
+		,[intTicketId]						= IE.[intTicketId]
+		,[intTicketHoursWorkedId]			= IE.[intTicketHoursWorkedId]
+		,[intCustomerStorageId]				= IE.[intCustomerStorageId]
+		,[intSiteDetailId]					= IE.[intSiteDetailId]
+		,[intLoadDetailId]					= IE.[intLoadDetailId]
+		,[intLotId]							= IE.[intLotId]
+		,[intOriginalInvoiceDetailId]		= IE.[intOriginalInvoiceDetailId]
+		,[intSiteId]						= IE.[intSiteId]
+		,[strBillingBy]						= IE.[strBillingBy]
+		,[dblPercentFull]					= IE.[dblPercentFull]
+		,[dblNewMeterReading]				= IE.[dblNewMeterReading]
+		,[dblPreviousMeterReading]			= IE.[dblPreviousMeterReading]
+		,[dblConversionFactor]				= IE.[dblConversionFactor]
+		,[intPerformerId]					= IE.[intPerformerId]
+		,[ysnLeaseBilling]					= IE.[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]			= IE.[ysnVirtualMeterReading]
+		,[intCurrencyExchangeRateTypeId]	= IE.[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]		= IE.[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]			= IE.[dblCurrencyExchangeRate]
+		,[intSubCurrencyId]					= IE.[intSubCurrencyId]
+		,[dblSubCurrencyRate]				= IE.[dblSubCurrencyRate]
+		,[ysnBlended]						= IE.[ysnBlended]
+		,[intConversionAccountId]			= IE.[intConversionAccountId]
+		,[intSalesAccountId]				= IE.[intSalesAccountId]
+		,[intStorageScheduleTypeId]			= IE.[intStorageScheduleTypeId]
+		,[intDestinationGradeId]			= IE.[intDestinationGradeId]
+		,[intDestinationWeightId]			= IE.[intDestinationWeightId]
 	FROM
 		@InvoiceEntries IE
 	INNER JOIN
-		#EntriesForProcessing EFP WITH (NOLOCK)
-			ON IE.[intId] = EFP.[intId]
+			#EntriesForProcessing EFP WITH (NOLOCK)
+				ON IE.[intId] = EFP.[intId]
 	WHERE
-		ISNULL(EFP.[ysnForInsert],0) = 0
+		ISNULL(EFP.[ysnForUpdate],0) = 1		
 		AND ISNULL(IE.[intInvoiceId], 0) <> 0
 		AND ISNULL(IE.[intInvoiceDetailId], 0) <> 0
+		AND (
+			IE.[ysnPost] IS NULL
+			OR
+			(IE.[ysnPost] IS NOT NULL AND IE.[ysnPost] = 1)
+			OR
+			(ISNULL(IE.[ysnUnPostAndUpdate],0) = 1 AND (IE.[ysnPost] IS NOT NULL AND IE.[ysnPost] = 0))			
+			)
+		
 	ORDER BY
-		[intId]
-
-			
+		IE.[intId]
+				
 	BEGIN TRY		
 		EXEC [dbo].[uspARUpdateCustomerInvoices]
 			 	 @InvoiceEntries	= @InvoicesForUpdate
@@ -1435,8 +1697,85 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
---UnPosting Updated Invoices
+--UnPosting Invoices
 BEGIN TRY
+	DECLARE  @IntegrationLog InvoiceIntegrationLogStagingTable
+	INSERT INTO @IntegrationLog
+		([intIntegrationLogId]
+		,[dtmDate]
+		,[intEntityId]
+		,[intGroupingOption]
+		,[strMessage]
+		,[strBatchIdForNewPost]
+		,[intPostedNewCount]
+		,[strBatchIdForNewPostRecap]
+		,[intRecapNewCount]
+		,[strBatchIdForExistingPost]
+		,[intPostedExistingCount]
+		,[strBatchIdForExistingRecap]
+		,[intRecapPostExistingCount]
+		,[strBatchIdForExistingUnPost]
+		,[intUnPostedExistingCount]
+		,[strBatchIdForExistingUnPostRecap]
+		,[intRecapUnPostedExistingCount]
+		,[intIntegrationLogDetailId]
+		,[intInvoiceId]
+		,[intInvoiceDetailId]
+		,[intId]
+		,[strTransactionType]
+		,[strType]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[ysnPost]
+		,[ysnInsert]
+		,[ysnHeader]
+		,[ysnSuccess]
+		,[ysnRecap])
+	SELECT
+		 [intIntegrationLogId]					= @IntegrationLogId
+		,[dtmDate]								= @DateNow
+		,[intEntityId]							= @UserId
+		,[intGroupingOption]					= @GroupingOption
+		,[strMessage]							= 'Invoice for Unpost.'
+		,[strBatchIdForNewPost]					= ''
+		,[intPostedNewCount]					= 0
+		,[strBatchIdForNewPostRecap]			= ''
+		,[intRecapNewCount]						= 0
+		,[strBatchIdForExistingPost]			= ''
+		,[intPostedExistingCount]				= 0
+		,[strBatchIdForExistingRecap]			= ''
+		,[intRecapPostExistingCount]			= 0
+		,[strBatchIdForExistingUnPost]			= ''
+		,[intUnPostedExistingCount]				= 0
+		,[strBatchIdForExistingUnPostRecap]		= ''
+		,[intRecapUnPostedExistingCount]		= 0
+		,[intIntegrationLogDetailId]			= 0
+		,[intInvoiceId]							= [intInvoiceId]
+		,[intInvoiceDetailId]					= [intInvoiceDetailId]
+		,[intId]								= [intId]
+		,[strTransactionType]					= [strTransactionType]
+		,[strType]								= [strType]
+		,[strSourceTransaction]					= [strSourceTransaction]
+		,[intSourceId]							= [intSourceId]
+		,[strSourceId]							= [strSourceId]
+		,[ysnPost]								= [ysnPost]
+		,[ysnInsert]							= 0
+		,[ysnHeader]							= 1
+		,[ysnSuccess]							= 1
+		,[ysnRecap]								= [ysnRecap]
+	FROM 
+		@InvoiceEntries
+	WHERE
+		ISNULL([ysnUnPostAndUpdate],0) = 0
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 0
+		AND [intInvoiceId] IS NOT NULL
+		
+
+	IF ISNULL(@IntegrationLogId, 0) <> 0
+		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
+
 	DECLARE @UpdatedIdsForUnPosting InvoiceId
 	INSERT INTO @UpdatedIdsForUnPosting(
 		 [intHeaderId]
@@ -1461,8 +1800,9 @@ BEGIN TRY
 		AND ISNULL([ysnHeader], 0) = 1	
 		AND ISNULL([ysnInsert], 0) = 0	
 		AND [ysnPost] IS NOT NULL
-		AND [ysnPost] = 1
+		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 0
+
 
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPosting)
@@ -1505,7 +1845,7 @@ BEGIN TRY
 		AND ISNULL([ysnHeader], 0) = 1	
 		AND ISNULL([ysnInsert], 0) = 0	
 		AND [ysnPost] IS NOT NULL
-		AND [ysnPost] = 1
+		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 1
 
 		
@@ -1541,3 +1881,4 @@ IF ISNULL(@RaiseError,0) = 0
 RETURN 1;
 
 END
+GO
