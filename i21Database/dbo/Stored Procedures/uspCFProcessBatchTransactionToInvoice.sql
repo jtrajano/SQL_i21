@@ -298,8 +298,7 @@ END
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[strNotes]
-						,[intTempDetailIdForTaxes]
-						,[ysnClearExisting])
+						,[intTempDetailIdForTaxes])
 					SELECT
 					[intDetailId]				= NULL
 					,[intTaxGroupId]			= NULL
@@ -317,7 +316,6 @@ END
 					,[ysnTaxExempt]				= 0
 					,[strNotes]					= ''
 					,[intTempDetailIdForTaxes]	= @strRecord
-					,[ysnClearExisting]			= 1
 					FROM 
 					tblCFTransaction cfTransaction
 					INNER JOIN tblCFTransactionTax cfTransactionTax
@@ -552,16 +550,14 @@ FROM @EntriesForInvoice
 	--IF (@ErrorMessage IS NULL)
 	--BEGIN
 	
-	--DECLARE @succefulCount INT
-	
+	DECLARE @succefulCount INT
 
-	SELECT intInvoiceId  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1 
+	SELECT intInvoiceId  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1
 
-	SELECT @SuccessfulCount = ISNULL(Count(*),0) FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1 
+	SELECT @succefulCount = ISNULL(Count(*),0) FROM tblARInvoiceIntegrationLogDetail
 
-	--SET @SuccessfulCount = @succefulCount;
 		
-	IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @SuccessfulCount > 0)
+	IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @succefulCount > 0)
 		BEGIN
 
 			IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
