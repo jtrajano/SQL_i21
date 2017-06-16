@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
 
 namespace iRely.Inventory.Model
@@ -345,6 +345,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit").HasPrecision(18, 6);
             this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
             this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strInternalCode).HasColumnName("strInternalCode");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strBatchSizeUOM).HasColumnName("strBatchSizeUOM");
         }

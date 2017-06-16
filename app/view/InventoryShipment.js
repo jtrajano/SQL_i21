@@ -1625,7 +1625,43 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colDockDoor',
                                                                         width: 75,
                                                                         dataIndex: 'strDockDoor',
-                                                                        text: 'Dock Door'
+                                                                        text: 'Dock Door',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intStorageLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Country Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strSubLocationName',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboDockDoor',
+                                                                            displayField: 'strName',
+                                                                            valueField: 'strName'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
