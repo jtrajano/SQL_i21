@@ -5394,6 +5394,10 @@
     <Build Include="dbo\Stored Procedures\uspARPostInvoicesIntegrationsNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostSOStatusFromInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLog.sql" />
+    <Build Include="dbo\Tables\tblARPaymentIntegrationLog.sql" />
+    <Build Include="dbo\Tables\tblARPaymentIntegrationLogDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
