@@ -3302,6 +3302,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             strUnitMeasure: context.record.get('strUnitMeasure'),
                             dblLotUOMConvFactor: context.record.get('dblItemUOMConvFactor')
                         });
+                        //Expiry Date Calculation
+                        var receiptDate = currentReceipt.get('dtmReceiptDate');
+                        var manufacturedDate = newReceiptItemLot.get('dtmManufacturedDate');
+                        var lifetime = currentReceiptItemVM.get('intLifeTime');
+                        var lifetimeType = currentReceiptItemVM.get('strLifeTimeType');
+                        //Calculate Expiry Date by Manufactured Date if available otherwise, Receipt Date
+                        var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
+                        if (!iRely.Functions.isEmpty(manufacturedDate)) {
+                            var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(manufacturedDate, lifetime, lifetimeType);
+                        }
+                        newReceiptItemLot.set('dtmExpiryDate', expiryDate);
+
                         currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                     }
                 }
