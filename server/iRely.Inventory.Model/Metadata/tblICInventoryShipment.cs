@@ -859,6 +859,25 @@ namespace iRely.Inventory.Model
                 _storageLocationName = value;
             }
         }
+        private string _dockDoor;
+        [NotMapped]
+        public string strDockDoor
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_dockDoor))
+                    if (vyuICGetInventoryShipmentItem != null)
+                        return vyuICGetInventoryShipmentItem.strDockDoor;
+                    else
+                        return null;
+                else
+                    return _dockDoor;
+            }
+            set
+            {
+                _dockDoor = value;
+            }
+        }
         private string _ownershipType;
         [NotMapped]
         public string strOwnershipType
@@ -1097,6 +1116,7 @@ namespace iRely.Inventory.Model
         public string strDiscountSchedule { get; set; }
         public string strStorageTypeDescription { get; set; }
         public string strForexRateType { get; set; }
+        public string strDockDoor { get; set; }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
     }

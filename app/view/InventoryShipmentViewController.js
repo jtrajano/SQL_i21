@@ -282,6 +282,39 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 column: 'intSubLocationId',
                                 value: '{grdInventoryShipment.selection.intSubLocationId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'strInternalCode',
+                                value: 'WH_DOCK_DOOR',
+                                conjunction: 'and',
+                                condition: 'noteq'
+                            }
+                        ]
+                    }
+                },
+                colDockDoor: {
+                    dataIndex: 'strDockDoor',
+                    editor: {
+                        readOnly: '{disableFieldInShipmentGrid}',
+                        store: '{storageLocation}',
+                        origValueField: 'intStorageLocationId',
+                        origUpdateField: 'intDockDoorId',
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intShipFromLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryShipment.selection.intSubLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strInternalCode',
+                                value: 'WH_DOCK_DOOR',
+                                conjunction: 'and',
+                                condition: 'eq'
                             }
                         ]
                     }
@@ -1308,7 +1341,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
                 current.set('intStorageLocationId', null);
                 current.set('strStorageLocationName', null);
-                
+                current.set('intDockDoorId', null);
+                current.set('strDockDoor', null);
                  //Remove all lots in Lot Grid                   
                  var shipmentLotItems = current['tblICInventoryShipmentItemLots'](),
                      shipmentLotRecords = shipmentLotItems ? shipmentLotItems.getRange() : [];

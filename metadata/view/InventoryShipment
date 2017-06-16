@@ -3234,7 +3234,67 @@
                                                                 "width": 75
                                                             },
                                                             "name": "MyColumn57",
-                                                            "designerId": "cf909553-424a-485b-97b3-27858d1ae489"
+                                                            "designerId": "cf909553-424a-485b-97b3-27858d1ae489",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "                                                                                {",
+                                                                            "                                                                                    dataIndex: 'intStorageLocationId',",
+                                                                            "                                                                                    dataType: 'numeric',",
+                                                                            "                                                                                    text: 'Country Id',",
+                                                                            "                                                                                    hidden: true",
+                                                                            "                                                                                },",
+                                                                            "                                                                                {",
+                                                                            "                                                                                    dataIndex: 'strName',",
+                                                                            "                                                                                    dataType: 'string',",
+                                                                            "                                                                                    text: 'Name',",
+                                                                            "                                                                                    flex: 1",
+                                                                            "                                                                                },",
+                                                                            "                                                                                {",
+                                                                            "                                                                                    dataIndex: 'strDescription',",
+                                                                            "                                                                                    dataType: 'string',",
+                                                                            "                                                                                    text: 'Description',",
+                                                                            "                                                                                    flex: 1",
+                                                                            "                                                                                },",
+                                                                            "                                                                                {",
+                                                                            "                                                                                    dataIndex: 'intSubLocationId',",
+                                                                            "                                                                                    dataType: 'numeric',",
+                                                                            "                                                                                    hidden: true",
+                                                                            "                                                                                },",
+                                                                            "                                                                                {",
+                                                                            "                                                                                    dataIndex: 'strSubLocationName',",
+                                                                            "                                                                                    dataType: 'string',",
+                                                                            "                                                                                    hidden: true",
+                                                                            "                                                                                }",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strName",
+                                                                        "itemId": "cboDockDoor",
+                                                                        "valueField": "strName"
+                                                                    },
+                                                                    "name": "MyComboBox93",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "175b6d98-48e1-4f98-a6d7-38e0accc1047",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Column",
