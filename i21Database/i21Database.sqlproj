@@ -5291,6 +5291,7 @@
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
     <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategoryMaintenance.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
