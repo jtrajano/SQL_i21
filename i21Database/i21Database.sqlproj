@@ -5279,6 +5279,7 @@
     <Build Include="dbo\Functions\fnGRConvertDecimalPartToWords.sql" />
     <Build Include="dbo\Functions\fnGRConvertNumberToWords.sql" />
 	<None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategoryMaintenance.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
