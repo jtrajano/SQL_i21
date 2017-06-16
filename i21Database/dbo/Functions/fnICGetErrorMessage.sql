@@ -195,6 +195,9 @@ BEGIN
 		WHEN @msgId = 80179 THEN 'Item: %s'
 		WHEN @msgId = 80180 THEN 'Unable to Post %s. The total is negative.'
 		WHEN @msgId = 80181 THEN 'Unable to create the Inventory Receipt. The total is going to be negative.'
+		WHEN @msgId = 80182 THEN 'Unable to create the Inventory Receipt. The total is going to be negative.'
+		WHEN @msgId = 80183 THEN 'The Freight Terms for customer %s is blank. Please add it at the Entity - Locations.'
+		WHEN @msgId = 80184 THEN 'Invalid customer record.'
 	END 
 
 	RETURN @msg

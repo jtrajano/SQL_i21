@@ -10,7 +10,7 @@
 	dtmShipDate DATETIME NOT NULL,
 	intShipFromLocationId INT NOT NULL,
 	intShipToLocationId INT NULL,
-	intFreightTermId INT NOT NULL,
+	intFreightTermId INT NULL, -- INT NOT NULL,
 	strSourceScreenName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 
 	-- Optional Fields
