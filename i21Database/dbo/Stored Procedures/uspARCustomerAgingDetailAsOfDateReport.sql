@@ -257,8 +257,9 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
- AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS)
-      
+ AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS) 
+ AND P.intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1)
+       
 UNION ALL
 
 SELECT P.dtmDatePaid
@@ -509,7 +510,8 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
- AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS)
+ AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS)  
+ AND P.intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1)
 						      
 UNION ALL
 
