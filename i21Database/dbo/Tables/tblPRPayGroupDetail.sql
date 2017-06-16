@@ -14,6 +14,7 @@
 	[dblTotal]					NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [dtmDateFrom]				DATETIME        NULL,
 	[dtmDateTo]					DATETIME        NULL,
+	[intSource]					INT             NULL DEFAULT ((0)),
 	[intSort]					INT             NULL DEFAULT ((1)),
     [intConcurrencyId]			INT             DEFAULT ((1)) NULL,
 	CONSTRAINT [PK_tblPRPayGroupDetail] PRIMARY KEY CLUSTERED ([intPayGroupDetailId] ASC),
