@@ -35,9 +35,10 @@ SELECT StorageLocation.intStorageLocationId
 	, StorageLocation.dblEffectiveDepth
 	, StorageLocation.dblUnitPerFoot
 	, StorageLocation.dblResidualUnit
+	, StorageUnitType.strInternalCode
 FROM tblICStorageLocation StorageLocation
-LEFT JOIN tblICStorageUnitType StorageUnitType ON StorageUnitType.intStorageUnitTypeId = StorageLocation.intStorageUnitTypeId
-LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = StorageLocation.intLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = StorageLocation.intSubLocationId
-LEFT JOIN tblICStorageLocation ParentStorageLocation ON ParentStorageLocation.intStorageLocationId = StorageLocation.intParentStorageLocationId
-LEFT JOIN tblICRestriction Restriction ON Restriction.intRestrictionId = StorageLocation.intRestrictionId
+	LEFT JOIN tblICStorageUnitType StorageUnitType ON StorageUnitType.intStorageUnitTypeId = StorageLocation.intStorageUnitTypeId
+	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = StorageLocation.intLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = StorageLocation.intSubLocationId
+	LEFT JOIN tblICStorageLocation ParentStorageLocation ON ParentStorageLocation.intStorageLocationId = StorageLocation.intParentStorageLocationId
+	LEFT JOIN tblICRestriction Restriction ON Restriction.intRestrictionId = StorageLocation.intRestrictionId
