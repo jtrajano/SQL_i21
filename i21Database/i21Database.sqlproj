@@ -5272,6 +5272,10 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateILMS.sql" />
     <Build Include="dbo\Tables\tblTFOutputDesignerField.sql" />
     <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLog.sql" />
+    <Build Include="dbo\Tables\tblARPaymentIntegrationLog.sql" />
+    <Build Include="dbo\Tables\tblARPaymentIntegrationLogDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
