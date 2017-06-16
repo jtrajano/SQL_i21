@@ -474,7 +474,7 @@ ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 ,[dtmPostDate]
 FROM @EntriesForInvoice
 
-select intCurrencyId, * from @EntriesForInvoice
+--select intCurrencyId, * from @EntriesForInvoice
 
 
 --SELECT * FROM @InvoiceEntriesTEMP
@@ -503,7 +503,8 @@ DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
 		,[strNotes]
-		,[intTempDetailIdForTaxes])
+		,[intTempDetailIdForTaxes]
+		,[ysnClearExisting])
 	SELECT
 	[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 	,[intTaxGroupId]			= NULL
@@ -521,6 +522,7 @@ DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 	,[ysnTaxExempt]				= 0
 	,[strNotes]					= ''
 	,[intTempDetailIdForTaxes]	= @TransactionId
+	,[ysnClearExisting]			= 1
 	FROM 
 	tblCFTransaction cfTransaction
 	INNER JOIN tblCFTransactionTax cfTransactionTax

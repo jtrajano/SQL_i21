@@ -5,7 +5,7 @@
 )
 RETURNS @returntable TABLE
 (
-	 [strCalculationMethod]	NVARCHAR(30)
+	 [strCalculationMethod]	NVARCHAR(30) COLLATE Latin1_General_CI_AS
 	,[dblRate]				NUMERIC(18,6)
 
 )
