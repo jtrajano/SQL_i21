@@ -87,9 +87,10 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[intTruckDriverReferenceId]			INT												NULL		-- Key Value  from [tblSCTruckDriverReference]
 	,[ysnResetDetails]						BIT												NULL		-- Indicate whether detail records will be deleted and recreated
 	,[ysnRecap]								BIT												NULL		-- If [ysnRecap] = 1 > Recap Invoices
-	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Invoices will be posted
+	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Invoices will be posted	
 																										-- If [ysnPost] = 0 > Existing posted Invoices will be unposted
 																										-- If [ysnPost] IS NULL > No action will be made
+	,[ysnUnPostAndUpdate]					BIT												NULL		-- 
 	,[ysnUpdateAvailableDiscount]			BIT												NULL		-- If [ysnUpdateAvailableDiscount] = 1 > Updates existing Posted/Unposted Invoice Available Discount Amount
 	,[ysnAccrueLicense]						BIT												NULL		-- If [ysnAccrueLicense] = 1 > License amount will be accrued upon posting
 	,[ysnInsertDetail]						BIT												NULL		-- If [ysnInsertDetail] = 1 > Line Item details included in the UDT will also be inserted when uspARCreateCustomerInvoices is called
