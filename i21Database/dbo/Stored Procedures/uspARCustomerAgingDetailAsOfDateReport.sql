@@ -258,7 +258,7 @@ WHERE I.ysnPosted = 1
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS) 
- AND P.intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1)
+ --AND P.intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1)
        
 UNION ALL
 
@@ -511,7 +511,7 @@ WHERE I.ysnPosted = 1
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS)  
- AND P.intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1)
+ --AND P.intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1)
 						      
 UNION ALL
 
