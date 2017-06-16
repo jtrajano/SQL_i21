@@ -55,6 +55,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, intDestinationGradeId = ShipmentItem.intDestinationGradeId
 	, strDestinationGrades = DestGrades.strWeightGradeDesc
 	, strForexRateType = forexRateType.strCurrencyExchangeRateType
+	, strDockDoor = DockDoor.strName
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
@@ -72,3 +73,4 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblCTWeightGrade DestWeights ON DestWeights.intWeightGradeId = ShipmentItem.intDestinationWeightId
 	LEFT JOIN tblCTWeightGrade DestGrades ON DestGrades.intWeightGradeId = ShipmentItem.intDestinationGradeId
 	LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON ShipmentItem.intForexRateTypeId = forexRateType.intCurrencyExchangeRateTypeId
+	LEFT JOIN tblICStorageLocation DockDoor ON DockDoor.intStorageLocationId = ShipmentItem.intDockDoorId
