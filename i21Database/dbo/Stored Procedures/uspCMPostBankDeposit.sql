@@ -237,7 +237,7 @@ IF EXISTS (
 	SELECT TOP 1 * FROM tblCMBankTransaction A
 	INNER JOIN  tblCMBankTransactionDetail B ON A.intTransactionId = B.intTransactionId
 	WHERE strTransactionId = @strTransactionId
-	AND A.dtmDate < B.dtmDate
+	AND DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0) < DATEADD(dd, DATEDIFF(dd, 0, B.dtmDate), 0)
 )
 BEGIN
 	RAISERROR('Date must be equal or greater than detail date.', 11, 1)
