@@ -468,7 +468,7 @@ BEGIN
 			(
 				SELECT 
 					C.intTermsId
-				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
+				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId AND C.ysnDefaultLocation = 1
 				WHERE B.intEntityId = @vendorId
 			) Terms
 			WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
