@@ -122,7 +122,7 @@ SELECT
 										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
 									END
 		,intLocationId				= SC.intProcessingLocationId
-		,intShipFromId                = (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
+		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
@@ -139,12 +139,6 @@ SELECT
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
 		,intGrossNetUOMId			= NULL
-		--,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
-		--									FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
-		--										ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
-		--									WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
-		--										AND ItemUOM.intItemId = SC.intItemId
-		--							 )
 		,intCostUOMId				= CASE
 										WHEN ISNULL(CNT.intPriceItemUOMId,0) = 0 THEN LI.intItemUOMId 
 										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
@@ -217,7 +211,6 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[intContractDetailId] 
 				,[ysnAccrue]
 				,[ysnPrice]
-				,[ysnInventoryCost]
 		)
 		SELECT	
 		DISTINCT
