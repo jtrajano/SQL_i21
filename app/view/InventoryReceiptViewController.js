@@ -144,7 +144,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         conjunction: 'and'
                     }
                 ],
-                readOnly: '{isReceiptReadonly}'
+                readOnly: '{isReceiptReadonly}',
+                hidden: '{checkHiddenInTransferOrder}'
             },
             cboReceiver: {
                 origValueField: 'intEntityUserSecurityId',
