@@ -41,7 +41,6 @@ SELECT IsNULL(BR.intBlendRequirementId, 0) AS intBlendRequirementId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblSMCompanyLocation CL on CL.intCompanyLocationId =W.intLocationId 
 INNER JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
-	AND W.intStatusId <> 13
 INNER JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 INNER JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
 INNER JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
@@ -70,4 +69,5 @@ WHERE W.intStatusId IN (
 		9
 		,10
 		,11
+		,13
 		)

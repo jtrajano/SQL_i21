@@ -31,7 +31,6 @@ BEGIN TRY
 		,@strLotTracking NVARCHAR(50)
 		,@intSpecialPalletLotId INT
 		,@strLocationName NVARCHAR(50)
-
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
 		,intItemId INT
@@ -249,20 +248,22 @@ BEGIN TRY
 		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
 		WHERE ChargesGLAccounts.intOtherChargeExpense IS NULL
 
-		SELECT	TOP 1 
-				@strLocationName = c.strLocationName
-		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-					ON il.intLocationId = c.intCompanyLocationId
-				INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-					ON ChargesGLAccounts.intChargeId = il.intItemId
-					AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intItemId1
-				AND ChargesGLAccounts.intOtherChargeExpense IS NULL
+		SELECT TOP 1 @strLocationName = c.strLocationName
+		FROM tblICItemLocation il
+		INNER JOIN tblSMCompanyLocation c ON il.intLocationId = c.intCompanyLocationId
+		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON ChargesGLAccounts.intChargeId = il.intItemId
+			AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
+		WHERE il.intItemId = @intItemId1
+			AND ChargesGLAccounts.intOtherChargeExpense IS NULL
 
 		IF @intItemId1 IS NOT NULL
 		BEGIN
 			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo1, @strLocationName, @ACCOUNT_CATEGORY_OtherChargeExpense;
+			EXEC uspICRaiseError 80008
+				,@strItemNo1
+				,@strLocationName
+				,@ACCOUNT_CATEGORY_OtherChargeExpense;
+
 			RETURN;
 		END
 
@@ -406,15 +407,21 @@ BEGIN TRY
 		,[dblReportingRate]
 		,[dblForeignRate]
 		,[strRateType]
-	)
+		)
 	EXEC dbo.uspICUnpostCosting @intTransactionId
 		,@strTransactionId
 		,@strBatchId
 		,@intUserId
 		,0
 
-	EXEC dbo.uspGLBookEntries @GLEntries
-		,0
+	IF EXISTS (
+			SELECT *
+			FROM @GLEntries
+			)
+	BEGIN
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,0
+	END
 
 	UPDATE dbo.tblMFWorkOrderProducedLot
 	SET ysnProductionReversed = 1
