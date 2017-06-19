@@ -101,7 +101,7 @@ BEGIN
 					,intCustomerId = A.intCustomerID
 					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END) 
 					,intDeliveryTermId = (CASE WHEN A.intDeliveryTermID IS NULL THEN G.A4GLIdentity ELSE A.intDeliveryTermID END)
-					,intStartBudgetMonth = MONTH(ISNULL(C.vwcus_budget_beg_mm,0))
+					,intStartBudgetMonth = ISNULL(C.vwcus_budget_beg_mm,0)
 					,dblNonHeatUsage = (CASE WHEN @strCalculateBudgetFor = ''Next Year''
 											THEN
 												(365 * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END))
