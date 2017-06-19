@@ -26,7 +26,6 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
         'Ext.form.field.ComboBox',
-        'Ext.form.field.Date',
         'Ext.grid.Panel',
         'Ext.grid.column.Check',
         'Ext.grid.View',
@@ -34,6 +33,7 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Number',
         'Ext.grid.column.Date',
+        'Ext.form.field.Date',
         'Ext.toolbar.Paging'
     ],
 
@@ -350,31 +350,6 @@ Ext.define('Inventory.view.Commodity', {
                                                             align: 'stretch'
                                                         },
                                                         items: [
-                                                            {
-                                                                xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'datefield',
-                                                                        itemId: 'dtmCropEndDateCurrent',
-                                                                        width: 280,
-                                                                        fieldLabel: 'Crop End Date Current',
-                                                                        labelWidth: 140
-                                                                    },
-                                                                    {
-                                                                        xtype: 'datefield',
-                                                                        flex: 1,
-                                                                        itemId: 'dtmCropEndDateNew',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'New',
-                                                                        labelWidth: 60
-                                                                    }
-                                                                ]
-                                                            },
                                                             {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtEdiCode',

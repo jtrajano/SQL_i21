@@ -715,61 +715,6 @@
                                             "designerId": "58d50895-ad8d-4633-a5cf-5d5562fa3af6",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.container.Container",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "hbox",
-                                                        "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "margin": "0 0 5 0"
-                                                    },
-                                                    "name": "MyContainer36",
-                                                    "designerId": "df31fb8d-0f29-46f3-b702-75b635632ea0",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Date",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Crop End Date Current",
-                                                                "itemId": "dtmCropEndDateCurrent",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null,
-                                                                "width": 280
-                                                            },
-                                                            "name": "MyDateField",
-                                                            "designerId": "4d6d6061-1f73-4e26-a868-cd5723064648"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Date",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "New",
-                                                                "itemId": "dtmCropEndDateNew",
-                                                                "labelWidth": 60,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "margin": "0 0 0 5"
-                                                            },
-                                                            "name": "MyDateField1",
-                                                            "designerId": "65cde855-6dec-41bf-ba74-bdc3a9c7419e"
-                                                        }
-                                                    ]
-                                                },
-                                                {
                                                     "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
@@ -1126,7 +1071,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter19",
+                                                            "name": "filter136",
                                                             "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2923,7 +2868,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter110",
+                                                    "name": "filter137",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3337,7 +3282,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter111",
+                                                    "name": "filter138",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3614,7 +3559,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter139",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3887,7 +3832,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter113",
+                                                    "name": "filter140",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4113,7 +4058,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging15",
                     "designerId": "fca9ca25-ac5c-43f8-9dd2-ce604fae6ecb",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

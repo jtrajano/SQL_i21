@@ -53,8 +53,6 @@ Ext.define('Inventory.view.CommodityViewController', {
                 value: '{current.strInsuranceAllState}',
                 store: '{states}'
             },
-            dtmCropEndDateCurrent: '{current.dtmCropEndDateCurrent}',
-            dtmCropEndDateNew: '{current.dtmCropEndDateNew}',
             txtEdiCode: '{current.strEDICode}',
             cboDefaultScheduleStore: {
                 origValueField: 'intStorageScheduleRuleId',
