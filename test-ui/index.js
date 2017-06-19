@@ -38,6 +38,15 @@ if(_url.indexOf('version=TF') < 1) {
             items: [
 
                 {
+                    url: 'SmokeTesting/OpenICScreens.js?v='+version,
+                    title: 'OpenICScreens',
+                    preload: [
+                        functionalTest,
+                        commonIC,
+                        commonICST
+                    ]
+                },
+                {
                     url: 'SmokeTesting/ICSmokeTests.js?v='+version,
                     title: 'ICSmokeTests',
                     preload: [

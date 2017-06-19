@@ -1071,13 +1071,6 @@ StartTest (function (t) {
 
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
-        .displayText('===== Scenario 21. Opening IC Screens ====')
-        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
-        .addFunction(function(next){
-            commonICST.openICScreens (t,next)
-        })
-
-
         .done();
 
 })
