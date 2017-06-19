@@ -5276,6 +5276,7 @@
     <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLog.sql" />
     <Build Include="dbo\Tables\tblARPaymentIntegrationLog.sql" />
     <Build Include="dbo\Tables\tblARPaymentIntegrationLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetUnitConversion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
