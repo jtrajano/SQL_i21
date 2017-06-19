@@ -238,7 +238,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 		WHERE P.intEntityEmployeeId = @intEmployee
 		  AND P.intPayGroupDetailId = @intPayGroupDetailId
 		  AND P.intEmployeeEarningId = @intEmployeeEarningId
-		  AND (P.dblTotal > 0 OR E.ysnDefault = 1)
+		  AND (P.dblTotal <> 0 OR E.ysnDefault = 1)
 
 		/* Get the Created Paycheck Earning Id*/
 		SELECT TOP 1 @intPaycheckEarningId = intPaycheckEarningId FROM @udtPRPaycheckEarningIn
