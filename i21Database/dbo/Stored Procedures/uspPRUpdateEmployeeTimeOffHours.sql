@@ -127,10 +127,10 @@ BEGIN
 									WHEN (T.strAwardPeriod <> 'Anniversary Date' AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN 0
 									ELSE dblHoursUsed END
 				,dblHoursCarryover = CASE WHEN (T.strAwardPeriod = 'Anniversary Date' AND GETDATE() >= T.dtmNextAward) THEN 
-											CASE WHEN (dblHoursCarryover + dblHoursEarned < dblMaxCarryover) THEN dblHoursCarryover + dblHoursEarned
+											CASE WHEN ((dblHoursCarryover + dblHoursEarned - dblHoursUsed) < dblMaxCarryover) THEN (dblHoursCarryover + dblHoursEarned - dblHoursUsed)
 											ELSE dblMaxCarryover END
 										  WHEN (T.strAwardPeriod <> 'Anniversary Date' AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN
-											CASE WHEN (dblHoursCarryover + dblHoursEarned < dblMaxCarryover) THEN dblHoursCarryover + dblHoursEarned
+											CASE WHEN ((dblHoursCarryover + dblHoursEarned - dblHoursUsed) < dblMaxCarryover) THEN (dblHoursCarryover + dblHoursEarned - dblHoursUsed)
 											ELSE dblMaxCarryover END
 									ELSE dblHoursCarryover END
 				,dblHoursEarned = CASE WHEN (T.strAwardPeriod = 'Anniversary Date' AND GETDATE() >= T.dtmNextAward) THEN 0
