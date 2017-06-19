@@ -91,7 +91,7 @@ StartTest (function (t) {
         //region
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
+        .clickMenuScreen('Storage Units','Screen')
         .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
         .waitUntilLoaded()
         .continueIf({
@@ -102,7 +102,7 @@ StartTest (function (t) {
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
                     .displayText('===== Scenario 1: Add New Storage Location. =====')
-                    .clickMenuScreen('Storage Locations','Screen')
+                    .clickMenuScreen('Storage Units','Screen')
                     .clickButton('New')
                     .waitUntilLoaded('')
                     .enterData('Text Field','Name','Indy Storage')
@@ -131,7 +131,7 @@ StartTest (function (t) {
         /*====================================== Add Storage Location ======================================*/
         //region
         .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
+        .clickMenuScreen('Storage Units','Screen')
         .filterGridRecords('Search', 'FilterGrid', 'Smoke Storage')
         .waitUntilLoaded()
 
@@ -145,7 +145,7 @@ StartTest (function (t) {
                 new iRely.FunctionalTest().start(t, next)
                     .displayText('Storage Location does not yet exists.')
                     .displayText('===== Scenario 1: Adding New Storage Location. =====')
-                    .clickMenuScreen('Storage Locations','Screen')
+                    .clickMenuScreen('Storage Units','Screen')
                     .clickButton('New')
                     .waitUntilLoaded('')
                     .enterData('Text Field','Name','Smoke Storage')
@@ -419,8 +419,8 @@ StartTest (function (t) {
                             , 'SC - Category - 01'
                             , 'SC - Commodity - 01'
                             , 3
-                            , 'LB'
-                            , 'LB'
+                            , 'Pounds'
+                            , 'Pounds'
                             , 10
                             , 10
                             , 40
@@ -460,8 +460,8 @@ StartTest (function (t) {
                             , 'SC - Category - 01'
                             , 'SC - Commodity - 01'
                             , 4
-                            , 'LB'
-                            , 'LB'
+                            , 'Pounds'
+                            , 'Pounds'
                             , 10
                             , 10
                             , 40
@@ -517,7 +517,7 @@ StartTest (function (t) {
 //        //region
 //        .displayText('===== Scenario 1: Create CT to IR for  Non Lotted Item Process Button =====')
 //        .addFunction(function(next){
-//            commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','LB', 1000, 10)
+//            commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','Pounds', 1000, 10)
 //        })
 //        .waitUntilLoaded('')
 //        //endregion
@@ -527,7 +527,7 @@ StartTest (function (t) {
 //        //region
 //        .displayText('===== Scenario 2:  CT to IR for Non Lotted Item Process Button =====')
 //        .addFunction(function(next){
-//            commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+//            commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Pounds')
 //        })
 //        .waitUntilLoaded('')
         //endregion
@@ -539,7 +539,7 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .displayText('===== Scenario 3: Create PO to IR for Non Lotted Item Add Orders Screen =====')
         .addFunction(function(next){
-            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','LB', 1000, 10)
+            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','Pounds', 1000, 10)
         })
         .waitUntilLoaded('')
         //endregion
@@ -549,7 +549,7 @@ StartTest (function (t) {
         //region
         .displayText('===== Scenario 4: Create PO to IR for Lotted Item  Add Orders Screen =====')
         .addFunction(function(next){
-            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Pounds')
         })
         .waitUntilLoaded('')
         //endregion
@@ -566,10 +566,10 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('Vendor',1,0)
         .selectComboBoxRowNumber('Location',1,0)
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-        .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', 100, 'LB')
+        .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', 100, 'Pounds')
         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Pounds')
+        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'Pounds')
         .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
         .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
@@ -577,12 +577,12 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
 
         .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
+        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','Pounds','strUnitMeasure')
         .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
         .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
         .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
         .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
-        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
+        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'Pounds')
         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
 
         //Calculate Charge Amount
@@ -631,7 +631,7 @@ StartTest (function (t) {
         //region
         .displayText('===== Scenario 6: Create Direct IR for Non Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'Smoke - NLTI - 01','LB', 1000, 10)
+            commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'Smoke - NLTI - 01','Pounds', 1000, 10)
         })
         //endregion
 
@@ -640,7 +640,7 @@ StartTest (function (t) {
         //region
         .displayText('===== Scenario 7: Create Direct IR for Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'Smoke - LTI - 01','Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Pounds')
         })
         //endregion
 
@@ -649,7 +649,7 @@ StartTest (function (t) {
 //        //region
 //        .displayText('===== Scenario 8: Create Sales Contract to Inventory Shipment Non Lotted =====')
 //        .addFunction(function(next){
-//            commonIC.addSCtoISAddORdersNonLotted (t,next, 'Apple Spice Sales','Smoke - NLTI - 01','SC - Commodity - 01', 100,'LB','0001 - Fort Wayne', 'USD', 14, 'Truck')
+//            commonIC.addSCtoISAddORdersNonLotted (t,next, 'Apple Spice Sales','Smoke - NLTI - 01','SC - Commodity - 01', 100,'Pounds','0001 - Fort Wayne', 'USD', 14, 'Truck')
 //        })
 //        //endregion
 //
@@ -657,7 +657,7 @@ StartTest (function (t) {
 //        /*====================================== Create SC for Lotted Item ======================================*/
 //        .displayText('===== Scenario 9: Create Sales Contract to Inventory Shipment Lotted=====')
 //        .addFunction(function(next){
-//            commonIC.addSCtoISAddORdersLotted (t,next, 'Apple Spice Sales','Smoke - LTI - 01','SC - Commodity - 01', 100,'LB','0001 - Fort Wayne', 'USD', 14,'Truck', 'Raw Station', 'RM Storage','LOT-01')
+//            commonIC.addSCtoISAddORdersLotted (t,next, 'Apple Spice Sales','Smoke - LTI - 01','SC - Commodity - 01', 100,'Pounds','0001 - Fort Wayne', 'USD', 14,'Truck', 'Raw Station', 'RM Storage','LOT-01')
 //        })
 //        //endregion
 
@@ -665,7 +665,7 @@ StartTest (function (t) {
         /*====================================== Create SO for Non Lotted Item ======================================*/
         .displayText('===== Scenario 10: Create SO IS for NON Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addSOtoISAddORdersNonLotted (t,next, 'Apple Spice Sales',  'USD', '0001 - Fort Wayne', 'Truck','Smoke - NLTI - 01','LB', 100)
+            commonIC.addSOtoISAddORdersNonLotted (t,next, 'Apple Spice Sales',  'USD', '0001 - Fort Wayne', 'Truck','Smoke - NLTI - 01','Pounds', 100)
         })
         //endregion
 
@@ -673,7 +673,7 @@ StartTest (function (t) {
         /*====================================== Create Direct IS for Non Lotted Item ======================================*/
         .displayText('===== Scenario 11: Create Direct IS for Non Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','LB', 100)
+            commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','Pounds', 100)
         })
         //endregion
 
@@ -681,7 +681,7 @@ StartTest (function (t) {
         /*====================================== Create Direct IS for Lotted Item ======================================*/
         .displayText('===== Scenario 12: Create Direct IS for Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 100, 'LOT-01')
+            commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','Pounds', 100, 'LOT-01')
         })
         //endregion
 
@@ -706,7 +706,7 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
-        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
+        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'Pounds')
         .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
@@ -737,7 +737,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','Currency','USD')
         .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'Smoke - LTI - 01')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Pounds')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Indy')
         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'Indy Storage')
@@ -746,12 +746,12 @@ StartTest (function (t) {
 
         .waitTillLoaded()
         .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
+        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','Pounds','strUnitMeasure')
         .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
         .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
         .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
         .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
-        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
+        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'Pounds')
         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'Indy Storage')
 
         .clickTab('Post Preview')
@@ -789,7 +789,7 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
-        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
+        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'Pounds')
         .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
@@ -825,7 +825,7 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
-        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
+        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'Pounds')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
         .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
