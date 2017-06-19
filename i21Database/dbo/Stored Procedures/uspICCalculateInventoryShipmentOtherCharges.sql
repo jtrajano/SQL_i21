@@ -84,19 +84,41 @@ BEGIN
 			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
-	FROM	dbo.tblICInventoryShipmentItem ShipmentItem INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
+	FROM	tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
+				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+			INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
 				ON ShipmentItem.intInventoryShipmentId = Charge.intInventoryShipmentId
 			INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = Charge.intChargeId		
 	WHERE	ShipmentItem.intInventoryShipmentId = @intInventoryShipmentId
 			AND Charge.strCostMethod = @COST_METHOD_PER_UNIT
-			AND (
-				Charge.intContractId IS NULL 
-				OR (
-					Charge.intContractId IS NOT NULL 
-					AND ShipmentItem.intOrderId = Charge.intContractId
-					--AND ShipmentItem.intLineNo = Charge.intContractDetailId // removing this because Shipment could have many contract details/sequences per contract
-				)	
+			AND 
+			(
+				1 =
+				CASE	WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NULL 
+							AND ShipmentItem.intOrderId IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NOT NULL 
+							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+						THEN 
+							1
+						
+						WHEN 
+							ISNULL(Shipment.intOrderType, 1) <> 1 
+							AND Charge.intContractId IS NULL 
+						THEN 
+							1
+						
+						ELSE 
+							0
+				END 				
 			)
 			AND Item.intOnCostTypeId IS NULL 
 			AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
@@ -189,13 +211,33 @@ BEGIN
 				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	WHERE	ShipmentItem.intInventoryShipmentId = @intInventoryShipmentId
 			AND Charge.strCostMethod = @COST_METHOD_PERCENTAGE
-			AND (
-				Charge.intContractId IS NULL 
-				OR (
-					Charge.intContractId IS NOT NULL 
-					AND ShipmentItem.intOrderId = Charge.intContractId
-					--AND ShipmentItem.intLineNo = Charge.intContractDetailId // removing this because Shipment could have many contract details/sequences per contract
-				)
+			AND 
+			(
+				1 =
+				CASE	WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NULL 
+							AND ShipmentItem.intOrderId IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NOT NULL 
+							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+						THEN 
+							1
+						
+						WHEN 
+							ISNULL(Shipment.intOrderType, 1) <> 1 
+							AND Charge.intContractId IS NULL 
+						THEN 
+							1
+						
+						ELSE 
+							0
+				END 				
 			)
 			AND Item.intOnCostTypeId IS NULL 
 			AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
