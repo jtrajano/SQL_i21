@@ -16,10 +16,12 @@ BEGIN TRY
 	DECLARE @intStageLocationId INT
 	DECLARE @dtmCurrentDate DATETIME
 	DECLARE @strUserName NVARCHAR(100)
+			,@strReferenceNo nvarchar(50)
 
 	SELECT @strInventoryShipmentNo = strShipmentNumber,
 		   @intShipFromLocationId = intShipFromLocationId,
-		   @dtmCurrentDate = GETDATE()
+		   @dtmCurrentDate = GETDATE(),
+		   @strReferenceNo='Ref. # '+strReferenceNumber
 	FROM tblICInventoryShipment
 	WHERE intInventoryShipmentId = @intInventoryShipmentId
 
@@ -63,7 +65,7 @@ BEGIN TRY
 		,@strOrderNo
 		,@strInventoryShipmentNo
 		,@intStageLocationId
-		,''
+		,@strReferenceNo
 		,@dtmCurrentDate
 		,@strUserName
 		
