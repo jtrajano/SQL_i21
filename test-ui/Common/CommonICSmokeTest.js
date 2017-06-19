@@ -768,8 +768,8 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 {dataIndex: 'strCommodity', text: 'Commodity'},
                 {dataIndex: 'strCountGroup', text: 'Count Group'},
                 {dataIndex: 'dtmCountDate', text: 'Count Date'},
-                {dataIndex: 'strSubLocationName', text: 'Sub Location'},
-                {dataIndex: 'strStorageLocationName', text: 'Storage Location'},
+                {dataIndex: 'strSubLocationName', text: 'Storage Location'},
+                {dataIndex: 'strStorageLocationName', text: 'Storage Unit'},
                 {dataIndex: 'strStatus', text: 'Status'}
 
             ])
@@ -995,7 +995,7 @@ Ext.define('Inventory.CommonICSmokeTest', {
             .waitUntilLoaded()
             .addResult('Successfully Opened Screen',3000)
             .waitUntilLoaded()
-            .clickTab('Item')
+            .clickTab('Items')
             .waitUntilLoaded()
             .addResult('Successfully Opened Screen',3000)
             .waitUntilLoaded()
@@ -1595,31 +1595,9 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 ,'InventoryValuation'
                 ,'StandardUOM'
             ], true)
-
-            //Categories Location tab
-            .clickTab('Locations')
-            .waitUntilLoaded()
-            .isControlVisible('btn',
-            [
-                'AddLocation'
-                ,'EditLocation'
-                ,'DeleteLocation'
-                ,'GridLayout'
-                ,'InsertCriteria'
-                ,'MaximizeGrid'
-            ], true)
-            .isControlVisible('txt',
-            [
-                ,'FilterGrid'
-            ], true)
-            .isControlVisible('col',
-            [
-                'LocationId'
-                ,'LocationCashRegisterDept'
-                ,'LocationTargetGrossProfit'
-                ,'LocationTargetInventoryCost'
-                ,'LocationCostInventoryBOM'
-            ], true)
+            //Categories Point of sale tab
+            .clickTab('Point of Sale')
+            .waitUntilLoaded('')
             //Categories GL Accounts tab
             .clickTab('GL Accounts')
             .waitUntilLoaded()
@@ -1664,7 +1642,7 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 ,'VendorOrderClass'
             ], true)
             //Categories Manufacturing tab
-            .clickTab('Vendor Category Xref')
+            .clickTab('Manufacturing')
             .waitUntilLoaded()
             .isControlVisible('txt',
             [
@@ -1901,8 +1879,8 @@ Ext.define('Inventory.CommonICSmokeTest', {
 
 
             //Inventory Storage Locations Screen
-            .displayText('=====  1.16 Open Storage Locations and Check Screen Fields ====')
-            .clickMenuScreen('Storage Locations','Screen')
+            .displayText('=====  1.16 Open Storage Units and Check Screen Fields ====')
+            .clickMenuScreen('Storage Units','Screen')
             .waitUntilLoaded()
             .verifySearchToolbarButton({openselected: false, openall: false, close: false})
             .verifyGridColumnNames('Search', [
@@ -1910,7 +1888,7 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 {dataIndex: 'strDescription', text: 'Description'},
                 {dataIndex: 'strStorageUnitType', text: 'Storage Unit Type'},
                 {dataIndex: 'strLocationName', text: 'Location'},
-                {dataIndex: 'strSubLocationName', text: 'Sub Location'},
+                {dataIndex: 'strSubLocationName', text: 'Storage Location'},
                 {dataIndex: 'strParentStorageLocationName', text: 'Parent Unit'},
                 {dataIndex: 'strRestrictionCode', text: 'Restriction Type'}
             ])
@@ -2043,16 +2021,14 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 { dataIndex: 'strDescription', text: 'Description'},
                 { dataIndex: 'strType', text: 'Item Type'},
                 { dataIndex: 'strCategoryCode', text: 'Category'},
-                { dataIndex: 'strLocationName', text: 'Location Name'},
                 { dataIndex: 'dblUnitOnHand', text: 'On Hand'},
-                { dataIndex: 'dblOnOrder', text: 'On Order'},
-                { dataIndex: 'dblOrderCommitted', text: 'Committed'},
+                { dataIndex: 'dblOnOrder', text: 'Purchase Order'},
+                { dataIndex: 'dblOrderCommitted', text: 'Sales Order'},
                 { dataIndex: 'dblUnitReserved', text: 'Reserved'},
                 { dataIndex: 'dblInTransitInbound', text: 'In Transit Inbound'},
                 { dataIndex: 'dblInTransitOutbound', text: 'In Transit Outbound'},
                 { dataIndex: 'dblUnitStorage', text: 'On Storage'},
                 { dataIndex: 'dblConsignedPurchase', text: 'Consigned Purchase'},
-                { dataIndex: 'dblConsignedSale', text: 'Consigned Sale'},
                 { dataIndex: 'dblAvailable', text: 'Available'},
                 { dataIndex: 'dblReorderPoint', text: 'Reorder Point'},
                 { dataIndex: 'dblLastCost', text: 'Last Cost'},
@@ -2076,8 +2052,8 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 { dataIndex: 'strItemNo', text: 'Item No'},
                 { dataIndex: 'strItemDescription', text: 'Description'},
                 { dataIndex: 'strLocationName', text: 'Location Name'},
-                { dataIndex: 'strSubLocationName', text: 'Sub Location'},
-                { dataIndex: 'strStorageLocation', text: 'Storage Location'},
+                { dataIndex: 'strSubLocationName', text: 'Storage Location'},
+                { dataIndex: 'strStorageLocation', text: 'Storage Unit'},
                 { dataIndex: 'strLotNumber', text: 'Lot Number'},
                 { dataIndex: 'dblQty', text: 'Quantity'},
                 { dataIndex: 'dblWeight', text: 'Weight'},
@@ -2100,8 +2076,8 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 { dataIndex: 'strCategory', text: 'Category'},
                 { dataIndex: 'strStockUOM', text: 'Stock UOM'},
                 { dataIndex: 'strLocationName', text: 'Location'},
-                { dataIndex: 'strSubLocationName', text: 'Sub Location'},
-                { dataIndex: 'strStorageLocationName', text: 'Storage Location'},
+                { dataIndex: 'strSubLocationName', text: 'Storage Location'},
+                { dataIndex: 'strStorageLocationName', text: 'Storage Unit'},
                 { dataIndex: 'strBOLNumber', text: 'BOL Number'},
                 { dataIndex: 'strEntity', text: 'Entity'},
                 { dataIndex: 'strLotNumber', text: 'Lot Number'},
@@ -2130,7 +2106,7 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 { dataIndex: 'strItemNo', text: 'Item No'},
                 { dataIndex: 'strItemDescription', text: 'Description'},
                 { dataIndex: 'strLocationName', text: 'Location'},
-                { dataIndex: 'strSubLocationName', text: 'Sub Location'},
+                { dataIndex: 'strSubLocationName', text: 'Storage Location'},
                 { dataIndex: 'dblValue', text: 'Value'},
                 { dataIndex: 'dblLastCost', text: 'Last Cost'},
                 { dataIndex: 'dblStandardCost', text: 'Standard Cost'},

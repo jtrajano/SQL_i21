@@ -33,5 +33,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchItemSubLocations(GetParameter param);
         Task<SearchResult> GetItemMotorFuelTax(GetParameter param);
         Task<SearchResult> SearchStockDetail(GetParameter param);
+        Task<decimal> GetUnitConversion(int? fromUnitMeasureId, int? toUnitMeasureId);
     }
 }

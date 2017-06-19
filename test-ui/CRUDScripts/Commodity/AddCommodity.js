@@ -53,13 +53,13 @@ StartTest (function (t) {
                     .enterData('Text Field','DecimalsOnDpr','6.00')
 
 
-                    .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','LB','strUnitMeasure')
-                    .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
+                    .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','Pounds','strUnitMeasure')
+                    .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'Pounds', 'ysnStockUnit', true)
                     .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
                     .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Bushels','strUnitMeasure')
                     .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
 
-                    .verifyGridData('Uom', 1, 'colUOMCode', 'LB')
+                    .verifyGridData('Uom', 1, 'colUOMCode', 'Pounds')
                     .verifyGridData('Uom', 2, 'colUOMCode', '50 lb bag')
                     .verifyGridData('Uom', 3, 'colUOMCode', 'Bushels')
                     .verifyGridData('Uom', 4, 'colUOMCode', '25 kg bag')
@@ -103,13 +103,13 @@ StartTest (function (t) {
                     .clickCheckBox('ExchangeTraded',true)
                     .enterData('Text Field','DecimalsOnDpr','6.00')
 
-                    .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','LB','strUnitMeasure')
-                    .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
+                    .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','Pounds','strUnitMeasure')
+                    .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'Pounds', 'ysnStockUnit', true)
                     .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
                     .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Bushels','strUnitMeasure')
                     .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
 
-                    .verifyGridData('Uom', 1, 'colUOMCode', 'LB')
+                    .verifyGridData('Uom', 1, 'colUOMCode', 'Pounds')
                     .verifyGridData('Uom', 2, 'colUOMCode', '50 lb bag')
                     .verifyGridData('Uom', 3, 'colUOMCode', 'Bushels')
                     .verifyGridData('Uom', 4, 'colUOMCode', '25 kg bag')
@@ -141,13 +141,13 @@ StartTest (function (t) {
         .waitUntilLoaded('iccommodity')
         .enterData('Text Field','Description','Updated Commodity')
 
-        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','LB','strUnitMeasure')
-        .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
+        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','Pounds','strUnitMeasure')
+        .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'Pounds', 'ysnStockUnit', true)
         .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
         .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Bushels','strUnitMeasure')
         .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
 
-        .verifyGridData('Uom', 1, 'colUOMCode', 'LB')
+        .verifyGridData('Uom', 1, 'colUOMCode', 'Pounds')
         .verifyGridData('Uom', 2, 'colUOMCode', '50 lb bag')
         .verifyGridData('Uom', 3, 'colUOMCode', 'Bushels')
         .verifyGridData('Uom', 4, 'colUOMCode', '25 kg bag')
@@ -167,7 +167,7 @@ StartTest (function (t) {
         .waitUntilLoaded('iccommodity')
         .verifyData('Text Field','Description','Updated Commodity')
 
-        .verifyGridData('Uom', 1, 'colUOMCode', 'LB')
+        .verifyGridData('Uom', 1, 'colUOMCode', 'Pounds')
         .verifyGridData('Uom', 2, 'colUOMCode', '50 lb bag')
         .verifyGridData('Uom', 3, 'colUOMCode', 'Bushels')
         .verifyGridData('Uom', 4, 'colUOMCode', '25 kg bag')

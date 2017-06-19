@@ -6,7 +6,7 @@ StartTest (function (t) {
         .displayText('===== Scenario 1: Add New Storage Location - Allow bin of the same name to be used in a different Sub Location. =====')
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
+        .clickMenuScreen('Storage Units','Screen')
         .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test SL - SH - 001')
         .waitUntilLoaded()

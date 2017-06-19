@@ -10,7 +10,7 @@ StartTest (function (t) {
         .clickMenuScreen('Users','Screen')
         .waitUntilLoaded()
         .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
-        .waitUntilLoaded('ementity')
+        .waitUntilLoaded('')
         .waitUntilLoaded()
         .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
         .clickTab('User')
@@ -87,7 +87,7 @@ StartTest (function (t) {
         /*====================================== Add Storage Location for Indianapolis======================================*/
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
+        .clickMenuScreen('Storage Units','Screen')
         .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
         .waitUntilLoaded()
         .continueIf({
@@ -98,7 +98,7 @@ StartTest (function (t) {
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
                     .displayText('===== Scenario 1: Add New Storage Location. =====')
-                    .clickMenuScreen('Storage Locations','Screen')
+                    .clickMenuScreen('Storage Units','Screen')
                     .clickButton('New')
                     .waitUntilLoaded('icstorageunit')
                     .enterData('Text Field','Name','Indy Storage')
@@ -205,8 +205,8 @@ StartTest (function (t) {
                             , 'CRUD - Category'
                             , 'CRUD - Commodity'
                             , 2
-                            , 'LB'
-                            , 'LB'
+                            , 'Pounds'
+                            , 'Pounds'
                             , 10
                             , 10
                             , 40
@@ -242,8 +242,8 @@ StartTest (function (t) {
                             , 'CRUD - Category'
                             , 'CRUD - Commodity'
                             , 2
-                            , 'LB'
-                            , 'LB'
+                            , 'Pounds'
+                            , 'Pounds'
                             , 10
                             , 10
                             , 40
@@ -260,8 +260,8 @@ StartTest (function (t) {
         //region Secnario 1: Delete Unused Item
         .displayText('===== Scenario 1: Delete Unused Item =====')
         .clickMenuScreen('Items','Screen')
-        .waitUntilLoaded()
-        .waitUntilLoaded('icitem')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('001 - DLTI', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickButton('Delete')
@@ -271,9 +271,9 @@ StartTest (function (t) {
         .clearTextFilter('FilterGrid')
 
         .waitUntilLoaded()
-        .waitUntilLoaded('icitem')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('002 - DLTI', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .waitUntilLoaded('')
         .clickButton('Delete')
 //        .verifyMessageBox('iRely i21','Are you sure you want to delete Item 001 - DLTI?','yesno','question')
         .clickMessageBoxButton('yes')
@@ -287,9 +287,9 @@ StartTest (function (t) {
         .displayText('===== Scenario 2: Delete Used Item =====')
         .clickMenuScreen('Items','Screen')
         .waitUntilLoaded()
-        .waitUntilLoaded('icitem')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('87G', 'strItemNo', 1)
-        .waitUntilLoaded('icitem')
+        .waitUntilLoaded('')
         .clickButton('Delete')
 //        .verifyMessageBox('iRely i21','Are you sure you want to delete Item 87G?','yesno','question')
         .clickMessageBoxButton('yes')
