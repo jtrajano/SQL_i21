@@ -212,7 +212,6 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[intCostUOMId] 
 				,[intOtherChargeEntityVendorId] 
 				,[dblAmount] 
-				,[strAllocateCostBy] 
 				,[intContractHeaderId]
 				,[intContractDetailId] 
 				,[ysnAccrue]
@@ -270,7 +269,6 @@ WHERE SCTicket.intTicketId = @intTicketId
 													END 
 												END
 											END
-		,[strAllocateCostBy]				= NULL
 		,[intContractHeaderId]				= NULL
 		,[intContractDetailId]				= NULL
 		,[ysnAccrue]						= CASE
@@ -308,7 +306,6 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[intCostUOMId] 
 				,[intOtherChargeEntityVendorId] 
 				,[dblAmount] 
-				,[strAllocateCostBy] 
 				,[intContractHeaderId]
 				,[intContractDetailId] 
 				,[ysnAccrue]
@@ -339,7 +336,6 @@ WHERE SCTicket.intTicketId = @intTicketId
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN SC.dblTicketFees
 											END
-		,[strAllocateCostBy]				= NULL
 		,[intContractHeaderId]				= NULL
 		,[intContractDetailId]				= NULL
 		,[ysnAccrue]						= CASE 
@@ -409,7 +405,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intCostUOMId] 
 									,[intOtherChargeEntityVendorId] 
 									,[dblAmount] 
-									,[strAllocateCostBy] 
 									,[intContractHeaderId]
 									,[intContractDetailId] 
 									,[ysnAccrue]
@@ -437,9 +432,12 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																		WHEN IC.strCostMethod = 'Amount' THEN ROUND (LoadCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(LoadCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, LoadCost.intItemUOMId), SC.dblGrossUnits), 2)
-																	END
-								,[strAllocateCostBy]				=  NULL
+																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN ROUND (LoadCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(LoadCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, LoadCost.intItemUOMId), SC.dblGrossUnits), 2)
+																		END
+																	END	
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= @ysnAccrue
@@ -471,7 +469,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intCostUOMId] 
 									,[intOtherChargeEntityVendorId] 
 									,[dblAmount] 
-									,[strAllocateCostBy] 
 									,[intContractHeaderId]
 									,[intContractDetailId] 
 									,[ysnAccrue]
@@ -499,9 +496,12 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN LoadCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN LoadCost.strCostMethod = 'Amount' THEN LoadCost.dblRate
+																		WHEN LoadCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN LoadCost.dblRate
+																		END
 																	END
-								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= LoadCost.ysnAccrue
@@ -532,7 +532,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intCostUOMId] 
 									,[intOtherChargeEntityVendorId] 
 									,[dblAmount] 
-									,[strAllocateCostBy] 
 									,[intContractHeaderId]
 									,[intContractDetailId] 
 									,[ysnAccrue]
@@ -562,7 +561,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
 																		WHEN IC.strCostMethod = 'Amount' THEN ROUND (ContractCost.dblRate * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
 																	END
-								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= @ysnAccrue
@@ -593,7 +591,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intCostUOMId] 
 										,[intOtherChargeEntityVendorId] 
 										,[dblAmount] 
-										,[strAllocateCostBy] 
 										,[intContractHeaderId]
 										,[intContractDetailId] 
 										,[ysnAccrue]
@@ -623,7 +620,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
 																	END
-								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= ContractCost.ysnAccrue
@@ -655,7 +651,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intCostUOMId] 
 									,[intOtherChargeEntityVendorId] 
 									,[dblAmount] 
-									,[strAllocateCostBy] 
 									,[intContractHeaderId]
 									,[intContractDetailId] 
 									,[ysnAccrue]
@@ -685,7 +680,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Per Unit' THEN 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN LoadCost.dblRate
 																	END
-								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= LoadCost.ysnAccrue
@@ -714,7 +708,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intCostUOMId] 
 									,[intOtherChargeEntityVendorId] 
 									,[dblAmount] 
-									,[strAllocateCostBy] 
 									,[intContractHeaderId]
 									,[intContractDetailId] 
 									,[ysnAccrue]
@@ -744,7 +737,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Per Unit' THEN 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN LoadCost.dblRate
 																	END
-								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= LoadCost.ysnAccrue
@@ -775,7 +767,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intCostUOMId] 
 									,[intOtherChargeEntityVendorId] 
 									,[dblAmount] 
-									,[strAllocateCostBy] 
 									,[intContractHeaderId]
 									,[intContractDetailId] 
 									,[ysnAccrue]
@@ -805,7 +796,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
 																	END
-								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= ContractCost.ysnAccrue
@@ -833,7 +823,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intCostUOMId] 
 									,[intOtherChargeEntityVendorId] 
 									,[dblAmount] 
-									,[strAllocateCostBy] 
 									,[intContractHeaderId]
 									,[intContractDetailId] 
 									,[ysnAccrue]
@@ -863,7 +852,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
 																	END
-								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= ContractCost.ysnAccrue
@@ -897,7 +885,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCostUOMId] 
 								,[intOtherChargeEntityVendorId] 
 								,[dblAmount] 
-								,[strAllocateCostBy] 
 								,[intContractHeaderId]
 								,[intContractDetailId] 
 								,[ysnAccrue]
@@ -929,7 +916,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
 																		WHEN IC.strCostMethod = 'Amount' THEN ROUND (RE.dblFreightRate * SC.dblGrossUnits, 2)
 																	END
-								,[strAllocateCostBy]				= NULL
 								,[intContractHeaderId]				= NULL
 								,[intContractDetailId]				= NULL
 								,[ysnAccrue]						= @ysnAccrue
@@ -961,7 +947,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCostUOMId] 
 								,[intOtherChargeEntityVendorId] 
 								,[dblAmount] 
-								,[strAllocateCostBy] 
 								,[intContractHeaderId]
 								,[intContractDetailId] 
 								,[ysnAccrue]
@@ -991,7 +976,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																WHEN IC.strCostMethod = 'Per Unit' THEN 0
 																WHEN IC.strCostMethod = 'Amount' THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
 															END
-						,[strAllocateCostBy]				=  NULL
 						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 						,[intContractDetailId]				= ContractCost.intContractDetailId
 						,[ysnAccrue]						= @ysnAccrue
@@ -1024,7 +1008,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intCostUOMId] 
 							,[intOtherChargeEntityVendorId] 
 							,[dblAmount] 
-							,[strAllocateCostBy] 
 							,[intContractHeaderId]
 							,[intContractDetailId] 
 							,[ysnAccrue]
@@ -1054,7 +1037,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
 																WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
 															END
-						,[strAllocateCostBy]				=  NULL
 						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 						,[intContractDetailId]				= ContractCost.intContractDetailId
 						,[ysnAccrue]						= ContractCost.ysnAccrue
@@ -1082,7 +1064,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intCostUOMId] 
 							,[intOtherChargeEntityVendorId] 
 							,[dblAmount] 
-							,[strAllocateCostBy] 
 							,[intContractHeaderId]
 							,[intContractDetailId] 
 							,[ysnAccrue]
@@ -1112,7 +1093,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 															WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
 															WHEN ContractCost.strCostMethod = 'Amount' THEN  ContractCost.dblRate
 														END
-					,[strAllocateCostBy]				=  NULL
 					,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 					,[intContractDetailId]				= ContractCost.intContractDetailId
 					,[ysnAccrue]						= ContractCost.ysnAccrue
