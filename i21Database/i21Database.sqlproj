@@ -5283,6 +5283,8 @@
     <Build Include="dbo\Stored Procedures\uspARAddToInvoicesToPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLogDetail.sql" />
     <Build Include="dbo\User Defined Types\PaymentIntegrationLogStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTaskO1.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductionReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
