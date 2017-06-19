@@ -109,8 +109,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TC.dblRegularHours
 			,EE.dblRateAmount
 			,CASE WHEN (EE.strCalculationType IN ('Fixed Amount')) THEN EE.dblRateAmount ELSE ROUND(TC.dblRegularHours * EE.dblRateAmount, 2) END
-			,@dtmBegin 
-			,@dtmEnd
+			,CAST(FLOOR(CAST(DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), @dtmBegin) AS FLOAT)) AS DATETIME)
+			,CAST(FLOOR(CAST(DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), @dtmEnd) AS FLOAT)) AS DATETIME)
 			,3
 			,1
 			,1
@@ -158,8 +158,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TCE.dblOvertimeHours
 			,EL.dblRateAmount 
 			,ROUND(TCE.dblOvertimeHours * EL.dblRateAmount, 2)
-			,@dtmBegin 
-			,@dtmEnd
+			,CAST(FLOOR(CAST(DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), @dtmBegin) AS FLOAT)) AS DATETIME)
+			,CAST(FLOOR(CAST(DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), @dtmEnd) AS FLOAT)) AS DATETIME)
 			,3
 			,1
 			,1
@@ -201,8 +201,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,0
 			,SUM(SD.dblTotal)
 			,SUM(SD.dblTotal)
-			,@dtmBegin 
-			,@dtmEnd
+			,CAST(FLOOR(CAST(DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), @dtmBegin) AS FLOAT)) AS DATETIME)
+			,CAST(FLOOR(CAST(DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), @dtmEnd) AS FLOAT)) AS DATETIME)
 			,1
 			,1
 		FROM
