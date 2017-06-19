@@ -29,6 +29,7 @@ Ext.define('Inventory.model.ShipmentCharge', {
             }
         },
         { name: 'intContractId', type: 'int', allowNull: true },
+        { name: 'intContractDetailId', type: 'int', allowNull: true },
         { name: 'intChargeId', type: 'int', allowNull: true },
         { name: 'strCostMethod', type: 'string' },
         { name: 'dblRate', type: 'float' },
