@@ -668,7 +668,7 @@ BEGIN
 		DELETE FROM @billDetailIds
 
 		--ADD CHARGES FOR MAIN VENDOR OR PRODUCER
-		IF(@totalChargesCount != 0)
+		IF(@totalChargesCount != 0 AND @counter2 = 1) --make sure charges has not been processed yet, this part should be only run once
 		BEGIN 
 			INSERT INTO tblAPBillDetail(
 				[intBillId],
