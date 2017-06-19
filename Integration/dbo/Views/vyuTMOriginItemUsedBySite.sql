@@ -17,8 +17,8 @@ BEGIN
 	FROM
 	(
 		SELECT DISTINCT
-			strItemNo = A.vwitm_no
-			,strDescription = A.vwitm_desc
+			strItemNo = A.vwitm_no COLLATE Latin1_General_CI_AS
+			,strDescription = A.vwitm_desc COLLATE Latin1_General_CI_AS
 			,intConcurrencyId = 0
 		FROM vwitmmst A
 		INNER JOIN tblTMSite B
