@@ -512,30 +512,29 @@ StartTest (function (t) {
         //endregion
 
 
+        .clickMenuFolder('Inventory','Folder')
+        /*====================================== Create CT to IR for  Non Lotted Item Process Button ======================================*/
+        //region
+        .displayText('===== Scenario 1: Create CT to IR for  Non Lotted Item Process Button =====')
+        .addFunction(function(next){
+            commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','Pounds', 1000, 10)
+        })
+        .waitUntilLoaded('')
+        //endregion
 
-//        /*====================================== Create CT to IR for  Non Lotted Item Process Button ======================================*/
-//        //region
-//        .displayText('===== Scenario 1: Create CT to IR for  Non Lotted Item Process Button =====')
-//        .addFunction(function(next){
-//            commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','Pounds', 1000, 10)
-//        })
-//        .waitUntilLoaded('')
-//        //endregion
-//
-//
-//        /*====================================== Create CT to IR for  Lotted Item Process Button ======================================*/
-//        //region
-//        .displayText('===== Scenario 2:  CT to IR for Non Lotted Item Process Button =====')
-//        .addFunction(function(next){
-//            commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Pounds')
-//        })
-//        .waitUntilLoaded('')
+
+        /*====================================== Create CT to IR for  Lotted Item Process Button ======================================*/
+        //region
+        .displayText('===== Scenario 2:  CT to IR for Non Lotted Item Process Button =====')
+        .addFunction(function(next){
+            commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Pounds')
+        })
+        .waitUntilLoaded('')
         //endregion
 
 
         /*====================================== Create PO to IR for Non Lotted Item Add Orders Screen ======================================*/
         //region
-        .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded('')
         .displayText('===== Scenario 3: Create PO to IR for Non Lotted Item Add Orders Screen =====')
         .addFunction(function(next){
@@ -645,21 +644,21 @@ StartTest (function (t) {
         //endregion
 
 
-//        /*====================================== Create SC for Non Lotted Item ======================================*/
-//        //region
-//        .displayText('===== Scenario 8: Create Sales Contract to Inventory Shipment Non Lotted =====')
-//        .addFunction(function(next){
-//            commonIC.addSCtoISAddORdersNonLotted (t,next, 'Apple Spice Sales','Smoke - NLTI - 01','SC - Commodity - 01', 100,'Pounds','0001 - Fort Wayne', 'USD', 14, 'Truck')
-//        })
-//        //endregion
-//
-//
-//        /*====================================== Create SC for Lotted Item ======================================*/
-//        .displayText('===== Scenario 9: Create Sales Contract to Inventory Shipment Lotted=====')
-//        .addFunction(function(next){
-//            commonIC.addSCtoISAddORdersLotted (t,next, 'Apple Spice Sales','Smoke - LTI - 01','SC - Commodity - 01', 100,'Pounds','0001 - Fort Wayne', 'USD', 14,'Truck', 'Raw Station', 'RM Storage','LOT-01')
-//        })
-//        //endregion
+        /*====================================== Create SC for Non Lotted Item ======================================*/
+        //region
+        .displayText('===== Scenario 8: Create Sales Contract to Inventory Shipment Non Lotted =====')
+        .addFunction(function(next){
+            commonIC.addSCtoISAddORdersNonLotted (t,next, 'Apple Spice Sales','Smoke - NLTI - 01','SC - Commodity - 01', 100,'Pounds','0001 - Fort Wayne', 'USD', 14, 'Truck')
+        })
+        //endregion
+
+
+        /*====================================== Create SC for Lotted Item ======================================*/
+        .displayText('===== Scenario 9: Create Sales Contract to Inventory Shipment Lotted=====')
+        .addFunction(function(next){
+            commonIC.addSCtoISAddORdersLotted (t,next, 'Apple Spice Sales','Smoke - LTI - 01','SC - Commodity - 01', 100,'Pounds','0001 - Fort Wayne', 'USD', 14,'Truck', 'Raw Station', 'RM Storage','LOT-01')
+        })
+        //endregion
 
 
         /*====================================== Create SO for Non Lotted Item ======================================*/
@@ -859,6 +858,8 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .clickButton('New')
         .waitUntilLoaded('')
+        .selectComboBoxRowValue('Location', '0001 - Fort Wayne',0)
+        .waitUntilLoaded('')
         .verifyData('Combo Box','Location','0001 - Fort Wayne')
         .selectComboBoxRowNumber('AdjustmentType',1,0)
         .enterData('Text Field','Description','Test Quantity Change')
@@ -887,6 +888,8 @@ StartTest (function (t) {
         .clickMenuScreen('Inventory Adjustments','Screen')
         .waitUntilLoaded()
         .clickButton('New')
+        .waitUntilLoaded('')
+        .selectComboBoxRowValue('Location', '0001 - Fort Wayne',0)
         .waitUntilLoaded('')
         .verifyData('Combo Box','Location','0001 - Fort Wayne')
         .selectComboBoxRowNumber('AdjustmentType',1,0)
@@ -925,6 +928,8 @@ StartTest (function (t) {
         .clickMenuScreen('Inventory Adjustments','Screen')
         .waitUntilLoaded()
         .clickButton('New')
+        .waitUntilLoaded('')
+        .selectComboBoxRowValue('Location', '0001 - Fort Wayne',0)
         .waitUntilLoaded('')
         .verifyData('Combo Box','Location','0001 - Fort Wayne')
         .selectComboBoxRowNumber('AdjustmentType',8,0)
@@ -972,6 +977,8 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Count','Screen')
         .clickButton('New')
+        .waitUntilLoaded('')
+        .selectComboBoxRowValue('Location', '0001 - Fort Wayne',0)
         .waitUntilLoaded()
         .selectComboBoxRowNumber('Category',1,0)
         .selectComboBoxRowNumber('Commodity',3,0)
@@ -1016,10 +1023,11 @@ StartTest (function (t) {
 
         .clickButton('Post')
         .waitUntilLoaded('')
-        .addResult('Clicking Recap',3000)
+        .addResult('Was not able to post!',3000)
         .waitUntilLoaded('')
         .waitUntilLoaded('')
         .clickMessageBoxButton('ok')
+        .waitUntilLoaded('')
         .waitUntilLoaded('')
         .clickButton('Close')
         .clickMenuFolder('Inventory','Folder')
