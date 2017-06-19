@@ -236,5 +236,40 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchStockDetail(param));
         }
+
+        public struct GetUnitConversionParam
+        {
+            public int? intFromUnitMeasureId { get; set; }
+            public int? intToUnitMeasureId { get; set; }
+        }
+
+        [HttpPost]
+        [ActionName("GetUnitConversion")]
+        public async Task<HttpResponseMessage> GetUnitConversion(GetUnitConversionParam param)
+        {
+            try
+            {
+                decimal result = await _bl.GetUnitConversion(param.intFromUnitMeasureId, param.intToUnitMeasureId);
+                return Request.CreateResponse(HttpStatusCode.Accepted, new
+                {
+                    success = true,
+                    message = new
+                    {
+                        data = result
+                    }
+                });
+            }
+            catch (Exception ex) {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new
+                {
+                    success = false,
+                    message = new
+                    {
+                        statusText = ex.Message
+                    }
+                });
+            }
+        }
+
     }
 }

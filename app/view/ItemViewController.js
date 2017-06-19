@@ -1853,20 +1853,19 @@ Ext.define('Inventory.view.ItemViewController', {
     getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
         iRely.Msg.showWait('Converting units...');
         ic.utils.ajax({
-            url: '../Inventory/api/UnitMeasure/Search',
-            method: 'Get'  
+            url: '../Inventory/api/Item/GetUnitConversion',
+            method: 'Post',
+            params: {
+                intFromUnitMeasureId: unitMeasureId,
+                intToUnitMeasureId: stockUnitMeasureId
+            }
         })
         .subscribe(
             function (successResponse) {
                 var jsonData = Ext.decode(successResponse.responseText);
-                var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: stockUnitMeasureId });
-                if (stockUnitConversions) {
-                    var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
-                        { intUnitMeasureId: unitMeasureId, intStockUnitMeasureId: stockUnitMeasureId });
-                    if (stockConversion) {
-                        var dblConversionToStock = stockConversion.dblConversionToStock;
-                        callback(dblConversionToStock);
-                    }
+                var result = jsonData && jsonData.message ? jsonData.message.data : 0.00; 
+                if (Ext.isNumeric(result) && callback) {
+                    callback(result);
                 }
                 iRely.Msg.close();
             },
@@ -1874,33 +1873,10 @@ Ext.define('Inventory.view.ItemViewController', {
             function (failureResponse) {
                  var jsonData = Ext.decode(failureResponse.responseText);
                  iRely.Msg.close();
-                 iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
             }
         );
-        // Ext.Ajax.request({
-        //     timeout: 120000,
-        //     url: '../Inventory/api/UnitMeasure/Search',
-        //     method: 'get',
-        //     success: function (response) {
-        //         var jsonData = Ext.decode(response.responseText);
-        //         var stockUnitConversions = _.findWhere(jsonData.data, { intUnitMeasureId: stockUnitMeasureId });
-        //         if (stockUnitConversions) {
-        //             var stockConversion = _.findWhere(stockUnitConversions.vyuICGetUOMConversions,
-        //                 { intUnitMeasureId: unitMeasureId, intStockUnitMeasureId: stockUnitMeasureId });
-        //             if (stockConversion) {
-        //                 var dblConversionToStock = stockConversion.dblConversionToStock;
-        //                 callback(dblConversionToStock);
-        //             }
-        //         }
-        //         iRely.Msg.close();
-        //     },
-        //     failure: function (response) {
-        //         var jsonData = Ext.decode(response.responseText);
-        //         iRely.Msg.close();
-        //         iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-        //     }
-        // });
-    },
+    },        
 
     beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
         if (obj.dataIndex === 'ysnStockUnit'){

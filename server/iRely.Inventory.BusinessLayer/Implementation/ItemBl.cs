@@ -1056,5 +1056,19 @@ namespace iRely.Inventory.BusinessLayer
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
+
+        /// <summary>
+        /// Get the Conversion of one UOM to another based on the Inventory UOM > Conversion values. 
+        /// </summary>
+        /// <param name="fromUnitMeasureId">Value of intUnitMeasureId. This should not be confused with intItemUOMId.</param>
+        /// <param name="toUnitMeaseureId">Value of intUnitMeasureId. This should not be confused with intItemUOMId.</param>
+        /// <returns>Conversion value in decimal.</returns>
+        public async Task<decimal> GetUnitConversion(int? fromUnitMeasureId, int? toUnitMeasureId)
+        {
+            var db = (InventoryEntities)_db.ContextManager;
+            decimal unitConversion = await db.GetUnitConversion(fromUnitMeasureId, toUnitMeasureId);
+            return unitConversion;
+        }
+
     }
 }
