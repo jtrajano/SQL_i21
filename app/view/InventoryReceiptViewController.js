@@ -6789,7 +6789,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 keyColumn: 'intContractHeaderId',
                 cellColumn: 'intOrderId',
                 source: [
-                    { type: 1, screen: 'Grain.view.ManuallyDistributeTickets', keyColumn: 'intTicketId', cellColumn: 'intSourceId' }, //Scale
+                    { type: 1, screen: 'Grain.view.ScaleStationSelection', keyColumn: 'intTicketId', cellColumn: 'intSourceId' }, //Scale
                     { type: 2, screen: 'Logistics.view.ShipmentSchedule', keyColumn: 'strLoadNumber', cellColumn: 'strSourceNumber' }, //Inbound Shipment
                     { type: 3, screen: 'Transport.view.Transport', keyColumn: 'intTransportId', cellColumn: 'intSourceId' }, //Transport
                     { type: 4, screen: 'Grain.view.Storage', keyColumn: 'intCustomerStorageId', cellColumn: 'intSourceId' }, //Settle Storage
@@ -6822,16 +6822,32 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         if(order) {
-            iRely.Functions.openScreen(order.screen, { 
-                action: 'view', 
-                filters: [ 
-                    { 
-                        column: order.keyColumn,
-                        value: record.get(order.cellColumn), 
-                        condition: 'eq' 
+            if(order.screen === 'Grain.view.ScaleStationSelection') {
+                ScaleTicketStore = Ext.create('Grain.store.ScaleTicket');
+                var filter = [{ column: 'intTicketId', value: record.get(order.cellColumn), condition: 'eq', conjunction:'or'}];
+                ScaleTicketStore.setRemoteFilter(true);
+                ScaleTicketStore.clearFilter();
+                ScaleTicketStore.addFilter(filter,false);
+                ScaleTicketStore.load({
+                    callback: function(records, operation, success) {
+                        iRely.Functions.openScreen('Grain.view.ScaleStationSelection', {action: 'edit',filters:[{column: "intTicketId",
+                            value: record.get('intTicketId')}],data:records});
                     }
-                ]
-            });
+                });
+            } else {
+                var params = {
+                    action: 'view',
+                    filters: [
+                        {
+                            column: order.keyColumn,
+                            value: record.get(order.cellColumn),
+                            condition: 'eq'
+                        }
+                    ]
+                };
+                    
+                iRely.Functions.openScreen(order.screen, params);
+            }
         }
     },
 
