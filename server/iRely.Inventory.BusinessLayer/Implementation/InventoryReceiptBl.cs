@@ -323,58 +323,20 @@ namespace iRely.Inventory.BusinessLayer
         public SaveResult ProcessBill(int receiptId, out int? newBill, out string newBills)
         {
             SaveResult saveResult = new SaveResult();
-            int? newBillId = null;
-            string newBillIds = string.Empty;
-            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            newBill = null;
+            newBills = String.Empty;
+            try
             {
-                var connection = _db.ContextManager.Database.Connection;
-                try
-                {
-                    var idParameter = new SqlParameter("intReceiptId", receiptId);
-                    var userId = new SqlParameter("@intUserId", iRely.Common.Security.GetEntityId());
-                    var outParam = new SqlParameter("@intBillId", newBillId);
-                    outParam.Direction = System.Data.ParameterDirection.Output;
-                    outParam.DbType = System.Data.DbType.Int32;
-                    outParam.SqlDbType = System.Data.SqlDbType.Int;
-
-                    var outParam2 = new SqlParameter("@strBillIds", newBillIds);
-                    outParam2.Direction = ParameterDirection.Output;
-                    outParam2.DbType = DbType.String;
-                    outParam2.Size = -1;
-                    outParam2.SqlDbType = SqlDbType.NVarChar;
-
-                    var prefix = new SqlParameter("@strPrefix", "^|");
-                    var suffix = new SqlParameter("@strSuffix", "|");
-
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspICProcessToBill @intReceiptId, @intUserId, @intBillId OUTPUT, @strBillIds OUTPUT, @strPrefix, @strSuffix", idParameter, userId, outParam, outParam2, prefix, suffix);
-                    newBillId = (int)outParam.Value;
-                    var ids = outParam2.Value.ToString();
-                    if(ids.Length > 0)
-                    {
-                        ids = ids.Substring(1, ids.Length - 2);
-                    }
-                    newBillIds = ids;
-                    saveResult = _db.Save(false);
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    if (ex.Message.Contains("Please setup default AP Account"))
-                    {
-                        ex = new Exception("Please setup default AP Account.", ex.InnerException);
-                    }
-                    else if (ex.Message.Contains("All of the item in the receipt was fully billed"))
-                    {
-                        ex = new Exception("All of the item in the receipt was fully billed.", ex.InnerException);
-                    }
-
-                    saveResult.BaseException = ex;
-                    saveResult.Exception = new ServerException(ex);
-                    saveResult.HasError = true;
-                }
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                db.ProcessBill(receiptId, out newBill, out newBills);
+                saveResult.HasError = false; 
             }
-            newBill = newBillId;
-            newBills = newBillIds;
+            catch (Exception ex)
+            {
+                saveResult.BaseException = ex;
+                saveResult.HasError = true;
+                saveResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
             return saveResult;
         }
 
