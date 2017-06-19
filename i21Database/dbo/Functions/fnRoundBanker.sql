@@ -26,6 +26,6 @@ BEGIN
 			SET @RoundedAmt = ROUND(@RoundedAmt,@Decimal, 0 )
 	END
 	
-	RETURN (@RoundedAmt + @WholeAmt)
+	RETURN ISNULL((@RoundedAmt + @WholeAmt), 0.000000)
 
 END

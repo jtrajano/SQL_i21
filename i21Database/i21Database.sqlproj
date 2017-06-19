@@ -5279,6 +5279,10 @@
     <Build Include="dbo\Stored Procedures\uspICGetUnitConversion.sql" />
     <Build Include="dbo\Functions\fnAPCalculateVoucherUnits.sql" />
     <Build Include="dbo\Functions\fnAPCalculateVoucherDetailUnits.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceAmountMultiplier.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddToInvoicesToPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLogDetail.sql" />
+    <Build Include="dbo\User Defined Types\PaymentIntegrationLogStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
