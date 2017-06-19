@@ -1412,19 +1412,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     fetchSetDefaultLocation: function(current, intDefaultLocation) {
         if(intDefaultLocation && current) {
             ic.utils.ajax({
-                url: '../entitymanagement/api/vendorentity/search',
+                url: '../entitymanagement/api/location/search',
                 params: {
                     filter: iRely.Functions.encodeFilters([{ column: 'intEntityId', value: current.get('intEntityVendorId') }])
                 }
             })
             .map(function(data) { return JSON.parse(data.responseText).data; })
             .subscribe(function(data) {
-                var entity = _.first(data);
-                if(entity) {
-                    var location = _.findWhere(entity.tblEntityLocations, { intEntityLocationId: intDefaultLocation });
-                    if(location) {
-                        current.set('strShipFrom', location.strLocationName);
-                    }
+                var location = _.findWhere(data, { intEntityLocationId: intDefaultLocation });
+                if(location) {
+                    current.set('strShipFrom', location.strLocationName);
                 }
             }, function(error) {
                 console.log(error);
