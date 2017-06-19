@@ -85,8 +85,8 @@
       <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=17.2.6373.32193, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\iRely.Common.17.2.6373.32193\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=17.2.6375.33144, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\iRely.Common.17.2.6375.33144\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">

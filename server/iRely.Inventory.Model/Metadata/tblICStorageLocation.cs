@@ -573,6 +573,7 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitPerFoot { get; set; }
         public decimal? dblResidualUnit { get; set; }
         public int? intItemId { get; set; }
+        public string strInternalCode { get; set; }
         public string strItemNo { get; set; }
         public string strBatchSizeUOM { get; set; }
         public tblICStorageLocation tblICStorageLocation { get; set; }

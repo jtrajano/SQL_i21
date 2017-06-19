@@ -20,7 +20,6 @@ namespace iRely.Inventory.Model
         {
             if(prod) return Security.GetCompanyName();
             return ConfigurationManager.ConnectionStrings["Development"].ConnectionString;
-            ;
         }
 
         public InventoryEntities()

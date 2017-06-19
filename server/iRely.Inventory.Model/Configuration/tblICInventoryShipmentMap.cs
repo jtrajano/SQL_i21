@@ -388,6 +388,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.strStorageTypeDescription).HasColumnName("strStorageTypeDescription");
             this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.strDockDoor).HasColumnName("strDockDoor");
         }
     }
 
