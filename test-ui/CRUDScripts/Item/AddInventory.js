@@ -10,8 +10,8 @@ StartTest (function (t) {
         .clickMenuScreen('Users','Screen')
         .waitUntilLoaded()
         .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
-        .waitUntilLoaded('ementity')
-        .waitUntilLoaded()
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
         .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
         .clickTab('User')
         .waitUntilLoaded()
@@ -87,7 +87,7 @@ StartTest (function (t) {
         /*====================================== Add Storage Location for Indianapolis======================================*/
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
+        .clickMenuScreen('Storage Units','Screen')
         .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
         .waitUntilLoaded()
         .continueIf({
@@ -98,7 +98,7 @@ StartTest (function (t) {
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
                     .displayText('===== Scenario 1: Add New Storage Location. =====')
-                    .clickMenuScreen('Storage Locations','Screen')
+                    .clickMenuScreen('Storage Units','Screen')
                     .clickButton('New')
                     .waitUntilLoaded('icstorageunit')
                     .enterData('Text Field','Name','Indy Storage')
@@ -205,8 +205,8 @@ StartTest (function (t) {
                             , 'CRUD - Category'
                             , 'CRUD - Commodity'
                             , 2
-                            , 'LB'
-                            , 'LB'
+                            , 'Pounds'
+                            , 'Pounds'
                             , 10
                             , 10
                             , 40
@@ -243,8 +243,8 @@ StartTest (function (t) {
                             , 'CRUD - Category'
                             , 'CRUD - Commodity'
                             , 1
-                            , 'LB'
-                            , 'LB'
+                            , 'Pounds'
+                            , 'Pounds'
                             , 10
                             , 10
                             , 40
@@ -282,8 +282,8 @@ StartTest (function (t) {
                             , 'CRUD - Category'
                             , 'CRUD - Commodity'
                             , 4
-                            , 'LB'
-                            , 'LB'
+                            , 'Pounds'
+                            , 'Pounds'
                             , 10
                             , 10
                             , 40
@@ -347,8 +347,8 @@ StartTest (function (t) {
                     .waitUntilLoaded('')
                     .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
                     .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-                    .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-                    .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
+                    .selectComboBoxRowValue('IssueUom', 'Pounds', 'IssueUom',0)
+                    .selectComboBoxRowValue('ReceiveUom', 'Pounds', 'ReceiveUom',0)
                     .selectComboBoxRowNumber('NegativeInventory',1,0)
                     .clickButton('Save')
                     .clickButton('Close')
@@ -358,8 +358,8 @@ StartTest (function (t) {
                     .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
                     .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
                     .selectComboBoxRowValue('StorageLocation', 'Indy Storage', 'StorageLocation',0)
-                    .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-                    .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
+                    .selectComboBoxRowValue('IssueUom', 'Pounds', 'IssueUom',0)
+                    .selectComboBoxRowValue('ReceiveUom', 'Pounds', 'ReceiveUom',0)
                     .selectComboBoxRowNumber('NegativeInventory',1,0)
                     .clickButton('Save')
                     .clickButton('Close')
@@ -395,9 +395,9 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .waitUntilLoaded('')
         .enterData('Text Field','Description','Test Lotted Item Serial - Updated')
-        .selectGridComboBoxRowValue('UnitOfMeasure',5,'strUnitMeasure','40 lb bag','strUnitMeasure')
+        .selectGridComboBoxRowValue('UnitOfMeasure',5,'strUnitMeasure','60 Kg Bags','strUnitMeasure')
         .waitTillLoaded('')
-        .verifyGridData('UnitOfMeasure', 5, 'colDetailUnitQty', '40')
+        .verifyGridData('UnitOfMeasure', 5, 'colDetailUnitQty', '60')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
         .waitTillLoaded('')
@@ -409,8 +409,8 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .waitUntilLoaded('')
         .verifyData('Text Field','Description', 'Test Lotted Item Serial - Updated')
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitMeasure', '40 lb bag')
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '40')
+        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitMeasure', '60 Kg Bags')
+        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '60')
         .addResult('Successfully Updated',2000)
         .clickButton('Close')
         .displayText('===== Update an Item Done=====')
