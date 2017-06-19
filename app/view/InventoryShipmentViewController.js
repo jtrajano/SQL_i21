@@ -2770,6 +2770,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         var newCost = Ext.create('Inventory.model.ShipmentCharge', {
                                                             intInventoryReceiptId: currentVM.get('intInventoryShipmentId'),
                                                             intContractId: order.get('intOrderId'),
+                                                            intContractDetailId: otherCharge.intContractDetailId,//order.get('intOrderId'),
                                                             intChargeId: otherCharge.intItemId,
                                                             ysnInventoryCost: false,
                                                             strCostMethod: otherCharge.strCostMethod,
