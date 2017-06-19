@@ -1,6 +1,7 @@
 StartTest (function (t) {
     var commonICST = Ext.create('Inventory.CommonICSmokeTest');
     var commonIC = Ext.create('Inventory.CommonIC');
+    var record = Math.floor((Math.random() * 1000000) + 1);
     new iRely.FunctionalTest().start(t)
 
 
@@ -554,9 +555,9 @@ StartTest (function (t) {
         //endregion
 
 
-        /*====================================== Create Direct IR for Lotted Item with other charges ======================================*/
+        /*====================================== Create Direct IR for Lotted Item with other charges process to voucher ======================================*/
         //region
-        .displayText('===== Scenario 5: Direct IR for Lotted Item with other charges  =====')
+        .displayText('===== Scenario 5: Direct IR for Lotted Item with other charges and process voucher  =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Receipts','Screen')
         .clickButton('New')
@@ -619,9 +620,47 @@ StartTest (function (t) {
         .clickTab('FreightInvoice')
         .waitUntilLoaded('')
         .verifyGridData('Charges', 1, 'colChargeAmount', '100')
+        .clickButton('Voucher')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Successfully Vouchered',2000)
+        .verifyMessageBox('iRely i21','Voucher successfully processed. Do you want to view it?','yesno','warning')
+        .clickMessageBoxButton('yes')
+        .addResult('Opening Voucher',2000)
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .verifyData('Combo Box','TransactionType','Voucher')
+        .verifyData('Combo Box','Vendor','The Manchester Company, Inc.')
+        .verifyData('Combo Box','Location','0001 - Fort Wayne')
+        .verifyGridData('VoucherDetails', 1, 'colItemNo', 'Smoke - LTI - 01')
+        .verifyGridData('VoucherDetails', 1, 'colUOM', 'Pounds')
+        .verifyGridData('VoucherDetails', 1, 'colQtyOrdered', '100')
+        .verifyGridData('VoucherDetails', 1, 'colCost', '10')
+        .verifyGridData('VoucherDetails', 1, 'colCostUOM', 'Pounds')
+        .verifyGridData('VoucherDetails', 1, 'colGrossUOM', 'Pounds')
+        .verifyGridData('VoucherDetails', 1, 'colNetWeight', '100')
+        .verifyGridData('VoucherDetails', 1, 'colTotal', '1000')
+
+        .verifyGridData('VoucherDetails', 2, 'colItemNo', 'Smoke - Other Charge Item - 01')
+        .verifyGridData('VoucherDetails', 2, 'colQtyOrdered', '1')
+        .verifyGridData('VoucherDetails', 2, 'colCost', '100')
+        .verifyGridData('VoucherDetails', 2, 'colTotal', '100')
+        .enterData('Text Field','InvoiceNo', record)
+        .clickButton('PostPreview')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Open Post Preview',2000)
+        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '100')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 3, 'colRecapCredit', '1100')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',2000)
         .clickButton('Close')
         .waitUntilLoaded('')
         .clickMenuFolder('Inventory','Folder')
+
         .displayText('=====  Scenario 1: Done: IR with Charges  =====')
         //endregion
 
