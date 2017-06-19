@@ -5277,6 +5277,8 @@
     <Build Include="dbo\Tables\tblARPaymentIntegrationLog.sql" />
     <Build Include="dbo\Tables\tblARPaymentIntegrationLogDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetUnitConversion.sql" />
+    <Build Include="dbo\Functions\fnAPCalculateVoucherUnits.sql" />
+    <Build Include="dbo\Functions\fnAPCalculateVoucherDetailUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
