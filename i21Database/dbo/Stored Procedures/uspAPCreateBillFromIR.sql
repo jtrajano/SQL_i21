@@ -720,7 +720,7 @@ BEGIN
 				[intForexRateTypeId]		=   A.intForexRateTypeId,
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 				[intTaxGroupId]				=	NULL,
-				[intAccountId]				=	A.intAccountId,
+				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),
 				[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 														ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
 												END,
@@ -914,7 +914,7 @@ BEGIN
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
 						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 						[intTaxGroupId]				=	NULL,
-						[intAccountId]				=	A.intAccountId,
+						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),
 						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
 						[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
