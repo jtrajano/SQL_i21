@@ -1,7 +1,7 @@
 ﻿
 CREATE VIEW [dbo].[vyuCMACHFromCustomer]
 AS
-SELECT        
+SELECT DISTINCT       
 BT.intBankAccountId, 
 Unde.intUndepositedFundId AS intTransactionId,
 BT.intTransactionId AS intBDEPTransactionId, 
