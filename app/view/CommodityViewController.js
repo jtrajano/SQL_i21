@@ -339,52 +339,59 @@ Ext.define('Inventory.view.CommodityViewController', {
         }
     },
 
-    onUOMSelect: function(combo, records, eOpts) {
+    onUOMSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
         var grid = combo.up('grid');
-        var win = combo.up('window');
+        var win = grid.up('window');
         var plugin = grid.getPlugin('cepUOM');
+        var currentItem = win.viewModel.data.current;
         var current = plugin.getActiveRecord();
-        var uomConversion = win.viewModel.storeInfo.uomConversion;
+        var me = this;
 
-        if (combo.column.itemId === 'colUOMCode')
-        {
+        if (combo.column.itemId === 'colUOMCode') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
             current.set('tblICUnitMeasure', records[0]);
 
-            var uoms = grid.store.data.items;
-            var exists = Ext.Array.findBy(uoms, function (row) {
-                if (row.get('ysnStockUnit') === true) {
-                    return true;
-                }
-            });
-            if (exists) {
-                if (uomConversion) {
-                    var index = uomConversion.data.findIndexBy(function (row) {
-                        if (row.get('intUnitMeasureId') === exists.get('intUnitMeasureId')) {
-                            return true;
-                        }
-                    });
-                    if (index >= 0) {
-                        var stockUOM = uomConversion.getAt(index);
-                        var conversions = stockUOM.data.vyuICGetUOMConversions;
-                        if (conversions) {
-                            var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                                if (row.intUnitMeasureId === current.get('intUnitMeasureId')) {
-                                    return true;
-                                }
-                            });
-                            if (selectedUOM) {
-                                current.set('dblUnitQty', selectedUOM.dblConversionToStock);
-                            }
-                        }
-                    }
-                }
+            var commodityUOMs = grid.store;
+            var stockUnit = commodityUOMs.findRecord('ysnStockUnit', true);
+            if (stockUnit) {
+                var unitMeasureId = stockUnit.get('intUnitMeasureId');
+                me.getConversionValue(current.get('intUnitMeasureId'), unitMeasureId, function(value) {
+                    current.set('dblUnitQty', value);
+                });
             }
         }
-    },
+    },    
+
+    getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
+        iRely.Msg.showWait('Converting units...');
+        ic.utils.ajax({
+            url: '../Inventory/api/Item/GetUnitConversion',
+            method: 'Post',
+            params: {
+                intFromUnitMeasureId: unitMeasureId,
+                intToUnitMeasureId: stockUnitMeasureId
+            }
+        })
+        .subscribe(
+            function (successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                var result = jsonData && jsonData.message ? jsonData.message.data : 0.00; 
+                if (Ext.isNumeric(result) && callback) {
+                    callback(result);
+                }
+                iRely.Msg.close();
+            },
+
+            function (failureResponse) {
+                 var jsonData = Ext.decode(failureResponse.responseText);
+                 iRely.Msg.close();
+                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
+            }
+        );
+    },      
 
     onAccountSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
@@ -411,43 +418,27 @@ Ext.define('Inventory.view.CommodityViewController', {
     },
 
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
+        var me = this;
         var grid = obj.up('grid');
         var win = obj.up('window');
         var current = grid.view.getRecord(rowIndex);
         var uomConversion = win.viewModel.storeInfo.uomConversion;
         var uoms = grid.store.data.items;
-
+        var newStockUOMId = current.get('intUnitMeasureId');
 
         if (obj.dataIndex === 'ysnStockUnit'){
             if (checked === true){
                 if (uoms) {
-                    uoms.forEach(function(uom){
+                    uoms.forEach(function(uom){                        
                         if (uom === current){
                             current.set('dblUnitQty', 1);
                         }
-                        if (uom !== current){
+                        var fromUnitMeasureId = uom.get('intUnitMeasureId');
+                        if (uom !== current && fromUnitMeasureId && newStockUOMId){
                             uom.set('ysnStockUnit', false);
-                            if (uomConversion) {
-                                var index = uomConversion.data.findIndexBy(function (row) {
-                                    if (row.get('intUnitMeasureId') === current.get('intUnitMeasureId')) {
-                                        return true;
-                                    }
-                                });
-                                if (index >= 0) {
-                                    var stockUOM = uomConversion.getAt(index);
-                                    var conversions = stockUOM.data.vyuICGetUOMConversions;
-                                    if (conversions) {
-                                        var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                                            if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
-                                                return true;
-                                            }
-                                        });
-                                        if (selectedUOM) {
-                                            uom.set('dblUnitQty', selectedUOM.dblConversionToStock);
-                                        }
-                                    }
-                                }
-                            }
+                            me.getConversionValue(fromUnitMeasureId, newStockUOMId, function(value) {
+                                uom.set('dblUnitQty', value);
+                            });                            
                         }
                     });
                 }
