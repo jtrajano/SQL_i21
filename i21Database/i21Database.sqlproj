@@ -5281,6 +5281,8 @@
 	<None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategoryMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetUnitConversion.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTaskO1.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductionReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

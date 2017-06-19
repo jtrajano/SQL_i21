@@ -30,6 +30,8 @@ BEGIN TRY
 		,@intNewLotId INT
 		,@dblAdjustByQuantity NUMERIC(16, 8)
 		,@dblLotReservedQty NUMERIC(16, 8)
+		,@ysnGenerateNewParentLotOnChangeItem BIT
+		,@intParentLotId INT
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -39,8 +41,15 @@ BEGIN TRY
 		,@intItemUOMId = intItemUOMId
 		,@dblAdjustByQuantity = - dblQty
 		,@intAdjustItemUOMId = intItemUOMId
+		,@intParentLotId = intParentLotId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	SELECT @ysnGenerateNewParentLotOnChangeItem = ysnGenerateNewParentLotOnChangeItem
+	FROM tblMFCompanyPreference
+
+	IF @ysnGenerateNewParentLotOnChangeItem IS NULL
+		SELECT @ysnGenerateNewParentLotOnChangeItem = 1
 
 	SELECT @dblLotReservedQty = dblQty
 	FROM tblICStockReservation
@@ -56,22 +65,32 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @strFromItemCategory = C.strCategoryCode,
-			@intFromItemCategory  = C.intCategoryId
+	SELECT @strFromItemCategory = C.strCategoryCode
+		,@intFromItemCategory = C.intCategoryId
 	FROM dbo.tblICItem I
 	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
 	WHERE I.intItemId = @intItemId
 
-	SELECT @strToItemCategory = C.strCategoryCode,
-			@intToItemCategory  = C.intCategoryId
+	SELECT @strToItemCategory = C.strCategoryCode
+		,@intToItemCategory = C.intCategoryId
 	FROM dbo.tblICItem I
 	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
 	WHERE I.intItemId = @intNewItemId
 
-	IF NOT EXISTS(SELECT 1 FROM tblMFItemChangeMap WHERE intFromItemCategoryId = @intFromItemCategory AND intToItemCategoryId = @intToItemCategory)
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblMFItemChangeMap
+			WHERE intFromItemCategoryId = @intFromItemCategory
+				AND intToItemCategoryId = @intToItemCategory
+			)
 	BEGIN
-		SET @strErrMsg = 'Item change not allowed from category ' + @strFromItemCategory + ' to ' + @strToItemCategory +'.'
-		RAISERROR (@strErrMsg,16,1)
+		SET @strErrMsg = 'Item change not allowed from category ' + @strFromItemCategory + ' to ' + @strToItemCategory + '.'
+
+		RAISERROR (
+				@strErrMsg
+				,16
+				,1
+				)
 	END
 
 	SELECT @intUnitMeasureId = intUnitMeasureId
@@ -145,6 +164,13 @@ BEGIN TRY
 		,@strReason = NULL
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+	IF @ysnGenerateNewParentLotOnChangeItem = 0
+	BEGIN
+		UPDATE tblICLot
+		SET intParentLotId = @intParentLotId
+		WHERE intLotId = @intNewLotId
+	END
 
 	SELECT @strNewLotNumber AS strNewLotNumber
 END TRY

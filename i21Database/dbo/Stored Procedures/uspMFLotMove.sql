@@ -41,6 +41,7 @@ BEGIN TRY
 		,@ysnAllowMultipleLots INT
 		,@ysnAllowMultipleItems INT
 		,@intDestinationLotStatusId INT
+		,@intCategoryId INT
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -67,6 +68,7 @@ BEGIN TRY
 	WHERE intStorageLocationId = @intStorageLocationId
 
 	SELECT @strItemNumber = strItemNo
+		,@intCategoryId = intCategoryId
 	FROM tblICItem
 	WHERE intItemId = @intItemId
 
@@ -96,14 +98,14 @@ BEGIN TRY
 				END
 			)
 
-	IF (
-			CASE 
-				WHEN @intItemUOMId = @intMoveItemUOMId
-					AND @intWeightUOMId IS NOT NULL
-					THEN @dblMoveQty * @dblWeightPerQty
-				ELSE @dblMoveQty
-				END
-			) > @dblLotAvailableQty
+	IF Convert(DECIMAL(24, 3), (
+				CASE 
+					WHEN @intItemUOMId = @intMoveItemUOMId
+						AND @intWeightUOMId IS NOT NULL
+						THEN @dblMoveQty * @dblWeightPerQty
+					ELSE @dblMoveQty
+					END
+				)) > Convert(DECIMAL(24, 3), @dblLotAvailableQty)
 	BEGIN
 		SET @ErrMsg = 'Move qty ' + LTRIM(CONVERT(NUMERIC(38, 4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item ''' + @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 
@@ -271,6 +273,27 @@ BEGIN TRY
 				)
 	END
 
+	IF EXISTS (
+			SELECT *
+			FROM tblICStorageLocationCategory
+			WHERE intStorageLocationId = @intNewStorageLocationId
+			)
+	BEGIN
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblICStorageLocationCategory
+				WHERE intStorageLocationId = @intNewStorageLocationId
+					AND intCategoryId = @intCategoryId
+				)
+		BEGIN
+			RAISERROR (
+					'The selected item is not allowed in the destination location.'
+					,11
+					,1
+					)
+		END
+	END
+
 	BEGIN TRANSACTION
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
@@ -311,7 +334,7 @@ BEGIN TRY
 		,@strNote = NULL
 		,@strReason = NULL
 		,@intLocationId = @intLocationId
-		,@intInventoryAdjustmentId=@intInventoryAdjustmentId
+		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
 	IF EXISTS (
 			SELECT *
