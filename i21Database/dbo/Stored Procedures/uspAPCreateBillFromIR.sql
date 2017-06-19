@@ -102,7 +102,7 @@ SET @totalChargesCount = (SELECT COUNT(*) FROM vyuICChargesForBilling
 							WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds))
 							--AND ISNULL(dblAmountBilled,0) < dblAmount)
 
-SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId);
+SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId);
 
 --Get the company location of the user to get the default ap account else get from preference
 SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @userLocation)
@@ -468,8 +468,8 @@ BEGIN
 			(
 				SELECT 
 					C.intTermsId
-				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
-				WHERE B.intEntityVendorId = @vendorId
+				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId AND C.ysnDefaultLocation = 1
+				WHERE B.intEntityId = @vendorId
 			) Terms
 			WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
@@ -626,7 +626,7 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 		LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
-		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityVendorId = @vendorId
+		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityId = @vendorId
 		LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
 		OUTER APPLY (
 			SELECT 
@@ -720,7 +720,7 @@ BEGIN
 				[intForexRateTypeId]		=   A.intForexRateTypeId,
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 				[intTaxGroupId]				=	NULL,
-				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),
+				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId,D.intItemLocationId, 'AP Clearing'),
 				[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 														ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
 												END,
@@ -745,8 +745,8 @@ BEGIN
 				[int1099Form]				=	0,
 				[int1099Category]			=	0       
 			FROM [vyuICChargesForBilling] A
-			INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
-				AND A.intInventoryReceiptId = B.intInventoryReceiptId
+			INNER JOIN tblICItemLocation D
+				ON A.intLocationId = D.intLocationId AND A.intItemId = D.intItemId
 			LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 													--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
@@ -852,9 +852,9 @@ BEGIN
 						SELECT 
 								C.intTermsId
 						FROM	tblAPVendor B INNER JOIN tblEMEntityLocation C 
-									ON B.intEntityVendorId = C.intEntityId 
+									ON B.intEntityId = C.intEntityId 
 									AND C.ysnDefaultLocation = 1
-						WHERE	B.intEntityVendorId = @intThirdPartyVendorId
+						WHERE	B.intEntityId = @intThirdPartyVendorId
 					) Terms	
 					WHERE	A.intInventoryReceiptId = @receiptId 
 							AND A.ysnPosted = 1
@@ -914,7 +914,7 @@ BEGIN
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
 						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 						[intTaxGroupId]				=	NULL,
-						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),
+						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, D.intItemLocationId, 'AP Clearing'),
 						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
 						[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
@@ -940,7 +940,8 @@ BEGIN
 						[int1099Form]				=	0,
 						[int1099Category]			=	0       
 					FROM [vyuICChargesForBilling] A
-					INNER JOIN tblICInventoryReceipt B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+					INNER JOIN tblICItemLocation D
+						ON A.intLocationId = D.intLocationId AND A.intItemId = D.intItemId
 					LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 					LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 					OUTER APPLY(
