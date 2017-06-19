@@ -908,7 +908,6 @@ BEGIN
 						[dblQtyReceived]			=	A.dblQuantityToBill,
 						[dblTax]					=	(CASE WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
 															 WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 1 THEN A.dblTax --IN THIS CASE IF IT TE TAX IS NEGATIVE, IT SHOULD RETAIN AS NEGATIVE
-															 WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
 															ELSE ISNULL(A.dblTax,0) END),
 						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
