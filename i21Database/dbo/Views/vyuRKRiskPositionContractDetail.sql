@@ -1,4 +1,4 @@
-﻿ALTER VIEW vyuRKRiskPositionContractDetail
+﻿CREATE VIEW vyuRKRiskPositionContractDetail
 
 as
 
