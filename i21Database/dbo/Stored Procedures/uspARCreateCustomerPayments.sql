@@ -1,1306 +1,771 @@
-﻿--CREATE PROCEDURE [dbo].[uspARCreateCustomerPayments]
---	 @PaymentEntries	PaymentIntegrationStagingTable	READONLY
---	,@IntegrationLogId	INT					= NULL
---	,@GroupingOption	INT					= 0
---	,@UserId			INT
---	,@RaiseError		BIT					= 0
---	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
---AS
+﻿CREATE PROCEDURE [dbo].[uspARCreateCustomerPayments]
+	 @PaymentEntries	PaymentIntegrationStagingTable	READONLY
+	,@IntegrationLogId	INT					= NULL
+	,@GroupingOption	INT					= 0
+	,@UserId			INT
+	,@RaiseError		BIT					= 0
+	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
+AS
 
---BEGIN
+BEGIN
 
---SET QUOTED_IDENTIFIER OFF
---SET ANSI_NULLS ON
---SET NOCOUNT ON
---SET XACT_ABORT ON
---SET ANSI_WARNINGS OFF
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
---DECLARE @ZeroDecimal NUMERIC(18, 6) = 0.000000
---		,@DateOnly DATETIME = CAST(GETDATE() AS DATE)
+DECLARE @ZeroDecimal		NUMERIC(18, 6)	= 0.000000
+		,@DateNow			DATETIME		= CAST(GETDATE() AS DATE)
+		,@DefaultCurrency	INT				= NULL
 
---DECLARE @PaymentsToGenerate AS PaymentIntegrationStagingTable
---DELETE FROM @PaymentsToGenerate
---INSERT INTO @PaymentsToGenerate (
---	 [intId]
---	,[strSourceTransaction]
---	,[intSourceId]
---	,[strSourceId]
---	,[intPaymentId]
---	,[intEntityCustomerId]
---	,[intLocationId]
---	,[intCurrencyId]
---	,[dtmDatePaid]
---	,[intPaymentMethodId]
---	,[strPaymentInfo]
---	,[strNotes]
---	,[intAccountId]
---	,[intBankAccountId]
---	,[intWriteOffAccountId]
---	,[strPaymentMethod]
---	,[dblAmountPaid]
---	,[strRecordNumber]
---	,[ysnApplytoBudget]
---	,[ysnApplyOnAccount]
---	,[ysnInvoicePrepayment]
---	,[ysnImportedFromOrigin]
---	,[ysnImportedAsPosted]
---	,[ysnAllowPrepayment]
---	,[ysnPost]
---	,[ysnRecap]
---	,[intEntityId]
---	,[intPaymentDetailId]
---	,[intPaymentId]
---	,[intBillId]
---	,[strTransactionNumber]
---	,[intTermId]
---	,[ysnApplyTermDiscount]
---	,[dblDiscount]
---	,[dblDiscountAvailable]
---	,[dblInterest]
---	,[dblPayment]
---	,[strInvoiceReportNumber]
---	,[intCurrencyExchangeRateTypeId]
---	,[intCurrencyExchangeRateId]
---	,[dblCurrencyExchangeRate]
---	,[ysnAllowOverpayment]
---)
---SELECT
---	 [intId]							= [intId]
---	,[strSourceTransaction]				= [strSourceTransaction]
---	,[intSourceId]						= [intSourceId]
---	,[strSourceId]						= [strSourceId]
---	,[intPaymentId]						= [intPaymentId]
---	,[intEntityCustomerId]				= [intEntityCustomerId]
---	,[intLocationId]					= [intLocationId]
---	,[intCurrencyId]					= [intCurrencyId]
---	,[dtmDatePaid]						= [dtmDatePaid]
---	,[intPaymentMethodId]				= [intPaymentMethodId]
---	,[strPaymentInfo]					= [strPaymentInfo]
---	,[strNotes]							= [strNotes]
---	,[intAccountId]						= [intAccountId]
---	,[intBankAccountId]					= [intBankAccountId]
---	,[intWriteOffAccountId]				= [intWriteOffAccountId]
---	,[strPaymentMethod]					= [strPaymentMethod]
---	,[dblAmountPaid]					= [dblAmountPaid]
---	,[strRecordNumber]					= [strRecordNumber]
---	,[ysnApplytoBudget]					= [ysnApplytoBudget]
---	,[ysnApplyOnAccount]				= [ysnApplyOnAccount]
---	,[ysnInvoicePrepayment]				= [ysnInvoicePrepayment]
---	,[ysnImportedFromOrigin]			= [ysnImportedFromOrigin]
---	,[ysnImportedAsPosted]				= [ysnImportedAsPosted]
---	,[ysnAllowPrepayment]				= [ysnAllowPrepayment]
---	,[ysnPost]							= [ysnPost]
---	,[ysnRecap]							= [ysnRecap]
---	,[intEntityId]						= [intEntityId]
---	,[intPaymentDetailId]				= [intPaymentDetailId]
---	,[intPaymentId]						= [intPaymentId]
---	,[intBillId]						= [intBillId]
---	,[strTransactionNumber]				= [strTransactionNumber]
---	,[intTermId]						= [intTermId]
---	,[ysnApplyTermDiscount]				= [ysnApplyTermDiscount]
---	,[dblDiscount]						= [dblDiscount]
---	,[dblDiscountAvailable]				= [dblDiscountAvailable]
---	,[dblInterest]						= [dblInterest]
---	,[dblPayment]						= [dblPayment]
---	,[strInvoiceReportNumber]			= [strInvoiceReportNumber]
---	,[intCurrencyExchangeRateTypeId]	= [intCurrencyExchangeRateTypeId]
---	,[intCurrencyExchangeRateId]		= [intCurrencyExchangeRateId]
---	,[dblCurrencyExchangeRate]			= [dblCurrencyExchangeRate]
---	,[ysnAllowOverpayment]				= [ysnAllowOverpayment]
---FROM
---	@PaymentEntries 
+SET @DefaultCurrency = ISNULL((SELECT TOP 1 SMCP.[intDefaultCurrencyId] FROM tblSMCompanyPreference SMCP INNER JOIN (SELECT [intCurrencyID] FROM tblSMCurrency) SMC ON SMCP.[intDefaultCurrencyId] = SMC.[intCurrencyID] WHERE SMCP.[intDefaultCurrencyId] IS NOT NULL),0)
 
 
---DECLARE @InvalidRecords AS TABLE (
---	 [intId]				INT
---	,[strMessage]			NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
---	,[strTransactionType]	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
---	,[strType]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
---	,[strSourceTransaction]	NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
---	,[intSourceId]			INT												NULL
---	,[strSourceId]			NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
---	,[intPaymentId]			INT												NULL
---)
-
---INSERT INTO @InvalidRecords(
---	 [intId]
---	,[strMessage]		
---	,[strTransactionType]
---	,[strType]
---	,[strSourceTransaction]
---	,[intSourceId]
---	,[strSourceId]
---	,[intPaymentId]
---)
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The company location Id provided does not exists!'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] = ITG.[intLocationId])
-
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The company location provided is not active!'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] IS NOT NULL AND SMCL.[intCompanyLocationId] = ITG.[intLocationId] AND SMCL.[ysnLocationActive] = 1)
-
---UNION ALL
-
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The customer Id provided does not exists!'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
-
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The customer provided is not active!'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
-
-
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The entity Id provided does not exists!'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	NOT EXISTS(SELECT NULL FROM tblEMEntity EME WITH (NOLOCK) WHERE EME.[intEntityId] = ITG.[intEntityId])
+DECLARE @PaymentsToGenerate AS PaymentIntegrationStagingTable
+DELETE FROM @PaymentsToGenerate
+INSERT INTO @PaymentsToGenerate (
+	 [intId]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intPaymentId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[dtmDatePaid]
+	,[intPaymentMethodId]
+	,[strPaymentMethod]
+	,[strPaymentInfo]
+	,[strNotes]
+	,[intAccountId]
+	,[intBankAccountId]
+	,[intWriteOffAccountId]
+	,[dblAmountPaid]
+	,[strPaymentOriginalId]
+	,[ysnUseOriginalIdAsPaymentNumber]
+	,[ysnApplytoBudget]
+	,[ysnApplyOnAccount]
+	,[ysnInvoicePrepayment]
+	,[ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]
+	,[ysnAllowPrepayment]
+	,[ysnPost]
+	,[ysnRecap]
+	,[intEntityId]
+	,[intPaymentDetailId]
+	,[intInvoiceId]
+	,[intBillId]
+	,[strTransactionNumber]
+	,[intTermId]
+	,[ysnApplyTermDiscount]
+	,[dblDiscount]
+	,[dblDiscountAvailable]
+	,[dblInterest]
+	,[dblPayment]
+	,[strInvoiceReportNumber]
+	,[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]
+	,[ysnAllowOverpayment]
+)
+SELECT
+	 [intId]								= [intId]
+	,[strSourceTransaction]					= [strSourceTransaction]
+	,[intSourceId]							= [intSourceId]
+	,[strSourceId]							= [strSourceId]
+	,[intPaymentId]							= [intPaymentId]
+	,[intEntityCustomerId]					= [intEntityCustomerId]
+	,[intCompanyLocationId]					= [intCompanyLocationId]
+	,[intCurrencyId]						= [intCurrencyId]
+	,[dtmDatePaid]							= [dtmDatePaid]
+	,[intPaymentMethodId]					= [intPaymentMethodId]
+	,[strPaymentMethod]						= [strPaymentMethod]
+	,[strPaymentInfo]						= [strPaymentInfo]
+	,[strNotes]								= [strNotes]
+	,[intAccountId]							= [intAccountId]
+	,[intBankAccountId]						= [intBankAccountId]
+	,[intWriteOffAccountId]					= [intWriteOffAccountId]
+	,[dblAmountPaid]						= [dblAmountPaid]
+	,[strPaymentOriginalId]					= [strPaymentOriginalId]
+	,[ysnUseOriginalIdAsPaymentNumber]		= [ysnUseOriginalIdAsPaymentNumber]
+	,[ysnApplytoBudget]						= [ysnApplytoBudget]
+	,[ysnApplyOnAccount]					= [ysnApplyOnAccount]
+	,[ysnInvoicePrepayment]					= [ysnInvoicePrepayment]
+	,[ysnImportedFromOrigin]				= [ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]					= [ysnImportedAsPosted]
+	,[ysnAllowPrepayment]					= [ysnAllowPrepayment]
+	,[ysnPost]								= [ysnPost]
+	,[ysnRecap]								= [ysnRecap]
+	,[intEntityId]							= [intEntityId]
+	,[intPaymentDetailId]					= [intPaymentDetailId]
+	,[intInvoiceId]							= [intInvoiceId]
+	,[intBillId]							= [intBillId]
+	,[strTransactionNumber]					= [strTransactionNumber]
+	,[intTermId]							= [intTermId]
+	,[ysnApplyTermDiscount]					= [ysnApplyTermDiscount]
+	,[dblDiscount]							= [dblDiscount]
+	,[dblDiscountAvailable]					= [dblDiscountAvailable]
+	,[dblInterest]							= [dblInterest]
+	,[dblPayment]							= [dblPayment]
+	,[strInvoiceReportNumber]				= [strInvoiceReportNumber]
+	,[intCurrencyExchangeRateTypeId]		= [intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]			= [intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= [dblCurrencyExchangeRate]
+	,[ysnAllowOverpayment]					= [ysnAllowOverpayment]
+FROM
+	@PaymentEntries 
 
 
+DECLARE @InvalidRecords AS TABLE (
+	 [intId]				INT
+	,[strMessage]			NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
+	,[strSourceTransaction]	NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
+	,[intSourceId]			INT												NULL
+	,[strSourceId]			NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
+	,[intPaymentId]			INT												NULL
+)
 
---DELETE FROM V
---FROM @PaymentsToGenerate V
---WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
+INSERT INTO @InvalidRecords(
+	 [intId]
+	,[strMessage]			
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intPaymentId]
+)
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The company location Id provided does not exists!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId])
 
+UNION ALL
 
---UPDATE
---	@PaymentsToGenerate
---SET
---	[intAccountId] = [dbo].[fnARGetInvoiceTypeAccount](strTransactionType, intCompanyLocationId)
---WHERE
---	ISNULL([intAccountId], 0) = 0
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The company location provided is not active!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] IS NOT NULL AND SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId] AND SMCL.[ysnLocationActive] = 1)
 
---UPDATE
---	@PaymentsToGenerate
---SET
---	[strDeliverPickup] = ISNULL((SELECT TOP 1 SMCL.strDeliverPickupDefault FROM tblSMCompanyLocation SMCL WHERE SMCL.intCompanyLocationId = [intCompanyLocationId]),'')
---WHERE
---	[strDeliverPickup] IS NULL 
---	OR LTRIM(RTRIM([strDeliverPickup])) = ''
+UNION ALL
 
---UPDATE
---	@PaymentsToGenerate
---SET
---	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, intDocumentMaintenanceId)
---WHERE
---	[strComments] IS NULL 
---	OR LTRIM(RTRIM([strComments])) = ''
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The customer Id provided does not exists!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
 
---UPDATE
---	@PaymentsToGenerate
---SET
---	[intEntityContactId] = [dbo].[fnARGetCustomerDefaultContact](intEntityCustomerId)
---WHERE
---	ISNULL([intEntityContactId], 0) = 0
+UNION ALL
 
---UPDATE
---	@PaymentsToGenerate
---SET
---	[intCurrencyId] = [dbo].[fnARGetCustomerDefaultCurrency](intEntityCustomerId)
---WHERE
---	ISNULL([intCurrencyId], 0) = 0
-
-
---INSERT INTO @InvalidRecords(
---	 [intId]
---	,[strMessage]		
---	,[strTransactionType]
---	,[strType]
---	,[strSourceTransaction]
---	,[intSourceId]
---	,[strSourceId]
---	,[intPaymentId]
---)
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'There is no setup for AR Account in the Company Configuration.'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	ITG.[intAccountId] IS NULL
---	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
-
-
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The account id provided is not a valid account of category "AR Account".'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	ITG.[intAccountId] IS NOT NULL
---	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
---	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'AR Account' AND GLAD.[intAccountId] =  ITG.[intAccountId])
-
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'There is no Undeposited Funds account setup under Company Location - ' + SMCL.[strLocationName]
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---INNER JOIN
---	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
---		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
---WHERE
---	ITG.[intAccountId] IS NULL
---	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The customer provided is not active!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
 
 
---UNION ALL
+UNION ALL
 
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The account id provided is not a valid account of category "Undeposited Funds".'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---INNER JOIN
---	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
---		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
---WHERE
---	ITG.[intAccountId] IS NOT NULL
---	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
---	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Undeposited Funds' AND GLAD.[intAccountId] =  ITG.[intAccountId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The entity Id provided does not exists!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblEMEntity EME WITH (NOLOCK) WHERE EME.[intEntityId] = ITG.[intEntityId])
 
---UNION ALL
+UNION ALL
 
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'There is no Customer Prepaid account setup under Company Location - ' + SMCL.[strLocationName]
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---INNER JOIN
---	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
---		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
---WHERE
---	ITG.[intAccountId] IS NULL
---	AND ITG.[strTransactionType] = 'Customer Prepayment'
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The payment method Id provided does not exists!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod SMPM WITH (NOLOCK) WHERE SMPM.[intPaymentMethodID] = ITG.[intPaymentMethodId] AND ISNULL(SMPM.[ysnActive], 0) = 1)
 
---UNION ALL
+UNION ALL
 
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The account id provided is not a valid account of category "Customer Prepayments".'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---INNER JOIN
---	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
---		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
---WHERE
---	ITG.[intAccountId] IS NOT NULL
---	AND ITG.[strTransactionType] = 'Customer Prepayment'
---	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Customer Prepayments' AND GLAD.[intAccountId] =  ITG.[intAccountId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The currency Id provided does not exists!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	ITG.[intCurrencyId] IS NOT NULL
+	AND NOT EXISTS (SELECT NULL FROM tblSMCurrency SMC WITH (NOLOCK) WHERE SMC.[intCurrencyID] = ITG.[intCurrencyId])
+	AND @DefaultCurrency IS NOT NULL
 
---UNION ALL
+UNION ALL
 
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'The currency Id provided does not exists!'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	ITG.[intCurrencyId] IS NOT NULL
---	AND NOT EXISTS (SELECT NULL FROM tblSMCurrency SMC WITH (NOLOCK) WHERE SMC.[intCurrencyID] = ITG.[intCurrencyId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'There is no Functional Currency setup in Company Configuration!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	ITG.[intCurrencyId] IS NULL
+	AND @DefaultCurrency IS NULL
 
---UNION ALL
+UNION ALL
 
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'There is no setup for default currency in the Company Configuration.'
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	ITG.[intCurrencyId] IS NULL
---	AND NOT EXISTS (SELECT NULL FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL)
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The payment method provided is not active!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod SMPM WITH (NOLOCK) WHERE SMPM.[intPaymentMethodID] = ITG.[intPaymentMethodId] AND ISNULL(SMPM.[ysnActive], 0) = 1)
 
---UNION ALL
+UNION ALL
 
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'Customer has no Term setup!' 
---	,[strTransactionType]	= ITG.[strTransactionType]
---	,[strType]				= ITG.[strType]
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE
---	ITG.[intTermId] IS NULL
---	AND NOT EXISTS (SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intTermsId] IS NOT NULL AND ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'This will create a prepayment which has not been allowed!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE	
+	ITG.[ysnAllowPrepayment] = 0
+	AND ITG.[intInvoiceId] IS NULL
+	AND ITG.[dblAmountPaid] > @ZeroDecimal
+
+
+UNION ALL
+
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'This will create a overpayment which has not been allowed!'
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+WHERE	
+	ITG.[ysnAllowOverpayment] = 0
+	AND ITG.[intInvoiceId] IS NOT NULL
+	AND ITG.[dblAmountPaid] > ([dblPayment] + [dblDiscount] - [dblInterest])
+
+
+DELETE FROM V
+FROM @PaymentsToGenerate V
+WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
+
+
+IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
+BEGIN
+	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM @InvalidRecords ORDER BY [intId])
+	RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END
+
+
+IF ISNULL(@RaiseError,0) = 0	
+	BEGIN TRANSACTION
+
+DECLARE  @AddDetailError NVARCHAR(MAX)
+		,@IntegrationLog PaymentIntegrationLogStagingTable
+
+INSERT INTO @IntegrationLog
+	([intIntegrationLogId]
+	,[dtmDate]
+	,[intEntityId]
+	,[intGroupingOption]
+	,[strMessage]
+	,[strBatchIdForNewPost]
+	,[intPostedNewCount]
+	,[strBatchIdForNewPostRecap]
+	,[intRecapNewCount]
+	,[strBatchIdForExistingPost]
+	,[intPostedExistingCount]
+	,[strBatchIdForExistingRecap]
+	,[intRecapPostExistingCount]
+	,[strBatchIdForExistingUnPost]
+	,[intUnPostedExistingCount]
+	,[strBatchIdForExistingUnPostRecap]
+	,[intRecapUnPostedExistingCount]
+	,[intIntegrationLogDetailId]
+	,[intPaymentId]
+	,[intPaymentDetailId]
+	,[intId]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[ysnPost]
+	,[ysnInsert]
+	,[ysnHeader]
+	,[ysnSuccess])
+SELECT
+	 [intIntegrationLogId]					= @IntegrationLogId
+	,[dtmDate]								= @DateNow
+	,[intEntityId]							= @UserId
+	,[intGroupingOption]					= @GroupingOption
+	,[strMessage]							= [strMessage]
+	,[strBatchIdForNewPost]					= ''
+	,[intPostedNewCount]					= 0
+	,[strBatchIdForNewPostRecap]			= ''
+	,[intRecapNewCount]						= 0
+	,[strBatchIdForExistingPost]			= ''
+	,[intPostedExistingCount]				= 0
+	,[strBatchIdForExistingRecap]			= ''
+	,[intRecapPostExistingCount]			= 0
+	,[strBatchIdForExistingUnPost]			= ''
+	,[intUnPostedExistingCount]				= 0
+	,[strBatchIdForExistingUnPostRecap]		= ''
+	,[intRecapUnPostedExistingCount]		= 0
+	,[intIntegrationLogDetailId]			= 0
+	,[intPaymentId]							= NULL
+	,[intInvoiceDetailId]					= NULL
+	,[intId]								= [intId]
+	,[strSourceTransaction]					= [strSourceTransaction]
+	,[intSourceId]							= [intSourceId]
+	,[strSourceId]							= [strSourceId]
+	,[ysnPost]								= NULL
+	,[ysnInsert]							= 1
+	,[ysnHeader]							= 1
+	,[ysnSuccess]							= 0
+FROM
+	@InvalidRecords
+
+BEGIN TRY
+MERGE INTO tblARPayment AS Target
+USING 
+	(
+	SELECT
+		 [intEntityCustomerId]		= ARC.[intEntityCustomerId]
+		,[intCurrencyId]			= ISNULL(ITG.[intCurrencyId], ISNULL(ARC.[intCurrencyId], @DefaultCurrency))	
+		,[dtmDatePaid]				= ISNULL(ITG.[dtmDatePaid], @DateNow)
+		,[intAccountId]				= ITG.[intAccountId]
+		,[intBankAccountId]			= ITG.[intBankAccountId]
+		,[intPaymentMethodId]		= ITG.[intPaymentMethodId]
+		,[intLocationId]			= ITG.[intCompanyLocationId]
+		,[dblAmountPaid]			= ITG.[dblAmountPaid]
+		,[dblBaseAmountPaid]		= ITG.[dblAmountPaid]
+		,[dblUnappliedAmount]		= ITG.[dblAmountPaid]
+		,[dblBaseUnappliedAmount]	= ITG.[dblAmountPaid]
+		,[dblOverpayment]			= @ZeroDecimal
+		,[dblBaseOverpayment]		= @ZeroDecimal
+		,[dblBalance]				= ARC.[dblARBalance]
+		,[strRecordNumber]			= CASE WHEN ISNULL(ITG.ysnUseOriginalIdAsPaymentNumber, 0) = 1 THEN ITG.strPaymentOriginalId ELSE NULL END
+		,[strPaymentInfo]			= ITG.[strPaymentInfo]
+		,[strNotes]					= ITG.[strNotes]
+		,[ysnApplytoBudget]			= ITG.[ysnApplytoBudget]
+		,[ysnApplyOnAccount]		= ITG.[ysnApplyOnAccount]
+		,[ysnInvoicePrepayment]		= ITG.[ysnInvoicePrepayment]
+		,[ysnImportedFromOrigin]	= ITG.[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]		= ITG.[ysnImportedAsPosted]
+		,[intEntityId]				= ITG.[intEntityId]
+		,[intWriteOffAccountId]		= ITG.[intWriteOffAccountId]
+		,[strPaymentMethod]			= ITG.[strPaymentMethod]
+		,[dblTotalAR]				= @ZeroDecimal
+		,[intConcurrencyId]			= 1
+		,[intId]					= ITG.[intId]
+		,[strSourceTransaction]		= ITG.[strSourceTransaction]
+		,[intSourceId]				= ITG.[intSourceId]
+		,[strSourceId]				= ITG.[strSourceId]
+		,[ysnPost]					= ITG.[ysnPost]
+		,[ysnRecap]					= ITG.[ysnRecap]
+		,[intPaymentId]				= ITG.[intPaymentId]
+		,[ysnPosted]				= ITG.[ysnImportedAsPosted]
+	FROM	
+		@PaymentsToGenerate ITG --WITH (NOLOCK)
+	INNER JOIN
+		(SELECT intId FROM @PaymentsToGenerate) ITG2  --WITH (NOLOCK)) ITG2
+			ON ITG.[intId] = ITG2.[intId]
+	INNER JOIN
+		(SELECT [intEntityCustomerId], [dblARBalance], [intCurrencyId] FROM tblARCustomer WITH (NOLOCK)) ARC
+			ON ITG.[intEntityCustomerId] = ARC.[intEntityCustomerId] 	
+	)
+AS Source
+ON Target.[intPaymentId] = Source.[intPaymentId]
+WHEN NOT MATCHED BY TARGET THEN
+INSERT(
+	 [intEntityCustomerId]
+	,[intCurrencyId]
+	,[dtmDatePaid]
+	,[intAccountId]
+	,[intBankAccountId]
+	,[intPaymentMethodId]
+	,[intLocationId]
+	,[dblAmountPaid]
+	,[dblBaseAmountPaid]
+	,[dblUnappliedAmount]
+	,[dblBaseUnappliedAmount]
+	,[dblOverpayment]
+	,[dblBaseOverpayment]
+	,[dblBalance]
+	,[strRecordNumber]
+	,[strPaymentInfo]
+	,[strNotes]
+	,[ysnApplytoBudget]
+	,[ysnApplyOnAccount]
+	,[ysnPosted]
+	,[ysnInvoicePrepayment]
+	,[ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]
+	,[intEntityId]
+	,[intWriteOffAccountId]
+	,[strPaymentMethod]
+	,[dblTotalAR]
+	,[intConcurrencyId]
+	)
+VALUES(
+	 [intEntityCustomerId]
+	,[intCurrencyId]
+	,[dtmDatePaid]
+	,[intAccountId]
+	,[intBankAccountId]
+	,[intPaymentMethodId]
+	,[intLocationId]
+	,[dblAmountPaid]
+	,[dblBaseAmountPaid]
+	,[dblUnappliedAmount]
+	,[dblBaseUnappliedAmount]
+	,[dblOverpayment]
+	,[dblBaseOverpayment]
+	,[dblBalance]
+	,[strRecordNumber]
+	,[strPaymentInfo]
+	,[strNotes]
+	,[ysnApplytoBudget]
+	,[ysnApplyOnAccount]
+	,[ysnPosted]
+	,[ysnInvoicePrepayment]
+	,[ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]
+	,[intEntityId]
+	,[intWriteOffAccountId]
+	,[strPaymentMethod]
+	,[dblTotalAR]
+	,[intConcurrencyId]
+)
+	OUTPUT  
+			@IntegrationLogId						--[intIntegrationLogId]
+			,@DateNow								--[dtmDate]
+			,INSERTED.[intEntityId]					--[intEntityId]
+			,@GroupingOption						--[intGroupingOption]
+			,'Payment was successfully created.'	--[strErrorMessage]
+			,''										--[strBatchIdForNewPost]
+			,0										--[intPostedNewCount]
+			,''										--[strBatchIdForNewPostRecap]
+			,0										--[intRecapNewCount]
+			,''										--[strBatchIdForExistingPost]
+			,0										--[intPostedExistingCount]
+			,''										--[strBatchIdForExistingRecap]
+			,0										--[intRecapPostExistingCount]
+			,''										--[strBatchIdForExistingUnPost]
+			,0										--[intUnPostedExistingCount]
+			,''										--[strBatchIdForExistingUnPostRecap]
+			,0										--[intRecapUnPostedExistingCount]
+			,NULL									--[intIntegrationLogDetailId]
+			,INSERTED.[intPaymentId]				--[[intPaymentId]]
+			,INSERTED.[intEntityCustomerId]			--[intEntityCustomerId]
+			,INSERTED.[intLocationId]				--[intCompanyLocationId]
+			,INSERTED.[intCurrencyId]				--[intCurrencyId]
+			,NULL									--[[intPaymentDetailId]]
+			,Source.[intId]							--[intId]
+			,Source.[strSourceTransaction]			--[strSourceTransaction]
+			,Source.[intSourceId]					--[intSourceId]
+			,Source.[strSourceId]					--[strSourceId]
+			,Source.[ysnPost]						--[ysnPost]
+			,1										--[ysnInsert]
+			,1										--[ysnHeader]
+			,1										--[ysnSuccess]
+			,Source.[ysnRecap]						--[ysnRecap]
+		INTO @IntegrationLog(
+			 [intIntegrationLogId]
+			,[dtmDate]
+			,[intEntityId]
+			,[intGroupingOption]
+			,[strMessage]
+			,[strBatchIdForNewPost]
+			,[intPostedNewCount]
+			,[strBatchIdForNewPostRecap]
+			,[intRecapNewCount]
+			,[strBatchIdForExistingPost]
+			,[intPostedExistingCount]
+			,[strBatchIdForExistingRecap]
+			,[intRecapPostExistingCount]
+			,[strBatchIdForExistingUnPost]
+			,[intUnPostedExistingCount]
+			,[strBatchIdForExistingUnPostRecap]
+			,[intRecapUnPostedExistingCount]
+			,[intIntegrationLogDetailId]
+			,[intPaymentId]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intCurrencyId]
+			,[intPaymentDetailId]
+			,[intId]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[ysnPost]
+			,[ysnInsert]
+			,[ysnHeader]
+			,[ysnSuccess]
+			,[ysnRecap]
+		);	
 	
---DELETE FROM V
---FROM @PaymentsToGenerate V
---WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
-
-
---IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
---BEGIN
---	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM @InvalidRecords ORDER BY [intId])
---	RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END
-
-
---IF ISNULL(@RaiseError,0) = 0	
---	BEGIN TRANSACTION
-
---DECLARE  @AddDetailError NVARCHAR(MAX)
---		,@IntegrationLog InvoiceIntegrationLogStagingTable
-
---INSERT INTO @IntegrationLog
---	([intIntegrationLogId]
---	,[dtmDate]
---	,[intEntityId]
---	,[intGroupingOption]
---	,[strMessage]
---	,[strBatchIdForNewPost]
---	,[intPostedNewCount]
---	,[strBatchIdForNewPostRecap]
---	,[intRecapNewCount]
---	,[strBatchIdForExistingPost]
---	,[intPostedExistingCount]
---	,[strBatchIdForExistingRecap]
---	,[intRecapPostExistingCount]
---	,[strBatchIdForExistingUnPost]
---	,[intUnPostedExistingCount]
---	,[strBatchIdForExistingUnPostRecap]
---	,[intRecapUnPostedExistingCount]
---	,[intIntegrationLogDetailId]
---	,[intPaymentId]
---	,[intInvoiceDetailId]
---	,[intId]
---	,[strTransactionType]
---	,[strType]
---	,[strSourceTransaction]
---	,[intSourceId]
---	,[strSourceId]
---	,[ysnPost]
---	,[ysnInsert]
---	,[ysnHeader]
---	,[ysnSuccess])
---SELECT
---	 [intIntegrationLogId]					= @IntegrationLogId
---	,[dtmDate]								= @DateOnly
---	,[intEntityId]							= @UserId
---	,[intGroupingOption]					= @GroupingOption
---	,[strMessage]							= [strMessage]
---	,[strBatchIdForNewPost]					= ''
---	,[intPostedNewCount]					= 0
---	,[strBatchIdForNewPostRecap]			= ''
---	,[intRecapNewCount]						= 0
---	,[strBatchIdForExistingPost]			= ''
---	,[intPostedExistingCount]				= 0
---	,[strBatchIdForExistingRecap]			= ''
---	,[intRecapPostExistingCount]			= 0
---	,[strBatchIdForExistingUnPost]			= ''
---	,[intUnPostedExistingCount]				= 0
---	,[strBatchIdForExistingUnPostRecap]		= ''
---	,[intRecapUnPostedExistingCount]		= 0
---	,[intIntegrationLogDetailId]			= 0
---	,[intPaymentId]							= NULL
---	,[intInvoiceDetailId]					= NULL
---	,[intId]								= [intId]
---	,[strTransactionType]					= [strTransactionType]
---	,[strType]								= [strType]
---	,[strSourceTransaction]					= [strSourceTransaction]
---	,[intSourceId]							= [intSourceId]
---	,[strSourceId]							= [strSourceId]
---	,[ysnPost]								= NULL
---	,[ysnInsert]							= 1
---	,[ysnHeader]							= 1
---	,[ysnSuccess]							= 0
---FROM
---	@InvalidRecords
-
---BEGIN TRY
---MERGE INTO tblARInvoice AS Target
---USING 
---	(
---	SELECT
---		 [intPaymentId]					= NULL
---		,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 THEN ITG.strInvoiceOriginId ELSE NULL END
---		,[strTransactionType]			= ITG.strTransactionType
---		,[strType]						= ITG.strType
---		,[intEntityCustomerId]			= ARC.[intEntityCustomerId]
---		,[intCompanyLocationId]			= ITG.intCompanyLocationId
---		,[intAccountId]					= ITG.[intAccountId]
---		,[intCurrencyId]				= ITG.intCurrencyId
---		,[intTermId]					= ISNULL(ITG.intTermId, ARC.[intTermsId])
---		,[intSourceId]					= [dbo].[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
---		,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
---		,[dtmDate]						= ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)
---		,[dtmDueDate]					= ISNULL(ITG.dtmDueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly), ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]),0)) AS DATE)))
---		,[dtmShipDate]					= ISNULL(ITG.dtmShipDate, DATEADD(month, 1, ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)))
---		,[dtmPostDate]					= ISNULL(CAST(ITG.dtmPostDate AS DATE),ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly))
---		,[dtmCalculated]				= NULL
---		,[dblInvoiceSubtotal]			= @ZeroDecimal
---		,[dblBaseInvoiceSubtotal]		= @ZeroDecimal
---		,[dblShipping]					= @ZeroDecimal
---		,[dblBaseShipping]				= @ZeroDecimal
---		,[dblTax]						= @ZeroDecimal
---		,[dblBaseTax]					= @ZeroDecimal
---		,[dblInvoiceTotal]				= @ZeroDecimal
---		,[dblBaseInvoiceTotal]			= @ZeroDecimal
---		,[dblDiscount]					= @ZeroDecimal
---		,[dblBaseDiscount]				= @ZeroDecimal
---		,[dblDiscountAvailable]			= @ZeroDecimal
---		,[dblBaseDiscountAvailable]		= @ZeroDecimal
---		,[dblInterest]					= @ZeroDecimal
---		,[dblBaseInterest]				= @ZeroDecimal
---		,[dblAmountDue]					= @ZeroDecimal
---		,[dblBaseAmountDue]				= @ZeroDecimal
---		,[dblPayment]					= @ZeroDecimal		
---		,[dblBasePayment]				= @ZeroDecimal		
---		,[intEntitySalespersonId]		= ISNULL(ITG.intEntitySalespersonId, ARC.[intSalespersonId])		
---		,[intFreightTermId]				= ITG.intFreightTermId
---		,[intShipViaId]					= ISNULL(ITG.intShipViaId, EL.[intShipViaId])
---		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = ITG.intPaymentMethodId)
---		,[strInvoiceOriginId]			= ITG.strInvoiceOriginId
---		,[strPONumber]					= ITG.strPONumber
---		,[strBOLNumber]					= ITG.strBOLNumber
---		,[strDeliverPickup]				= ITG.strDeliverPickup
---		,[strComments]					= CASE WHEN (ITG.strComments IS NULL OR ITG.strComments = '') THEN (SELECT TOP 1 strMessage FROM tblSMDocumentMaintenanceMessage WHERE intDocumentMaintenanceId = ITG.intDocumentMaintenanceId AND strHeaderFooter NOT IN ('Footer')) ELSE ITG.strComments END
---		,[strFooterComments]			= dbo.fnARGetFooterComment(ITG.intCompanyLocationId, ARC.intEntityCustomerId, 'Invoice Footer')
---		,[intShipToLocationId]			= ISNULL(ITG.intShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
---		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
---		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
---		,[strShipToCity]				= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
---		,[strShipToState]				= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
---		,[strShipToZipCode]				= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
---		,[strShipToCountry]				= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
---		,[intBillToLocationId]			= ISNULL(ITG.intBillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
---		,[strBillToLocationName]		= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
---		,[strBillToAddress]				= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
---		,[strBillToCity]				= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
---		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
---		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
---		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))		
---		,[ysnPosted]					= (CASE WHEN ITG.strTransactionType IN ('Overpayment', 'Customer Prepayment') THEN ITG.ysnPost ELSE 0 END)
---		,[ysnPaid]						= 0
---		,[ysnProcessed]					= 0
---		,[ysnRecurring]					= 0
---		,[ysnTemplate]					= ISNULL(ITG.ysnTemplate,0)
---		,[ysnForgiven]					= ISNULL(ITG.ysnForgiven,0) 
---		,[ysnCalculated]				= ISNULL(ITG.ysnCalculated,0)
---		,[ysnSplitted]					= ISNULL(ITG.ysnSplitted,0)		
---		,[dblSplitPercent]				= 1.000000
---		,[ysnImpactInventory]			= 0
---		,[ysnImportedFromOrigin]		= 0
---		,[ysnImportedAsPosted]			= 0
---		,[intPaymentId]					= ITG.intPaymentId 
---		,[intSplitId]					= ITG.intSplitId 
---		,[intDistributionHeaderId]		= NULL
---		,[intLoadDistributionHeaderId]	= ITG.intLoadDistributionHeaderId 
---		,[strActualCostId]				= ITG.strActualCostId
---		,[strImportFormat]				= ITG.strImportFormat
---		,[intShipmentId]				= ITG.intShipmentId 
---		,[intTransactionId]				= ITG.intTransactionId
---		,[intMeterReadingId]			= ITG.intMeterReadingId
---		,[intContractHeaderId]			= ITG.intContractHeaderId
---		,[intOriginalInvoiceId]			= ITG.intOriginalInvoiceId
---		,[intLoadId]                    = ITG.intLoadId
---		,[intEntityId]					= ITG.intEntityId
---		,[intEntityContactId]			= ITG.intEntityContactId
---		,[intDocumentMaintenanceId]		= NULL
---		,[dblTotalWeight]				= @ZeroDecimal
---		,[dblTotalTermDiscount]			= @ZeroDecimal
---		,[intTruckDriverId]				= ITG.intTruckDriverId
---		,[intTruckDriverReferenceId]	= ITG.intTruckDriverReferenceId
---		,[intConcurrencyId]				= 0
---		,[intId]						= ITG.[intId]
---		,[strSourceTransaction]			= ITG.[strSourceTransaction]
---		,[intSourceIdTemp]				= ITG.[intSourceId]	
---		,[strSourceId]					= ITG.[strSourceId]
---		,[ysnPost]						= ITG.[ysnPost]
---		,[ysnUpdateAvailableDiscount]	= ITG.[ysnUpdateAvailableDiscount]
---		,[ysnRecap]						= ITG.[ysnRecap]
---	FROM	
---		@PaymentsToGenerate ITG --WITH (NOLOCK)
---	INNER JOIN
---		(SELECT intId FROM @PaymentsToGenerate) ITG2  --WITH (NOLOCK)) ITG2
---			ON ITG.[intId] = ITG2.[intId]
---	INNER JOIN
---		(SELECT [intEntityCustomerId], [intTermsId], [intSalespersonId], [intShipToId], [intBillToId] FROM tblARCustomer WITH (NOLOCK)) ARC
---			ON ITG.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
---	LEFT OUTER JOIN
---		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [intEntityId], [strCountry], [strState], [strCity], [strZipCode], [intTermsId], [intShipViaId]
---		FROM 
---			[tblEMEntityLocation] WITH (NOLOCK)
---		WHERE
---			ysnDefaultLocation = 1
---		) EL
---			ON ARC.[intEntityCustomerId] = EL.[intEntityId]
---	LEFT OUTER JOIN
---		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
---			ON ISNULL(ITG.intShipToLocationId, 0) <> 0
---			AND ITG.intShipToLocationId = SL.[intEntityLocationId]
---	LEFT OUTER JOIN
---		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL1
---			ON ARC.[intShipToId] = SL1.intEntityLocationId
---	LEFT OUTER JOIN
---		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL
---			ON ISNULL(ITG.intBillToLocationId, 0) <> 0
---			AND ITG.intBillToLocationId = BL.intEntityLocationId		
---	LEFT OUTER JOIN
---		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
---			ON ARC.[intBillToId] = BL1.intEntityLocationId		
---	)
---AS Source
---ON Target.[intPaymentId] = Source.[intPaymentId]
---WHEN NOT MATCHED BY TARGET THEN
---INSERT(
---	 [strInvoiceNumber]
---	,[strTransactionType]
---	,[strType]
---	,[intEntityCustomerId]
---	,[intCompanyLocationId]
---	,[intAccountId]
---	,[intCurrencyId]
---	,[intTermId]
---	,[intSourceId]
---	,[intPeriodsToAccrue]
---	,[dtmDate]
---	,[dtmDueDate]
---	,[dtmShipDate]
---	,[dtmPostDate]
---	,[dtmCalculated]
---	,[dblInvoiceSubtotal]
---	,[dblBaseInvoiceSubtotal]
---	,[dblShipping]
---	,[dblBaseShipping]
---	,[dblTax]
---	,[dblBaseTax]
---	,[dblInvoiceTotal]
---	,[dblBaseInvoiceTotal]
---	,[dblDiscount]
---	,[dblBaseDiscount]
---	,[dblDiscountAvailable]
---	,[dblBaseDiscountAvailable]
---	,[dblInterest]
---	,[dblBaseInterest]
---	,[dblAmountDue]
---	,[dblBaseAmountDue]
---	,[dblPayment]
---	,[dblBasePayment]
---	,[intEntitySalespersonId]
---	,[intFreightTermId]
---	,[intShipViaId]
---	,[intPaymentMethodId]
---	,[strInvoiceOriginId]
---	,[strPONumber]
---	,[strBOLNumber]
---	,[strDeliverPickup]
---	,[strComments]
---	,[strFooterComments]
---	,[intShipToLocationId]
---	,[strShipToLocationName]
---	,[strShipToAddress]
---	,[strShipToCity]
---	,[strShipToState]
---	,[strShipToZipCode]
---	,[strShipToCountry]
---	,[intBillToLocationId]
---	,[strBillToLocationName]
---	,[strBillToAddress]
---	,[strBillToCity]
---	,[strBillToState]
---	,[strBillToZipCode]
---	,[strBillToCountry]
---	,[ysnPosted]
---	,[ysnPaid]
---	,[ysnProcessed]
---	,[ysnRecurring]
---	,[ysnForgiven]
---	,[ysnCalculated]
---	,[ysnSplitted]
---	,[dblSplitPercent]
---	,[ysnImpactInventory]
---	,[ysnImportedFromOrigin]
---	,[ysnImportedAsPosted]
---	,[intPaymentId]
---	,[intSplitId]
---	,[intDistributionHeaderId]
---	,[intLoadDistributionHeaderId]
---	,[strActualCostId]
---	,[strImportFormat]
---	,[intShipmentId]
---	,[intTransactionId]
---	,[intMeterReadingId]
---	,[intContractHeaderId]
---	,[intOriginalInvoiceId]
---	,[intLoadId]
---	,[intEntityId]
---	,[intEntityContactId]
---	,[intDocumentMaintenanceId]
---	,[dblTotalWeight]
---	,[dblTotalTermDiscount]
---	,[intTruckDriverId]
---	,[intTruckDriverReferenceId]
---	,[intConcurrencyId]
---	)
---VALUES(
---	 [strInvoiceNumber]
---	,[strTransactionType]
---	,[strType]
---	,[intEntityCustomerId]
---	,[intCompanyLocationId]
---	,[intAccountId]
---	,[intCurrencyId]
---	,[intTermId]
---	,[intSourceId]
---	,[intPeriodsToAccrue]
---	,[dtmDate]
---	,[dtmDueDate]
---	,[dtmShipDate]
---	,[dtmPostDate]
---	,[dtmCalculated]
---	,[dblInvoiceSubtotal]
---	,[dblBaseInvoiceSubtotal]
---	,[dblShipping]
---	,[dblBaseShipping]
---	,[dblTax]
---	,[dblBaseTax]
---	,[dblInvoiceTotal]
---	,[dblBaseInvoiceTotal]
---	,[dblDiscount]
---	,[dblBaseDiscount]
---	,[dblDiscountAvailable]
---	,[dblBaseDiscountAvailable]
---	,[dblInterest]
---	,[dblBaseInterest]
---	,[dblAmountDue]
---	,[dblBaseAmountDue]
---	,[dblPayment]
---	,[dblBasePayment]
---	,[intEntitySalespersonId]
---	,[intFreightTermId]
---	,[intShipViaId]
---	,[intPaymentMethodId]
---	,[strInvoiceOriginId]
---	,[strPONumber]
---	,[strBOLNumber]
---	,[strDeliverPickup]
---	,[strComments]
---	,[strFooterComments]
---	,[intShipToLocationId]
---	,[strShipToLocationName]
---	,[strShipToAddress]
---	,[strShipToCity]
---	,[strShipToState]
---	,[strShipToZipCode]
---	,[strShipToCountry]
---	,[intBillToLocationId]
---	,[strBillToLocationName]
---	,[strBillToAddress]
---	,[strBillToCity]
---	,[strBillToState]
---	,[strBillToZipCode]
---	,[strBillToCountry]
---	,[ysnPosted]
---	,[ysnPaid]
---	,[ysnProcessed]
---	,[ysnRecurring]
---	,[ysnForgiven]
---	,[ysnCalculated]
---	,[ysnSplitted]
---	,[dblSplitPercent]
---	,[ysnImpactInventory]
---	,[ysnImportedFromOrigin]
---	,[ysnImportedAsPosted]
---	,[intPaymentId]
---	,[intSplitId]
---	,[intDistributionHeaderId]
---	,[intLoadDistributionHeaderId]
---	,[strActualCostId]
---	,[strImportFormat]
---	,[intShipmentId]
---	,[intTransactionId]
---	,[intMeterReadingId]
---	,[intContractHeaderId]
---	,[intOriginalInvoiceId]
---	,[intLoadId]
---	,[intEntityId]
---	,[intEntityContactId]
---	,[intDocumentMaintenanceId]
---	,[dblTotalWeight]
---	,[dblTotalTermDiscount]
---	,[intTruckDriverId]
---	,[intTruckDriverReferenceId]
---	,[intConcurrencyId]
---)
---	OUTPUT  
---			@IntegrationLogId						--[intIntegrationLogId]
---			,@DateOnly								--[dtmDate]
---			,INSERTED.[intEntityId]					--[intEntityId]
---			,@GroupingOption						--[intGroupingOption]
---			,'Invoice was successfully created.'	--[strErrorMessage]
---			,''										--[strBatchIdForNewPost]
---			,0										--[intPostedNewCount]
---			,''										--[strBatchIdForNewPostRecap]
---			,0										--[intRecapNewCount]
---			,''										--[strBatchIdForExistingPost]
---			,0										--[intPostedExistingCount]
---			,''										--[strBatchIdForExistingRecap]
---			,0										--[intRecapPostExistingCount]
---			,''										--[strBatchIdForExistingUnPost]
---			,0										--[intUnPostedExistingCount]
---			,''										--[strBatchIdForExistingUnPostRecap]
---			,0										--[intRecapUnPostedExistingCount]
---			,NULL									--[intIntegrationLogDetailId]
---			,INSERTED.[intPaymentId]				--[intPaymentId]
---			,INSERTED.[intEntityCustomerId]			--[intEntityCustomerId]
---			,INSERTED.[intCompanyLocationId]		--[intCompanyLocationId]
---			,INSERTED.[intCurrencyId]				--[intCurrencyId]
---			,INSERTED.[intTermId]					--[intTermId]
---			,NULL									--[intInvoiceDetailId]
---			,Source.[intId]							--[intId]
---			,INSERTED.[strTransactionType]			--[strTransactionType]
---			,INSERTED.[strType]						--[strType]
---			,Source.[strSourceTransaction]			--[strSourceTransaction]
---			,Source.[intSourceId]					--[intSourceId]
---			,Source.[strSourceId]					--[strSourceId]
---			,Source.[ysnPost]						--[ysnPost]
---			,1										--[ysnInsert]
---			,1										--[ysnHeader]
---			,1										--[ysnSuccess]
---			,Source.[ysnRecap]						--[ysnRecap]
---		INTO @IntegrationLog(
---			 [intIntegrationLogId]
---			,[dtmDate]
---			,[intEntityId]
---			,[intGroupingOption]
---			,[strMessage]
---			,[strBatchIdForNewPost]
---			,[intPostedNewCount]
---			,[strBatchIdForNewPostRecap]
---			,[intRecapNewCount]
---			,[strBatchIdForExistingPost]
---			,[intPostedExistingCount]
---			,[strBatchIdForExistingRecap]
---			,[intRecapPostExistingCount]
---			,[strBatchIdForExistingUnPost]
---			,[intUnPostedExistingCount]
---			,[strBatchIdForExistingUnPostRecap]
---			,[intRecapUnPostedExistingCount]
---			,[intIntegrationLogDetailId]
---			,[intPaymentId]
---			,[intEntityCustomerId]
---			,[intCompanyLocationId]
---			,[intCurrencyId]
---			,[intTermId]
---			,[intInvoiceDetailId]
---			,[intId]
---			,[strTransactionType]
---			,[strType]
---			,[strSourceTransaction]
---			,[intSourceId]
---			,[strSourceId]
---			,[ysnPost]
---			,[ysnInsert]
---			,[ysnHeader]
---			,[ysnSuccess]
---			,[ysnRecap]
---		);	
+	IF ISNULL(@IntegrationLogId, 0) <> 0
+		EXEC [uspARInsertPaymentIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 	
---	IF ISNULL(@IntegrationLogId, 0) <> 0
---		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
-	
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 
 
---BEGIN TRY
---	DECLARE @LineItems PaymentIntegrationStagingTable
---	DELETE FROM @LineItems
---	INSERT INTO @LineItems
---		([intId]
---		,[strTransactionType]
---		,[strType]
---		,[strSourceTransaction]
---		,[strSourceId]
---		,[intPaymentId]
---		,[intEntityCustomerId]
---		,[intEntityContactId]
---		,[intCompanyLocationId]
---		,[intAccountId]
---		,[intCurrencyId]
---		,[intTermId]
---		,[intPeriodsToAccrue]
---		,[dtmDate]
---		,[dtmDueDate]
---		,[dtmShipDate]
---		,[dtmPostDate]
---		,[intEntitySalespersonId]
---		,[intFreightTermId]
---		,[intShipViaId]
---		,[intPaymentMethodId]
---		,[strInvoiceOriginId]
---		,[ysnUseOriginIdAsInvoiceNumber]
---		,[strPONumber]
---		,[strBOLNumber]
---		,[strDeliverPickup]
---		,[strComments]
---		,[intShipToLocationId]
---		,[intBillToLocationId]
---		,[ysnTemplate]
---		,[ysnForgiven]
---		,[ysnCalculated]
---		,[ysnSplitted]
---		,[intPaymentId]
---		,[intSplitId]
---		,[intLoadDistributionHeaderId]
---		,[strActualCostId]
---		,[intShipmentId]
---		,[intTransactionId]
---		,[intMeterReadingId]
---		,[intContractHeaderId]
---		,[intLoadId]
---		,[intOriginalInvoiceId]
---		,[intEntityId]
---		,[intTruckDriverId]
---		,[intTruckDriverReferenceId]
---		,[ysnResetDetails]
---		,[ysnRecap]
---		,[ysnPost]
---		,[ysnUpdateAvailableDiscount]
---		,[ysnInsertDetail]
---		,[intInvoiceDetailId]
---		,[intItemId]
---		,[intPrepayTypeId]
---		,[ysnRestricted]
---		,[ysnInventory]
---		,[strDocumentNumber]
---		,[strItemDescription]
---		,[intOrderUOMId]
---		,[dblQtyOrdered]
---		,[intItemUOMId]
---		,[dblQtyShipped]
---		,[dblDiscount]
---		,[dblItemTermDiscount]
---		,[strItemTermDiscountBy]
---		,[dblItemWeight]
---		,[intItemWeightUOMId]
---		,[dblPrice]
---		,[strPricing]
---		,[strVFDDocumentNumber]
---		,[ysnRefreshPrice]
---		,[strMaintenanceType]
---		,[strFrequency]
---		,[intMaintenanceAccountId]
---		,[dtmMaintenanceDate]
---		,[dblMaintenanceAmount]
---		,[intLicenseAccountId]
---		,[dblLicenseAmount]
---		,[intTaxGroupId]
---		,[intStorageLocationId]
---		,[intCompanyLocationSubLocationId]
---		,[ysnRecomputeTax]
---		,[intSCInvoiceId]
---		,[strSCInvoiceNumber]
---		,[intSCBudgetId]
---		,[strSCBudgetDescription]
---		,[intInventoryShipmentItemId]
---		,[intInventoryShipmentChargeId]
---		,[strShipmentNumber]
---		,[intRecipeItemId]
---		,[intRecipeId]
---		,[intSubLocationId]
---		,[intCostTypeId]
---		,[intMarginById]
---		,[intCommentTypeId]
---		,[dblMargin]
---		,[dblRecipeQuantity]
---		,[intSalesOrderDetailId]
---		,[strSalesOrderNumber]
---		,[intContractDetailId]
---		,[intShipmentPurchaseSalesContractId]
---		,[dblShipmentGrossWt]
---		,[dblShipmentTareWt]
---		,[dblShipmentNetWt]
---		,[intTicketId]
---		,[intTicketHoursWorkedId]
---		,[intDocumentMaintenanceId]
---		,[intCustomerStorageId]
---		,[intSiteDetailId]
---		,[intLoadDetailId]
---		,[intLotId]
---		,[intOriginalInvoiceDetailId]
---		,[intSiteId]
---		,[strBillingBy]
---		,[dblPercentFull]
---		,[dblNewMeterReading]
---		,[dblPreviousMeterReading]
---		,[dblConversionFactor]
---		,[intPerformerId]
---		,[ysnLeaseBilling]
---		,[ysnVirtualMeterReading]
---		,[ysnClearDetailTaxes]
---		,[intTempDetailIdForTaxes]
---		,[intCurrencyExchangeRateTypeId]
---		,[intCurrencyExchangeRateId]
---		,[dblCurrencyExchangeRate]
---		,[intSubCurrencyId]
---		,[dblSubCurrencyRate]
---		,[ysnBlended]
---		,[strImportFormat]
---		,[dblCOGSAmount]
---		,[intConversionAccountId]
---		,[intSalesAccountId]
---		,[intStorageScheduleTypeId]
---		,[intDestinationGradeId]
---		,[intDestinationWeightId])
---	SELECT
---		 [intId]								= IL.[intId]
---		,[strTransactionType]					= ITG.[strTransactionType]
---		,[strType]								= ITG.[strType]
---		,[strSourceTransaction]					= ITG.[strSourceTransaction]
---		,[strSourceId]							= ITG.[strSourceId]
---		,[intPaymentId]							= IL.[intPaymentId]
---		,[intEntityCustomerId]					= IL.[intEntityCustomerId]
---		,[intEntityContactId]					= ITG.[intEntityContactId]
---		,[intCompanyLocationId]					= IL.[intCompanyLocationId]
---		,[intAccountId]							= ITG.[intAccountId]
---		,[intCurrencyId]						= IL.[intCurrencyId]
---		,[intTermId]							= IL.[intTermId]
---		,[intPeriodsToAccrue]					= ITG.[intPeriodsToAccrue]
---		,[dtmDate]								= ITG.[dtmDate]
---		,[dtmDueDate]							= ITG.[dtmDueDate]
---		,[dtmShipDate]							= ITG.[dtmShipDate]
---		,[dtmPostDate]							= ITG.[dtmPostDate]
---		,[intEntitySalespersonId]				= ITG.[intEntitySalespersonId]
---		,[intFreightTermId]						= ITG.[intFreightTermId]
---		,[intShipViaId]							= ITG.[intShipViaId]
---		,[intPaymentMethodId]					= ITG.[intPaymentMethodId]
---		,[strInvoiceOriginId]					= ITG.[strInvoiceOriginId]
---		,[ysnUseOriginIdAsInvoiceNumber]		= ITG.[ysnUseOriginIdAsInvoiceNumber]
---		,[strPONumber]							= ITG.[strPONumber]
---		,[strBOLNumber]							= ITG.[strBOLNumber]
---		,[strDeliverPickup]						= ITG.[strDeliverPickup]
---		,[strComments]							= ITG.[strComments]
---		,[intShipToLocationId]					= ITG.[intShipToLocationId]
---		,[intBillToLocationId]					= ITG.[intBillToLocationId]
---		,[ysnTemplate]							= ITG.[ysnTemplate]
---		,[ysnForgiven]							= ITG.[ysnForgiven]
---		,[ysnCalculated]						= ITG.[ysnCalculated]
---		,[ysnSplitted]							= ITG.[ysnSplitted]
---		,[intPaymentId]							= ITG.[intPaymentId]
---		,[intSplitId]							= ITG.[intSplitId]
---		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]
---		,[strActualCostId]						= ITG.[strActualCostId]
---		,[intShipmentId]						= ITG.[intShipmentId]
---		,[intTransactionId]						= ITG.[intTransactionId]
---		,[intMeterReadingId]					= ITG.[intMeterReadingId]
---		,[intContractHeaderId]					= ITG.[intContractHeaderId]
---		,[intLoadId]							= ITG.[intLoadId]
---		,[intOriginalInvoiceId]					= ITG.[intOriginalInvoiceId]
---		,[intEntityId]							= ITG.[intEntityId]
---		,[intTruckDriverId]						= ITG.[intTruckDriverId]
---		,[intTruckDriverReferenceId]			= ITG.[intTruckDriverReferenceId]
---		,[ysnResetDetails]						= ITG.[ysnResetDetails]
---		,[ysnRecap]								= ITG.[ysnRecap]
---		,[ysnPost]								= ITG.[ysnPost]
---		,[ysnUpdateAvailableDiscount]			= ITG.[ysnUpdateAvailableDiscount]
---		,[ysnInsertDetail]						= ITG.[ysnInsertDetail]
---		,[intInvoiceDetailId]					= ITG.[intInvoiceDetailId]
---		,[intItemId]							= ITG.[intItemId]
---		,[intPrepayTypeId]						= ITG.[intPrepayTypeId]
---		,[ysnRestricted]						= ITG.[ysnRestricted]
---		,[ysnInventory]							= ITG.[ysnInventory]
---		,[strDocumentNumber]					= ITG.[strDocumentNumber]
---		,[strItemDescription]					= ITG.[strItemDescription]
---		,[intOrderUOMId]						= ITG.[intOrderUOMId]
---		,[dblQtyOrdered]						= ITG.[dblQtyOrdered]
---		,[intItemUOMId]							= ITG.[intItemUOMId]
---		,[dblQtyShipped]						= ITG.[dblQtyShipped]
---		,[dblDiscount]							= ITG.[dblDiscount]
---		,[dblItemTermDiscount]					= ITG.[dblItemTermDiscount]
---		,[strItemTermDiscountBy]				= ITG.[strItemTermDiscountBy]
---		,[dblItemWeight]						= ITG.[dblItemWeight]
---		,[intItemWeightUOMId]					= ITG.[intItemWeightUOMId]
---		,[dblPrice]								= ITG.[dblPrice]
---		,[strPricing]							= ITG.[strPricing]
---		,[strVFDDocumentNumber]					= ITG.[strVFDDocumentNumber]
---		,[ysnRefreshPrice]						= ITG.[ysnRefreshPrice]
---		,[strMaintenanceType]					= ITG.[strMaintenanceType]
---		,[strFrequency]							= ITG.[strFrequency]
---		,[intMaintenanceAccountId]				= ITG.[intMaintenanceAccountId]
---		,[dtmMaintenanceDate]					= ITG.[dtmMaintenanceDate]
---		,[dblMaintenanceAmount]					= ITG.[dblMaintenanceAmount]
---		,[intLicenseAccountId]					= ITG.[intLicenseAccountId]
---		,[dblLicenseAmount]						= ITG.[dblLicenseAmount]
---		,[intTaxGroupId]						= ITG.[intTaxGroupId]
---		,[intStorageLocationId]					= ITG.[intStorageLocationId]
---		,[intCompanyLocationSubLocationId]		= ITG.[intCompanyLocationSubLocationId]
---		,[ysnRecomputeTax]						= ITG.[ysnRecomputeTax]
---		,[intSCInvoiceId]						= ITG.[intSCInvoiceId]
---		,[strSCInvoiceNumber]					= ITG.[strSCInvoiceNumber]
---		,[intSCBudgetId]						= ITG.[intSCBudgetId]
---		,[strSCBudgetDescription]				= ITG.[strSCBudgetDescription]
---		,[intInventoryShipmentItemId]			= ITG.[intInventoryShipmentItemId]
---		,[intInventoryShipmentChargeId]			= ITG.[intInventoryShipmentChargeId]
---		,[strShipmentNumber]					= ITG.[strShipmentNumber]
---		,[intRecipeItemId]						= ITG.[intRecipeItemId]
---		,[intRecipeId]							= ITG.[intRecipeId]
---		,[intSubLocationId]						= ITG.[intSubLocationId]
---		,[intCostTypeId]						= ITG.[intCostTypeId]
---		,[intMarginById]						= ITG.[intMarginById]
---		,[intCommentTypeId]						= ITG.[intCommentTypeId]
---		,[dblMargin]							= ITG.[dblMargin]
---		,[dblRecipeQuantity]					= ITG.[dblRecipeQuantity]
---		,[intSalesOrderDetailId]				= ITG.[intSalesOrderDetailId]
---		,[strSalesOrderNumber]					= ITG.[strSalesOrderNumber]
---		,[intContractDetailId]					= ITG.[intContractDetailId]
---		,[intShipmentPurchaseSalesContractId]	= ITG.[intShipmentPurchaseSalesContractId]
---		,[dblShipmentGrossWt]					= ITG.[dblShipmentGrossWt]
---		,[dblShipmentTareWt]					= ITG.[dblShipmentTareWt]
---		,[dblShipmentNetWt]						= ITG.[dblShipmentNetWt]
---		,[intTicketId]							= ITG.[intTicketId]
---		,[intTicketHoursWorkedId]				= ITG.[intTicketHoursWorkedId]
---		,[intDocumentMaintenanceId]				= ITG.[intDocumentMaintenanceId]
---		,[intCustomerStorageId]					= ITG.[intCustomerStorageId]
---		,[intSiteDetailId]						= ITG.[intSiteDetailId]
---		,[intLoadDetailId]						= ITG.[intLoadDetailId]
---		,[intLotId]								= ITG.[intLotId]
---		,[intOriginalInvoiceDetailId]			= ITG.[intOriginalInvoiceDetailId]
---		,[intSiteId]							= ITG.[intSiteId]
---		,[strBillingBy]							= ITG.[strBillingBy]
---		,[dblPercentFull]						= ITG.[dblPercentFull]
---		,[dblNewMeterReading]					= ITG.[dblNewMeterReading]
---		,[dblPreviousMeterReading]				= ITG.[dblPreviousMeterReading]
---		,[dblConversionFactor]					= ITG.[dblConversionFactor]
---		,[intPerformerId]						= ITG.[intPerformerId]
---		,[ysnLeaseBilling]						= ITG.[ysnLeaseBilling]
---		,[ysnVirtualMeterReading]				= ITG.[ysnVirtualMeterReading]
---		,[ysnClearDetailTaxes]					= ITG.[ysnClearDetailTaxes]
---		,[intTempDetailIdForTaxes]				= ITG.[intTempDetailIdForTaxes]
---		,[intCurrencyExchangeRateTypeId]		= ITG.[intCurrencyExchangeRateTypeId]
---		,[intCurrencyExchangeRateId]			= ITG.[intCurrencyExchangeRateId]
---		,[dblCurrencyExchangeRate]				= ITG.[dblCurrencyExchangeRate]
---		,[intSubCurrencyId]						= ITG.[intSubCurrencyId]
---		,[dblSubCurrencyRate]					= ITG.[dblSubCurrencyRate]
---		,[ysnBlended]							= ITG.[ysnBlended]
---		,[strImportFormat]						= ITG.[strImportFormat]
---		,[dblCOGSAmount]						= ITG.[dblCOGSAmount]
---		,[intConversionAccountId]				= ITG.[intConversionAccountId]
---		,[intSalesAccountId]					= ITG.[intSalesAccountId]
---		,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
---		,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
---		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
---	FROM
---		@PaymentsToGenerate ITG
---	INNER JOIN
---		@IntegrationLog IL
---			ON ITG.[intId] = IL.[intId]
---			AND IL.[ysnSuccess] = 1
+BEGIN TRY
+	DECLARE @LineItems PaymentIntegrationStagingTable
+	DELETE FROM @LineItems
+	INSERT INTO @LineItems
+		([intId]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[intPaymentId]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intCurrencyId]
+		,[dtmDatePaid]
+		,[intPaymentMethodId]
+		,[strPaymentMethod]
+		,[strPaymentInfo]
+		,[strNotes]
+		,[intAccountId]
+		,[intBankAccountId]
+		,[intWriteOffAccountId]		
+		,[dblAmountPaid]
+		,[strPaymentOriginalId]
+		,[ysnUseOriginalIdAsPaymentNumber]
+		,[ysnApplytoBudget]
+		,[ysnApplyOnAccount]
+		,[ysnInvoicePrepayment]
+		,[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]
+		,[ysnAllowPrepayment]
+		,[ysnPost]
+		,[ysnRecap]
+		,[ysnUnPostAndUpdate]
+		,[intEntityId]
+		--Detail																																															
+		,[intPaymentDetailId]
+		,[intInvoiceId]
+		,[intBillId]
+		,[strTransactionNumber]
+		,[intTermId]
+		,[ysnApplyTermDiscount]
+		,[dblDiscount]
+		,[dblDiscountAvailable]
+		,[dblInterest]
+		,[dblPayment]
+		,[strInvoiceReportNumber]
+		,[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]
+		,[ysnAllowOverpayment])
+	SELECT
+		 [intId]							= IL.[intId]
+		,[strSourceTransaction]				= IL.[strSourceTransaction]
+		,[intSourceId]						= IL.[intSourceId]
+		,[strSourceId]						= IL.[strSourceId]
+		,[intPaymentId]						= IL.[intPaymentId]
+		,[intEntityCustomerId]				= IL.[intEntityCustomerId]
+		,[intCompanyLocationId]				= IL.[intCompanyLocationId]
+		,[intCurrencyId]					= IL.[intCurrencyId]
+		,[dtmDatePaid]						= ITG.[dtmDatePaid]
+		,[intPaymentMethodId]				= ITG.[intPaymentMethodId]
+		,[strPaymentMethod]					= ITG.[strPaymentMethod]
+		,[strPaymentInfo]					= ITG.[strPaymentInfo]
+		,[strNotes]							= ITG.[strNotes]
+		,[intAccountId]						= ITG.[intAccountId]
+		,[intBankAccountId]					= ITG.[intBankAccountId]
+		,[intWriteOffAccountId]				= ITG.[intWriteOffAccountId]
+		,[dblAmountPaid]					= ITG.[dblAmountPaid]
+		,[strPaymentOriginalId]				= ITG.[strPaymentOriginalId]
+		,[ysnUseOriginalIdAsPaymentNumber]	= ITG.[ysnUseOriginalIdAsPaymentNumber]
+		,[ysnApplytoBudget]					= ITG.[ysnApplytoBudget]
+		,[ysnApplyOnAccount]				= ITG.[ysnApplyOnAccount]
+		,[ysnInvoicePrepayment]				= ITG.[ysnInvoicePrepayment]
+		,[ysnImportedFromOrigin]			= ITG.[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]				= ITG.[ysnImportedAsPosted]
+		,[ysnAllowPrepayment]				= ITG.[ysnAllowPrepayment]
+		,[ysnPost]							= ITG.[ysnPost]
+		,[ysnRecap]							= ITG.[ysnRecap]
+		,[ysnUnPostAndUpdate]				= ITG.[ysnUnPostAndUpdate]
+		,[intEntityId]						= ITG.[intEntityId]
+		--Detail																																															
+		,[intPaymentDetailId]				= ITG.[intPaymentDetailId]
+		,[intInvoiceId]						= ITG.[intInvoiceId]
+		,[intBillId]						= ITG.[intBillId]
+		,[strTransactionNumber]				= ITG.[strTransactionNumber]
+		,[intTermId]						= ITG.[intTermId]
+		,[ysnApplyTermDiscount]				= ITG.[ysnApplyTermDiscount]
+		,[dblDiscount]						= ITG.[dblDiscount]
+		,[dblDiscountAvailable]				= ITG.[dblDiscountAvailable]
+		,[dblInterest]						= ITG.[dblInterest]
+		,[dblPayment]						= ITG.[dblPayment]
+		,[strInvoiceReportNumber]			= ITG.[strInvoiceReportNumber]
+		,[intCurrencyExchangeRateTypeId]	= ITG.[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]		= ITG.[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]			= CASE WHEN ISNULL(ITG.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ITG.[dblCurrencyExchangeRate] END
+		,[ysnAllowOverpayment]				= ITG.[ysnAllowOverpayment]
+	FROM
+		@PaymentsToGenerate ITG
+	INNER JOIN
+		@IntegrationLog IL
+			ON ITG.[intId] = IL.[intId]
+			AND IL.[ysnSuccess] = 1
 
---	EXEC [dbo].[uspARAddItemToInvoices]
---		 @PaymentEntries	= @LineItems
---		,@IntegrationLogId	= @IntegrationLogId
---		,@UserId			= @UserId
---		,@RaiseError		= @RaiseError
---		,@ErrorMessage		= @AddDetailError	OUTPUT
+	EXEC [dbo].[uspARAddToInvoicesToPayments]
+		 @PaymentEntries	= @LineItems
+		,@IntegrationLogId	= @IntegrationLogId
+		,@UserId			= @UserId
+		,@RaiseError		= @RaiseError
+		,@ErrorMessage		= @AddDetailError	OUTPUT
 
---		IF LEN(ISNULL(@AddDetailError,'')) > 0
---			BEGIN
---				IF ISNULL(@RaiseError,0) = 0
---					ROLLBACK TRANSACTION
---				SET @ErrorMessage = @AddDetailError;
---				IF ISNULL(@RaiseError,0) = 1
---					RAISERROR(@ErrorMessage, 16, 1);
---				RETURN 0;
---			END
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
+		IF LEN(ISNULL(@AddDetailError,'')) > 0
+			BEGIN
+				IF ISNULL(@RaiseError,0) = 0
+					ROLLBACK TRANSACTION
+				SET @ErrorMessage = @AddDetailError;
+				IF ISNULL(@RaiseError,0) = 1
+					RAISERROR(@ErrorMessage, 16, 1);
+				RETURN 0;
+			END
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 	
---BEGIN TRY
---	DECLARE @CreatedInvoiceIds InvoiceId	
---	DELETE FROM @CreatedInvoiceIds
+BEGIN TRY
+	DECLARE @CreatedInvoiceIds InvoiceId	
+	DELETE FROM @CreatedInvoiceIds
 
---	INSERT INTO @CreatedInvoiceIds(
---		 [intHeaderId]
---		,[ysnUpdateAvailableDiscountOnly]
---		,[intDetailId])
---	SELECT 
---		 [intHeaderId]						= [intPaymentId]
---		,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount]
---		,[intDetailId]						= NULL
---	 FROM @IntegrationLog WHERE [ysnSuccess] = 1
+	INSERT INTO @CreatedInvoiceIds(
+		 [intHeaderId]
+		--,[ysnUpdateAvailableDiscountOnly]
+		,[intDetailId])
+	SELECT 
+		 [intHeaderId]						= [intPaymentId]
+		--,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount]
+		,[intDetailId]						= NULL
+	 FROM @IntegrationLog WHERE [ysnSuccess] = 1
 
---	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @CreatedInvoiceIds
+	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @CreatedInvoiceIds
 
---	DECLARE @InvoiceLog AuditLogStagingTable	
---	DELETE FROM @InvoiceLog
+	DECLARE @InvoiceLog AuditLogStagingTable	
+	DELETE FROM @InvoiceLog
 
---	INSERT INTO @InvoiceLog(
---		 [strScreenName]
---		,[intKeyValueId]
---		,[intEntityId]
---		,[strActionType]
---		,[strDescription]
---		,[strActionIcon]
---		,[strChangeDescription]
---		,[strFromValue]
---		,[strToValue]
---		,[strDetails]
---	)
---	SELECT 
---		 [strScreenName]			= 'AccountsReceivable.view.Invoice'
---		,[intKeyValueId]			= ARI.[intPaymentId]
---		,[intEntityId]				= IL.[intEntityId]
---		,[strActionType]			= 'Processed'
---		,[strDescription]			= IL.[strSourceTransaction] + ' to Invoice'
---		,[strActionIcon]			= NULL
---		,[strChangeDescription]		= IL.[strSourceTransaction] + ' to Invoice'
---		,[strFromValue]				= IL.[strSourceId]
---		,[strToValue]				= ARI.[strInvoiceNumber]
---		,[strDetails]				= NULL
---	 FROM @IntegrationLog IL
---	INNER JOIN
---		(SELECT [intPaymentId], [strInvoiceNumber] FROM tblARInvoice) ARI
---			ON IL.[intPaymentId] = ARI.[intPaymentId]
---	 WHERE
---		[ysnSuccess] = 1 
---		AND [ysnInsert] = 1
+	INSERT INTO @InvoiceLog(
+		 [strScreenName]
+		,[intKeyValueId]
+		,[intEntityId]
+		,[strActionType]
+		,[strDescription]
+		,[strActionIcon]
+		,[strChangeDescription]
+		,[strFromValue]
+		,[strToValue]
+		,[strDetails]
+	)
+	SELECT 
+		 [strScreenName]			= 'AccountsReceivable.view.Invoice'
+		,[intKeyValueId]			= ARI.[intPaymentId]
+		,[intEntityId]				= IL.[intEntityId]
+		,[strActionType]			= 'Processed'
+		,[strDescription]			= IL.[strSourceTransaction] + ' to Invoice'
+		,[strActionIcon]			= NULL
+		,[strChangeDescription]		= IL.[strSourceTransaction] + ' to Invoice'
+		,[strFromValue]				= IL.[strSourceId]
+		,[strToValue]				= ARI.[strInvoiceNumber]
+		,[strDetails]				= NULL
+	 FROM @IntegrationLog IL
+	INNER JOIN
+		(SELECT [intPaymentId], [strInvoiceNumber] FROM tblARInvoice) ARI
+			ON IL.[intPaymentId] = ARI.[intPaymentId]
+	 WHERE
+		[ysnSuccess] = 1 
+		AND [ysnInsert] = 1
 
---	EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+	EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
 
---END TRY
---BEGIN CATCH
---	IF ISNULL(@RaiseError,0) = 0
---		ROLLBACK TRANSACTION
---	SET @ErrorMessage = ERROR_MESSAGE();
---	IF ISNULL(@RaiseError,0) = 1
---		RAISERROR(@ErrorMessage, 16, 1);
---	RETURN 0;
---END CATCH
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
---IF ISNULL(@RaiseError,0) = 0
---	COMMIT TRANSACTION
---SET @ErrorMessage = NULL;
---RETURN 1;
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION
+SET @ErrorMessage = NULL;
+RETURN 1;
 	
---END
---GO
+END
+GO
