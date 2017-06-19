@@ -3,7 +3,7 @@
 */
 CREATE TYPE [dbo].[LineItemTaxDetailStagingTable] AS TABLE
 (		
-	 [intId]								INT				IDENTITY PRIMARY KEY CLUSTERED																																											
+	 [intId]								INT				 																																								
 	,[intDetailId]							INT												NULL		-- Id of the line item record
 	--,[intInvoiceDetailTaxId]				INT												NULL		-- Invoice Detail Tax Id(Insert new if NULL, else Update existing) 
 	,[intDetailTaxId]						INT												NULL		-- Invoice Detail Tax Id(Insert new if NULL, else Update existing) 

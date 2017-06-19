@@ -3,7 +3,7 @@
 */
 CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 (
-	 [intId]				INT IDENTITY PRIMARY KEY CLUSTERED
+	 [intId]				INT  
 	,[intInvoiceId]			INT				NULL									-- The id of the Invoice, if it exists. 
 	,[intEntityCustomerId]	INT				NOT NULL								-- The Customer. 	
 	,[intLocationId]		INT				NOT NULL								-- Company Location

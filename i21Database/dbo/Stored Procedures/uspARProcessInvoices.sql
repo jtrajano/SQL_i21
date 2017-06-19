@@ -957,7 +957,7 @@ BEGIN
 						RETURN 0;
 					END CATCH
 				END
-				DELETE FROM #EntriesForProcessing WHERE intId = @ForDetailId
+				UPDATE #EntriesForProcessing SET [ysnProcessed] = 1 WHERE [intId] = @ForDetailId 
 		END		
 	END
 
