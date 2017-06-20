@@ -5290,7 +5290,8 @@
     <None Include="Scripts\Post-Deployment\EM\Data_Fix_From_1710_to_1720_Currency_Cus_Ven.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
     <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
-
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5422,7 +5423,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
     <None Include="Scripts\Post-Deployment\IC\20_UpdateContractItemStatuses.sql" />
-	<None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategoryMaintenance.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategoryMaintenance.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
