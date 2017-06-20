@@ -5487,4 +5487,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\1720_Statement_Footer_To_Report.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\DB\6_PanelOwnerMigration.sql" />
+  </ItemGroup>
 </Project>
