@@ -5488,4 +5488,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\DB\6_PanelOwnerMigration.sql" />
+  </ItemGroup>
 </Project>
