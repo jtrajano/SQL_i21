@@ -415,49 +415,7 @@ BEGIN
 				RETURN 0;
 			END
 
-	END	
-
-	DECLARE @InsertedInvoiceIds InvoiceId	
-	DELETE FROM @InsertedInvoiceIds
-
-	--INSERT INTO @InsertedInvoiceIds(
-	--	 [intHeaderId]
-	--	,[ysnUpdateAvailableDiscountOnly]
-	--	,[intDetailId]
-	--	,[ysnForDelete]
-	--	,[ysnFromPosting]
-	--	,[ysnPost]
-	--	,[ysnAccrueLicense]
-	--	,[strTransactionType]
-	--	,[strSourceTransaction]
-	--	,[ysnProcessed])
-	--SELECT
-	--	 [intHeaderId]						= ARIILD.[intInvoiceId]
-	--	,[ysnUpdateAvailableDiscountOnly]	= IFI.[ysnUpdateAvailableDiscount]
-	--	,[intDetailId]						= NULL
-	--	,[ysnForDelete]						= 0
-	--	,[ysnFromPosting]					= 0
-	--	,[ysnPost]							= ARIILD.[ysnPost]
-	--	,[ysnAccrueLicense]					= ARIILD.[ysnAccrueLicense]
-	--	,[strTransactionType]				= ARIILD.[strTransactionType]
-	--	,[strSourceTransaction]				= IFI.[strSourceTransaction]
-	--	,[ysnProcessed]						= 0
-	--	FROM
-	--	(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId], [strTransactionType], [ysnPost], [ysnAccrueLicense] FROM tblARPaymentIntegrationLogDetail WITH (NOLOCK)) ARIILD
-	--	INNER JOIN
-	--	(SELECT [intId], [ysnUpdateAvailableDiscount], [strSourceTransaction] FROM @PaymentsForInsert) IFI
-	--		ON IFI. [intId] = ARIILD.[intId] 
-	--WHERE
-	--		ISNULL(ARIILD.[ysnHeader], 0) = 1
-	--		AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
-	--		AND ISNULL(ARIILD.[intInvoiceId], 0) <> 0
-
-
-	EXEC	[dbo].[uspARUpdateInvoicesIntegrations]
-				 @InvoiceIds			= @InsertedInvoiceIds
-				,@UserId				= @UserId
-
-	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @InsertedInvoiceIds
+	END		
 		
 END
 
