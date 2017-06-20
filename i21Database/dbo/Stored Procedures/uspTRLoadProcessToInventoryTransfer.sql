@@ -139,6 +139,57 @@ END
 			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)))
 	GROUP BY TR.intLoadReceiptId, TR.intCompanyLocationId, DH.intCompanyLocationId
 
+	UNION ALL 
+
+	SELECT [dtmTransferDate]		= MIN(TL.dtmLoadDateTime)
+		,[strTransferType]          = 'Location to Location'
+		,[intSourceType]            = 3
+		,[strDescription]           = MIN(IC.strDescription)
+		,[intFromLocationId]        = TR.intCompanyLocationId
+		,[intToLocationId]          = DH.intCompanyLocationId
+		,[ysnShipmentRequired]      = 0
+		,[intStatusId]              = 1
+		,[intShipViaId]             = MIN(TL.intShipViaId)
+		,[intFreightUOMId]          = MIN(ItemUOM.intUnitMeasureId)
+		,[strActualCostId]			= (CASE WHEN MIN(TR.strOrigin) = 'Terminal' AND MIN(DH.strDestination) = 'Customer'
+												THEN MIN(TL.strTransaction)
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
+												THEN NULL
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
+												THEN MIN(TL.strTransaction)
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
+												THEN NULL
+											END)
+		,[intItemId]                = MIN(TR.intItemId)
+		,[intLotId]                 = NULL
+		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
+		,[dblQuantityToTransfer]    = SUM(CASE WHEN SP.strGrossOrNet = 'Gross' THEN TR.dblGross ELSE TR.dblNet END)
+		,[strNewLotId]              = NULL
+		,[intFromSubLocationId]     = NULL
+		,[intToSubLocationId]       = NULL
+		,[intFromStorageLocationId] = NULL
+		,[intToStorageLocationId]   = NULL
+		,[intInventoryTransferId]   = MIN(TR.intInventoryTransferId)
+		,[intSourceId]              = TR.intLoadReceiptId
+		,[strSourceId]				= MIN(TL.strTransaction)
+		,[strSourceScreenName]		= 'Transport Loads'
+    FROM	tblTRLoadHeader TL 	        
+			LEFT JOIN tblTRLoadDistributionHeader DH ON TL.intLoadHeaderId = DH.intLoadHeaderId		
+			LEFT JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+			LEFT JOIN vyuTRGetLoadBlendIngredient Blend ON Blend.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+			LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.intItemId = Blend.intIngredientItemId
+            LEFT JOIN vyuICGetItemStock IC
+			    ON IC.intItemId = TR.intItemId AND IC.intLocationId = TR.intCompanyLocationId   	
+			LEFT JOIN tblTRSupplyPoint SP 
+				ON SP.intSupplyPointId = TR.intSupplyPointId
+			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = TR.intItemId AND ItemUOM.ysnStockUnit = 1
+    WHERE	TL.intLoadHeaderId = @intLoadHeaderId
+		AND ISNULL(DD.strReceiptLink, '') = ''
+	    AND IC.strType != 'Non-Inventory'
+		AND TR.intCompanyLocationId != DH.intCompanyLocationId 
+		AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)
+	GROUP BY TR.intLoadReceiptId, TR.intCompanyLocationId, DH.intCompanyLocationId
+
 
 	UPDATE @TransferEntries
 	SET intInventoryTransferId = tblPatch.intInventoryTransferId
