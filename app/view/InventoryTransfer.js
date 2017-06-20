@@ -130,6 +130,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
+                                        hidden: true,
                                         itemId: 'btnPostPreview',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post Preview'
@@ -183,6 +184,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'container',
                                                         flex: 1,
+                                                        margin: '0 0 0 5',
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'
@@ -193,7 +195,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 flex: 1,
                                                                 itemId: 'txtTransferNumber',
                                                                 fieldLabel: 'Transfer No',
-                                                                labelWidth: 90,
                                                                 readOnly: true,
                                                                 blankText: 'Created on Save',
                                                                 emptyText: 'Created on Save'
@@ -202,8 +203,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 xtype: 'datefield',
                                                                 flex: 1,
                                                                 itemId: 'dtmTransferDate',
-                                                                fieldLabel: 'Transfer Date',
-                                                                labelWidth: 90
+                                                                fieldLabel: 'Transfer Date'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -216,9 +216,9 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     }
                                                                 ],
                                                                 flex: 1,
+                                                                hidden: true,
                                                                 itemId: 'cboTransferType',
                                                                 fieldLabel: 'Transfer Type',
-                                                                labelWidth: 90,
                                                                 displayField: 'strDescription',
                                                                 queryMode: 'local',
                                                                 valueField: 'strDescription'
@@ -241,7 +241,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 flex: 1,
                                                                 itemId: 'cboSourceType',
                                                                 fieldLabel: 'Source Type',
-                                                                labelWidth: 90,
                                                                 displayField: 'strSourceType',
                                                                 queryMode: 'local',
                                                                 valueField: 'intSourceType'
@@ -277,7 +276,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 flex: 1,
                                                                 itemId: 'cboTransferredBy',
                                                                 fieldLabel: 'Transferred By',
-                                                                labelWidth: 90,
                                                                 readOnly: true,
                                                                 displayField: 'strUserName',
                                                                 valueField: 'intEntityId'
@@ -318,7 +316,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 enableDrillDown: true,
                                                                 itemId: 'cboFromLocation',
                                                                 fieldLabel: 'From Location',
-                                                                labelWidth: 110,
+                                                                labelWidth: 120,
                                                                 displayField: 'strLocationName',
                                                                 valueField: 'strLocationName'
                                                             },
@@ -347,15 +345,9 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 enableDrillDown: true,
                                                                 itemId: 'cboToLocation',
                                                                 fieldLabel: 'To Location',
-                                                                labelWidth: 110,
+                                                                labelWidth: 120,
                                                                 displayField: 'strLocationName',
                                                                 valueField: 'strLocationName'
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkShipmentRequired',
-                                                                fieldLabel: 'Shipment Required',
-                                                                labelWidth: 110
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -375,15 +367,15 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 ],
                                                                 itemId: 'cboStatus',
                                                                 fieldLabel: 'Status',
-                                                                labelWidth: 110,
+                                                                labelWidth: 120,
                                                                 displayField: 'strStatus',
                                                                 valueField: 'strStatus'
                                                             },
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtDescription',
-                                                                fieldLabel: 'Description',
-                                                                labelWidth: 110
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkShipmentRequired',
+                                                                fieldLabel: 'Shipment Required',
+                                                                labelWidth: 120
                                                             }
                                                         ]
                                                     },
@@ -476,6 +468,22 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 ]
                                                             }
                                                         ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'container',
+                                                margin: '0 0 0 5',
+                                                layout: {
+                                                    type: 'hbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'textfield',
+                                                        flex: 1,
+                                                        itemId: 'txtDescription',
+                                                        fieldLabel: 'Description'
                                                     }
                                                 ]
                                             },
@@ -1100,6 +1108,16 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                 ]
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'glrecaptab',
+                                        itemId: 'pgePostPreview',
+                                        layout: 'fit',
+                                        title: 'Post Preview',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabPostPreview'
+                                        }
                                     },
                                     {
                                         xtype: 'panel',

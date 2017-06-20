@@ -65,38 +65,49 @@ namespace iRely.Inventory.BusinessLayer
             base.Add(entity);
         }
 
-        public SaveResult PostTransaction(Common.Posting_RequestModel Transfer, bool isRecap)
+        public async Task<Common.GLPostResult> PostTransaction(Common.Posting_RequestModel Transfer, bool isRecap)
         {
+            // Save the record first 
+            var glPostResult = new Common.GLPostResult();
+            glPostResult.Exception = new ServerException();
+
             // Save the record first 
             var result = _db.Save(false);
 
             if (result.HasError)
             {
-                return result;
+                glPostResult.BaseException = result.BaseException;
+                glPostResult.Exception = result.Exception;
+                glPostResult.HasError = result.HasError;
+                glPostResult.RowsAffected = result.RowsAffected;
+                glPostResult.strBatchId = null;
+
+                return glPostResult;
             }
 
             // Post the Adjustment transaction 
-            var postResult = new SaveResult();
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                string strBatchId; 
                 if (Transfer.isPost)
                 {
-                    db.PostInventoryTransfer(isRecap, Transfer.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = await db.PostInventoryTransfer(isRecap, Transfer.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnPostInventoryTransfer(isRecap, Transfer.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = await db.UnPostInventoryTransfer(isRecap, Transfer.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
-                postResult.HasError = false;
+                glPostResult.HasError = false;
+                glPostResult.strBatchId = strBatchId;
             }
             catch (Exception ex)
             {
-                postResult.BaseException = ex;
-                postResult.HasError = true;
-                postResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+                glPostResult.BaseException = ex;
+                glPostResult.HasError = true;
+                glPostResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
-            return postResult;
+            return glPostResult;
         }
 
         public async Task<SearchResult> SearchTransferDetails(GetParameter param)

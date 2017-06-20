@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IInventoryTransferBl : IBusinessLayer<tblICInventoryTransfer>
     {
-        SaveResult PostTransaction(Common.Posting_RequestModel Transfer, bool isRecap);
+        Task<Common.GLPostResult> PostTransaction(Common.Posting_RequestModel Transfer, bool isRecap);
         Task<SearchResult> SearchTransferDetails(GetParameter param);
     }
 }
