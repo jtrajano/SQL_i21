@@ -899,7 +899,6 @@ BEGIN TRY
 		   ,@ItemsToPost  AS ItemCostingTableType		   
 		   ,@strBatchId AS NVARCHAR(20)		   
 		   ,@intReceiptId AS INT
-		   ,@intInventoryReceiptItemId AS INT
 		   ,@intScaleTicketId AS INT
 		   ,@dblFreightRate NUMERIC(38, 20)
 		   ,@dblFreightAdjustment DECIMAL(7, 2)
@@ -1217,17 +1216,11 @@ BEGIN TRY
 		IF @intReceiptId IS NOT NULL 
 		BEGIN 
 			-- Work-around. Add dummy cost on the IR before converting it to Voucher
-			SET @intInventoryReceiptItemId=NULL
-			SELECT @intInventoryReceiptItemId=MIN(intInventoryReceiptItemId) 
-			FROM tblICInventoryReceiptItem 
-			WHERE intInventoryReceiptId = @intReceiptId AND dblUnitCost=0
-
 			UPDATE	ri
-			SET		ri.dblUnitCost = SV.[dblCashPrice]					
+			SET		ri.dblUnitCost = 1
+					,ri.dblLineTotal = 1
 			FROM	tblICInventoryReceiptItem ri
-			JOIN    @SettleVoucherCreate SV  ON SV.intItemId=ri.intItemId
-			WHERE	ri.intInventoryReceiptItemId=@intInventoryReceiptItemId 
-			AND     SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort=1
+			WHERE	ri.intInventoryReceiptId = @intReceiptId
 
 			EXEC uspICProcessToBill 
 					@intReceiptId
@@ -1241,10 +1234,11 @@ BEGIN TRY
 			END
 
 			-- Work-around. Put the cost back to zero. 
-			UPDATE	tblICInventoryReceiptItem
-			SET		dblUnitCost = 0					
-			FROM	tblICInventoryReceiptItem
-			WHERE	intInventoryReceiptItemId=@intInventoryReceiptItemId
+			UPDATE	ri
+			SET		ri.dblUnitCost = 0
+					,ri.dblLineTotal = 0
+			FROM	tblICInventoryReceiptItem ri
+			WHERE	ri.intInventoryReceiptId = @intReceiptId
 
 			-- Update the cost of the voucher detail. 
 			UPDATE	bd
