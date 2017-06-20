@@ -5296,6 +5296,7 @@
     <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTaskO1.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetProductionReport.sql" />
+    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
