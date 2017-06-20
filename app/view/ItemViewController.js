@@ -3583,20 +3583,32 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     onCommodityDrilldown: function(combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
+        if (!combo) return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        var commodityId = current ? current.get('intCommodityId') : null; 
+
+        if (!commodityId) {
             iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
         }
         else {
-            iRely.Functions.openScreen('Inventory.view.Commodity', combo.getValue());
+            iRely.Functions.openScreen('Inventory.view.Commodity', commodityId);
         }
     },
 
     onCategoryDrilldown: function(combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
+        if (!combo) return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        var categoryId = current ? current.get('intCategoryId') : null; 
+
+        if (!categoryId) {
             iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
         }
         else {
-            iRely.Functions.openScreen('Inventory.view.Category', combo.getValue());
+            iRely.Functions.openScreen('Inventory.view.Category', categoryId);
         }
     },
 
