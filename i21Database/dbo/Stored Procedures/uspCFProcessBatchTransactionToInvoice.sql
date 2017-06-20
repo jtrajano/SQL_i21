@@ -552,14 +552,16 @@ FROM @EntriesForInvoice
 	--IF (@ErrorMessage IS NULL)
 	--BEGIN
 	
-	DECLARE @succefulCount INT
+	--DECLARE @succefulCount INT
+	
 
-	SELECT intInvoiceId  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1
+	SELECT intInvoiceId  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1 
 
-	SELECT @succefulCount = ISNULL(Count(*),0) FROM tblARInvoiceIntegrationLogDetail
+	SELECT @SuccessfulCount = ISNULL(Count(*),0) FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1 
 
+	--SET @SuccessfulCount = @succefulCount;
 		
-	IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @succefulCount > 0)
+	IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @SuccessfulCount > 0)
 		BEGIN
 
 			IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
