@@ -3,6 +3,7 @@
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -24,11 +25,8 @@ DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3 
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
 
--- Get the default currency ID
+-- Get the default currency ID and other variables. 
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
-
--- Get the Inventory Receipt batch number
-DECLARE @strBatchId AS NVARCHAR(40) 
 		,@strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
@@ -226,7 +224,10 @@ BEGIN
 END
 
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+BEGIN 
+	SET @strBatchId = NULL 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+END 
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -517,7 +518,9 @@ BEGIN
 	ELSE 
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
-		EXEC dbo.uspCMPostRecap @GLEntries
+		EXEC dbo.uspGLPostRecap 
+				@GLEntries
+				,@intEntityUserSecurityId
 		COMMIT TRAN @TransactionName
 	END 
 END 
