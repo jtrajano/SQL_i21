@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRCalculateDiscountandShrink]
-@intDiscountScheduleCodeId INT
+	 @intDiscountScheduleCodeId INT
 	,@dblReading DECIMAL(24, 10)
 AS
 BEGIN TRY
@@ -79,31 +79,46 @@ BEGIN TRY
 			,dblShrink DECIMAL(24, 6)
 		 )
 
-		INSERT INTO @tblIncrementalTab 
-		(
-			 dblFrom
-			,dblTo
-			,dblIncrementBy
-			,dblDiscountAmount
-			,dblShrink
-		)
-		SELECT 
-		 dblRangeStartingValue
-		,dblRangeEndingValue
-		,dblIncrementValue
-		,dblDiscountValue
-		,dblShrinkValue 
-		FROM
-		(SELECT TOP 100 PERCENT
-			 intDiscountScheduleLineId
-			,dblRangeStartingValue
-			,dblRangeEndingValue
-			,dblIncrementValue
-			,dblDiscountValue
-			,dblShrinkValue
-		FROM tblGRDiscountScheduleLine
-		WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId
-		ORDER BY intDiscountScheduleLineId)t
+		 IF EXISTS(SELECT 1 FROM tblGRDiscountScheduleLine WHERE dblIncrementValue >0 AND intDiscountScheduleCodeId=@intDiscountScheduleCodeId)
+		 BEGIN
+				INSERT INTO @tblIncrementalTab 
+				(
+					 dblFrom
+					,dblTo
+					,dblIncrementBy
+					,dblDiscountAmount
+					,dblShrink
+				)
+				SELECT 
+				 dblRangeStartingValue
+				,dblRangeEndingValue
+				,dblIncrementValue
+				,dblDiscountValue
+				,dblShrinkValue 
+				FROM tblGRDiscountScheduleLine
+				WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId
+				ORDER BY dblRangeStartingValue
+		 END
+		 ELSE
+		 BEGIN
+				INSERT INTO @tblIncrementalTab 
+				(
+					 dblFrom
+					,dblTo
+					,dblIncrementBy
+					,dblDiscountAmount
+					,dblShrink
+				)
+				SELECT 
+				 dblRangeStartingValue
+				,dblRangeEndingValue
+				,dblIncrementValue
+				,dblDiscountValue
+				,dblShrinkValue 
+				FROM tblGRDiscountScheduleLine
+				WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId
+				ORDER BY dblRangeStartingValue DESC
+		 END
 
 		SELECT @intIncrementalKey = MIN(intIncrementalKey)
 		FROM @tblIncrementalTab
