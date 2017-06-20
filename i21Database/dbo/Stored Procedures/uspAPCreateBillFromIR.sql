@@ -461,13 +461,13 @@ BEGIN
 				[dblDiscount]			=	0,
 				[dblWithheld]			=	0,
 				[intStoreLocationId]	=	A.intLocationId,
-				[intPayToAddressId]		=	A.intShipFromId,
+				[intPayToAddressId]		=	ISNULL(NULLIF(Terms.intBillToId, 0),A.intShipFromId),
 				[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
 			FROM #tmpReceiptData A
 			OUTER APPLY 
 			(
 				SELECT 
-					C.intTermsId
+					C.intTermsId, B.intBillToId
 				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
 				WHERE B.intEntityVendorId = @vendorId
 			) Terms
