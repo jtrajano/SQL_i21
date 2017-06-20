@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARReComputePaymentAmounts]
-	@PaymentIds	PaymentId	READONLY
+	@PaymentIds	Id	READONLY
 AS
 
 BEGIN
@@ -20,7 +20,7 @@ SET
 FROM
 	tblARPaymentDetail ARPD
 WHERE 
-	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARPD.[intPaymentId])
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intId] = ARPD.[intPaymentId])
 						
 UPDATE ARPD
 SET
@@ -37,16 +37,16 @@ SET
 FROM
 	tblARPaymentDetail ARPD
 WHERE 
-	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARPD.[intPaymentId])
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intId] = ARPD.[intPaymentId])
 
 UPDATE ARP
 SET
 	-- ARP.[dblAmountPaid]			= PD.[dblPaymentTotal]
 	--,ARP.[dblBaseAmountPaid]		= PD.[dblBasePaymentTotal]
 	--,
-	 ARP.[dblUnappliedAmount]		= ARP.dblAmountPaid - (PD.[dblPaymentTotal])
-	,ARP.[dblBaseUnappliedAmount]	= ARP.dblBaseAmountPaid - (PD.[dblBasePaymentTotal])
-FROM tblARPayment ARP
+	 ARP.[dblUnappliedAmount]		= ARP.[dblPaymentTotal] - (PD.[dblPaymentTotal])
+	,ARP.[dblBaseUnappliedAmount]	= ARP.[dblBasePaymentTotal] - (PD.[dblBasePaymentTotal])
+FROM tblARPayment P
 INNER JOIN 
 	(SELECT
 		 [intPaymentId]			= [intPaymentId]
@@ -55,8 +55,8 @@ INNER JOIN
 	FROM
 		tblARPaymentDetail GROUP BY intPaymentId
 	) PD
-		ON ARP.[intPaymentId] = PD.[intPaymentId]
+		ON P.[intPaymentId] = PD.[intPaymentId]
 WHERE
-	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intId] = ARPD.[intIPaymentId])
 
 END
