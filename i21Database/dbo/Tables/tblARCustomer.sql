@@ -99,6 +99,7 @@
 	[ysnApprovalsNotRequired] BIT DEFAULT(0),
 	[intTermsId]          INT            NULL,
     [intPaymentMethodId]        INT            NULL,
+	[dtmLastServiceCharge] DATETIME NULL,
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
