@@ -41,6 +41,8 @@ DECLARE @vendorId AS INT;
 DECLARE @intProducerId AS INT;
 DECLARE @intReceiptChargeId AS INT;
 DECLARE @thirdPartyVoucherId AS INT;
+DECLARE @receiptCurrency INT;
+DECLARE @chargeCurrency INT;
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -50,7 +52,8 @@ CREATE TABLE #tmpReceiptIds (
 CREATE TABLE #tmpReceiptBillIds (
 	[intBillId] [INT] PRIMARY KEY,
 	[intInventoryReceiptId] INT,
-	[intEntityVendorId] INT
+    [intEntityVendorId] INT,
+    [intCurrencyId] INT
 	UNIQUE ([intBillId])
 );
 
@@ -292,6 +295,7 @@ BEGIN
 	SELECT 
 		@receiptLocation = intLocationId 
 		,@vendorId = intEntityVendorId
+		,@receiptCurrency = intCurrencyId
 	FROM #tmpReceiptData WHERE intInventoryReceiptId = @receiptId
 
 	SET @location = @receiptLocation; 
@@ -436,7 +440,7 @@ BEGIN
 				[intSubCurrencyCents]
 		
 			)
-			OUTPUT inserted.intBillId, @receiptId, @vendorId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId)
+			OUTPUT inserted.intBillId, @receiptId, @vendorId, inserted.intCurrencyId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId, intCurrencyId)
 			SELECT
 				[intEntityVendorId]		=	@vendorId,
 				[strVendorOrderNumber] 	=	A.strVendorRefNo,
@@ -755,7 +759,7 @@ BEGIN
 				SELECT ysnPrice FROM #tmpReceiptChargeData RC
 				WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 			) C   
-			WHERE A.intInventoryReceiptId = @receiptId AND A.intEntityVendorId = @vendorId
+			WHERE A.intInventoryReceiptId = @receiptId AND A.intEntityVendorId = @vendorId AND A.intCurrencyId = @receiptCurrency
 		END    
 
 		DELETE FROM #tmpReceiptDetailData WHERE intInventoryReceiptItemId = @receiptDetailId
@@ -777,17 +781,18 @@ BEGIN
 
 		   SELECT @intThirdPartyVendorId = (CASE WHEN (A.intEntityVendorId != ISNULL(B.intEntityVendorId,A.intEntityVendorId)) THEN B.intEntityVendorId ELSE A.intEntityVendorId END), 
 							   @ysnThirdPartyVendor = (CASE WHEN (A.intEntityVendorId != ISNULL(B.intEntityVendorId,A.intEntityVendorId)) THEN 1 ELSE 0 END),
-							   @ysnPrice = (CASE WHEN (A.intEntityVendorId != ISNULL(B.intEntityVendorId,A.intEntityVendorId)) AND ysnPrice > 0 THEN 1 ELSE 0 END)
+							   @ysnPrice = (CASE WHEN (A.intEntityVendorId != ISNULL(B.intEntityVendorId,A.intEntityVendorId)) AND ysnPrice > 0 THEN 1 ELSE 0 END),
+							   @chargeCurrency = ISNULL(NULLIF(B.intCurrencyId,0),A.intCurrencyId)
 						FROM #tmpReceiptData A
 						INNER JOIN dbo.#tmpReceiptChargeData B ON  A.intInventoryReceiptId = B.intInventoryReceiptId 
 						WHERE intInventoryReceiptChargeId = @intReceiptChargeId 
-						AND A.intInventoryReceiptId = @receiptId
+						--AND A.intInventoryReceiptId = @receiptId
 						--AND ISNULL(B.dblAmountBilled,0) < B.dblAmount
 			
 			SET @chargeCounter = @chargeCounter + 1;
 
 			--MAKE SURE VOUCHER WAS NOT CREATED YET			
-			IF NOT EXISTS(SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intThirdPartyVendorId)
+			IF NOT EXISTS(SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intThirdPartyVendorId AND intCurrencyId = @chargeCurrency)
 				AND @intThirdPartyVendorId IS NOT NULL --AND @ysnThirdPartyVendor > 0
 			BEGIN
 				EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
@@ -819,7 +824,7 @@ BEGIN
 						[intPayToAddressId],
 						[intSubCurrencyCents]
 					)
-					OUTPUT inserted.intBillId, @receiptId, @intThirdPartyVendorId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId)
+					OUTPUT inserted.intBillId, @receiptId, @intThirdPartyVendorId, inserted.intCurrencyId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId, intCurrencyId)
 					SELECT
 						[intEntityVendorId]		=	@intThirdPartyVendorId
 						,[strVendorOrderNumber] =	A.strVendorRefNo
@@ -831,7 +836,7 @@ BEGIN
 						,[dtmDateCreated] 		=	GETDATE()
 						,[dtmBillDate] 			=	GETDATE()
 						,[dtmDueDate] 			=	GETDATE()
-						,[intCurrencyId]		=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT))
+						,[intCurrencyId]        =   @chargeCurrency
 						,[intAccountId] 		=	@APAccount
 						,[strBillId]			=	@generatedBillRecordId
 						,[strReference] 		=	A.strBillOfLading
@@ -851,6 +856,7 @@ BEGIN
 					(
 						SELECT 
 								C.intTermsId
+								,B.intCurrencyId
 						FROM	tblAPVendor B INNER JOIN tblEMEntityLocation C 
 									ON B.intEntityId = C.intEntityId 
 									AND C.ysnDefaultLocation = 1
