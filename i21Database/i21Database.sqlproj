@@ -5297,6 +5297,8 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTaskO1.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetProductionReport.sql" />
     <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
