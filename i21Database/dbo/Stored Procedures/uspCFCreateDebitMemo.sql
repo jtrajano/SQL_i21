@@ -10,7 +10,7 @@ BEGIN
 
 	BEGIN TRY 
 		----------------VARIABLES---------------
-		DECLARE @EntriesForInvoice		AS InvoiceIntegrationStagingTable
+		DECLARE @EntriesForInvoice		AS InvoiceStagingTable
 		DECLARE @TaxDetails				AS LineItemTaxDetailStagingTable 
 		DECLARE @companyLocationId		INT = 0
 		DECLARE @accountId				INT = 0
@@ -23,8 +23,7 @@ BEGIN
 		SET @executedLine = 1
 		CREATE TABLE #tblCFInvoiceResult	
 		(
-			 intId							INT
-			,intDebitMemoId					INT
+			intDebitMemoId					INT
 		)
 		----------------------------------------
 
@@ -42,12 +41,12 @@ BEGIN
 		----------------------------------------
 
 		--------------INVOICE FEE LIST--------------
-		SET @executedLine = 4
+		--SET @executedLine = 4
 		
 		----------------------------------------
 
 		----------ENTRIES FOR INVOICE-----------
-		SET @executedLine = 5
+		SET @executedLine = 4
 		INSERT INTO @EntriesForInvoice(
 			 [strTransactionType]
 			,[strSCInvoiceNumber]		
@@ -410,23 +409,209 @@ BEGIN
 		--,intSalesPersonId
 		----------------------------------------
 
-		--SELECT * FROM @EntriesForInvoice
+		
+		SET @executedLine = 6
+		DECLARE @InvoiceEntriesTEMP	InvoiceStagingTable
+		INSERT INTO @InvoiceEntriesTEMP(
+		[intId]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[intInvoiceId]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intCurrencyId]
+		,[intTermId]
+		,[dtmDate]
+		,[dtmDueDate]
+		,[dtmShipDate]
+		,[intEntitySalespersonId]
+		,[intFreightTermId]
+		,[intShipViaId]
+		,[intPaymentMethodId]
+		,[strInvoiceOriginId]
+		,[ysnUseOriginIdAsInvoiceNumber]
+		,[strPONumber]
+		,[strBOLNumber]
+		,[strDeliverPickup]
+		,[strComments]
+		,[intShipToLocationId]
+		,[intBillToLocationId]
+		,[ysnTemplate]
+		,[ysnForgiven]
+		,[ysnCalculated]
+		,[ysnSplitted]
+		,[intPaymentId]
+		,[intSplitId]
+		,[intLoadDistributionHeaderId]
+		,[strActualCostId]
+		,[intShipmentId]
+		,[intTransactionId]
+		,[intEntityId]
+		,[ysnResetDetails]
+		,[ysnPost]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[ysnInventory]
+		,[strItemDescription]
+		,[intItemUOMId]
+		,[dblQtyOrdered]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblPrice]
+		,[ysnRefreshPrice]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[dblLicenseAmount]
+		,[intTaxGroupId]
+		,[ysnRecomputeTax]
+		,[intSCInvoiceId]
+		,[strSCInvoiceNumber]
+		,[intInventoryShipmentItemId]
+		,[strShipmentNumber]
+		,[intSalesOrderDetailId]
+		,[strSalesOrderNumber]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intShipmentPurchaseSalesContractId]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]
+		,[ysnClearDetailTaxes]					
+		,[intTempDetailIdForTaxes]
+		,[strType]
+		,[ysnUpdateAvailableDiscount]
+		,[strItemTermDiscountBy]
+		,[dblItemTermDiscount]
+		,[dtmPostDate])
+		SELECT 
+		ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[intInvoiceId]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intCurrencyId]
+		,[intTermId]
+		,[dtmDate]
+		,[dtmDueDate]
+		,[dtmShipDate]
+		,[intEntitySalespersonId]
+		,[intFreightTermId]
+		,[intShipViaId]
+		,[intPaymentMethodId]
+		,[strInvoiceOriginId]
+		,[ysnUseOriginIdAsInvoiceNumber]
+		,[strPONumber]
+		,[strBOLNumber]
+		,[strDeliverPickup]
+		,[strComments]
+		,[intShipToLocationId]
+		,[intBillToLocationId]
+		,[ysnTemplate]
+		,[ysnForgiven]
+		,[ysnCalculated]
+		,[ysnSplitted]
+		,[intPaymentId]
+		,[intSplitId]
+		,[intLoadDistributionHeaderId]
+		,[strActualCostId]
+		,[intShipmentId]
+		,[intTransactionId]
+		,[intEntityId]
+		,[ysnResetDetails]
+		,[ysnPost]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[ysnInventory]
+		,[strItemDescription]
+		,[intItemUOMId]
+		,[dblQtyOrdered]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblPrice]
+		,[ysnRefreshPrice]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[dblLicenseAmount]
+		,[intTaxGroupId]
+		,[ysnRecomputeTax]
+		,[intSCInvoiceId]
+		,[strSCInvoiceNumber]
+		,[intInventoryShipmentItemId]
+		,[strShipmentNumber]
+		,[intSalesOrderDetailId]
+		,[strSalesOrderNumber]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intShipmentPurchaseSalesContractId]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]
+		,[ysnClearDetailTaxes]					
+		,[intTempDetailIdForTaxes]
+		,[strType]
+		,[ysnUpdateAvailableDiscount]
+		,[strItemTermDiscountBy]
+		,[dblItemTermDiscount]
+		,[dtmPostDate]
+		FROM @EntriesForInvoice
+
+
+		SELECT dblPrice,dblQtyShipped,* FROM @EntriesForInvoice
+		SELECT dblPrice,dblQtyShipped,* FROM @InvoiceEntriesTEMP
 
 		----------CREATE DEBIT MEMOS------------
-		SET @executedLine = 6
-		EXEC [dbo].[uspARProcessInvoices]
-		 @InvoiceEntries	 = @EntriesForInvoice
+
+		DECLARE @LogId INT
+
+		SET @executedLine = 7
+		EXEC [dbo].[uspARProcessInvoicesByBatch]
+		 @InvoiceEntries	= @InvoiceEntriesTEMP
 		,@LineItemTaxEntries = @TaxDetails
 		,@UserId			= 1
 		,@GroupingOption	= 11
 		,@RaiseError		= 1
-		,@ErrorMessage		= @ErrorMessage		OUTPUT
-		,@CreatedIvoices	= @CreatedIvoices	OUTPUT
-		,@UpdatedIvoices	= @UpdatedIvoices	OUTPUT
+		,@ErrorMessage		= @ErrorMessage OUTPUT
+		,@LogId				= @LogId OUTPUT
+
+		
+		--EXEC [dbo].[uspARProcessInvoices]
+		-- @InvoiceEntries	 = @InvoiceEntriesTEMP
+		--,@LineItemTaxEntries = @TaxDetails
+		--,@UserId			= 1
+		--,@GroupingOption	= 11
+		--,@RaiseError		= 1
+		--,@ErrorMessage		= @ErrorMessage		OUTPUT
+		--,@CreatedIvoices	= @CreatedIvoices	OUTPUT
+		--,@UpdatedIvoices	= @UpdatedIvoices	OUTPUT
 		----------------------------------------
 
 		
-
+		SET @executedLine = 8
 		DECLARE @intInvoiceResultId			INT
 		DECLARE @dblTotalQuantity			NUMERIC(18,6)
 		DECLARE @strInvoiceReportNumber		NVARCHAR(MAX)
@@ -437,40 +622,53 @@ BEGIN
 		DECLARE @dblFeeAmount				NUMERIC(18,6)
 
 		---------INVOICE PROCESS RESULT---------
-		SET @executedLine = 7
+		
+		SET @executedLine = 9
+		DECLARE @SuccessfulCount INT
+
+		SET @SuccessfulCount = 0;
+
 		INSERT INTO #tblCFInvoiceResult
 		(
-			intId,
 			intDebitMemoId
 		)
-		SELECT RecordKey , Record 
-		FROM fnCFSplitString(@CreatedIvoices,',')
+		SELECT intInvoiceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1 
+
+		SELECT @SuccessfulCount = Count(*) FROM #tblCFInvoiceResult
+
+		--INSERT INTO #tblCFInvoiceResult
+		--(
+		--	intId,
+		--	intDebitMemoId
+		--)
+		--SELECT RecordKey , Record 
+		--FROM fnCFSplitString(@CreatedIvoices,',')
 
 		------------LOOP CUST GROUP------------
-		SET @executedLine = 8
+		SET @executedLine = 10
 		WHILE (EXISTS(SELECT 1 FROM #tblCFInvoiceResult))
 		---------------------------------------
 		BEGIN
 			
 			
-			SET @executedLine = 9
+			SET @executedLine = 11
 			SELECT	TOP 1 
 			@intInvoiceResultId = intDebitMemoId
 			FROM #tblCFInvoiceResult
 
-
+			SET @executedLine = 12
 			SELECT TOP 1 
 			 @strInvoiceNumber = strInvoiceNumber
 			,@intEntityCustomerId = intEntityCustomerId	
 			FROM tblARInvoice 
 			WHERE intInvoiceId = @intInvoiceResultId
 
+			SET @executedLine = 13
 			SELECT TOP 1 
 			 @strInvoiceReportNumber = strTempInvoiceReportNumber 
 			,@dblTotalQuantity = SUM(dblQuantity)
 			,@dblAccountTotalAmount = dblAccountTotalAmount
 			,@dblAccountTotalDiscount = dblAccountTotalDiscount
-		
 			FROM tblCFInvoiceStagingTable 
 			WHERE intCustomerId = @intEntityCustomerId
 			GROUP BY
@@ -482,13 +680,13 @@ BEGIN
 			,dtmInvoiceDate
 			,intSalesPersonId
 
-
+			SET @executedLine = 14
 			SELECT TOP 1 
 			@dblFeeAmount = dblFeeTotalAmount
 			FROM tblCFInvoiceFeeStagingTable 
 			WHERE intCustomerId = @intEntityCustomerId
 			
-			SET @executedLine = 10
+			SET @executedLine = 15
 			UPDATE tblCFInvoiceProcessResult
 			SET 
 			 strInvoiceId				= @strInvoiceNumber
@@ -504,7 +702,7 @@ BEGIN
 			WHERE intCustomerId = @intEntityCustomerId
 			
 
-			SET @executedLine = 11
+			SET @executedLine = 16
 			DELETE FROM #tblCFInvoiceResult 
 			WHERE intDebitMemoId = @intInvoiceResultId
 		END
@@ -513,19 +711,19 @@ BEGIN
 		----------------------------------------
 		
 		----------DROP TEMPORARY TABLE----------
-		SET @executedLine = 12
+		--SET @executedLine = 12
 		----------------------------------------
 
 	END TRY
 	BEGIN CATCH
 
 		------------SET ERROR MESSAGE-----------
-		SET @executedLine = 13
+		--SET @executedLine = 13
 		DECLARE @CatchErrorMessage NVARCHAR(4000);  
 		DECLARE @CatchErrorSeverity INT;  
 		DECLARE @CatchErrorState INT;  
   
-		SET @executedLine = 14
+		--SET @executedLine = 14
 		SELECT   
 			@CatchErrorMessage = 'Line:' + (LTRIM(RTRIM(STR(@executedLine)))) + ' Process Debit Memo  > ' + ERROR_MESSAGE(),  
 			@CatchErrorSeverity = ERROR_SEVERITY(),  
@@ -539,8 +737,8 @@ BEGIN
 		----------------------------------------
 
 		----------DROP TEMPORARY TABLE----------
-		SET @executedLine = 15
-		DROP TABLE tblCFInvoiceStagingTable
+		--SET @executedLine = 15
+		--DROP TABLE tblCFInvoiceStagingTable
 		----------------------------------------
 	
 	END CATCH
