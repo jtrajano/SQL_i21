@@ -14,7 +14,7 @@ FROM (
 	CD.intContractSeq,
 	strEntityName = EM.strName,
 	intEntityId = EM.intEntityId,
-	intPartyEntityId = (CASE 
+	intPartyEntityId = ISNULL((CASE 
 						WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 1
 						THEN EMPD.intEntityId
 						ELSE CASE 
@@ -22,7 +22,7 @@ FROM (
 								THEN EMPH.intEntityId
 							ELSE EM.intEntityId
 							END
-						END),
+						END),0),
 	strPaidTo = (CASE 
 				 WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 1
 					THEN EMPD.strName
