@@ -16,7 +16,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedUnitMeasure',
-        'Inventory.store.BufferedItemStockUOMViewTotals'
+        'Inventory.store.BufferedItemStockUOMViewTotals',
+        'GeneralLedger.controls.RecapTab'        
     ],
 
     stores: {
@@ -139,7 +140,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
 
     formulas: {
         intCurrencyId: function(get) {
-            return get('current.intCurrencyId');
+            //Since transfer does not have a currency, return the functional currency. 
+            return i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         },
         
         destinationWeightsDisabled: function(get) {

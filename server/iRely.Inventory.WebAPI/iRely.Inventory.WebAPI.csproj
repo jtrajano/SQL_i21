@@ -254,8 +254,8 @@
       <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=17.2.6379.14928, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\iRely.Common.17.2.6379.14928\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=17.2.6379.35258, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\iRely.Common.17.2.6379.35258\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="iRely.Reports.Helper, Version=17.1.6353.624, Culture=neutral, PublicKeyToken=null">

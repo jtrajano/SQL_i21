@@ -249,6 +249,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
+                                "hidden": true,
                                 "icon": null,
                                 "itemId": "btnPostPreview",
                                 "layout|flex": null,
@@ -375,7 +376,8 @@
                                                 "container|align": "stretch",
                                                 "designer|displayName": "container",
                                                 "layout": "vbox",
-                                                "layout|flex": 1
+                                                "layout|flex": 1,
+                                                "margin": "0 0 0 5"
                                             },
                                             "name": "MyContainer13",
                                             "designerId": "2dee4c8e-b245-4517-83c9-6f91c5cb2e41",
@@ -396,7 +398,7 @@
                                                         "hidden": null,
                                                         "hideTrigger": null,
                                                         "itemId": "txtTransferNumber",
-                                                        "labelWidth": 90,
+                                                        "labelWidth": null,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "name": null,
@@ -429,7 +431,7 @@
                                                         "fieldLabel": "Transfer Date",
                                                         "hideTrigger": null,
                                                         "itemId": "dtmTransferDate",
-                                                        "labelWidth": 90,
+                                                        "labelWidth": null,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": null,
@@ -472,10 +474,10 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strDescription",
                                                         "fieldLabel": "Transfer Type",
-                                                        "hidden": null,
+                                                        "hidden": true,
                                                         "hideTrigger": null,
                                                         "itemId": "cboTransferType",
-                                                        "labelWidth": 90,
+                                                        "labelWidth": null,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "name": null,
@@ -532,7 +534,7 @@
                                                         "hidden": null,
                                                         "hideTrigger": null,
                                                         "itemId": "cboSourceType",
-                                                        "labelWidth": 90,
+                                                        "labelWidth": null,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "name": null,
@@ -602,7 +604,7 @@
                                                         "hidden": null,
                                                         "hideTrigger": null,
                                                         "itemId": "cboTransferredBy",
-                                                        "labelWidth": 90,
+                                                        "labelWidth": null,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "name": null,
@@ -686,7 +688,7 @@
                                                         "hidden": null,
                                                         "hideTrigger": null,
                                                         "itemId": "cboFromLocation",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 120,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
@@ -756,7 +758,7 @@
                                                         "hidden": null,
                                                         "hideTrigger": null,
                                                         "itemId": "cboToLocation",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 120,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "margin": null,
@@ -790,23 +792,6 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Shipment Required",
-                                                        "itemId": "chkShipmentRequired",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyCheckbox4",
-                                                    "designerId": "e2853660-7bfe-49b1-881f-5f7453f5ea3f"
-                                                },
-                                                {
                                                     "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
@@ -837,7 +822,7 @@
                                                         "hidden": null,
                                                         "hideTrigger": null,
                                                         "itemId": "cboStatus",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 120,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
@@ -864,20 +849,21 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Description",
-                                                        "itemId": "txtDescription",
-                                                        "labelWidth": 110,
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Shipment Required",
+                                                        "itemId": "chkShipmentRequired",
+                                                        "labelWidth": 120,
                                                         "layout|flex": null
                                                     },
-                                                    "name": "MyTextField22",
-                                                    "designerId": "41b9c35c-73f3-4c0e-a119-2f601680bc73"
+                                                    "name": "MyCheckbox4",
+                                                    "designerId": "e2853660-7bfe-49b1-881f-5f7453f5ea3f"
                                                 }
                                             ]
                                         },
@@ -1082,6 +1068,47 @@
                                     ]
                                 },
                                 {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "designer|displayName": "container",
+                                        "height": null,
+                                        "layout": "hbox",
+                                        "layout|flex": null,
+                                        "layout|margins": null,
+                                        "margin": "0 0 0 5",
+                                        "maxHeight": null,
+                                        "padding": null
+                                    },
+                                    "name": "MyContainer40",
+                                    "designerId": "e7bab3d6-ee02-4816-b246-fdc046e9dcd6",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.field.Text",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "fieldLabel": "Description",
+                                                "height": null,
+                                                "itemId": "txtDescription",
+                                                "layout|flex": 1,
+                                                "maxHeight": null,
+                                                "padding": null
+                                            },
+                                            "name": "MyTextField1",
+                                            "designerId": "41b9c35c-73f3-4c0e-a119-2f601680bc73"
+                                        }
+                                    ]
+                                },
+                                {
                                     "type": "Ext.grid.Panel",
                                     "reference": {
                                         "name": "items",
@@ -1183,7 +1210,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter1",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2304,6 +2331,37 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "glrecaptab",
+                                "itemId": "pgePostPreview",
+                                "layout": "fit",
+                                "title": "Post Preview"
+                            },
+                            "name": "MyPanel37",
+                            "designerId": "316afac4-95d9-497f-9172-ad97f97e56a4",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabPostPreview"
+                                    },
+                                    "name": "TabConfig3",
+                                    "designerId": "5abdf437-b4fc-46d5-aac0-dd0adb98ce52"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
                                 "itemId": "pgeAuditLog",
                                 "layout": "fit",
                                 "title": "Audit Log"
@@ -2353,7 +2411,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging116",
+                    "name": "statusbarpaging1",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

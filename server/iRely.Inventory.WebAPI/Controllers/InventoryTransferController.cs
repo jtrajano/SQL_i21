@@ -23,15 +23,16 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpPost]
-        public HttpResponseMessage PostTransaction(BusinessLayer.Common.Posting_RequestModel transfer)
+        public async Task<HttpResponseMessage> PostTransaction(BusinessLayer.Common.Posting_RequestModel transfer)
         {
-            var result = _bl.PostTransaction(transfer, transfer.isRecap);
+            var result = await _bl.PostTransaction(transfer, transfer.isRecap);
 
             var httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;
             return Request.CreateResponse(httpStatusCode, new
             {
                 data = new
                 {
+                    strBatchId = result.strBatchId,
                     strTransactionId = transfer.strTransactionId
                 },
                 success = result.HasError ? false : true,

@@ -26,12 +26,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             btnUnpost: {
                 hidden: '{hideUnpostButton}'
             },
-            btnPostPreview: {
-                hidden: '{hidePostButton}'
-            },
-            btnUnpostPreview: {
-                hidden: '{hideUnpostButton}'  
-            },
             btnAddItem: {
                 hidden: '{current.ysnPosted}'
             },
@@ -85,23 +79,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 store: '{status}',
                 readOnly: '{current.ysnPosted}'
             },
-
-//            cboShipVia: {
-//                value: '{current.intShipViaId}',
-//                store: '{shipVia}',
-//                readOnly: '{current.ysnPosted}'
-//            },
-//            cboFreightUOM: {
-//                value: '{current.intFreightUOMId}',
-//                store: '{uom}',
-//                readOnly: '{current.ysnPosted}'
-//            },
-//            txtTaxAmount: '{current.dblTaxAmount}',
-//
-//            pnlFreight: {
-//                hidden: '{hideOnStorageToStorage}'
-//            },
-
             grdInventoryTransfer: {
                 readOnly: '{current.ysnPosted}',
                 colSourceNumber: {
@@ -247,18 +224,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     }
                 },
                 colTransferQty: 'dblQuantity',
-                //colTransferUOM: {
-                //    dataIndex: 'strUnitMeasure',
-                //    editor: {
-                //        readOnly: '{checkLotExists}',
-                //        store: '{itemUOM}',
-                //        defaultFilters: [{
-                //            column: 'intItemId',
-                //            value: '{grdInventoryTransfer.selection.intItemId}',
-                //            conjunction: 'and'
-                //        }]
-                //    }
-                //},
                 colNewLotID: {
                     dataIndex: 'strNewLotId'
                 },
@@ -267,21 +232,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'ysnWeights',
                     disabled: '{destinationWeightsDisabled}'
                 }
-//                colTaxCode: {
-//                    dataIndex: 'strTaxCode',
-//                    editor: {
-//                        store: '{taxCode}'
-//                    }
-//                },
-//                colTaxAmount: 'dblTaxAmount',
-//                colFreightRate: {
-//                    dataIndex: 'dblFreightRate',
-//                    hidden: '{hideOnStorageToStorage}'
-//                },
-//                colFreightAmount: {
-//                    dataIndex: 'dblFreightAmount',
-//                    hidden: '{hideOnStorageToStorage}'
-//                }
             }
         }
     },
@@ -612,13 +562,16 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 
         var me = this;
         var win = btnPost.up('window');
-        var context = win.context;
-        var current = win.viewModel.data.current;
+        var context = win ? win.context : null;
+        var current = context ? win.viewModel.data.current : null;
 
         if (!current){
             btnPost.enable();
             return;
         }        
+
+        var tabInventoryTransfer = win.down('#tabInventoryTransfer');
+        var activeTab = tabInventoryTransfer ? tabInventoryTransfer.getActiveTab() : null;        
 
         var doPost = function (){
             ic.utils.ajax({
@@ -633,6 +586,14 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             .subscribe(
                 function(successResponse) {
                     win.context.data.load();
+                    // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
+                    if (activeTab && activeTab.itemId == 'pgePostPreview') {
+                        var cfg = {
+                            isAfterPostCall: true,
+                            ysnPosted: current.get('ysnPosted') ? true : false
+                        };
+                        me.doPostPreview(win, cfg);
+                    }
                     btnPost.enable();
                 }
                 ,function(failureResponse) {
@@ -668,68 +629,77 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
     },
 
-    onRecapClick: function(button, e, eOpts) {
+    doPostPreview: function (win, cfg) {
         var me = this;
-        var win = button.up('window');
+
+        if (!win) { return; }
+        cfg = cfg ? cfg : {};
+
+        var isAfterPostCall = cfg.isAfterPostCall;
+        var ysnPosted = cfg.ysnPosted;
+
         var context = win.context;
+        var current = win.viewModel.data.current;
+        var grdInventoryTransfer = win.down('#grdInventoryTransfer');
 
-        var doRecap = function(recapButton, currentRecord){
+        //Deselect all rows in Item Grid
+        if (grdInventoryTransfer) { grdInventoryTransfer.getSelectionModel().deselectAll(); }
 
-            // Call the buildRecapData to generate the recap data
-            CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/InventoryTransfer/PostTransaction',
-                strTransactionId: currentRecord.get('strTransferNo'),
-                ysnPosted: currentRecord.get('ysnPosted'),
-                scope: me,
-                success: function(){
-                    // If data is generated, show the recap screen.
-                    var showPostButton = true;
-                    if (currentRecord.get('intSourceType') === 3){
-                        showPostButton = false;
-                    }
-
-                    CashManagement.common.BusinessRules.showRecap({
-                        strTransactionId: currentRecord.get('strTransferNo'),
-                        ysnPosted: currentRecord.get('ysnPosted'),
-                        dtmDate: currentRecord.get('dtmTransferDate'),
-                        strCurrencyId: null,
-                        dblExchangeRate: 1,
-                        scope: me,
-                        showPostButton: showPostButton,
-                        showUnpostButton: showPostButton,
-                        postCallback: function(){
-                            me.onPostClick(recapButton);
-                        },
-                        unpostCallback: function(){
-                            me.onPostClick(recapButton);
-                        }
-                    });
+        var doRecap = function () {
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryTransfer/PostTransaction',
+                params: {
+                    strTransactionId: current.get('strTransferNo'),
+                    isPost: isAfterPostCall ? ysnPosted : current.get('ysnPosted') ? false : true,
+                    isRecap: true
                 },
-                failure: function(message){
-                    // Show why recap failed.
-                    var msgBox = iRely.Functions;
-                    msgBox.showCustomDialog(
-                        msgBox.dialogType.ERROR,
-                        msgBox.dialogButtonType.OK,
-                        message
-                    );
+                method: 'post'
+            })
+            .subscribe(
+                function (successResponse) {
+                    var postResult = Ext.decode(successResponse.responseText);
+                    var batchId = postResult.data.strBatchId;
+                    if (batchId) {
+                        me.bindRecapGrid(batchId);
+                    }
                 }
-            });
+                , function (failureResponse) {
+                    // Show Post Preview failed.
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                }
+            )
         };
 
-        // If there is no data change, do the post.
-        if (!context.data.hasChanges()){
-            doRecap(button, win.viewModel.data.current);
-            return;
+        // Save any unsaved data first before doing the post. 
+        if (context.data.hasChanges()) {
+            context.data.validator.validateRecord({ window: win }, function(valid) {
+                // If records are valid, continue with the save. 
+                if (valid){
+                    context.data.saveRecord({
+                        successFn: function () {
+                            doRecap();             
+                        }
+                    });
+                }
+            });            
         }
+        else {
+            doRecap();
+        }        
+    },     
 
-        // Save has data changes first before doing the post.
-        context.data.saveRecord({
-            successFn: function() {
-                doRecap(button, win.viewModel.data.current);
-            }
-        });
-    }, 
+    onTransferTabChange: function (tabPanel, newCard, oldCard, eOpts) {
+        var me = this;
+        var win = tabPanel.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        switch (newCard.itemId) {
+            case 'pgePostPreview':
+                me.doPostPreview(win);
+        }
+    },    
 
     onItemHeaderClick: function(menu, column) {
         //var grid = column.initOwnerCt.grid;
@@ -843,18 +813,15 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             "#btnUnpost": {
                 click: this.onPostClick
             },
-            "#btnPostPreview": {
-                click: this.onRecapClick
-            },
-            "#btnUnpostPreview": {
-                click: this.onRecapClick
-            },
             "#btnViewItem": {
                 click: this.onViewItemClick
             },
             "#grdInventoryTransfer": {
                 selectionchange: this.onDetailSelectionChange
-            }
+            },
+            "#tabInventoryTransfer": {
+                tabChange: this.onTransferTabChange
+            }             
         });
     }
 });
