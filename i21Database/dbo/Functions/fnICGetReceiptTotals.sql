@@ -32,7 +32,7 @@ BEGIN
 		-- 2. (Receipt >> Vendor Id) = (Charge >> Vendor Id)
 		SELECT @totalCharges = SUM(
 					CASE 
-						WHEN Receipt.intCurrencyId = ReceiptCharge.intCurrencyId THEN 
+						WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
 							CASE 
 								WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblAmount 
 								WHEN Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblAmount 
@@ -51,7 +51,7 @@ BEGIN
 		SELECT	@totalChargesTax = 
 				SUM (
 					CASE 
-						WHEN Receipt.intCurrencyId = ReceiptCharge.intCurrencyId THEN 
+						WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
 							CASE 
 								WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblTax 
 								WHEN Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblTax 
