@@ -899,6 +899,11 @@ BEGIN TRY
 		   ,@ItemsToPost  AS ItemCostingTableType		   
 		   ,@strBatchId AS NVARCHAR(20)		   
 		   ,@intReceiptId AS INT
+		   ,@intScaleTicketId AS INT
+		   ,@dblFreightRate NUMERIC(38, 20)
+		   ,@dblFreightAdjustment DECIMAL(7, 2)
+		   ,@dblGrossUnits NUMERIC(38, 20)
+		   ,@dblPerUnitFreight NUMERIC(38, 20)
 		   ,@intBillId AS INT
 		   ,@success AS BIT 
 		   
@@ -1191,9 +1196,21 @@ BEGIN TRY
 		--Get IR id created from the Scale Ticket
 		BEGIN 
 			SELECT TOP 1 
-			@intReceiptId =intInventoryReceiptId FROM tblGRStorageHistory 
+			@intReceiptId =intInventoryReceiptId,@intScaleTicketId=intTicketId FROM tblGRStorageHistory 
 			WHERE strType='FROM Scale' AND intCustomerStorageId = @intCustomerStorageId
-		END 
+		END
+
+		SELECT 
+		 @dblFreightRate = dblFreightRate
+		,@dblFreightAdjustment = dblFreightAdjustment
+		,@dblGrossUnits = dblGrossUnits 
+		FROM tblSCTicket
+		WHERE intTicketId=@intScaleTicketId 
+
+		SELECT @dblPerUnitFreight=(@dblFreightRate*@dblGrossUnits+@dblFreightAdjustment)/dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOriginalBalance)
+		FROM tblGRCustomerStorage CS
+		JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+		WHERE intCustomerStorageId = @intCustomerStorageId
 
 		-- Create a new voucher 
 		IF @intReceiptId IS NOT NULL 
@@ -1209,6 +1226,12 @@ BEGIN TRY
 					@intReceiptId
 					, @UserKey
 					, @intBillId OUTPUT 
+			
+			IF ISNULL(@intBillId,0)=0
+			BEGIN
+				RAISERROR ('Unable to create the voucher.',16,1);
+				RETURN;
+			END
 
 			-- Work-around. Put the cost back to zero. 
 			UPDATE	ri
@@ -1276,6 +1299,52 @@ BEGIN TRY
 			FROM   @SettleVoucherCreate SV
 			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort <> 1
 			--AND   SV.intItemId NOT IN (SELECT intItemId FROM tblAPBillDetail Where intBillId=@intBillId)
+			UNION 
+			SELECT 
+			 intBillId = @intBillId 
+			,intAccountId = dbo.[fnGetItemGLAccount](SV.intChargeId, @intItemLocationId, 'Other Charge Expense')
+			,intItemId = SV.intChargeId
+			,intContractHeaderId = NULL
+			,intContractDetailId = NULL
+			,dblTotal = CASE 
+							 WHEN SV.strCostMethod='Amount' THEN ROUND(@dblFreightRate+@dblFreightAdjustment,2)
+							 WHEN SV.strCostMethod='Per Unit' THEN ROUND(@dblUnits *@dblPerUnitFreight,2)
+						END
+			,dblQtyOrdered = CASE 
+								WHEN SV.intEntityVendorId=@EntityId AND ISNULL(SV.ysnAccrue,0)=1 AND ISNULL(SV.ysnPrice,0)=0 THEN  1
+								WHEN SV.intEntityVendorId=@EntityId AND ISNULL(SV.ysnAccrue,0)=0 AND ISNULL(SV.ysnPrice,0)=1 THEN -1
+								WHEN SV.intEntityVendorId <> @EntityId AND ISNULL(SV.ysnAccrue,0)=1 AND ISNULL(SV.ysnPrice,0)=1 THEN -1
+							 END	
+			,dblQtyReceived = CASE 
+								WHEN SV.intEntityVendorId=@EntityId AND ISNULL(SV.ysnAccrue,0)=1 AND ISNULL(SV.ysnPrice,0)=0 THEN  1
+								WHEN SV.intEntityVendorId=@EntityId AND ISNULL(SV.ysnAccrue,0)=0 AND ISNULL(SV.ysnPrice,0)=1 THEN -1
+								WHEN SV.intEntityVendorId <> @EntityId AND ISNULL(SV.ysnAccrue,0)=1 AND ISNULL(SV.ysnPrice,0)=1 THEN -1
+							 END			
+			,dblRate = 0
+			,dblCost = ABS(
+						   @dblUnits * 
+							CASE 
+								 WHEN SV.strCostMethod='Amount' THEN   @dblFreightRate+@dblFreightAdjustment
+								 WHEN SV.strCostMethod='Per Unit' THEN @dblPerUnitFreight
+							END
+						   )
+			,intCurrencyId = @intCurrencyId
+			FROM   tblICInventoryReceiptCharge SV
+			WHERE SV.intInventoryReceiptId = @intReceiptId
+			AND( 
+				    (SV.intEntityVendorId=@EntityId AND ISNULL(SV.ysnAccrue,0)=1 AND ISNULL(SV.ysnPrice,0)=0) 
+					OR
+					(SV.intEntityVendorId=@EntityId AND ISNULL(SV.ysnAccrue,0)=0 AND ISNULL(SV.ysnPrice,0)=1)
+					OR
+					(SV.intEntityVendorId <> @EntityId AND ISNULL(SV.ysnAccrue,0)=1 AND ISNULL(SV.ysnPrice,0)=1)
+				)
+				 
+			AND SV.intChargeId NOT IN 
+			(
+				SELECT intItemId FROM @SettleVoucherCreate
+				WHERE intCustomerStorageId = @intCustomerStorageId AND IsProcessed = 0 AND intItemSort=3
+			)
+
 			
 			-- 1. Tax recomputation because of the new cost.
 			INSERT INTO @detailCreated
