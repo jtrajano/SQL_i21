@@ -618,7 +618,7 @@ END CATCH
 					ARI.strType = 'Tank Delivery'
 					AND ARID.intSiteId IS NULL
 					AND ICI.ysnTankRequired = 1
-					AND ICI.strType <> 'Comment'
+					AND ISNULL(ICI.strType, '') <> 'Comment'
 				 							
 				--zero amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -710,7 +710,7 @@ END CATCH
 					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 					AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
-					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+					AND ISNULL(IST.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software')
 					
 				--Dsicount Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -741,7 +741,7 @@ END CATCH
 				WHERE 
 					((ISNULL(IST.intDiscountAccountId,0) = 0  AND  ISNULL(@DiscountAccountId,0) = 0) OR GLA.intAccountId IS NULL)
 					AND Detail.dblDiscount <> 0		
-					AND IT.strType <> 'Comment'			
+					AND ISNULL(IT.strType, '') <> 'Comment'			
 
 				--Currency is required
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -984,7 +984,7 @@ END CATCH
 						ON D.intItemId = I.intItemId	 				
 				WHERE
 					ISNULL(A.intPeriodsToAccrue,0) > 1
-					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+					AND ISNULL(I.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 								
 				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1017,8 +1017,157 @@ END CATCH
 						ON Acct.intGeneralAccountId = GLA.intAccountId
 				WHERE
 					(ISNULL(Acct.intGeneralAccountId,0) = 0 OR GLA.intAccountId IS NULL)
-					AND I.strType IN ('Non-Inventory','Service')
-					AND I.strType <> 'Comment'
+					AND ISNULL(I.strType, '') IN ('Non-Inventory','Service')
+					AND ISNULL(I.strType, '') <> 'Comment'
+
+				--Software - Maintenance Type				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Type of item - ' + I.strItemNo + ' is not valid.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') NOT IN ('License/Maintenance', 'Maintenance Only', 'SaaS', 'License Only')
+					
+				--Software - Maintenance Frequency				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Frequency of item - ' + I.strItemNo + ' is not valid.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+					AND ISNULL(D.strFrequency, '') NOT IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					
+				--Software - Maintenance Date				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Start Date of item - ' + I.strItemNo + ' is required.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND D.dtmMaintenanceDate IS NULL
+
+
+				--Software - License Amount
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The License Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblLicenseAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License Only')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ISNULL(D.dblLicenseAmount, @ZeroDecimal) <> ISNULL(D.dblPrice, @ZeroDecimal)
+
+				--Software - Maintenance Amount				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblMaintenanceAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('Maintenance Only', 'SaaS')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ISNULL(D.dblMaintenanceAmount, @ZeroDecimal) <> ISNULL(D.dblPrice, @ZeroDecimal)
+
+
+				--Software - Maintenance Amount + License				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Amount + License Amount of item - ' + I.strItemNo + ' does not match the Price.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblMaintenanceAmount, dblLicenseAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
+						ON D.intItemId = I.intItemId											
+				WHERE
+					ISNULL(I.strType,'') = 'Software'	
+					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance')
+					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
+					AND ((ISNULL(D.dblMaintenanceAmount, @ZeroDecimal) + ISNULL(D.dblLicenseAmount, @ZeroDecimal)) <> ISNULL(D.dblPrice, @ZeroDecimal))
 					
 				--Software - Maintenance Sales				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1051,7 +1200,7 @@ END CATCH
 						ON Acct.intMaintenanceSalesAccountId = GLA.intAccountId	 				
 				WHERE
 					(ISNULL(Acct.intMaintenanceSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND I.strType = 'Software'	
+					AND ISNULL(I.strType,'') = 'Software'	
 					AND D.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 					
 					
@@ -1086,7 +1235,7 @@ END CATCH
 						ON Acct.intGeneralAccountId = GLA.intAccountId	 				
 				WHERE
 					(ISNULL(Acct.intGeneralAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND I.strType = 'Software'	
+					AND ISNULL(I.strType, '') = 'Software'	
 					AND D.strMaintenanceType IN ('License/Maintenance', 'License Only')		
 					
 				--Other Charge Income Account	
@@ -1120,7 +1269,7 @@ END CATCH
 						ON Acct.intOtherChargeIncomeAccountId = GLA.intAccountId										
 				WHERE
 					(ISNULL(Acct.intOtherChargeIncomeAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND I.strType = 'Other Charge'	
+					AND ISNULL(I.strType, '') = 'Other Charge'	
 
 
 				--Sales Account				
@@ -1155,7 +1304,7 @@ END CATCH
 				WHERE
 					D.dblTotal <> @ZeroDecimal 
 					AND (D.intItemId IS NOT NULL OR D.intItemId <> 0)
-					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+					AND ISNULL(I.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 					AND (ISNULL(Acct.intSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
@@ -1269,7 +1418,7 @@ END CATCH
 					AND (ISNULL(D.intInventoryShipmentItemId,0) <> 0 OR ISNULL(D.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND (ISNULL(IST.intCOGSAccountId,0) = 0 OR GLA.intAccountId IS NULL)
 					AND ISNULL(D.intItemId, 0) <> 0
-					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+					AND ISNULL(IST.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 					AND A.strTransactionType <> 'Debit Memo'
 
 
@@ -1322,7 +1471,7 @@ END CATCH
 					D.dblTotal <> @ZeroDecimal
 					AND (ISNULL(D.intInventoryShipmentItemId,0) <> 0 OR ISNULL(D.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(D.intItemId, 0) <> 0
-					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+					AND ISNULL(IST.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 					AND A.strTransactionType <> 'Debit Memo'	
 					AND (ISNULL(IST.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					
@@ -1360,7 +1509,7 @@ END CATCH
 					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+					AND ISNULL(ICI.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 					AND Header.strTransactionType <> 'Debit Memo'
 					
 					
@@ -1403,7 +1552,7 @@ END CATCH
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ARI.[strTransactionType] <> 'Debit Memo'		
-					AND ARIC.strType NOT IN ('Finished Good','Comment')
+					AND ISNULL(ARIC.strType, '') NOT IN ('Finished Good','Comment')
 
 				--Inventory In-Transit Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1438,7 +1587,7 @@ END CATCH
 					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+					AND ISNULL(ICI.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 					AND Header.strTransactionType <> 'Debit Memo'
 					
 					
@@ -1481,7 +1630,7 @@ END CATCH
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ARI.[strTransactionType] <> 'Debit Memo'																		
-					AND ARIC.strType NOT IN ('Finished Good','Comment')
+					AND ISNULL(ARIC.strType, '') NOT IN ('Finished Good','Comment')
 				
 				--Zero Contract Item Price	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1919,7 +2068,7 @@ BEGIN TRY
 			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 			AND ID.ysnBlended <> @post
 			AND ICI.ysnAutoBlend = 1
-			AND ICI.strType = 'Finished Good'
+			AND ISNULL(ICI.strType, '') = 'Finished Good'
 
 			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 				BEGIN
@@ -2504,11 +2653,13 @@ IF @post = 1
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 			
 			WHERE
-				B.dblTotal <> @ZeroDecimal 
-				AND ((B.intItemId IS NULL OR B.intItemId = 0)
-					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
+				--B.dblTotal <> @ZeroDecimal 
+				--AND
+				((B.intItemId IS NULL OR B.intItemId = 0)
+					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND ISNULL(strType, '') IN ('Non-Inventory','Service','Other Charge'))))
 				AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND (B.dblTotal <> 0 OR B.dblQtyShipped <> 0)
 
 
 			--CREDIT Software -- License
@@ -2648,7 +2799,7 @@ IF @post = 1
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
-				AND I.strType = 'Software'
+				AND ISNULL(I.strType, '') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND (ISNULL(A.intPeriodsToAccrue,0) <= 1 OR ( ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(@accrueLicense,0) = 0))
 
@@ -2664,7 +2815,7 @@ IF @post = 1
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseLicenseAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblBaseLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2790,7 +2941,7 @@ IF @post = 1
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
-				AND I.strType = 'Software'
+				AND ISNULL(I.strType, '') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND (ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(@accrueLicense,0) = 0)
 
@@ -2807,7 +2958,7 @@ IF @post = 1
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2921,7 +3072,7 @@ IF @post = 1
 			WHERE
 				B.dblMaintenanceAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-				AND I.strType = 'Software'
+				AND ISNULL(I.strType, '') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
@@ -2989,7 +3140,7 @@ IF @post = 1
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
 			WHERE			 
 				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+				AND ISNULL(I.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				--AND B.dblTotal <> @ZeroDecimal 
@@ -3060,7 +3211,7 @@ IF @post = 1
 				B.dblTotal <> @ZeroDecimal  
 				AND A.strTransactionType = 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
-				AND I.strType <> 'Comment'
+				AND ISNULL(I.strType, '') <> 'Comment'
 
 			--CREDIT Shipping
 			UNION ALL 
@@ -3526,7 +3677,7 @@ IF @post = 1
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+				AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 				AND A.strTransactionType <> 'Debit Memo'
 				
 			UNION ALL 
@@ -3610,7 +3761,7 @@ IF @post = 1
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+				AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 				AND A.strTransactionType <> 'Debit Memo'
 		END TRY
 		BEGIN CATCH
@@ -3660,7 +3811,7 @@ IF @post = 1
 				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN IST.strType = 'Finished Good' AND Detail.ysnBlended = 1 
+				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN ISNULL(IST.strType, '') = 'Finished Good' AND Detail.ysnBlended = 1 
 																			THEN (
 																				SELECT SUM(ICIT.[dblCost]) 
 																				FROM
@@ -3727,7 +3878,7 @@ IF @post = 1
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
+				AND (ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ISNULL(IST.strType, '') = 'Finished Good' AND Detail.ysnBlended = 1))
 				AND Header.strTransactionType <> 'Debit Memo'							
 				AND (Detail.intStorageScheduleTypeId IS NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) = 0)				
 
@@ -3790,7 +3941,7 @@ IF @post = 1
 				AND ISNULL(ARID.[intItemId],0) <> 0
 				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 				AND ARI.[strTransactionType] <> 'Debit Memo'
-				AND ARIC.strType NOT IN ('Finished Good','Comment')
+				AND ISNULL(ARIC.strType, '') NOT IN ('Finished Good','Comment')
 				AND (ARID.intStorageScheduleTypeId IS NULL OR ISNULL(ARID.intStorageScheduleTypeId,0) = 0)			
 			
 		END TRY
@@ -4026,7 +4177,7 @@ IF @post = 1
 				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN IST.strType = 'Finished Good' AND Detail.ysnBlended = 1 
+				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN ISNULL(IST.strType,'') = 'Finished Good' AND Detail.ysnBlended = 1 
 																			THEN (
 																				SELECT SUM(ICIT.[dblCost]) 
 																				FROM
@@ -4088,7 +4239,7 @@ IF @post = 1
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
+				AND (ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ISNULL(IST.strType, '') = 'Finished Good' AND Detail.ysnBlended = 1))
 				AND Header.strTransactionType <> 'Debit Memo'
 				AND (Detail.intStorageScheduleTypeId IS NOT NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) <> 0)		
 		
@@ -4326,7 +4477,7 @@ IF @post = 0
 				--AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				--AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				(ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND ISNULL(IST.strType, '') NOT IN ('Non-Inventory','Service','Other Charge','Software')
 
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostICInvoiceData ORDER BY intInvoiceId)
 			BEGIN
