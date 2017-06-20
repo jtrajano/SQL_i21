@@ -59,6 +59,12 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
+	IF (@intItemUOMId = @intWeightUOMId)
+	BEGIN
+		SELECT @dblMoveQty = @dblMoveQty / @dblWeightPerQty
+			,@intItemUOMId = @intLotItemUOMId
+	END
+	
 	SELECT @strStorageLocationName = strName
 	FROM tblICStorageLocation
 	WHERE intStorageLocationId = @intStorageLocationId
