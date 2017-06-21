@@ -19,7 +19,7 @@ Ext.define('Inventory.model.Transfer', {
         { name: 'strTransferType', type: 'string' },
         { name: 'intSourceType', type: 'int', allowNull: true },
         { name: 'intTransferredById', type: 'int', allowNull: true },
-        { name: 'strDescription', type: 'string' },
+        { name: 'strDescription', type: 'string', allowNull: true  },
         { name: 'intFromLocationId', type: 'int', allowNull: true },
         { name: 'intToLocationId', type: 'int', allowNull: true },
         { name: 'ysnShipmentRequired', type: 'boolean' },
