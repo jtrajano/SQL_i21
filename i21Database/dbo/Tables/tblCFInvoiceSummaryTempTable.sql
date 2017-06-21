@@ -3,11 +3,11 @@
     [intTermsCode]                 INT             NULL,
     [intTermsId]                   INT             NULL,
     [intARItemId]                  INT             NULL,
-    [strDepartmentDescription]     NVARCHAR (MAX)  NULL,
-    [strShortName]                 NVARCHAR (MAX)  NULL,
-    [strProductDescription]        NVARCHAR (MAX)  NULL,
-    [strItemNumber]                NVARCHAR (MAX)  NULL,
-    [strItemDescription]           NVARCHAR (MAX)  NULL,
+    [strDepartmentDescription]     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strShortName]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strProductDescription]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strItemNumber]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strItemDescription]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblTotalQuantity]             NUMERIC (18, 6) NULL,
     [dblTotalGrossAmount]          NUMERIC (18, 6) NULL,
     [dblTotalNetAmount]            NUMERIC (18, 6) NULL,
@@ -21,4 +21,6 @@
     [intAccountId]                 INT             NULL,
     [intTransactionId]             INT             NULL
 );
+
+
 
