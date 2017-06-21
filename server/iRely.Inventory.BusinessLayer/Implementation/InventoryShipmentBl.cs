@@ -172,37 +172,10 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public SaveResult ProcessInvoice(int shipmentId, out int? newInvoice)
+        public async Task<int?> ProcessShipmentToInvoice(int shipmentId)
         {
-            SaveResult saveResult = new SaveResult();
-            int? newInvoiceId = null;
-
-            using (var transaction = _db.ContextManager.Database.BeginTransaction())
-            {
-                var connection = _db.ContextManager.Database.Connection;
-                try
-                {
-                    var idParameter = new SqlParameter("ShipmentId", shipmentId);
-                    var userId = new SqlParameter("@UserId", iRely.Common.Security.GetEntityId());
-                    var outParam = new SqlParameter("@NewInvoiceId", newInvoiceId);
-                    outParam.Direction = System.Data.ParameterDirection.Output;
-                    outParam.DbType = System.Data.DbType.Int32;
-                    outParam.SqlDbType = System.Data.SqlDbType.Int;
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspARCreateInvoiceFromShipment @ShipmentId, @UserId, @NewInvoiceId OUTPUT", idParameter, userId, outParam);
-                    newInvoiceId = (int)outParam.Value;
-                    saveResult = _db.Save(false);
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    saveResult.BaseException = ex;
-                    saveResult.Exception = new ServerException(ex);
-                    saveResult.HasError = true;
-                    //transaction.Rollback();
-                }
-            }
-            newInvoice = newInvoiceId;
-            return saveResult;
+            var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+            return await db.ProcessShipmentToInvoice(shipmentId);
         }
 
         public override void Add(tblICInventoryShipment entity)
