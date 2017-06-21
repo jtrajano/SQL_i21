@@ -425,14 +425,43 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
     createRecord: function (config, action) {
         var today = new Date();
-        var record = Ext.create('Inventory.model.InventoryCount');
+        var newRecord = Ext.create('Inventory.model.InventoryCount');
+        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
 
-        record.set('dtmCountDate', today);
-        record.set('intStatus', 1);
-        if (app.DefaultLocation > 0)
-            record.set('intLocationId', app.DefaultLocation);
+        newRecord.set('dtmCountDate', today);
+        newRecord.set('intStatus', 1);
 
-        action(record);
+        if (defaultLocation){
+            newRecord.set('intLocationId', defaultLocation);
+            Ext.create('i21.store.CompanyLocationBuffered', {
+                storeId: 'icReceiptCompanyLocation',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intCompanyLocationId',
+                            value: defaultLocation,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'strLocationName:intCompanyLocationId:'
+                    },
+                    callback: function(records, operation, success){
+                        var record; 
+                        if (records && records.length > 0) {
+                            record = records[0];
+                        }
+
+                        if(success && record){
+                            newRecord.set('strLocation', record.get('strLocationName'));
+                            newRecord.set('intLocationId', record.get('intCompanyLocationId'));
+                        }
+                    }
+                }
+            });            
+        }         
+
+        action(newRecord);
     },
 
     getTotalLocationStockOnHand: function (intLocationId, intItemId, callback) {

@@ -535,13 +535,44 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
     createRecord: function (config, action) {
         var today = new Date();
-        var record = Ext.create('Inventory.model.Adjustment');
-        record.set('intAdjustmentType', '1');
-        if (app.DefaultLocation > 0)
-            record.set('intLocationId', app.DefaultLocation);
-        record.set('dtmAdjustmentDate', today);
-        record.set('ysnPosted', false);
-        action(record);
+        var newRecord = Ext.create('Inventory.model.Adjustment');
+        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+
+        newRecord.set('intAdjustmentType', '1');
+        newRecord.set('dtmAdjustmentDate', today);
+        newRecord.set('ysnPosted', false);
+
+        if (defaultLocation){
+            newRecord.set('intLocationId', defaultLocation);
+            Ext.create('i21.store.CompanyLocationBuffered', {
+                storeId: 'icReceiptCompanyLocation',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intCompanyLocationId',
+                            value: defaultLocation,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'strLocationName:intCompanyLocationId:'
+                    },
+                    callback: function(records, operation, success){
+                        var record; 
+                        if (records && records.length > 0) {
+                            record = records[0];
+                        }
+
+                        if(success && record){
+                            newRecord.set('strLocation', record.get('strLocationName'));
+                            newRecord.set('intLocationId', record.get('intCompanyLocationId'));
+                        }
+                    }
+                }
+            });            
+        } 
+
+        action(newRecord);
     },
 
     validateRecord: function (config, action) {
