@@ -74,6 +74,7 @@
 			,o.strLocationName
 			,strEntityLocation = p.strLocationName
 			,strLostToCompetitor = q.strName
+			,strDirectionEntityType = (case when a.strDirection = 'Purchase' then 'Vendor' else 'Customer' end)
 		from
 			tblCRMOpportunity a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
