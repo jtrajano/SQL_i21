@@ -7,6 +7,23 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+	IF ISNULL(@xmlParam, '') = ''
+	BEGIN
+		SELECT '' AS 'strFromShipment'
+			,'' AS 'strToShipment'
+			,'' AS 'strShipToZipCode'
+			,'' AS 'strCarrier'
+			,'' AS 'strPONumber'
+			,'' AS 'strDPCI'
+			,'' AS 'intCasePack'
+			,'' AS 'strStyle'
+			,'' AS 'strBarCodeLabel'
+			,'' AS 'strBarCode'
+			,'' AS 'strReferenceNumber'
+
+		RETURN
+	END
+
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @xmlDocumentId INT
 		,@strOrderManifestId NVARCHAR(MAX)
@@ -139,6 +156,7 @@ BEGIN TRY
 		,I.strItemNo AS strStyle
 		,OML.strSSCCNo AS strBarCodeLabel
 		,OML.strSSCCNo AS strBarCode
+		,S.strReferenceNumber
 	FROM tblMFOrderManifest OM
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 	JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
