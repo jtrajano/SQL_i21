@@ -1158,10 +1158,13 @@ BEGIN
   
 	SET @InventoryReceiptId = @ReceiptId
 
-	UPDATE tblGRStorageHistory 
-	SET [intInventoryReceiptId] = @InventoryReceiptId
-	WHERE [strType] = 'From Scale' AND intCustomerStorageId = (SELECT MAX(intCustomerStorageId) FROM tblGRCustomerStorage) 
-	AND ISNULL(intInventoryReceiptId,0) = 0
+	UPDATE SH  
+	SET SH.[intInventoryReceiptId] = @InventoryReceiptId
+	FROM tblGRStorageHistory SH
+	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
+	JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
+	WHERE SH.[strType] = 'From Scale' AND IR.intInventoryReceiptId=@InventoryReceiptId AND SH.dtmHistoryDate=IR.dtmReceiptDate
+	AND ISNULL(SH.intInventoryReceiptId,0) = 0
 
 	--DECLARE @intInventoryReceiptItemId	INT = NULL,
 	--		@dblQty						NUMERIC(18,6) = 0
