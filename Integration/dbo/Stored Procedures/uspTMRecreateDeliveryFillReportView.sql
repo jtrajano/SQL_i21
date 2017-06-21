@@ -139,6 +139,10 @@ BEGIN
 					,intDriverId = C.intDriverID
 					,C.intRouteId
 					,dblNextDeliveryGallons = ISNULL(C.dblLastGalsInTank,0.0) - ISNULL(C.dblEstimatedGallonsLeft,0.0)
+					,intGroupSiteCount = CASE WHEN ISNULL(C.intFillGroupId,0) = 0 THEN 0 ELSE (SELECT COUNT(intSiteId) 
+																							FROM vyuTMDeliveryFillGroupSubReport 
+																							WHERE intFillGroupId = C.intFillGroupId
+																								AND intSiteId <> C.intSiteID) END
 				FROM tblTMCustomer A 
 				INNER JOIN vwcusmst B 
 					on A.intCustomerNumber = B.A4GLIdentity 
@@ -294,6 +298,10 @@ BEGIN
 				,intDriverId = C.intDriverID
 				,C.intRouteId
 				,dblNextDeliveryGallons = ISNULL(C.dblLastGalsInTank,0.0) - ISNULL(C.dblEstimatedGallonsLeft,0.0)
+				,intGroupSiteCount = CASE WHEN ISNULL(C.intFillGroupId,0) = 0 THEN 0 ELSE (SELECT COUNT(intSiteId) 
+																							FROM vyuTMDeliveryFillGroupSubReport 
+																							WHERE intFillGroupId = C.intFillGroupId
+																								AND intSiteId <> C.intSiteID) END
 			FROM tblTMCustomer A 
 			INNER JOIN vyuTMCustomerEntityView B
 				ON A.intCustomerNumber = B.A4GLIdentity
