@@ -69,24 +69,33 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpPost]
-        [ActionName("ProcessInvoice")]
-        public HttpResponseMessage ProcessInvoice(ShipmentParam p)
+        [ActionName("ProcessShipmentToInvoice")]
+        public async Task<HttpResponseMessage> ProcessShipmentToInvoice(ShipmentParam p)
         {
             int? newInvoice = null;
-            var result = _bl.ProcessInvoice(p.id, out newInvoice);
-
-            HttpStatusCode httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;            
-            return Request.CreateResponse(httpStatusCode, new
+            try
             {
-                success = !result.HasError,
-                message = new
+                newInvoice = await _bl.ProcessShipmentToInvoice(p.id);
+                return Request.CreateResponse(HttpStatusCode.Accepted, new
                 {
-                    InvoiceId = newInvoice,
-                    statusText = result.Exception.Message,
-                    status = result.Exception.Error,
-                    button = result.Exception.Button.ToString()
-                }
-            });
+                    success = true,
+                    message = new
+                    {
+                        InvoiceId = newInvoice
+                    }
+                });
+            }
+            catch (Exception ex) {
+                return Request.CreateResponse(HttpStatusCode.Conflict, new
+                {
+                    success = false,
+                    message = new
+                    {
+                        InvoiceId = newInvoice,
+                        statusText = ex.Message
+                    }
+                });
+            }
         }
 
         [HttpGet]

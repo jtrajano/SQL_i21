@@ -1615,7 +1615,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
             ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/InventoryShipment/ProcessInvoice',
+                url: '../Inventory/api/InventoryShipment/ProcessShipmentToInvoice',
                 params: {
                     id: current.get('intInventoryShipmentId')
                 },
@@ -1625,23 +1625,24 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 function(successResponse){
                     var jsonData = Ext.decode(successResponse.responseText);
                     var message = jsonData.message; 
-                    if (message && message.InvoiceId){
-                        var buttonAction = function(button) {
-                            if (button === 'yes') {
-                                iRely.Functions.openScreen('AccountsReceivable.view.Invoice', {
-                                    filters: [
-                                        {
-                                            column: 'intInvoiceId',
-                                            value: message.InvoiceId
-                                        }
-                                    ],
-                                    action: 'view'
-                                });
-                                win.close();
-                            }
-                        };
-                        iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice successfully processed. Do you want to view this Invoice?', buttonAction);
-                    }
+                    var invoiceId = message ? message.InvoiceId : null;
+
+                    var buttonAction = function(button) {
+                        if (button === 'yes') {
+                            iRely.Functions.openScreen('AccountsReceivable.view.Invoice', {
+                                filters: [
+                                    {
+                                        column: 'intInvoiceId',
+                                        value: invoiceId
+                                    }
+                                ],
+                                action: 'view'
+                            });
+                            win.close();
+                        }
+                    };
+                    iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice successfully processed. Do you want to view this Invoice?', buttonAction);
+
                     button.enable();
                 },
                 function(failureResponse) {
