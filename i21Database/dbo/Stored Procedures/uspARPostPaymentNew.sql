@@ -237,7 +237,7 @@ IF(@BeginDate IS NOT NULL)
 IF(@BeginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO @ARPaymentPostData
-		([intPaymentId]
+			([intPaymentId]
 			,[strTransactionId]
 			,[intARAccountId]
 			,[intBankAccountId]

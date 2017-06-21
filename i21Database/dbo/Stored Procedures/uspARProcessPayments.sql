@@ -429,6 +429,570 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
+--UnPosting posted Payments for update
+BEGIN TRY
+	DECLARE @IdsForUnPosting PaymentId
+
+	INSERT INTO @IdsForUnPosting(
+		 [intHeaderId]
+		,[intDetailId]
+		,[strTransactionId]
+		,[intARAccountId]
+		,[intBankAccountId]
+		,[intDiscountAccountId]
+		,[intInterestAccountId]
+		,[intWriteOffAccountId]
+		,[intGainLossAccountId]
+		,[intCFAccountId]
+		,[ysnForDelete]
+		,[ysnFromPosting]
+		,[ysnPost]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[ysnProcessed]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]			= EFP.[intPaymentId]
+		,[intDetailId]			= EFP.[intPaymentDetailId]
+		,[strTransactionId]		= NULL
+		,[intARAccountId]		= IE.[intAccountId]
+		,[intBankAccountId]		= IE.[intBankAccountId]
+		,[intDiscountAccountId]	= NULL
+		,[intInterestAccountId]	= NULL
+		,[intWriteOffAccountId]	= IE.[intWriteOffAccountId]
+		,[intGainLossAccountId]	= NULL
+		,[intCFAccountId]		= NULL
+		,[ysnForDelete]			= 0
+		,[ysnFromPosting]		= 0
+		,[ysnPost]				= IE.[ysnPost]
+		,[strTransactionType]	= IE.[strTransactionType]
+		,[strSourceTransaction]	= IE.[strSourceTransaction]
+		,[ysnProcessed]			= 0		 
+	FROM
+		#EntriesForProcessing EFP
+	INNER JOIN
+		@PaymentEntries IE
+			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
+	WHERE
+		ISNULL(EFP.[ysnForUpdate],0) = 1
+		AND ISNULL(IE.[ysnUnPostAndUpdate],0) = 1
+		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+		AND ISNULL(EFP.[ysnRecap], 0) = 0
+
+		
+	IF EXISTS(SELECT TOP 1 NULL FROM @IdsForUnPosting)
+		EXEC [dbo].[uspARPostPaymentNew]
+			 @BatchId			= NULL
+			,@Post				= 0
+			,@Recap				= 0
+			,@UserId			= @UserId
+			,@PaymentIds		= @IdsForUnPosting
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@RaiseError		= @RaiseError
+
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
+
+--Posting Newly Created Payments
+BEGIN TRY
+	DECLARE @NewIdsForPosting PaymentId
+	INSERT INTO @NewIdsForPosting(
+		 [intHeaderId]
+		,[intDetailId]
+		,[strTransactionId]
+		,[intARAccountId]
+		,[intBankAccountId]
+		,[intDiscountAccountId]
+		,[intInterestAccountId]
+		,[intWriteOffAccountId]
+		,[intGainLossAccountId]
+		,[intCFAccountId]
+		,[ysnForDelete]
+		,[ysnFromPosting]
+		,[ysnPost]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[ysnProcessed]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]			= [intPaymentId]
+		,[intDetailId]			= [intPaymentDetailId]
+		,[strTransactionId]		= NULL
+		,[intARAccountId]		= NULL
+		,[intBankAccountId]		= NULL
+		,[intDiscountAccountId]	= NULL
+		,[intInterestAccountId]	= NULL
+		,[intWriteOffAccountId]	= NULL
+		,[intGainLossAccountId]	= NULL
+		,[intCFAccountId]		= NULL
+		,[ysnForDelete]			= 0
+		,[ysnFromPosting]		= 0
+		,[ysnPost]				= [ysnPost]
+		,[strTransactionType]	= NULL
+		,[strSourceTransaction]	= [strSourceTransaction]
+		,[ysnProcessed]			= 0		 
+	FROM
+		tblARPaymentIntegrationLogDetail WITH (NOLOCK)
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 0
+
+		
+	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPosting)
+		EXEC [dbo].[uspARPostPaymentNew]
+			 @BatchId			= NULL
+			,@Post				= 1
+			,@Recap				= 0
+			,@UserId			= @UserId
+			,@PaymentIds		= @NewIdsForPosting
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@RaiseError		= @RaiseError
+
+	DECLARE @NewIdsForPostingRecap PaymentId
+	INSERT INTO @NewIdsForPostingRecap(
+		 [intHeaderId]
+		,[intDetailId]
+		,[strTransactionId]
+		,[intARAccountId]
+		,[intBankAccountId]
+		,[intDiscountAccountId]
+		,[intInterestAccountId]
+		,[intWriteOffAccountId]
+		,[intGainLossAccountId]
+		,[intCFAccountId]
+		,[ysnForDelete]
+		,[ysnFromPosting]
+		,[ysnPost]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[ysnProcessed]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]			= [intPaymentId]
+		,[intDetailId]			= [intPaymentDetailId]
+		,[strTransactionId]		= NULL
+		,[intARAccountId]		= NULL
+		,[intBankAccountId]		= NULL
+		,[intDiscountAccountId]	= NULL
+		,[intInterestAccountId]	= NULL
+		,[intWriteOffAccountId]	= NULL
+		,[intGainLossAccountId]	= NULL
+		,[intCFAccountId]		= NULL
+		,[ysnForDelete]			= 0
+		,[ysnFromPosting]		= 0
+		,[ysnPost]				= [ysnPost]
+		,[strTransactionType]	= NULL
+		,[strSourceTransaction]	= [strSourceTransaction]
+		,[ysnProcessed]			= 0		 
+	FROM
+		tblARPaymentIntegrationLogDetail WITH (NOLOCK)
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 1	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 1
+
+		
+	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPostingRecap)
+		EXEC [dbo].[uspARPostPaymentNew]
+			 @BatchId			= NULL
+			,@Post				= 1
+			,@Recap				= 1
+			,@UserId			= @UserId
+			,@PaymentIds		= @NewIdsForPostingRecap
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
+
+--Posting Updated Payments
+BEGIN TRY
+	DECLARE @UpdatedIdsForPosting PaymentId
+	INSERT INTO @UpdatedIdsForPosting(
+		 [intHeaderId]
+		,[intDetailId]
+		,[strTransactionId]
+		,[intARAccountId]
+		,[intBankAccountId]
+		,[intDiscountAccountId]
+		,[intInterestAccountId]
+		,[intWriteOffAccountId]
+		,[intGainLossAccountId]
+		,[intCFAccountId]
+		,[ysnForDelete]
+		,[ysnFromPosting]
+		,[ysnPost]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[ysnProcessed]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]			= [intPaymentId]
+		,[intDetailId]			= [intPaymentDetailId]
+		,[strTransactionId]		= NULL
+		,[intARAccountId]		= NULL
+		,[intBankAccountId]		= NULL
+		,[intDiscountAccountId]	= NULL
+		,[intInterestAccountId]	= NULL
+		,[intWriteOffAccountId]	= NULL
+		,[intGainLossAccountId]	= NULL
+		,[intCFAccountId]		= NULL
+		,[ysnForDelete]			= 0
+		,[ysnFromPosting]		= 0
+		,[ysnPost]				= [ysnPost]
+		,[strTransactionType]	= NULL
+		,[strSourceTransaction]	= [strSourceTransaction]
+		,[ysnProcessed]			= 0		 
+	FROM
+		tblARPaymentIntegrationLogDetail WITH (NOLOCK)
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 0	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 0
+
+		
+	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPosting)
+		EXEC [dbo].[uspARPostPaymentNew]
+			 @BatchId			= NULL
+			,@Post				= 1
+			,@Recap				= 0
+			,@UserId			= @UserId
+			,@PaymentIds		= @UpdatedIdsForPosting
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@RaiseError		= @RaiseError
+
+	DECLARE @UpdatedIdsForPostingRecap PaymentId
+	INSERT INTO @UpdatedIdsForPostingRecap(
+		 [intHeaderId]
+		,[intDetailId]
+		,[strTransactionId]
+		,[intARAccountId]
+		,[intBankAccountId]
+		,[intDiscountAccountId]
+		,[intInterestAccountId]
+		,[intWriteOffAccountId]
+		,[intGainLossAccountId]
+		,[intCFAccountId]
+		,[ysnForDelete]
+		,[ysnFromPosting]
+		,[ysnPost]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[ysnProcessed]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]			= [intPaymentId]
+		,[intDetailId]			= [intPaymentDetailId]
+		,[strTransactionId]		= NULL
+		,[intARAccountId]		= NULL
+		,[intBankAccountId]		= NULL
+		,[intDiscountAccountId]	= NULL
+		,[intInterestAccountId]	= NULL
+		,[intWriteOffAccountId]	= NULL
+		,[intGainLossAccountId]	= NULL
+		,[intCFAccountId]		= NULL
+		,[ysnForDelete]			= 0
+		,[ysnFromPosting]		= 0
+		,[ysnPost]				= [ysnPost]
+		,[strTransactionType]	= NULL
+		,[strSourceTransaction]	= [strSourceTransaction]
+		,[ysnProcessed]			= 0		 
+	FROM
+		tblARPaymentIntegrationLogDetail WITH (NOLOCK)
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 0	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 1
+		AND ISNULL([ysnRecap], 0) = 1
+
+		
+	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPostingRecap)
+		EXEC [dbo].[uspARPostPaymentNew]
+			 @BatchId			= NULL
+			,@Post				= 1
+			,@Recap				= 1
+			,@UserId			= @UserId
+			,@PaymentIds		= @UpdatedIdsForPostingRecap
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@RaiseError		= @RaiseError
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
+
+--UnPosting Payments
+BEGIN TRY
+	DECLARE  @IntegrationLog PaymentIntegrationLogStagingTable
+	INSERT INTO @IntegrationLog
+		([intIntegrationLogId]
+		,[dtmDate]
+		,[intEntityId]
+		,[intGroupingOption]
+		,[strMessage]
+		,[strBatchIdForNewPost]
+		,[intPostedNewCount]
+		,[strBatchIdForNewPostRecap]
+		,[intRecapNewCount]
+		,[strBatchIdForExistingPost]
+		,[intPostedExistingCount]
+		,[strBatchIdForExistingRecap]
+		,[intRecapPostExistingCount]
+		,[strBatchIdForExistingUnPost]
+		,[intUnPostedExistingCount]
+		,[strBatchIdForExistingUnPostRecap]
+		,[intRecapUnPostedExistingCount]
+		,[intIntegrationLogDetailId]
+		,[intPaymentId]
+		,[intPaymentDetailId]
+		,[intId]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[ysnPost]
+		,[ysnInsert]
+		,[ysnHeader]
+		,[ysnSuccess]
+		,[ysnRecap])
+	SELECT
+		 [intIntegrationLogId]					= @IntegrationLogId
+		,[dtmDate]								= @DateNow
+		,[intEntityId]							= @UserId
+		,[intGroupingOption]					= @GroupingOption
+		,[strMessage]							= 'Invoice for Unpost.'
+		,[strBatchIdForNewPost]					= ''
+		,[intPostedNewCount]					= 0
+		,[strBatchIdForNewPostRecap]			= ''
+		,[intRecapNewCount]						= 0
+		,[strBatchIdForExistingPost]			= ''
+		,[intPostedExistingCount]				= 0
+		,[strBatchIdForExistingRecap]			= ''
+		,[intRecapPostExistingCount]			= 0
+		,[strBatchIdForExistingUnPost]			= ''
+		,[intUnPostedExistingCount]				= 0
+		,[strBatchIdForExistingUnPostRecap]		= ''
+		,[intRecapUnPostedExistingCount]		= 0
+		,[intIntegrationLogDetailId]			= 0
+		,[intPaymentId]							= [intPaymentId]
+		,[intPaymentDetailId]					= [intPaymentDetailId]
+		,[intId]								= [intId]				
+		,[strSourceTransaction]					= [strSourceTransaction]
+		,[intSourceId]							= [intSourceId]
+		,[strSourceId]							= [strSourceId]
+		,[ysnPost]								= [ysnPost]
+		,[ysnInsert]							= 0
+		,[ysnHeader]							= 1
+		,[ysnSuccess]							= 1
+		,[ysnRecap]								= [ysnRecap]
+	FROM 
+		@PaymentEntries
+	WHERE
+		ISNULL([ysnUnPostAndUpdate],0) = 0
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 0
+		AND [intInvoiceId] IS NOT NULL
+		
+
+	IF ISNULL(@IntegrationLogId, 0) <> 0
+		EXEC [uspARInsertPaymentIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
+
+	DECLARE @UpdatedIdsForUnPosting PaymentId
+	INSERT INTO @UpdatedIdsForUnPosting(
+		 [intHeaderId]
+		,[intDetailId]
+		,[strTransactionId]
+		,[intARAccountId]
+		,[intBankAccountId]
+		,[intDiscountAccountId]
+		,[intInterestAccountId]
+		,[intWriteOffAccountId]
+		,[intGainLossAccountId]
+		,[intCFAccountId]
+		,[ysnForDelete]
+		,[ysnFromPosting]
+		,[ysnPost]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[ysnProcessed]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]			= [intPaymentId]
+		,[intDetailId]			= [intPaymentDetailId]
+		,[strTransactionId]		= NULL
+		,[intARAccountId]		= NULL
+		,[intBankAccountId]		= NULL
+		,[intDiscountAccountId]	= NULL
+		,[intInterestAccountId]	= NULL
+		,[intWriteOffAccountId]	= NULL
+		,[intGainLossAccountId]	= NULL
+		,[intCFAccountId]		= NULL
+		,[ysnForDelete]			= 0
+		,[ysnFromPosting]		= 0
+		,[ysnPost]				= [ysnPost]
+		,[strTransactionType]	= NULL
+		,[strSourceTransaction]	= [strSourceTransaction]
+		,[ysnProcessed]			= 0		 
+	FROM
+		tblARPaymentIntegrationLogDetail WITH (NOLOCK)
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 0	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 0
+		AND ISNULL([ysnRecap], 0) = 0
+
+
+		
+	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPosting)
+		EXEC [dbo].[uspARPostPaymentNew]
+			 @BatchId			= NULL
+			,@Post				= 0
+			,@Recap				= 0
+			,@UserId			= @UserId
+			,@PaymentIds		= @UpdatedIdsForUnPosting
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
+
+	DECLARE @UpdatedIdsForUnPostingRecap PaymentId
+	INSERT INTO @UpdatedIdsForUnPostingRecap(
+		 [intHeaderId]
+		,[intDetailId]
+		,[strTransactionId]
+		,[intARAccountId]
+		,[intBankAccountId]
+		,[intDiscountAccountId]
+		,[intInterestAccountId]
+		,[intWriteOffAccountId]
+		,[intGainLossAccountId]
+		,[intCFAccountId]
+		,[ysnForDelete]
+		,[ysnFromPosting]
+		,[ysnPost]
+		,[strTransactionType]
+		,[strSourceTransaction]
+		,[ysnProcessed]
+	)
+	SELECT DISTINCT
+		 [intHeaderId]			= [intPaymentId]
+		,[intDetailId]			= [intPaymentDetailId]
+		,[strTransactionId]		= NULL
+		,[intARAccountId]		= NULL
+		,[intBankAccountId]		= NULL
+		,[intDiscountAccountId]	= NULL
+		,[intInterestAccountId]	= NULL
+		,[intWriteOffAccountId]	= NULL
+		,[intGainLossAccountId]	= NULL
+		,[intCFAccountId]		= NULL
+		,[ysnForDelete]			= 0
+		,[ysnFromPosting]		= 0
+		,[ysnPost]				= [ysnPost]
+		,[strTransactionType]	= NULL
+		,[strSourceTransaction]	= [strSourceTransaction]
+		,[ysnProcessed]			= 0		 
+	FROM
+		tblARPaymentIntegrationLogDetail WITH (NOLOCK)
+	WHERE
+		[intIntegrationLogId] = @IntegrationLogId
+		AND ISNULL([ysnSuccess], 0) = 1
+		AND ISNULL([ysnHeader], 0) = 1	
+		AND ISNULL([ysnInsert], 0) = 0	
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 0
+		AND ISNULL([ysnRecap], 0) = 1
+
+		
+	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPostingRecap)
+		EXEC [dbo].[uspARPostPaymentNew]
+			 @BatchId			= NULL
+			,@Post				= 0
+			,@Recap				= 1
+			,@UserId			= @UserId
+			,@PaymentIds		= @UpdatedIdsForUnPostingRecap
+			,@IntegrationLogId	= @IntegrationLogId
+			,@BeginDate			= NULL
+			,@EndDate			= NULL
+			,@BeginTransaction	= NULL
+			,@EndTransaction	= NULL
+			,@Exclude			= NULL
+			,@TransType			= N'all'
+			,@RaiseError		= @RaiseError
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
+
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION 
 	
