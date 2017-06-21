@@ -216,36 +216,40 @@ BEGIN
 			,ri.intWeightUOMId
 			,ri.intCostUOMId
 			,dblUnitCost = ri.dblUnitCost
-				--ISNULL(
-				--	dbo.fnGetCostFromCostBucket(
-				--		ri.intItemId
-				--		,il.intItemLocationId
-				--		,ISNULL(ri.intCostUOMId, ri.intUnitMeasureId)
-				--		,NULL	-- If @intLotId is null, it will get the cost from the first lot record received for the line item. 
-				--		,r.strReceiptNumber
-				--		,r.intInventoryReceiptId
-				--		,ri.intInventoryReceiptItemId
-				--		,r.strActualCostId
-				--	) 
-				--	* CASE WHEN ri.ysnSubCurrency = 1 THEN r.intSubCurrencyCents ELSE 1 END 
-				--	, ri.dblUnitCost
-				--)
-				,ri.dblUnitRetail
+			,ri.dblUnitRetail
 			,ri.ysnSubCurrency
-			,dblLineTotal = 			
-				CASE WHEN ISNULL(ri.dblQtyReturned, 0) <> 0 THEN -- Recompute the line total since it is a partial return. 
+			,dblLineTotal = 
+				CASE 
+					-- Recompute the line total since it is a partial return. 
+					WHEN ISNULL(ri.dblQtyReturned, 0) <> 0 THEN 
 						ROUND(
 							CASE 
-								WHEN ri.intWeightUOMId IS NOT NULL THEN 
-									(ISNULL(ri.dblNet, 0) - ISNULL(ri.dblNetReturned, 0))
-									* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intWeightUOMId, ri.dblUnitCost) 
+								-- If using sub-currency, then divide it by the cents. 
+								WHEN ri.ysnSubCurrency = 1 AND ISNULL(r.intSubCurrencyCents, 0) <> 0 THEN 
+									CASE 
+										WHEN ri.intWeightUOMId IS NOT NULL THEN 
+											(ISNULL(ri.dblNet, 0) - ISNULL(ri.dblNetReturned, 0))
+											* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intWeightUOMId, ri.dblUnitCost) 
+										ELSE 
+											(ISNULL(ri.dblOpenReceive, 0) - ISNULL(ri.dblQtyReturned, 0))
+											* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intUnitMeasureId, ri.dblUnitCost) 			
+									END 
+									/ CASE WHEN ISNULL(r.intSubCurrencyCents, 0) <= 0 THEN 1 ELSE r.intSubCurrencyCents END 
+								-- If a regular currency, then calculate as usual. 
 								ELSE 
-									(ISNULL(ri.dblOpenReceive, 0) - ISNULL(ri.dblQtyReturned, 0))
-									* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intUnitMeasureId, ri.dblUnitCost) 			
+									CASE 
+										WHEN ri.intWeightUOMId IS NOT NULL THEN 
+											(ISNULL(ri.dblNet, 0) - ISNULL(ri.dblNetReturned, 0))
+											* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intWeightUOMId, ri.dblUnitCost) 
+										ELSE 
+											(ISNULL(ri.dblOpenReceive, 0) - ISNULL(ri.dblQtyReturned, 0))
+											* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intUnitMeasureId, ri.dblUnitCost) 			
+									END 
 							END 
-							/ CASE WHEN ISNULL(r.intSubCurrencyCents, 0) <= 0 THEN 1 ELSE r.intSubCurrencyCents END 
 							, 2
 						)
+					
+					-- If it is a full return, use the same value for the line total. 
 					ELSE 
 						ri.dblLineTotal 
 				END 					
