@@ -52,6 +52,12 @@ DECLARE @Taxes AS TABLE (
 	,[strNotes]				NVARCHAR(500)
 )
 
+-- Clear the tax details 
+DELETE	tblICInventoryReceiptItemTax 
+FROM	tblICInventoryReceiptItemTax tax INNER JOIN tblICInventoryReceiptItem ri
+			on tax.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+WHERE	ri.intInventoryReceiptId = @inventoryReceiptId
+
 -- Create the cursor
 DECLARE loopReceiptItems CURSOR LOCAL FAST_FORWARD
 FOR 
@@ -124,22 +130,38 @@ BEGIN
 			,@Qty	NUMERIC(38,20)
 
 	SELECT TOP 1
-			@Amount = 				
-					dbo.fnDivide(
-						CASE 
-							WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-								dbo.fnCalculateCostBetweenUOM(COALESCE(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
-							ELSE 
-								dbo.fnCalculateCostBetweenUOM(COALESCE(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intUnitMeasureId, ReceiptItem.dblUnitCost) 			
-						END 
-						,CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 0) = 0 THEN 1 ELSE Receipt.intSubCurrencyCents END 
-					)
-					
-		,@Qty	 = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-							ReceiptItem.dblNet 
-						ELSE 
-							ReceiptItem.dblOpenReceive 
-					END 
+		@Amount = 				
+			CASE 
+				WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+					dbo.fnCalculateCostBetweenUOM(
+						COALESCE(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId)
+						, ReceiptItem.intWeightUOMId
+						, CASE 
+								WHEN ReceiptItem.ysnSubCurrency = 1 AND ISNULL(Receipt.intSubCurrencyCents, 0) <> 0 THEN 
+									dbo.fnDivide(ReceiptItem.dblUnitCost, Receipt.intSubCurrencyCents) 
+								ELSE
+									ReceiptItem.dblUnitCost
+                          END 
+					) 
+				ELSE 
+					dbo.fnCalculateCostBetweenUOM(
+						COALESCE(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId)
+						, ReceiptItem.intUnitMeasureId
+						, CASE 
+								WHEN ReceiptItem.ysnSubCurrency = 1 AND ISNULL(Receipt.intSubCurrencyCents, 0) <> 0 THEN 
+									dbo.fnDivide(ReceiptItem.dblUnitCost, Receipt.intSubCurrencyCents) 
+								ELSE
+									ReceiptItem.dblUnitCost
+                          END 
+					) 			
+			END 	
+		,@Qty	 = 
+			CASE	
+				WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+					ReceiptItem.dblNet 
+				ELSE 
+					ReceiptItem.dblOpenReceive 
+			END 
 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -204,13 +226,7 @@ END
 
 -- Calculate the tax per line item 
 UPDATE	ReceiptItem 
-SET		dblTax = ROUND(
-			dbo.fnDivide(
-				ISNULL(Taxes.dblTaxPerLineItem, 0)
-				,ISNULL(Receipt.intSubCurrencyCents, 1) 
-			)
-		, 2) 
-
+SET		dblTax = ROUND(ISNULL(Taxes.dblTaxPerLineItem, 0) , 2) 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN (
