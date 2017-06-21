@@ -208,13 +208,13 @@ SET @batchIdUsed = @batchId;
 		END
 		ELSE
 		BEGIN
-			IF EXISTS(SELECT 1 FROM #tempTransferDetails tempTD INNER JOIN tblPATCustomerStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo WHERE CS.ysnPosted != 1)
+			IF NOT EXISTS(SELECT * FROM #tempTransferDetails tempTD INNER JOIN tblPATCustomerStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo WHERE CS.ysnPosted = 1)
 			BEGIN
 				DELETE FROM tblPATCustomerStock WHERE strCertificateNo IN (SELECT strToCertificateNo FROM #tempTransferDetails where intTransferType = 4)
 			END
 			ELSE
 			BEGIN
-				RAISERROR('Stock Issued is already posted.', 16, 1);
+				RAISERROR('Issued stocks are already posted.', 16, 1);
 				GOTO Post_Rollback;
 			END
 		END
