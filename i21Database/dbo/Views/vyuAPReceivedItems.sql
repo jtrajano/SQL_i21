@@ -371,7 +371,7 @@ FROM
 	,[intStorageLocationId]		=	B.intStorageLocationId	 
 	,[strStorageLocationName]	=	ISL.strName
 	,[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0)
-	,[dblWeightLoss]			=	ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0)
+	,[dblWeightLoss]			=	CASE WHEN Loads.dblNet IS NOT NULL THEN Loads.dblNet - ISNULL(B.dblNet,0) ELSE 0 END
 	,[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END
 	,[dblClaimAmount]			=	CASE WHEN (ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0) > 0) THEN 
 									(
