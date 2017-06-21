@@ -12,7 +12,7 @@
 	@batchId			NVARCHAR(100) = NULL OUTPUT,
 	@totalAmount		NUMERIC(18,6) = NULL OUTPUT
 AS
-	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT)	
+	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT, dtmLastServiceCharge DATETIME)	
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
 	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]
 	DECLARE @temp_aging_table TABLE(
@@ -79,15 +79,15 @@ AS
 	--GET SELECTED CUSTOMERS
 	IF (@customerIds = '')
 		BEGIN
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-			SELECT E.[intEntityId], C.intServiceChargeId FROM vyuARCustomerSearch E
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId, dtmLastServiceCharge) 
+			SELECT E.[intEntityId], C.intServiceChargeId, C.intTermsId, C.dtmLastServiceCharge FROM vyuARCustomerSearch E
 				INNER JOIN tblARCustomer C ON E.[intEntityId] = C.[intEntityId]
 				WHERE E.ysnActive = 1 AND ISNULL(C.intServiceChargeId, 0) <> 0
 		END
 	ELSE
 		BEGIN
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId)
-			SELECT [intEntityId], intServiceChargeId FROM tblARCustomer WHERE [intEntityId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId, dtmLastServiceCharge)
+			SELECT [intEntityId], intServiceChargeId, intTermsId, dtmLastServiceCharge FROM tblARCustomer WHERE [intEntityId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
 		END
 
 	--GET SELECTED STATUS CODES
@@ -109,15 +109,26 @@ AS
 			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('CF Tran'))
 		END
 
+	IF EXISTS(SELECT TOP 1 NULL FROM #tmpCustomers WHERE ISNULL(intTermId, 0) = 0) AND @isRecap = 0
+		BEGIN
+			RAISERROR(120042, 16, 1)
+			RETURN 0
+		END
+
 	--PROCESS EACH CUSTOMER
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomers)
 		BEGIN
 			DECLARE @entityId			INT,
-					@serviceChargeId	INT					
+					@serviceChargeId	INT,
+					@dtmLastServiceCharge DATETIME
 
 			SELECT TOP 1 @entityId = intEntityId,
-						 @serviceChargeId = intServiceChargeId FROM #tmpCustomers
+						 @serviceChargeId = intServiceChargeId,
+						 @dtmLastServiceCharge = dtmLastServiceCharge
+			FROM #tmpCustomers
+
 			DELETE FROM @tempTblTypeServiceCharge
+
 			IF (@serviceChargeId > 0)
 				BEGIN
 					--GET INVOICES DUE
@@ -182,8 +193,8 @@ AS
 										   GROUP BY PD.intInvoiceId
 								) AS PAYMENTDATE ON PAYMENTDATE.intInvoiceId = I.intInvoiceId 
 							WHERE I.ysnPosted = 1 							  
-								AND I.strTransactionType = 'Invoice'
-								AND I.strType IN ('Standard', 'Transport Delivery')
+								AND I.strTransactionType IN ('Invoice', 'Debit Memo')
+								AND I.strType NOT IN ('CF Tran')
 								AND I.intEntityCustomerId = @entityId
 								AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < @asOfDate
 								AND (PAYMENTDATE.dtmDatePaid IS NOT NULL AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < PAYMENTDATE.dtmDatePaid OR PAYMENTDATE.dtmDatePaid IS NULL)
@@ -193,7 +204,11 @@ AS
 						BEGIN
 							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
 
-							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
+							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+							FROM @temp_aging_table
+							WHERE intEntityCustomerId = @entityId							
+							  AND dtmDueDate BETWEEN ISNULL(@dtmLastServiceCharge, '01/01/1900') AND @asOfDate
+
 							SELECT TOP 1 @dblMinimumSC = ISNULL(dblMinimumCharge, 0)
 									   , @dblMinFinanceSC = ISNULL(dblMinimumFinanceCharge, 0)
 							FROM tblARCustomer C 
@@ -223,7 +238,10 @@ AS
 										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
 									WHERE AGING.intEntityCustomerId = @entityId
 
-									UPDATE tblARCustomer SET dtmLastServiceCharge = @asOfDate WHERE intEntityId = @entityId
+									IF ISNULL(@isRecap, 0) = 0
+										BEGIN
+											UPDATE tblARCustomer SET dtmLastServiceCharge = @asOfDate WHERE intEntityId = @entityId
+										END
 								END					
 						END
 
