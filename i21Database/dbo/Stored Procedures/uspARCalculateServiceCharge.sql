@@ -229,6 +229,8 @@ AS
 										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.[intEntityId]
 										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
 									WHERE AGING.intEntityCustomerId = @entityId
+
+									UPDATE tblARCustomer SET dtmLastServiceCharge = @asOfDate WHERE intEntityId = @entityId
 								END					
 						END
 
