@@ -1394,10 +1394,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     break;
                 case 'cboUOM':
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
-                    current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
-                    current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
-                    current.set('strSubLocationName', records[0].get('strSubLocationName'));
-                    current.set('intSubLocationId', records[0].get('intSubLocationId'));
+                    // current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
+                    // current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+                    // current.set('strSubLocationName', records[0].get('strSubLocationName'));
+                    // current.set('intSubLocationId', records[0].get('intSubLocationId'));
                     break;
             }
         }
