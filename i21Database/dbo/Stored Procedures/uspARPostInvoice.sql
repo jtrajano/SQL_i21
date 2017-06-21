@@ -23,8 +23,8 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
-  
+SET ANSI_WARNINGS OFF   
+
 
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -4569,18 +4569,18 @@ IF @recap = 1
 			tblGLPostRecap
 		INNER JOIN
 		(
-			SELECT GLA.intAccountId, GLA.strDescription 
+			SELECT DISTINCT GLA.intAccountId, GLA.strDescription 
 			FROM 
 				(SELECT intAccountId, strDescription, strBatchId FROM tblGLPostRecap) GLPR
 				INNER JOIN 
 				(SELECT intAccountId, strDescription FROM tblGLAccount) GLA ON GLPR.intAccountId = GLPR.intAccountId
-				WHERE
-					(ISNULL(GLPR.strDescription, '') = '' OR (GLPR.strDescription = 'Thank you for your business!'))
+				WHERE					
+					GLA.strDescription <> ISNULL(GLPR.strDescription,'')
 					AND GLPR.strBatchId = @tmpBatchId
 		) ABC ON tblGLPostRecap.intAccountId = ABC.intAccountId
-		WHERE 
-			((ISNULL(tblGLPostRecap.strDescription, '') = '') OR  (tblGLPostRecap.strDescription = 'Thank you for your business!'))
-			AND tblGLPostRecap.strBatchId = @tmpBatchId
+		WHERE 			
+			ABC.strDescription <> ISNULL(tblGLPostRecap.strDescription, '')
+			AND tblGLPostRecap.strBatchId = @tmpBatchId		 
 
 		--EXEC uspGLPostRecap @GLEntries, @UserEntityID 
 
