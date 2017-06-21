@@ -214,23 +214,43 @@ BEGIN
 			,ri.intWeightUOMId
 			,ri.intCostUOMId
 			,dblUnitCost = ri.dblUnitCost
-				--ISNULL(
-				--	dbo.fnGetCostFromCostBucket(
-				--		ri.intItemId
-				--		,il.intItemLocationId
-				--		,ISNULL(ri.intCostUOMId, ri.intUnitMeasureId)
-				--		,NULL	-- If @intLotId is null, it will get the cost from the first lot record received for the line item. 
-				--		,r.strReceiptNumber
-				--		,r.intInventoryReceiptId
-				--		,ri.intInventoryReceiptItemId
-				--		,r.strActualCostId
-				--	) 
-				--	* CASE WHEN ri.ysnSubCurrency = 1 THEN r.intSubCurrencyCents ELSE 1 END 
-				--	, ri.dblUnitCost
-				--)
-				,ri.dblUnitRetail
+			,ri.dblUnitRetail
 			,ri.ysnSubCurrency
-			,ri.dblLineTotal
+			,dblLineTotal = 
+				CASE 
+					-- Recompute the line total since it is a partial return. 
+					WHEN ISNULL(ri.dblQtyReturned, 0) <> 0 THEN 
+						ROUND(
+							CASE 
+								-- If using sub-currency, then divide it by the cents. 
+								WHEN ri.ysnSubCurrency = 1 AND ISNULL(r.intSubCurrencyCents, 0) <> 0 THEN 
+									CASE 
+										WHEN ri.intWeightUOMId IS NOT NULL THEN 
+											(ISNULL(ri.dblNet, 0) - ISNULL(ri.dblNetReturned, 0))
+											* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intWeightUOMId, ri.dblUnitCost) 
+										ELSE 
+											(ISNULL(ri.dblOpenReceive, 0) - ISNULL(ri.dblQtyReturned, 0))
+											* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intUnitMeasureId, ri.dblUnitCost) 			
+									END 
+									/ CASE WHEN ISNULL(r.intSubCurrencyCents, 0) <= 0 THEN 1 ELSE r.intSubCurrencyCents END 
+								-- If a regular currency, then calculate as usual. 
+								ELSE 
+									CASE 
+										WHEN ri.intWeightUOMId IS NOT NULL THEN 
+											(ISNULL(ri.dblNet, 0) - ISNULL(ri.dblNetReturned, 0))
+											* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intWeightUOMId, ri.dblUnitCost) 
+										ELSE 
+											(ISNULL(ri.dblOpenReceive, 0) - ISNULL(ri.dblQtyReturned, 0))
+											* dbo.fnCalculateCostBetweenUOM(COALESCE(ri.intCostUOMId, ri.intUnitMeasureId), ri.intUnitMeasureId, ri.dblUnitCost) 			
+									END 
+							END 
+							, 2
+						)
+					
+					-- If it is a full return, use the same value for the line total. 
+					ELSE 
+						ri.dblLineTotal 
+				END 					
 			,ri.intGradeId
 			,ri.dblGross
 			,dblNet = ri.dblNet - ISNULL(ri.dblNetReturned, 0) 
@@ -395,7 +415,15 @@ BEGIN
 			AND c.ysnInventoryCost = 1 
 END 
 
--- Create the taxes
+DECLARE @isPartialReturn AS BIT = 0 
+SELECT	TOP 1 
+		@isPartialReturn = 1 
+FROM	tblICInventoryReceiptItem 
+WHERE	intInventoryReceiptId = @intReceiptId 
+		AND ISNULL(dblQtyReturned, 0) <> 0
+
+-- Copy the taxes from the original if doing a full return. 
+IF (@isPartialReturn = 0)
 BEGIN 
 	INSERT INTO tblICInventoryReceiptItemTax (
 			intInventoryReceiptItemId
@@ -437,6 +465,11 @@ BEGIN
 			INNER JOIN tblICInventoryReceiptItemTax tx
 				ON tx.intInventoryReceiptItemId = ri.intSourceInventoryReceiptItemId
 	WHERE	r.intInventoryReceiptId = @intInventoryReturnId
+END 
+-- If it is a partial return, recalculate the taxes. 
+ELSE 
+BEGIN
+	EXEC uspICCalculateReceiptTax @intInventoryReturnId
 END 
 
 -- Update the returned qty

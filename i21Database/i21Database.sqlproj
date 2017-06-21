@@ -5289,6 +5289,7 @@
     <Build Include="dbo\Stored Procedures\uspARReComputePaymentAmounts.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostPaymentNew.sql" />
     <Build Include="dbo\User Defined Types\PaymentId.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
