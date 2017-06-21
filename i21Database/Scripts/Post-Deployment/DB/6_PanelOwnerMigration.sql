@@ -19,7 +19,7 @@ IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
 		(SELECT A.intPanelId, A.intUserId, B.intPanelOwnerId 
 			FROM tblDBPanel A LEFT JOIN tblDBPanelOwner B
 				ON A.intPanelId = B.intPanelId AND A.intUserId = B.intUserId
-			WHERE A.intUserId > 0
+			WHERE A.intUserId > 0  AND A.intSourcePanelId = 0
 		) C 
 		WHERE C.intPanelOwnerId IS NULL
 
