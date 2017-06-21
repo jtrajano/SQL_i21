@@ -815,6 +815,7 @@ BEGIN
 	CROSS APPLY (
 		SELECT
 			SUM(ISNULL(dblTotal,0) + ISNULL(dblTax,0)) AS dblTotal
+			,ISNULL(SUM(dblTotal),0) AS dblSubtotal
 		FROM tblAPBillDetail B
 		WHERE B.intBillId = A.intBillId
 	) Details
