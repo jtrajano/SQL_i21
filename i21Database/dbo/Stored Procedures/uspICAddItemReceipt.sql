@@ -581,8 +581,10 @@ BEGIN
 
 		SELECT TOP 1 
 				@valueSubLocationId = RawData.intSubLocationId
-				,@getItemId = RawData.intItemId
-		FROM	@ReceiptEntries	RawData LEFT JOIN tblSMCompanyLocationSubLocation sub 
+				,@getItem = i.strItemNo
+		FROM	@ReceiptEntries	RawData LEFT JOIN tblICItem i 
+					ON RawData.intItemId = i.intItemId		
+				LEFT JOIN tblSMCompanyLocationSubLocation sub 
 					ON sub.intCompanyLocationSubLocationId = RawData.intSubLocationId
 		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) <> 'transfer order'
 				AND sub.intCompanyLocationSubLocationId IS NULL 		
@@ -590,10 +592,6 @@ BEGIN
 
 		IF @valueSubLocationId IS NOT NULL 
 		BEGIN
-			SELECT	@getItem = strItemNo
-			FROM	tblICItem
-			WHERE	intItemId = @getItemId
-
 			EXEC uspICRaiseError 80098, @getItem
 			GOTO _Exit_With_Rollback;
 		END
@@ -605,18 +603,17 @@ BEGIN
 
 		SELECT TOP 1 
 				@valueStorageLocationId = RawData.intStorageLocationId
-				, @getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData LEFT JOIN tblICStorageLocation storage 
+				, @getItem = i.strItemNo 
+		FROM	@ReceiptEntries RawData LEFT JOIN tblICItem i 
+					ON RawData.intItemId = i.intItemId
+				LEFT JOIN tblICStorageLocation storage 
 					ON storage.intStorageLocationId = RawData.intStorageLocationId
+					AND storage.intSubLocationId = RawData.intSubLocationId -- Sub-location for the storage location must match too. 
 		WHERE	storage.intStorageLocationId IS NULL 
 				AND RawData.intStorageLocationId IS NOT NULL 
 
 		IF @valueStorageLocationId IS NOT NULL 
 		BEGIN
-			SELECT @getItem = strItemNo
-			FROM tblICItem
-			WHERE intItemId = @getItemId
-
 			-- Storage Unit is invalid or missing for item {Item}.
 			EXEC uspICRaiseError 80098, @getItem
 			GOTO _Exit_With_Rollback;
@@ -798,7 +795,7 @@ BEGIN
 				,intCostUOMId			= RawData.intCostUOMId
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
-				,intTaxGroupId			= RawData.intTaxGroupId
+				,intTaxGroupId			= ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId) 
 				,intForexRateTypeId		= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 				,dblForexRate			= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
 				,intContainerId			= RawData.intContainerId 
@@ -830,6 +827,20 @@ BEGIN
 					,CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 					,RawData.dtmDate
 				) forexRate
+
+				-- Get the default tax group (if override was not provided)
+				OUTER APPLY (
+					SELECT	taxGroup.intTaxGroupId, taxGroup.strTaxGroup
+					FROM	tblSMTaxGroup taxGroup
+					WHERE	taxGroup.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
+								RawData.intEntityVendorId	-- @VendorId
+								,RawData.intLocationId		--,@CompanyLocationId
+								,NULL						--,@ItemId
+								,RawData.intShipFromId		--,@VendorLocationId
+								,RawData.intFreightTermId	--,@FreightTermId
+							)
+							AND RawData.intTaxGroupId IS NULL 			
+				) taxHierarcy 
 
 				-- Integrations with the other modules: 
 				-- 1. Purchase Order
@@ -1158,7 +1169,7 @@ BEGIN
 				,[strCostMethod]			= RawData.strCostMethod
 				,[dblRate]					= RawData.dblRate
 				,[intCostUOMId]				= RawData.intCostUOMId
-				,[intEntityVendorId]		= RawData.intOtherChargeEntityVendorId
+				,[intEntityVendorId]		= ISNULL(RawData.intOtherChargeEntityVendorId, RawData.intEntityVendorId) 
 				,[dblAmount]				= RawData.dblAmount
 				,[strAllocateCostBy]		= RawData.strAllocateCostBy
 				,[ysnAccrue]				= RawData.ysnAccrue
@@ -1166,7 +1177,7 @@ BEGIN
 				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
 				,[intCurrencyId]			= COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
 				,[intCent]					= CostCurrency.intCent
-				,[intTaxGroupId]			= RawData.intTaxGroupId
+				,[intTaxGroupId]			= ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId)
 				,[intForexRateTypeId]		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 				,[dblForexRate]				= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 
 
@@ -1194,6 +1205,20 @@ BEGIN
 					,CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 					,r.dtmReceiptDate
 				) forexRate
+
+				-- Get the default tax group (if override was not provided)
+				OUTER APPLY (
+					SELECT	taxGroup.intTaxGroupId, taxGroup.strTaxGroup
+					FROM	tblSMTaxGroup taxGroup
+					WHERE	taxGroup.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
+								ISNULL(RawData.intOtherChargeEntityVendorId, RawData.intEntityVendorId)	-- @VendorId
+								,RawData.intLocationId			--,@CompanyLocationId
+								,NULL							--,@ItemId
+								,RawData.intShipFromId			--,@VendorLocationId
+								,NULL							--,@FreightTermId -- NOTE: There is no freight terms for Other Charges. 
+							)
+							AND RawData.intTaxGroupId IS NULL 			
+				) taxHierarcy 
 
 		WHERE RawHeaderData.intId = @intId
 
