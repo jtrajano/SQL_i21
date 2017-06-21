@@ -5433,7 +5433,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // Validate the lot qty.
         if (lineItemQty <= 0) {
-            iRely.Functions.showErrorDialog('Cannot replicate zero Qty to Receive.');
+            iRely.Functions.showErrorDialog('Cannot replicate zero Receipt Qty.');
             return;
         }
 

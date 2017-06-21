@@ -938,7 +938,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             if (get('current.strReceiptType') == 'Inventory Return'){
                 return 'Qty to Return';
            }
-           return 'Qty to Receive';
+           return 'Receipt Qty';
        },
        hideVoucherButton: function(get) {
             if (get('current.strReceiptType') == 'Inventory Return') {

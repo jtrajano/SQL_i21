@@ -135,7 +135,7 @@ Ext.define('Inventory.model.ReceiptItem', {
                     if (this.sign(this.get('dblNet')) != 1){
                         errors.add({
                             field: 'dblNet',
-                            message: 'Net Qty must be a positive number when Qty to Receive is positive.'
+                            message: 'Net Qty must be a positive number when Receipt Qty is positive.'
                         });
                         return false;
                     }
@@ -144,7 +144,7 @@ Ext.define('Inventory.model.ReceiptItem', {
                     if (this.sign(this.get('dblNet')) != -1){
                         errors.add({
                             field: 'dblNet',
-                            message: 'Net Qty must be a negative number when Qty to Receive is negative.'
+                            message: 'Net Qty must be a negative number when Receipt Qty is negative.'
                         });
                         return false;
                     }
