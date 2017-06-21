@@ -306,6 +306,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 conjunction: 'and'
                             },
                             {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryShipment.selection.intSubLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
                                 column: 'strInternalCode',
                                 value: 'WH_DOCK_DOOR',
                                 conjunction: 'and',
