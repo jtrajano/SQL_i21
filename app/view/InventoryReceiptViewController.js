@@ -1594,7 +1594,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             method: 'get'
         })
-            .subscribe(
+        subscribe(
             function (successResponse) {
                 var jsonData = Ext.decode(successResponse.responseText);
 
@@ -1609,7 +1609,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 //iRely.Functions.showErrorDialog(jsonData.message.statusText);
                 iRely.Functions.showErrorDialog('Something went wrong while getting the default Tax Group for the item.');
             }
-            );
+        );
     },
 
     getVendorCost: function (cfg, successFn, failureFn) {
@@ -4698,10 +4698,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
             var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
 
-            // Get the important header data:         
-            var intLocationId = masterRecord.get('intLocationId');
-            var intFreightTermId = masterRecord.get('intFreightTermId');
-
             // Get the transaction currency
             var chargeCurrencyId = cboCurrency.getValue();
 
@@ -4790,8 +4786,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Get the default tax group
             var taxCfg = {
-                freightTermId: intFreightTermId,
-                locationId: intLocationId,
+                freightTermId: null, // Freight Terms is not applicable for other charges. 
+                locationId: masterRecord.get('intLocationId'),
                 entityVendorId: current.get('intEntityVendorId'),
                 entityLocationId: null,
             };
@@ -4810,6 +4806,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         if (combo.itemId === 'cboCostVendor') {
+            current.set('intEntityVendorId', record.get('intEntityId'));
+
+            // Get the tax group for the other charge. 
+            {                
+                var taxCfg = {
+                    freightTermId: null, // Freight Terms is not applicable for other charges. 
+                    locationId: masterRecord.get('intLocationId'),
+                    entityVendorId: current.get('intEntityVendorId'),
+                    entityLocationId: null,
+                };
+                me.getDefaultReceiptTaxGroupId(current, taxCfg);
+            }
+            
             // Convert the current amount (or rate) to the functional currency; 
             var dblAmount = null;
             var dblCurrentForexRate = current.get('dblForexRate');
@@ -4836,12 +4845,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // Clear the forex rate
             current.set('dblForexRate', null);
 
-            //Do not compute tax for Third Party Vendor
-            if (current.get('intEntityVendorId') !== masterRecord.get('intEntityVendorId')) {
-                current.set('intTaxGroupId', null);
-                current.set('strTaxGroup', null);
-                current.set('dblTax', 0);
-
+            // Process the foreign currency for the 3rd party vendor. 
+            if (current.get('intEntityVendorId') !== masterRecord.get('intEntityVendorId'))
+            {
                 // Get and set the vendor currency. 
                 var thirdPartyVendorCurrencyId = record.get('intCurrencyId');
                 var thirdPartyVendorCurrency = record.get('strCurrency');
@@ -4934,7 +4940,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             );
         }
-
     },
 
     onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
