@@ -2086,7 +2086,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         taxAmount = taxAmount * -1;
                     }
 
-                    taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
+                    taxAmount = i21.ModuleMgr.Inventory.roundDecimalValue(taxAmount, 2);
 
                     if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
                         if (itemDetailTax.ysnTaxExempt)
@@ -5870,7 +5870,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     taxAmount = -(taxAmount);
                                 }
 
-                                taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
+                                taxAmount = i21.ModuleMgr.Inventory.roundDecimalValue(taxAmount, 2);
 
                                 // Do not compute tax if it can't be converted to voucher. 
                                 // This means accrue is false and price down is false. 

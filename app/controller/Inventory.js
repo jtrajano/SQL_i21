@@ -151,10 +151,13 @@ Ext.define('Inventory.controller.Inventory', {
     },
 
     roundDecimalValue: function(number, precision) {
+        if (!Ext.isNumeric(number)) number;
+        if (!Ext.isNumeric(precision)) number;
+
         var factor = Math.pow(10, precision);
-        var tempNumber = number * factor;
+        var tempNumber = Math.abs(number) * factor;
         var roundedTempNumber = Math.round(tempNumber);
-        return roundedTempNumber / factor;
+        return Math.sign(number) == -1 ? -(roundedTempNumber / factor) : roundedTempNumber / factor;
     },
 
     getTodayDate: function() {
