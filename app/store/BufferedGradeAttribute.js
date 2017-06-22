@@ -6,14 +6,14 @@ Ext.define('Inventory.store.BufferedGradeAttribute', {
     alias: 'store.icbufferedgradeattribute',
 
     requires: [
-        'Inventory.model.CommodityGrade'
+        'Inventory.model.CommodityGradeView'
     ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            model: 'Inventory.model.CommodityGrade',
+            model: 'Inventory.model.CommodityGradeView',
             storeId: 'BufferedGradeAttribute',
             pageSize: 50,
             batchActions: true,

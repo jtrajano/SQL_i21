@@ -420,4 +420,13 @@ namespace iRely.Inventory.Model
         public string strStorageTypeCode { get; set; }
         public tblICCommodity tblICCommodity { get; set; }
     }
+
+    public class vyuICGetCommodityGrade
+    {
+        public int intCommodityAttributeId { get; set; }
+        public int intCommodityId { get; set; }
+        public string strGrade { get; set; }
+        public string strCommodityCode { get; set; }
+        public string strCommodityDescription { get; set; }
+    }
 }

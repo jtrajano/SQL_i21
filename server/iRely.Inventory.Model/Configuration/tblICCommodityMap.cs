@@ -258,4 +258,20 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strStorageTypeCode).HasColumnName("strStorageTypeCode");
         }
     }
+
+    public class vyuICGetCommodityGradeMap : EntityTypeConfiguration<vyuICGetCommodityGrade>
+    {
+        public vyuICGetCommodityGradeMap()
+        {
+            this.HasKey(t => t.intCommodityAttributeId);
+
+            this.ToTable("vyuICGetCommodityGrades");
+
+            this.Property(t => t.intCommodityAttributeId).HasColumnName("intCommodityAttributeId");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
+            this.Property(t => t.strCommodityDescription).HasColumnName("strCommodityDescription");
+            this.Property(t => t.strGrade).HasColumnName("strGrade");
+        }
+    }
 }

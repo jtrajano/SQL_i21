@@ -143,7 +143,7 @@ namespace iRely.Inventory.BusinessLayer
         /// <returns></returns>
         public async Task<SearchResult> SearchGradeAttributes(GetParameter param)
         {
-            var query = _db.GetQuery<tblICCommodityGrade>()
+            var query = _db.GetQuery<vyuICGetCommodityGrade>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
