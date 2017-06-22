@@ -273,8 +273,8 @@ BEGIN
 		FROM tblAPBill A 
 		CROSS APPLY (
 			SELECT
-				SUM(CASE WHEN C.intTransactionType != 1 THEN B.dblTotal * -1 ELSE B.dblTotal END) 
-					+ SUM(CASE WHEN C.intTransactionType != 1 THEN B.dblTax * -1 ELSE B.dblTax END) AS dblTotal
+				SUM(B.dblTotal) 
+			  + SUM(B.dblTax) AS dblTotal
 			FROM tblAPBillDetail B 
 			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 			WHERE B.intBillId = A.intBillId
