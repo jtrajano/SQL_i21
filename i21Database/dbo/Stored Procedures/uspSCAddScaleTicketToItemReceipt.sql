@@ -122,7 +122,7 @@ SELECT
 										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
 									END
 		,intLocationId				= SC.intProcessingLocationId
-		,intShipFromId                = (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
+		,intShipFromId              = (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
@@ -218,7 +218,6 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[ysnPrice]
 		)
 		SELECT	
-		DISTINCT
 		[intEntityVendorId]					= RE.intEntityVendorId
 		,[strBillOfLadding]					= RE.strBillOfLadding
 		,[strReceiptType]					= RE.strReceiptType
@@ -237,14 +236,14 @@ WHERE SCTicket.intTicketId = @intTicketId
 												CASE 
 													WHEN QM.dblDiscountAmount < 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
 														ELSE (QM.dblDiscountAmount * -1)
 													END 
 													WHEN QM.dblDiscountAmount > 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId)
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
 														ELSE QM.dblDiscountAmount
-													END 
+													END
 												END
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
@@ -256,21 +255,25 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN 
-												CASE
-													WHEN QM.dblDiscountAmount < 0 THEN 
+												CASE 
+													WHEN RE.ysnIsStorage = 1 THEN 0
+													WHEN RE.ysnIsStorage = 0 THEN
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
-														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId) * -1)
-													END 
-													WHEN QM.dblDiscountAmount > 0 THEN 
-													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId)
-														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId)
-													END 
+														WHEN QM.dblDiscountAmount < 0 THEN 
+														CASE
+															WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
+															ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
+														END 
+														WHEN QM.dblDiscountAmount > 0 THEN 
+														CASE
+															WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
+															ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
+														END 
+													END
 												END
 											END
-		,[intContractHeaderId]				= NULL
-		,[intContractDetailId]				= NULL
+		,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
+		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= CASE
 												WHEN QM.dblDiscountAmount < 0 THEN 1
 												WHEN QM.dblDiscountAmount > 0 THEN 0
@@ -311,8 +314,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[ysnAccrue]
 				,[ysnPrice]
 		)
-		SELECT
-        DISTINCT
+		SELECT	
 		[intEntityVendorId]					= RE.intEntityVendorId
 		,[strBillOfLadding]					= RE.strBillOfLadding
 		,[strReceiptType]					= RE.strReceiptType
@@ -334,10 +336,14 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
-												WHEN IC.strCostMethod = 'Amount' THEN SC.dblTicketFees
+												WHEN IC.strCostMethod = 'Amount' THEN 
+												CASE
+													WHEN RE.ysnIsStorage = 1 THEN 0
+													WHEN RE.ysnIsStorage = 0 THEN SC.dblTicketFees
+												END
 											END
-		,[intContractHeaderId]				= NULL
-		,[intContractDetailId]				= NULL
+		,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
+		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= CASE 
 												WHEN @ysnDeductFeesCusVen = 1 THEN 1
 												WHEN @ysnDeductFeesCusVen = 0 THEN 0
@@ -437,7 +443,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																			WHEN RE.ysnIsStorage = 1 THEN 0
 																			WHEN RE.ysnIsStorage = 0 THEN ROUND (LoadCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(LoadCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, LoadCost.intItemUOMId), SC.dblGrossUnits), 2)
 																		END
-																	END	
+																	END						
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= @ysnAccrue
@@ -501,7 +507,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																			WHEN RE.ysnIsStorage = 1 THEN 0
 																			WHEN RE.ysnIsStorage = 0 THEN LoadCost.dblRate
 																		END
-																	END
+																	END								
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= LoadCost.ysnAccrue
@@ -559,7 +565,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																		WHEN IC.strCostMethod = 'Amount' THEN ROUND (ContractCost.dblRate * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN ROUND (ContractCost.dblRate * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																		END
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
@@ -618,7 +628,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																		END
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
@@ -678,7 +692,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN LoadCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN LoadCost.strCostMethod = 'Amount' THEN LoadCost.dblRate
+																		WHEN LoadCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN LoadCost.dblRate
+																		END
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
@@ -735,7 +753,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN LoadCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN LoadCost.strCostMethod = 'Amount' THEN LoadCost.dblRate
+																		WHEN LoadCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN LoadCost.dblRate
+																		END
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
@@ -794,7 +816,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																		END
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
@@ -850,7 +876,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																		WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																		END
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
@@ -914,7 +944,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	END
 								,[dblAmount]						=  CASE
 																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																		WHEN IC.strCostMethod = 'Amount' THEN ROUND (RE.dblFreightRate * SC.dblGrossUnits, 2)
+																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		CASE
+																			WHEN RE.ysnIsStorage = 1 THEN 0
+																			WHEN RE.ysnIsStorage = 0 THEN ROUND (RE.dblFreightRate * SC.dblGrossUnits, 2)
+																		END
 																	END
 								,[intContractHeaderId]				= NULL
 								,[intContractDetailId]				= NULL
@@ -974,7 +1008,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 						,[dblAmount]						= CASE
 																WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																WHEN IC.strCostMethod = 'Amount' THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																WHEN IC.strCostMethod = 'Amount' THEN 
+																CASE
+																	WHEN RE.ysnIsStorage = 1 THEN 0
+																	WHEN RE.ysnIsStorage = 0 THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																END
 															END
 						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 						,[intContractDetailId]				= ContractCost.intContractDetailId
@@ -1035,7 +1073,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 						,[dblAmount]						= CASE
 																WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+																WHEN ContractCost.strCostMethod = 'Amount' THEN 
+																CASE
+																	WHEN RE.ysnIsStorage = 1 THEN 0
+																	WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																END
 															END
 						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 						,[intContractDetailId]				= ContractCost.intContractDetailId
@@ -1091,7 +1133,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 					,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 					,[dblAmount]						= CASE
 															WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-															WHEN ContractCost.strCostMethod = 'Amount' THEN  ContractCost.dblRate
+															WHEN ContractCost.strCostMethod = 'Amount' THEN  
+															CASE
+																WHEN RE.ysnIsStorage = 1 THEN 0
+																WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+															END
 														END
 					,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 					,[intContractDetailId]				= ContractCost.intContractDetailId
@@ -1104,7 +1150,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 			END
 	END
 
-SELECT @checkContract = COUNT(intContractDetailId) FROM @ReceiptStagingTable WHERE intContractDetailId != 0;
+SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptType = 'Purchase Contract';
 IF(@checkContract > 0)
 	UPDATE @ReceiptStagingTable SET strReceiptType = 'Purchase Contract'
 
@@ -1115,7 +1161,7 @@ IF (@total = 0)
 EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
 		,@OtherCharges
-		,@intUserId;
+		,@intEntityId;
 
 -- Update the Inventory Receipt Key to the Transaction Table
 UPDATE	SC
