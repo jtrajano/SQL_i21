@@ -28,6 +28,6 @@
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPREmployeeTimeOff] FOREIGN KEY ([intEntityEmployeeId],[intTypeTimeOffId]) REFERENCES [dbo].[tblPREmployeeTimeOff] ([intEntityEmployeeId],[intTypeTimeOffId]),
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId]),
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblSMEvents] FOREIGN KEY ([intEventId]) REFERENCES [dbo].[tblSMEvents] ([intEventId]),
-	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRPayGroupDetail] FOREIGN KEY ([intPayGroupDetailId]) REFERENCES [tblPRPayGroupDetail]([intPayGroupDetailId]),
+	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRPayGroupDetail] FOREIGN KEY ([intPayGroupDetailId]) REFERENCES [tblPRPayGroupDetail]([intPayGroupDetailId]) ON DELETE SET NULL,
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [dbo].[tblPRPaycheck] ([intPaycheckId])
 )

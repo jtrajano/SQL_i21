@@ -160,6 +160,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
 						WHERE EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId AND EE.intPayGroupId IS NOT NULL)
 			BEGIN
+				DECLARE @intTimeOffPayGroupDetail INT
 
 				/* Insert Pay Group Detail Entry for the Time Off */
 				INSERT INTO tblPRPayGroupDetail (
@@ -211,6 +212,9 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
 					WHERE EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 					AND EE.intPayGroupId IS NOT NULL
+
+				SELECT @intTimeOffPayGroupDetail = SCOPE_IDENTITY()
+				UPDATE tblPRTimeOffRequest SET intPayGroupDetailId = @intTimeOffPayGroupDetail WHERE intTimeOffRequestId = @intTimeOffRequestId
 
 				/* Check if the corresponding Linked Earning to deduct exists in the Pay Group Detail */
 				DECLARE @intPayGroupDetail INT = NULL

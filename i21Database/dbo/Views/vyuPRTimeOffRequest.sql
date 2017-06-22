@@ -18,6 +18,8 @@ SELECT
 						+ ' Hour' + CASE WHEN (dblRequest > 0) THEN 's ' ELSE ' ' END + TOFF.strTimeOff
 	,REQ.strReason
 	,REQ.strAddress
+	,PC.strPaycheckId
+	,PC.dtmPayDate
 	,REQ.intConcurrencyId
 FROM 
 	tblPRTimeOffRequest REQ
@@ -30,3 +32,4 @@ FROM
 			ON TRN.intScreenId = SCR.intScreenId 
 			AND SCR.strNamespace = 'Payroll.view.TimeOffRequest') TRANS 
 		ON REQ.intTimeOffRequestId = TRANS.intRecordId
+	LEFT JOIN tblPRPaycheck PC ON REQ.intPaycheckId = PC.intPaycheckId

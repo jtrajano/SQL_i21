@@ -362,6 +362,12 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 	AND intEntityEmployeeId = @intEmployee AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
 	AND intPayGroupDetailId IN (SELECT intPayGroupDetailId FROM #tmpPayGroupDetail)
 
+	/* Associate Time Off Requests to created Paycheck */
+	UPDATE tblPRTimeOffRequest 
+	SET intPaycheckId = @intPaycheckId
+	WHERE ysnPostedToCalendar = 1 AND intPaycheckId IS NULL
+	AND intEntityEmployeeId = @intEmployee AND intPayGroupDetailId IN (SELECT intPayGroupDetailId FROM #tmpPayGroupDetail)
+
 	/* Delete Processed Pay Group Details */
 	DELETE FROM tblPRPayGroupDetail WHERE intPayGroupDetailId IN (SELECT intPayGroupDetailId FROM #tmpPayGroupDetail)
 
