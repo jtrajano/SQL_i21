@@ -56,6 +56,7 @@
 :r "..\dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql"
 :r "..\dbo\Stored Procedures\uspCMImportValidations.sql"
 :r "..\dbo\Stored Procedures\uspCMReconcileBankRecords.sql"
+:r "..\dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql"
 
 -- ACCOUNTS PAYABLE
 :r "..\dbo\Views\vwapivcmst.sql"
