@@ -5302,6 +5302,7 @@
     <Build Include="dbo\Stored Procedures\uspPATImportCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMCreateLostRevenue.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemPricingPreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
