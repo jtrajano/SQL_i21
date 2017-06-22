@@ -16,6 +16,7 @@
     [strAddress] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnPostedToCalendar] BIT NULL DEFAULT ((0)),
 	[intEventId] INT NULL,
+	[intPaycheckId] INT NULL,
 	[intCreatedUserId] INT NOT NULL,
 	[dtmCreated] DATETIME NOT NULL,
 	[intLastModifiedUserId] INT NOT NULL,
@@ -25,5 +26,6 @@
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRTypeTimeOff] FOREIGN KEY ([intTypeTimeOffId]) REFERENCES [dbo].[tblPRTypeTimeOff] ([intTypeTimeOffId]),
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPREmployeeTimeOff] FOREIGN KEY ([intEntityEmployeeId],[intTypeTimeOffId]) REFERENCES [dbo].[tblPREmployeeTimeOff] ([intEntityEmployeeId],[intTypeTimeOffId]),
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId]),
-	CONSTRAINT [FK_tblPRTimeOffRequest_tblSMEvents] FOREIGN KEY ([intEventId]) REFERENCES [dbo].[tblSMEvents] ([intEventId])
+	CONSTRAINT [FK_tblPRTimeOffRequest_tblSMEvents] FOREIGN KEY ([intEventId]) REFERENCES [dbo].[tblSMEvents] ([intEventId]),
+	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [dbo].[tblPRPaycheck] ([intPaycheckId])
 )
