@@ -5300,6 +5300,8 @@
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
+    <Build Include="dbo\Stored Procedures\uspCRMCreateLostRevenue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
