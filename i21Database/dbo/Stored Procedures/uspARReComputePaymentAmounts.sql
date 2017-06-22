@@ -41,11 +41,11 @@ WHERE
 
 UPDATE ARP
 SET
-	-- ARP.[dblAmountPaid]			= PD.[dblPaymentTotal]
-	--,ARP.[dblBaseAmountPaid]		= PD.[dblBasePaymentTotal]
+	 ARP.[dblAmountPaid]			= PD.[dblPaymentTotal]
+	,ARP.[dblBaseAmountPaid]		= PD.[dblBasePaymentTotal]
 	--,
-	 ARP.[dblUnappliedAmount]		= ARP.dblAmountPaid - (PD.[dblPaymentTotal])
-	,ARP.[dblBaseUnappliedAmount]	= ARP.dblBaseAmountPaid - (PD.[dblBasePaymentTotal])
+	-- ARP.[dblUnappliedAmount]		= ARP.dblAmountPaid - (PD.[dblPaymentTotal])
+	--,ARP.[dblBaseUnappliedAmount]	= ARP.dblBaseAmountPaid - (PD.[dblBasePaymentTotal])
 FROM tblARPayment ARP
 INNER JOIN 
 	(SELECT
