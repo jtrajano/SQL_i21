@@ -206,7 +206,10 @@ SELECT distinct cd.intContractHeaderId, cd.intContractDetailId,
         ORDER BY intFutureMarketId,dtmFutureMonthsDate asc)
     end) ,@dtmSettlemntPriceDate) as dblFuturesClosingPrice1,	
 
-CASE WHEN cd.intPricingTypeId=1 THEN isnull(dblFutures,0) ELSE dblFuture end as dblFutures ,                 
+
+	  CASE WHEN isnull(strPricingStatus,'')='Unpriced' then 
+          dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate)   else                                                        
+          CASE WHEN cd.intPricingTypeId=1 THEN isnull(dblFutures,0) ELSE dblFuture end end as dblFutures,                 
                                               
 isnull((SELECT top 1 isnull(dblBasisOrDiscount,0)+isnull(dblCashOrFuture,0) FROM tblRKM2MBasisDetail temp 
     WHERE temp.intM2MBasisId=@intM2MBasisId and temp.intCommodityId=@intCommodityId
@@ -249,7 +252,6 @@ WHERE   cd.intCommodityId= @intCommodityId
             AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
             AND isnull(cd.intMarketZoneId,0)= case when isnull(@intMarketZoneId,0)=0 then isnull(cd.intMarketZoneId,0) else @intMarketZoneId end
             AND intContractStatusId not in(2,3,6) and convert(datetime,convert(varchar, cd.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
-			and strPricingStatus <>  case when isnull(@ysnIncludeBasisDifferentialsInResults,0)=0 then 'Unpriced' else '' end
 				
 INSERT INTO @tblFinalDetail (intContractHeaderId,
     intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
