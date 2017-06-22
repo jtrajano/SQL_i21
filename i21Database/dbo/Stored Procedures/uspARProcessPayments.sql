@@ -41,6 +41,8 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
 	CREATE TABLE #EntriesForProcessing(
 		 [intId]						INT												NOT NULL
+		,[intPaymentId]					INT												NULL
+		,[intPaymentDetailId]			INT												NULL
 		,[intEntityCustomerId]			INT												NULL
 		,[intCompanyLocationId]			INT												NULL
 		,[intCurrencyId]				INT												NULL
@@ -171,6 +173,7 @@ BEGIN
 		,[intBillId]
 		,[strTransactionNumber]
 		,[intTermId]
+		,[intInvoiceAccountId]
 		,[ysnApplyTermDiscount]
 		,[dblDiscount]
 		,[dblDiscountAvailable]
@@ -220,6 +223,7 @@ BEGIN
 		,[intBillId]							= (CASE WHEN @GroupingOption = 0 THEN IE.[intBillId] ELSE NULL END) 
 		,[strTransactionNumber]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strTransactionNumber] ELSE NULL END) 
 		,[intTermId]							= (CASE WHEN @GroupingOption = 0 THEN IE.[intTermId] ELSE NULL END) 
+		,[intInvoiceAccountId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intInvoiceAccountId] ELSE NULL END) 
 		,[ysnApplyTermDiscount]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnApplyTermDiscount] ELSE NULL END) 
 		,[dblDiscount]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblDiscount] ELSE NULL END) 
 		,[dblDiscountAvailable]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblDiscountAvailable] ELSE NULL END) 
@@ -322,6 +326,7 @@ BEGIN
 			,[intBillId]
 			,[strTransactionNumber]
 			,[intTermId]
+			,[intInvoiceAccountId]
 			,[ysnApplyTermDiscount]
 			,[dblDiscount]
 			,[dblDiscountAvailable]
@@ -370,6 +375,7 @@ BEGIN
 			,[intBillId]							= ITG.[intBillId]
 			,[strTransactionNumber]					= ITG.[strTransactionNumber]
 			,[intTermId]							= ITG.[intTermId]
+			,[intInvoiceAccountId]					= ITG.[intInvoiceAccountId]
 			,[ysnApplyTermDiscount]					= ITG.[ysnApplyTermDiscount]
 			,[dblDiscount]							= ITG.[dblDiscount]
 			,[dblDiscountAvailable]					= ITG.[dblDiscountAvailable]
@@ -472,11 +478,11 @@ BEGIN TRY
 		#EntriesForProcessing EFP
 	INNER JOIN
 		@PaymentEntries IE
-			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
+			ON EFP.[intPaymentId] = IE.[intPaymentId] 
 	WHERE
 		ISNULL(EFP.[ysnForUpdate],0) = 1
 		AND ISNULL(IE.[ysnUnPostAndUpdate],0) = 1
-		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+		AND ISNULL(EFP.[intPaymentId],0) <> 0
 		AND ISNULL(EFP.[ysnRecap], 0) = 0
 
 		
