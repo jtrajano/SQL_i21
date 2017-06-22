@@ -3,7 +3,7 @@
 	@intTicketId INT,
 	@intEntityId INT,
 	@intTicketDiscountId INT,
-	@strCostMethod NVARCHAR(10),
+	@dblUnitQty AS NUMERIC(38, 20),
 	@intUnitMeasureId INT = NULL
 )
 RETURNS NUMERIC(18, 6) 
@@ -25,7 +25,8 @@ BEGIN
 	,@strDiscountCalculationOptionId varchar
 	,@dblSplitPercent AS NUMERIC(38, 20)
 	,@dblUOMQty AS NUMERIC(38, 20)
-	,@intItemId AS NUMERIC(38, 20);
+	,@intItemId AS NUMERIC(38, 20)
+	,@dblQtyToDistribute AS NUMERIC(38, 20);
 
 	SELECT @dblTicketGrossUnit = dblGrossUnits, @dblTicketShrinkUnit = dblShrink, @dblTicketNetUnits = dblNetUnits 
 	,@dblTicketGrossWeight = dblGrossWeight, @dblTicketTareWeight = dblTareWeight, @intItemId = intItemId
@@ -42,17 +43,25 @@ BEGIN
 
 	IF @strDiscountCalculationOptionId = '1' --NET WEIGHT
 		BEGIN
-			SET @calculatedValue = ((@dblTicketNetUnits * @dblSplitPercent)/ @dblUOMQty) * @dblDiscountAmount
+			SET @dblQtyToDistribute = @dblTicketNetUnits * @dblSplitPercent
+			SET @dblSplitPercent = @dblUnitQty / @dblQtyToDistribute
+			SET @calculatedValue = ((@dblQtyToDistribute * @dblSplitPercent)/ @dblUOMQty) * @dblDiscountAmount
 		END
 	ELSE IF  @strDiscountCalculationOptionId = '2' --WET WEIGHT
 		BEGIN
 			SELECT @dblGrossShrinkPercentage = SUM(dblShrinkPercent) FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strShrinkWhat = 'Gross Weight'
-			SET @dblGrossShrink = (@dblTicketGrossUnit * @dblSplitPercent) * ISNULL(@dblGrossShrinkPercentage,0);
+
+			SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
+			SET @dblSplitPercent = @dblUnitQty / @dblQtyToDistribute
+
+			SET @dblGrossShrink = (@dblQtyToDistribute * @dblSplitPercent) * ISNULL(@dblGrossShrinkPercentage,0);
 			SET @dblGrossShrink = @dblGrossShrink / 100;
-			SET @dblTicketWetUnits = ((@dblTicketGrossUnit * @dblSplitPercent) / @dblUOMQty) - @dblGrossShrink
+			SET @dblTicketWetUnits = ((@dblQtyToDistribute * @dblSplitPercent) / @dblUOMQty) - @dblGrossShrink
 			SET @calculatedValue =  @dblDiscountAmount * @dblTicketWetUnits
 		END
 	ELSE 
-		SET @calculatedValue =  ((@dblTicketGrossUnit * @dblSplitPercent) / @dblUOMQty) * @dblDiscountAmount
+		SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
+		SET @dblSplitPercent = @dblUnitQty / @dblQtyToDistribute
+		SET @calculatedValue =  ((@dblQtyToDistribute * @dblSplitPercent) / @dblUOMQty) * @dblDiscountAmount
 	RETURN @calculatedValue
 END
