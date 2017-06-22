@@ -365,7 +365,7 @@ BEGIN
 	VALUES (@nbsPK, SCOPE_IDENTITY(), 9, 0, NULL, N'tblCFTransaction', N'dblOriginalGrossPrice', NULL, 7, NULL, 1, 1)
 
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
-	VALUES (@nbsPK, N'Product Id', 0, 164, NULL, 0, 2, NULL)
+	VALUES (@nbsPK, N'Product Id', 0, 1874, NULL, 0, 2, NULL)
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat],[intRounding]) 
 	VALUES (@nbsPK, N'Quantity', 0, 1877, NULL, 0, 2, N'5 Implied Decimals', 3)
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 

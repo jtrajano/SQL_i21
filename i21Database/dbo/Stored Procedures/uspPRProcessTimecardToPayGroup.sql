@@ -71,6 +71,14 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,@intEntityEmployeeId = intEntityEmployeeId
 		FROM #tmpTimecard
 
+		/* Delete any Generated Hours that occupies this Period */
+		DELETE FROM tblPRPayGroupDetail
+		WHERE (intEmployeeEarningId = @intEmployeeEarningId OR strCalculationType IN ('Overtime', 'Shift Differential'))
+			AND intDepartmentId = @intEmployeeDepartmentId
+			AND intEntityEmployeeId = @intEntityEmployeeId
+			AND dtmDateFrom >= @dtmBegin AND dtmDateFrom <= @dtmEnd
+			AND intSource = 0
+
 		/* Insert Regular Hours To Pay Group Detail */
 		INSERT INTO tblPRPayGroupDetail
 			(intPayGroupId
@@ -86,6 +94,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,dblTotal
 			,dtmDateFrom
 			,dtmDateTo
+			,intSource
 			,intSort
 			,intConcurrencyId)
 		SELECT
@@ -102,6 +111,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,CASE WHEN (EE.strCalculationType IN ('Fixed Amount')) THEN EE.dblRateAmount ELSE ROUND(TC.dblRegularHours * EE.dblRateAmount, 2) END
 			,@dtmBegin 
 			,@dtmEnd
+			,3
 			,1
 			,1
 		FROM #tmpTimecard TC 
@@ -134,6 +144,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,dblTotal
 			,dtmDateFrom
 			,dtmDateTo
+			,intSource
 			,intSort
 			,intConcurrencyId)
 		SELECT
@@ -149,6 +160,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,ROUND(TCE.dblOvertimeHours * EL.dblRateAmount, 2)
 			,@dtmBegin 
 			,@dtmEnd
+			,3
 			,1
 			,1
 		FROM tblPREmployeeEarning EL 

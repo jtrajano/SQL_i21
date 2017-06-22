@@ -15,7 +15,7 @@ AS
 DECLARE @intRecordKey INT
 DECLARE @strRecord INT
 DECLARE @UserEntityId INT
-DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+DECLARE @EntriesForInvoice AS InvoiceStagingTable
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 DECLARE @ysnRemoteTransaction INT
 
@@ -37,7 +37,7 @@ SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecur
 SELECT DISTINCT RecordKey = intTransactionId INTO #tmpTransactionId FROM vyuCFBatchPostTransactions
 --ORDER BY intTransactionId
 --OFFSET     0 ROWS       
---FETCH NEXT 500 ROWS ONLY
+--FETCH NEXT 1000 ROWS ONLY
 
 
 IF @TransactionId != 'ALL'
@@ -151,26 +151,26 @@ END
 					,[strSourceTransaction]					= 'CF Tran'
 					,[intSourceId]							= cfTrans.intTransactionId
 					,[strSourceId]							= cfTrans.strTransactionId
-					,[intInvoiceId]							= cfTrans.intInvoiceId --NULL Value will create new invoice
+					,[intInvoiceId]							= I.intInvoiceId --cfTrans.intInvoiceId --NULL Value will create new invoice
 					,[intEntityCustomerId]					= cfCardAccount.intCustomerId
 					,[intCompanyLocationId]					= cfSiteItem.intARLocationId
-					,[intCurrencyId]						= 1
+					,[intCurrencyId]						= I.intCurrencyId
 					,[intTermId]							= @companyConfigTermId
 					,[dtmDate]								= cfTrans.dtmTransactionDate
 					,[dtmDueDate]							= NULL
 					,[dtmShipDate]							= cfTrans.dtmTransactionDate
 					,[intEntitySalespersonId]				= cfCardAccount.intSalesPersonId
-					,[intFreightTermId]						= NULL 
-					,[intShipViaId]							= NULL 
-					,[intPaymentMethodId]					= NULL
+					,[intFreightTermId]						= I.[intFreightTermId] 
+					,[intShipViaId]							= I.[intShipViaId] 
+					,[intPaymentMethodId]					= I.[intPaymentMethodId]
 					,[strInvoiceOriginId]					= cfTrans.strTransactionId
 					,[ysnUseOriginIdAsInvoiceNumber]		= 1
 					,[strPONumber]							= ''
 					,[strBOLNumber]							= ''
 					,[strDeliverPickup]						= cfTrans.strDeliveryPickupInd
 					,[strComments]							= ''
-					,[intShipToLocationId]					= NULL
-					,[intBillToLocationId]					= NULL
+					,[intShipToLocationId]					= I.[intShipToLocationId]
+					,[intBillToLocationId]					= I.[intBillToLocationId]
 					,[ysnTemplate]							= 0
 					,[ysnForgiven]							= 0
 					,[ysnCalculated]						= 0  --0 OS
@@ -215,8 +215,8 @@ END
 					,[strShipmentNumber]					= ''
 					,[intSalesOrderDetailId]				= NULL
 					,[strSalesOrderNumber]					= ''
-					,[intContractHeaderId]					= ctContracts.intContractHeaderId
-					,[intContractDetailId]					= ctContracts.intContractDetailId
+					,[intContractHeaderId]					= cfTrans.intContractId
+					,[intContractDetailId]					= cfTrans.intContractDetailId
 					,[intShipmentPurchaseSalesContractId]	= NULL
 					,[intTicketId]							= NULL
 					,[intTicketHoursWorkedId]				= NULL
@@ -271,8 +271,11 @@ END
 							WHERE strTransactionPriceId = 'Net Price')
 							AS cfTransPrice
 				ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
-				LEFT JOIN vyuCTContractDetailView ctContracts
-				ON cfTrans.intContractId = ctContracts.intContractHeaderId AND cfTrans.intContractDetailId =  ctContracts.intContractDetailId
+				LEFT OUTER JOIN
+	tblARInvoice I
+		ON cfTrans.intInvoiceId = I.intInvoiceId
+				--LEFT JOIN vyuCTContractDetailView ctContracts
+				--ON cfTrans.intContractId = ctContracts.intContractHeaderId AND cfTrans.intContractDetailId =  ctContracts.intContractDetailId
 				WHERE cfTrans.intTransactionId = @strRecord
 
 
@@ -295,7 +298,8 @@ END
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[strNotes]
-						,[intTempDetailIdForTaxes])
+						,[intTempDetailIdForTaxes]
+						,[ysnClearExisting])
 					SELECT
 					[intDetailId]				= NULL
 					,[intTaxGroupId]			= NULL
@@ -313,6 +317,7 @@ END
 					,[ysnTaxExempt]				= 0
 					,[strNotes]					= ''
 					,[intTempDetailIdForTaxes]	= @strRecord
+					,[ysnClearExisting]			= 1
 					FROM 
 					tblCFTransaction cfTransaction
 					INNER JOIN tblCFTransactionTax cfTransactionTax
@@ -331,26 +336,209 @@ END
 
 	DROP TABLE #tmpTransactionId
 
+	
+DECLARE @InvoiceEntriesTEMP	InvoiceStagingTable
+INSERT INTO @InvoiceEntriesTEMP(
+[intId]
+,[strTransactionType]
+,[strSourceTransaction]
+,[intSourceId]
+,[strSourceId]
+,[intInvoiceId]
+,[intEntityCustomerId]
+,[intCompanyLocationId]
+,[intCurrencyId]
+,[intTermId]
+,[dtmDate]
+,[dtmDueDate]
+,[dtmShipDate]
+,[intEntitySalespersonId]
+,[intFreightTermId]
+,[intShipViaId]
+,[intPaymentMethodId]
+,[strInvoiceOriginId]
+,[ysnUseOriginIdAsInvoiceNumber]
+,[strPONumber]
+,[strBOLNumber]
+,[strDeliverPickup]
+,[strComments]
+,[intShipToLocationId]
+,[intBillToLocationId]
+,[ysnTemplate]
+,[ysnForgiven]
+,[ysnCalculated]
+,[ysnSplitted]
+,[intPaymentId]
+,[intSplitId]
+,[intLoadDistributionHeaderId]
+,[strActualCostId]
+,[intShipmentId]
+,[intTransactionId]
+,[intEntityId]
+,[ysnResetDetails]
+,[ysnPost]
+,[intInvoiceDetailId]
+,[intItemId]
+,[ysnInventory]
+,[strItemDescription]
+,[intItemUOMId]
+,[dblQtyOrdered]
+,[dblQtyShipped]
+,[dblDiscount]
+,[dblPrice]
+,[ysnRefreshPrice]
+,[strMaintenanceType]
+,[strFrequency]
+,[dtmMaintenanceDate]
+,[dblMaintenanceAmount]
+,[dblLicenseAmount]
+,[intTaxGroupId]
+,[ysnRecomputeTax]
+,[intSCInvoiceId]
+,[strSCInvoiceNumber]
+,[intInventoryShipmentItemId]
+,[strShipmentNumber]
+,[intSalesOrderDetailId]
+,[strSalesOrderNumber]
+,[intContractHeaderId]
+,[intContractDetailId]
+,[intShipmentPurchaseSalesContractId]
+,[intTicketId]
+,[intTicketHoursWorkedId]
+,[intSiteId]
+,[strBillingBy]
+,[dblPercentFull]
+,[dblNewMeterReading]
+,[dblPreviousMeterReading]
+,[dblConversionFactor]
+,[intPerformerId]
+,[ysnLeaseBilling]
+,[ysnVirtualMeterReading]
+,[ysnClearDetailTaxes]					
+,[intTempDetailIdForTaxes]
+,[strType]
+,[ysnUpdateAvailableDiscount]
+,[strItemTermDiscountBy]
+,[dblItemTermDiscount]
+,[dtmPostDate])
+SELECT 
+ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
+,[strTransactionType]
+,[strSourceTransaction]
+,[intSourceId]
+,[strSourceId]
+,[intInvoiceId]
+,[intEntityCustomerId]
+,[intCompanyLocationId]
+,[intCurrencyId]
+,[intTermId]
+,[dtmDate]
+,[dtmDueDate]
+,[dtmShipDate]
+,[intEntitySalespersonId]
+,[intFreightTermId]
+,[intShipViaId]
+,[intPaymentMethodId]
+,[strInvoiceOriginId]
+,[ysnUseOriginIdAsInvoiceNumber]
+,[strPONumber]
+,[strBOLNumber]
+,[strDeliverPickup]
+,[strComments]
+,[intShipToLocationId]
+,[intBillToLocationId]
+,[ysnTemplate]
+,[ysnForgiven]
+,[ysnCalculated]
+,[ysnSplitted]
+,[intPaymentId]
+,[intSplitId]
+,[intLoadDistributionHeaderId]
+,[strActualCostId]
+,[intShipmentId]
+,[intTransactionId]
+,[intEntityId]
+,[ysnResetDetails]
+,[ysnPost]
+,[intInvoiceDetailId]
+,[intItemId]
+,[ysnInventory]
+,[strItemDescription]
+,[intItemUOMId]
+,[dblQtyOrdered]
+,[dblQtyShipped]
+,[dblDiscount]
+,[dblPrice]
+,[ysnRefreshPrice]
+,[strMaintenanceType]
+,[strFrequency]
+,[dtmMaintenanceDate]
+,[dblMaintenanceAmount]
+,[dblLicenseAmount]
+,[intTaxGroupId]
+,[ysnRecomputeTax]
+,[intSCInvoiceId]
+,[strSCInvoiceNumber]
+,[intInventoryShipmentItemId]
+,[strShipmentNumber]
+,[intSalesOrderDetailId]
+,[strSalesOrderNumber]
+,[intContractHeaderId]
+,[intContractDetailId]
+,[intShipmentPurchaseSalesContractId]
+,[intTicketId]
+,[intTicketHoursWorkedId]
+,[intSiteId]
+,[strBillingBy]
+,[dblPercentFull]
+,[dblNewMeterReading]
+,[dblPreviousMeterReading]
+,[dblConversionFactor]
+,[intPerformerId]
+,[ysnLeaseBilling]
+,[ysnVirtualMeterReading]
+,[ysnClearDetailTaxes]					
+,[intTempDetailIdForTaxes]
+,[strType]
+,[ysnUpdateAvailableDiscount]
+,[strItemTermDiscountBy]
+,[dblItemTermDiscount]
+,[dtmPostDate]
+FROM @EntriesForInvoice
+
 	--Select * from @EntriesForInvoice
+
 	--return
 	
 	BEGIN TRANSACTION
 
 	--select * from @TaxDetails
 
-	EXEC [dbo].[uspARProcessInvoices]
-	@InvoiceEntries	= @EntriesForInvoice
-	,@LineItemTaxEntries = @TaxDetails
-	,@UserId					= @UserId
-	,@GroupingOption			= 11
-	,@RaiseError				= 1
-	,@ErrorMessage				= @ErrorMessage OUTPUT
-	,@CreatedIvoices			= @CreatedIvoices OUTPUT
-	,@UpdatedIvoices			= @UpdatedIvoices OUTPUT
-	,@BatchIdForNewPost			= @BatchId OUTPUT
-	,@BatchIdForExistingPost	= @BatchId OUTPUT
-	,@BatchIdForNewPostRecap	= @BatchId OUTPUT
-	,@BatchIdForExistingRecap	= @BatchId OUTPUT
+	--EXEC [dbo].[uspARProcessInvoices]
+	--@InvoiceEntries	= @EntriesForInvoice
+	--,@LineItemTaxEntries = @TaxDetails
+	--,@UserId					= @UserId
+	--,@GroupingOption			= 11
+	--,@RaiseError				= 1
+	--,@ErrorMessage				= @ErrorMessage OUTPUT
+	--,@CreatedIvoices			= @CreatedIvoices OUTPUT
+	--,@UpdatedIvoices			= @UpdatedIvoices OUTPUT
+	--,@BatchIdForNewPost			= @BatchId OUTPUT
+	--,@BatchIdForExistingPost	= @BatchId OUTPUT
+	--,@BatchIdForNewPostRecap	= @BatchId OUTPUT
+	--,@BatchIdForExistingRecap	= @BatchId OUTPUT
+
+	
+	DECLARE @LogId INT
+
+	EXEC [dbo].[uspARProcessInvoicesByBatch]
+		 @InvoiceEntries	= @InvoiceEntriesTEMP
+		,@LineItemTaxEntries = @TaxDetails
+		,@UserId			= @UserId
+		,@GroupingOption	= 11
+		,@RaiseError		= 1
+		,@ErrorMessage		= @ErrorMessage OUTPUT
+		,@LogId				= @LogId OUTPUT
 
 
 	DECLARE @intCreatedRecordKey INT
@@ -361,167 +549,179 @@ END
 
 	SET @SuccessfulCount = 0;
 
-	IF (@ErrorMessage IS NULL)
-	BEGIN
-		IF (@ErrorMessage IS NULL AND @CreatedIvoices IS NOT NULL)
+	--IF (@ErrorMessage IS NULL)
+	--BEGIN
+	
+	--DECLARE @succefulCount INT
+	
+
+	SELECT intInvoiceId  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1 
+
+	SELECT @SuccessfulCount = ISNULL(Count(*),0) FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1 
+
+	--SET @SuccessfulCount = @succefulCount;
+		
+	IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @SuccessfulCount > 0)
+		BEGIN
+
+			IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
 			BEGIN
+				--SELECT * INTO #tmpCreatedInvoice
+				--FROM [fnCFSplitString](@CreatedIvoices,',') 
 
-				IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
+				--SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+				--FROM #tmpCreatedInvoice
+
+
+				WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
 				BEGIN
-					SELECT * INTO #tmpCreatedInvoice
-					FROM [fnCFSplitString](@CreatedIvoices,',') 
+					SELECT @intCreatedRecordKey = intInvoiceId FROM #tmpCreatedInvoice
+					SELECT @intCreatedInvoiceId = CAST(intInvoiceId AS INT) FROM #tmpCreatedInvoice WHERE intInvoiceId = @intCreatedRecordKey
+				
+					UPDATE tblCFTransaction 
+					SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
+					WHERE intTransactionId = (SELECT intTransactionId 
+												FROM tblARInvoice 
+												WHERE intInvoiceId = @intCreatedInvoiceId)
 
-					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
-					FROM #tmpCreatedInvoice
+					SELECT TOP 1 
+					@transactionDate = dtmTransactionDate,
+					@intCardId = intCardId
+					FROM tblCFTransaction where intTransactionId = (SELECT TOP 1 intTransactionId 
+																	FROM tblARInvoice 
+																	WHERE intInvoiceId = @intCreatedInvoiceId)
 
 
-					WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+					IF (@Post = 1)
 					BEGIN
-						SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice
-						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
-				
-						UPDATE tblCFTransaction 
-						SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
-						WHERE intTransactionId = (SELECT intTransactionId 
-													FROM tblARInvoice 
-													WHERE intInvoiceId = @intCreatedInvoiceId)
-
-						SELECT TOP 1 
-						@transactionDate = dtmTransactionDate,
-						@intCardId = intCardId
-						FROM tblCFTransaction where intTransactionId = (SELECT TOP 1 intTransactionId 
-																		FROM tblARInvoice 
-																		WHERE intInvoiceId = @intCreatedInvoiceId)
-
-
-					   IF (@Post = 1)
-						BEGIN
-							UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND ( dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
-						END
-						ELSE
-						BEGIN
-							select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
-							UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
-						END
-				
-						DELETE FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
-
+						UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND ( dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
 					END
-
-					DROP TABLE #tmpCreatedInvoice
-				END 
-				ELSE IF (@Recap = 1)
-				BEGIN
-					SELECT * INTO #tmpCreatedInvoice2
-					FROM [fnCFSplitString](@CreatedIvoices,',') 
-
-					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
-					FROM #tmpCreatedInvoice2
-
-
-					WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice2 ))
+					ELSE
 					BEGIN
-						SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice2
-						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
-				
-						UPDATE tblCFTransaction 
-						SET intInvoiceId = @intCreatedInvoiceId
-						WHERE intTransactionId = (SELECT intTransactionId 
-													FROM tblARInvoice 
-													WHERE intInvoiceId = @intCreatedInvoiceId)
-
-				
-						DELETE FROM #tmpCreatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
-
+						select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
+						UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
 					END
+				
+					DELETE FROM #tmpCreatedInvoice WHERE intInvoiceId = @intCreatedRecordKey
 
-					DROP TABLE #tmpCreatedInvoice2
 				END
-			
+
+				DROP TABLE #tmpCreatedInvoice
+			END 
+			ELSE IF (@Recap = 1)
+			BEGIN
+				--SELECT * INTO #tmpCreatedInvoice2
+				--FROM [fnCFSplitString](@CreatedIvoices,',') 
+
+				--SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+				--FROM #tmpCreatedInvoice2
+
+
+				WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+				BEGIN
+					SELECT @intCreatedRecordKey = intInvoiceId FROM #tmpCreatedInvoice
+					SELECT @intCreatedInvoiceId = CAST(intInvoiceId AS INT) FROM #tmpCreatedInvoice WHERE intInvoiceId = @intCreatedRecordKey
+				
+					UPDATE tblCFTransaction 
+					SET intInvoiceId = @intCreatedInvoiceId
+					WHERE intTransactionId = (SELECT intTransactionId 
+												FROM tblARInvoice 
+												WHERE intInvoiceId = @intCreatedInvoiceId)
+
+				
+					DELETE FROM #tmpCreatedInvoice WHERE intInvoiceId = @intCreatedRecordKey
+
+				END
+
+				DROP TABLE #tmpCreatedInvoice
 			END
 
-			IF (@ErrorMessage IS NULL AND @UpdatedIvoices IS NOT NULL)
-			BEGIN
+		COMMIT TRANSACTION
+
+			--IF (@ErrorMessage IS NULL AND @UpdatedIvoices IS NOT NULL)
+			--BEGIN
 			
+			--	IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
+			--	BEGIN
+			--		--SELECT * INTO #tmpUpdatedInvoice
+			--		--FROM [fnCFSplitString](@UpdatedIvoices,',') 
+
+			--		--SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+			--		--FROM #tmpUpdatedInvoice
+
+
+			--		WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+			--		BEGIN
+			--			SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice
+			--			SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
 				
-
-				IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
-				BEGIN
-					SELECT * INTO #tmpUpdatedInvoice
-					FROM [fnCFSplitString](@UpdatedIvoices,',') 
-
-					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
-					FROM #tmpUpdatedInvoice
-
-
-					WHILE (EXISTS(SELECT 1 FROM #tmpUpdatedInvoice ))
-					BEGIN
-						SELECT @intCreatedRecordKey = RecordKey FROM #tmpUpdatedInvoice
-						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
-				
-						UPDATE tblCFTransaction 
-						SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
-						WHERE intTransactionId = (SELECT intTransactionId 
-													FROM tblARInvoice 
-													WHERE intInvoiceId = @intCreatedInvoiceId)
+			--			UPDATE tblCFTransaction 
+			--			SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
+			--			WHERE intTransactionId = (SELECT intTransactionId 
+			--										FROM tblARInvoice 
+			--										WHERE intInvoiceId = @intCreatedInvoiceId)
 
 						
-						SELECT TOP 1 
-						@transactionDate = dtmTransactionDate,
-						@intCardId = intCardId
-						FROM tblCFTransaction where intTransactionId = (SELECT TOP 1 intTransactionId 
-																		FROM tblARInvoice 
-																		WHERE intInvoiceId = @intCreatedInvoiceId)
+			--			SELECT TOP 1 
+			--			@transactionDate = dtmTransactionDate,
+			--			@intCardId = intCardId
+			--			FROM tblCFTransaction where intTransactionId = (SELECT TOP 1 intTransactionId 
+			--															FROM tblARInvoice 
+			--															WHERE intInvoiceId = @intCreatedInvoiceId)
 
 
-					   IF (@Post = 1)
-						BEGIN
-							UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND (dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
-						END
-						ELSE
-						BEGIN
-							select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
-							UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
-						END
+			--		   IF (@Post = 1)
+			--			BEGIN
+			--				UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND (dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
+			--			END
+			--			ELSE
+			--			BEGIN
+			--				select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
+			--				UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
+			--			END
 
 				
-						DELETE FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
+			--			DELETE FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
 
-					END
+			--		END
 
-					DROP TABLE #tmpUpdatedInvoice
-				END
-				IF (@Recap = 1)
-				BEGIN
-					SELECT * INTO #tmpUpdatedInvoice2
-					FROM [fnCFSplitString](@UpdatedIvoices,',') 
+			--		DROP TABLE #tmpCreatedInvoice
+			--	END
+			--	IF (@Recap = 1)
+			--	BEGIN
+			--		--SELECT * INTO #tmpUpdatedInvoice2
+			--		--FROM [fnCFSplitString](@UpdatedIvoices,',') 
 
-					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
-					FROM #tmpUpdatedInvoice2
+			--		--SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+			--		--FROM #tmpUpdatedInvoice2
 
 
-					WHILE (EXISTS(SELECT 1 FROM #tmpUpdatedInvoice2 ))
-					BEGIN
-						SELECT @intCreatedRecordKey = RecordKey FROM #tmpUpdatedInvoice2
-						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpUpdatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+			--		WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+			--		BEGIN
+			--			SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice
+			--			SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
 				
-						UPDATE tblCFTransaction 
-						SET intInvoiceId = @intCreatedInvoiceId
-						WHERE intTransactionId = (SELECT intTransactionId 
-													FROM tblARInvoice 
-													WHERE intInvoiceId = @intCreatedInvoiceId)
+			--			UPDATE tblCFTransaction 
+			--			SET intInvoiceId = @intCreatedInvoiceId
+			--			WHERE intTransactionId = (SELECT intTransactionId 
+			--										FROM tblARInvoice 
+			--										WHERE intInvoiceId = @intCreatedInvoiceId)
 				
-						DELETE FROM #tmpUpdatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+			--			DELETE FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
 
-					END
+			--		END
 
-					DROP TABLE #tmpUpdatedInvoice2
-				END
+			--		DROP TABLE #tmpCreatedInvoice
+			--	END
+
+				--
+			--END
+
 			
-			END
+		--END
 
-			COMMIT TRANSACTION
-		END
+		--COMMIT TRANSACTION
+	END
 	ELSE
 		BEGIN
 			--COMMIT TRANSACTION

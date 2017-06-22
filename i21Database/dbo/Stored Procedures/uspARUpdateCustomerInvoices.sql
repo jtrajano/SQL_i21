@@ -73,7 +73,7 @@ INSERT INTO @InvoicesToUpdate (
 	,[ysnUpdateAvailableDiscount]	
 )
 SELECT DISTINCT
-	 [intInvoiceId]						= [intInvoiceId]
+	 [intId]							= [intId]
 	,[strTransactionType]				= [strTransactionType]
 	,[strType]							= [strType]
 	,[strSourceTransaction]				= [strSourceTransaction]
@@ -109,14 +109,14 @@ SELECT DISTINCT
 	,[ysnSplitted]						= [ysnSplitted]
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
-	,[intLoadDistributionHeaderId]		= ISNULL([intLoadDistributionHeaderId], [intSourceId])
+	,[intLoadDistributionHeaderId]		= [intLoadDistributionHeaderId]
 	,[strActualCostId]					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
-	,[intShipmentId]					= ISNULL([intShipmentId], [intSourceId])
-	,[intTransactionId] 				= ISNULL([intTransactionId], [intSourceId])
-	,[intMeterReadingId]				= ISNULL([intMeterReadingId], [intSourceId])
-	,[intContractHeaderId]				= ISNULL([intContractHeaderId], [intSourceId])
-	,[intLoadId]						= ISNULL([intLoadId], [intSourceId])
-	,[intOriginalInvoiceId]				= ISNULL([intOriginalInvoiceId], [intSourceId])
+	,[intShipmentId]					= [intShipmentId]
+	,[intTransactionId] 				= [intTransactionId]
+	,[intMeterReadingId]				= [intMeterReadingId]
+	,[intContractHeaderId]				= [intContractHeaderId]
+	,[intLoadId]						= [intLoadId]
+	,[intOriginalInvoiceId]				= [intOriginalInvoiceId]
 	,[intEntityId]						= [intEntityId]
 	,[intTruckDriverId]					= [intTruckDriverId]
 	,[intTruckDriverReferenceId]		= [intTruckDriverReferenceId]
@@ -399,122 +399,122 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblEMEntity EME WITH (NOLOCK) WHERE EME.[intEntityId] = ITG.[intEntityId])
 	
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'There is no setup for AR Account in the Company Configuration.'
-	,[strTransactionType]	= ITG.[strTransactionType]
-	,[strType]				= ITG.[strType]
-	,[strSourceTransaction]	= ITG.[strSourceTransaction]
-	,[intSourceId]			= ITG.[intSourceId]
-	,[strSourceId]			= ITG.[strSourceId]
-	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToUpdate ITG --WITH (NOLOCK)
-WHERE
-	ITG.[intAccountId] IS NULL
-	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
+--SELECT
+--	 [intId]				= ITG.[intId]
+--	,[strMessage]			= 'There is no setup for AR Account in the Company Configuration.'
+--	,[strTransactionType]	= ITG.[strTransactionType]
+--	,[strType]				= ITG.[strType]
+--	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+--	,[intSourceId]			= ITG.[intSourceId]
+--	,[strSourceId]			= ITG.[strSourceId]
+--	,[intInvoiceId]			= ITG.[intInvoiceId]
+--FROM
+--	@InvoicesToUpdate ITG --WITH (NOLOCK)
+--WHERE
+--	ITG.[intAccountId] IS NULL
+--	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'The account id provided is not a valid account of category "AR Account".'
-	,[strTransactionType]	= ITG.[strTransactionType]
-	,[strType]				= ITG.[strType]
-	,[strSourceTransaction]	= ITG.[strSourceTransaction]
-	,[intSourceId]			= ITG.[intSourceId]
-	,[strSourceId]			= ITG.[strSourceId]
-	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToUpdate ITG --WITH (NOLOCK)
-WHERE
-	ITG.[intAccountId] IS NOT NULL
-	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
-	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'AR Account' AND GLAD.[intAccountId] =  ITG.[intAccountId])
+--SELECT
+--	 [intId]				= ITG.[intId]
+--	,[strMessage]			= 'The account id provided is not a valid account of category "AR Account".'
+--	,[strTransactionType]	= ITG.[strTransactionType]
+--	,[strType]				= ITG.[strType]
+--	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+--	,[intSourceId]			= ITG.[intSourceId]
+--	,[strSourceId]			= ITG.[strSourceId]
+--	,[intInvoiceId]			= ITG.[intInvoiceId]
+--FROM
+--	@InvoicesToUpdate ITG --WITH (NOLOCK)
+--WHERE
+--	ITG.[intAccountId] IS NOT NULL
+--	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
+--	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'AR Account' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'There is no Undeposited Funds account setup under Company Location - ' + SMCL.[strLocationName]
-	,[strTransactionType]	= ITG.[strTransactionType]
-	,[strType]				= ITG.[strType]
-	,[strSourceTransaction]	= ITG.[strSourceTransaction]
-	,[intSourceId]			= ITG.[intSourceId]
-	,[strSourceId]			= ITG.[strSourceId]
-	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToUpdate ITG --WITH (NOLOCK)
-INNER JOIN
-	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
-		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
-WHERE
-	ITG.[intAccountId] IS NULL
-	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
+--SELECT
+--	 [intId]				= ITG.[intId]
+--	,[strMessage]			= 'There is no Undeposited Funds account setup under Company Location - ' + SMCL.[strLocationName]
+--	,[strTransactionType]	= ITG.[strTransactionType]
+--	,[strType]				= ITG.[strType]
+--	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+--	,[intSourceId]			= ITG.[intSourceId]
+--	,[strSourceId]			= ITG.[strSourceId]
+--	,[intInvoiceId]			= ITG.[intInvoiceId]
+--FROM
+--	@InvoicesToUpdate ITG --WITH (NOLOCK)
+--INNER JOIN
+--	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
+--		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
+--WHERE
+--	ITG.[intAccountId] IS NULL
+--	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'The account id provided is not a valid account of category "Undeposited Funds".'
-	,[strTransactionType]	= ITG.[strTransactionType]
-	,[strType]				= ITG.[strType]
-	,[strSourceTransaction]	= ITG.[strSourceTransaction]
-	,[intSourceId]			= ITG.[intSourceId]
-	,[strSourceId]			= ITG.[strSourceId]
-	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToUpdate ITG --WITH (NOLOCK)
-INNER JOIN
-	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
-		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
-WHERE
-	ITG.[intAccountId] IS NOT NULL
-	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
-	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Undeposited Funds' AND GLAD.[intAccountId] =  ITG.[intAccountId])
+--SELECT
+--	 [intId]				= ITG.[intId]
+--	,[strMessage]			= 'The account id provided is not a valid account of category "Undeposited Funds".'
+--	,[strTransactionType]	= ITG.[strTransactionType]
+--	,[strType]				= ITG.[strType]
+--	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+--	,[intSourceId]			= ITG.[intSourceId]
+--	,[strSourceId]			= ITG.[strSourceId]
+--	,[intInvoiceId]			= ITG.[intInvoiceId]
+--FROM
+--	@InvoicesToUpdate ITG --WITH (NOLOCK)
+--INNER JOIN
+--	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
+--		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
+--WHERE
+--	ITG.[intAccountId] IS NOT NULL
+--	AND ITG.[strTransactionType] IN ('Cash', 'Cash Refund')
+--	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Undeposited Funds' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'There is no Customer Prepaid account setup under Company Location - ' + SMCL.[strLocationName]
-	,[strTransactionType]	= ITG.[strTransactionType]
-	,[strType]				= ITG.[strType]
-	,[strSourceTransaction]	= ITG.[strSourceTransaction]
-	,[intSourceId]			= ITG.[intSourceId]
-	,[strSourceId]			= ITG.[strSourceId]
-	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToUpdate ITG --WITH (NOLOCK)
-INNER JOIN
-	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
-		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
-WHERE
-	ITG.[intAccountId] IS NULL
-	AND ITG.[strTransactionType] = 'Customer Prepayment'
+--SELECT
+--	 [intId]				= ITG.[intId]
+--	,[strMessage]			= 'There is no Customer Prepaid account setup under Company Location - ' + SMCL.[strLocationName]
+--	,[strTransactionType]	= ITG.[strTransactionType]
+--	,[strType]				= ITG.[strType]
+--	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+--	,[intSourceId]			= ITG.[intSourceId]
+--	,[strSourceId]			= ITG.[strSourceId]
+--	,[intInvoiceId]			= ITG.[intInvoiceId]
+--FROM
+--	@InvoicesToUpdate ITG --WITH (NOLOCK)
+--INNER JOIN
+--	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
+--		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
+--WHERE
+--	ITG.[intAccountId] IS NULL
+--	AND ITG.[strTransactionType] = 'Customer Prepayment'
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'The account id provided is not a valid account of category "Customer Prepayments".'
-	,[strTransactionType]	= ITG.[strTransactionType]
-	,[strType]				= ITG.[strType]
-	,[strSourceTransaction]	= ITG.[strSourceTransaction]
-	,[intSourceId]			= ITG.[intSourceId]
-	,[strSourceId]			= ITG.[strSourceId]
-	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToUpdate ITG --WITH (NOLOCK)
-INNER JOIN
-	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
-		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
-WHERE
-	ITG.[intAccountId] IS NOT NULL
-	AND ITG.[strTransactionType] = 'Customer Prepayment'
-	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Customer Prepayments' AND GLAD.[intAccountId] =  ITG.[intAccountId])
+--SELECT
+--	 [intId]				= ITG.[intId]
+--	,[strMessage]			= 'The account id provided is not a valid account of category "Customer Prepayments".'
+--	,[strTransactionType]	= ITG.[strTransactionType]
+--	,[strType]				= ITG.[strType]
+--	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+--	,[intSourceId]			= ITG.[intSourceId]
+--	,[strSourceId]			= ITG.[strSourceId]
+--	,[intInvoiceId]			= ITG.[intInvoiceId]
+--FROM
+--	@InvoicesToUpdate ITG --WITH (NOLOCK)
+--INNER JOIN
+--	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
+--		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
+--WHERE
+--	ITG.[intAccountId] IS NOT NULL
+--	AND ITG.[strTransactionType] = 'Customer Prepayment'
+--	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'Customer Prepayments' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
 UNION ALL
 
@@ -657,7 +657,7 @@ BEGIN TRY
 		  ,ARI.[strType]						= ITG.[strType]
 		  ,ARI.[intEntityCustomerId]			= ITG.[intEntityCustomerId]
 		  ,ARI.[intCompanyLocationId]			= ITG.[intCompanyLocationId]
-		  ,ARI.[intAccountId]					= ITG.[intAccountId]
+		  --,ARI.[intAccountId]					= ITG.[intAccountId]
 		  ,ARI.[intCurrencyId]					= ITG.[intCurrencyId]
 		  ,ARI.[intTermId]						= ISNULL(ITG.[intTermId], ARC.[intTermsId])
 		  ,ARI.[intSourceId]					= dbo.[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])

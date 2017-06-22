@@ -57,20 +57,26 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strCalculationMethod]	=	Taxes.strCalculationMethod, 
 		[dblRate]				=	Taxes.dblRate, 
 		[intAccountId]			=	Taxes.intTaxAccountId, 
-		[dblTax]				=	CASE WHEN D.intInventoryReceiptChargeId IS NOT NULL AND D.ysnPrice = 1 THEN Taxes.dblTax * -1 ELSE Taxes.dblTax END, 
-		[dblAdjustedTax]		=	CASE WHEN D.intInventoryReceiptChargeId IS NOT NULL AND D.ysnPrice = 1 THEN Taxes.dblAdjustedTax * -1 ELSE Taxes.dblAdjustedTax END, 
+		[dblTax]				=	ISNULL(Taxes.dblTax,0), 
+		[dblAdjustedTax]		=	ISNULL(Taxes.dblAdjustedTax,0), 
 		[ysnTaxAdjusted]		=	Taxes.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	Taxes.ysnSeparateOnInvoice, 
 		[ysnCheckOffTax]		=	Taxes.ysnCheckoffTax
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId
-	LEFT JOIN tblICInventoryReceiptCharge D ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
-	CROSS APPLY fnGetItemTaxComputationForVendor(B.intItemId, A.intEntityVendorId, A.dtmDate, B.dblCost, CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END, B.intTaxGroupId,A.intShipToId,A.intShipFromId, 0, NULL, 0) Taxes
+	--LEFT JOIN tblICInventoryReceiptCharge D ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
+	CROSS APPLY fnGetItemTaxComputationForVendor(B.intItemId, A.intEntityVendorId, A.dtmDate, B.dblCost, CASE WHEN B.intWeightUOMId > 0 
+										THEN dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId, ISNULL(NULLIF(B.intCostUOMId,0), B.intUnitOfMeasureId), B.dblNetWeight) 
+										ELSE (CASE WHEN B.intCostUOMId > 0 THEN dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B.intCostUOMId, B.dblQtyReceived) ELSE B.dblQtyReceived END)
+									END, B.intTaxGroupId,A.intShipToId,A.intShipFromId, 0, NULL, 0) Taxes
 	WHERE Taxes.dblTax IS NOT NULL
 
 	UPDATE A
-		SET A.dblTax = TaxAmount.dblTax
+		SET A.dblTax = CASE WHEN D.intInventoryReceiptChargeId IS NOT NULL AND D.intInventoryReceiptChargeId > 0 AND D.ysnPrice = 1
+								THEN TaxAmount.dblTax * -1 
+							ELSE TaxAmount.dblTax
+						END
 	FROM tblAPBillDetail A
 	INNER JOIN @billDetailIds B ON A.intBillDetailId = B.intId
 	CROSS APPLY (
@@ -78,6 +84,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			SUM(CASE WHEN B.ysnTaxAdjusted = 1 THEN B.dblAdjustedTax ELSE B.dblTax END) dblTax
 		FROM tblAPBillDetailTax B WHERE B.intBillDetailId = A.intBillDetailId
 	) TaxAmount
+	LEFT JOIN tblICInventoryReceiptCharge D ON A.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
 	WHERE TaxAmount.dblTax IS NOT NULL
 
 	UPDATE A

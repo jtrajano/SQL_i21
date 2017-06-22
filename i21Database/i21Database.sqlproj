@@ -2960,7 +2960,6 @@
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentField.sql" />
     <Build Include="dbo\Tables\tblTFTransaction.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionDetail.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionHeader.sql" />
@@ -2997,10 +2996,8 @@
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
@@ -5267,6 +5264,34 @@
     <Build Include="dbo\Tables\tblTFException.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateStagingTable.sql" />
     <None Include="Scripts\Post-Deployment\EM\Data_Fix_From_1710_to_1720_Currency_Cus_Ven.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthorityCustomerLicense.sql" />
+    <Build Include="dbo\Views\vyuTFGetTaxAuthorityCustomerLicense.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateRMFT5.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateRMFT5US.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateILMG.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateILMS.sql" />
+    <Build Include="dbo\Tables\tblTFOutputDesignerField.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLog.sql" />
+    <Build Include="dbo\Tables\tblARPaymentIntegrationLog.sql" />
+    <Build Include="dbo\Tables\tblARPaymentIntegrationLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetUnitConversion.sql" />
+    <Build Include="dbo\Functions\fnAPCalculateVoucherUnits.sql" />
+    <Build Include="dbo\Functions\fnAPCalculateVoucherDetailUnits.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceAmountMultiplier.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddToInvoicesToPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLogDetail.sql" />
+    <Build Include="dbo\User Defined Types\PaymentIntegrationLogStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTaskO1.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductionReport.sql" />
+    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
+    <Build Include="dbo\Stored Procedures\uspARReComputePaymentAmounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostPaymentNew.sql" />
+    <Build Include="dbo\User Defined Types\PaymentId.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5468,5 +5493,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\DB\6_PanelOwnerMigration.sql" />
   </ItemGroup>
 </Project>

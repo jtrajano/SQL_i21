@@ -2015,9 +2015,6 @@ BEGIN TRY
 		AND EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrderRecipeItem ri
-			LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId
-				AND ri.intWorkOrderId = SI.intWorkOrderId
-				AND SI.intRecipeId = ri.intRecipeId
 			WHERE ri.intWorkOrderId = @intWorkOrderId
 				AND ri.intRecipeItemTypeId = 1
 				AND (
@@ -2045,8 +2042,10 @@ BEGIN TRY
 					FROM tblMFWorkOrderConsumedLot WC
 					WHERE (
 							WC.intItemId = ri.intItemId
-							OR WC.intItemId = SI.intSubstituteItemId
-							)
+							OR WC.intItemId in (Select SI.intSubstituteItemId From dbo.tblMFWorkOrderRecipeSubstituteItem SI Where SI.intRecipeItemId = ri.intRecipeItemId
+				AND SI.intWorkOrderId = ri.intWorkOrderId
+				AND SI.intRecipeId = ri.intRecipeId
+							))
 						AND WC.intWorkOrderId = @intWorkOrderId
 						AND IsNULL(WC.intBatchId, @intBatchId) = @intBatchId
 					)
@@ -2054,9 +2053,6 @@ BEGIN TRY
 	BEGIN
 		SELECT @intInputItemId = ri.intItemId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
-		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId
-			AND ri.intWorkOrderId = SI.intWorkOrderId
-			AND SI.intRecipeId = ri.intRecipeId
 		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
@@ -2077,8 +2073,10 @@ BEGIN TRY
 				FROM tblMFWorkOrderConsumedLot WC
 				WHERE (
 						WC.intItemId = ri.intItemId
-						OR WC.intItemId = SI.intSubstituteItemId
-						)
+						OR WC.intItemId in (Select SI.intSubstituteItemId From dbo.tblMFWorkOrderRecipeSubstituteItem SI Where SI.intRecipeItemId = ri.intRecipeItemId
+				AND SI.intWorkOrderId = ri.intWorkOrderId
+				AND SI.intRecipeId = ri.intRecipeId
+						))
 					AND WC.intWorkOrderId = @intWorkOrderId
 					AND IsNULL(WC.intBatchId, @intBatchId) = @intBatchId
 				)

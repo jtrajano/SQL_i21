@@ -241,7 +241,7 @@ SELECT dtmDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 , dblAvailableCredit	= 0
 	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-	LEFT JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
+	INNER JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN (SELECT intPrepaymentId
 		            , dblAppliedInvoiceAmount = SUM(dblAppliedInvoiceAmount)
@@ -257,8 +257,9 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
- AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS)
-      
+ AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS) 
+ --AND P.intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1)
+       
 UNION ALL
 
 SELECT P.dtmDatePaid
@@ -493,7 +494,7 @@ SELECT I.strInvoiceNumber
 	  , dblAvailableCredit	= 0
 	  , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-	LEFT JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
+	INNER JOIN ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN (SELECT intPrepaymentId
 		            , dblAppliedInvoiceAmount = SUM(dblAppliedInvoiceAmount)
@@ -509,7 +510,8 @@ WHERE I.ysnPosted = 1
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
- AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS)
+ AND I.intAccountId IN (SELECT intAccountId FROM GLACCOUNTS)  
+ --AND P.intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1)
 						      
 UNION ALL
 

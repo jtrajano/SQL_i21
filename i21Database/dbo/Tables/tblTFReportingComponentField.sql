@@ -6,7 +6,6 @@
 	[strFormat] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strFooter] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intWidth] [int] NULL,
-	[intScheduleFieldTemplateId] [int] NULL,
 	[intMasterId] INT NULL,
 	[intConcurrencyId] [int] DEFAULT ((1)) NULL,
 	CONSTRAINT [PK_tblTFReportingComponentField] PRIMARY KEY ([intReportingComponentFieldId] ASC),

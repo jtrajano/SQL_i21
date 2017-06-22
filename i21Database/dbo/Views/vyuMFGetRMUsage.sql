@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetRMUsage
 AS
-SELECT DISTINCT Convert(CHAR, WI.dtmProductionDate, 101) [Dump Date]
+SELECT DISTINCT Convert(CHAR, W.dtmPlannedDate, 101) [Dump Date]
 	,I.strItemNo [Product]
 	,I.strDescription [Product Description]
 	,PL.strParentLotNumber AS [Production Lot]

@@ -53,6 +53,7 @@ BEGIN TRY
 		,@intStagingLocationId INT
 		,@strPickByUpperToleranceQty NVARCHAR(50)
 		,@ysnPickRemainingQty bit
+		,@strReferernceNo nvarchar(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -71,7 +72,7 @@ BEGIN TRY
 			,intUserId INT
 			,ysnPickRemainingQty Bit
 			) x
-	Select @ysnPickRemainingQty=0
+	--Select @ysnPickRemainingQty=0
 
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT
@@ -220,6 +221,8 @@ BEGIN TRY
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
+	Select @strReferernceNo=strWorkOrderNo from tblMFWorkOrder Where intWorkOrderId in (Select intWorkOrderId from @tblMFWorkOrder)
+
 	INSERT INTO @OrderHeaderInformation (
 		intOrderStatusId
 		,intOrderTypeId
@@ -235,7 +238,7 @@ BEGIN TRY
 		,1
 		,2
 		,@strBOLNo
-		,''
+		,@strReferernceNo
 		,CASE 
 			WHEN @strStageLocationType = 'Alternate Staging Location'
 				THEN NULL

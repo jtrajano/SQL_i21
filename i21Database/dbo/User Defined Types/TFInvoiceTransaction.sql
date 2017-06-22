@@ -45,6 +45,17 @@
 	[strHeaderPhone] NVARCHAR(50) NULL,
 	[strHeaderStateTaxID] NVARCHAR(50) NULL,
 	[strHeaderFederalTaxID] NVARCHAR(50) NULL,
+	[strTransporterIdType] NVARCHAR(50) NULL,
+	[strVendorIdType] NVARCHAR(50) NULL,
+	[strCustomerIdType] NVARCHAR(50) NULL,
+	[strVendorInvoiceNumber] NVARCHAR(50) NULL,
+	[strCustomerLicenseNumber] NVARCHAR(50) NULL,
+	[strCustomerAccountStatusCode] NVARCHAR(50) NULL,
+	[strCustomerStreetAddress] NVARCHAR(50) NULL,
+	[strCustomerZipCode] NVARCHAR(50) NULL,
+	[strReportingComponentNote] NVARCHAR(50) NULL,
+	[strDiversionNumber] NVARCHAR(50) NULL,
+	[strDiversionOriginalDestinationState] NVARCHAR(50) NULL,
 	[strTransactionType] NVARCHAR(50) NULL,
 	[intTransactionNumberId] INT NULL
 )

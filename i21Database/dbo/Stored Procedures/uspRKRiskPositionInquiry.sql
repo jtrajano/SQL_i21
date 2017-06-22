@@ -85,7 +85,7 @@ SELECT cv.strFutureMonth,
   ,cv.intFutureMarketId
   ,dtmFutureMonthsDate
   ,ysnExpired
-  FROM vyuCTContractDetailView cv  
+  FROM vyuRKRiskPositionContractDetail cv  
   JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId 
   JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
@@ -131,7 +131,7 @@ SELECT cv.strFutureMonth,
   ,isnull((SELECT  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,sum(dblQuantity)) dblQuantity FROM tblCTPriceFixation pf
 		 join tblCTPriceFixationDetail pd on pf.intPriceFixationId=pd.intPriceFixationId	 
 		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedQty
-  FROM vyuCTContractDetailView cv  
+  FROM vyuRKRiskPositionContractDetail cv  
   JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId 
   JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
@@ -176,7 +176,7 @@ SELECT cv.strFutureMonth,
   ,isnull((SELECT  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,sum(pd.dblQuantity)) dblQuantity FROM tblCTPriceFixation pf
 		 join tblCTPriceFixationDetail pd on pf.intPriceFixationId=pd.intPriceFixationId	 
 		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedQty
-  FROM vyuCTContractDetailView cv  
+  FROM vyuRKRiskPositionContractDetail cv  
   JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId 
   JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
@@ -209,7 +209,7 @@ SELECT
   ,cv.intFutureMarketId
   ,ysnExpired
   ,dtmFutureMonthsDate INTO #DeltaPrecent
-FROM vyuCTContractDetailView cv  
+FROM vyuRKRiskPositionContractDetail cv  
 JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
 JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
 JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  

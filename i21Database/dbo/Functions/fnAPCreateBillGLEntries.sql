@@ -55,21 +55,21 @@ BEGIN
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
 	-- Get Total Value of Other Charges Taxes
-	 SELECT @ReceiptId = IRI.intInventoryReceiptId
-	 	 FROM tblAPBillDetail APB
-	 INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = APB.intInventoryReceiptItemId
-	 WHERE APB.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	 --SELECT @ReceiptId = IRI.intInventoryReceiptId
+	 --	 FROM tblAPBillDetail APB
+	 --INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = APB.intInventoryReceiptItemId
+	 --WHERE APB.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	 --print @ReceiptId
 
-	  SELECT TOP 1 @VendorId = intEntityVendorId FROM tblAPBill WHERE intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	  --SELECT TOP 1 @VendorId = intEntityVendorId FROM tblAPBill WHERE intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 
-	 SELECT @OtherChargeTaxes = SUM(CASE 
-			  WHEN ReceiptCharge.ysnPrice = 1
-			   THEN ISNULL(ReceiptCharge.dblTax,0) * -1
-			  ELSE ISNULL(ReceiptCharge.dblTax,0) 
-			 END )
-	 FROM tblICInventoryReceiptCharge ReceiptCharge
-	 WHERE ReceiptCharge.intInventoryReceiptId = @ReceiptId AND ReceiptCharge.intEntityVendorId = @VendorId --get the charges only for that vendor
+	 --SELECT @OtherChargeTaxes = SUM(CASE 
+		--	  WHEN ReceiptCharge.ysnPrice = 1
+		--	   THEN ISNULL(ReceiptCharge.dblTax,0) * -1
+		--	  ELSE ISNULL(ReceiptCharge.dblTax,0) 
+		--	 END )
+	 --FROM tblICInventoryReceiptCharge ReceiptCharge
+	 --WHERE ReceiptCharge.intInventoryReceiptId = @ReceiptId AND ReceiptCharge.intEntityVendorId = @VendorId --get the charges only for that vendor
 	 --print @OtherChargeTaxes
 
 	INSERT INTO @returntable
@@ -87,7 +87,7 @@ BEGIN
 													 ELSE A.dblAmountDue END))
 											END AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
+		[dblCreditUnit]					=	units.dblTotalUnits,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
@@ -131,6 +131,7 @@ BEGIN
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
+			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
 			CROSS APPLY
@@ -163,7 +164,7 @@ BEGIN
 		[dblDebit]						=	0,
 		[dblCredit]						=	CAST(B.dblAmountApplied AS DECIMAL(18,2)) * ISNULL(NULLIF(ForexRate.dblRate,0),1),
 		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
+		[dblCreditUnit]					=	0,
 		[strDescription]				=	C.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	D.strVendorId,
@@ -235,7 +236,7 @@ BEGIN
 														END
 												* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) , --Bill Detail
 		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	0,
+		[dblDebitUnit]					=	units.dblTotalUnits,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
@@ -287,9 +288,10 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
-			LEFT JOIN [dbo].tblAPBillDetail B
+			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			LEFT JOIN tblAPVendor C
+			CROSS APPLY dbo.fnAPCalculateVoucherDetailUnits(B.intBillDetailId) units
+			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
 			LEFT JOIN tblICInventoryReceiptItem E
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
@@ -300,7 +302,8 @@ BEGIN
 			LEFT JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			LEFT JOIN tblICItem F
-				ON B.intItemId = F.intItemId					
+				ON B.intItemId = F.intItemId
+		
 			OUTER APPLY (
 				--Add the tax from IR
 				SELECT 
@@ -445,7 +448,7 @@ BEGIN
 													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
 											END AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	0,
+		[dblDebitUnit]					=	units.dblTotalUnits,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
@@ -485,6 +488,7 @@ BEGIN
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
+			CROSS APPLY dbo.fnAPCalculateVoucherDetailUnits(B.intBillDetailId) units
 			INNER JOIN tblICItem B2
 				ON B.intItemId = B2.intItemId
 			INNER JOIN tblICItemLocation loc

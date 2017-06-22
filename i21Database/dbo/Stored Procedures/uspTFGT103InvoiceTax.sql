@@ -105,6 +105,17 @@ BEGIN TRY
 			, strHeaderPhone
 			, strHeaderStateTaxID
 			, strHeaderFederalTaxID
+			, strTransporterIdType
+			, strVendorIdType
+			, strCustomerIdType
+			, strVendorInvoiceNumber
+			, strCustomerLicenseNumber
+			, strCustomerAccountStatusCode
+			, strCustomerStreetAddress
+			, strCustomerZipCode
+			, strReportingComponentNote
+			, strDiversionNumber
+			, strDiversionOriginalDestinationState
 			, strTransactionType
 			, intTransactionNumberId)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
@@ -149,6 +160,17 @@ BEGIN TRY
 			, tblSMCompanySetup.strPhone
 			, tblSMCompanySetup.strStateTaxID
 			, tblSMCompanySetup.strFederalTaxID
+			, strTransporterIdType = 'FEIN'
+			, strVendorIdType = 'FEIN'
+			, strCustomerIdType = 'FEIN'
+			, strVendorInvoiceNumber = NULL
+			, strCustomerLicenseNumber = NULL
+			, strCustomerAccountStatusCode = tblARAccountStatus.strAccountStatusCode
+			, strCustomerStreetAddress = tblEMEntityLocation.strAddress
+			, strCustomerZipCode = tblEMEntityLocation.strZipCode
+			, strReportingComponentNote = tblTFReportingComponent.strNote
+			, strDiversionNumber = NULL
+			, strDiversionOriginalDestinationState = NULL
 			, strTransactionType = 'Invoice'
 			, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 		FROM tblTFProductCode
@@ -163,6 +185,7 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 		INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityCustomerId
 		INNER JOIN tblEMEntity ON tblARCustomer.intEntityCustomerId = tblEMEntity.intEntityId
+		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityCustomerId AND tblEMEntityLocation.ysnDefaultLocation = 1
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter
@@ -278,6 +301,17 @@ BEGIN TRY
 			, strHeaderFederalTaxID
 			, dblTax
 			, dblTaxExempt
+			, strTransporterIdType
+			, strVendorIdType
+			, strCustomerIdType
+			, strVendorInvoiceNumber
+			, strCustomerLicenseNumber
+			, strCustomerAccountStatusCode
+			, strCustomerStreetAddress
+			, strCustomerZipCode
+			, strReportingComponentNote
+			, strDiversionNumber
+			, strDiversionOriginalDestinationState
 			, strTransactionType
 			, intTransactionNumberId)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
@@ -326,6 +360,17 @@ BEGIN TRY
 			, tblSMCompanySetup.strFederalTaxID
 			, (ISNULL(tblICInventoryTransferDetail.dblQuantity, 0) * @ConfigGUTRate) AS dblTax
 			, 0.000000 AS dblTaxExempt
+			, strTransporterIdType = 'FEIN'
+			, strVendorIdType = 'FEIN'
+			, strCustomerIdType = 'FEIN'
+			, strVendorInvoiceNumber = NULL
+			, strCustomerLicenseNumber = NULL
+			, strCustomerAccountStatusCode = NULL
+			, strCustomerStreetAddress = NULL
+			, strCustomerZipCode = NULL
+			, strReportingComponentNote = tblTFReportingComponent.strNote
+			, strDiversionNumber = NULL
+			, strDiversionOriginalDestinationState = NULL
 			, strTransactionType = 'Transfer'
 			, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 		FROM tblTFProductCode
@@ -406,6 +451,17 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
+				, strTransporterIdType
+				, strVendorIdType
+				, strCustomerIdType
+				, strVendorInvoiceNumber
+				, strCustomerLicenseNumber
+				, strCustomerAccountStatusCode
+				, strCustomerStreetAddress
+				, strCustomerZipCode
+				, strReportingComponentNote
+				, strDiversionNumber
+				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId)
 			SELECT DISTINCT @Guid
@@ -450,6 +506,17 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, @DateFrom
 				, @DateTo
+				, strTransporterIdType
+				, strVendorIdType
+				, strCustomerIdType
+				, strVendorInvoiceNumber
+				, strCustomerLicenseNumber
+				, strCustomerAccountStatusCode
+				, strCustomerStreetAddress
+				, strCustomerZipCode
+				, strReportingComponentNote
+				, strDiversionNumber
+				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
 			FROM @TFTransaction TRANS

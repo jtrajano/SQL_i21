@@ -37,6 +37,7 @@ BEGIN TRY
 		,@dblOldQty NUMERIC(38, 20)
 		,@dblSourceOldQty NUMERIC(38, 20)
 		,@intLotItemUOMId INT
+		,@intCategoryId INT
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -58,11 +59,18 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
+	IF (@intItemUOMId = @intWeightUOMId)
+	BEGIN
+		SELECT @dblMoveQty = @dblMoveQty / @dblWeightPerQty
+			,@intItemUOMId = @intLotItemUOMId
+	END
+	
 	SELECT @strStorageLocationName = strName
 	FROM tblICStorageLocation
 	WHERE intStorageLocationId = @intStorageLocationId
 
 	SELECT @strItemNumber = strItemNo
+		,@intCategoryId=intCategoryId
 	FROM tblICItem
 	WHERE intItemId = @intItemId
 
@@ -84,14 +92,14 @@ BEGIN TRY
 				END
 			)
 
-	IF (
+	IF Convert(decimal(24,3),(
 			CASE 
 				WHEN @intLotItemUOMId = @intItemUOMId
 					AND @intWeightUOMId IS NOT NULL
 					THEN @dblMoveQty * @dblWeightPerQty
 				ELSE @dblMoveQty
 				END
-			) > @dblLotAvailableQty
+			)) > Convert(decimal(24,3),@dblLotAvailableQty)
 	BEGIN
 		SET @ErrMsg = 'Move qty ' + LTRIM(CONVERT(NUMERIC(38, 4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item ''' + @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 
@@ -101,6 +109,18 @@ BEGIN TRY
 				,1
 				)
 	END
+
+	if Convert(decimal(24,3),(
+			CASE 
+				WHEN @intLotItemUOMId = @intItemUOMId
+					AND @intWeightUOMId IS NOT NULL
+					THEN @dblMoveQty * @dblWeightPerQty
+				ELSE @dblMoveQty
+				END
+			)) = Convert(decimal(24,3),@dblLotAvailableQty)
+	Begin
+		Select @dblMoveQty=Convert(decimal(24,3),@dblMoveQty)
+	End
 
 	SELECT @strNewLotNumber = @strLotNumber
 
@@ -166,6 +186,28 @@ BEGIN TRY
 			END
 		END
 	END
+
+	IF EXISTS (
+			SELECT *
+			FROM tblICStorageLocationCategory
+			WHERE intStorageLocationId = @intNewStorageLocationId
+			)
+	BEGIN
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblICStorageLocationCategory
+				WHERE intStorageLocationId = @intNewStorageLocationId
+					AND intCategoryId = @intCategoryId
+				)
+		BEGIN
+			RAISERROR (
+					'The selected item is not allowed in the destination location.'
+					,11
+					,1
+					)
+		END
+	END
+
 
 	BEGIN TRANSACTION
 

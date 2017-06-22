@@ -461,13 +461,13 @@ BEGIN
 				[dblDiscount]			=	0,
 				[dblWithheld]			=	0,
 				[intStoreLocationId]	=	A.intLocationId,
-				[intPayToAddressId]		=	A.intShipFromId,
+				[intPayToAddressId]		=	ISNULL(NULLIF(Terms.intBillToId, 0),A.intShipFromId),
 				[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
 			FROM #tmpReceiptData A
 			OUTER APPLY 
 			(
 				SELECT 
-					C.intTermsId
+					C.intTermsId, B.intBillToId
 				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
 				WHERE B.intEntityVendorId = @vendorId
 			) Terms
@@ -668,7 +668,7 @@ BEGIN
 		DELETE FROM @billDetailIds
 
 		--ADD CHARGES FOR MAIN VENDOR OR PRODUCER
-		IF(@totalChargesCount != 0)
+		IF(@totalChargesCount != 0 AND @counter2 = 1) --make sure charges has not been processed yet, this part should be only run once
 		BEGIN 
 			INSERT INTO tblAPBillDetail(
 				[intBillId],
@@ -720,7 +720,7 @@ BEGIN
 				[intForexRateTypeId]		=   A.intForexRateTypeId,
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 				[intTaxGroupId]				=	NULL,
-				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),
+				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId,D.intItemLocationId, 'AP Clearing'),
 				[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 														ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
 												END,
@@ -745,8 +745,8 @@ BEGIN
 				[int1099Form]				=	0,
 				[int1099Category]			=	0       
 			FROM [vyuICChargesForBilling] A
-			INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
-				AND A.intInventoryReceiptId = B.intInventoryReceiptId
+			INNER JOIN tblICItemLocation D
+				ON A.intLocationId = D.intLocationId AND A.intItemId = D.intItemId
 			LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 													--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
@@ -908,13 +908,12 @@ BEGIN
 						[dblQtyReceived]			=	A.dblQuantityToBill,
 						[dblTax]					=	(CASE WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
 															 WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 1 THEN A.dblTax --IN THIS CASE IF IT TE TAX IS NEGATIVE, IT SHOULD RETAIN AS NEGATIVE
-															 WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
 															ELSE ISNULL(A.dblTax,0) END),
 						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
 						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 						[intTaxGroupId]				=	NULL,
-						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, B.intLocationId, 'AP Clearing'),
+						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, D.intItemLocationId, 'AP Clearing'),
 						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
 						[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
@@ -940,7 +939,8 @@ BEGIN
 						[int1099Form]				=	0,
 						[int1099Category]			=	0       
 					FROM [vyuICChargesForBilling] A
-					INNER JOIN tblICInventoryReceipt B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+					INNER JOIN tblICItemLocation D
+						ON A.intLocationId = D.intLocationId AND A.intItemId = D.intItemId
 					LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 					LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 					OUTER APPLY(
@@ -986,7 +986,7 @@ BEGIN
 	CROSS APPLY (
 		SELECT
 			ISNULL(SUM(ISNULL(dblTotal,0) + ISNULL(dblTax,0)),0) AS dblTotal
-			,SUM(dblTotal) AS dblSubtotal
+			,ISNULL(SUM(dblTotal),0) AS dblSubtotal
 		FROM tblAPBillDetail B
 		WHERE B.intBillId = A.intBillId
 	) Details

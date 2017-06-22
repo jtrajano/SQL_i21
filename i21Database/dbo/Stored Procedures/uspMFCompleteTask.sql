@@ -19,6 +19,8 @@ BEGIN TRY
 	DECLARE @strOrderNo NVARCHAR(100)
 	DECLARE @intRemainingTasks INT
 	DECLARE @intOrderDetailId INT
+		,@dblAllocatedQty NUMERIC(38, 20)
+		,@dblQty NUMERIC(38, 20)
 	DECLARE @tblTasks TABLE (
 		intTaskRecordId INT Identity(1, 1)
 		,intTaskId INT
@@ -45,7 +47,7 @@ BEGIN TRY
 		BEGIN
 			SELECT @intNewSubLocationId = SL.intSubLocationId
 				,@intNewStorageLocationId = T.intToStorageLocationId
-				,@dblMoveQty = T.dblPickQty 
+				,@dblMoveQty = T.dblPickQty
 				,@blnValidateLotReservation = 1
 				,@blnInventoryMove = 0
 				,@intLotId = intLotId
@@ -176,20 +178,60 @@ BEGIN TRY
 			WHERE s.strShipmentNumber = @strShipmentNo
 				AND intItemId = @intLotItemId
 
-			INSERT INTO tblICInventoryShipmentItemLot (
-				intInventoryShipmentItemId
-				,intLotId
-				,dblQuantityShipped
-				,dblGrossWeight
-				,dblTareWeight
-				)
-			VALUES (
-				@intShipmentItemId
-				,@intNewLotId
-				,@dblLotQty
-				,@dblLotWeight
-				,0
-				)
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblICInventoryShipmentItemLot
+					WHERE intInventoryShipmentItemId = @intShipmentItemId
+						AND intLotId = @intNewLotId
+					)
+			BEGIN
+				INSERT INTO tblICInventoryShipmentItemLot (
+					intInventoryShipmentItemId
+					,intLotId
+					,dblQuantityShipped
+					,dblGrossWeight
+					,dblTareWeight
+					)
+				VALUES (
+					@intShipmentItemId
+					,@intNewLotId
+					,@dblLotQty
+					,@dblLotWeight
+					,0
+					)
+			END
+			ELSE
+			BEGIN
+				UPDATE tblICInventoryShipmentItemLot
+				SET dblQuantityShipped = dblQuantityShipped + @dblLotQty
+					,dblGrossWeight = dblGrossWeight + @dblLotWeight
+				WHERE intInventoryShipmentItemId = @intShipmentItemId
+					AND intLotId = @intNewLotId
+			END
+
+			SELECT @dblAllocatedQty = NULL
+
+			SELECT @dblAllocatedQty = dblQuantityShipped
+			FROM tblICInventoryShipmentItemLot
+			WHERE intInventoryShipmentItemId = @intShipmentItemId
+				AND intLotId = @intNewLotId
+
+			SELECT @dblQty = NULL
+
+			SELECT @dblQty = dblQty
+			FROM tblICLot
+			WHERE intLotId = @intNewLotId
+
+			IF @dblAllocatedQty > @dblQty
+			BEGIN
+				RAISERROR (
+						'QUANTITY IS NOT AVAILABLE TO COMPLETE PICK TASK.'
+						,16
+						,1
+						)
+
+				RETURN
+			END
 		END
 	END
 	ELSE
@@ -227,7 +269,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intNewSubLocationId = SL.intSubLocationId
 					,@intNewStorageLocationId = T.intToStorageLocationId
-					,@dblMoveQty = T.dblPickQty 
+					,@dblMoveQty = T.dblPickQty
 					,@blnValidateLotReservation = 1
 					,@blnInventoryMove = 0
 					,@intLotId = intLotId
@@ -356,20 +398,60 @@ BEGIN TRY
 				WHERE s.strShipmentNumber = @strShipmentNo
 					AND intItemId = @intLotItemId
 
-				INSERT INTO tblICInventoryShipmentItemLot (
-					intInventoryShipmentItemId
-					,intLotId
-					,dblQuantityShipped
-					,dblGrossWeight
-					,dblTareWeight
-					)
-				VALUES (
-					@intShipmentItemId
-					,@intNewLotId
-					,@dblLotQty
-					,@dblLotWeight
-					,0
-					)
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblICInventoryShipmentItemLot
+						WHERE intInventoryShipmentItemId = @intShipmentItemId
+							AND intLotId = @intNewLotId
+						)
+				BEGIN
+					INSERT INTO tblICInventoryShipmentItemLot (
+						intInventoryShipmentItemId
+						,intLotId
+						,dblQuantityShipped
+						,dblGrossWeight
+						,dblTareWeight
+						)
+					VALUES (
+						@intShipmentItemId
+						,@intNewLotId
+						,@dblLotQty
+						,@dblLotWeight
+						,0
+						)
+				END
+				ELSE
+				BEGIN
+					UPDATE tblICInventoryShipmentItemLot
+					SET dblQuantityShipped = dblQuantityShipped + @dblLotQty
+						,dblGrossWeight = dblGrossWeight + @dblLotWeight
+					WHERE intInventoryShipmentItemId = @intShipmentItemId
+						AND intLotId = @intNewLotId
+				END
+
+				SELECT @dblAllocatedQty = NULL
+
+				SELECT @dblAllocatedQty = dblQuantityShipped
+				FROM tblICInventoryShipmentItemLot
+				WHERE intInventoryShipmentItemId = @intShipmentItemId
+					AND intLotId = @intNewLotId
+
+				SELECT @dblQty = NULL
+
+				SELECT @dblQty = dblQty
+				FROM tblICLot
+				WHERE intLotId = @intNewLotId
+
+				IF @dblAllocatedQty > @dblQty
+				BEGIN
+					RAISERROR (
+							'QUANTITY IS NOT AVAILABLE TO COMPLETE PICK TASK.'
+							,16
+							,1
+							)
+
+					RETURN
+				END
 			END
 
 			SELECT @intMinTaskRecordId = MIN(intTaskRecordId)
@@ -383,13 +465,14 @@ BEGIN TRY
 	WHERE intOrderHeaderId = @intOrderHeaderId
 		AND intTaskStateId <> 4
 
-	IF @intRemainingTasks = 0 and @strOrderType='WO PROD RETURN'
+	IF @intRemainingTasks = 0
+		AND @strOrderType = 'WO PROD RETURN'
 	BEGIN
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 10
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
-	Else IF @intRemainingTasks = 0 
+	ELSE IF @intRemainingTasks = 0
 	BEGIN
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 6

@@ -6,9 +6,9 @@
     [intDayofMonthDue]            INT             NULL,
     [intDueNextMonth]             INT             NULL,
     [intSort]                     INT             NULL,
-    [strTerm]                     NVARCHAR (MAX)  NULL,
-    [strTermType]                 NVARCHAR (MAX)  NULL,
-    [strTermCode]                 NVARCHAR (MAX)  NULL,
+    [strTerm]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strTermType]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strTermCode]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmDiscountDate]             DATETIME        NULL,
     [dtmDueDate]                  DATETIME        NULL,
     [dtmInvoiceDate]              DATETIME        NULL,
@@ -22,9 +22,11 @@
     [intAccountId]                INT             NULL,
     [intTransactionId]            INT             NULL,
     [dblEligableGallon]           NUMERIC (18, 6) NULL,
-    [strDiscountSchedule]         NVARCHAR (MAX)  NULL,
+    [strDiscountSchedule]         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnShowOnCFInvoice]          BIT             NULL
 );
+
+
 
 
 

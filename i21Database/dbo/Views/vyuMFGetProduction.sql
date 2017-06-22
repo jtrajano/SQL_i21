@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetProduction
 AS
-SELECT Convert(CHAR, WP.dtmProductionDate, 101) AS [Production Date]
+SELECT Convert(CHAR, W.dtmPlannedDate, 101) AS [Production Date]
 	,I.strItemNo AS Item
 	,I.strDescription AS Description
 	,W.strWorkOrderNo AS [Work Order #]
@@ -21,7 +21,7 @@ JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 WHERE WP.ysnProductionReversed = 0
-GROUP BY WP.dtmProductionDate
+GROUP BY W.dtmPlannedDate
 	,I.strItemNo
 	,I.strDescription
 	,W.strWorkOrderNo

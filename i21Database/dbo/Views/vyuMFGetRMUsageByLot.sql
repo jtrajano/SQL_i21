@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetRMUsageByLot
 AS
-SELECT DISTINCT Convert(CHAR, WI.dtmProductionDate, 101) [Dump Date]
+SELECT DISTINCT Convert(CHAR, W.dtmPlannedDate, 101) [Dump Date]
 	,I.strItemNo [Product]
 	,I.strDescription [Product Description]
 	,(
@@ -38,7 +38,7 @@ WHERE C.strCategoryCode NOT IN (
 			AND PA.intLocationId = W.intLocationId
 			AND PA.intAttributeId = 46
 		)
-GROUP BY WI.dtmProductionDate
+GROUP BY W.dtmPlannedDate
 	,I.strItemNo
 	,I.strDescription
 	,MC.strCellName

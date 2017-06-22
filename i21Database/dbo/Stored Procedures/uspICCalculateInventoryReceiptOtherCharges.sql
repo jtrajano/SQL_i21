@@ -88,19 +88,41 @@ BEGIN
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
-	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+	FROM	tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = Charge.intChargeId				
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PER_UNIT
-			AND (
-				Charge.intContractId IS NULL 
-				OR (
-					Charge.intContractId IS NOT NULL 
-					AND ReceiptItem.intOrderId = Charge.intContractId
-					AND ReceiptItem.intLineNo = Charge.intContractDetailId
-				)	
+			AND 
+			(
+				1 =
+				CASE	WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND ReceiptItem.intOrderId IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NOT NULL 
+							AND ReceiptItem.intOrderId = Charge.intContractId
+							AND ReceiptItem.intLineNo = Charge.intContractDetailId
+						THEN 
+							1
+						
+						WHEN 
+							ISNULL(Receipt.strReceiptType, 'Direct') <> 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+						THEN 
+							1
+						
+						ELSE 
+							0
+				END 				
 			)
 			AND Item.intOnCostTypeId IS NULL 
 			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
@@ -195,13 +217,33 @@ BEGIN
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PERCENTAGE
-			AND (
-				Charge.intContractId IS NULL 
-				OR (
-					Charge.intContractId IS NOT NULL 
-					AND ReceiptItem.intOrderId = Charge.intContractId
-					AND ReceiptItem.intLineNo = Charge.intContractDetailId
-				)
+			AND 
+			(
+				1 =
+				CASE	WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND ReceiptItem.intOrderId IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NOT NULL 
+							AND ReceiptItem.intOrderId = Charge.intContractId
+							AND ReceiptItem.intLineNo = Charge.intContractDetailId
+						THEN 
+							1
+						
+						WHEN 
+							ISNULL(Receipt.strReceiptType, 'Direct') <> 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+						THEN 
+							1
+						
+						ELSE 
+							0
+				END 				
 			)
 			AND Item.intOnCostTypeId IS NULL 
 			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
