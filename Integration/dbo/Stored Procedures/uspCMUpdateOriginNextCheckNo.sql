@@ -3,17 +3,15 @@
 -- If there is an integration with the origin system, this stored procedure will be used. 
 -- Otherwise, the stored procedure in the i21Database will be used. 
 
+GO
+IF	EXISTS(select top 1 1 from sys.procedures where name = 'uspCMUpdateOriginNextCheckNo')
+	AND (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+BEGIN 
+	DROP PROCEDURE uspCMUpdateOriginNextCheckNo
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
-BEGIN
-
-	EXEC('
-		IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspCMUpdateOriginNextCheckNo'' and type = ''P'') 
-			DROP PROCEDURE [dbo].[uspCMUpdateOriginNextCheckNo];
-	')
 
 	EXEC ('
-		CREATE PROCEDURE uspCMUpdateOriginNextCheckNo
+		CREATE PROCEDURE [dbo].[uspCMUpdateOriginNextCheckNo]
 			@strNextCheckNumber NVARCHAR(20)
 			,@intBankAccountId INT 
 		AS
