@@ -390,8 +390,8 @@ USING
 		,[intLocationId]			= ITG.[intCompanyLocationId]
 		,[dblAmountPaid]			= ITG.[dblAmountPaid]
 		,[dblBaseAmountPaid]		= ITG.[dblAmountPaid]
-		,[dblUnappliedAmount]		= ITG.[dblAmountPaid]
-		,[dblBaseUnappliedAmount]	= ITG.[dblAmountPaid]
+		,[dblUnappliedAmount]		= @ZeroDecimal
+		,[dblBaseUnappliedAmount]	= @ZeroDecimal
 		,[dblOverpayment]			= @ZeroDecimal
 		,[dblBaseOverpayment]		= @ZeroDecimal
 		,[dblBalance]				= ARC.[dblARBalance]
