@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
+﻿
+CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
 	 @entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -125,7 +126,7 @@ BEGIN
 		,dtmInvoiceDate
 		,@accountId
 		,NULL
-		,dblTotalAmount
+		,dblAccountTotalAmount
 		,(SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
 		,strInvoiceReportNumber
 		,0
@@ -151,6 +152,8 @@ BEGIN
 		LEFT OUTER JOIN tblARInvoice I
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		--------------------------------------
+
+		--select * From @EntriesForPayment
 
 		SET @executedLine = 4
 		DECLARE @PaymentEntriesTEMP	PaymentIntegrationStagingTable
@@ -409,12 +412,15 @@ BEGIN
 		--DROP TABLE #tblCFInvoices
 		--DROP TABLE #tblCFDisctinctCustomerInvoice
 
+
+		--select '[uspARProcessPayments]',* from @PaymentEntriesTEMP
+
 		SET @executedLine = 5
 		DECLARE @LogId INT
 		EXEC [dbo].[uspARProcessPayments]
 		 @PaymentEntries	= @PaymentEntriesTEMP
 		,@UserId			= 1
-		,@GroupingOption	= 0
+		,@GroupingOption	= 1
 		,@RaiseError		= 1
 		,@ErrorMessage		= @ErrorMessage OUTPUT
 		,@LogId				= @LogId OUTPUT
@@ -447,7 +453,7 @@ BEGIN
 
 			SET @executedLine = 9
 			SELECT TOP 1 
-			 @strPaymentNumber		= strPaymentInfo
+			 @strPaymentNumber		= strRecordNumber
 			,@intEntityCustomerId	= intEntityCustomerId	
 			,@dblAmountPaid			= dblAmountPaid
 			FROM tblARPayment 
