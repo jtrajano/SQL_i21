@@ -84,7 +84,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 						AND EL.intPayGroupId IS NOT NULL
 			WHERE 
-				tblPRPayGroupDetail.intPayGroupDetailId = (SELECT TOP 1 intPayGroupDetailId FROM tblPRPayGroupDetail PGD 
+				tblPRPayGroupDetail.intPayGroupDetailId = (SELECT TOP 1 PGD.intPayGroupDetailId FROM tblPRPayGroupDetail PGD 
 							INNER JOIN tblPREmployeeEarning EL
 								ON PGD.intEmployeeEarningId = EL.intEmployeeEarningId
 							INNER JOIN tblPREmployeeEarning EE 
@@ -215,7 +215,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 				/* Check if the corresponding Linked Earning to deduct exists in the Pay Group Detail */
 				DECLARE @intPayGroupDetail INT = NULL
 				DECLARE @intSource INT = 1
-				SELECT TOP 1 @intPayGroupDetail = intPayGroupDetailId FROM tblPRPayGroupDetail PGD 
+				SELECT TOP 1 @intPayGroupDetail = PGD.intPayGroupDetailId FROM tblPRPayGroupDetail PGD 
 							INNER JOIN tblPREmployeeEarning EL
 								ON PGD.intEmployeeEarningId = EL.intEmployeeEarningId
 							INNER JOIN tblPREmployeeEarning EE 
