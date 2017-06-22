@@ -501,13 +501,6 @@ BEGIN
 			,@INVENTORY_RETURN_TYPE
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
-
-		---- Negate the GL entries from the other charges. 
-		--UPDATE @GLEntries
-		--SET dblDebit = -dblDebit
-		--	,dblCredit = -dblCredit
-		--	,dblDebitUnit = -dblDebitUnit
-		--	,dblCreditUnit = -dblCreditUnit			
 	END 
 
 	-- Get company owned items to post. 
@@ -815,7 +808,7 @@ BEGIN
 
 				IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
-				-- Create the GL entries specific for Inventory Receipt/Return 
+				-- Create the GL entries specific for Inventory Return 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
 						,[strBatchId]
