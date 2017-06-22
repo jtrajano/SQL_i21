@@ -1189,7 +1189,7 @@ BEGIN
 	FROM tblGRStorageHistory SH
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
 	JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
-	WHERE SH.[strType] = 'From Scale' AND IR.intInventoryReceiptId=@InventoryReceiptId AND SH.dtmHistoryDate=IR.dtmReceiptDate
+	WHERE SH.[strType] = 'From Scale' AND IR.intInventoryReceiptId=@InventoryReceiptId 
 	AND ISNULL(SH.intInventoryReceiptId,0) = 0
 
 	--DECLARE @intInventoryReceiptItemId	INT = NULL,
