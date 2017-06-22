@@ -15,6 +15,7 @@ CREATE PROCEDURE [dbo].[uspICReturnStockInActualCost]
 	,@dblCost AS NUMERIC(38, 20)
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT
+	,@intTransactionDetailId AS INT
 	,@intEntityUserSecurityId AS INT
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
@@ -120,6 +121,7 @@ BEGIN
 			,strTransactionId
 			,strBatchId
 			,intTransactionTypeId 
+			,intTransactionDetailId
 		)
 		SELECT 
 			intInventoryActualCostId	= @cbId
@@ -131,6 +133,7 @@ BEGIN
 			,strTransactionId			= @strTransactionId
 			,strBatchId					= @strBatchId
 			,intTransactionTypeId		= @intTransactionTypeId
+			,intTransactionDetailId		= @intTransactionDetailId
 	END 
 END 
 

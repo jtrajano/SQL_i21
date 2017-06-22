@@ -86,6 +86,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
@@ -173,6 +174,7 @@ BEGIN
 					,strTransactionId
 					,strBatchId
 					,intTransactionTypeId 
+					,intTransactionDetailId
 				)
 				SELECT 
 					intInventoryLIFOId			= @UpdatedLIFOId
@@ -184,6 +186,7 @@ BEGIN
 					,strTransactionId			= @strTransactionId
 					,strBatchId					= @strBatchId
 					,intTransactionTypeId		= @intTransactionTypeId
+					,intTransactionDetailId		= @intTransactionDetailId
 			END 
 			
 			-- Reduce the remaining qty
