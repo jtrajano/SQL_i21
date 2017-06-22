@@ -262,38 +262,38 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod SMPM WITH (NOLOCK) WHERE SMPM.[intPaymentMethodID] = ITG.[intPaymentMethodId] AND ISNULL(SMPM.[ysnActive], 0) = 1)
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'This will create a prepayment which has not been allowed!'
-	,[strSourceTransaction]	= ITG.[strSourceTransaction]
-	,[intSourceId]			= ITG.[intSourceId]
-	,[strSourceId]			= ITG.[strSourceId]
-	,[intPaymentId]			= ITG.[intPaymentId]
-FROM
-	@PaymentsToGenerate ITG --WITH (NOLOCK)
-WHERE	
-	ITG.[ysnAllowPrepayment] = 0
-	AND ITG.[intInvoiceId] IS NULL
-	AND ITG.[dblAmountPaid] > @ZeroDecimal
+--SELECT
+--	 [intId]				= ITG.[intId]
+--	,[strMessage]			= 'This will create a prepayment which has not been allowed!'
+--	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+--	,[intSourceId]			= ITG.[intSourceId]
+--	,[strSourceId]			= ITG.[strSourceId]
+--	,[intPaymentId]			= ITG.[intPaymentId]
+--FROM
+--	@PaymentsToGenerate ITG --WITH (NOLOCK)
+--WHERE	
+--	ITG.[ysnAllowPrepayment] = 0
+--	AND ITG.[intInvoiceId] IS NULL
+--	AND ITG.[dblAmountPaid] > @ZeroDecimal
 
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'This will create a overpayment which has not been allowed!'
-	,[strSourceTransaction]	= ITG.[strSourceTransaction]
-	,[intSourceId]			= ITG.[intSourceId]
-	,[strSourceId]			= ITG.[strSourceId]
-	,[intPaymentId]			= ITG.[intPaymentId]
-FROM
-	@PaymentsToGenerate ITG --WITH (NOLOCK)
-WHERE	
-	ITG.[ysnAllowOverpayment] = 0
-	AND ITG.[intInvoiceId] IS NOT NULL
-	AND ITG.[dblAmountPaid] > ([dblPayment] + [dblDiscount] - [dblInterest])
+--SELECT
+--	 [intId]				= ITG.[intId]
+--	,[strMessage]			= 'This will create a overpayment which has not been allowed!'
+--	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+--	,[intSourceId]			= ITG.[intSourceId]
+--	,[strSourceId]			= ITG.[strSourceId]
+--	,[intPaymentId]			= ITG.[intPaymentId]
+--FROM
+--	@PaymentsToGenerate ITG --WITH (NOLOCK)
+--WHERE	
+--	ITG.[ysnAllowOverpayment] = 0
+--	AND ITG.[intInvoiceId] IS NOT NULL
+--	AND ITG.[dblAmountPaid] > ([dblPayment] + [dblDiscount] - [dblInterest])
 
 
 DELETE FROM V
@@ -672,6 +672,8 @@ BEGIN TRY
 		@IntegrationLog IL
 			ON ITG.[intId] = IL.[intId]
 			AND IL.[ysnSuccess] = 1
+	WHERE
+		ITG.[intInvoiceId] IS NOT NULL
 
 	EXEC [dbo].[uspARAddToInvoicesToPayments]
 		 @PaymentEntries	= @LineItems

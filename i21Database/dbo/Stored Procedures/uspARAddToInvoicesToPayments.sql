@@ -350,36 +350,36 @@ WHERE
 	(IT.[dblAmountDue] + IT.[dblInterest]) < (IT.[dblPayment] + (CASE WHEN IT.[ysnApplyTermDiscount] = 1 THEN IT.[dblDiscountAvailable] ELSE IT.[dblDiscount] END))
 	AND IT.[ysnFromAP] = 0
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= IT.[intId]
-	,[strMessage]			= 'Payment of ' + CONVERT(NVARCHAR(100),CAST(ISNULL(IT.[dblPayment], @ZeroDecimal) AS MONEY),2)  + ' for invoice ' + IT.[strTransactionNumber] + ' will cause an under payment.'
-	,[strSourceTransaction]	= IT.[strSourceTransaction]
-	,[intSourceId]			= IT.[intSourceId]
-	,[strSourceId]			= IT.[strSourceId]
-	,[intPaymentId]			= IT.[intPaymentId]
-FROM
-	@ItemEntries IT
-WHERE
-	([dbo].fnRoundBanker(ISNULL((SELECT SUM(ISNULL(ARPD.dblPayment, @ZeroDecimal)) FROM tblARPaymentDetail ARPD WHERE ARPD.[intPaymentId] = IT.[intPaymentId]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) + IT.[dblPayment]) > (IT.[dblAmountPaid] + IT.[dblPayment]) AND IT.[strTransactionType] <> 'Customer Prepayment'
-	AND IT.[ysnFromAP] = 0
+--SELECT
+--	 [intId]				= IT.[intId]
+--	,[strMessage]			= 'Payment of ' + CONVERT(NVARCHAR(100),CAST(ISNULL(IT.[dblPayment], @ZeroDecimal) AS MONEY),2)  + ' for invoice ' + IT.[strTransactionNumber] + ' will cause an under payment.'
+--	,[strSourceTransaction]	= IT.[strSourceTransaction]
+--	,[intSourceId]			= IT.[intSourceId]
+--	,[strSourceId]			= IT.[strSourceId]
+--	,[intPaymentId]			= IT.[intPaymentId]
+--FROM
+--	@ItemEntries IT
+--WHERE
+--	([dbo].fnRoundBanker(ISNULL((SELECT SUM(ISNULL(ARPD.dblPayment, @ZeroDecimal)) FROM tblARPaymentDetail ARPD WHERE ARPD.[intPaymentId] = IT.[intPaymentId]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) + IT.[dblPayment]) > (IT.[dblAmountPaid] + IT.[dblPayment]) AND IT.[strTransactionType] <> 'Customer Prepayment'
+--	AND IT.[ysnFromAP] = 0
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= IT.[intId]
-	,[strMessage]			= 'Payment of ' + CONVERT(NVARCHAR(100),CAST(ISNULL(IT.[dblPayment], @ZeroDecimal) AS MONEY),2)  + ' for invoice ' + IT.[strTransactionNumber] + ' will cause an over payment.'
-	,[strSourceTransaction]	= IT.[strSourceTransaction]
-	,[intSourceId]			= IT.[intSourceId]
-	,[strSourceId]			= IT.[strSourceId]
-	,[intPaymentId]			= IT.[intPaymentId]
-FROM
-	@ItemEntries IT
-WHERE
-	IT.[ysnAllowOverpayment] = 0 
-	AND ([dbo].fnRoundBanker(ISNULL((SELECT SUM(ISNULL(ARPD.[dblPayment], @ZeroDecimal)) FROM tblARPaymentDetail ARPD WHERE ARPD.[intPaymentId] = IT.[intPaymentId]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) + IT.[dblPayment]) > (IT.[dblAmountPaid] + IT.[dblPayment])
-	AND IT.[ysnFromAP] = 0
+--SELECT
+--	 [intId]				= IT.[intId]
+--	,[strMessage]			= 'Payment of ' + CONVERT(NVARCHAR(100),CAST(ISNULL(IT.[dblPayment], @ZeroDecimal) AS MONEY),2)  + ' for invoice ' + IT.[strTransactionNumber] + ' will cause an over payment.'
+--	,[strSourceTransaction]	= IT.[strSourceTransaction]
+--	,[intSourceId]			= IT.[intSourceId]
+--	,[strSourceId]			= IT.[strSourceId]
+--	,[intPaymentId]			= IT.[intPaymentId]
+--FROM
+--	@ItemEntries IT
+--WHERE
+--	IT.[ysnAllowOverpayment] = 0 
+--	AND ([dbo].fnRoundBanker(ISNULL((SELECT SUM(ISNULL(ARPD.[dblPayment], @ZeroDecimal)) FROM tblARPaymentDetail ARPD WHERE ARPD.[intPaymentId] = IT.[intPaymentId]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) + IT.[dblPayment]) > (IT.[dblAmountPaid] + IT.[dblPayment])
+--	AND IT.[ysnFromAP] = 0
 
 UNION ALL
 
