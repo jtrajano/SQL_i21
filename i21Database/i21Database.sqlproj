@@ -5278,12 +5278,13 @@
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianPrimaryElevatorReceipt.sql" />
     <Build Include="dbo\Functions\fnGRConvertDecimalPartToWords.sql" />
     <Build Include="dbo\Functions\fnGRConvertNumberToWords.sql" />
-	<None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategoryMaintenance.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategoryMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspMFInventoryReceiptReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetUnitConversion.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTaskO1.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetProductionReport.sql" />
     <Build Include="dbo\Views\vyuICGetCommodityGrade.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
