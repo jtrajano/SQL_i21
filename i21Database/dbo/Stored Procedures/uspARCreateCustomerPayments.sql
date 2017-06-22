@@ -701,20 +701,18 @@ END CATCH
 
 	
 BEGIN TRY
-	DECLARE @CreatedInvoiceIds InvoiceId	
-	DELETE FROM @CreatedInvoiceIds
+	DECLARE @CreatedPaymentIds PaymentId	
+	DELETE FROM @CreatedPaymentIds
 
-	INSERT INTO @CreatedInvoiceIds(
+	INSERT INTO @CreatedPaymentIds(
 		 [intHeaderId]
-		--,[ysnUpdateAvailableDiscountOnly]
 		,[intDetailId])
 	SELECT 
 		 [intHeaderId]						= [intPaymentId]
-		--,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount]
 		,[intDetailId]						= NULL
 	 FROM @IntegrationLog WHERE [ysnSuccess] = 1
 
-	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @CreatedInvoiceIds
+	EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
 
 	DECLARE @InvoiceLog AuditLogStagingTable	
 	DELETE FROM @InvoiceLog
@@ -732,20 +730,20 @@ BEGIN TRY
 		,[strDetails]
 	)
 	SELECT 
-		 [strScreenName]			= 'AccountsReceivable.view.Invoice'
-		,[intKeyValueId]			= ARI.[intPaymentId]
+		 [strScreenName]			= 'AccountsReceivable.view.ReceivePaymentsDetail'
+		,[intKeyValueId]			= ARP.[intPaymentId]
 		,[intEntityId]				= IL.[intEntityId]
 		,[strActionType]			= 'Processed'
-		,[strDescription]			= IL.[strSourceTransaction] + ' to Invoice'
+		,[strDescription]			= IL.[strSourceTransaction] + ' to Payment'
 		,[strActionIcon]			= NULL
-		,[strChangeDescription]		= IL.[strSourceTransaction] + ' to Invoice'
+		,[strChangeDescription]		= IL.[strSourceTransaction] + ' to Payment'
 		,[strFromValue]				= IL.[strSourceId]
-		,[strToValue]				= ARI.[strInvoiceNumber]
+		,[strToValue]				= ARP.[strRecordNumber]
 		,[strDetails]				= NULL
 	 FROM @IntegrationLog IL
 	INNER JOIN
-		(SELECT [intPaymentId], [strInvoiceNumber] FROM tblARInvoice) ARI
-			ON IL.[intPaymentId] = ARI.[intPaymentId]
+		(SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment) ARP
+			ON IL.[intPaymentId] = ARP.[intPaymentId]
 	 WHERE
 		[ysnSuccess] = 1 
 		AND [ysnInsert] = 1

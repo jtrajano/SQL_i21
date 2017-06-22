@@ -501,7 +501,7 @@ USING
 		,[intBillId]						= [intBillId]
 		,[strTransactionNumber]				= [strTransactionNumber]
 		,[intTermId]						= [intTermId]
-		,[intAccountId]						= [intAccountId]
+		,[intAccountId]						= [intInvoiceAccountId]
 		,[dblInvoiceTotal]					= [dblInvoiceTotal]
 		,[dblBaseInvoiceTotal]				= [dblBaseInvoiceTotal]
 		,[dblDiscount]						= [dblDiscount]
@@ -638,21 +638,38 @@ END CATCH
 		
 BEGIN TRY
 
-	DECLARE @InsertedPaymentIds Id	
-	DELETE FROM @InsertedPaymentIds
+	DECLARE @CreatedPaymentIds PaymentId	
+	DELETE FROM @CreatedPaymentIds
 
-	INSERT INTO @InsertedPaymentIds([intId])
-	SELECT
-		 [intId]	= ARPD.[intPaymentId]
-	FROM
+	INSERT INTO @CreatedPaymentIds(
+		 [intHeaderId]
+		,[intDetailId])
+	SELECT 
+		 [intHeaderId]						= [intPaymentId]
+		,[intDetailId]						= NULL
+	 FROM
 		(SELECT [intPaymentId], [intId] FROM tblARPaymentIntegrationLogDetail WITH (NOLOCK) WHERE ISNULL([ysnHeader], 0) = 1 AND ISNULL([ysnSuccess], 0) = 1) ARPD
 	INNER JOIN
 		(SELECT [intId] FROM @ItemEntries) IFI
 			ON IFI. [intId] = ARPD.[intId] 
 
+	EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
+
+	--DECLARE @InsertedPaymentIds Id	
+	--DELETE FROM @InsertedPaymentIds
+
+	--INSERT INTO @InsertedPaymentIds([intId])
+	--SELECT
+	--	 [intId]	= ARPD.[intPaymentId]
+	--FROM
+	--	(SELECT [intPaymentId], [intId] FROM tblARPaymentIntegrationLogDetail WITH (NOLOCK) WHERE ISNULL([ysnHeader], 0) = 1 AND ISNULL([ysnSuccess], 0) = 1) ARPD
+	--INNER JOIN
+	--	(SELECT [intId] FROM @ItemEntries) IFI
+	--		ON IFI. [intId] = ARPD.[intId] 
 
 
-	EXEC [dbo].[uspARReComputePaymentAmounts] @InvoiceIds = @InsertedPaymentIds
+
+	--EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @InsertedPaymentIds
 	
 END TRY
 BEGIN CATCH
