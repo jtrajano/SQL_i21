@@ -283,7 +283,7 @@ BEGIN TRY
 
    select @strCompanyName as CompanyName
 		  , FORMAT(GETDATE(), 'D', 'en-US' ) as DateToday
-		  , CONVERT(VARCHAR(8), GETDATE(), 108) + ' ' + RIGHT(CONVERT(VARCHAR(30), GETDATE(), 9), 2) as TimeToday
+		  , RIGHT('0' + LTRIM(STUFF(RIGHT(CONVERT(CHAR(26), CURRENT_TIMESTAMP, 109), 14),9, 4, ' ')),11) as TimeToday
 		  , strLocation
 		  , strUpc
 		  , strItemDescription
