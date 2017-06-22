@@ -328,6 +328,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 			BEGIN TRY
 				IF @RecomputeTax = 1
 					EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId  
+ 					IF @RecomputeTax = 1
+						EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId, @DetailId = @NewDetailId				 
 			END TRY
 			BEGIN CATCH
 				IF ISNULL(@RaiseError,0) = 0	

@@ -411,8 +411,10 @@ DECLARE @NewId INT
 SET @NewId = SCOPE_IDENTITY()
 		
 BEGIN TRY
-	IF @RecomputeTax = 1
-		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId  
+ 	IF @RecomputeTax = 1
+		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId, @DetailId = @NewId
+ 	ELSE
+ 		EXEC dbo.[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0	
