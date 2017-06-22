@@ -398,11 +398,11 @@ USING
 		,[strRecordNumber]			= CASE WHEN ISNULL(ITG.ysnUseOriginalIdAsPaymentNumber, 0) = 1 THEN ITG.strPaymentOriginalId ELSE NULL END
 		,[strPaymentInfo]			= ITG.[strPaymentInfo]
 		,[strNotes]					= ITG.[strNotes]
-		,[ysnApplytoBudget]			= ITG.[ysnApplytoBudget]
-		,[ysnApplyOnAccount]		= ITG.[ysnApplyOnAccount]
-		,[ysnInvoicePrepayment]		= ITG.[ysnInvoicePrepayment]
-		,[ysnImportedFromOrigin]	= ITG.[ysnImportedFromOrigin]
-		,[ysnImportedAsPosted]		= ITG.[ysnImportedAsPosted]
+		,[ysnApplytoBudget]			= ISNULL(ITG.[ysnApplytoBudget], 0)
+		,[ysnApplyOnAccount]		= ISNULL(ITG.[ysnApplyOnAccount], 0)
+		,[ysnInvoicePrepayment]		= ISNULL(ITG.[ysnInvoicePrepayment], 0)
+		,[ysnImportedFromOrigin]	= ISNULL(ITG.[ysnImportedFromOrigin], 0)
+		,[ysnImportedAsPosted]		= ISNULL(ITG.[ysnImportedAsPosted], 0)
 		,[intEntityId]				= ITG.[intEntityId]
 		,[intWriteOffAccountId]		= ITG.[intWriteOffAccountId]
 		,[strPaymentMethod]			= ITG.[strPaymentMethod]
@@ -415,7 +415,7 @@ USING
 		,[ysnPost]					= ITG.[ysnPost]
 		,[ysnRecap]					= ITG.[ysnRecap]
 		,[intPaymentId]				= ITG.[intPaymentId]
-		,[ysnPosted]				= ITG.[ysnImportedAsPosted]
+		,[ysnPosted]				= ISNULL(ITG.[ysnImportedAsPosted], 0)
 	FROM	
 		@PaymentsToGenerate ITG --WITH (NOLOCK)
 	INNER JOIN
