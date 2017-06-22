@@ -218,7 +218,6 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[ysnPrice]
 		)
 		SELECT	
-		DISTINCT
 		[intEntityVendorId]					= RE.intEntityVendorId
 		,[strBillOfLadding]					= RE.strBillOfLadding
 		,[strReceiptType]					= RE.strReceiptType
@@ -237,12 +236,12 @@ WHERE SCTicket.intTicketId = @intTicketId
 												CASE 
 													WHEN QM.dblDiscountAmount < 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
 														ELSE (QM.dblDiscountAmount * -1)
 													END 
 													WHEN QM.dblDiscountAmount > 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId)
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
 														ELSE QM.dblDiscountAmount
 													END
 												END
@@ -262,19 +261,19 @@ WHERE SCTicket.intTicketId = @intTicketId
 													CASE
 														WHEN QM.dblDiscountAmount < 0 THEN 
 														CASE
-															WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
-															ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId) * -1)
+															WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
+															ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
 														END 
 														WHEN QM.dblDiscountAmount > 0 THEN 
 														CASE
-															WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId)
-															ELSE dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId)
+															WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
+															ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
 														END 
 													END
 												END
 											END
-		,[intContractHeaderId]				= NULL
-		,[intContractDetailId]				= NULL
+		,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
+		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= CASE
 												WHEN QM.dblDiscountAmount < 0 THEN 1
 												WHEN QM.dblDiscountAmount > 0 THEN 0
@@ -343,8 +342,8 @@ WHERE SCTicket.intTicketId = @intTicketId
 													WHEN RE.ysnIsStorage = 0 THEN SC.dblTicketFees
 												END
 											END
-		,[intContractHeaderId]				= NULL
-		,[intContractDetailId]				= NULL
+		,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
+		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= CASE 
 												WHEN @ysnDeductFeesCusVen = 1 THEN 1
 												WHEN @ysnDeductFeesCusVen = 0 THEN 0
