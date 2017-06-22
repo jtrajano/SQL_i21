@@ -13,7 +13,7 @@ BEGIN
 		DECLARE @EntriesForInvoice		AS InvoiceStagingTable
 		DECLARE @TaxDetails				AS LineItemTaxDetailStagingTable 
 		DECLARE @companyLocationId		INT = 0
-		DECLARE @accountId				INT = 0
+		DECLARE @accountId				INT = NULL
 		DECLARE @executedLine			INT = 0 
 		----------------------------------------
 
@@ -44,6 +44,7 @@ BEGIN
 		--SET @executedLine = 4
 		
 		----------------------------------------
+		SELECT @accountId
 
 		----------ENTRIES FOR INVOICE-----------
 		SET @executedLine = 4
@@ -410,11 +411,16 @@ BEGIN
 		----------------------------------------
 
 		
+		--UPDATE @InvoiceEntriesTEMP SET intSalesAccountId = @accountId
+		--UPDATE @EntriesForInvoice SET intSalesAccountId = @accountId
+		
 		SET @executedLine = 6
 		DECLARE @InvoiceEntriesTEMP	InvoiceStagingTable
 		INSERT INTO @InvoiceEntriesTEMP(
 		[intId]
 		,[strTransactionType]
+		,[strSCInvoiceNumber]		
+		,[intSalesAccountId]
 		,[strSourceTransaction]
 		,[intSourceId]
 		,[strSourceId]
@@ -469,7 +475,6 @@ BEGIN
 		,[intTaxGroupId]
 		,[ysnRecomputeTax]
 		,[intSCInvoiceId]
-		,[strSCInvoiceNumber]
 		,[intInventoryShipmentItemId]
 		,[strShipmentNumber]
 		,[intSalesOrderDetailId]
@@ -494,10 +499,13 @@ BEGIN
 		,[ysnUpdateAvailableDiscount]
 		,[strItemTermDiscountBy]
 		,[dblItemTermDiscount]
-		,[dtmPostDate])
+		,[strDocumentNumber]
+		)
 		SELECT 
 		ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 		,[strTransactionType]
+		,[strSCInvoiceNumber]		
+		,[intSalesAccountId]
 		,[strSourceTransaction]
 		,[intSourceId]
 		,[strSourceId]
@@ -552,7 +560,6 @@ BEGIN
 		,[intTaxGroupId]
 		,[ysnRecomputeTax]
 		,[intSCInvoiceId]
-		,[strSCInvoiceNumber]
 		,[intInventoryShipmentItemId]
 		,[strShipmentNumber]
 		,[intSalesOrderDetailId]
@@ -577,11 +584,17 @@ BEGIN
 		,[ysnUpdateAvailableDiscount]
 		,[strItemTermDiscountBy]
 		,[dblItemTermDiscount]
-		,[dtmPostDate]
+		,[strDocumentNumber]
 		FROM @EntriesForInvoice
 
 
-		--SELECT dblPrice,dblQtyShipped,* FROM @EntriesForInvoice
+		
+
+		--SELECT intSalesAccountId,intCompanyLocationId,intEntityId,dblPrice,dblQtyShipped,* FROM @EntriesForInvoice
+		--SELECT intSalesAccountId,intCompanyLocationId,intEntityId,dblPrice,dblQtyShipped,* FROM @InvoiceEntriesTEMP
+
+
+		
 		--SELECT dblPrice,dblQtyShipped,* FROM @InvoiceEntriesTEMP
 
 		----------CREATE DEBIT MEMOS------------
