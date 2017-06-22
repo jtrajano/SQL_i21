@@ -5285,6 +5285,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetProductionReport.sql" />
     <Build Include="dbo\Views\vyuICGetCommodityGrade.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
