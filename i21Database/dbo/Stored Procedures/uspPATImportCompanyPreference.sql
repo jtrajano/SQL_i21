@@ -65,7 +65,6 @@ SET ANSI_WARNINGS OFF
 			dblCutoffAmount = @CutOffAmt,
 			strCutoffTo = @CutOffCashEquity,
 			strPayOnGrain = @GaPayStlInd,
-			strPrintCheck = @ChkPrtYN,
 			dblMinimumDividends = @MinDivAmt,
 			ysnProRatedDividends = @ProrateDiv,
 			dtmCutoffDate = @ProrateCutOffDt,
@@ -77,8 +76,8 @@ SET ANSI_WARNINGS OFF
 	END
 	ELSE
 	BEGIN
-		INSERT INTO tblPATCompanyPreference(strRefund, dblMinimumRefund, dblServiceFee, dblCutoffAmount, strCutoffTo, strPayOnGrain, strPrintCheck, dblMinimumDividends, ysnProRatedDividends, dtmCutoffDate, intVotingStockId, intNonVotingStockId, intFractionalShareId, intServiceFeeIncomeId, intConcurrencyId)
-		VALUES(@RefundInd, @RefundMinAmt, @ServiceFee, @CutOffAmt, @CutOffCashEquity, @GaPayStlInd, @ChkPrtYN, @MinDivAmt, @ProrateDiv, @ProrateCutOffDt, @VotingGLId, @NonVotingGLId, @FracShareGLId, @ServiceFeeGLId, 1)
+		INSERT INTO tblPATCompanyPreference(strRefund, dblMinimumRefund, dblServiceFee, dblCutoffAmount, strCutoffTo, strPayOnGrain, dblMinimumDividends, ysnProRatedDividends, dtmCutoffDate, intVotingStockId, intNonVotingStockId, intFractionalShareId, intServiceFeeIncomeId, intConcurrencyId)
+		VALUES(@RefundInd, @RefundMinAmt, @ServiceFee, @CutOffAmt, @CutOffCashEquity, @GaPayStlInd, @MinDivAmt, @ProrateDiv, @ProrateCutOffDt, @VotingGLId, @NonVotingGLId, @FracShareGLId, @ServiceFeeGLId, 1)
 	END
 	---------------------------- END - UPDATE COMPANY PREFERENCE FROM ORIGIN ----------------------------------------------
 END
