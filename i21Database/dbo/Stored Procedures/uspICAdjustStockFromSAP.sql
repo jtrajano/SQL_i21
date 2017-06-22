@@ -38,20 +38,18 @@ BEGIN
 	-- SET Values --
 	----------------
 	-- Set Transaction Date
-		--SET @dtmQtyChange = ISNULL(@dtmQtyChange, GETDATE());
-	IF EXISTS(SELECT * FROM tblICInventoryLot Lot WHERE Lot.intItemId=@intItemId)
-		BEGIN
-			IF @dtmQtyChange IS NULL
-				BEGIN
-					SELECT TOP 1 @dtmQtyChange=Lot.dtmDate 
-					FROM tblICInventoryLot Lot 
-						LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Lot.intItemId
-					WHERE Lot.intItemId=@intItemId AND Lot.intSubLocationId=@intSubLocationId AND ItemLocation.intLocationId = @intLocationId
-					ORDER BY Lot.dtmDate desc
-				END
-		END
-	ELSE
+	IF @dtmQtyChange IS NULL
+	BEGIN
+		SELECT	TOP 1 
+				@dtmQtyChange = COALESCE(Lot.dtmDate, @dtmQtyChange, GETDATE()) 
+		FROM	tblICInventoryLot Lot LEFT JOIN tblICItemLocation ItemLocation 
+					ON ItemLocation.intItemLocationId = Lot.intItemLocationId
+		WHERE	Lot.intItemId = @intItemId 
+				AND Lot.intSubLocationId = @intSubLocationId 
+				AND ItemLocation.intLocationId = @intLocationId	
+		ORDER BY Lot.dtmDate desc
 		SET @dtmQtyChange = ISNULL(@dtmQtyChange, GETDATE());
+	END
  	
 	IF @intItemId IS NOT NULL
 		BEGIN
@@ -71,7 +69,6 @@ BEGIN
 					WHERE intLocationId = @intLocationId AND intItemId = @intItemId
 				END
 		END
-
 	---------------------------------------------
 	-- Validate values specified in the fields --
 	---------------------------------------------
@@ -92,6 +89,10 @@ BEGIN
 			GOTO _Exit;
 		END
 
+
+	PRINT 'VALIDATE'
+	PRINT @dtmQtyChange
+
 	-- Validate the date against the FY Periods  
 	IF EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmQtyChange) = 0) 
 	BEGIN   
@@ -100,6 +101,10 @@ BEGIN
 		GOTO _Exit;
 	END
 	
+
+	PRINT 'VALIDATE'
+
+
 	-- Validate Item Id
 	IF NOT EXISTS (SELECT 1 FROM tblICItem where intItemId = @intItemId)
 	BEGIN
@@ -207,6 +212,8 @@ BEGIN
 	--------------------------------------
 	-- Transaction: Quantity Adjustment -- 
 	--------------------------------------
+
+	PRINT 'PROCESS LOT ADJUST QTY'
 
 	 -- Check if item is Lot-Tracked or not
 	 IF EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intItemId AND strLotTracking ='No')
@@ -423,6 +430,7 @@ END
 -- Create Quantity Change Adjustment then post
 _AdjustQuantity:
 BEGIN	
+	
 	EXEC dbo.uspICInventoryAdjustment_CreatePostQtyChangeFromSAP
 	-- Parameters for filtering:
 	@intItemId = @intItemId
@@ -443,3 +451,21 @@ BEGIN
 END
 
 _Exit:
+
+
+--SELECT 
+--	[@intItemId] = @intItemId
+--	,[@dtmDate] = @dtmQtyChange
+--	,[@intLocationId] = @intLocationId
+--	,[@intSubLocationId] = @intSubLocationId	
+--	,[@intStorageLocationId] = @intStorageLocationId
+--	,[@strLotNumber] = @strLotNumber	
+--	-- Parameters for the new values: 
+--	,[@dblAdjustByQuantity] = @dblAdjustQtyBy
+--	,[@dblNewUnitCost] = @dblCost
+--	,[@intItemUOMId] = @intItemUOMId
+--	-- Parameters used for linking or FK (foreign key) relationships
+--	,[@intSourceId] = @intSourceId
+--	,[@intSourceTransactionTypeId] = 41 --SAP stock integration
+--	,[@intEntityUserSecurityId] = @intEntityUserId
+--	,[@intInventoryAdjustmentId] = @intInventoryAdjustmentId

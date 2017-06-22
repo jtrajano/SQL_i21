@@ -5290,6 +5290,7 @@
     <Build Include="dbo\Stored Procedures\uspARPostPaymentNew.sql" />
     <Build Include="dbo\User Defined Types\PaymentId.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
