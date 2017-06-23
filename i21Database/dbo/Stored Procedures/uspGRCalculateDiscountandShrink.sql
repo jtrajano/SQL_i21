@@ -195,15 +195,15 @@ BEGIN TRY
 					BEGIN
 						SET @dblEndingValue = @dblFrom + @dblIncrementBy
 						IF @dblEndingValue >= @dblNextRowFrom
-						   SET @dblEndingValue = @dblEndingValue - 0.000001
+						   SET @dblEndingValue = @dblEndingValue + 0.000001
 					END
-					ELSE IF @dblFrom < @dblTo - @dblIncrementBy
+					ELSE IF @dblFrom <= @dblTo - @dblIncrementBy
 						IF @dblTo = @dblNextRowFrom
-							SET @dblEndingValue = @dblTo - 0.000001
+							SET @dblEndingValue = @dblTo + 0.000001
 						ELSE
 							SET @dblEndingValue = @dblTo
-					ELSE
-						SET @dblEndingValue = @dblTo
+					--ELSE
+					--	SET @dblEndingValue = @dblTo
 
 					SET @dblNewDiscountAmount = ISNULL(@dblNewDiscountAmount, 0) + @dblDiscountAmount
 					SET @dblNewShrink = ISNULL(@dblNewShrink, 0) + @dblShrink
