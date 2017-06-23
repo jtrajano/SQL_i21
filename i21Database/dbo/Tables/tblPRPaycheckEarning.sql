@@ -15,6 +15,7 @@
 	[intAccountId] INT NOT NULL,
 	[intTaxCalculationType] INT NULL DEFAULT ((0)),
 	[intSort] [int] NULL,
+	[intTimeOffRequestId] [int] NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRPaycheckEarning] PRIMARY KEY ([intPaycheckEarningId]),
 	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
@@ -190,3 +191,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheckEarning',
     @level2type = N'COLUMN',
     @level2name = N'intTaxCalculationType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Time Off Request Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intTimeOffRequestId'
