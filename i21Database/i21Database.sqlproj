@@ -5293,6 +5293,7 @@
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
+    <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
     <Build Include="dbo\Views\vyuETGPSCoordinates.sql" />
   </ItemGroup>
   <ItemGroup>
