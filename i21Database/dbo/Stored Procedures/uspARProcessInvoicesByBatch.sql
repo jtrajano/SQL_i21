@@ -1469,14 +1469,15 @@ BEGIN
 		,[ysnUpdateAvailableDiscountOnly]	= IFI.[ysnUpdateAvailableDiscount]
 		,[intDetailId]						= NULL
 		FROM
-		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId], [ysnInsert] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) ARIILD
 		INNER JOIN
-		(SELECT [intId], [ysnUpdateAvailableDiscount] FROM @InvoicesForInsert) IFI
+		(SELECT [intId], [ysnUpdateAvailableDiscount] FROM @InvoicesForUpdate) IFI
 			ON IFI. [intId] = ARIILD.[intId] 
 	WHERE
 			ISNULL(ARIILD.[ysnHeader], 0) = 1
 			AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
 			AND ISNULL(ARIILD.[intInvoiceId], 0) <> 0
+			AND ISNULL(ARIILD.[ysnInsert], 0) = 0
 
 
 	EXEC	[dbo].[uspARUpdateInvoicesIntegrations]
