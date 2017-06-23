@@ -505,11 +505,11 @@ BEGIN
 			AND intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
---------------------------------------------------------------------
--- Retroactively compute the stocks on Stock-UOM and Stock tables. 
---------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Retroactively compute the stocks on-Hand for the Stock-UOM and Stock tables. 
+-------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICFixStockQuantities
+	EXEC dbo.uspICFixStockOnHand
 END 
 
 --------------------------------------------------------------------
@@ -1455,7 +1455,7 @@ BEGIN
 													)
 									END
 							,dblSalesPrice			= 0
-							,intCurrencyId			= NULL 
+							,intCurrencyId			= companyPref.intDefaultCurrencyId 
 							,dblExchangeRate		= 1
 							,intTransactionId		= Adj.intInventoryAdjustmentId
 							,intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
@@ -1466,7 +1466,7 @@ BEGIN
 							,intStorageLocationId	= ISNULL(AdjDetail.intNewStorageLocationId, AdjDetail.intStorageLocationId)
 							,strActualCostId		= NULL 
 							,intForexRateTypeId		= NULL
-							,dblForexRate			= NULL 
+							,dblForexRate			= 1 
 					FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 
@@ -1505,6 +1505,11 @@ BEGIN
 							LEFT JOIN dbo.tblICItemUOM StockUnit 
 								ON StockUnit.intItemId = AdjDetail.intItemId
 								AND StockUnit.ysnStockUnit = 1
+
+							OUTER APPLY (
+								SELECT	TOP 1 intDefaultCurrencyId 
+								FROM	tblSMCompanyPreference		
+							) companyPref
 
 					WHERE	Adj.strAdjustmentNo = @strTransactionId
 							AND FromStock.strBatchId = @strBatchId
