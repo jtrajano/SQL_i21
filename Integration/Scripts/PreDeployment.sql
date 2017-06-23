@@ -219,6 +219,7 @@
 :r "..\dbo\Stored Procedures\uspARImportAccount.sql"
 :r "..\dbo\Stored Procedures\uspARImportCustomer.sql"
 :r "..\dbo\Stored Procedures\uspARImportCustomerSpecialPrice.sql"
+:r "..\dbo\Stored Procedures\uspARImportPTTaxExemption.sql"
 :r "..\dbo\Stored Procedures\uspARImportSalesperson.sql"
 :r "..\dbo\Stored Procedures\uspARImportMarketZone.sql"
 :r "..\dbo\Stored Procedures\uspARImportServiceCharge.sql"
