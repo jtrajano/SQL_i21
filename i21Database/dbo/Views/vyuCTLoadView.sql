@@ -24,7 +24,7 @@ AS
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
 				,STUFF(
 					(
-						SELECT	', ' + CAST(strContainerNumber AS VARCHAR(10)) [text()]
+						SELECT	', ' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
 						FROM	tblLGLoadContainer 
 						WHERE	intLoadId = LO.intLoadId
 						FOR XML PATH(''), TYPE)
@@ -84,7 +84,7 @@ AS
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
 				,STUFF(
 					(
-						SELECT	', ' + CAST(strContainerNumber AS VARCHAR(10)) [text()]
+						SELECT	', ' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
 						FROM	tblLGLoadContainer 
 						WHERE	intLoadId = LO.intLoadId
 						FOR XML PATH(''), TYPE)
