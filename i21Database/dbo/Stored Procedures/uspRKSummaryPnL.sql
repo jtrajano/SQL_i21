@@ -1,4 +1,5 @@
 ﻿CREATE PROC [dbo].[uspRKSummaryPnL]
+	@dtmFromDate datetime,
     @dtmToDate datetime,
 	@intCommodityId int = null,
 	@ysnExpired bit,
@@ -60,8 +61,7 @@ FROM (
 				,Sell1
 				,intNet1
 				,dblActual
-				,(SELECT dbo.fnRKGetLatestClosingPrice(intFutureMarketId, intFutureMonthId, @dtmToDate)
-				  ) AS dblClosing1
+				,(SELECT dbo.fnRKGetLatestClosingPrice(intFutureMarketId, intFutureMonthId, @dtmToDate)) AS dblClosing1
 				,dblPrice
 				,dblContractSize
 				,intConcurrencyId
@@ -72,7 +72,7 @@ FROM (
 			FROM vyuRKUnrealizedPnL 
 			where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
 			and intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
-			and ysnExpired=@ysnExpired
+			and ysnExpired=@ysnExpired and dtmTradeDate between	@dtmFromDate and  @dtmToDate
 
 			union
 
@@ -109,8 +109,8 @@ FROM (
 WHERE t.intCommodityId=case when isnull(@intCommodityId,0)=0 then t.intCommodityId else @intCommodityId end 
 	AND t.intFutureMarketId=case when isnull(@intFutureMarketId,0)=0 then t.intFutureMarketId else @intFutureMarketId end 
 	and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
-	AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end  )
-	and t.ysnExpired=@ysnExpired			
+	AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end AND dtmTradeDate BETWEEN	@dtmFromDate AND @dtmToDate )
+	and t.ysnExpired=@ysnExpired and dtmTradeDate <= @dtmToDate		
 			) t
 		) u
 	GROUP BY intFutureMonthId
@@ -186,7 +186,7 @@ ELSE
 				,NetPnL,ysnExpired
 			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
 			and intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
-
+			and dtmTradeDate between	@dtmFromDate and  @dtmToDate
 			union
 
 			SELECT distinct GrossPnL
@@ -222,9 +222,8 @@ ELSE
 WHERE t.intCommodityId=case when isnull(@intCommodityId,0)=0 then t.intCommodityId else @intCommodityId end 
 	AND t.intFutureMarketId=case when isnull(@intFutureMarketId,0)=0 then t.intFutureMarketId else @intFutureMarketId end 
 	and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
-	AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end  )
-			) t
-		) u
+	AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end  AND dtmTradeDate BETWEEN	@dtmFromDate AND @dtmToDate)
+	and dtmTradeDate <= @dtmToDate	) t ) u
 	GROUP BY intFutureMonthId
 		,intFutureMarketId
 		,strFutMarketName
