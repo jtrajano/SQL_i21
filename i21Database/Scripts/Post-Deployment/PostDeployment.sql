@@ -359,6 +359,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
 :r .\EM\040_UpdateEmailDistribution.sql
 :r .\EM\Data_Fix_From_1710_to_1720_Currency_Cus_Ven.sql
+:r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
+
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

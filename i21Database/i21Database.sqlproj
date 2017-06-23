@@ -5293,6 +5293,7 @@
     <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
     <Build Include="dbo\Views\vyuCTQualityApprovedRejected.sql" />
+    <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
