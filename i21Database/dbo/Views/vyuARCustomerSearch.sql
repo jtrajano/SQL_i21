@@ -49,6 +49,8 @@ SELECT
 ,strTerm 
 ,Cus.strStatementFormat
 ,Cus.strAccountNumber
+,strShipViaName = ShipViaEnt.strName
+,strFreightTerm = FT.strFreightTerm
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 LEFT JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
@@ -60,3 +62,6 @@ LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.[intEntityId]
 LEFT JOIN tblEMEntity T on S.[intEntityId] = T.intEntityId
 LEFT JOIN tblSMTaxGroup Tax ON Loc.intTaxGroupId = Tax.intTaxGroupId
 LEFT JOIN tblSMTerm Term on Cus.intTermsId = Term.intTermID
+
+LEFT JOIN tblEMEntity ShipViaEnt ON Loc.intShipViaId = ShipViaEnt.intEntityId
+LEFT JOIN tblSMFreightTerms FT ON Loc.intFreightTermId = FT.intFreightTermId
