@@ -5304,6 +5304,7 @@
     <Build Include="dbo\Stored Procedures\uspCRMCreateLostRevenue.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemPricingPreview.sql" />
     <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
+    <Build Include="dbo\Views\vyuETGPSCoordinates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
