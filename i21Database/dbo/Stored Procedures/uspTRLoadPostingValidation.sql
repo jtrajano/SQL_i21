@@ -262,13 +262,23 @@ BEGIN TRY
 			AND BlendIngredient.intIngredientItemId = @intItemId
 		GROUP BY BlendIngredient.intIngredientItemId
 
+		UNION ALL 
+
+		SELECT Detail.intItemId
+			, Detail.dblUnits
+		FROM tblTRLoadDistributionDetail Detail
+		LEFT JOIN tblTRLoadDistributionHeader Header ON Header.intLoadDistributionHeaderId = Detail.intLoadDistributionHeaderId
+		WHERE Detail.intLoadDistributionDetailId NOT IN (SELECT DISTINCT intLoadDistributionDetailId FROM vyuTRGetLoadBlendIngredient)
+			AND Header.intLoadHeaderId = @intLoadHeaderId
+			AND Detail.intItemId = @intItemId
+
 		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
 		BEGIN
 			SELECT @dblDistributedQuantity = SUM(dblQuantity) FROM #tmpBlendDistributionItems
 
 			IF (@dblReceivedQuantity != @dblDistributedQuantity)
 			BEGIN
-				SET @strresult = 'Raw Materials ' + @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match required quantity ' + LTRIM(@dblDistributedQuantity) + ' for blending'
+				SET @strresult = 'Raw Materials ' + @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match required quantity ' + LTRIM(@dblDistributedQuantity) + '.'
 				RAISERROR(@strresult, 16, 1)
 			END
 		END
