@@ -1854,6 +1854,12 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
+        if (!Ext.isNumeric(unitMeasureId))
+            return;
+
+        if (!Ext.isNumeric(stockUnitMeasureId))
+            return;
+
         iRely.Msg.showWait('Converting units...');
         ic.utils.ajax({
             url: '../Inventory/api/Item/GetUnitConversion',
