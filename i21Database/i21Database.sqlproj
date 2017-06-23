@@ -5303,6 +5303,7 @@
     <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMCreateLostRevenue.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemPricingPreview.sql" />
+    <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
