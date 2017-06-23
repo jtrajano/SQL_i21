@@ -75,8 +75,24 @@ BEGIN TRY
 		,@intLotItemId INT
 		,@intPMCategoryId INT
 		,@intPMStageLocationId INT
+		,@intNoOfDecimalPlacesOnConsumption INT
+		,@ysnConsumptionByRatio BIT
 
-	Declare @tblMFWorkOrderInputLot table (strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS)
+	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
+		,@ysnConsumptionByRatio = ysnConsumptionByRatio
+	FROM tblMFCompanyPreference
+
+	IF @intNoOfDecimalPlacesOnConsumption IS NULL
+	BEGIN
+		SELECT @intNoOfDecimalPlacesOnConsumption = 4
+	END
+
+	IF @ysnConsumptionByRatio IS NULL
+	BEGIN
+		SELECT @ysnConsumptionByRatio = 0
+	END
+
+	DECLARE @tblMFWorkOrderInputLot TABLE (strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS)
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
@@ -99,12 +115,20 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	INSERT INTO @tblMFWorkOrderInputLot(strLotNumber)
-	Select L.strLotNumber 
-	from dbo.tblICLot L 
-	JOIN dbo.tblMFWorkOrderInputLot WI on WI.intLotId=L.intLotId and ysnConsumptionReversed =0
-	Where WI.intWorkOrderId=@intWorkOrderId
+	INSERT INTO @tblMFWorkOrderInputLot (strLotNumber)
+	SELECT L.strLotNumber
+	FROM dbo.tblICLot L
+	JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intLotId = L.intLotId
+		AND ysnConsumptionReversed = 0
+	WHERE WI.intWorkOrderId = @intWorkOrderId
 
+	DECLARE @tblMFWorkOrderInputItem TABLE (
+		intItemId INT
+		,dblQuantity NUMERIC(18, 6)
+		,intItemUOMId INT
+		,dblRatio NUMERIC(18, 6)
+		,intMainItemId INT
+		)
 	DECLARE @tblMFMachine TABLE (intMachineId INT)
 
 	INSERT INTO @tblMFMachine (intMachineId)
@@ -199,6 +223,7 @@ BEGIN TRY
 		,intConsumptionMethodId INT
 		,strLotTracking NVARCHAR(50)
 		,dblLowerToleranceReqQty NUMERIC(18, 6)
+		,intMainItemId INT
 		)
 	DECLARE @tblSubstituteItem TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -258,6 +283,7 @@ BEGIN TRY
 		,intConsumptionMethodId
 		,strLotTracking
 		,dblLowerToleranceReqQty
+		,intMainItemId
 		)
 	SELECT ri.intItemId
 		,CASE 
@@ -346,6 +372,7 @@ BEGIN TRY
 						END
 					)
 			END
+		,ri.intItemId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -473,6 +500,7 @@ BEGIN TRY
 						)
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
+		,ri.intItemId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -519,6 +547,7 @@ BEGIN TRY
 			) - WC.dblQuantity / rs.dblSubstituteRatio > 0
 
 	IF @strPickPreference = 'Substitute Item'
+		AND @ysnConsumptionByRatio = 0
 	BEGIN
 		INSERT INTO @tblSubstituteItem (
 			intItemId
@@ -555,6 +584,142 @@ BEGIN TRY
 					ELSE ri.ysnPartialFillConsumption
 					END
 				)
+	END
+
+	IF @ysnConsumptionByRatio = 1
+	BEGIN
+		DECLARE @tblICItem TABLE (
+			intItemId INT
+			,intMainItemId INT
+			)
+
+		INSERT INTO @tblICItem (
+			intItemId
+			,intMainItemId
+			)
+		SELECT ri.intItemId
+			,ri.intItemId
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+			AND r.intWorkOrderId = ri.intWorkOrderId
+		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
+		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intRecipeItemTypeId = 1
+			AND ri.intConsumptionMethodId IN (
+				1
+				,2
+				)
+		
+		UNION
+		
+		SELECT RSI.intSubstituteItemId
+			,RSI.intItemId
+		FROM dbo.tblMFWorkOrderRecipeItem RI
+		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
+			AND RI.intWorkOrderId = RSI.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = RI.intRecipeId
+			AND r.intWorkOrderId = RI.intWorkOrderId
+		JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
+		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
+		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = RSI.intItemUOMId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemId = RSI.intSubstituteItemId
+			AND IU.intUnitMeasureId = IU1.intUnitMeasureId
+		WHERE RI.intWorkOrderId = @intWorkOrderId
+			AND (
+				(
+					RI.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+						AND RI.dtmValidTo
+					)
+				OR (
+					RI.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+						AND DATEPART(dy, RI.dtmValidTo)
+					)
+				)
+			AND RI.intRecipeItemTypeId = 1
+			AND RI.intConsumptionMethodId IN (
+				1
+				,2
+				)
+
+		INSERT INTO @tblMFWorkOrderInputItem
+		SELECT DISTINCT I.intItemId
+			,SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId)
+			,WI.intItemUOMId
+			,(SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intMainItemId)) * 100
+			,I.intMainItemId
+		FROM @tblICItem I
+		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+			AND WI.intWorkOrderId = @intWorkOrderId
+			AND WI.ysnConsumptionReversed = 0
+
+		DECLARE @tblItem1 TABLE (intItemId INT)
+
+		INSERT INTO @tblItem1 (intItemId)
+		SELECT WI.intItemId
+		FROM @tblMFWorkOrderInputItem WI
+		JOIN @tblItem I ON I.intItemId = WI.intMainItemId
+		WHERE NOT EXISTS (
+				SELECT *
+				FROM @tblItem I2
+				WHERE I2.intItemId = WI.intItemId
+				)
+
+		INSERT INTO @tblItem (
+			intItemId
+			,dblReqQty
+			,intItemUOMId
+			,intStorageLocationId
+			,intConsumptionMethodId
+			,strLotTracking
+			,dblLowerToleranceReqQty
+			,intMainItemId
+			)
+		SELECT WI.intItemId
+			,Round(I.dblReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
+			,WI.intItemUOMId
+			,I.intStorageLocationId
+			,I.intConsumptionMethodId
+			,I.strLotTracking
+			,Round(I.dblLowerToleranceReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
+			,I.intMainItemId
+		FROM @tblMFWorkOrderInputItem WI
+		JOIN @tblItem I ON I.intItemId = WI.intMainItemId
+		WHERE NOT EXISTS (
+				SELECT *
+				FROM @tblItem I2
+				WHERE I2.intItemId = WI.intItemId
+				)
+
+		UPDATE @tblItem
+		SET dblReqQty = Round(dblReqQty * IsNULL(dblRatio,0) / 100, @intNoOfDecimalPlacesOnConsumption)
+			,dblLowerToleranceReqQty = Round(dblLowerToleranceReqQty * IsNULL(dblRatio,0) / 100, @intNoOfDecimalPlacesOnConsumption)
+		FROM @tblItem I
+		JOIN @tblMFWorkOrderInputItem WI ON WI.intItemId = I.intItemId
+		WHERE NOT EXISTS (
+				SELECT *
+				FROM @tblItem1 I2
+				WHERE I2.intItemId = WI.intItemId
+				)
+
+		Delete I
+		from @tblItem I JOIN @tblMFWorkOrderInputItem WI on I.intItemId=WI.intMainItemId Where dblRatio=100 and WI.intItemId<>WI.intMainItemId 
 	END
 
 	SELECT @intItemRecordId = Min(intItemRecordId)
@@ -632,6 +797,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			IF @strPickPreference = 'Substitute Item'
+				AND @ysnConsumptionByRatio = 0
 			BEGIN
 				INSERT INTO @tblLot (
 					strLotNumber
@@ -749,131 +915,10 @@ BEGIN TRY
 							)
 						)
 					AND L.dblQty > 0
-					AND L.strLotNumber IN (Select WI.strLotNumber 
-										from @tblMFWorkOrderInputLot WI)
-				ORDER BY CASE 
-						WHEN @ysnPickByLotCode = 0
-							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
-						ELSE CONVERT(INT, Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
-						END ASC
-				INSERT INTO @tblLot (
-					strLotNumber
-					,intLotId
-					,intItemId
-					,dblQty
-					,dblIssuedQuantity
-					,dblWeightPerUnit
-					,intItemUOMId
-					,intItemIssuedUOMId
-					,ysnSubstituteItem
-					,dblSubstituteRatio
-					,dblMaxSubstituteRatio
-					,intStorageLocationId
-					,intSubLocationId
-					)
-				SELECT L.strLotNumber
-					,L.intLotId
-					,L.intItemId
-					,(
-						CASE 
-							WHEN intWeightUOMId IS NOT NULL
-								THEN dblWeight
-							ELSE dblQty
-							END
-						) - ISNULL((
-							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
-							FROM tblICStockReservation SR
-							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-							WHERE SR.intLotId = L.intLotId
-								AND SR.intTransactionId <> @intWorkOrderId
-								AND SR.strTransactionId <> @strWorkOrderNo
-								AND ISNULL(ysnPosted, 0) = 0
-							), 0)
-					,(
-						CASE 
-							WHEN intWeightUOMId IS NOT NULL
-								THEN L.dblQty
-							ELSE dblQty / (
-									CASE 
-										WHEN L.dblWeightPerQty = 0
-											OR L.dblWeightPerQty IS NULL
-											THEN 1
-										ELSE L.dblWeightPerQty
-										END
-									)
-							END
-						) - ISNULL((
-							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
-							FROM tblICStockReservation SR
-							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-							WHERE SR.intLotId = L.intLotId
-								AND SR.intTransactionId <> @intWorkOrderId
-								AND SR.strTransactionId <> @strWorkOrderNo
-								AND ISNULL(ysnPosted, 0) = 0
-							), 0) / (
-						CASE 
-							WHEN L.dblWeightPerQty = 0
-								OR L.dblWeightPerQty IS NULL
-								THEN 1
-							ELSE L.dblWeightPerQty
-							END
+					AND L.strLotNumber IN (
+						SELECT WI.strLotNumber
+						FROM @tblMFWorkOrderInputLot WI
 						)
-					,CASE 
-						WHEN L.dblWeightPerQty IS NULL
-							OR L.dblWeightPerQty = 0
-							THEN 1
-						ELSE L.dblWeightPerQty
-						END
-					,CASE 
-						WHEN L.intWeightUOMId IS NULL
-							OR L.intWeightUOMId = 0
-							THEN L.intItemUOMId
-						ELSE L.intWeightUOMId
-						END
-					,L.intItemUOMId
-					,1 AS ysnSubstituteItem
-					,SI.dblSubstituteRatio
-					,SI.dblMaxSubstituteRatio
-					,L.intStorageLocationId
-					,L.intSubLocationId
-				FROM dbo.tblICLot L
-				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
-					AND R.strInternalCode = 'STOCK'
-				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
-				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
-					AND BS.strPrimaryStatus = 'Active'
-				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-				WHERE SI.intItemId = @intItemId
-					AND L.intLocationId = @intLocationId
-					AND LS.strPrimaryStatus = 'Active'
-					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (
-						L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						OR L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						)
-					AND L.dblQty > 0
-					AND L.strLotNumber Not IN (Select WI.strLotNumber 
-										from @tblMFWorkOrderInputLot WI)
 				ORDER BY CASE 
 						WHEN @ysnPickByLotCode = 0
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
@@ -992,13 +1037,145 @@ BEGIN TRY
 						)
 					)
 				AND L.dblQty > 0
-				AND L.strLotNumber IN (Select WI.strLotNumber 
-										from @tblMFWorkOrderInputLot WI)
+				AND L.strLotNumber IN (
+					SELECT WI.strLotNumber
+					FROM @tblMFWorkOrderInputLot WI
+					)
 			ORDER BY CASE 
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 					ELSE CONVERT(INT, Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
 					END ASC
+
+			IF @strPickPreference = 'Substitute Item'
+				AND @ysnConsumptionByRatio = 0
+			BEGIN
+				INSERT INTO @tblLot (
+					strLotNumber
+					,intLotId
+					,intItemId
+					,dblQty
+					,dblIssuedQuantity
+					,dblWeightPerUnit
+					,intItemUOMId
+					,intItemIssuedUOMId
+					,ysnSubstituteItem
+					,dblSubstituteRatio
+					,dblMaxSubstituteRatio
+					,intStorageLocationId
+					,intSubLocationId
+					)
+				SELECT L.strLotNumber
+					,L.intLotId
+					,L.intItemId
+					,(
+						CASE 
+							WHEN intWeightUOMId IS NOT NULL
+								THEN dblWeight
+							ELSE dblQty
+							END
+						) - ISNULL((
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+							FROM tblICStockReservation SR
+							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+							WHERE SR.intLotId = L.intLotId
+								AND SR.intTransactionId <> @intWorkOrderId
+								AND SR.strTransactionId <> @strWorkOrderNo
+								AND ISNULL(ysnPosted, 0) = 0
+							), 0)
+					,(
+						CASE 
+							WHEN intWeightUOMId IS NOT NULL
+								THEN L.dblQty
+							ELSE dblQty / (
+									CASE 
+										WHEN L.dblWeightPerQty = 0
+											OR L.dblWeightPerQty IS NULL
+											THEN 1
+										ELSE L.dblWeightPerQty
+										END
+									)
+							END
+						) - ISNULL((
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+							FROM tblICStockReservation SR
+							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+							WHERE SR.intLotId = L.intLotId
+								AND SR.intTransactionId <> @intWorkOrderId
+								AND SR.strTransactionId <> @strWorkOrderNo
+								AND ISNULL(ysnPosted, 0) = 0
+							), 0) / (
+						CASE 
+							WHEN L.dblWeightPerQty = 0
+								OR L.dblWeightPerQty IS NULL
+								THEN 1
+							ELSE L.dblWeightPerQty
+							END
+						)
+					,CASE 
+						WHEN L.dblWeightPerQty IS NULL
+							OR L.dblWeightPerQty = 0
+							THEN 1
+						ELSE L.dblWeightPerQty
+						END
+					,CASE 
+						WHEN L.intWeightUOMId IS NULL
+							OR L.intWeightUOMId = 0
+							THEN L.intItemUOMId
+						ELSE L.intWeightUOMId
+						END
+					,L.intItemUOMId
+					,1 AS ysnSubstituteItem
+					,SI.dblSubstituteRatio
+					,SI.dblMaxSubstituteRatio
+					,L.intStorageLocationId
+					,L.intSubLocationId
+				FROM dbo.tblICLot L
+				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+					AND SL.ysnAllowConsume = 1
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+					AND R.strInternalCode = 'STOCK'
+				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
+				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+				WHERE SI.intItemId = @intItemId
+					AND L.intLocationId = @intLocationId
+					AND LS.strPrimaryStatus = 'Active'
+					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND (
+						L.intStorageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+								WHEN @intConsumptionMethodId = 2
+									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+								ELSE L.intStorageLocationId
+								END
+							)
+						OR L.intStorageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+								WHEN @intConsumptionMethodId = 2
+									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+								ELSE L.intStorageLocationId
+								END
+							)
+						)
+					AND L.dblQty > 0
+					AND L.strLotNumber NOT IN (
+						SELECT WI.strLotNumber
+						FROM @tblMFWorkOrderInputLot WI
+						)
+				ORDER BY CASE 
+						WHEN @ysnPickByLotCode = 0
+							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+						ELSE CONVERT(INT, Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+						END ASC
+			END
 
 			INSERT INTO @tblLot (
 				strLotNumber
@@ -1111,8 +1288,10 @@ BEGIN TRY
 						)
 					)
 				AND L.dblQty > 0
-				AND L.strLotNumber Not IN (Select WI.strLotNumber 
-										from @tblMFWorkOrderInputLot WI)
+				AND L.strLotNumber NOT IN (
+					SELECT WI.strLotNumber
+					FROM @tblMFWorkOrderInputLot WI
+					)
 			ORDER BY CASE 
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
@@ -1638,6 +1817,7 @@ BEGIN TRY
 			WHERE intLotRecordId = @intLotRecordId
 
 			IF @ysnSubstituteItem = 1
+				AND @ysnConsumptionByRatio = 0
 			BEGIN
 				SELECT @dblReqQty = @dblReqQty * (@dblMaxSubstituteRatio / 100) * @dblSubstituteRatio
 
@@ -1846,6 +2026,7 @@ BEGIN TRY
 
 				IF @ysnSubstituteItem = 1
 					AND @dblMaxSubstituteRatio <> 100
+					AND @ysnConsumptionByRatio = 0
 				BEGIN
 					SELECT @dblReqQty = (@dblReqQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio) * (100 - @dblMaxSubstituteRatio) / 100
 
@@ -1973,6 +2154,7 @@ BEGIN TRY
 				WHERE intLotRecordId = @intLotRecordId
 
 				IF @ysnSubstituteItem = 1
+					AND @ysnConsumptionByRatio = 0
 				BEGIN
 					SELECT @dblReqQty = (@dblReqQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio) - (@dblQty / @dblSubstituteRatio * 100 / @dblMaxSubstituteRatio)
 
@@ -2042,10 +2224,14 @@ BEGIN TRY
 					FROM tblMFWorkOrderConsumedLot WC
 					WHERE (
 							WC.intItemId = ri.intItemId
-							OR WC.intItemId in (Select SI.intSubstituteItemId From dbo.tblMFWorkOrderRecipeSubstituteItem SI Where SI.intRecipeItemId = ri.intRecipeItemId
-				AND SI.intWorkOrderId = ri.intWorkOrderId
-				AND SI.intRecipeId = ri.intRecipeId
-							))
+							OR WC.intItemId IN (
+								SELECT SI.intSubstituteItemId
+								FROM dbo.tblMFWorkOrderRecipeSubstituteItem SI
+								WHERE SI.intRecipeItemId = ri.intRecipeItemId
+									AND SI.intWorkOrderId = ri.intWorkOrderId
+									AND SI.intRecipeId = ri.intRecipeId
+								)
+							)
 						AND WC.intWorkOrderId = @intWorkOrderId
 						AND IsNULL(WC.intBatchId, @intBatchId) = @intBatchId
 					)
@@ -2073,10 +2259,14 @@ BEGIN TRY
 				FROM tblMFWorkOrderConsumedLot WC
 				WHERE (
 						WC.intItemId = ri.intItemId
-						OR WC.intItemId in (Select SI.intSubstituteItemId From dbo.tblMFWorkOrderRecipeSubstituteItem SI Where SI.intRecipeItemId = ri.intRecipeItemId
-				AND SI.intWorkOrderId = ri.intWorkOrderId
-				AND SI.intRecipeId = ri.intRecipeId
-						))
+						OR WC.intItemId IN (
+							SELECT SI.intSubstituteItemId
+							FROM dbo.tblMFWorkOrderRecipeSubstituteItem SI
+							WHERE SI.intRecipeItemId = ri.intRecipeItemId
+								AND SI.intWorkOrderId = ri.intWorkOrderId
+								AND SI.intRecipeId = ri.intRecipeId
+							)
+						)
 					AND WC.intWorkOrderId = @intWorkOrderId
 					AND IsNULL(WC.intBatchId, @intBatchId) = @intBatchId
 				)

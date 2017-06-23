@@ -862,7 +862,7 @@ BEGIN TRY
 		END
 	END
 
-	IF @dblMinQtyCanBeProduced > - 1
+	IF @dblMinQtyCanBeProduced > - 1 and @ysnPickRemainingQty=1
 	BEGIN
 		SELECT @intItemUOMId = intItemUOMId
 		FROM tblMFWorkOrder

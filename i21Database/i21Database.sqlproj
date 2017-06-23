@@ -5287,6 +5287,8 @@
     <Build Include="dbo\Stored Procedures\uspPATImportCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
     <Build Include="dbo\Views\vyuARInvoiceDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\vyuMFGetSSCCDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCopyRecipeByWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
