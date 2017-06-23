@@ -19,7 +19,7 @@ BEGIN TRY
 		,@intCycleCountSessionId INT
 		,@ysnIncludeOutputItem BIT
 		,@strExcludeItemType NVARCHAR(MAX)
-		,@strWorkOrderNo NVARCHAR(MAX)
+		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmCurrentDate DATETIME
 		,@dtmCurrentDateTime DATETIME
 		,@intDayOfYear INT
@@ -27,6 +27,8 @@ BEGIN TRY
 		,@intProductionStagingId INT
 		,@intProductionStageLocationId INT
 		,@intPMStageLocationId INT
+		,@intNoOfDecimalPlacesOnConsumption INT
+		,@ysnConsumptionByRatio BIT
 
 	SELECT @TRANCOUNT = @@TRANCOUNT
 
@@ -38,6 +40,20 @@ BEGIN TRY
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
+
+	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
+		,@ysnConsumptionByRatio = ysnConsumptionByRatio
+	FROM tblMFCompanyPreference
+
+	IF @intNoOfDecimalPlacesOnConsumption IS NULL
+	BEGIN
+		SELECT @intNoOfDecimalPlacesOnConsumption = 4
+	END
+
+	IF @ysnConsumptionByRatio IS NULL
+	BEGIN
+		SELECT @ysnConsumptionByRatio = 0
+	END
 
 	SELECT @intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
@@ -117,6 +133,7 @@ BEGIN TRY
 			)
 		,@intItemId = intItemId
 		,@intManufacturingProcessId = intManufacturingProcessId
+		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder W
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -501,7 +518,7 @@ BEGIN TRY
 			,1 AS ysnMainItem
 			,ri.intItemUOMId
 			,I.intCategoryId
-			,NULL
+			,ri.intItemId
 			,ri.intRecipeItemId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
@@ -732,7 +749,7 @@ BEGIN TRY
 	FROM @tblICFinalItem I
 	JOIN tblICLot L ON L.intItemId = I.intItemId
 		AND L.intLotStatusId = 1
-		AND ISNULL(L.dtmExpiryDate,@dtmCurrentDate) >= @dtmCurrentDate
+		AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 		AND L.dblQty > 0
 		AND (
 			L.intStorageLocationId = CASE 
@@ -749,151 +766,243 @@ BEGIN TRY
 	GROUP BY I.intItemId
 		,I.intItemUOMId
 
+	DECLARE @tblMFReservation TABLE (
+		intItemId INT
+		,dblQty NUMERIC(18, 6)
+		,intItemUOMId INT
+		)
+
+	INSERT INTO @tblMFReservation
+	SELECT I.intItemId
+		,IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, I.intItemUOMId, ISNULL(SR.dblQty, 0))), 0)
+		,I.intItemUOMId
+	FROM @tblICFinalItem I
+	LEFT JOIN tblICStockReservation SR ON SR.intItemId = I.intItemId
+		AND SR.intTransactionId <> @intWorkOrderId
+		AND SR.strTransactionId <> @strWorkOrderNo
+		AND ISNULL(ysnPosted, 0) = 0
+	GROUP BY I.intItemId
+		,I.intItemUOMId
+
+	UPDATE L
+	SET dblQty = L.dblQty - IsNULL(R.dblQty, 0)
+	FROM @tblMFLot L
+	LEFT JOIN @tblMFReservation R ON L.intItemId = R.intItemId
+
 	DECLARE @tblMFWorkOrderInputLot TABLE (
 		intItemId INT
 		,dblQuantity NUMERIC(18, 6)
 		,intItemUOMId INT
+		,dblRatio NUMERIC(18, 6)
 		)
 
-	INSERT INTO @tblMFWorkOrderInputLot
-	SELECT I.intItemId
-		,SUM(IsNULL(WI.dblQuantity, 0))
-		,WI.intItemUOMId
-	FROM @tblICFinalItem I
-	JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
-		AND WI.intWorkOrderId = @intWorkOrderId
-		AND WI.ysnConsumptionReversed = 0
-	GROUP BY I.intItemId
-		,WI.intItemUOMId
-
-	INSERT INTO @tblMFQtyInProductionStagingLocation (
-		intItemId
-		,dblQtyInProductionStagingLocation ---System Qty
-		,dblOpeningQty
-		,dblQtyInProdStagingLocation
-		,intCategoryId
-		,dblRequiredQty
-		)
-	SELECT I.intItemId
-		,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(I.dblRequiredQty, 0)
-		,CASE 
-			WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
-				THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
-			ELSE 0
-			END
-		,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
-		,I.intCategoryId
-		,IsNULL(I.dblRequiredQty, 0)
-	FROM @tblICFinalItem I
-	LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
-	LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
-	WHERE I.intItemId IN (
-			SELECT Max(intItemId)
-			FROM @tblICFinalItem
-			GROUP BY intRecipeItemId
-			HAVING count(intRecipeItemId) = 1
-			)
-
-	DECLARE @dblRequiredQty DECIMAL(38, 20)
-		,@dblQty DECIMAL(38, 20)
-		,@intPrevRecipeItemId INT
-		,@intRecipeItemId INT
-		,@intItemId1 INT
-
-	SELECT @intPrevRecipeItemId = 0
-
-	SELECT @intItemId1 = MIN(intItemId)
-	FROM @tblICFinalItem I
-	WHERE I.intItemId NOT IN (
-			SELECT Max(intItemId)
-			FROM @tblICFinalItem
-			GROUP BY intRecipeItemId
-			HAVING count(intRecipeItemId) = 1
-			)
-
-	WHILE @intItemId1 IS NOT NULL
+	IF @ysnConsumptionByRatio = 0
 	BEGIN
-		SELECT @dblQty = 0
+		INSERT INTO @tblMFWorkOrderInputLot
+		SELECT I.intItemId
+			,SUM(IsNULL(WI.dblQuantity, 0))
+			,WI.intItemUOMId
+			,100
+		FROM @tblICFinalItem I
+		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+			AND WI.intWorkOrderId = @intWorkOrderId
+			AND WI.ysnConsumptionReversed = 0
+		GROUP BY I.intItemId
+			,WI.intItemUOMId
 
-		SELECT @dblQty = IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
-			,@dblRequiredQty = CASE 
-				WHEN @intPrevRecipeItemId <> intRecipeItemId
-					THEN IsNULL(I.dblRequiredQty, 0)
-				ELSE @dblRequiredQty
+		INSERT INTO @tblMFQtyInProductionStagingLocation (
+			intItemId
+			,dblQtyInProductionStagingLocation ---System Qty
+			,dblOpeningQty
+			,dblQtyInProdStagingLocation
+			,intCategoryId
+			,dblRequiredQty
+			)
+		SELECT I.intItemId
+			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(I.dblRequiredQty, 0)
+			,CASE 
+				WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
+					THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+				ELSE 0
 				END
-			,@intRecipeItemId = intRecipeItemId
+			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
+			,I.intCategoryId
+			,IsNULL(I.dblRequiredQty, 0)
 		FROM @tblICFinalItem I
 		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
-		WHERE I.intItemId = @intItemId1
-
-		IF @dblQty >= @dblRequiredQty
-		BEGIN
-			INSERT INTO @tblMFQtyInProductionStagingLocation (
-				intItemId
-				,dblQtyInProductionStagingLocation ---System Qty
-				,dblOpeningQty
-				,dblQtyInProdStagingLocation
-				,intCategoryId
-				,dblRequiredQty
-				)
-			SELECT I.intItemId
-				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - @dblRequiredQty
-				,CASE 
-					WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
-						THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
-					ELSE 0
-					END
-				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
-				,I.intCategoryId
-				,@dblRequiredQty
-			FROM @tblICFinalItem I
-			LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
-			LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
-			WHERE I.intItemId = @intItemId1
-
-			SELECT @dblRequiredQty = 0
-		END
-		ELSE
-		BEGIN
-			INSERT INTO @tblMFQtyInProductionStagingLocation (
-				intItemId
-				,dblQtyInProductionStagingLocation ---System Qty
-				,dblOpeningQty
-				,dblQtyInProdStagingLocation
-				,intCategoryId
-				,dblRequiredQty
-				)
-			SELECT I.intItemId
-				,0
-				,CASE 
-					WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
-						THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
-					ELSE 0
-					END
-				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
-				,I.intCategoryId
-				,@dblQty
-			FROM @tblICFinalItem I
-			LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
-			LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
-			WHERE I.intItemId = @intItemId1
-
-			SELECT @dblRequiredQty = @dblRequiredQty - @dblQty
-		END
-
-		SELECT @intPrevRecipeItemId = @intRecipeItemId
-
-		SELECT @intItemId1 = MIN(intItemId)
+		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblMFWorkOrderInputLot
+		SELECT DISTINCT I.intItemId
+			,SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId)
+			,WI.intItemUOMId
+			,(SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intMainItemId)) * 100
 		FROM @tblICFinalItem I
-		WHERE I.intItemId NOT IN (
-				SELECT Max(intItemId)
-				FROM @tblICFinalItem
-				GROUP BY intRecipeItemId
-				HAVING count(intRecipeItemId) = 1
-				)
-			AND I.intItemId > @intItemId1
+		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+			AND WI.intWorkOrderId = @intWorkOrderId
+			AND WI.ysnConsumptionReversed = 0
+
+		INSERT INTO @tblMFQtyInProductionStagingLocation (
+			intItemId
+			,dblQtyInProductionStagingLocation ---System Qty
+			,dblOpeningQty
+			,dblQtyInProdStagingLocation
+			,intCategoryId
+			,dblRequiredQty
+			)
+		SELECT I.intItemId
+			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - Round((IsNULL(I.dblRequiredQty, 0) * IsNULL(dblRatio, 100) / 100), @intNoOfDecimalPlacesOnConsumption)
+			,CASE 
+				WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
+					THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+				ELSE 0
+				END
+			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
+			,I.intCategoryId
+			,Round(IsNULL(I.dblRequiredQty, 0) * IsNULL(dblRatio, 100) / 100, @intNoOfDecimalPlacesOnConsumption)
+		FROM @tblICFinalItem I
+		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
 	END
 
+	--WHERE I.intItemId IN (
+	--		SELECT Max(intItemId)
+	--		FROM @tblICFinalItem
+	--		GROUP BY intRecipeItemId
+	--		HAVING count(intRecipeItemId) = 1
+	--		)
+	----DECLARE @dblRequiredQty DECIMAL(38, 20)
+	----	,@dblQty DECIMAL(38, 20)
+	----	,@intPrevRecipeItemId INT
+	----	,@intRecipeItemId INT
+	----	,@intItemId1 INT
+	----SELECT @intPrevRecipeItemId = 0
+	----SELECT @intItemId1 = MIN(intItemId)
+	----FROM @tblICFinalItem I
+	----WHERE I.intItemId NOT IN (
+	----		SELECT Max(intItemId)
+	----		FROM @tblICFinalItem
+	----		GROUP BY intRecipeItemId
+	----		HAVING count(intRecipeItemId) = 1
+	----		)
+	----WHILE @intItemId1 IS NOT NULL
+	----BEGIN
+	----	SELECT @dblQty = 0
+	----	SELECT @dblQty = IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+	----		,@dblRequiredQty = CASE 
+	----			WHEN @intPrevRecipeItemId <> intRecipeItemId
+	----				THEN IsNULL(I.dblRequiredQty, 0)
+	----			ELSE @dblRequiredQty
+	----			END
+	----		,@intRecipeItemId = intRecipeItemId
+	----	FROM @tblICFinalItem I
+	----	LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	----	WHERE I.intItemId = @intItemId1
+	----	IF @dblQty >= @dblRequiredQty
+	----	BEGIN
+	----		INSERT INTO @tblMFQtyInProductionStagingLocation (
+	----			intItemId
+	----			,dblQtyInProductionStagingLocation ---System Qty
+	----			,dblOpeningQty
+	----			,dblQtyInProdStagingLocation
+	----			,intCategoryId
+	----			,dblRequiredQty
+	----			)
+	----		SELECT I.intItemId
+	----			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - @dblRequiredQty
+	----			,CASE 
+	----				WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
+	----					THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+	----				ELSE 0
+	----				END
+	----			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
+	----			,I.intCategoryId
+	----			,@dblRequiredQty
+	----		FROM @tblICFinalItem I
+	----		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+	----		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	----		WHERE I.intItemId = @intItemId1
+	----		SELECT @dblRequiredQty = 0
+	----	END
+	----	ELSE
+	----	BEGIN
+	----		IF NOT EXISTS (
+	----				SELECT *
+	----				FROM @tblICFinalItem I
+	----				WHERE I.intItemId NOT IN (
+	----						SELECT Max(intItemId)
+	----						FROM @tblICFinalItem
+	----						GROUP BY intRecipeItemId
+	----						HAVING count(intRecipeItemId) = 1
+	----						)
+	----					AND I.intItemId > @intItemId1
+	----				)
+	----			AND @dblRequiredQty - @dblQty > 0
+	----		BEGIN
+	----			INSERT INTO @tblMFQtyInProductionStagingLocation (
+	----				intItemId
+	----				,dblQtyInProductionStagingLocation ---System Qty
+	----				,dblOpeningQty
+	----				,dblQtyInProdStagingLocation
+	----				,intCategoryId
+	----				,dblRequiredQty
+	----				)
+	----			SELECT I.intItemId
+	----				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - @dblRequiredQty
+	----				,CASE 
+	----					WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
+	----						THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+	----					ELSE 0
+	----					END
+	----				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
+	----				,I.intCategoryId
+	----				,@dblRequiredQty
+	----			FROM @tblICFinalItem I
+	----			LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+	----			LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	----			WHERE I.intItemId = @intItemId1
+	----			SELECT @dblRequiredQty = 0
+	----		END
+	----		ELSE
+	----		BEGIN
+	----			INSERT INTO @tblMFQtyInProductionStagingLocation (
+	----				intItemId
+	----				,dblQtyInProductionStagingLocation ---System Qty
+	----				,dblOpeningQty
+	----				,dblQtyInProdStagingLocation
+	----				,intCategoryId
+	----				,dblRequiredQty
+	----				)
+	----			SELECT I.intItemId
+	----				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - @dblQty
+	----				,CASE 
+	----					WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
+	----						THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+	----					ELSE 0
+	----					END
+	----				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
+	----				,I.intCategoryId
+	----				,@dblQty
+	----			FROM @tblICFinalItem I
+	----			LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+	----			LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	----			WHERE I.intItemId = @intItemId1
+	----			SELECT @dblRequiredQty = @dblRequiredQty - @dblQty
+	----		END
+	----	END
+	----	SELECT @intPrevRecipeItemId = @intRecipeItemId
+	----	SELECT @intItemId1 = MIN(intItemId)
+	----	FROM @tblICFinalItem I
+	----	WHERE I.intItemId NOT IN (
+	----			SELECT Max(intItemId)
+	----			FROM @tblICFinalItem
+	----			GROUP BY intRecipeItemId
+	----			HAVING count(intRecipeItemId) = 1
+	----			)
+	----		AND I.intItemId > @intItemId1
+	----END
 	DELETE
 	FROM @tblICFinalItem
 	WHERE ysnMainItem = 0
@@ -915,6 +1024,7 @@ BEGIN TRY
 			SELECT *
 			FROM @tblICFinalItem I
 			WHERE I.intMainItemId = FI.intItemId
+				AND ysnMainItem = 0
 			)
 
 	IF @strInstantConsumption = 'True'
@@ -1116,6 +1226,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-GO
-
-

@@ -5293,6 +5293,8 @@
     <Build Include="dbo\Stored Procedures\uspPATImportCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
     <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
+    <Build Include="dbo\Stored Procedures\vyuMFGetSSCCDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCopyRecipeByWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

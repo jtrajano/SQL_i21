@@ -57,6 +57,20 @@ SELECT InvS.strReferenceNumber
 			END) AS dblNoOfPallet
 	,(I.intUnitPerLayer * I.intLayerPerPallet) AS intCasesPerPallet
 	,IsNULL(I.intInnerUnits,0) AS intUnitsPerCase
+	,InvS.dtmRequestedArrivalDate 
+	,FT.strFreightTerm 
+	,InvS.strComment 
+	,InvS.strDeliveryInstruction
+	,InvS.strDriverId
+	,InvS.strVessel 
+	,InvS.strSealNumber 
+	,InvS.dtmAppointmentTime
+	,InvS.dtmDepartureTime 
+	,InvS.dtmArrivalTime
+	,InvS.dtmDeliveredDate 
+	,InvS.strFreeTime
+	,InvS.strReceivedBy 
+	,SV.strName
 FROM dbo.tblICInventoryShipment InvS
 JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
 JOIN dbo.tblICInventoryShipmentItemLot InvSL ON InvSL.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
@@ -69,4 +83,6 @@ JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = InvS.intShipToLocationId
 JOIN dbo.tblSMCompanyLocation EL1 ON EL1.intCompanyLocationId = InvS.intShipFromLocationId
+JOIN tblSMFreightTerms FT on FT.intFreightTermId =InvS.intFreightTermId
+Left JOIN tblSMShipVia SV on SV.intEntityShipViaId =InvS.intShipViaId
 ORDER BY InvS.strShipmentNumber DESC
