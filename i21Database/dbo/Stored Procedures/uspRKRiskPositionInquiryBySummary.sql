@@ -573,18 +573,60 @@ SELECT 11 intRowNumber,strGroup,Selection ,
 	group by   strGroup,Selection,PriceStatus,strAccountNumber
 		
   
-SELECT intRowNumber ,strGroup,Selection ,  
-                            PriceStatus  ,  
-                            strFutureMonth ,  
-                            strAccountNumber ,  
-                           CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) dblNoOfContract,  
-                            strTradeNo,  
-                            TransactionDate  ,  
-                            TranType,  
-                            CustVendor,       
-                            dblNoOfLot ,  
-                            dblQuantity ,
-                           intOrderByHeading ,
-                           intContractHeaderId ,
-                           intFutOptTransactionHeaderId  from @ListFinal
-						    order by intRowNumber, CASE WHEN  strFutureMonth not in('Previous','Total') THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
+DECLARE @MonthOrder as Table (  
+     intRowNumber1 int identity(1,1),  
+     intRowNumber int,
+	 strGroup  nvarchar(200) COLLATE Latin1_General_CI_AS, 
+     Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
+     PriceStatus  nvarchar(50) COLLATE Latin1_General_CI_AS,  
+     strFutureMonth  nvarchar(20) COLLATE Latin1_General_CI_AS,  
+     strAccountNumber  nvarchar(200) COLLATE Latin1_General_CI_AS,  
+     dblNoOfContract  decimal(24,10),  
+     strTradeNo  nvarchar(200) COLLATE Latin1_General_CI_AS,  
+     TransactionDate  datetime,  
+     TranType  nvarchar(50) COLLATE Latin1_General_CI_AS,  
+     CustVendor nvarchar(50) COLLATE Latin1_General_CI_AS,       
+     dblNoOfLot decimal(24,10),  
+     dblQuantity decimal(24,10),
+     intOrderByHeading int,
+     intContractHeaderId int ,
+     intFutOptTransactionHeaderId int       
+     ) 		
+INSERT INTO @MonthOrder  (intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate ,  
+						  TranType,CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
+SELECT intRowNumber ,strGroup,Selection ,PriceStatus  , strFutureMonth , strAccountNumber , CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)),  
+strTradeNo,  TransactionDate  , TranType, CustVendor,  dblNoOfLot ,  dblQuantity ,intOrderByHeading ,intContractHeaderId ,intFutOptTransactionHeaderId  
+FROM @ListFinal where strFutureMonth='Previous' 
+
+INSERT INTO @MonthOrder  (intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate ,  
+						  TranType,CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
+SELECT intRowNumber ,strGroup,Selection ,PriceStatus  , strFutureMonth , strAccountNumber , CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)),  
+strTradeNo,  TransactionDate  , TranType, CustVendor,  dblNoOfLot ,  dblQuantity ,intOrderByHeading ,intContractHeaderId ,intFutOptTransactionHeaderId  
+FROM @ListFinal where strFutureMonth NOT IN('Previous','Total')
+ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth),intOrderByHeading,PriceStatus ASC
+
+INSERT INTO @MonthOrder  (intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate ,  
+						  TranType,CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
+SELECT intRowNumber ,strGroup,Selection ,PriceStatus  , strFutureMonth , strAccountNumber , CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)),  
+strTradeNo,  TransactionDate  , TranType, CustVendor,  dblNoOfLot ,  dblQuantity ,intOrderByHeading ,intContractHeaderId ,intFutOptTransactionHeaderId  
+FROM @ListFinal where strFutureMonth='Total' 
+
+SELECT intRowNumber1 intRowNumber ,strGroup,Selection ,  
+            PriceStatus  ,  
+            strFutureMonth ,  
+            strAccountNumber ,  
+            CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) dblNoOfContract,  
+            strTradeNo,  
+            TransactionDate  ,  
+            TranType,  
+            CustVendor,       
+            dblNoOfLot ,  
+            dblQuantity ,
+            intOrderByHeading ,
+            intContractHeaderId ,
+            intFutOptTransactionHeaderId  FROM @MonthOrder
+ORDER BY intRowNumber1
+,CASE WHEN  strFutureMonth not in('Previous','Total') THEN CONVERT(DATETIME,'01 '+strFutureMonth) END
+,intOrderByHeading
+,PriceStatus
+ ASC
