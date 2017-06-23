@@ -8,7 +8,7 @@ begin
 			B.strNumberFormat = A.strNumberFormat
 		FROM tblSMUserSecurity A
 			JOIN tblEMEntity B
-				ON A.intEntityUserSecurityId = B.intEntityId
+				ON A.intEntityId = B.intEntityId
 
 	UPDATE tblEMEntity SET strDateFormat = 'M/d/yyyy',
 		strNumberFormat = '1,234,567.89'
