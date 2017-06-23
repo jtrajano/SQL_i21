@@ -20,6 +20,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INSERT INTO tblAPBillDetail(
 		[intBillId]						,
 		[intAccountId]					,
+		[intItemId]						,
 		[intCustomerStorageId]			,
 		[strMiscDescription]				,
 		[dblTotal]						,
@@ -28,11 +29,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblCost]						,
 		[int1099Form]					,
 		[int1099Category]				,
+		[intContractDetailId]			,
+		[intContractHeaderId]			,
 		[intLineNo]						
 	)
 	SELECT
 		[intBillId]						=	@voucherId,
 		[intAccountId]					=	ISNULL(A.intAccountId , ISNULL(G.intAccountId, D.intGLAccountExpenseId)),
+		[intItemId]						=	A.intItemId,
 		[intCustomerStorageId]			=	A.intCustomerStorageId,
 		[strMiscDescription]				=	ISNULL(A.strMiscDescription, A2.strDescription),
 		[dblTotal]						=	CAST(A.dblCost * A.dblQtyReceived  AS DECIMAL(18,2)),
@@ -44,6 +48,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 													WHEN E.str1099Form = '1099-B' THEN 3
 												ELSE 0 END),
 		[int1099Category]				=	ISNULL(F.int1099CategoryId, 0),
+		[intContractDetailId]			=	A.intContractDetailId,
+		[intContractHeaderId]			=	A.intContractHeaderId,
 		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))			
 	FROM @voucherDetailStorage A
 	INNER JOIN tblICItem A2 ON A.intItemId = A2.intItemId

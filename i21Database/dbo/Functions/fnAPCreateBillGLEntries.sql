@@ -79,20 +79,23 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	 CAST(CASE WHEN ForexRate.dblRate > 0 
-												 THEN  (CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
-													 ELSE Details.dblTotal END) * ISNULL(NULLIF(Details.dblRate,0),1) 
-											ELSE (
-													(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
-													 ELSE A.dblAmountDue END))
-											END AS DECIMAL(18,2)),
+		[dblCredit]						=	 
+											--CAST(CASE WHEN ForexRate.dblRate > 0 
+											--	 THEN  (CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+											--		 ELSE Details.dblTotal END) * ISNULL(NULLIF(Details.dblRate,0),1) 
+											--ELSE (
+											--		(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+											--		 ELSE A.dblAmountDue END))
+											--END AS DECIMAL(18,2)),
+											(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+													 ELSE Details.dblTotal END) * ISNULL(NULLIF(Details.dblRate,0),1),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	units.dblTotalUnits,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
+		[dblExchangeRate]				=	ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'
@@ -114,44 +117,37 @@ BEGIN
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	CAST(
-											CASE WHEN Details.dblRate > 0 
-														THEN
-														(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
-														 ELSE Details.dblTotal END)
-														ELSE
-														(
-														(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
-														 ELSE A.dblAmountDue END)
-														)
-											END														 
+											(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+												 ELSE Details.dblTotal END)
 											AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
-		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
+		[dblForeignRate]				=	ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
+		[strRateType]					=	Details.strCurrencyExchangeRateType,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
 			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-			CROSS APPLY
-			(
-				SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
-				FROM dbo.tblAPBillDetail A 
-				LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
-				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-			) ForexRate
-			CROSS APPLY
-			(
-				SELECT CASE COUNT(DISTINCT A.dblRate) WHEN 1 THEN 0 ELSE 1 END AS ysnUniqueForex
-				FROM tblAPBillDetail A
-				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-			) ForexRateCounter
+			--CROSS APPLY
+			--(
+			--	SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
+			--	FROM dbo.tblAPBillDetail A 
+			--	LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+			--	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+			--) ForexRate
+			--CROSS APPLY
+			--(
+			--	SELECT CASE COUNT(DISTINCT A.dblRate) WHEN 1 THEN 0 ELSE 1 END AS ysnUniqueForex
+			--	FROM tblAPBillDetail A
+			--	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+			--) ForexRateCounter
 			OUTER APPLY
 			(
-				SELECT (R.dblTotal + R.dblTax) AS dblTotal , R.dblRate  AS dblRate
+				SELECT (R.dblTotal + R.dblTax) AS dblTotal , R.dblRate  AS dblRate, exRates.intCurrencyExchangeRateTypeId, exRates.strCurrencyExchangeRateType
 				FROM dbo.tblAPBillDetail R
-				WHERE R.intBillId = A.intBillId AND dblRate > 0
+				LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+				WHERE R.intBillId = A.intBillId
 			) Details
 			
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
