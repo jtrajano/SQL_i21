@@ -14,8 +14,11 @@ BEGIN
 			@intUniqueId	INT,
 			@Id				INT,
 			@routeScreen	NVARCHAR(50),
-			@intSalespersonId INT
+			@intSalespersonId INT,
+			@strDefaultContractReport NVARCHAR(50),
+			@strThanks		NVARCHAR(MAX) = 'Thank you for your business.'
 
+	SELECT @strDefaultContractReport = strDefaultContractReport FROM tblCTCompanyPreference
 
 	DECLARE @loop TABLE
 	(
@@ -77,6 +80,12 @@ BEGIN
 
 	SET @Subject = @strMailType + ' - ' + @strNumber
 
+	IF	@strDefaultContractReport	=	'ContractJDE' AND @strMailType = 'Price Contract'
+	BEGIN
+		SET @strMailType = 'Price Fixation'
+		SEt @strThanks = 'This confirmation of Price Fixation is deemed to be correct and accepted by you unless explicitly objected in writing latest 24 hours after the price fixation date.'
+	END
+
 	SET @body +='<!DOCTYPE html>'
 	SET @body +='<html>'
 	SET @body +='<body>Dear <strong>'+@strEntityName+'</strong>, <br><br>'
@@ -91,7 +100,7 @@ BEGIN
 	END
 
 	SET @body += '<br>'
-	SET @body +='Thank you for your business. <br><br>'
+	SET @body +=@strThanks+'<br><br>'
 	SET @body +='Sincerely, <br>'
 	SET @body +='#SIGNATURE#'
 	SET @body +='</html>'
