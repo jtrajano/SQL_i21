@@ -5291,6 +5291,7 @@
     <Build Include="dbo\User Defined Types\PaymentId.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
