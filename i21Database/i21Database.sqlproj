@@ -5289,6 +5289,7 @@
     <Build Include="dbo\Views\vyuARInvoiceDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\vyuMFGetSSCCDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCopyRecipeByWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
