@@ -53,3 +53,12 @@ CONSTRAINT [FK_tblLGLoadContainer_tblSMCurrency_intCurrencyId] FOREIGN KEY ([int
 GO
 
 CREATE STATISTICS [_dta_stat_1001926791_16_1] ON [dbo].[tblLGLoadContainer]([ysnRejected], [intLoadContainerId])
+
+go
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadContainer_207_1851869664__K3_4] ON [dbo].[tblLGLoadContainer]
+(
+	[intLoadId] ASC
+)
+INCLUDE ( 	[strContainerNumber]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go

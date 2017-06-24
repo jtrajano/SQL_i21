@@ -82,15 +82,7 @@ AS
 				,LO.dtmStuffingDate
 				,LO.dtmETSPOL
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
-				,STUFF(
-					(
-						SELECT	', ' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
-						FROM	tblLGLoadContainer 
-						WHERE	intLoadId = LO.intLoadId
-						FOR XML PATH(''), TYPE)
-						.value('.','NVARCHAR(MAX)'
-					),1,2,' '
-				) strContainerNumber
+				,NULL strContainerNumber
 
 		FROM	vyuLGLoadView		LO
 		JOIN	tblLGLoadDetail		LD ON LD.intLoadId = LO.intLoadId
