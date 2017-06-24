@@ -118,7 +118,7 @@ SELECT 	 SQ.intContractDetailId
 		,SQ.strLocationName
 
 	FROM 		vyuCTContractSequence			 	SQ			
-	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId
+	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId = 1
 	JOIN 		tblCTContractHeader				 	CH	ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
 	LEFT JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=	CH.intContractBasisId
 	LEFT JOIN	tblICItem						 	IM	ON	IM.intItemId						=	SQ.intItemId
@@ -159,4 +159,4 @@ SELECT 	 SQ.intContractDetailId
 		GROUP BY intPContractDetailId
 	)										 		LG	ON	LG.intPContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN	vyuCTLoadView						LV	ON	LV.intContractDetailId				=	CD.intContractDetailId
-	OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
+	LEFT JOIN	vyuCTQualityApprovedRejected		QA	ON	QA.intContractDetailId				=	CD.intContractDetailId
