@@ -5292,6 +5292,7 @@
     <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
