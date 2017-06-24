@@ -5295,6 +5295,7 @@
     <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
     <Build Include="dbo\Stored Procedures\vyuMFGetSSCCDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCopyRecipeByWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
