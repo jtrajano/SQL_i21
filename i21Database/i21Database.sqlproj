@@ -5292,6 +5292,7 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateReceiptTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
+    <Build Include="dbo\Views\vyuCTQualityApprovedRejected.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
