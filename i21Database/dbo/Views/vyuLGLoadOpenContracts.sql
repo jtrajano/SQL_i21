@@ -159,7 +159,7 @@ SELECT CD.intContractDetailId
 	,U1.strUnitMeasure AS strUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
-	,ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblShippingInstructionQty,0) AS dblUnLoadedQuantity
+	,ISNULL(CD.dblQuantity, 0) - (CASE WHEN ISNULL(CD.dblShippingInstructionQty,0)<=0 THEN 0 ELSE ISNULL(CD.dblShippingInstructionQty,0) END) AS dblUnLoadedQuantity
 	,CH.intContractTypeId intPurchaseSale
 	,CH.intEntityId
 	,CH.strContractNumber
