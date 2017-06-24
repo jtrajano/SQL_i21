@@ -69,3 +69,44 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_11_2002822197__K9_K1_17_18
 INCLUDE ( 	[dblNet],
 	[intWeightItemUOMId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+
+go
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_207_287600363__K3_K1_K9_K13] ON [dbo].[tblLGLoadDetail]
+(
+	[intLoadId] ASC,
+	[intLoadDetailId] ASC,
+	[intPContractDetailId] ASC,
+	[dblQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_207_287600363__K9_K3_K13] ON [dbo].[tblLGLoadDetail]
+(
+	[intPContractDetailId] ASC,
+	[intLoadId] ASC,
+	[dblQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_207_287600363__K3_K9_K13_K1] ON [dbo].[tblLGLoadDetail]
+(
+	[intLoadId] ASC,
+	[intPContractDetailId] ASC,
+	[dblQuantity] ASC,
+	[intLoadDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_207_287600363__K3_K9] ON [dbo].[tblLGLoadDetail]
+(
+	[intLoadId] ASC,
+	[intPContractDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE STATISTICS [_dta_stat_287600363_9_13] ON [dbo].[tblLGLoadDetail]([intPContractDetailId], [dblQuantity])
+go
+
+CREATE STATISTICS [_dta_stat_287600363_9_3_1_13] ON [dbo].[tblLGLoadDetail]([intPContractDetailId], [intLoadId], [intLoadDetailId], [dblQuantity])
+go
