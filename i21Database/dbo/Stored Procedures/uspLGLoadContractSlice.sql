@@ -63,7 +63,8 @@ BEGIN TRY
 			   FROM tblLGLoad L
 			   JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			   WHERE LD.intPContractDetailId = @intParentContractDetailId
-					AND L.intShipmentType = 1)
+					AND L.intShipmentType = 1
+					AND L.intShipmentStatus <> 10)
 	BEGIN
 		RAISERROR ('Shipment exists for the contract sequence. Cannot proceed.',16,1)
 	END
