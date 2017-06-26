@@ -232,7 +232,7 @@ INSERT INTO @temp_aging_table
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
 
 INSERT INTO @temp_balanceforward_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateFrom, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityId
