@@ -76,6 +76,7 @@ BEGIN TRY
 		WHERE L.ysnPosted = 1 
 			AND (LD.intPContractDetailId = @intContractDetailId OR LD.intSContractDetailId = @intContractDetailId)
 			AND LD.intItemId <> @intItemId
+			AND L.intShipmentStatus <> 10
 
 	IF (@intCount > 0)
 	BEGIN
@@ -88,6 +89,7 @@ BEGIN TRY
 		WHERE (IsNull(L.intTicketId, 0) <> 0 OR IsNull(L.intLoadHeaderId, 0) <> 0) 
 			AND (LD.intPContractDetailId = @intContractDetailId OR LD.intSContractDetailId = @intContractDetailId)
 			AND LD.intItemId <> @intItemId
+			AND L.intShipmentStatus <> 10
 
 	IF (@intCount > 0)
 	BEGIN
