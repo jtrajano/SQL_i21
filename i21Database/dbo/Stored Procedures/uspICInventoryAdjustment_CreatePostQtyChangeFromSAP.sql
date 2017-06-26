@@ -125,6 +125,16 @@ END
 EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT 
 IF @@ERROR <> 0 GOTO _Exit
 
+
+--Re-check if the adjustment id is already used. If yes, then regenerate the adjustment no. 
+BEGIN 
+	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo)
+	BEGIN 
+		EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT 
+		IF @@ERROR <> 0 GOTO _Exit
+	END
+END 
+
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Set the transaction date and expiration date
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -256,3 +266,4 @@ BEGIN
 END 
 
 _Exit:
+
