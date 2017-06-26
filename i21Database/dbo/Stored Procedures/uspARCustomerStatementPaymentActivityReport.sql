@@ -209,7 +209,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , strCustomerName		= C.strName
 	  , C.dblCreditLimit
 	  , I.intInvoiceId
-	  , I.strInvoiceNumber
+	  , strInvoiceNumber    = CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 THEN I.strInvoiceNumber ELSE ISNULL(I.strInvoiceOriginId, I.strInvoiceNumber) END
 	  , strBOLNumber		= CASE WHEN I.strTransactionType = ''Customer Prepayment'' THEN ''Prepayment: '' + ISNULL(PCREDITS.strPaymentInfo, '''') ELSE ''BOL# '' + I.strBOLNumber END
       , I.dtmDate
       , I.dtmDueDate
