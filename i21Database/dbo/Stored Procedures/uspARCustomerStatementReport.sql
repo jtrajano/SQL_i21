@@ -210,7 +210,7 @@ BEGIN
 END
  
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
-(SELECT I.strInvoiceNumber AS strReferenceNumber
+(SELECT strReferenceNumber = CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 THEN I.strInvoiceNumber ELSE ISNULL(I.strInvoiceOriginId, I.strInvoiceNumber) END
 	 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
 	 , intEntityCustomerId = C.intEntityId
 	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
@@ -336,7 +336,7 @@ FROM
 	@temp_statement_table
 WHERE 
 	strReferenceNumber IN (SELECT 
-								strInvoiceNumber 
+								strInvoiceNumber = CASE WHEN ISNULL(ysnImportedFromOrigin, 0) = 0 THEN strInvoiceNumber ELSE strInvoiceOriginId END 
 						   FROM 
 								tblARInvoice 
 					       WHERE 
