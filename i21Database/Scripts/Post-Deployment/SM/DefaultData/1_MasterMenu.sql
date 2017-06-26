@@ -3940,6 +3940,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Delivery 
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'EnergyTrac.view.DeliveryMetrics?showSearch=true' WHERE strMenuName = 'Delivery Metrics' AND strModuleName = 'Energy Trac' AND intParentMenuID = @EnergyTracParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fleet Tracking' AND strModuleName = 'Energy Trac' AND intParentMenuID = @EnergyTracParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Fleet Tracking', N'Energy Trac', @EnergyTracParentMenuId, N'Fleet Tracking', N'Activity', N'Screen', N'EnergyTrac.view.FleetTracking', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'EnergyTrac.view.FleetTracking' WHERE strMenuName = 'Fleet Tracking' AND strModuleName = 'Energy Trac' AND intParentMenuID = @EnergyTracParentMenuId
+
 /* INTEGRATION */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Integration' AND strModuleName = 'Integration' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
