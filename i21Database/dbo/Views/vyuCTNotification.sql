@@ -114,7 +114,7 @@ AS
 
 		FROM	Header CH
 		WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted')
-		AND		CH.intContractHeaderId	NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractStatusId = 2)
+		AND		CH.intContractHeaderId	NOT IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 2)
 		UNION ALL
 
 		SELECT	CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
