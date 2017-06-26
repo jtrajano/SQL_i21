@@ -54,7 +54,11 @@ BEGIN
 	IF @strType = 'FutureMarket'
 	BEGIN
 		SELECT	@intProductTypeId = intProductTypeId,@intCommodityId = intCommodityId FROM tblICItem WHERE intItemId = @intItemId
-		SELECT	@intFutureMarketId = intFutureMarketId FROM tblRKCommodityMarketMapping WHERE strCommodityAttributeId+',' LIKE '%'+LTRIM(@intProductTypeId)+',%' AND intCommodityId = @intCommodityId
+		
+		IF ISNULL(@intMarketId,0) = 0 
+			SELECT	@intFutureMarketId = intFutureMarketId FROM tblRKCommodityMarketMapping WHERE strCommodityAttributeId+',' LIKE '%'+LTRIM(@intProductTypeId)+',%' AND intCommodityId = @intCommodityId
+		ELSE
+			SET @intFutureMarketId = @intMarketId
 
 		IF	ISNULL(@intFutureMarketId,0) > 0
 		BEGIN
