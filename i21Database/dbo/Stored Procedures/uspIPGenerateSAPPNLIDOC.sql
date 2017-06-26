@@ -88,7 +88,7 @@ Begin
 		--GL account details (Broker account)
 		Set @strXml += '<E1BPACGL09 SEGMENT="1">'
 		Set @strXml += '<ITEMNO_ACC>'	+ '0000001000'		+ '</ITEMNO_ACC>'
-		Set @strXml += '<GL_ACCOUNT>'	+ ISNULL(@strBrokerAccount,'')				+ '</GL_ACCOUNT>'
+		Set @strXml += '<GL_ACCOUNT>'	+ right('0' + ISNULL(@strBrokerAccount,''),10)	+ '</GL_ACCOUNT>'
 		Set @strXml += '<ITEM_TEXT>'	+ ISNULL(CONVERT(VARCHAR,@intMatchNo),'')	+ '</ITEM_TEXT>'
 		Set @strXml += '<COSTCENTER>'	+ ISNULL(@strCostCenter,'')	+ '</COSTCENTER>'
 		Set @strXml +=	'</E1BPACGL09>'
