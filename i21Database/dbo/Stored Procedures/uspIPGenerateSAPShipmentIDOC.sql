@@ -159,7 +159,7 @@ Begin
 		GOTO NEXT_SHIPMENT
 	End
 
-	If UPPER(@strHeaderRowState)='MODIFIED' AND ISNULL(@strExternalDeliveryNumber,'')=''
+	If UPPER(@strHeaderRowState) in ('MODIFIED','DELETE') AND ISNULL(@strExternalDeliveryNumber,'')=''
 		Begin
 			GOTO NEXT_SHIPMENT
 		End
@@ -299,6 +299,9 @@ Begin
 			@strWeightUOM				=	dbo.fnIPConverti21UOMToSAP(strWeightUOM),
 			@strRowState				=	strRowState
 		From @tblDetail Where intRowNo=@intMinDetail
+
+			If UPPER(@strCommodityCode)='COFFEE' AND ISNULL(@ysnBatchSplit,0)=0
+				Select TOP 1 @dblNetWeight=dblNetWt from tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId
 
 			--Validation
 			If ISNULL(@dblNetWeight,0)<=0
