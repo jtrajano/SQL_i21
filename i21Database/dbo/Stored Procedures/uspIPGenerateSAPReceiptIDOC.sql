@@ -87,8 +87,8 @@ Insert Into @tblReceiptHeader(intInventoryReceiptId,strDeliveryNo,dtmReceiptDate
 Select DISTINCT r.intInventoryReceiptId,l.strExternalShipmentNumber,r.dtmReceiptDate,l.intLoadId,r.strReceiptNumber
 From tblICInventoryReceiptItem ri 
 Join tblICInventoryReceipt r on ri.intInventoryReceiptId=r.intInventoryReceiptId
-JOIN vyuLGLoadContainerPurchaseContracts s ON s.intPContractDetailId = ri.intLineNo
-JOIN tblLGLoad l on s.intLoadId=l.intLoadId
+JOIN tblLGLoadDetail ld on ri.intSourceId=ld.intLoadDetailId
+JOIN tblLGLoad l on ld.intLoadId=l.intLoadId
 Where r.intSourceType=2 AND r.ysnPosted=1 AND ri.ysnExported IS NULL AND ISNULL(l.strExternalShipmentNumber,'')<>'' AND strReceiptType<>'Inventory Return'
 
 Select @intMinHeader=Min(intInventoryReceiptId) From @tblReceiptHeader
@@ -103,10 +103,18 @@ Begin
 
 	Insert Into @tblReceiptDetail(intInventoryReceiptId,intInventoryReceiptItemId,strDeliveryItemNo,strItemNo,strSubLocation,strStorageLocation,strContainerNo,dblQuantity,strUOM,strCommodityCode,intLoadDetailId,strPONo,intContractDetailId)
 	Select ri.intInventoryReceiptId,ri.intInventoryReceiptItemId,ld.strExternalShipmentItemNumber AS strDeliveryItemNo,
-	ri.strItemNo,ri.strSubLocationName,ri.strStorageLocationName,ri.strContainer strContainerNumber,ri.dblNetWgt,ri.strWeightUOM,c.strCommodityCode,ri.intSourceId,ri.strOrderNumber,ri.intLineNo
-	From vyuICGetInventoryReceiptItem ri 
+	i.strItemNo,csl.strSubLocationName,sl.strName AS strStorageLocation,lc.strContainerNumber,ri.dblNet,um.strUnitMeasure AS strWeightUOM,c.strCommodityCode,ri.intSourceId,ch.strContractNumber,ri.intLineNo
+	From tblICInventoryReceiptItem ri 
+	Join tblICItem i on ri.intItemId=i.intItemId
 	Join tblLGLoadDetail ld on ri.intSourceId=ld.intLoadDetailId
-	JOIN tblICCommodity c on ri.intCommodityId=c.intCommodityId
+	JOIN tblICCommodity c on i.intCommodityId=c.intCommodityId
+	Join tblSMCompanyLocationSubLocation csl on ri.intSubLocationId=csl.intCompanyLocationSubLocationId
+	Join tblICStorageLocation sl on ri.intStorageLocationId=sl.intStorageLocationId
+	Join tblLGLoadContainer lc on ri.intContainerId=lc.intLoadContainerId
+	Join tblCTContractDetail cd on ri.intLineNo=cd.intContractDetailId and cd.intContractDetailId=ld.intPContractDetailId
+	Join tblCTContractHeader ch on cd.intContractHeaderId=ch.intContractHeaderId and ri.intOrderId=ch.intContractHeaderId
+	join tblICItemUOM iu on ri.intWeightUOMId=iu.intItemUOMId
+	join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Where ri.intInventoryReceiptId=@intMinHeader
 
 	Select TOP 1 @strCommodityCode=strCommodityCode From @tblReceiptDetail 
@@ -290,8 +298,8 @@ Begin
 	End
 
 	Set @strReceiptDetailIds=NULL
-	Select @strReceiptDetailIds=COALESCE(CONVERT(VARCHAR,@strReceiptDetailIds) + ',', '') + CONVERT(VARCHAR,intInventoryReceiptItemId) 
-	From vyuICGetInventoryReceiptItem Where intInventoryReceiptId=@intMinHeader
+	Select @strReceiptDetailIds=COALESCE(CONVERT(VARCHAR(max),@strReceiptDetailIds) + ',', '') + CONVERT(VARCHAR,intInventoryReceiptItemId) 
+	From tblICInventoryReceiptItem Where intInventoryReceiptId=@intMinHeader
 
 	If @ysnUpdateFeedStatusOnRead=1
 		Update tblICInventoryReceiptItem Set ysnExported=0 Where intInventoryReceiptId=@intMinHeader
