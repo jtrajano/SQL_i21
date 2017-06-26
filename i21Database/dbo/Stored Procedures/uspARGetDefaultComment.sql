@@ -25,7 +25,7 @@ BEGIN
 					FROM tblSMDocumentMaintenanceMessage
 					WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 		WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
-		AND [strSource] <> 'Statement Footer'
+		AND [strSource] <> 'Statement Report'
 	ORDER BY A.[intDocumentMaintenanceId] DESC
 
 	--2. Filter by Transaction, Location, Customer
@@ -38,7 +38,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -54,7 +54,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -70,7 +70,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -86,7 +86,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -102,7 +102,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -118,7 +118,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -134,7 +134,7 @@ BEGIN
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -169,7 +169,7 @@ BEGIN
 		AND intCompanyLocationId = @intCompanyLocationId
 		AND intEntityCustomerId = @intEntityCustomerId
 		AND strType = @strType
-		AND [strSource] <> 'Statement Footer'
+		AND [strSource] <> 'Statement Report'
 	ORDER BY A.[intDocumentMaintenanceId] DESC
 
 	--2. Filter by Transaction, Location, Customer
@@ -184,7 +184,7 @@ BEGIN
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId = @intCompanyLocationId
 				AND intEntityCustomerId = @intEntityCustomerId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -203,7 +203,7 @@ BEGIN
 				AND intCompanyLocationId = @intCompanyLocationId
 				AND intEntityCustomerId IS NULL
 				AND strType = @strType
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -221,7 +221,7 @@ BEGIN
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId = @intCompanyLocationId
 				AND intEntityCustomerId IS NULL
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -240,7 +240,7 @@ BEGIN
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId = @intEntityCustomerId
 				AND strType = @strType
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -258,7 +258,7 @@ BEGIN
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId = @intEntityCustomerId
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -277,7 +277,7 @@ BEGIN
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId IS NULL		
 				AND strType = @strType
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE
@@ -295,7 +295,7 @@ BEGIN
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId IS NULL		
-				AND [strSource] <> 'Statement Footer'
+				AND [strSource] <> 'Statement Report'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
 	ELSE

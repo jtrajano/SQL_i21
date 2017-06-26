@@ -233,7 +233,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	 , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
 	 , CL.strLocationName
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
+	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Report'')	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
 	 , dblARBalance = CUST.dblARBalance
