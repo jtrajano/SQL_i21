@@ -4,10 +4,6 @@
 AS
 
 BEGIN TRY
-	
-	--Insert
-	INSERT INTO TestDatabase.dbo.tblPerson (strFirstName)
-	VALUES (@xmlParam)
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
@@ -777,9 +773,6 @@ BEGIN TRY
 	--	INSERT @tblMassUpdatePreview
 	--	EXEC (@SqlQuery1)
 	--END
-
-	----Print
-	----Exec XMLDB.dbo.PrintString @SqlQuery1 @
 	
 
 	--IF ((@dblSalesPrice IS NOT NULL) OR (@dtmSalesStartingDate IS NOT NULL) OR (@dtmSalesEndingDate IS NOT NULL))
