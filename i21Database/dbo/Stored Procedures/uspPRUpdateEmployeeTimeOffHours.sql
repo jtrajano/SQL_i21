@@ -31,6 +31,9 @@ BEGIN
 								DATEADD(YY, DATEDIFF(YY,0,getdate()) + 1, -1)
 							 WHEN (strAwardPeriod = 'Anniversary Date') THEN
 								DATEADD(YY, YEAR(GETDATE()) - YEAR(E.dtmDateHired), E.dtmDateHired)
+							 WHEN (strAwardPeriod = 'Paycheck') THEN
+								(SELECT TOP 1 dtmPayDate FROM tblPRPaycheck WHERE ysnPosted = 1 AND ysnVoid = 0 AND 
+									intEntityEmployeeId = ISNULL(@intEntityEmployeeId, E.intEntityId))
 							 ELSE NULL 
 						END
 		,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
@@ -40,6 +43,7 @@ BEGIN
 		,strPeriod
 		,dblRateFactor
 		,strAwardPeriod
+		,strPayPeriod
 	INTO #tmpEmployees
 	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
 		ON E.[intEntityId] = T.intEntityEmployeeId
@@ -57,6 +61,24 @@ BEGIN
 										DATEADD(QQ, 1, dtmNextAward)
 									 WHEN (strAwardPeriod IN ('Start of Year', 'End of Year', 'Anniversary Date')) THEN
 										DATEADD(YY, 1, dtmNextAward)
+									 WHEN (strAwardPeriod IN ('Paycheck')) THEN
+										CASE WHEN (strPayPeriod = 'Daily') THEN 
+												DATEADD(DD, 1, dtmNextAward)
+											 WHEN (strPayPeriod = 'Weekly') THEN
+												DATEADD(WK, 1, dtmNextAward)
+											 WHEN (strPayPeriod = 'Bi-Weekly') THEN 
+												DATEADD(WK, 2, dtmNextAward)
+											 WHEN (strPayPeriod = 'Semi-Monthly') THEN 
+												DATEADD(DD, 15, dtmNextAward)
+											 WHEN (strPayPeriod = 'Monthly') THEN 
+												DATEADD(MM, 1, dtmNextAward)
+											 WHEN (strPayPeriod = 'Quarterly') THEN 
+												DATEADD(QQ, 1, dtmNextAward)
+											 WHEN (strPayPeriod = 'Annual') THEN 
+												DATEADD(YY, 1, dtmNextAward)
+											 ELSE 
+												dtmNextAward 
+										END
 									 ELSE dtmNextAward 
 								END
 							ELSE
