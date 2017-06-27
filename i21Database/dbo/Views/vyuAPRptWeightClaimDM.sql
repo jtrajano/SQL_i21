@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuAPRptWeightClaimDM]
 AS
-SELECT
+SELECT DISTINCT
 (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
 --,(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 ,strCompanyAddress = (SELECT TOP 1 ISNULL(RTRIM(strCompanyName) + CHAR(13) + char(10), '')
