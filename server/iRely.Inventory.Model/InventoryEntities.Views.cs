@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets0458a197b63cc9a95ee7c09f2d24357047e24570c3f0e5e17dd81a6875384854))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets65080ed773463072d6bd745dece50633b8a2c5b1314be6a155a1e8a203c6e8b1))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets0458a197b63cc9a95ee7c09f2d24357047e24570c3f0e5e17dd81a6875384854 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets65080ed773463072d6bd745dece50633b8a2c5b1314be6a155a1e8a203c6e8b1 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "0458a197b63cc9a95ee7c09f2d24357047e24570c3f0e5e17dd81a6875384854"; }
+            get { return "65080ed773463072d6bd745dece50633b8a2c5b1314be6a155a1e8a203c6e8b1"; }
         }
 
         /// <summary>
@@ -2035,16 +2035,6 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.vyuICStockDetails")
             {
                 return GetView397();
-            }
-
-            if (extentName == "CodeFirstDatabase.vyuICSearchItem")
-            {
-                return GetView398();
-            }
-
-            if (extentName == "InventoryEntities.vyuICSearchItems")
-            {
-                return GetView399();
             }
 
             return null;
@@ -16390,136 +16380,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblExtendedCost AS vyuICStockDetail_dblExtendedCost, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICStockDetail AS T
-    ) AS T1");
-        }
-
-        /// <summary>
-        /// Gets the view for CodeFirstDatabase.vyuICSearchItem.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView398()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing vyuICSearchItem
-        [CodeFirstDatabaseSchema.vyuICSearchItem](T1.vyuICSearchItem_intItemId, T1.vyuICSearchItem_strItemNo, T1.vyuICSearchItem_strType, T1.vyuICSearchItem_strDescription, T1.vyuICSearchItem_strManufacturer, T1.vyuICSearchItem_strBrandCode, T1.vyuICSearchItem_strBrandName, T1.vyuICSearchItem_strStatus, T1.vyuICSearchItem_strModelNo, T1.vyuICSearchItem_strTracking, T1.vyuICSearchItem_strLotTracking, T1.vyuICSearchItem_intCommodityId, T1.vyuICSearchItem_strCommodity, T1.vyuICSearchItem_intCategoryId, T1.vyuICSearchItem_strCategory, T1.vyuICSearchItem_ysnInventoryCost, T1.vyuICSearchItem_ysnAccrue, T1.vyuICSearchItem_ysnMTM, T1.vyuICSearchItem_intM2MComputationId, T1.vyuICSearchItem_strM2MComputation, T1.vyuICSearchItem_ysnPrice, T1.vyuICSearchItem_strCostMethod, T1.vyuICSearchItem_intOnCostTypeId, T1.vyuICSearchItem_strOnCostType, T1.vyuICSearchItem_dblAmount, T1.vyuICSearchItem_intCostUOMId, T1.vyuICSearchItem_strCostUOM, T1.vyuICSearchItem_strCostType, T1.vyuICSearchItem_strShortName, T1.vyuICSearchItem_strRequired, T1.vyuICSearchItem_ysnBasisContract, T1.vyuICSearchItem_intTonnageTaxUOMId, T1.vyuICSearchItem_strTonnageTaxUOM, T1.vyuICSearchItem_dblGAShrinkFactor, T1.vyuICSearchItem_intOriginId, T1.vyuICSearchItem_strOrigin, T1.vyuICSearchItem_intProductTypeId, T1.vyuICSearchItem_strProductType, T1.vyuICSearchItem_intRegionId, T1.vyuICSearchItem_strRegion, T1.vyuICSearchItem_intSeasonId, T1.vyuICSearchItem_strSeason, T1.vyuICSearchItem_intClassVarietyId, T1.vyuICSearchItem_strClass, T1.vyuICSearchItem_intProductLineId, T1.vyuICSearchItem_strProductLine, T1.vyuICSearchItem_intGradeId, T1.vyuICSearchItem_strGrade, T1.vyuICSearchItem_strMarketValuation)
-    FROM (
-        SELECT 
-            T.intItemId AS vyuICSearchItem_intItemId, 
-            T.strItemNo AS vyuICSearchItem_strItemNo, 
-            T.strType AS vyuICSearchItem_strType, 
-            T.strDescription AS vyuICSearchItem_strDescription, 
-            T.strManufacturer AS vyuICSearchItem_strManufacturer, 
-            T.strBrandCode AS vyuICSearchItem_strBrandCode, 
-            T.strBrandName AS vyuICSearchItem_strBrandName, 
-            T.strStatus AS vyuICSearchItem_strStatus, 
-            T.strModelNo AS vyuICSearchItem_strModelNo, 
-            T.strTracking AS vyuICSearchItem_strTracking, 
-            T.strLotTracking AS vyuICSearchItem_strLotTracking, 
-            T.intCommodityId AS vyuICSearchItem_intCommodityId, 
-            T.strCommodity AS vyuICSearchItem_strCommodity, 
-            T.intCategoryId AS vyuICSearchItem_intCategoryId, 
-            T.strCategory AS vyuICSearchItem_strCategory, 
-            T.ysnInventoryCost AS vyuICSearchItem_ysnInventoryCost, 
-            T.ysnAccrue AS vyuICSearchItem_ysnAccrue, 
-            T.ysnMTM AS vyuICSearchItem_ysnMTM, 
-            T.intM2MComputationId AS vyuICSearchItem_intM2MComputationId, 
-            T.strM2MComputation AS vyuICSearchItem_strM2MComputation, 
-            T.ysnPrice AS vyuICSearchItem_ysnPrice, 
-            T.strCostMethod AS vyuICSearchItem_strCostMethod, 
-            T.intOnCostTypeId AS vyuICSearchItem_intOnCostTypeId, 
-            T.strOnCostType AS vyuICSearchItem_strOnCostType, 
-            T.dblAmount AS vyuICSearchItem_dblAmount, 
-            T.intCostUOMId AS vyuICSearchItem_intCostUOMId, 
-            T.strCostUOM AS vyuICSearchItem_strCostUOM, 
-            T.strCostType AS vyuICSearchItem_strCostType, 
-            T.strShortName AS vyuICSearchItem_strShortName, 
-            T.strRequired AS vyuICSearchItem_strRequired, 
-            T.ysnBasisContract AS vyuICSearchItem_ysnBasisContract, 
-            T.intTonnageTaxUOMId AS vyuICSearchItem_intTonnageTaxUOMId, 
-            T.strTonnageTaxUOM AS vyuICSearchItem_strTonnageTaxUOM, 
-            T.dblGAShrinkFactor AS vyuICSearchItem_dblGAShrinkFactor, 
-            T.intOriginId AS vyuICSearchItem_intOriginId, 
-            T.strOrigin AS vyuICSearchItem_strOrigin, 
-            T.intProductTypeId AS vyuICSearchItem_intProductTypeId, 
-            T.strProductType AS vyuICSearchItem_strProductType, 
-            T.intRegionId AS vyuICSearchItem_intRegionId, 
-            T.strRegion AS vyuICSearchItem_strRegion, 
-            T.intSeasonId AS vyuICSearchItem_intSeasonId, 
-            T.strSeason AS vyuICSearchItem_strSeason, 
-            T.intClassVarietyId AS vyuICSearchItem_intClassVarietyId, 
-            T.strClass AS vyuICSearchItem_strClass, 
-            T.intProductLineId AS vyuICSearchItem_intProductLineId, 
-            T.strProductLine AS vyuICSearchItem_strProductLine, 
-            T.intGradeId AS vyuICSearchItem_intGradeId, 
-            T.strGrade AS vyuICSearchItem_strGrade, 
-            T.strMarketValuation AS vyuICSearchItem_strMarketValuation, 
-            True AS _from0
-        FROM InventoryEntities.vyuICSearchItems AS T
-    ) AS T1");
-        }
-
-        /// <summary>
-        /// Gets the view for InventoryEntities.vyuICSearchItems.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView399()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing vyuICSearchItems
-        [iRely.Inventory.Model.vyuICSearchItem](T1.vyuICSearchItem_intItemId, T1.vyuICSearchItem_strItemNo, T1.vyuICSearchItem_strType, T1.vyuICSearchItem_strDescription, T1.vyuICSearchItem_strManufacturer, T1.vyuICSearchItem_strBrandCode, T1.vyuICSearchItem_strBrandName, T1.vyuICSearchItem_strStatus, T1.vyuICSearchItem_strModelNo, T1.vyuICSearchItem_strTracking, T1.vyuICSearchItem_strLotTracking, T1.vyuICSearchItem_intCommodityId, T1.vyuICSearchItem_strCommodity, T1.vyuICSearchItem_intCategoryId, T1.vyuICSearchItem_strCategory, T1.vyuICSearchItem_ysnInventoryCost, T1.vyuICSearchItem_ysnAccrue, T1.vyuICSearchItem_ysnMTM, T1.vyuICSearchItem_intM2MComputationId, T1.vyuICSearchItem_strM2MComputation, T1.vyuICSearchItem_ysnPrice, T1.vyuICSearchItem_strCostMethod, T1.vyuICSearchItem_intOnCostTypeId, T1.vyuICSearchItem_strOnCostType, T1.vyuICSearchItem_dblAmount, T1.vyuICSearchItem_intCostUOMId, T1.vyuICSearchItem_strCostUOM, T1.vyuICSearchItem_strCostType, T1.vyuICSearchItem_strShortName, T1.vyuICSearchItem_strRequired, T1.vyuICSearchItem_ysnBasisContract, T1.vyuICSearchItem_intTonnageTaxUOMId, T1.vyuICSearchItem_strTonnageTaxUOM, T1.vyuICSearchItem_dblGAShrinkFactor, T1.vyuICSearchItem_intOriginId, T1.vyuICSearchItem_strOrigin, T1.vyuICSearchItem_intProductTypeId, T1.vyuICSearchItem_strProductType, T1.vyuICSearchItem_intRegionId, T1.vyuICSearchItem_strRegion, T1.vyuICSearchItem_intSeasonId, T1.vyuICSearchItem_strSeason, T1.vyuICSearchItem_intClassVarietyId, T1.vyuICSearchItem_strClass, T1.vyuICSearchItem_intProductLineId, T1.vyuICSearchItem_strProductLine, T1.vyuICSearchItem_intGradeId, T1.vyuICSearchItem_strGrade, T1.vyuICSearchItem_strMarketValuation)
-    FROM (
-        SELECT 
-            T.intItemId AS vyuICSearchItem_intItemId, 
-            T.strItemNo AS vyuICSearchItem_strItemNo, 
-            T.strType AS vyuICSearchItem_strType, 
-            T.strDescription AS vyuICSearchItem_strDescription, 
-            T.strManufacturer AS vyuICSearchItem_strManufacturer, 
-            T.strBrandCode AS vyuICSearchItem_strBrandCode, 
-            T.strBrandName AS vyuICSearchItem_strBrandName, 
-            T.strStatus AS vyuICSearchItem_strStatus, 
-            T.strModelNo AS vyuICSearchItem_strModelNo, 
-            T.strTracking AS vyuICSearchItem_strTracking, 
-            T.strLotTracking AS vyuICSearchItem_strLotTracking, 
-            T.intCommodityId AS vyuICSearchItem_intCommodityId, 
-            T.strCommodity AS vyuICSearchItem_strCommodity, 
-            T.intCategoryId AS vyuICSearchItem_intCategoryId, 
-            T.strCategory AS vyuICSearchItem_strCategory, 
-            T.ysnInventoryCost AS vyuICSearchItem_ysnInventoryCost, 
-            T.ysnAccrue AS vyuICSearchItem_ysnAccrue, 
-            T.ysnMTM AS vyuICSearchItem_ysnMTM, 
-            T.intM2MComputationId AS vyuICSearchItem_intM2MComputationId, 
-            T.strM2MComputation AS vyuICSearchItem_strM2MComputation, 
-            T.ysnPrice AS vyuICSearchItem_ysnPrice, 
-            T.strCostMethod AS vyuICSearchItem_strCostMethod, 
-            T.intOnCostTypeId AS vyuICSearchItem_intOnCostTypeId, 
-            T.strOnCostType AS vyuICSearchItem_strOnCostType, 
-            T.dblAmount AS vyuICSearchItem_dblAmount, 
-            T.intCostUOMId AS vyuICSearchItem_intCostUOMId, 
-            T.strCostUOM AS vyuICSearchItem_strCostUOM, 
-            T.strCostType AS vyuICSearchItem_strCostType, 
-            T.strShortName AS vyuICSearchItem_strShortName, 
-            T.strRequired AS vyuICSearchItem_strRequired, 
-            T.ysnBasisContract AS vyuICSearchItem_ysnBasisContract, 
-            T.intTonnageTaxUOMId AS vyuICSearchItem_intTonnageTaxUOMId, 
-            T.strTonnageTaxUOM AS vyuICSearchItem_strTonnageTaxUOM, 
-            T.dblGAShrinkFactor AS vyuICSearchItem_dblGAShrinkFactor, 
-            T.intOriginId AS vyuICSearchItem_intOriginId, 
-            T.strOrigin AS vyuICSearchItem_strOrigin, 
-            T.intProductTypeId AS vyuICSearchItem_intProductTypeId, 
-            T.strProductType AS vyuICSearchItem_strProductType, 
-            T.intRegionId AS vyuICSearchItem_intRegionId, 
-            T.strRegion AS vyuICSearchItem_strRegion, 
-            T.intSeasonId AS vyuICSearchItem_intSeasonId, 
-            T.strSeason AS vyuICSearchItem_strSeason, 
-            T.intClassVarietyId AS vyuICSearchItem_intClassVarietyId, 
-            T.strClass AS vyuICSearchItem_strClass, 
-            T.intProductLineId AS vyuICSearchItem_intProductLineId, 
-            T.strProductLine AS vyuICSearchItem_strProductLine, 
-            T.intGradeId AS vyuICSearchItem_intGradeId, 
-            T.strGrade AS vyuICSearchItem_strGrade, 
-            T.strMarketValuation AS vyuICSearchItem_strMarketValuation, 
-            True AS _from0
-        FROM CodeFirstDatabase.vyuICSearchItem AS T
     ) AS T1");
         }
     }

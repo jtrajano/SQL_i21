@@ -82,8 +82,8 @@
       <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=17.2.6386.32426, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\iRely.Common.17.2.6386.32426\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=17.2.6380.31292, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\iRely.Common.17.2.6380.31292\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
@@ -282,7 +282,7 @@
     <Compile Include="Metadata\vyuICGetItemUOM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\GetUnitConversion.cs" />
-    <Compile Include="Stored Procedures\ProcessBill.cs" />
+    <Compile Include="Stored Procedures\ProcessBill.cs" />	
     <Compile Include="Stored Procedures\ProcessShipmentToInvoice.cs" />
     <Compile Include="Stored Procedures\ConvertToStockUnit.cs" />
     <Compile Include="Stored Procedures\CopyItemLocation.cs" />

@@ -178,7 +178,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICSearchItem>()
+            var query = _db.GetQuery<vyuICGetCompactItem>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
