@@ -130,27 +130,27 @@ BEGIN
 		WHERE intLotId = @intLotId
 	END
 
+	DECLARE @strLotNumber NVARCHAR(50)
+		,@intBondStatusId INT
+		,@strContainerNo NVARCHAR(50)
+		,@intInventoryReceiptItemId INT
+		,@intInventoryReceiptId INT
+		,@strVendorRefNo NVARCHAR(50)
+		,@strWarehouseRefNo NVARCHAR(50)
+		,@strReceiptNumber NVARCHAR(50)
+		,@strTransactionId NVARCHAR(50)
+		,@dtmReceiptDate DATETIME
+
+	SELECT @strLotNumber = strLotNumber
+	FROM tblICLot
+	WHERE intLotId = @intLotId
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblMFLotInventory
 			WHERE intLotId = @intLotId
 			)
 	BEGIN
-		DECLARE @strLotNumber NVARCHAR(50)
-			,@intBondStatusId INT
-			,@strContainerNo NVARCHAR(50)
-			,@intInventoryReceiptItemId INT
-			,@intInventoryReceiptId INT
-			,@strVendorRefNo NVARCHAR(50)
-			,@strWarehouseRefNo NVARCHAR(50)
-			,@strReceiptNumber NVARCHAR(50)
-			,@strTransactionId NVARCHAR(50)
-			,@dtmReceiptDate DATETIME
-
-		SELECT @strLotNumber = strLotNumber
-		FROM tblICLot
-		WHERE intLotId = @intLotId
-
 		SELECT @intBondStatusId = NULL
 
 		SELECT @intBondStatusId = LI.intBondStatusId
@@ -163,19 +163,22 @@ BEGIN
 		JOIN tblICLot L ON L.intLotId = LI.intLotId
 		WHERE L.strLotNumber = @strLotNumber
 
-		if @intBondStatusId is null and not exists(Select *from tblICLot L WHERE L.strLotNumber = @strLotNumber)
-		Begin
-			Select @intBondStatusId=
-					CASE 
-						WHEN @ysnRequireCustomerApproval = 1
-							THEN (
-									SELECT intBondStatusId
-									FROM tblMFCompanyPreference
-									)
-						ELSE NULL
-						END
-					
-		End
+		IF @intBondStatusId IS NULL
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblICLot L
+				WHERE L.strLotNumber = @strLotNumber
+				)
+		BEGIN
+			SELECT @intBondStatusId = CASE 
+					WHEN @ysnRequireCustomerApproval = 1
+						THEN (
+								SELECT intBondStatusId
+								FROM tblMFCompanyPreference
+								)
+					ELSE NULL
+					END
+		END
 
 		SELECT @ysnRequireCustomerApproval = ysnRequireCustomerApproval
 		FROM tblICItem
@@ -222,6 +225,28 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		SELECT @strVendorRefNo = LI.strVendorRefNo
+			,@strWarehouseRefNo = LI.strWarehouseRefNo
+			,@strReceiptNumber = LI.strReceiptNumber
+			,@dtmReceiptDate = dtmReceiptDate
+		FROM tblMFLotInventory LI
+		JOIN tblICLot L ON L.intLotId = LI.intLotId
+		WHERE L.strLotNumber = @strLotNumber
+
+		IF @strReceiptNumber IS NULL
+		BEGIN
+			SELECT @strTransactionId = strTransactionId
+			FROM tblICLot
+			WHERE intLotId = @intLotId
+
+			SELECT @strVendorRefNo = strVendorRefNo
+				,@strWarehouseRefNo = strWarehouseRefNo
+				,@strReceiptNumber = strReceiptNumber
+				,@dtmReceiptDate = dtmReceiptDate
+			FROM tblICInventoryReceipt
+			WHERE strReceiptNumber = @strTransactionId
+		END
+
 		UPDATE tblMFLotInventory
 		SET strVendorRefNo = @strVendorRefNo
 			,strWarehouseRefNo = @strWarehouseRefNo
