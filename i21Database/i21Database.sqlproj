@@ -5315,6 +5315,7 @@
     <Build Include="dbo\Views\vyuMFGetTaskQty.sql" />
     <Build Include="dbo\Views\vyuLGArrivalForecast.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCalculateFiscalSummary.sql" />
+    <Build Include="dbo\Functions\fnCFForceRounding.sql" />
     <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotSplitOnHandHeld.sql" />
   </ItemGroup>

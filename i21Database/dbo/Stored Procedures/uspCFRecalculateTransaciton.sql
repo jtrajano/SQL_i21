@@ -99,6 +99,8 @@ BEGIN
 	DECLARE @strProductNumber				NVARCHAR(MAX)
 	DECLARE @strItemId						NVARCHAR(MAX)
 
+	DECLARE @ysnBackoutDueToRouding			BIT	= 0
+
 
 	-- IF RECALCULATE FROM IMPORTING--
 	-- SAVE RESULT ON GLOBAL TEMP TABLE
@@ -407,17 +409,18 @@ BEGIN
 	WHERE intSiteGroupId = @intSiteGroupId
 
 
-	IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
-	BEGIN
-		SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
-	END
+	--IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+	--BEGIN
+	--	SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+	--END
 
-
+	TAXCOMPUTATION:
+	
 	---------------------------------------------------
 	--				TAX COMPUTATION					 --
 	---------------------------------------------------
 	
-	DECLARE @tblCFOriginalTax		TABLE
+	DECLARE @tblCFOriginalTax				TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -447,7 +450,7 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	DECLARE @tblCFCalculatedTax		TABLE
+	DECLARE @tblCFCalculatedTax				TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -477,7 +480,7 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	DECLARE @tblCFTransactionTax	TABLE
+	DECLARE @tblCFTransactionTax			TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -507,7 +510,7 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	DECLARE @tblCFBackoutTax		TABLE
+	DECLARE @tblCFBackoutTax				TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -537,7 +540,7 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	DECLARE @tblCFRemoteTax			TABLE
+	DECLARE @tblCFRemoteTax					TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -569,7 +572,10 @@ BEGIN
 	)
 	DECLARE @LineItemTaxDetailStagingTable LineItemTaxDetailStagingTable
 
-	DECLARE @strTaxCodes			VARCHAR(MAX) 
+
+
+
+	DECLARE @strTaxCodes		  VARCHAR(MAX) 
 	DECLARE @intLoopTaxGroupID 	  INT
 	DECLARE @intLoopTaxCodeID 	  INT
 	DECLARE @intLoopTaxClassID	  INT
@@ -1053,6 +1059,12 @@ BEGIN
 				OR @strPriceMethod = 'Network Cost')
 				BEGIN
 
+					
+					IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+					BEGIN
+						SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+					END
+
 					INSERT INTO @tblCFOriginalTax	
 				(
 					 [intTaxGroupId]				
@@ -1106,6 +1118,13 @@ BEGIN
 					,1 --@DisregardExemptionSetup
 					,0
 				)
+
+					--Select * from @tblCFOriginalTax
+
+					--IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+					--BEGIN
+					--	SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+					--END
 
 					INSERT INTO @tblCFCalculatedTax	
 				(
@@ -1161,9 +1180,126 @@ BEGIN
 					,0
 				)
 
-				
-
+					--SELECT * FROM @tblCFCalculatedTax
 					--SELECT * FROM @tblCFOriginalTax
+
+				END
+				ELSE IF (LOWER(@strPriceBasis) = 'local index fixed'
+				OR @ysnBackoutDueToRouding = 1)
+				BEGIN
+
+					IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+					BEGIN
+						SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+					END
+
+					INSERT INTO @tblCFOriginalTax	
+				(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,(@dblOriginalPrice * @dblQuantity)
+					,@LineItemTaxDetailStagingTable
+					,1
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,@intTaxGroupId
+					,0
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+					,@intCardId		
+					,@intVehicleId
+					,1 --@DisregardExemptionSetup
+					,0
+				)
+
+					INSERT INTO @tblCFCalculatedTax	
+					(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,(@dblPrice * @dblQuantity)
+					,@LineItemTaxDetailStagingTable
+					,1
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,@intTaxGroupId
+					,0
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+					,@intCardId		
+					,@intVehicleId
+					,0 -- @DisregardExemptionSetup
+					,0
+				)
 
 				END
 				ELSE
@@ -1486,6 +1622,8 @@ BEGIN
 	--SELECT * FROM @tblCFRemoteTax
 	--SELECT * FROM @tblCFTransactionTax
 
+	--SET @ysnBackoutDueToRouding = 0
+
 	---------------------------------------------------
 	--				TAX COMPUTATION					 --
 	---------------------------------------------------
@@ -1497,9 +1635,9 @@ BEGIN
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
-	DECLARE @totalCalculatedTax					NUMERIC(18,6)
-	DECLARE @totalOriginalTax					NUMERIC(18,6)
-	DECLARE @totalCalculatedTaxExempt			NUMERIC(18,6)
+	DECLARE @totalCalculatedTax					NUMERIC(18,6) = 0
+	DECLARE @totalOriginalTax					NUMERIC(18,6) = 0
+	DECLARE @totalCalculatedTaxExempt			NUMERIC(18,6) = 0
 
 	SELECT 
 	 @totalCalculatedTax = ISNULL(SUM(dblCalculatedTax),0)
@@ -1563,9 +1701,14 @@ BEGIN
 				,ROUND((@dblPrice - (@totalCalculatedTaxExempt / @dblQuantity)) * @dblQuantity,2)
 			)
 		END
-	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed')
+	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed' 
+			OR @ysnBackoutDueToRouding = 1)
 		BEGIN
-			INSERT INTO @tblTransactionPrice (
+
+		--RESET
+		SET @ysnBackoutDueToRouding = 0;
+
+		INSERT INTO @tblTransactionPrice (
 		 strTransactionPriceId	
 		,dblOriginalAmount		
 		,dblCalculatedAmount	
@@ -1589,34 +1732,55 @@ BEGIN
 		END
 	ELSE
 		BEGIN
-			INSERT INTO @tblTransactionPrice (
-		 strTransactionPriceId	
-		,dblOriginalAmount		
-		,dblCalculatedAmount	
-		)
-		VALUES
-		(
-			 'Gross Price'
-			,@dblOriginalPrice
-			,@dblPrice + (@totalCalculatedTax / @dblQuantity) 
-		),
-		(
-			 'Net Price'
-			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-			,@dblPrice
-		),
-		--OLD WAY--
-		--(
-		--	 'Net Price'
-		--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-		--	,@dblPrice
-		--),
-		(
-			 'Total Amount'
-			,ROUND(@dblOriginalPrice * @dblQuantity,2)
-			,ROUND((@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
-		)
+
+		IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+		BEGIN
+			SELECT @dblPrice = dbo.fnCFForceRounding((@dblPrice + (@totalCalculatedTax / @dblQuantity)))
+			SET @ysnBackoutDueToRouding  = 1
+			SET @ysnForceRounding = 0
+
+			------CLEAN TAX TABLE--------
+			 DELETE FROM @tblCFOriginalTax				
+			 DELETE FROM @tblCFCalculatedTax				
+			 DELETE FROM @tblCFTransactionTax			
+			 DELETE FROM @tblCFBackoutTax				
+			 DELETE FROM @tblCFRemoteTax					
+			 DELETE FROM @LineItemTaxDetailStagingTable
+
+			GOTO TAXCOMPUTATION
 		END
+		ELSE
+		BEGIN
+
+			INSERT INTO @tblTransactionPrice (
+			 strTransactionPriceId	
+			,dblOriginalAmount		
+			,dblCalculatedAmount	
+			)
+			VALUES
+			(
+				 'Gross Price'
+				,@dblOriginalPrice
+				,@dblPrice + (@totalCalculatedTax / @dblQuantity) 
+			),
+			(
+				 'Net Price'
+				,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+				,@dblPrice
+			),
+			--OLD WAY--
+			--(
+			--	 'Net Price'
+			--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			--	,@dblPrice
+			--),
+			(
+				 'Total Amount'
+				,ROUND(@dblOriginalPrice * @dblQuantity,2)
+				,ROUND((@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
+			)
+		END
+	END
 
 	
 	---------------------------------------------------
