@@ -5291,6 +5291,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCopyRecipeByWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
     <Build Include="dbo\Views\vyuCTQualityApprovedRejected.sql" />
+    <Build Include="dbo\Views\vyuICSearchItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
