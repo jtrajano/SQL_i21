@@ -85,6 +85,7 @@ BEGIN
 	DECLARE @intPriceIndexId 				INT
 	DECLARE @intSiteGroupId 				INT
 
+	DECLARE @ysnForceRounding				BIT
 	DECLARE @strPriceProfileId				NVARCHAR(MAX)
 	DECLARE @strPriceIndexId				NVARCHAR(MAX)
 	DECLARE @strSiteGroup					NVARCHAR(MAX)
@@ -373,6 +374,7 @@ BEGIN
 	SELECT TOP 1 
 	@strPriceProfileId = cfPriceProfile.strPriceProfile
 	,@dblPriceProfileRate = cfPriceProfileDetail.dblRate
+	,@ysnForceRounding =ysnForceRounding
 	FROM tblCFPriceProfileHeader AS cfPriceProfile
 	INNER JOIN tblCFPriceProfileDetail AS cfPriceProfileDetail 
 	ON cfPriceProfile.intPriceProfileHeaderId = cfPriceProfileDetail.intPriceProfileHeaderId
@@ -401,6 +403,12 @@ BEGIN
 	@strSiteGroup = strSiteGroup
 	FROM tblCFSiteGroup
 	WHERE intSiteGroupId = @intSiteGroupId
+
+
+	IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+	BEGIN
+		SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+	END
 
 
 	---------------------------------------------------
