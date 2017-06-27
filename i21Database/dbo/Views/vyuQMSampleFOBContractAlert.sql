@@ -10,7 +10,11 @@ FROM (
 		,'' AS strStatus
 		,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
 		,CD.dblQuantity
-		,ISNULL(QA.dblApprovedQty, 0) AS dblApprovedQty
+		,CASE 
+			WHEN (ISNULL(QA.strSampleStatus, 'Rejected') = 'Partially Approved')
+				THEN ISNULL(QA.dblApprovedQty, 0)
+			ELSE 0
+			END AS dblApprovedQty
 		,I.strItemNo
 		,I.strDescription
 		,CD.strERPPONumber
@@ -22,24 +26,33 @@ FROM (
 		,CD.intContractHeaderId
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		AND CD.intContractStatusId = 1
 	JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 		AND LOWER(CB.strContractBasis) = 'fob'
 	JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 		AND WG.ysnSample = 1
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
 	JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
-	JOIN tblQMSample S ON S.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblQMSample S ON S.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 		AND CA.strType = 'Origin'
 	LEFT JOIN tblSMCountry C ON C.intCountryID = CA.intCountryID
 	LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intProductTypeId
 		AND CA1.strType = 'ProductType'
-	OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
-	WHERE ISNULL(QA.dblApprovedQty, 0) <> ISNULL(CD.dblQuantity, 0)
+	LEFT JOIN vyuCTQualityApprovedRejected QA ON QA.intContractDetailId = CD.intContractDetailId
+	WHERE ISNULL(QA.strSampleStatus, 'Rejected') IN (
+			'Rejected'
+			,'Partially Rejected'
+			,'Partially Approved'
+			)
 	GROUP BY CD.intContractDetailId
 		,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq)
 		,CD.dblQuantity
-		,ISNULL(QA.dblApprovedQty, 0)
+		,CASE 
+			WHEN (ISNULL(QA.strSampleStatus, 'Rejected') = 'Partially Approved')
+				THEN ISNULL(QA.dblApprovedQty, 0)
+			ELSE 0
+			END
 		,I.strItemNo
 		,I.strDescription
 		,CD.strERPPONumber
@@ -47,7 +60,6 @@ FROM (
 		,CH.strCustomerContract
 		,C.strCountry
 		,CA1.strDescription
-		,S.intSampleTypeId
 		,CD.intContractHeaderId
 	) t
 	,tblCTEvent EV
