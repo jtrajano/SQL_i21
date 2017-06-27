@@ -270,6 +270,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetCustomerCurrencyMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentMap());
             modelBuilder.Configurations.Add(new vyuICStockDetailMap());
+
+            modelBuilder.Configurations.Add(new vyuICSearchItemMap());
         }
     }
 }
