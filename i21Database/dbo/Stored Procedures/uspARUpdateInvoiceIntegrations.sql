@@ -16,15 +16,6 @@ DECLARE @intInvoiceId INT
 SET @intInvoiceId = @InvoiceId
 SET @intUserId = @UserId
 
-IF (@intInvoiceId IS NULL)
-	BEGIN
-		SET @ForDelete = 0
-	END
-ELSE
-	BEGIN
-		SET @ForDelete = 1
-	END
-
 EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @intInvoiceId, @ForDelete
 EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 0
