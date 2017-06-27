@@ -19,6 +19,15 @@ BEGIN
 	DECLARE @dblOrderCommitted NUMERIC(18,6)
 	DECLARE @dblUnitReserved NUMERIC(18,6)
 
+	IF (@InvoiceId IS NULL)
+		BEGIN
+			SET @Negate = 0
+		END
+	ELSE
+		BEGIN
+			SET @Negate = 1
+		END
+
 	INSERT INTO @items (
 		[intItemId]				
 		,[intItemLocationId]	
