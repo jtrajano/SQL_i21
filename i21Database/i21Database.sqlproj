@@ -5312,6 +5312,7 @@
     <Build Include="dbo\Views\vyuICSearchItem.sql" />
     <Build Include="dbo\Views\vyuPATStockClassification.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportUpdateRebateOrDiscountPreview.sql" />
+    <Build Include="dbo\Functions\fnCFForceRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
