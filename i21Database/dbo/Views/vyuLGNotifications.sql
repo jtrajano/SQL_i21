@@ -299,7 +299,9 @@ FROM (
 		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
-		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 1)
+		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments LDOC
+							  JOIN tblICDocument D ON D.intDocumentId = LDOC.intDocumentId
+							  WHERE ISNULL(LDOC.ysnReceived ,0) = 1 AND D.strDocumentName LIKE '4C%')
 			AND CH.intContractTypeId = 1 
 			AND ISNULL(L.ysn4cRegistration,0) =0 
 			AND CD.intContractStatusId <> 3
