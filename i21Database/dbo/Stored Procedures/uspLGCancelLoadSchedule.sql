@@ -135,7 +135,16 @@ BEGIN TRY
 				UPDATE tblLGLoad
 				SET intShipmentStatus = 1
 					,ysnCancelled = @ysnCancel
+					,strExternalShipmentNumber = NULL
 				WHERE intLoadId = @intLoadId
+
+				IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE intLoadId = @intLoadId)
+				BEGIN
+					DELETE FROM tblLGLoadStg WHERE intLoadId = @intLoadId
+				END	
+
+				EXEC [uspLGReserveStockForInventoryShipment] @intLoadId = @intLoadId
+					,@ysnReserveStockForInventoryShipment = 1
 
 				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadId
 					,@strRowState = 'Added'
