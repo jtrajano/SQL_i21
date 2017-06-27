@@ -39,7 +39,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intItemId]						=	A.intItemId,
 		[intCustomerStorageId]			=	A.intCustomerStorageId,
 		[strMiscDescription]				=	ISNULL(A.strMiscDescription, A2.strDescription),
-		[dblTotal]						=	CAST(A.dblCost * A.dblQtyReceived  AS DECIMAL(18,2)),
+		[dblTotal]						=	A.dblCost * A.dblQtyReceived,
 		[dblQtyOrdered]					=	A.dblQtyReceived,
 		[dblQtyReceived]					=	A.dblQtyReceived,
 		[dblCost]						=	A.dblCost,
@@ -54,8 +54,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM @voucherDetailStorage A
 	INNER JOIN tblICItem A2 ON A.intItemId = A2.intItemId
 	CROSS APPLY tblAPBill B
-	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityId
-	INNER JOIN tblEMEntity E ON D.intEntityId = E.intEntityId
+	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
+	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
 	LEFT JOIN tblICItemLocation loc ON loc.intLocationId = B.intShipToId AND loc.intItemId = A.intItemId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	--LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'AP Clearing'
