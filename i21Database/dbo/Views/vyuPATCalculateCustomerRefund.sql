@@ -76,10 +76,10 @@ SELECT	NEWID() AS id,
 		dblEquityRefund,
 		dblCashRefund,
 		dblLessFWT = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN ROUND(dblCashRefund * (dblLessFWTPercentage/100), 2) ELSE 0 END,
-		dblLessServiceFee = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund AND dblCashRefund > ComPref.dblCutoffAmount THEN ComPref.dblServiceFee ELSE 0 END,
+		dblLessServiceFee = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund OR (dblCashRefund <= ComPref.dblCutoffAmount AND ComPref.strCutoffTo = 'Cash') THEN ComPref.dblServiceFee ELSE 0 END,
 		dblCheckAmount = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN 
 								ROUND(dblCashRefund - ROUND(dblCashRefund * (dblLessFWTPercentage/100), 2) - 
-								(CASE WHEN dblRefundAmount >= ComPref.dblServiceFee AND dblCashRefund > ComPref.dblCutoffAmount THEN ComPref.dblServiceFee ELSE 0 END), 2)
+								(CASE WHEN dblRefundAmount >= ComPref.dblServiceFee OR (dblCashRefund <= ComPref.dblCutoffAmount AND ComPref.strCutoffTo = 'Cash') THEN ComPref.dblServiceFee ELSE 0 END), 2)
 							ELSE 0 END
 		FROM (SELECT	intCustomerId,
 						intFiscalYearId,
