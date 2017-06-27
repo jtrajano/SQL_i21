@@ -223,7 +223,7 @@ JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	AND LS.strPrimaryStatus = 'Active'
 	AND L.intLotStatusId = 1
-	AND L.dtmExpiryDate > GetDate()
+	AND IsNULL(L.dtmExpiryDate,GetDate()) > GetDate()
 GROUP BY I.intItemId
 	,IsNULL(L.intWeightUOMId, L.intItemUOMId)
 
@@ -255,7 +255,7 @@ JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	AND LS.strPrimaryStatus = 'Active'
 	AND L.intLotStatusId = 1
-	AND L.dtmExpiryDate > GetDate()
+	AND IsNULL(L.dtmExpiryDate,GetDate()) > GetDate()
 GROUP BY I.intItemId
 	,IsNULL(L.intWeightUOMId, L.intItemUOMId)
 

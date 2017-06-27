@@ -780,7 +780,7 @@ BEGIN TRY
 	LEFT JOIN tblICStockReservation SR ON SR.intItemId = I.intItemId
 		AND SR.intTransactionId <> @intWorkOrderId
 		AND SR.strTransactionId <> @strWorkOrderNo
-		AND ISNULL(ysnPosted, 0) = 0
+		AND ISNULL(ysnPosted, 0) = 0 AND SR.intInventoryTransactionType=8
 	GROUP BY I.intItemId
 		,I.intItemUOMId
 
