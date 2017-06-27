@@ -207,6 +207,7 @@ BEGIN
 		,intStorageLocationId
 		,intSourceTransactionId
 		,strSourceTransactionId
+		,strActualCostId 
 		)
 	SELECT intItemId = cl.intItemId
 		,intItemLocationId = il.intItemLocationId
@@ -227,6 +228,7 @@ BEGIN
 		,intStorageLocationId = cl.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
+		,strActualCostId='tblTRLoadHeader.strTransaction'
 	FROM dbo.tblMFWorkOrderConsumedLot cl
 	JOIN dbo.tblICItem i ON cl.intItemId = i.intItemId
 	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
@@ -323,7 +325,7 @@ BEGIN
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 		,@intUserId
 
-	IF @ysnPostGL=1
+	IF @ysnPostGL=1 AND EXISTS(Select *from @GLEntries)
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
@@ -541,8 +543,12 @@ BEGIN
 			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
 
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,@ysnPost
+		IF EXISTS(SELECT *FROM @GLEntries)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,@ysnPost
+		END
+
 	END
 
 	IF @dblOtherCharges IS NOT NULL
@@ -757,8 +763,12 @@ BEGIN
 			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
 
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,@ysnPost
+		IF EXISTS(SELECT *FROM @GLEntries)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,@ysnPost
+		End
+
 	END
 
 	UPDATE dbo.tblMFWorkOrder
