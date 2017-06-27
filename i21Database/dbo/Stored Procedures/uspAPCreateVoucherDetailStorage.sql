@@ -35,7 +35,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	)
 	SELECT
 		[intBillId]						=	@voucherId,
-		[intAccountId]					=	ISNULL(A.intAccountId , ISNULL(G.intAccountId, D.intGLAccountExpenseId)),
+		[intAccountId]					=	ISNULL(A.intAccountId , ISNULL(dbo.[fnGetItemGLAccount](A.intItemId, loc.intItemLocationId, 'AP Clearing'), D.intGLAccountExpenseId)),
 		[intItemId]						=	A.intItemId,
 		[intCustomerStorageId]			=	A.intCustomerStorageId,
 		[strMiscDescription]				=	ISNULL(A.strMiscDescription, A2.strDescription),
@@ -54,10 +54,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM @voucherDetailStorage A
 	INNER JOIN tblICItem A2 ON A.intItemId = A2.intItemId
 	CROSS APPLY tblAPBill B
-	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
-	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
+	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
+	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
+	LEFT JOIN tblICItemLocation loc ON loc.intLocationId = B.intShipToId AND loc.intItemId = A.intItemId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
-	LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'General'
+	--LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'AP Clearing'
 	WHERE B.intBillId = @voucherId
 
 	INSERT INTO @voucherIds
