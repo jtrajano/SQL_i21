@@ -1,6 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateFiscalSummaryHistory]
 	AS
-WITH FiscalSum AS(
+WITH ComPref AS(
+	SELECT TOP(1)
+	strRefund,
+	dblMinimumRefund,
+	dblServiceFee,
+	dblCutoffAmount,
+	strCutoffTo
+	FROM tblPATCompanyPreference
+),
+FiscalSum AS(
 	SELECT	R.intRefundId,
 			R.intFiscalYearId,
 			RC.intCustomerId,
@@ -28,12 +37,15 @@ WITH FiscalSum AS(
 				intCustomerId,
 				RCat.dblVolume,
 				dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate,
-				dblCashRefund = (RCat.dblVolume * RCat.dblRefundRate) * (RR.dblCashPayout/100)
+				dblCashRefund = CASE WHEN dblCashRefund <= ComPref.dblCutoffAmount THEN
+											(CASE WHEN ComPref.strCutoffTo = 'Cash' THEN dblEquityRefund + dblCashRefund ELSE 0 END)
+											ELSE dblCashRefund END
 		FROM tblPATRefundCustomer RC
 		INNER JOIN tblPATRefundCategory RCat
 			ON RCat.intRefundCustomerId = RC.intRefundCustomerId
 		INNER JOIN tblPATRefundRate RR
-			ON RR.intRefundTypeId = RC.intRefundTypeId) RC
+			ON RR.intRefundTypeId = RC.intRefundTypeId
+		CROSS JOIN ComPref) RC
 	INNER JOIN tblPATRefund R
 		ON R.intRefundId = RC.intRefundId
 	INNER JOIN tblARCustomer AC
