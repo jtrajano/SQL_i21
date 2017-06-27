@@ -13,6 +13,8 @@
 	,@strSiteId						NVARCHAR(MAX)	 =	 ''
 	,@strLocalPricingIndex			NVARCHAR(MAX)	 =	 ''
 	,@dblRate						NUMERIC(18,6)	 =    0
+	,@ysnForceRounding				NVARCHAR(MAX)	 =	 ''
+
 	---------------------------------------------------------
 	 
 AS
@@ -35,6 +37,21 @@ BEGIN
 	---------------------------------------------------------
 	----				    VALIDATION		   			 ----
 	---------------------------------------------------------
+
+	IF (@ysnForceRounding = 'N')
+		BEGIN 
+			SET @ysnForceRounding = 0
+		END
+	ELSE IF (@ysnForceRounding = 'Y' OR @ysnForceRounding IS NULL OR @ysnForceRounding = '')
+		BEGIN
+			SET @ysnForceRounding = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strPriceProfile,'Invalid Force Rounding value'+ @ysnForceRounding +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
 
 	IF(@strPriceProfile IS NULL OR @strPriceProfile = '')
 	BEGIN
@@ -291,7 +308,8 @@ BEGIN
 				,intSiteId				
 				,intLocalPricingIndex	
 				,dblRate					
-				,strBasis				
+				,strBasis
+				,ysnForceRounding				
 				)
 			VALUES(
 				 @intId
@@ -302,6 +320,7 @@ BEGIN
 				,@intLocalPricingIndex	
 				,@dblRate					
 				,@strBasis		
+				,@ysnForceRounding
 				)
 			COMMIT TRANSACTION
 			RETURN 1
@@ -315,6 +334,3 @@ BEGIN
 		END CATCH
 	END
 END
-GO
-
-
