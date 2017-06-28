@@ -794,6 +794,7 @@ BEGIN TRY
 		,dblQuantity NUMERIC(18, 6)
 		,intItemUOMId INT
 		,dblRatio NUMERIC(18, 6)
+		,intMainItemId INT
 		)
 
 	IF @ysnConsumptionByRatio = 0
@@ -803,12 +804,14 @@ BEGIN TRY
 			,SUM(IsNULL(WI.dblQuantity, 0))
 			,WI.intItemUOMId
 			,100
+			,I.intMainItemId
 		FROM @tblICFinalItem I
 		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
 			AND WI.intWorkOrderId = @intWorkOrderId
 			AND WI.ysnConsumptionReversed = 0
 		GROUP BY I.intItemId
 			,WI.intItemUOMId
+			,I.intMainItemId
 
 		INSERT INTO @tblMFQtyInProductionStagingLocation (
 			intItemId
@@ -839,10 +842,14 @@ BEGIN TRY
 			,SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId)
 			,WI.intItemUOMId
 			,(SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intMainItemId)) * 100
+			,I.intMainItemId
 		FROM @tblICFinalItem I
 		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
 			AND WI.intWorkOrderId = @intWorkOrderId
 			AND WI.ysnConsumptionReversed = 0
+
+		Delete I
+		from @tblICFinalItem I JOIN @tblMFWorkOrderInputLot WI on I.intItemId=WI.intMainItemId Where dblRatio=100 and WI.intItemId<>WI.intMainItemId
 
 		INSERT INTO @tblMFQtyInProductionStagingLocation (
 			intItemId
