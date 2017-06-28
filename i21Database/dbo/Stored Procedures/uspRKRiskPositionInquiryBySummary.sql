@@ -402,7 +402,7 @@ SELECT DISTINCT 2 intRowNumber,'Outright Coverage' grpname,'Terminal position (b
   case when ft.strBuySell='Buy' then (ft.intNoOfContract*@dblContractSize) else -(ft.intNoOfContract*@dblContractSize) end dblQuantity,um.intCommodityUnitMeasureId  
   , null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
 FROM tblRKFutOptTransaction ft  
-JOIN tblRKFutureMarket mar on mar.intFutureMarketId=ft.intFutureMarketId
+JOIN tblRKFutureMarket mar on mar.intFutureMarketId=ft.intFutureMarketId and ft.strStatus='Filled'
 JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  and ft.intInstrumentTypeId = 1  and ft.intCommodityId=@intCommodityId 
                                                        and ft.intFutureMarketId=@intFutureMarketId
 JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  AND dtmFutureMonthsDate >= @dtmFutureMonthsDate  
