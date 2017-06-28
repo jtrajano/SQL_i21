@@ -177,6 +177,7 @@
     <Folder Include="Scripts\Post-Deployment\CRM" />
     <Folder Include="Scripts\Post-Deployment\LG" />
     <Folder Include="Scripts\Post-Deployment\EM\DataMigration" />
+    <Folder Include="Scripts\Post-Deployment\RM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -5444,6 +5445,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
     <None Include="Scripts\Post-Deployment\IC\20_UpdateContractItemStatuses.sql" />
+    <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -17,6 +17,7 @@ DECLARE @dtmSettlemntPriceDate DATETIME
 DECLARE @strLocationName nvarchar(50)
 DECLARE @ysnIncludeInventoryM2M bit
 DECLARE @ysnEnterForwardCurveForMarketBasisDifferential bit
+DECLARE @ysnCanadianCustomer bit
 
 SELECT @dtmPriceDate=dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId=@intM2MBasisId  
 SELECT @ysnIncludeBasisDifferentialsInResults=ysnIncludeBasisDifferentialsInResults FROM tblRKCompanyPreference
@@ -24,6 +25,8 @@ SELECT @ysnEnterForwardCurveForMarketBasisDifferential=ysnEnterForwardCurveForMa
 SELECT @dtmSettlemntPriceDate=dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId=@intFutureSettlementPriceId
 SELECT @strLocationName=strLocationName from tblSMCompanyLocation where intCompanyLocationId=@intLocationId
 SELECT @ysnIncludeInventoryM2M= ysnIncludeInventoryM2M from tblRKCompanyPreference
+SELECT @ysnCanadianCustomer = isnull(ysnCanadianCustomer,0) FROM tblRKCompanyPreference
+
 DECLARE @tblFinalDetail TABLE (
        intContractHeaderId int,   
        intContractDetailId int
@@ -52,6 +55,7 @@ DECLARE @tblFinalDetail TABLE (
        ,dblMarketBasis1 NUMERIC(24, 10)
        ,dblMarketBasisUOM  NUMERIC(24, 10)
        ,dblContractBasis NUMERIC(24, 10)
+	   ,dblDummyContractBasis NUMERIC(24, 10)
        ,dblFuturePrice1 NUMERIC(24, 10)
        ,dblFuturesClosingPrice1 NUMERIC(24, 10)
        ,intContractTypeId int
@@ -145,6 +149,7 @@ DECLARE @tblOpenContractList TABLE (
                  intPricingTypeId int,
                  strPricingType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 				 dblContractBasis NUMERIC(24, 10),
+				 dblDummyContractBasis NUMERIC(24, 10),
                  dblCash NUMERIC(24, 10),
 				 dblFuturesClosingPrice1 NUMERIC(24, 10),
 				 dblFutures NUMERIC(24, 10),                
@@ -173,7 +178,7 @@ DECLARE @tblOpenContractList TABLE (
 
 INSERT INTO @tblOpenContractList (intContractHeaderId, intContractDetailId,strContractOrInventoryType,strContractSeq,strEntityName,intEntityId,strFutMarketName,
 intFutureMarketId,strFutureMonth,intFutureMonthId,strCommodityCode,intCommodityId,strItemNo,intItemId,strOrgin,intOriginId,strPosition, strPeriod,strPriOrNotPriOrParPriced,
-intPricingTypeId,strPricingType,dblContractBasis,dblCash,dblFuturesClosingPrice1,dblFutures ,dblMarketBasis1, dblMarketBasisUOM, dblFuturePrice1,                         
+intPricingTypeId,strPricingType,dblContractBasis,dblDummyContractBasis,dblCash,dblFuturesClosingPrice1,dblFutures ,dblMarketBasis1, dblMarketBasisUOM, dblFuturePrice1,                         
 intContractTypeId ,dblRate,intCommodityUnitMeasureId,intQuantityUOMId,intPriceUOMId,intCurrencyId,PriceSourceUOMId,dblCosts,dblContractOriginalQty,
 ysnSubCurrency,intMainCurrencyId,intCent,dtmPlannedAvailabilityDate,intCompanyLocationId,intMarketZoneId,intContractStatusId,dtmContractDate,ysnExpired)		
 
@@ -198,6 +203,7 @@ SELECT distinct cd.intContractHeaderId, cd.intContractDetailId,
                   cd.intPricingTypeId,
                   cd.strPricingType,
 				  isnull(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END,0) dblContractBasis,
+				  isnull(cd.dblBasis,0) dblDummyContractBasis,
                   CASE WHEN cd.intPricingTypeId=6 then dblCashPrice else null end dblCash,
     dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,(CASE WHEN ffm.ysnExpired= 0 THEN cd.intFutureMonthId  
 		ELSE (SELECT TOP 1  intFutureMonthId FROM tblRKFuturesMonth FuMo WHERE dtmFutureMonthsDate > 
@@ -256,14 +262,14 @@ WHERE   cd.intCommodityId= @intCommodityId
 INSERT INTO @tblFinalDetail (intContractHeaderId,
     intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
        ,strCommodityCode ,intCommodityId ,strItemNo ,intItemId ,strOrgin ,intOriginId ,strPosition ,strPeriod ,strPriOrNotPriOrParPriced ,intPricingTypeId ,strPricingType 
-       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
+       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis,dblDummyContractBasis,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
        ,intConcurrencyId ,dblOpenQty ,dblRate ,intCommodityUnitMeasureId ,intQuantityUOMId ,intPriceUOMId ,intCurrencyId ,PriceSourceUOMId ,dblMarketBasis 
        ,dblCashPrice ,dblAdjustedContractPrice ,dblFuturesClosingPrice ,dblFuturePrice ,dblMarketPrice ,dblResult ,dblMarketFuturesResult ,dblResultCash1 ,dblContractPrice 
        ,dblResultCash ,dblResultBasis,ysnSubCurrency,intMainCurrencyId,intCent,dtmPlannedAvailabilityDate) 
 
 SELECT distinct   intContractHeaderId,intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
        ,strCommodityCode ,intCommodityId ,strItemNo ,intItemId ,strOrgin ,intOriginId ,strPosition ,strPeriod ,strPriOrNotPriOrParPriced ,intPricingTypeId ,strPricingType 
-       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
+       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblDummyContractBasis,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
        ,0 as intConcurrencyId ,dblOpenQty ,dblRate ,intCommodityUnitMeasureId ,intQuantityUOMId ,intPriceUOMId ,intCurrencyId ,PriceSourceUOMId ,dblMarketBasis 
        ,dblCashPrice ,dblAdjustedContractPrice,dblFuturePrice ,dblFuturePrice ,dblMarketPrice ,dblResult ,dblMarketFuturesResult ,dblResultCash1 ,dblContractPrice 
        ,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash,
@@ -307,7 +313,7 @@ convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dbl
 (SELECT 
 		cd.intContractHeaderId,cd.intContractDetailId, cd.strContractOrInventoryType,cd.strContractSeq,cd.strEntityName,cd.intEntityId,cd.strFutMarketName,
 		cd.intFutureMarketId,cd.strFutureMonth,cd.intFutureMonthId,cd.strCommodityCode,cd.intCommodityId,cd.strItemNo,cd.intItemId,cd.strOrgin,cd.intOriginId,cd.strPosition, 
-		cd.strPeriod,cd.strPriOrNotPriOrParPriced,cd.intPricingTypeId,cd.strPricingType,cd.dblContractBasis,cd.dblCash,cd.dblFuturesClosingPrice1,cd.dblFutures , cd.dblMarketBasis1,                            
+		cd.strPeriod,cd.strPriOrNotPriOrParPriced,cd.intPricingTypeId,cd.strPricingType,cd.dblContractBasis,cd.dblDummyContractBasis,cd.dblCash,cd.dblFuturesClosingPrice1,cd.dblFutures , cd.dblMarketBasis1,                            
 		cd.dblMarketBasisUOM,cd.dblFuturePrice1,cd.intContractTypeId ,cd.dblRate,cd.intCommodityUnitMeasureId,cd.intQuantityUOMId,cd.intPriceUOMId,cd.intCurrencyId,
 		convert(int,cd.PriceSourceUOMId) PriceSourceUOMId,cd.dblCosts, cd.dblContractOriginalQty,
 		SUM(iv.dblPurchaseContractShippedQty) over (Partition BY cd.intContractDetailId) as InTransQty,
@@ -323,13 +329,13 @@ BEGIN
 INSERT INTO @tblFinalDetail (intContractHeaderId,
     intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
        ,strCommodityCode ,intCommodityId ,strItemNo ,intItemId ,strOrgin ,intOriginId ,strPosition ,strPeriod ,strPriOrNotPriOrParPriced ,intPricingTypeId ,strPricingType 
-       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
+       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblDummyContractBasis,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
        ,intConcurrencyId ,dblOpenQty ,dblRate ,intCommodityUnitMeasureId ,intQuantityUOMId ,intPriceUOMId ,intCurrencyId ,PriceSourceUOMId ,dblMarketBasis 
        ,dblCashPrice ,dblAdjustedContractPrice ,dblFuturesClosingPrice ,dblFuturePrice ,dblMarketPrice ,dblResult ,dblMarketFuturesResult ,dblResultCash1 ,dblContractPrice 
        ,dblResultCash ,dblResultBasis,dblShipQty,ysnSubCurrency,intMainCurrencyId,intCent,dtmPlannedAvailabilityDate) 
 SELECT DISTINCT     intContractHeaderId,intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
        ,strCommodityCode ,intCommodityId ,strItemNo ,intItemId ,strOrgin ,intOriginId ,strPosition ,strPeriod ,strPriOrNotPriOrParPriced ,intPricingTypeId ,strPricingType 
-       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
+       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblDummyContractBasis,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
        ,intConcurrencyId ,dblOpenQty ,dblRate ,intCommodityUnitMeasureId ,intQuantityUOMId ,intPriceUOMId ,intCurrencyId ,PriceSourceUOMId ,dblMarketBasis 
        ,dblCashPrice ,dblAdjustedContractPrice ,dblFuturesClosingPrice ,dblFuturePrice ,dblMarketPrice ,dblResult ,dblMarketFuturesResult ,dblResultCash1 ,dblContractPrice 
        ,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash,
@@ -370,7 +376,7 @@ convert(decimal(24,6),
   FROM
 (SELECT   DISTINCT  cd.intContractHeaderId, cd.intContractDetailId,'Inventory (P)' as strContractOrInventoryType,cd.strContractSeq,cd.strEntityName,
 				cd.intEntityId,cd.strFutMarketName,cd.intFutureMarketId,cd.strFutureMonth,cd.intFutureMonthId,cd.strCommodityCode,cd.intCommodityId,cd.strItemNo,cd.intItemId,
-				cd.strOrgin,cd.intOriginId,cd.strPosition, cd.strPeriod,cd.strPriOrNotPriOrParPriced,cd.intPricingTypeId,cd.strPricingType,cd.dblContractBasis,cd.dblFutures,
+				cd.strOrgin,cd.intOriginId,cd.strPosition, cd.strPeriod,cd.strPriOrNotPriOrParPriced,cd.intPricingTypeId,cd.strPricingType,cd.dblContractBasis,cd.dblDummyContractBasis,cd.dblFutures,
 				cd.dblCash,cd.dblMarketBasis1,cd.dblMarketBasisUOM,cd.dblFuturePrice1,cd.dblFuturesClosingPrice1,cd.intContractTypeId ,0 as intConcurrencyId ,
 				sum(ia.OpenQty) over (Partition BY cd.intContractDetailId) dblOpenQty1,cd.dblRate,cd.intCommodityUnitMeasureId,cd.intQuantityUOMId,cd.intPriceUOMId,cd.intCurrencyId,
 				cd.PriceSourceUOMId,cd.dblCosts,sum(si.dblQty) over (Partition BY cd.intContractDetailId) dblOpenQtyShipped ,
@@ -390,13 +396,13 @@ END
 INSERT INTO @tblFinalDetail (intContractHeaderId,
     intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
        ,strCommodityCode ,intCommodityId ,strItemNo ,intItemId ,strOrgin ,intOriginId ,strPosition ,strPeriod ,strPriOrNotPriOrParPriced ,intPricingTypeId ,strPricingType 
-       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
+       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblDummyContractBasis,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
        ,intConcurrencyId ,dblOpenQty ,dblRate ,intCommodityUnitMeasureId ,intQuantityUOMId ,intPriceUOMId ,intCurrencyId ,PriceSourceUOMId ,dblMarketBasis 
        ,dblCashPrice ,dblAdjustedContractPrice ,dblFuturesClosingPrice ,dblFuturePrice ,dblMarketPrice ,dblResult ,dblMarketFuturesResult ,dblResultCash1 ,dblContractPrice 
        ,dblResultCash ,dblResultBasis,dblShipQty,ysnSubCurrency,intMainCurrencyId,intCent,dtmPlannedAvailabilityDate) 
 SELECT DISTINCT    intContractHeaderId, intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
        ,strCommodityCode ,intCommodityId ,strItemNo ,intItemId ,strOrgin ,intOriginId ,strPosition ,strPeriod ,strPriOrNotPriOrParPriced ,intPricingTypeId ,strPricingType 
-       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
+       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblDummyContractBasis,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
        ,intConcurrencyId ,dblOpenQty ,dblRate ,intCommodityUnitMeasureId ,intQuantityUOMId ,intPriceUOMId ,intCurrencyId ,PriceSourceUOMId ,dblMarketBasis 
        ,dblCashPrice ,dblAdjustedContractPrice ,dblFuturePrice ,dblFuturePrice ,dblMarketPrice ,dblResult ,dblMarketFuturesResult ,dblResultCash1 ,dblContractPrice 
        ,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash,
@@ -438,7 +444,7 @@ convert(decimal(24,6),
 (SELECT    cd.intContractHeaderId,  cd.intContractDetailId,'In-transit'+'(P)' as strContractOrInventoryType, 0 as intConcurrencyId ,
 			cd.strContractSeq,cd.strEntityName,cd.intEntityId,cd.strFutMarketName,cd.intFutureMarketId,cd.strFutureMonth,cd.intFutureMonthId,cd.strCommodityCode,
 			cd.intCommodityId,cd.strItemNo,cd.intItemId,cd.strOrgin,cd.intOriginId,cd.strPosition, cd.strPeriod,cd.strPriOrNotPriOrParPriced,cd.intPricingTypeId,
-			cd.strPricingType,cd.dblContractBasis,cd.dblFutures,cd.dblCash,    cd.dblMarketBasis1,cd.dblMarketBasisUOM,cd.dblFuturePrice1,cd.intContractTypeId,
+			cd.strPricingType,cd.dblContractBasis,cd.dblDummyContractBasis,cd.dblFutures,cd.dblCash,    cd.dblMarketBasis1,cd.dblMarketBasisUOM,cd.dblFuturePrice1,cd.intContractTypeId,
 			SUM(sri.dblOpenReceive) over (partition by cd.intContractDetailId) dblContractPQty, 
 			sum(cc.dblPurchaseContractShippedQty)  over (partition by cd.intContractDetailId) dblOpenQty1,
 			cd.dblRate,cd.intCommodityUnitMeasureId,cd.intQuantityUOMId,cd.intPriceUOMId,cd.intCurrencyId,cd.PriceSourceUOMId ,cd.dblCosts,0 dblSalesIntransit
@@ -453,13 +459,13 @@ LEFT JOIN vyuRKPurchaseIntransitView cc on cc.intContractDetailId=cd.intContract
 INSERT INTO @tblFinalDetail (intContractHeaderId,
               intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
        ,strCommodityCode ,intCommodityId ,strItemNo ,intItemId ,strOrgin ,intOriginId ,strPosition ,strPeriod ,strPriOrNotPriOrParPriced ,intPricingTypeId ,strPricingType 
-       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
+       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblDummyContractBasis,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
        ,intConcurrencyId ,dblOpenQty ,dblRate ,intCommodityUnitMeasureId ,intQuantityUOMId ,intPriceUOMId ,intCurrencyId ,PriceSourceUOMId ,dblMarketBasis 
        ,dblCashPrice ,dblAdjustedContractPrice ,dblFuturesClosingPrice ,dblFuturePrice ,dblMarketPrice ,dblResult ,dblMarketFuturesResult ,dblResultCash1 ,dblContractPrice 
        ,dblResultCash ,dblResultBasis,dblShipQty,ysnSubCurrency,intMainCurrencyId,intCent,dtmPlannedAvailabilityDate) 
 SELECT DISTINCT intContractHeaderId, intContractDetailId ,strContractOrInventoryType ,strContractSeq ,strEntityName ,intEntityId ,strFutMarketName ,intFutureMarketId ,strFutureMonth ,intFutureMonthId 
        ,strCommodityCode ,intCommodityId ,strItemNo ,intItemId ,strOrgin ,intOriginId ,strPosition ,strPeriod ,strPriOrNotPriOrParPriced ,intPricingTypeId ,strPricingType 
-       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
+       ,dblFutures,dblCash,dblCosts,dblMarketBasis1,dblMarketBasisUOM,dblContractBasis ,dblDummyContractBasis,dblFuturePrice1 ,dblFuturesClosingPrice1 ,intContractTypeId 
        ,intConcurrencyId ,dblOpenQty ,dblRate ,intCommodityUnitMeasureId ,intQuantityUOMId ,intPriceUOMId ,intCurrencyId ,PriceSourceUOMId ,dblMarketBasis 
        ,dblCashPrice ,dblAdjustedContractPrice ,dblFuturesClosingPrice ,dblFuturePrice ,dblMarketPrice ,dblResult ,dblMarketFuturesResult ,dblResultCash1 ,dblContractPrice 
        ,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash,
@@ -517,7 +523,7 @@ SELECT  distinct  cd.intContractHeaderId,cd.intContractDetailId,
                   cd.strPriOrNotPriOrParPriced,
                   cd.intPricingTypeId,
                   cd.strPricingType,
-                  cd.dblContractBasis,
+                  cd.dblContractBasis,dblDummyContractBasis,
                   cd.dblFutures ,
 				  cd.dblCash,
                   cd.dblMarketBasis1,    
@@ -647,6 +653,8 @@ SELECT intContractHeaderId,
             end as dblOpenQty,
       intPricingTypeId,strPricingType, 
       convert(decimal(24,6),dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))) as dblContractBasis,
+	  convert(decimal(24,6),dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))) as dblDummyContractBasis,
+	  convert(decimal(24,6),dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))) as dblCanadianContractBasis,
       convert(decimal(24,6),dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures)) as dblFutures,    
       convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblCash)) as dblCash, 
          dblCosts,
@@ -662,7 +670,13 @@ SELECT intContractHeaderId,
               dblResult as dblResult1,
               dblResultBasis as dblResultBasis1,
               dblMarketFuturesResult as dblMarketFuturesResult1,
-                       intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate   
+            intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate,
+				CONVERT(decimal(24,6), case when isnull(dblRate,0)=0 then 
+			dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures)
+			else
+			case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end<>@intCurrencyUOMId THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures)*dblRate 
+			else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures) end 
+			end) dblCanadianFutures	   
 FROM @tblFinalDetail ORDER BY intCommodityId
 END
 ELSE
@@ -681,6 +695,13 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
             strCommodityCode,intCommodityId,strItemNo,intItemId,intOriginId,strOrgin,strPosition,strPeriod,strPriOrNotPriOrParPriced,
                      case when intContractTypeId =1 then  dblOpenQty else -dblOpenQty end dblOpenQty ,                    
             intPricingTypeId,strPricingType,
+			convert(decimal(24,6),
+            case when isnull(dblRate,0)=0 then 
+            dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblDummyContractBasis,0))
+            else
+            case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end<>@intCurrencyUOMId THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblDummyContractBasis,0))*dblRate 
+            else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblDummyContractBasis,0)) end end)
+            as dblDummyContractBasis,
             convert(decimal(24,6),
             case when isnull(dblRate,0)=0 then 
             dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))
@@ -688,13 +709,22 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
             case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end<>@intCurrencyUOMId THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))*dblRate 
             else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0)) end end)
             as dblContractBasis,
+			convert(decimal(24,6),
+            case when isnull(dblRate,0)=0 then 
+            dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))
+            else
+            case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end<>@intCurrencyUOMId THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0))*dblRate 
+            else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0)) end end)
+            as dblCanadianContractBasis,
+
+			case when @ysnCanadianCustomer= 1 then dblFutures else 
             convert(decimal(24,6), case when isnull(dblRate,0)=0 then 
             dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures)
             else
             case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end<>@intCurrencyUOMId THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures)*dblRate 
             else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures) end 
-            end)
-            as dblFutures,             
+            end) end
+            as 	dblFutures,             
             convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblCash)) as dblCash, 
                      dblCosts,
                      dbo.fnRKGetCurrencyConvertion(CASE WHEN ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* 
@@ -717,9 +747,18 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
                      case when isnull(@ysnIncludeBasisDifferentialsInResults,0) =0 then 0 else 
 					 case when  ysnSubCurrency=1 then dblResultBasis/isnull(intCent,0) else dblResultBasis end end as dblResultBasis1,
                      case when  ysnSubCurrency=1 then dblMarketFuturesResult/isnull(intCent,0) else dblMarketFuturesResult end  as dblMarketFuturesResult1            
-                                   ,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate
+                                   ,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate,
+
+						CONVERT(decimal(24,6), case when isnull(dblRate,0)=0 then 
+						dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures)
+						else
+						case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end<>@intCurrencyUOMId THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures)*dblRate 
+						else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblFutures) end 
+						end) dblCanadianFutures	
       FROM @tblFinalDetail )t 
       ORDER BY intCommodityId,strContractSeq desc    
+
+	  
 END
 
 ------------- Calculation of Results ----------------------
@@ -770,22 +809,31 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRo
 SELECT DISTINCT 0 as intConcurrencyId,intContractHeaderId,intContractDetailId,
 strContractOrInventoryType,strContractSeq,strEntityName,intEntityId,intFutureMarketId,strFutMarketName,intFutureMonthId,
 strFutureMonth,dblOpenQty dblOpenQty,strCommodityCode,intCommodityId,intItemId,strItemNo,strOrgin,strPosition,strPeriod,strPriOrNotPriOrParPriced,intPricingTypeId,strPricingType,
-dblContractBasis dblContractBasis,dblFutures dblFutures, dblCash dblCash ,abs(dblCosts) dblCosts,
+case when isnull(@ysnIncludeBasisDifferentialsInResults,0) = 0 then 0 else	case when @ysnCanadianCustomer= 1 then dblCanadianFutures+dblCanadianContractBasis-isnull(dblFutures,0) else dblContractBasis end end dblContractBasis,
+dblFutures dblFutures, dblCash dblCash ,abs(dblCosts) dblCosts,
 dblMarketBasis dblMarketBasis,dblFuturePrice dblFuturePrice,intContractTypeId,dblAdjustedContractPrice dblAdjustedContractPrice ,
 dblCashPrice dblCashPrice,dblMarketPrice dblMarketPrice,case when isnull(@ysnIncludeBasisDifferentialsInResults,0) =0 then isnull(dblResultBasis,0)+isnull(dblMarketFuturesResult,0)+isnull(dblResultCash,0) ELSE dblResult END dblResult,dblResultBasis dblResultBasis,
 dblMarketFuturesResult dblMarketFuturesResult,dblResultCash dblResultCash,
-dblContractBasis + dblFutures + dblCash dblContractPrice,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate FROM #Temp 
+
+CASE WHEN @ysnCanadianCustomer = 1 then dblCanadianFutures+case when isnull(@ysnIncludeBasisDifferentialsInResults,0) = 0 then dblDummyContractBasis else dblCanadianContractBasis end+dblCash
+
+ELSE dblContractBasis + dblFutures + dblCash end dblContractPrice
+
+,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate FROM #Temp 
 WHERE strContractOrInventoryType  like '%(P)%' and dblOpenQty > 0 
 UNION
 SELECT DISTINCT 0 as intConcurrencyId,intContractHeaderId,intContractDetailId,
 strContractOrInventoryType,strContractSeq,strEntityName,intEntityId,intFutureMarketId,strFutMarketName,intFutureMonthId,
 strFutureMonth,dblOpenQty dblOpenQty,strCommodityCode,intCommodityId,intItemId,strItemNo,strOrgin,strPosition,strPeriod,strPriOrNotPriOrParPriced,intPricingTypeId,strPricingType,
-dblContractBasis dblContractBasis,dblFutures dblFutures, dblCash dblCash ,abs(dblCosts) dblCosts,
+case when isnull(@ysnIncludeBasisDifferentialsInResults,0) = 0 then 0 else	case when @ysnCanadianCustomer= 1 then dblCanadianFutures+dblCanadianContractBasis-isnull(dblFutures,0) else dblContractBasis end end dblContractBasis,dblFutures dblFutures, dblCash dblCash ,abs(dblCosts) dblCosts,
 dblMarketBasis dblMarketBasis,dblFuturePrice dblFuturePrice,intContractTypeId,dblAdjustedContractPrice dblAdjustedContractPrice ,
 dblCashPrice dblCashPrice,dblMarketPrice dblMarketPrice,
 case when isnull(@ysnIncludeBasisDifferentialsInResults,0) =0 then isnull(dblResultBasis,0)+isnull(dblMarketFuturesResult,0)+isnull(dblResultCash,0) ELSE dblResult END  dblResult,
 dblResultBasis dblResultBasis,
 dblMarketFuturesResult dblMarketFuturesResult,dblResultCash dblResultCash,
-dblContractBasis + dblFutures + dblCash dblContractPrice,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate FROM #Temp 
+
+case when @ysnCanadianCustomer = 1 then dblCanadianFutures+case when isnull(@ysnIncludeBasisDifferentialsInResults,0) = 0 then 0 else dblCanadianContractBasis end+dblCash else dblContractBasis + dblFutures + dblCash end dblContractPrice,
+
+intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate FROM #Temp 
 WHERE strContractOrInventoryType  like '%(S)%' and dblOpenQty <> 0 )t ORDER BY intContractHeaderId DESC
 
