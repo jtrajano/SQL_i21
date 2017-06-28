@@ -1,25 +1,41 @@
 ﻿CREATE VIEW [dbo].[vyuMFGetBlendTransactions]
 	AS 
-SELECT DISTINCT w.intWorkOrderId [Blending Transaction Id],w.strWorkOrderNo [Blending Transaction No],ISNULL(wp.dtmProductionDate,w.dtmCompletedDate) [Blend Date],
-t1.intItemId [Primary Product Id],t1.strItemNo [Primary Product],t1.dblQuantity [Primary Product Qty],
-t2.intItemId [Blending Agent Product Id],t2.strItemNo [Blending Agent Product],t2.dblQuantity [Blending Agent Qty],
-i.intItemId [Finished Good Id],i.strItemNo [Finished Good Product],wp.dblQuantity [Finished Good Product Qty]
+SELECT DISTINCT intBlendTransactionId = w.intWorkOrderId
+	, strBlendTransactionNo = w.strWorkOrderNo
+	, dtmBlendDate = ISNULL(wp.dtmProductionDate,w.dtmCompletedDate)
+	, intPrimaryItemId = t1.intItemId
+	, strPrimaryItemNo = t1.strItemNo
+	, dblPrimaryQty = t1.dblQuantity
+	, intBlendAgendItemId = t2.intItemId
+	, strBlendAgentItemNo = t2.strItemNo
+	, dblBlendAgentQty = t2.dblQuantity
+	, intFinishedGoodItemId = i.intItemId
+	, strFinishedGoodItemNo = i.strItemNo
+	, dblFinishedGoodQty = wp.dblQuantity
 FROM tblMFWorkOrderProducedLot wp 
-join tblMFWorkOrder w on wp.intWorkOrderId=w.intWorkOrderId
-join tblICItem i on wp.intItemId=i.intItemId
-join tblMFManufacturingProcess mp on w.intManufacturingProcessId=mp.intManufacturingProcessId
-left join
+JOIN tblMFWorkOrder w ON wp.intWorkOrderId = w.intWorkOrderId
+JOIN tblICItem i ON wp.intItemId = i.intItemId
+JOIN tblMFManufacturingProcess mp ON w.intManufacturingProcessId = mp.intManufacturingProcessId
+LEFT JOIN
 (
-	select intWorkOrderId,i.intItemId,i.strItemNo,SUM(dblQuantity) dblQuantity,ROW_NUMBER() OVER(Partition By intWorkOrderId Order By SUM(dblQuantity) Desc) intRowNo
-	from tblMFWorkOrderConsumedLot wp
-	join tblICItem i on wp.intItemId=i.intItemId
-	group by intWorkOrderId,i.intItemId, i.strItemNo 
-) t1 on w.intWorkOrderId=t1.intWorkOrderId AND t1.intRowNo=1
-left join
+	SELECT intWorkOrderId
+		, i.intItemId
+		, i.strItemNo
+		, SUM(dblQuantity) dblQuantity
+		, ROW_NUMBER() OVER(Partition By intWorkOrderId Order By SUM(dblQuantity) Desc) intRowNo
+	FROM tblMFWorkOrderConsumedLot wp
+	JOIN tblICItem i ON wp.intItemId = i.intItemId
+	GROUP BY intWorkOrderId, i.intItemId, i.strItemNo 
+) t1 ON w.intWorkOrderId = t1.intWorkOrderId AND t1.intRowNo = 1
+LEFT JOIN
 (
-	select intWorkOrderId,i.intItemId,i.strItemNo,SUM(dblQuantity) dblQuantity,ROW_NUMBER() OVER(Partition By intWorkOrderId Order By SUM(dblQuantity) Desc) intRowNo
-	from tblMFWorkOrderConsumedLot wp
-	join tblICItem i on wp.intItemId=i.intItemId
-	group by intWorkOrderId,i.intItemId, i.strItemNo 
-) t2 on w.intWorkOrderId=t2.intWorkOrderId AND t2.intRowNo=2
-Where mp.intAttributeTypeId=2 and isnull(wp.ysnProductionReversed,0)=0
+	SELECT intWorkOrderId
+		, i.intItemId
+		, i.strItemNo
+		, SUM(dblQuantity) dblQuantity
+		, ROW_NUMBER() OVER(Partition By intWorkOrderId Order By SUM(dblQuantity) Desc) intRowNo
+	FROM tblMFWorkOrderConsumedLot wp
+	JOIN tblICItem i ON wp.intItemId = i.intItemId
+	GROUP BY intWorkOrderId, i.intItemId, i.strItemNo 
+) t2 ON w.intWorkOrderId = t2.intWorkOrderId AND t2.intRowNo = 2
+WHERE mp.intAttributeTypeId = 2 AND ISNULL(wp.ysnProductionReversed,0) = 0
