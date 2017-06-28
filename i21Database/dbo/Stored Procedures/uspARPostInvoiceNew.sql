@@ -4787,7 +4787,7 @@ IF @Recap = 0
 				,[strTransactionType]
 				,[strSourceTransaction]
 				,[ysnProcessed])
-			SELECT
+			SELECT DISTINCT
 				 [intHeaderId]						= PID.[intInvoiceId]
 				,[ysnUpdateAvailableDiscountOnly]	= ARIILD.[ysnUpdateAvailableDiscount]
 				,[intDetailId]						= NULL

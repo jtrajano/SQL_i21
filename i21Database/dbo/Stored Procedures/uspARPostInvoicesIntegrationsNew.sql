@@ -33,7 +33,7 @@ BEGIN
 		,[strToValue]
 		,[strDetails]
 	)
-	SELECT 
+	SELECT DISTINCT
 		 [strScreenName]			= 'AccountsReceivable.view.Invoice'
 		,[intKeyValueId]			= ARI.[intInvoiceId]
 		,[intEntityId]				= @UserId
@@ -202,7 +202,7 @@ INSERT INTO @InvoiceLog(
 	,[strToValue]
 	,[strDetails]
 )
-SELECT 
+SELECT DISTINCT
 	 [strScreenName]			= 'AccountsReceivable.view.Invoice'
 	,[intKeyValueId]			= ARI.[intInvoiceId]
 	,[intEntityId]				= @UserId
