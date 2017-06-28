@@ -282,11 +282,12 @@ FROM vyuARCustomer C
 	LEFT JOIN tblEMEntity ESP ON C.intSalespersonId = ESP.intEntityId	
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId	
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-) MainQuery'
+) MainQuery
+WHERE dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +''
 
 IF ISNULL(@filter,'') != ''
 BEGIN
-	SET @query = @query + ' WHERE ' + @filter
+	SET @query = @query + ' AND ' + @filter
 END
 
 INSERT INTO @temp_statement_table
@@ -404,13 +405,13 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 IF @ysnPrintOnlyPastDue = 1
     BEGIN
-        DELETE FROM @temp_statement_table WHERE dtmDueDate <= @dtmDateTo
+        DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateTo) < 0
         UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
     END
 
 IF @ysnPrintZeroBalance = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE dblARBalance = 0
+        DELETE FROM @temp_statement_table WHERE dblBalance = 0
         DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
     END
 
