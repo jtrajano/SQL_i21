@@ -662,7 +662,39 @@ BEGIN
 		INNER JOIN tblAPBillDetail B ON A.intBillDetailId = B.intBillDetailId
 		WHERE B.intInventoryReceiptChargeId IS NULL 
 
-		EXEC uspAPUpdateVoucherDetailTax @billDetailIds
+		--EXEC uspAPUpdateVoucherDetailTax @billDetailIds
+		INSERT INTO tblAPBillDetailTax(
+			[intBillDetailId]		, 
+			[intTaxGroupId]			, 
+			[intTaxCodeId]			, 
+			[intTaxClassId]			, 
+			[strTaxableByOtherTaxes], 
+			[strCalculationMethod]	, 
+			[dblRate]				, 
+			[intAccountId]			, 
+			[dblTax]				, 
+			[dblAdjustedTax]		, 
+			[ysnTaxAdjusted]		, 
+			[ysnSeparateOnBill]		, 
+			[ysnCheckOffTax]
+		)
+		SELECT
+			[intBillDetailId]		=	B.intBillDetailId, 
+			[intTaxGroupId]			=	C.intTaxGroupId, 
+			[intTaxCodeId]			=	C.intTaxCodeId, 
+			[intTaxClassId]			=	C.intTaxClassId, 
+			[strTaxableByOtherTaxes]=	C.strTaxableByOtherTaxes, 
+			[strCalculationMethod]	=	C.strCalculationMethod, 
+			[dblRate]				=	C.dblRate, 
+			[intAccountId]			=	C.intTaxAccountId, 
+			[dblTax]				=	C.dblTax, 
+			[dblAdjustedTax]		=	ISNULL(C.dblAdjustedTax,0), 
+			[ysnTaxAdjusted]		=	C.ysnTaxAdjusted, 
+			[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
+			[ysnCheckOffTax]		=	C.ysnCheckoffTax
+		FROM @billDetailIds A
+		INNER JOIN tblAPBillDetail B ON A.intId = B.intBillDetailId
+		INNER JOIN tblICInventoryReceiptItemTax C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
 		
 		--DELETE THE @billDetailIds ID TO AVOID DUPLICATE INSERTION OF BILLDETAIL ID
 		DELETE FROM @billDetailIds
