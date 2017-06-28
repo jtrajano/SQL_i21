@@ -5300,6 +5300,7 @@
     <Build Include="dbo\Views\vyuICSearchItem.sql" />
     <Build Include="dbo\Views\vyuPATStockClassification.sql" />
     <Build Include="dbo\Views\vyuMFGetBlendTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetRCConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
