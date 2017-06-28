@@ -3,6 +3,7 @@
 SELECT	NEWID() AS id,
 		R.intRefundId,
 		intCustomerId = RCus.intCustomerId,
+		EN.strEntityNo,
 		strCustomerName = EN.strName,
 		R.intFiscalYearId,
 		ysnEligibleRefund = (CASE WHEN RCus.dblRefundAmount >= R.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END),
