@@ -108,7 +108,7 @@ BEGIN
 			ELSE LD.intSContractDetailId
 			END
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	JOIN tblCTContractText CT ON CT.intContractTextId = CH.intContractTextId
+	LEFT JOIN tblCTContractText CT ON CT.intContractTextId = CH.intContractTextId
 	WHERE L.intLoadId = @intLoadId
 
 	SELECT TOP 1 @strContainerQtyUOM = LTRIM(dbo.fnRemoveTrailingZeroes(SUM(dblQuantity))) + ' ' + strItemUOM
