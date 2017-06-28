@@ -43,7 +43,7 @@ BEGIN TRY
 						WHERE intUserRoleId = @UserRoleID
 						AND intMenuId IN (SELECT intMenuID
 												FROM tblSMMasterMenu
-												WHERE ((strMenuName NOT IN ('System Manager', 'User Roles') AND strModuleName = 'System Manager' AND intParentMenuID = 1) 
+												WHERE ((strMenuName NOT IN ('System Manager', 'Maintenance') AND strModuleName = 'System Manager' AND intParentMenuID = 1) 
 												OR intParentMenuID IN (10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
 					END
 			END

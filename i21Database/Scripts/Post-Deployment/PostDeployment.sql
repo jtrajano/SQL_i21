@@ -47,6 +47,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
 :r .\SM\1720_Statement_Footer_To_Report.sql
+:r .\SM\1730_UpdateOriginSubMenusSorting.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
