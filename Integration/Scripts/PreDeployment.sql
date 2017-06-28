@@ -238,3 +238,6 @@
 
 -- C-Store
 :r "..\dbo\Views\vyustpbkmst.sql"
+
+-- PAYROLL
+:r "..\dbo\Views\vyuPROriginEmployee.sql"

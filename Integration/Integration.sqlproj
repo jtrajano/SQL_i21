@@ -414,5 +414,6 @@
     <None Include="Scripts\GL\1b_FlagCOACrossReferenceAccountsFromOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateTMCustomerView.sql" />
+    <None Include="dbo\Views\vyuPROriginEmployee.sql" />
   </ItemGroup>
 </Project>

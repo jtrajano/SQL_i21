@@ -5293,6 +5293,7 @@
     <Build Include="dbo\Views\vyuCTQualityApprovedRejected.sql" />
     <Build Include="dbo\Views\vyuICSearchItem.sql" />
     <Build Include="dbo\Views\vyuPATStockClassification.sql" />
+    <Build Include="dbo\Views\vyuPROriginEmployee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
