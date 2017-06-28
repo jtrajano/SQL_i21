@@ -6,6 +6,7 @@ WITH ComPref AS(
 	FROM tblPATCompanyPreference
 ), Refunds AS (
 	SELECT	Total.intCustomerId,
+			ENT.strEntityNo,
 			strCustomerName = ENT.strName,
 			intFiscalYearId = Total.intFiscalYear,
 			Total.intRefundTypeId,
@@ -40,6 +41,7 @@ WITH ComPref AS(
 
 SELECT	id = NEWID(),
 		intCustomerId,
+		strEntityNo,
 		strCustomerName,
 		intFiscalYearId,
 		intRefundTypeId,
@@ -52,6 +54,7 @@ SELECT	id = NEWID(),
 	FROM Refunds
 	CROSS APPLY ComPref
 	GROUP BY intCustomerId,
+		strEntityNo,
 		strCustomerName,
 		intFiscalYearId,
 		intRefundTypeId,
