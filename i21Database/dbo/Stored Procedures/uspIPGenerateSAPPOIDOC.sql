@@ -493,7 +493,7 @@ Begin
 						Set @strCondXml += '<COND_P_UNT>'		+ '1000'	+ '</COND_P_UNT>'
 					Else
 						Set @strCondXml += '<COND_P_UNT>'		+ '1'	+ '</COND_P_UNT>'
-					Set @strCondXml += '<CHANGE_ID>'		+ 'U' + '</CHANGE_ID>'
+					Set @strCondXml += '<CHANGE_ID>'		+ 'I' + '</CHANGE_ID>'
 					Set @strCondXml += '</E1BPMEPOCOND>'
 				End
 
