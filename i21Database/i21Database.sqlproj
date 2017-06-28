@@ -5294,6 +5294,7 @@
     <Build Include="dbo\Views\vyuICSearchItem.sql" />
     <Build Include="dbo\Views\vyuPATStockClassification.sql" />
     <Build Include="dbo\Views\vyuPROriginEmployee.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateDeliveryHistoryAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
