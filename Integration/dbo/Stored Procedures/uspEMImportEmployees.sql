@@ -223,6 +223,12 @@ BEGIN
 	DECLARE @strType				NVARCHAR(100)
 	DECLARE @strDepartment			NVARCHAR(50)
 	
+	DECLARE @strWCCode				NVARCHAR(50)
+	DECLARE @strWCDesc				NVARCHAR(100)
+	DECLARE @dblWCRate				NUMERIC(18,6)
+	DECLARE @intWC					INT
+
+
 	SELECT premp_emp INTO #tmpprempmst 
 	FROM prempmst
 		where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
@@ -250,7 +256,7 @@ BEGIN
 				@strLastName		= premp_last_name,
 				@strSuffix			= premp_extension,
                 --Contacts                
-                @strPhone			= ISNULL(premp_phone,''''),                
+                @strPhone			= LTRIM(RTRIM(ISNULL(premp_phone,''''))),                
 
                 --Locations                
                 @strAddress			= dbo.fnTrim(ISNULL(premp_addr1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(premp_addr2,'''')),
@@ -273,13 +279,13 @@ BEGIN
 										WHEN premp_marital_status = ''D'' then ''Divorced''
 										ELSE ''Other'' END,
 				@strSpouse			= premp_spouse,						
-				@strEthnicity		= CASE WHEN premp_race = ''C'' THEN ''Caucasian'' --[not int the list ]
+				@strEthnicity		= CASE WHEN premp_race = ''C'' THEN ''White (not Hispanic or Latino)''
 										WHEN premp_race = ''H'' THEN ''Hispanic or Latino''
 										WHEN premp_race = ''I'' THEN ''American Indian or Alaska Native (not Hispanic or Latino)''
 										WHEN premp_race = ''T'' THEN ''Two or More Races (not Hispanic or Latino)''
-										WHEN premp_race = ''N'' THEN ''Afro-American'' --[not int the list ]
-										WHEN premp_race = ''O'' THEN ''Oriental'' --[not int the list ]
-										WHEN premp_race = ''P'' THEN ''Pacific Islander'' --[not int the list ]									
+										WHEN premp_race = ''N'' THEN ''Black or African American (not Hispanic or Latino)''
+										WHEN premp_race = ''O'' THEN ''Asian (not Hispanic or Latino)''
+										WHEN premp_race = ''P'' THEN ''Native Hawaiian or Other Pacific Islander (not Hispanic or Latino)''								
 										END,
 				@strEEOCCode		= CASE WHEN premp_eeo_code = ''1'' THEN ''1.2 - First/Mid Level Officials & Managers''
 										WHEN premp_eeo_code = ''2'' THEN ''2 - Professionals''
@@ -290,7 +296,8 @@ BEGIN
 										WHEN premp_eeo_code = ''7'' THEN ''7 - Operatives''
 										WHEN premp_eeo_code = ''8'' THEN ''8 - Laborers & Helpers''
 										WHEN premp_eeo_code = ''9'' THEN ''9 - Service Workers''
-										WHEN premp_eeo_code = ''10'' THEN ''1.1 - Executive/Senior Level Officials and Managers''				
+										WHEN premp_eeo_code = ''10'' THEN ''1.1 - Executive/Senior Level Officials and Managers''
+										ELSE ''''				
 										END, 
 				@strSocialSecurity	= premp_ssn,
 				@dtmTerminated		= case when premp_term_dt = 0 then null else premp_term_dt end,
@@ -310,7 +317,10 @@ BEGIN
 				@ysnRetirementPlan	= premp_pension_flag_9,
 				@dblRegularHours	= premp_std_hrs,
 				@dtmLastModified	= CASE WHEN ISNULL(premp_user_rev_dt,0) = 0 THEN NULL ELSE premp_user_rev_dt END,
-				@strDepartment		= premp_dept
+				@strDepartment		= premp_dept,
+
+
+				@strWCCode			= premp_prwcc_code
 					
             FROM prempmst
             WHERE premp_emp = @originEmployee
@@ -372,11 +382,26 @@ BEGIN
 			VALUES (@EntityId, ''Employee'', 0)
 		end
 		
+		SET @intWC = null
+		--intWorkersCompensationId
+		if not exists(select top 1 1 from tblPRWorkersCompensation where strWCCode = @strWCCode)
+		begin
+			select 
+				@strWCDesc = prwcc_desc, 
+				@dblWCRate = prwcc_company_rate 
+				from prwccmst 
+					where prwcc_code = @strWCCode
+
+			insert into tblPRWorkersCompensation(strWCCode, strDescription, dblRate)
+				select @strWCCode,@strWCDesc, @dblWCRate
+
+			set @intWC = @@IDENTITY
+		end
+		else 
+			select @intWC = intWorkersCompensationId from tblPRWorkersCompensation where strWCCode = @strWCCode
 		
-		
-		
-		insert into tblPREmployee(intEntityEmployeeId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType)
-		values(@EntityId, @originEmployee, @strPhone, 9,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType)
+		insert into tblPREmployee(intEntityEmployeeId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType, intWorkersCompensationId)
+		values(@EntityId, @originEmployee, @strPhone, 9,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType, @intWC)
 		
 		
 		insert into tblEMEntityNote(dtmDate,dtmTime,intDuration,strUser,strSubject,strNotes,intEntityId)
@@ -573,6 +598,7 @@ BEGIN
 	FROM prempmst
 	where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
 END
+
 
 
 
