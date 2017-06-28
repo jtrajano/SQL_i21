@@ -1620,8 +1620,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 entityLocationId: cfg.entityLocationId
             },
             method: 'get'
-        })
-        subscribe(
+        }).subscribe(
             function (successResponse) {
                 var jsonData = Ext.decode(successResponse.responseText);
 
