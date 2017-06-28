@@ -342,7 +342,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strEmail, '')
 			WHEN 'Company'
-				THEN ISNULL(FirstNotifyCompany.strEmail, '')
+				THEN ISNULL(FNCompanyLocation.strEmail, '')
 			WHEN 'Vendor'
 				THEN ISNULL(FirstNotify.strEmail, '')
 			WHEN 'Customer'
@@ -355,7 +355,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strFax, '')
 			WHEN 'Company'
-				THEN ISNULL(FirstNotifyCompany.strFax, '')
+				THEN ISNULL(FNCompanyLocation.strFax, '')
 			WHEN 'Vendor'
 				THEN ISNULL(FirstNotify.strFax, '')
 			WHEN 'Customer'
@@ -381,7 +381,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strPhone, '')
 			WHEN 'Company'
-				THEN ISNULL(FirstNotifyCompany.strPhone, '')
+				THEN ISNULL(FNCompanyLocation.strPhone, '')
 			WHEN 'Vendor'
 				THEN ISNULL(FirstNotifyContactEntity.strPhone, '')
 			WHEN 'Customer'
@@ -394,7 +394,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strAddress, '')
 			WHEN 'Company'
-				THEN ISNULL(FirstNotifyCompany.strAddress, '')
+				THEN ISNULL(FNCompanyLocation.strAddress, '')
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strAddress, '')
 			WHEN 'Customer'
@@ -407,7 +407,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strCity, '')
 			WHEN 'Company'
-				THEN ISNULL(FirstNotifyCompany.strCity, '')
+				THEN ISNULL(FNCompanyLocation.strCity, '')
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strCity, '')
 			WHEN 'Customer'
@@ -420,7 +420,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strCountry, '')
 			WHEN 'Company'
-				THEN ISNULL(FirstNotifyCompany.strCountry, '')
+				THEN ISNULL(FNCompanyLocation.strCountry, '')
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strCountry, '')
 			WHEN 'Customer'
@@ -433,7 +433,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strState, '')
 			WHEN 'Company'
-				THEN ISNULL(FirstNotifyCompany.strState, '')
+				THEN ''
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strState, '')
 			WHEN 'Customer'
@@ -446,7 +446,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strZipCode, '')
 			WHEN 'Company'
-				THEN ISNULL(FirstNotifyCompany.strZip, '')
+				THEN ISNULL(FNCompanyLocation.strZipPostalCode, '')
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strZipCode, '')
 			WHEN 'Customer'
@@ -472,7 +472,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strEmail, '')
 			WHEN 'Company'
-				THEN ISNULL(SecondNotifyCompany.strEmail, '')
+				THEN ISNULL(SNCompanyLocation.strEmail, '')
 			WHEN 'Vendor'
 				THEN ISNULL(SecondNotify.strEmail, '')
 			WHEN 'Customer'
@@ -485,7 +485,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strFax, '')
 			WHEN 'Company'
-				THEN ISNULL(SecondNotifyCompany.strFax, '')
+				THEN ISNULL(SNCompanyLocation.strFax, '')
 			WHEN 'Vendor'
 				THEN ISNULL(SecondNotify.strFax, '')
 			WHEN 'Customer'
@@ -511,7 +511,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strPhone, '')
 			WHEN 'Company'
-				THEN ISNULL(SecondNotifyCompany.strPhone, '')
+				THEN ISNULL(SNCompanyLocation.strPhone, '')
 			WHEN 'Vendor'
 				THEN ISNULL(SecondNotifyContactEntity.strPhone, '')
 			WHEN 'Customer'
@@ -524,7 +524,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strAddress, '')
 			WHEN 'Company'
-				THEN ISNULL(SecondNotifyCompany.strAddress, '')
+				THEN ISNULL(SNCompanyLocation.strAddress, '')
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strAddress, '')
 			WHEN 'Customer'
@@ -537,7 +537,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strCity, '')
 			WHEN 'Company'
-				THEN ISNULL(SecondNotifyCompany.strCity, '')
+				THEN ISNULL(SNCompanyLocation.strCity, '')
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strCity, '')
 			WHEN 'Customer'
@@ -550,7 +550,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strCountry, '')
 			WHEN 'Company'
-				THEN ISNULL(SecondNotifyCompany.strCountry, '')
+				THEN ISNULL(SNCompanyLocation.strCountry, '')
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strCountry, '')
 			WHEN 'Customer'
@@ -563,7 +563,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strState, '')
 			WHEN 'Company'
-				THEN ISNULL(SecondNotifyCompany.strState, '')
+				THEN ''
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strState, '')
 			WHEN 'Customer'
@@ -576,7 +576,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strZipCode, '')
 			WHEN 'Company'
-				THEN ISNULL(SecondNotifyCompany.strZip, '')
+				THEN ISNULL(SNCompanyLocation.strZipPostalCode, '')
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strZipCode, '')
 			WHEN 'Customer'
@@ -654,7 +654,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strAddress, '')
 			WHEN 'Company'
-				THEN ISNULL(ConsigneeNotifyCompany.strAddress, '')
+				THEN ISNULL(CNCompanyLocation.strAddress, '')
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strAddress, '')
 			WHEN 'Customer'
@@ -667,7 +667,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strCity, '')
 			WHEN 'Company'
-				THEN ISNULL(ConsigneeNotifyCompany.strCity, '')
+				THEN ISNULL(CNCompanyLocation.strCity, '')
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strCity, '')
 			WHEN 'Customer'
@@ -680,7 +680,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strCountry, '')
 			WHEN 'Company'
-				THEN ISNULL(ConsigneeNotifyCompany.strCountry, '')
+				THEN ISNULL(CNCompanyLocation.strCountry, '')
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strCountry, '')
 			WHEN 'Customer'
@@ -693,7 +693,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strState, '')
 			WHEN 'Company'
-				THEN ISNULL(ConsigneeNotifyCompany.strState, '')
+				THEN ''
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strState, '')
 			WHEN 'Customer'
@@ -706,7 +706,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strZipCode, '')
 			WHEN 'Company'
-				THEN ISNULL(ConsigneeNotifyCompany.strZip, '')
+				THEN ISNULL(CNCompanyLocation.strZipPostalCode, '')
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strZipCode, '')
 			WHEN 'Customer'
@@ -781,18 +781,21 @@ FROM (
 	LEFT JOIN tblEMEntity FirstNotifyContactEntity ON FirstNotifyContactEntity.intEntityId = FirstNotifyContact.intEntityContactId
 	LEFT JOIN tblCMBank FirstNotifyBank ON FirstNotifyBank.intBankId = FLNP.intBankId
 	LEFT JOIN tblSMCompanySetup FirstNotifyCompany ON FirstNotifyCompany.intCompanySetupID = FLNP.intCompanySetupID
+	LEFT JOIN tblSMCompanyLocation FNCompanyLocation ON FNCompanyLocation.intCompanyLocationId = FLNP.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocation FNLocation ON FNLocation.intEntityLocationId = FLNP.intEntityLocationId
 	LEFT JOIN tblEMEntity SecondNotify ON SecondNotify.intEntityId = SLNP.intEntityId
 	LEFT JOIN tblEMEntityToContact SecondNotifyContact ON SecondNotifyContact.intEntityId = SecondNotify.intEntityId
 	LEFT JOIN tblEMEntity SecondNotifyContactEntity ON SecondNotifyContactEntity.intEntityId = SecondNotifyContact.intEntityContactId
 	LEFT JOIN tblCMBank SecondNotifyBank ON SecondNotifyBank.intBankId = SLNP.intBankId
 	LEFT JOIN tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SLNP.intCompanySetupID
+	LEFT JOIN tblSMCompanyLocation SNCompanyLocation ON SNCompanyLocation.intCompanyLocationId = SLNP.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocation SNLocation ON SNLocation.intEntityLocationId = SLNP.intEntityLocationId
 	LEFT JOIN tblEMEntity ConsigneeNotify ON ConsigneeNotify.intEntityId = CLNP.intEntityId
 	LEFT JOIN tblEMEntityToContact ConsigneeNotifyContact ON ConsigneeNotifyContact.intEntityId = ConsigneeNotify.intEntityId
 	LEFT JOIN tblEMEntity ConsigneeNotifyContactEntity ON ConsigneeNotifyContactEntity.intEntityId = ConsigneeNotifyContact.intEntityContactId
 	LEFT JOIN tblCMBank ConsigneeNotifyBank ON ConsigneeNotifyBank.intBankId = CLNP.intBankId
 	LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
+	LEFT JOIN tblSMCompanyLocation CNCompanyLocation ON CNCompanyLocation.intCompanyLocationId = CLNP.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationId
 	LEFT JOIN tblSMCurrency DemCurrency ON DemCurrency.intCurrencyID = L.intDemurrageCurrencyId
 	LEFT JOIN tblSMCurrency DesCurrency ON DesCurrency.intCurrencyID = L.intDespatchCurrencyId
