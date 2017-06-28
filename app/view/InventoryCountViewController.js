@@ -375,6 +375,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             // ]
         });
 
+
+        // var gmgr = Ext.create('iRely.grid.Manager', {
+        //     grid: grdPhysicalCount,
+        //     deleteButton: win.down('#btnRemoveDetail'),
+
+        // });
+
         me.attachOnEditListener(win, grdPhysicalCount);
 
         return win.context;
@@ -700,20 +707,68 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var plugin = grdPhysicalCount.getPlugin('cepPhysicalCount');
         plugin.on({
             edit: function(editor, context, eOpts) {
-                grdPhysicalCount.store.save();
+                grdPhysicalCount.store.sync();
             }
         });
 
         var component = Ext.create('iRely.grid.Manager', {
             grid: grdPhysicalCount,
-            deleteButton: win.down('#btnRemove'),
+            allowNewRow: true,
             createRecord: me.createLineItemRecord
+        });
+    },
+
+    onDetachSelectedRows: function(e) {
+        var msgAction = function (button) {
+            if (button === 'yes') {
+                var me = this;
+                var win = e.up('window');
+                var grid = win.down('grid');
+                var store = grid.store;
+                var selection = grid.getSelectionModel().getSelection();
+                var extraParams = store.proxy.extraParams;
+                store.proxy.extraParams = null;
+                store.remove(selection);
+                store.sync({
+                    callback: function() {
+                        store.proxy.extraParams = extraParams;
+                        store.load();
+                    }
+                });
+            }
+        };
+        iRely.Functions.showCustomDialog('question', 'yesno', 'Are you sure you want to delete the selected record(s)?', msgAction);
+    },
+
+    onAttachNewRow: function(e) {
+        var me = this;
+        var win = e.up('window');
+        var vm = win.getViewModel();
+        var grid = win.down('grid');
+        var store = grid.store;
+
+        win.context.data.saveRecord({
+            callbackFn: function (batch, eOpts, success) {
+                me.createLineItemRecord(win.getViewModel().getView().context.configuration, function(record) {
+                    iRely.Functions.openScreen('Inventory.view.InventoryCountDetails', { 
+                        viewConfig: {
+                            listeners: {
+                                close: function() {
+                                    store.load();    
+                                }
+                            }
+                        },
+                        action: 'new',
+                        current: vm.get('current') 
+                    });
+                });
+            }
         });
     },
 
     onRecountCheckChange: function(column, index, value, record) {
         var store = record.store;
-        store.save();
+        store.sync();
     },
 
     onFetchClick: function (button) {
@@ -1595,6 +1650,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     //var win = combo.up('window');
                     //ic.count.loadDetails(this, win, win.context, true, ic.count.getFilter(win.viewModel.data.current));
                 }
+            },
+            "#btnDetachSelectedRows": {
+                click: this.onDetachSelectedRows
+            },
+            "#btnAttachNewRow": {
+                click: this.onAttachNewRow
             }
         });
     }

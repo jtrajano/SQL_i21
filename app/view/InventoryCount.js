@@ -224,12 +224,11 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
-                                                    enableDrillDown: true,
                                                     itemId: 'cboLocation',
                                                     fieldLabel: 'Location',
                                                     labelWidth: 85,
                                                     displayField: 'strLocationName',
-                                                    valueField: 'strLocationName'
+                                                    valueField: 'intCompanyLocationId'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -252,12 +251,11 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
-                                                    enableDrillDown: true,
                                                     itemId: 'cboCategory',
                                                     fieldLabel: 'Category',
                                                     labelWidth: 85,
                                                     displayField: 'strCategoryCode',
-                                                    valueField: 'strCategoryCode'
+                                                    valueField: 'intCategoryId'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -280,12 +278,11 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
-                                                    enableDrillDown: true,
                                                     itemId: 'cboCommodity',
                                                     fieldLabel: 'Commodity',
                                                     labelWidth: 85,
                                                     displayField: 'strCommodityCode',
-                                                    valueField: 'strCommodityCode'
+                                                    valueField: 'intCommodityId'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -338,12 +335,11 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             hidden: true
                                                         }
                                                     ],
-                                                    enableDrillDown: true,
                                                     itemId: 'cboCountGroup',
                                                     fieldLabel: 'Count Group',
                                                     labelWidth: 85,
                                                     displayField: 'strCountGroup',
-                                                    valueField: 'strCountGroup'
+                                                    valueField: 'intCountGroupId'
                                                 },
                                                 {
                                                     xtype: 'datefield',
@@ -378,7 +374,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         {
                                                             dataIndex: 'intCompanyLocationSubLocationId',
                                                             dataType: 'numeric',
-                                                            text: 'Storage Location Id',
+                                                            text: 'Sub Location Id',
                                                             hidden: true
                                                         },
                                                         {
@@ -390,7 +386,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         {
                                                             dataIndex: 'strSubLocationName',
                                                             dataType: 'string',
-                                                            text: 'Storage Location Name',
+                                                            text: 'Sub Location Name',
                                                             flex: 1
                                                         },
                                                         {
@@ -400,11 +396,10 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
-                                                    enableDrillDown: true,
                                                     itemId: 'cboSubLocation',
-                                                    fieldLabel: 'Storage Location',
+                                                    fieldLabel: 'Sub Location',
                                                     displayField: 'strSubLocationName',
-                                                    valueField: 'strSubLocationName'
+                                                    valueField: 'intCompanyLocationSubLocationId'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -417,7 +412,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         {
                                                             dataIndex: 'strName',
                                                             dataType: 'string',
-                                                            text: 'Storage Unit',
+                                                            text: 'Storage Location',
                                                             flex: 1
                                                         },
                                                         {
@@ -427,11 +422,10 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
-                                                    enableDrillDown: true,
                                                     itemId: 'cboStorageLocation',
-                                                    fieldLabel: 'Storage Unit',
+                                                    fieldLabel: 'Storage Location',
                                                     displayField: 'strName',
-                                                    valueField: 'strName'
+                                                    valueField: 'intStorageLocationId'
                                                 },
                                                 {
                                                     xtype: 'textfield',
@@ -597,6 +591,20 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             cls: 'x-form-clear-trigger'
                                                         }
                                                     }
+                                                },
+                                                {
+                                                    xtype: 'button',
+                                                    tabIndex: -1,
+                                                    itemId: 'btnAttachNewRow',
+                                                    iconCls: 'small-insert',
+                                                    text: 'Add'
+                                                },
+                                                {
+                                                    xtype: 'button',
+                                                    tabIndex: -1,
+                                                    itemId: 'btnDetachSelectedRows',
+                                                    iconCls: 'small-remove',
+                                                    text: 'Delete'
                                                 }
                                             ]
                                         },
@@ -654,8 +662,6 @@ Ext.define('Inventory.view.InventoryCount', {
                                     columns: [
                                         {
                                             xtype: 'gridcolumn',
-                                            headerDrillDownClick: 'onHeaderItemDrillDown',
-                                            headerDrillDownText: 'Open',
                                             itemId: 'colItem',
                                             dataIndex: 'string',
                                             text: 'Item',
@@ -893,13 +899,13 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     {
                                                         dataIndex: 'intSubLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Storage Location Id',
+                                                        text: 'Sub Location Id',
                                                         hidden: true
                                                     },
                                                     {
                                                         dataIndex: 'intStorageLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Storage Unit Id',
+                                                        text: 'Storage Location Id',
                                                         hidden: true
                                                     },
                                                     {

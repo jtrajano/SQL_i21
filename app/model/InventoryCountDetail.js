@@ -28,7 +28,7 @@ Ext.define('Inventory.model.InventoryCountDetail', {
                 }
             }
         },
-        { name: 'intItemId', type: 'int', allowNull: true },
+        { name: 'intItemId', type: 'int', allowNull: false },
         { name: 'intItemLocationId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intStorageLocationId', type: 'int', allowNull: true },
@@ -39,7 +39,7 @@ Ext.define('Inventory.model.InventoryCountDetail', {
         { name: 'dblPallets', type: 'float' },
         { name: 'dblQtyPerPallet', type: 'float' },
         { name: 'dblPhysicalCount', type: 'float' },
-        { name: 'intItemUOMId', type: 'int', allowNull: true },
+        { name: 'intItemUOMId', type: 'int', allowNull: false },
         { name: 'ysnRecount', type: 'boolean' },
         { name: 'intEntityUserSecurityId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true },
@@ -78,6 +78,7 @@ Ext.define('Inventory.model.InventoryCountDetail', {
 
     validators: [
         { type: 'presence', field: 'intItemUOMId' },
-        { type: 'presence', field: 'strUnitMeasure' }
+        { type: 'presence', field: 'strUnitMeasure' },
+        { type: 'presence', field: 'strItemNo' }
     ]
 });

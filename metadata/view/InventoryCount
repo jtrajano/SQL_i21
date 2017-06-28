@@ -1259,6 +1259,42 @@
                                                             ]
                                                         }
                                                     ]
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-insert",
+                                                        "itemId": "btnAttachNewRow",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Add"
+                                                    },
+                                                    "name": "MyButton28",
+                                                    "designerId": "02e72fde-c6c6-4e84-9af0-9464b53fae9f"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-remove",
+                                                        "itemId": "btnDetachSelectedRows",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Delete"
+                                                    },
+                                                    "name": "MyButton27",
+                                                    "designerId": "56ea8594-7f68-445e-9e33-45cd3e6d0158"
                                                 }
                                             ]
                                         },
@@ -1326,7 +1362,7 @@
                                                         "itemId": "gridfilter",
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter135",
+                                                    "name": "filter1",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1478,7 +1514,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colSubLocation",
-                                                "text": "Sub Location"
+                                                "text": "Storage Location"
                                             },
                                             "name": "MyColumn10",
                                             "designerId": "bb2f66a4-5d8e-4b4b-a5fd-e8ac9a7510e5",
@@ -1508,25 +1544,25 @@
                                                             "    {",
                                                             "\t\tdataIndex: 'intSubLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Sub Location Id',",
+                                                            "\t\ttext: 'Storage Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strSubLocationName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Sub Location',",
+                                                            "\t\ttext: 'Storage Location',",
                                                             "\t\tflex: 1",
                                                             "\t},    ",
                                                             "\t{",
                                                             "\t\tdataIndex: 'intStorageLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Location Id',",
+                                                            "\t\ttext: 'Storage Unit Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strStorageLocationName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Location',",
+                                                            "\t\ttext: 'Storage Unit',",
                                                             "\t\tflex: 1",
                                                             "\t},    ",
                                                             "\t{",
@@ -1580,7 +1616,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colStorageLocation",
-                                                "text": "Storage Location"
+                                                "text": "Storage Unit"
                                             },
                                             "name": "MyColumn",
                                             "designerId": "701caf49-e88d-40a5-9890-980259adc2c1",
@@ -1610,19 +1646,19 @@
                                                             "{",
                                                             "dataIndex: 'intSubLocationId',",
                                                             "dataType: 'numeric',",
-                                                            "text: 'Sub Location Id',",
+                                                            "text: 'Storage Location Id',",
                                                             "hidden: true",
                                                             "},",
                                                             "{",
                                                             "dataIndex: 'intStorageLocationId',",
                                                             "dataType: 'numeric',",
-                                                            "text: 'Storage Location Id',",
+                                                            "text: 'Storage Unit Id',",
                                                             "hidden: true",
                                                             "},",
                                                             "{",
                                                             "dataIndex: 'strStorageLocationName',",
                                                             "dataType: 'string',",
-                                                            "text: 'Storage Location',",
+                                                            "text: 'Storage Unit',",
                                                             "flex: 1",
                                                             "},  ",
                                                             "{",
@@ -2313,7 +2349,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging1",
                     "designerId": "819ea614-6c35-4e6e-8d56-521d4ef1d53e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
