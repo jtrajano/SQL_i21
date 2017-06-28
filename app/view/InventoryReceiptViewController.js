@@ -1234,12 +1234,47 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         action(newRecord);
     },
 
+    getLotExpiryDate: function(manufacturedDate, receiptDate, lifeTime, lifeTimeType){
+        // Calculate Expiry Date by:
+        // 1. Manufactured Date
+        // 2. Or by Receipt Date if manufactured date is missing. 
+        
+        // Check if it is a valid date object. 
+        var startDate = manufacturedDate ? manufacturedDate : receiptDate;
+        if (!startDate || Object.prototype.toString.call(startDate) !== "[object Date]") return; 
+
+        // Check if the lifeTime and lifeTimeType have a value. 
+        if (!lifeTime || !Ext.isNumeric(lifeTime)) return;
+        if (!lifeTimeType) return; 
+
+        var expiryDate;
+        switch (lifeTimeType) {
+            case 'Minutes':
+                expiryDate = Ext.Date.add(startDate, Ext.Date.MINUTE, lifeTime);
+                break;
+            case 'Hours':
+                expiryDate = Ext.Date.add(startDate, Ext.Date.HOUR, lifeTime);
+                break;
+            case 'Days':
+                expiryDate = Ext.Date.add(startDate, Ext.Date.DAY, lifeTime);
+                break;
+            case 'Months':
+                expiryDate = Ext.Date.add(startDate, Ext.Date.MONTH, lifeTime);
+                break;
+            case 'Years':
+                expiryDate = Ext.Date.add(startDate, Ext.Date.YEAR, lifeTime);
+                break;
+        }
+        return expiryDate;
+    },
+
     onLotCreateRecord: function (config, action) {
         var win = config.grid.up('window');
+        var me = win.controller;
+
         var current = win.viewModel.data.current;
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var record = Ext.create('Inventory.model.ReceiptItemLot');
-        var me = win.controller;
 
         record.set('strUnitMeasure', currentReceiptItem.get('strUnitMeasure'));
         record.set('intItemUnitMeasureId', currentReceiptItem.get('intUnitMeasureId'));
@@ -1252,20 +1287,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dblNetWeight', 0.00);
         record.set('dblQuantity', config.dummy.get('dblQuantity'));
         record.set('strCondition', i21.ModuleMgr.Inventory.getCompanyPreference('strLotCondition'));
-
-        //Expiry Date Calculation
-        var receiptDate = current.get('dtmReceiptDate');
-        var manufacturedDate = record.get('dtmManufacturedDate');
-        var lifetime = currentReceiptItem.get('intLifeTime');
-        var lifetimeType = currentReceiptItem.get('strLifeTimeType');
-        //Calculate Expiry Date by Manufactured Date if available otherwise, Receipt Date
-        if (!iRely.Functions.isEmpty(manufacturedDate)) {
-            var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(manufacturedDate, lifetime, lifetimeType);
-        }
-        else {
-            var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
-        }
-        record.set('dtmExpiryDate', expiryDate);
+        record.set(
+            'dtmExpiryDate', 
+            me.getLotExpiryDate(
+                record.get('dtmManufacturedDate'), 
+                current.get('dtmReceiptDate'), 
+                currentReceiptItem.get('intLifeTime'), 
+                currentReceiptItem.get('strLifeTimeType')
+            )
+        );
 
         var qty = config.dummy.get('dblQuantity');
         var lotCF = currentReceiptItem.get('dblItemUOMConvFactor');
@@ -1818,11 +1848,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intWeightUOMId', null);
                 current.set('strWeightUOM', null);
             }
-
-            var receiptDate = win.viewModel.data.current.get('dtmReceiptDate');
-            var lifetime = current.get('intLifeTime');
-            var lifetimeType = current.get('strLifeTimeType');
-            var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
 
             // Get the default tax group
             var taxCfg = {
@@ -2790,11 +2815,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else {            
             return;
         }
-
         var me = this;
         var win = button.up('window'),
             current = win.viewModel.data.current;
-
         if (!current){
             btnVoucher.enable();
             return; // exit immediately. 
@@ -2842,7 +2865,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             );
         };
-
         // Loop thru the items. See if there are any zero cost items. 
         Ext.Array.each(receiptItems.data.items, function (item) {
             if (!item.dummy) {
@@ -2993,95 +3015,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true } });
         }
     },
-
-    // onRecapClick: function (button, e, eOpts) {
-    //     var me = this;
-    //     var win = button.up('window');
-    //     var cboCurrency = win.down('#cboCurrency');
-    //     var context = win.context;
-    //     var pnlLotTracking = win.down('#pnlLotTracking');
-    //     var grdInventoryReceipt = win.down('#grdInventoryReceipt');
-
-    //     //Hide Lot Tracking Grid
-    //     pnlLotTracking.setVisible(false);
-    //     //Deselect all rows in Item Grid
-    //     grdInventoryReceipt.getSelectionModel().deselectAll();
-
-    //     var doRecap = function (recapButton, currentRecord, currency) {
-
-    //         // Call the buildRecapData to generate the recap data
-    //         CashManagement.common.BusinessRules.buildRecapData({
-    //             postURL: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
-    //             strTransactionId: currentRecord.get('strReceiptNumber'),
-    //             ysnPosted: currentRecord.get('ysnPosted'),
-    //             scope: me,
-    //             success: function () {
-    //                 // If data is generated, show the recap screen.
-
-    //                 // Hide the post/unpost button if: 
-    //                 var showButton;
-    //                 switch (currentRecord.get('intSourceType')) {
-    //                     case 1: // Scale  
-    //                     case 3: // Transport Load
-    //                     case 4: // Settle Storage 
-    //                         showButton = false; 
-    //                         break; 
-    //                     default:  
-    //                         showButton = true;
-    //                         break;   
-    //                 }
-
-    //                 CashManagement.common.BusinessRules.showRecap({
-    //                     strTransactionId: currentRecord.get('strReceiptNumber'),
-    //                     ysnPosted: currentRecord.get('ysnPosted'),
-    //                     dtmDate: currentRecord.get('dtmReceiptDate'),
-    //                     strCurrencyId: currency,
-    //                     dblExchangeRate: 1,
-    //                     scope: me,
-    //                     showPostButton: showButton,
-    //                     showUnpostButton: showButton,
-    //                     postCallback: function () {
-    //                         me.onReceiveClick(recapButton);
-    //                     },
-    //                     unpostCallback: function () {
-    //                         me.onReceiveClick(recapButton);
-    //                     }
-    //                 });
-    //             },
-    //             failure: function (message) {
-    //                 // Show why recap failed.
-    //                 var msgBox = iRely.Functions;
-    //                 msgBox.showCustomDialog(
-    //                     msgBox.dialogType.ERROR,
-    //                     msgBox.dialogButtonType.OK,
-    //                     message
-    //                 );
-    //             }
-    //         });
-    //     };
-
-    //     // If there is no data change, calculate the charge and do the recap. 
-    //     if (!context.data.hasChanges()) {
-    //         me.doOtherChargeCalculate(win);
-    //         var task = new Ext.util.DelayedTask(function () {
-    //             doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
-    //         });
-    //         task.delay(3000);
-
-    //         return;
-    //     }
-
-    //     // Save has data changes first before anything else. 
-    //     context.data.saveRecord({
-    //         successFn: function () {
-    //             me.doOtherChargeCalculate(win);
-    //             var task = new Ext.util.DelayedTask(function () {
-    //                 doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
-    //             });
-    //             task.delay(3000);
-    //         }
-    //     });
-    // },
 
     onAfterReceive: function (success, message) {
         if (success === true) {
@@ -3263,21 +3196,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var me = win.controller;
         var vw = win.viewModel;
         var currentReceipt = vw.data.current;
+        var currentReceiptItem = context.record;
 
         // If editing the open receive and unit cost, update the following too:
         // 1. Unit Retail
         // 2. Gross Margin. Set to zero.
         if (context.field === 'dblUnitCost') {
-            if (context.record) {
-                context.record.set('dblUnitRetail', context.value);
-                context.record.set('dblGrossMargin', 0);
+            if (currentReceiptItem) {
+                currentReceiptItem.set('dblUnitRetail', context.value);
+                currentReceiptItem.set('dblGrossMargin', 0);
             }
         }
 
         if (context.field === 'dblOpenReceive' || context.field === 'strUnitMeasure' || context.field === 'strWeightUOM') {
-            if (context.record) {
+            if (currentReceiptItem) {
                 // Calculate the gross weight.
-                me.calculateGrossNet(context.record, 1);
+                me.calculateGrossNet(currentReceiptItem, 1);
 
                 //set default values to lot
                 var pnlLotTracking = win.down('#pnlLotTracking');
@@ -3286,31 +3220,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     //Check if lot table has no record except for dummy
                     if (currentReceiptItemVM.tblICInventoryReceiptItemLots().getRange().length == 1) {
                         var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                            intInventoryReceiptItemId: context.record.get('intInventoryReceiptItemId'),
-                            intSubLocationId: context.record.get('intSubLocationId'),
-                            intStorageLocationId: context.record.get('intStorageLocationId'),
-                            dblQuantity: context.record.get('dblOpenReceive'),
-                            dblGrossWeight: context.record.get('dblGross'),
-                            dblTareWeight: context.record.get('dblGross') - context.record.get('dblNet'),
-                            dblNetWeight: context.record.get('dblNet'),
-                            intItemUnitMeasureId: context.record.get('intUnitMeasureId'),
-                            strWeightUOM: context.record.get('strWeightUOM'),
-                            strStorageLocation: context.record.get('strStorageLocationName'),
-                            strSubLocationName: context.record.get('strSubLocationName'),
-                            strUnitMeasure: context.record.get('strUnitMeasure'),
-                            dblLotUOMConvFactor: context.record.get('dblItemUOMConvFactor')
+                                intInventoryReceiptItemId: currentReceiptItem.get('intInventoryReceiptItemId'),
+                                intSubLocationId: currentReceiptItem.get('intSubLocationId'),
+                                intStorageLocationId: currentReceiptItem.get('intStorageLocationId'),
+                                dblQuantity: currentReceiptItem.get('dblOpenReceive'),
+                                dblGrossWeight: currentReceiptItem.get('dblGross'),
+                                dblTareWeight: currentReceiptItem.get('dblGross') - currentReceiptItem.get('dblNet'),
+                                dblNetWeight: currentReceiptItem.get('dblNet'),
+                                intItemUnitMeasureId: currentReceiptItem.get('intUnitMeasureId'),
+                                strWeightUOM: currentReceiptItem.get('strWeightUOM'),
+                                strStorageLocation: currentReceiptItem.get('strStorageLocationName'),
+                                strSubLocationName:  currentReceiptItem.get('strSubLocationName'),
+                                strUnitMeasure: currentReceiptItem.get('strUnitMeasure'),
+                                dblLotUOMConvFactor: currentReceiptItem.get('dblItemUOMConvFactor')
                         });
-                        //Expiry Date Calculation
-                        var receiptDate = currentReceipt.get('dtmReceiptDate');
-                        var manufacturedDate = newReceiptItemLot.get('dtmManufacturedDate');
-                        var lifetime = currentReceiptItemVM.get('intLifeTime');
-                        var lifetimeType = currentReceiptItemVM.get('strLifeTimeType');
-                        //Calculate Expiry Date by Manufactured Date if available otherwise, Receipt Date
-                        var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
-                        if (!iRely.Functions.isEmpty(manufacturedDate)) {
-                            var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(manufacturedDate, lifetime, lifetimeType);
-                        }
-                        newReceiptItemLot.set('dtmExpiryDate', expiryDate);
+
+                        newReceiptItemLot.set(
+                            'dtmExpiryDate', 
+                            me.getLotExpiryDate(
+                                null, 
+                                currentReceipt.get('dtmReceiptDate'), 
+                                currentReceiptItem.get('intLifeTime'), 
+                                currentReceiptItem.get('strLifeTimeType')
+                            )
+                        );
 
                         currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                     }
@@ -3320,34 +3253,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // If editing the unit retail, update the gross margin too.
         else if (context.field === 'dblUnitRetail') {
-            if (context.record) {
+            if (currentReceiptItem) {
                 var salesPrice = context.value;
-                var grossMargin = ((salesPrice - context.record.get('dblUnitCost')) / (salesPrice)) * 100;
-                context.record.set('dblGrossMargin', grossMargin);
+                var grossMargin = ((salesPrice - currentReceiptItem.get('dblUnitCost')) / (salesPrice)) * 100;
+                currentReceiptItem.set('dblGrossMargin', grossMargin);
             }
         }
 
         // Accept the data input.
-        context.record.set(context.field, context.value);
+        currentReceiptItem.set(context.field, context.value);
 
         // Validate the gross and net variance.
-        vw.data.currentReceiptItem = context.record;
+        vw.data.currentReceiptItem = currentReceiptItem;
         if (context.field === 'dblGross' || context.field === 'dblNet') {
             me.validateWeightLoss(win)
         }
-
-        // Calculate the taxes and line totals.
 
         // Calculate the taxes
         me.calculateItemTaxes();
 
         // Calculate the line total
-        context.record.set('dblLineTotal', me.calculateLineTotal(currentReceipt, context.record));
-
-
-        //// Update the summary totals
-        //me.showSummaryTotals(win);
-        //me.showOtherCharges(win);
+        currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
     },
 
     onEditLots: function (editor, context, eOpts) {
@@ -3387,36 +3313,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         //Calculate expiryDate
         if (context.field === 'dtmManufacturedDate') {
-            //Expiry Date Calculation
-            var receiptDate = currentReceipt.get('dtmReceiptDate');
-            var manufacturedDate = context.record.get('dtmManufacturedDate');
-            var lifetime = receiptItem.get('intLifeTime');
-            var lifetimeType = receiptItem.get('strLifeTimeType');
-            //Calculate Expiry Date by Manufactured Date if available otherwise, Receipt Date
-            if (!iRely.Functions.isEmpty(manufacturedDate)) {
-                var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(manufacturedDate, lifetime, lifetimeType);
-            }
-            else {
-                var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
-            }
-            context.record.set('dtmExpiryDate', expiryDate);
+            context.record.set(
+                'dtmExpiryDate', 
+                me.getLotExpiryDate(
+                    context.record.get('dtmManufacturedDate'), 
+                    currentReceipt.get('dtmReceiptDate'), 
+                    receiptItem.get('intLifeTime'), 
+                    receiptItem.get('strLifeTimeType')
+                )
+            );            
         }
 
-        // // Calculate the 'Stated Net Per Unit'
-        // if (context.field === 'dblStatedNetPerUnit'){
-        //     context.record.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, receiptItem, context.record));
-        // }
-
-        // // Calculate the 'Stated Net Per Unit'
-        // if (context.field === 'dblStatedTotalNet'){
-        //     context.record.set('dblStatedTotalNet', me.calculateStatedTotalNet(currentReceipt, receiptItem, context.record));
-        // }        
-
-        // // Calculate the 'Physical vs Stated'
-        // if (context.field === 'dblPhysicalVsStated'){
-        //     context.record.set('dblPhysicalVsStated', me.calculatePhysicalVsStated(currentReceipt, receiptItem, context.record));
-        // }                
-
+        // Calculate the 'Stated Net Per Unit'
         if (
             context.field === 'dblStatedGrossPerUnit'
             || context.field === 'dblStatedTarePerUnit'
