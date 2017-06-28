@@ -23,5 +23,9 @@ FROM
 	SELECT intIntegrationLogDetailId as intResultId, strBatchId as strBatchNumber, intInvoiceId as intTransactionId, [strPostedTransactionId] as strTransactionId, strPostingMessage as strMessage, NULL, strTransactionType, NULL
 	FROM tblARInvoiceIntegrationLogDetail
 	WHERE ysnHeader = 1 AND ysnSuccess = 1 AND ysnPost IS NOT NULL AND (ysnPosted = 1 or ysnUnPosted = 1)
+	UNION ALL
+	SELECT intIntegrationLogDetailId as intResultId, strBatchId as strBatchNumber, intPaymentId as intTransactionId, [strPostedTransactionId] as strTransactionId, strPostingMessage as strMessage, NULL, 'Receivable' AS strTransactionType, NULL
+	FROM tblARPaymentIntegrationLogDetail
+	WHERE ysnHeader = 1 AND ysnSuccess = 1 AND ysnPost IS NOT NULL AND (ysnPosted = 1 or ysnUnPosted = 1)
 ) BatchPostingResult	
 WHERE strDescription IS NOT NULL
