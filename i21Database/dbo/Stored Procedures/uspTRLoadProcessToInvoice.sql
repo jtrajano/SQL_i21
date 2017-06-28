@@ -361,17 +361,35 @@ BEGIN TRY
 	--Auto Blend
 	SELECT DistItem.intLoadDistributionDetailId
 		, DistItem.intItemId
-		, intRecipeId
+		, Recipe.intRecipeId
 		, dblQty = dblUnits
 		, Recipe.intItemUOMId
 		, HeaderDistItem.intCompanyLocationId
+		, strActualCost = (CASE WHEN MIN(Receipt.strOrigin) = 'Terminal' AND MIN(HeaderDistItem.strDestination) = 'Customer'
+									THEN MIN(LoadHeader.strTransaction)
+								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) = MIN(HeaderDistItem.intCompanyLocationId)
+									THEN NULL
+								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) != MIN(HeaderDistItem.intCompanyLocationId)
+									THEN MIN(LoadHeader.strTransaction)
+								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Location'
+									THEN NULL
+								END)
 	INTO #tmpBlendDistributionItems
 	FROM tblTRLoadDistributionDetail DistItem
-	LEFT JOIN tblMFRecipe Recipe ON Recipe.intItemId = DistItem.intItemId
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+	LEFT JOIN tblMFRecipe Recipe ON Recipe.intItemId = DistItem.intItemId AND Recipe.intLocationId = HeaderDistItem.intCompanyLocationId
+	LEFT JOIN tblMFRecipeItem RecipeItem ON RecipeItem.intRecipeId = Recipe.intRecipeId
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = RecipeItem.intItemId
 	WHERE HeaderDistItem.intLoadHeaderId = @intLoadHeaderId
 		AND ysnActive = 1
 		AND ISNULL(DistItem.strReceiptLink, '') = ''
+	GROUP BY DistItem.intLoadDistributionDetailId
+		, DistItem.intItemId
+		, Recipe.intRecipeId
+		, dblUnits
+		, Recipe.intItemUOMId
+		, HeaderDistItem.intCompanyLocationId
 
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpBlendDistributionItems) AND @ysnRecap = 0
 	BEGIN
@@ -382,6 +400,7 @@ BEGIN TRY
 			, @LocationId INT
 			, @Qty NUMERIC(18, 6)
 			, @QtyBlended NUMERIC(18, 6)
+			, @ActualCost NVARCHAR(20)
 
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
 		BEGIN
@@ -391,6 +410,7 @@ BEGIN TRY
 				, @ItemUOMId = intItemUOMId
 				, @LocationId = intCompanyLocationId
 				, @Qty = dblQty
+				, @ActualCost = strActualCost
 			FROM #tmpBlendDistributionItems
 
 			IF (@ysnPostOrUnPost = 1)
@@ -406,6 +426,7 @@ BEGIN TRY
 					, @intSubLocationId = NULL
 					, @intStorageLocationId = NULL
 					, @intUserId = @intUserId
+					, @strActualCost = @ActualCost
 					, @dblMaxQtyToProduce = @QtyBlended OUTPUT
 				
 				IF (@Qty <> @QtyBlended)

@@ -9,6 +9,7 @@
 	@intSubLocationId int=NULL,
 	@intStorageLocationId int=NULL,
 	@intUserId int,
+	@strActualCost NVARCHAR(20) = NULL,
 	@dblMaxQtyToProduce numeric(38,20) OUT
 AS
 BEGIN TRY
