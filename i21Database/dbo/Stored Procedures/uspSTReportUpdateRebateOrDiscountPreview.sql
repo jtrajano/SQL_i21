@@ -152,6 +152,9 @@ BEGIN TRY
 	SET @UpdateCount = 0
 	SET @RecCount = 0
 
+	DECLARE @CompanyCurrencyDecimal NVARCHAR(1)
+	SET @CompanyCurrencyDecimal = 0
+	SELECT @CompanyCurrencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 
 	DECLARE @SqlQuery1 as NVARCHAR(MAX)
 	-----------------------------------Handle Dynamic Query 1
@@ -299,14 +302,18 @@ BEGIN TRY
 	 BEGIN
 		 IF (@dblRebateAmount <> 0)
 		 BEGIN
-	   
+
 			SET @SqlQuery1 = 'SELECT' + CHAR(13)
 								   + ' e.strLocationName' + CHAR(13)
 								   + ', b.strUpcCode' + CHAR(13)
 								   + ', c.strDescription' + CHAR(13)
 								   + ', ''Rebate Amount''' + CHAR(13)
-								   + ', CAST(a.dblDiscount as NVARCHAR(250))' + CHAR(13)
-								   + ', ''' + CAST(@dblRebateAmount as NVARCHAR(250)) + '''' + CHAR(13)
+								   + ', CAST(a.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								   + ', CAST(' + CAST(@dblRebateAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								   --+ ', STR(a.dblDiscount, 25, ' + CAST(@CompanyCurrencyDecimal as NVARCHAR(1)) + ')' + CHAR(13)
+								   --+ ', CAST(a.dblDiscount as NVARCHAR(250))' + CHAR(13)
+								   --+ ', ''' + STR(@dblRebateAmount, 25, @CompanyCurrencyDecimal) + '''' + CHAR(13)
+								   --+ ', ''' + CAST(@dblRebateAmount as NVARCHAR(250)) + '''' + CHAR(13)
 			               + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 			               + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 			               + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
@@ -366,8 +373,10 @@ BEGIN TRY
 								   + ', b.strUpcCode' + CHAR(13)
 								   + ', c.strDescription' + CHAR(13)
 								   + ', ''Accumlated Amount''' + CHAR(13)
-								   + ', CAST(a.dblAccumulatedAmount as NVARCHAR(250))' + CHAR(13)
-								   + ', ''' + CAST(@dblAccumAmount as NVARCHAR(250)) + '''' + CHAR(13)
+								   + ', CAST(a.dblAccumulatedAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								   + ', CAST(' + CAST(@dblAccumAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								   --+ ', CAST(a.dblAccumulatedAmount as NVARCHAR(250))' + CHAR(13)
+								   --+ ', ''' + CAST(@dblAccumAmount as NVARCHAR(250)) + '''' + CHAR(13)
 			               + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 			               + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 			               + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
@@ -428,8 +437,10 @@ BEGIN TRY
 									+ ', b.strUpcCode' + CHAR(13)
 									+ ', c.strDescription' + CHAR(13)
 									+ ', ''Accumlated Quantity''' + CHAR(13)
-									+ ', CAST(a.dblAccumulatedQty as NVARCHAR(250))' + CHAR(13)
-									+ ', ''' + CAST(@dblAccumlatedQty as NVARCHAR(250)) + '''' + CHAR(13)
+									+ ', CAST(a.dblAccumulatedQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								    + ', CAST(' + CAST(@dblAccumlatedQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+									--+ ', CAST(a.dblAccumulatedQty as NVARCHAR(250))' + CHAR(13)
+									--+ ', ''' + CAST(@dblAccumlatedQty as NVARCHAR(250)) + '''' + CHAR(13)
 			                + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 			                + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 			                + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
@@ -495,8 +506,12 @@ BEGIN TRY
 									 + ', b.strUpcCode' + CHAR(13)
 									 + ', c.strDescription' + CHAR(13)
 									 + ', ''Discount Amount''' + CHAR(13)
-									 + ', CAST(a.dblDiscount as NVARCHAR(250))' + CHAR(13)
-									 + ', ''' + CAST(@dblDiscAmountUnit as NVARCHAR(250)) + '''' + CHAR(13)
+									 + ', CAST(a.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								     + ', CAST(' + CAST(@dblDiscAmountUnit AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+									 --+ ', STR(a.dblDiscount, 25, ' + CAST(@CompanyCurrencyDecimal as NVARCHAR(1)) + ')' + CHAR(13)
+									 --+ ', CAST(a.dblDiscount as NVARCHAR(250))' + CHAR(13)
+									 --+ ', ''' + STR(@dblDiscAmountUnit, 25, @CompanyCurrencyDecimal) + '''' + CHAR(13)
+									 --+ ', ''' + CAST(@dblDiscAmountUnit as NVARCHAR(250)) + '''' + CHAR(13)
 			                 + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 			                 + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 			                 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
@@ -555,8 +570,10 @@ BEGIN TRY
 								   + ', b.strUpcCode' + CHAR(13)
 								   + ', c.strDescription' + CHAR(13)
 								   + ', ''Discoount through amount''' + CHAR(13)
-								   + ', CAST(a.dblDiscountThruAmount as NVARCHAR(250))' + CHAR(13)
-								   + ', ''' + CAST(@dblDiscThroughAmount as NVARCHAR(250)) + '''' + CHAR(13)
+								   + ', CAST(a.dblDiscountThruAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								   + ', CAST(' + CAST(@dblDiscThroughAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								   --+ ', CAST(a.dblDiscountThruAmount as NVARCHAR(250))' + CHAR(13)
+								   --+ ', ''' + CAST(@dblDiscThroughAmount as NVARCHAR(250)) + '''' + CHAR(13)
 			               + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 			               + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 			               + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
@@ -616,8 +633,10 @@ BEGIN TRY
 									+ ', b.strUpcCode' + CHAR(13)
 									+ ', c.strDescription' + CHAR(13)
 									+ ', ''Discoount through quantity''' + CHAR(13)
-									+ ', CAST(a.dblDiscountThruQty as NVARCHAR(250))' + CHAR(13)
-									+ ', ''' + CAST(@dblDiscThroughQty as NVARCHAR(250)) + '''' + CHAR(13)
+									+ ', CAST(a.dblDiscountThruQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+								    + ', CAST(' + CAST(@dblDiscThroughQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+									--+ ', CAST(a.dblDiscountThruQty as NVARCHAR(250))' + CHAR(13)
+									--+ ', ''' + CAST(@dblDiscThroughQty as NVARCHAR(250)) + '''' + CHAR(13)
 			                + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 			                + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 			                + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
@@ -725,7 +744,8 @@ BEGIN TRY
 	END
 
 
-
+	--+ ', CAST(a.dblDiscountThruQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+	--							    + ', CAST(' + CAST(@dblDiscThroughQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
 
 	--Get Old Data
 	DECLARE @strOldData as NVARCHAR(MAX)
@@ -742,30 +762,36 @@ BEGIN TRY
 	BEGIN
 		IF(@dblRebateAmount <> 0)
 		BEGIN
-			SET @strOldData = @strOldData + ' IP.dblDiscount, CHAR(13),'
+			--SET @strOldData = @strOldData + ' IP.dblDiscount, CHAR(13),'
+			SET @strOldData = @strOldData + ' CAST(IP.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
 		END
 		IF(@dblAccumAmount <> 0)
 		BEGIN
-			SET @strOldData = @strOldData + ' IP.dblAccumulatedAmount, CHAR(13),'
+			--SET @strOldData = @strOldData + ' IP.dblAccumulatedAmount, CHAR(13),'
+			SET @strOldData = @strOldData + ' CAST(IP.dblAccumulatedAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
 		END
 		IF(@dblAccumlatedQty <> 0)
 		BEGIN
-			SET @strOldData = @strOldData + ' IP.dblAccumulatedQty, CHAR(13),'
+			--SET @strOldData = @strOldData + ' IP.dblAccumulatedQty, CHAR(13),'
+			SET @strOldData = @strOldData + ' CAST(IP.dblAccumulatedQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
 		END
 	END
 	ELSE IF (@strPromotionType = 'Vendor Discount')
 	BEGIN
 		IF(@dblDiscAmountUnit <> 0)
 		BEGIN
-			SET @strOldData = @strOldData + ' IP.dblDiscount, CHAR(13),'
+			--SET @strOldData = @strOldData + ' IP.dblDiscount, CHAR(13),'
+			SET @strOldData = @strOldData + ' CAST(IP.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
 		END
 		IF(@dblDiscThroughAmount <> 0)
 		BEGIN
-			SET @strOldData = @strOldData + ' IP.dblDiscountThruAmount, CHAR(13),'
+			--SET @strOldData = @strOldData + ' IP.dblDiscountThruAmount, CHAR(13),'
+			SET @strOldData = @strOldData + ' CAST(IP.dblDiscountThruAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
 		END
 		IF(@dblDiscThroughQty <> 0)
 		BEGIN
-			SET @strOldData = @strOldData + ' IP.dblDiscountThruQty, CHAR(13),'
+			--SET @strOldData = @strOldData + ' IP.dblDiscountThruQty, CHAR(13),'
+			SET @strOldData = @strOldData + ' CAST(IP.dblDiscountThruQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
 		END
 	END
 	SET @strOldData = SUBSTRING(@strOldData, 0, LEN(@strOldData))
