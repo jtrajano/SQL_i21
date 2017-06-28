@@ -665,6 +665,7 @@ BEGIN
 		SELECT A.intBillDetailId FROM #tmpCreatedBillDetail A
 		INNER JOIN tblAPBillDetail B ON A.intBillDetailId = B.intBillDetailId
 		WHERE B.intInventoryReceiptChargeId IS NULL 
+		AND B.intInventoryReceiptItemId = @receiptDetailId
 
 		--EXEC uspAPUpdateVoucherDetailTax @billDetailIds
 		INSERT INTO tblAPBillDetailTax(
