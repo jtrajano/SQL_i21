@@ -23,7 +23,8 @@ Ext.application({
     views: [
         'RebuildInventory',
         'LotDetailHistory',
-        'CopyItemLocation'
+        'CopyItemLocation',
+        'InventoryCountDetails'
     ],
     name: 'Inventory',
 

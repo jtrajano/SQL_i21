@@ -10,7 +10,8 @@
         "views": [
             "RebuildInventory",
             "LotDetailHistory",
-            "CopyItemLocation"
+            "CopyItemLocation",
+            "InventoryCountDetails"
         ]
     },
     "name": "Application",

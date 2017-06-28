@@ -20,7 +20,7 @@ Ext.define('Inventory.store.BufferedInventoryCountDetail', {
             create: '../Inventory/api/InventoryCountDetail/Post',
             read: '../Inventory/api/InventoryCount/GetInventoryCountDetails',
             update: '../Inventory/api/InventoryCountDetail/UpdateDetail',
-            destroy: '../Inventory/api/InventoryCountDetail/Delete',
+            destroy: '../Inventory/api/InventoryCountDetail/DeleteDetail',
         },
         reader: {
             type: 'json',
