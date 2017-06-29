@@ -5295,6 +5295,9 @@
     <Build Include="dbo\Views\vyuCTQualityApprovedRejected.sql" />
     <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
     <Build Include="dbo\Views\vyuICSearchItem.sql" />
+    <Build Include="dbo\Tables\tblCTEventRecipientFilter.sql" />
+    <Build Include="dbo\Views\vyuCTEventRecipientFilter.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAlertNotificationCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
