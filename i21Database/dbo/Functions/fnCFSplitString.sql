@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnCFSplitString] 
     (   
-    @DelimitedString    varchar(8000),
+    @DelimitedString    varchar(max),
     @Delimiter              varchar(100) 
     )
 RETURNS @tblArray TABLE
