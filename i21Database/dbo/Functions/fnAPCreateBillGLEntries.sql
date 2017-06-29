@@ -90,7 +90,7 @@ BEGIN
 											(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
 													 ELSE Details.dblTotal END) * ISNULL(NULLIF(Details.dblRate,0),1),
 		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	units.dblTotalUnits,
+		[dblCreditUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
@@ -232,7 +232,7 @@ BEGIN
 														END
 												* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) , --Bill Detail
 		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	units.dblTotalUnits,
+		[dblDebitUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
@@ -444,7 +444,7 @@ BEGIN
 													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
 											END AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	units.dblTotalUnits,
+		[dblDebitUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
