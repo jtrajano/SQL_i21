@@ -15,6 +15,7 @@ DECLARE @DiscountDay INT, @DayMonthDue INT, @DueNextMonth INT
 DECLARE @DiscountEP NUMERIC(18,6)
 DECLARE @DiscountDate datetime
 DECLARE @CurrentDate datetime
+DECLARE @MaxDaysInMonth int
 
 SET @CurrentDate = DATEADD(DAY, 0, DATEDIFF(DAY, 0, GETDATE()))
 
@@ -23,12 +24,13 @@ SELECT
 	,@DiscountDay = ISNULL(intDiscountDay, 1)
 	,@DiscountDate = ISNULL(dtmDiscountDate, @PaymentDate) 
 	,@DiscountEP = ISNULL(dblDiscountEP,0)
+	,@MaxDaysInMonth = DATEDIFF(DAY, DATEADD(DAY, 1-DAY(@TransactionDate), @TransactionDate), DATEADD(MONTH, 1, DATEADD(DAY, 1-DAY(@TransactionDate), @TransactionDate)))
 FROM
 	tblSMTerm
 WHERE
 	intTermID = @TermId
 
-SET @DiscountDay = CASE WHEN @DiscountDay = 0 THEN 1 ELSE @DiscountDay END
+SET @DiscountDay = CASE WHEN @DiscountDay = 0 OR @DiscountDay > @MaxDaysInMonth  THEN 1 ELSE @DiscountDay END
 
 IF (@Type = 'Standard')
 	BEGIN

@@ -96,9 +96,9 @@ LEFT OUTER JOIN
 			SUM(
 			CASE WHEN [strItemTermDiscountBy] = 'Percent'
 				THEN
-					([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000)
+					(ISNULL([dblQtyShipped], @ZeroDecimal) * ISNULL([dblPrice], @ZeroDecimal)) * (ISNULL([dblItemTermDiscount], @ZeroDecimal)/100.000000)
 				ELSE
-					[dblItemTermDiscount]
+					ISNULL([dblItemTermDiscount], @ZeroDecimal)
 			END
 			)	AS [dblItemTermDiscountTotal]
 		,[intInvoiceId]
@@ -116,15 +116,15 @@ WHERE
 
 UPDATE ARID
 SET
-	  ARID.[dblTotalTax]		= T.[dblAdjustedTax]
-	 ,ARID.[dblBaseTotalTax]	= T.[dblBaseAdjustedTax]
+	  ARID.[dblTotalTax]		= ISNULL(T.[dblAdjustedTax], @ZeroDecimal)
+	 ,ARID.[dblBaseTotalTax]	= ISNULL(T.[dblBaseAdjustedTax], @ZeroDecimal)
 FROM
 	tblARInvoiceDetail ARID
 LEFT OUTER JOIN
 	(
 		SELECT
-			 SUM([dblAdjustedTax]) [dblAdjustedTax]
-			,SUM([dblBaseAdjustedTax]) [dblBaseAdjustedTax]
+			 SUM(ISNULL([dblAdjustedTax], @ZeroDecimal)) [dblAdjustedTax]
+			,SUM(ISNULL([dblBaseAdjustedTax], @ZeroDecimal)) [dblBaseAdjustedTax]
 			,[intInvoiceDetailId]
 		FROM
 			tblARInvoiceDetailTax

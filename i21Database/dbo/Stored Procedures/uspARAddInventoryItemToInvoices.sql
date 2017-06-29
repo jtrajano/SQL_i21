@@ -333,7 +333,7 @@ USING
 	SELECT
 		 [intInvoiceId]							= IE.[intInvoiceId]
 		,[intInvoiceDetailId]					= NULL
-		,[strDocumentNumber]					= IE.[strDocumentNumber]
+		,[strDocumentNumber]					= ISNULL(IE.[strDocumentNumber], IE.[strSourceId])
 		,[intItemId]							= IC.[intItemId]
 		,[intPrepayTypeId]						= IE.[intPrepayTypeId]
 		,[dblPrepayRate]						= IE.[dblPrepayRate]
@@ -349,7 +349,7 @@ USING
 		,[strItemTermDiscountBy]				= ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
 		,[dblPrice]								= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
 		,[dblBasePrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
-		,[strPricing]							= ISNULL(IP.[strPricing], IE.[strPricing])
+		,[strPricing]							= ISNULL(IP.[strPricing], CASE WHEN ISNULL(IE.[strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + IE.[strSourceTransaction] COLLATE Latin1_General_CI_AS ELSE IE.[strPricing] COLLATE Latin1_General_CI_AS END)
 		,[dblTotalTax]							= @ZeroDecimal
 		,[dblBaseTotalTax]						= @ZeroDecimal
 		,[dblTotal]								= @ZeroDecimal
@@ -359,8 +359,8 @@ USING
 		,[dblCurrencyExchangeRate]				= CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END
 		,[intSubCurrencyId]						= ISNULL(ISNULL(IP.[intSubCurrencyId], IE.[intSubCurrencyId]), IE.[intCurrencyId])
 		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(ISNULL(IP.[intSubCurrencyId], IE.[intSubCurrencyId]), 0) = 0 THEN 1 ELSE ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) END
-		,[ysnRestricted]						= IE.[ysnRestricted]
-		,[ysnBlended]							= IE.[ysnBlended]
+		,[ysnRestricted]						= ISNULL(IE.[ysnRestricted], 0)
+		,[ysnBlended]							= ISNULL(IE.[ysnBlended], 0)
 		,[intAccountId]							= Acct.[intAccountId]
 		,[intCOGSAccountId]						= Acct.[intCOGSAccountId]
 		,[intSalesAccountId]					= ISNULL(IE.[intSalesAccountId], Acct.[intSalesAccountId])
@@ -414,8 +414,8 @@ USING
 		,[dblPreviousMeterReading]				= IE.[dblPreviousMeterReading]
 		,[dblConversionFactor]					= IE.[dblConversionFactor]
 		,[intPerformerId]						= IE.[intPerformerId]
-		,[ysnLeaseBilling]						= IE.[ysnLeaseBilling]
-		,[ysnVirtualMeterReading]				= IE.[ysnVirtualMeterReading]
+		,[ysnLeaseBilling]						= ISNULL(IE.[ysnLeaseBilling], 0)
+		,[ysnVirtualMeterReading]				= ISNULL(IE.[ysnVirtualMeterReading], 0)
 		,[dblOriginalItemWeight]				= @ZeroDecimal
 		,[intRecipeId]							= IE.[intRecipeId]
 		,[intSubLocationId]						= IE.[intSubLocationId]
