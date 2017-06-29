@@ -15,6 +15,7 @@
     [ysnCalculateGrainBankonADB] BIT NULL DEFAULT 1, 
     [ysnAllowGrainBankOverdraw] BIT NULL,
 	[ysnCanadianPrimaryElevatorReceipt] BIT NULL DEFAULT 0,
+	[ysnDeliverySheet] BIT DEFAULT 0 NOT NULL,
 	[intItemId] INT NULL, 
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])

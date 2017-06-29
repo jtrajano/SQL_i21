@@ -5304,6 +5304,7 @@
     <Build Include="dbo\Views\vyuPROriginEmployeeEarning.sql" />
     <Build Include="dbo\Views\vyuPROriginEmployeeTax.sql" />
     <Build Include="dbo\Views\vyuPROriginTaxTable.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

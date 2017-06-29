@@ -6580,4 +6580,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strWhereFinalized" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="97e509f2-386b-4bd2-936d-b229195113f3" ChangeDateTime="06/29/2017 18:13:17">
+    <Property Name="ElementName" Value="[dbo].[tblSCDeliverySheets].[intCompanyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDeliverySheets]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="abf56f03-26e2-4ed9-87ea-d136a0608268" ChangeDateTime="06/29/2017 18:13:36">
+    <Property Name="ElementName" Value="[dbo].[tblSCDeliverySheets].[strDeliverySheetNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDeliverySheets]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDeliverySheetsNumber" />
+  </Operation>
 </Operations>
