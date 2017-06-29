@@ -465,7 +465,7 @@ SET strTransactionId = B.strPaymentRecordNum,
 	intPayeeId = C.intEntityVendorId
 FROM tblCMBankTransaction A
 INNER JOIN tblAPPayment B
-	ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
+	ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END) --11 ORIGIN DEPOSIT
 	AND A.dtmDate = B.dtmDatePaid
 	AND A.intBankAccountId = B.intBankAccountId
 	AND A.strReferenceNo = B.strPaymentInfo
@@ -474,6 +474,7 @@ INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.in
 	--AND A.strPayee = D.strName
 WHERE A.strSourceSystem IN ('AP','CW')
 AND A.strTransactionId <> B.strPaymentRecordNum
+AND A.ysnCheckVoid = 0 -- we wil never have any voided payment imported from origin as they are clearing the apivcmst.apchk_chk_no after voiding
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
