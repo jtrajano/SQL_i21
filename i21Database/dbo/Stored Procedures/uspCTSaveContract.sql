@@ -97,6 +97,13 @@ BEGIN TRY
 	EXEC uspQMSampleContractSlice @intContractHeaderId
 	EXEC uspLGLoadContractSlice @intContractHeaderId
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
+
+	--Update Signature Date
+	IF EXISTS(SELECT * FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId AND ysnSigned = 1 AND dtmSigned IS NULL)
+	BEGIN
+		UPDATE tblCTContractHeader SET dtmSigned = DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) WHERE intContractHeaderId = @intContractHeaderId		
+	END
+
 END TRY
 
 BEGIN CATCH

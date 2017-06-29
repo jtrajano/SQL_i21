@@ -5305,6 +5305,9 @@
     <Build Include="dbo\Views\vyuPROriginEmployeeTax.sql" />
     <Build Include="dbo\Views\vyuPROriginTaxTable.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheet.sql" />
+    <Build Include="dbo\Tables\tblCTEventRecipientFilter.sql" />
+    <Build Include="dbo\Views\vyuCTEventRecipientFilter.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAlertNotificationCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
