@@ -342,7 +342,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strEmail, '')
 			WHEN 'Company'
-				THEN ISNULL(FNCompanyLocation.strEmail, '')
+				THEN ISNULL(FNCompanyLocation.strEmail, FirstNotifyCompany.strEmail)
 			WHEN 'Vendor'
 				THEN ISNULL(FirstNotify.strEmail, '')
 			WHEN 'Customer'
@@ -355,7 +355,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strFax, '')
 			WHEN 'Company'
-				THEN ISNULL(FNCompanyLocation.strFax, '')
+				THEN ISNULL(FNCompanyLocation.strFax, FirstNotifyCompany.strFax)
 			WHEN 'Vendor'
 				THEN ISNULL(FirstNotify.strFax, '')
 			WHEN 'Customer'
@@ -381,7 +381,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strPhone, '')
 			WHEN 'Company'
-				THEN ISNULL(FNCompanyLocation.strPhone, '')
+				THEN ISNULL(FNCompanyLocation.strPhone, FirstNotifyCompany.strPhone)
 			WHEN 'Vendor'
 				THEN ISNULL(FirstNotifyContactEntity.strPhone, '')
 			WHEN 'Customer'
@@ -394,7 +394,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strAddress, '')
 			WHEN 'Company'
-				THEN ISNULL(FNCompanyLocation.strAddress, '')
+				THEN ISNULL(FNCompanyLocation.strAddress, FirstNotifyCompany.strAddress)
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strAddress, '')
 			WHEN 'Customer'
@@ -407,7 +407,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strCity, '')
 			WHEN 'Company'
-				THEN ISNULL(FNCompanyLocation.strCity, '')
+				THEN ISNULL(FNCompanyLocation.strCity, FirstNotifyCompany.strCity)
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strCity, '')
 			WHEN 'Customer'
@@ -420,7 +420,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strCountry, '')
 			WHEN 'Company'
-				THEN ISNULL(FNCompanyLocation.strCountry, '')
+				THEN ISNULL(FNCompanyLocation.strCountry, FirstNotifyCompany.strCountry)
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strCountry, '')
 			WHEN 'Customer'
@@ -446,7 +446,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(FirstNotifyBank.strZipCode, '')
 			WHEN 'Company'
-				THEN ISNULL(FNCompanyLocation.strZipPostalCode, '')
+				THEN ISNULL(FNCompanyLocation.strZipPostalCode, FirstNotifyCompany.strZip)
 			WHEN 'Vendor'
 				THEN ISNULL(FNLocation.strZipCode, '')
 			WHEN 'Customer'
@@ -472,7 +472,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strEmail, '')
 			WHEN 'Company'
-				THEN ISNULL(SNCompanyLocation.strEmail, '')
+				THEN ISNULL(SNCompanyLocation.strEmail, SecondNotifyCompany.strEmail)
 			WHEN 'Vendor'
 				THEN ISNULL(SecondNotify.strEmail, '')
 			WHEN 'Customer'
@@ -485,7 +485,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strFax, '')
 			WHEN 'Company'
-				THEN ISNULL(SNCompanyLocation.strFax, '')
+				THEN ISNULL(SNCompanyLocation.strFax, SecondNotifyCompany.strFax)
 			WHEN 'Vendor'
 				THEN ISNULL(SecondNotify.strFax, '')
 			WHEN 'Customer'
@@ -511,7 +511,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strPhone, '')
 			WHEN 'Company'
-				THEN ISNULL(SNCompanyLocation.strPhone, '')
+				THEN ISNULL(SNCompanyLocation.strPhone, SecondNotifyCompany.strPhone)
 			WHEN 'Vendor'
 				THEN ISNULL(SecondNotifyContactEntity.strPhone, '')
 			WHEN 'Customer'
@@ -524,7 +524,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strAddress, '')
 			WHEN 'Company'
-				THEN ISNULL(SNCompanyLocation.strAddress, '')
+				THEN ISNULL(SNCompanyLocation.strAddress, SecondNotifyCompany.strAddress)
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strAddress, '')
 			WHEN 'Customer'
@@ -537,7 +537,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strCity, '')
 			WHEN 'Company'
-				THEN ISNULL(SNCompanyLocation.strCity, '')
+				THEN ISNULL(SNCompanyLocation.strCity, SecondNotifyCompany.strCity)
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strCity, '')
 			WHEN 'Customer'
@@ -550,7 +550,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strCountry, '')
 			WHEN 'Company'
-				THEN ISNULL(SNCompanyLocation.strCountry, '')
+				THEN ISNULL(SNCompanyLocation.strCountry, SecondNotifyCompany.strCountry)
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strCountry, '')
 			WHEN 'Customer'
@@ -576,7 +576,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(SecondNotifyBank.strZipCode, '')
 			WHEN 'Company'
-				THEN ISNULL(SNCompanyLocation.strZipPostalCode, '')
+				THEN ISNULL(SNCompanyLocation.strZipPostalCode, SecondNotifyCompany.strZip)
 			WHEN 'Vendor'
 				THEN ISNULL(SNLocation.strZipCode, '')
 			WHEN 'Customer'
@@ -654,7 +654,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strAddress, '')
 			WHEN 'Company'
-				THEN ISNULL(CNCompanyLocation.strAddress, '')
+				THEN ISNULL(CNCompanyLocation.strAddress, ConsigneeNotifyCompany.strAddress)
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strAddress, '')
 			WHEN 'Customer'
@@ -667,7 +667,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strCity, '')
 			WHEN 'Company'
-				THEN ISNULL(CNCompanyLocation.strCity, '')
+				THEN ISNULL(CNCompanyLocation.strCity, ConsigneeNotifyCompany.strCity)
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strCity, '')
 			WHEN 'Customer'
@@ -680,7 +680,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strCountry, '')
 			WHEN 'Company'
-				THEN ISNULL(CNCompanyLocation.strCountry, '')
+				THEN ISNULL(CNCompanyLocation.strCountry, ConsigneeNotifyCompany.strCountry)
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strCountry, '')
 			WHEN 'Customer'
@@ -706,7 +706,7 @@ FROM (
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strZipCode, '')
 			WHEN 'Company'
-				THEN ISNULL(CNCompanyLocation.strZipPostalCode, '')
+				THEN ISNULL(CNCompanyLocation.strZipPostalCode, ConsigneeNotifyCompany.strZip)
 			WHEN 'Vendor'
 				THEN ISNULL(CNLocation.strZipCode, '')
 			WHEN 'Customer'
