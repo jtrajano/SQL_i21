@@ -51,7 +51,12 @@ AS
 			ITS.intOriginId as intSOriginId,
 			US.strUnitType as strSUnitType,
 			ITP.strType AS strPItemType,
-			ITP.strType AS strSItemType
+			ITP.strType AS strSItemType,
+			strPriceCurrency = SCurrency.strCurrency,
+			dblSalesPrice = CDS.dblCashPrice,
+			strPriceUOM = SUOM.strUnitMeasure,
+			intPriceUnitMeasureId = SItemUOM.intUnitMeasureId,
+			SCurrency.ysnSubCurrency
 
 	FROM 	tblLGAllocationDetail AD
 	JOIN	tblLGAllocationHeader	AH	ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -65,6 +70,9 @@ AS
 	JOIN	tblICUnitMeasure		US	ON	US.intUnitMeasureId				=	AD.intSUnitMeasureId
 	JOIN	tblICItem				ITP	ON	ITP.intItemId				= CDP.intItemId
 	JOIN	tblICItem				ITS	ON	ITS.intItemId				= CDS.intItemId
+	JOIN	tblSMCurrency			SCurrency ON SCurrency.intCurrencyID = CDS.intCurrencyId
+	JOIN	tblICItemUOM			SItemUOM ON SItemUOM.intItemUOMId = CDS.intPriceItemUOMId
+	JOIN	tblICUnitMeasure		SUOM ON SUOM.intUnitMeasureId = SItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocation	PCL ON PCL.intCompanyLocationId = CDP.intCompanyLocationId
 	LEFT JOIN tblSMCompanyLocation	SCL ON SCL.intCompanyLocationId = CDS.intCompanyLocationId
 	LEFT JOIN	tblCTPosition			PP	ON	PP.intPositionId			= CHP.intPositionId
@@ -76,4 +84,4 @@ AS
 								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0 AND
 			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
 								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0
-			)			
+			)
