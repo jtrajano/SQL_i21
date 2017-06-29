@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFLotOwnerUpdate @intLotId INT
 	,@intNewItemOwnerId INT
 	,@intUserId INT
+	,@strParentLotNumber NVARCHAR(50)
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -16,6 +17,10 @@ BEGIN TRY
 		,@intInventoryAdjustmentId INT
 		,@intStorageLocationId INT
 		,@intSubLocationId INT
+		,@intLotStatusId INT
+		,@dtmExpiryDate DATETIME
+		,@intParentLotId INT
+		,@strOldParentLotNumber NVARCHAR(50)
 
 	SELECT @strLotNumber = strLotNumber
 		,@intItemId = intItemId
@@ -23,6 +28,8 @@ BEGIN TRY
 		,@intSubLocationId = intSubLocationId
 		,@intLocationId = intLocationId
 		,@dtmDate = GETDATE()
+		,@intLotStatusId = intLotStatusId
+		,@dtmExpiryDate = dtmExpiryDate
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -93,6 +100,22 @@ BEGIN TRY
 			,@intInventoryAdjustmentId = NULL
 			,@intOldItemOwnerId = NULL
 			,@intNewItemOwnerId = @intNewItemOwnerId
+
+		SELECT @intSourceId = 1
+			,@intSourceTransactionTypeId = 8
+
+		EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
+			,@dtmDate = @dtmDate
+			,@intLocationId = @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			,@intNewOwnerId = @intOwnerId
+			,@intSourceId = @intSourceId
+			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+			,@intEntityUserSecurityId = @intUserId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+			,@strDescription = NULL
 	END
 	ELSE
 	BEGIN
@@ -138,24 +161,46 @@ BEGIN TRY
 				,@intInventoryAdjustmentId = NULL
 				,@intOldItemOwnerId = @intOldItemOwnerId
 				,@intNewItemOwnerId = @intNewItemOwnerId
+
+			SELECT @intSourceId = 1
+				,@intSourceTransactionTypeId = 8
+
+			EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
+				,@dtmDate = @dtmDate
+				,@intLocationId = @intLocationId
+				,@intSubLocationId = @intSubLocationId
+				,@intStorageLocationId = @intStorageLocationId
+				,@strLotNumber = @strLotNumber
+				,@intNewOwnerId = @intOwnerId
+				,@intSourceId = @intSourceId
+				,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+				,@intEntityUserSecurityId = @intUserId
+				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+				,@strDescription = NULL
 		END
 	END
 
-	SELECT @intSourceId = 1
-		,@intSourceTransactionTypeId = 8
+	-- Parent Lot No. Update
+	SELECT @strOldParentLotNumber = PL.strParentLotNumber
+	FROM tblICLot L
+	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+	WHERE L.intLotId = @intLotId
 
-	EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
-		,@dtmDate = @dtmDate
-		,@intLocationId = @intLocationId
-		,@intSubLocationId = @intSubLocationId
-		,@intStorageLocationId = @intStorageLocationId
-		,@strLotNumber = @strLotNumber
-		,@intNewOwnerId = @intOwnerId
-		,@intSourceId = @intSourceId
-		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
-		,@intEntityUserSecurityId = @intUserId
-		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-		,@strDescription = NULL
+	IF ISNULL(@strOldParentLotNumber, '') <> ISNULL(@strParentLotNumber, '')
+	BEGIN
+		EXEC uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
+			,@strParentLotAlias = NULL
+			,@intItemId = @intItemId
+			,@dtmExpiryDate = @dtmExpiryDate
+			,@intLotStatusId = @intLotStatusId
+			,@intEntityUserSecurityId = @intUserId
+			,@intLotId = @intLotId
+			,@intParentLotId = @intParentLotId OUTPUT
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@dtmDate = NULL
+			,@intShiftId = NULL
+	END
 END TRY
 
 BEGIN CATCH
