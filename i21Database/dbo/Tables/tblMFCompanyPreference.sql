@@ -41,7 +41,6 @@
 	ysnSetDefaultQtyOnHandheld BIT,
 	ysnEnableStagingBOL BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnEnableStagingBOL] DEFAULT 0,
 	strBOLReportName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	ysnCycleCountByStockUnit BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnCycleCountByStockUnit] DEFAULT 0,
 	ysnReserveOnStage Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnReserveOnStage] DEFAULT 0,
 	ysnGenerateNewParentLotOnChangeItem Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnGenerateNewParentLotOnChangeItem] DEFAULT 1,
 	intNoOfDecimalPlacesOnConsumption int NULL CONSTRAINT [DF_tblMFCompanyPreference_intNoOfDecimalPlacesOnConsumption] DEFAULT 0,
