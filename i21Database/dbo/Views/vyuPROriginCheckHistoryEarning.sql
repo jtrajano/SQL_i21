@@ -19,3 +19,4 @@ SELECT TOP 0
 	,strMemoType		= CAST('' AS NVARCHAR(200))
 	,strUserId			= CAST('' AS NVARCHAR(200))
 	,dtmUserRevision	= CAST(NULL AS DATETIME)
+	,intIdentityKey		= CAST(-999 AS INT)

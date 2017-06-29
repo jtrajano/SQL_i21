@@ -9,3 +9,4 @@ SELECT TOP 0
 	,strOldData		= CAST('' AS NVARCHAR(100))
 	,strNewData		= CAST('' AS NVARCHAR(100))
 	,strUserId		= CAST('' AS NVARCHAR(100))
+	,intIdentityKey	= CAST(-999 AS INT)

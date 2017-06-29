@@ -48,3 +48,4 @@ SELECT TOP 0
 	,dtmReviewDate			= CAST(NULL AS DATETIME)
 	,dtmNextReviewDate		= CAST(NULL AS DATETIME)
 	,dtmInsuranceDate		= CAST(NULL AS DATETIME)
+	,intIdentityKey		= CAST(-999 AS INT)

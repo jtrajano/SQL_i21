@@ -14,3 +14,4 @@ SELECT TOP 0
 	,dblTotalWages		= CAST(0.000000 AS NUMERIC(18, 6))
 	,strUserId			= CAST('' AS NVARCHAR(200))
 	,dtmUserRevision	= CAST(NULL AS DATETIME)
+	,intIdentityKey		= CAST(-999 AS INT)

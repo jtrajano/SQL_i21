@@ -26,6 +26,7 @@ BEGIN
 									CAST((premt_user_rev_dt % 100) AS VARCHAR)
 								END 
 								AS DATETIME)
+		,intIdentityKey		= ISNULL(CAST(A4GLIdentity AS INT), -999)
 	FROM
 		premtmst')
 

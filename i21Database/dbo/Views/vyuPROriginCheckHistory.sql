@@ -28,3 +28,4 @@ SELECT TOP 0
 	,ysnPrenoteSent		= CAST(0 AS BIT)
 	,strUserId			= CAST('' AS NVARCHAR(200))
 	,dtmUserRevision	= CAST(NULL AS DATETIME)
+	,intIdentityKey		= CAST(-999 AS INT)
