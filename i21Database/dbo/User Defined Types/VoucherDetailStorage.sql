@@ -2,9 +2,10 @@
 (
 	[intCustomerStorageId]		INT NOT NULL,
 	[intItemId]					INT	NOT NULL,
-	[intAccountId]					INT	NOT NULL,
-	[dblQtyReceived]				DECIMAL(18, 6)	NOT NULL, 
-	[strMiscDescription]			NVARCHAR(500)	NULL, 
+	[intAccountId]				INT	NULL,
+	[dblQtyReceived]			DECIMAL(18, 6)	NOT NULL, 
+	[strMiscDescription]		NVARCHAR(500)	NULL, 
     [dblCost]					DECIMAL(18, 6)	NOT NULL,
-	PRIMARY KEY CLUSTERED ([intCustomerStorageId] ASC) 
+	[intContractHeaderId]		INT NULL,
+	[intContractDetailId]		INT NULL
 )
