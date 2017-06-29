@@ -85,7 +85,7 @@ BEGIN
 	SELECT @strFullName = E.strName,
 		   @strUserEmailId = ETC.strEmail,
 		   @strUserPhoneNo = EPN.strPhone  FROM tblSMUserSecurity S
-	JOIN tblEMEntity E ON E.intEntityId = S.intEntityUserSecurityId 
+	JOIN tblEMEntity E ON E.intEntityId = S.intEntityId
 	JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
 	JOIN tblEMEntity ETC ON ETC.intEntityId = EC.intEntityContactId
 	JOIN tblEMEntityPhoneNumber EPN ON EPN.intEntityId = ETC.intEntityId
