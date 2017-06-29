@@ -138,6 +138,7 @@ SELECT   Load.intLoadId
 		,strSLocationFax = SCL.strFax
 		,strSLocationPhone = SCL.strPhone
 
+		,Commodity.strCommodityCode AS strCommodity
 		,Item.strItemNo
 		,Item.strDescription AS strItemDescription
 		,UOM.strUnitMeasure AS strItemUOM
@@ -227,6 +228,7 @@ LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.i
 LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LoadDetail.intSContractDetailId
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
+LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId

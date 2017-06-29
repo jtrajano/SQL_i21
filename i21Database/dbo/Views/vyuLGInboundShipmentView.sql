@@ -158,7 +158,12 @@ SELECT
 		dblContainerWeightPerQty = (LC.dblNetWt / LC.dblQuantity),
 		ISNULL(LDCL.dblReceivedQty,LD.dblDeliveredQuantity) as dblContainerContractReceivedQty,
 		dblReceivedGrossWt = IsNull((SELECT sum(ICItem.dblGross) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0),
-		dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0)
+		dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0), 
+		PCT.dblFutures, 
+		PCT.dblBasis, 
+		PCT.intPriceItemUOMId, 
+		PCT.dblTotalCost
+
 FROM tblLGLoad  L  --  tblLGShipmentBLContainerContract SC
 JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId  --tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
 JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = LD.intPContractDetailId
