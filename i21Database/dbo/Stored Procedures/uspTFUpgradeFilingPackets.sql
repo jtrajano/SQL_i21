@@ -27,8 +27,8 @@ BEGIN TRY
 	INTO #tmpFP
 	FROM @FilingPackets FP
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = FP.strFormCode COLLATE Latin1_General_CI_AS
-		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = FP.strScheduleCode COLLATE Latin1_General_CI_AS
-		AND RC.strType COLLATE Latin1_General_CI_AS = FP.strType COLLATE Latin1_General_CI_AS
+		AND ISNULL(RC.strScheduleCode, '') COLLATE Latin1_General_CI_AS = ISNULL(FP.strScheduleCode, '') COLLATE Latin1_General_CI_AS
+		AND ISNULL(RC.strType, '') COLLATE Latin1_General_CI_AS = ISNULL(FP.strType, '') COLLATE Latin1_General_CI_AS
 		AND RC.intTaxAuthorityId = @TaxAuthorityId
 
 	UPDATE tblTFFilingPacket

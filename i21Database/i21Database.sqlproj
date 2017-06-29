@@ -2960,7 +2960,6 @@
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentField.sql" />
     <Build Include="dbo\Tables\tblTFTransaction.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionDetail.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionHeader.sql" />
     <Build Include="dbo\Tables\tblTRLoadHeader.sql" />
@@ -2996,10 +2995,7 @@
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
@@ -5301,6 +5297,7 @@
     <Build Include="dbo\Views\vyuPATStockClassification.sql" />
     <Build Include="dbo\Views\vyuMFGetBlendTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetRCConfiguration.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\IL_Illinois.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

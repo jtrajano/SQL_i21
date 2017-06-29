@@ -43,6 +43,8 @@ BEGIN TRY
 		UPDATE
 		SET 
 			strState = SOURCE.strState
+			, strTaxCategory = SOURCE.strTaxCategory
+			, intTaxAuthorityId = @TaxAuthorityId
 	WHEN NOT MATCHED THEN 
 		INSERT (
 			intTaxAuthorityId
