@@ -80,7 +80,11 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 70,name = 'Unrealized Gain or Loss Offset Contract Purchase' UNION ALL --GL-3286
 			SELECT id = 71,name = 'Unrealized Gain or Loss Offset Contract Sales' UNION ALL--GL-3286
 			SELECT id = 72,name = 'Realized Gain or Loss Payables' UNION ALL--GL-3286
-			SELECT id = 73,name = 'Realized Gain or Loss Receivables' --GL-3286
+			SELECT id = 73,name = 'Realized Gain or Loss Receivables' UNION ALL --GL-3286
+			SELECT id = 74,name = 'Unrealized Gain or Loss' UNION ALL --GL-3464
+			SELECT id = 75,name = 'Unrealized Futures Gain or Loss' UNION ALL --GL-3464
+			SELECT id = 76,name = 'Futures Trade Equity' UNION ALL --GL-3464
+			SELECT id = 77,name = 'Futures Gain or Loss Realized' --GL-3464
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
