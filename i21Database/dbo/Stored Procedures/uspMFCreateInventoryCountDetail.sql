@@ -1,24 +1,22 @@
-﻿CREATE PROCEDURE uspMFCreateInventoryCountDetail
-			@strInventoryCountNo NVARCHAR(50),
-			@intLotId INT,
-			@intUserSecurityId INT,
-			@dblPhysicalCount NUMERIC(18,6)
+﻿CREATE PROCEDURE uspMFCreateInventoryCountDetail @strInventoryCountNo NVARCHAR(50)
+	,@intLotId INT
+	,@intUserSecurityId INT
+	,@dblPhysicalCount NUMERIC(18, 6)
+	,@intPhysicalCountUOMId INT
 AS
 BEGIN
 	DECLARE @intLocationId INT
 	DECLARE @intSubLocationId INT
 	DECLARE @intStorageLocationId INT
 	DECLARE @strLotNumber NVARCHAR(100)
-	DECLARE @dblLotQty NUMERIC(18,6)
-	DECLARE @dblLastCost NUMERIC(18,6)
-	DECLARE @dblLotWeight NUMERIC(18,6)
+	DECLARE @dblLotQty NUMERIC(18, 6)
+	DECLARE @dblLastCost NUMERIC(18, 6)
+	DECLARE @dblLotWeight NUMERIC(18, 6)
 	DECLARE @intLotItemLocationId INT
 	DECLARE @intItemId INT
 	DECLARE @intInventoryCountId INT
 	DECLARE @intItemUOMId INT
-	DECLARE @intCountItemUOMId int
-	DECLARE @intStockItemUOMId int
-			,@ysnCycleCountByStockUnit bit
+	DECLARE @intCountItemUOMId INT
 
 	SELECT @intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
@@ -27,21 +25,26 @@ BEGIN
 	FROM tblICInventoryCount
 	WHERE strCountNo = @strInventoryCountNo
 
-	SELECT @intLotId = intLotId,
-		   @strLotNumber = strLotNumber,
-		   @dblLotQty = dblQty,
-		   @intLotItemLocationId = intItemLocationId,
-		   @intItemId = intItemId,
-		   @dblLastCost = dblLastCost,
-		   @intItemUOMId = intItemUOMId,
-		   @dblLotWeight=dblWeight
+	SELECT @intLotId = intLotId
+		,@strLotNumber = strLotNumber
+		,@dblLotQty = dblQty
+		,@intLotItemLocationId = intItemLocationId
+		,@intItemId = intItemId
+		,@dblLastCost = dblLastCost
+		,@intItemUOMId = intItemUOMId
+		,@dblLotWeight = dblWeight
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	IF NOT EXISTS (SELECT 1 FROM tblICInventoryCountDetail WHERE intLotId = @intLotId AND intInventoryCountId = @intInventoryCountId)
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblICInventoryCountDetail
+			WHERE intLotId = @intLotId
+				AND intInventoryCountId = @intInventoryCountId
+			)
 	BEGIN
 		INSERT INTO tblICInventoryCountDetail (
-			 intInventoryCountId
+			intInventoryCountId
 			,intItemId
 			,intItemLocationId
 			,intSubLocationId
@@ -57,9 +60,10 @@ BEGIN
 			,ysnRecount
 			,intEntityUserSecurityId
 			,intSort
-			,intConcurrencyId)
+			,intConcurrencyId
+			)
 		VALUES (
-			 @intInventoryCountId
+			@intInventoryCountId
 			,@intItemId
 			,@intLotItemLocationId
 			,@intSubLocationId
@@ -75,36 +79,35 @@ BEGIN
 			,0
 			,@intUserSecurityId
 			,1
-			,1)
+			,1
+			)
 	END
 	ELSE
 	BEGIN
-		Select @intStockItemUOMId=intItemUOMId from tblICItemUOM Where intItemId=@intItemId and ysnStockUnit =1
-		Select @intCountItemUOMId=intItemUOMId
-		From tblICInventoryCountDetail 
+		SELECT @intCountItemUOMId = intItemUOMId
+		FROM tblICInventoryCountDetail
 		WHERE intLotId = @intLotId
 			AND intInventoryCountId = @intInventoryCountId
 
-		Select @ysnCycleCountByStockUnit=ysnCycleCountByStockUnit from tblMFCompanyPreference 
-
-		IF @ysnCycleCountByStockUnit is null
-		Begin
-			Select @ysnCycleCountByStockUnit=1
-		End
-
-		If @intCountItemUOMId=@intStockItemUOMId or @ysnCycleCountByStockUnit=0
-		Begin
+		IF @intCountItemUOMId = @intPhysicalCountUOMId
+		BEGIN
 			UPDATE tblICInventoryCountDetail
 			SET dblPhysicalCount = @dblPhysicalCount
 			WHERE intLotId = @intLotId
 				AND intInventoryCountId = @intInventoryCountId
-		end
-		Else
-		Begin
+		END
+		ELSE
+		BEGIN
 			UPDATE tblICInventoryCountDetail
-			SET dblPhysicalCount = @dblPhysicalCount,dblSystemCount =Case When @intStockItemUOMId=@intItemUOMId Then @dblLotQty Else @dblLotWeight End,intItemUOMId =@intStockItemUOMId
+			SET dblPhysicalCount = @dblPhysicalCount
+				,dblSystemCount = CASE 
+					WHEN @intPhysicalCountUOMId = @intItemUOMId
+						THEN @dblLotQty
+					ELSE @dblLotWeight
+					END
+				,intItemUOMId = @intPhysicalCountUOMId
 			WHERE intLotId = @intLotId
 				AND intInventoryCountId = @intInventoryCountId
-		End
+		END
 	END
 END
