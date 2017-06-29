@@ -5295,6 +5295,15 @@
     <Build Include="dbo\Views\vyuPATStockClassification.sql" />
     <Build Include="dbo\Views\vyuPROriginEmployee.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateDeliveryHistoryAdjustment.sql" />
+    <Build Include="dbo\Views\vyuPROriginCheckHistory.sql" />
+    <Build Include="dbo\Views\vyuPROriginCheckHistoryDeduction.sql" />
+    <Build Include="dbo\Views\vyuPROriginCheckHistoryEarning.sql" />
+    <Build Include="dbo\Views\vyuPROriginCheckHistoryTax.sql" />
+    <Build Include="dbo\Views\vyuPROriginEmployeeChangeHistory.sql" />
+    <Build Include="dbo\Views\vyuPROriginEmployeeDeduction.sql" />
+    <Build Include="dbo\Views\vyuPROriginEmployeeEarning.sql" />
+    <Build Include="dbo\Views\vyuPROriginEmployeeTax.sql" />
+    <Build Include="dbo\Views\vyuPROriginTaxTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

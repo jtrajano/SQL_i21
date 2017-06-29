@@ -240,4 +240,12 @@
 :r "..\dbo\Views\vyustpbkmst.sql"
 
 -- PAYROLL
-:r "..\dbo\Views\vyuPROriginEmployee.sql"
+:r "..\dbo\Views\vyuPROriginCheckHistory.sql"
+:r "..\dbo\Views\vyuPROriginCheckHistoryDeduction.sql"
+:r "..\dbo\Views\vyuPROriginCheckHistoryEarning.sql"
+:r "..\dbo\Views\vyuPROriginCheckHistoryTax.sql"
+:r "..\dbo\Views\vyuPROriginEmployeeChangeHistory.sql"
+:r "..\dbo\Views\vyuPROriginEmployeeDeduction.sql"
+:r "..\dbo\Views\vyuPROriginEmployeeEarning.sql"
+:r "..\dbo\Views\vyuPROriginEmployeeTax.sql"
+:r "..\dbo\Views\vyuPROriginTaxTable.sql"

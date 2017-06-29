@@ -415,5 +415,14 @@
     <None Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateTMCustomerView.sql" />
     <None Include="dbo\Views\vyuPROriginEmployee.sql" />
+    <None Include="dbo\Views\vyuPROriginTaxTable.sql" />
+    <None Include="dbo\Views\vyuPROriginCheckHistoryTax.sql" />
+    <None Include="dbo\Views\vyuPROriginCheckHistory.sql" />
+    <None Include="dbo\Views\vyuPROriginCheckHistoryEarning.sql" />
+    <None Include="dbo\Views\vyuPROriginCheckHistoryDeduction.sql" />
+    <None Include="dbo\Views\vyuPROriginEmployeeTax.sql" />
+    <None Include="dbo\Views\vyuPROriginEmployeeEarning.sql" />
+    <None Include="dbo\Views\vyuPROriginEmployeeDeduction.sql" />
+    <None Include="dbo\Views\vyuPROriginEmployeeChangeHistory.sql" />
   </ItemGroup>
 </Project>
