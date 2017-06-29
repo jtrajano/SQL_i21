@@ -22,16 +22,19 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intAccountId]					,
 		[intItemId]						,
 		[intCustomerStorageId]			,
-		[strMiscDescription]				,
+		[strMiscDescription]			,
 		[dblTotal]						,
 		[dblQtyOrdered]					,
-		[dblQtyReceived]					,
+		[dblQtyReceived]				,
 		[dblCost]						,
 		[int1099Form]					,
 		[int1099Category]				,
 		[intContractDetailId]			,
 		[intContractHeaderId]			,
-		[intLineNo]						
+		[intLineNo]						,
+		[intUnitOfMeasureId]			,
+		[intCostUOMId]					,
+		[intWeightUOMId]				
 	)
 	SELECT
 		[intBillId]						=	@voucherId,
@@ -50,7 +53,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Category]				=	ISNULL(F.int1099CategoryId, 0),
 		[intContractDetailId]			=	A.intContractDetailId,
 		[intContractHeaderId]			=	A.intContractHeaderId,
-		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))			
+		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1)),
+		[intUnitOfMeasureId]			=	A.intUnitOfMeasureId,
+		[intCostUOMId]					=	A.intCostUOMId,
+		[intWeightUOMId]				=	A.intWeightUOMId			
 	FROM @voucherDetailStorage A
 	INNER JOIN tblICItem A2 ON A.intItemId = A2.intItemId
 	CROSS APPLY tblAPBill B
