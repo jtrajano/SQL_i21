@@ -37,8 +37,33 @@ AS
 		JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		LEFT
 		JOIN	tblEMEntity					SP	ON	SP.intEntityId					=	CH.intSalespersonId		LEFT
 		JOIN	tblSMCountry				CR	ON	CR.intCountryID					=	CH.intCountryId			LEFT
-		JOIN	tblEMEntity					CY	ON	CY.intEntityId					=	CH.intCreatedById		OUTER
-		APPLY	dbo.fnCTGetTopOneSequence(CH.intContractHeaderId,0) CD
+		JOIN	tblEMEntity					CY	ON	CY.intEntityId					=	CH.intCreatedById		LEFT
+		JOIN	
+		(
+				SElECT * FROM
+				(
+					SELECT	intCurrencyId,					intBookId,					intSubBookId,					intCompanyLocationId, 
+							intContractSeq,					dtmStartDate,				dtmEndDate,						strPurchasingGroup,
+							dblQuantity,					dblFutures,					dblBasis,						dblCashPrice,
+							dblScheduleQty,					dblNoOfLots,				strItemNo,						strPricingType,
+							strFutMarketName,				strItemUOM,					strLocationName,				strPriceUOM,
+							strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
+							strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
+							intContractStatusId,			strContractItemName,		strContractItemNo,				intContractHeaderId,
+							ROW_NUMBER() OVER (PARTITION BY intContractHeaderId ORDER BY intContractDetailId ASC) intRowNum
+					FROM	vyuCTContractSequence
+				)t	WHERE intRowNum = 1			
+
+		)									CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId	LEFT
+		JOIN
+		(
+				SELECT intContractDetailId, strBasisComponent = STUFF((
+				SELECT ', ' + strItemNo + ' = ' + dbo.fnRemoveTrailingZeroes(dblRate) FROM vyuCTContractCostView
+				WHERE intContractDetailId = x.intContractDetailId
+				FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, '')
+				FROM vyuCTContractCostView AS x
+				GROUP BY intContractDetailId
+		)									BC	ON	BC.intContractDetailId			=	CD.intContractDetailId
 	)
 
 	SELECT	CAST(ROW_NUMBER() OVER(ORDER BY intContractHeaderId DESC) AS INT) AS intUniqueId,
@@ -96,7 +121,7 @@ AS
 				CH.strContractItemNo
 
 		FROM Header CH
-		WHERE ISNULL(ysnSigned,0) = 0 
+		WHERE ISNULL(ysnSigned,0) = 0 AND CH.intContractDetailId IS NOT NULL
 
 		UNION ALL
 
@@ -115,6 +140,8 @@ AS
 		FROM	Header CH
 		WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted')
 		AND		CH.intContractHeaderId	NOT IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 2)
+		AND		intContractDetailId IS NOT NULL
+
 		UNION ALL
 
 		SELECT	CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
@@ -136,4 +163,4 @@ AS
 
 	)t
 
-	WHERE intContractStatusId <> 3
+	WHERE ISNULL(intContractStatusId,1) <> 3

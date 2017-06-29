@@ -369,8 +369,8 @@ GO
 			(	
 				SELECT ISNULL(	CASE	WHEN	strEventName =  'Unconfirmed contract'				THEN	'Unconfirmed'
 										WHEN	strEventName =  'Contract without a sequence'		THEN	'Empty'	
-										WHEN	strEventName =	'Unsubmitted Contract Alert'		THEN	'Unsigned'
-										WHEN	strEventName =  'Unsigned Contract Alert'			THEN	'Unsubmitted'
+										WHEN	strEventName =	'Unsubmitted Contract Alert'		THEN	'Unsubmitted'
+										WHEN	strEventName =  'Unsigned Contract Alert'			THEN	'Unsigned'
 										WHEN	strEventName =  'Approved Contract Mail Not Sent'	THEN	'Mail Not Sent For'
 								END,'') 
 				FROM tblCTEvent

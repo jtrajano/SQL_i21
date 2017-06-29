@@ -5298,6 +5298,9 @@
     <Build Include="dbo\Views\vyuMFGetBlendTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetRCConfiguration.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\IL_Illinois.sql" />
+    <Build Include="dbo\Tables\tblCTEventRecipientFilter.sql" />
+    <Build Include="dbo\Views\vyuCTEventRecipientFilter.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAlertNotificationCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
