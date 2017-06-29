@@ -18,7 +18,7 @@ IF @intSeqId = 13
 		BEGIN
 			INSERT INTO @tblTemp (intInventoryShipmentItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference, strDistributionOption,dblTotal,intCommodityId)
 			SELECT PLDetail.intPickLotDetailId as intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,CT.strContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicketNumber,CT.dtmContractDate as dtmTicketDateTime ,
-			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,	PLDetail.dblLotPickedQty AS dblTotal,intCommodityId
+			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,	PLDetail.dblLotPickedQty AS dblTotal,CT.intCommodityId
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
 			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
@@ -42,7 +42,7 @@ IF @intSeqId = 13
 		BEGIN
 		Insert into @tblTemp (intInventoryShipmentItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference, strDistributionOption,dblTotal,intCommodityId)
 			SELECT PLDetail.intPickLotDetailId as intInventoryShipmentItemId,CT.strLocationName,convert(nvarchar,CT.strContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicketNumber,CT.dtmContractDate as dtmTicketDateTime ,
-			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,	PLDetail.dblLotPickedQty AS dblTotal,intCommodityId
+			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,	PLDetail.dblLotPickedQty AS dblTotal,CT.intCommodityId
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
 			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
