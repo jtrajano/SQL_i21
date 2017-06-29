@@ -22,7 +22,7 @@ DECLARE @CurrentErrorMessage NVARCHAR(250)
 SET @ZeroDecimal = 0.000000
 
 DECLARE @EntriesForProcessing AS TABLE(
-	 [intId]						INT												NOT NULL
+	 [intId]						int IDENTITY(1,1)												 
 	,[intInvoiceDetailId]			INT												NULL
 	,[intDetailTaxId]				INT												NULL
 	,[intTaxGroupId]				INT												NULL
@@ -48,9 +48,8 @@ IF ISNULL(@RaiseError,0) = 0
 	
 	
 INSERT INTO @EntriesForProcessing
-	(
-	 [intId]
-	,[intInvoiceDetailId]
+	(	 
+	[intInvoiceDetailId]
 	,[intDetailTaxId]
 	,[intTaxGroupId]
 	,[intTaxCodeId]
@@ -69,9 +68,8 @@ INSERT INTO @EntriesForProcessing
 	,[ysnAdded]
 	,[ysnUpdated]
 	)
-SELECT
-	 [intId]
-	,[intDetailId]
+SELECT	
+	[intDetailId]
 	,[intDetailTaxId]
 	,[intTaxGroupId]
 	,[intTaxCodeId]
