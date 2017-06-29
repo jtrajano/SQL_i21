@@ -7,5 +7,8 @@
 	[strMiscDescription]		NVARCHAR(500)	NULL, 
     [dblCost]					DECIMAL(18, 6)	NOT NULL,
 	[intContractHeaderId]		INT NULL,
-	[intContractDetailId]		INT NULL
+	[intContractDetailId]		INT NULL,
+	[intUnitOfMeasureId] [int] NULL,
+	[intCostUOMId] [int] NULL,
+	[intWeightUOMId] [int] NULL
 )

@@ -20,19 +20,26 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INSERT INTO tblAPBillDetail(
 		[intBillId]						,
 		[intAccountId]					,
+		[intItemId]						,
 		[intCustomerStorageId]			,
-		[strMiscDescription]				,
+		[strMiscDescription]			,
 		[dblTotal]						,
 		[dblQtyOrdered]					,
-		[dblQtyReceived]					,
+		[dblQtyReceived]				,
 		[dblCost]						,
 		[int1099Form]					,
 		[int1099Category]				,
-		[intLineNo]						
+		[intContractDetailId]			,
+		[intContractHeaderId]			,
+		[intLineNo]						,
+		[intUnitOfMeasureId]			,
+		[intCostUOMId]					,
+		[intWeightUOMId]				
 	)
 	SELECT
 		[intBillId]						=	@voucherId,
-		[intAccountId]					=	ISNULL(A.intAccountId , ISNULL(G.intAccountId, D.intGLAccountExpenseId)),
+		[intAccountId]					=	ISNULL(A.intAccountId , ISNULL(dbo.[fnGetItemGLAccount](A.intItemId, loc.intItemLocationId, 'AP Clearing'), D.intGLAccountExpenseId)),
+		[intItemId]						=	A.intItemId,
 		[intCustomerStorageId]			=	A.intCustomerStorageId,
 		[strMiscDescription]				=	ISNULL(A.strMiscDescription, A2.strDescription),
 		[dblTotal]						=	CAST(A.dblCost * A.dblQtyReceived  AS DECIMAL(18,2)),
@@ -44,14 +51,20 @@ IF @transCount = 0 BEGIN TRANSACTION
 													WHEN E.str1099Form = '1099-B' THEN 3
 												ELSE 0 END),
 		[int1099Category]				=	ISNULL(F.int1099CategoryId, 0),
-		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))			
+		[intContractDetailId]			=	A.intContractDetailId,
+		[intContractHeaderId]			=	A.intContractHeaderId,
+		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1)),
+		[intUnitOfMeasureId]			=	A.intUnitOfMeasureId,
+		[intCostUOMId]					=	A.intCostUOMId,
+		[intWeightUOMId]				=	A.intWeightUOMId		
 	FROM @voucherDetailStorage A
 	INNER JOIN tblICItem A2 ON A.intItemId = A2.intItemId
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
 	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
+	LEFT JOIN tblICItemLocation loc ON loc.intLocationId = B.intShipToId AND loc.intItemId = A.intItemId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
-	LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'General'
+	--LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'AP Clearing'
 	WHERE B.intBillId = @voucherId
 
 	INSERT INTO @voucherIds
