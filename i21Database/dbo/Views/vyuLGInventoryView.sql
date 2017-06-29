@@ -16,6 +16,7 @@ SELECT
 	,Shipment.strWeightUOM
 	,Shipment.intVendorEntityId
 	,Shipment.strVendor
+	,Shipment.strCommodity
 	,Shipment.strItemNo
 	,Shipment.strItemDescription
 	,'' strTrackingNumber
@@ -30,6 +31,10 @@ SELECT
 	,Shipment.intItemId
 	,intWeightItemUOMId = (SELECT U.intItemUOMId FROM tblICItemUOM U WHERE U.intItemId = Shipment.intItemId AND U.intUnitMeasureId=Shipment.intWeightUOMId)
 	,strWarehouseRefNo = ''
+	,Shipment.dblFutures
+	,Shipment.dblCashPrice
+	,Shipment.dblBasis
+	,Shipment.dblTotalCost
 
 FROM vyuLGInboundShipmentView Shipment
 WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 AND Shipment.ysnInventorized = 1
@@ -47,6 +52,7 @@ SELECT
 	,Spot.strWeightUOM
 	,Spot.intEntityVendorId
 	,Spot.strVendor
+	,Spot.strCommodity
 	,Spot.strItemNo
 	,Spot.strItemDescription
 	,Spot.strLoadNumber AS strTrackingNumber
@@ -61,6 +67,10 @@ SELECT
 	,Spot.intItemId
 	,intWeightItemUOMId = Spot.intItemWeightUOMId
 	,Spot.strWarehouseRefNo
+	,Spot.dblFutures
+	,Spot.dblCashPrice
+	,Spot.dblBasis
+	,Spot.dblTotalCost
 
 FROM vyuLGPickOpenInventoryLots Spot
 WHERE Spot.dblQty > 0.0
