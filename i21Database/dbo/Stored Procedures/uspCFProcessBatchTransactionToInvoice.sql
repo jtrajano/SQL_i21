@@ -1012,7 +1012,7 @@ END
 
 	SELECT intInvoiceId, intSourceId  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 AND ISNULL(ysnPosted,0) = 1
 
-	SELECT @SuccessfulCount = ISNULL(Count(*),0) FROM #tmpCreatedInvoice
+	SELECT @SuccessfulCount = ISNULL(Count(*),0) FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 AND ISNULL(ysnPosted,0) = 1 --#tmpCreatedInvoice
 
 	--SET @SuccessfulCount = @succefulCount;
 		
@@ -1088,4 +1088,4 @@ END
 			ROLLBACK TRANSACTION
 		END
 
-	DROP TABLE #tmpCreatedInvoice
+	IF OBJECT_ID('tempdb..#tmpCreatedInvoice') IS NOT NULL DROP TABLE #tmpCreatedInvoice

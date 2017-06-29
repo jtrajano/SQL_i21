@@ -200,7 +200,7 @@ USING
 	SELECT
 		 [intInvoiceId]							= IE.[intInvoiceId]
 		,[intInvoiceDetailId]					= NULL
-		,[strDocumentNumber]					= IE.[strDocumentNumber]
+		,[strDocumentNumber]					= ISNULL(IE.[strDocumentNumber], IE.[strSourceId])
 		,[intItemId]							= CASE WHEN (ISNULL(IE.[intCommentTypeId], 0) <> 0) THEN IE.[intItemId] ELSE NULL END 
 		,[intPrepayTypeId]						= IE.[intPrepayTypeId]
 		,[dblPrepayRate]						= IE.[dblPrepayRate]
@@ -216,7 +216,7 @@ USING
 		,[strItemTermDiscountBy]				= IE.[strItemTermDiscountBy]
 		,[dblPrice]								= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END)
 		,[dblBasePrice]							= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
-		,[strPricing]							= IE.[strPricing]
+		,[strPricing]							= CASE WHEN ISNULL(IE.[strPricing],'') = '' AND RTRIM(LTRIM(ISNULL(IE.[strSourceTransaction],''))) <> '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + IE.[strSourceTransaction] COLLATE Latin1_General_CI_AS ELSE IE.[strPricing] COLLATE Latin1_General_CI_AS END
 		,[dblTotalTax]							= @ZeroDecimal
 		,[dblBaseTotalTax]						= @ZeroDecimal
 		,[dblTotal]								= @ZeroDecimal
@@ -226,8 +226,8 @@ USING
 		,[dblCurrencyExchangeRate]				= CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END
 		,[intSubCurrencyId]						= ISNULL(IE.[intSubCurrencyId], IE.[intCurrencyId])
 		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(IE.[intSubCurrencyId], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblSubCurrencyRate], 1) END
-		,[ysnRestricted]						= IE.[ysnRestricted]
-		,[ysnBlended]							= IE.[ysnBlended]
+		,[ysnRestricted]						= ISNULL(IE.[ysnRestricted], 0)
+		,[ysnBlended]							= ISNULL(IE.[ysnBlended], 0)
 		,[intAccountId]							= IE.[intAccountId]
 		,[intCOGSAccountId]						= NULL
 		,[intSalesAccountId]					= IE.[intSalesAccountId]
@@ -281,8 +281,8 @@ USING
 		,[dblPreviousMeterReading]				= IE.[dblPreviousMeterReading]
 		,[dblConversionFactor]					= IE.[dblConversionFactor]
 		,[intPerformerId]						= IE.[intPerformerId]
-		,[ysnLeaseBilling]						= IE.[ysnLeaseBilling]
-		,[ysnVirtualMeterReading]				= IE.[ysnVirtualMeterReading]
+		,[ysnLeaseBilling]						= ISNULL(IE.[ysnLeaseBilling], 0)
+		,[ysnVirtualMeterReading]				= ISNULL(IE.[ysnVirtualMeterReading], 0)
 		,[dblOriginalItemWeight]				= @ZeroDecimal
 		,[intRecipeId]							= IE.[intRecipeId]
 		,[intSubLocationId]						= IE.[intSubLocationId]
