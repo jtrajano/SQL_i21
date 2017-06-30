@@ -1062,20 +1062,22 @@ BEGIN TRY
 			,[dblCost]
 			,[intContractHeaderId]
 			,[intContractDetailId]
+			,[intUnitOfMeasureId]
 		)
 		SELECT 
-			 [intCustomerStorageId]
-			,[intItemId]
-			, NULL
+			 a.[intCustomerStorageId]
+			,a.[intItemId]
+			,NULL
 			,@dblUnits AS [dblUnits]
-			,[strItemNo]
-			,[dblCashPrice]
-			,[intContractHeaderId]
-			,[intContractDetailId]
-		FROM @SettleVoucherCreate
-		WHERE intCustomerStorageId = @intCustomerStorageId 
-		AND   (strOrderType IS NULL OR strOrderType = @strOrderType)
-		AND IsProcessed = 0 ORDER BY intItemSort
+			,a.[strItemNo]
+			,a.[dblCashPrice]
+			,a.[intContractHeaderId]
+			,a.[intContractDetailId]
+			,b.intItemUOMId
+		FROM @SettleVoucherCreate a
+		LEFT JOIN tblICItemUOM b ON b.intItemId=a.intItemId AND b.intUnitMeasureId=@intUnitMeasureId 
+		AND   (a.strOrderType IS NULL OR a.strOrderType = @strOrderType)
+		AND a.IsProcessed = 0 ORDER BY intItemSort
 
 		EXEC [dbo].[uspAPCreateBillData] 
 			 @userId = @UserKey
