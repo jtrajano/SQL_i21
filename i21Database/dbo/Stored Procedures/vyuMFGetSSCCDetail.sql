@@ -1,6 +1,8 @@
 ﻿CREATE VIEW vyuMFGetSSCCDetail
 AS
 SELECT InvS.strShipmentNumber
+	,InvS.dtmShipDate
+	,InvS.dtmRequestedArrivalDate  As dtmActualShipDate
 	,InvS.strBOLNumber
 	,InvS.strReferenceNumber
 	,(
@@ -18,7 +20,7 @@ SELECT InvS.strShipmentNumber
 	,SV.strName AS strCarrier
 	,I.strItemNo
 	,I.strDescription
-	,OML.strSSCCNo
+	,Right(OML.strSSCCNo,Len(OML.strSSCCNo)-9) As strSSCCNo
 	,1 AS dblQty
 FROM dbo.tblICInventoryShipment InvS
 JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
