@@ -19,7 +19,9 @@ AS
 			NM.strCommodityUOM,
 			NM.ysnPrepaid,
 			NM.strContractBasis,
-			NM.intUnitMeasureId
+			NM.intUnitMeasureId,
+			NM.strSalesperson,
+			NM.strTextCode
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
