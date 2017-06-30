@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerInquiry]
 AS 
-SELECT C.[intEntityId]
+SELECT intEntityCustomerId          = C.intEntityId
 	 , strCustomerName				= C.strName
 	 , CI.strTerm
 	 , C.strCustomerNumber
@@ -14,6 +14,9 @@ SELECT C.[intEntityId]
 	 , strBusinessLocation			= C.strLocationName
 	 , CI.strBudgetStatus
 	 , dblYTDSales					= ISNULL(CI.dblYTDSales, CONVERT(NUMERIC(18,6), 0))
+	 , dblYDTServiceCharge			= ISNULL(CI.dblYDTServiceCharge, CONVERT(NUMERIC(18,6), 0))
+	 , dblHighestAR					= ISNULL(CI.dblHighestAR, CONVERT(NUMERIC(18,6), 0))
+	 , dblHighestDueAR				= ISNULL(CI.dblHighestDueAR, CONVERT(NUMERIC(18,6), 0))
 	 , dblLastPayment				= ISNULL(CI.dblLastPayment, CONVERT(NUMERIC(18,6), 0))
 	 , dblLastYearSales				= ISNULL(CI.dblLastYearSales, CONVERT(NUMERIC(18,6), 0))
 	 , dblLastStatement				= ISNULL(CI.dblLastStatement, CONVERT(NUMERIC(18,6), 0))
@@ -35,10 +38,13 @@ SELECT C.[intEntityId]
 	 , dblNextPaymentAmount			= ISNULL(CI.dblNextPaymentAmount, CONVERT(NUMERIC(18,6), 0))
 	 , dblAmountPastDue				= ISNULL(CI.dblAmountPastDue, CONVERT(NUMERIC(18,6), 0))
 	 , intRemainingBudgetPeriods	= ISNULL(CI.intRemainingBudgetPeriods, CONVERT(NUMERIC(18,6), 0))
+	 , intAveragePaymentDays		= ISNULL(CI.intAveragePaymentDays, CONVERT(NUMERIC(18,6), 0))	 
 	 , dtmNextPaymentDate			= CI.dtmNextPaymentDate
 	 , dtmLastPaymentDate			= CI.dtmLastPaymentDate
 	 , dtmLastStatementDate			= CI.dtmLastStatementDate
 	 , dtmBudgetMonth				= CI.dtmBudgetMonth
+	 , dtmHighestARDate				= CI.dtmHighestARDate
+	 , dtmHighestDueARDate			= CI.dtmHighestDueARDate
 FROM vyuARCustomer C
 LEFT JOIN vyuARCustomerInquiryReport CI
-	ON C.[intEntityId] = CI.intEntityCustomerId
+	ON C.intEntityId = CI.intEntityCustomerId
