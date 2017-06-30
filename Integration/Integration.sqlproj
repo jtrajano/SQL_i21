@@ -424,5 +424,6 @@
     <None Include="dbo\Views\vyuPROriginEmployeeEarning.sql" />
     <None Include="dbo\Views\vyuPROriginEmployeeDeduction.sql" />
     <None Include="dbo\Views\vyuPROriginEmployeeChangeHistory.sql" />
+    <None Include="dbo\Stored Procedures\uspGLSyncGLACTMST.sql" />
   </ItemGroup>
 </Project>

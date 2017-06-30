@@ -12,7 +12,7 @@ CREATE TABLE [dbo].[tblGLRevalueDetails](
 	[strTicket] [nvarchar](50) COLLATE Latin1_General_CI_AS,
 	[strContractId] [nvarchar](50) COLLATE Latin1_General_CI_AS,
 	[strItemId] [nvarchar](50) COLLATE Latin1_General_CI_AS,
-	[intQuantity] [int] NULL,
+	[dblQuantity] [numeric](18, 6) NULL,
 	[dblUnitPrice] [numeric](18, 6) NULL,
 	[dblTransactionAmount] [numeric](18, 6) NULL,
 	[intCurrencyId] [int] NULL,
