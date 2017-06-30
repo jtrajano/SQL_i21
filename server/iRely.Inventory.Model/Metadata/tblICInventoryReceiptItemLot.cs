@@ -48,182 +48,182 @@ namespace iRely.Inventory.Model
         public decimal? dblPhysicalVsStated { get; set; }
         public int? intSort { get; set; }
 
-        [NotMapped]
-        public decimal dblNetWeight
-        {
-            get
-            {
-                return (this.dblGrossWeight ?? 0) - (this.dblTareWeight ?? 0);
-            }
-        }
-        private string _uom;
-        [NotMapped]
-        public string strUnitMeasure
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_uom))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _uom;
-            }
-            set
-            {
-                _uom = value;
-            }
-        }
-        private string _weightUOM;
-        [NotMapped]
-        public string strWeightUOM
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_weightUOM))
-                    if (tblICInventoryReceiptItem != null)
-                        return tblICInventoryReceiptItem.strWeightUOM;
-                    else
-                        return null;
-                else
-                    return _weightUOM;
-            }
-            set
-            {
-                _weightUOM = value;
-            }
-        }
-        private decimal _lotConv;
-        [NotMapped]
-        public decimal dblLotUOMConvFactor
-        {
-            get
-            {
-                if (vyuICGetInventoryReceiptItemLot != null)
-                    return vyuICGetInventoryReceiptItemLot.dblUnitQty ?? 0;
-                else
-                    return _lotConv;
-            }
-            set
-            {
-                _lotConv = value;
-            }
-        }
-        private string _storageLocation;
-        [NotMapped]
-        public string strStorageLocation
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_storageLocation))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strStorageLocationName;
-                    else
-                        return null;
-                else
-                    return _storageLocation;
-            }
-            set
-            {
-                _storageLocation = value;
-            }
-        }
-        private string _subLocation;
-        [NotMapped]
-        public string strSubLocationName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_subLocation))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strSubLocationName;
-                    else
-                        return null;
-                else
-                    return _subLocation;
-            }
-            set
-            {
-                _subLocation = value;
-            }
-        }
-        private string _vendorId;
-        [NotMapped]
-        public string strVendorId
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_vendorId))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strVendorId;
-                    else
-                        return null;
-                else
-                    return _vendorId;
-            }
-            set
-            {
-                _vendorId = value;
-            }
-        }
-        private string _origin;
-        [NotMapped]
-        public string strOrigin
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_origin))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strOrigin;
-                    else
-                        return null;
-                else
-                    return _origin;
-            }
-            set
-            {
-                _origin = value;
-            }
-        }
-        private string _grade;
-        [NotMapped]
-        public string strGrade
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_grade))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strGrade;
-                    else
-                        return null;
-                else
-                    return _grade;
-            }
-            set
-            {
-                _grade = value;
-            }
-        }
-        private string _unitType;
-        [NotMapped]
-        public string strUnitType
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_unitType))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strUnitType;
-                    else
-                        return null;
-                else
-                    return _unitType;
-            }
-            set
-            {
-                _unitType = value;
-            }
-        }
+        //[NotMapped]
+        //public decimal dblNetWeight
+        //{
+        //    get
+        //    {
+        //        return (this.dblGrossWeight ?? 0) - (this.dblTareWeight ?? 0);
+        //    }
+        //}
+        //private string _uom;
+        //[NotMapped]
+        //public string strUnitMeasure
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_uom))
+        //            if (vyuICGetInventoryReceiptItemLot != null)
+        //                return vyuICGetInventoryReceiptItemLot.strUnitMeasure;
+        //            else
+        //                return null;
+        //        else
+        //            return _uom;
+        //    }
+        //    set
+        //    {
+        //        _uom = value;
+        //    }
+        //}
+        //private string _weightUOM;
+        //[NotMapped]
+        //public string strWeightUOM
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_weightUOM))
+        //            if (tblICInventoryReceiptItem != null)
+        //                return tblICInventoryReceiptItem.strWeightUOM;
+        //            else
+        //                return null;
+        //        else
+        //            return _weightUOM;
+        //    }
+        //    set
+        //    {
+        //        _weightUOM = value;
+        //    }
+        //}
+        //private decimal _lotConv;
+        //[NotMapped]
+        //public decimal dblLotUOMConvFactor
+        //{
+        //    get
+        //    {
+        //        if (vyuICGetInventoryReceiptItemLot != null)
+        //            return vyuICGetInventoryReceiptItemLot.dblUnitQty ?? 0;
+        //        else
+        //            return _lotConv;
+        //    }
+        //    set
+        //    {
+        //        _lotConv = value;
+        //    }
+        //}
+        //private string _storageLocation;
+        //[NotMapped]
+        //public string strStorageLocation
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_storageLocation))
+        //            if (vyuICGetInventoryReceiptItemLot != null)
+        //                return vyuICGetInventoryReceiptItemLot.strStorageLocationName;
+        //            else
+        //                return null;
+        //        else
+        //            return _storageLocation;
+        //    }
+        //    set
+        //    {
+        //        _storageLocation = value;
+        //    }
+        //}
+        //private string _subLocation;
+        //[NotMapped]
+        //public string strSubLocationName
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_subLocation))
+        //            if (vyuICGetInventoryReceiptItemLot != null)
+        //                return vyuICGetInventoryReceiptItemLot.strSubLocationName;
+        //            else
+        //                return null;
+        //        else
+        //            return _subLocation;
+        //    }
+        //    set
+        //    {
+        //        _subLocation = value;
+        //    }
+        //}
+        //private string _vendorId;
+        //[NotMapped]
+        //public string strVendorId
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_vendorId))
+        //            if (vyuICGetInventoryReceiptItemLot != null)
+        //                return vyuICGetInventoryReceiptItemLot.strVendorId;
+        //            else
+        //                return null;
+        //        else
+        //            return _vendorId;
+        //    }
+        //    set
+        //    {
+        //        _vendorId = value;
+        //    }
+        //}
+        //private string _origin;
+        //[NotMapped]
+        //public string strOrigin
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_origin))
+        //            if (vyuICGetInventoryReceiptItemLot != null)
+        //                return vyuICGetInventoryReceiptItemLot.strOrigin;
+        //            else
+        //                return null;
+        //        else
+        //            return _origin;
+        //    }
+        //    set
+        //    {
+        //        _origin = value;
+        //    }
+        //}
+        //private string _grade;
+        //[NotMapped]
+        //public string strGrade
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_grade))
+        //            if (vyuICGetInventoryReceiptItemLot != null)
+        //                return vyuICGetInventoryReceiptItemLot.strGrade;
+        //            else
+        //                return null;
+        //        else
+        //            return _grade;
+        //    }
+        //    set
+        //    {
+        //        _grade = value;
+        //    }
+        //}
+        //private string _unitType;
+        //[NotMapped]
+        //public string strUnitType
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_unitType))
+        //            if (vyuICGetInventoryReceiptItemLot != null)
+        //                return vyuICGetInventoryReceiptItemLot.strUnitType;
+        //            else
+        //                return null;
+        //        else
+        //            return _unitType;
+        //    }
+        //    set
+        //    {
+        //        _unitType = value;
+        //    }
+        //}
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
         public vyuICGetInventoryReceiptItemLot vyuICGetInventoryReceiptItemLot { get; set; }

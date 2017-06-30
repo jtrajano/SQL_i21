@@ -19,6 +19,17 @@ Ext.define('Inventory.model.ReceiptItemTax', {
                     role: 'tblICInventoryReceiptItemTaxes',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/InventoryReceiptItemTax/Get'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'DESC',

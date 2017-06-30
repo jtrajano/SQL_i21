@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
 using iRely.Inventory.BusinessLayer;
+using System.Web.Http.ModelBinding;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -71,119 +72,224 @@ namespace iRely.Inventory.BusinessLayer
             base.Add(entity);
         }
 
-        //public override void Update(tblICInventoryReceipt entity)
-        //{
-        //    var item = entity.tblICInventoryReceiptItems.First();
-        //    if (item != null)
-        //    {
-        //        var itemTax = new tblICInventoryReceiptItemTax();
-        //         itemTax.intTaxGroupMasterId = itemDetailTax.intTaxGroupMasterId;
-        //         itemTax.intTaxGroupId = itemDetailTax.intTaxGroupId,
-        //         itemTax.intTaxCodeId = itemDetailTax.intTaxCodeId,
-        //         itemTax.intTaxClassId = itemDetailTax.intTaxClassId,
-        //         itemTax.strTaxCode = itemDetailTax.strTaxCode,
-        //         itemTax.strTaxableByOtherTaxes = itemDetailTax.strTaxableByOtherTaxes,
-        //         itemTax.strCalculationMethod = itemDetailTax.strCalculationMethod,
-        //         itemTax.dblRate = itemDetailTax.dblRate,
-        //         itemTax.dblTax = itemDetailTax.dblTax,
-        //         itemTax.dblAdjustedTax = 0;
-        //         itemTax.intTaxAccountId = null;
-        //         itemTax.ysnTaxAdjusted = false;
-        //         itemTax.ysnSeparateOnInvoice = false;
-        //         itemTax.ysnCheckoffTax = false;
-        //        item.tblICInventoryReceiptItemTaxes.Add(itemTax);
-        //    }
+        public override async Task<GetObjectResult> GetAsync(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICInventoryReceipt>().Filter(param, true);
+            var data = await query.Execute(param, "intInventoryReceiptId")
+                        .Select(t => new
+                        {
+                            t.intInventoryReceiptId
+                            , t.strReceiptType
+                            , t.intSourceType
+                            , t.intEntityVendorId
+                            , t.intTransferorId
+                            , t.intLocationId
+                            , t.strReceiptNumber
+                            , t.dtmReceiptDate
+                            , t.intCurrencyId
+                            , t.intSubCurrencyCents
+                            , t.intBlanketRelease
+                            , t.strVendorRefNo
+                            , t.strBillOfLading
+                            , t.intShipViaId
+                            , t.intShipFromId
+                            , t.intReceiverId
+                            , t.strVessel
+                            , t.intFreightTermId
+                            , t.intShiftNumber
+                            , t.dblInvoiceAmount
+                            , t.ysnPrepaid
+                            , t.ysnInvoicePaid
+                            , t.intCheckNo
+                            , t.dtmCheckDate
+                            , t.intTrailerTypeId
+                            , t.dtmTrailerArrivalDate
+                            , t.dtmTrailerArrivalTime
+                            , t.strSealNo
+                            , t.strSealStatus
+                            , t.dtmReceiveTime
+                            , t.dblActualTempReading
+                            , t.intShipmentId
+                            , t.intTaxGroupId
+                            , t.ysnPosted
+                            , t.intCreatedUserId
+                            , t.intEntityId
+                            , t.intConcurrencyId
+                            , t.strWarehouseRefNo
+                            , t.ysnOrigin
+                            , t.dtmLastFreeWhseDate
 
-        //    base.Update(entity);
-        //}
+                            , strVendorName = t.vyuICInventoryReceiptLookUp.strVendorName
+                            , intVendorEntityId = t.vyuICInventoryReceiptLookUp.intEntityId
+                            , strFobPoint = t.vyuICInventoryReceiptLookUp.strFobPoint
+                            , strLocationName = t.vyuICInventoryReceiptLookUp.strLocationName
+                            , strCurrency = t.vyuICInventoryReceiptLookUp.strCurrency
+                            , strFromLocation = t.vyuICInventoryReceiptLookUp.strFromLocation
+                            , strUserName = t.vyuICInventoryReceiptLookUp.strUserName
+                            , strShipFrom = t.vyuICInventoryReceiptLookUp.strShipFrom
+                            , strShipVia = t.vyuICInventoryReceiptLookUp.strShipVia
+                            , strFreightTerm = t.vyuICInventoryReceiptLookUp.strFreightTerm
+                        }).ToListAsync();
 
-        //public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
-        //{
-        //    SaveResult result = new SaveResult();
+            return new GetObjectResult()
+            {
+                data = data,
+                total = await query.CountAsync()
+            };
+        }
 
-        //    using (var transaction = _db.ContextManager.Database.BeginTransaction())
-        //    {
-        //        var connection = _db.ContextManager.Database.Connection;
-        //        try
-        //        {
-        //            int? ReceiptId = null;
-        //            bool ysnDeleted = false;
-        //            foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
-        //            {
-        //                ReceiptId = receipt.intInventoryReceiptId;
-        //                if (receipt.strReceiptType == "Purchase Order")
-        //                {
-        //                    var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
-        //                    var openStatus = new SqlParameter("ysnOpenStatus", true);
-        //                    _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
-        //                }
-        //            }
-        //            var deletedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(p => p.State == EntityState.Deleted).ToList();
-        //            foreach (var receipt in deletedReceipts)
-        //            {
-        //                ReceiptId = receipt.Entity.intInventoryReceiptId;
-        //                ysnDeleted = true;
-        //                if (receipt.Entity.strReceiptType == "Purchase Order")
-        //                {
-        //                    var idParameter = new SqlParameter("intReceiptNo", receipt.Entity.intInventoryReceiptId);
-        //                    var openStatus = new SqlParameter("ysnOpenStatus", true);
-        //                    _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
-        //                }
-        //            }
+        public async Task<GetObjectResult> GetReceiptItems(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICInventoryReceiptItem>().Filter(param);
+            var data = await query
+                .Select(s => new
+                {
+                    s.intInventoryReceiptItemId,
+                    s.intInventoryReceiptId,
+                    s.intLineNo,
+                    s.intOrderId,
+                    s.intSourceId,
+                    s.intItemId,
+                    s.intContainerId,
+                    s.intSubLocationId,
+                    s.intStorageLocationId,
+                    s.intOwnershipType,
+                    s.dblOrderQty,
+                    s.dblBillQty,
+                    s.dblOpenReceive,
+                    s.intLoadReceive,
+                    s.intUnitMeasureId,
+                    s.intWeightUOMId,
+                    s.intCostUOMId,
+                    s.dblUnitCost,
+                    s.dblUnitRetail,
+                    s.ysnSubCurrency,
+                    s.dblLineTotal,
+                    s.intGradeId,
+                    s.dblGross,
+                    s.dblNet,
+                    s.dblTax,
+                    s.intDiscountSchedule,
+                    s.ysnExported,
+                    s.dtmExportedDate,
+                    s.intSort,
+                    s.intConcurrencyId,
+                    s.intTaxGroupId,
+                    s.intForexRateTypeId,
+                    s.dblForexRate,
 
-        //            _db.ContextManager.Database.ExecuteSqlCommand("uspICLogTransactionDetail @TransactionType, @TransactionId", new SqlParameter("TransactionType", 1), new SqlParameter("TransactionId", ReceiptId));
+                    // PROJECTED
+                    strItemNo = s.tblICItem.strItemNo,
+                    strItemDescription = s.tblICItem.strDescription,
+                    strOrderNumber = s.vyuICInventoryReceiptItemLookUp.strOrderNumber,
+                    strSourceNumber = s.vyuICInventoryReceiptItemLookUp.strSourceNumber,
+                    dtmOrderDate = s.vyuICInventoryReceiptItemLookUp.dtmDate,
+                    strLotTracking = s.tblICItem.strLotTracking,
+                    strOrderUOM = s.vyuICInventoryReceiptItemLookUp.strOrderUOM,
+                    dblOrdered = s.vyuICInventoryReceiptItemLookUp.dblOrdered,
+                    dblReceived = s.vyuICInventoryReceiptItemLookUp.dblReceived,
+                    dblOrderUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblOrderUOMConvFactor,
+                    strUnitMeasure = s.vyuICInventoryReceiptItemLookUp.strUnitMeasure,
+                    intItemUOMId = s.vyuICInventoryReceiptItemLookUp.intItemUOMId,
+                    intItemUOMDecimalPlaces = s.vyuICInventoryReceiptItemLookUp.intItemUOMDecimalPlaces,
+                    strUnitType = s.vyuICInventoryReceiptItemLookUp.strUnitType,
+                    strSubLocationName = s.vyuICInventoryReceiptItemLookUp.strSubLocationName,
+                    strStorageLocationName = s.vyuICInventoryReceiptItemLookUp.strStorageLocationName,
+                    strGrade = s.vyuICInventoryReceiptItemLookUp.strGrade,
+                    strOwnershipType = s.intOwnershipType == 1 ? "Own"
+                        : s.intOwnershipType == 2 ? "Storage"
+                        : s.intOwnershipType == 3 ? "Consigned Purchase"
+                        : s.intOwnershipType == 4 ? "Consigned Sale"
+                        : "Own",
+                    intCommodityId = s.vyuICInventoryReceiptItemLookUp.intCommodityId,
+                    strWeightOUM = s.vyuICInventoryReceiptItemLookUp.strWeightUOM,
+                    strContainer = s.vyuICInventoryReceiptItemLookUp.strContainer,
+                    dblItemUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblItemUOMConvFactor,
+                    dblWeightUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblWeightUOMConvFactor,
+                    dblGrossMargin = s.vyuICInventoryReceiptItemLookUp.dblGrossMargin,
+                    strLifeTimeType = s.vyuICInventoryReceiptItemLookUp.strLifeTimeType,
+                    intLifeTime = s.vyuICInventoryReceiptItemLookUp.intLifeTime,
+                    strCostUOM = s.vyuICInventoryReceiptItemLookUp.strCostUOM,
+                    dblCostUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblCostUOMConvFactor,
+                    ysnLoad = s.vyuICInventoryReceiptItemLookUp.ysnLoad,
+                    dblAvailableQty = s.vyuICInventoryReceiptItemLookUp.dblAvailableQty,
+                    strDiscountSchedule = s.vyuICInventoryReceiptItemLookUp.strDiscountSchedule,
+                    dblFranchise = s.vyuICInventoryReceiptItemLookUp.dblFranchise,
+                    dblContainerWeightPerQty = s.vyuICInventoryReceiptItemLookUp.dblContainerWeightPerQty,
+                    strSubCurrency = s.vyuICInventoryReceiptItemLookUp.strSubCurrency,
+                    strPricingType = s.vyuICInventoryReceiptItemLookUp.strPricingType,
+                    strTaxGroup = s.vyuICInventoryReceiptItemLookUp.strTaxGroup,
+                    strForexRateType = s.vyuICInventoryReceiptItemLookUp.strForexRateType
+                })
+                .AsNoTracking().ToListAsync();
 
-        //            result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            return new GetObjectResult()
+            {
+                data = data
+            };
+        }
 
-        //            foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
-        //            {
-        //                ReceiptId = receipt.intInventoryReceiptId;
-        //                var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
-        //                _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo", idParameter);
+        public async Task<GetObjectResult> GetReceiptInspections(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICInventoryReceiptInspection>().Filter(param);
+            var data = await query.AsNoTracking().ToListAsync();
 
-        //                //if (receipt.strReceiptType == "Purchase Order")
-        //                //{
-        //                //    var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
-        //                //    _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo", idParameter);
-        //                //}
+            return new GetObjectResult()
+            {
+                data = data,
+                total = await query.CountAsync()
+            };
+        }
 
+        public async Task<GetObjectResult> GetReceiptCharges(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICInventoryReceiptCharge>().Filter(param);
+            var data = await query
+                .Select(s => new {
+                    s.intInventoryReceiptChargeId
+                    , s.intInventoryReceiptId
+                    , s.intContractId
+                    , s.intContractDetailId
+                    , s.intChargeId
+                    , s.ysnInventoryCost
+                    , s.strCostMethod
+                    , s.dblRate
+                    , s.intCostUOMId
+                    , s.ysnSubCurrency
+                    , s.intCurrencyId
+                    , s.dblAmount
+                    , s.strAllocateCostBy
+                    , s.ysnAccrue
+                    , s.intEntityVendorId
+                    , s.ysnPrice
+                    , s.dblAmountBilled
+                    , s.dblAmountPaid
+                    , s.dblAmountPriced
+                    , s.intSort
+                    , s.dblTax
+                    , s.intConcurrencyId
+                    , s.intTaxGroupId
+                    , s.intForexRateTypeId
+                    , s.dblForexRate
+                    , strContractNumber = s.vyuICGetInventoryReceiptCharge.strContractNumber
+                    , strItemNo = s.vyuICGetInventoryReceiptCharge.strItemNo
+                    , strItemDescription = s.vyuICGetInventoryReceiptCharge.strItemDescription
+		            , strCostUOM = s.vyuICGetInventoryReceiptCharge.strCostUOM
+                    , strUnitType = s.vyuICGetInventoryReceiptCharge.strUnitType
+                    , strOnCostType = s.vyuICGetInventoryReceiptCharge.strOnCostType
+                    , strVendorId = s.vyuICGetInventoryReceiptCharge.strVendorId
+                    , strVendorName = s.vyuICGetInventoryReceiptCharge.strVendorName
+                    , strCurrency = s.vyuICGetInventoryReceiptCharge.strCurrency
+                    , strTaxGroup = s.vyuICGetInventoryReceiptCharge.strTaxGroup
+                    , strForexRateType = s.vyuICGetInventoryReceiptCharge.strForexRateType
+            }).AsNoTracking().ToListAsync();
 
-        //                _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
-        //            }
-
-        //            foreach (var receipt in deletedReceipts)
-        //            {
-        //                ReceiptId = receipt.Entity.intInventoryReceiptId;
-        //                ysnDeleted = true;
-        //                _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
-        //            }
-
-        //            if (result.HasError)
-        //            {
-        //                throw result.BaseException;
-        //            }
-        //            transaction.Commit();
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            result.BaseException = ex;
-        //            result.Exception = new ServerException(ex);
-        //            result.HasError = true;
-        //            //transaction.Rollback();
-        //        }
-        //    }
-
-        //    return new BusinessResult<tblICInventoryReceipt>()
-        //    {
-        //        success = !result.HasError,
-        //        message = new MessageResult()
-        //        {
-        //            statusText = result.Exception.Message,
-        //            status = result.Exception.Error,
-        //            button = result.Exception.Button.ToString()
-        //        }
-        //    };
-        //}
+            return new GetObjectResult()
+            {
+                data = data,
+                total = await query.CountAsync()
+            };
+        }
 
         public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
         {
