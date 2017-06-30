@@ -5308,6 +5308,7 @@
     <Build Include="dbo\Tables\tblCTEventRecipientFilter.sql" />
     <Build Include="dbo\Views\vyuCTEventRecipientFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAlertNotificationCount.sql" />
+    <Build Include="dbo\Tables\tblEMEntityCardInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
