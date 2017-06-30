@@ -2424,6 +2424,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Overview'
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.Overview?showSearch=true' WHERE strMenuName = 'Overview' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Alert Filter' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Alert Filter', N'Contract Management', @ContractManagementParentMenuId, N'Alert Filter', N'Maintenance', N'Screen', N'ContractManagement.view.EventRecipientFilter', N'small-menu-maintenance', 1, 1, 0, 1, 19, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.EventRecipientFilter' WHERE strMenuName = 'Alert Filter' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
+
 /* Start of Delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Contract Options' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Cost Types' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
