@@ -188,10 +188,7 @@ EXEC [uspARCustomerAgingDetailAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSale
 SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
      , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
      , * 
-FROM 
-	@temp_aging_table
-WHERE 
-	intInvoiceId NOT IN (SELECT intInvoiceId FROM tblARPaymentDetail WHERE intPaymentId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1))'
+FROM @temp_aging_table'
 
 IF ISNULL(@filter,'') != ''
 BEGIN
