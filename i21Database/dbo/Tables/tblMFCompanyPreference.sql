@@ -44,6 +44,8 @@
 	ysnReserveOnStage Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnReserveOnStage] DEFAULT 0,
 	ysnGenerateNewParentLotOnChangeItem Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnGenerateNewParentLotOnChangeItem] DEFAULT 1,
 	intNoOfDecimalPlacesOnConsumption int NULL CONSTRAINT [DF_tblMFCompanyPreference_intNoOfDecimalPlacesOnConsumption] DEFAULT 0,
-	ysnConsumptionByRatio Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnConsumptionByRatio] DEFAULT 0
+	ysnConsumptionByRatio Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnConsumptionByRatio] DEFAULT 0,
+	ysnSetDefaultQty BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSetDefaultQty] DEFAULT 0,
+
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
