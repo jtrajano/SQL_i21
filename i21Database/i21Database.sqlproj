@@ -5311,6 +5311,7 @@
     <Build Include="dbo\Tables\tblEMEntityCardInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSyncGLACTMST.sql" />
     <Build Include="dbo\Stored Procedures\uspGLDeleteAccount.sql" />
+    <Build Include="dbo\Views\vyuICLGContainerLookup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
