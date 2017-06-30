@@ -12,6 +12,9 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IInventoryReceiptBl : IBusinessLayer<tblICInventoryReceipt>
     {
+        Task<GetObjectResult> GetReceiptItems(GetParameter param);
+        Task<GetObjectResult> GetReceiptCharges(GetParameter param);
+        Task<GetObjectResult> GetReceiptInspections(GetParameter param);
         SaveResult ProcessBill(int receiptId, out int? newBill, out string newBills);
         SaveResult CalculateCharges(int receiptId);
         //SaveResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap);

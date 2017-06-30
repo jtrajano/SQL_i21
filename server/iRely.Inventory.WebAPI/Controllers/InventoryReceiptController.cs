@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
 using iRely.Inventory.BusinessLayer;
+using System.Web.Http.ModelBinding;
 
 namespace iRely.Inventory.WebApi
 {
@@ -20,6 +21,27 @@ namespace iRely.Inventory.WebApi
             : base(bl)
         {
             _bl = bl;
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetReceiptItems([ModelBinder] GetParameter param)
+        {
+            var result = await _bl.GetReceiptItems(param);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetReceiptInspections([ModelBinder] GetParameter param)
+        {
+            var result = await _bl.GetReceiptInspections(param);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetReceiptCharges([ModelBinder] GetParameter param)
+        {
+            var result = await _bl.GetReceiptCharges(param);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
         }
 
         public override System.Threading.Tasks.Task<HttpResponseMessage> Post(IEnumerable<tblICInventoryReceipt> entities, bool continueOnConflict = false)

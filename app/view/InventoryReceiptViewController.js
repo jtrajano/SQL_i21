@@ -910,14 +910,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             onSaveClick: me.saveAndPokeGrid(win, grdInventoryReceipt),
-            include: 'tblICInventoryReceiptInspections,' +
-            'vyuICInventoryReceiptLookUp,' +
-            'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
-            'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
-            'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
-            'tblICInventoryReceiptItems.tblICUnitMeasure,' +
-            'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge,' +
-            'tblICInventoryReceiptCharges.tblICInventoryReceiptChargeTaxes',
+            // include: 'tblICInventoryReceiptInspections,' +
+            // 'vyuICInventoryReceiptLookUp,' +
+            // 'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
+            // 'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
+            // 'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
+            // 'tblICInventoryReceiptItems.tblICUnitMeasure,' +
+            // 'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge,' +
+            // 'tblICInventoryReceiptCharges.tblICInventoryReceiptChargeTaxes',
             attachment: Ext.create('iRely.attachment.Manager', {
                 type: 'Inventory.Receipt',
                 window: win
@@ -925,6 +925,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             details: [
                 {
                     key: 'tblICInventoryReceiptItems',
+                    lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdInventoryReceipt,
                         deleteButton: grdInventoryReceipt.down('#btnRemoveInventoryReceipt')
@@ -932,6 +933,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     details: [
                         {
                             key: 'tblICInventoryReceiptItemLots',
+                            lazy: true,
                             component: Ext.create('iRely.grid.Manager', {
                                 grid: grdLotTracking,
                                 deleteButton: grdLotTracking.down('#btnRemoveLot'),
@@ -939,12 +941,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             })
                         },
                         {
-                            key: 'tblICInventoryReceiptItemTaxes'
+                            key: 'tblICInventoryReceiptItemTaxes',
+                            lazy: true
                         }
                     ]
                 },
                 {
                     key: 'tblICInventoryReceiptCharges',
+                    lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdCharges,
                         deleteButton: grdCharges.down('#btnRemoveCharge'),
@@ -952,13 +956,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }),
                     details: [
                         {
-                            key: 'tblICInventoryReceiptChargeTaxes'
+                            key: 'tblICInventoryReceiptChargeTaxes',
+                            lazy: true
                         }
                     ]
 
                 },
                 {
                     key: 'tblICInventoryReceiptInspections',
+                    lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdIncomingInspection,
                         position: 'none'
@@ -1083,18 +1089,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     ];
                 }
                 context.data.load({
-                    filters: config.filters
+                    filters: config.filters,
+                    callback: function() {
+                        var cboReceiptType = win.down('#cboReceiptType');
+                        if (cboReceiptType) cboReceiptType.focus();
+                    }
                 });
             }
-
-            // Default control focus 
-            var task = new Ext.util.DelayedTask(function () {
-                var cboReceiptType = win.down('#cboReceiptType');
-                if (cboReceiptType) cboReceiptType.focus();
-            });
-            task.delay(500);
-
-            //me.setupAdditionalBinding(win);
         }
     },
     onPageChange: function (pagingStatusBar, record, eOpts) {
@@ -1117,6 +1118,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.showOtherCharges(win);
         }
     },
+    
     updateWeightLossText: function (window, clear, weightLoss) {
         if (clear) {
             window.down("#txtWeightLossMsgValue").setValue("");
@@ -4509,14 +4511,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     pnlLotTracking.setVisible(true);
                 }
 
-                if (!current.phantom && !current.dirty) {
-                    win.down("#grdLotTracking").setLoading("Loading lots...");
-                    current.tblICInventoryReceiptItemLots().load({
-                        callback: function(records, operation, success) {
-                            win.down("#grdLotTracking").setLoading(false);
-                        }
-                    });
-                }
+                // if (!current.phantom && !current.dirty) {
+                //     win.down("#grdLotTracking").setLoading("Loading lots...");
+                //     current.tblICInventoryReceiptItemLots().load({
+                //         callback: function(records, operation, success) {
+                //             win.down("#grdLotTracking").setLoading(false);
+                //         }
+                //     });
+                // }
             }
             else {
                 vm.data.currentReceiptItem = null;

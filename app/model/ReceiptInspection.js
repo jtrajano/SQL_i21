@@ -19,6 +19,17 @@ Ext.define('Inventory.model.ReceiptInspection', {
                     role: 'tblICInventoryReceiptInspections',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/InventoryReceipt/GetReceiptInspections'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'DESC',
