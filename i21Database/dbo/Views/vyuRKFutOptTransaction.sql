@@ -44,10 +44,12 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dblUnAllocatedAmount
 			,ft.dblSpotRate
 			,ft.ysnLiquidation
-			,ft.ysnSwap					
+			,ft.ysnSwap	
+			,rm.strFutureMonth strRollingMonth				
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
+LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS rm ON ft.[intRollingMonthId] = rm.[intFutureMonthId]
 LEFT OUTER JOIN [dbo].[tblRKOptionsMonth] AS om ON ft.[intOptionMonthId] = om.[intOptionMonthId]
 LEFT OUTER JOIN [dbo].[tblCTBook] AS sb ON ft.[intBookId] = sb.[intBookId]
 LEFT OUTER JOIN [dbo].[tblCTSubBook] AS ssb ON ft.[intSubBookId] = ssb.[intSubBookId]
@@ -60,4 +62,4 @@ LEFT OUTER JOIN [dbo].[tblSMCompanyLocation] AS cl ON ft.[intLocationId] = cl.[i
 LEFT OUTER JOIN [dbo].[tblCMBank] AS b ON ft.[intBankId] = b.[intBankId]
 LEFT OUTER JOIN [dbo].[tblCMBankAccount] AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
 LEFT OUTER JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
-)t order by convert(int,REPLACE(REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''),'-H','')) ASC
+)t ORDER BY CONVERT(INT,REPLACE(REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''),'-H','')) ASC
