@@ -70,9 +70,27 @@ BEGIN
 	-- Validate Freight Term Id
 	BEGIN
 		DECLARE @strCustomer AS NVARCHAR(50)
+		
+		-- Validate the freight terms for the shipment header.
 		SELECT	TOP 1 
 				@strCustomer = e.strName
 		FROM	@Entries shipment INNER JOIN tblEMEntity e
+					ON shipment.intEntityCustomerId = e.intEntityId
+				LEFT JOIN tblSMFreightTerms f
+					ON f.intFreightTermId = shipment.intFreightTermId
+		WHERE	f.intFreightTermId IS NULL 		
+
+		IF @strCustomer IS NOT NULL 
+		BEGIN 
+			-- 'The Freight Terms for customer {Customer} is blank. Please add it at the Entity - Locations.'
+			EXEC uspICRaiseError 80183, @strCustomer;
+			GOTO _Exit;
+		END 
+
+		-- Validate the freight terms for the shipment charges.
+		SELECT	TOP 1 
+				@strCustomer = e.strName
+		FROM	@Charges shipment INNER JOIN tblEMEntity e
 					ON shipment.intEntityCustomerId = e.intEntityId
 				LEFT JOIN tblSMFreightTerms f
 					ON f.intFreightTermId = shipment.intFreightTermId
