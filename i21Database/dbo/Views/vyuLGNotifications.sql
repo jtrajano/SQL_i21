@@ -13,6 +13,7 @@ FROM (
 			,CH.intContractHeaderId
 			,CH.strContractNumber
 			,CD.intContractSeq
+			,'' AS strLoadNumber
 			,I.strItemNo
 			,CO.strCommodityCode
 			,CH.dtmCreated
@@ -72,6 +73,7 @@ FROM (
 			,CH.intContractHeaderId
 			,CH.strContractNumber
 			,CD.intContractSeq
+			,'' AS strLoadNumber
 			,I.strItemNo
 			,CO.strCommodityCode
 			,CH.dtmCreated
@@ -123,6 +125,7 @@ FROM (
 			,CH.intContractHeaderId
 			,CH.strContractNumber
 			,CD.intContractSeq
+			,L.strLoadNumber AS strLoadNumber
 			,I.strItemNo
 			,CO.strCommodityCode
 			,CH.dtmCreated
@@ -172,6 +175,7 @@ FROM (
 			,CH.intContractHeaderId
 			,CH.strContractNumber
 			,CD.intContractSeq
+			,L.strLoadNumber AS strLoadNumber
 			,I.strItemNo
 			,CO.strCommodityCode
 			,CH.dtmCreated
@@ -222,6 +226,7 @@ FROM (
 			,CH.intContractHeaderId
 			,CH.strContractNumber
 			,CD.intContractSeq
+			,L.strLoadNumber AS strLoadNumber
 			,I.strItemNo
 			,CO.strCommodityCode
 			,CH.dtmCreated
@@ -270,6 +275,7 @@ FROM (
 			,CH.intContractHeaderId
 			,CH.strContractNumber
 			,CD.intContractSeq
+			,L.strLoadNumber AS strLoadNumber
 			,I.strItemNo
 			,CO.strCommodityCode
 			,CH.dtmCreated
@@ -318,6 +324,7 @@ FROM (
 			,CH.intContractHeaderId
 			,CH.strContractNumber
 			,CD.intContractSeq
+			,L.strLoadNumber AS strLoadNumber
 			,I.strItemNo
 			,CO.strCommodityCode
 			,CH.dtmCreated
