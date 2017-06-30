@@ -71,7 +71,7 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
                   @intLocationId = @intLocationId,
                   @intMarketZoneId = @intMarketZoneId
 
-SELECT cd.*,case when isnull(ysnRiskToProducer,0)=1 then e.strName else null end as strProducer,
+SELECT Distinct cd.*,case when isnull(ysnRiskToProducer,0)=1 then e.strName else null end as strProducer,
 			case when isnull(ysnRiskToProducer,0)=1 then ch.intProducerId  else null end intProducerId into #temp FROM @tblFinalDetail cd
 JOIN tblCTContractDetail ch on ch.intContractHeaderId=cd.intContractHeaderId
 LEFT JOIN tblEMEntity e on e.intEntityId=ch.intProducerId
