@@ -1013,11 +1013,10 @@ BEGIN TRY
 	DELETE
 	FROM @tblICFinalItem
 	WHERE ysnMainItem = 0
-		AND intItemId IN (
-			SELECT SL.intItemId
-			FROM @tblMFQtyInProductionStagingLocation SL
-			WHERE SL.dblQtyInProdStagingLocation = 0
-			)
+		AND intItemId NOT IN (
+			SELECT WI.intItemId
+			FROM @tblMFWorkOrderInputLot WI
+			) 
 
 	DELETE FI
 	FROM @tblICFinalItem FI
