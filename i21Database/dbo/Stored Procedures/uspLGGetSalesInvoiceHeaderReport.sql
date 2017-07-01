@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspLGGetSalesInvoiceHeaderReport]
+﻿CREATE PROCEDURE [dbo].[uspLGGetSalesInvoiceHeaderReport]
 		@xmlParam NVARCHAR(MAX) = NULL  
 AS
 BEGIN
