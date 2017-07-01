@@ -708,8 +708,8 @@ BEGIN TRY
 				)
 
 		UPDATE @tblItem
-		SET dblReqQty = Round(dblReqQty * IsNULL(dblRatio,0) / 100, @intNoOfDecimalPlacesOnConsumption)
-			,dblLowerToleranceReqQty = Round(dblLowerToleranceReqQty * IsNULL(dblRatio,0) / 100, @intNoOfDecimalPlacesOnConsumption)
+		SET dblReqQty = Round(dblReqQty * IsNULL(dblRatio, 0) / 100, @intNoOfDecimalPlacesOnConsumption)
+			,dblLowerToleranceReqQty = Round(dblLowerToleranceReqQty * IsNULL(dblRatio, 0) / 100, @intNoOfDecimalPlacesOnConsumption)
 		FROM @tblItem I
 		JOIN @tblMFWorkOrderInputItem WI ON WI.intItemId = I.intItemId
 		WHERE NOT EXISTS (
@@ -718,8 +718,15 @@ BEGIN TRY
 				WHERE I2.intItemId = WI.intItemId
 				)
 
-		Delete I
-		from @tblItem I JOIN @tblMFWorkOrderInputItem WI on I.intItemId=WI.intMainItemId Where dblRatio=100 and WI.intItemId<>WI.intMainItemId 
+		DELETE I
+		FROM @tblItem I
+		WHERE I.intItemId IN (
+				SELECT WI.intMainItemId
+				FROM @tblMFWorkOrderInputItem WI
+				WHERE WI.intItemId <> WI.intMainItemId
+				GROUP BY WI.intMainItemId
+				HAVING Round(SUM(dblRatio), 0) = 100
+				)
 	END
 
 	SELECT @intItemRecordId = Min(intItemRecordId)

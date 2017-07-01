@@ -848,8 +848,15 @@ BEGIN TRY
 			AND WI.intWorkOrderId = @intWorkOrderId
 			AND WI.ysnConsumptionReversed = 0
 
-		Delete I
-		from @tblICFinalItem I JOIN @tblMFWorkOrderInputLot WI on I.intItemId=WI.intMainItemId Where dblRatio=100 and WI.intItemId<>WI.intMainItemId
+		DELETE I
+		FROM @tblICFinalItem I
+		WHERE I.intItemId IN (
+				SELECT WI.intMainItemId
+				FROM @tblMFWorkOrderInputLot WI
+				WHERE WI.intItemId <> WI.intMainItemId
+				GROUP BY WI.intMainItemId
+				HAVING Round(SUM(dblRatio), 0) = 100
+				)
 
 		INSERT INTO @tblMFQtyInProductionStagingLocation (
 			intItemId
