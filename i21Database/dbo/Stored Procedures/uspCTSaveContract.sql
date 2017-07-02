@@ -23,12 +23,36 @@ BEGIN TRY
 			@strRowState				NVARCHAR(100),
 			@intNetWeightUOMId			INT,
 			@dblNetWeight				NUMERIC(18,6),
-			@intItemUOMId				INT
+			@intItemUOMId				INT,
+			@intContractStatusId		INT,
+			@intContractScreenId		INT,
+			@ysnOnceApproved			BIT,
+			@ysnFeedOnApproval			BIT,
+			@intTransactionId			INT,
+			@intApproverId				INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId			=	@intContractHeaderId
+
+	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval from tblCTCompanyPreference
+
+	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
+
+	SELECT  @ysnOnceApproved  =	ysnOnceApproved,
+			@intTransactionId = intTransactionId 
+	FROM	tblSMTransaction 
+	WHERE	intRecordId = @intContractHeaderId 
+	AND		intScreenId = @intContractScreenId
+
+	SELECT	TOP 1
+			@intApproverId	  =	intApproverId 
+	FROM	tblSMApproval 
+	WHERE	intTransactionId  =	@intTransactionId 
+	AND		intScreenId = @intContractScreenId 
+	AND		strStatus = 'Approved' 
+	ORDER BY intApprovalId DESC
 
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 	
@@ -46,7 +70,9 @@ BEGIN TRY
 				@intLastModifiedById=	intLastModifiedById,
 				@intNetWeightUOMId	=	intNetWeightUOMId,
 				@dblNetWeight		=	dblNetWeight,
-				@intItemUOMId		=	intItemUOMId
+				@intItemUOMId		=	intItemUOMId,
+				@intContractStatusId=	intContractStatusId
+
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
@@ -70,6 +96,14 @@ BEGIN TRY
 		EXEC uspLGUpdateLoadItem @intContractDetailId
 
 		EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+
+		IF	@intContractStatusId	=	1	AND
+			@ysnOnceApproved		=	1	AND
+			@ysnFeedOnApproval		=	1	AND
+			NOT EXISTS (SELECT * from tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
+		BEGIN
+			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1
+		END
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
