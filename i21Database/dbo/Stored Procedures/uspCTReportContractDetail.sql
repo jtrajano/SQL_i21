@@ -105,9 +105,13 @@ BEGIN TRY
 			CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
 					WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(@dblNoOfLots)
 			END	AS	dblNoOfLots,
-			AM.strAmendedColumns			
+			AM.strAmendedColumns,
+			CO.strCommodityCode,
+			CD.strERPBatchNumber
+
 	FROM	tblCTContractDetail CD	
-	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
+	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
+	JOIN	tblICCommodity		CO	ON	CO.intCommodityId		=	CH.intCommodityId		LEFT
 	JOIN	tblICItemUOM		QM	ON	QM.intItemUOMId			=	CD.intItemUOMId			LEFT
 	JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	QM.intUnitMeasureId		LEFT
 	JOIN	tblICItemUOM		PM	ON	PM.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
