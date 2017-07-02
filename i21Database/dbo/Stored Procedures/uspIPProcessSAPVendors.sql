@@ -128,8 +128,6 @@ Begin
 	--Entity Type
 	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
 	Values (@intEntityId,'Vendor',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Producer',0)
 
 	--Entity Location
 	Insert Into tblEMEntityLocation(intEntityId,strLocationName,strAddress,strCity,strCountry,strZipCode,intTermsId,ysnDefaultLocation,ysnActive)
