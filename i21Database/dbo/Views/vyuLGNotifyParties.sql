@@ -4,7 +4,7 @@ SELECT	E.intEntityId,
 		E.strName,
 		E.strType 				AS strEntity
 FROM	vyuEMEntity				E
-JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
+JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
 WHERE strType IN ('Vendor', 'Customer','Forwarding Agent','Shipping Line')
 AND ISNULL(V.ysnPymtCtrlActive,0) = 1
 
