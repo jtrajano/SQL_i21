@@ -16,9 +16,9 @@ SELECT LD.intLoadDetailId
 	,CASE WHEN ISNULL(LDCL.dblQuantity,0) = 0 THEN LD.dblQuantity ELSE LDCL.dblQuantity END AS dblQuantity
 	,CASE WHEN ISNULL(LDCL.dblReceivedQty, 0) = 0 THEN LD.dblDeliveredQuantity ELSE ISNULL(LDCL.dblReceivedQty, 0) END AS dblDeliveredQuantity
 	,COALESCE(LDCL.dblQuantity - ISNULL(LDCL.dblReceivedQty, 0), LD.dblQuantity - LD.dblDeliveredQuantity) AS dblBalanceToReceive
-	,COALESCE((LC.dblGrossWt / LC.dblQuantity) * LDCL.dblQuantity, LD.dblGross) AS dblGross
-	,COALESCE((LC.dblTareWt / LC.dblQuantity) * LDCL.dblQuantity, LD.dblTare) AS dblTare
-	,COALESCE((LC.dblNetWt / LC.dblQuantity) * LDCL.dblQuantity, LD.dblNet) AS dblNet
+	,COALESCE((LC.dblGrossWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity, LD.dblGross) AS dblGross
+	,COALESCE((LC.dblTareWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity, LD.dblTare) AS dblTare
+	,COALESCE((LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity, LD.dblNet) AS dblNet
 	,AD.dblSeqPrice AS dblCost
 	,AD.strSeqPriceUOM AS strPCostUOM
 	,AD.intSeqPriceUOMId intPCostUOMId
@@ -81,7 +81,7 @@ SELECT LD.intLoadDetailId
 			THEN PWG.dblFranchise / 100
 		ELSE 0
 		END AS dblFranchise
-	,dblContainerWeightPerQty = (LC.dblNetWt / LC.dblQuantity)
+	,dblContainerWeightPerQty = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END)
 	,LW.intSubLocationId
 	,SubLocation.strSubLocationName
 	,ISNULL(LC.intLoadContainerId,-1) AS intLoadContainerId

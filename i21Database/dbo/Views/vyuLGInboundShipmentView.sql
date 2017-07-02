@@ -152,10 +152,10 @@ SELECT
 
 ---- Container Contract Association Details
 		ISNULL(LDCL.dblQuantity,LD.dblQuantity) as dblContainerContractQty,
-		dblContainerContractGrossWt = (LC.dblGrossWt / LC.dblQuantity) * LDCL.dblQuantity,
-		dblContainerContractTareWt = (LC.dblTareWt / LC.dblQuantity) * LDCL.dblQuantity,
-		dblContainerContractlNetWt = (LC.dblNetWt / LC.dblQuantity) * LDCL.dblQuantity,	
-		dblContainerWeightPerQty = (LC.dblNetWt / LC.dblQuantity),
+		dblContainerContractGrossWt = (LC.dblGrossWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,
+		dblContainerContractTareWt = (LC.dblTareWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,
+		dblContainerContractlNetWt = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,	
+		dblContainerWeightPerQty = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END),
 		ISNULL(LDCL.dblReceivedQty,LD.dblDeliveredQuantity) as dblContainerContractReceivedQty,
 		dblReceivedGrossWt = IsNull((SELECT sum(ICItem.dblGross) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0),
 		dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0), 
