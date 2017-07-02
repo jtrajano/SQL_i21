@@ -19,9 +19,9 @@ SELECT
 	,intLocationId = L.intCompanyLocationId
 	,LDCL.dblQuantity
 	,ISNULL(LDCL.dblReceivedQty, 0) AS dblReceivedQty
-	,dblGrossWt = (LC.dblGrossWt / LC.dblQuantity) * LDCL.dblQuantity
-	,dblTareWt = (LC.dblTareWt / LC.dblQuantity) * LDCL.dblQuantity
-	,dblNetWt = (LC.dblNetWt / LC.dblQuantity) * LDCL.dblQuantity
+	,dblGrossWt = (LC.dblGrossWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity
+	,dblTareWt = (LC.dblTareWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity
+	,dblNetWt = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity
 	,dblCost = AD.dblSeqPrice
 	,intWeightUOMId = L.intWeightUnitMeasureId
 	,WTUOM.strUnitMeasure AS strWeightUOM
@@ -92,7 +92,7 @@ SELECT
 	,ysnSubCurrency = AD.ysnSeqSubCurrency
 	,dblMainCashPrice = CT.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END
 	,dblFranchise = CASE WHEN WG.dblFranchise > 0 THEN WG.dblFranchise / 100 ELSE 0 END
-	,dblContainerWeightPerQty = (LC.dblNetWt / LC.dblQuantity)
+	,dblContainerWeightPerQty = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END)
 	,LW.intLoadWarehouseId
 	,LW.strDeliveryNoticeNumber
 	,LW.dtmDeliveryNoticeDate
