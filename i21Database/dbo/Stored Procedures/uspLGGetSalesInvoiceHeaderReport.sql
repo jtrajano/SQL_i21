@@ -68,7 +68,8 @@ BEGIN
 		L.dtmScheduledDate,
 		L.dtmDeliveredDate,
 		CB.strContractBasis,
-		C.strFLOId
+		C.strFLOId,
+		Inv.dblInvoiceTotal
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer C ON C.intEntityId = Inv.intEntityCustomerId
