@@ -74,6 +74,7 @@ BEGIN
 				,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
 				,strSiteDescription = ISNULL(A.strDescription,'''')
+				,strSiteRecurringPO = ISNULL(A.strRecurringPONumber,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -187,6 +188,7 @@ BEGIN
 				,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
 				,strSiteDescription = ISNULL(A.strDescription,'''')
+				,strSiteRecurringPO = ISNULL(A.strRecurringPONumber,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
