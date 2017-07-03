@@ -45,7 +45,7 @@ BEGIN
 		, 'addchange' [RecordActionType] 
 		, CONVERT(nvarchar(10), GETDATE(), 21) [RecordActionEffectiveDate]
 		, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [ITTDetailRecordActionType] 
-		, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN 'PLU' ELSE 'upcA' END [POSCodeFormatFormat]
+		, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN 'PLU' ELSE 'upcA' END [POSCodeFormat]
 		, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
 				ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
 			END [POSCode]

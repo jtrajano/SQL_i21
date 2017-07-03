@@ -21,8 +21,8 @@ BEGIN
 		, CASE PIL.ysnDeleteFromRegister WHEN 0 THEN 'addchange' WHEN 1 THEN 'delete' ELSE 'addchange' END as [ILTDetailRecordActionType] 
 		, PIL.intPromoItemListNo [ItemListID]
 		, PIL.strPromoItemListDescription [ItemListDescription]
-		, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN 'PLU' ELSE 'upcA' END [POSCodeFormat]
-		, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
+		, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) THEN 'PLU' ELSE 'upcA' END [POSCodeFormat]
+		, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
 				ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
 			END [POSCode]
 		, IUM.strUnitMeasure [PosCodeModifierName] 
