@@ -120,6 +120,11 @@ BEGIN
 	strEntityName = ENTITY.strName,
 	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
+		(SELECT TOP 1 SC.dtmTicketDateTime FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
+		ELSE
+		(SELECT TOP 1 SC.dtmTicketDateTime FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+		END AS dtmDeliveryDate,
+	CASE WHEN INVRCPT.intSourceType = 4 THEN
 		(SELECT TOP 1 SC.intTicketId FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		ELSE
 		(SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
@@ -179,11 +184,11 @@ BEGIN
 		ELSE
 		(SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END AS dblGrossWeight,
-	CASE WHEN INVRCPT.intSourceType = 4 THEN
-		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
-		ELSE
-		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
-		END AS dblShrinkWeight,
+	--CASE WHEN INVRCPT.intSourceType = 4 THEN
+	--	(SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
+	--	ELSE
+	--	(SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+	--	END AS dblShrinkWeight,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
 		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
 		ELSE
@@ -290,6 +295,11 @@ BEGIN
 	strEntityName = ENTITY.strName,
 	strVendorAddress = '',--dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
+		(SELECT TOP 1 SC.dtmTicketDateTime FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)
+		ELSE
+		(SELECT TOP 1 SC.dtmTicketDateTime FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
+		END AS dtmDeliveryDate,
+	CASE WHEN INVSHIP.intSourceType = 4 THEN
 		(SELECT TOP 1 SC.intTicketId FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)
 		ELSE
 		(SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
@@ -349,11 +359,11 @@ BEGIN
 		ELSE
 		(SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
 		END AS dblGrossWeight,
-	CASE WHEN INVSHIP.intSourceType = 4 THEN
-		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)	
-		ELSE
-		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
-		END AS dblShrinkWeight,
+	--CASE WHEN INVSHIP.intSourceType = 4 THEN
+	--	(SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)	
+	--	ELSE
+	--	(SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
+	--	END AS dblShrinkWeight,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
 		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)	
 		ELSE
@@ -458,6 +468,7 @@ BEGIN
 	--Vendor Address
 	strEntityName = ENTITY.strName,
 	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
+	dtmDeliveryDate = (SELECT TOP 1 SC.dtmTicketDateTime FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE GR.intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	intTicketId = (SELECT TOP 1 intTicketId FROM tblGRCustomerStorage WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	strTicketNumber = (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE GR.intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	'' as strReceiptNumber,
@@ -482,7 +493,7 @@ BEGIN
 			WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId )),
 	Bill.dtmDate,
 	dblGrossWeight = (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),
-	dblShrinkWeight = (SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),	
+	--dblShrinkWeight = (SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),	
 	dblTareWeight = (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),	
 	dblNetWeight = (SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	BillDtl.dblCost,
@@ -567,6 +578,11 @@ BEGIN
 	strEntityName = ENTITY.strName,
 	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
+		(SELECT TOP 1 SC.dtmTicketDateTime FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
+		ELSE
+		(SELECT TOP 1 SC.dtmTicketDateTime FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+		END AS dtmDeliveryDate,
+	CASE WHEN INVRCPT.intSourceType = 4 THEN
 		(SELECT TOP 1 SC.intTicketId FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		ELSE
 		(SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
@@ -626,11 +642,11 @@ BEGIN
 		ELSE
 		(SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END AS dblGrossWeight,
-	CASE WHEN INVRCPT.intSourceType = 4 THEN
-		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
-		ELSE
-		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
-		END AS dblShrinkWeight,
+	--CASE WHEN INVRCPT.intSourceType = 4 THEN
+	--	(SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
+	--	ELSE
+	--	(SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+	--	END AS dblShrinkWeight,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
 		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
 		ELSE
@@ -737,6 +753,11 @@ BEGIN
 	strEntityName = ENTITY.strName,
 	strVendorAddress = '',--dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
+		(SELECT TOP 1 SC.dtmTicketDateTime FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)
+		ELSE
+		(SELECT TOP 1 SC.dtmTicketDateTime FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
+		END AS dtmDeliveryDate,
+	CASE WHEN INVSHIP.intSourceType = 4 THEN
 		(SELECT TOP 1 SC.intTicketId FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)
 		ELSE
 		(SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
@@ -796,11 +817,11 @@ BEGIN
 		ELSE
 		(SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
 		END AS dblGrossWeight,
-	CASE WHEN INVSHIP.intSourceType = 4 THEN
-		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)	
-		ELSE
-		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
-		END AS dblShrinkWeight,
+	--CASE WHEN INVSHIP.intSourceType = 4 THEN
+	--	(SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)	
+	--	ELSE
+	--	(SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
+	--	END AS dblShrinkWeight,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
 		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)	
 		ELSE
@@ -905,6 +926,7 @@ BEGIN
 	--Vendor Address
 	strEntityName = ENTITY.strName,
 	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
+	dtmDeliveryDate = (SELECT TOP 1 SC.dtmTicketDateTime FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE GR.intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	intTicketId = (SELECT TOP 1 intTicketId FROM tblGRCustomerStorage WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	strTicketNumber = (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE GR.intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	'' as strReceiptNumber,
@@ -929,7 +951,7 @@ BEGIN
 			WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId )),
 	Bill.dtmDate,
 	dblGrossWeight = (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),
-	dblShrinkWeight = (SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),	
+	--dblShrinkWeight = (SELECT TOP 1 ISNULL(SC.dblShrink,0) / NULLIF(SC.dblConvertedUOMQty,1) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),	
 	dblTareWeight = (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),	
 	dblNetWeight = (SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	BillDtl.dblCost,
