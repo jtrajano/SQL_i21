@@ -244,6 +244,7 @@
 :r "..\dbo\Views\vyuPROriginCheckHistoryDeduction.sql"
 :r "..\dbo\Views\vyuPROriginCheckHistoryEarning.sql"
 :r "..\dbo\Views\vyuPROriginCheckHistoryTax.sql"
+:r "..\dbo\Views\vyuPROriginEmployee.sql"
 :r "..\dbo\Views\vyuPROriginEmployeeChangeHistory.sql"
 :r "..\dbo\Views\vyuPROriginEmployeeDeduction.sql"
 :r "..\dbo\Views\vyuPROriginEmployeeEarning.sql"

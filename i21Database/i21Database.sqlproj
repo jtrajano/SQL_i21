@@ -5315,6 +5315,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceStorageCostReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceAdditionalCostReport.sql" />
+    <Build Include="dbo\Views\vyuETGPSCoordinates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
