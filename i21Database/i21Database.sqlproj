@@ -5322,6 +5322,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateLotByOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTaskStatus.sql" />
+    <Build Include="dbo\Tables\tblETGPSCoordinates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
