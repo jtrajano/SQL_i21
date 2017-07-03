@@ -1285,6 +1285,7 @@ namespace iRely.Inventory.Model
         public decimal? dblStockUnitQty { get; set; }
         public decimal? dblMinOrder { get; set; }
         public decimal? dblReorderPoint { get; set; }
+        public decimal? dblNearingReorderBy { get; set; }
         public int? intAllowNegativeInventory { get; set; }
         public string strAllowNegativeInventory { get; set; }
         public int? intCostingMethod { get; set; }

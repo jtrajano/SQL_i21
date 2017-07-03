@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets6cfb6da5190c8d7b2b7ddadf77a3ff5ab9be99c5e4c04b47e0869daa72d796fe))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb742bd5685684373bfc35c79deea6d9f24fc726eed42ca49199f4a8e17921072))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets6cfb6da5190c8d7b2b7ddadf77a3ff5ab9be99c5e4c04b47e0869daa72d796fe : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsb742bd5685684373bfc35c79deea6d9f24fc726eed42ca49199f4a8e17921072 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "6cfb6da5190c8d7b2b7ddadf77a3ff5ab9be99c5e4c04b47e0869daa72d796fe"; }
+            get { return "b742bd5685684373bfc35c79deea6d9f24fc726eed42ca49199f4a8e17921072"; }
         }
 
         /// <summary>
@@ -16357,7 +16357,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICStockDetail
-        [CodeFirstDatabaseSchema.vyuICStockDetail](T1.vyuICStockDetail_intKey, T1.vyuICStockDetail_intItemId, T1.vyuICStockDetail_strItemNo, T1.vyuICStockDetail_strType, T1.vyuICStockDetail_strDescription, T1.vyuICStockDetail_strLotTracking, T1.vyuICStockDetail_strInventoryTracking, T1.vyuICStockDetail_strStatus, T1.vyuICStockDetail_intLocationId, T1.vyuICStockDetail_intItemLocationId, T1.vyuICStockDetail_intSubLocationId, T1.vyuICStockDetail_intCategoryId, T1.vyuICStockDetail_strCategoryCode, T1.vyuICStockDetail_intCommodityId, T1.vyuICStockDetail_strCommodityCode, T1.vyuICStockDetail_strStorageLocationName, T1.vyuICStockDetail_strSubLocationName, T1.vyuICStockDetail_intStorageLocationId, T1.vyuICStockDetail_strLocationName, T1.vyuICStockDetail_strLocationType, T1.vyuICStockDetail_intStockUOMId, T1.vyuICStockDetail_strStockUOM, T1.vyuICStockDetail_strStockUOMType, T1.vyuICStockDetail_dblStockUnitQty, T1.vyuICStockDetail_dblMinOrder, T1.vyuICStockDetail_dblReorderPoint, T1.vyuICStockDetail_intAllowNegativeInventory, T1.vyuICStockDetail_strAllowNegativeInventory, T1.vyuICStockDetail_intCostingMethod, T1.vyuICStockDetail_strCostingMethod, T1.vyuICStockDetail_dblAmountPercent, T1.vyuICStockDetail_dblSalePrice, T1.vyuICStockDetail_dblMSRPPrice, T1.vyuICStockDetail_strPricingMethod, T1.vyuICStockDetail_dblLastCost, T1.vyuICStockDetail_dblStandardCost, T1.vyuICStockDetail_dblAverageCost, T1.vyuICStockDetail_dblEndMonthCost, T1.vyuICStockDetail_dblOnOrder, T1.vyuICStockDetail_dblInTransitInbound, T1.vyuICStockDetail_dblUnitOnHand, T1.vyuICStockDetail_dblInTransitOutbound, T1.vyuICStockDetail_dblBackOrder, T1.vyuICStockDetail_dblOrderCommitted, T1.vyuICStockDetail_dblUnitStorage, T1.vyuICStockDetail_dblConsignedPurchase, T1.vyuICStockDetail_dblConsignedSale, T1.vyuICStockDetail_dblUnitReserved, T1.vyuICStockDetail_dblAvailable, T1.vyuICStockDetail_dblExtendedCost)
+        [CodeFirstDatabaseSchema.vyuICStockDetail](T1.vyuICStockDetail_intKey, T1.vyuICStockDetail_intItemId, T1.vyuICStockDetail_strItemNo, T1.vyuICStockDetail_strType, T1.vyuICStockDetail_strDescription, T1.vyuICStockDetail_strLotTracking, T1.vyuICStockDetail_strInventoryTracking, T1.vyuICStockDetail_strStatus, T1.vyuICStockDetail_intLocationId, T1.vyuICStockDetail_intItemLocationId, T1.vyuICStockDetail_intSubLocationId, T1.vyuICStockDetail_intCategoryId, T1.vyuICStockDetail_strCategoryCode, T1.vyuICStockDetail_intCommodityId, T1.vyuICStockDetail_strCommodityCode, T1.vyuICStockDetail_strStorageLocationName, T1.vyuICStockDetail_strSubLocationName, T1.vyuICStockDetail_intStorageLocationId, T1.vyuICStockDetail_strLocationName, T1.vyuICStockDetail_strLocationType, T1.vyuICStockDetail_intStockUOMId, T1.vyuICStockDetail_strStockUOM, T1.vyuICStockDetail_strStockUOMType, T1.vyuICStockDetail_dblStockUnitQty, T1.vyuICStockDetail_dblMinOrder, T1.vyuICStockDetail_dblReorderPoint, T1.vyuICStockDetail_dblNearingReorderBy, T1.vyuICStockDetail_intAllowNegativeInventory, T1.vyuICStockDetail_strAllowNegativeInventory, T1.vyuICStockDetail_intCostingMethod, T1.vyuICStockDetail_strCostingMethod, T1.vyuICStockDetail_dblAmountPercent, T1.vyuICStockDetail_dblSalePrice, T1.vyuICStockDetail_dblMSRPPrice, T1.vyuICStockDetail_strPricingMethod, T1.vyuICStockDetail_dblLastCost, T1.vyuICStockDetail_dblStandardCost, T1.vyuICStockDetail_dblAverageCost, T1.vyuICStockDetail_dblEndMonthCost, T1.vyuICStockDetail_dblOnOrder, T1.vyuICStockDetail_dblInTransitInbound, T1.vyuICStockDetail_dblUnitOnHand, T1.vyuICStockDetail_dblInTransitOutbound, T1.vyuICStockDetail_dblBackOrder, T1.vyuICStockDetail_dblOrderCommitted, T1.vyuICStockDetail_dblUnitStorage, T1.vyuICStockDetail_dblConsignedPurchase, T1.vyuICStockDetail_dblConsignedSale, T1.vyuICStockDetail_dblUnitReserved, T1.vyuICStockDetail_dblAvailable, T1.vyuICStockDetail_dblExtendedCost)
     FROM (
         SELECT 
             T.intKey AS vyuICStockDetail_intKey, 
@@ -16386,6 +16386,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblStockUnitQty AS vyuICStockDetail_dblStockUnitQty, 
             T.dblMinOrder AS vyuICStockDetail_dblMinOrder, 
             T.dblReorderPoint AS vyuICStockDetail_dblReorderPoint, 
+            T.dblNearingReorderBy AS vyuICStockDetail_dblNearingReorderBy, 
             T.intAllowNegativeInventory AS vyuICStockDetail_intAllowNegativeInventory, 
             T.strAllowNegativeInventory AS vyuICStockDetail_strAllowNegativeInventory, 
             T.intCostingMethod AS vyuICStockDetail_intCostingMethod, 
@@ -16423,7 +16424,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICStockDetails
-        [iRely.Inventory.Model.vyuICStockDetail](T1.vyuICStockDetail_intKey, T1.vyuICStockDetail_intItemId, T1.vyuICStockDetail_strItemNo, T1.vyuICStockDetail_strType, T1.vyuICStockDetail_strDescription, T1.vyuICStockDetail_strLotTracking, T1.vyuICStockDetail_strInventoryTracking, T1.vyuICStockDetail_strStatus, T1.vyuICStockDetail_intLocationId, T1.vyuICStockDetail_intItemLocationId, T1.vyuICStockDetail_intSubLocationId, T1.vyuICStockDetail_intCategoryId, T1.vyuICStockDetail_strCategoryCode, T1.vyuICStockDetail_intCommodityId, T1.vyuICStockDetail_strCommodityCode, T1.vyuICStockDetail_strStorageLocationName, T1.vyuICStockDetail_strSubLocationName, T1.vyuICStockDetail_intStorageLocationId, T1.vyuICStockDetail_strLocationName, T1.vyuICStockDetail_strLocationType, T1.vyuICStockDetail_intStockUOMId, T1.vyuICStockDetail_strStockUOM, T1.vyuICStockDetail_strStockUOMType, T1.vyuICStockDetail_dblStockUnitQty, T1.vyuICStockDetail_dblMinOrder, T1.vyuICStockDetail_dblReorderPoint, T1.vyuICStockDetail_intAllowNegativeInventory, T1.vyuICStockDetail_strAllowNegativeInventory, T1.vyuICStockDetail_intCostingMethod, T1.vyuICStockDetail_strCostingMethod, T1.vyuICStockDetail_dblAmountPercent, T1.vyuICStockDetail_dblSalePrice, T1.vyuICStockDetail_dblMSRPPrice, T1.vyuICStockDetail_strPricingMethod, T1.vyuICStockDetail_dblLastCost, T1.vyuICStockDetail_dblStandardCost, T1.vyuICStockDetail_dblAverageCost, T1.vyuICStockDetail_dblEndMonthCost, T1.vyuICStockDetail_dblOnOrder, T1.vyuICStockDetail_dblInTransitInbound, T1.vyuICStockDetail_dblUnitOnHand, T1.vyuICStockDetail_dblInTransitOutbound, T1.vyuICStockDetail_dblBackOrder, T1.vyuICStockDetail_dblOrderCommitted, T1.vyuICStockDetail_dblUnitStorage, T1.vyuICStockDetail_dblConsignedPurchase, T1.vyuICStockDetail_dblConsignedSale, T1.vyuICStockDetail_dblUnitReserved, T1.vyuICStockDetail_dblAvailable, T1.vyuICStockDetail_dblExtendedCost)
+        [iRely.Inventory.Model.vyuICStockDetail](T1.vyuICStockDetail_intKey, T1.vyuICStockDetail_intItemId, T1.vyuICStockDetail_strItemNo, T1.vyuICStockDetail_strType, T1.vyuICStockDetail_strDescription, T1.vyuICStockDetail_strLotTracking, T1.vyuICStockDetail_strInventoryTracking, T1.vyuICStockDetail_strStatus, T1.vyuICStockDetail_intLocationId, T1.vyuICStockDetail_intItemLocationId, T1.vyuICStockDetail_intSubLocationId, T1.vyuICStockDetail_intCategoryId, T1.vyuICStockDetail_strCategoryCode, T1.vyuICStockDetail_intCommodityId, T1.vyuICStockDetail_strCommodityCode, T1.vyuICStockDetail_strStorageLocationName, T1.vyuICStockDetail_strSubLocationName, T1.vyuICStockDetail_intStorageLocationId, T1.vyuICStockDetail_strLocationName, T1.vyuICStockDetail_strLocationType, T1.vyuICStockDetail_intStockUOMId, T1.vyuICStockDetail_strStockUOM, T1.vyuICStockDetail_strStockUOMType, T1.vyuICStockDetail_dblStockUnitQty, T1.vyuICStockDetail_dblMinOrder, T1.vyuICStockDetail_dblReorderPoint, T1.vyuICStockDetail_dblNearingReorderBy, T1.vyuICStockDetail_intAllowNegativeInventory, T1.vyuICStockDetail_strAllowNegativeInventory, T1.vyuICStockDetail_intCostingMethod, T1.vyuICStockDetail_strCostingMethod, T1.vyuICStockDetail_dblAmountPercent, T1.vyuICStockDetail_dblSalePrice, T1.vyuICStockDetail_dblMSRPPrice, T1.vyuICStockDetail_strPricingMethod, T1.vyuICStockDetail_dblLastCost, T1.vyuICStockDetail_dblStandardCost, T1.vyuICStockDetail_dblAverageCost, T1.vyuICStockDetail_dblEndMonthCost, T1.vyuICStockDetail_dblOnOrder, T1.vyuICStockDetail_dblInTransitInbound, T1.vyuICStockDetail_dblUnitOnHand, T1.vyuICStockDetail_dblInTransitOutbound, T1.vyuICStockDetail_dblBackOrder, T1.vyuICStockDetail_dblOrderCommitted, T1.vyuICStockDetail_dblUnitStorage, T1.vyuICStockDetail_dblConsignedPurchase, T1.vyuICStockDetail_dblConsignedSale, T1.vyuICStockDetail_dblUnitReserved, T1.vyuICStockDetail_dblAvailable, T1.vyuICStockDetail_dblExtendedCost)
     FROM (
         SELECT 
             T.intKey AS vyuICStockDetail_intKey, 
@@ -16452,6 +16453,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblStockUnitQty AS vyuICStockDetail_dblStockUnitQty, 
             T.dblMinOrder AS vyuICStockDetail_dblMinOrder, 
             T.dblReorderPoint AS vyuICStockDetail_dblReorderPoint, 
+            T.dblNearingReorderBy AS vyuICStockDetail_dblNearingReorderBy, 
             T.intAllowNegativeInventory AS vyuICStockDetail_intAllowNegativeInventory, 
             T.strAllowNegativeInventory AS vyuICStockDetail_strAllowNegativeInventory, 
             T.intCostingMethod AS vyuICStockDetail_intCostingMethod, 

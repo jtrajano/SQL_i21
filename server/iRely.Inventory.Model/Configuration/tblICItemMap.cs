@@ -986,6 +986,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblStockUnitQty).HasColumnName("dblStockUnitQty");
             this.Property(t => t.dblMinOrder).HasColumnName("dblMinOrder");
             this.Property(t => t.dblReorderPoint).HasColumnName("dblReorderPoint");
+            this.Property(t => t.dblNearingReorderBy).HasColumnName("dblNearingReorderBy");
             this.Property(t => t.intAllowNegativeInventory).HasColumnName("intAllowNegativeInventory");
             this.Property(t => t.strAllowNegativeInventory).HasColumnName("strAllowNegativeInventory");
             this.Property(t => t.intCostingMethod).HasColumnName("intCostingMethod");
