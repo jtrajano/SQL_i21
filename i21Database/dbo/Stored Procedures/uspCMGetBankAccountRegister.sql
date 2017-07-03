@@ -89,8 +89,8 @@ intTransactionId
 	END AS strPayee
 ,CAST(dtmDate AS DATE) AS dtmDate
 ,dtmDateReconciled
-,CASE WHEN intBankTransactionTypeId IN (2,3,9,12,13,14,15,16,20,21,22,23)  THEN dblAmount 
-	WHEN intBankTransactionTypeId = 5 AND dblAmount < 0 THEN dblAmount * -1
+,CASE WHEN intBankTransactionTypeId IN (3,9,12,13,14,15,16,20,21,22,23)  THEN dblAmount 
+	WHEN intBankTransactionTypeId IN (2,5) AND dblAmount < 0 THEN dblAmount * -1
 	ELSE 0 
 	END AS dblPayment
 ,CASE WHEN intBankTransactionTypeId IN (1,10,11,18,19,103,116,121,122,123)  THEN dblAmount 
