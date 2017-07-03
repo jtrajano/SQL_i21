@@ -16,8 +16,8 @@ SELECT
 , dblYDTServiceCharge       = ISNULL(YTDSERVICECHARGE.dblYDTServiceCharge, 0)
 , dblHighestAR				= ISNULL(HIGHESTAR.dblInvoiceTotal, 0)
 , dtmHighestARDate			= HIGHESTAR.dtmDate
-, dblHighestDueAR			= 0.000000
-, dtmHighestDueARDate		= NULL
+, dblHighestDueAR			= ISNULL(HIGHESTDUEAR.dblInvoiceTotal, 0)
+, dtmHighestDueARDate		= HIGHESTDUEAR.dtmDate
 , dblLastYearSales			= ISNULL(LASTYEARSALES.dblLastYearSales, 0)
 , dblLastPayment			= ISNULL(PAYMENT.dblAmountPaid, 0)
 , dtmLastPaymentDate		= PAYMENT.dtmDatePaid
@@ -144,9 +144,30 @@ OUTER APPLY (
 	FROM dbo.tblARInvoice
 	WHERE ysnPosted = 1
 	  AND strTransactionType IN ('Invoice', 'Debit Memo')
+	  AND strType <> 'CF Tran'
 	  AND intEntityCustomerId = CAR.intEntityCustomerId
 	ORDER BY dblInvoiceTotal DESC	  
 ) HIGHESTAR
+OUTER APPLY (
+	SELECT TOP 1 I.dblInvoiceTotal
+			   , I.dtmDate
+	FROM dbo.tblARInvoice I WITH (NOLOCK)
+		LEFT JOIN (SELECT intInvoiceId
+						 , dtmDatePaid = MAX(P.dtmDatePaid)
+					FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+						INNER JOIN (SELECT intPaymentId
+										 , dtmDatePaid
+									FROM dbo.tblARPayment P WITH (NOLOCK)
+						) P ON P.intPaymentId = PD.intPaymentId 
+					GROUP BY intInvoiceId
+		) PD ON PD.intInvoiceId = I.intInvoiceId
+	WHERE ysnPosted = 1
+	AND strTransactionType IN ('Invoice', 'Debit Memo')
+	AND strType <> 'CF Tran'
+	AND intEntityCustomerId = CAR.intEntityCustomerId
+	AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) > 0
+	ORDER BY DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) DESC
+) HIGHESTDUEAR
 OUTER APPLY (
 	SELECT dblYDTServiceCharge = SUM(ISNULL(dblInvoiceTotal, 0))
 	FROM dbo.tblARInvoice WITH (NOLOCK)	
