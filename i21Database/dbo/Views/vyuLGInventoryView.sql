@@ -35,8 +35,11 @@ SELECT
 	,Shipment.dblCashPrice
 	,Shipment.dblBasis
 	,Shipment.dblTotalCost
-
+	,L.strExternalShipmentNumber
+	,CD.strERPPONumber
 FROM vyuLGInboundShipmentView Shipment
+LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
 WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 AND Shipment.ysnInventorized = 1
 
 UNION ALL
@@ -71,7 +74,10 @@ SELECT
 	,Spot.dblCashPrice
 	,Spot.dblBasis
 	,Spot.dblTotalCost
-
+	,L.strExternalShipmentNumber
+	,CD.strERPPONumber
 FROM vyuLGPickOpenInventoryLots Spot
+LEFT JOIN tblLGLoad L ON Spot.strLoadNumber = L.strLoadNumber
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
 WHERE Spot.dblQty > 0.0
 ) t1
