@@ -33,7 +33,8 @@ BEGIN TRY
 			@intSubBookId				INT,
 			@ysnHedge					BIT,
 			@strAction					NVARCHAR(50) = '',
-			@intOutputId				INT
+			@intOutputId				INT,
+			@dtmFixationDate			DATETIME
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
@@ -56,6 +57,7 @@ BEGIN TRY
 					@intHedgeFutureMonthId	=	FD.intHedgeFutureMonthId,
 					@dblHedgePrice			=	FD.dblHedgePrice,
 					@ysnHedge				=	FD.ysnHedge,
+					@dtmFixationDate		=	FD.dtmFixationDate,
 
 					@intContractHeaderId	=	PF.intContractHeaderId,
 					@intContractDetailId	=	PF.intContractDetailId,
@@ -100,7 +102,7 @@ BEGIN TRY
 				SET @strXML = @strXML +  '<intFutureMonthId>' + LTRIM(@intHedgeFutureMonthId) + '</intFutureMonthId>'
 				SET @strXML = @strXML +  '<dblPrice>' + LTRIM(@dblHedgePrice) + '</dblPrice>'
 				SET @strXML = @strXML +  '<strStatus>' + 'Filled' + '</strStatus>'
-				SET @strXML = @strXML +  '<dtmFilledDate>' + LTRIM(GETDATE()) + '</dtmFilledDate>'
+				SET @strXML = @strXML +  '<dtmFilledDate>' + LTRIM(@dtmFixationDate) + '</dtmFilledDate>'
 				if ISNULL(@intBookId,0) > 0
 					SET @strXML = @strXML +  '<intBookId>' + LTRIM(@intBookId) + '</intBookId>'
 				if ISNULL(@intSubBookId,0) > 0
