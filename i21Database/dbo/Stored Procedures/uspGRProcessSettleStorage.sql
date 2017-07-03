@@ -902,13 +902,18 @@ BEGIN TRY
 		   ,@intReceiptId AS INT
 		   ,@intInventoryReceiptItemId AS INT
 		   ,@intScaleTicketId AS INT
+		   ,@intScaleFreightItemId AS INT
+		   ,@intScaleContractId INT
+		   ,@itemUOMIdFrom      INT
+		   ,@itemUOMIdTo        INT
 		   ,@dblFreightRate NUMERIC(38, 20)
 		   ,@dblFreightAdjustment DECIMAL(7, 2)
 		   ,@dblGrossUnits NUMERIC(38, 20)
 		   ,@dblPerUnitFreight NUMERIC(38, 20)
+		   ,@dblContractCostConvertedUOM NUMERIC(38, 20)
 		   ,@intCreatedBillId AS INT
-		   ,@success AS BIT 
-		   
+		   ,@success AS BIT
+		   		   
 	SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
 	FROM @SettleVoucherCreate
 	WHERE IsProcessed = 0 AND strOrderType IS NOT NULL
@@ -1082,10 +1087,117 @@ BEGIN TRY
 			,a.[intContractDetailId]
 			,b.intItemUOMId
 		FROM @SettleVoucherCreate a
-		JOIN tblICItemUOM b ON b.intItemId=a.intItemId AND b.intUnitMeasureId=@intUnitMeasureId
+		JOIN tblICItemUOM b ON b.intItemId=a.intItemId AND b.intUnitMeasureId=@intUnitMeasureId 
 		AND a.intCustomerStorageId = @intCustomerStorageId 
 		AND   (a.strOrderType IS NULL OR a.strOrderType = @strOrderType)
 		AND a.IsProcessed = 0 ORDER BY intItemSort
+
+		SELECT TOP 1 
+		 @intReceiptId = intInventoryReceiptId
+		,@intScaleTicketId = intTicketId
+		FROM tblGRStorageHistory
+		WHERE strType = 'FROM Scale' AND intCustomerStorageId = @intCustomerStorageId
+
+		SELECT @intScaleFreightItemId = ISNULL(a.intFreightItemId,0)
+		FROM tblSCScaleSetup a
+		JOIN tblSCTicket b ON b.intScaleSetupId = a.intScaleSetupId
+		WHERE b.intTicketId = @intScaleTicketId
+
+		IF @intScaleFreightItemId > 0
+		BEGIN
+			IF EXISTS (
+						SELECT 1
+						FROM tblICInventoryReceiptCharge
+						WHERE intInventoryReceiptId = @intReceiptId
+							AND intChargeId = @intScaleFreightItemId
+							AND (
+									(
+										intEntityVendorId = @EntityId
+										AND ISNULL(ysnAccrue, 0) = 1
+										AND ISNULL(ysnPrice, 0) = 0
+									)
+								OR (
+										intEntityVendorId = @EntityId
+										AND ISNULL(ysnAccrue, 0) = 0
+										AND ISNULL(ysnPrice, 0) = 1
+									)
+								OR (
+										intEntityVendorId <> @EntityId
+										AND ISNULL(ysnAccrue, 0) = 1
+										AND ISNULL(ysnPrice, 0) = 1
+									)
+								)
+					)
+			BEGIN
+				SELECT 
+					 @dblFreightRate = dblFreightRate
+					,@dblFreightAdjustment = dblFreightAdjustment
+					,@dblGrossUnits = dblGrossUnits
+					,@intScaleContractId = ISNULL(intContractId,0)
+					,@itemUOMIdFrom=intItemUOMIdFrom
+				FROM tblSCTicket
+				WHERE intTicketId = @intScaleTicketId
+				
+				SET @dblContractCostConvertedUOM = 1
+
+				IF @intScaleContractId >0
+				BEGIN
+					IF EXISTS(SELECT 1 FROM vyuCTContractCostView WHERE intContractDetailId = @intScaleContractId AND intItemId=@intScaleFreightItemId AND ysnAccrue=1)
+					BEGIN
+						SELECT @itemUOMIdTo = intItemUOMId FROM vyuCTContractCostView WHERE intContractDetailId = @intScaleContractId AND intItemId=@intScaleFreightItemId AND ysnAccrue=1
+						SELECT @dblContractCostConvertedUOM= dbo.fnCalculateQtyBetweenUOM (@itemUOMIdFrom , dbo.fnGetMatchingItemUOMId(@ItemId, @itemUOMIdTo), 1)
+					END 
+				END
+				
+				SELECT @dblPerUnitFreight = (@dblFreightRate * @dblGrossUnits*@dblContractCostConvertedUOM + @dblFreightAdjustment) / dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CS.intUnitMeasureId, CU.intUnitMeasureId, CS.dblOriginalBalance)
+				FROM tblGRCustomerStorage CS
+				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
+				WHERE intCustomerStorageId = @intCustomerStorageId
+				
+				
+
+				INSERT INTO @voucherDetailStorage 
+				(
+					[intCustomerStorageId]
+					,[intItemId]
+					,[intAccountId]
+					,[dblQtyReceived]
+					,[strMiscDescription]
+					,[dblCost]
+					,[intContractHeaderId]
+					,[intContractDetailId]
+					,[intUnitOfMeasureId]
+				)
+				SELECT @intCustomerStorageId
+					,a.[intChargeId] AS intItemId
+					,NULL
+					,@dblUnits AS [dblUnits]
+					,b.[strItemNo]
+					,CASE 
+							WHEN a.strCostMethod = 'Amount'
+								THEN 
+										CASE 
+											WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 0 THEN ROUND(@dblFreightRate + @dblFreightAdjustment, 2)
+											WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 0 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblFreightRate + @dblFreightAdjustment, 2)
+											WHEN a.intEntityVendorId <> @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblFreightRate + @dblFreightAdjustment, 2)
+										 END
+							WHEN a.strCostMethod = 'Per Unit'
+								THEN 
+										CASE 
+											WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 0 THEN ROUND(@dblUnits * @dblPerUnitFreight, 2)
+											WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 0 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblUnits * @dblPerUnitFreight, 2)
+											WHEN a.intEntityVendorId <> @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblUnits * @dblPerUnitFreight, 2)
+										END
+					 END
+					,NULL [intContractHeaderId]
+					,NULL [intContractDetailId]
+					,a.intCostUOMId
+				FROM tblICInventoryReceiptCharge a
+				JOIN tblICItem b ON b.intItemId = a.intChargeId
+				WHERE a.intInventoryReceiptId = @intReceiptId
+				AND   a.[intChargeId] = @intScaleFreightItemId
+			END
+		END
 
 		EXEC [dbo].[uspAPCreateBillData] 
 			 @userId = @UserKey
