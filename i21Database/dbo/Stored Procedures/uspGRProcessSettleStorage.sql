@@ -1082,7 +1082,8 @@ BEGIN TRY
 			,a.[intContractDetailId]
 			,b.intItemUOMId
 		FROM @SettleVoucherCreate a
-		LEFT JOIN tblICItemUOM b ON b.intItemId=a.intItemId AND b.intUnitMeasureId=@intUnitMeasureId 
+		JOIN tblICItemUOM b ON b.intItemId=a.intItemId AND b.intUnitMeasureId=@intUnitMeasureId
+		AND a.intCustomerStorageId = @intCustomerStorageId 
 		AND   (a.strOrderType IS NULL OR a.strOrderType = @strOrderType)
 		AND a.IsProcessed = 0 ORDER BY intItemSort
 
