@@ -234,7 +234,7 @@ Begin
 		strSubLocation,strStorageLocation,strContainerNo,dblQuantity,strUOM,strPONo,strPOLineItemNo,strShipItemRefNo,strRowState,strCommodityCode,
 		dblGrossWeight,dblNetWeight,strWeightUOM)
 	Select sd.intLoadStgId,sd.intLGLoadDetailStgId,sd.intLoadId,sd.intLoadDetailId,
-		(10 * ROW_NUMBER() OVER(ORDER BY intLGLoadDetailStgId ASC)) strDeliveryItemNo,
+		CASE WHEN isnull(sd.strExternalShipmentItemNumber,'')='' THEN (10 * ROW_NUMBER() OVER(ORDER BY intLGLoadDetailStgId ASC)) ELSE sd.strExternalShipmentItemNumber END strDeliveryItemNo,
 		'',sd.strItemNo,sd.strSubLocationName,sd.strStorageLocationName,
 		CASE WHEN @strTransactionType='Shipping Instructions' THEN '' 
 		Else sd.strExternalPOBatchNumber End,
