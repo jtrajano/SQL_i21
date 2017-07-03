@@ -135,7 +135,7 @@ BEGIN
 		(SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END AS strTicketNumber,
 	INVRCPT.strReceiptNumber,
-	INVRCPTITEM.intInventoryReceiptItemId,
+	ISNULL(INVRCPTITEM.intInventoryReceiptItemId,0) as intInventoryReceiptItemId,
 	--LOCATION.strLocationName,
 	Bill.strBillId as RecordId,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
@@ -203,10 +203,10 @@ BEGIN
 	BillDtl.dblQtyOrdered as Net,
 	UOM.strUnitMeasure,
 	BillDtl.dblTotal,
-	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId),0) as dblTax,
+	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) as dblTax,
 	CNTRCT.strContractNumber,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
@@ -593,7 +593,7 @@ BEGIN
 		(SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END AS strTicketNumber,
 	INVRCPT.strReceiptNumber,
-	INVRCPTITEM.intInventoryReceiptItemId,
+	ISNULL(INVRCPTITEM.intInventoryReceiptItemId,0) as intInventoryReceiptItemId,
 	--LOCATION.strLocationName,
 	Bill.strBillId as RecordId,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
@@ -661,10 +661,10 @@ BEGIN
 	BillDtl.dblQtyOrdered as Net,
 	UOM.strUnitMeasure,
 	BillDtl.dblTotal,
-	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId),0) as dblTax,
+	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) as dblTax,
 	CNTRCT.strContractNumber,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
