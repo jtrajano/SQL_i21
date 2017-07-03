@@ -5301,6 +5301,11 @@
     <Build Include="dbo\Tables\tblCTEventRecipientFilter.sql" />
     <Build Include="dbo\Views\vyuCTEventRecipientFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAlertNotificationCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidatePickOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateDockdoorLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateLotByOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateTaskStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
