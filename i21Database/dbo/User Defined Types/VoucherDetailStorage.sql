@@ -8,7 +8,11 @@
     [dblCost]					DECIMAL(18, 6)	NOT NULL,
 	[intContractHeaderId]		INT NULL,
 	[intContractDetailId]		INT NULL,
-	[intUnitOfMeasureId] [int] NULL,
-	[intCostUOMId] [int] NULL,
-	[intWeightUOMId] [int] NULL
+	[intUnitOfMeasureId] 		INT NULL,
+	[intCostUOMId] 				INT NULL,
+	[intWeightUOMId] 			INT NULL,
+	[dblWeightUnitQty] 			DECIMAL(18, 6)	NOT NULL,
+    [dblCostUnitQty] 			DECIMAL(18, 6)	NOT NULL,
+    [dblUnitQty] 				DECIMAL(18, 6)	NOT NULL,
+    [dblNetWeight] 				DECIMAL(18, 6)	NOT NULL
 )
