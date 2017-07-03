@@ -70,9 +70,9 @@ BEGIN
 		,dblVacHrsPd			= CAST(premp_vac_hrs_pd AS NUMERIC(18, 6))
 		,strSicAwardAnnivorYtd	= CASE WHEN(premp_sic_awards_anniv_ytd_ay = ''A'') THEN ''Anniversary Date'' ELSE ''Start of Year'' END
 		,ysnSicAwardCalculated	= CAST(CASE WHEN (premp_sic_awards_calcd_yn = ''Y'') THEN 1 ELSE 0 END AS BIT)
-		,strJobTitle			= premp_job_title
-		,strEEOC				= premp_eeo_code
-		,strEthnicity			= premp_race
+		,strJobTitle			= CAST(premp_job_title AS NVARCHAR(200))
+		,strEEOC				= CAST(premp_eeo_code AS NVARCHAR(200))
+		,strEthnicity			= CAST(premp_race AS NVARCHAR(200))
 		,strGender				= CASE WHEN(premp_sex = ''M'') THEN ''Male'' ELSE ''Female'' END
 		,strMaritalStatus		= CASE WHEN(premp_marital_status = ''M'') THEN ''Married'' ELSE ''Single'' END
 		,dtmBirthDate			= CAST(CASE WHEN (ISNULL(premp_birth_dt, 0) = 0) THEN NULL
@@ -87,7 +87,7 @@ BEGIN
 											CAST((premp_term_dt % 100) AS VARCHAR)
 										END 
 								  AS DATETIME)
-		,strTermCode			= premp_term_code
+		,strTermCode			= CAST(premp_term_code AS NVARCHAR(200))
 		,dtmOriginalHireDate	= CAST(CASE WHEN (ISNULL(premp_orig_hire_dt, 0) = 0) THEN NULL
 										ELSE CAST((premp_orig_hire_dt / 10000) AS VARCHAR) + ''-'' + 
 											CAST((premp_orig_hire_dt % 10000) / 100 AS VARCHAR) + ''-'' + 
