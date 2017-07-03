@@ -925,6 +925,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strStorageTypeCode",
                                                         "fieldLabel": "Scale Auto Dist Default",
+                                                        "hidden": true,
                                                         "itemId": "cboScaleAutoDistDefault",
                                                         "labelWidth": 140,
                                                         "layout|flex": null,
