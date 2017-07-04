@@ -8,7 +8,8 @@ RETURNS @returntable TABLE
 	strError NVARCHAR(200),
 	strTransactionType NVARCHAR(50),
 	strTransactionId NVARCHAR(50),
-	intTransactionId INT
+	intTransactionId INT,
+	intErrorKey INT
 )
 AS
 BEGIN
@@ -23,12 +24,13 @@ BEGIN
 	BEGIN
 
 		--BILL WAS POSTED FROM ORIGIN
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'No recap available. Transaction was posted from Origin System.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			22
 		FROM tblAPBill A 
 		OUTER APPLY (
 			SELECT intGLDetailId FROM tblGLDetail B

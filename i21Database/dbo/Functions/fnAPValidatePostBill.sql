@@ -8,7 +8,8 @@ RETURNS @returntable TABLE
 	strError NVARCHAR(200),
 	strTransactionType NVARCHAR(50),
 	strTransactionId NVARCHAR(50),
-	intTransactionId INT
+	intTransactionId INT,
+	intErrorKey INT
 )
 AS
 BEGIN
@@ -21,43 +22,65 @@ BEGIN
 
 	IF @post = 1
 	BEGIN
+		--Validate updating of payment, amountdue after apply (offset) feature.
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			A.strBillId + ' invalid amount applied.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			1
+		FROM tblAPBill A
+		WHERE 
+		EXISTS(SELECT 1 FROM tblAPAppliedPrepaidAndDebit B WHERE B.intBillId IN (SELECT intBillId FROM @tmpBills) 
+					AND B.intTransactionId = A.intBillId AND B.ysnApplied = 1) --Prepay and Debit Memo transactions
+		AND (
+			A.dblPayment > A.dblTotal
+			OR A.dblAmountDue < 0
+			OR A.dblAmountDue > A.dblTotal
+			OR A.dblPayment < 0
+		)
+
 		--You cannot post foreign transaction that has no rate. 
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			A.strBillId + ' '  + 'is using Foreign currency. Please check transaction if has a forex rate.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			2
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND A.intCurrencyId ! = (SELECT TOP 1 intDefaultCurrencyId  FROM dbo.tblSMCompanyPreference) AND dblRate = 0
 
 		--You cannot post recurring transaction.
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'You cannot post recurring transaction',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			3
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND A.ysnRecurring = 1
 
 		--Missing vendor order number
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'Unable to post. Vendor order number is missing.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			4
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND A.intTransactionType = 1
 		AND ISNULL(A.strVendorOrderNumber,'') = ''
 
 		----Fiscal Year
-		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		--SELECT 
 		--	'Unable to find an open fiscal year period to match the transaction date.',
 		--	'Bill',
@@ -68,79 +91,86 @@ BEGIN
 		--	0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
 		--zero amount
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'You cannot post a bill with no details.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			5
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
 		AND NOT EXISTS(SELECT 1 FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId)
 
 		--No Terms specifiedvouch
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'No terms has been specified.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			6
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND 
 			0 = A.intTermsId
 
 		--NOT BALANCE
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'The debit and credit amounts are not balanced.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			7
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
 			(A.dblTotal) <> (SELECT SUM(dblTotal) + SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
 
 		--ALREADY POSTED
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'The transaction is already posted.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			8
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
 			A.ysnPosted = 1
 
 		--Header Account ID
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'The AP account is not specified.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			9
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
 			A.intAccountId IS NULL AND A.intAccountId = 0
 
 		--For Approved
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'You cannot post for approved transaction.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			10
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) 
 		AND EXISTS (
 			SELECT 1 FROM vyuAPForApprovalTransaction B WHERE A.intBillId = B.intTransactionId AND B.strScreenName = 'Voucher'
 		)
 
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'The account id on one of the details is not specified.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			11
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
 			1 = (SELECT 1 FROM tblAPBillDetail B 
@@ -148,12 +178,13 @@ BEGIN
 							AND (B.intAccountId IS NULL AND B.intAccountId = 0))
 
 		--VALIDATION FOR RECEIPT
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'The item "' + C.strItemNo + '" on this transaction was already vouchered.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			12
 		FROM tblAPBill A 
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			INNER JOIN
@@ -171,12 +202,13 @@ BEGIN
 			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 			AND A.intTransactionType = 1
 
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			13
 		FROM tblAPBill A 
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
@@ -185,12 +217,13 @@ BEGIN
 		AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)) > C.dblOpenReceive
 
 		--VALIDATION FOR MISCELLANEOUS ITEM
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'The item "' + D.strItemNo + '" on this transaction was already vouchered.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			14
 		FROM tblAPBill A 
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			INNER JOIN tblPOPurchaseDetail C ON B.intPurchaseDetailId = C.intPurchaseDetailId
@@ -200,12 +233,13 @@ BEGIN
 		AND A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 
 		--DO NOT ALLOW TO POST IF BILL ITEMS HAVE ASSOCIATED ITEM RECEIPT AND AND ITEM RECEIPT IS NOT POSTED
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'The associated item receipt ' + C.strReceiptNumber + ' was unposted.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			15
 		FROM tblAPBill A 
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			INNER JOIN
@@ -223,12 +257,13 @@ BEGIN
 			AND A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 
 		--VALIDATE EXPENSE ACCOUNT USED
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'Account used for item ''' + ISNULL(ISNULL(C.strItemNo, B.strMiscDescription),'') + ''' is invalid.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			16
 		FROM tblAPBill A 
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -238,9 +273,55 @@ BEGIN
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND GLD.intAccountCategoryId IN (1, 2, 5)
 
+		--VALIDATE EXPENSE ACCOUNT USED IF ACTIVE DETAIL
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Expense Account used to this Voucher is Inactive.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			17
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN vyuGLAccountDetail GLD ON B.intAccountId = GLD.intAccountId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND GLD.ysnActive = 0
+
+		--VALIDATE EXPENSE ACCOUNT USED IF ACTIVE HEADER
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Account used to this Voucher is Inactive.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			18
+		FROM tblAPBill A 
+			INNER JOIN vyuGLAccountDetail GLD ON A.intAccountId = GLD.intAccountId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND GLD.ysnActive = 0
+
+		--DO NOT POST NEGATIVE VOUCHER
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Posting of negative voucher is not allowed.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			19
+		FROM tblAPBill A 
+		CROSS APPLY (
+			SELECT
+				SUM(B.dblTotal) 
+			  + SUM(B.dblTax) AS dblTotal
+			FROM tblAPBillDetail B 
+			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+			WHERE B.intBillId = A.intBillId
+		) details
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND details.dblTotal < 0
+			
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
 		--COMPARE THE CASH PRICE
-		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		--SELECT
 		--	'The cost of item ' + D.strItemNo + ' did not match with the contract price.'
 		--	,'Bill'
@@ -261,12 +342,13 @@ BEGIN
 	BEGIN
 
 		--BILL WAS POSTED FROM ORIGIN
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'Modification not allowed. Transaction is from Origin System.',
 			'Bill',
 			A.strBillId,
-			A.intBillId
+			A.intBillId,
+			20
 		FROM tblAPBill A 
 		OUTER APPLY (
 			SELECT intGLDetailId FROM tblGLDetail B
@@ -276,12 +358,13 @@ BEGIN
 		AND GLEntries.intGLDetailId IS NULL
 
 		--ALREADY HAVE PAYMENTS
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'You cannot unpost this voucher. ' + A.strPaymentRecordNum + ' payment was already made on this voucher. You must delete the payable first.',
 			'Bill',
 			C.strBillId,
-			C.intBillId
+			C.intBillId,
+			21
 		FROM tblAPPayment A
 			INNER JOIN tblAPPaymentDetail B 
 				ON A.intPaymentId = B.intPaymentId
@@ -295,7 +378,7 @@ BEGIN
 				ELSE 1 END
 
 		--NO FISCAL PERIOD
-		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		--SELECT 
 		--	'Unable to find an open fiscal year period to match the transaction date.',
 		--	'Bill',
