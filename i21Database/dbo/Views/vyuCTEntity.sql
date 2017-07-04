@@ -88,7 +88,7 @@ AS
 					FROM	tblSMCurrency 
 					WHERE	intCurrencyID = SC.intDefaultCurrencyId
 							AND Y.strType NOT IN ('Vendor', 'Customer')
-				) defaultCurerncy
-		WHERE	CY.intCurrencyID = COALESCE(vendorCurrency.intCurrencyID, customerCurrency.intCurrencyID, customerCurrency.intCurrencyID)
+				) defaultCurrency
+		WHERE	CY.intCurrencyID = COALESCE(vendorCurrency.intCurrencyID, customerCurrency.intCurrencyID, defaultCurrency.intCurrencyID)
 	) CY 	
 	LEFT JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId		
