@@ -10,7 +10,8 @@
 
 GO
 CREATE NONCLUSTERED INDEX [IX_intEntityId]
-    ON [dbo].[tblEMEntityType]([intEntityId] ASC);
+    ON [dbo].[tblEMEntityType]([intEntityId] ASC)
+	INCLUDE(intEntityTypeId, strType); 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_tblEMEntityType_intEntityId_strType]

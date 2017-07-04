@@ -5298,6 +5298,9 @@
     <Build Include="dbo\Tables\tblCTEventRecipientFilter.sql" />
     <Build Include="dbo\Views\vyuCTEventRecipientFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAlertNotificationCount.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerLookup.sql" />
+    <Build Include="dbo\Views\vyuCTCompactContractDetailView.sql" />
+    <Build Include="dbo\Views\vyuTRGetTransportLoadReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

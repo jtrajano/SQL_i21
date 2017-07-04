@@ -42,16 +42,27 @@ Type the overview for the table here.
 	)
 	GO
 
-		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemUOMId_intUnitMeasureId_intItemId]
-		ON [dbo].[tblICItemUOM]([intItemUOMId] ASC, [intUnitMeasureId] ASC, [intItemId] ASC);
-	GO
+	--	CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemUOMId_intUnitMeasureId_intItemId]
+	--	ON [dbo].[tblICItemUOM]([intItemUOMId] ASC, [intUnitMeasureId] ASC, [intItemId] ASC);
+	--GO
 		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemUOMId]
 		ON [dbo].[tblICItemUOM]([intItemUOMId] ASC)
-		INCLUDE(intUnitMeasureId, intItemId, ysnStockUnit); 
+		INCLUDE(intUnitMeasureId, intItemId, ysnStockUnit, dblUnitQty); 
 	GO
 		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intUnitMeasureId]
-		ON [dbo].[tblICItemUOM]([intUnitMeasureId] ASC);
+		ON [dbo].[tblICItemUOM]([intUnitMeasureId] ASC)
+		INCLUDE(intItemId, intItemUOMId, ysnStockUnit, dblUnitQty); 
 	GO
+		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemId]
+		ON [dbo].[tblICItemUOM]([intItemId] ASC)
+		INCLUDE(intUnitMeasureId, intItemUOMId, ysnStockUnit, dblUnitQty); 
+	GO
+
+		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemId_ysnStockUnit]
+		ON [dbo].[tblICItemUOM]([intItemId] ASC, [ysnStockUnit] ASC)
+		INCLUDE(intUnitMeasureId, intItemUOMId, dblUnitQty); 
+	GO
+
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

@@ -153,32 +153,32 @@ CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPODReasonCodeId_intReasonCodeId] 
 
 go
 
-CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_207_2053178660__K97_K1_K48_K3_K44_42_45_51_52_53_54_71_72_73_78] ON [dbo].[tblLGLoad]
-(
-	[intShipmentType] ASC,
-	[intLoadId] ASC,
-	[intShippingLineEntityId] ASC,
-	[strLoadNumber] ASC,
-	[strOriginPort] ASC
-)
-INCLUDE ( 	[strBLNumber],
-	[strDestinationPort],
-	[strMVessel],
-	[strMVoyageNumber],
-	[strFVessel],
-	[strFVoyageNumber],
-	[dtmETAPOL],
-	[dtmETSPOL],
-	[dtmETAPOD],
-	[dtmStuffingDate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
-go
+--CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_207_2053178660__K97_K1_K48_K3_K44_42_45_51_52_53_54_71_72_73_78] ON [dbo].[tblLGLoad]
+--(
+--	[intShipmentType] ASC,
+--	[intLoadId] ASC,
+--	[intShippingLineEntityId] ASC,
+--	[strLoadNumber] ASC,
+--	[strOriginPort] ASC
+--)
+--INCLUDE ( 	[strBLNumber],
+--	[strDestinationPort],
+--	[strMVessel],
+--	[strMVoyageNumber],
+--	[strFVessel],
+--	[strFVoyageNumber],
+--	[dtmETAPOL],
+--	[dtmETSPOL],
+--	[dtmETAPOD],
+--	[dtmStuffingDate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+--go
 
-CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_207_2053178660__K97_K1] ON [dbo].[tblLGLoad]
-(
-	[intShipmentType] ASC,
-	[intLoadId] ASC
-)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
-go
+--CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_207_2053178660__K97_K1] ON [dbo].[tblLGLoad]
+--(
+--	[intShipmentType] ASC,
+--	[intLoadId] ASC
+--)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+--go
 
 CREATE STATISTICS [_dta_stat_2053178660_3_44] ON [dbo].[tblLGLoad]([strLoadNumber], [strOriginPort])
 go
@@ -191,3 +191,25 @@ go
 
 CREATE STATISTICS [_dta_stat_2053178660_1_48_97_3_44] ON [dbo].[tblLGLoad]([intLoadId], [intShippingLineEntityId], [intShipmentType], [strLoadNumber], [strOriginPort])
 go
+
+CREATE NONCLUSTERED INDEX [IX_tblLGLoad_intLoadId] ON [dbo].[tblLGLoad]
+(
+	[intLoadId] ASC
+)
+INCLUDE ( 	
+	[intShipmentType]
+	,[intShippingLineEntityId]
+	,[strLoadNumber]
+	,[strOriginPort]
+	,[strBLNumber]
+	,[strDestinationPort]
+	,[strMVessel]
+	,[strMVoyageNumber]
+	,[strFVessel]
+	,[strFVoyageNumber]
+	,[dtmETAPOL]
+	,[dtmETSPOL]
+	,[dtmETAPOD]
+	,[dtmStuffingDate]
+) 
+GO

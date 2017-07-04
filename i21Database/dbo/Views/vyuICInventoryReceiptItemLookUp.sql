@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuICInventoryReceiptItemLookUp]
-	AS
+AS
 
 SELECT	ReceiptItem.intInventoryReceiptId
 		, ReceiptItem.intInventoryReceiptItemId
@@ -64,7 +64,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 					THEN LoadReceipt.strTransaction 
 
 				WHEN Receipt.intSourceType = 4 -- Settle Storage
-					THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 					
+					THEN ISNULL(GrainStorageView.strStorageTicketNumber, '') 					
 
 				ELSE CAST(NULL AS NVARCHAR(50)) 
 				END
@@ -241,63 +241,102 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 
 		-- Integrations with the other modules: 
 		-- 1. Purchase Order
-		LEFT JOIN vyuPODetails POView
-			ON POView.intPurchaseId = ReceiptItem.intOrderId 
-			AND intPurchaseDetailId = ReceiptItem.intLineNo
-			AND (
-				Receipt.strReceiptType = 'Purchase Order'
-				OR (
-					Receipt.strReceiptType = 'Inventory Return'
-					AND rtn.strReceiptType = 'Purchase Order'
-				)
-			)
+		OUTER APPLY (
+			SELECT	strPurchaseOrderNumber
+					,strUOM
+					,dblQtyOrdered
+					,dblQtyReceived
+					,dblItemUOMCF					
+			FROM	vyuPODetails POView
+			WHERE	POView.intPurchaseId = ReceiptItem.intOrderId 
+					AND intPurchaseDetailId = ReceiptItem.intLineNo
+					AND (
+						Receipt.strReceiptType = 'Purchase Order'
+						OR (
+							Receipt.strReceiptType = 'Inventory Return'
+							AND rtn.strReceiptType = 'Purchase Order'
+						)
+					)	
+		) POView
 
 		-- 2. Contracts
-		LEFT JOIN vyuCTContractDetailView ContractView
-			ON ContractView.intContractDetailId = ReceiptItem.intLineNo
-			AND (
-				Receipt.strReceiptType = 'Purchase Contract'
-				OR (
-					Receipt.strReceiptType = 'Inventory Return'
-					AND rtn.strReceiptType = 'Purchase Contract'
-				)
-			)
+		OUTER APPLY (
+			SELECT	strContractNumber
+					,dtmContractDate
+					,strItemUOM
+					,ysnLoad
+					,intNoOfLoad
+					,dblDetailQuantity
+					,intLoadReceived
+					,dblBalance
+					,dblAvailableQty
+					,strPricingType
+			FROM	vyuCTCompactContractDetailView ContractView
+			WHERE	ContractView.intContractDetailId = ReceiptItem.intLineNo
+					AND (
+						Receipt.strReceiptType = 'Purchase Contract'
+						OR (
+							Receipt.strReceiptType = 'Inventory Return'
+							AND rtn.strReceiptType = 'Purchase Contract'
+						)
+					)		
+		) ContractView
 
 		-- 3. Inventory Transfer
-		LEFT JOIN vyuICGetInventoryTransferDetail TransferView
-			ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
-			AND (
-				Receipt.strReceiptType = 'Transfer Order'
-				OR (
-					Receipt.strReceiptType = 'Inventory Return'
-					AND rtn.strReceiptType = 'Transfer Order'
-				)
-			)
+		OUTER APPLY (
+			SELECT	strTransferNo
+					,strUnitMeasure
+					,dblQuantity
+					,dblItemUOMCF
+			FROM	vyuICGetInventoryTransferDetail TransferView
+			WHERE	TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
+					AND (
+						Receipt.strReceiptType = 'Transfer Order'
+						OR (
+							Receipt.strReceiptType = 'Inventory Return'
+							AND rtn.strReceiptType = 'Transfer Order'
+						)
+					)
+		) TransferView
 
 		-- 4. Logistics
-		LEFT JOIN vyuICLoadContainerPurchaseContracts LogisticsView
-			ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
-			AND intLoadContainerId = ReceiptItem.intContainerId
-			AND Receipt.intSourceType = 2
-			AND (
-				Receipt.strReceiptType = 'Purchase Contract'
-				OR (
-					Receipt.strReceiptType = 'Inventory Return'
-					AND rtn.strReceiptType = 'Purchase Contract'
-				)
-			)
+		OUTER APPLY (
+			SELECT	* 
+			FROM	vyuLGLoadContainerLookup LogisticsView --LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
+			WHERE	LogisticsView.intLoadDetailId = ReceiptItem.intSourceId 
+					AND intLoadContainerId = ReceiptItem.intContainerId
+					AND Receipt.intSourceType = 2
+					AND (
+						Receipt.strReceiptType = 'Purchase Contract'
+						OR (
+							Receipt.strReceiptType = 'Inventory Return'
+							AND rtn.strReceiptType = 'Purchase Contract'
+						)
+					)
+		) LogisticsView
 
 		-- 5. Scale Tickets
-		LEFT JOIN tblSCTicket SCTicket
-			ON SCTicket.intTicketId = ReceiptItem.intSourceId
-			AND Receipt.intSourceType = 1 -- Scale 
+		OUTER APPLY (
+			SELECT	strTicketNumber
+			FROM	tblSCTicket SCTicket
+			WHERE	SCTicket.intTicketId = ReceiptItem.intSourceId 
+					AND Receipt.intSourceType = 1 -- Scale 		
+		) SCTicket
 
 		-- 6. Transport Loads (New tables)
-		LEFT JOIN vyuTRGetLoadReceipt LoadReceipt
-			ON LoadReceipt.intLoadReceiptId = ReceiptItem.intSourceId
-			AND Receipt.intSourceType = 3
+		OUTER APPLY (
+			SELECT	strTransaction
+					,dblOrderedQuantity
+					,dblGross
+			FROM	vyuTRGetTransportLoadReceipt LoadReceipt --vyuTRGetLoadReceipt LoadReceipt
+			WHERE	LoadReceipt.intLoadReceiptId = ReceiptItem.intSourceId 
+					AND Receipt.intSourceType = 3		
+		) LoadReceipt
 
 		-- 7. Grain > Settle Storage 
-		LEFT JOIN vyuGRStorageSearchView
-			ON vyuGRStorageSearchView.intCustomerStorageId = ReceiptItem.intSourceId
-				AND Receipt.intSourceType = 4
+		OUTER APPLY (
+			SELECT	strStorageTicketNumber
+			FROM	tblGRCustomerStorage
+			WHERE	intCustomerStorageId = ReceiptItem.intSourceId 
+					AND Receipt.intSourceType = 4
+		) GrainStorageView

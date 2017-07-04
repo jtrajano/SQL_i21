@@ -39,3 +39,33 @@ CONSTRAINT [FK_tblLGLoadDetailContainerLink_tblSMCurrency_intCurrencyId] FOREIGN
 GO
 
 CREATE STATISTICS [_dta_stat_1097927133_4_5] ON [dbo].[tblLGLoadDetailContainerLink]([intLoadContainerId], [intLoadDetailId])
+
+GO 
+
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadDetailContainerLink_intLoadId] ON [dbo].[tblLGLoadDetailContainerLink]
+(
+	[intLoadId] ASC
+)
+INCLUDE ( 	
+	[intLoadContainerId]
+	,[intLoadDetailId]
+) 
+GO 
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadDetailContainerLink_intLoadDetailId] ON [dbo].[tblLGLoadDetailContainerLink]
+(
+	[intLoadDetailId] ASC
+)
+INCLUDE ( 	
+	[intLoadContainerId]
+	,[intLoadId]
+) 
+GO 
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadDetailContainerLink_intLoadContainerId] ON [dbo].[tblLGLoadDetailContainerLink]
+(
+	[intLoadContainerId] ASC
+)
+INCLUDE ( 	
+	[intLoadId]
+	,[intLoadDetailId]
+) 
+GO 
