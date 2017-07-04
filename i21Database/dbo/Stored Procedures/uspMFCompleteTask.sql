@@ -1,26 +1,30 @@
 ﻿CREATE PROCEDURE uspMFCompleteTask @intOrderHeaderId INT
 	,@intUserId INT
 	,@intTaskId INT = NULL
+	,@ysnLoad BIT = 0
 AS
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @intNewSubLocationId INT
-	DECLARE @intNewStorageLocationId INT
-	DECLARE @dblMoveQty NUMERIC(38, 20)
-	DECLARE @intMoveItemUOMId INT
-	DECLARE @blnValidateLotReservation BIT = 0
-	DECLARE @blnInventoryMove BIT = 0
-	DECLARE @intLotId INT
-	DECLARE @intNewLotId INT
-	DECLARE @strLotNumber NVARCHAR(100)
-	DECLARE @intItemId INT
-	DECLARE @intLotLocationId INT
-	DECLARE @intMinTaskRecordId INT
-	DECLARE @strOrderNo NVARCHAR(100)
-	DECLARE @intRemainingTasks INT
-	DECLARE @intOrderDetailId INT
+		,@intNewSubLocationId INT
+		,@intNewStorageLocationId INT
+		,@dblMoveQty NUMERIC(38, 20)
+		,@intMoveItemUOMId INT
+		,@blnValidateLotReservation BIT = 0
+		,@blnInventoryMove BIT = 0
+		,@intLotId INT
+		,@intNewLotId INT
+		,@strLotNumber NVARCHAR(100)
+		,@intItemId INT
+		,@intLotLocationId INT
+		,@intMinTaskRecordId INT
+		,@strOrderNo NVARCHAR(100)
+		,@intRemainingTasks INT
+		,@intOrderDetailId INT
 		,@dblAllocatedQty NUMERIC(38, 20)
 		,@dblQty NUMERIC(38, 20)
+		,@ysnLoadProcessEnabled BIT
+		,@strReferenceNo NVARCHAR(50)
+		,@intDockDoorId INT
 	DECLARE @tblTasks TABLE (
 		intTaskRecordId INT Identity(1, 1)
 		,intTaskId INT
@@ -32,11 +36,24 @@ BEGIN TRY
 		,@dblLotQty NUMERIC(18, 6)
 		,@dblLotWeight NUMERIC(18, 6)
 		,@strOrderType NVARCHAR(50)
+		,@intStagingLocationId INT
+		,@intDefaultShipmentDockDoorLocation INT
+
+	SELECT @ysnLoadProcessEnabled = ysnLoadProcessEnabled
+		,@intDefaultShipmentDockDoorLocation = intDefaultShipmentDockDoorLocation
+	FROM tblMFCompanyPreference
+
+	IF @ysnLoadProcessEnabled IS NULL
+	BEGIN
+		SELECT @ysnLoadProcessEnabled = 0
+	END
 
 	BEGIN TRANSACTION
 
 	SELECT @strOrderNo = OH.strOrderNo
 		,@strOrderType = OT.strOrderType
+		,@strReferenceNo = strReferenceNo
+		,@intStagingLocationId = OH.intStagingLocationId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -61,6 +78,14 @@ BEGIN TRY
 				,@intMoveItemUOMId = intItemUOMId
 			FROM tblICLot
 			WHERE intLotId = @intLotId
+
+			SELECT @intDockDoorId = NULL
+
+			SELECT @intDockDoorId = IsNULL(InvSI.intDockDoorId, @intDefaultShipmentDockDoorLocation)
+			FROM tblICInventoryShipment InvS
+			JOIN tblICInventoryShipmentItem InvSI ON InvS.intInventoryShipmentId = InvSI.intInventoryShipmentId
+			WHERE strShipmentNumber = @strReferenceNo
+				AND InvSI.intItemId = @intItemId
 		END
 		ELSE
 		BEGIN
@@ -106,11 +131,33 @@ BEGIN TRY
 			AND intSubLocationId = @intNewSubLocationId
 			AND intStorageLocationId = @intNewStorageLocationId
 
-		UPDATE tblMFTask
-		SET intTaskStateId = 4
-			,intLotId = @intNewLotId
-			,intFromStorageLocationId = @intNewStorageLocationId
-		WHERE intTaskId = @intTaskId
+		IF @ysnLoadProcessEnabled = 0 OR @strOrderType <> 'INVENTORY SHIPMENT STAGING'
+		BEGIN
+			UPDATE tblMFTask
+			SET intTaskStateId = 4
+				,intLotId = @intNewLotId
+				,intFromStorageLocationId = @intNewStorageLocationId
+			WHERE intTaskId = @intTaskId
+		END
+		ELSE IF @ysnLoadProcessEnabled = 1
+			AND @ysnLoad = 0 --Staging is completed.
+		BEGIN
+			UPDATE tblMFTask
+			SET intTaskStateId = 3
+				,intLotId = @intNewLotId
+				,intFromStorageLocationId = @intNewStorageLocationId
+				,intToStorageLocationId = @intDockDoorId
+			WHERE intTaskId = @intTaskId
+		END
+		ELSE IF @ysnLoadProcessEnabled = 1
+			AND @ysnLoad = 1
+		BEGIN
+			UPDATE tblMFTask
+			SET intTaskStateId = 4
+				,intLotId = @intNewLotId
+				,intFromStorageLocationId = @intNewStorageLocationId
+			WHERE intTaskId = @intTaskId
+		END
 
 		INSERT INTO tblMFPickForWOStaging (
 			intOrderHeaderId
@@ -122,6 +169,7 @@ BEGIN TRY
 			,dblPickedQty
 			,intUserId
 			,strPickedFrom
+			,ysnLoad
 			)
 		VALUES (
 			@intOrderHeaderId
@@ -133,28 +181,42 @@ BEGIN TRY
 			,@dblMoveQty
 			,@intUserId
 			,'Handheld'
+			,@ysnLoad
 			)
 
-		INSERT INTO tblMFOrderManifest (
-			intConcurrencyId
-			,intOrderDetailId
-			,intOrderHeaderId
-			,intLotId
-			,strManifestItemNote
-			,intLastUpdateId
-			,dtmLastUpdateOn
-			)
-		VALUES (
-			1
-			,@intOrderDetailId
-			,@intOrderHeaderId
-			,@intNewLotId
-			,'Order Staged'
-			,@intUserId
-			,GetDate()
-			)
+		IF @ysnLoad = 0
+		BEGIN
+			INSERT INTO tblMFOrderManifest (
+				intConcurrencyId
+				,intOrderDetailId
+				,intOrderHeaderId
+				,intLotId
+				,strManifestItemNote
+				,intLastUpdateId
+				,dtmLastUpdateOn
+				)
+			VALUES (
+				1
+				,@intOrderDetailId
+				,@intOrderHeaderId
+				,@intNewLotId
+				,'Order Staged'
+				,@intUserId
+				,GetDate()
+				)
+		END
 
 		IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+			AND (
+				(
+					@ysnLoadProcessEnabled = 1
+					AND @ysnLoad = 1
+					)
+				OR (
+					@ysnLoadProcessEnabled = 0
+					AND @ysnLoad = 0
+					)
+				)
 		BEGIN
 			SELECT @strShipmentNo = NULL
 				,@intShipmentItemId = NULL
@@ -236,15 +298,33 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @tblTasks (
-			intTaskId
-			,intOrderHeaderId
-			)
-		SELECT intTaskId
-			,intOrderHeaderId
-		FROM tblMFTask
-		WHERE intOrderHeaderId = @intOrderHeaderId
-			AND intTaskStateId <> 4
+		IF @ysnLoad = 0
+		BEGIN
+			INSERT INTO @tblTasks (
+				intTaskId
+				,intOrderHeaderId
+				)
+			SELECT intTaskId
+				,intOrderHeaderId
+			FROM tblMFTask
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intTaskStateId NOT IN (
+					3
+					,4
+					)
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTasks (
+				intTaskId
+				,intOrderHeaderId
+				)
+			SELECT intTaskId
+				,intOrderHeaderId
+			FROM tblMFTask
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intTaskStateId <> 4
+		END
 
 		SELECT @intMinTaskRecordId = MIN(intTaskRecordId)
 		FROM @tblTasks
@@ -283,6 +363,14 @@ BEGIN TRY
 					,@intMoveItemUOMId = intItemUOMId
 				FROM tblICLot
 				WHERE intLotId = @intLotId
+
+				SELECT @intDockDoorId = NULL
+
+				SELECT @intDockDoorId = IsNULL(InvSI.intDockDoorId, @intDefaultShipmentDockDoorLocation)
+				FROM tblICInventoryShipment InvS
+				JOIN tblICInventoryShipmentItem InvSI ON InvS.intInventoryShipmentId = InvSI.intInventoryShipmentId
+				WHERE strShipmentNumber = @strReferenceNo
+					AND InvSI.intItemId = @intItemId
 			END
 			ELSE
 			BEGIN
@@ -326,11 +414,33 @@ BEGIN TRY
 				AND intSubLocationId = @intNewSubLocationId
 				AND intStorageLocationId = @intNewStorageLocationId
 
-			UPDATE tblMFTask
-			SET intTaskStateId = 4
-				,intLotId = @intNewLotId
-				,intFromStorageLocationId = @intNewStorageLocationId
-			WHERE intTaskId = @intTaskId
+			IF @ysnLoadProcessEnabled = 0 OR @strOrderType <> 'INVENTORY SHIPMENT STAGING'
+			BEGIN
+				UPDATE tblMFTask
+				SET intTaskStateId = 4
+					,intLotId = @intNewLotId
+					,intFromStorageLocationId = @intNewStorageLocationId
+				WHERE intTaskId = @intTaskId
+			END
+			ELSE IF @ysnLoadProcessEnabled = 1
+				AND @ysnLoad = 0 --Staging is completed.
+			BEGIN
+				UPDATE tblMFTask
+				SET intTaskStateId = 3
+					,intLotId = @intNewLotId
+					,intFromStorageLocationId = @intNewStorageLocationId
+					,intToStorageLocationId = @intDockDoorId
+				WHERE intTaskId = @intTaskId
+			END
+			ELSE IF @ysnLoadProcessEnabled = 1
+				AND @ysnLoad = 1
+			BEGIN
+				UPDATE tblMFTask
+				SET intTaskStateId = 4
+					,intLotId = @intNewLotId
+					,intFromStorageLocationId = @intNewStorageLocationId
+				WHERE intTaskId = @intTaskId
+			END
 
 			INSERT INTO tblMFPickForWOStaging (
 				intOrderHeaderId
@@ -342,6 +452,7 @@ BEGIN TRY
 				,dblPickedQty
 				,intUserId
 				,strPickedFrom
+				,ysnLoad
 				)
 			VALUES (
 				@intOrderHeaderId
@@ -353,28 +464,42 @@ BEGIN TRY
 				,@dblMoveQty
 				,@intUserId
 				,'Desktop'
+				,@ysnLoad
 				)
 
-			INSERT INTO tblMFOrderManifest (
-				intConcurrencyId
-				,intOrderDetailId
-				,intOrderHeaderId
-				,intLotId
-				,strManifestItemNote
-				,intLastUpdateId
-				,dtmLastUpdateOn
-				)
-			VALUES (
-				1
-				,@intOrderDetailId
-				,@intOrderHeaderId
-				,@intNewLotId
-				,'Order Staged'
-				,@intUserId
-				,GetDate()
-				)
+			IF @ysnLoad = 0
+			BEGIN
+				INSERT INTO tblMFOrderManifest (
+					intConcurrencyId
+					,intOrderDetailId
+					,intOrderHeaderId
+					,intLotId
+					,strManifestItemNote
+					,intLastUpdateId
+					,dtmLastUpdateOn
+					)
+				VALUES (
+					1
+					,@intOrderDetailId
+					,@intOrderHeaderId
+					,@intNewLotId
+					,'Order Staged'
+					,@intUserId
+					,GetDate()
+					)
+			END
 
 			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+				AND (
+					(
+						@ysnLoadProcessEnabled = 1
+						AND @ysnLoad = 1
+						)
+					OR (
+						@ysnLoadProcessEnabled = 0
+						AND @ysnLoad = 0
+						)
+					)
 			BEGIN
 				SELECT @strShipmentNo = NULL
 					,@intShipmentItemId = NULL
@@ -460,10 +585,23 @@ BEGIN TRY
 		END
 	END
 
-	SELECT @intRemainingTasks = COUNT(*)
-	FROM tblMFTask
-	WHERE intOrderHeaderId = @intOrderHeaderId
-		AND intTaskStateId <> 4
+	IF @ysnLoad = 0
+	BEGIN
+		SELECT @intRemainingTasks = COUNT(*)
+		FROM tblMFTask
+		WHERE intOrderHeaderId = @intOrderHeaderId
+			AND intTaskStateId NOT IN (
+				3
+				,4
+				)
+	END
+	ELSE
+	BEGIN
+		SELECT @intRemainingTasks = COUNT(*)
+		FROM tblMFTask
+		WHERE intOrderHeaderId = @intOrderHeaderId
+			AND intTaskStateId <> 4
+	END
 
 	IF @intRemainingTasks = 0
 		AND @strOrderType = 'WO PROD RETURN'
@@ -472,10 +610,27 @@ BEGIN TRY
 		SET intOrderStatusId = 10
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
-	ELSE IF @intRemainingTasks = 0
+	ELSE IF (
+			@intRemainingTasks = 0
+			AND (@ysnLoadProcessEnabled = 0 OR @strOrderType <> 'INVENTORY SHIPMENT STAGING')
+			) 
 	BEGIN
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 6
+		WHERE intOrderHeaderId = @intOrderHeaderId
+	END
+	ELSE IF @intRemainingTasks = 0
+		AND @ysnLoadProcessEnabled = 1 and @ysnLoad =0
+	BEGIN
+		UPDATE tblMFOrderHeader
+		SET intOrderStatusId = 6
+		WHERE intOrderHeaderId = @intOrderHeaderId
+	END
+	ELSE IF @intRemainingTasks = 0
+		AND @ysnLoadProcessEnabled = 1 and @ysnLoad =1
+	BEGIN
+		UPDATE tblMFOrderHeader
+		SET intOrderStatusId = 7
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
 
@@ -489,7 +644,7 @@ BEGIN CATCH
 
 	IF @strErrMsg != ''
 	BEGIN
-		SET @strErrMsg = 'uspMFCompleteTask: ' + @strErrMsg
+		SET @strErrMsg =  @strErrMsg
 
 		RAISERROR (
 				@strErrMsg
