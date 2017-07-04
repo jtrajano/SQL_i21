@@ -12,8 +12,10 @@
     [strSPInventory]        NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strSPInvoice] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strSPRunReport] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intComponentTypeId] INT NULL,
 	[ysnIncludeSalesFreightOnly] BIT NULL,
 	[intMasterId] INT NULL,
     [intConcurrencyId] INT DEFAULT((1)) NULL, 
-    CONSTRAINT [PK_tblTFReportingComponent] PRIMARY KEY ([intReportingComponentId] ASC),
+    CONSTRAINT [PK_tblTFReportingComponent] PRIMARY KEY ([intReportingComponentId] ASC), 
+    CONSTRAINT [FK_tblTFReportingComponent_tblTFComponentType] FOREIGN KEY ([intComponentTypeId]) REFERENCES [tblTFComponentType]([intComponentTypeId]),
 )

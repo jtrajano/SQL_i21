@@ -11,6 +11,8 @@ SELECT RC.intReportingComponentId
 	, RC.strType
 	, RC.strNote
 	, RC.strTransactionType
+	, CType.intComponentTypeId
+	, CType.strComponentType
 	, RC.intPositionId
 	, RC.strSPInventory
 	, RC.strSPInvoice
@@ -18,3 +20,4 @@ SELECT RC.intReportingComponentId
 	, RC.ysnIncludeSalesFreightOnly
 FROM tblTFReportingComponent RC
 LEFT JOIN tblTFTaxAuthority TA ON TA.intTaxAuthorityId = RC.intTaxAuthorityId
+LEFT JOIN tblTFComponentType CType ON CType.intComponentTypeId = RC.intComponentTypeId

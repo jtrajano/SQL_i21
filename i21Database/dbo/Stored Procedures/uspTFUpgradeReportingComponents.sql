@@ -52,6 +52,7 @@ BEGIN TRY
 			, strSPInventory		= SOURCE.strSPInventory
 			, strSPInvoice			= SOURCE.strSPInvoice
 			, strSPRunReport		= SOURCE.strSPRunReport
+			, intComponentTypeId	= SOURCE.intComponentTypeId
 	WHEN NOT MATCHED THEN 
 		INSERT (
 			intTaxAuthorityId
@@ -67,6 +68,7 @@ BEGIN TRY
 			, strSPInvoice
 			, strSPRunReport
 			, intMasterId
+			, intComponentTypeId
 		)
 		VALUES (
 			@TaxAuthorityId
@@ -82,6 +84,7 @@ BEGIN TRY
 			, SOURCE.strSPInvoice
 			, SOURCE.strSPRunReport
 			, SOURCE.intMasterId
+			, SOURCE.intComponentTypeId
 		);
 	
 END TRY

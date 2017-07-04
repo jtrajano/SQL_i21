@@ -6041,4 +6041,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intOutputDesignerFieldId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2c9ee4d9-f8de-4921-bbc3-0d6d03b5ed28" ChangeDateTime="07/03/2017 08:22:24">
+    <Property Name="ElementName" Value="[dbo].[tblTFComponentType].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFComponentType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intComponentTypeId" />
+  </Operation>
 </Operations>

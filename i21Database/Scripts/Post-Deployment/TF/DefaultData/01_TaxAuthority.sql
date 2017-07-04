@@ -288,3 +288,49 @@ UNION ALL SELECT intOriginDestinationStateId = 49, strOriginDestinationState = '
 UNION ALL SELECT intOriginDestinationStateId = 50, strOriginDestinationState = 'WY', intMasterId = 50
 
 EXEC uspTFUpgradeOriginDestinationState @OriginDestinationStates = @OriginDestinationStates
+
+
+GO
+
+-- Component Types
+SELECT * 
+INTO #tmpTypes
+FROM (
+SELECT intComponentTypeId = 1, strComponentType = 'Preview'
+UNION ALL SELECT intComponentTypeId = 2, strComponentType = 'Report'
+UNION ALL SELECT intComponentTypeId = 3, strComponentType = 'EDI'
+UNION ALL SELECT intComponentTypeId = 4, strComponentType = 'EFile'
+UNION ALL SELECT intComponentTypeId = 5, strComponentType = 'EFile Main'
+) tblPatch
+
+SET IDENTITY_INSERT tblTFComponentType ON
+
+MERGE	
+INTO	tblTFComponentType 
+WITH	(HOLDLOCK) 
+AS		TARGET
+USING (
+	SELECT * FROM #tmpTypes
+) AS SOURCE
+	ON TARGET.strComponentType COLLATE Latin1_General_CI_AS = SOURCE.strComponentType COLLATE Latin1_General_CI_AS
+
+WHEN MATCHED THEN 
+	UPDATE
+	SET strComponentType = SOURCE.strComponentType
+WHEN NOT MATCHED BY TARGET THEN 
+	INSERT (
+		intComponentTypeId,
+		strComponentType
+	)
+	VALUES (
+		SOURCE.intComponentTypeId,
+		SOURCE.strComponentType
+	)
+WHEN NOT MATCHED BY SOURCE THEN
+	DELETE;
+
+DROP TABLE #tmpTypes
+
+SET IDENTITY_INSERT tblTFComponentType OFF
+
+GO
