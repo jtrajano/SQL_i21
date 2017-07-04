@@ -208,26 +208,44 @@ LEFT JOIN tblICInventoryReceipt Receipt
 	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN vyuICGetItemUOM ItemUOM 
 	ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
-LEFT JOIN vyuCTContractDetailView ContractView
+LEFT JOIN vyuCTCompactContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
 	AND strReceiptType = 'Purchase Contract'
-LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
-	ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
+LEFT JOIN vyuLGLoadContainerLookup LogisticsView --LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
+	ON LogisticsView.intLoadDetailId = CASE WHEN Receipt.intSourceType = 2 THEN ReceiptItem.intSourceId ELSE NULL END 
 	AND intLoadContainerId = ReceiptItem.intContainerId
 	AND strReceiptType = 'Purchase Contract'
 	AND Receipt.intSourceType = 2
-LEFT JOIN vyuTRGetLoadReceipt LoadReceipt
-	ON LoadReceipt.intLoadReceiptId = ReceiptItem.intSourceId
-	AND Receipt.intSourceType = 3
+OUTER APPLY (
+	SELECT	LoadHeader.strTransaction
+			, dblOrderedQuantity  = CASE WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Net' THEN LoadReceipt.dblNet
+										WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Gross' THEN LoadReceipt.dblGross
+										WHEN ISNULL(LoadSchedule.dblQuantity,0) != 0 THEN LoadSchedule.dblQuantity END
+			, dblReceivedQuantity = CASE WHEN SupplyPoint.strGrossOrNet = 'Gross' THEN LoadReceipt.dblGross
+										WHEN SupplyPoint.strGrossOrNet = 'Net' THEN LoadReceipt.dblNet END
+
+	FROM	tblTRLoadReceipt LoadReceipt LEFT JOIN tblTRLoadHeader LoadHeader
+				ON LoadHeader.intLoadHeaderId = LoadReceipt.intLoadHeaderId	
+			LEFT JOIN tblTRSupplyPoint SupplyPoint
+				ON SupplyPoint.intSupplyPointId = LoadReceipt.intSupplyPointId
+			LEFT JOIN tblLGLoadDetail LoadSchedule
+				ON LoadSchedule.intLoadDetailId = LoadReceipt.intLoadDetailId
+	WHERE	LoadReceipt.intLoadReceiptId = CASE WHEN Receipt.intSourceType = 3 THEN ReceiptItem.intSourceId ELSE NULL END 
+			AND Receipt.intSourceType = 3
+) LoadReceipt
 LEFT JOIN vyuPODetails POView
-	ON POView.intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo
+	ON POView.intPurchaseId = ReceiptItem.intOrderId 
+	AND intPurchaseDetailId = ReceiptItem.intLineNo
 	AND Receipt.strReceiptType = 'Purchase Order'
 LEFT JOIN vyuICGetInventoryTransferDetail TransferView
 	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
 	AND Receipt.strReceiptType = 'Transfer Order'
-LEFT JOIN vyuGRStorageSearchView
-	ON vyuGRStorageSearchView.intCustomerStorageId = ReceiptItem.intSourceId
-	AND Receipt.intSourceType = 4
+OUTER APPLY (
+	SELECT	strStorageTicketNumber
+	FROM	tblGRCustomerStorage
+	WHERE	intCustomerStorageId = ReceiptItem.intSourceId 
+			AND Receipt.intSourceType = 4
+) vyuGRStorageSearchView
 OUTER APPLY (
 	SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
@@ -236,5 +254,4 @@ OUTER APPLY (
 			AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
 			AND Receipt.strReceiptType = 'Inventory Return'
 ) rtn
-
 

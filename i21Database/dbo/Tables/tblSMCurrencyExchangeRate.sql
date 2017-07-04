@@ -9,3 +9,13 @@
 	CONSTRAINT [FK_tblSMCurrencyExchangeRate_tblSMCurrency_To] FOREIGN KEY (intToCurrencyId) REFERENCES tblSMCurrency(intCurrencyID), 
     CONSTRAINT [AK_tblSMCurrencyExchangeRate_FromToCurrencyId] UNIQUE ([intFromCurrencyId], [intToCurrencyId]) 
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblSMCurrencyExchangeRate_intFromCurrencyId] 
+	ON [dbo].[tblSMCurrencyExchangeRate] ([intFromCurrencyId])
+	INCLUDE([intCurrencyExchangeRateId], [intToCurrencyId]); 
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSMCurrencyExchangeRate_intToCurrencyId] 
+	ON [dbo].[tblSMCurrencyExchangeRate] ([intToCurrencyId])
+	INCLUDE([intCurrencyExchangeRateId], [intFromCurrencyId]); 
+GO

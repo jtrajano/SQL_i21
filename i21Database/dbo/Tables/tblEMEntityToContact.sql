@@ -18,7 +18,11 @@
 
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblEMEntityToContact_intEntityId_ysnDefaultContact] ON [dbo].[tblEMEntityToContact] ([intEntityId], [ysnDefaultContact])
+CREATE NONCLUSTERED INDEX [IX_tblEMEntityToContact_intEntityId_ysnDefaultContact] 
+	ON [dbo].[tblEMEntityToContact] ([intEntityId], [ysnDefaultContact]);
+GO
 
-
-
+CREATE NONCLUSTERED INDEX [IX_tblEMEntityToContact_intEntityId] 
+	ON [dbo].[tblEMEntityToContact] ([intEntityId])
+	INCLUDE([intEntityToContactId], [intEntityContactId], [intEntityLocationId], [ysnDefaultContact], [ysnPortalAccess]); 
+GO

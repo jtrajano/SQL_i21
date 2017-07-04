@@ -56,9 +56,20 @@ CREATE STATISTICS [_dta_stat_1001926791_16_1] ON [dbo].[tblLGLoadContainer]([ysn
 
 go
 
-CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadContainer_207_1851869664__K3_4] ON [dbo].[tblLGLoadContainer]
+--CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadContainer_207_1851869664__K3_4] ON [dbo].[tblLGLoadContainer]
+--(
+--	[intLoadId] ASC
+--)
+--INCLUDE ( 	[strContainerNumber]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+--go
+
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadContainer_intLoadId] ON [dbo].[tblLGLoadContainer]
 (
 	[intLoadId] ASC
 )
-INCLUDE ( 	[strContainerNumber]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
-go
+INCLUDE ( 	
+	[strContainerNumber]
+	,[dblQuantity]
+	,[intLoadContainerId]
+) 
+GO 
