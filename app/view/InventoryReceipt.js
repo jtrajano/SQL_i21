@@ -311,7 +311,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 dataType: 'string',
                                                                 text: 'Currency',
                                                                 hidden: true
-                                                            },
+                                                            }
                                                         ],
                                                         enableDrillDown: true,
                                                         lookUpField: true,
@@ -1086,6 +1086,31 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         {
                                                                                             dataIndex: 'intReceiveUnitMeasureId',
                                                                                             dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intGrossUOMId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intGrossUnitMeasureId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblGrossUOMConvFactor',
+                                                                                            dataType: 'float',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strGrossUOMType',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strGrossUOM',
+                                                                                            dataType: 'string',
                                                                                             hidden: true
                                                                                         }
                                                                                     ],

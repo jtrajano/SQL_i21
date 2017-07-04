@@ -493,6 +493,20 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intModuleId).HasColumnName("intModuleId");
             this.Property(t => t.strModule).HasColumnName("strModule");
             this.Property(t => t.ysnUseWeighScales).HasColumnName("ysnUseWeighScales");
+            this.Property(t => t.intGrossUOMId).HasColumnName("");
+            this.Property(t => t.intGrossUnitMeasureId).HasColumnName("intGrossUnitMeasureId");
+            this.Property(t => t.dblGrossUOMConvFactor).HasColumnName("dblGrossUOMConvFactor");
+            this.Property(t => t.strGrossUOMType).HasColumnName("strGrossUOMType");
+            this.Property(t => t.strGrossUOM).HasColumnName("strGrossUOM");
+            this.Property(t => t.strGrossUPC).HasColumnName("strGrossUPC");
+            this.Property(t => t.dblGrossSalePrice).HasColumnName("dblGrossSalePrice");
+            this.Property(t => t.dblGrossMSRPPrice).HasColumnName("dblGrossMSRPPrice");
+            this.Property(t => t.dblGrossLastCost).HasColumnName("dblGrossLastCost");
+            this.Property(t => t.dblGrossStandardCost).HasColumnName("dblGrossStandardCost");
+            this.Property(t => t.dblGrossAverageCost).HasColumnName("dblGrossAverageCost");
+            this.Property(t => t.dblGrossEndMonthCost).HasColumnName("dblGrossEndMonthCost");
+            this.Property(t => t.ysnGrossUOMAllowPurchase).HasColumnName("ysnGrossUOMAllowPurchase");
+            this.Property(t => t.ysnGrossUOMAllowSale).HasColumnName("ysnGrossUOMAllowSale");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)
@@ -579,6 +593,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
             this.Property(t => t.intIssueUOMId).HasColumnName("intIssueUOMId");
             this.Property(t => t.strIssueUOM).HasColumnName("strIssueUOM");
+            this.Property(t => t.intGrossUOMId).HasColumnName("intGrossUOMId");
+            this.Property(t => t.strGrossUOM).HasColumnName("strGrossUOM");
             this.Property(t => t.intReceiveUOMId).HasColumnName("intReceiveUOMId");
             this.Property(t => t.strReceiveUOM).HasColumnName("strReceiveUOM");
             this.Property(t => t.intFamilyId).HasColumnName("intFamilyId");

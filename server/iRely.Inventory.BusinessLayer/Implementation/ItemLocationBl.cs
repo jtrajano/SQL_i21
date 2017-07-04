@@ -69,6 +69,8 @@ namespace iRely.Inventory.BusinessLayer
                         strIssueUOM = ItemLocation.strIssueUOM,
                         intReceiveUOMId = ItemLocation.intReceiveUOMId,
                         strReceiveUOM = ItemLocation.strReceiveUOM,
+                        intGrossUOMId = ItemLocation.intGrossUOMId,
+                        strGrossUOM = ItemLocation.strGrossUOM,
                         intFamilyId = ItemLocation.intFamilyId,
                         strFamily = ItemLocation.strFamily,
                         intClassId = ItemLocation.intClassId,

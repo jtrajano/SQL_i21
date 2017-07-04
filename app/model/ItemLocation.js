@@ -49,6 +49,7 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intStorageLocationId', type: 'int', allowNull: true },
         { name: 'intIssueUOMId', type: 'int', allowNull: true },
+        { name: 'intGrossUOMId', type: 'int', allowNull: true },
         { name: 'intReceiveUOMId', type: 'int', allowNull: true },
         { name: 'intFamilyId', type: 'int', allowNull: true },
         { name: 'intClassId', type: 'int', allowNull: true },

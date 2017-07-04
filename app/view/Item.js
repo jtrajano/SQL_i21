@@ -25,7 +25,6 @@ Ext.define('Inventory.view.Item', {
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.TextArea',
-        'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
         'Ext.form.field.Number',
@@ -34,6 +33,7 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.plugin.CellEditing',
         'Ext.selection.CheckboxModel',
         'Ext.form.Label',
+        'Ext.form.field.Checkbox',
         'Ext.form.field.Date',
         'Ext.grid.column.Date',
         'Ext.grid.feature.Summary',
@@ -254,7 +254,7 @@ Ext.define('Inventory.view.Item', {
                                                                 itemId: 'cboManufacturer',
                                                                 fieldLabel: 'Manufacturer',
                                                                 displayField: 'strManufacturer',
-                                                                valueField: 'strManufacturer'
+                                                                valueField: 'intManufacturerId'
                                                             },
                                                             {
                                                                 xtype: 'combobox',
@@ -297,7 +297,7 @@ Ext.define('Inventory.view.Item', {
                                                                 itemId: 'cboCommodity',
                                                                 fieldLabel: 'Commodity',
                                                                 displayField: 'strCommodityCode',
-                                                                valueField: 'strCommodityCode'
+                                                                valueField: 'intCommodityId'
                                                             },
                                                             {
                                                                 xtype: 'combobox',
@@ -305,11 +305,6 @@ Ext.define('Inventory.view.Item', {
                                                                 fieldLabel: 'Lot Tracking',
                                                                 displayField: 'strLotTracking',
                                                                 valueField: 'strLotTracking'
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkUseWeighScales',
-                                                                fieldLabel: 'Use Weigh Scales'
                                                             }
                                                         ]
                                                     },
@@ -348,7 +343,7 @@ Ext.define('Inventory.view.Item', {
                                                                 fieldLabel: 'Brand',
                                                                 labelWidth: 116,
                                                                 displayField: 'strBrandCode',
-                                                                valueField: 'strBrandCode'
+                                                                valueField: 'intBrandId'
                                                             },
                                                             {
                                                                 xtype: 'textfield',
@@ -1098,7 +1093,7 @@ Ext.define('Inventory.view.Item', {
                                                                 flex: 2,
                                                                 itemId: 'grdItemSubLocations',
                                                                 margin: '0 0 0 10',
-                                                                title: 'Storage Locations',
+                                                                title: 'Sub Locations',
                                                                 forceFit: true,
                                                                 dockedItems: [
                                                                     {
@@ -1132,14 +1127,14 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colsubSubLocationName',
                                                                         width: 244,
-                                                                        text: 'Storage Location',
+                                                                        text: 'Sub Location',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
                                                                                     dataIndex: 'intCompanyLocationSubLocationId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Storage Location Id',
+                                                                                    text: 'Sub Location Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -1151,7 +1146,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 {
                                                                                     dataIndex: 'strSubLocationName',
                                                                                     dataType: 'string',
-                                                                                    text: 'Storage Location Name',
+                                                                                    text: 'Sub Location Name',
                                                                                     flex: 1
                                                                                 },
                                                                                 {
@@ -1178,7 +1173,7 @@ Ext.define('Inventory.view.Item', {
                                                                         hidden: true,
                                                                         itemId: 'colsubSubLocationId',
                                                                         dataIndex: 'intSubLocationId',
-                                                                        text: 'Storage Location Id'
+                                                                        text: 'Sub Location Id'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -1352,7 +1347,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 fieldLabel: 'Fuel Category',
                                                                                 labelWidth: 125,
                                                                                 displayField: 'strRinFuelCategoryCode',
-                                                                                valueField: 'strRinFuelCategoryCode'
+                                                                                valueField: 'intRinFuelCategoryId'
                                                                             },
                                                                             {
                                                                                 xtype: 'numericfield',
@@ -1482,8 +1477,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 itemId: 'cboMedicationTag',
                                                                                 fieldLabel: 'Medication Tag',
                                                                                 labelWidth: 115,
-                                                                                displayField: 'strDescription',
-                                                                                valueField: 'strDescription'
+                                                                                displayField: 'strTagNumber',
+                                                                                valueField: 'intTagId'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcombobox',
@@ -1511,8 +1506,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 itemId: 'cboIngredientTag',
                                                                                 fieldLabel: 'Ingredient Tag',
                                                                                 labelWidth: 115,
-                                                                                displayField: 'strDescription',
-                                                                                valueField: 'strDescription'
+                                                                                displayField: 'strTagNumber',
+                                                                                valueField: 'intTagId'
                                                                             },
                                                                             {
                                                                                 xtype: 'textfield',
@@ -1565,7 +1560,7 @@ Ext.define('Inventory.view.Item', {
                                                                         fieldLabel: 'Physical Item',
                                                                         labelWidth: 125,
                                                                         displayField: 'strItemNo',
-                                                                        valueField: 'strItemNo'
+                                                                        valueField: 'intItemId'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
@@ -1584,35 +1579,6 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'chkHazardMaterial',
                                                                         fieldLabel: 'Hazard Material',
                                                                         labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intTagId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Tag Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strTagNumber',
-                                                                                dataType: 'string',
-                                                                                text: 'Tag Number',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        enableDrillDown: 'true',
-                                                                        itemId: 'cboHazmat',
-                                                                        fieldLabel: 'Hazmat Message',
-                                                                        labelWidth: 125,
-                                                                        displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
@@ -1695,7 +1661,7 @@ Ext.define('Inventory.view.Item', {
                                                                         fieldLabel: 'Module',
                                                                         labelWidth: 125,
                                                                         displayField: 'strModule',
-                                                                        valueField: 'strModule'
+                                                                        valueField: 'intModuleId'
                                                                     }
                                                                 ]
                                                             }
@@ -3171,7 +3137,6 @@ Ext.define('Inventory.view.Item', {
                                                                             ],
                                                                             itemId: 'cboItemContractStatus',
                                                                             editable: false,
-                                                                            pickerWidth: 200,
                                                                             displayField: 'strStatus',
                                                                             valueField: 'strStatus'
                                                                         }
@@ -4243,7 +4208,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 fieldLabel: 'Patronage Category',
                                                                                 labelWidth: 116,
                                                                                 displayField: 'strCategoryCode',
-                                                                                valueField: 'strCategoryCode'
+                                                                                valueField: 'intPatronageCategoryId'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcombobox',
@@ -4272,7 +4237,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 fieldLabel: 'Direct Sale',
                                                                                 labelWidth: 116,
                                                                                 displayField: 'strCategoryCode',
-                                                                                valueField: 'strCategoryCode'
+                                                                                valueField: 'intPatronageCategoryId'
                                                                             }
                                                                         ]
                                                                     }
@@ -5414,7 +5379,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboOrigin',
                                                                         fieldLabel: 'Origin',
                                                                         displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
+                                                                        valueField: 'intCommodityAttributeId'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -5441,7 +5406,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboProductType',
                                                                         fieldLabel: 'Product Type',
                                                                         displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
+                                                                        valueField: 'intCommodityAttributeId'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -5468,7 +5433,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboRegion',
                                                                         fieldLabel: 'Region',
                                                                         displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
+                                                                        valueField: 'intCommodityAttributeId'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -5495,7 +5460,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboSeason',
                                                                         fieldLabel: 'Season',
                                                                         displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
+                                                                        valueField: 'intCommodityAttributeId'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -5522,7 +5487,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboClass',
                                                                         fieldLabel: 'Class',
                                                                         displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
+                                                                        valueField: 'intCommodityAttributeId'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -5549,7 +5514,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboProductLine',
                                                                         fieldLabel: 'Product Line',
                                                                         displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
+                                                                        valueField: 'intCommodityProductLineId'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',

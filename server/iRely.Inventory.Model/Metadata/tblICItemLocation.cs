@@ -22,6 +22,7 @@ namespace iRely.Inventory.Model
         public int? intStorageLocationId { get; set; }
         public int? intIssueUOMId { get; set; }
         public int? intReceiveUOMId { get; set; }
+        public int? intGrossUOMId { get; set; }
         public int? intFamilyId { get; set; }
         public int? intClassId { get; set; }
         public int? intProductCodeId { get; set; }
@@ -303,6 +304,26 @@ namespace iRely.Inventory.Model
             set
             {
                 _issueUom = value;
+            }
+        }
+
+        private string _grossUOM;
+        [NotMapped]
+        public string strGrossUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_grossUOM))
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strGrossUOM;
+                    else
+                        return null;
+                else
+                    return _grossUOM;
+            }
+            set
+            {
+                _grossUOM = value;
             }
         }
 

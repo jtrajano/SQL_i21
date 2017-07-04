@@ -78,6 +78,9 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         issueUOM: {
             type: 'icbuffereditemunitmeasure'
         },
+        grossUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
         receiveUOM: {
             type: 'icbuffereditemunitmeasure'
         },

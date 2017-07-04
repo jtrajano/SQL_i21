@@ -65,6 +65,16 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                     conjunction: 'and'
                 }]
             },
+            cboGrossUOM: {
+                value: '{current.strGrossUOM}',
+                origValueField: 'intItemUOMId',
+                origUpdateField: 'intGrossUOMId',
+                store: '{grossUOM}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}'
+                }]
+            },
             cboIssueUom: {
                 value: '{current.strIssueUOM}',
                 origValueField: 'intItemUOMId',

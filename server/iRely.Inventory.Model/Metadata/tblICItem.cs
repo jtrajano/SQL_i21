@@ -739,11 +739,13 @@ namespace iRely.Inventory.Model
         public int? intReceiveUnitMeasureId { get; set; }
         public decimal? dblReceiveUOMConvFactor { get; set; }
         public int? intIssueUOMId { get; set; }
+        public int? intGrossUOMId { get; set; }
         public int? intIssueUnitMeasureId { get; set; }
         public decimal? dblIssueUOMConvFactor { get; set; }
         public string strReceiveUOMType { get; set; }
         public string strIssueUOMType { get; set; }
         public string strReceiveUOM { get; set; }
+        public string strGrossUOM { get; set; }
         public string strReceiveUPC { get; set; }
         public decimal? dblReceiveSalePrice { get; set; }
         public decimal? dblReceiveMSRPPrice { get; set; }
@@ -808,6 +810,19 @@ namespace iRely.Inventory.Model
         public int? intModuleId { get; set; }
         public string strModule { get; set; }
         public bool? ysnUseWeighScales { get; set; }
+
+        public int? intGrossUnitMeasureId { get; set; }
+        public decimal? dblGrossUOMConvFactor { get; set; }
+        public string strGrossUOMType { get; set; }
+        public string strGrossUPC { get; set; }
+        public decimal? dblGrossSalePrice { get; set; }
+        public decimal? dblGrossMSRPPrice { get; set; }
+        public decimal? dblGrossLastCost { get; set; }
+        public decimal? dblGrossStandardCost { get; set; }
+        public decimal? dblGrossAverageCost { get; set; }
+        public decimal? dblGrossEndMonthCost { get; set; }
+        public bool? ysnGrossUOMAllowPurchase { get; set; }
+        public bool? ysnGrossUOMAllowSale { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }
@@ -877,6 +892,8 @@ namespace iRely.Inventory.Model
         public int? intIssueUOMId { get; set; }
         public string strIssueUOM { get; set; }
         public int? intReceiveUOMId { get; set; }
+        public int? intGrossUOMId { get; set; }
+        public string strGrossUOM { get; set; }
         public string strReceiveUOM { get; set; }
         public int? intFamilyId { get; set; }
         public string strFamily { get; set; }
@@ -1162,6 +1179,8 @@ namespace iRely.Inventory.Model
         public string strIssueUOM { get; set; }
         public int? intReceiveUOMId { get; set; }
         public string strReceiveUOM { get; set; }
+        public int? intGrossUOMId { get; set; }
+        public string strGrossUOM { get; set; }
         public int? intFamilyId { get; set; }
         public string strFamily { get; set; }
         public int? intClassId { get; set; }
