@@ -5329,6 +5329,8 @@
     <Build Include="dbo\Views\vyuCTCompactContractDetailView.sql" />
     <Build Include="dbo\Views\vyuTRGetTransportLoadReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetStockHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventoryByParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
