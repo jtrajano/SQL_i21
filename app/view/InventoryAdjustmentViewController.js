@@ -531,7 +531,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var grid = column.$initParent.grid;
         var win = grid.up('window');
         var combo = win.down('#cboLocation');
-        
+
         if(grid && grid.selection) {
             if (grid.itemId === 'grdInventoryAdjustment') {
                 iRely.Functions.openScreen('i21.view.CompanyLocation', { 
@@ -728,12 +728,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         currentItemIndex = 0,
                         countLineNumber = 0,
                         duplicateLotDetected = 0;
+                        hasNonZero = true,
                         eachLotId = [];
                     //Validate Lot Id
                     if(countLineItems > 1) {
                         Ext.Array.each(current.tblICInventoryAdjustmentDetails().data.items, function (item) {
                             if (!item.dummy) {
                                 eachLotId[currentItemIndex] = item.get('intLotId');
+                                if(item.get('dblAdjustByQuantity') && item.get('dblAdjustByQuantity') !== 0)
+                                    hasNonZero = false;
+
                                 currentItemIndex++;
                             }
                         });
@@ -750,6 +754,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                     }
                                 }
                             }
+                        }
+
+                        if(hasNonZero && current.get('intAdjustmentType') === 8) {
+                            iRely.Functions.showErrorDialog("None of the items have specified a non-zero value for 'Adjustment Qty By' field.");
+                            return;
                         }
 
                         if(duplicateLotDetected == 1) {
@@ -1466,7 +1475,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     msgBox.showCustomDialog(
                         msgBox.dialogType.ERROR,
                         msgBox.dialogButtonType.OK,
-                        message
+                        message.statusText
                     );
                 }
             });
