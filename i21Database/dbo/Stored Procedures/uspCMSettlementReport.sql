@@ -205,8 +205,8 @@ BEGIN
 	BillDtl.dblTotal,
 	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) as dblTax,
 	CNTRCT.strContractNumber,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId  AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
+	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId   AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
@@ -229,12 +229,12 @@ BEGIN
 		BillDtl.dblTax
 		END as InboundTax,
 	0 as OutboundTax,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId  AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
 	0 as OutboundDiscount,
 	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
 		0
 		ELSE
-		(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0))
+		(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId  AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0))
 		END as InboundNetDue,
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
@@ -663,8 +663,8 @@ BEGIN
 	BillDtl.dblTotal,
 	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) as dblTax,
 	CNTRCT.strContractNumber,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
+	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId  AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
@@ -687,12 +687,12 @@ BEGIN
 		BillDtl.dblTax
 		END as InboundTax,
 	0 as OutboundTax,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId  AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
 	0 as OutboundDiscount,
 	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
 		0
 		ELSE
-		(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0))
+		(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId  AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0))
 		END as InboundNetDue,
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
