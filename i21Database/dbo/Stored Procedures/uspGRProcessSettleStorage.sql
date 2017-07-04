@@ -1075,17 +1075,25 @@ BEGIN TRY
 			,[intContractHeaderId]
 			,[intContractDetailId]
 			,[intUnitOfMeasureId]
+			,[dblWeightUnitQty]
+			,[dblCostUnitQty] 
+			,[dblUnitQty]
+			,[dblNetWeight] 	
 		)
 		SELECT 
-			 a.[intCustomerStorageId]
-			,a.[intItemId]
-			,NULL
-			,@dblUnits AS [dblUnits]
-			,a.[strItemNo]
-			,a.[dblCashPrice]
-			,a.[intContractHeaderId]
-			,a.[intContractDetailId]
-			,b.intItemUOMId
+			 a.[intCustomerStorageId] AS [intCustomerStorageId]
+			,a.[intItemId] AS [intItemId]
+			,NULL AS [intAccountId]
+			,@dblUnits AS [dblQtyReceived]
+			,a.[strItemNo] AS [strMiscDescription]
+			,a.[dblCashPrice] AS [dblCost]
+			,a.[intContractHeaderId] AS [intContractHeaderId]
+			,a.[intContractDetailId] AS [intContractDetailId]
+			,b.intItemUOMId AS [intUnitOfMeasureId]
+			,1 AS [dblWeightUnitQty]
+			,1 AS [dblCostUnitQty] 
+			,1 AS [dblUnitQty]
+			,0 AS [dblNetWeight]
 		FROM @SettleVoucherCreate a
 		JOIN tblICItemUOM b ON b.intItemId=a.intItemId AND b.intUnitMeasureId=@intUnitMeasureId 
 		AND a.intCustomerStorageId = @intCustomerStorageId 
@@ -1167,6 +1175,10 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intUnitOfMeasureId]
+					,[dblWeightUnitQty]
+					,[dblCostUnitQty] 
+					,[dblUnitQty]
+					,[dblNetWeight] 
 				)
 				SELECT @intCustomerStorageId
 					,a.[intChargeId] AS intItemId
@@ -1192,6 +1204,10 @@ BEGIN TRY
 					,NULL [intContractHeaderId]
 					,NULL [intContractDetailId]
 					,a.intCostUOMId
+					,1 AS [dblWeightUnitQty]
+					,1 AS [dblCostUnitQty] 
+					,1 AS [dblUnitQty]
+					,0 AS [dblNetWeight]
 				FROM tblICInventoryReceiptCharge a
 				JOIN tblICItem b ON b.intItemId = a.intChargeId
 				WHERE a.intInventoryReceiptId = @intReceiptId
