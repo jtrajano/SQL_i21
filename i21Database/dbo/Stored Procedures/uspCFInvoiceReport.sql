@@ -105,7 +105,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -209,10 +209,22 @@ BEGIN
 			 @InvoiceDate = [from]
 		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
 
+		DECLARE @CustomerName NVARCHAR(MAX)
+		DECLARE @CustomerNameValue NVARCHAR(MAX)
+		SELECT TOP 1
+			 @CustomerName = [from]
+			,@CustomerNameValue = [fieldname]
+		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
+
 
 		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
 		BEGIN
 			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strInvoiceReportNumber IS NOT NULL AND strInvoiceReportNumber != '''' )'
+			IF (ISNULL(@CustomerName,'') != '')
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' + 
+				' (' + @CustomerNameValue  + ' = ' + '''' + @CustomerName + '''' + ' )' END
+			END
 		END
 		
 		
