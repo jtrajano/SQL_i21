@@ -2134,6 +2134,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Workers C
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 19, strCommand = N'Payroll.view.WorkersCompensationCodes' WHERE strMenuName = 'Workers Compensation Codes' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Origin Data' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Origin Data', N'Payroll', @PayrollParentMenuId, N'Origin Data', N'Maintenance', N'Screen', N'Payroll.view.OriginData?showSearch=true&searchCommand=OriginData', N'small-menu-maintenance', 1, 1, 0, 1, 20, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 20, strCommand = N'Payroll.view.OriginData?showSearch=true&searchCommand=OriginData' WHERE strMenuName = 'Origin Data' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollParentMenuId)
     INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
     VALUES (N'Reports', N'Payroll', @PayrollParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, NULL, 1)
