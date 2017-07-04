@@ -57,6 +57,7 @@ DECLARE @temp_aging_table TABLE(
 	,[dtmAsOfDate]				DATETIME
 	,[strSalespersonName]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	,[intCompanyLocationId]		INT
+	,[strSourceTransaction]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 )
 
 DECLARE @temp_availablecustomer_table TABLE(
@@ -68,7 +69,7 @@ DECLARE @temp_availablecustomer_table TABLE(
 IF @strLetterName <> 'Service Charge Invoices Letter'
 BEGIN
 	INSERT INTO @temp_aging_table
-	EXEC uspARCollectionOverdueDetailReport NULL, NULL  
+	EXEC uspARCustomerAgingDetailAsOfDateReport NULL, NULL, NULL, NULL
 
 	DELETE FROM @temp_aging_table
 	WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WITH (NOLOCK) WHERE strType IN ('CF Tran'))
