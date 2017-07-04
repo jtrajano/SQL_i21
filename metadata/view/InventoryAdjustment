@@ -416,6 +416,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLocationName",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Location",
                                                         "hidden": null,
                                                         "hideTrigger": null,
@@ -431,7 +432,9 @@
                                                     "name": "MyComboBox",
                                                     "configAlternates": {
                                                         "alwaysDisplayDecimals": "boolean",
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrilldown": "boolean",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "2af7fbdb-361b-496c-942e-7c9ce2469341",
                                                     "customConfigs": [
@@ -443,6 +446,11 @@
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -676,7 +684,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter117",
+                                                    "name": "filter16",
                                                     "designerId": "be0a06de-99ab-416d-ae5c-3a1068a87c05",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -701,12 +709,26 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strItemNo",
+                                                "headerDrillDownClick": "onItemHeaderClick",
+                                                "headerDrillDownText": "Open",
                                                 "itemId": "colItemNumber",
                                                 "text": "Item No.",
                                                 "width": 100
                                             },
                                             "name": "MyColumn7",
                                             "designerId": "a4d443ea-1398-41ab-89cf-c039fb19e461",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownClick",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownText",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -819,12 +841,26 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strSubLocation",
+                                                "headerDrillDownClick": "onStorageLocationHeaderClick",
+                                                "headerDrillDownText": "Open",
                                                 "itemId": "colSubLocation",
                                                 "text": "Storage Location",
                                                 "width": 100
                                             },
                                             "name": "MyColumn37",
                                             "designerId": "811f8610-422c-4a9f-8435-2990d122ef2c",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownText",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownClick",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -921,12 +957,26 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strStorageLocation",
+                                                "headerDrillDownClick": "onStorageUnitHeaderClick",
+                                                "headerDrillDownText": "Open",
                                                 "itemId": "colStorageLocation",
                                                 "text": "Storage Unit",
                                                 "width": 110
                                             },
                                             "name": "MyColumn38",
                                             "designerId": "ac371495-75f1-4197-b720-a3a1f53a5c06",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownText",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownClick",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -2679,7 +2729,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging110",
+                    "name": "statusbarpaging12",
                     "designerId": "fc46f0de-7c8f-4d13-8dd6-f03119153f7d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

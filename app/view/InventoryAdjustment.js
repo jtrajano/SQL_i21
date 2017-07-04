@@ -210,6 +210,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     }
                                                                 ],
                                                                 flex: 1,
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboLocation',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Location',
@@ -308,6 +309,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownClick: 'onItemHeaderClick',
+                                                        headerDrillDownText: 'Open',
                                                         itemId: 'colItemNumber',
                                                         width: 100,
                                                         dataIndex: 'strItemNo',
@@ -384,6 +387,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownText: 'Open',
+                                                        headerDrillDownClick: 'onStorageLocationHeaderClick',
                                                         itemId: 'colSubLocation',
                                                         width: 100,
                                                         dataIndex: 'strSubLocation',
@@ -453,6 +458,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownText: 'Open',
+                                                        headerDrillDownClick: 'onStorageUnitHeaderClick',
                                                         itemId: 'colStorageLocation',
                                                         width: 110,
                                                         dataIndex: 'strStorageLocation',

@@ -452,6 +452,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         ]                        
                     }
                 }
+            },
+            btnViewItem: {
+                hidden: true
             }
         }
     },
@@ -489,7 +492,140 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             ]
         });
 
+        // var colItemNo = grdInventoryAdjustment.columns[0];
+        // var colStorageLocation = grdInventoryAdjustment.columns[2];
+        // var colStorageUnit = grdInventoryAdjustment.columns[3];
+
+        // colItemNo.renderer = this.onRenderDrilldown;
+        // colStorageLocation.renderer = this.onRenderDrilldown;
+        // colStorageUnit.renderer = this.onRenderDrilldown;
         return win.context;
+    },
+
+    onLocationDrilldown: function(combo) {
+        iRely.Functions.openScreen('i21.view.CompanyLocation', { 
+            filters: [
+                {
+                    column: 'strLocationName',
+                    value: combo.getRawValue()
+                }
+            ],
+            viewConfig: { modal: true } 
+        });
+    },
+
+    onItemHeaderClick: function (menu, column) {
+        // var grid = column.initOwnerCt.grid; 
+        var grid = column.$initParent.grid;
+        if(grid && grid.selection) {
+            if (grid.itemId === 'grdInventoryAdjustment') {
+                i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
+            }
+        } else {
+            iRely.Functions.showErrorDialog('Please make a selection.');
+        }
+    },
+
+    onStorageLocationHeaderClick: function (menu, column) {
+        // var grid = column.initOwnerCt.grid; 
+        var grid = column.$initParent.grid;
+        var win = grid.up('window');
+        var combo = win.down('#cboLocation');
+        
+        if(grid && grid.selection) {
+            if (grid.itemId === 'grdInventoryAdjustment') {
+                iRely.Functions.openScreen('i21.view.CompanyLocation', { 
+                    filters: [
+                        {
+                            column: 'strLocationName',
+                            value: combo.getRawValue()
+                        }
+                    ],
+                    viewConfig: { modal: true } 
+                });
+            }
+        } else {
+            iRely.Functions.showErrorDialog('Please make a selection.');
+        }
+    },
+
+    onStorageUnitHeaderClick: function (menu, column) {
+        // var grid = column.initOwnerCt.grid; 
+        var grid = column.$initParent.grid;
+        if(grid && grid.selection) {
+            if (grid.itemId === 'grdInventoryAdjustment') {
+                i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.StorageUnit', grid, 'intStorageLocationId');
+            }
+        } else {
+            iRely.Functions.showErrorDialog('Please make a selection.');
+        }
+    },
+
+    onRenderDrilldown: function (value, column, record, rowIndex, dataIndex) {
+        var id = null;
+
+        if(dataIndex === 1) {
+            id = record.get('intItemId');
+        } else if (dataIndex === 3) {
+            id = record.get('intSubLocationId');
+        } else if (dataIndex === 4) {
+            id = record.get('intStorageLocationId');
+        }
+
+        if(id !== null) {
+            return `<a id="_drilldown-${id.toString()}" style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration='none'" onMouseOver="this.style.textDecoration='underline'" href="javascript:void(0);">${value}</a>`;
+        }
+        
+        return value;
+    },
+
+    onCellClick: function (view, cell, cellIndex, record, row, rowIndex, e) {
+        var linkClicked = (e.target.tagName == 'A');
+        var clickedDataIndex =
+            view.panel.headerCt.getHeaderAtIndex(cellIndex).dataIndex;
+
+        if (linkClicked) {
+            var win = view.up('window');
+            var me = win.controller;
+            var vm = win.getViewModel();
+
+            if (!record) {
+                //iRely.Functions.showErrorDialog('Please select a location to edit.');
+                return;
+            }
+
+            var id = null, screen = null;
+
+            if(clickedDataIndex === 'strItemNo') {
+                id = record.get('intItemId');
+                screen = 'Inventory.view.Item';
+            } else if (clickedDataIndex === 'strSubLocation') {
+                id = record.get('intSubLocationId');
+                screen = 'i21.view.CompanyLocation';
+            } else if (clickedDataIndex === 'strStorageLocation') {
+                id = record.get('intStorageLocationId');
+                screen = 'Inventory.view.StorageUnit';
+            }
+
+            if(id !== null) {
+                if (vm.data.current.phantom === true) {
+                    win.context.data.saveRecord({
+                        successFn: function (batch, eOpts) {
+                            iRely.Functions.openScreen(screen, id);
+                            return;
+                        }
+                    });
+                }
+                else {
+                    win.context.data.validator.validateRecord({ window: win }, function (valid) {
+                        if (valid) {
+                            iRely.Functions.openScreen(screen, id);
+                            return;
+                        }
+                    });
+                }
+            }
+        }
     },
 
     createTransaction: function(config, action) {
@@ -1552,6 +1688,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#cboNewOwner": {
                 select: this.onAdjustmentDetailSelect
+            },
+            "#grdInventoryAdjustment": {
+                cellclick: this.onCellClick
+            },
+            "#cboLocation": {
+                drilldown: this.onLocationDrilldown
             }
         });
     }
