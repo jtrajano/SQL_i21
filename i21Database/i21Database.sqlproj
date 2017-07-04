@@ -5310,6 +5310,7 @@
     <Build Include="dbo\Views\vyuCTCompactContractDetailView.sql" />
     <Build Include="dbo\Views\vyuTRGetTransportLoadReceipt.sql" />
     <Build Include="dbo\Tables\tblTFComponentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
