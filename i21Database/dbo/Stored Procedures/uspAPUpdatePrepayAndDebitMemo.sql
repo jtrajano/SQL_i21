@@ -8,10 +8,10 @@ CREATE TABLE #tmpBillsId (
 	UNIQUE (intBillId)
 );
 
-BEGIN TRY
+--BEGIN TRY
 
-DECLARE @transCount INT = @@TRANCOUNT;
-IF @transCount = 0 BEGIN TRANSACTION
+--DECLARE @transCount INT = @@TRANCOUNT;
+--IF @transCount = 0 BEGIN TRANSACTION
 
 INSERT INTO #tmpBillsId SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@billIds)
 
@@ -49,59 +49,60 @@ CROSS APPLY
 	AND C.intTransactionType = 11 --Claims
 ) AppliedPayments
 WHERE A.intTransactionType IN (2,3,8)
-AND 1 = CASE WHEN A.intTransactionType= 3 AND A.ysnPosted != 1 --DEBIT MEMO should be posted
-			 THEN 0 ELSE 1 END
+--removed to add performance improvement, we could only apply to posted transactions, unless it pulls the unposted transaction as well
+--AND 1 = CASE WHEN A.intTransactionType= 3 AND A.ysnPosted != 1 --DEBIT MEMO should be posted
+--			 THEN 0 ELSE 1 END
 
 --DELETE THE RECORDS THAT HAS NOT BEEN USED IF POSTING
-IF @post = 1
-BEGIN
-	DELETE A
-	FROM tblAPAppliedPrepaidAndDebit A
-	INNER JOIN #tmpBillsId B ON A.intBillId = B.intBillId
-	WHERE A.dblAmountApplied = 0
-END
+--IF @post = 1
+--BEGIN
+--	DELETE A
+--	FROM tblAPAppliedPrepaidAndDebit A
+--	INNER JOIN #tmpBillsId B ON A.intBillId = B.intBillId
+--	WHERE A.dblAmountApplied = 0
+--END
 
 --VALIDATIONS
 --MAKE SURE PAYMENT IS CORRECT FOR CURRENT TRANSACTION
-DECLARE @error NVARCHAR(200);
-SELECT TOP 1
-	@error = A.strBillId + ' invalid amount applied.'
-FROM tblAPBill A
-WHERE (
-		(A.intBillId IN (SELECT intBillId FROM #tmpBillsId)) --Bill Transactions
-		OR
-		EXISTS(SELECT 1 FROM tblAPAppliedPrepaidAndDebit B WHERE B.intBillId IN (SELECT intBillId FROM #tmpBillsId) 
-					AND B.intTransactionId = A.intBillId AND B.ysnApplied = 1) --Prepay and Debit Memo transactions
-	)
-AND (
-	A.dblPayment > A.dblTotal
-	OR A.dblAmountDue < 0
-	OR A.dblAmountDue > A.dblTotal
-	OR A.dblPayment < 0
-)
+--DECLARE @error NVARCHAR(200);
+--SELECT TOP 1
+--	@error = A.strBillId + ' invalid amount applied.'
+--FROM tblAPBill A
+--WHERE (
+--		(A.intBillId IN (SELECT intBillId FROM #tmpBillsId)) --Bill Transactions
+--		OR
+--		EXISTS(SELECT 1 FROM tblAPAppliedPrepaidAndDebit B WHERE B.intBillId IN (SELECT intBillId FROM #tmpBillsId) 
+--					AND B.intTransactionId = A.intBillId AND B.ysnApplied = 1) --Prepay and Debit Memo transactions
+--	)
+--AND (
+--	A.dblPayment > A.dblTotal
+--	OR A.dblAmountDue < 0
+--	OR A.dblAmountDue > A.dblTotal
+--	OR A.dblPayment < 0
+--)
 
 
-IF @error IS NOT NULL
-BEGIN
-	RAISERROR(@error, 16, 1);
-END
+--IF @error IS NOT NULL
+--BEGIN
+--	RAISERROR(@error, 16, 1);
+--END
 
-IF @transCount = 0 COMMIT TRANSACTION
+--IF @transCount = 0 COMMIT TRANSACTION
 
-END TRY
-BEGIN CATCH
-	DECLARE @ErrorSeverity INT,
-			@ErrorNumber   INT,
-			@ErrorMessage nvarchar(4000),
-			@ErrorState INT,
-			@ErrorLine  INT,
-			@ErrorProc nvarchar(200);
-	-- Grab error information from SQL functions
-	SET @ErrorSeverity = ERROR_SEVERITY()
-	SET @ErrorNumber   = ERROR_NUMBER()
-	SET @ErrorMessage  = ERROR_MESSAGE()
-	SET @ErrorState    = ERROR_STATE()
-	SET @ErrorLine     = ERROR_LINE()
-	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-END CATCH
+--END TRY
+--BEGIN CATCH
+--	DECLARE @ErrorSeverity INT,
+--			@ErrorNumber   INT,
+--			@ErrorMessage nvarchar(4000),
+--			@ErrorState INT,
+--			@ErrorLine  INT,
+--			@ErrorProc nvarchar(200);
+--	-- Grab error information from SQL functions
+--	SET @ErrorSeverity = ERROR_SEVERITY()
+--	SET @ErrorNumber   = ERROR_NUMBER()
+--	SET @ErrorMessage  = ERROR_MESSAGE()
+--	SET @ErrorState    = ERROR_STATE()
+--	SET @ErrorLine     = ERROR_LINE()
+--	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+--	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+--END CATCH

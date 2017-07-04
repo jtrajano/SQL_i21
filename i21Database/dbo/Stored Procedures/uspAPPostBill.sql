@@ -48,7 +48,8 @@ CREATE TABLE #tmpInvalidBillData (
 	[strError] [NVARCHAR](200),
 	[strTransactionType] [NVARCHAR](50),
 	[strTransactionId] [NVARCHAR](50),
-	[intTransactionId] INT
+	[intTransactionId] INT,
+	[intErrorKey]	INT
 );
 
 IF(@batchId IS NULL)
@@ -127,6 +128,8 @@ SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
 
+--Update the prepay and debit memo
+EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -136,6 +139,13 @@ BEGIN
 	--VALIDATIONS
 	INSERT INTO #tmpInvalidBillData 
 	SELECT * FROM fnAPValidatePostBill(@billIds, @post)
+
+	--if there are invalid applied amount, undo updating of amountdue and payment
+	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1)
+	BEGIN
+		DECLARE @reversedPost BIT = ~@post
+		EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @reversedPost
+	END
 
 END
 ELSE
@@ -474,7 +484,7 @@ BEGIN
 		--	AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		--	GROUP BY B.intTransactionId
 		--) AppliedPayments
-		EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 0
+		--EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 0
 
 		IF EXISTS(SELECT 1 FROM @adjustedEntries)
 		BEGIN
@@ -582,7 +592,13 @@ BEGIN
 		--	AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)	--make sure update only those prepayments of the current bills
 		--	GROUP BY B.intTransactionId
 		--) AppliedPayments
-		EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 1
+		--EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 1
+
+		--DELETE THE RECORDS THAT HAS NOT BEEN USED FOR APPLYING IF POSTING
+		DELETE A
+		FROM tblAPAppliedPrepaidAndDebit A
+		INNER JOIN #tmpPostBillData B ON A.intBillId = B.intBillId
+		WHERE A.dblAmountApplied = 0
 
 		--If Prepaid was made the bill fully paid, update the ysnPaid to 1
 		UPDATE A
