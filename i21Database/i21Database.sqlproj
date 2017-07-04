@@ -5324,6 +5324,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateTaskStatus.sql" />
     <Build Include="dbo\Tables\tblETGPSCoordinates.sql" />
     <Build Include="dbo\Tables\tblSMStartingNumberLocation.sql" />
+    <Build Include="dbo\tblDBPanelOwner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5511,5 +5512,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\1720_Statement_Footer_To_Report.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\DB\6_PanelOwnerMigration.sql" />
   </ItemGroup>
 </Project>
