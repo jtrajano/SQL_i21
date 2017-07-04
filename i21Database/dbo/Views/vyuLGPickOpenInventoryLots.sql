@@ -82,7 +82,8 @@ SELECT Lot.intLotId
 	   , CTDetail.dblCashPrice
 	   , CTDetail.intPriceItemUOMId
 	   , CTDetail.dblTotalCost
-
+	   , LD.intWeightItemUOMId
+	   , PO.strPosition
 FROM tblICLot Lot
 JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem      ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
@@ -106,5 +107,6 @@ LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = Lot.intWeig
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= Item.intOriginId	AND CA.strType = 'Origin'
 LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
+LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
 WHERE Lot.dblQty > 0 
 ) InvLots

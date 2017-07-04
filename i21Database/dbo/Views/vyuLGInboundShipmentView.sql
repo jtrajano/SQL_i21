@@ -162,7 +162,8 @@ SELECT
 		PCT.dblFutures, 
 		PCT.dblBasis, 
 		PCT.intPriceItemUOMId, 
-		PCT.dblTotalCost
+		PCT.dblTotalCost,
+		LD.intWeightItemUOMId
 
 FROM tblLGLoad  L  --  tblLGShipmentBLContainerContract SC
 JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId  --tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
