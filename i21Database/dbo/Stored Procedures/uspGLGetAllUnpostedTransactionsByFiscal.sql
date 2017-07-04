@@ -5,12 +5,12 @@
 -- Description:	Gets all unposted transaction (GL,CM,AP,IC,AR) 
 -- JIRA Key:	GL-1923
 -- =============================================
-CREATE PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
+CREATE PROCEDURE [uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
  @intFiscalYearId INT,
  @intEntityId INT,
  @intFiscalYearPeriodId INT = 0,
- @strModule NVARCHAR(3)
- 
+	@strModule NVARCHAR(3),
+	@ysnUnpostedTrans  int OUT
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -106,6 +106,7 @@ BEGIN
 		SELECT  @transactionType ='Origin' 
 		SELECT TransactionType = @transactionType 
 		SELECT strTransactionId,strTransactionType,dtmDate FROM @tblOriginTransactions
+	SET @ysnUnpostedTrans = 1
 		RETURN --SHOW GL SCREEN IF THERE ARE TRANSACTION THEN EXIT
 	END
 	-- END OPEN GL UNPOSTED SCREEN
@@ -162,6 +163,7 @@ BEGIN
 
 			SELECT @msg = CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END  
 			SELECT TransactionType = @transactionType , message = @msg ,batchGUID = @guid 
+		SET @ysnUnpostedTrans = 1
 		END
 
 		-- END OPEN BATCH POSTING SCREEN
@@ -169,6 +171,7 @@ BEGIN
 		BEGIN
 			-- ANY SCREEN IS NOT OPENED.
 			SELECT TransactionType = 'Empty'  , message = '' ,batchGUID = '' 
+		SET @ysnUnpostedTrans = 0
 		END
 
 END
