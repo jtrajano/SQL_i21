@@ -30,3 +30,20 @@
 	CONSTRAINT [FK_tblGRStorageHistory_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_intCustomerStorageId] ON [dbo].[tblGRStorageHistory]
+(
+	[intCustomerStorageId] ASC
+)
+INCLUDE ( 	
+	intStorageHistoryId
+	,intTicketId
+	,intInventoryReceiptId
+	,intInvoiceId
+	,intInventoryShipmentId
+	,intBillId
+	,intContractHeaderId
+) 
+GO 

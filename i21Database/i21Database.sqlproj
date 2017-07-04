@@ -5306,6 +5306,9 @@
     <Build Include="dbo\Stored Procedures\uspMFGetOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateLotByOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTaskStatus.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerLookup.sql" />
+    <Build Include="dbo\Views\vyuCTCompactContractDetailView.sql" />
+    <Build Include="dbo\Views\vyuTRGetTransportLoadReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
