@@ -28,3 +28,4 @@ FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblCTWeightGrade PWG 
 			ON PWG.intWeightGradeId = CH.intWeightId
+		WHERE L.intShipmentType = 1
