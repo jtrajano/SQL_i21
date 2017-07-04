@@ -13,7 +13,7 @@ BEGIN
 		,strCode			= CAST(prhst_code AS NVARCHAR(200))
 		,strCheckNumber		= CAST(prhst_no AS NVARCHAR(200))
 		,strCheckType		= CAST(CASE prhst_chk_type WHEN ''I'' THEN ''Individual'' ELSE ''Regular'' END AS NVARCHAR(200))
-		,strDeductionCode	= CAST(prhst_tax AS NVARCHAR(200))
+		,strTaxCode			= CAST(prhst_tax AS NVARCHAR(200))
 		,strType			= CAST(prhst_tax_type AS NVARCHAR(200))
 		,strDepartment		= CAST(prhst_dept AS NVARCHAR(200))
 		,dblAmount			= CAST(prhst_amt AS NUMERIC(18, 6))
