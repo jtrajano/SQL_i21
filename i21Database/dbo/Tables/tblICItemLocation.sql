@@ -23,6 +23,7 @@ Type the overview for the table here.
 		[intStorageLocationId] INT NULL, 
 		[intIssueUOMId] INT NULL, 
 		[intReceiveUOMId] INT NULL, 
+		[intGrossUOMId] INT NULL,
 		[intFamilyId] INT NULL, 
 		[intClassId] INT NULL, 
 		[intProductCodeId] INT NULL, 

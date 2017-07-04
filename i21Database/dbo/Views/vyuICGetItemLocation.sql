@@ -28,6 +28,8 @@ SELECT ItemLocation.intItemLocationId
 	, strIssueUOM = IssueUOM.strUnitMeasure
 	, ItemLocation.intReceiveUOMId
 	, strReceiveUOM = ReceiveUOM.strUnitMeasure
+	, ItemLocation.intGrossUOMId
+	, strGrossUOM = GrossUOM.strUnitMeasure
 	, ItemLocation.intFamilyId
 	, strFamily = Family.strSubcategoryId
 	, ItemLocation.intClassId
@@ -88,12 +90,12 @@ SELECT ItemLocation.intItemLocationId
 FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
-	
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = ItemLocation.intVendorId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ItemLocation.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemLocation.intStorageLocationId
 	LEFT JOIN vyuICGetItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
 	LEFT JOIN vyuICGetItemUOM IssueUOM ON IssueUOM.intItemUOMId = ItemLocation.intIssueUOMId
+	LEFT JOIN vyuICGetItemUOM GrossUOM ON GrossUOM.intItemUOMId = ItemLocation.intGrossUOMId
 	LEFT JOIN tblSTSubcategory Family ON Family.intSubcategoryId = ItemLocation.intFamilyId
 	LEFT JOIN tblSTSubcategory Class ON Class.intSubcategoryId = ItemLocation.intClassId
 	LEFT JOIN tblSTSubcategoryRegProd ProductCode ON ProductCode.intRegProdId = ItemLocation.intProductCodeId
