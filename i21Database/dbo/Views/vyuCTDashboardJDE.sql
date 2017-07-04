@@ -38,6 +38,7 @@ SELECT 	 SQ.intContractDetailId
 		,CD.intNumberOfContainers			
 		,SQ.strItemNo				
 		,SQ.strItemDescription	
+		,IM.strShortName AS strItemShortName
 		,PT.strDescription						AS strProductType
 		,CS.strContractStatus				
 		,(SQ.dblQuantity - SQ.dblBalance)		AS dblQtyShortClosed
@@ -107,6 +108,7 @@ SELECT 	 SQ.intContractDetailId
 		,CD.strVendorLotID
 		,SQ.strContractItemName
 		,SQ.strContractItemNo
+		,IC.strGrade  AS strQualityApproval
 		,CASE 	WHEN CD.dblBalance <> CD.dblQuantity	
 				THEN 'Y'
 				ELSE 'N' 
@@ -143,8 +145,6 @@ SELECT 	 SQ.intContractDetailId
 	LEFT JOIN 	tblICCommodityAttribute			 	PT	ON	PT.intCommodityAttributeId			=	IM.intProductTypeId
 	LEFT JOIN 	tblCTBook						 	BK	ON	BK.intBookId						=	SQ.intBookId
 	LEFT JOIN 	tblCTSubBook					 	SK	ON	SK.intSubBookId						=	SQ.intSubBookId
-	LEFT JOIN 	tblCTContractCertification		 	CC	ON	CC.intContractDetailId				=	SQ.intContractDetailId
-	LEFT JOIN 	tblICCertification				 	CF	ON	CF.intCertificationId				=	CC.intCertificationId
 	LEFT JOIN 	tblICItemUOM					 	WU	ON	WU.intItemUOMId						=	SQ.intNetWeightUOMId
 	LEFT JOIN 	tblICUnitMeasure				 	U7	ON	U7.intUnitMeasureId					=	WU.intUnitMeasureId
 	LEFT JOIN 	tblICUnitMeasure				 	U8	ON	1 = 1
@@ -160,3 +160,14 @@ SELECT 	 SQ.intContractDetailId
 	)										 		LG	ON	LG.intPContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN	vyuCTLoadView						LV	ON	LV.intContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN	vyuCTQualityApprovedRejected		QA	ON	QA.intContractDetailId				=	CD.intContractDetailId
+	LEFT JOIN
+	(
+			SELECT intContractDetailId, strCertificationName = STUFF((
+			SELECT ', ' + IC.strCertificationName 
+			FROM	tblCTContractCertification	CF
+			JOIN	tblICCertification			IC	ON	IC.intCertificationId	=	CF.intCertificationId
+			WHERE intContractDetailId = x.intContractDetailId
+			FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, '')
+			FROM tblCTContractCertification AS x
+			GROUP BY intContractDetailId
+	)												CF	ON	CF.intContractDetailId			=	CD.intContractDetailId
