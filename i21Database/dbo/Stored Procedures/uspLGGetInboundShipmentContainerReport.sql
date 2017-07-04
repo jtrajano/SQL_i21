@@ -164,7 +164,7 @@ BEGIN
 		SELECT L.strBLNumber
 			,LC.strContainerNumber
 			,LDV.strItemNo
-			,LDV.strItemDescription
+			,CASE WHEN ISNULL(ITM.strContractItemName,'') = '' THEN LDV.strItemDescription ELSE ITM.strContractItemName END AS strItemDescription
 			,CB.strContractBasis
 			,CH.strContractNumber
 			,CH.strContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberWithSeq
