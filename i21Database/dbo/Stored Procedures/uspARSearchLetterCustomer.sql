@@ -9,13 +9,15 @@ DECLARE @strLetterName			NVARCHAR(MAX),
 		@strCompanyAddress		NVARCHAR(100),
 		@strCompanyPhone		NVARCHAR(50)
 
-SET NOCOUNT ON;
-SELECT 
-	@strLetterName = strName 
-FROM 
-	tblSMLetter 
-WHERE 
-	intLetterId = CAST(@intLetterId AS NVARCHAR(10))
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET XACT_ABORT ON  
+SET ANSI_WARNINGS OFF
+
+SELECT @strLetterName = strName 
+FROM dbo.tblSMLetter WITH (NOLOCK)
+WHERE intLetterId = CAST(@intLetterId AS NVARCHAR(10))
 SET NOCOUNT OFF;
 
 SET NOCOUNT ON;
@@ -24,18 +26,17 @@ SELECT TOP 1
 	@strCompanyName			= strCompanyName,
 	@strCompanyAddress		= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL),
 	@strCompanyPhone		= strPhone
-FROM 
-	tblSMCompanySetup
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 SET NOCOUNT OFF;
 
 DECLARE @temp_aging_table TABLE(
-	 [strInvoiceNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	 [strCustomerName]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	,[strCustomerNumber]		NVARCHAR(15)	COLLATE Latin1_General_CI_AS
+	,[strInvoiceNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	,[strRecordNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
-	,[intInvoiceId]				INT
-	,[strCustomerName]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	,[intInvoiceId]				INT	
 	,[strBOLNumber]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS
-	,[intEntityCustomerId]		INT
-	,[strCustomerNumber]		NVARCHAR(15)	COLLATE Latin1_General_CI_AS			
+	,[intEntityCustomerId]		INT				
 	,[dblCreditLimit]			NUMERIC(18,6)
 	,[dblTotalAR]				NUMERIC(18,6)
 	,[dblFuture]				NUMERIC(18,6)
@@ -56,782 +57,291 @@ DECLARE @temp_aging_table TABLE(
 	,[dtmAsOfDate]				DATETIME
 	,[strSalespersonName]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	,[intCompanyLocationId]		INT
+	,[strSourceTransaction]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 )
 
 DECLARE @temp_availablecustomer_table TABLE(
-	[intEntityCustomerId]		INT 
+	 [intEntityCustomerId]		INT
+	,[strCustomerName]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS
+	,[strCustomerNumber]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS
 )
 
-INSERT INTO 
-	@temp_aging_table
-EXEC uspARCollectionOverdueDetailReport NULL, NULL, NULL  
+IF @strLetterName <> 'Service Charge Invoices Letter'
+BEGIN
+	INSERT INTO @temp_aging_table
+	EXEC uspARCustomerAgingDetailAsOfDateReport NULL, NULL, NULL, NULL
 
+	DELETE FROM @temp_aging_table
+	WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WITH (NOLOCK) WHERE strType IN ('CF Tran'))
 
-DELETE FROM @temp_aging_table
-WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WHERE strType IN ('CF Tran'))
-
-DELETE FROM tblARCollectionOverdueDetail
-INSERT INTO tblARCollectionOverdueDetail
-(
-	intCompanyLocationId		 
-	,strCompanyName				 
-	,strCompanyAddress			 
-	,strCompanyPhone			 
-	,intEntityCustomerId		 
-	,strCustomerNumber			 
-	,strCustomerName			 
-	,strCustomerAddress			 
-	,strCustomerPhone			 
-	,strAccountNumber			 
-	,intInvoiceId				 
-	,strInvoiceNumber			 
-	,strBOLNumber				 
-	,dblCreditLimit				 
-	,intTermId					 
-	,strTerm					 
-	,dblTotalAR					 
-	,dblFuture					 
-	,dbl0Days					 
-	,dbl10Days					 
-	,dbl30Days					 
-	,dbl60Days					 
-	,dbl90Days					 
-	,dbl120Days					 
-	,dbl121Days					 
-	,dblTotalDue				 
-	,dblAmountPaid				 
-	,dblInvoiceTotal			 		 
-	,dblCredits					 	
-	,dblPrepaids				 	
-	,dtmDate					 
-	,dtmDueDate					 
-)
-SELECT intCompanyLocationId		=	@intCompanyLocationId
-	, strCompanyName			=	@strCompanyName
-	, strCompanyAddress			=	@strCompanyAddress
-	, strCompanyPhone			=	@strCompanyPhone
-	, intEntityCustomerId		=	 Aging.intEntityCustomerId
-	, strCustomerNumber			=	 Aging.strCustomerName
- 	, strCustomerName			=	Cus.strName
-	, strCustomerAddress		=	[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, Cus.strName, NULL)
-	, strCustomerPhone			=	EnPhoneNo.strPhone 
-	, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WHERE [intEntityId] = Cus.[intEntityId]) 
-	, intInvoiceId				=	Aging.intInvoiceId	
-	, strInvoiceNumber			=	Aging.strInvoiceNumber		 
-	, strBOLNumber				=	Aging.strBOLNumber
-	, dblCreditLimit			=	Aging.dblCreditLimit				 
-	, intTermId					=	Cus.intTermsId			 
-	, strTerm					=	Cus.strTerm			 
-	, dblTotalAR				=	Aging.dblTotalAR	 
-	, dblFuture					=	Aging.dblFuture	 					 
-	, dbl0Days					=	Aging.dbl0Days	 					 
-	, dbl10Days					=	Aging.dbl10Days	 					 
-	, dbl30Days					=	Aging.dbl30Days	 					 
-	, dbl60Days					=	Aging.dbl60Days	 					 
-	, dbl90Days					=	Aging.dbl90Days	 				 
-	, dbl120Days				=	Aging.dbl120Days	 					 
-	, dbl121Days				=	Aging.dbl121Days	 					 
-	, dblTotalDue				=	Aging.dblTotalDue	 			 
-	, dblAmountPaid				=	Aging.dblAmountPaid				 
-	, dblInvoiceTotal			=	Aging.dblInvoiceTotal		 
-	, dblCredits				=	Aging.dblCredits						 	
-	, dblPrepaids				=	Aging.dblPrepaids					 	
-	, dtmDate					=	Aging.dtmDate						 
-	, dtmDueDate				=	Aging.dtmDueDate		 
-FROM 
+	DELETE FROM tblARCollectionOverdueDetail
+	INSERT INTO tblARCollectionOverdueDetail
 	(
-	SELECT 
-		* 
-	FROM 
-		@temp_aging_table 
-	WHERE 
-		intInvoiceId NOT IN (SELECT 
-								intInvoiceId 
-							FROM 
-								tblARInvoice 
-							WHERE 
-								strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') AND ysnPaid = 1) 
-	)  Aging
-INNER JOIN (
-			SELECT 
-				ARC.[intEntityId]
-				, strCustomerNumber					= ISNULL(ARC.strCustomerNumber, EME.strEntityNo)
-				, EME.strName
-				, BillToLoc.strBillToAddress
-				, BillToLoc.strBillToCity
-				, BillToLoc.strBillToCountry
-				, BillToLoc.strBillToLocationName
-				, BillToLoc.strBillToState
-				, BillToLoc.strBillToZipCode
-				, ARC.intTermsId
-				, ARC.strTerm
-			FROM 
-				(SELECT 
-					[intEntityId], 
-					strCustomerNumber, 
-					intBillToId,		
-					ARC.intTermsId,
-					SMT.strTerm								
-				FROM 
-					tblARCustomer ARC
-				INNER JOIN (
-							SELECT 
-								intTermID,
-								strTerm 
-							FROM 
-								tblSMTerm) SMT ON ARC.intTermsId = SMT.intTermID ) ARC
-				INNER JOIN (
-							SELECT 
-								intEntityId, 
-								strEntityNo, 
-								strName								 
-							FROM 
-								tblEMEntity
-							) EME ON ARC.[intEntityId] = EME.intEntityId
-				LEFT JOIN (
-							SELECT 
-								Loc.intEntityId, 
-								Loc.intEntityLocationId,
-								Loc.intTermsId,
-								SMT.strTerm																
-							FROM 
-								tblEMEntityLocation Loc
-							INNER JOIN (
-										SELECT 
-											intTermID,
-											strTerm 
-										FROM 
-											tblSMTerm) SMT ON Loc.intTermsId = SMT.intTermID
-							WHERE ysnDefaultLocation = 1
-							) EMEL ON ARC.[intEntityId] = EMEL.intEntityId
-				LEFT JOIN (
-							SELECT 
-								intEntityId, 
-								intEntityLocationId,
-								strBillToAddress		= strAddress,
-								strBillToCity			= strCity,
-								strBillToLocationName	= strLocationName,
-								strBillToCountry		= strCountry,
-								strBillToState			= strState,
-								strBillToZipCode		= strZipCode
-							FROM 
-								tblEMEntityLocation
-							) BillToLoc ON ARC.[intEntityId] = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
-			) Cus ON Aging.intEntityCustomerId = Cus.[intEntityId]
-INNER JOIN (
-			SELECT 
-				intEntityId
-					, [intEntityContactId]
-					, ysnDefaultContact 
-			FROM 
-				[tblEMEntityToContact]
-			WHERE 
-				ysnDefaultContact = 1) CusToCon ON Aging.intEntityCustomerId = CusToCon.intEntityId  
- LEFT JOIN (
-			SELECT 
-				intEntityId
-				, strPhone 
-			FROM 
-				tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
+		intCompanyLocationId		 
+		,strCompanyName				 
+		,strCompanyAddress			 
+		,strCompanyPhone			 
+		,intEntityCustomerId		 
+		,strCustomerNumber			 
+		,strCustomerName			 
+		,strCustomerAddress			 
+		,strCustomerPhone			 
+		,strAccountNumber			 
+		,intInvoiceId				 
+		,strInvoiceNumber			 
+		,strBOLNumber				 
+		,dblCreditLimit				 
+		,intTermId					 
+		,strTerm					 
+		,dblTotalAR					 
+		,dblFuture					 
+		,dbl0Days					 
+		,dbl10Days					 
+		,dbl30Days					 
+		,dbl60Days					 
+		,dbl90Days					 
+		,dbl120Days					 
+		,dbl121Days					 
+		,dblTotalDue				 
+		,dblAmountPaid				 
+		,dblInvoiceTotal			 		 
+		,dblCredits					 	
+		,dblPrepaids				 	
+		,dtmDate					 
+		,dtmDueDate					 
+	)
+	SELECT intCompanyLocationId		=	@intCompanyLocationId
+		, strCompanyName			=	@strCompanyName
+		, strCompanyAddress			=	@strCompanyAddress
+		, strCompanyPhone			=	@strCompanyPhone
+		, intEntityCustomerId		=	AGING.intEntityCustomerId
+		, strCustomerNumber			=	AGING.strCustomerName
+ 		, strCustomerName			=	CUSTOMER.strName
+		, strCustomerAddress		=	[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, CUSTOMER.strName, NULL)
+		, strCustomerPhone			=	CUSTOMER.strPhone
+		, strAccountNumber			=	CUSTOMER.strAccountNumber
+		, intInvoiceId				=	AGING.intInvoiceId	
+		, strInvoiceNumber			=	AGING.strInvoiceNumber		 
+		, strBOLNumber				=	AGING.strBOLNumber
+		, dblCreditLimit			=	AGING.dblCreditLimit				 
+		, intTermId					=	CUSTOMER.intTermsId			 
+		, strTerm					=	''--CUSTOMER.strTerm
+		, dblTotalAR				=	AGING.dblTotalAR	 
+		, dblFuture					=	AGING.dblFuture	 					 
+		, dbl0Days					=	AGING.dbl0Days	 					 
+		, dbl10Days					=	AGING.dbl10Days	 					 
+		, dbl30Days					=	AGING.dbl30Days	 					 
+		, dbl60Days					=	AGING.dbl60Days	 					 
+		, dbl90Days					=	AGING.dbl90Days	 				 
+		, dbl120Days				=	AGING.dbl120Days	 					 
+		, dbl121Days				=	AGING.dbl121Days	 					 
+		, dblTotalDue				=	AGING.dblTotalDue	 			 
+		, dblAmountPaid				=	AGING.dblAmountPaid				 
+		, dblInvoiceTotal			=	AGING.dblInvoiceTotal		 
+		, dblCredits				=	AGING.dblCredits						 	
+		, dblPrepaids				=	AGING.dblPrepaids					 	
+		, dtmDate					=	AGING.dtmDate						 
+		, dtmDueDate				=	AGING.dtmDueDate		 
+	FROM @temp_aging_table AGING
+	INNER JOIN (SELECT intEntityId
+					 , intTermsId
+					 , strName
+					 , strBillToAddress
+					 , strBillToCity
+					 , strBillToState
+					 , strBillToZipCode
+					 , strBillToCountry
+					 , strPhone
+					 , strAccountNumber
+				FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
+	) CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityId
+	WHERE AGING.intInvoiceId NOT IN (SELECT intInvoiceId 
+									 FROM dbo.tblARInvoice WITH (NOLOCK)
+									 WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') AND ysnPaid = 1)
 			
-DELETE FROM tblARCollectionOverdue				
-INSERT INTO tblARCollectionOverdue
-(
-	intEntityCustomerId 				 
-	,dblCreditLimitSum	  				 
-	,dblTotalARSum 						 
-	,dblFutureSum 				 
-	,dbl0DaysSum 						 
-	,dbl10DaysSum 					 
-	,dbl30DaysSum  						 
-	,dbl60DaysSum 					 
-	,dbl90DaysSum 						 
-	,dbl120DaysSum  						 
-	,dbl121DaysSum 						 
-	,dblTotalDueSum 				 
-	,dblAmountPaidSum  					 
-	,dblInvoiceTotalSum	 			 		 
-	,dblCreditsSum 					 	
-	,dblPrepaidsSum  	
-)
-SELECT 			 
-	intEntityCustomerId 				 
-	,dblCreditLimitSum		= SUM(dblCreditLimit) 				 
-	,dblTotalARSum			= SUM(dblTotalAR) 						 
-	,dblFutureSum			= SUM(dblFuture) 						 
-	,dbl0DaysSum			= SUM(dbl0Days) 						 
-	,dbl10DaysSum			= SUM(dbl10Days) 						 
-	,dbl30DaysSum			= SUM(dbl30Days) 						 
-	,dbl60DaysSum			= SUM(dbl60Days) 						 
-	,dbl90DaysSum			= SUM(dbl90Days) 						 
-	,dbl120DaysSum			= SUM(dbl120Days) 						 
-	,dbl121DaysSum			= SUM(dbl121Days) 						 
-	,dblTotalDueSum			= SUM(dblTotalDue) 					 
-	,dblAmountPaidSum		= SUM(dblAmountPaid) 					 
-	,dblInvoiceTotalSum		= SUM(dblInvoiceTotal) 				 		 
-	,dblCreditsSum			= SUM(dblCredits) 						 	
-	,dblPrepaidsSum			= SUM(dblPrepaids) 					 	
-FROM 
-	@temp_aging_table
-GROUP BY 
-	intEntityCustomerId
-
-
-
+	DELETE FROM tblARCollectionOverdue				
+	INSERT INTO tblARCollectionOverdue
+	(
+		intEntityCustomerId 				 
+		,dblCreditLimitSum	  				 
+		,dblTotalARSum 						 
+		,dblFutureSum 				 
+		,dbl0DaysSum 						 
+		,dbl10DaysSum 					 
+		,dbl30DaysSum  						 
+		,dbl60DaysSum 					 
+		,dbl90DaysSum 						 
+		,dbl120DaysSum  						 
+		,dbl121DaysSum 						 
+		,dblTotalDueSum 				 
+		,dblAmountPaidSum  					 
+		,dblInvoiceTotalSum	 			 		 
+		,dblCreditsSum 					 	
+		,dblPrepaidsSum  	
+	)
+	SELECT 			 
+		intEntityCustomerId 				 
+		,dblCreditLimitSum		= SUM(dblCreditLimit) 				 
+		,dblTotalARSum			= SUM(dblTotalAR) 						 
+		,dblFutureSum			= SUM(dblFuture) 						 
+		,dbl0DaysSum			= SUM(dbl0Days) 						 
+		,dbl10DaysSum			= SUM(dbl10Days) 						 
+		,dbl30DaysSum			= SUM(dbl30Days) 						 
+		,dbl60DaysSum			= SUM(dbl60Days) 						 
+		,dbl90DaysSum			= SUM(dbl90Days) 						 
+		,dbl120DaysSum			= SUM(dbl120Days) 						 
+		,dbl121DaysSum			= SUM(dbl121Days) 						 
+		,dblTotalDueSum			= SUM(dblTotalDue) 					 
+		,dblAmountPaidSum		= SUM(dblAmountPaid) 					 
+		,dblInvoiceTotalSum		= SUM(dblInvoiceTotal) 				 		 
+		,dblCreditsSum			= SUM(dblCredits) 						 	
+		,dblPrepaidsSum			= SUM(dblPrepaids) 					 	
+	FROM 
+		@temp_aging_table
+	GROUP BY 
+		intEntityCustomerId
+END
+	
 IF @strLetterName = 'Recent Overdue Collection Letter'
 BEGIN
-
 	INSERT INTO @temp_availablecustomer_table
-	(
-		intEntityCustomerId
-	)
-	SELECT 
-		ARCO.intEntityCustomerId
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-				FROM 
-					(SELECT
-						EME.[intEntityId]
-					FROM 
-						(SELECT 
-							intEntityId 
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]									 
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId
-												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
-									WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	SELECT ARCO.intEntityCustomerId
+		 , ENTITY.strName
+		 , ENTITY.strCustomerNumber
+	FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityId 
+					 , strName
+					 , strCustomerNumber
+				FROM dbo.vyuARCustomer WITH (NOLOCK) 
+				WHERE ysnActive = 1
+	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
+	WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 
 	DELETE 
-	FROM 
-		tblARCollectionOverdueDetail 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	FROM dbo.tblARCollectionOverdueDetail 
+	WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	DELETE 
-	FROM 
-		tblARCollectionOverdue 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	FROM dbo.tblARCollectionOverdue 
+	WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT 
-		ARCO.intEntityCustomerId
-		, strCustomerNumber
-		, strCustomerName 		
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-					, strCustomerNumber
-					, strCustomerName 
-				FROM 
-					(SELECT
-						EME.[intEntityId],
-						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-						strCustomerName
-					 FROM 
-						(SELECT 
-							intEntityId,
-							strEntityNo,
-							strCustomerName		= strName
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]
-										, ARC.strCustomerNumber
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId 
-												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
-									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
-	ORDER BY 
-		strCustomerName
+	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
 	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
-	(
-		intEntityCustomerId
-	)
-	SELECT 
-		ARCO.intEntityCustomerId
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-				FROM 
-					(SELECT
-						EME.[intEntityId]
-					 FROM 
-						(SELECT 
-							intEntityId
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]									 
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId
-												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
-									 WHERE
-										ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	SELECT ARCO.intEntityCustomerId
+		 , ENTITY.strName
+		 , ENTITY.strCustomerNumber
+	FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityId 
+					 , strName
+					 , strCustomerNumber
+				FROM dbo.vyuARCustomer WITH (NOLOCK) 
+				WHERE ysnActive = 1
+	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
+	WHERE (ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdueDetail 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdue 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT 
-		ARCO.intEntityCustomerId
-		, strCustomerNumber
-		, strCustomerName 		
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-					, strCustomerNumber
-					, strCustomerName 
-				FROM 
-					(SELECT
-						EME.[intEntityId],
-						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-						strCustomerName
-					 FROM 
-						(SELECT 
-							intEntityId,
-							strEntityNo,
-							strCustomerName		= strName
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]
-										, ARC.strCustomerNumber
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId 
-												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
-									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
-	ORDER BY 
-		strCustomerName
+	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
 	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
-	(
-		intEntityCustomerId
-	)
-	SELECT 
-		ARCO.intEntityCustomerId
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-				FROM 
-					(SELECT
-						EME.[intEntityId]
-					 FROM 
-						(SELECT 
-							intEntityId
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]									 
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId
-												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
-									 WHERE
-										ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	SELECT ARCO.intEntityCustomerId
+		 , ENTITY.strName
+		 , ENTITY.strCustomerNumber
+	FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityId 
+					 , strName
+					 , strCustomerNumber
+				FROM dbo.vyuARCustomer WITH (NOLOCK) 
+				WHERE ysnActive = 1
+	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
+	WHERE (ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdueDetail 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdue 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT 
-		ARCO.intEntityCustomerId
-		, strCustomerNumber
-		, strCustomerName 
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-					, strCustomerNumber
-					, strCustomerName 
-				FROM 
-					(SELECT
-						EME.[intEntityId],
-						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-						strCustomerName
-					 FROM 
-						(SELECT 
-							intEntityId,
-							strEntityNo,
-							strCustomerName		= strName
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-									ARC.[intEntityId]
-										, ARC.strCustomerNumber
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId 
-												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
-									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
-	ORDER BY 
-		strCustomerName
+	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
 	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
-	(
-		intEntityCustomerId
-	)
-	SELECT 
-		ARCO.intEntityCustomerId
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-				FROM 
-					(SELECT
-						EME.[intEntityId]
-					 FROM 
-						(SELECT 
-							intEntityId
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]									 
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId
-												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
-									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus
-			  ) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	SELECT ARCO.intEntityCustomerId
+		 , ENTITY.strName
+		 , ENTITY.strCustomerNumber
+	FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityId 
+					 , strName
+					 , strCustomerNumber
+				FROM dbo.vyuARCustomer WITH (NOLOCK) 
+				WHERE ysnActive = 1
+	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
+	WHERE (ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdueDetail 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdue 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT 
-		ARCO.intEntityCustomerId
-		, strCustomerNumber
-		, strCustomerName 
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-					, strCustomerNumber
-					, strCustomerName 
-				FROM 
-					(SELECT
-						EME.[intEntityId],
-						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-						strCustomerName
-					 FROM 
-						(SELECT 
-							intEntityId,
-							strEntityNo,
-							strCustomerName		= strName
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]
-										, ARC.strCustomerNumber
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId 
-												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
-									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus
-			  ) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
-	ORDER BY 
-		strCustomerName
+	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
 	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = 'Final Overdue Collection Letter'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
-	(
-		intEntityCustomerId
-	)
-	SELECT 
-		ARCO.intEntityCustomerId
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-				FROM 
-					(SELECT
-						EME.[intEntityId]
-					 FROM 
-						(SELECT 
-							intEntityId
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]									 
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId
-												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
-									 WHERE
-										ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus						
-				) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl121DaysSum,0) <> 0)
+	SELECT ARCO.intEntityCustomerId
+		 , ENTITY.strName
+		 , ENTITY.strCustomerNumber
+	FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityId 
+					 , strName
+					 , strCustomerNumber
+				FROM dbo.vyuARCustomer WITH (NOLOCK) 
+				WHERE ysnActive = 1
+	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
+	WHERE (ISNULL(dbl121DaysSum,0) <> 0)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdueDetail 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdue 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT 
-		ARCO.intEntityCustomerId
-		, strCustomerNumber
-		, strCustomerName 
-	FROM 
-		tblARCollectionOverdue ARCO
-	INNER JOIN (SELECT 
-					Cus.[intEntityId]
-					, strCustomerNumber
-					, strCustomerName 
-				FROM 
-					(SELECT
-						EME.[intEntityId],
-						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-						strCustomerName
-					 FROM 
-						(SELECT 
-							intEntityId,
-							strEntityNo,
-							strCustomerName		= strName
-						FROM 
-							tblEMEntity) EME
-						INNER JOIN (SELECT 
-										ARC.[intEntityId]
-										, ARC.strCustomerNumber
-									FROM 
-										tblARCustomer ARC
-									INNER JOIN (SELECT 
-													intEntityCustomerId 
-												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
-									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-					) Cus						
-				) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
-	WHERE 
-		(ISNULL(dbl121DaysSum,0) <> 0)
-	ORDER BY 
-		strCustomerName
+	SELECT * FROM temp_availablecustomer_table ORDER BY strCustomerName
 	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = 'Credit Suspension'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
-	(
-		intEntityCustomerId
-	)
-	SELECT 
-		Cus.[intEntityId]
-	FROM 
-		(SELECT
-			EME.[intEntityId]
-		 FROM 
-			(SELECT 
-				intEntityId
-			FROM 
-				tblEMEntity) EME
-			INNER JOIN (SELECT 
-							ARC.[intEntityId]									 
-						FROM 
-							tblARCustomer ARC
-			            WHERE
-							dblCreditLimit = 0 AND ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-		) Cus
+	SELECT intEntityId
+		 , strName
+		 , strCustomerNumber
+	FROM dbo.vyuARCustomer WITH (NOLOCK) 
+	WHERE ysnActive = 1
+	  AND dblCreditLimit = 0
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdueDetail 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdue 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT 
-		Cus.[intEntityId]
-		, strCustomerNumber
-		, strCustomerName 
-	FROM 
-		(SELECT
-			EME.[intEntityId],
-			strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-			strCustomerName
-		 FROM 
-			(SELECT 
-				intEntityId,
-				strEntityNo,
-				strCustomerName		= strName
-			FROM 
-				tblEMEntity) EME
-			INNER JOIN (SELECT 
-							ARC.[intEntityId]
-							, ARC.strCustomerNumber
-						FROM 
-							tblARCustomer ARC
-						INNER JOIN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
-						 WHERE
-							ARC.dblCreditLimit = 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-		) Cus
-	ORDER BY 
-		strCustomerName
+	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
 	SET NOCOUNT OFF;
 END
 
@@ -839,153 +349,63 @@ ELSE IF @strLetterName = 'Expired Credit Card'
 BEGIN
 	GetActiveCustomers:
 	INSERT INTO @temp_availablecustomer_table
-	(
-		intEntityCustomerId
-	)
-	SELECT Cus.[intEntityId]
-	FROM 
-		(SELECT
-			EME.[intEntityId]
-		 FROM 
-			(SELECT 
-				intEntityId
-			FROM 
-				tblEMEntity) EME
-			INNER JOIN (SELECT 
-							ARC.[intEntityId]									 
-						FROM 
-							tblARCustomer ARC
-						 WHERE
-							ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-		) Cus
+	SELECT intEntityId
+		 , strName
+		 , strCustomerNumber
+	FROM dbo.vyuARCustomer WITH (NOLOCK) 
+	WHERE ysnActive = 1
+	  AND dblCreditLimit = 0
 			
-	DELETE 
-	FROM 
-		tblARCollectionOverdueDetail 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdueDetail 
+	WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdue 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT Cus.[intEntityId]
-		, strCustomerNumber
-		, strCustomerName 
-	FROM 
-		(SELECT
-			EME.[intEntityId],
-			strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-			strCustomerName
-		 FROM 
-			(SELECT 
-				intEntityId,
-				strEntityNo,
-				strCustomerName		= strName
-			FROM 
-				tblEMEntity) EME
-			INNER JOIN (SELECT 
-							ARC.[intEntityId]
-							, ARC.strCustomerNumber
-						FROM 
-							tblARCustomer ARC
-						INNER JOIN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
-						 WHERE
-							ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-		) Cus		
-	ORDER BY 
-		strCustomerName
+	SELECT * FROM @temp_availablecustomer_table ARC ORDER BY strCustomerName	
 	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = 'Credit Review'
 BEGIN
 	INSERT INTO @temp_availablecustomer_table
-	(
-		intEntityCustomerId
-	)
-	SELECT 
-		Cus.[intEntityId]
-	FROM 
-		(SELECT
-			EME.[intEntityId]
-		 FROM 
-			(SELECT 
-				intEntityId
-			FROM 
-				tblEMEntity) EME
-			INNER JOIN (SELECT 
-							ARC.[intEntityId]									 
-						FROM 
-							tblARCustomer ARC
-						 
-						 WHERE
-							ARC.dblCreditLimit > 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-		) Cus	
+	SELECT intEntityId
+		 , strName
+		 , strCustomerNumber
+	FROM dbo.vyuARCustomer WITH (NOLOCK) 
+	WHERE ysnActive = 1
+	  AND dblCreditLimit > 0
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdueDetail 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
-	DELETE 
-	FROM 
-		tblARCollectionOverdue 
-	WHERE 
-		intEntityCustomerId NOT IN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table)
+	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT 
-		Cus.[intEntityId]
-		, strCustomerNumber				 
-		, strCustomerName 
-	FROM 
-		(SELECT
-			EME.[intEntityId],
-			strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
-			strCustomerName
-		 FROM 
-			(SELECT 
-				intEntityId,
-				strEntityNo,
-				strCustomerName		= strName
-			FROM 
-				tblEMEntity) EME
-			INNER JOIN (SELECT 
-							ARC.[intEntityId]
-							, ARC.strCustomerNumber
-						FROM 
-							tblARCustomer ARC
-						INNER JOIN (SELECT 
-										intEntityCustomerId 
-									FROM 
-										@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
-						WHERE
-						ARC.dblCreditLimit > 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
-		) Cus	
-	ORDER BY 
-		strCustomerName
+	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
 	SET NOCOUNT OFF;
 END
+
+ELSE IF  @strLetterName = 'Service Charge Invoices Letter'
+BEGIN
+	SET NOCOUNT ON;
+	SELECT I.intEntityCustomerId
+		 , CUST.strCustomerNumber
+		 , CUST.strCustomerName
+	FROM dbo.tblARInvoice I WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityId
+					 , strCustomerNumber
+					 , strCustomerName  = strName
+				FROM dbo.vyuARCustomer WITH (NOLOCK)
+				WHERE ysnActive = 1
+	) CUST ON I.intEntityCustomerId = CUST.intEntityId	 
+	WHERE I.strType = 'Service Charge'
+	GROUP BY I.intEntityCustomerId
+		   , CUST.strCustomerNumber
+		   , CUST.strCustomerName
+	ORDER BY CUST.strCustomerName
+	SET NOCOUNT OFF;	
+END
+
 ELSE
 BEGIN
 	GOTO GetActiveCustomers
