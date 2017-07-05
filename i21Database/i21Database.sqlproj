@@ -5335,6 +5335,7 @@
     <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemDataPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemPricingPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportUpdateRebateOrDiscountPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATLetters.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
