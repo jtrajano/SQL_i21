@@ -29,8 +29,21 @@ BEGIN
 	BEGIN
 		SELECT TOP 1 @currentMenu = intMenuID FROM #TempOriginMenus
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE intParentMenuID = @currentMenu AND strType = 'Legacy')
+		BEGIN
+			INSERT INTO tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strCategory, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort)
+			SELECT strMenuName, strMenuName, @currentMenu, strDescription, strCategory, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort 
+			FROM tblSMMasterMenu 
+			WHERE intMenuID = @currentMenu
+
+			UPDATE ScreenMenus
+			SET ScreenMenus.intParentMenuID = SCOPE_IDENTITY()
+			FROM tblSMMasterMenu ScreenMenus
+			WHERE intParentMenuID = @currentMenu AND strType = 'Legacy'
+		END
+
 		UPDATE  OriginMenus
-		SET     OriginMenus.intSort = RowNumber
+		SET     OriginMenus.intSort = (RowNumber - 1)
 		FROM
 		(
 			SELECT  t.intSort, ROW_NUMBER() OVER (ORDER BY intMenuID ASC) AS RowNumber
