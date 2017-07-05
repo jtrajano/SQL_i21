@@ -6,6 +6,7 @@
 	[intEarningAccountId] [int] NULL,
 	[intDeductionAccountId] [int] NULL,
 	[ysnMaskEmployeeName] BIT NOT NULL DEFAULT ((0)), 
+	[ysnPreventNegativeTimeOff] BIT NOT NULL DEFAULT ((0)), 
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRCompanyPreference] PRIMARY KEY CLUSTERED 
 (
