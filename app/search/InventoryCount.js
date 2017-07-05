@@ -112,28 +112,31 @@ Ext.define('Inventory.search.InventoryCount', {
     },
 
     onOpenCountGroupClick: function(e) {
-        var dashPanel = iRely.Functions.getComponentByQuery('#searchTabPanel');
-        var tabCountGroup = dashPanel.items.map.subTab1;
-        var grid = tabCountGroup.items.map.grdSearch;
-        var selection = grid.getSelectionModel().selected;
-        var filters = _.map(selection.items, function(x) {
-            return {
-                column: 'intCountGroupId',
-                value: x.get('intCountGroupId')
-            };
-        });
+        var panel = e.up('panel');
+        var grid = panel ? panel.query('#grdSearch') : null;
+        grid = _.filter(grid, { url: '../Inventory/api/CountGroup/Search' });
+        if(grid && grid.length > 0) {
+            grid = grid[0];
+            var selection = grid.getSelectionModel().selected;
+            var filters = _.map(selection.items, function(x) {
+                return {
+                    column: 'intCountGroupId',
+                    value: x.get('intCountGroupId')
+                };
+            });
 
-        iRely.Functions.openScreen('Inventory.view.InventoryCountGroup', { action: 'edit', 
-            filters: filters,
-            viewConfig: {
-                modal: true, 
-                listeners: { 
-                    close: function(control) { 
-                        grid.getStore().reload();
+            iRely.Functions.openScreen('Inventory.view.InventoryCountGroup', { action: 'edit', 
+                filters: filters,
+                viewConfig: {
+                    modal: true, 
+                    listeners: { 
+                        close: function(control) { 
+                            grid.getStore().reload();
+                        }
                     }
                 }
-            }
-        });      
+            });   
+        }   
     },
 
     onNewCountGroupClick: function (e) {

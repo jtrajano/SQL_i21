@@ -48,29 +48,29 @@ Ext.define('Inventory.search.StockDetail', {
                     iconCls: 'small-calculator',
                     listeners: {
                         click: function (e) {
-                            var dashPanel = iRely.Functions.getComponentByQuery('#searchTabPanel');
-                            var tabCountGroup = dashPanel.items.map.mainTab;
-                            var grid = tabCountGroup.items.map.grdSearch;
-                            var selection = _.first(grid.getSelectionModel().selected.items);
+                            var grid = e.up('panel');
+                            if(grid.url === '../Inventory/api/Item/SearchStockDetail') {
+                                var selection = _.first(grid.getSelectionModel().selected.items);
 
-                            if(selection) {
-                                iRely.Functions.openScreen('Inventory.view.InventoryValuation', {
-                                    showSearch: true,
-                                    filters: [
-                                        {
-                                            column: 'strItemNo',
-                                            value: selection.get('strItemNo'),
-                                            condition: 'eq',
-                                            conjunction: 'And'
-                                        },
-                                        {
-                                            column: 'strLocationName',
-                                            value: selection.get('strLocationName'),
-                                            condition: 'eq',
-                                            conjunction: 'And'
-                                        }
-                                    ]
-                                });
+                                if(selection) {
+                                    iRely.Functions.openScreen('Inventory.view.InventoryValuation', {
+                                        showSearch: true,
+                                        filters: [
+                                            {
+                                                column: 'strItemNo',
+                                                value: selection.get('strItemNo'),
+                                                condition: 'eq',
+                                                conjunction: 'And'
+                                            },
+                                            {
+                                                column: 'strLocationName',
+                                                value: selection.get('strLocationName'),
+                                                condition: 'eq',
+                                                conjunction: 'And'
+                                            }
+                                        ]
+                                    });
+                                }
                             }
                         }
                     }
