@@ -713,7 +713,10 @@ BEGIN
 		END
 		IF(@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL)
 		BEGIN
-			SET @ysnInvalid = 1
+			IF (@strTransactionType != 'Foreign Sale')
+			BEGIN
+				SET @ysnInvalid = 1
+			END
 		END
 		IF(@intARItemLocationId = 0 OR @intARItemLocationId IS NULL)
 		BEGIN
@@ -1052,10 +1055,10 @@ BEGIN
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')
 		BEGIN
 				UPDATE tblCFTransaction 
-				SET intContractId = null 
-				,strPriceBasis = null
-				,dblTransferCost = 0
-				,strPriceMethod = 'Standard Pricing'
+				SET intContractId		= null 
+				,strPriceBasis			= null
+				,dblTransferCost		= @dblTransferCost	
+				,strPriceMethod			= 'Standard Pricing'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
 				,intSiteGroupId			= null
@@ -1074,7 +1077,7 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost = 0
+				,dblTransferCost		= @dblTransferCost
 				,strPriceMethod = 'Import File Price'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1114,7 +1117,7 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost = 0
+				,dblTransferCost 		= @dblTransferCost
 				,strPriceMethod = 'Special Pricing'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1131,14 +1134,14 @@ BEGIN
 		END
 		ELSE IF (@strPriceMethod = 'Price Profile')
 		BEGIN
-				IF(@strPrcPriceBasis = 'Transfer Cost' OR @strPrcPriceBasis = 'Transfer Price' OR @strPrcPriceBasis = 'Discounted Price' OR @strPrcPriceBasis = 'Full Retail')
-				BEGIN
-					SET @dblTransferCost = @dblTransferCost
-				END
-				ELSE
-				BEGIN
-					SET @dblTransferCost = 0
-				END
+				--IF(@strPrcPriceBasis = 'Transfer Cost' OR @strPrcPriceBasis = 'Transfer Price' OR @strPrcPriceBasis = 'Discounted Price' OR @strPrcPriceBasis = 'Full Retail')
+				--BEGIN
+				--	SET @dblTransferCost = @dblTransferCost
+				--END
+				--ELSE
+				--BEGIN
+				--	SET @dblTransferCost = 0
+				--END
 
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
@@ -1178,7 +1181,7 @@ BEGIN
 					
 				UPDATE tblCFTransaction 
 				SET strPriceBasis = null 
-				,dblTransferCost = 0 
+				,dblTransferCost		= @dblTransferCost
 				,strPriceMethod = 'Contract Pricing'
 				,intContractId = @intPrcContractHeaderId
 				,intContractDetailId = @intPrcContractDetailId
@@ -1216,7 +1219,7 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost = 0
+				,dblTransferCost 		= @dblTransferCost
 				,strPriceMethod = @strPriceMethod
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null

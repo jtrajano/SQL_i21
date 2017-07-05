@@ -1,5 +1,4 @@
-﻿
-CREATE FUNCTION [dbo].[fnCFGetTransactionMargin] (
+﻿CREATE FUNCTION [dbo].[fnCFGetTransactionMargin] (
 	 @intTransactionId		INT = 0
 	 ,@intItemId			INT = 0
 	 ,@intLocationId		INT = 0
@@ -152,3 +151,6 @@ RETURN
 
 
 END
+GO
+
+

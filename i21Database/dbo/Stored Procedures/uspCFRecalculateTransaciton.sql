@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿
+CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -1612,8 +1613,9 @@ BEGIN
 	--				MARGIN COMPUTATION				 --
 	---------------------------------------------------
 	DECLARE @dblMargin NUMERIC(18,6)
+	DECLARE @dblCalculatedCost NUMERIC(18,6)
 
-	SELECT @dblMargin = dblMargin , @dblTransferCost = dblCost
+	SELECT @dblMargin = dblMargin , @dblCalculatedCost = dblCost
 	FROM [dbo].[fnCFGetTransactionMargin](
 	 0
 	,@intItemId			
@@ -1751,6 +1753,12 @@ BEGIN
 	---------------------------------------------------
 	--					ZERO PRICING				 --
 	---------------------------------------------------
+
+	IF (ISNULL(@ysnInvalid,0) = 0)
+	BEGIN
+		SET @dblTransferCost = @dblCalculatedCost -- calculated based on transaction type. (margin calc)
+
+	END
 
 	---------------------------------------------------
 	--					PRICING OUT					 --
@@ -1950,3 +1958,6 @@ BEGIN
 	---------------------------------------------------
 	
 	END
+GO
+
+
