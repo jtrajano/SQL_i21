@@ -101,6 +101,7 @@ SELECT 	 SQ.intContractDetailId
 		,LV.dtmETSPOL
 		,LV.dtmETAPOL
 		,LV.dtmETAPOD
+		,LV.strBookingReference
 		,CASE 	WHEN ISNULL(LV.ysnDocsReceived, 0) = 0 	
 				THEN 'N'
 				ELSE 'Y' 
@@ -118,6 +119,7 @@ SELECT 	 SQ.intContractDetailId
 		,CH.dtmCreated
 		,CD.dtmUpdatedAvailabilityDate
 		,SQ.strLocationName
+		,CH.dtmContractDate
 
 	FROM 		vyuCTContractSequence			 	SQ			
 	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId = 1
