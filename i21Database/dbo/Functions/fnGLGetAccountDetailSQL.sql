@@ -49,10 +49,8 @@ AS
    ,strTransactionForm=ISNULL(A.strTransactionForm ,'''')
    ,strModuleName =ISNULL(A.strModuleName,'''')
    ,strReference= ISNULL(A.strReference,'''')
-
-   ,strReferenceDetail = ISNULL(detail.strReference,'''')
+   ,strReferenceDetail = ISNULL(A.strReference, detail.strReference)
    ,strDocument = ISNULL(detail.strDocument,'''')
-
    ,dblTotal = (
 				CASE	WHEN Grp.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN (ISNULL(ROUND(A.dblDebit,2), 0 ) - ISNULL(ROUND(A.dblCredit,2),0))
 						ELSE ((ISNULL(ROUND(A.dblCredit,2), 0 ) - ISNULL(ROUND(A.dblDebit,2),0) ))*-1
