@@ -30,7 +30,8 @@ AS
 						FOR XML PATH(''), TYPE)
 						.value('.','NVARCHAR(MAX)'
 					),1,2,' '
-				) strContainerNumber
+				) strContainerNumber,
+				LO.strBookingReference
 
 		FROM	vyuLGLoadView		LO
 		JOIN	tblLGLoadDetail		LD ON LD.intLoadId = LO.intLoadId
@@ -57,6 +58,8 @@ AS
 			,dtmETAPOD
 			,dtmStuffingDate
 			,dtmETSPOL
+			,strBookingReference
+
 
 	FROM
 	(
@@ -83,6 +86,7 @@ AS
 				,LO.dtmETSPOL
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
 				,NULL strContainerNumber
+				,LO.strBookingReference
 
 		FROM	vyuLGLoadView		LO
 		JOIN	tblLGLoadDetail		LD ON LD.intLoadId = LO.intLoadId
@@ -107,3 +111,4 @@ AS
 			,dtmETAPOD
 			,dtmStuffingDate
 			,dtmETSPOL
+			,strBookingReference
