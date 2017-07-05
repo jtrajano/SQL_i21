@@ -43,6 +43,7 @@
 
 	-------------SITE RELATED-------------
 	,@strSiteId						NVARCHAR(MAX)
+	,@strSiteName					NVARCHAR(MAX)	= NULL
 	,@strTransactionType			NVARCHAR(MAX)	= NULL
 	,@strDeliveryPickupInd			NVARCHAR(MAX)	= NULL
 	,@intSiteId						INT				= 0
@@ -323,7 +324,7 @@ BEGIN
 			SELECT
 				intNetworkId			= @intNetworkId
 				,strSiteNumber			= @strSiteId
-				,strSiteName			= @strSiteId
+				,strSiteName			= @strSiteName
 				,strDeliveryPickup		= 'Pickup'
 				,intARLocationId		= @intNetworkLocation
 				,strControllerType		= (CASE @strNetworkType 
@@ -385,7 +386,7 @@ BEGIN
 			SELECT
 				intNetworkId			= @intNetworkId
 				,strSiteNumber			= @strSiteId
-				,strSiteName			= @strSiteId
+				,strSiteName			= @strSiteName
 				,strDeliveryPickup		= 'Pickup'
 				,intARLocationId		= @intNetworkLocation
 				,strControllerType		= 'Voyager'
