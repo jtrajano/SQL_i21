@@ -5337,6 +5337,7 @@
     <Build Include="dbo\Stored Procedures\uspSTReportUpdateRebateOrDiscountPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspPATLetters.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultComment.sql" />
+    <Build Include="dbo\Views\vyuMFGetTaskQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
