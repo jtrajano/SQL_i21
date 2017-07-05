@@ -1,4 +1,4 @@
-﻿CREATE procedure uspGLSyncGLACTMST
+CREATE procedure uspGLSyncGLACTMST
 @ysnActive BIT,
 @ysnSystem BIT,
 @intAccountId INT,
@@ -7,5 +7,3 @@
 @strDescriptionLookup NVARCHAR(8),
 @strUnit NVARCHAR(20)
 AS
-	
-

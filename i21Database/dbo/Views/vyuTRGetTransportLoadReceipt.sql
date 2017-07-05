@@ -1,0 +1,20 @@
+﻿CREATE VIEW [dbo].[vyuTRGetTransportLoadReceipt]
+	AS
+
+SELECT Receipt.intLoadReceiptId
+		, Header.strTransaction
+		, dblOrderedQuantity  = CASE WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Net' THEN Receipt.dblNet
+								WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Gross' THEN Receipt.dblGross
+								WHEN ISNULL(LoadSchedule.dblQuantity,0) != 0 THEN LoadSchedule.dblQuantity END
+		, Receipt.dblGross
+FROM tblTRLoadReceipt Receipt
+LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = Receipt.intLoadHeaderId
+--LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = Receipt.intTerminalId
+LEFT JOIN vyuTRSupplyPointView SupplyPoint ON SupplyPoint.intSupplyPointId = Receipt.intSupplyPointId
+--LEFT JOIN tblSMCompanyLocation CompanyLocation ON CompanyLocation.intCompanyLocationId = Receipt.intCompanyLocationId
+--LEFT JOIN tblICItem Item ON Item.intItemId = Receipt.intItemId
+--LEFT JOIN vyuCTContractDetailView Contract ON Contract.intContractDetailId = Receipt.intContractDetailId
+--LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
+--LEFT JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = Receipt.intInventoryTransferId
+--LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId
+LEFT JOIN vyuLGLoadDetailView LoadSchedule ON LoadSchedule.intLoadDetailId = Receipt.intLoadDetailId

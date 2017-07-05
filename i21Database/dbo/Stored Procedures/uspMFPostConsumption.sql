@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@strRetBatchId NVARCHAR(40) = NULL OUT
 	,@intBatchId INT = NULL
 	,@ysnPostGL BIT=1
+	,@strActualCost NVARCHAR(20) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -228,7 +229,7 @@ BEGIN
 		,intStorageLocationId = cl.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
-		,strActualCostId='tblTRLoadHeader.strTransaction'
+		,strActualCostId=@strActualCost
 	FROM dbo.tblMFWorkOrderConsumedLot cl
 	JOIN dbo.tblICItem i ON cl.intItemId = i.intItemId
 	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId

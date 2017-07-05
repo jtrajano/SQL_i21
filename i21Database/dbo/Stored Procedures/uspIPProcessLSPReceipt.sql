@@ -120,7 +120,7 @@ Begin
 											 	
 		--Move to Archive
 		Insert Into tblIPReceiptArchive(strDeliveryNo,strExternalRefNo,dtmReceiptDate,strPartnerNo,strImportStatus,strErrorMessage)
-		Select strDeliveryNo,strExternalRefNo,dtmReceiptDate,strPartnerNo,'Success',''
+		Select strDeliveryNo,@strReceiptNo,dtmReceiptDate,strPartnerNo,'Success',''
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
 		Select @intNewStageReceiptId=SCOPE_IDENTITY()

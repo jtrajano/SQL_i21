@@ -151,21 +151,27 @@ SELECT
 		LC.strUSDAComments,
 
 ---- Container Contract Association Details
-		LDCL.dblQuantity as dblContainerContractQty,
-		dblContainerContractGrossWt = (LC.dblGrossWt / LC.dblQuantity) * LDCL.dblQuantity,
-		dblContainerContractTareWt = (LC.dblTareWt / LC.dblQuantity) * LDCL.dblQuantity,
-		dblContainerContractlNetWt = (LC.dblNetWt / LC.dblQuantity) * LDCL.dblQuantity,	
-		dblContainerWeightPerQty = (LC.dblNetWt / LC.dblQuantity),
-		LDCL.dblReceivedQty as dblContainerContractReceivedQty,
+		ISNULL(LDCL.dblQuantity,LD.dblQuantity) as dblContainerContractQty,
+		dblContainerContractGrossWt = (LC.dblGrossWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,
+		dblContainerContractTareWt = (LC.dblTareWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,
+		dblContainerContractlNetWt = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,	
+		dblContainerWeightPerQty = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END),
+		ISNULL(LDCL.dblReceivedQty,LD.dblDeliveredQuantity) as dblContainerContractReceivedQty,
 		dblReceivedGrossWt = IsNull((SELECT sum(ICItem.dblGross) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0),
-		dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0)
-FROM tblLGLoadDetailContainerLink LDCL --  tblLGShipmentBLContainerContract SC
-JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId--tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
-JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId -- tblLGShipment S ON S.intShipmentId = SC.intShipmentId
+		dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0), 
+		PCT.dblFutures, 
+		PCT.dblBasis, 
+		PCT.intPriceItemUOMId, 
+		PCT.dblTotalCost,
+		LD.intWeightItemUOMId
+
+FROM tblLGLoad  L  --  tblLGShipmentBLContainerContract SC
+JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId  --tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
 JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = LD.intPContractDetailId
 JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= PCT.intCompanyLocationId
 JOIN vyuCTEntity EY ON EY.intEntityId = PCH.intEntityId AND EY.strEntityType = (CASE WHEN PCH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+LEFT JOIN  tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId -- tblLGShipment S ON S.intShipmentId = SC.intShipmentId
 LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = PCT.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = PCT.intItemUOMId

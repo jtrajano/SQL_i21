@@ -38,7 +38,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
   
 -- Declare the variables.  
 DECLARE @intBankAccountId AS INT
-		,@strTransactionId AS NVARCHAR(40)
+		,@strTransactionIds AS NVARCHAR(max)
 		,@strModule AS NVARCHAR(40)
   
 -- Declare the variables for the XML parameter  
@@ -48,8 +48,8 @@ DECLARE @xmlDocumentId AS INT
 DECLARE @temp_xml_table TABLE (  
  [fieldname] NVARCHAR(50)  
  ,condition NVARCHAR(20)        
- ,[from] NVARCHAR(50)  
- ,[to] NVARCHAR(50)  
+ ,[from] NVARCHAR(max)  
+ ,[to] NVARCHAR(max)  
  ,[join] NVARCHAR(10)  
  ,[begingroup] NVARCHAR(50)  
  ,[endgroup] NVARCHAR(50)  
@@ -66,8 +66,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (  
  [fieldname] nvarchar(50)  
  , condition nvarchar(20)  
- , [from] nvarchar(50)  
- , [to] nvarchar(50)  
+ , [from] nvarchar(max)  
+ , [to] nvarchar(max)  
  , [join] nvarchar(10)  
  , [begingroup] nvarchar(50)  
  , [endgroup] nvarchar(50)  
@@ -79,7 +79,7 @@ SELECT @intBankAccountId = [from]
 FROM @temp_xml_table   
 WHERE [fieldname] = 'intBankAccountId'  
 
-SELECT	@strTransactionId = [from]
+SELECT	@strTransactionIds = [from]
 FROM @temp_xml_table   
 WHERE [fieldname] = 'strTransactionId'
 
@@ -88,7 +88,7 @@ FROM @temp_xml_table
 WHERE [fieldname] = 'strModule'
   
 -- Sanitize the parameters  
-SET @strTransactionId = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL ELSE @strTransactionId END  
+SET @strTransactionIds = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionIds, ''))) = '' THEN NULL ELSE @strTransactionIds END  
 SET @strModule = CASE WHEN LTRIM(RTRIM(ISNULL(@strModule, ''))) = '' THEN NULL ELSE @strModule END  
   
 -- Report Query:  
@@ -592,7 +592,7 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	--LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
-	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 
 	UNION ALL SELECT
 	BNKTRN.intBankAccountId,
@@ -758,5 +758,5 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON INVDTL.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	--LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
-	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 END

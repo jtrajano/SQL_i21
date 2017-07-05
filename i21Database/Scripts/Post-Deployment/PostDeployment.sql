@@ -47,7 +47,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
 :r .\SM\1720_Statement_Footer_To_Report.sql
-:r .\SM\1730_UpdateOriginSubMenusSorting.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -201,7 +200,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql
 :r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
-:r .\AR\DefaultData\25_UpdateTransactionAccountIds.sql
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
 
@@ -229,7 +227,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\MigrateVouchersForApproval.sql
 :r .\AP\MigratePOForApprovals.sql
 :r .\AP\UpdateVoucherDetail1099.sql
-:r .\AP\UpdateAmountSign.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -256,6 +253,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
+:R .\CT\172To173.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -334,13 +332,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\037_DefaultDataLocationPayee.sql
 :r .\EM\038_UpdateEncryptionUsed.sql
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
---START KEEP FROM 1710-1720
-:r .\EM\DataMigration\1710_1720_CCSite_migration.sql
---END KEEP FROM 1710-1720
-:r .\EM\040_UpdateEmailDistribution.sql
-:r .\EM\Data_Fix_From_1710_to_1720_Currency_Cus_Ven.sql
-:r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
-
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

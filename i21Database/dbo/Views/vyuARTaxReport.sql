@@ -5,6 +5,7 @@ SELECT I.intEntityCustomerId
 	 , I.dtmDate
 	 , C.strCustomerNumber
 	 , C.strName	 
+	 , strDisplayName			= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(C.strName, '')
 	 , strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
 	 , intCurrencyId			= I.intCurrencyId
@@ -39,6 +40,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (SELECT TC.intTaxCodeId
 				 , TC.strTaxAgency
 				 , TC.strTaxCode
+				 , strTaxCodeDescription = TC.strDescription
 				 , TC.intTaxClassId
 				 , CL.strTaxClass
 				 , TC.strCountry
@@ -104,6 +106,7 @@ INNER JOIN (SELECT TC.intTaxCodeId
 				 TC.intTaxCodeId
 				,TC.strTaxAgency
 				,TC.strTaxCode
+				,TC.strDescription
 				,TC.intTaxClassId
 				,CL.strTaxClass
 				,TC.strCountry

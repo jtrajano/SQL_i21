@@ -38,6 +38,8 @@
     [intLastModifiedUserId]    INT              NULL,
     [dtmLastModified]          DATETIME         NULL,
 	[ysnRecurring]			   BIT              DEFAULT 0 NOT NULL,
+	[ysnHold]				   BIT				DEFAULT 0 NOT NULL,
+	[strHoldReason]			   NVARCHAR (250)	COLLATE Latin1_General_CI_AS NULL,
 	[ysnDelete]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL

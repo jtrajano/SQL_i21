@@ -26,8 +26,6 @@ SELECT
 	,strStockUOM = sUOM.strUnitMeasure
 	,strStockUOMType = sUOM.strUnitType
 	,dblStockUnitQty = StockUOM.dblUnitQty
-	,dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0)
-	,dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0)
 	,ItemLocation.intAllowNegativeInventory
 	,strAllowNegativeInventory = (CASE WHEN ItemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
 							 WHEN ItemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
@@ -36,42 +34,45 @@ SELECT
 	,strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
 							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
 							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END)
-	,dblAmountPercent = ISNULL(ItemPricing.dblAmountPercent, 0)
-	,dblSalePrice = ISNULL(ItemPricing.dblSalePrice, 0)
-	,dblMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0)
+	,dblAmountPercent = ISNULL(ItemPricing.dblAmountPercent, 0.00)
+	,dblSalePrice = ISNULL(ItemPricing.dblSalePrice, 0.00)
+	,dblMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0.00)
 	,ItemPricing.strPricingMethod
-	,dblLastCost = ISNULL(ItemPricing.dblLastCost, 0)
-	,dblStandardCost = ISNULL(ItemPricing.dblStandardCost, 0)
-	,dblAverageCost = ISNULL(ItemPricing.dblAverageCost, 0)
-	,dblEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0)
+	,dblLastCost = ISNULL(ItemPricing.dblLastCost, 0.00)
+	,dblStandardCost = ISNULL(ItemPricing.dblStandardCost, 0.00)
+	,dblAverageCost = ISNULL(ItemPricing.dblAverageCost, 0.00)
+	,dblEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0.00)
 
-	,dblOnOrder = ISNULL(ItemStockUOM.dblOnOrder, 0)
-	,dblInTransitInbound = ISNULL(ItemStockUOM.dblInTransitInbound, 0)
-	,dblUnitOnHand = CAST(ISNULL(ItemStockUOM.dblOnHand, 0) AS NUMERIC(38, 7))
+	,dblOnOrder = ISNULL(ItemStockUOM.dblOnOrder, 0.00)
+	,dblInTransitInbound = ISNULL(ItemStockUOM.dblInTransitInbound, 0.00)
+	,dblUnitOnHand = CAST(ISNULL(ItemStockUOM.dblOnHand, 0.00) AS NUMERIC(38, 7))
 	,dblInTransitOutbound = ISNULL(ItemStockUOM.dblInTransitOutbound, 0)
 	,dblBackOrder =	CASE	-- Compute the back order qty when committed > available Qty. 
-							WHEN	ISNULL(ItemStockUOM.dblOrderCommitted, 0) > ((ISNULL(ItemStockUOM.dblOnHand, 0) - (ISNULL(ItemStockUOM.dblUnitReserved, 0) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0) + ISNULL(ItemStockUOM.dblConsignedSale, 0))) )
-									AND ((ISNULL(ItemStockUOM.dblOnHand, 0) - (ISNULL(ItemStockUOM.dblUnitReserved, 0) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0) + ISNULL(ItemStockUOM.dblConsignedSale, 0))) ) > 0 THEN 
+							WHEN	ISNULL(ItemStockUOM.dblOrderCommitted, 0.00) > ((ISNULL(ItemStockUOM.dblOnHand, 0.000) - (ISNULL(ItemStockUOM.dblUnitReserved, 0.00) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0.00) + ISNULL(ItemStockUOM.dblConsignedSale, 0.00))) )
+									AND ((ISNULL(ItemStockUOM.dblOnHand, 0.00) - (ISNULL(ItemStockUOM.dblUnitReserved, 0.00) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0.00) + ISNULL(ItemStockUOM.dblConsignedSale, 0.00))) ) > 0 THEN 
 										ABS(
-											ISNULL(ItemStockUOM.dblOrderCommitted, 0)
-											- ((ISNULL(ItemStockUOM.dblOnHand, 0) - (ISNULL(ItemStockUOM.dblUnitReserved, 0) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0) + ISNULL(ItemStockUOM.dblConsignedSale, 0))) )										
+											ISNULL(ItemStockUOM.dblOrderCommitted, 0.00)
+											- ((ISNULL(ItemStockUOM.dblOnHand, 0.00) - (ISNULL(ItemStockUOM.dblUnitReserved, 0.00) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0.00) + ISNULL(ItemStockUOM.dblConsignedSale, 0.00))) )										
 										)
 							ELSE 
 								0
 					END
-	,dblOrderCommitted = ISNULL(ItemStockUOM.dblOrderCommitted, 0)
-	,dblUnitStorage = ISNULL(ItemStockUOM.dblUnitStorage, 0)
-	,dblConsignedPurchase = ISNULL(ItemStockUOM.dblConsignedPurchase, 0)
-	,dblConsignedSale = ISNULL(ItemStockUOM.dblConsignedSale, 0)
-	,dblUnitReserved = ISNULL(ItemStockUOM.dblUnitReserved, 0)
+	,dblOrderCommitted = ISNULL(ItemStockUOM.dblOrderCommitted, 0.00)
+	,dblUnitStorage = ISNULL(ItemStockUOM.dblUnitStorage, 0.00)
+	,dblConsignedPurchase = ISNULL(ItemStockUOM.dblConsignedPurchase, 0.00)
+	,dblConsignedSale = ISNULL(ItemStockUOM.dblConsignedSale, 0.00)
+	,dblUnitReserved = ISNULL(ItemStockUOM.dblUnitReserved, 0.00)
 	,dblAvailable = 
-				ISNULL(ItemStockUOM.dblOnHand, 0)  
+				ISNULL(ItemStockUOM.dblOnHand, 0.00)  
 				- (
-						ISNULL(ItemStockUOM.dblUnitReserved, 0) 
-						+ ISNULL(ItemStockUOM.dblConsignedSale, 0)
+						ISNULL(ItemStockUOM.dblUnitReserved, 0.00) 
+						+ ISNULL(ItemStockUOM.dblConsignedSale, 0.00)
 				)
 	
-	,dblExtendedCost = ISNULL(ItemStockUOM.dblOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0)
+	,dblExtendedCost = ISNULL(ItemStockUOM.dblOnHand, 0.00) * ISNULL(ItemPricing.dblAverageCost, 0.00)
+	,dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0.00)
+	,dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0.00)
+	,dblNearingReorderBy = CAST(ISNULL(ItemStockUOM.dblOnHand, 0.00) - ISNULL(ItemLocation.dblReorderPoint, 0.00) AS NUMERIC(38, 7))
 FROM	
 	tblICItem Item 
 	LEFT JOIN (

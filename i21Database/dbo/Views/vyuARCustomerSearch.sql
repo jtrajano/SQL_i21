@@ -62,6 +62,5 @@ LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.[intEntityId]
 LEFT JOIN tblEMEntity T on S.[intEntityId] = T.intEntityId
 LEFT JOIN tblSMTaxGroup Tax ON Loc.intTaxGroupId = Tax.intTaxGroupId
 LEFT JOIN tblSMTerm Term on Cus.intTermsId = Term.intTermID
-
 LEFT JOIN tblEMEntity ShipViaEnt ON Loc.intShipViaId = ShipViaEnt.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON Loc.intFreightTermId = FT.intFreightTermId

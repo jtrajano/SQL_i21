@@ -1,4 +1,4 @@
-﻿
+
 GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGLSyncGLACTMST')
 	DROP PROCEDURE uspGLSyncGLACTMST
@@ -23,12 +23,12 @@ SELECT TOP 1 @LegacyReferenceId = intLegacyReferenceId FROM tblGLCOACrossReferen
 IF @LegacyReferenceId IS NULL RETURN -1
 
 UPDATE glactmst
-SET 
-glact_active_yn = case when @ysnActive = 1 then ''Y'' else ''N'' end , 
-glact_sys_acct_yn = case when @ysnSystem = 1 then ''Y'' else ''N'' end , 
+SET
+glact_active_yn = case when @ysnActive = 1 then ''Y'' else ''N'' end ,
+glact_sys_acct_yn = case when @ysnSystem = 1 then ''Y'' else ''N'' end ,
 glact_desc = @strDescription,
 glact_desc_lookup = @strDescriptionLookup, glact_uom = gluommst.A4GLIdentity
-from glactmst 
+from glactmst
 outer apply (
 	select top 1 A4GLIdentity from gluommst WHERE gluom_code = @strUnit
 )gluommst

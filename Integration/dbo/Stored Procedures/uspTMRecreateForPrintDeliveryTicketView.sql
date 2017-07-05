@@ -1,13 +1,13 @@
 GO
-	PRINT 'START OF CREATING [uspTMRecreateDeliveryTicketView] SP'
+	PRINT 'START OF CREATING [uspTMRecreateForPrintDeliveryTicketView] SP'
 GO
 
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspTMRecreateDeliveryTicketView]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].uspTMRecreateDeliveryTicketView
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspTMRecreateForPrintDeliveryTicketView]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].uspTMRecreateForPrintDeliveryTicketView
 GO
 
 
-CREATE PROCEDURE uspTMRecreateDeliveryTicketView 
+CREATE PROCEDURE uspTMRecreateForPrintDeliveryTicketView 
 AS
 BEGIN
 	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTMForPrintDeliveryTicket')
@@ -122,11 +122,11 @@ BEGIN
 	END
 END
 GO
-	PRINT 'END OF CREATING [uspTMRecreateDeliveryTicketView] SP'
+	PRINT 'END OF CREATING [uspTMRecreateForPrintDeliveryTicketView] SP'
 GO
-	PRINT 'START OF Execute [uspTMRecreateDeliveryTicketView] SP'
+	PRINT 'START OF Execute [uspTMRecreateForPrintDeliveryTicketView] SP'
 GO
-	EXEC ('uspTMRecreateDeliveryTicketView')
+	EXEC ('uspTMRecreateForPrintDeliveryTicketView')
 GO
-	PRINT 'END OF Execute [uspTMRecreateDeliveryTicketView] SP'
+	PRINT 'END OF Execute [uspTMRecreateForPrintDeliveryTicketView] SP'
 GO

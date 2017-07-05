@@ -131,6 +131,26 @@ Begin
 	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate) AND ISNULL(strErrorMessage,'') <>'Success'
 End
 
+If @strMessageType='MBN Receipt'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Delivery No</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + ISNULL(strDeliveryNo,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strErrorMessage,'') + '</td>
+	</tr>'
+	From tblIPReceiptError r
+	Where strPartnerNo='0012XI01'
+	AND ISNULL(ysnMailSent,0)=0 AND ISNULL(strErrorMessage,'') <>'Success'
+
+	Update tblIPReceiptError Set ysnMailSent=1
+	Where strPartnerNo='0012XI01' AND ISNULL(strErrorMessage,'') <>'Success'
+End
+
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
 Set @strHtml=REPLACE(@strHtml,'@detail',@strDetail)
 Set @strMessage=@strStyle + @strHtml

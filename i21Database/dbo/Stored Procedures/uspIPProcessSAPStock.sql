@@ -42,12 +42,13 @@ Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 If ISNULL(@strSessionId,'')=''
 	Insert Into @tblStock(strItemNo,strSubLocation,dblQuantity,strSessionId)
 	Select strItemNo,strSubLocation,SUM(ISNULL(dblQuantity,0)),strSessionId 
-	From tblIPStockStage Group By strItemNo,strSubLocation,strSessionId
+	From tblIPStockStage Where strStockType='WB'
+	Group By strItemNo,strSubLocation,strSessionId
 Else
 	Insert Into @tblStock(strItemNo,strSubLocation,dblQuantity,strSessionId)
 	Select strItemNo,strSubLocation,SUM(ISNULL(dblQuantity,0)),strSessionId 
 	From tblIPStockStage 
-	Where strSessionId=@strSessionId
+	Where strSessionId=@strSessionId AND strStockType='WB'
 	Group By strItemNo,strSubLocation,strSessionId
 
 Select @intMinRowNo=Min(intRowNo) From @tblStock
@@ -73,6 +74,12 @@ Begin
 
 		If @strStockType='WB'
 			Set @dblQuantity = @dblQuantity + @dblInTransitQuantity
+
+		--Add Qty from LK,KB
+		Select @dblQuantity = @dblQuantity + SUM(ISNULL(dblQuantity,0)) 
+		From tblIPStockStage 
+		Where strSessionId=@strSessionId AND strStockType<>'WB'
+		Group By strItemNo,strSubLocation,strSessionId
 
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intSubLocationId=intCompanyLocationSubLocationId 

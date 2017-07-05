@@ -196,13 +196,13 @@ BEGIN
 	INSERT INTO @ItemGLAccounts (
 		intItemId
 		,intItemLocationId 
-		,intInventoryId
+		--,intInventoryId
 		,intContraInventoryId
 		,intTransactionTypeId
 	)
 	SELECT	Query.intItemId
 			,Query.intItemLocationId
-			,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_Inventory) 
+			--,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_Inventory) 
 			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing) 
 			,intTransactionTypeId = @intTransactionTypeId
 	FROM	(
@@ -216,6 +216,7 @@ BEGIN
 							AND ItemLocation.intLocationId = Receipt.intLocationId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 						AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+						AND ISNULL(ReceiptItem.intOwnershipType, 0) = 1 -- Only "Own" items will have GL entries. 
 			) Query
 
 	-- Get the GL Account ids to use for the other charges. 
@@ -245,38 +246,6 @@ BEGIN
 							AND ItemLocation.intLocationId = Receipt.intLocationId
 				WHERE	OtherCharges.intInventoryReceiptId = @intInventoryReceiptId
 			) Query
-
-
-	-- Check for missing Inventory Account Id
-	BEGIN 
-		SET @strItemNo = NULL
-		SET @intChargeItemId = NULL
-
-		SELECT	TOP 1 
-				@intChargeItemId = Item.intItemId 
-				,@strItemNo = Item.strItemNo
-		FROM	tblICItem Item INNER JOIN @ItemGLAccounts ItemGLAccount
-					ON Item.intItemId = ItemGLAccount.intItemId
-		WHERE	ItemGLAccount.intInventoryId IS NULL 
-
-		SELECT	TOP 1 
-				@strLocationName = c.strLocationName
-		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-					ON il.intLocationId = c.intCompanyLocationId
-				INNER JOIN @ItemGLAccounts ItemGLAccount
-					ON ItemGLAccount.intItemId = il.intItemId
-					AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intChargeItemId
-				AND ItemGLAccount.intInventoryId IS NULL 				 			
-
-		IF @intChargeItemId IS NOT NULL 
-		BEGIN 
-			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_Inventory;
-			RETURN;
-		END 
-	END 
-	;
 
 	-- Check for missing AP Clearing Account Id
 	BEGIN 

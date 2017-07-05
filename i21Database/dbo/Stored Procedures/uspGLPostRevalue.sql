@@ -26,7 +26,7 @@ BEGIN TRY
 			BEGIN
 				IF EXISTS(SELECT TOP 1 1 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)
 				RAISERROR ('The transaction is already posted.',11,1)
-				EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT 		
+			EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT
 			END
 		ELSE
 			SELECT @strPostBatchId =  NEWID()

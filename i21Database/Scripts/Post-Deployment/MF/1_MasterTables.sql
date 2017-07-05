@@ -2487,3 +2487,9 @@ UPDATE tblMFCompanyPreference
 SET strBOLReportName = 'BOLReport'
 WHERE strBOLReportName IS NULL
 GO
+
+GO
+UPDATE tblMFCompanyPreference
+SET ysnSetDefaultQty = 0
+WHERE ysnSetDefaultQty IS NULL
+GO

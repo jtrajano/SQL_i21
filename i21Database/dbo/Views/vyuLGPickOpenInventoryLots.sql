@@ -8,6 +8,8 @@ dblTareWeight = (dblTareWeightFull / dblQty) * dblUnPickedQty
 FROM (
 SELECT Lot.intLotId
        , Lot.intItemId
+	   , COM.intCommodityId
+	   , COM.strCommodityCode AS strCommodity
        , Item.strItemNo
        , strItemDescription = Item.strDescription
        , Lot.intLocationId as intCompanyLocationId
@@ -75,7 +77,13 @@ SELECT Lot.intLotId
        , L.strLoadNumber
        , L.dtmPostedDate
        , Receipt.strWarehouseRefNo
-
+	   , CTDetail.dblFutures
+	   , CTDetail.dblBasis
+	   , CTDetail.dblCashPrice
+	   , CTDetail.intPriceItemUOMId
+	   , CTDetail.dblTotalCost
+	   , LD.intWeightItemUOMId
+	   , PO.strPosition
 FROM tblICLot Lot
 JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem      ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
@@ -88,6 +96,7 @@ LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = LD.intP
 LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = CTDetail.intContractHeaderId
 LEFT JOIN vyuCTEntity EY ON EY.intEntityId = CTHeader.intEntityId AND EY.strEntityType = (CASE WHEN CTHeader.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
+LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Lot.intLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lot.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -98,5 +107,6 @@ LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = Lot.intWeig
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= Item.intOriginId	AND CA.strType = 'Origin'
 LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
+LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
 WHERE Lot.dblQty > 0 
 ) InvLots

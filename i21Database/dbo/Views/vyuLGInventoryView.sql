@@ -9,13 +9,14 @@ SELECT
 	,Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0) as dblStockQty
 	,Shipment.strItemUOM as strStockUOM
 	,CASE WHEN IsNull (Shipment.dblContainerContractReceivedQty, 0) > 0 THEN
-							((Shipment.dblContainerContractGrossWt - Shipment.dblContainerContractTareWt) / Shipment.dblContainerContractQty) * (Shipment.dblContainerContractQty - Shipment.dblContainerContractReceivedQty)
+							((ISNULL(Shipment.dblContainerContractGrossWt,0) - ISNULL(Shipment.dblContainerContractTareWt,0)) / ISNULL(Shipment.dblContainerContractQty,1)) * (ISNULL(Shipment.dblContainerContractQty,0) - ISNULL(Shipment.dblContainerContractReceivedQty,0))
 						ELSE
-							Shipment.dblContainerContractGrossWt - Shipment.dblContainerContractTareWt
+							ISNULL(Shipment.dblContainerContractGrossWt,0) - ISNULL(Shipment.dblContainerContractTareWt,0)
 						END as dblNetWeight
 	,Shipment.strWeightUOM
 	,Shipment.intVendorEntityId
 	,Shipment.strVendor
+	,Shipment.strCommodity
 	,Shipment.strItemNo
 	,Shipment.strItemDescription
 	,'' strTrackingNumber
@@ -30,8 +31,25 @@ SELECT
 	,Shipment.intItemId
 	,intWeightItemUOMId = (SELECT U.intItemUOMId FROM tblICItemUOM U WHERE U.intItemId = Shipment.intItemId AND U.intUnitMeasureId=Shipment.intWeightUOMId)
 	,strWarehouseRefNo = ''
-
+	,((dbo.fnCTConvertQtyToTargetItemUOM(Shipment.intWeightItemUOMId, 
+											CD.intPriceItemUOMId, 
+											CASE 
+											WHEN ISNULL(Shipment.dblContainerContractReceivedQty, 0) > 0
+												THEN ((ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)) / ISNULL(Shipment.dblContainerContractQty, 1)) * (ISNULL(Shipment.dblContainerContractQty, 0) - ISNULL(Shipment.dblContainerContractReceivedQty, 0))
+											ELSE ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)
+											END)
+		) * Shipment.dblCashPrice)/ (CASE WHEN CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) = 0 THEN 1 ELSE 100 END) AS dblTotalCost
+	,Shipment.dblFutures
+	,Shipment.dblCashPrice
+	,Shipment.dblBasis
+	,L.strExternalShipmentNumber
+	,CD.strERPPONumber
+	,Shipment.strPosition
 FROM vyuLGInboundShipmentView Shipment
+LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
+LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
+LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 AND Shipment.ysnInventorized = 1
 
 UNION ALL
@@ -47,6 +65,7 @@ SELECT
 	,Spot.strWeightUOM
 	,Spot.intEntityVendorId
 	,Spot.strVendor
+	,Spot.strCommodity
 	,Spot.strItemNo
 	,Spot.strItemDescription
 	,Spot.strLoadNumber AS strTrackingNumber
@@ -61,7 +80,19 @@ SELECT
 	,Spot.intItemId
 	,intWeightItemUOMId = Spot.intItemWeightUOMId
 	,Spot.strWarehouseRefNo
-
+	,((dbo.fnCTConvertQtyToTargetItemUOM(Spot.intWeightItemUOMId, 
+											CD.intPriceItemUOMId, Spot.dblNetWeight )
+		) * Spot.dblCashPrice)/ (CASE WHEN CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) = 0 THEN 1 ELSE 100 END)
+	,Spot.dblFutures
+	,Spot.dblCashPrice
+	,Spot.dblBasis
+	,L.strExternalShipmentNumber
+	,CD.strERPPONumber
+	,Spot.strPosition
 FROM vyuLGPickOpenInventoryLots Spot
+LEFT JOIN tblLGLoad L ON Spot.strLoadNumber = L.strLoadNumber
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
+LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
+LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 WHERE Spot.dblQty > 0.0
 ) t1

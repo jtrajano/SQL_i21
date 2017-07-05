@@ -332,6 +332,20 @@ BEGIN TRY
 
 	EXEC uspLGCreateLoadIntegrationLog @intNewLoadId,'Added',2
 
+	IF (@intNewLoadId > 0)
+	BEGIN
+		DECLARE @StrDescription AS NVARCHAR(MAX) = 'Contract seq sliced.'
+
+		EXEC uspSMAuditLog @keyValue = @intNewLoadId
+			,@screenName = 'Logistics.view.ShipmentSchedule'
+			,@entityId = @intUserId
+			,@actionType = 'Created'
+			,@actionIcon = 'small-new-plus'
+			,@changeDescription = @StrDescription
+			,@fromValue = ''
+			,@toValue = @strLoadSINumber
+	END
+
 END TRY
 
 BEGIN CATCH

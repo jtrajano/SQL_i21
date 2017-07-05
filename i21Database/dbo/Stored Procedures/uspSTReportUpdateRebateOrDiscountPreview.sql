@@ -951,7 +951,8 @@ BEGIN TRY
 
 
    select @strCompanyName as CompanyName
-		  , FORMAT(GETDATE(), 'D', 'en-US' ) as DateToday
+		  --, FORMAT(GETDATE(), 'D', 'en-US' ) as DateToday
+		  , LEFT(DATENAME(DW,GETDATE()),10) + ' ' + DATENAME(MONTH, SYSDATETIME())+ ' ' + RIGHT('0' + DATENAME(DAY, SYSDATETIME()), 2) + ', ' + DATENAME(YEAR, SYSDATETIME()) as DateToday
 		  , RIGHT('0' + LTRIM(STUFF(RIGHT(CONVERT(CHAR(26), CURRENT_TIMESTAMP, 109), 14),9, 4, ' ')),11) as TimeToday
 		  , strLocation
 		  , strUpc

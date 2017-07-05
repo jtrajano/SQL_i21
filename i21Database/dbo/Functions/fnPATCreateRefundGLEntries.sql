@@ -100,7 +100,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	E.intAPClearingGLAccount, 
 		[dblDebit]						=	0,
-		[dblCredit]						=	ROUND(B.dblCashRefund,2) + ROUND(A.dblServiceFee, 2),
+		[dblCredit]						=	ROUND(B.dblCashRefund,2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	'AP Clearing',
@@ -176,49 +176,6 @@ BEGIN
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
 	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnEligibleRefund = 1
-	UNION ALL
-	--SERVICE FEE INCOME
-	SELECT	
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-		[strBatchID]					=	@batchId,
-		[intAccountId]					=	E.intServiceFeeIncomeId,
-		[dblDebit]						=	ROUND(A.dblServiceFee, 2),
-		[dblCredit]						=	0,
-		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	0,
-		[strDescription]				=	'Service Fee Income',
-		[strCode]						=	'PAT',
-		[strReference]					=	A.strRefundNo,
-		[intCurrencyId]					=	0,
-		[dblExchangeRate]				=	1,
-		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	A.dtmRefundDate,
-		[strJournalLineDescription]		=	'Service Fee Income',
-		[intJournalLineNo]				=	1,
-		[ysnIsUnposted]					=	0,
-		[intUserId]						=	@intUserId,
-		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.strRefundNo, 
-		[intTransactionId]				=	A.intRefundId, 
-		[strTransactionType]			=	'Service Fee',
-		[strTransactionForm]			=	@SCREEN_NAME,
-		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	0,      
-		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	0,
-		[dblCreditReport]				=	0,
-		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	0,
-		[strRateType]					=	NULL,
-		[intConcurrencyId]				=	1
-	FROM	[dbo].tblPATRefund A
-			INNER JOIN tblPATRefundCustomer B
-				ON A.intRefundId = B.intRefundId
-			INNER JOIN tblPATRefundRate D
-				ON B.intRefundTypeId = D.intRefundTypeId
-			CROSS JOIN tblPATCompanyPreference E
-	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnEligibleRefund = 1
-
 	RETURN
 END
 

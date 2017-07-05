@@ -9,7 +9,7 @@ BEGIN TRY
 	DECLARE @dblOrgContractDetailQty NUMERIC(18, 6)
 	DECLARE @intOrgContractDetailQtyUOM INT
 	DECLARE @intOrgLoadId INT
-	DECLARE @intOrgLoadIDetaild INT
+	DECLARE @intOrgLoadDetaild INT
 	DECLARE @dblOrgLoadDetailQty NUMERIC(18, 6)
 	DECLARE @intOrgLoadDetailItemUOM INT
 	DECLARE @intOrgLoadDetailWeightUOM INT
@@ -22,6 +22,8 @@ BEGIN TRY
 	DECLARE @intUserId INT
 	DECLARE @intContractDetailId INT
 	DECLARE @intMergeContractDetailId INT
+	DECLARE @intAuditLogLoadId INT
+	DECLARE @strDetails NVARCHAR(MAX)
 	DECLARE @ContractSliceDetail TABLE (
 		intCRowNo INT IDENTITY(1, 1)
 		,intCContractDetailId INT
@@ -108,7 +110,7 @@ BEGIN TRY
 		WHERE intCRowNo = @intCRowNo
 
 		SET @intOrgLoadId = NULL
-		SET @intOrgLoadIDetaild = NULL
+		SET @intOrgLoadDetaild = NULL
 		SET @dblOrgLoadDetailQty = NULL
 		SET @dblOrgContractDetailQty = NULL
 		SET @intOrgContractDetailQtyUOM = NULL
@@ -127,13 +129,13 @@ BEGIN TRY
 		WHILE (@intMinLoadRecordId > 0)
 		BEGIN
 			SET @intOrgLoadId = NULL
-			SET @intOrgLoadIDetaild = NULL
+			SET @intOrgLoadDetaild = NULL
 			SET @dblOrgLoadDetailQty = NULL
 			SET @dblOrgContractDetailQty = NULL
 			SET @intOrgContractDetailQtyUOM = NULL
 
 			SELECT @intOrgLoadId = intLoadId
-				  ,@intOrgLoadIDetaild = intLoadDetailId
+				  ,@intOrgLoadDetaild = intLoadDetailId
 				  ,@dblOrgLoadDetailQty = dblLoadDetailQty
 				  ,@intOrgLoadDetailItemUOM = intItemUOMId
 				  ,@intOrgLoadDetailWeightUOM = intWeightUOMId
@@ -149,7 +151,25 @@ BEGIN TRY
 			SET dblQuantity += @dblOrgContractDetailQty
 				,dblNet += dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId, intWeightItemUOMId, @dblOrgContractDetailQty)
 				,dblGross += dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId, intWeightItemUOMId, @dblOrgContractDetailQty)
-			WHERE intLoadDetailId = @intOrgLoadIDetaild
+			WHERE intLoadDetailId = @intOrgLoadDetaild
+
+			IF (LEN(@intOrgLoadDetaild) > 0)
+			BEGIN
+				SELECT @intUserId = NULL
+				SELECT @intAuditLogLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intOrgLoadDetaild
+				SELECT @strDetails = '{"change":"intContractDetailId","iconCls":"small-gear","from":"' + LTRIM(@intParentContractDetailId) + '","to":"' + LTRIM(@intCContractDetailId) + '","leaf":true}'
+
+				SELECT @intUserId = intLastModifiedById
+				FROM tblCTContractDetail
+				WHERE intContractDetailId = @intParentContractDetailId
+
+				EXEC uspSMAuditLog @keyValue = @intAuditLogLoadId
+									,@screenName = 'Logistics.view.ShipmentSchedule'
+									,@entityId = @intUserId
+									,@actionType = 'Updated'
+									,@actionIcon = 'small-tree-modified'
+									,@details = @strDetails
+			END
 
 			SELECT @intMinLoadRecordId = MIN(intLoadRecordId)
 			FROM @ParentLoad

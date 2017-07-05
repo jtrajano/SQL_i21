@@ -17,8 +17,7 @@ DECLARE @ErrorState INT;
 CREATE TABLE #tmpBillIds (
 	[intBillId] [INT] PRIMARY KEY,
 	[intInventoryReceiptId] [INT],
-	[intEntityVendorId] INT,
-	[intCurrencyId] INT,
+	[intEntityVendorId] INT
 )
 
 INSERT INTO #tmpBillIds

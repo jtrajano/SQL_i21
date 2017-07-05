@@ -18,14 +18,8 @@ AS
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
 			CAST(ISNULL(V.intEntityId,0) AS BIT) ysnVendor,
-			CASE	WHEN Y.strType = 'Vendor'	THEN	CASE WHEN TM.ysnActive = 1 THEN V.intTermsId ELSE NULL END
-					WHEN Y.strType = 'Customer'	THEN	CASE WHEN TM.ysnActive = 1 THEN U.intTermsId ELSE NULL END
-					ELSE L.intTermsId 
-			END AS intTermId,
-			CASE	WHEN Y.strType = 'Vendor'	THEN	CASE WHEN TM.ysnActive = 1 THEN TM.strTerm ELSE NULL END
-					WHEN Y.strType = 'Customer'	THEN	CASE WHEN TM.ysnActive = 1 THEN TM.strTerm ELSE NULL END
-					ELSE TM.strTerm 
-			END AS strTerm,
+			intTermId = TM.intTermID,
+			strTerm = TM.strTerm,
 			V.strVendorAccountNum,
 			CY.intCurrencyID	AS	intCurrencyId,
 			CY.strCurrency,
@@ -33,28 +27,70 @@ AS
 			MY.strCurrency		AS	strMainCurrency
 
 	FROM	tblEMEntity				E
-	CROSS
-	APPLY	tblSMCompanyPreference	SC	
-	JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
-										AND L.ysnDefaultLocation	=	1
-	JOIN	[tblEMEntityType]		Y	ON	Y.intEntityId			=	E.intEntityId
-	JOIN	[tblEMEntityToContact]	C	ON	C.intEntityId			=	E.intEntityId 
-										AND C.ysnDefaultContact		=	1
-	JOIN	tblEMEntity				T	ON	T.intEntityId			=	C.intEntityContactId	LEFT 
-	JOIN	tblAPVendor				V	ON	V.intEntityId			=	E.intEntityId			LEFT
-	JOIN	tblARCustomer			U	ON	U.intEntityId			=	E.intEntityId			LEFT
-	JOIN	(
-				SELECT	EY.intEntityId 
-				FROM	tblEMEntity			EY
-				JOIN	[tblEMEntityType]	ET	ON	ET.intEntityId	=	EY.intEntityId	
-												AND	ET.strType		=	'Ship Via'
-			)						S	ON	S.intEntityId			=	E.intEntityId			LEFT
-	JOIN	tblSMTerm				TM	ON TM.intTermID				=	CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
-																				WHEN Y.strType = 'Customer'	THEN	U.intTermsId
-																				ELSE L.intTermsId 
-																		END						LEFT
-	JOIN	tblSMCurrency			CY	ON CY.intCurrencyID			=	CASE	WHEN Y.strType = 'Vendor'	THEN	ISNULL(V.intCurrencyId,SC.intDefaultCurrencyId)
-																				WHEN Y.strType = 'Customer'	THEN	ISNULL(U.intCurrencyId,SC.intDefaultCurrencyId)
-																				ELSE SC.intDefaultCurrencyId
-																		END						LEFT
-	JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId	
+	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
+	LEFT JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
+											AND L.ysnDefaultLocation	=	1
+	LEFT JOIN	[tblEMEntityType]		Y	ON	Y.intEntityId			=	E.intEntityId
+	LEFT JOIN	[tblEMEntityToContact]	C	ON	C.intEntityId			=	E.intEntityId 
+											AND C.ysnDefaultContact		=	1
+	LEFT JOIN	tblEMEntity				T	ON	T.intEntityId			=	C.intEntityContactId	 
+	LEFT JOIN	tblAPVendor				V	ON	V.intEntityId			=	E.intEntityId			
+	LEFT JOIN	tblARCustomer			U	ON	U.intEntityId			=	E.intEntityId			
+	OUTER APPLY (
+		SELECT	EY.intEntityId 
+		FROM	tblEMEntity EY INNER JOIN tblEMEntityType ET
+					ON EY.intEntityId = ET.intEntityId
+		WHERE	EY.intEntityId = E.intEntityId	
+				AND	ET.strType = 'Ship Via'
+	) S	
+				
+	OUTER APPLY (
+		SELECT  TM.intTermID, TM.strTerm 
+		FROM	tblSMTerm TM
+				OUTER APPLY (
+					SELECT	intTermID, ysnActive
+					FROM	tblSMTerm 
+					WHERE	intTermID = V.intTermsId
+							AND Y.strType = 'Vendor'
+							AND ysnActive = 1				
+				) vendorTerm
+				OUTER APPLY (
+					SELECT	intTermID, ysnActive
+					FROM	tblSMTerm 
+					WHERE	intTermID = U.intTermsId
+							AND Y.strType = 'Customer'
+							AND ysnActive = 1				
+				) customerTerm 
+				OUTER APPLY (
+					SELECT	intTermID, ysnActive
+					FROM	tblSMTerm 
+					WHERE	intTermID = L.intTermsId 
+							AND Y.strType NOT IN ('Vendor', 'Customer') 
+							AND ysnActive = 1				
+				) defaultTerm
+		WHERE	TM.intTermID = COALESCE(vendorTerm.intTermID, customerTerm.intTermID, defaultTerm.intTermID)
+	) TM 
+	OUTER APPLY (
+		SELECT	CY.intCurrencyID, CY.strCurrency, CY.ysnSubCurrency, CY.intMainCurrencyId				
+		FROM	tblSMCurrency CY 
+				OUTER APPLY (
+					SELECT	intCurrencyID
+					FROM	tblSMCurrency 
+					WHERE	intCurrencyID = V.intCurrencyId
+							AND Y.strType = 'Vendor'
+				) vendorCurrency
+				OUTER APPLY (
+					SELECT	intCurrencyID
+					FROM	tblSMCurrency 
+					WHERE	intCurrencyID = U.intCurrencyId
+							AND Y.strType = 'Customer'
+				) customerCurrency
+				OUTER APPLY (
+					SELECT	intCurrencyID
+					FROM	tblSMCurrency 
+					WHERE	intCurrencyID = SC.intDefaultCurrencyId
+							AND Y.strType NOT IN ('Vendor', 'Customer')
+				) defaultCurrency
+		WHERE	CY.intCurrencyID = COALESCE(vendorCurrency.intCurrencyID, customerCurrency.intCurrencyID, defaultCurrency.intCurrencyID)
+	) CY 	
+	LEFT JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId		

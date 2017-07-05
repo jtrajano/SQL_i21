@@ -61,5 +61,11 @@
 		VALUES(10, 'Cash', NULL, 0, NULL, 1, 0)
 	END
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Credit Card')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
+		VALUES(11, 'Credit Card', NULL, 0, NULL, 1, 0)
+	END
+
 	SET IDENTITY_INSERT tblSMPaymentMethod OFF
 GO

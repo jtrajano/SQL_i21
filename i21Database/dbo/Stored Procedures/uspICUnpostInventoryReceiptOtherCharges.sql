@@ -80,6 +80,7 @@ BEGIN
 							ON ItemLocation.intItemId = ReceiptItem.intItemId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+						AND ISNULL(ReceiptItem.intOwnershipType, 0) = 1 -- Only "Own" items will have GL entries. 
 			) Query
 
 	-- Get the GL Account ids to use for the other charges. 
@@ -109,37 +110,6 @@ BEGIN
 							AND ItemLocation.intLocationId = Receipt.intLocationId
 				WHERE	OtherCharges.intInventoryReceiptId = @intInventoryReceiptId
 			) Query
-
-	-- Check for missing Inventory Account Id
-	BEGIN 
-		SET @strItemNo = NULL
-		SET @intItemId = NULL
-
-		SELECT	TOP 1 
-				@intItemId = Item.intItemId 
-				,@strItemNo = Item.strItemNo
-		FROM	tblICItem Item INNER JOIN @ItemGLAccounts ItemGLAccount
-					ON Item.intItemId = ItemGLAccount.intItemId
-		WHERE	ItemGLAccount.intInventoryId IS NULL 
-
-		SELECT	TOP 1 
-				@strLocationName = c.strLocationName
-		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-					ON il.intLocationId = c.intCompanyLocationId
-				INNER JOIN @ItemGLAccounts ItemGLAccount
-					ON ItemGLAccount.intItemId = il.intItemId
-					AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intItemId
-				AND ItemGLAccount.intInventoryId IS NULL 
-
-		IF @intItemId IS NOT NULL 
-		BEGIN 
-			-- {Item} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_Inventory;
-			RETURN;
-		END 
-	END 
-	;
 
 	-- Check for missing AP Clearing Account Id
 	BEGIN 

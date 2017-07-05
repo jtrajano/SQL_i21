@@ -3,6 +3,7 @@
 */ 
 CREATE PROCEDURE uspCMCheckPrint_GetCheckSettlement
 	@intBankAccountId INT = NULL,
+	@strTransactionIds NVARCHAR(MAX) = NULL,
 	@ysnCheckSettlement INT = NULL OUTPUT 
 AS
 
@@ -17,8 +18,8 @@ SET ANSI_WARNINGS OFF
 SELECT TOP 1
 @ysnCheckSettlement = 1	
 FROM	dbo.tblCMBankTransaction CHK 
-		INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
-			AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
+		--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
+		--	AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
 		INNER JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 		INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
@@ -28,7 +29,7 @@ FROM	dbo.tblCMBankTransaction CHK
 		INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 		--INNER JOIN tblSCTicket TICKET ON INVRCPTITEM.intSourceId = TICKET.intTicketId			
 WHERE	CHK.intBankAccountId = @intBankAccountId
-		AND CHK.strTransactionId = CHK.strTransactionId
+		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 		AND INVRCPTITEM.intSourceId IS NOT NULL
 
 SET @ysnCheckSettlement = ISNULL(@ysnCheckSettlement, 0)

@@ -159,7 +159,7 @@ Begin
 		GOTO NEXT_SHIPMENT
 	End
 
-	If UPPER(@strHeaderRowState)='MODIFIED' AND ISNULL(@strExternalDeliveryNumber,'')=''
+	If UPPER(@strHeaderRowState) in ('MODIFIED','DELETE') AND ISNULL(@strExternalDeliveryNumber,'')=''
 		Begin
 			GOTO NEXT_SHIPMENT
 		End
@@ -234,7 +234,7 @@ Begin
 		strSubLocation,strStorageLocation,strContainerNo,dblQuantity,strUOM,strPONo,strPOLineItemNo,strShipItemRefNo,strRowState,strCommodityCode,
 		dblGrossWeight,dblNetWeight,strWeightUOM)
 	Select sd.intLoadStgId,sd.intLGLoadDetailStgId,sd.intLoadId,sd.intLoadDetailId,
-		(10 * ROW_NUMBER() OVER(ORDER BY intLGLoadDetailStgId ASC)) strDeliveryItemNo,
+		CASE WHEN isnull(sd.strExternalShipmentItemNumber,'')='' THEN (10 * ROW_NUMBER() OVER(ORDER BY intLGLoadDetailStgId ASC)) ELSE sd.strExternalShipmentItemNumber END strDeliveryItemNo,
 		'',sd.strItemNo,sd.strSubLocationName,sd.strStorageLocationName,
 		CASE WHEN @strTransactionType='Shipping Instructions' THEN '' 
 		Else sd.strExternalPOBatchNumber End,
@@ -300,6 +300,9 @@ Begin
 			@strRowState				=	strRowState
 		From @tblDetail Where intRowNo=@intMinDetail
 
+			If UPPER(@strCommodityCode)='COFFEE' AND ISNULL(@ysnBatchSplit,0)=0
+				Select TOP 1 @dblNetWeight=dblNetWt from tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId
+
 			--Validation
 			If ISNULL(@dblNetWeight,0)<=0
 			Begin
@@ -339,7 +342,7 @@ Begin
 			Else
 				Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 			If UPPER(@strCommodityCode)='COFFEE'
-				Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
+				Set @strItemXml += '<CHARG>'  +  LTRIM(RTRIM(ISNULL(@strContainerNo,''))) + '</CHARG>' 
 			Else
 				Set @strItemXml += '<CHARG>'  +  '' + '</CHARG>' 
 			Set @strItemXml += '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
@@ -356,7 +359,7 @@ Begin
 			If ISNULL(@ysnBatchSplit,0)=1 AND UPPER(@strHeaderRowState)='MODIFIED'
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
 			If ISNULL(@ysnBatchSplit,0)=0 AND UPPER(@strCommodityCode)='COFFEE'
-				Set @strItemXml += '<LICHN>' + ISNULL(@strContainerNo,'') + '</LICHN>'
+				Set @strItemXml += '<LICHN>' + LTRIM(RTRIM(ISNULL(@strContainerNo,''))) + '</LICHN>'
 
 			If UPPER(@strHeaderRowState)='MODIFIED'
 			Begin
@@ -421,12 +424,12 @@ Begin
 							+ '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 							+ '<WERKS>'  +  CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN ISNULL(lc.strSubLocation,'')  ELSE '' END + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(lc.strStorageLocation,'') + '</LGORT>' 
-							+ '<CHARG>'  +  ISNULL(lc.strContainerNo,'') + '</CHARG>' 
+							+ '<CHARG>'  +  LTRIM(RTRIM(ISNULL(lc.strContainerNo,''))) + '</CHARG>' 
 							+ '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),lc.dblNetWt)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(lc.strWeightUOM,'')) + '</VRKME>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
-							+ '<LICHN>' + ISNULL(lc.strContainerNo,'') + '</LICHN>' 
+							+ '<LICHN>' + LTRIM(RTRIM(ISNULL(lc.strContainerNo,''))) + '</LICHN>' 
 
 							+ '<E1EDL19 SEGMENT="1">'
 							+ '<QUALF>'  + CASE WHEN UPPER(lc.strRowState)='DELETE' Then 'DEL' ELSE 'QUA' END + '</QUALF>' 
@@ -493,7 +496,7 @@ Begin
 				From @tblContainer Where intRowNo=@intMinContainer
 
 					Set @strContainerXml += '<E1EDL37 SEGMENT="1">'
-					Set @strContainerXml += '<EXIDV>'  +  ISNULL(@strContainerNo,'') + '</EXIDV>' 
+					Set @strContainerXml += '<EXIDV>'  +  LTRIM(RTRIM(ISNULL(@strContainerNo,''))) + '</EXIDV>' 
 					Set @strContainerXml += '<VHILM>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM>' 
 					Set @strContainerXml += '<VHART>'  +  '0002' + '</VHART>' 
 					Set @strContainerXml += '<VHILM_KU>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM_KU>' 
@@ -532,7 +535,11 @@ Begin
 	Set @strXml +=  '</DELVRY07>'
 
 	If @ysnUpdateFeedStatusOnRead=1
-		Update tblLGLoadStg Set strFeedStatus='Awt Ack' Where intLoadStgId = @intMinHeader
+		Begin
+			Update tblLGLoadContainer Set ysnNewContainer=0 Where intLoadId=@intLoadId AND ysnNewContainer=1
+
+			Update tblLGLoadStg Set strFeedStatus='Awt Ack' Where intLoadStgId = @intMinHeader
+		End
 
 	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml,strShipmentNo,strDeliveryNo)
 	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' WHEN UPPER(@strHeaderRowState)='DELETE' THEN 'DELETE' ELSE 'UPDATE' END,@strXml,ISNULL(@strLoadNumber,''),ISNULL(@strExternalDeliveryNumber,''))

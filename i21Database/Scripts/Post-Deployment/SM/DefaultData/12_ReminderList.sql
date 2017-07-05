@@ -685,7 +685,17 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} unconfirmed.'
+	SET	[strMessage] = N'{0} {1} {2} unconfirmed.',
+		[strQuery]  =       N'	SELECT	DISTINCT CD.intContractHeaderId 
+							FROM	tblCTContractDetail CD
+							CROSS JOIN		tblCTEvent EV	
+							JOIN	tblCTAction	AC	ON	AC.intActionId = EV.intActionId
+							JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+							JOIN	tblCTContractHeader	CH	ON CH.intContractHeaderId	=	CD.intContractHeaderId
+							LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+							WHERE	intContractStatusId = 2 AND AC.strInternalCode = ''Unconfirmed Sequence'' AND ER.intEntityId = {0}
+							AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)
+							'
 	WHERE [strReminder] = N'Unconfirmed' AND [strType] = N'Contract' 
 END
 
@@ -711,7 +721,17 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} without sequence.'
+	SET	[strMessage] = N'{0} {1} {2} without sequence.',
+		[strQuery]  =	N'	SELECT	DISTINCT CH.intContractHeaderId 
+						FROM	tblCTContractHeader CH	CROSS	
+						JOIN	tblCTEvent			EV	
+						JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+						JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
+						JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+						WHERE	CD.intContractHeaderId IS NULL AND AC.strInternalCode = ''Contract without Sequence'' AND ER.intEntityId = {0}
+						AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)
+						GROUP BY CH.intContractHeaderId'
 	WHERE [strReminder] = N'Empty' AND [strType] = N'Contract' 
 END
 
@@ -734,7 +754,17 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} Unsigned.'
+	SET	[strMessage] = N'{0} {1} {2} Unsigned.',
+		[strQuery]  =	N'	SELECT	DISTINCT CH.intContractHeaderId 
+							FROM	tblCTContractHeader CH
+							CROSS JOIN		tblCTEvent EV
+							JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId											
+							JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+							LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+							WHERE	ISNULL(ysnSigned,0) = 0 AND EV.strEventName = ''Unsigned Contract Alert'' AND ER.intEntityId = {0}
+							AND CD.intContractStatusId <> 3
+							AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)
+							'
 	WHERE [strReminder] = N'Unsigned' AND [strType] = N'Contract' 
 END
 
@@ -760,14 +790,18 @@ ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
 	SET	[strMessage] = N'{0} {1} {2} Unsubmitted.',
-		[strQuery]=   N'SELECT	intContractHeaderId 
-							FROM	tblCTContractHeader CH,	
-									tblCTEvent EV											
-									JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
-									WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
-									AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE LTRIM(RTRIM(ISNULL(strERPPONumber,''''))) = '''')
-									AND		EV.strEventName = ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
-										'
+		[strQuery]=   N'SELECT DISTINCT	CH.intContractHeaderId 
+						FROM	tblCTContractHeader CH	
+						CROSS JOIN tblCTEvent EV											
+						JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+						LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+						WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
+						AND		CH.intContractHeaderId	NOT IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 2)
+						AND		EV.strEventName = ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
+						AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)
+						AND CD.intContractDetailId IS NOT NULL AND CD.intContractStatusId <> 3
+						'
 	WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Contract' 
 END
 GO
@@ -1058,5 +1092,21 @@ BEGIN
 											',
 			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Approved Not Sent', 
 			[intSort]            =        25
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strQuery]=   N'SELECT	intContractHeaderId 
+						FROM	tblCTContractHeader CH	
+						CROSS JOIN tblCTEvent EV											
+						JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+						JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId
+						JOIN	tblSMScreen			SN	ON	SN.intScreenId	=	TN.intScreenId AND SN.strNamespace IN (''ContractManagement.view.Contract'', ''ContractManagement.view.Amendments'')
+						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+						WHERE	ISNULL(ysnMailSent,0) = 0 AND TN.ysnOnceApproved = 1
+						AND		EV.strEventName  =  ''Approved Contract Mail Not Sent'' AND ER.intEntityId = {0}
+						AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)
+						'
+	WHERE [strReminder] = N'Mail Not Sent For' AND [strType] = N'Approved Contract' 
 END
 GO

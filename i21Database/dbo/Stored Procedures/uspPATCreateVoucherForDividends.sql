@@ -27,7 +27,7 @@ SET ANSI_WARNINGS OFF
 		dblCheckAmount NUMERIC(18,6)
 	);
 
-BEGIN TRANSACTION
+	BEGIN TRANSACTION
 
 	IF(@dividendsCustomer = 'all')
 	BEGIN
@@ -77,7 +77,8 @@ BEGIN TRANSACTION
 
 	INSERT INTO @dividendCustomerIds
 	SELECT intDividendCustomerId FROM #tempDivCust
-BEGIN TRY
+	
+	BEGIN TRY
 
 	SELECT TOP 1 @intAPClearingId = intAPClearingGLAccount FROM tblPATCompanyPreference;
 
@@ -87,8 +88,8 @@ BEGIN TRY
 		SELECT TOP 1 
 			@intDivCustId = T.intDividendCustomerId,
 			@intCustomerId = T.intCustomerId, 
-			@dblDividentAmt = ROUND(T.dblDividendAmount,2),
-			@strVenderOrderNumber = '' + T.strDividendNo + '' + CONVERT(NVARCHAR(MAX),T.intDividendCustomerId)
+			@dblDividentAmt = ROUND(T.dblDividendAmount, 2),
+			@strVenderOrderNumber = '' + T.strDividendNo + '-' + CONVERT(NVARCHAR(MAX),T.intDividendCustomerId)
 			FROM @dividendCustomerIds Div INNER JOIN #tempDivCust T ON T.intDividendCustomerId = Div.intId
 
 		INSERT INTO @voucherDetailNonInventory([intAccountId],[intItemId],[strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost],[intTaxGroupId])
@@ -104,7 +105,9 @@ BEGIN TRY
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT
 
-		UPDATE tblAPBillDetail SET int1099Form = 5, int1099Category= 0 WHERE intBillId = @intCreatedBillId
+			
+		UPDATE tblPATDividendsCustomer SET intBillId = @intCreatedBillId WHERE intDividendCustomerId = @intDivCustId;
+		UPDATE tblAPBillDetail SET int1099Form = 5, int1099Category = 0, dbl1099 = @dblDividentAmt WHERE intBillId = @intCreatedBillId;
 
 		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
 		BEGIN
@@ -115,7 +118,7 @@ BEGIN TRY
 			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
 			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
 
-			EXEC uspAPUpdateVoucherTotal @voucherId;
+			EXEC [dbo].[uspAPUpdateVoucherTotal] @voucherId;
 			DELETE FROM @voucherId;
 		END
 		
@@ -135,7 +138,6 @@ BEGIN TRY
 			@endTransaction = @intCreatedBillId,
 			@success = @bitSuccess OUTPUT
 
-		UPDATE tblPATDividendsCustomer SET intBillId = @intCreatedBillId WHERE intDividendCustomerId = @intDivCustId;
 
 		DELETE FROM @dividendCustomerIds WHERE intId = @intDivCustId;
 		DELETE FROM @voucherDetailNonInventory;
@@ -144,11 +146,11 @@ BEGIN TRY
 		SET @totalRecords = @totalRecords + 1;
 	END
 	
-IF @@ERROR <> 0	GOTO Post_Rollback;
+	IF @@ERROR <> 0	GOTO Post_Rollback;
 
-END TRY
+	END TRY
 
-BEGIN CATCH
+	BEGIN CATCH
 	DECLARE @intErrorSeverity INT,
 			@intErrorNumber   INT,
 			@intErrorState INT;
@@ -159,7 +161,7 @@ BEGIN CATCH
 	SET @intErrorState    = ERROR_STATE()
 	RAISERROR (@strErrorMessage , @intErrorSeverity, @intErrorState, @intErrorNumber)
 	GOTO Post_Rollback
-END CATCH
+	END CATCH
 
 Post_Commit:
 	COMMIT TRANSACTION

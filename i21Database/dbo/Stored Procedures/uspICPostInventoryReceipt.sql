@@ -1417,9 +1417,20 @@ END
 IF @ysnRecap = 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspGLPostRecap 
+
+	-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
+	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN 
+		EXEC dbo.uspGLPostRecap 
 			@GLEntries
 			,@intEntityUserSecurityId
+	END 
+	ELSE 
+	BEGIN 
+		-- Post preview is not available. Financials are only booked for company-owned stocks.
+		EXEC uspICRaiseError 80185; 
+	END 
+
 	COMMIT TRAN @TransactionName
 END 
 

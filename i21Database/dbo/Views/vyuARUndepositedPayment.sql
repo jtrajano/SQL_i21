@@ -8,7 +8,8 @@ SELECT
 	,[dblAmount]				= A.[dblAmountPaid]
 	,[strSourceSystem]			= 'AR'
 	,[intBankAccountId]			= A.[intBankAccountId]
-	,[intLocationId]			= A.[intLocationId] 					
+	,[intLocationId]			= A.[intLocationId] 
+	,[strPaymentMethod]			= SMPM.[strPaymentMethod]					
 
 FROM 
 	tblARPayment A
@@ -45,7 +46,8 @@ SELECT
 	,[dblAmount]				= A.[dblInvoiceTotal] 
 	,[strSourceSystem]			= 'AR'
 	,[intBankAccountId]			= NULL
-	,[intLocationId]			= A.[intCompanyLocationId] 					
+	,[intLocationId]			= A.[intCompanyLocationId] 		
+	,[strPaymentMethod]			= SMPM.[strPaymentMethod]								
 
 FROM 
 	tblARInvoice A

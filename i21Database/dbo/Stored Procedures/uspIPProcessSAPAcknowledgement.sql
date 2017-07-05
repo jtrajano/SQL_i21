@@ -135,10 +135,13 @@ Begin
 
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
-			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
+			If (Select ISNULL(strERPPONumber,'') from tblCTContractDetail Where intContractDetailId=@strTrackingNo)<>@strParam
+			Begin
+				Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
+				Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
 
-			Update tblCTContractHeader Set intConcurrencyId=intConcurrencyId+1 Where intContractHeaderId=@intContractHeaderId
+				Update tblCTContractHeader Set intConcurrencyId=intConcurrencyId+1 Where intContractHeaderId=@intContractHeaderId
+			End
 
 			--For Added Contract
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success',strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
@@ -183,8 +186,9 @@ Begin
 
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
-			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
+			If (Select ISNULL(strERPPONumber,'') from tblCTContractDetail Where intContractDetailId=@strTrackingNo)<>@strParam
+				Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
+				Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
 
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success'
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus IN ('Awt Ack','Ack Rcvd')
@@ -215,13 +219,16 @@ Begin
 
 		If @strStatus IN (52,53) --Success
 			Begin
-				Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId 
-				AND Exists (Select 1 From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId) 
+				If (Select ISNULL(strExternalShipmentNumber,'') from tblLGLoad Where intLoadId=@intLoadId)<>@strParam
+				Begin
+					Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId 
+					AND Exists (Select 1 From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId) 
 
-				Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
-				Where intLoadId=@intLoadId
+					Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
+					Where intLoadId=@intLoadId
 
-				Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo,intConcurrencyId=intConcurrencyId+1 Where intLoadDetailId=@strTrackingNo And intLoadId=@intLoadId
+					Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo,intConcurrencyId=intConcurrencyId+1 Where intLoadDetailId=@strTrackingNo And intLoadId=@intLoadId
+				End
 
 				Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success',strExternalShipmentNumber=@strParam
 				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
@@ -280,10 +287,15 @@ Begin
 
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId 
-			AND Exists (Select 1 From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId) 
+			DECLARE @tblContainerIdOutput table (intLoadContainerId int)
 
-			Update tblLGLoad Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+			Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 
+			OUTPUT INSERTED.intLoadContainerId INTO @tblContainerIdOutput
+			Where intLoadId=@intLoadId 
+			AND Exists (Select 1 From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId) AND ysnNewContainer=1
+
+			If Exists (Select TOP 1 1 From @tblContainerIdOutput)
+				Update tblLGLoad Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')

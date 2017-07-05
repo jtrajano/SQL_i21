@@ -9,7 +9,7 @@
 	,dtmShipDate DATETIME NOT NULL
 	,intShipFromLocationId INT NOT NULL
 	,intShipToLocationId INT NULL
-	,intFreightTermId INT NOT NULL
+	,intFreightTermId INT NULL
 
 	-- Charges
 	,intContractId INT NULL

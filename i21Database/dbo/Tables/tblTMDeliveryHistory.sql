@@ -73,6 +73,7 @@
     [dtmCreatedDate] DATETIME NULL DEFAULT (GETDATE()), 
     [ysnWillCallLeakCheckRequired] BIT NOT NULL DEFAULT 0, 
     [dblWillCallOriginalPercentLeft] NUMERIC(18, 6) NULL, 
+	[ysnManualAdjustment] BIT NOT NULL DEFAULT 0
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMDeliveryHistory_tblLGRoute] FOREIGN KEY ([intWillCallRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])

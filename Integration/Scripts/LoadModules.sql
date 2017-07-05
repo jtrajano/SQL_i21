@@ -79,6 +79,11 @@ BEGIN
 	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''EC'', N''E-COMMERCE'', CASE ISNULL(coctl_ec, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
+-- PAYROLL
+IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_pr')
+BEGIN
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''PR'', N''PAYROLL'', CASE ISNULL(coctl_pr, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+END
 
 
 RETURN;

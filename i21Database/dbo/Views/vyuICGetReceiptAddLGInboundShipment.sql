@@ -66,6 +66,9 @@ FROM (
 		, intForexRateTypeId		= CAST(NULL AS INT) -- Add dummy fields for the meantime. 
 		, strForexRateType			= currencyType.strCurrencyExchangeRateType -- Add dummy fields for the meantime. 
 		, dblForexRate				= CAST(NULL AS NUMERIC(18, 6)) -- Add dummy fields for the meantime. 
+		, ysnBundleItem				= CAST(0 AS BIT)
+		, intBundledItemId			= CAST(NULL AS INT)
+		, strBundledItemNo			= CAST(NULL AS NVARCHAR(50))
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 

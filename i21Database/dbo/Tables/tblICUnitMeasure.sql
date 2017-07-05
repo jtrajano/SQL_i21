@@ -18,7 +18,7 @@ Type the overview for the table here.
 		[strUnitType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[intDecimalPlaces] INT NULL DEFAULT 6, 
-    CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]), 
+		CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]), 
 		CONSTRAINT [AK_tblICUnitMeasure_strUnitMeasure] UNIQUE ([strUnitMeasure]) 
 	)
 	GO
@@ -26,10 +26,10 @@ Type the overview for the table here.
 	--	ON [dbo].[tblICUnitMeasure]([intUnitMeasureId] ASC, [strUnitMeasure] ASC);
 	--GO
 
-		CREATE NONCLUSTERED INDEX [IX_tblICUnitMeasure_intUnitMeasureId]
-		ON [dbo].[tblICUnitMeasure]([intUnitMeasureId] ASC)
-		INCLUDE (strUnitMeasure); 
-	GO
+	--CREATE NONCLUSTERED INDEX [IX_tblICUnitMeasure_intUnitMeasureId]
+	--	ON [dbo].[tblICUnitMeasure]([intUnitMeasureId] ASC)
+	--	INCLUDE (strUnitMeasure, strUnitType, intDecimalPlaces); 
+	--GO
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',

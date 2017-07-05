@@ -24,6 +24,8 @@ Unde.ysnGenerated,
 Unde.ysnNotified, 
 Unde.strNotificationStatus, 
 Unde.intBankFileAuditId,
+Unde.ysnHold,
+Unde.strHoldReason,
 Unde.intConcurrencyId,
 ysnPayeeEFTInfoActive = ISNULL((
 		SELECT TOP 1 ysnActive FROM [tblEMEntityEFTInformation] EFTInfo 

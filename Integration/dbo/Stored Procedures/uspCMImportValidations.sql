@@ -119,13 +119,18 @@ BEGIN
 		WHERE NotBalance = 1
 
 		--Check for duplicate Bank Name
-		SELECT TOP 1 @Duplicate_Bank_Name_Found = 1 
-		FROM(
-				SELECT  ssbnk_name = i.ssbnk_name COLLATE Latin1_General_CI_AS
-				FROM ssbnkmst i
-				GROUP BY i.ssbnk_name COLLATE Latin1_General_CI_AS
-				HAVING (COUNT(i.ssbnk_name) > 1)
-			) Q
+		SELECT TOP 1 @Duplicate_Bank_Name_Found = 1  
+		FROM (
+			SELECT	
+				strBankName	= LTRIM(RTRIM(ISNULL(apcbk_desc COLLATE Latin1_General_CI_AS, ''''))) 
+			FROM apcbkmst
+
+			UNION ALL SELECT 
+				strBankName	= LTRIM(RTRIM(ISNULL(ssbnk_name COLLATE Latin1_General_CI_AS, '''')))		
+			FROM ssbnkmst
+		) tbl
+		GROUP BY strBankName COLLATE Latin1_General_CI_AS
+		HAVING (COUNT(strBankName) > 1)
 
 
 		SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)

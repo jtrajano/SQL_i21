@@ -56,6 +56,22 @@ SELECT
 	dblIssueEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	ysnIssueUOMAllowPurchase = COALESCE(IssueUOM.ysnAllowPurchase, StockUOM.ysnAllowPurchase), 
 	ysnIssueUOMAllowSale = COALESCE(IssueUOM.ysnAllowSale, StockUOM.ysnAllowSale), 
+	
+	intGrossUOMId = GrossUOM.intItemUOMId,
+	intGrossUnitMeasureId = GrossUOM.intUnitMeasureId,
+	dblGrossUOMConvFactor = GrossUOM.dblUnitQty,
+	strGrossUOMType = gUOM.strUnitType,
+	strGrossUOM = gUOM.strUnitMeasure,
+	strGrossUPC = GrossUOM.strUpcCode,
+	dblGrossSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * GrossUOM.dblUnitQty,
+	dblGrossMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * GrossUOM.dblUnitQty,
+	dblGrossLastCost = ISNULL(ItemPricing.dblLastCost, 0) * GrossUOM.dblUnitQty,
+	dblGrossStandardCost = ISNULL(ItemPricing.dblStandardCost, 0) * GrossUOM.dblUnitQty,
+	dblGrossAverageCost = ISNULL(ItemPricing.dblAverageCost, 0) * GrossUOM.dblUnitQty,
+	dblGrossEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * GrossUOM.dblUnitQty,
+	ysnGrossUOMAllowPurchase = GrossUOM.ysnAllowPurchase, 
+	ysnGrossUOMAllowSale = GrossUOM.ysnAllowSale, 
+
 	dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0),
 	dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0),
 	ItemLocation.intAllowNegativeInventory,
@@ -141,7 +157,11 @@ FROM
 			ON iUOM.intUnitMeasureId = IssueUOM.intUnitMeasureId
 	)
 		ON IssueUOM.intItemUOMId = ItemLocation.intIssueUOMId
-
+	LEFT JOIN (
+		tblICItemUOM GrossUOM INNER JOIN tblICUnitMeasure gUOM 
+			ON gUOM.intUnitMeasureId = GrossUOM.intUnitMeasureId
+	)
+		ON GrossUOM.intItemUOMId = ItemLocation.intGrossUOMId
 	LEFT JOIN (
 		tblICItemUOM StockUOM INNER JOIN tblICUnitMeasure sUOM
 			ON StockUOM.intUnitMeasureId = sUOM.intUnitMeasureId

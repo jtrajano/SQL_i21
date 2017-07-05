@@ -169,6 +169,18 @@ Begin
 		GOTO NEXT_SHIPMENT
 	End
 
+	If ISNULL(@strLoadNumber,'') not like 'LS-%'
+	Begin
+		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='Old Load' Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+
+	If Exists (Select 1 from tblLGLoadDetailLSPStg where intLoadStgId=@intLoadStgId and upper(strCommodityCode)='TEA')
+	Begin
+		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='Tea Logistics is not handled' Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+
 	If ISNULL(@strPositionType,'') ='Spot'
 	Begin
 		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='It is a Spot Contract' Where intLoadStgId=@intLoadStgId

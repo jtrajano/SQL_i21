@@ -844,6 +844,18 @@ BEGIN TRY
 			AND WI.intWorkOrderId = @intWorkOrderId
 			AND WI.ysnConsumptionReversed = 0
 
+
+		DELETE I
+		FROM @tblICFinalItem I
+		WHERE I.intItemId IN (
+				SELECT WI.intMainItemId
+				FROM @tblMFWorkOrderInputLot WI
+				WHERE WI.intItemId <> WI.intMainItemId
+				GROUP BY WI.intMainItemId
+				HAVING Round(SUM(dblRatio), 0) = 100
+				)
+
+
 		INSERT INTO @tblMFQtyInProductionStagingLocation (
 			intItemId
 			,dblQtyInProductionStagingLocation ---System Qty
@@ -1006,11 +1018,10 @@ BEGIN TRY
 	DELETE
 	FROM @tblICFinalItem
 	WHERE ysnMainItem = 0
-		AND intItemId IN (
-			SELECT SL.intItemId
-			FROM @tblMFQtyInProductionStagingLocation SL
-			WHERE SL.dblQtyInProdStagingLocation = 0
-			)
+		AND intItemId NOT IN (
+			SELECT WI.intItemId
+			FROM @tblMFWorkOrderInputLot WI
+			) 
 
 	DELETE FI
 	FROM @tblICFinalItem FI

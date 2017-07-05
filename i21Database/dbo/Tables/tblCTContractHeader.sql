@@ -130,3 +130,17 @@ GO
 
 CREATE STATISTICS [_dta_stat_34411492_29_30_4_1] ON [dbo].[tblCTContractHeader]([intContractBasisId], [intPositionId], [intEntityId], [intContractHeaderId])
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTContractHeader_intEntityId] ON [dbo].[tblCTContractHeader]
+(
+	[intEntityId] ASC
+)
+INCLUDE ( 	
+	intContractHeaderId
+	,intContractTypeId
+	,strContractNumber
+	,dtmContractDate
+	,intSalespersonId
+	,ysnLoad
+) 
+GO 

@@ -9,5 +9,6 @@
 	[dblOrderQty] NUMERIC(38, 20) NULL,
 	[dblPickedQty] NUMERIC(38, 20) NULL,
 	[intUserId] INT NULL,
-	[strPickedFrom] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	[strPickedFrom] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [ysnLoad] BIT NULL
 )

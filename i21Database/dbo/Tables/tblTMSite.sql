@@ -75,6 +75,7 @@
     [intLocationId] INT NULL, 
     [intCompanyLocationPricingLevelId] INT NULL, 
     [intGlobalJulianCalendarId] INT NULL, 
+	[ysnRoutingAlert]			  BIT             DEFAULT 0 NOT NULL,
     CONSTRAINT [PK_tblTMSite] PRIMARY KEY CLUSTERED ([intSiteID] ASC),
     CONSTRAINT [FK_tblTMSite_tblTMClock] FOREIGN KEY ([intClockID]) REFERENCES [dbo].[tblTMClock] ([intClockID]),
     CONSTRAINT [FK_tblTMSite_tblTMCustomer] FOREIGN KEY ([intCustomerID]) REFERENCES [dbo].[tblTMCustomer] ([intCustomerID]),

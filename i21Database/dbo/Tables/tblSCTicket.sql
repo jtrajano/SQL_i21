@@ -112,6 +112,7 @@
 	[strCostMethod]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intGradeId] INT NULL,
 	[intWeightId] INT NULL,
+	[intDeliverySheetId] INT NULL,
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -133,7 +134,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblGRStorageScheduleRule_intStorageScheduleId] FOREIGN KEY ([intStorageScheduleId]) REFERENCES [dbo].[tblGRStorageScheduleRule] ([intStorageScheduleRuleId]),
 	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdFrom] FOREIGN KEY (intItemUOMIdFrom) REFERENCES [tblICItemUOM](intItemUOMId),
 	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdTo] FOREIGN KEY (intItemUOMIdTo) REFERENCES [tblICItemUOM](intItemUOMId),
-	CONSTRAINT [FK_tblSCTicket_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY (intTicketTypeId) REFERENCES [tblSCListTicketTypes](intTicketTypeId)
+	CONSTRAINT [FK_tblSCTicket_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY (intTicketTypeId) REFERENCES [tblSCListTicketTypes](intTicketTypeId),
+	CONSTRAINT [FK_tblSCTicket_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY (intDeliverySheetId) REFERENCES [tblSCDeliverySheet](intDeliverySheetId)
 )
 
 GO

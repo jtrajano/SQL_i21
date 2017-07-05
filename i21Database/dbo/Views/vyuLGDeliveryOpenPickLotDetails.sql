@@ -58,7 +58,15 @@ SELECT DISTINCT PL.intPickLotDetailId,
   PLH.strCustomerNo, 
   Receipt.strWarehouseRefNo,
   L.strLoadNumber,
-  ysnDelivered = CONVERT(BIT,(CASE WHEN ISNULL(L.strLoadNumber,'') = '' THEN 0 ELSE 1 END))
+  ysnDelivered = CONVERT(BIT,(CASE WHEN ISNULL(L.strLoadNumber,'') = '' THEN 0 ELSE 1 END)),
+  strPriceCurrency = SCurrency.strCurrency,
+  dblSalesPrice = SCD.dblCashPrice,
+  strPriceUOM = SUOM.strUnitMeasure,
+  dblSalesAmount = CASE WHEN SCurrency.ysnSubCurrency <> 1 THEN
+						PL.dblNetWt * SCD.dblCashPrice * dbo.fnLGGetItemUnitConversion(SCD.intItemId, (SELECT Top(1) IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = SCD.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId), SUOM.intUnitMeasureId)
+					ELSE
+						PL.dblNetWt * SCD.dblCashPrice * dbo.fnLGGetItemUnitConversion(SCD.intItemId, (SELECT Top(1) IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = SCD.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId), SUOM.intUnitMeasureId) / 100
+					END
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
@@ -70,6 +78,9 @@ JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = AD.intSContractDetailI
 JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 JOIN tblICUnitMeasure  UM ON UM.intUnitMeasureId   = PL.intLotUnitMeasureId
 JOIN tblICUnitMeasure SaleUOM ON SaleUOM.intUnitMeasureId = PL.intSaleUnitMeasureId
+JOIN tblSMCurrency SCurrency ON SCurrency.intCurrencyID = SCD.intCurrencyId
+JOIN tblICItemUOM SItemUOM ON SItemUOM.intItemUOMId = SCD.intPriceItemUOMId
+JOIN tblICUnitMeasure SUOM ON SUOM.intUnitMeasureId = SItemUOM.intUnitMeasureId
 JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
 LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId

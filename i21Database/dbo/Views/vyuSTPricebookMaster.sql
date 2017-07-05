@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuSTPricebookMaster]
 AS 
 SELECT        
-adj5.intCompanyLocationId
+ NEWID() as strPricebookMasterId
+, adj5.intCompanyLocationId
 , adj5.strLocationName
 , adj6.intItemUOMId
 , adj6.strUpcCode
