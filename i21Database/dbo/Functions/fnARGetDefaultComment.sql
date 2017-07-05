@@ -4,6 +4,7 @@
 	@intEntityCustomerId	INT = NULL,
 	@strTransactionType     NVARCHAR(50) = NULL,
 	@strType                NVARCHAR(50) = NULL,
+	@strHeaderFooter		NVARCHAR(50) = NULL,
 	@DocumentMaintenanceId	INT = NULL
 )
 RETURNS NVARCHAR(MAX) AS
@@ -23,7 +24,8 @@ BEGIN
 		FROM [tblSMDocumentMaintenance] A
 		INNER JOIN (SELECT intDocumentMaintenanceId
 						 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-					FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+					FROM tblSMDocumentMaintenanceMessage
+					WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 		WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 		AND [strSource] <> 'Statement Footer'
 	ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -35,7 +37,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -50,7 +53,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -65,7 +69,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -80,7 +85,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -95,7 +101,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -110,7 +117,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -125,7 +133,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 				AND [strSource] <> 'Statement Footer'
 			ORDER BY A.[intDocumentMaintenanceId] DESC
@@ -140,7 +149,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] IS NULL AND A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END
@@ -155,7 +165,8 @@ BEGIN
 		FROM [tblSMDocumentMaintenance] A
 		INNER JOIN (SELECT intDocumentMaintenanceId
 						 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-					FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+					FROM tblSMDocumentMaintenanceMessage
+					WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 		WHERE [strSource] = @strTransactionType
 		AND intCompanyLocationId = @intCompanyLocationId
 		AND intEntityCustomerId = @intEntityCustomerId
@@ -170,7 +181,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId = @intCompanyLocationId
 				AND intEntityCustomerId = @intEntityCustomerId
@@ -187,7 +199,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId = @intCompanyLocationId
 				AND intEntityCustomerId IS NULL
@@ -205,7 +218,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId = @intCompanyLocationId
 				AND intEntityCustomerId IS NULL
@@ -222,7 +236,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId = @intEntityCustomerId
@@ -240,7 +255,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId = @intEntityCustomerId
@@ -257,7 +273,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId IS NULL		
@@ -275,7 +292,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId IS NULL		
@@ -292,7 +310,8 @@ BEGIN
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
-							FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+							FROM tblSMDocumentMaintenanceMessage
+							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] IS NULL
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 		END

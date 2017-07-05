@@ -3,11 +3,10 @@
 	@intEntityCustomerId	INT = NULL,
 	@strTransactionType     NVARCHAR(50) = NULL,
 	@strType                NVARCHAR(50) = NULL,
-	@strDefaultComment		NVARCHAR(500) = NULL OUTPUT,
+	@strHeaderComment		NVARCHAR(500) = NULL OUTPUT,
+	@strFooterComment		NVARCHAR(500) = NULL OUTPUT,
 	@DocumentMaintenanceId	INT = NULL
 AS
 
-
-SET @strDefaultComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, @DocumentMaintenanceId)
-
-
+SET @strHeaderComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, 'Header', @DocumentMaintenanceId)
+SET @strFooterComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, NULL, 'Footer', @DocumentMaintenanceId)

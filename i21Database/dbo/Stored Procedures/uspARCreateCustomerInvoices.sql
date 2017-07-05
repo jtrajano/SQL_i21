@@ -634,7 +634,7 @@ WHERE
 UPDATE
 	@InvoicesToGenerate
 SET
-	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, intDocumentMaintenanceId)
+	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, 'Header', intDocumentMaintenanceId)
 WHERE
 	[strComments] IS NULL 
 	OR LTRIM(RTRIM([strComments])) = ''
