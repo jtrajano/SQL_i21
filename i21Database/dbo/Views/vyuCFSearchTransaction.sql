@@ -1,9 +1,38 @@
-﻿CREATE VIEW [dbo].[vyuCFSearchTransaction]
+﻿
+CREATE VIEW [dbo].[vyuCFSearchTransaction]
 AS
 SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.intPumpNumber, cfTransaction.strPONumber, cfTransaction.strMiscellaneous,
                          cfTransaction.strDeliveryPickupInd, cfTransaction.intTransactionId, cfTransaction.dtmBillingDate, cfTransaction.intTransTime, cfTransaction.strSequenceNumber,
                          cfSite.strLocationName AS strCompanyLocation, cfTransaction.strTransactionId, cfTransaction.dtmTransactionDate, cfTransaction.strTransactionType,
-                         cfTransaction.dblQuantity, cfCard.strCustomerNumber, cfCard.strName, cfCard.strCardNumber, cfCard.strCardDescription, cfNetwork.strNetwork, cfSite.strSiteNumber,
+                         cfTransaction.dblQuantity, 
+
+						  (CASE 
+						 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN cfNetwork.intCustomerId
+						 ELSE  cfCard.intEntityId
+						 END)
+						 AS intEntityId,
+
+						 (CASE 
+						 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN cfNetwork.strEntityNo
+						 ELSE  cfCard.strEntityNo
+						 END) AS strCustomerNumber,
+
+						 (CASE 
+						 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN cfNetwork.strForeignCustomer
+						 ELSE cfCard.strName
+						 END) AS strName,
+
+						 (CASE 
+						 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN cfTransaction.strForeignCardId
+						 ELSE cfCard.strCardNumber
+						 END) AS strCardNumber,
+
+						 (CASE 
+						 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN 'Foreign Card'
+						 ELSE cfCard.strCardDescription
+						 END) AS strCardDescription,
+						
+						 cfNetwork.strNetwork, cfSite.strSiteNumber,
                          cfSite.strSiteName, cfItem.strProductNumber, cfItem.strItemNo, cfItem.strDescription, ROUND(cfTransPrice.dblCalculatedAmount,2) AS dblCalculatedTotalAmount,
                          cfTransPrice.dblOriginalAmount AS dblOriginalTotalAmount, cfTransGrossPrice.dblCalculatedAmount AS dblCalculatedGrossAmount,
                          cfTransGrossPrice.dblOriginalAmount AS dblOriginalGrossAmount, cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount,
@@ -17,13 +46,16 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
 						 -- WHEN cfTransaction.ysnPosted = 1 THEN cfTransNetPrice.dblCalculatedAmount - arSalesAnalysisReport.dblUnitCost
        --                   ELSE cfTransNetPrice.dblCalculatedAmount - cfItem.dblAverageCost END ELSE cfTransGrossPrice.dblCalculatedAmount - cfTransaction.dblTransferCost END, 0)
 			
-                         0.0 AS dblMargin, cfCard.intEntityCustomerId, cfTransaction.dtmInvoiceDate, cfTransaction.strInvoiceReportNumber
+                         0.0 AS dblMargin,  cfTransaction.dtmInvoiceDate, cfTransaction.strInvoiceReportNumber
 
 FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN 
              --            dbo.tblARInvoice AS arInvoice ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId LEFT OUTER JOIN
              --            dbo.vyuARSalesAnalysisReport AS arSalesAnalysisReport ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId
              --AND arInvoice.strInvoiceNumber = arSalesAnalysisReport.strRecordNumber LEFT OUTER JOIN
-                         dbo.tblCFNetwork AS cfNetwork ON cfTransaction.intNetworkId = cfNetwork.intNetworkId LEFT OUTER JOIN
+                         (SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
+INNER JOIN tblEMEntity emEntity ON 
+cfNetwork.intCustomerId = emEntity.intEntityId) as cfNetwork  on cfNetwork.intNetworkId = cfTransaction.intNetworkId
+LEFT OUTER JOIN
                              (SELECT   smiCompanyLocation.strLocationName, cfiSite.intSiteId, cfiSite.strSiteNumber, cfiSite.strSiteName
                                 FROM         dbo.tblCFSite AS cfiSite LEFT OUTER JOIN 
                                                          dbo.tblSMCompanyLocation AS smiCompanyLocation ON cfiSite.intARLocationId = smiCompanyLocation.intCompanyLocationId) AS cfSite ON
@@ -39,11 +71,11 @@ FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                                                          dbo.vyuICGetItemPricing AS iciItemPricing ON cfiItem.intARItemId = iciItemPricing.intItemId AND iciItemLocation.intLocationId = iciItemPricing.intLocationId AND
                                                          iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId AND iciItemLocation.intIssueUOMId = iciItemPricing.intUnitMeasureId) AS cfItem ON
                          cfTransaction.intProductId = cfItem.intItemId LEFT OUTER JOIN 
-                             (SELECT   cfiAccount.intAccountId, cfiCustomer.strName, cfiCustomer.strCustomerNumber, cfiCustomer.intEntityCustomerId, cfiCard.intCardId, cfiCard.strCardNumber,
+                             (SELECT   cfiAccount.intAccountId, cfiCustomer.strName, cfiCustomer.strEntityNo, cfiCustomer.intEntityId, cfiCard.intCardId, cfiCard.strCardNumber,
                                                          cfiCard.strCardDescription 
                                 FROM         dbo.tblCFAccount AS cfiAccount INNER JOIN 
                                                          dbo.tblCFCard AS cfiCard ON cfiCard.intAccountId = cfiAccount.intAccountId INNER JOIN
-                                                         dbo.vyuCFCustomerEntity AS cfiCustomer ON cfiCustomer.intEntityCustomerId = cfiAccount.intCustomerId) AS cfCard ON
+                                                         dbo.tblEMEntity AS cfiCustomer ON cfiCustomer.intEntityId = cfiAccount.intCustomerId) AS cfCard ON
                          cfTransaction.intCardId = cfCard.intCardId LEFT OUTER JOIN 
                              (SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                 FROM         dbo.tblCFTransactionPrice 
@@ -58,4 +90,7 @@ FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                                 FROM         dbo.tblCFTransactionTax AS tblCFTransactionTax 
                                 GROUP BY intTransactionId) AS tblCFTransactionTax_1 ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId LEFT OUTER JOIN
                          dbo.tblCTContractHeader AS ctContracts ON cfTransaction.intContractId = ctContracts.intContractHeaderId
+
 GO
+
+

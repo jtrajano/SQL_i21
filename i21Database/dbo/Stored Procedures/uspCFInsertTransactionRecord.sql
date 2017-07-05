@@ -736,7 +736,10 @@ BEGIN
 		IF(@intCardId = 0 OR @intCardId IS NULL)
 		BEGIN
 			SET @intCardId = NULL
-			SET @ysnInvalid = 1
+			IF (@strTransactionType != 'Foreign Sale')
+			BEGIN
+				SET @ysnInvalid = 1
+			END
 		END
 		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
 		BEGIN

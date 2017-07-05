@@ -1691,7 +1691,10 @@ BEGIN
 	END
 	IF(@intCardId = 0 OR @intCardId IS NULL)
 	BEGIN
-		SET @ysnInvalid = 1
+		IF (@TransactionType != 'Foreign Sale')
+		BEGIN
+			SET @ysnInvalid = 1
+		END
 	END
 	IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 	BEGIN
@@ -1706,7 +1709,10 @@ BEGIN
 	IF(@intCardId = 0 OR @intCardId IS NULL)
 	BEGIN
 		SET @intCardId = NULL
-		SET @ysnInvalid = 1
+		IF (@TransactionType != 'Foreign Sale')
+		BEGIN
+			SET @ysnInvalid = 1
+		END
 	END
 	IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
 	BEGIN
