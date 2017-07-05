@@ -40,6 +40,45 @@ Ext.define('Inventory.search.InventoryShipment', {
                 { dataIndex: 'strFreeTime', text: 'Free Time', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strReceivedBy', text: 'Received By', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strComment', text: 'Comment', flex: 1, dataType: 'string', hidden: true }
+            ],
+            buttons: [
+                {
+                    text: 'Items',
+                    itemId: 'btnItem',
+                    clickHandler: 'onItemClick',
+                    width: 80
+                },
+                {
+                    text: 'Categories',
+                    itemId: 'btnCategory',
+                    clickHandler: 'onCategoryClick',
+                    width: 100
+                },
+                {
+                    text: 'Commodities',
+                    itemId: 'btnCommodity',
+                    clickHandler: 'onCommodityClick',
+                    width: 100
+                },
+                {
+                    text: 'Locations',
+                    itemId: 'btnLocation',
+                    clickHandler: 'onLocationClick',
+                    width: 100
+                },
+                {
+                    text: 'Storage Units',
+                    itemId: 'btnStorageLocation',
+                    clickHandler: 'onStorageLocationClick',
+                    width: 110
+                },
+                {
+                    text: 'Customer',
+                    itemId: 'btnCustomer',
+                    clickHandler: 'onViewCustomerClick',
+                    width: 80
+
+                }
             ]
         },
         {
@@ -140,46 +179,6 @@ Ext.define('Inventory.search.InventoryShipment', {
                     width: 400
                 }                        
             ]                                        
-        }
-    ],
-
-    buttons: [
-        {
-            text: 'Items',
-            itemId: 'btnItem',
-            clickHandler: 'onItemClick',
-            width: 80
-        },
-        {
-            text: 'Categories',
-            itemId: 'btnCategory',
-            clickHandler: 'onCategoryClick',
-            width: 100
-        },
-        {
-            text: 'Commodities',
-            itemId: 'btnCommodity',
-            clickHandler: 'onCommodityClick',
-            width: 100
-        },
-        {
-            text: 'Locations',
-            itemId: 'btnLocation',
-            clickHandler: 'onLocationClick',
-            width: 100
-        },
-        {
-            text: 'Storage Units',
-            itemId: 'btnStorageLocation',
-            clickHandler: 'onStorageLocationClick',
-            width: 110
-        },
-        {
-            text: 'Customer',
-            itemId: 'btnCustomer',
-            clickHandler: 'onViewCustomerClick',
-            width: 80
-
         }
     ],
 

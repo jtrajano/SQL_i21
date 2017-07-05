@@ -31,6 +31,32 @@ Ext.define('Inventory.search.Item', {
                 {dataIndex: 'strProductLine', text: 'Product Line', width: 150, dataType: 'string', minWidth: 150},
                 //{dataIndex: 'strGrade', text: 'Grade', width: 150, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strMarketValuation', text: 'Market Valuation', flex: 1, dataType: 'string', minWidth: 250}
+            ],
+            buttons: [
+                {
+                    text: 'Categories',
+                    itemId: 'btnCategory',
+                    clickHandler: 'onCategoryClick',
+                    width: 100
+                },
+                {
+                    text: 'Commodities',
+                    itemId: 'btnCommodity',
+                    clickHandler: 'onCommodityClick',
+                    width: 100
+                },
+                {
+                    text: 'Inventory UOM',
+                    itemId: 'btnInventoryUOM',
+                    clickHandler: 'onInventoryUOMClick',
+                    width: 100
+                },
+                {
+                    text: 'Lot Status',
+                    itemId: 'btnLotStatus',
+                    clickHandler: 'onLotStatusClick',
+                    width: 100
+                }
             ]
         },
         {
@@ -199,32 +225,6 @@ Ext.define('Inventory.search.Item', {
                 { dataIndex: 'dblWeight', text: 'Weight', hidden: true, width: 100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
                 { dataIndex: 'dblVolume', text: 'Volume', hidden: true, width: 100, flex: 1, dataType: 'float', xtype: 'numbercolumn' }
             ]
-        }
-    ],
-    buttons: [
-        {
-            text: 'Categories',
-            itemId: 'btnCategory',
-            clickHandler: 'onCategoryClick',
-            width: 100
-        },
-        {
-            text: 'Commodities',
-            itemId: 'btnCommodity',
-            clickHandler: 'onCommodityClick',
-            width: 100
-        },
-        {
-            text: 'Inventory UOM',
-            itemId: 'btnInventoryUOM',
-            clickHandler: 'onInventoryUOMClick',
-            width: 100
-        },
-        {
-            text: 'Lot Status',
-            itemId: 'btnLotStatus',
-            clickHandler: 'onLotStatusClick',
-            width: 100
         }
     ],
 
