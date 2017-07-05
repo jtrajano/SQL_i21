@@ -43,6 +43,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@strTransactionId NVARCHAR(40)
 		,@intTransactionId INT 
 		,@msg_id INT
+		,@intStartingNumberId INT
 		
 -- Check for invalid bank account id. 
 IF NOT EXISTS (
@@ -59,16 +60,18 @@ BEGIN
 END
 
 -- Initialize the transaction id. 
-SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
-FROM	dbo.tblSMStartingNumber
-WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+--SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
+--FROM	dbo.tblSMStartingNumber
+--WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+SELECT	@intStartingNumberId = intStartingNumberId FROM	dbo.tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+EXEC uspSMGetStartingNumber @intStartingNumberId, strTransactionId
 IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Increment the next transaction number
-UPDATE	dbo.tblSMStartingNumber
-SET		intNumber += 1
-WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
-IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
+--UPDATE	dbo.tblSMStartingNumber
+--SET		intNumber += 1
+--WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+--IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Check for duplicate transaction id. 
 IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankTransaction] WHERE strTransactionId = @strTransactionId)
