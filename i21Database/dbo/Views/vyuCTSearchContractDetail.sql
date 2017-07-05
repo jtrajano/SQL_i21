@@ -42,6 +42,7 @@ AS
 
 			IC.strContractItemName,
 			IC.strContractItemNo,
+			IC.strGrade AS strQualityApproval,
 			U4.strUnitMeasure				AS	strWeightUOM,
 			IM.strItemNo,		
 			IM.strShortName					AS	strItemShortName,		
