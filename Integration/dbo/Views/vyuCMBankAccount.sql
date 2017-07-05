@@ -46,7 +46,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intBankStatementImportId
 				,strBankStatementFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intBankStatementImportId)
 				,i21.intEFTBankFileFormatId
+				,i21.intEFTARFileFormatId
+				,i21.intEFTPRFileFormatId
 				,strACHFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intEFTBankFileFormatId)
+				,strEFTARFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intEFTARFileFormatId)
+				,strEFTPRFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intEFTPRFileFormatId)
 				,i21.intPositivePayBankFileFormatId
 				,strPositivePayFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intPositivePayBankFileFormatId)
 				,i21.strEFTCompanyId
@@ -238,6 +242,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intEFTNextNo
 					,intBankStatementImportId
 					,intEFTBankFileFormatId
+					,intEFTARFileFormatId
+					,intEFTPRFileFormatId
 					,intPositivePayBankFileFormatId
 					,strEFTCompanyId
 					,strEFTBankName
@@ -310,6 +316,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intEFTNextNo						= i.intEFTNextNo
 					,intBankStatementImportId			= i.intBankStatementImportId
 					,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+					,intEFTARFileFormatId				= i.intEFTARFileFormatId
+					,intEFTPRFileFormatId				= i.intEFTPRFileFormatId
 					,intPositivePayBankFileFormatId		= i.intPositivePayBankFileFormatId
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
@@ -500,6 +508,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intEFTNextNo						= i.intEFTNextNo
 					,intBankStatementImportId			= i.intBankStatementImportId
 					,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+					,intEFTARFileFormatId				= i.intEFTARFileFormatId
+					,intEFTPRFileFormatId				= i.intEFTPRFileFormatId
 					,intPositivePayBankFileFormatId		= i.intPositivePayBankFileFormatId
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName

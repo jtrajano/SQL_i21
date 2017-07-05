@@ -160,6 +160,8 @@ BEGIN
 				,intBackupCheckEndingNo
 				,intEFTNextNo
 				,intEFTBankFileFormatId
+				,intEFTARFileFormatId
+				,intEFTPRFileFormatId
 				,strEFTCompanyId
 				,strEFTBankName
 				,strMICRDescription
@@ -211,7 +213,9 @@ BEGIN
 				,intBackupCheckStartingNo			= 0
 				,intBackupCheckEndingNo				= 0
 				,intEFTNextNo						= ISNULL(i.apcbk_next_eft_no, 0)
-				,intEFTBankFileFormatId				= NULL 
+				,intEFTBankFileFormatId				= NULL
+				,intEFTARFileFormatId				= NULL
+				,intEFTPRFileFormatId				= NULL 
 				,strEFTCompanyId					= ''''
 				,strEFTBankName						= ''''
 				,strMICRDescription					= ''''
