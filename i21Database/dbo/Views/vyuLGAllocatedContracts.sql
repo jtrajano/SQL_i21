@@ -82,20 +82,19 @@ SELECT
 	,SFR.strOrigin+' - '+SFR.strDest as strSOriginDest
 	,SCT.dblNoOfLots as dblSNoOfLots
 	,ysnDelivered = CONVERT(BIT, CASE 
-								 WHEN SCT.dblBalance <= 0
-									THEN 1
-								 ELSE CASE 
-										WHEN (
-												ALD.dblSAllocatedQty > ISNULL((
+								 WHEN (ALD.dblSAllocatedQty > ISNULL((
 														SELECT SUM(LD.dblQuantity)
-														FROM tblLGLoadDetail LD
-														WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId
+														FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+														WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3)
 														), 0)
 												)
 											THEN 0
-										ELSE 1
-										END
-								 END)
+									ELSE 1
+								END)
+	,dblSDeliveredQty = IsNull((SELECT SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3)), 0)
+	,dblBalanceToDeliver = ALD.dblSAllocatedQty - IsNull((SELECT SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3)), 0)
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = ALH.intCommodityId
