@@ -83,7 +83,7 @@
 :r .\8_AP\UpdateVoucherCurrency.SQL
 --:r .\8_AP\tblAPapivcmst.sql
 --:r .\8_AP\UpdateBillToReceiptAssociation.sql
-
+:r .\8_AP\UpdateBillContact.sql
 --:r .\8_AP\UpdateMissingPaymentInfo.sql
 --:r .\8_AP\UpdateBillStatus.sql
 --:r .\8_AP\AddPOVendorConstraint.sql
