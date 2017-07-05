@@ -281,7 +281,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 		LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
-		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
+		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0 AND RE.ysnIsStorage = 0
 
 		--Insert record for fee
 		INSERT INTO @OtherCharges
