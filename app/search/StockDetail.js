@@ -38,13 +38,50 @@ Ext.define('Inventory.search.StockDetail', {
             ],
             showNew: false,
             showOpenSelected: false,
-            enableDblClick: false
+            enableDblClick: false,
+            singleSelection: true,
+            customControl: [
+                {
+                    xtype: 'button',
+                    text: 'Valuation',
+                    itemId: 'btnValuation',
+                    iconCls: 'small-calculator',
+                    listeners: {
+                        click: function (e) {
+                            var dashPanel = iRely.Functions.getComponentByQuery('#searchTabPanel');
+                            var tabCountGroup = dashPanel.items.map.mainTab;
+                            var grid = tabCountGroup.items.map.grdSearch;
+                            var selection = _.first(grid.getSelectionModel().selected.items);
+
+                            if(selection) {
+                                iRely.Functions.openScreen('Inventory.view.InventoryValuation', {
+                                    showSearch: true,
+                                    filters: [
+                                        {
+                                            column: 'strItemNo',
+                                            value: selection.get('strItemNo'),
+                                            condition: 'eq',
+                                            conjunction: 'And'
+                                        },
+                                        {
+                                            column: 'strLocationName',
+                                            value: selection.get('strLocationName'),
+                                            condition: 'eq',
+                                            conjunction: 'And'
+                                        }
+                                    ]
+                                });
+                            }
+                        }
+                    }
+                }
+            ]
         },
         {
             showNew: false,
             showOpenSelected: false,
             enableDblClick: false,
-            title: 'Storage Locations YTD',
+            title: 'Search Storage Locations YTD',
             api: {
                 read: '../Inventory/api/StorageLocation/SearchSubLocationBinDetails'
             },
