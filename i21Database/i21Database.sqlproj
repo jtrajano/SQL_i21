@@ -5313,6 +5313,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStockHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryByParentLot.sql" />
+    <Build Include="dbo\Views\vyuMFGetTaskQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
