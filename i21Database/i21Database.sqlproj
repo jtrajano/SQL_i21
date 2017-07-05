@@ -5331,6 +5331,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStockHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryByParentLot.sql" />
+    <Build Include="dbo\Functions\fnSTDynamicQueryItemData.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemDataPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemPricingPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportUpdateRebateOrDiscountPreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -563,7 +563,7 @@ BEGIN TRY
 			EXEC (@SqlQuery1)
 		 END
 
-		 IF (@dblDiscThroughAmount <> 0)
+		 IF (@dblDiscThroughAmount IS NOT NULL)
 		 BEGIN
 			SET @SqlQuery1 = 'SELECT' + CHAR(13)
 								   + ' e.strLocationName' + CHAR(13)
@@ -587,7 +587,7 @@ BEGIN TRY
 					SET @SqlQuery1 = @SqlQuery1 + ' and d.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')'
 			  END				    				   
 			
-			  IF (@strVendorId IS NOT NULL)
+			  IF (@strVendorId <> '')
 			  BEGIN 
 					SET @SqlQuery1 = @SqlQuery1 +  ' and  a.intItemLocationId
 					IN (select intItemLocationId from tblICItemLocation where intVendorId
@@ -625,7 +625,7 @@ BEGIN TRY
 			EXEC (@SqlQuery1)
 		 END
 
-		 IF (@dblDiscThroughQty <> 0)
+		 IF (@dblDiscThroughQty IS NOT NULL)
 		 BEGIN
 	    
 			 SET @SqlQuery1 = 'SELECT' + CHAR(13)
@@ -695,247 +695,168 @@ BEGIN TRY
 	SELECT @UpdateCount = count(*) from @tblMassUpdatePreview WHERE strOldData !=  strNewData
 
 
-
-	-----------------------------------Handle Dynamic Query 5
-	--select * from tblSTMassUpdateReportMaster
-	--select * from tblICItemSpecialPricing
-
-	--Get Change Description
-	DECLARE @strChangeDescription as NVARCHAR(MAX)
-	SET @strChangeDescription = ''
-	IF(@dtmBeginDate IS NOT NULL)
-	BEGIN
-		SET @strChangeDescription = @strChangeDescription + ' Sales start date'' + CHAR(13) + '''
-	END
-	IF(@dtmEndDate IS NOT NULL)
-	BEGIN
-		SET @strChangeDescription = @strChangeDescription + ' Sales end date'' + CHAR(13) + '''
-	END
-	
-	IF (@strPromotionType = 'Vendor Rebate')
-	BEGIN
-		IF(@dblRebateAmount <> 0)
+	IF((@ysnPreview != 'Y')
+	AND(@UpdateCount > 0))	  
 		BEGIN
-			SET @strChangeDescription = @strChangeDescription + ' Rebate amount'' + CHAR(13) + '''
-		END
-		IF(@dblAccumAmount <> 0)
-		BEGIN
-			SET @strChangeDescription = @strChangeDescription + ' Accumulated amount'' + CHAR(13) + '''
-		END
-		IF(@dblAccumlatedQty <> 0)
-		BEGIN
-			SET @strChangeDescription = @strChangeDescription + ' Accumulated quantity'' + CHAR(13) + '''
-		END
-	END
-	ELSE IF (@strPromotionType = 'Vendor Discount')
-	BEGIN
-		IF(@dblDiscAmountUnit <> 0)
-		BEGIN
-			SET @strChangeDescription = @strChangeDescription + ' Discount amount unit'' + CHAR(13) + '''
-		END
-		IF(@dblDiscThroughAmount <> 0)
-		BEGIN
-			SET @strChangeDescription = @strChangeDescription + ' Discount through amount'' + CHAR(13) + '''
-		END
-		IF(@dblDiscThroughQty <> 0)
-		BEGIN
-			SET @strChangeDescription = @strChangeDescription + ' Discount through quantity'' + CHAR(13) + '''
-		END
-	END
+	       
+			  SET @UpdateCount = 0
 
+			  IF (@strPromotionType = 'Vendor Rebate')
+			  BEGIN
+				   set @SqlQuery1 = ' update tblICItemSpecialPricing set '    
+	  
+				   IF (@dtmBeginDate IS NOT NULL)
+				   BEGIN
+						 set @SqlQuery1 = @SqlQuery1 + ' dtmBeginDate = ''' + LTRIM(@dtmBeginDate) + '''' 
+				   END
 
-	--+ ', CAST(a.dblDiscountThruQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-	--							    + ', CAST(' + CAST(@dblDiscThroughQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
+				   IF (@dtmEndDate IS NOT NULL)
+				   BEGIN
+   					  IF (@dtmBeginDate IS NOT NULL)
+						set @SqlQuery1 = @SqlQuery1 + ' , dtmEndDate = ''' + LTRIM(@dtmEndDate) + ''''
+					  else
+						 set @SqlQuery1 = @SqlQuery1 + ' dtmEndDate = ''' + LTRIM(@dtmEndDate) + '''' 
+				   END
 
-	--Get Old Data
-	DECLARE @strOldData as NVARCHAR(MAX)
-	SET @strOldData = ''
-	IF(@dtmBeginDate IS NOT NULL)
-	BEGIN
-		SET @strOldData = @strOldData + ' IP.dtmBeginDate, CHAR(13),'
-	END
-	IF(@dtmEndDate IS NOT NULL)
-	BEGIN
-		SET @strOldData = @strOldData + ' IP.dtmEndDate, CHAR(13),'
-	END
-	IF (@strPromotionType = 'Vendor Rebate')
-	BEGIN
-		IF(@dblRebateAmount <> 0)
-		BEGIN
-			--SET @strOldData = @strOldData + ' IP.dblDiscount, CHAR(13),'
-			SET @strOldData = @strOldData + ' CAST(IP.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
-		END
-		IF(@dblAccumAmount <> 0)
-		BEGIN
-			--SET @strOldData = @strOldData + ' IP.dblAccumulatedAmount, CHAR(13),'
-			SET @strOldData = @strOldData + ' CAST(IP.dblAccumulatedAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
-		END
-		IF(@dblAccumlatedQty <> 0)
-		BEGIN
-			--SET @strOldData = @strOldData + ' IP.dblAccumulatedQty, CHAR(13),'
-			SET @strOldData = @strOldData + ' CAST(IP.dblAccumulatedQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
-		END
-	END
-	ELSE IF (@strPromotionType = 'Vendor Discount')
-	BEGIN
-		IF(@dblDiscAmountUnit <> 0)
-		BEGIN
-			--SET @strOldData = @strOldData + ' IP.dblDiscount, CHAR(13),'
-			SET @strOldData = @strOldData + ' CAST(IP.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
-		END
-		IF(@dblDiscThroughAmount <> 0)
-		BEGIN
-			--SET @strOldData = @strOldData + ' IP.dblDiscountThruAmount, CHAR(13),'
-			SET @strOldData = @strOldData + ' CAST(IP.dblDiscountThruAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
-		END
-		IF(@dblDiscThroughQty <> 0)
-		BEGIN
-			--SET @strOldData = @strOldData + ' IP.dblDiscountThruQty, CHAR(13),'
-			SET @strOldData = @strOldData + ' CAST(IP.dblDiscountThruQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')), CHAR(13),'
-		END
-	END
-	SET @strOldData = SUBSTRING(@strOldData, 0, LEN(@strOldData))
+				   IF (@dblRebateAmount IS NOT NULL)
+				   BEGIN
+					   IF ((@dtmBeginDate IS NOT NULL)
+					   OR (@dtmEndDate IS NOT NULL))
+						   set @SqlQuery1 = @SqlQuery1 + ' , dblDiscount = ''' + LTRIM(@dblRebateAmount) + ''''
+					   else
+						   set @SqlQuery1 = @SqlQuery1 + ' dblDiscount = ''' + LTRIM(@dblRebateAmount) + '''' 
+				   END
 
+				   IF (@dblAccumAmount IS NOT NULL)
+				   BEGIN
+					  IF ((@dtmBeginDate IS NOT NULL)
+					  OR (@dtmEndDate IS NOT NULL)
+					  OR (@dblRebateAmount IS NOT NULL))
+						  set @SqlQuery1 = @SqlQuery1 + ' , dblAccumulatedAmount = ''' + LTRIM(@dblAccumAmount) + ''''
+					  else
+						  set @SqlQuery1 = @SqlQuery1 + ' dblAccumulatedAmount = ''' + LTRIM(@dblAccumAmount) + '''' 
+				   END
 
+				   IF (@dblAccumlatedQty IS NOT NULL)
+				   BEGIN
+					  IF ((@dtmBeginDate IS NOT NULL)
+					  OR (@dtmEndDate IS NOT NULL)
+					  OR (@dblRebateAmount IS NOT NULL)
+					  OR (@dblAccumAmount IS NOT NULL))
+						  set @SqlQuery1 = @SqlQuery1 + ' , dblAccumulatedQty = ''' + LTRIM(@dblAccumlatedQty) + ''''
+					  else
+						 set @SqlQuery1 = @SqlQuery1 + ' dblAccumulatedQty = ''' + LTRIM(@dblAccumlatedQty) + '''' 
+				   END
+			  END
 
+			  IF (@strPromotionType = 'Vendor Discount')
+			  BEGIN
+				  set @SqlQuery1 = ' update tblICItemSpecialPricing set '    
+	  
+				   IF (@dtmBeginDate IS NOT NULL)
+				   BEGIN
+					 set @SqlQuery1 = @SqlQuery1 + ' dtmBeginDate = ''' + LTRIM(@dtmBeginDate) + '''' 
+				   END
 
-	--Get New Data
-	DECLARE @strNewData as NVARCHAR(MAX)
-	SET @strNewData = ''
-	IF(@dtmBeginDate IS NOT NULL)
-	BEGIN
-		SET @strNewData = @strNewData + ' ' + CAST(@dtmBeginDate as NVARCHAR) + ''' + CHAR(13) + '''
-	END
-	IF(@dtmEndDate IS NOT NULL)
-	BEGIN
-		SET @strNewData = @strNewData + ' ' + CAST(@dtmEndDate as NVARCHAR) + ''' + CHAR(13) + '''
-	END
-	
-	IF (@strPromotionType = 'Vendor Rebate')
-	BEGIN
-		IF(@dblRebateAmount <> 0)
-		BEGIN
-			SET @strNewData = @strNewData + ' ' + CAST(@dblRebateAmount as NVARCHAR) + ''' + CHAR(13) + '''
-		END
-		IF(@dblAccumAmount <> 0)
-		BEGIN
-			SET @strNewData = @strNewData + ' ' + CAST(@dblAccumAmount as NVARCHAR) + ''' + CHAR(13) + '''
-		END
-		IF(@dblAccumlatedQty <> 0)
-		BEGIN
-			SET @strNewData = @strNewData + ' ' + CAST(@dblAccumlatedQty as NVARCHAR) + ''' + CHAR(13) + '''
-		END
-	END
-	ELSE IF (@strPromotionType = 'Vendor Discount')
-	BEGIN
-		IF(@dblDiscAmountUnit <> 0)
-		BEGIN
-			SET @strNewData = @strNewData + ' ' + CAST(@dblDiscAmountUnit as NVARCHAR) + ''' + CHAR(13) + '''
-		END
-		IF(@dblDiscThroughAmount <> 0)
-		BEGIN
-			SET @strNewData = @strNewData + ' ' + CAST(@dblDiscThroughAmount as NVARCHAR) + ''' + CHAR(13) + '''
-		END
-		IF(@dblDiscThroughQty <> 0)
-		BEGIN
-			SET @strNewData = @strNewData + ' ' + CAST(@dblDiscThroughQty as NVARCHAR) + ''' + CHAR(13) + '''
-		END
-	END
+				   IF (@dtmEndDate IS NOT NULL)
+				   BEGIN
+   					  IF (@dtmBeginDate IS NOT NULL)
+						 set @SqlQuery1 = @SqlQuery1 + ' , dtmEndDate = ''' + LTRIM(@dtmEndDate) + ''''
+					  else
+						 set @SqlQuery1 = @SqlQuery1 + ' dtmEndDate = ''' + LTRIM(@dtmEndDate) + '''' 
+				   END
 
-	IF((@ysnPreview != 'Y') AND(@UpdateCount > 0))
-	BEGIN
-		IF (@strPromotionType = 'Vendor Rebate')
-		BEGIN
-				SET @SqlQuery1 = '--QUERY1' + CHAR(13)
-								+ ' SELECT' + CHAR(13)
-										+ ' CL.strLocationName as strLocation' + CHAR(13)
-										+ ', UOM.strUpcCode as strUpc' + CHAR(13)
-										+ ', I.strDescription as strItemDescription' + CHAR(13)
-										+ ', ''' + CAST(@strChangeDescription as NVARCHAR(MAX)) + ''' as strChangeDescription' + CHAR(13)
-										+ ', CONCAT(' + CAST(@strOldData as NVARCHAR(MAX)) + ') as strOldData' + CHAR(13)
-										+ ', ''' + CAST(@strNewData as NVARCHAR(MAX)) + ''' as strNewData' + CHAR(13)
-								+ ' FROM tblICItemSpecialPricing IP' + CHAR(13)
-								+ ' JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = IP.intItemLocationId' + CHAR(13)
-								+ ' JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId' + CHAR(13)
-								+ ' JOIN dbo.tblICItem I ON I.intItemId = IP.intItemId' + CHAR(13)
-								+ ' JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = IP.intItemId' + CHAR(13)
+				   IF (@dblDiscAmountUnit IS NOT NULL)
+				   BEGIN
+					  IF ((@dtmBeginDate IS NOT NULL)
+					  OR (@dtmEndDate IS NOT NULL))
+						  set @SqlQuery1 = @SqlQuery1 + ' , dblDiscount = ''' + LTRIM(@dblDiscAmountUnit) + ''''
+					  else
+						  set @SqlQuery1 = @SqlQuery1 + ' dblDiscount = ''' + LTRIM(@dblDiscAmountUnit) + '''' 
+				   END
 
-		END
+				   IF (@dblDiscThroughAmount IS NOT NULL)
+				   BEGIN
+					  IF ((@dtmBeginDate IS NOT NULL)
+					  OR (@dtmEndDate IS NOT NULL)
+					  OR (@dblDiscAmountUnit IS NOT NULL))
+						  set @SqlQuery1 = @SqlQuery1 + ' , dblDiscountThruAmount = ''' + LTRIM(@dblDiscThroughAmount) + ''''
+					  else
+						  set @SqlQuery1 = @SqlQuery1 + ' dblDiscountThruAmount = ''' + LTRIM(@dblDiscThroughAmount) + '''' 
+				   END
 
-		ELSE IF (@strPromotionType = 'Vendor Discount')
-		BEGIN
-				SET @SqlQuery1 = '--QUERY2' + CHAR(13)
-								+ ' SELECT' + CHAR(13)
-										+ ' CL.strLocationName as strLocation' + CHAR(13)
-										+ ', UOM.strUpcCode as strUpc' + CHAR(13)
-										+ ', I.strDescription as strItemDescription' + CHAR(13)
-										+ ', ''' + CAST(@strChangeDescription as NVARCHAR(MAX)) + ''' as strChangeDescription' + CHAR(13)
-										+ ', CONCAT(' + CAST(@strOldData as NVARCHAR(MAX)) + ') as strOldData' + CHAR(13)
-										+ ', ''' + CAST(@strNewData as NVARCHAR(MAX)) + ''' as strNewData' + CHAR(13)
-								+ ' FROM tblICItemSpecialPricing IP' + CHAR(13)
-								+ ' JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = IP.intItemLocationId' + CHAR(13)
-								+ ' JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId' + CHAR(13)
-								+ ' JOIN dbo.tblICItem I ON I.intItemId = IP.intItemId' + CHAR(13)
-								+ ' JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = IP.intItemId' + CHAR(13)
+				   IF (@dblDiscThroughQty IS NOT NULL)
+				   BEGIN
+					  IF ((@dtmBeginDate IS NOT NULL)
+					  OR (@dtmEndDate IS NOT NULL)
+					  OR (@dblDiscAmountUnit IS NOT NULL)
+					  OR (@dblDiscThroughAmount IS NOT NULL))
+						 set @SqlQuery1 = @SqlQuery1 + ' , dblDiscountThruQty = ''' + LTRIM(@dblDiscThroughQty) + ''''
+					  else
+						 set @SqlQuery1 = @SqlQuery1 + ' dblDiscountThruQty = ''' + LTRIM(@dblDiscThroughQty) + '''' 
+				   END
+			END
 
-		END
+			set @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
 
-		SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
+			IF (@strCompanyLocationId IS NOT NULL)
+				BEGIN 
+					 set @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemSpecialPricing.intItemLocationId
+					 IN (select intItemLocationId from tblICItemLocation where intLocationId
+					 IN (select intLocationId from tblICItemLocation where intLocationId
+		   			 IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + '))'
+				 END
 
-		IF (@strCompanyLocationId <> '')
-		    BEGIN 
-		         SET @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemSpecialPricing.intItemLocationId
-		         IN (select intItemLocationId from tblICItemLocation where intLocationId
-		         IN (select intLocationId from tblICItemLocation where intLocationId
-		   	     IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + '))'
-		     END
+			 IF (@strVendorId IS NOT NULL)
+				 BEGIN 
+					   set @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemSpecialPricing.intItemLocationId
+					   IN (select intItemLocationId from tblICItemLocation where intVendorId
+					   IN (select intEntityId from tblEMEntity where intEntityId 
+					   IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
+				 END
 
-	     IF (@strVendorId <> '')
-		     BEGIN 
-		           SET @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemSpecialPricing.intItemLocationId
-		           IN (select intItemLocationId from tblICItemLocation where intVendorId
-		           IN (select intEntityId from tblEMEntity where intEntityId 
-			       IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
-		     END
+			 IF (@strCategoryId IS NOT NULL)
+				  BEGIN
+     					 set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemId  
+						  IN (select intItemId from tblICItem where intCategoryId IN
+						  (select intCategoryId from tblICCategory where intCategoryId
+						  IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
+				   END
 
-	     IF (@strCategoryId <> '')
-		      BEGIN
-     	             SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemId  
-		              IN (select intItemId from tblICItem where intCategoryId IN
-			          (select intCategoryId from tblICCategory where intCategoryId
-			          IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
-		       END
+			 IF (@strFamilyId IS NOT NULL)
+				 BEGIN
+  						set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+						(select intItemLocationId from tblICItemLocation where intFamilyId IN
+						(select intFamilyId from tblICItemLocation where intFamilyId 
+						IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))'
+				  END
 
-		 IF (@strFamilyId <> '')
-		     BEGIN
-  			        SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
-			        (select intItemLocationId from tblICItemLocation where intFamilyId IN
-			        (select intFamilyId from tblICItemLocation where intFamilyId 
-			        IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))'
-		      END
+			 IF (@strClassId IS NOT NULL)
+				 BEGIN
+						set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+					   (select intItemLocationId from tblICItemLocation where intClassId IN
+		 			   (select intClassId from tblICItemLocation where intClassId 
+						IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
+				 END
 
-		 IF (@strClassId <> '')
-		     BEGIN
-		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
-		           (select intItemLocationId from tblICItemLocation where intClassId IN
-		 	       (select intClassId from tblICItemLocation where intClassId 
-			       IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
-		     END
-
-         IF (@strPromotionType = 'Vendor Rebate')
-		     BEGIN
-                 SET @SqlQuery1 = @SqlQuery1 + ' and  strPromotionType = ''Rebate''' 
-			 END
+			 IF (@strPromotionType = 'Vendor Rebate')
+				 BEGIN
+					 set @SqlQuery1 = @SqlQuery1 + ' and  strPromotionType = ''Rebate''' 
+				 END
               
-         IF (@strPromotionType = 'Vendor Discount')
-		     BEGIN
-                 SET @SqlQuery1 = @SqlQuery1 + ' and  strPromotionType = ''Vendor Discount''' 
-			 END
+			 IF (@strPromotionType = 'Vendor Discount')
+				 BEGIN
+					 set @SqlQuery1 = @SqlQuery1 + ' and  strPromotionType = ''Vendor Discount''' 
+				 END
 
-		 
-		INSERT @tblMassUpdatePreview
-		EXEC (@SqlQuery1)
+			--Print
+			SET @SqlQuery1 = @SqlQuery1 + CHAR(13) +'--9.)@ysnPreview ' + CAST(@ysnPreview as NVARCHAR(250)) + '	@UpdateCount ' + CAST(@UpdateCount as NVARCHAR(250))
+			EXEC XMLDB.dbo.PrintString @SqlQuery1
+
+			 EXEC (@SqlQuery1)
+			 SELECT  @UpdateCount = (@@ROWCOUNT)   
 	END
+
 
 	-- Get CompanyName
 	DECLARE @strCompanyName as NVARCHAR(250)
@@ -951,7 +872,6 @@ BEGIN TRY
 
 
    select @strCompanyName as CompanyName
-		  --, FORMAT(GETDATE(), 'D', 'en-US' ) as DateToday
 		  , LEFT(DATENAME(DW,GETDATE()),10) + ' ' + DATENAME(MONTH, SYSDATETIME())+ ' ' + RIGHT('0' + DATENAME(DAY, SYSDATETIME()), 2) + ', ' + DATENAME(YEAR, SYSDATETIME()) as DateToday
 		  , RIGHT('0' + LTRIM(STUFF(RIGHT(CONVERT(CHAR(26), CURRENT_TIMESTAMP, 109), 14),9, 4, ' ')),11) as TimeToday
 		  , strLocation
