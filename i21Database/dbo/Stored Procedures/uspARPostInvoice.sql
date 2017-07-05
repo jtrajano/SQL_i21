@@ -418,31 +418,6 @@ BEGIN TRY
 					BEGIN TRY
 					IF @post = 1
 						BEGIN
-							
-							--DECLARE @StorageTicketInfoByFIFO AS TABLE(
-							--	 [intId]					INT IDENTITY (1, 1)
-							--	,[intCustomerStorageId]		INT
-							--	,[strStorageTicketNumber]	NVARCHAR(40) COLLATE Latin1_General_CI_AS
-							--	,[dblOpenBalance]			NUMERIC(18, 6)
-							--	,[intUnitMeasureId]			INT
-							--	,[strUnitMeasure]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
-							--	,[strItemType]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
-							--	,[intItemId]				INT
-							--	,[strItem]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
-							--	,[dblCharge]				DECIMAL(24, 10)						
-							--)
-
-							--INSERT INTO @StorageTicketInfoByFIFO(
-							--	 [intCustomerStorageId]
-							--	,[strStorageTicketNumber]
-							--	,[dblOpenBalance]
-							--	,[intUnitMeasureId]
-							--	,[strUnitMeasure]
-							--	,[strItemType]
-							--	,[intItemId]
-							--	,[strItem]
-							--	,[dblCharge]						
-							--)				
 							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
 								 @strOptionType		= 'Update'
 								,@strSourceType		= 'Invoice'
@@ -452,75 +427,6 @@ BEGIN TRY
 								,@dblUnitsConsumed	= @Quantity
 								,@IntSourceKey		= @InvoiceId
 								,@intUserId			= @UserEntityID							
-
-							--WHILE EXISTS (SELECT NULL FROM @StorageTicketInfoByFIFO)
-							--	BEGIN
-							--		DECLARE 
-							--			 @GrainId				INT
-							--			,@GrainItemId			INT										
-							--			,@GrainItemUOMId		INT
-							--			,@dblCharge				NUMERIC (18,6)
-							--			,@NewDetailId			INT		
-							--			,@ErrorMessage			NVARCHAR(250)				
-							--			,@CurrentErrorMessage	NVARCHAR(250)
-							--			,@ItemDesc				NVARCHAR(250)				
-
-							--		SELECT TOP 1 
-							--			 @GrainId			= STI.intId 
-							--			,@CustomerStorageId	= STI.intCustomerStorageId
-							--			,@GrainItemUOMId	= ICIU.[intItemUOMId]
-							--			,@GrainItemId		= STI.[intItemId]
-							--			,@dblCharge			= STI.[dblCharge]
-							--			,@ItemDesc			= ICI.strDescription
-							--		FROM 
-							--			@StorageTicketInfoByFIFO STI
-							--		INNER JOIN 
-							--			tblICItemUOM ICIU
-							--				ON STI.intItemId = ICIU.intItemId
-							--				AND STI.intUnitMeasureId = ICIU.intUnitMeasureId
-							--		INNER JOIN
-							--			tblICItem ICI
-							--				ON STI.intItemId = ICI.intItemId  
-										
-									
-							--		BEGIN TRY					
-							--			EXEC [dbo].[uspARAddItemToInvoice]
-							--				@InvoiceId						= @InvoiceId	
-							--				,@ItemId						= @GrainItemId										
-							--				,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
-							--				,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
-							--				,@RaiseError					= @raiseError							 
-							--				,@ItemCustomerStorageId			= @CustomerStorageId				
-							--				,@RecomputeTax					= 0
-							--				,@ItemUOMId						= @GrainItemUOMId
-							--				,@ItemQtyShipped				= 1
-							--				,@ItemPrice						= @dblCharge
-							--				,@ItemDescription				= @ItemDesc
-					
-
-							--			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
-							--				BEGIN
-							--					IF ISNULL(@raiseError,0) = 0
-							--						ROLLBACK TRANSACTION
-							--					SET @ErrorMessage = @CurrentErrorMessage;
-							--					IF ISNULL(@raiseError,0) = 1
-							--						RAISERROR(@ErrorMessage, 16, 1);
-							--					RETURN 0;
-							--				END
-							--		END TRY
-							--		BEGIN CATCH
-							--			IF ISNULL(@raiseError,0) = 0
-							--				ROLLBACK TRANSACTION
-							--			SET @ErrorMessage = ERROR_MESSAGE();
-							--			IF ISNULL(@raiseError,0) = 1
-							--				RAISERROR(@ErrorMessage, 16, 1);
-							--			RETURN 0;
-							--		END CATCH			
-
-							--		UPDATE tblARInvoiceDetail SET intCustomerStorageId = @CustomerStorageId WHERE intInvoiceDetailId = @NewDetailId
-							--		DELETE FROM @StorageTicketInfoByFIFO  WHERE intId  = @GrainId
-							--	END
-								--DELETE FROM @StorageTicketInfoByFIFO WHERE intItemId = @ItemId
 							END
 					ELSE
 						BEGIN
@@ -529,8 +435,7 @@ BEGIN TRY
 									@IntSourceKey	= @InvoiceId,
 									@intUserId		= @UserEntityID
 
-							UPDATE tblARInvoiceDetail SET intCustomerStorageId = NULL WHERE intInvoiceDetailId = @InvoiceDetailId
-							--DELETE FROM tblARInvoiceDetail WHERE intCustomerStorageId IS NOT NULL AND intInvoiceId = @InvoiceId
+							UPDATE tblARInvoiceDetail SET intCustomerStorageId = NULL WHERE intInvoiceDetailId = @InvoiceDetailId							 
 						END						
 					END TRY
 					BEGIN CATCH
@@ -677,8 +582,9 @@ END CATCH
 					dbo.tblARInvoice ARI
 						ON PID.intInvoiceId = ARI.intInvoiceId				
 				INNER JOIN
-					dbo.tblARCustomer ARC
-						ON ARI.intEntityCustomerId = ARC.[intEntityId] 
+					(SELECT [intEntityId], strCustomerNumber, ysnActive FROM dbo.tblARCustomer WITH (NOLOCK)) ARC
+						ON ARI.intEntityCustomerId = ARC.[intEntityId] 					
+
 				WHERE
 					ARC.ysnActive = 0
 					
@@ -1203,7 +1109,7 @@ END CATCH
 					tblARInvoice A 
 						ON D.intInvoiceId = A.intInvoiceId
 				INNER JOIN
-					tblARCustomer C
+					(SELECT [intEntityId] FROM tblARCustomer WITH (NOLOCK)) C
 						ON A.intEntityCustomerId = C.[intEntityId]
 				INNER JOIN 
 					@PostInvoiceData	P
@@ -1243,7 +1149,7 @@ END CATCH
 						ON D.intItemId = IST.intItemId 
 						AND A.intCompanyLocationId = IST.intLocationId 
 				INNER JOIN
-					tblARCustomer C
+					(SELECT [intEntityId] FROM tblARCustomer WITH (NOLOCK)) C
 						ON A.intEntityCustomerId = C.[intEntityId]					
 				INNER JOIN 
 					@PostInvoiceData	P
@@ -1297,7 +1203,7 @@ END CATCH
 						ON D.intItemId = IST.intItemId 
 						AND A.intCompanyLocationId = IST.intLocationId 
 				INNER JOIN
-					tblARCustomer C
+					(SELECT [intEntityId] FROM tblARCustomer WITH (NOLOCK)) C
 						ON A.intEntityCustomerId = C.[intEntityId]					
 				INNER JOIN 
 					@PostInvoiceData	P
@@ -1591,7 +1497,7 @@ END CATCH
 					@PostInvoiceData PID
 						ON ARI.intInvoiceId = PID.intInvoiceId
 				INNER JOIN
-					tblARCustomer ARC
+					(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) ARC
 						ON ARI.intEntityCustomerId = ARC.[intEntityId] 
 				LEFT OUTER JOIN
 					tblTMSite TMS
@@ -2228,7 +2134,7 @@ IF @post = 1
 			FROM
 				tblARInvoice A
 			LEFT JOIN 
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
@@ -2306,8 +2212,7 @@ IF @post = 1
 					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
 					AND ARI1.strTransactionType = 'Credit Memo' 
 			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.[intEntityId]
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2354,8 +2259,7 @@ IF @post = 1
 			FROM
 				tblARInvoice A
 			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.[intEntityId]
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2435,8 +2339,7 @@ IF @post = 1
 					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
 					AND ARI1.strTransactionType <> 'Credit Memo' 
 			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.[intEntityId]
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2484,8 +2387,7 @@ IF @post = 1
 				tblARInvoice A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.[intEntityId]		
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId 	
@@ -2627,8 +2529,7 @@ IF @post = 1
 				tblICItem I
 					ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.[intEntityId]		
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId 
@@ -2765,8 +2666,7 @@ IF @post = 1
 				tblICItem I
 					ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.[intEntityId]		
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2900,7 +2800,7 @@ IF @post = 1
 				tblICItem I
 					ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				@PostInvoiceData	P
@@ -2966,7 +2866,7 @@ IF @post = 1
 				tblARInvoice A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]			
 			INNER JOIN 
 				@PostInvoiceData	P
@@ -3035,7 +2935,7 @@ IF @post = 1
 				tblARInvoice A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]			
 			INNER JOIN 
 				@PostInvoiceData	P
@@ -3100,7 +3000,7 @@ IF @post = 1
 			FROM
 				tblARInvoice A 
 			LEFT JOIN 
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]	
 			INNER JOIN
 				tblSMCompanyLocation L
@@ -3179,8 +3079,11 @@ IF @post = 1
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
 			INNER JOIN
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.intEntityCustomerId = C.[intEntityId]
+			INNER JOIN
+				tblSMCompanyLocation SMCL
+					ON A.intCompanyLocationId = SMCL.intCompanyLocationId 
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId				
@@ -3245,7 +3148,7 @@ IF @post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.intEntityCustomerId = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
@@ -3494,7 +3397,7 @@ IF @post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.intEntityCustomerId = C.[intEntityId]					
 			INNER JOIN 
 				@PostInvoiceData	P
@@ -3578,7 +3481,7 @@ IF @post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				tblARCustomer C
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.intEntityCustomerId = C.[intEntityId]					
 			INNER JOIN 
 				@PostInvoiceData	P
@@ -3660,27 +3563,28 @@ IF @post = 1
 				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN IST.strType = 'Finished Good' AND Detail.ysnBlended = 1 
-																			THEN (
-																				SELECT SUM(ICIT.[dblCost]) 
-																				FROM
-																					tblICInventoryTransaction ICIT
-																				INNER JOIN
-																					tblMFWorkOrder MFWO
-																						ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
-																						AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
-																				WHERE
-																					MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.intWorkOrderId)FROM tblMFWorkOrder WHERE tblMFWorkOrder.intInvoiceDetailId = Detail.intInvoiceDetailId)
-																					AND ICIT.[ysnIsUnposted] = 0
-																					AND ICIT.[strTransactionForm] = 'Produce'
-																			)
-																			ELSE
-																				CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-																							dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
-																						ELSE 
-																							IST.dblLastCost  
-																				END 
-																		END
+				,dblCost					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ISNULL(IST.strType,'') = 'Finished Good' AND Detail.ysnBlended = 1 
+																				THEN (
+																					SELECT SUM(ICIT.[dblCost]) 
+																					FROM
+																						(SELECT [intTransactionId], [strTransactionId], [dblCost], [ysnIsUnposted], [strTransactionForm] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+																					INNER JOIN
+																						(SELECT [intWorkOrderId], [intBatchID], [strWorkOrderNo] FROM tblMFWorkOrder WITH (NOLOCK)) MFWO
+																							ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
+																							AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
+																					WHERE
+																						MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.intWorkOrderId)FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.intInvoiceDetailId = Detail.intInvoiceDetailId)
+																						AND ICIT.[ysnIsUnposted] = 0
+																						AND ICIT.[strTransactionForm] = 'Produce'
+																				)
+																				ELSE
+																					CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
+																								dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
+																							ELSE 
+																								IST.dblLastCost  
+																					END 
+																			END
+																			,Header.dblSplitPercent)
 																		,ItemUOM.dblUnitQty
 																	),@ZeroDecimal)
 				,dblSalesPrice				= Detail.dblPrice 
@@ -3699,16 +3603,16 @@ IF @post = 1
 			FROM 
 				tblARInvoiceDetail Detail
 			INNER JOIN
-				tblARInvoice Header
-					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
-					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
-					and 1 = CASE	
-								WHEN Header.strTransactionType = 'Credit Memo'
-									THEN Header.ysnImpactInventory
-									ELSE 1
-								END
-
+				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCurrencyId, strImportFormat, intCompanyLocationId, intDistributionHeaderId, 
+					intLoadDistributionHeaderId, strActualCostId, dtmShipDate, intPeriodsToAccrue, ysnImpactInventory, dblSplitPercent
+				 FROM tblARInvoice WITH (NOLOCK)) Header
+					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
+						AND ISNULL(intPeriodsToAccrue,0) <= 1
+						AND 1 = CASE	
+									WHEN strTransactionType = 'Credit Memo'
+										THEN ysnImpactInventory
+										ELSE 1
+									END					 
 			INNER JOIN
 				@PostInvoiceData P
 					ON Header.intInvoiceId = P.intInvoiceId	
@@ -3742,12 +3646,13 @@ IF @post = 1
 				,dblUOMQty					= ICIUOM.[dblUnitQty]
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.intItemLocationId) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId, ARIC.[intItemUnitMeasureId]) 
-																				ELSE 
-																					IST.dblLastCost  
-																		END 
-																		,ICIUOM.dblUnitQty
+				,dblCost					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.intItemLocationId) = @AVERAGECOST THEN 
+																										dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId, ARIC.[intItemUnitMeasureId]) 
+																									ELSE 
+																										IST.dblLastCost  
+																							END 
+																							,ARI.[dblSplitPercent]
+																					), ICIUOM.dblUnitQty
 																),@ZeroDecimal)
 				,dblSalesPrice				= ARID.[dblPrice]
 				,intCurrencyId				= ARI.[intCurrencyId]
@@ -3768,7 +3673,8 @@ IF @post = 1
 				tblARInvoiceDetail ARID
 					ON ARIC.[intItemId] = ARID.[intItemId]
 			INNER JOIN
-				tblARInvoice ARI
+				(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, [strImportFormat], [dblSplitPercent]
+				 FROM tblARInvoice WITH (NOLOCK)) ARI
 					ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]
 			INNER JOIN
 				@PostInvoiceData P
@@ -4905,7 +4811,7 @@ IF @recap = 0
 						FROM dbo.tblARInvoice WITH (NOLOCK)
 						WHERE intInvoiceId IN (SELECT intInvoiceId FROM @InvoiceToUpdate)
 						GROUP BY intEntityCustomerId
-			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
+			) INVOICE ON CUSTOMER.[intEntityId] = INVOICE.intEntityCustomerId
 
 		DELETE dbo.tblARPrepaidAndCredit  
 		FROM 

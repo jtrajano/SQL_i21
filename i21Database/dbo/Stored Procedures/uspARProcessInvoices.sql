@@ -61,7 +61,7 @@ BEGIN TRY
 	WHERE 
 		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 		OR
-		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice')) 
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct')) 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
 	CREATE TABLE #EntriesForProcessing(
@@ -721,6 +721,8 @@ BEGIN
 					,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
 					,@ItemLicenseAmount				= [dblLicenseAmount]
 					,@ItemTaxGroupId				= [intTaxGroupId]
+					,@ItemStorageLocationId			= [intStorageLocationId]
+					,@ItemCompanyLocationSubLocationId	= [intCompanyLocationSubLocationId]
 					,@RecomputeTax					= [ysnRecomputeTax]
 					,@ItemSCInvoiceId				= [intSCInvoiceId]
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
@@ -807,6 +809,8 @@ BEGIN
 						,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 						,@ItemLicenseAmount				= @ItemLicenseAmount
 						,@ItemTaxGroupId				= @ItemTaxGroupId
+						,@ItemStorageLocationId			= @ItemStorageLocationId
+						,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId
 						,@RecomputeTax					= @RecomputeTax
 						,@ItemSCInvoiceId				= @ItemSCInvoiceId
 						,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
@@ -1347,6 +1351,8 @@ BEGIN TRY
 						,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
 						,@ItemLicenseAmount				= [dblLicenseAmount]
 						,@ItemTaxGroupId				= [intTaxGroupId]
+						,@ItemStorageLocationId			= [intStorageLocationId]
+						,@ItemCompanyLocationSubLocationId	= [intCompanyLocationSubLocationId]
 						,@RecomputeTax					= [ysnRecomputeTax]
 						,@ItemSCInvoiceId				= [intSCInvoiceId]
 						,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
@@ -1429,6 +1435,8 @@ BEGIN TRY
 							,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 							,@ItemLicenseAmount				= @ItemLicenseAmount
 							,@ItemTaxGroupId				= @ItemTaxGroupId
+							,@ItemStorageLocationId			= @ItemStorageLocationId
+							,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId
 							,@RecomputeTax					= @RecomputeTax
 							,@ItemSCInvoiceId				= @ItemSCInvoiceId
 							,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
@@ -1610,6 +1618,8 @@ BEGIN TRY
 					,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
 					,@ItemLicenseAmount				= [dblLicenseAmount]
 					,@ItemTaxGroupId				= [intTaxGroupId]
+					,@ItemStorageLocationId			= @ItemStorageLocationId
+					,@ItemCompanyLocationSubLocationId	= [intCompanyLocationSubLocationId]
 					,@RecomputeTax					= [ysnRecomputeTax]
 					,@ItemSCInvoiceId				= [intSCInvoiceId]
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
@@ -1728,6 +1738,8 @@ BEGIN TRY
 						,[dblMaintenanceAmount]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceAmount ELSE [dblMaintenanceAmount] END			
 						,[dblLicenseAmount]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLicenseAmount ELSE [dblLicenseAmount] END				
 						,[intTaxGroupId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemTaxGroupId ELSE [intTaxGroupId] END				
+						,[intStorageLocationId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemStorageLocationId ELSE [intStorageLocationId] END				
+						,[intCompanyLocationSubLocationId]		= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCompanyLocationSubLocationId ELSE [intCompanyLocationSubLocationId] END				
 						,[intSCInvoiceId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSCInvoiceId ELSE [intSCInvoiceId] END					
 						,[strSCInvoiceNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSCInvoiceNumber ELSE [strSCInvoiceNumber] END				
 						,[intInventoryShipmentItemId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemInventoryShipmentItemId ELSE [intInventoryShipmentItemId] END			
@@ -1904,11 +1916,7 @@ BEGIN TRY
 	WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnRecomputed],0) = 0 AND ISNULL([ysnProcessed],0) = 1 AND ISNULL([intInvoiceId],0) <> 0)
 	BEGIN
 		SELECT TOP 1 @InvoiceId = [intInvoiceId], @Id = [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnRecomputed],0) = 0 AND ISNULL([ysnProcessed],0) = 1 AND ISNULL([intInvoiceId],0) <> 0 ORDER BY [intId]
-		SELECT TOP 1 @RecomputeTax = ISNULL([ysnRecomputeTax],0), @UpdateAvailableDiscount = ISNULL([ysnUpdateAvailableDiscount],0) FROM @InvoiceEntries WHERE [intId] = @Id 
-		IF @RecomputeTax = 1
-			EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
-		ELSE
-			EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId, @AvailableDiscountOnly = @UpdateAvailableDiscount
+		EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId, @AvailableDiscountOnly = @UpdateAvailableDiscount
 						
 		UPDATE #EntriesForProcessing SET [ysnRecomputed] = 1 WHERE [intInvoiceId] = @InvoiceId
 	END	
