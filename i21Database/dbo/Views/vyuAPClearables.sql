@@ -58,11 +58,7 @@ SELECT	DISTINCT
 				WHERE A.intInventoryReceiptChargeId IS NULL AND A.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 				GROUP BY intInventoryReceiptItemId 
 			) totalVouchered
-			INNER JOIN dbo.tblICInventoryReceiptItem ri 
-				ON   ri.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-			INNER JOIN dbo.tblSCTicket sc 
-				ON sc.intTicketId =  ri.intSourceId
-WHERE ((dblReceiptQty - dblVoucherQty)) != 0 AND sc.intStorageScheduleTypeId != 1 --DO NOT INCLUDE OPEN STORAGE FROM GRAIN AP-3826
+WHERE ((dblReceiptQty - dblVoucherQty)) != 0 
 UNION ALL 
 
 --QUERY FOR RECEIPT VENDOR ACCRUE CHARGES
@@ -134,12 +130,7 @@ LEFT JOIN vyuAPVendor Vendor
 			) Detail		
 		WHERE ISNULL(intInventoryReceiptChargeId, '') <> ''
 	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId = Receipt.intEntityVendorId
-	OUTER APPLY(
-		SELECT TOP 1 sc.intStorageScheduleTypeId FROM dbo.tblICInventoryReceiptItem ri
-		INNER JOIN dbo.tblSCTicket sc ON sc.intTicketId = ri.intSourceId
-		WHERE ri.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-	)receiptitem
-WHERE Receipt.ysnPosted = 1 AND receiptitem.intStorageScheduleTypeId != 1 --DO NOT INCLUDE OPEN STORAGE FROM GRAIN AP-3826
+WHERE Receipt.ysnPosted = 1  
 	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
 UNION ALL																									
@@ -211,12 +202,7 @@ LEFT JOIN vyuAPVendor Vendor
 			) Detail		
 		WHERE ISNULL(intInventoryReceiptChargeId, '') <> ''
 	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId = Receipt.intEntityVendorId
-	OUTER APPLY(
-		SELECT TOP 1 sc.intStorageScheduleTypeId FROM dbo.tblICInventoryReceiptItem ri
-		INNER JOIN dbo.tblSCTicket sc ON sc.intTicketId = ri.intSourceId
-		WHERE ri.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-	)receiptitem
-WHERE Receipt.ysnPosted = 1 AND receiptitem.intStorageScheduleTypeId != 1 --DO NOT INCLUDE OPEN STORAGE FROM GRAIN AP-3826
+WHERE Receipt.ysnPosted = 1 
 	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
 		
@@ -292,11 +278,6 @@ LEFT JOIN vyuAPVendor Vendor
 			) Detail		
 		WHERE ISNULL(intInventoryReceiptChargeId, '') <> '' 
 	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId NOT IN (Receipt.intEntityVendorId)
-	OUTER APPLY(
-		SELECT TOP 1 sc.intStorageScheduleTypeId FROM dbo.tblICInventoryReceiptItem ri
-		INNER JOIN dbo.tblSCTicket sc ON sc.intTicketId = ri.intSourceId
-		WHERE ri.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-	)receiptitem
-WHERE Receipt.ysnPosted = 1 AND ReceiptCharge.ysnAccrue = 1  AND receiptitem.intStorageScheduleTypeId != 1 --DO NOT INCLUDE OPEN STORAGE FROM GRAIN AP-3826
+WHERE Receipt.ysnPosted = 1 AND ReceiptCharge.ysnAccrue = 1
 	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
