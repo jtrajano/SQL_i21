@@ -36,7 +36,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSCDeliverySheet',
     @level2type = N'COLUMN',
-    @level2name = N'intLocationId'
+    @level2name = N'intCompanyLocationId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Column',
