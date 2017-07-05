@@ -48,7 +48,10 @@ AS
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
 	 OUTER APPLY(
-		SELECT TOP 1 strComments, strDocument FROM tblGLJournalDetail WHERE intJournalDetailId = A.intJournalLineNo
+		SELECT TOP 1 strComments,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
+		ON B.intJournalId = C.intJournalId WHERE
+		 A.intJournalLineNo = B.intJournalDetailId AND
+		 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
 	 ) J
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
