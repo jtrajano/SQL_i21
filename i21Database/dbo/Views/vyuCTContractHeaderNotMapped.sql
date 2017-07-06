@@ -30,7 +30,15 @@ AS
 						CB.strContractBasis,
 						CM.intUnitMeasureId,
 						SP.strName					AS	strSalesperson,
-						TX.strTextCode
+						TX.strTextCode,
+
+						AB.strCity					AS	strArbitration,
+						IB.strDescription			AS	strInsuranceBy,	
+						IT.strDescription			AS	strInvoiceType,	
+						AN.strName					AS	strAssociationName,
+						PR.strName					AS	strProducer,
+						CO.strCountry,		
+						CT.strCity					AS	strINCOLocation
 
 				FROM	tblCTContractHeader			CH	
 				JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CH.intEntityId			LEFT
@@ -45,5 +53,12 @@ AS
 				JOIN	tblICCommodityUnitMeasure	CM	ON	CM.intCommodityUnitMeasureId=	CH.intCommodityUOMId	LEFT	
 				JOIN	tblICUnitMeasure			U2	ON	U2.intUnitMeasureId			=	CM.intUnitMeasureId		LEFT	
 				JOIN	tblEMEntity					SP	ON	SP.intEntityId				=	CH.intSalespersonId		LEFT	
-				JOIN	tblCTContractText			TX	ON	TX.intContractTextId		=	CH.intContractTextId		
+				JOIN	tblCTContractText			TX	ON	TX.intContractTextId		=	CH.intContractTextId	LEFT
+				JOIN	tblSMCountry				CO	ON	CO.intCountryID				=	CH.intCountryId			LEFT
+				JOIN	tblSMCity					CT	ON	CT.intCityId				=	CH.intINCOLocationTypeId	LEFT
+				JOIN	tblSMCity					AB	ON	AB.intCityId				=	CH.intArbitrationId		LEFT
+				JOIN	tblCTInsuranceBy			IB	ON	IB.intInsuranceById			=	CH.intInsuranceById		LEFT
+				JOIN	tblCTInvoiceType			IT	ON	IT.intInvoiceTypeId			=	CH.intInvoiceTypeId		LEFT
+				JOIN	tblCTAssociation			AN	ON	AN.intAssociationId			=	CH.intAssociationId		LEFT
+				JOIN	tblEMEntity					PR	ON	PR.intEntityId				=	CH.intProducerId		
 			)t

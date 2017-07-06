@@ -21,7 +21,14 @@ AS
 			NM.strContractBasis,
 			NM.intUnitMeasureId,
 			NM.strSalesperson,
-			NM.strTextCode
+			NM.strTextCode,
+			NM.strArbitration,
+			NM.strInsuranceBy,
+			NM.strInvoiceType,
+			NM.strAssociationName,
+			NM.strProducer,
+			NM.strCountry,
+			NM.strINCOLocation
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
