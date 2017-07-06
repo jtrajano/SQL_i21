@@ -689,7 +689,7 @@ BEGIN
 			[dblRate]				=	C.dblRate, 
 			[intAccountId]			=	C.intTaxAccountId, 
 			[dblTax]				=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), --C.dblTax, oldtax x newtotal /oldtotal
-			[dblAdjustedTax]		=	ISNULL(C.dblAdjustedTax,0), 
+			[dblAdjustedTax]		=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
 			[ysnTaxAdjusted]		=	C.ysnTaxAdjusted, 
 			[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
 			[ysnCheckOffTax]		=	C.ysnCheckoffTax
