@@ -441,51 +441,61 @@ BEGIN
 					@Bank_type = premp_dd_acct_type_cs
 				FROM prempmst where premp_dir_dep_bank is not null
 					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + @originEmployee +  '''''' ''
+
+			SET @Bank_code = null
 	
 		execute sp_executesql @Bank_command, N''@Bank_code NVARCHAR(50) output, @Bank_account nvarchar(50) output, @Bank_type nvarchar(50) output'', @Bank_code output, @Bank_account output, @Bank_type output 
 			
 			if @Bank_code is not null
 			BEGIN		
+				SET @Bank_name = null
 				--select @Bank_name = ssbnk_name from ssbnkmst where ssbnk_code = @Bank_code
 				select @Bank_name = ssbnk_transit_route from ssbnkmst where ssbnk_code = @Bank_code
 				
-				select @i21_bank_id = intBankId, 
-						@i21_bank_name = strBankName 				
-				from tblCMBank where LTRIM(RTRIM(dbo.fnAESDecryptASym(strRTN))) = LTRIM(RTRIM(@Bank_name))
+				if(@Bank_name is not null)
+				BEGIN
+					
+					set @i21_bank_id = null
+					select @i21_bank_id = intBankId, 
+							@i21_bank_name = strBankName 				
+					from tblCMBank where LTRIM(RTRIM(dbo.fnAESDecryptASym(strRTN))) = LTRIM(RTRIM(@Bank_name))
 
-				if @i21_bank_id is not null
-				begin
-					SET @Bank_type = LTRIM(RTRIM(@Bank_type))
-					INSERT INTO tblEMEntityEFTInformation(
-						intEntityId, 
-						intBankId, 
-						strBankName, 
-						strAccountNumber, 
-						strAccountType,
-						strAccountClassification, 
-						dtmEffectiveDate,
-						ysnActive,
-						ysnPrenoteSent,
-						intConcurrencyId, 
-						ysnPrintNotifications,
-						dblAmount, 
-						intOrder,
-						ysnPullTaxSeparately,
-						ysnRefundBudgetCredits,
-						strDistributionType)
-					select top 1 
-						@EntityId,
-						@i21_bank_id,
-						@i21_bank_name,
-						@Bank_account,
-						CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
-							WHEN @Bank_type = ''S'' THEN ''Savings'' END,
-						''Personal'',
-						''1/1/2017'',
-						1,
-						1,
-						1, 0, 0, 0, 0 ,0, ''Remainder''
-				end
+					if @i21_bank_id is not null
+					begin
+						SET @Bank_type = LTRIM(RTRIM(@Bank_type))
+						INSERT INTO tblEMEntityEFTInformation(
+							intEntityId, 
+							intBankId, 
+							strBankName, 
+							strAccountNumber, 
+							strAccountType,
+							strAccountClassification, 
+							dtmEffectiveDate,
+							ysnActive,
+							ysnPrenoteSent,
+							intConcurrencyId, 
+							ysnPrintNotifications,
+							dblAmount, 
+							intOrder,
+							ysnPullTaxSeparately,
+							ysnRefundBudgetCredits,
+							strDistributionType)
+						select top 1 
+							@EntityId,
+							@i21_bank_id,
+							@i21_bank_name,
+							@Bank_account,
+							CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
+								WHEN @Bank_type = ''S'' THEN ''Savings'' END,
+							''Personal'',
+							''1/1/2017'',
+							1,
+							1,
+							1, 0, 0, 0, 0 ,0, ''Remainder''
+					end
+				END
+				
+				
 
 			END
 
@@ -503,51 +513,58 @@ BEGIN
 				FROM prempmst where premp_ded_dep_bank_'' + Cast(@Bank_count as nvarchar)+ '' is not null
 					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + @originEmployee +  '''''' ''
 
+			SET @Bank_code = null
 
 			execute sp_executesql @Bank_command, N''@Bank_code NVARCHAR(50) output, @Bank_amount decimal(18,9) output, @Bank_account nvarchar(50) output, @Bank_type nvarchar(50) output'', @Bank_code output, @Bank_amount output, @Bank_account output, @Bank_type output 
 			
 			if @Bank_code is not null
 			BEGIN		
+				SET @Bank_name = null
 				--select @Bank_name = ssbnk_name from ssbnkmst where ssbnk_code = @Bank_code
 				select @Bank_name = ssbnk_transit_route from ssbnkmst where ssbnk_code = @Bank_code
+				
+				if(@Bank_name is not null)
+				BEGIN
+					set @i21_bank_id = null
+					select @i21_bank_id = intBankId, 
+							@i21_bank_name = strBankName 				
+					from tblCMBank where LTRIM(RTRIM(dbo.fnAESDecryptASym(strRTN))) = LTRIM(RTRIM(@Bank_name))
 
-				select @i21_bank_id = intBankId, 
-						@i21_bank_name = strBankName 				
-				from tblCMBank where LTRIM(RTRIM(dbo.fnAESDecryptASym(strRTN))) = LTRIM(RTRIM(@Bank_name))
-
-				if @i21_bank_id is not null
-				begin
-					SET @Bank_type = LTRIM(RTRIM(@Bank_type))
-					INSERT INTO tblEMEntityEFTInformation(
-						intEntityId, 
-						intBankId, 
-						strBankName, 
-						strAccountNumber, 
-						strAccountType,
-						strAccountClassification, 
-						dtmEffectiveDate,
-						ysnActive,
-						ysnPrenoteSent,
-						intConcurrencyId, 
-						ysnPrintNotifications,
-						dblAmount, 
-						intOrder,
-						ysnPullTaxSeparately,
-						ysnRefundBudgetCredits,
-						strDistributionType)
-					select top 1 
-						@EntityId,
-						@i21_bank_id,
-						@i21_bank_name,
-						@Bank_account,
-						CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
-							WHEN @Bank_type = ''S'' THEN ''Savings'' END,
-						''Personal'',
-						''1/1/2017'',
-						1,
-						1,
-						1, 0, @Bank_amount, 1, 0 ,0, ''Fixed Amount''
-				end
+					if @i21_bank_id is not null
+					begin
+						SET @Bank_type = LTRIM(RTRIM(@Bank_type))
+						INSERT INTO tblEMEntityEFTInformation(
+							intEntityId, 
+							intBankId, 
+							strBankName, 
+							strAccountNumber, 
+							strAccountType,
+							strAccountClassification, 
+							dtmEffectiveDate,
+							ysnActive,
+							ysnPrenoteSent,
+							intConcurrencyId, 
+							ysnPrintNotifications,
+							dblAmount, 
+							intOrder,
+							ysnPullTaxSeparately,
+							ysnRefundBudgetCredits,
+							strDistributionType)
+						select top 1 
+							@EntityId,
+							@i21_bank_id,
+							@i21_bank_name,
+							@Bank_account,
+							CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
+								WHEN @Bank_type = ''S'' THEN ''Savings'' END,
+							''Personal'',
+							''1/1/2017'',
+							1,
+							1,
+							1, 0, @Bank_amount, 1, 0 ,0, ''Fixed Amount''
+					end
+				END
+				
 
 			END
 
