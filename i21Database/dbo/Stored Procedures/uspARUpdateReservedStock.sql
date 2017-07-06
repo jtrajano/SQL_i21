@@ -3,6 +3,7 @@
 	,@Negate		BIT	= 0
 	,@UserId		INT = NULL
 	,@FromPosting	BIT = 0     
+	,@Post			BIT = 0     
 AS
 BEGIN
 
@@ -13,6 +14,7 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @TransactionTypeId AS INT = 33
+			,@Ownership_Own AS INT = 1
 	SELECT @TransactionTypeId = [intTransactionTypeId] FROM dbo.tblICInventoryTransactionType WHERE [strName] = 'Invoice'
 	DECLARE @items ItemReservationTableType
 
@@ -30,553 +32,6 @@ BEGIN
 	,[intTransactionTypeId]						--INT NOT NULL											-- The transaction type. Source table for the types are found in tblICInventoryTransactionType	
 	,[intOwnershipTypeId]						--INT NULL DEFAULT 1	-- Ownership type of the item.  
 	)
-	----DIRECT
-	----Quantity/UOM Changed
-	--SELECT
-	--	 [intItemId]			= ARID.[intItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARID.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped] - dbo.fnCalculateQtyBetweenUOM(ARTD.[intItemUOMId], ARID.[intItemUOMId], ARTD.[dblQtyShipped])
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetail ARID
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblARTransactionDetail ARTD
-	--		ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-	--		AND ARID.[intInvoiceId] = ARTD.[intTransactionId] 
-	--		AND ARTD.[strTransactionType] = ARI.[strTransactionType] 
-	--INNER JOIN
-	--	tblICItemUOM ICIUOM 
-	--		ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARID.[intItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intItemId] = ARTD.[intItemId]		
-	--	AND (ARID.[intItemUOMId] <> ARTD.[intItemUOMId] OR ARID.[dblQtyShipped] <> dbo.fnCalculateQtyBetweenUOM(ARTD.[intItemUOMId], ARID.[intItemUOMId], ARTD.[dblQtyShipped]))
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0
-
-
-	--UNION ALL
-
-	----Quantity/UOM Changed -- Component
-	--SELECT
-	--	 [intItemId]			= ARIDC.[intComponentItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARIDC.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= (ARID.[dblQtyShipped] - dbo.fnCalculateQtyBetweenUOM(ARTD.[intItemUOMId], ARID.[intItemUOMId], ARTD.[dblQtyShipped])) * ARIDC.[dblQuantity]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM
-	--	tblARInvoiceDetailComponent ARIDC
-	--INNER JOIN 
-	--	tblARInvoiceDetail ARID
-	--		ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblARTransactionDetail ARTD
-	--		ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-	--		AND ARID.[intInvoiceId] = ARTD.[intTransactionId] 
-	--		AND ARTD.[strTransactionType] = ARI.[strTransactionType] 
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intItemId] = ARTD.[intItemId]		
-	--	AND (ARID.[intItemUOMId] <> ARTD.[intItemUOMId] OR (ARID.[dblQtyShipped] * ARIDC.[dblQuantity]) <> (dbo.fnCalculateQtyBetweenUOM(ARTD.[intItemUOMId], ARID.[intItemUOMId], ARTD.[dblQtyShipped]) * ARIDC.[dblQuantity]))
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0
-				
-	--UNION ALL
-
-	----Item Changed -old
-	--SELECT
-	--	 [intItemId]			= ARTD.[intItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARTD.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARTD.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARTD.[intStorageLocationId]
-	--	,[dblQty]				= ARTD.[dblQtyShipped] * -1
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetail ARID
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblARTransactionDetail ARTD
-	--		ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-	--		AND ARID.[intInvoiceId] = ARTD.[intTransactionId] 
-	--		AND ARTD.[strTransactionType] = ARI.[strTransactionType]
-	--INNER JOIN
-	--	tblICItemUOM ICIUOM 
-	--		ON ICIUOM.[intItemUOMId] = ARTD.[intItemUOMId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARTD.[intItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARTD.[intItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intItemId] <> ARTD.[intItemId]		
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0		
-
-
-	--UNION ALL
-
-	----Item Changed -old -- Component
-	--SELECT
-	--	 [intItemId]			= ARIDC.[intComponentItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARIDC.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARTD.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARTD.[intStorageLocationId]
-	--	,[dblQty]				= (ARTD.[dblQtyShipped] * ARIDC.[dblQuantity]) * -1
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetailComponent ARIDC
-	--INNER JOIN 
-	--	tblARInvoiceDetail ARID
-	--		ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblARTransactionDetail ARTD
-	--		ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-	--		AND ARID.[intInvoiceId] = ARTD.[intTransactionId] 
-	--		AND ARTD.[strTransactionType] = ARI.[strTransactionType]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intItemId] <> ARTD.[intItemId]		
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0		
-	
-	--UNION ALL
-
-	----Item Changed +new
-	--SELECT
-	--	 [intItemId]			= ARID.[intItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARID.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetail ARID
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblARTransactionDetail ARTD
-	--		ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-	--		AND ARID.[intInvoiceId] = ARTD.[intTransactionId] 
-	--		AND ARTD.[strTransactionType] = ARI.[strTransactionType]
-	--INNER JOIN
-	--	tblICItemUOM ICIUOM 
-	--		ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARID.[intItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intItemId] <> ARTD.[intItemId]		
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0
-
-	--UNION ALL
-
-	----Item Changed +new  --Component
-	--SELECT
-	--	 [intItemId]			= ARIDC.[intComponentItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARIDC.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped] * ARIDC.[dblQuantity]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetailComponent ARIDC
-	--INNER JOIN 
-	--	tblARInvoiceDetail ARID
-	--		ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblARTransactionDetail ARTD
-	--		ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-	--		AND ARID.[intInvoiceId] = ARTD.[intTransactionId] 
-	--		AND ARTD.[strTransactionType] = ARI.[strTransactionType]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intItemId] <> ARTD.[intItemId]		
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0
-
-	--UNION ALL
-
-	----Added Item
-	--SELECT
-	--	 [intItemId]			= ARID.[intItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARID.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetail ARID
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblICItemUOM ICIUOM 
-	--		ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARID.[intItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intInvoiceDetailId] NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = ARI.[strTransactionType])	
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0	
-
-
-	--UNION ALL
-
-	----Added Item --Component
-	--SELECT
-	--	 [intItemId]			= ARIDC.[intComponentItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARIDC.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped] * ARIDC.[dblQuantity]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetailComponent ARIDC
-	--INNER JOIN 
-	--	tblARInvoiceDetail ARID
-	--		ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intInvoiceDetailId] NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = ARI.[strTransactionType])	
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0	
-
-	--UNION ALL
-
-	----Deleted Item
-	--SELECT
-	--	 [intItemId]			= ARTD.[intItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARTD.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARTD.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARTD.[intStorageLocationId]
-	--	,[dblQty]				= ARTD.[dblQtyShipped] * -1
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARTransactionDetail ARTD
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARTD.[intTransactionId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblICItemUOM ICIUOM 
-	--		ON ICIUOM.[intItemUOMId] = ARTD.[intItemUOMId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARTD.[intItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARTD.[intItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
-	--	AND ISNULL(ARTD.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARTD.[intSalesOrderDetailId], 0) = 0
-
-
-	--UNION ALL
-
-	----Deleted Item	--Component
-	--SELECT
-	--	 [intItemId]			= ARIDC.[intComponentItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARIDC.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARTD.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARTD.[intStorageLocationId]
-	--	,[dblQty]				= (ARTD.[dblQtyShipped] * ARIDC.[dblQuantity]) * -1
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetailComponent ARIDC
-	--INNER JOIN 
-	--	tblARTransactionDetail ARTD
-	--		ON ARIDC.[intInvoiceDetailId] = ARTD.intTransactionDetailId
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARTD.[intTransactionId] = ARI.[intInvoiceId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
-	--	AND ISNULL(ARTD.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARTD.[intSalesOrderDetailId], 0) = 0
-		
-	--UNION ALL		
-
-	----Item Changed +new
-	--SELECT
-	--	 [intItemId]			= ARID.[intItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARID.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetail ARID
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblARTransactionDetail ARTD
-	--		ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-	--		AND ARID.[intInvoiceId] = ARTD.[intTransactionId] 
-	--		AND ARTD.[strTransactionType] = ARI.[strTransactionType]
-	--INNER JOIN
-	--	tblICItemUOM ICIUOM 
-	--		ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARID.[intItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intItemId] <> ARTD.[intItemId]		
-	--	AND (ISNULL(ARID.[intInventoryShipmentItemId], 0) <> 0 OR ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0)							
-
-	--UNION ALL
-
-	----Item Changed +new		--Component
-	--SELECT
-	--	 [intItemId]			= ARIDC.[intComponentItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARIDC.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped] * ARIDC.[dblQuantity]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM
-	--	tblARInvoiceDetailComponent ARIDC
-	--INNER JOIN 
-	--	tblARInvoiceDetail ARID
-	--		ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblARTransactionDetail ARTD
-	--		ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-	--		AND ARID.[intInvoiceId] = ARTD.[intTransactionId] 
-	--		AND ARTD.[strTransactionType] = ARI.[strTransactionType]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 0
-	--	AND [dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ARID.[intItemId] <> ARTD.[intItemId]		
-	--	AND (ISNULL(ARID.[intInventoryShipmentItemId], 0) <> 0 OR ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0)							
-
-	--UNION ALL
-		
-	----POSTING
-	----Direct
-	--SELECT
-	--	 [intItemId]			= ARID.[intItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARID.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetail ARID
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--INNER JOIN
-	--	tblICItemUOM ICIUOM 
-	--		ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARID.[intItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 1
-	--	AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0	
-		
-	--UNION ALL
-
-	----Direct	--Component
-	--SELECT
-	--	 [intItemId]			= ARIDC.[intComponentItemId]
-	--	,[intItemLocationId]	= ICGIS.[intItemLocationId]
-	--	,[intItemUOMId]			= ARIDC.[intItemUOMId]
-	--	,[intLotId]				= NULL
-	--	,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-	--	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	--	,[dblQty]				= ARID.[dblQtyShipped] * ARIDC.[dblQuantity]
-	--	,[intTransactionId]		= @InvoiceId
-	--	,[strTransactionId]		= ARI.[strInvoiceNumber]
-	--	,[intTransactionTypeId]	= @TransactionTypeId
-	--	,[intOwnershipTypeId]	= 1
-	--FROM 
-	--	tblARInvoiceDetailComponent ARIDC
-	--INNER JOIN 
-	--	tblARInvoiceDetail ARID
-	--		ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
-	--INNER JOIN
-	--	tblARInvoice ARI
-	--		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	--LEFT OUTER JOIN
-	--	vyuICGetItemStock ICGIS
-	--		ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
-	--		AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	--WHERE 
-	--	ISNULL(@FromPosting,0) = 1
-	--	AND [dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
-	--	AND ARI.[intInvoiceId] = @InvoiceId
-	--	AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-	--	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-	--	AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0	
-
-
 	SELECT
 		 [intItemId]			= ARID.[intItemId]
 		,[intItemLocationId]	= ICGIS.[intItemLocationId]
@@ -584,44 +39,41 @@ BEGIN
 		,[intLotId]				= NULL
 		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
-		,[dblQty]				= ARID.[dblQtyShipped]
+		,[dblQty]				= ARID.[dblQtyShipped] * (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
 		,[strTransactionId]		= ARI.[strInvoiceNumber]
 		,[intTransactionTypeId]	= @TransactionTypeId
-		,[intOwnershipTypeId]	= 1
+		,[intOwnershipTypeId]	= @Ownership_Own
 	FROM 
-		tblARInvoiceDetail ARID
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId]
+		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
-		tblARInvoice ARI
+		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN
-		tblICItemUOM ICIUOM 
+		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
 			ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
 	LEFT OUTER JOIN
-		vyuICGetItemStock ICGIS
+		(SELECT [intItemId], [intLocationId], [intItemLocationId] FROM vyuICGetItemStock WITH (NOLOCK)) ICGIS
 			ON ARID.[intItemId] = ICGIS.[intItemId] 
 			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-	WHERE 
-		ISNULL(@FromPosting,0) = 0
-		AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
+	WHERE [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
 		AND ARI.[intInvoiceId] = @InvoiceId
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-							
-		
-	UPDATE
-		@items
-	SET
-		dblQty = dblQty * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)			
+		AND ARID.[intInventoryShipmentItemId] IS NULL
+		AND ARID.[intLotId] IS NULL
 
-	--EXEC [uspICIncreaseReservedQty] 
-	--	 @ItemsToIncreaseReserve = @items
+	IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
+		EXEC [uspICCreateStockReservation]
+			 @ItemsToReserve		= @items
+			,@intTransactionId		= @InvoiceId
+			,@intTransactionTypeId	= @TransactionTypeId
 
-
-	EXEC [uspICCreateStockReservation] 
-		 @ItemsToReserve		= @items
-		 ,@intTransactionId		= @InvoiceId
-		 ,@intTransactionTypeId	= @TransactionTypeId
+	IF ISNULL(@FromPosting, 0 ) = 1
+		EXEC [dbo].[uspICPostStockReservation]
+			 @intTransactionId		= @InvoiceId
+			,@intTransactionTypeId	= @TransactionTypeId
+			,@ysnPosted				= @Post
 	 
 END
 
