@@ -5314,6 +5314,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetStockHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryByParentLot.sql" />
     <Build Include="dbo\Views\vyuMFGetTaskQty.sql" />
+    <Build Include="dbo\Views\vyuLGArrivalForecast.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
