@@ -11,6 +11,8 @@ SELECT OH.intOrderHeaderId
 	,I.strDescription
 	,UM.strUnitMeasure
 	,LS.strSecondaryStatus AS strLotStatus
+	,T.dblQty AS dblTaskQty
+	,T.dblPickQty
 FROM tblMFOrderHeader OH 
 JOIN tblMFOrderManifest M ON OH.intOrderHeaderId = M.intOrderHeaderId
 JOIN tblICLot L ON L.intLotId = M.intLotId
@@ -18,3 +20,5 @@ JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 JOIN tblICItem I ON I.intItemId = L.intItemId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
+	AND T.intLotId = M.intLotId
