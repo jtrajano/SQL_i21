@@ -274,8 +274,8 @@ BEGIN TRY
 			SQ.strContractPrintSignOff,
 			LTRIM(RTRIM(EY.strEntityName))AS strCompanyName,
 			@strApprovalText AS strApprovalText,
-			CASE WHEN @IsFullApproved=1 THEN @FirstApprovalSign ELSE NULL END AS FirstApprovalSign,
-			CASE WHEN @IsFullApproved=1 THEN @SecondApprovalSign ELSE NULL END AS SecondApprovalSign,
+			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign ELSE NULL END AS FirstApprovalSign,
+			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END AS SecondApprovalSign,
 
 			@strAmendedColumns strAmendedColumns
 

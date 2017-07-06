@@ -32,6 +32,7 @@ AS
 					),1,2,' '
 				) strContainerNumber,
 				LO.strBookingReference
+				,LO.intLoadId
 
 		FROM	tblLGLoad			LO
 		JOIN	tblLGLoadDetail		LD ON LD.intLoadId		=	LO.intLoadId LEFT
@@ -60,7 +61,7 @@ AS
 			,dtmStuffingDate
 			,dtmETSPOL
 			,strBookingReference
-
+			,intLoadId
 
 	FROM
 	(
@@ -88,6 +89,7 @@ AS
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
 				,NULL strContainerNumber
 				,LO.strBookingReference
+				,LO.intLoadId
 
 		FROM	tblLGLoad			LO
 		JOIN	tblLGLoadDetail		LD ON LD.intLoadId		=	LO.intLoadId	LEFT
@@ -114,3 +116,4 @@ AS
 			,dtmStuffingDate
 			,dtmETSPOL
 			,strBookingReference
+			,intLoadId

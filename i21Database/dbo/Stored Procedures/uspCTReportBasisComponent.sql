@@ -11,7 +11,8 @@ AS
 			@SQL					NVARCHAR(MAX),
 			@EndFromDate			DATETIME,
 			@EndToDate				DATETIME,
-			@Position				NVARCHAR(100)
+			@Position				NVARCHAR(100),
+			@Vendor					NVARCHAR(900)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -100,6 +101,10 @@ AS
 	SELECT	@Position = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'Position'
+
+	SELECT	@Vendor = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'Vendor'
 
 	IF OBJECT_ID('tempdb..##BasisComponent') IS NOT NULL  				
 		DROP TABLE ##BasisComponent				
@@ -212,6 +217,20 @@ AS
 	IF RTRIM(LTRIM(ISNULL(@Position,''))) <> ''
 	BEGIN
 		SET @Condition = ' Position IN (''' + @Position + ''') '
+	END
+
+	IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''
+	BEGIN
+		SET @Condition = @Condition + ' AND '
+	END
+
+	IF RTRIM(LTRIM(ISNULL(@Vendor,''))) <> ''
+	BEGIN
+		SET @Condition = ' strCustomerVendor IN (''' + @Vendor + ''') '
+	END
+	ELSE
+	BEGIN
+		SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
 	END
 
 	IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''

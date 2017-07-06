@@ -102,6 +102,7 @@ SELECT 	 SQ.intContractDetailId
 		,LV.dtmETAPOL
 		,LV.dtmETAPOD
 		,LV.strBookingReference
+		,LV.intLoadId
 		,CASE 	WHEN ISNULL(LV.ysnDocsReceived, 0) = 0 	
 				THEN 'N'
 				ELSE 'Y' 
