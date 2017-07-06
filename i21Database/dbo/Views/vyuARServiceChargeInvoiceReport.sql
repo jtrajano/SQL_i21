@@ -34,6 +34,7 @@ FROM (
 	FROM dbo.tblARInvoice WITH (NOLOCK)
 	WHERE strType = 'Service Charge'
 	  AND ysnForgiven = 0
+	  AND ysnPaid = 0
 ) ARI 
 INNER JOIN (
 	SELECT intInvoiceId
@@ -66,7 +67,8 @@ INNER JOIN (
 		, dblBaseTotal			= SUM(dblBaseInvoiceTotal)
 	FROM dbo.tblARInvoice WITH (NOLOCK)
 	WHERE strType = 'Service Charge'
-	  AND ysnForgiven = 0		
+	  AND ysnForgiven = 0
+	  AND ysnPaid = 0
 	GROUP BY intEntityCustomerId
 ) SUMMARY ON CUSTOMER.intEntityId = SUMMARY.intEntityCustomerId
 OUTER APPLY (
