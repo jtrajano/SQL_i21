@@ -18,6 +18,8 @@ SELECT   Load.intLoadId
 		,Load.dtmETAPOD
 		,Load.dtmETAPOL
 		,Load.dtmETSPOL
+		,POS.strPosition
+		,POS.strPositionType
         ,strType = CASE WHEN Load.intPurchaseSale = 1 THEN 
 						'Inbound' 
 						ELSE 
@@ -261,3 +263,4 @@ LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
 			ELSE ICI.intCountryId
 			END
 		)
+LEFT JOIN tblCTPosition POS ON POS.intPositionId = Load.intPositionId
