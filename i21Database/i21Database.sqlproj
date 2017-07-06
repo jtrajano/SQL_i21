@@ -5342,6 +5342,7 @@
     <Build Include="dbo\Views\vyuARServiceChargeInvoiceReport.sql" />
     <Build Include="dbo\Views\vyuLGArrivalForecast.sql" />
     <Build Include="dbo\Views\vyuSCDeliverySheetView.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
