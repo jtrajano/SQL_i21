@@ -5345,6 +5345,9 @@
     <Build Include="dbo\Functions\fnARGetCustomerDefaultContact.sql" />
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
     <Build Include="dbo\Views\vyuARCollectionCreditViewReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql">
+      <AnsiNulls>Off</AnsiNulls>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
