@@ -465,7 +465,7 @@ BEGIN
 				,dtmDueDate
 				,strTerm
 			)
-			SELECT intEntityId
+			SELECT intEntityCustomerId
 				, strInvoiceNumber
 				, dtmDate							 
 				, 0	dbl10Days		 

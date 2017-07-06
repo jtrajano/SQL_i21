@@ -5343,6 +5343,8 @@
     <Build Include="dbo\Views\vyuLGArrivalForecast.sql" />
     <Build Include="dbo\Views\vyuSCDeliverySheetView.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerDefaultContact.sql" />
+    <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
+    <Build Include="dbo\Views\vyuARCollectionCreditViewReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
