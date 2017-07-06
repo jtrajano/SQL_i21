@@ -172,7 +172,8 @@ BEGIN TRY
 							 + ' FROM tblICItemPricing a' + CHAR(13)
 							 + ' JOIN tblICItemUOM b ON a.intItemId = b.intItemId' + CHAR(13)
 							 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							 + ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 							 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 			SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
@@ -271,7 +272,8 @@ BEGIN TRY
 							+ ' from tblICItemPricing a' + CHAR(13)
 							+ ' JOIN tblICItemUOM b ON a.intItemId = b.intItemId' + CHAR(13)
 							+ ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							--+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							+ ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 							+ ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 			SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
@@ -369,7 +371,8 @@ BEGIN TRY
 							+ ' FROM tblICItemSpecialPricing a' + CHAR(13)
 							+ ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 							+ ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							--+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							+ ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 							+ ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 			SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
@@ -470,7 +473,8 @@ BEGIN TRY
 						 + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 						 + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 						 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-						 + ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+						 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+						 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 						 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 		SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
@@ -570,7 +574,8 @@ BEGIN TRY
 		                 + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 		                 + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 		                 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-		                 + ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+		                 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+						 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 		                 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 		SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
