@@ -236,4 +236,28 @@ BEGIN
 	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Previous ACH transactions set intBankFileAuditId = 0','1')
 END	
 
+--This will fix all CM's NULL intTransactionId on tblGLDetail and tblGLDetailRecap. This is related to this jira key CM-1793
+IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Fix for NULL intTransactionId on GL table')
+BEGIN
+
+	--GL DETAIL
+	UPDATE tblGLDetail
+	SET intTransactionId = (SELECT TOP 1 intTransactionId FROM tblGLDetail WHERE strTransactionId = GL.strTransactionId AND strModuleName = GL.strModuleName AND intTransactionId IS NOT NULL) 
+	FROM tblGLDetail GL
+	WHERE GL.strModuleName = 'Cash Management'
+	AND GL.intTransactionId IS NULL
+	
+	--GL DETAIL RECAP
+	UPDATE tblGLDetailRecap 
+	SET intTransactionId = (SELECT TOP 1 intTransactionId FROM tblGLDetail WHERE strTransactionId = GL.strTransactionId AND strModuleName = GL.strModuleName AND intTransactionId IS NOT NULL) 
+	FROM tblGLDetailRecap GL
+	WHERE GL.strModuleName = 'Cash Management'
+	AND GL.intTransactionId IS NULL
+
+
+	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Fix for NULL intTransactionId on GL table','1')
+END	
+
+
 print('/*******************  END Cash Management Data Fixess *******************/')
