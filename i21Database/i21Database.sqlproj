@@ -5348,6 +5348,10 @@
       <AnsiNulls>Off</AnsiNulls>
     </None>
     <Build Include="dbo\Stored Procedures\uspPATCalculateFiscalSummary.sql" />
+    <Build Include="dbo\Views\vyuRKPnLContractDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForUnRealized.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForRealized.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForAll.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
