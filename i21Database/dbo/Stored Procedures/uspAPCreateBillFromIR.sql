@@ -688,7 +688,7 @@ BEGIN
 			[strCalculationMethod]	=	C.strCalculationMethod, 
 			[dblRate]				=	C.dblRate, 
 			[intAccountId]			=	C.intTaxAccountId, 
-			[dblTax]				=	C.dblTax, 
+			[dblTax]				=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), --C.dblTax, oldtax x newtotal /oldtotal
 			[dblAdjustedTax]		=	ISNULL(C.dblAdjustedTax,0), 
 			[ysnTaxAdjusted]		=	C.ysnTaxAdjusted, 
 			[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
@@ -696,6 +696,15 @@ BEGIN
 		FROM @billDetailIds A
 		INNER JOIN tblAPBillDetail B ON A.intId = B.intBillDetailId
 		INNER JOIN tblICInventoryReceiptItemTax C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceiptItem D ON B.intInventoryReceiptItemId = D.intInventoryReceiptItemId
+
+		UPDATE voucherDetails
+			SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
+		FROM tblAPBillDetail voucherDetails
+		OUTER APPLY (
+			SELECT SUM(ISNULL(dblTax,0)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
+		) taxes
+		WHERE voucherDetails.intBillDetailId IN (SELECT intId FROM @billDetailIds)
 		
 		--DELETE THE @billDetailIds ID TO AVOID DUPLICATE INSERTION OF BILLDETAIL ID
 		DELETE FROM @billDetailIds
