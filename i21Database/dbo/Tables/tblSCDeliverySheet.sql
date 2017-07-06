@@ -5,6 +5,7 @@
     [intCompanyLocationId] INT NOT NULL, 
 	[strDeliverySheetNumber] NVARCHAR(MAX) NULL,
     [dtmDeliverySheetDate] DATETIME NULL DEFAULT GETDATE(), 
+    [ysnPost] BIT NULL DEFAULT (0),
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
 	CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
