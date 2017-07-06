@@ -5341,6 +5341,7 @@
     <Build Include="dbo\Functions\fnARFormatLetterAddress.sql" />
     <Build Include="dbo\Views\vyuARServiceChargeInvoiceReport.sql" />
     <Build Include="dbo\Views\vyuLGArrivalForecast.sql" />
+    <Build Include="dbo\Views\vyuSCDeliverySheetView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
