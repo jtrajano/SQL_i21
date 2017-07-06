@@ -230,13 +230,18 @@ IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 										 OR (AVG(ISNULL(dblCreditLimit, 0)) = 0 AND SUM(ISNULL(dblTotalAR, 0)) = 0))
 	END
 
-SELECT strCompanyName		= COMPANY.strCompanyName
-     , strCompanyAddress	= COMPANY.strCompanyAddress
-     , AGING.* 
+DECLARE @temp_open_invoices TABLE (intInvoiceId INT)
+INSERT INTO @temp_open_invoices
+SELECT DISTINCT intInvoiceId FROM @temp_aging_table GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+
+SELECT COMPANY.strCompanyName
+     , COMPANY.strCompanyAddress
+     , *
 FROM @temp_aging_table AGING
+INNER JOIN @temp_open_invoices UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0)
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY'
 
