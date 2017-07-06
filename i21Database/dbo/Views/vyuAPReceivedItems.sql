@@ -468,9 +468,9 @@ FROM
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
-		,[intAccountId]								=	A.intAccountId
-		,[strAccountId]								=	A.strAccountId
-		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = A.intAccountId)
+		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strName]									=	A.strName
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
@@ -526,7 +526,8 @@ FROM
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
 	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
-	
+	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId 
+		 AND ItemLoc.intLocationId = A.intLocationId
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
