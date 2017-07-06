@@ -26,10 +26,10 @@ FiscalSum AS(
 					(RC.dblCashRefund)
 					END) ELSE 0 END) - CASE WHEN RC.ysnEligibleRefund = 1 THEN R.dblServiceFee ELSE 0 END,
 			dblEquityRefund = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN RC.dblRefundAmount - RC.dblCashRefund ELSE 0 END),
-			intVoting = [dbo].[fnPATCountStockStatus]('Voting', R.intRefundId),
-			intNonVoting = [dbo].[fnPATCountStockStatus]('Non-Voting', R.intRefundId),
-			intProducers = [dbo].[fnPATCountStockStatus]('Producer', R.intRefundId),
-			intOthers = [dbo].[fnPATCountStockStatus]('Other', R.intRefundId)
+			intVoting = [dbo].[fnPATCountStockStatus]('Voting', R.intRefundId, default),
+			intNonVoting = [dbo].[fnPATCountStockStatus]('Non-Voting', R.intRefundId, default),
+			intProducers = [dbo].[fnPATCountStockStatus]('Producer', R.intRefundId, default),
+			intOthers = [dbo].[fnPATCountStockStatus]('Other', R.intRefundId, default)
 	FROM (SELECT intRefundId,
 				RC.intRefundCustomerId,
 				RC.ysnEligibleRefund,

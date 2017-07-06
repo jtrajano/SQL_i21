@@ -4248,7 +4248,6 @@
     <Build Include="dbo\Views\vyuAPForApprovalTransaction.sql" />
     <Build Include="dbo\Functions\fnPATCountStockStatus.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundTypeHistory.sql" />
-    <Build Include="dbo\Views\vyuPATCalculateFiscalSummary.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundSummary.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundSummaryHistory.sql" />
     <Build Include="dbo\Views\vyuPATCalculateNoRefundSummaryHistory.sql" />
@@ -5348,6 +5347,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql">
       <AnsiNulls>Off</AnsiNulls>
     </None>
+    <Build Include="dbo\Stored Procedures\uspPATCalculateFiscalSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
