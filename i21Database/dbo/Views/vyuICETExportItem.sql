@@ -13,6 +13,7 @@ SELECT DISTINCT
 FROM tblICItem item
 	INNER JOIN tblICItemLocation itemLocation ON itemLocation.intItemId = item.intItemId
 	INNER JOIN tblSMCompanyLocation location ON location.intCompanyLocationId = itemLocation.intLocationId
+	INNER JOIN tblETExportFilterLocation ExportLocation ON location.intCompanyLocationId = ExportLocation.intCompanyLocationId
 	LEFT JOIN tblICItemPricing itemPricing ON itemPricing.intItemId = item.intItemId
 		AND itemPricing.intItemLocationId = itemLocation.intItemLocationId
 	LEFT JOIN tblICItemUOM itemUOM ON itemUOM.intItemId = item.intItemId
