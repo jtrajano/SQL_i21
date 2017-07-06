@@ -2733,9 +2733,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Delivery Sheets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Delivery Sheets', N'Ticket Management', @TicketManagementMaintenanceParentMenuId, N'Delivery Sheets', N'Maintenance', N'Screen', N'Grain.view.DeliverySheets', N'small-menu-maintenance', 0, 0, 0, 1, 12, 1)
+	VALUES (N'Delivery Sheets', N'Ticket Management', @TicketManagementMaintenanceParentMenuId, N'Delivery Sheets', N'Maintenance', N'Screen', N'Grain.view.DeliverySheet', N'small-menu-maintenance', 0, 0, 0, 1, 12, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.DeliverySheets', intSort = 12 WHERE strMenuName = 'Delivery Sheets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.DeliverySheet', intSort = 12 WHERE strMenuName = 'Delivery Sheets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
