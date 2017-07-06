@@ -446,11 +446,12 @@ BEGIN
 			
 			if @Bank_code is not null
 			BEGIN		
-				select @Bank_name = ssbnk_name from ssbnkmst where ssbnk_code = @Bank_code
+				--select @Bank_name = ssbnk_name from ssbnkmst where ssbnk_code = @Bank_code
+				select @Bank_name = ssbnk_transit_route from ssbnkmst where ssbnk_code = @Bank_code
 				
 				select @i21_bank_id = intBankId, 
-						@i21_bank_name = strBankName 
-				from tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@Bank_name))
+						@i21_bank_name = strBankName 				
+				from tblCMBank where LTRIM(RTRIM(dbo.fnAESDecryptASym(strRTN))) = LTRIM(RTRIM(@Bank_name))
 
 				if @i21_bank_id is not null
 				begin
@@ -507,11 +508,12 @@ BEGIN
 			
 			if @Bank_code is not null
 			BEGIN		
-				select @Bank_name = ssbnk_name from ssbnkmst where ssbnk_code = @Bank_code
+				--select @Bank_name = ssbnk_name from ssbnkmst where ssbnk_code = @Bank_code
+				select @Bank_name = ssbnk_transit_route from ssbnkmst where ssbnk_code = @Bank_code
 
 				select @i21_bank_id = intBankId, 
-						@i21_bank_name = strBankName 
-				from tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@Bank_name))
+						@i21_bank_name = strBankName 				
+				from tblCMBank where LTRIM(RTRIM(dbo.fnAESDecryptASym(strRTN))) = LTRIM(RTRIM(@Bank_name))
 
 				if @i21_bank_id is not null
 				begin
