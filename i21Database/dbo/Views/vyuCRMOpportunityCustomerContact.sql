@@ -12,6 +12,7 @@
 			,tblEMEntity.ysnActive
 			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = tblARCustomer.intEntityCustomerId and et.strType in ('Customer','Prospect'))
 			,tblEMEntityPhoneNumber.strPhone
+			,strDirectionEntityType = 'Customer'
 		from tblARCustomer
 			,[tblEMEntityToContact]
 			,tblEMEntity
@@ -35,6 +36,7 @@
 			,tblEMEntity.ysnActive
 			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = tblAPVendor.intEntityVendorId and et.strType in ('Vendor'))
 			,tblEMEntityPhoneNumber.strPhone
+			,strDirectionEntityType = 'Vendor'
 		from tblAPVendor
 			,[tblEMEntityToContact]
 			,tblEMEntity
