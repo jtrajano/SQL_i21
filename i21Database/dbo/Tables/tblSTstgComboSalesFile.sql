@@ -12,7 +12,7 @@
     [SalesRestrictCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [LinkCodeType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
 	[LinkCodeValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[ComboDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
+	[ComboDescription] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
 	[ComboPrice] NUMERIC(18, 6) NULL, 
     [ItemListID] INT NULL, 
     [ComboItemQuantity] INT NULL, 
