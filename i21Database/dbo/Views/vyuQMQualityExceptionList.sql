@@ -16,6 +16,10 @@ SELECT TR.intTestResultId
 	--,CH.strContractNumber
 	--,SC.strContainerNumber
 	,COALESCE(CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq), CH1.strContractNumber + ' - ' + LTRIM(CD1.intContractSeq), CH2.strContractNumber + ' - ' + LTRIM(CD2.intContractSeq)) AS strContractNumber
+	,CY.strCommodityCode
+	,CY.strDescription AS strCommodityDescription
+	,S.dblRepresentingQty
+	,UM1.strUnitMeasure AS strRepresentingUOM
 	,COALESCE(SC.strContainerNumber, S.strContainerNumber) AS strContainerNumber
 	,ISNULL(L.intLotId, PL.intParentLotId) AS intLotId
 	,ISNULL(L.strLotNumber, PL.strParentLotNumber) AS strLotNumber
@@ -50,6 +54,7 @@ JOIN dbo.tblICItem AS I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
 JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 LEFT JOIN dbo.tblEMEntity AS E ON E.intEntityId = S.intEntityId
+LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUOMId
 LEFT JOIN dbo.tblICLot AS L ON L.intLotId = S.intProductValueId
 	AND S.intProductTypeId = 6
 LEFT JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = S.intProductValueId
@@ -61,6 +66,7 @@ LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intProductValueId
 	AND S.intProductTypeId = 8
 LEFT JOIN dbo.tblCTContractHeader AS CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 LEFT JOIN dbo.tblLGLoadDetail AS LD ON LD.intLoadDetailId = S.intProductValueId
 	AND S.intProductTypeId = 10
 LEFT JOIN dbo.tblLGLoad AS LL ON LL.intLoadId = LD.intLoadId

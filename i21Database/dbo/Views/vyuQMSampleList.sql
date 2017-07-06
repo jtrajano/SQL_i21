@@ -4,6 +4,8 @@ SELECT S.intSampleId
 	,S.strSampleNumber
 	,ST.strSampleTypeName
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
+	,CY.strCommodityCode
+	,CY.strDescription AS strCommodityDescription
 	,CH.strCustomerContract
 	,IC.strContractItemName
 	,I1.strItemNo AS strBundleItemNo
@@ -78,3 +80,4 @@ LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUO
 LEFT JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
+LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
