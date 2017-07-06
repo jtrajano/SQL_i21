@@ -1047,13 +1047,14 @@ BEGIN
 		WHERE VoucherDetail.intBillId = @currentVoucher
 	) ContractTerm
 
-	IF @contractTermId > 0
-	BEGIN
-		UPDATE Voucher
-			SET Voucher.intTermsId = @contractTermId, Voucher.dtmDueDate = ISNULL(dbo.fnGetDueDateBasedOnTerm(@receipttDate, @contractTermId), Voucher.dtmDueDate)
-		FROM tblAPBill Voucher
-		WHERE Voucher.intBillId = @currentVoucher
-	END
+	UPDATE Voucher
+		SET Voucher.intTermsId = (CASE WHEN @contractTermId > 0 THEN @contractTermId ELSE Voucher.intTermsId END),
+		 Voucher.dtmDueDate = (CASE WHEN @contractTermId > 0
+									THEN ISNULL(dbo.fnGetDueDateBasedOnTerm(@receipttDate, @contractTermId), Voucher.dtmDueDate)
+									ELSE ISNULL(dbo.fnGetDueDateBasedOnTerm(Voucher.dtmDate, Voucher.intTermsId), Voucher.dtmDueDate)
+								END)
+	FROM tblAPBill Voucher
+	WHERE Voucher.intBillId = @currentVoucher
 	
 	--INSERT BILLDETAIL CHARGE TAX
 	--IF(@chargeQty != 0)
