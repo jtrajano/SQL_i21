@@ -118,17 +118,29 @@ BEGIN
 		, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN '1' ELSE NULL END [BlueLawSysId1]
 		, CASE WHEN IL.ysnApplyBlueLaw2 = 1 THEN '2' ELSE NULL END [BlueLawSysId2]
 	from tblICItem I
+	JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
+	JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId 
 	JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+	LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
+	JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
 	JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 	JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
 	JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-	JOIN tblSTStore ST ON ST.intCompanyLocationId = L.intCompanyLocationId 
-	JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
-	LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intStoreId = ST.intStoreId
 	JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
-	JOIN tblICItemPricing Prc ON Prc.intItemId = I.intItemId
+	JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
 	JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
-	JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId 
+
+	--JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+	--JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
+	--JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
+	--JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+	--JOIN tblSTStore ST ON ST.intCompanyLocationId = L.intCompanyLocationId 
+	--JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
+	--LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intStoreId = ST.intStoreId
+	--JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
+	--JOIN tblICItemPricing Prc ON Prc.intItemId = I.intItemId
+	--JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
+	--JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId 
 	WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation
     AND ((@Category <>'whitespaces' AND Cat.intCategoryId IN(select * from dbo.fnSplitString(@Category,',')))
     OR (@Category ='whitespaces'  AND Cat.intCategoryId = Cat.intCategoryId))
