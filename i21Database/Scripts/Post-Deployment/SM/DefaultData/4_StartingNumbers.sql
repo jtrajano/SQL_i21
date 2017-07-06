@@ -1140,6 +1140,7 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Statement FormNo')
+
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 119
 			,[strTransactionType]	= N'SSCC Label Serial No'
@@ -1149,6 +1150,7 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'SSCC Label Serial No')
+
 	UNION ALL
 	SELECT	 [intStartingNumberId]	= 120
 			,[strTransactionType]	= N'CPE Receipt'
@@ -1158,6 +1160,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'CPE Receipt')
+
+	UNION ALL
+	SELECT	 [intStartingNumberId]	= 121
+			,[strTransactionType]	= N'Delivery Sheet'
+			,[strPrefix]			= N' '
+			,[intNumber]			= 1
+			,[strModule]			= 'Grain'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Sheet')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
