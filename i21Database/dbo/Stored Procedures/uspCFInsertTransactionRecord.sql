@@ -361,7 +361,7 @@ BEGIN
 
 		IF(@intTaxGroupByState IS NULL)
 		BEGIN
-			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strState
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
 		END
 		
 		IF(@intTaxGroupByState IS NULL)
