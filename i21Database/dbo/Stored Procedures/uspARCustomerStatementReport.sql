@@ -182,7 +182,7 @@ SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, 1
 
 DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue', 'ysnReportDetail')
 UPDATE @temp_xml_table SET fieldname = 'strName' WHERE fieldname = 'strCustomerName'
@@ -344,7 +344,7 @@ WHERE
 
 IF @ysnPrintOnlyPastDue = 1
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE dblPastDue = 0
+		DELETE FROM @temp_statement_table WHERE dtmDueDate <= @dtmDateTo
 		UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
 	END
 
@@ -355,7 +355,10 @@ IF @ysnPrintZeroBalance = 0
 	END
 
 IF @ysnPrintCreditBalance = 0
-	DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
+	BEGIN
+		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
+		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0
+	END
 
 INSERT INTO @temp_cf_table
 (

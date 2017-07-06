@@ -229,7 +229,7 @@ BEGIN
 END
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, 1
 
 INSERT INTO @temp_balanceforward_table
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateFrom, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
@@ -405,7 +405,7 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 IF @ysnPrintOnlyPastDue = 1
     BEGIN
-        DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateTo) < 0
+        DELETE FROM @temp_statement_table WHERE dtmDueDate <= @dtmDateTo
         UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
     END
 
@@ -416,7 +416,10 @@ IF @ysnPrintZeroBalance = 0
     END
 
 IF @ysnPrintCreditBalance = 0
-    DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')        
+	BEGIN
+		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
+		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0
+	END
 
 INSERT INTO @temp_cf_table
 (
