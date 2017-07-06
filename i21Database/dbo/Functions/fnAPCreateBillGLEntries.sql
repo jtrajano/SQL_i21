@@ -79,13 +79,17 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	 CAST(CASE WHEN ForexRate.dblRate > 0 
-												 THEN  (CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
-													 ELSE Details.dblTotal END) * ISNULL(NULLIF(Details.dblRate,0),1) 
-											ELSE (
-													(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
-													 ELSE A.dblAmountDue END))
-											END AS DECIMAL(18,2)),
+		[dblCredit]						=	 
+											--CAST(CASE WHEN ForexRate.dblRate > 0 
+											--	 THEN  (CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+											--		 ELSE Details.dblTotal END) * ISNULL(NULLIF(Details.dblRate,0),1) 
+											--ELSE (
+											--		(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+											--		 ELSE A.dblAmountDue END))
+											--END AS DECIMAL(18,2)),
+											--Subtract the payment on detail total using percentage
+											(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+													 ELSE Details.dblTotal END) - ((ISNULL(A.dblPayment,0) / Details.dblTotal) * Details.dblTotal) * ISNULL(NULLIF(Details.dblRate,0),1),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
