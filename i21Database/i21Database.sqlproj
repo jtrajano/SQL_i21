@@ -5340,6 +5340,7 @@
     <Build Include="dbo\Views\vyuMFGetTaskQty.sql" />
     <Build Include="dbo\Functions\fnARFormatLetterAddress.sql" />
     <Build Include="dbo\Views\vyuARServiceChargeInvoiceReport.sql" />
+    <Build Include="dbo\Views\vyuLGArrivalForecast.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
