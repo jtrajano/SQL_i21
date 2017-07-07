@@ -1,30 +1,56 @@
-﻿CREATE VIEW [dbo].[vyuGLPostRemind]
+﻿CREATE VIEW vyuGLPostRemind 
 AS
 WITH cte AS(
-	SELECT A.PostRemind_Days,A.PostRemind_BeforeAfter, B.Item intEntity FROM tblGLCompanyPreferenceOption A
-	CROSS APPLY dbo.fnSplitString(A.PostRemind_Users,',')  B
+	SELECT top 1 A.PostRemind_Users, A.PostRemind_Days,A.PostRemind_BeforeAfter FROM tblGLCompanyPreferenceOption A
+	
+),
+USERS as (
+	SELECT B.Item intEntityId FROM cte A
+	OUTER APPLY dbo.fnSplitString(A.PostRemind_Users,',')B
+),
+After as
+(
+	SELECT PreviousFiscal.dtmStartDate, PreviousFiscal.dtmEndDate
+	FROM cte A
+	CROSS APPLY(
+		SELECT TOP 1 dtmStartDate, dtmEndDate
+		,dateadd( day, PostRemind_Days -1, dtmEndDate) dtmMin
+		 FROM tblGLFiscalYearPeriod
+		WHERE CONVERT(DATE, GETDATE(),101) > dtmEndDate order by dtmStartDate desc
+	) PreviousFiscal
+	CROSS APPLY(
+	 SELECT top 1 dtmEndDate FROM tblGLFiscalYearPeriod WHERE
+		dtmEndDate > PreviousFiscal.dtmEndDate
+		order by dtmStartDate 
+	)NextFiscal
+	WHERE PostRemind_BeforeAfter = 'After'
+	AND  GETDATE() >= PreviousFiscal.dtmMin and 
+	getdate() <=NextFiscal.dtmEndDate
+),
+Before as
+(
+	SELECT CurrentFiscal.dtmStartDate, CurrentFiscal.dtmEndDate
+	FROM cte A
+	CROSS APPLY(
+		SELECT TOP 1 dtmStartDate, dtmEndDate , DATEADD(day,  (A.PostRemind_Days+1) * -1, dtmEndDate) dtmMin FROM tblGLFiscalYearPeriod
+		WHERE CONVERT(DATE, GETDATE(),101) BETWEEN dtmStartDate AND dtmEndDate
+
+	) CurrentFiscal
+	WHERE PostRemind_BeforeAfter = 'Before'
+	AND GETDATE() between CurrentFiscal.dtmMin and CurrentFiscal.dtmEndDate
+	
+	
+),
+RESULT as (
+SELECT dtmStartDate DateLimit1, dtmEndDate DateLimit2 FROM After 
+UNION
+SELECT dtmStartDate DateLimit1, dtmEndDate DateLimit2 FROM Before
 )
-,cte2 as (
-SELECT TOP 1
-case when Options.PostRemind_BeforeAfter = 'Before' THEN 
-	DATEADD(day, Options.PostRemind_Days *-1, dtmEndDate) 
-ELSE
-	dtmStartDate END	
-AS DateLimit1,
-CASE WHEN Options.PostRemind_BeforeAfter = 'Before' THEN 
-	 DATEADD(DAY,1,dtmEndDate)
-ELSE
-	DATEADD(day,Options.PostRemind_Days+1, dtmStartDate)  END	
-AS DateLimit2
-FROM tblGLFiscalYearPeriod 
-CROSS APPLY(
-	SELECT TOP 1  PostRemind_Days,PostRemind_BeforeAfter FROM cte )Options
-	WHERE CONVERT(DATE, GETDATE(),101) BETWEEN dtmStartDate AND  dtmEndDate
-)
-SELECT  intJournalId, intEntityId, DateLimit1,DateLimit2 FROM tblGLJournal J JOIN 
-	cte ON J.intEntityId = cte.intEntity 
-	JOIN cte2 on CONVERT(DATE, J.dtmDate,101) BETWEEN DateLimit1 AND DateLimit2
-	WHERE ysnPosted = 0
-	AND ISNULL(ysnRecurringTemplate,0) = 0
-	AND CONVERT(DATE, GETDATE(),101) BETWEEN DateLimit1 AND  DateLimit2
+SELECT  intJournalId, j.intEntityId, DateLimit1,DateLimit2 FROM tblGLJournal j JOIN 
+	USERS u ON j.intEntityId = u.intEntityId 
+	JOIN RESULT on CONVERT(DATE, j.dtmDate,101) BETWEEN DateLimit1 AND DateLimit2
+	WHERE j.ysnPosted = 0
+	AND ISNULL(j.ysnRecurringTemplate,0) = 0
 GO
+
+
