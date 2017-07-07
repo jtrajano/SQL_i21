@@ -12,6 +12,7 @@ namespace iRely.Inventory.BusinessLayer
     public interface IStorageLocationBl : IBusinessLayer<tblICStorageLocation>
     {
         Task<SearchResult> SearchStorageBins(GetParameter param);
+        Task<SearchResult> GetStorageUnitStock(GetParameter param);
         Task<SearchResult> SearchSubLocationBins(GetParameter param);
         Task<SearchResult> SearchSubLocationBinDetails(GetParameter param);
         Task<SearchResult> SearchStorageBinDetails(GetParameter param);
@@ -19,3 +20,4 @@ namespace iRely.Inventory.BusinessLayer
         StorageLocationBl.DuplicateStorageLocationSaveResult DuplicateStorageLocation(int intStorageLocationId);
     }
 }
+

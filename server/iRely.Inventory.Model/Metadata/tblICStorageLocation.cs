@@ -198,6 +198,29 @@ namespace iRely.Inventory.Model
         public vyuICGetStorageLocation vyuICGetStorageLocation { get; set; }
     }
 
+    public class vyuICGetStorageUnitStock
+    {
+        public int intItemStockUOMId { get; set; }
+        public string strItemNo { get; set; }
+        public int? intItemId { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strCommodityCode { get; set; }
+        public int? intLocationId { get; set; }
+        public string strLocation { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocation { get; set; }
+        public int? intStorageUnitId { get; set; }
+        public string strStorageUnit { get; set; }
+        public decimal? dblOnHand { get; set; }
+        public string strUnitMeasure { get; set; }
+        public decimal? dblEffectiveDepth { get; set; }
+        public decimal? dblResidualUnit { get; set; }
+        public decimal? dblUnitPerFoot { get; set; }
+        public decimal? dblPackFactor { get; set; }
+        public int? intLotId { get; set; }
+        public string strLotNumber{ get; set; }
+    }
+
     public class tblICStorageLocationCategory : BaseEntity
     {
         public int intStorageLocationCategoryId { get; set; }

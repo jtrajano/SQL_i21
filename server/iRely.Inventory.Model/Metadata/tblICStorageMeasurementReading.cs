@@ -66,6 +66,13 @@ namespace iRely.Inventory.Model
         public decimal? dblAirSpaceReading { get; set; }
         public decimal? dblCashPrice { get; set; }
         public int? intDiscountSchedule { get; set; }
+        public decimal? dblOnHand { get; set; }
+        public decimal? dblValue { get; set; }
+        public decimal? dblNewOnHand { get; set; }
+        public decimal? dblVariance { get; set; }
+        public decimal? dblGainLoss { get; set; }
+        public decimal? dblResidualUnit { get; set; }
+        public decimal? dblUnitPerFoot { get; set; }
         public int? intSort { get; set; }
 
         private string _unitMeasure;

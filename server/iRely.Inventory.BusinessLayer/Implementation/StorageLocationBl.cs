@@ -47,6 +47,20 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public async Task<SearchResult> GetStorageUnitStock(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetStorageUnitStock>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "strItemNo", "ASC").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
         public override async Task<SearchResult> Search(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetStorageLocation>()

@@ -45,6 +45,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblAirSpaceReading).HasColumnName("dblAirSpaceReading").HasPrecision(18, 6);
             this.Property(t => t.dblCashPrice).HasColumnName("dblCashPrice").HasPrecision(18, 6);
             this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
+            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand").HasPrecision(18, 6);
+            this.Property(t => t.dblValue).HasColumnName("dblValue").HasPrecision(18, 6);
+            this.Property(t => t.dblNewOnHand).HasColumnName("dblNewOnHand").HasPrecision(18, 6);
+            this.Property(t => t.dblVariance).HasColumnName("dblVariance").HasPrecision(18, 6);
+            this.Property(t => t.dblGainLoss).HasColumnName("dblGainLoss").HasPrecision(18, 6);
+            this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetStorageMeasurementReadingConversion)

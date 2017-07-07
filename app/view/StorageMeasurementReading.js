@@ -240,12 +240,43 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colCommodity',
-                                                        width: 100,
-                                                        text: 'Commodity',
+                                                        itemId: 'colStorageLocation',
+                                                        width: 120,
+                                                        text: 'Storage Unit',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
+                                                                {
+                                                                    dataIndex: 'intStorageUnitId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStorageUnit',
+                                                                    dataType: 'string',
+                                                                    width: 200,
+                                                                    text: 'Storage Unit',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intStorageLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Storage Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStorageLocation',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Location',
+                                                                    width: 200,
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblEffectiveDepth',
+                                                                    dataType: 'float',
+                                                                    text: 'Effective Depth',
+                                                                    flex: 1
+                                                                },
                                                                 {
                                                                     dataIndex: 'intCommodityId',
                                                                     dataType: 'numeric',
@@ -254,29 +285,9 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                                 {
                                                                     dataIndex: 'strCommodityCode',
                                                                     dataType: 'string',
-                                                                    text: 'Commodity Code',
+                                                                    text: 'Commodity',
                                                                     flex: 1
                                                                 },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboCommodity',
-                                                            displayField: 'strCommodityCode',
-                                                            valueField: 'strCommodityCode'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colItem',
-                                                        width: 120,
-                                                        text: 'Item',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
                                                                 {
                                                                     dataIndex: 'intItemId',
                                                                     dataType: 'numeric',
@@ -285,85 +296,48 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                                 {
                                                                     dataIndex: 'strItemNo',
                                                                     dataType: 'string',
-                                                                    text: 'Item Number',
-                                                                    flex: 1
+                                                                    width: 180,
+                                                                    flex: 1,
+                                                                    text: 'Item No'
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strType',
-                                                                    dataType: 'string',
-                                                                    text: 'Item Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLotTracking',
-                                                                    dataType: 'string',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strStockUOM',
-                                                                    dataType: 'string',
-                                                                    text: 'Stock UOM',
-                                                                    hidden: true
-                                                                }
-                                                            ],
-                                                            itemId: 'cboItem',
-                                                            displayField: 'strItemNo',
-                                                            valueField: 'strItemNo'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colStorageLocation',
-                                                        width: 120,
-                                                        text: 'Storage Unit',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intStorageLocationId',
-                                                                    dataType: 'numeric',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strName',
-                                                                    dataType: 'string',
-                                                                    text: 'Storage Unit',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intSubLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Storage Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strSubLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Storage Location',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'dblEffectiveDepth',
+                                                                    dataIndex: 'dblOnHand',
                                                                     dataType: 'float',
-                                                                    text: 'Effective Depth',
+                                                                    text: 'On Hand',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'UOM',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLotId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLotNumber',
+                                                                    dataType: 'string',
+                                                                    flex: 1,
+                                                                    text: 'Lot No'
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitPerFoot',
+                                                                    dataType: 'float',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblResidualUnit',
+                                                                    dataType: 'float',
+                                                                    hidden: true
                                                                 }
                                                             ],
+                                                            pickerWidth: 750,
                                                             itemId: 'cboStorageLocation',
-                                                            displayField: 'strName',
-                                                            valueField: 'strName'
+                                                            displayField: 'strStorageUnit',
+                                                            valueField: 'strStorageUnit'
                                                         }
                                                     },
                                                     {
@@ -374,6 +348,19 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colCommodity',
+                                                        width: 100,
+                                                        text: 'Commodity'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colItem',
+                                                        width: 120,
+                                                        text: 'Item'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        format: '0,000.##',
                                                         itemId: 'colEffectiveDepth',
                                                         width: 100,
                                                         text: 'Effective Depth'
@@ -441,6 +428,46 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                             displayField: 'strDiscountDescription',
                                                             valueField: 'strDiscountDescription'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        format: '0,000.##',
+                                                        itemId: 'colCurrentStock',
+                                                        width: 100,
+                                                        dataIndex: 'dblOnHand',
+                                                        text: 'Current Stock'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        format: '0,000.##',
+                                                        itemId: 'colNewStock',
+                                                        width: 100,
+                                                        dataIndex: 'dblNewOnHand',
+                                                        text: 'New Stock'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        format: '0,000.##',
+                                                        itemId: 'colValue',
+                                                        width: 100,
+                                                        dataIndex: 'dblValue',
+                                                        text: 'Value'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        format: '0,000.##',
+                                                        itemId: 'colVariance',
+                                                        width: 100,
+                                                        dataIndex: 'dblVariance',
+                                                        text: 'Variance'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        format: '0,000.##',
+                                                        itemId: 'colGainLoss',
+                                                        width: 100,
+                                                        dataIndex: 'dblGainLoss',
+                                                        text: 'Gain/Loss'
                                                     }
                                                 ],
                                                 viewConfig: {

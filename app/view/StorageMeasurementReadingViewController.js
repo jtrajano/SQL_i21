@@ -19,38 +19,12 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
             txtReadingNumber: '{current.strReadingNo}',
 
             grdStorageMeasurementReading: {
-                colCommodity: {
-                    dataIndex: 'strCommodity',
-                    editor: {
-                        origValueField: 'intCommodityId',
-                        origUpdateField: 'intCommodityId',
-                        store: '{commodity}'
-                    }
-                },
-                colItem: {
-                    dataIndex: 'strItemNo',
-                    editor: {
-                        origValueField: 'intItemId',
-                        origUpdateField: 'intItemId',
-                        store: '{item}',
-                        defaultFilters: [
-                            {
-                                column: 'intLocationId',
-                                value: '{current.intLocationId}',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intCommodityId',
-                                value: '{grdStorageMeasurementReading.selection.intCommodityId}',
-                                conjunction: 'and'
-                            }
-                        ]
-                    }
-                },
+                colCommodity: 'strCommodity',
+                colItem: 'strItemNo',
                 colStorageLocation: {
                     dataIndex: 'strStorageLocationName',
                     editor: {
-                        origValueField: 'intStorageLocationId',
+                        origValueField: 'intStorageUnitId',
                         origUpdateField: 'intStorageLocationId',
                         store: '{storageLocation}',
                         defaultFilters: [
@@ -81,7 +55,12 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                             }
                         ]
                     }
-                }
+                },
+                colStock: 'dblOnHand',
+                colNewStock: 'dblNewOnHand',
+                colValue: 'dblValue',
+                colVariance: 'dblVariance',
+                colGainLoss: 'dblGainLoss'
             }
         }
     },
@@ -248,9 +227,20 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         var plugin = grid.getPlugin('cepStorageMeasurementReading');
         var current = plugin.getActiveRecord();
 
-        current.set('intSubLocationId', records[0].get('intSubLocationId'));
-        current.set('strSubLocationName', records[0].get('strSubLocationName'));
+        current.set('intSubLocationId', records[0].get('intStorageLocationId'));
+        current.set('strSubLocationName', records[0].get('strStorageLocation'));
+        current.set('strStorageLocationName', records[0].get('strStorageUnit'));
+        current.set('intStorageLocationId', records[0].get('intStorageUnitId'));
+        current.set('intItemId', records[0].get('intItemId'));
+        current.set('strItemNo', records[0].get('strItemNo'));
+        current.set('intCommodityId', records[0].get('intCommodityId'));
+        current.set('strCommodity', records[0].get('strCommodity'));
+        current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
         current.set('dblEffectiveDepth', records[0].get('dblEffectiveDepth'));
+
+        current.set('dblUnitPerFoot', records[0].get('dblUnitPerFoot'));
+        current.set('dblResidualUnit', records[0].get('dblResidualUnit'));
+        current.set('dblOnHand', records[0].get('dblOnHand'));
     },
 
     onItemSelect: function(combo, records, opts) {

@@ -6,8 +6,10 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewModel', {
         'i21.store.CompanyLocationBuffered',
         'Inventory.store.BufferedCommodity',
         'Inventory.store.BufferedItemStockView',
+        'Inventory.store.BufferedItemStockUOMView',
         'Inventory.store.BufferedStorageLocation',
-        'Grain.store.BufferedDiscountSchedule'
+        'Grain.store.BufferedDiscountSchedule',
+        'Inventory.store.BufferedStorageUnitStock'
     ],
 
     stores: {
@@ -21,7 +23,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewModel', {
             type: 'icbuffereditemstockview',
         },
         storageLocation: {
-            type: 'icbufferedstoragelocation'
+            type: 'icbufferedstorageunitstock'
         },
         discountSchedule: {
             type: 'grbuffereddiscountschedule'

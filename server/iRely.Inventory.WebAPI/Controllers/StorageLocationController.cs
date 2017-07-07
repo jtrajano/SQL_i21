@@ -23,6 +23,14 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("GetStorageUnitStock")]
+        public async Task<HttpResponseMessage> GetStorageUnitStock(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStorageUnitStock(param));
+        }
+
+
+        [HttpGet]
         [ActionName("SearchStorageBins")]
         public async Task<HttpResponseMessage> SearchStorageBins(GetParameter param)
         {

@@ -1,0 +1,26 @@
+Ext.define('Inventory.store.BufferedStorageUnitStock', {
+    extend: 'Ext.data.BufferedStore',
+    alias: 'store.icbufferedstorageunitstock',
+
+    requires: [
+        'Inventory.model.StorageUnitStock'
+    ],
+
+    model: 'Inventory.model.StorageUnitStock',
+    storeId: 'BufferedStorageUnitStock',
+    pageSize: 50,
+    batchActions: true,
+    remoteFilter: true,
+    remoteSort: true,
+    proxy: {
+        type: 'rest',
+        api: {
+            read: '../Inventory/api/StorageLocation/GetStorageUnitStock'
+        },
+        reader: {
+            type: 'json',
+            rootProperty: 'data',
+            messageProperty: 'message'
+        }
+    }
+});

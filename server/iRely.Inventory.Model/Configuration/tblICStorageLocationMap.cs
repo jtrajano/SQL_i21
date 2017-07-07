@@ -56,6 +56,37 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICGetStorageUnitStockMap : EntityTypeConfiguration<vyuICGetStorageUnitStock>
+    {
+        public vyuICGetStorageUnitStockMap()
+        {
+            this.HasKey(t => t.intItemStockUOMId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetStorageUnitStock");
+
+            this.Property(t => t.intItemStockUOMId).HasColumnName("intItemStockUOMId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.strLocation).HasColumnName("strLocation");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
+            this.Property(t => t.intStorageUnitId).HasColumnName("intStorageUnitId");
+            this.Property(t => t.strStorageUnit).HasColumnName("strStorageUnit");
+            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.dblEffectiveDepth).HasColumnName("dblEffectiveDepth");
+            this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit");
+            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot");
+            this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor");
+            this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
+            this.Property(t => t.intLotId).HasColumnName("intLotId");
+        }
+    }
+
     public class tblICStorageLocationCategoryMap : EntityTypeConfiguration<tblICStorageLocationCategory>
     {
         public tblICStorageLocationCategoryMap()
