@@ -5542,6 +5542,7 @@
     <Build Include="dbo\Functions\fnPOPurchaseDetailGetReceiptNumber.sql" />
     <Build Include="dbo\Views\vyuPOPurchaseDetailReceiptNumber.sql" />
     <Build Include="dbo\Functions\fnPOPurchaseDetailGetReceiptId.sql" />
+    <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
