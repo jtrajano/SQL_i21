@@ -38,7 +38,10 @@ BEGIN TRY
 
 	SELECT
 		ROW_NUMBER() OVER(ORDER BY DH.intLoadDistributionHeaderId, DD.intLoadDistributionDetailId DESC) AS intId
-		,[strSourceTransaction]					= 'Transport Load'
+		, *
+	INTO #tmpSourceTable
+	FROM (
+	SELECT DISTINCT [strSourceTransaction]					= 'Transport Load'
 		,[intLoadDistributionHeaderId]			= DH.intLoadDistributionHeaderId
 		,[intLoadDistributionDetailId]			= DD.intLoadDistributionDetailId
 		,[intSourceId]							= DH.intLoadDistributionHeaderId
@@ -134,7 +137,6 @@ BEGIN TRY
 		,[dblSurcharge]							= DD.dblDistSurcharge
 		,DD.dblFreightRate
 		,DD.ysnFreightInPrice
-	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 			LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 			LEFT JOIN tblARCustomer Customer ON Customer.intEntityCustomerId = DH.intEntityCustomerId
@@ -157,6 +159,7 @@ BEGIN TRY
 						ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 		WHERE TL.intLoadHeaderId = @intLoadHeaderId
 			AND DH.strDestination = 'Customer'
+	) tblInvoices
 
 	-- Concatenate PO Number, BOL Number, and Comments in cases there are different values and they are not used as a grouping option
 	DECLARE @concatPONumber NVARCHAR(MAX) = ''
