@@ -1,17 +1,23 @@
-﻿CREATE FUNCTION [dbo].[fnCFGetTransactionMargin] (
+﻿
+
+CREATE FUNCTION [dbo].[fnCFGetTransactionMargin] (
 	 @intTransactionId		INT = 0
 	 ,@intItemId			INT = 0
 	 ,@intLocationId		INT = 0
 	 ,@dblNetPrice			NUMERIC(18,6) = 0.0
 	 ,@dblGrossPrice		NUMERIC(18,6) = 0.0
+	 ,@dblTotalCalcTax		NUMERIC(18,6) = 0.0
+	 ,@dblTotalOrigTax		NUMERIC(18,6) = 0.0
+	 ,@dblQuantity			NUMERIC(18,6) = 0.0
 	 ,@dblTransferCost		NUMERIC(18,6) = 0.0
 	 ,@strTransactionType	NVARCHAR(MAX) = ''
 	 ,@strPriceBasis		NVARCHAR(MAX) = ''
 )
 RETURNS @returntable TABLE
 (
-	dblMargin NUMERIC(18,6)
-	,dblCost NUMERIC(18,6)
+	 dblMargin			NUMERIC(18,6)
+	,dblInventoryCost	NUMERIC(18,6)
+	,dblTransferCost	NUMERIC(18,6)
 )
 AS
 BEGIN 
@@ -34,14 +40,16 @@ BEGIN
 	WHERE intTransactionId = @intTransactionId
 
 
-	IF (@strExistingTransactionType = 'Local/Network' AND  @strPriceBasis != 'Transfer Cost')
+	IF (@strExistingTransactionType = 'Local/Network')
+	--AND  @strPriceBasis != 'Transfer Cost')
 	BEGIN
 		IF (@strExistingTransactionPosted = 1)
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
-			dblMargin = cfTransNetPrice.dblCalculatedAmount - arSalesAnalysisReport.dblUnitCost,
-			dblCost = arSalesAnalysisReport.dblUnitCost 
+			dblMargin = ISNULL(cfTransNetPrice.dblCalculatedAmount,0) - ISNULL(arSalesAnalysisReport.dblUnitCost,0),
+			dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0),
+			dblTransferCost = ISNULL(cfTransaction.dblTransferCost,0)
 			FROM tblCFTransaction AS cfTransaction
 			INNER JOIN tblARInvoice AS arInvoice
 			ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId
@@ -60,8 +68,9 @@ BEGIN
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
-			dblMargin = cfTransNetPrice.dblCalculatedAmount - cfItem.dblAverageCost,
-			dblCost = cfItem.dblAverageCost
+			dblMargin = ISNULL(cfTransNetPrice.dblCalculatedAmount,0) - ISNULL(cfItem.dblAverageCost,0),
+			dblInventoryCost = ISNULL(cfItem.dblAverageCost,0),
+			dblTransferCost = ISNULL(cfTransaction.dblTransferCost,0)
 			FROM tblCFTransaction AS cfTransaction INNER JOIN 
 			(SELECT cfiItem.intItemId, cfiItem.strProductNumber, iciItem.strDescription, iciItem.intItemId AS intARItemId, iciItem.strItemNo, iciItemPricing.dblAverageCost, iciItemPricing.dblStandardCost, iciItemPricing.dblLastCost
 			FROM  dbo.tblCFItem AS cfiItem LEFT OUTER JOIN
@@ -84,8 +93,10 @@ BEGIN
 	BEGIN
 		INSERT INTO @returntable
 		SELECT
-		dblMargin = cfTransGrossPrice.dblCalculatedAmount - cfTransaction.dblTransferCost,
-		dblCost = cfTransaction.dblTransferCost  
+		dblMargin = (ISNULL(cfTransGrossPrice.dblCalculatedAmount,0) - ISNULL(cfTransaction.dblTransferCost,0)) +
+			((ISNULL(cfTotalTax.dblTaxOriginalAmount,0)/ISNULL(cfTransaction.dblQuantity,0) - ISNULL(cfTotalTax.dblTaxCalculatedAmount,0)/ISNULL(cfTransaction.dblQuantity,0))),
+		dblTransferCost = ISNULL(cfTransaction.dblTransferCost,0) ,
+		dblInventoryCost = 0
 		FROM tblCFTransaction AS cfTransaction LEFT OUTER JOIN
 		(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
 		FROM     dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
@@ -93,6 +104,8 @@ BEGIN
 		(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
 		FROM            dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
 		WHERE        (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId
+		LEFT OUTER JOIN 
+		(SELECT intTransactionId ,SUM(dblTaxCalculatedAmount) AS dblTaxCalculatedAmount ,SUM(dblTaxOriginalAmount) AS dblTaxOriginalAmount  FROM tblCFTransactionTax group by intTransactionId) AS cfTotalTax ON cfTotalTax.intTransactionId = cfTransaction.intTransactionId
 		WHERE cfTransaction.intTransactionId = @intTransactionId
 	END
 
@@ -104,43 +117,27 @@ BEGIN
 	
 	INSERT INTO @returntable
 	SELECT
+
 	dblMargin = (
+
 	CASE @strTransactionType 
-	WHEN 'Local/Network' 
-		THEN 
-			CASE @strPriceBasis
-			WHEN 'Transfer Cost'
-			THEN
-				@dblNetPrice - @dblTransferCost
-			ELSE
-				@dblNetPrice - dblAverageCost
-			END
-	WHEN 'Extended Remote' 
-	THEN @dblGrossPrice - @dblTransferCost 
-	WHEN 'Remote' 
-	THEN @dblGrossPrice - @dblTransferCost
-	WHEN 'Foreign Sale' 
-	THEN @dblGrossPrice - @dblTransferCost
-	ELSE 0 
+
+		WHEN 'Local/Network' 
+		THEN ISNULL(@dblNetPrice,0) - ISNULL(dblAverageCost,0)
+
+		WHEN 'Extended Remote' 
+		THEN (ISNULL(@dblGrossPrice,0) - ISNULL(@dblTransferCost,0)) + ((ISNULL(@dblTotalOrigTax,0) / ISNULL(@dblQuantity,0)) - (ISNULL(@dblTotalCalcTax,0) / ISNULL(@dblQuantity,0)))
+
+		WHEN 'Remote' 
+		THEN (ISNULL(@dblGrossPrice,0) - ISNULL(@dblTransferCost,0)) + ((ISNULL(@dblTotalOrigTax,0) / ISNULL(@dblQuantity,0)) - (ISNULL(@dblTotalCalcTax,0) / ISNULL(@dblQuantity,0)))
+
+		WHEN 'Foreign Sale' 
+		THEN (ISNULL(@dblGrossPrice,0) - ISNULL(@dblTransferCost,0)) + ((ISNULL(@dblTotalOrigTax,0) / ISNULL(@dblQuantity,0)) - (ISNULL(@dblTotalCalcTax,0) / ISNULL(@dblQuantity,0)))
+
+		ELSE 0 
 	END),
-	dblCost = CASE @strTransactionType 
-	WHEN 'Local/Network' 
-		THEN 
-			CASE @strPriceBasis
-				WHEN 'Transfer Cost'
-				THEN
-					@dblTransferCost
-				ELSE
-					dblAverageCost
-				END
-	WHEN 'Extended Remote' 
-	THEN @dblTransferCost 
-	WHEN 'Remote' 
-	THEN @dblTransferCost
-	WHEN 'Foreign Sale' 
-	THEN @dblTransferCost
-	ELSE 0 
-	END
+	dblInventoryCost = dblAverageCost,
+	dblTransferCost = @dblTransferCost
 	FROM vyuICGetItemPricing 
 	WHERE intItemId = @intItemId
 	AND intLocationId = @intLocationId

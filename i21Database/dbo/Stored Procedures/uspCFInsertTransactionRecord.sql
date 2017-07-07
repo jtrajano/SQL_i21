@@ -688,6 +688,7 @@ BEGIN
 		DECLARE @dblPriceIndexRate			NUMERIC(18,6)
 		DECLARE @dtmPriceIndexDate			DATETIME
 		DECLARE @dblMargin					NUMERIC(18,6)
+		DECLARE @dblInventoryCost			NUMERIC(18,6)
 	------------------------------------------------------------
 
 
@@ -1039,6 +1040,8 @@ BEGIN
 		,@dtmPriceIndexDate				= dtmPriceIndexDate	
 		,@ysnDuplicate					= ysnDuplicate
 		,@ysnRecalculateInvalid			= ysnInvalid
+		,@dblInventoryCost				= dblInventoryCost
+		,@dblMargin						= dblMargin
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1058,7 +1061,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId		= null 
 				,strPriceBasis			= null
-				,dblTransferCost		= @dblTransferCost	
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod			= 'Standard Pricing'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1078,7 +1082,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost		= @dblTransferCost
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = 'Import File Price'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1098,7 +1103,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost = @dblTransferCost
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = @strPriceMethod
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1118,7 +1124,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost 		= @dblTransferCost
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = 'Special Pricing'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1147,7 +1154,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis			= @strPrcPriceBasis
-				,dblTransferCost		= @dblTransferCost
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod			= 'Price Profile'
 				,intPriceProfileId 		= @intPriceProfileId 	
 				,intPriceIndexId		= @intPriceIndexId	
@@ -1182,7 +1190,8 @@ BEGIN
 					
 				UPDATE tblCFTransaction 
 				SET strPriceBasis = null 
-				,dblTransferCost		= @dblTransferCost
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = 'Contract Pricing'
 				,intContractId = @intPrcContractHeaderId
 				,intContractDetailId = @intPrcContractDetailId
@@ -1220,7 +1229,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost 		= @dblTransferCost
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = @strPriceMethod
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null

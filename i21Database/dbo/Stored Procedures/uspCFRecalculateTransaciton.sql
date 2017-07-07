@@ -18,7 +18,7 @@ CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton]
 ,@PostedCSV				BIT				=	0
 ,@IsImporting			BIT				=	0
 -------------REMOTE TAXES-------------
---  1. REMOTE TRANSACTION			--
+--  1. REMOTE TRANSACTION			--transactiontax
 --  2. EXT. REMOTE TRANSACTION 		--
 --------------------------------------
 ,@TaxState							NVARCHAR(MAX)	= ''
@@ -122,6 +122,7 @@ BEGIN
 		,intNetworkId					INT
 		,intSiteId						INT
 		,dblTransferCost				NUMERIC(18,6)
+		,dblInventoryCost				NUMERIC(18,6)
 		,dblOriginalPrice				NUMERIC(18,6)
 		,dblPrice						NUMERIC(18,6)
 		,strPriceMethod					NVARCHAR(MAX)
@@ -636,6 +637,8 @@ BEGIN
 				,@CountySalesTax				=@CountySalesTax	
 				,@CitySalesTax					=@CitySalesTax		
 
+				--SELECT * FROM @tblCFRemoteTax
+
 				IF(@IsImporting = 0)
 				BEGIN
 
@@ -670,7 +673,7 @@ BEGIN
 					DROP TABLE #ItemTax
 				END
 
-				--select * from @tblCFRemoteTax
+--				SELECT * FROM @tblCFRemoteTax
 
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
@@ -733,6 +736,8 @@ BEGIN
 				FROM
 				@tblCFRemoteTax
 				WHERE ysnInvalidSetup = 0
+
+				--SELECT * from @LineItemTaxDetailStagingTable
 
 
 				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
@@ -1383,6 +1388,7 @@ BEGIN
 				,@CountySalesTax				=@CountySalesTax	
 				,@CitySalesTax					=@CitySalesTax
 
+				
 
 				UPDATE @tblCFRemoteTax SET ysnInvalidSetup = 1 , dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
@@ -1492,12 +1498,14 @@ BEGIN
 	,@totalOriginalTax = ISNULL(SUM(dblOriginalTax),0)
 	FROM
 	@tblCFTransactionTax
+	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 
 	SELECT 
 	 @totalCalculatedTaxExempt = ISNULL(SUM(dblOriginalTax),0)
 	FROM
 	@tblCFTransactionTax
-	WHERE ysnTaxExempt = 1
+	WHERE ysnTaxExempt = 1 AND 
+	(ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
 	
 	
 
@@ -1613,15 +1621,18 @@ BEGIN
 	--				MARGIN COMPUTATION				 --
 	---------------------------------------------------
 	DECLARE @dblMargin NUMERIC(18,6)
-	DECLARE @dblCalculatedCost NUMERIC(18,6)
+	DECLARE @dblInventoryCost NUMERIC(18,6)
 
-	SELECT @dblMargin = dblMargin , @dblCalculatedCost = dblCost
+	SELECT @dblMargin = dblMargin , @dblInventoryCost = dblInventoryCost
 	FROM [dbo].[fnCFGetTransactionMargin](
 	 0
 	,@intItemId			
 	,@intLocationId	
 	,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price')
 	,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price')
+	,(select SUM(dblCalculatedTax) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
+	,(select SUM(dblOriginalTax) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
+	,@dblQuantity
 	,@dblTransferCost	
 	,@strTransactionType
 	,@strPriceBasis
@@ -1754,11 +1765,11 @@ BEGIN
 	--					ZERO PRICING				 --
 	---------------------------------------------------
 
-	IF (ISNULL(@ysnInvalid,0) = 0)
-	BEGIN
-		SET @dblTransferCost = @dblCalculatedCost -- calculated based on transaction type. (margin calc)
+	--IF (ISNULL(@ysnInvalid,0) = 0)
+	--BEGIN
+	--	SET @dblTransferCost = @dblCalculatedCost -- calculated based on transaction type. (margin calc)
 
-	END
+	--END
 
 	---------------------------------------------------
 	--					PRICING OUT					 --
@@ -1780,6 +1791,7 @@ BEGIN
 			,intNetworkId
 			,intSiteId
 			,dblTransferCost
+			,dblInventoryCost
 			,dblOriginalPrice
 			,dblPrice				
 			,strPriceMethod		
@@ -1816,6 +1828,7 @@ BEGIN
 			,@intNetworkId				AS intNetworkId
 			,@intSiteId					AS intSiteId
 			,@dblTransferCost			AS dblTransferCost
+			,@dblInventoryCost			AS dblInventoryCost
 			,@dblOriginalPrice			AS dblOriginalPrice
 			,@dblPrice					AS dblPrice				
 			,@strPriceMethod			AS strPriceMethod		
@@ -1854,6 +1867,7 @@ BEGIN
 			,@intNetworkId				AS intNetworkId
 			,@intSiteId					AS intSiteId
 			,@dblTransferCost			AS dblTransferCost
+			,@dblInventoryCost			AS dblInventoryCost
 			,@dblOriginalPrice			AS dblOriginalPrice
 			,@dblPrice					AS dblPrice				
 			,@strPriceMethod			AS strPriceMethod		
