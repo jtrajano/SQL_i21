@@ -608,7 +608,9 @@ Begin
 	Where intWorkOrderId=@intWorkOrderId
 
 	--Consume Lots/Items/End Blend Sheet
-	Exec [uspMFPostConsumption] 1,0,@intWorkOrderId,@intUserId,NULL,@strRetBatchId, OUT @strActualCost 
+
+	Exec [uspMFPostConsumption] 1,0,@intWorkOrderId,@intUserId,NULL,@strRetBatchId OUT,NULL,1,@strActualCost 
+
 
 	Update tblMFWorkOrder Set intStatusId=12,dtmCompletedDate=GETDATE(),intLastModifiedUserId=@intUserId,dtmLastModified=GETDATE(),strBatchId=@strRetBatchId 
 	Where intWorkOrderId=@intWorkOrderId
