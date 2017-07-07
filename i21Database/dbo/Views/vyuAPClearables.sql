@@ -5,7 +5,7 @@ AS
 SELECT	DISTINCT	 
 			 dtmReceiptDate
 			,strReceiptNumber
-			,intInventoryReceiptId
+			,receiptItem.intInventoryReceiptId
 			,strBillOfLading	
 			,strOrderNumber
 			,dtmLastVoucherDate AS dtmDate

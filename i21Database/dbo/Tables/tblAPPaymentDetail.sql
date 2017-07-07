@@ -28,3 +28,41 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intPaymentId_intBillId] ON [dbo
 	[intPaymentId] ASC
 )
 WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+GO
+
+CREATE TRIGGER trg_tblAPPaymentDetail
+ON dbo.tblAPPaymentDetail
+AFTER DELETE AS
+BEGIN
+INSERT INTO tblAPPaymentDetailDeleted
+(
+	[intPaymentDetailId]	,
+	[intPaymentId]			,
+	[intBillId]         	,
+	[intAccountId]      	,
+	[dblDiscount]       	,
+	[dblAmountDue]      	,
+	[dblPayment]        	,
+	[dblInterest]       	,
+	[dblTotal] 				,
+	[intConcurrencyId] 		,
+	[dblWithheld] 			,
+	[intInvoiceId]
+)
+SELECT 
+	[intPaymentDetailId]	,
+	[intPaymentId]			,
+	[intBillId]         	,
+	[intAccountId]      	,
+	[dblDiscount]       	,
+	[dblAmountDue]      	,
+	[dblPayment]        	,
+	[dblInterest]       	,
+	[dblTotal] 				,
+	[intConcurrencyId] 		,
+	[dblWithheld] 			,
+	[intInvoiceId]
+FROM DELETED
+END
+GO

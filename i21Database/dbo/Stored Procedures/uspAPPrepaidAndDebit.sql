@@ -51,7 +51,7 @@ SELECT
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
 	[intPrepayType]			=	B.intPrepayTypeId,
-	[dblTotal]				=	B.dblTotal,
+	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
@@ -61,11 +61,12 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId) + B.dblTax) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))
+										END
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+											THEN (((B.dblTotal + B.dblTax)- dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
 													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
 																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
@@ -74,17 +75,17 @@ SELECT
 												 END  
 										END
 									ELSE 0 END,	
-	[dblAmountApplied]		=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal 
-											ELSE B.dblTotal END
+											THEN B.dblTotal + B.dblTax
+											ELSE B.dblTotal + B.dblTax END
 									WHEN 3 THEN
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal 
-											ELSE B.dblTotal END
+										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN B.dblTotal + B.dblTax
+											ELSE B.dblTotal + B.dblTax END
 									ELSE 0 END),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
@@ -95,7 +96,7 @@ CROSS APPLY
 (
 	SELECT
 		C.intItemId
-		,C.dblTotal
+		,C.dblTotal + C.dblTax AS dblTotal
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
@@ -105,11 +106,11 @@ CROSS APPLY
 		,C.intLineNo
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
-		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE C2.intContractHeaderId = C.intContractHeaderId and intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
@@ -143,7 +144,7 @@ SELECT
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
 	[intPrepayType]			=	B.intPrepayTypeId,
-	[dblTotal]				=	B.dblTotal,
+	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
@@ -153,11 +154,12 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount)  AS DECIMAL(18,2)) END
+											ELSE CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId) + B.dblTax) * CurrentBill.allocatedAmount)  AS DECIMAL(18,2)) 
+										END
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+											THEN (((B.dblTotal + B.dblTax)- dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
 													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
 																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
@@ -166,17 +168,17 @@ SELECT
 												 END  
 										END
 									ELSE 0 END,
-	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal 
-											ELSE B.dblTotal END
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									WHEN 3 THEN
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal  
-											ELSE B.dblTotal END
+										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN (B.dblTotal + B.dblTax)  
+											ELSE (B.dblTotal + B.dblTax) END
 									ELSE 0 END),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
@@ -187,7 +189,7 @@ CROSS APPLY
 (
 	SELECT
 		C.intItemId
-		,C.dblTotal
+		,C.dblTotal + C.dblTax AS dblTotal
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
@@ -197,11 +199,11 @@ CROSS APPLY
 		,C.intLineNo
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
-		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and intBillId = @billId AND C2.intContractDetailId = C.intContractDetailId
 	) Total
 	WHERE intBillId = @billId 
@@ -235,7 +237,7 @@ SELECT
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
 	[intPrepayType]			=	B.intPrepayTypeId,
-	[dblTotal]				=	B.dblTotal,
+	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
@@ -245,11 +247,12 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))  END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId) + B.dblTax) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))  
+										END
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+											THEN (((B.dblTotal + B.dblTax) - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
 													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
 																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
@@ -258,17 +261,17 @@ SELECT
 												 END  
 										END                                       
 									ELSE 0 END,
-	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									WHEN 3 THEN
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									ELSE 0 END),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
@@ -279,7 +282,7 @@ CROSS APPLY
 (
 	SELECT
 		C.intItemId
-		,C.dblTotal
+		,C.dblTotal + C.dblTax AS dblTotal
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
@@ -289,11 +292,11 @@ CROSS APPLY
 		,C.intLineNo
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
-		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE /*C2.intContractHeaderId = C.intContractHeaderId and*/ intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
@@ -327,7 +330,7 @@ SELECT
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
 	[intPrepayType]			=	B.intPrepayTypeId,
-	[dblTotal]				=	B.dblTotal,
+	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
@@ -337,11 +340,11 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId) + B.dblTax) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+											THEN (((B.dblTotal + B.dblTax)- dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
 													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
 																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
@@ -350,18 +353,18 @@ SELECT
 												 END  
 										END
 									ELSE 0 END,
-	[dblAmountApplied]		=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal
-											ELSE B.dblTotal  END
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax)  END
 									WHEN 3 THEN
                                     
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									ELSE 0 END),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
@@ -372,7 +375,7 @@ CROSS APPLY
 (
 	SELECT
 		C.intItemId
-		,C.dblTotal
+		,C.dblTotal + C.dblTax AS dblTotal
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
@@ -382,11 +385,11 @@ CROSS APPLY
 		,C.intLineNo
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
-		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE /*C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and*/ intBillId = @billId
 	) Total
 	WHERE intBillId = @billId 
@@ -453,7 +456,7 @@ SELECT
 	--[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
 	--[dblBalance]			=	A.dblAmountDue,
 	--[dblAmountApplied]		=	0,
-	[dblTotal]				=	B.dblTotal,
+	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION
@@ -463,11 +466,11 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId) + B.dblTax) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
 									--PERCENTAGE ALLOCATION COMPUTATION              
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+											THEN (((B.dblTotal + B.dblTax) - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
 													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
 																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
@@ -476,17 +479,17 @@ SELECT
 												 END  
 										END                                        
 									ELSE 0 END,
-	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									WHEN 3 THEN
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									ELSE 0 END),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
@@ -496,17 +499,17 @@ CROSS APPLY
 (
 	SELECT
 		C.intItemId
-		,C.dblTotal
+		,C.dblTotal + C.dblTax AS dblTotal
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
 		,C.intLineNo
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
-		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE  intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
@@ -544,8 +547,8 @@ SELECT
 	--[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = 90),
 	--[dblBalance]			=	A.dblAmountDue,
 	--[dblAmountApplied]		=	0,
-	[dblTotal]				=	B.dblTotal,
-	[dblBillAmount]		=	CurrentBill.dblTotal,
+	[dblTotal]				=	(B.dblTotal + B.dblTax),
+	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION
 									WHEN 1 THEN
@@ -554,11 +557,11 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))  END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId) + B.dblTax) * CurrentBill.allocatedAmount) AS DECIMAL(18,2))  END
 									--PERCENTAGE ALLOCATION COMPUTATION              
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+											THEN (((B.dblTotal + B.dblTax) - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
 													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
 																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
@@ -567,17 +570,17 @@ SELECT
 												 END  
 										END                                        
 									ELSE 0 END,
-	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									WHEN 3 THEN
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									ELSE 0 END),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
@@ -587,17 +590,17 @@ CROSS APPLY
 (
 	SELECT
 		C.intItemId
-		,C.dblTotal
+		,C.dblTotal + C.dblTax AS dblTotal
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
 		,C.intLineNo
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
-		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE  intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
@@ -636,7 +639,7 @@ SELECT
 	--[dblBillAmount]			=	CurrentBill.dblTotal,
 	--[dblBalance]			=	A.dblAmountDue,
 	--[dblAmountApplied]		=	0,
-	[dblTotal]				=	B.dblTotal,
+	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION 
@@ -646,11 +649,11 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
+											ELSE  CAST(((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId) + B.dblTax) * CurrentBill.allocatedAmount) AS DECIMAL(18,2)) END
 									--PERCENTAGE ALLOCATION COMPUTATION                                  
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+											THEN (((B.dblTotal + B.dblTax) - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
 													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
 																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
@@ -659,17 +662,17 @@ SELECT
 												 END  
 										END                                        
 									ELSE 0 END,
-	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									WHEN 3 THEN
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
-											ELSE B.dblTotal END
+										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN (B.dblTotal + B.dblTax)
+											ELSE (B.dblTotal + B.dblTax) END
 									ELSE 0 END),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
@@ -680,17 +683,17 @@ INNER JOIN
 (
 	SELECT
 		C.intItemId
-		,C.dblTotal
+		,C.dblTotal + C.dblTax AS dblTotal
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
 		,C.intLineNo
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
-		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE  intBillId = @billId
 	) Total
 	WHERE intBillId = @billId

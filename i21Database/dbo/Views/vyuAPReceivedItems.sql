@@ -655,11 +655,11 @@ FROM
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
-		,[dblUnitCost]								=	CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
 																ELSE	ISNULL(CC.dblRate,0) 
-														END
+														END,0)
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,0) ELSE ISNULL(G1.dblRate,0) END
 		,[strRateType]								=	NULL
@@ -731,7 +731,8 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
-	WHERE		RC.intInventoryReceiptChargeId IS NULL
+	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
+	AND ysnBilled = 0
 		UNION ALL
 	SELECT
 	DISTINCT  
@@ -755,11 +756,11 @@ FROM
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
-		,[dblUnitCost]								=	CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
 																ELSE	ISNULL(CC.dblRate,0) 
-														END
+														END,0)
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,0) ELSE ISNULL(G1.dblRate,0) END
 		,[strRateType]								=	NULL
@@ -831,8 +832,8 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
-	WHERE		RC.intInventoryReceiptChargeId IS NULL
-
+	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
+	AND ysnBilled = 0
 	UNION ALL
 		 SELECT
 		 [intEntityVendorId]							=	A.intVendorEntityId
@@ -855,7 +856,7 @@ FROM
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	A.dblCashPrice
+		,[dblUnitCost]								=	ISNULL(A.dblCashPrice,0)
 		,[dblTax]									=	0
 		,[dblRate]									=	0
 		,[strRateType]								=	NULL
