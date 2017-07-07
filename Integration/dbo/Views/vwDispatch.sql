@@ -17,7 +17,7 @@ BEGIN
 		AS
 		SELECT
 		DispatchID = A.intDispatchID,
-		CustomerNumber = H.vwcus_key + '' '' + CASE H.vwcus_co_per_ind_cp
+		CustomerNumber = H.vwcus_key COLLATE Latin1_General_CI_AS + '' '' + CASE H.vwcus_co_per_ind_cp
 				WHEN ''C'' THEN RTRIM(H.vwcus_last_name) + H.vwcus_first_name
 				ELSE RTRIM(H.vwcus_last_name) + '','' + H.vwcus_first_name
 				END,
@@ -75,7 +75,7 @@ BEGIN
 				AS
 				SELECT
 				DispatchID = A.intDispatchID,
-				CustomerNumber = H.vwcus_key + '' '' + CASE H.vwcus_co_per_ind_cp
+				CustomerNumber = H.vwcus_key COLLATE Latin1_General_CI_AS + '' '' + CASE H.vwcus_co_per_ind_cp
 						WHEN ''C'' THEN RTRIM(H.vwcus_last_name) + H.vwcus_first_name
 						ELSE RTRIM(H.vwcus_last_name) + '','' + H.vwcus_first_name
 						END,
