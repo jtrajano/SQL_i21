@@ -5352,6 +5352,7 @@
     <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForUnRealized.sql" />
     <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForRealized.sql" />
     <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForAll.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageUnitStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
