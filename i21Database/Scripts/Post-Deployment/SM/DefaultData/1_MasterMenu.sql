@@ -4249,62 +4249,79 @@ SELECT @PatronageMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE 
 /* ADD TO RESPECTIVE CATEGORY */ 
 UPDATE tblSMMasterMenu SET intParentMenuID = @PatronageMaintenanceParentMenuId WHERE intParentMenuID =  @PatronageParentMenuId AND strCategory = 'Maintenance'
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Refund Calculation Worksheet' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+/* START OF RENAMING OF MENUS  */
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Refund Calculation Worksheet' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = 'Process Refund', strDescription = 'Process Refund' WHERE strMenuName = 'Refund Calculation Worksheet' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Refund' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Refunds', strDescription = 'Refunds' WHERE strMenuName = 'Process Refund' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Dividends' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Dividends', strDescription = 'Dividends' WHERE strMenuName = 'Process Dividends' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Volume Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Volume', strDescription = 'Volume' WHERE strMenuName = 'Volume Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Equity Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Equity', strDescription = 'Equity' WHERE strMenuName = 'Equity Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Stock', strDescription = 'Stock' WHERE strMenuName = 'Stock Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+/* END OF RENAMING OF MENUS */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Refund Rate' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Refund Rate', N'Patronage', @PatronageMaintenanceParentMenuId, N'Refund Rate', N'Maintenance', N'Screen', N'Patronage.view.RefundRate?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Refund Rate', N'Patronage', @PatronageMaintenanceParentMenuId, N'Refund Rate', N'Maintenance', N'Screen', N'Patronage.view.RefundRate?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.RefundRate?showSearch=true' WHERE strMenuName = 'Refund Rate' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Patronage.view.RefundRate?showSearch=true' WHERE strMenuName = 'Refund Rate' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Estate/Corporation' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Estate/Corporation', N'Patronage', @PatronageMaintenanceParentMenuId, N'Estate/Corporation', N'Maintenance', N'Screen', N'Patronage.view.EstateCorporation?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Estate/Corporation', N'Patronage', @PatronageMaintenanceParentMenuId, N'Estate/Corporation', N'Maintenance', N'Screen', N'Patronage.view.EstateCorporation?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.EstateCorporation?showSearch=true' WHERE strMenuName = 'Estate/Corporation' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Refund' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Process Refund', N'Patronage', @PatronageMaintenanceParentMenuId, N'Process Refund', N'Maintenance', N'Screen', N'Patronage.view.RefundCalculationWorksheet?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.RefundCalculationWorksheet?showSearch=true' WHERE strMenuName = 'Process Refund' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Stock Details', N'Patronage', @PatronageMaintenanceParentMenuId, N'Stock Details', N'Maintenance', N'Screen', N'Patronage.view.CustomerStock?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.CustomerStock?showSearch=true' WHERE strMenuName = 'Stock Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Equity Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Equity Details', N'Patronage', @PatronageMaintenanceParentMenuId, N'Equity Details', N'Maintenance', N'Screen', N'Patronage.view.EquityDetail', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.EquityDetail' WHERE strMenuName = 'Equity Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Volume Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Volume Details', N'Patronage', @PatronageMaintenanceParentMenuId, N'Volume Details', N'Maintenance', N'Screen', N'Patronage.view.VolumeDetail', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.VolumeDetail' WHERE strMenuName = 'Volume Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Dividends' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Process Dividends', N'Patronage', @PatronageMaintenanceParentMenuId, N'Process Dividends', N'Maintenance', N'Screen', N'Patronage.view.ProcessDividend?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.ProcessDividend?showSearch=true' WHERE strMenuName = 'Process Dividends' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Patronage.view.EstateCorporation?showSearch=true' WHERE strMenuName = 'Estate/Corporation' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Setup', N'Patronage', @PatronageMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'Patronage.view.Setup', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Setup', N'Patronage', @PatronageMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'Patronage.view.Setup', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.Setup' WHERE strMenuName = 'Setup' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Patronage.view.Setup' WHERE strMenuName = 'Setup' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Volume' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Volume', N'Patronage', @PatronageMaintenanceParentMenuId, N'Volume', N'Maintenance', N'Screen', N'Patronage.view.VolumeDetail', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Patronage.view.VolumeDetail' WHERE strMenuName = 'Volume' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Equity' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Equity', N'Patronage', @PatronageMaintenanceParentMenuId, N'Equity', N'Maintenance', N'Screen', N'Patronage.view.EquityDetail', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Patronage.view.EquityDetail' WHERE strMenuName = 'Equity' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Stock', N'Patronage', @PatronageMaintenanceParentMenuId, N'Stock', N'Maintenance', N'Screen', N'Patronage.view.CustomerStock?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Patronage.view.CustomerStock?showSearch=true' WHERE strMenuName = 'Stock' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Refunds' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Refunds', N'Patronage', @PatronageMaintenanceParentMenuId, N'Refunds', N'Maintenance', N'Screen', N'Patronage.view.RefundCalculationWorksheet?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Patronage.view.RefundCalculationWorksheet?showSearch=true' WHERE strMenuName = 'Refunds' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dividends' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Dividends', N'Patronage', @PatronageMaintenanceParentMenuId, N'Dividends', N'Maintenance', N'Screen', N'Patronage.view.ProcessDividend?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Patronage.view.ProcessDividend?showSearch=true' WHERE strMenuName = 'Dividends' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Print Letter' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Print Letter', N'Patronage', @PatronageMaintenanceParentMenuId, N'Print Letter', N'Maintenance', N'Screen', N'Patronage.view.PrintLetter', N'small-menu-maintenance', 0, 0, 0, 1, 11, 1)
+	VALUES (N'Print Letter', N'Patronage', @PatronageMaintenanceParentMenuId, N'Print Letter', N'Maintenance', N'Screen', N'Patronage.view.PrintLetter', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.PrintLetter' WHERE strMenuName = 'Print Letter' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Patronage.view.PrintLetter' WHERE strMenuName = 'Print Letter' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
 
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Patronage Category' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Stock Classification' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageMaintenanceParentMenuId
