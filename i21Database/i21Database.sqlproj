@@ -5353,6 +5353,8 @@
     <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForRealized.sql" />
     <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForAll.sql" />
     <Build Include="dbo\Views\vyuICGetStorageUnitStock.sql" />
+    <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

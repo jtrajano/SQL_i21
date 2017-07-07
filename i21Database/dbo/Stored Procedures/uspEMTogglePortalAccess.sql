@@ -72,6 +72,9 @@ BEGIN
 			select @intEntityContactId, @userName, @dc, 0
 		end
 		
+		UPDATE tblEMEntity SET strDateFormat = 'M/d/yyyy',
+			strNumberFormat = '1,234,567.89'
+			WHERE intEntityId  = @intEntityContactId 
 
 		update [tblEMEntityToContact] set 
 			--ysnPortalAccess = 0, 
