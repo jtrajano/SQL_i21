@@ -145,11 +145,14 @@ Ext.define('Inventory.search.InventoryCount', {
                 modal: true, 
                 listeners: { 
                     close: function() { 
-                        var dashPanel = iRely.Functions.getComponentByQuery('#searchTabPanel');
-                        var tabCountGroup = dashPanel.items.map.subTab1;
-                        var grid = tabCountGroup.items.map.grdSearch;
-                        if(grid) {
-                            grid.getStore().reload();
+                        var panel = e.up('panel');
+                        var grid = panel ? panel.query('#grdSearch') : null;
+                        grid = _.filter(grid, { url: '../Inventory/api/CountGroup/Search' });
+                        if(grid && grid.length > 0) {
+                            grid = grid[0];
+                            if(grid) {
+                                grid.getStore().reload();
+                            }
                         }
                     }
                 }
