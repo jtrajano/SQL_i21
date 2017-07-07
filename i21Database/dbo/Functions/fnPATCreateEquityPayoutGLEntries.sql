@@ -145,7 +145,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	ComPref.intAPClearingGLAccount,
 		[dblDebit]						=	0,
-		[dblCredit]						=	ROUND(B.dblEquityPaid,2),
+		[dblCredit]						=	ROUND(C.dblEquityPay,2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	'Posted Equity Payment',
@@ -176,6 +176,8 @@ BEGIN
 	FROM	[dbo].[tblPATEquityPay] A
 	INNER JOIN tblPATEquityPaySummary B ON
 		B.intEquityPayId = A.intEquityPayId
+	INNER JOIN tblPATEquityPayDetail C ON
+		C.intEquityPaySummaryId = B.intEquityPaySummaryId
 	CROSS JOIN tblPATCompanyPreference ComPref
 	WHERE	A.intEquityPayId IN (SELECT intTransactionId FROM @tmpTransacions)
 	RETURN
