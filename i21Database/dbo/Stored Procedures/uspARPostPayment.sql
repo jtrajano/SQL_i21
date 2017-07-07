@@ -1458,7 +1458,7 @@ IF @post = 1
 			,strModuleName				= @MODULE_NAME
 			,intConcurrencyId			= 1
 			,[dblDebitForeign]			= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
-			,[dblDebitReport]			= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,[dblDebitReport]			= A.dblBaseAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,[dblCreditForeign]			= 0
 			,[dblCreditReport]			= 0
 			,[dblReportingRate]			= 0
@@ -1507,7 +1507,7 @@ IF @post = 1
 			,[dblDebitForeign]			= 0
 			,[dblDebitReport]			= 0
 			,[dblCreditForeign]			= A.dblUnappliedAmount
-			,[dblCreditReport]			= A.dblUnappliedAmount
+			,[dblCreditReport]			= A.dblBaseUnappliedAmount
 			,[dblReportingRate]			= 0
 			,[dblForeignRate]			= 0
 			,[strRateType]				= ''	 
@@ -1553,7 +1553,7 @@ IF @post = 1
 			,[dblDebitForeign]			= 0
 			,[dblDebitReport]			= 0
 			,[dblCreditForeign]			= A.dblAmountPaid
-			,[dblCreditReport]			= A.dblAmountPaid
+			,[dblCreditReport]			= A.dblBaseAmountPaid
 			,[dblReportingRate]			= 0
 			,[dblForeignRate]			= 0
 			,[strRateType]				= ''	 
@@ -1601,7 +1601,7 @@ IF @post = 1
 			,strModuleName				= @MODULE_NAME
 			,intConcurrencyId			= 1
 			,[dblDebitForeign]			= B.dblDiscount
-			,[dblDebitReport]			= B.dblDiscount
+			,[dblDebitReport]			= B.dblBaseDiscount
 			,[dblCreditForeign]			= 0
 			,[dblCreditReport]			= 0
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
@@ -1667,7 +1667,7 @@ IF @post = 1
 			,strModuleName				= @MODULE_NAME
 			,intConcurrencyId			= 1
 			,[dblDebitForeign]			= B.dblInterest
-			,[dblDebitReport]			= B.dblInterest
+			,[dblDebitReport]			= B.dblBaseInterest
 			,[dblCreditForeign]			= 0
 			,[dblCreditReport]			= 0
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
@@ -1742,9 +1742,9 @@ IF @post = 1
 												THEN (B.dblPayment - B.dblInterest)  + B.dblDiscount
 												ELSE B.dblPayment END)
 										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
-			,[dblCreditReport]			= (CASE WHEN (B.dblAmountDue = (B.dblPayment - B.dblInterest) + B.dblDiscount)
-												THEN (B.dblPayment - B.dblInterest)  + B.dblDiscount
-												ELSE B.dblPayment END)
+			,[dblCreditReport]			= (CASE WHEN (B.dblBaseAmountDue = (B.dblBasePayment - B.dblBaseInterest) + B.dblBaseDiscount)
+												THEN (B.dblBasePayment - B.dblBaseInterest)  + B.dblBaseDiscount
+												ELSE B.dblBasePayment END)
 										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
@@ -1882,7 +1882,7 @@ IF @post = 1
 			,[dblDebitForeign]			= 0
 			,[dblDebitReport]			= 0
 			,[dblCreditForeign]			= B.dblDiscount
-			,[dblCreditReport]			= B.dblDiscount
+			,[dblCreditReport]			= B.dblBaseDiscount
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
 			,[strRateType]				= SMCERT.strCurrencyExchangeRateType		 
@@ -1948,7 +1948,7 @@ IF @post = 1
 			,[dblDebitForeign]			= 0
 			,[dblDebitReport]			= 0
 			,[dblCreditForeign]			= B.dblInterest
-			,[dblCreditReport]			= B.dblInterest
+			,[dblCreditReport]			= B.dblBaseInterest
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
 			,[strRateType]				= SMCERT.strCurrencyExchangeRateType		  
