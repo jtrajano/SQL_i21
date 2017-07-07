@@ -2493,3 +2493,9 @@ UPDATE tblMFCompanyPreference
 SET ysnSetDefaultQty = 0
 WHERE ysnSetDefaultQty IS NULL
 GO
+
+GO
+UPDATE tblMFCompanyPreference
+SET ysnSplitLotOnPartialQty = 0
+WHERE ysnSplitLotOnPartialQty IS NULL
+GO

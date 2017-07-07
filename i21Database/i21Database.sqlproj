@@ -5358,6 +5358,7 @@
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateOriginSubMenusSorting.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdatePatronageMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotSplitOnHandHeld.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -48,5 +48,7 @@
 	ysnConsumptionByRatio Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnConsumptionByRatio] DEFAULT 0,
 	ysnSetDefaultQty BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSetDefaultQty] DEFAULT 0,
 	ysnLoadProcessEnabled Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnLoadProcessEnabled] DEFAULT 0,
+	ysnSplitLotOnPartialQty Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSplitLotOnPartialQty] DEFAULT 0,
+
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

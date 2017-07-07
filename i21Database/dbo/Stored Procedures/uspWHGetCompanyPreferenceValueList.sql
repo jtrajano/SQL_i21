@@ -40,7 +40,8 @@ BEGIN
 					   CAST(ysnCreateLoadTasks AS NVARCHAR(255)) ysnCreateLoadTasks, 
 					   CAST(intMaximumPalletsOnForklift AS NVARCHAR(255)) intMaximumPalletsOnForklift,
 					   CAST((SELECT ysnGenerateInvShipmentStagingOrder ysnGenerateInvShipmentStagingOrder FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnGenerateInvShipmentStagingOrder,
-					   CAST((SELECT ysnSetDefaultQtyOnHandheld ysnSetDefaultQtyOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSetDefaultQtyOnHandheld
+					   CAST((SELECT ysnSetDefaultQtyOnHandheld ysnSetDefaultQtyOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSetDefaultQtyOnHandheld,
+					   CAST((SELECT ISNULL(ysnSplitLotOnPartialQty,0) ysnSplitLotOnPartialQty FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSplitLotOnPartialQty
 				FROM tblWHCompanyPreference
 				) p
 			UNPIVOT(SettingValue FOR SettingName IN (
@@ -65,6 +66,7 @@ BEGIN
 						,intMaximumPalletsOnForklift
 						,ysnGenerateInvShipmentStagingOrder
 						,ysnSetDefaultQtyOnHandheld
+						,ysnSplitLotOnPartialQty
 						)) AS unpvt
 			) tblCompanyPreference
 		WHERE intCompanyLocationId = @intCompanyLocationId
@@ -97,7 +99,8 @@ BEGIN
 					   CAST(ysnCreateLoadTasks AS NVARCHAR(255)) ysnCreateLoadTasks, 
 					   CAST(intMaximumPalletsOnForklift AS NVARCHAR(255)) intMaximumPalletsOnForklift,
 					   CAST((SELECT ysnGenerateInvShipmentStagingOrder ysnGenerateInvShipmentStagingOrder FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnGenerateInvShipmentStagingOrder,
-					   CAST((SELECT ysnSetDefaultQtyOnHandheld ysnSetDefaultQtyOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSetDefaultQtyOnHandheld
+					   CAST((SELECT ysnSetDefaultQtyOnHandheld ysnSetDefaultQtyOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSetDefaultQtyOnHandheld,
+					   CAST((SELECT ISNULL(ysnSplitLotOnPartialQty,0) ysnSplitLotOnPartialQty FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSplitLotOnPartialQty
 				FROM tblWHCompanyPreference
 			) p
 		UNPIVOT(SettingValue FOR SettingName IN (
@@ -122,6 +125,7 @@ BEGIN
 					,intMaximumPalletsOnForklift
 					,ysnGenerateInvShipmentStagingOrder
 					,ysnSetDefaultQtyOnHandheld
+					,ysnSplitLotOnPartialQty
 					)) AS unpvt
 				) tblCompanyPreference
 	END
