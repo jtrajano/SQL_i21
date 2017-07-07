@@ -26,6 +26,7 @@ SELECT e.strName,strContractNumber,
                                                 JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
                                                 JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
                                                 JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
+												join tblCTContractHeader ch on ch.intContractHeaderId=cd1.intContractHeaderId and ch.intCommodityId=@intCommodityId
                                                 WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=det.intContractDetailId)t ),0)
             FROM tblCTContractDetail det WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(1,6))  dblFullyPriced
 
@@ -37,7 +38,7 @@ SELECT e.strName,strContractNumber,
 				case when isnull(mc.ysnSubCurrency,0) = 1 then 100 else 1 end
 				) )
            FROM tblCTContractDetail det
-			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
+			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId and ch.intCommodityId=@intCommodityId
 			  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId 
               join tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
               join tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
@@ -50,7 +51,8 @@ SELECT e.strName,strContractNumber,
                             FROM tblICInventoryReturned r
                                     JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
                                     JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
-                                    JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
+                                    JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
+									JOIN tblCTContractHeader h on ch.intContractHeaderId=cd1.intContractDetailId and ch.intCommodityId=@intCommodityId
                             WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t
 							
 							),0)) dblUnPriced
@@ -68,8 +70,8 @@ SELECT e.strName,strContractNumber,
 				/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
               JOIN vyuCTSearchPriceContractDetail detcd on det.intPriceFixationId=detcd.intPriceFixationId 
-			  JOIN tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
-			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
+			  JOIN tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId and ch.intCommodityId=@intCommodityId
+			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId and ch.intCommodityId=@intCommodityId
 			  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId               
 			  JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
               JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
@@ -90,6 +92,6 @@ FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId 
 JOIN tblEMEntity e on e.intEntityId=ch.intEntityId
-WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate 
+WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
 )t)t1 group by t1.strName
 )t2
