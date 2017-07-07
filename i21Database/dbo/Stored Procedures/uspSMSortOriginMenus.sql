@@ -19,4 +19,39 @@ BEGIN
 	UPDATE tblSMMasterMenu SET intSort = 48, intParentMenuID = 0 WHERE strMenuName = 'Process C-Store (xx)' AND strModuleName = 'Origin' AND (intParentMenuID = 0 OR intParentMenuID IS NULL)
 	UPDATE tblSMMasterMenu SET intSort = 49, intParentMenuID = 0 WHERE strMenuName = 'Store Accounting' AND strModuleName = 'Origin' AND (intParentMenuID = 0 OR intParentMenuID IS NULL)
 	UPDATE tblSMMasterMenu SET intSort = 50, intParentMenuID = 0 WHERE strMenuName = 'Select a C-Store' AND strModuleName = 'Origin' AND (intParentMenuID = 0 OR intParentMenuID IS NULL)
+
+	DECLARE @currentMenu INT
+
+	IF OBJECT_ID('tempdb..#TempOriginMenus') IS NOT NULL DROP TABLE #TempOriginMenus
+	SELECT intMenuID INTO #TempOriginMenus FROM tblSMMasterMenu WHERE intParentMenuID = 0 AND intParentMenuID = 0 AND ysnIsLegacy = 1
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #TempOriginMenus)
+	BEGIN
+		SELECT TOP 1 @currentMenu = intMenuID FROM #TempOriginMenus
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE intParentMenuID = @currentMenu AND strType = 'Legacy')
+		BEGIN
+			INSERT INTO tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strCategory, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort)
+			SELECT strMenuName, strMenuName, @currentMenu, strDescription, strCategory, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort 
+			FROM tblSMMasterMenu 
+			WHERE intMenuID = @currentMenu
+
+			UPDATE ScreenMenus
+			SET ScreenMenus.intParentMenuID = SCOPE_IDENTITY()
+			FROM tblSMMasterMenu ScreenMenus
+			WHERE intParentMenuID = @currentMenu AND strType = 'Legacy'
+		END
+
+		UPDATE  OriginMenus
+		SET     OriginMenus.intSort = (RowNumber - 1)
+		FROM
+		(
+			SELECT  t.intSort, ROW_NUMBER() OVER (ORDER BY intMenuID ASC) AS RowNumber
+			FROM    tblSMMasterMenu t
+			WHERE   intParentMenuID = @currentMenu
+		) AS OriginMenus
+
+		DELETE FROM #TempOriginMenus WHERE intMenuID = @currentMenu
+	END
+
 END

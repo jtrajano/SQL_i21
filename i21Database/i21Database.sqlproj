@@ -5355,6 +5355,7 @@
     <Build Include="dbo\Views\vyuICGetStorageUnitStock.sql" />
     <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
     <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdateOriginSubMenusSorting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

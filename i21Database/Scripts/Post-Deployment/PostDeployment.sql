@@ -44,6 +44,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\25_ApprovalHistory.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
+:r .\SM\1730_UpdateOriginSubMenusSorting.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
 :r .\SM\1720_Statement_Footer_To_Report.sql
