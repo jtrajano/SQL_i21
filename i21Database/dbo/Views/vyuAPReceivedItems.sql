@@ -77,7 +77,7 @@ FROM
 		,[dblFranchiseWeight]		=	0.00
 		,[dblClaimAmount]			=	0.00
 		,[intLocationId]			=	tblReceived.intLocationId
-	
+		,[strReceiptLocation]		=	tblReceived.strReceiptLocation
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
@@ -129,6 +129,7 @@ FROM
 				,B1.intStorageLocationId
 				,ISL.strName AS strStorageLocationName
 				,intLocationId = A1.intLocationId
+				,strReceiptLocation = (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A1.intLocationId)
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -273,6 +274,7 @@ FROM
 	,[dblFranchiseWeight]		=	0.00 
 	,[dblClaimAmount]			=	0.00
 	,[intLocationId]			=	A.intShipToId
+	,[strReceiptLocation]		= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	,[ysnReturn]								=	CAST(0 AS BIT)
@@ -381,6 +383,7 @@ FROM
 										  ELSE B.dblUnitCost END) / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END
 									) ELSE 0.00 END
 	,[intLocationId]			=	A.intLocationId
+	,[strReceiptLocation]		= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
@@ -514,6 +517,7 @@ FROM
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
+		,[strReceiptLocation]						= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
@@ -619,6 +623,7 @@ FROM
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
+		,[strReceiptLocation]						=	(SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
@@ -712,6 +717,7 @@ FROM
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	NULL --Contract doesn't have location
+		,[strReceiptLocation]						=	NULL
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
@@ -813,6 +819,7 @@ FROM
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	NULL --Contract doesn't have location
+		,[strReceiptLocation]						=	NULL
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[ysnReturn]								=	CAST(1 AS BIT)
@@ -904,6 +911,7 @@ FROM
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
+		,[strReceiptLocation]						=	NULL
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
@@ -994,6 +1002,7 @@ FROM
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
+		,[strReceiptLocation]						=	NULL
 		,[intInventoryShipmentItemId]				=	A.intInventoryShipmentItemId
 		,[intInventoryShipmentChargeId]				=	A.intInventoryShipmentChargeId
 		,[ysnReturn]								=	CAST(0 AS BIT)
