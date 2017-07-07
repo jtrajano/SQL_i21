@@ -4792,7 +4792,7 @@ ELSE
 				dblInvoiceTotal, strTransactionType, dtmDate
 			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
 				ON PID.intInvoiceId = ARI.intInvoiceId 	
-	END
+	END 
 
 
 Do_Rollback:
