@@ -18,7 +18,7 @@
     [intEntityVendorId] INT NULL,
 	[intBatchId] INT NULL,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
-    [ysnVoid] BIT NOT NULL DEFAULT 0, 
+    --[ysnVoid] BIT NOT NULL DEFAULT 0, 
     [ysnPrinted] BIT NOT NULL DEFAULT 0, 
 	[ysnPrepay] BIT NOT NULL DEFAULT 0, 
 	[ysnDeleted] BIT NULL DEFAULT 0,
