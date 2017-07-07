@@ -5360,6 +5360,8 @@
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotSplitOnHandHeld.sql" />
     <Build Include="dbo\Functions\fnAPCalculateVoucherUnits.sql" />
+    <Build Include="dbo\Tables\tblCRMProspectRequirement.sql" />
+    <Build Include="dbo\Views\vyuCRMProspectRequirementLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
