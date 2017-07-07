@@ -121,7 +121,7 @@ SET @intCFAccount = (SELECT TOP 1 intGLAccountId FROM tblCFCompanyPreference WIT
 DECLARE @UserEntityID			INT
 	,@AllowOtherUserToPost		BIT
 
-SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityUserSecurityId] = @UserId),@UserId)
+SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityId] = @UserId),@UserId)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WITH (NOLOCK) WHERE intEntityUserSecurityId = @UserEntityID)
 
 INSERT INTO @ARPaymentPostData
@@ -1530,7 +1530,7 @@ IF @Post = 1
 				ON A.intPaymentMethodId = PM.intPaymentMethodID
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARPaymentPostData P
 				ON A.[intPaymentId] = P.[intPaymentId]
@@ -1574,7 +1574,7 @@ IF @Post = 1
 			tblARPayment A 
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@AROverpayment P
 				ON A.[intPaymentId] = P.[intPaymentId]
@@ -1620,7 +1620,7 @@ IF @Post = 1
 			tblARPayment A
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			tblSMCompanyLocation SMCL
 				ON A.[intLocationId] = SMCL.[intCompanyLocationId] 
@@ -1673,7 +1673,7 @@ IF @Post = 1
 				ON A.[intPaymentId] = B.[intPaymentId]
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARPaymentPostData P
 				ON A.[intPaymentId] = P.[intPaymentId]
@@ -1739,7 +1739,7 @@ IF @Post = 1
 				ON A.[intPaymentId] = B.[intPaymentId]
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARPaymentPostData P
 				ON A.[intPaymentId] = P.[intPaymentId]
@@ -1812,7 +1812,7 @@ IF @Post = 1
 				ON A.[intPaymentId] = B.[intPaymentId]
 		INNER JOIN 
 			tblARCustomer C 
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARPaymentPostData P
 				ON A.[intPaymentId] = P.[intPaymentId]
@@ -1879,7 +1879,7 @@ IF @Post = 1
 				ON B.[intPaymentId] = A.[intPaymentId]
 		INNER JOIN 
 			tblARCustomer C 
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			tblARInvoice I
 				ON B.[intInvoiceId] = I.[intInvoiceId]
@@ -1949,7 +1949,7 @@ IF @Post = 1
 				ON A.[intPaymentId] = B.[intPaymentId]
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARPaymentPostData P
 				ON A.[intPaymentId] = P.[intPaymentId]
@@ -2015,7 +2015,7 @@ IF @Post = 1
 				ON A.[intPaymentId] = B.[intPaymentId]
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARPaymentPostData P
 				ON A.[intPaymentId] = P.[intPaymentId]
@@ -3018,7 +3018,7 @@ IF @RaiseError = 0
 							) P ON PD.[intPaymentId] = P.[intPaymentId]
 						WHERE PD.[intPaymentId] IN (SELECT intPaymentId FROM @tblPaymentsToUpdateBudget)
 						GROUP BY intEntityCustomerId
-			) PAYMENT ON CUSTOMER.intEntityCustomerId = PAYMENT.intEntityCustomerId
+			) PAYMENT ON CUSTOMER.[intEntityId] = PAYMENT.intEntityCustomerId
 
 			--Update Customer's Budget 
 			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
