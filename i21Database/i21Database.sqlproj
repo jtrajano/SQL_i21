@@ -5359,6 +5359,7 @@
     <None Include="Scripts\Post-Deployment\SM\1730_UpdatePatronageMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotSplitOnHandHeld.sql" />
+    <Build Include="dbo\Functions\fnAPCalculateVoucherUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

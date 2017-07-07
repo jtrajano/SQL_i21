@@ -135,6 +135,7 @@ BEGIN
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
+			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.[intEntityId]
 			CROSS APPLY
@@ -293,6 +294,7 @@ BEGIN
 	FROM	[dbo].tblAPBill A 
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
+			CROSS APPLY dbo.fnAPCalculateVoucherDetailUnits(B.intBillDetailId) units
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblICInventoryReceiptItem E
@@ -489,6 +491,7 @@ BEGIN
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
+			CROSS APPLY dbo.fnAPCalculateVoucherDetailUnits(B.intBillDetailId) units
 			INNER JOIN tblICItem B2
 				ON B.intItemId = B2.intItemId
 			INNER JOIN tblICItemLocation loc
