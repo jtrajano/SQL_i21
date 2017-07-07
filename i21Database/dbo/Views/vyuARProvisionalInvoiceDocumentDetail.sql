@@ -6,6 +6,7 @@ SELECT
 	,[strDocumentDetailId]					= 'icis:' + CAST(ARSI.[intInventoryShipmentItemId] AS NVARCHAR(250))
 	,[intShipmentId]						= NULL
 	,[intShipmentPurchaseSalesContractId]	= NULL
+	,[intLoadDetailId]						= ARSI.[intLoadDetailId] 
 	,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId]
 	,[intInventoryShipmentId]				= ARSI.[intInventoryShipmentId]
 	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId]
@@ -53,7 +54,8 @@ SELECT
 	 [strDocumentId]						= ARSID.[strShippedItemId]
 	,[strDocumentDetailId]					= CAST(ARSID.[strShippedItemDetailId] AS NVARCHAR(250))
 	,[intShipmentId]						= ARSID.[intShipmentId]
-	,[intShipmentPurchaseSalesContractId]	= ARSID.[intShipmentPurchaseSalesContractId] 
+	,[intShipmentPurchaseSalesContractId]	= NULL 
+	,[intLoadDetailId]						= ARSID.[intLoadDetailId] 
 	,[intSalesOrderDetailId]				= ARSID.[intSalesOrderDetailId]
 	,[intInventoryShipmentId]				= ARSID.[intInventoryShipmentId]
 	,[intInventoryShipmentItemId]			= ARSID.[intInventoryShipmentItemId]

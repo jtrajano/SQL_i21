@@ -202,6 +202,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
+:r .\AR\DefaultData\28_UpdateBaseAmounts.sql
+:r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -227,6 +229,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\MigrateVouchersForApproval.sql
 :r .\AP\MigratePOForApprovals.sql
 :r .\AP\UpdateVoucherDetail1099.sql
+:r .\AP\UpdateAmountSign.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -332,6 +335,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\037_DefaultDataLocationPayee.sql
 :r .\EM\038_UpdateEncryptionUsed.sql
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
+:r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

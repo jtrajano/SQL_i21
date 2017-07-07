@@ -57,6 +57,7 @@
 	,@ItemCustomerStorageId			INT				= NULL		
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL		
+	,@ItemLotId						INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
@@ -285,6 +286,7 @@ BEGIN TRY
 				,[intCustomerStorageId]
 				,[intSiteDetailId]
 				,[intLoadDetailId]
+				,[intLotId]
 				,[intOriginalInvoiceDetailId]
 				,[intSiteId]
 				,[strBillingBy]
@@ -367,6 +369,7 @@ BEGIN TRY
 				,[intCustomerStorageId]				= @ItemCustomerStorageId
 				,[intSiteDetailId]					= @ItemSiteDetailId
 				,[intLoadDetailId]					= @ItemLoadDetailId
+				,[intLotId]							= @ItemLotId
 				,[intOriginalInvoiceDetailId]		= @ItemOriginalInvoiceDetailId 
 				,[intSiteId]						= @ItemSiteId
 				,[strBillingBy]						= @ItemBillingBy

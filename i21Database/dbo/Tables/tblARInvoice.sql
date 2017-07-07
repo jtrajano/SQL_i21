@@ -65,6 +65,7 @@
 	[ysnForgiven]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnForgiven] DEFAULT ((0)),
 	[ysnCalculated]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCalculated] DEFAULT ((0)),
 	[ysnSplitted]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnSplitted] DEFAULT ((0)),		
+	[dblSplitPercent]				NUMERIC(18, 6)									NOT NULL	CONSTRAINT [DF_tblARInvoice_dblSplitPercent] DEFAULT ((1)),
 	[ysnImpactInventory]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImpactInventory] DEFAULT ((1)),		
 	[ysnImportedFromOrigin]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedFromOrigin] DEFAULT ((0)),		
 	[ysnImportedAsPosted]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedAsPosted] DEFAULT ((0)),		
@@ -162,6 +163,7 @@ BEGIN
 									WHEN @strTransactionType = 'Customer Prepayment' THEN 'Customer Prepayment' 
 									WHEN @strTransactionType = 'Overpayment' THEN 'Customer Overpayment'
 									WHEN @strTransactionType = 'Invoice' AND @strType = 'Service Charge' THEN 'Service Charge'
+									WHEN @strTransactionType = 'Invoice' AND @strType = 'Provisional' THEN 'Provisional'
 									ELSE 'Invoice' END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId

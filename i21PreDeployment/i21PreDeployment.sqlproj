@@ -283,4 +283,10 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\6_GL\AccountCategory.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\3_fnARGetCustomerDefaultContact.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\4_UpdateInvoicePaymentMethod.sql" />
+  </ItemGroup>
 </Project>

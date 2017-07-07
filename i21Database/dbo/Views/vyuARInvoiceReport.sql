@@ -1,17 +1,18 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceReport]
 AS
 SELECT intInvoiceId				= INV.intInvoiceId	 
-	 , strCompanyName			= CASE WHEN LOCATION.strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END
-	 , strCompanyAddress		= CASE WHEN LOCATION.strUseLocationAddress IS NULL OR LOCATION.strUseLocationAddress = 'No' OR LOCATION.strUseLocationAddress = '' OR LOCATION.strUseLocationAddress = 'Always'
+	 , strCompanyName			= CASE WHEN [LOCATION].strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END
+	 , strCompanyAddress		= CASE WHEN [LOCATION].strUseLocationAddress IS NULL OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = '' OR [LOCATION].strUseLocationAddress = 'Always'
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip, COMPANY.strCountry, NULL, COMPANY.ysnIncludeEntityName)
-									   WHEN LOCATION.strUseLocationAddress = 'Yes'
-											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, LOCATION.strAddress, LOCATION.strCity, LOCATION.strStateProvince, LOCATION.strZipPostalCode, LOCATION.strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
-									   WHEN LOCATION.strUseLocationAddress = 'Letterhead'
+									   WHEN [LOCATION].strUseLocationAddress = 'Yes'
+											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, [LOCATION].strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
+									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
 								  END
 	 , strType					= ISNULL(INV.strType, 'Standard')
      , strCustomerName			= CUSTOMER.strName
-	 , strLocationName			= LOCATION.strLocationName
+	 , strCustomerNumber        = CUSTOMER.strCustomerNumber
+	 , strLocationName			= [LOCATION].strLocationName
 	 , dtmDate					= INV.dtmDate
 	 , dtmPostDate				= INV.dtmPostDate
 	 , strCurrency				= CURRENCY.strCurrency	 	 
@@ -87,6 +88,7 @@ FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
 	     , strName
+		 , strCustomerNumber
 	     , ysnIncludeEntityName 
 	FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
 ) CUSTOMER ON INV.intEntityCustomerId = CUSTOMER.intEntityId
@@ -100,7 +102,7 @@ INNER JOIN (
 		 , strZipPostalCode
 		 , strCountry
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) LOCATION ON INV.intCompanyLocationId = LOCATION.intCompanyLocationId
+) LOCATION ON INV.intCompanyLocationId = [LOCATION].intCompanyLocationId
 INNER JOIN (
 	SELECT intTermID
 		 , strTerm

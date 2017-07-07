@@ -47,6 +47,7 @@ WHERE	strTransactionId = @strTransactionId
 
 INSERT INTO #tmpGLDetail (
 		[strTransactionId]
+		,[intTransactionId]
 		,[dtmDate]
 		,[strBatchId]
 		,[intAccountId]
@@ -71,6 +72,7 @@ INSERT INTO #tmpGLDetail (
 		,[intEntityId]
 )
 SELECT	[strTransactionId]
+		,[intTransactionId]
 		-- If date is provided, use date reverse as the date for unposting the transaction.
 		,dtmDate = ISNULL(@dtmDateReverse, [dtmDate]) 
 		,[strBatchId]

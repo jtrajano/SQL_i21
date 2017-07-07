@@ -201,7 +201,7 @@ BEGIN
 END
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, 1
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityId
@@ -343,12 +343,15 @@ IF @ysnPrintOnlyPastDue = 1
 
 IF @ysnPrintZeroBalance = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE dblARBalance = 0
+        DELETE FROM @temp_statement_table WHERE dblBalance = 0
         DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
     END
 
 IF @ysnPrintCreditBalance = 0
-    DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')  
+	BEGIN
+		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
+		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0 
+	END
 
 INSERT INTO @temp_cf_table
 (

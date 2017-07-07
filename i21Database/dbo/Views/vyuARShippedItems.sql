@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
-
 WITH SCALETICKET AS (
 	SELECT intTicketId
 		 , strTicketNumber
@@ -285,9 +284,15 @@ LEFT OUTER JOIN
 		 FROM tblICInventoryShipment WITH (NOLOCK)
 		) H ON H.[intInventoryShipmentId] = D.[intInventoryShipmentId]
 	  WHERE H.[intOrderType] = 2) ISD ON SOD.[intSalesOrderDetailId] = ISD.[intLineNo]
-LEFT OUTER JOIN CURRENCY SMC ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
-LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
-WHERE SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+LEFT OUTER JOIN
+	(SELECT intCurrencyID,
+			[strCurrency]
+	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN
+	tblSMCurrencyExchangeRateType SMCRT
+		ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+WHERE
+      SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	  AND ((SOD.[dblQtyOrdered] - ISNULL(SOD.[dblQtyShipped], 0.000000) <> 0.000000) OR (ISNULL(ISD.[intLineNo],0) = 0))
 	
 UNION ALL
@@ -581,8 +586,7 @@ CROSS APPLY
 	LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
 	LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 	WHERE		
-		ISI.[intLineNo] = SOD.[intSalesOrderDetailId]		 
-		 
+		ISI.[intLineNo] = SOD.[intSalesOrderDetailId]	
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
 		,ISH.[strShipmentNumber]

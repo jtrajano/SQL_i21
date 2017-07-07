@@ -1,14 +1,14 @@
 ﻿CREATE FUNCTION [dbo].[fnARGetCustomerDefaultContact]
 (
-	@EntityCustomerId	INT
+	@EntityCustomerId    INT
 )
 RETURNS INT
 AS
 BEGIN
-	RETURN	(				
+	RETURN    (                
 				SELECT TOP 1    
-					D.intEntityId    							
-				FROM dbo.tblEMEntity AS B 			
+					D.intEntityId                                
+				FROM dbo.tblEMEntity AS B             
 					INNER JOIN dbo.[tblEMEntityToContact] AS C 
 							ON B.[intEntityId] = C.[intEntityId] 
 					INNER JOIN dbo.tblEMEntity AS D 
@@ -19,4 +19,5 @@ BEGIN
 					B.intEntityId = @EntityCustomerId
 					AND C.ysnDefaultContact = 1
 			)
+   
 END

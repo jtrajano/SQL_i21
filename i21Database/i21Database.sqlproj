@@ -4248,7 +4248,6 @@
     <Build Include="dbo\Views\vyuAPForApprovalTransaction.sql" />
     <Build Include="dbo\Functions\fnPATCountStockStatus.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundTypeHistory.sql" />
-    <Build Include="dbo\Views\vyuPATCalculateFiscalSummary.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundSummary.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundSummaryHistory.sql" />
     <Build Include="dbo\Views\vyuPATCalculateNoRefundSummaryHistory.sql" />
@@ -5331,6 +5330,31 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStockHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryByParentLot.sql" />
+    <Build Include="dbo\Functions\fnSTDynamicQueryItemData.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemDataPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportUpdateItemPricingPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportUpdateRebateOrDiscountPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATLetters.sql" />
+    <Build Include="dbo\Functions\fnARGetDefaultComment.sql" />
+    <Build Include="dbo\Views\vyuMFGetTaskQty.sql" />
+    <Build Include="dbo\Functions\fnARFormatLetterAddress.sql" />
+    <Build Include="dbo\Views\vyuARServiceChargeInvoiceReport.sql" />
+    <Build Include="dbo\Views\vyuLGArrivalForecast.sql" />
+    <Build Include="dbo\Views\vyuSCDeliverySheetView.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultContact.sql" />
+    <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
+    <Build Include="dbo\Views\vyuARCollectionCreditViewReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql">
+      <AnsiNulls>Off</AnsiNulls>
+    </None>
+    <Build Include="dbo\Stored Procedures\uspPATCalculateFiscalSummary.sql" />
+    <Build Include="dbo\Views\vyuRKPnLContractDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForUnRealized.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForRealized.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKClearingHouseStatementForAll.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageUnitStock.sql" />
+    <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5460,6 +5484,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\25_ApprovalHistory.sql" />
     <None Include="Scripts\Post-Deployment\CT\172To173.sql" />
     <None Include="Scripts\Post-Deployment\IC\20_UpdateContractItemStatuses.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

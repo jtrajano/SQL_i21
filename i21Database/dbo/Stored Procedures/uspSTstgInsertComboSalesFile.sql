@@ -49,14 +49,26 @@ BEGIN
 		, 'Saturday' [WeekdaySaturday]
 	from tblICItem I
 	JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-	JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
-	JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
-	JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+	JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId 
 	JOIN tblSTStore ST ON ST.intCompanyLocationId = L.intCompanyLocationId 
 	JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
-	JOIN tblSTPromotionItemList PIL ON PIL.intStoreId = ST.intStoreId
 	JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
 	JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+	JOIN tblSTPromotionItemList PIL ON PIL.intPromoItemListId = PSLD.intPromoItemListId
+	JOIN tblSTPromotionItemListDetail PILD ON PILD.intPromoItemListId = PIL.intPromoItemListId
+	JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = PILD.intItemUOMId 
+	JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+
+	--JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+	--JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
+	--JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
+	--JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+	--JOIN tblSTStore ST ON ST.intCompanyLocationId = L.intCompanyLocationId 
+	--JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
+	--JOIN tblSTPromotionItemList PIL ON PIL.intStoreId = ST.intStoreId
+	--JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
+	--JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+
 	WHERE R.intRegisterId = @Register  AND ST.intStoreId = @StoreLocation AND PSL.strPromoType = 'C'
 	AND PSL.intPromoSalesId BETWEEN @BeginningComboId AND @EndingComboId
 	

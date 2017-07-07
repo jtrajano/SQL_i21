@@ -409,7 +409,7 @@ END
 				SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
 				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
 				BEGIN
-					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
+					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 					SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
 					
 					EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]

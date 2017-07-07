@@ -16,6 +16,7 @@ Declare @intMinHeader				INT,
 		@strContractBasisDesc		NVARCHAR(500) ,--INCOTERMS2
 		@strBillOfLading			NVARCHAR(100) , 
 		@strShippingLine			NVARCHAR(100) , 
+		@strShippingLineName		NVARCHAR(250) , 
 		@strExternalDeliveryNumber	NVARCHAR(100) , 
 		@dtmScheduledDate			DATETIME,
 		@strRowState				NVARCHAR(50) ,
@@ -122,7 +123,8 @@ Begin
 		@strContractBasis			=	strContractBasis ,--INCOTERMS1
 		@strContractBasisDesc		=	strContractBasisDesc ,--INCOTERMS2
 		@strBillOfLading			=	strBillOfLading , 
-		@strShippingLine			=	strShippingLineAccountNo , 
+		@strShippingLine			=	strShippingLineAccountNo ,
+		@strShippingLineName		=	strShippingLine , 
 		@strExternalDeliveryNumber	=	strExternalShipmentNumber, 
 		@dtmScheduledDate			=   dtmScheduledDate,
 		@strFeedStatus				=	strFeedStatus,
@@ -198,7 +200,7 @@ Begin
 	--Header
 	Set @strXml += '<E1EDL20 SEGMENT="1">'
 	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
-	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')			+ '</BOLNR>'
+	Set @strXml += '<BOLNR>'	+ LEFT(LEFT(ISNULL(@strShippingLineName,''),4) + '     ',5) + ISNULL(@strBillOfLading,'') + '</BOLNR>'
 	Set @strXml += '<TRAID>'	+ ISNULL(@strShippingLine,'')			+ '</TRAID>'
 	Set @strXml += '<LIFEX>'	+ LTRIM(RTRIM(ISNULL(@strLoadNumber,'') + ' ' + dbo.fnEscapeXML(ISNULL(@strMVessel,'')))) + '</LIFEX>'
 
@@ -539,6 +541,11 @@ Begin
 			Update tblLGLoadContainer Set ysnNewContainer=0 Where intLoadId=@intLoadId AND ysnNewContainer=1
 
 			Update tblLGLoadStg Set strFeedStatus='Awt Ack' Where intLoadStgId = @intMinHeader
+
+			--For Tea Update mark as Rcvd
+			If UPPER(@strCommodityCode)='TEA' AND (Select UPPER(strRowState) from tblLGLoadStg Where intLoadStgId = @intMinHeader)='MODIFIED'
+			AND Exists (Select 1 From tblLGLoadContainer Where intLoadId=@intLoadId AND ISNULL(ysnNewContainer,0)=0) 
+				Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success' Where intLoadStgId = @intMinHeader
 		End
 
 	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml,strShipmentNo,strDeliveryNo)

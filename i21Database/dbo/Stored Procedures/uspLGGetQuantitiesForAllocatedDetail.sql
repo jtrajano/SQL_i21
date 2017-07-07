@@ -11,7 +11,9 @@
 	@dblPWeightPerUnit DECIMAL(18, 6) = 0 OUTPUT,
 	@dblSWeightPerUnit DECIMAL(18, 6) = 0 OUTPUT,
 	@strPUnitType		NVARCHAR (MAX) = '' OUTPUT,
-	@strSUnitType		NVARCHAR (MAX) = '' OUTPUT
+	@strSUnitType		NVARCHAR (MAX) = '' OUTPUT,
+	@dblPAllocatedQty DECIMAL(18, 6) = 0 OUTPUT,
+	@dblSAllocatedQty DECIMAL(18, 6) = 0 OUTPUT
 
 AS
 DECLARE @ErrMsg NVARCHAR(MAX)
@@ -37,7 +39,9 @@ BEGIN TRY
 			@dblPWeightPerUnit	  = IsNull([dbo].fnLGGetItemUnitConversion (CTP.intItemId, CTP.intItemUOMId, AH.intWeightUnitMeasureId), 0.0),
 			@dblSWeightPerUnit	  = IsNull([dbo].fnLGGetItemUnitConversion (CTS.intItemId, CTS.intItemUOMId, AH.intWeightUnitMeasureId), 0.0),
 			@strPUnitType		  = (SELECT UOM.strUnitType FROM tblICUnitMeasure UOM WHERE UOM.intUnitMeasureId = AD.intPUnitMeasureId),
-			@strSUnitType		  = (SELECT UOM.strUnitType FROM tblICUnitMeasure UOM WHERE UOM.intUnitMeasureId = AD.intSUnitMeasureId)
+			@strSUnitType		  = (SELECT UOM.strUnitType FROM tblICUnitMeasure UOM WHERE UOM.intUnitMeasureId = AD.intSUnitMeasureId),
+			@dblPAllocatedQty	  = AD.dblPAllocatedQty,
+			@dblSAllocatedQty	  = AD.dblSAllocatedQty
 			
 	FROM 	tblLGAllocationDetail AD 
 			JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -56,7 +60,9 @@ BEGIN TRY
 			@dblPWeightPerUnit	  as dblPWeightPerUnit,
 			@dblSWeightPerUnit	  as dblSWeightPerUnit,
 			@strPUnitType		  as strPUnitType,
-			@strSUnitType		  as strSUnitType
+			@strSUnitType		  as strSUnitType,
+			@dblPAllocatedQty     as dblPAllocatedQty,
+			@dblSAllocatedQty     as dblSAllocatedQty
 END TRY
 
 BEGIN CATCH

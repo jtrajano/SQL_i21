@@ -97,6 +97,7 @@
 	,@ItemCustomerStorageId			INT				= NULL		
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL		
+	,@ItemLotId						INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
@@ -147,8 +148,7 @@ IF ISNULL(@Comment, '') = ''
 					@intEntityCustomerId = @EntityCustomerId,
 					@strTransactionType = @TransactionType,
 					@strType = @Type,
-					@strHeaderFooter = 'Header',
-					@strDefaultComment = @Comment OUTPUT,
+					@strHeaderComment = @Comment OUTPUT,
 					@DocumentMaintenanceId = @DocumentMaintenanceId
 	END
 
@@ -594,6 +594,7 @@ BEGIN TRY
 		,@ItemCustomerStorageId			= @ItemCustomerStorageId
 		,@ItemSiteDetailId				= @ItemSiteDetailId
 		,@ItemLoadDetailId				= @ItemLoadDetailId
+		,@ItemLotId						= @ItemLotId
 		,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 		,@ItemSiteId					= @ItemSiteId
 		,@ItemBillingBy					= @ItemBillingBy

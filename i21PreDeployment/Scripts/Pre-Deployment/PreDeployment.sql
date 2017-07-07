@@ -59,7 +59,7 @@
 
 
 -- AR
-:r .\7_AR\3_UpdateInvoiceDefaultContact.sql
+:r .\7_AR\3_fnARGetCustomerDefaultContact.sql
 :r .\7_AR\4_UpdateInvoicePaymentMethod.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql
 :r .\7_AR\6_PaymentDetailInvoiceCleanUp.sql
@@ -79,7 +79,7 @@
 :r .\8_AP\UpdateVoucherCurrency.SQL
 :r .\8_AP\tblAPapivcmst.sql
 --:r .\8_AP\UpdateBillToReceiptAssociation.sql
-
+:r .\8_AP\UpdateBillContact.sql
 --:r .\8_AP\UpdateMissingPaymentInfo.sql
 --:r .\8_AP\UpdateBillStatus.sql
 --:r .\8_AP\AddPOVendorConstraint.sql
@@ -128,8 +128,6 @@
 :r .\12_EM\16_CleanCustomerProductVersion.sql
 :r .\12_EM\20_CleanCustomerSpecialPrice.sql
 :r .\12_EM\21_CleanAPBillMissingContact.sql
-:r .\12_EM\22_UpdateNullPaymentMethodVendor.sql
-
 --RK
 :r .\13_RK\01_DropTableScript.sql
 

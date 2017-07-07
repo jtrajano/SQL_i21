@@ -65,7 +65,7 @@ BEGIN TRY
 	SELECT @strCompanyLocationId = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strCompanyLocationId'
-	
+
 	--strVendorId
 	SELECT @strVendorId = [from]
 	FROM @temp_xml_table
@@ -159,7 +159,7 @@ BEGIN TRY
 
 	DECLARE @SqlQuery1 as NVARCHAR(MAX)
 	-----------------------------------Handle Dynamic Query 1
-	IF (@dblStandardCost <> 0)
+	IF (@dblStandardCost IS NOT NULL)
 		BEGIN
    
 			SET @SqlQuery1 = 'SELECT' + CHAR(13)
@@ -172,7 +172,8 @@ BEGIN TRY
 							 + ' FROM tblICItemPricing a' + CHAR(13)
 							 + ' JOIN tblICItemUOM b ON a.intItemId = b.intItemId' + CHAR(13)
 							 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							 + ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 							 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 			SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
@@ -214,7 +215,7 @@ BEGIN TRY
 					  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))' + CHAR(13)
 				  END
 
-			  IF (@intUpcCode <> 0)
+			  IF (@intUpcCode IS NOT NULL)
 				   BEGIN
 					   set @SqlQuery1 = @SqlQuery1 +  ' and b.intItemUOMId IN (' + CAST(@intUpcCode as NVARCHAR) + ')' + CHAR(13)
 				   END
@@ -253,11 +254,12 @@ BEGIN TRY
 
 		INSERT @tblMassUpdatePreview
 		EXEC (@SqlQuery1)
+
 	END 
 
 
 	-----------------------------------Handle Dynamic Query 2
-	IF (@dblRetailPrice <> 0)
+	IF (@dblRetailPrice IS NOT NULL)
 		BEGIN
 
 			SET @SqlQuery1 = 'SELECT' + CHAR(13)
@@ -270,7 +272,8 @@ BEGIN TRY
 							+ ' from tblICItemPricing a' + CHAR(13)
 							+ ' JOIN tblICItemUOM b ON a.intItemId = b.intItemId' + CHAR(13)
 							+ ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							--+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							+ ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 							+ ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 			SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
@@ -312,7 +315,7 @@ BEGIN TRY
 				  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
 			  END
 
-		  IF (@intUpcCode <> 0)
+		  IF (@intUpcCode IS NOT NULL)
 			   BEGIN
 				   set @SqlQuery1 = @SqlQuery1 +  ' and b.intItemUOMId IN (' + CAST(@intUpcCode as NVARCHAR) + ')'
 			   END
@@ -350,11 +353,12 @@ BEGIN TRY
 
 		INSERT @tblMassUpdatePreview
 		EXEC (@SqlQuery1)
+
  END 
 
 
     -----------------------------------Handle Dynamic Query 3
-	IF (@dblSalesPrice <> 0)
+	IF (@dblSalesPrice IS NOT NULL)
 		BEGIN
 
 			SET @SqlQuery1 = 'SELECT' + CHAR(13)
@@ -367,7 +371,8 @@ BEGIN TRY
 							+ ' FROM tblICItemSpecialPricing a' + CHAR(13)
 							+ ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 							+ ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							--+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+							+ ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 							+ ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 			SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
@@ -409,7 +414,7 @@ BEGIN TRY
 					  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
 				   END
 
-			IF (@intUpcCode <> 0)
+			IF (@intUpcCode IS NOT NULL)
 				   BEGIN
 					   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemUnitMeasureId IN (' + CAST(@intUpcCode as NVARCHAR) + ')'
 				   END
@@ -449,6 +454,7 @@ BEGIN TRY
 
 		INSERT @tblMassUpdatePreview
 		EXEC (@SqlQuery1)
+	
  END 
 
 
@@ -467,7 +473,8 @@ BEGIN TRY
 						 + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 						 + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 						 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-						 + ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+						 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+						 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 						 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 		SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
@@ -509,7 +516,7 @@ BEGIN TRY
 				  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
 			   END
 
-		IF (@intUpcCode <> 0)
+		IF (@intUpcCode IS NOT NULL)
 			  BEGIN
 				  SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemUnitMeasureId IN (' + CAST(@intUpcCode as NVARCHAR) + ')'
 			  END
@@ -567,7 +574,8 @@ BEGIN TRY
 		                 + ' FROM tblICItemSpecialPricing a' + CHAR(13)
 		                 + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
 		                 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-		                 + ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+		                 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
+						 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
 		                 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
 		SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
@@ -609,7 +617,7 @@ BEGIN TRY
 				  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
 			  END
 
-		IF (@intUpcCode <> 0)
+		IF (@intUpcCode IS NOT NULL)
 			  BEGIN
 				   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemUnitMeasureId IN (' + CAST(@intUpcCode as NVARCHAR) + ')'
 			  END
@@ -651,6 +659,252 @@ BEGIN TRY
 			EXEC (@SqlQuery1)
 	END 
 
+
+	SELECT @UpdateCount = count(*) from @tblMassUpdatePreview WHERE strOldData != strNewData
+
+
+	--Update
+	-----------------------------------Handle Dynamic Query 6
+	 IF ((@ysnPreview != 'Y')
+	 AND (@UpdateCount > 0))
+	 BEGIN
+       
+		 SET @UpdateCount = 0 
+    
+
+		 IF ((@dblStandardCost IS NOT NULL)
+		 OR (@dblRetailPrice IS NOT NULL))
+		 BEGIN
+
+				 set @SqlQuery1 = ' update tblICItemPricing set '
+
+				 if (@dblStandardCost IS NOT NULL)
+				 BEGIN
+					set @SqlQuery1 = @SqlQuery1 + 'dblStandardCost = ''' + LTRIM(@dblStandardCost) + ''''
+				 END
+
+				 if (@dblRetailPrice IS NOT NULL)  
+				 BEGIN
+				   if (@dblStandardCost IS NOT NULL)
+					  set @SqlQuery1 = @SqlQuery1 + ' , dblSalePrice = ''' + LTRIM(@dblRetailPrice) + ''''
+				   else
+					  set @SqlQuery1 = @SqlQuery1 + ' dblSalePrice = ''' + LTRIM(@dblRetailPrice) + '''' 
+				 END
+
+				 set @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
+	    
+			   if (@strCompanyLocationId IS NOT NULL)
+				  BEGIN 
+						set @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemPricing.intItemLocationId
+						IN (select intItemLocationId from tblICItemLocation where intLocationId
+						IN (select intLocationId from tblICItemLocation where intLocationId 
+						IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + '))'
+				  END
+
+			   if (@strVendorId IS NOT NULL)
+				   BEGIN 
+						 set @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemPricing.intItemLocationId
+						 IN (select intItemLocationId from tblICItemLocation where intVendorId
+						 IN (select intEntityId from tblEMEntity where intEntityId 
+						 IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
+				   END
+
+			   if (@strCategoryId IS NOT NULL)
+				   BEGIN
+						 set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemPricing.intItemId  
+						 IN (select intItemId from tblICItem where intCategoryId IN
+						 (select intCategoryId from tblICCategory where intCategoryId 
+						 IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
+				   END
+
+			   if (@strFamilyId IS NOT NULL)
+				   BEGIN
+						  set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemPricing.intItemLocationId IN 
+						  (select intItemLocationId from tblICItemLocation where intFamilyId IN
+						  (select intFamilyId from tblICItemLocation where intFamilyId 
+						  IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))'
+				   END
+
+				if (@strClassId  IS NOT NULL)
+					BEGIN
+						  set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemPricing.intItemLocationId IN 
+						  (select intItemLocationId from tblICItemLocation where intClassId IN
+						  (select intClassId from tblICItemLocation where intClassId 
+						  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
+					 END
+
+				if (@intUpcCode IS NOT NULL)
+					BEGIN
+						  set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemPricing.intItemId  
+						 IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+						  (select intItemUOMId from tblICItemUOM  where intItemUOMId 
+						  IN (' + CAST(@intUpcCode as NVARCHAR) + ')' + '))'
+					END
+
+				if ((@strRegion IS NOT NULL)
+				and(@strRegion != ''))
+			 		   BEGIN
+						 set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemPricing.intItemLocationId IN 
+						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
+						 (select intCompanyLocationId from tblSTStore where strRegion 
+						 IN ( ''' + (@strRegion) + ''')' + '))'
+					   END
+
+				if ((@strDistrict IS NOT NULL)
+				and(@strDistrict != ''))
+					BEGIN
+			 			 set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemPricing.intItemLocationId IN 
+						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
+						 (select intCompanyLocationId from tblSTStore where strDistrict 
+						 IN ( ''' + (@strDistrict) + ''')' + '))'
+					END
+
+			   if ((@strState IS NOT NULL)
+				and(@strState != ''))
+					BEGIN
+					   set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemPricing.intItemLocationId IN 
+					   (select intItemLocationId from tblICItemLocation where intLocationId IN 
+					   (select intCompanyLocationId from tblSTStore where strState 
+						IN ( ''' + (@strState) + ''')' + '))'
+					END
+
+			   if ((@strDescription IS NOT NULL)
+				and (@strDescription != ''))
+					BEGIN
+					   set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemPricing.intItemId IN 
+					   (select intItemId from tblICItem where strDescription 
+						like ''%' + LTRIM(@strDescription) + '%'' )'
+					END
+
+				EXEC (@SqlQuery1)
+
+		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT) 
+		  END
+
+
+
+		  IF ((@dblSalesPrice IS NOT NULL)
+		  OR (@dtmSalesStartingDate IS NOT NULL)
+		  OR (@dtmSalesEndingDate IS NOT NULL))
+		  BEGIN
+			   set @SqlQuery1 = ' update tblICItemSpecialPricing set '
+
+			   if (@dblSalesPrice IS NOT NULL)
+			   BEGIN
+				 set @SqlQuery1 = @SqlQuery1 + 'dblUnitAfterDiscount = ''' + LTRIM(@dblSalesPrice) + ''''
+			   END
+
+			   if (@dtmSalesStartingDate IS NOT NULL)  
+			  BEGIN
+				  if (@dblSalesPrice IS NOT NULL)
+					  set @SqlQuery1 = @SqlQuery1 + ' , dtmBeginDate = ''' + LTRIM(@dtmSalesStartingDate) + ''''
+				 else
+					set @SqlQuery1 = @SqlQuery1 + ' dtmBeginDate = ''' + LTRIM(@dtmSalesStartingDate) + '''' 
+			   END
+
+			   if (@dtmSalesEndingDate IS NOT NULL)  
+			  BEGIN
+				  if ((@dblSalesPrice IS NOT NULL)
+				   OR (@dtmSalesStartingDate IS NOT NULL))
+					  set @SqlQuery1 = @SqlQuery1 + ' , dtmEndDate = ''' + LTRIM(@dtmSalesEndingDate) + ''''
+				 else
+					  set @SqlQuery1 = @SqlQuery1 + ' dtmEndDate = ''' + LTRIM(@dtmSalesEndingDate) + '''' 
+			   END
+
+			   set @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
+
+			   if (@strCompanyLocationId IS NOT NULL)
+				  BEGIN 
+						set @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemSpecialPricing.intItemLocationId
+						IN (select intItemLocationId from tblICItemLocation where intLocationId
+						IN (select intLocationId from tblICItemLocation where intLocationId
+						IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + '))'
+				  END
+
+			   if (@strVendorId IS NOT NULL)
+				   BEGIN 
+						 set @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemSpecialPricing.intItemLocationId
+						 IN (select intItemLocationId from tblICItemLocation where intVendorId
+						 IN (select intEntityId from tblEMEntity where intEntityId 
+						 IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
+				   END
+
+				  if (@strCategoryId IS NOT NULL)
+					 BEGIN
+						  set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemId  
+						  IN (select intItemId from tblICItem where intCategoryId IN
+						  (select intCategoryId from tblICCategory where intCategoryId
+						   IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
+					 END
+
+				  if (@strFamilyId IS NOT NULL)
+					 BEGIN
+						  set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+						  (select intItemLocationId from tblICItemLocation where intFamilyId IN
+						  (select intFamilyId from tblICItemLocation where intFamilyId 
+						  IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))'
+					 END
+
+				  if (@strClassId IS NOT NULL)
+					  BEGIN
+						  set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+						  (select intItemLocationId from tblICItemLocation where intClassId IN
+						  (select intClassId from tblICItemLocation where intClassId 
+						  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
+					   END
+
+				   if (@intUpcCode IS NOT NULL)
+					   BEGIN
+						   set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemId  
+						  IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+						   (select intItemUOMId from tblICItemUOM  where intItemUOMId 
+						   IN (' + CAST(@intUpcCode as NVARCHAR) + ')' + '))'
+					   END
+
+					if ((@strRegion IS NOT NULL)
+					and(@strRegion != ''))
+						BEGIN
+						 set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
+						 (select intCompanyLocationId from tblSTStore where strRegion 
+						 IN ( ''' + (@strRegion) + ''')' + '))'
+						END
+
+					if ((@strDistrict IS NOT NULL)
+					and(@strDistrict != ''))
+						BEGIN
+						 set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
+						 (select intCompanyLocationId from tblSTStore where strDistrict 
+						 IN ( ''' + (@strDistrict) + ''')' + '))'
+						END
+
+				   if ((@strState IS NOT NULL)
+					and(@strState != ''))
+						BEGIN
+						 set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
+						 (select intCompanyLocationId from tblSTStore where strState 
+						 IN ( ''' + (@strState) + ''')' + '))'
+						END
+
+				   if ((@strDescription IS NOT NULL)
+					and (@strDescription != ''))
+					BEGIN
+					   set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemSpecialPricing.intItemId IN 
+					   (select intItemId from tblICItem where strDescription 
+						like ''%' + LTRIM(@strDescription) + '%'' )'
+					END
+			
+
+					SET @SqlQuery1 = @SqlQuery1 + ' and  strPromotionType = ''Discount'''
+
+					EXEC (@SqlQuery1)
+					SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
+		  END
+	 END
+
+
 	-- Get CompanyName
 	DECLARE @strCompanyName as NVARCHAR(250)
 	IF EXISTS (SELECT * FROM dbo.tblSMCompanySetup)
@@ -661,8 +915,6 @@ BEGIN TRY
 	BEGIN
 		SET @strCompanyName = 'Not Set'
 	END
-
-
 
    select @strCompanyName as CompanyName
 		  --, FORMAT(GETDATE(), 'D', 'en-US' ) as DateToday

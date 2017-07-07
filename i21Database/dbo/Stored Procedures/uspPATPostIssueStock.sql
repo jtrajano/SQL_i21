@@ -386,7 +386,7 @@ BEGIN
 				,[strPONumber]							= ''
 				,[strBOLNumber]							= ''
 				,[strDeliverPickup]						= ''
-				,[strComments]							= ''
+				,[strComments]							= CS.strCertificateNo
 				,[intShipToLocationId]					= NULL
 				,[intBillToLocationId]					= NULL
 				,[ysnTemplate]							= 0

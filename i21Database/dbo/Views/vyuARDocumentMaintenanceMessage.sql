@@ -12,7 +12,7 @@ SELECT A.intDocumentMaintenanceId
 	 , B.intDocumentMaintenanceMessageId
 	 , B.strHeaderFooter
 	 , B.intCharacterLimit
-	 , strMessage							= dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+	 , strMessage								= REPLACE(REPLACE(REPLACE(dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX))), '<p>', ''), '</p>',''), '&nbsp;', ' ')
 	 , B.ysnRecipe
 	 , B.ysnQuote
 	 , B.ysnSalesOrder

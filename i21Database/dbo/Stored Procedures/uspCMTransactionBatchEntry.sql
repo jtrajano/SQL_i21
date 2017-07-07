@@ -20,7 +20,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @NewIntTransactionId INT,
 		@transactionType NVARCHAR(50) = 'Bank Deposit',
-		@newStrTransactionId  NVARCHAR(40)
+		@newStrTransactionId  NVARCHAR(40),
+		@intStartingNumberId INT
 
 --Variables for Detail
 DECLARE @intTransactionId INT
@@ -78,7 +79,9 @@ FROM @BankTransactionBatchDetailEntries
 			IF @strRowState = 'Added'
 			BEGIN
 				--Assemble the transaction id
-				SELECT @newStrTransactionId = strPrefix + CAST(intNumber AS NVARCHAR) FROM tblSMStartingNumber WHERE strTransactionType = @transactionType
+				--SELECT @newStrTransactionId = strPrefix + CAST(intNumber AS NVARCHAR) FROM tblSMStartingNumber WHERE strTransactionType = @transactionType
+				SELECT @intStartingNumberId = intStartingNumberId FROM tblSMStartingNumber WHERE strTransactionType = @transactionType
+				EXEC uspSMGetStartingNumber @intStartingNumberId, @newStrTransactionId, @intCompanyLocationId
 
 				SET @newStrTransactionIds = ISNULL(@newStrTransactionIds,'') + @newStrTransactionId + ','
 
@@ -209,7 +212,7 @@ FROM @BankTransactionBatchDetailEntries
 
 				
 				--UPDATE starting numbers
-				UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE strTransactionType = @transactionType
+				--UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE strTransactionType = @transactionType
 			END
 
 			IF @strRowState = 'Modified'

@@ -55,7 +55,7 @@ Begin
 
 		Begin Tran
 
-		Update tblLGLoad Set dtmETAPOD=@dtmETA,intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+		Update tblLGLoad Set dtmETAPOD=@dtmETA,dtmPlannedAvailabilityDate=@dtmETA,intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 		Insert Into tblLGETATracking(intLoadId,strTrackingType,dtmETAPOD,dtmModifiedOn)
 		Values(@intLoadId,'ETA POD',@dtmETA,GETDATE()) 

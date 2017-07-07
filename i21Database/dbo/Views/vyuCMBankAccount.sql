@@ -43,6 +43,10 @@ SELECT	i21.intBankAccountId
 		,strACHFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intEFTBankFileFormatId)
 		,i21.intPositivePayBankFileFormatId
 		,strPositivePayFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intPositivePayBankFileFormatId)
+		,i21.intEFTARFileFormatId
+		,strEFTARFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intEFTARFileFormatId)
+		,i21.intEFTPRFileFormatId
+		,strEFTPRFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intEFTPRFileFormatId)
 		,i21.strEFTCompanyId
 		,i21.strEFTBankName
 		,i21.strMICRDescription
@@ -148,6 +152,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intEFTNextNo
 						,intBankStatementImportId
 						,intEFTBankFileFormatId
+						,intEFTARFileFormatId
+						,intEFTPRFileFormatId
 						,intPositivePayBankFileFormatId
 						,strEFTCompanyId
 						,strEFTBankName
@@ -220,6 +226,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intEFTNextNo						= i.intEFTNextNo
 						,intBankStatementImportId			= i.intBankStatementImportId
 						,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+						,intEFTARFileFormatId				= i.intEFTARFileFormatId
+						,intEFTPRFileFormatId				= i.intEFTPRFileFormatId
 						,intPositivePayBankFileFormatId		= i.intPositivePayBankFileFormatId
 						,strEFTCompanyId					= i.strEFTCompanyId
 						,strEFTBankName						= i.strEFTBankName
@@ -315,6 +323,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intEFTNextNo						= i.intEFTNextNo
 					,intBankStatementImportId			= i.intBankStatementImportId
 					,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+					,intEFTARFileFormatId				= i.intEFTARFileFormatId
+					,intEFTPRFileFormatId				= i.intEFTPRFileFormatId
 					,intPositivePayBankFileFormatId		= i.intPositivePayBankFileFormatId
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName

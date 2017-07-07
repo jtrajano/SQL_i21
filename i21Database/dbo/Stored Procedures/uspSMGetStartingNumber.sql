@@ -10,22 +10,6 @@ SET @locationNumber = ''
 DECLARE @parameters VARCHAR(150)
 SET @parameters = ''
 
-IF @intCompanyLocationId IS NOT NULL
-BEGIN
-	-- Check if starting number does not requires company location id
-	DECLARE @ysnUseLocation BIT
-	SELECT @ysnUseLocation = ysnUseLocation FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
-
-	IF @ysnUseLocation = 1
-	BEGIN
-		SELECT @locationNumber = strLocationNumber + '-' FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
-		IF @locationNumber = '-'
-		BEGIN
-			SET @locationNumber = ''
-		END
-	END
-END
-
 -- IF MODULE IS CONTRACT MANAGEMENT
 IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId AND strModule = 'Contract Management')
 BEGIN
@@ -81,27 +65,56 @@ END
 -- BY COMPANY LOCATION
 IF @intCompanyLocationId IS NOT NULL
 BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumberLocation WHERE intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId)
-	BEGIN
-		SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(location.intNumber AS NVARCHAR(20)) --CASE WHEN @digit = 0 THEN CAST(location.intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(location.intNumber, 1) AS NVARCHAR(20)), @digit) END
-		FROM tblSMStartingNumberLocation location
-		INNER JOIN tblSMStartingNumber number
-		ON location.intStartingNumberId = number.intStartingNumberId
-		WHERE location.intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId
 
-		-- Increment the next number
-		UPDATE	tblSMStartingNumberLocation
-		SET		intNumber = ISNULL(intNumber, 0) + 1
-		WHERE	intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId
+	-- Check if starting number does not requires company location id
+	DECLARE @ysnUseLocation BIT
+	SELECT @ysnUseLocation = ysnUseLocation FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
+
+	IF @ysnUseLocation = 1
+	BEGIN
+
+		IF EXISTS (SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId)
+		BEGIN
+
+			SELECT @locationNumber = strLocationNumber + '-' FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+
+			IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumberLocation WHERE intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId)
+			BEGIN
+				SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(location.intNumber AS NVARCHAR(20)) --CASE WHEN @digit = 0 THEN CAST(location.intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(location.intNumber, 1) AS NVARCHAR(20)), @digit) END
+				FROM tblSMStartingNumberLocation location
+				INNER JOIN tblSMStartingNumber number
+				ON location.intStartingNumberId = number.intStartingNumberId
+				WHERE location.intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId
+
+				-- Increment the next number
+				UPDATE	tblSMStartingNumberLocation
+				SET		intNumber = ISNULL(intNumber, 0) + 1
+				WHERE	intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId
+			END
+			ELSE
+			BEGIN
+				INSERT INTO tblSMStartingNumberLocation (intStartingNumberId, intCompanyLocationId, intNumber, intConcurrencyId)
+				VALUES (@intStartingNumberId, @intCompanyLocationId, 2, 1)
+
+				-- Assemble the string ID. 
+				SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(1 AS NVARCHAR(20))--CASE WHEN @digit = 0 THEN CAST(1 AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(1, 1) AS NVARCHAR(20)), @digit) END
+				FROM	tblSMStartingNumber
+				WHERE	intStartingNumberId = @intStartingNumberId
+			END
+
+		END
+		
 	END
 	ELSE
 	BEGIN
-		INSERT INTO tblSMStartingNumberLocation (intStartingNumberId, intCompanyLocationId, intNumber, intConcurrencyId)
-		VALUES (@intStartingNumberId, @intCompanyLocationId, 2, 1)
-
 		-- Assemble the string ID. 
-		SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(intNumber AS NVARCHAR(20))--CASE WHEN @digit = 0 THEN CAST(1 AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(1, 1) AS NVARCHAR(20)), @digit) END
+		SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(intNumber AS NVARCHAR(20))
 		FROM	tblSMStartingNumber
+		WHERE	intStartingNumberId = @intStartingNumberId
+
+		-- Increment the next number
+		UPDATE	tblSMStartingNumber
+		SET		intNumber = ISNULL(intNumber, 0) + 1
 		WHERE	intStartingNumberId = @intStartingNumberId
 	END
 END

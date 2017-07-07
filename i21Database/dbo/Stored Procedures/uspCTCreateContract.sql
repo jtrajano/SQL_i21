@@ -115,7 +115,7 @@ BEGIN TRY
 				ysnPrinted			=	0,
 
 				intItemId			=	SC.intItemId,		intItemUOMId				=	SC.intItemUOMIdTo,
-				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SC.intStorageScheduleId,SP.intStorageScheduleId),
+				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SP.intStorageScheduleId,SC.intStorageScheduleId),
 				dtmEndDate			=	CP.dtmDefEndDate,	intCompanyLocationId		=	SC.intProcessingLocationId, 
 				dblQuantity			=	0,					intContractStatusId			=	1,
 				dblBalance			=	0,					dtmStartDate				=	SC.dtmTicketDateTime,

@@ -170,7 +170,7 @@ SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, 1
 
 DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
 
@@ -190,7 +190,7 @@ BEGIN
 END
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
-(SELECT I.strInvoiceNumber AS strReferenceNumber
+(SELECT strReferenceNumber = CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 THEN I.strInvoiceNumber ELSE ISNULL(I.strInvoiceOriginId, I.strInvoiceNumber) END
 	 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
 	 , C.intEntityCustomerId
 	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
@@ -206,13 +206,14 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityId, I.dtmDate), 0)
 	 , dblRunningBalance = SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE (CASE WHEN I.strType = ''CF Tran'' THEN 0 ELSE I.dblInvoiceTotal END) END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 	 , C.strCustomerNumber
-	 , C.strName
+	 , strDisplayName = CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(CC.strCheckPayeeName, C.strName) END
+	 , strName = C.strName
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
 	 , CL.strLocationName
-	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
+	 , strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
+	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Report'')	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
 	 , dblARBalance = CUST.dblARBalance
@@ -314,7 +315,7 @@ FROM
 	@temp_statement_table
 WHERE 
 	strReferenceNumber IN (SELECT 
-								strInvoiceNumber 
+								strInvoiceNumber = CASE WHEN ISNULL(ysnImportedFromOrigin, 0) = 0 THEN strInvoiceNumber ELSE strInvoiceOriginId END 
 						   FROM 
 								tblARInvoice 
 					       WHERE 
@@ -322,7 +323,7 @@ WHERE
 
 IF @ysnPrintOnlyPastDue = 1
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE dblPastDue = 0
+		DELETE FROM @temp_statement_table WHERE dtmDueDate <= @dtmDateTo
 		UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
 	END
 
@@ -333,7 +334,10 @@ IF @ysnPrintZeroBalance = 0
 	END
 
 IF @ysnPrintCreditBalance = 0
-	DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
+	BEGIN
+		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
+		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0
+	END
 
 INSERT INTO @temp_cf_table
 (
