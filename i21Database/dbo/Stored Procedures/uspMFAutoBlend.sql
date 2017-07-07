@@ -609,7 +609,7 @@ Begin
 
 	--Consume Lots/Items/End Blend Sheet
 
-	Exec [uspMFPostConsumption] 1,0,@intWorkOrderId,@intUserId,NULL,@strRetBatchId OUT,NULL,1,@strActualCost 
+	Exec [uspMFPostConsumption] 1,0,@intWorkOrderId,@intUserId,NULL,@strRetBatchId OUT,NULL,1,NULL
 
 
 	Update tblMFWorkOrder Set intStatusId=12,dtmCompletedDate=GETDATE(),intLastModifiedUserId=@intUserId,dtmLastModified=GETDATE(),strBatchId=@strRetBatchId 
