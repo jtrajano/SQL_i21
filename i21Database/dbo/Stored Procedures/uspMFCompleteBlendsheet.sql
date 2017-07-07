@@ -2,6 +2,7 @@
 	@strXml NVARCHAR(MAX)
 	,@intLotId INT = 0 OUT
 	,@strLotNumber NVARCHAR(50) = '' OUT
+	,@strActualCost NVARCHAR(20) = NULL
 	)
 AS
 BEGIN TRY
@@ -330,6 +331,10 @@ BEGIN TRY
 			,''
 			,''
 			,@dtmCurrentDate
+			,null
+			,null
+			,null
+			,@strActualCost
 	END
 	ELSE
 	BEGIN

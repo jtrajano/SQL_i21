@@ -661,7 +661,7 @@ Begin
 	Set @strXml += @strWorkOrderConsumedLotsXml
 	Set @strXml += '</root>'
 
-	Exec uspMFCompleteBlendSheet @strXml,@intBlendLotId OUT,@strLotNumber OUT
+	Exec uspMFCompleteBlendSheet @strXml,@intBlendLotId OUT,@strLotNumber OUT, @strActualCost
 
 	If @strOrderType='SALES ORDER'
 		Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId AND intWorkOrderId > @intWorkOrderId

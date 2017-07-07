@@ -23,6 +23,7 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction]
 	,@intTransactionDetailId INT = NULL
 	,@strShiftActivityNo NVARCHAR(50) = NULL
 	,@intShiftId int=NULL
+	,@strActualCost NVARCHAR(20) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -511,6 +512,7 @@ BEGIN
 			,intStorageLocationId
 			,intSourceTransactionId
 			,strSourceTransactionId
+			,strActualCostId
 			)
 		SELECT intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
@@ -549,6 +551,7 @@ BEGIN
 			,intStorageLocationId = @intStorageLocationId
 			,intSourceTransactionId = @INVENTORY_PRODUCE
 			,strSourceTransactionId = @strTransactionId
+			,strActualCostId = @strActualCost
 	ELSE
 		INSERT INTO @ItemsForPost (
 			intItemId
@@ -570,6 +573,7 @@ BEGIN
 			,intStorageLocationId
 			,intSourceTransactionId
 			,strSourceTransactionId
+			,strActualCostId
 			)
 		SELECT intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
@@ -608,7 +612,7 @@ BEGIN
 			,intStorageLocationId = @intStorageLocationId
 			,intSourceTransactionId = @INVENTORY_PRODUCE
 			,strSourceTransactionId = @strTransactionId
-
+			,strActualCostId = @strActualCost
 	DELETE
 	FROM @GLEntries
 
