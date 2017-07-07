@@ -833,7 +833,8 @@ INNER JOIN ENTITY EME ON ARC.intEntityId = EME.[intEntityId]
 LEFT OUTER JOIN STORAGELOCATION ICSL ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId]		
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intInventoryShipmentItemId],0) = 0) ARID ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 LEFT OUTER JOIN COMPANYLOCATION SMCL ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN CURRENCY SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]	
 LEFT OUTER JOIN SCALETICKET ON ICISI.[intSourceId] = SCALETICKET.[intTicketId]		
