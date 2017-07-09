@@ -230,7 +230,8 @@ AS
 	END
 	ELSE
 	BEGIN
-		SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
+		IF LTRIM(RTRIM(ISNULL(@Condition,''))) <> ''
+			SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
 	END
 
 	IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''
@@ -248,7 +249,8 @@ AS
 	END
 	ELSE
 	BEGIN
-		SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
+		IF LTRIM(RTRIM(ISNULL(@Condition,''))) <> ''
+			SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
 	END
 
 	IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''
@@ -270,7 +272,8 @@ AS
 	END
 	ELSE
 	BEGIN
-		SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
+		IF LTRIM(RTRIM(ISNULL(@Condition,''))) <> ''
+			SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
 	END
 
 	IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''
@@ -292,7 +295,8 @@ AS
 	END
 	ELSE
 	BEGIN
-		SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
+		IF LTRIM(RTRIM(ISNULL(@Condition,''))) <> ''
+			SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
 	END
 
 	SET @SQL = 'SELECT * FROM ##BasisComponent WHERE ' + @Condition
