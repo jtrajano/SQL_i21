@@ -5414,6 +5414,7 @@
     <Build Include="dbo\Views\vyuRKGetInvoicedQty.sql" />
     <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
     <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAlertNotificationCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
