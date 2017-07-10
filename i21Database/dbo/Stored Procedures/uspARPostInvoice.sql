@@ -24,6 +24,9 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
+
+
+ 
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -354,7 +357,7 @@ END CATCH
 
 --Process Grain Bank Items
 BEGIN TRY
-	IF @recap = 0
+	--IF @recap = 0
 		BEGIN
 			DECLARE @GrainItems TABLE(
 									 intEntityCustomerId		INT
@@ -388,8 +391,11 @@ BEGIN TRY
 				AND ID.intStorageScheduleTypeId IS NOT NULL
 				AND ID.dblQtyShipped <> @ZeroDecimal
 
+	
+
 			WHILE EXISTS (SELECT NULL FROM @GrainItems)
 				BEGIN
+				
 					DECLARE
 						 @EntityCustomerId		INT
 						,@InvoiceId				INT 
@@ -417,6 +423,7 @@ BEGIN TRY
 					BEGIN TRY
 					IF @post = 1
 						BEGIN
+
 							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
 								 @strOptionType		= 'Update'
 								,@strSourceType		= 'Invoice'
@@ -425,7 +432,163 @@ BEGIN TRY
 								,@intStorageTypeId	= @StorageScheduleTypeId
 								,@dblUnitsConsumed	= @Quantity
 								,@IntSourceKey		= @InvoiceId
-								,@intUserId			= @UserEntityID							
+								,@intUserId			= @UserEntityID			
+								
+							DECLARE @GrainStorageCharge TABLE  (
+								intCustomerStorageId INT,
+								strStorageTicketNumber NVARCHAR(100),
+								dblOpeningBalance NUMERIC(18,6),
+								intUnitMeasureId INT,
+								strUnitMeasure NVARCHAR(100),
+								strItemType NVARCHAR(100),
+								intItemId INT,
+								strItem NVARCHAR(100),
+								dblCharge NUMERIC(18,6)
+							);
+						 
+							INSERT INTO @GrainStorageCharge
+							(
+								intCustomerStorageId, 
+								strStorageTicketNumber,
+								dblOpeningBalance,
+								intUnitMeasureId,
+								strUnitMeasure, 
+								strItemType,
+								intItemId,
+								strItem,
+								dblCharge 
+							)
+							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
+								@strOptionType		= 'Update'
+								,@strSourceType		= 'Invoice'
+								,@intEntityId		= @EntityCustomerId
+								,@intItemId			= @ItemId
+								,@intStorageTypeId	= @StorageScheduleTypeId
+								,@dblUnitsConsumed	= @Quantity
+								,@IntSourceKey		= @InvoiceId
+								,@intUserId			= @UserEntityID								
+						
+							DECLARE @intStorageItemId INT
+									, @strStorageItemDescription NVARCHAR(100)
+									, @intStorageUOM INT
+									, @intItemUOM INT
+									, @strItemDescription NVARCHAR(100)
+									, @dblStorageCharge NUMERIC (18,6)
+									, @intCustomerStorageId INT
+							
+							SELECT TOP 1 
+								@intStorageItemId = intItemId
+								, @strStorageItemDescription = strItem
+								, @intStorageUOM = intUnitMeasureId
+								, @dblStorageCharge = dblCharge
+								, @intCustomerStorageId = intCustomerStorageId
+							FROM
+								@GrainStorageCharge	
+							WHERE 
+								strItemType = 'Storage Charge'
+
+							SELECT 
+								@strItemDescription = strDescription 
+							FROM 
+								tblICItem
+							WHERE 
+								intItemId = @intStorageItemId
+
+							SELECT 
+								@intItemUOM = intItemUOMId 
+							FROM 
+								tblICItemUOM
+							WHERE 
+								intUnitMeasureId = @intStorageUOM 			
+
+							DECLARE  @NewId INT
+									,@NewDetailId INT
+									,@AddDetailError NVARCHAR(MAX)
+					 
+							EXEC [dbo].[uspARAddItemToInvoice]
+									 @InvoiceId						= @InvoiceId	
+									,@ItemId						= @intStorageItemId
+									,@ItemPrepayTypeId				= NULL
+									,@ItemPrepayRate				= NULL
+									,@ItemIsInventory				= NULL
+									,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
+									,@ErrorMessage					= @AddDetailError	OUTPUT
+									,@RaiseError					= @RaiseError
+									,@ItemDocumentNumber			= NULL
+									,@ItemDescription				= @strItemDescription
+									,@OrderUOMId					= NULL
+									,@ItemQtyOrdered				= NULL
+									,@ItemUOMId						= @intItemUOM
+									,@ItemQtyShipped				= 1
+									,@ItemDiscount					= NULL
+									,@ItemTermDiscount				= NULL
+									,@ItemTermDiscountBy			= NULL
+									,@ItemPrice						= @dblStorageCharge
+									,@RefreshPrice					= 0
+									,@ItemMaintenanceType			= NULL
+									,@ItemFrequency					= NULL
+									,@ItemMaintenanceDate			= NULL
+									,@ItemMaintenanceAmount			= NULL
+									,@ItemLicenseAmount				= NULL
+									,@ItemTaxGroupId				= NULL
+									,@ItemStorageLocationId			= NULL 
+									,@ItemCompanyLocationSubLocationId	= NULL 
+									,@RecomputeTax					= NULL
+									,@ItemSCInvoiceId				= NULL
+									,@ItemSCInvoiceNumber			= NULL
+									,@ItemInventoryShipmentItemId	= NULL
+									,@ItemInventoryShipmentChargeId	= NULL
+									,@ItemShipmentNumber			= NULL
+									,@ItemRecipeItemId				= NULL
+									,@ItemRecipeId					= NULL
+									,@ItemSublocationId				= NULL
+									,@ItemCostTypeId				= NULL
+									,@ItemMarginById				= NULL
+									,@ItemCommentTypeId				= NULL
+									,@ItemMargin					= NULL
+									,@ItemRecipeQty					= NULL		
+									,@ItemSalesOrderDetailId		= NULL
+									,@ItemSalesOrderNumber			= NULL
+									,@ItemContractHeaderId			= NULL
+									,@ItemContractDetailId			= NULL
+									,@ItemShipmentId				= NULL
+									,@ItemShipmentPurchaseSalesContractId	= NULL
+									,@ItemWeightUOMId				= NULL
+									,@ItemWeight					= NULL
+									,@ItemShipmentGrossWt			= NULL
+									,@ItemShipmentTareWt			= NULL
+									,@ItemShipmentNetWt				= NULL
+									,@ItemTicketId					= NULL
+									,@ItemTicketHoursWorkedId		= NULL
+									,@ItemCustomerStorageId			= @intCustomerStorageId
+									,@ItemSiteDetailId				= NULL
+									,@ItemLoadDetailId				= NULL
+									,@ItemLotId						= NULL
+									,@ItemOriginalInvoiceDetailId	= NULL
+									,@ItemSiteId					= NULL
+									,@ItemBillingBy					= NULL
+									,@ItemPercentFull				= NULL
+									,@ItemNewMeterReading			= NULL
+									,@ItemPreviousMeterReading		= NULL
+									,@ItemConversionFactor			= NULL
+									,@ItemPerformerId				= NULL
+									,@ItemLeaseBilling				= NULL
+									,@ItemVirtualMeterReading		= NULL
+									,@ItemConversionAccountId		= NULL
+									,@ItemSalesAccountId			= NULL
+									,@ItemSubCurrencyId				= NULL
+									,@ItemSubCurrencyRate			= NULL
+									,@ItemStorageScheduleTypeId		= @StorageScheduleTypeId
+									,@ItemDestinationGradeId		= NULL
+									,@ItemDestinationWeightId		= NULL	
+									
+									
+							UPDATE tblARInvoiceDetail 
+							SET 
+								intCustomerStorageId = @intCustomerStorageId 
+							WHERE 
+								intInvoiceDetailId IN (@NewDetailId)
+																																			
 							END
 					ELSE
 						BEGIN
@@ -434,7 +597,18 @@ BEGIN TRY
 									@IntSourceKey	= @InvoiceId,
 									@intUserId		= @UserEntityID
 
-							UPDATE tblARInvoiceDetail SET intCustomerStorageId = NULL WHERE intInvoiceDetailId = @InvoiceDetailId							
+							DELETE FROM tblARInvoiceDetail 
+							WHERE 
+								intInvoiceId = @InvoiceId AND intCustomerStorageId IS NOT NULL
+
+							UPDATE tblARInvoiceDetail 
+							SET 
+								intCustomerStorageId = NULL 
+							WHERE 
+								intInvoiceDetailId = @InvoiceDetailId	
+								
+							EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId									
+												
 						END						
 					END TRY
 					BEGIN CATCH
@@ -4770,7 +4944,7 @@ SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
 IF @raiseError = 0
 	COMMIT TRANSACTION
-RETURN 1;
+	RETURN 1;
 
 IF @post = 0
 	BEGIN
