@@ -9,6 +9,7 @@
     [dtmDateModified]   DATETIME         NOT NULL,
     [intSize]           INT              NOT NULL,
     [intEntityId]       INT              NULL,
+	[ysnDisableDelete]	BIT				 NULL,
     [intConcurrencyId]  INT              NOT NULL,
     CONSTRAINT [PK_dbo.tblAttachment] PRIMARY KEY CLUSTERED ([intAttachmentId] ASC)
 );
