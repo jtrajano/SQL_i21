@@ -1,6 +1,6 @@
-﻿CREATE PROCEDURE [dbo].uspMFCreatePickOrder (
+﻿CREATE PROCEDURE [dbo].uspMFCreatePickOrderValidation (
 	@strXML NVARCHAR(MAX)
-	,@intOrderHeaderId INT OUTPUT
+	,@strValidationMsg NVARCHAR(MAX) = '' OUTPUT
 	)
 AS
 BEGIN TRY
@@ -54,6 +54,7 @@ BEGIN TRY
 		,@strPickByUpperToleranceQty NVARCHAR(50)
 		,@ysnPickRemainingQty bit
 		,@strReferernceNo nvarchar(50)
+		,@intOrderHeaderId INT
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -146,18 +147,7 @@ BEGIN TRY
 
 	SELECT @strUserName = strUserName
 	FROM tblSMUserSecurity
-	WHERE [intEntityId] = @intUserId
-
-	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-		,@intItemId = NULL
-		,@intManufacturingId = NULL
-		,@intSubLocationId = NULL
-		,@intLocationId = @intLocationId
-		,@intOrderTypeId = 6
-		,@intBlendRequirementId = NULL
-		,@intPatternCode = 75
-		,@ysnProposed = 0
-		,@strPatternString = @strBOLNo OUTPUT
+	WHERE intEntityUserSecurityId = @intUserId
 
 	DECLARE @tblMFOrderHeader TABLE (intOrderHeaderId INT)
 
@@ -217,8 +207,6 @@ BEGIN TRY
 	
 	SELECT @intPMStageLocationId
 
-	BEGIN TRANSACTION
-
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
 	Select @strReferernceNo=strWorkOrderNo from tblMFWorkOrder Where intWorkOrderId in (Select intWorkOrderId from @tblMFWorkOrder)
@@ -250,8 +238,8 @@ BEGIN TRY
 		,@dtmCurrentDate
 		,@strUserName
 
-	INSERT INTO @tblMFOrderHeader
-	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
+	--INSERT INTO @tblMFOrderHeader
+	--EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM @tblMFOrderHeader
@@ -862,71 +850,30 @@ BEGIN TRY
 		END
 	END
 
-	--IF @dblMinQtyCanBeProduced > - 1 and @ysnPickRemainingQty=1
-	--BEGIN
-	--	SELECT @intItemUOMId = intItemUOMId
-	--	FROM tblMFWorkOrder
-	--	WHERE intWorkOrderId = @intWorkOrderId
+	IF @dblMinQtyCanBeProduced > - 1 and @ysnPickRemainingQty=1
+	BEGIN
+		SELECT @intItemUOMId = intItemUOMId
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
 
-	--	SELECT @intUnitMeasureId = intUnitMeasureId
-	--	FROM tblICItemUOM
-	--	WHERE intItemUOMId = @intItemUOMId
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intItemUOMId
 
-	--	SELECT @strUnitMeasure = strUnitMeasure
-	--	FROM tblICUnitMeasure
-	--	WHERE intUnitMeasureId = @intUnitMeasureId
+		SELECT @strUnitMeasure = strUnitMeasure
+		FROM tblICUnitMeasure
+		WHERE intUnitMeasureId = @intUnitMeasureId
 
-	--	SELECT @strMinQtyCanBeProduced = @strMinQtyCanBeProduced + ' ' + @strUnitMeasure
-
-	--	RAISERROR (
-	--			'Available qty for item %s is %s which is less than the required qty %s. %s can be produced with the available inputs. Please change the work order quantity and try again.'
-	--			,11
-	--			,1
-	--			,@strItemNo
-	--			,@strAvailableQty
-	--			,@strRequiredQty
-	--			,@strMinQtyCanBeProduced
-	--			)
-
-	--	RETURN
-	--END
-
-	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
-
-	INSERT INTO tblMFStageWorkOrder (
-		intWorkOrderId
-		,intItemId
-		,dtmPlannedDate
-		,intPlannnedShiftId
-		,intOrderHeaderId
-		,intConcurrencyId
-		,dtmCreated
-		,intCreatedUserId
-		,dtmLastModified
-		,intLastModifiedUserId
-		)
-	SELECT intWorkOrderId
-		,intItemId
-		,dtmPlannedDate
-		,intPlannedShift
-		,@intOrderHeaderId
-		,0
-		,@dtmCurrentDate
-		,@intUserId
-		,@dtmCurrentDate
-		,@intUserId
-	FROM @tblMFWorkOrder
-
-	COMMIT TRANSACTION
+		SELECT @strMinQtyCanBeProduced = @strMinQtyCanBeProduced + ' ' + @strUnitMeasure
+		
+		SELECT @strValidationMsg = 'Available qty for item ' + @strItemNo + ' is ' + @strAvailableQty + ' which is less than the required qty ' + @strRequiredQty + '. ' + @strMinQtyCanBeProduced + ' can be produced with the available inputs. Do you want to continue ?.'
+	END
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-
-	IF XACT_STATE() != 0
-		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0
 		EXEC sp_xml_removedocument @idoc
