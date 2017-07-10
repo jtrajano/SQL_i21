@@ -73,6 +73,7 @@ BEGIN
 				,intFillMethodId = B.intFillMethodId
 				,strFillMethod = L.strFillMethod
 				,ysnHold = B.ysnOnHold
+				,ysnRoutingAlert = B.ysnRoutingAlert
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -145,6 +146,7 @@ BEGIN
 				,intFillMethodId = B.intFillMethodId
 				,strFillMethod = L.strFillMethod
 				,ysnHold = B.ysnOnHold
+				,ysnRoutingAlert = B.ysnRoutingAlert
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
