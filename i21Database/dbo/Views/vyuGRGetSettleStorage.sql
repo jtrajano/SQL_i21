@@ -18,7 +18,10 @@ AS
 ,dblSelectedUnits
 ,dblDiscountsDue
 ,dblNetSettlement
-,ysnPosted
+,SS.ysnPosted
+,SS.intBillId
+,Bill.strBillId
 FROM tblGRSettleStorage SS
 JOIN tblEMEntity E ON E.intEntityId = SS.intEntityId  
 JOIN tblICItem Item ON Item.intItemId = SS.intItemId
+JOIN tblAPBill Bill ON Bill.intBillId=SS.intBillId

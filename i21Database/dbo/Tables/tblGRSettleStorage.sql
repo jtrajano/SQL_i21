@@ -2,7 +2,8 @@
 (
 	[intSettleStorageId] INT NOT NULL  IDENTITY, 
     [intConcurrencyId] INT NOT NULL, 
-    [intEntityId] INT NULL, 
+    [intEntityId] INT NULL,
+	[intCompanyLocationId] INT NULL, 
 	[intItemId] INT NULL,
 	[dblSpotUnits] NUMERIC(18, 6) NULL,
 	[dblFuturesPrice] NUMERIC(18, 6) NULL,     
@@ -17,7 +18,13 @@
 	[dblDiscountsDue] NUMERIC(18, 6) NULL,
 	[dblNetSettlement] NUMERIC(18, 6) NULL,
 	[ysnPosted] [bit] NULL DEFAULT ((0)),
+	[intCommodityId] INT NULL,
+	[intCommodityStockUomId] INT NULL,
+	[intCreatedUserId] INT NULL,
+	[intBillId] INT NULL,
     CONSTRAINT [PK_tblGRSettleStorage_intCustomerStorageId] PRIMARY KEY ([intSettleStorageId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
+	CONSTRAINT [FK_tblGRSettleStorage_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+	CONSTRAINT [FK_tblGRSettleStorage_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )

@@ -107,16 +107,16 @@ BEGIN
 						  ) + ' '
 
 	IF (@Amount >= 100 AND @Amount <= 999)
-		SET @str = @str + dbo.NumberToWords(@Amount / 100) + ' Hundred ' + dbo.NumberToWords(@Amount % 100)
+		SET @str = @str + dbo.fnGRConvertNumberToWords(@Amount / 100) + ' Hundred ' + dbo.fnGRConvertNumberToWords(@Amount % 100)
 
 	IF (@Amount >= 1000 AND @Amount <= 99999)
-		SET @str = @str + dbo.NumberToWords(@Amount / 1000) + ' Thousand ' + dbo.NumberToWords(@Amount % 1000)
+		SET @str = @str + dbo.fnGRConvertNumberToWords(@Amount / 1000) + ' Thousand ' + dbo.fnGRConvertNumberToWords(@Amount % 1000)
 
 	IF (@Amount >= 100000 AND @Amount <= 9999999)
-		SET @str = @str + dbo.NumberToWords(@Amount / 100000) + ' Lac ' + dbo.NumberToWords(@Amount % 100000)
+		SET @str = @str + dbo.fnGRConvertNumberToWords(@Amount / 100000) + ' Lac ' + dbo.fnGRConvertNumberToWords(@Amount % 100000)
 
 	IF (@Amount >= 10000000)
-		SET @str = @str + dbo.NumberToWords(@Amount / 10000000) + ' Crore ' + dbo.NumberToWords(@Amount % 10000000)
+		SET @str = @str + dbo.fnGRConvertNumberToWords(@Amount / 10000000) + ' Crore ' + dbo.fnGRConvertNumberToWords(@Amount % 10000000)
 	
 	RETURN @str
 END
