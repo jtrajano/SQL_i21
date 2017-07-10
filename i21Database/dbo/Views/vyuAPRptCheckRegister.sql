@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPRptCheckRegister]
 	AS 
 		SELECT  
+			APP.strPaymentRecordNum,
 			CMBT.ysnCheckVoid,
 			CMBT.ysnClr,
 			'AP' AS strSystem,
