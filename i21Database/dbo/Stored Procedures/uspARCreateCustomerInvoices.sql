@@ -558,7 +558,7 @@ SELECT
 FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId])
 
 UNION ALL
 
@@ -574,7 +574,7 @@ SELECT
 FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
 
 
 UNION ALL
@@ -634,7 +634,7 @@ WHERE
 UPDATE
 	@InvoicesToGenerate
 SET
-	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, intDocumentMaintenanceId)
+	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, 'Header', intDocumentMaintenanceId)
 WHERE
 	[strComments] IS NULL 
 	OR LTRIM(RTRIM([strComments])) = ''
@@ -830,7 +830,7 @@ FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intTermId] IS NULL
-	AND NOT EXISTS (SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intTermsId] IS NOT NULL AND ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
+	AND NOT EXISTS (SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intTermsId] IS NOT NULL AND ARC.[intEntityId] = ITG.[intEntityCustomerId])
 	
 DELETE FROM V
 FROM @InvoicesToGenerate V
@@ -925,7 +925,7 @@ USING
 		,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 THEN ITG.strInvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= ITG.strTransactionType
 		,[strType]						= ITG.strType
-		,[intEntityCustomerId]			= ARC.[intEntityCustomerId]
+		,[intEntityCustomerId]			= ARC.[intEntityId]
 		,[intCompanyLocationId]			= ITG.intCompanyLocationId
 		,[intAccountId]					= ITG.[intAccountId]
 		,[intCurrencyId]				= ITG.intCurrencyId
@@ -964,7 +964,7 @@ USING
 		,[strBOLNumber]					= ITG.strBOLNumber
 		,[strDeliverPickup]				= ITG.strDeliverPickup
 		,[strComments]					= CASE WHEN (ITG.strComments IS NULL OR ITG.strComments = '') THEN (SELECT TOP 1 strMessage FROM tblSMDocumentMaintenanceMessage WHERE intDocumentMaintenanceId = ITG.intDocumentMaintenanceId AND strHeaderFooter NOT IN ('Footer')) ELSE ITG.strComments END
-		,[strFooterComments]			= dbo.fnARGetFooterComment(ITG.intCompanyLocationId, ARC.intEntityCustomerId, 'Invoice Footer')
+		,[strFooterComments]			= dbo.fnARGetFooterComment(ITG.intCompanyLocationId, ARC.intEntityId, 'Invoice Footer')
 		,[intShipToLocationId]			= ISNULL(ITG.intShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
@@ -1025,7 +1025,7 @@ USING
 			ON ITG.[intId] = ITG2.[intId]
 	INNER JOIN
 		(SELECT [intEntityId], [intTermsId], [intSalespersonId], [intShipToId], [intBillToId] FROM tblARCustomer WITH (NOLOCK)) ARC
-			ON ITG.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
+			ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 
 	LEFT OUTER JOIN
 		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [intEntityId], [strCountry], [strState], [strCity], [strZipCode], [intTermsId], [intShipViaId]
 		FROM 
@@ -1033,7 +1033,7 @@ USING
 		WHERE
 			ysnDefaultLocation = 1
 		) EL
-			ON ARC.[intEntityCustomerId] = EL.[intEntityId]
+			ON ARC.[intEntityId] = EL.[intEntityId]
 	LEFT OUTER JOIN
 		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
 			ON ISNULL(ITG.intShipToLocationId, 0) <> 0

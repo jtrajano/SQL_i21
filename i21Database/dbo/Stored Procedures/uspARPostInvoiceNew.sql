@@ -525,7 +525,7 @@ END CATCH
 						ON PID.intInvoiceId = ARI.intInvoiceId				
 				INNER JOIN
 					(SELECT intEntityId, strCustomerNumber, ysnActive FROM dbo.tblARCustomer WITH (NOLOCK)) ARC
-						ON ARI.intEntityCustomerId = ARC.intEntityCustomerId 					
+						ON ARI.intEntityCustomerId = ARC.intEntityId 					
 				WHERE
 					ARC.ysnActive = 0
 								
@@ -1575,7 +1575,7 @@ END CATCH
 						ON ARI.intInvoiceId = PID.intInvoiceId
 				INNER JOIN
 					(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) ARC
-						ON ARI.intEntityCustomerId = ARC.intEntityCustomerId 
+						ON ARI.intEntityCustomerId = ARC.intEntityId 
 				LEFT OUTER JOIN
 					(SELECT intSiteID, intCustomerID FROM tblTMSite WITH (NOLOCK)) TMS
 						ON ARID.intSiteId = TMS.intSiteID

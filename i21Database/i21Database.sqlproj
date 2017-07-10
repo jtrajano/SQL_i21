@@ -1872,7 +1872,6 @@
     <Build Include="dbo\Tables\tblWHTaskPriority.sql" />
     <Build Include="dbo\Tables\tblWHTaskState.sql" />
     <Build Include="dbo\Tables\tblWHTaskType.sql" />
-    <Build Include="dbo\Stored Procedures\uspARAddInvoice.sql" />
     <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />

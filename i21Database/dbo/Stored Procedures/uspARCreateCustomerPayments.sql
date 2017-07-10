@@ -172,7 +172,7 @@ SELECT
 FROM
 	@PaymentsToGenerate ITG --WITH (NOLOCK)
 WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityId])
 
 UNION ALL
 
@@ -186,7 +186,7 @@ SELECT
 FROM
 	@PaymentsToGenerate ITG --WITH (NOLOCK)
 WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityId] AND ARC.[ysnActive] = 1)
 
 
 UNION ALL
@@ -381,7 +381,7 @@ MERGE INTO tblARPayment AS Target
 USING 
 	(
 	SELECT
-		 [intEntityCustomerId]		= ARC.[intEntityCustomerId]
+		 [intEntityCustomerId]		= ARC.[intEntityId]
 		,[intCurrencyId]			= ISNULL(ITG.[intCurrencyId], ISNULL(ARC.[intCurrencyId], @DefaultCurrency))	
 		,[dtmDatePaid]				= ISNULL(ITG.[dtmDatePaid], @DateNow)
 		,[intAccountId]				= ITG.[intAccountId]
@@ -423,7 +423,7 @@ USING
 			ON ITG.[intId] = ITG2.[intId]
 	INNER JOIN
 		(SELECT [intEntityId], [dblARBalance], [intCurrencyId] FROM tblARCustomer WITH (NOLOCK)) ARC
-			ON ITG.[intEntityCustomerId] = ARC.[intEntityCustomerId] 	
+			ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 	
 	)
 AS Source
 ON Target.[intPaymentId] = Source.[intPaymentId]

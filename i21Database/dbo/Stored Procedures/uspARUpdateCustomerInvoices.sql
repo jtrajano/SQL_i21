@@ -364,7 +364,7 @@ SELECT
 FROM
 	@InvoicesToUpdate ITG --WITH (NOLOCK)
 WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId])
 
 UNION ALL
 
@@ -380,7 +380,7 @@ SELECT
 FROM
 	@InvoicesToUpdate ITG --WITH (NOLOCK)
 WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
 
 
 UNION ALL
@@ -819,7 +819,7 @@ BEGIN TRY
 		@InvoicesToUpdate ITG --WITH (NOLOCK)
 			ON ARI.[intInvoiceId] = ITG.[intInvoiceId]
 	INNER JOIN tblARCustomer ARC
-			ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+			ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 	LEFT OUTER JOIN
 					(	SELECT 
 								[intEntityLocationId]
@@ -837,7 +837,7 @@ BEGIN TRY
 						WHERE
 							ysnDefaultLocation = 1
 					) EL
-						ON ARC.[intEntityCustomerId] = EL.[intEntityId]
+						ON ARC.[intEntityId] = EL.[intEntityId]
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] SL
 			ON ISNULL(ITG.[intShipToLocationId], 0) <> 0
