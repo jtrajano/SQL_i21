@@ -513,7 +513,7 @@ BEGIN TRY
 									,@ItemIsInventory				= NULL
 									,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
 									,@ErrorMessage					= @AddDetailError	OUTPUT
-									,@RaiseError					= @RaiseError
+									,@RaiseError					= @raiseError
 									,@ItemDocumentNumber			= NULL
 									,@ItemDescription				= @strItemDescription
 									,@OrderUOMId					= NULL
