@@ -5407,6 +5407,7 @@
     <Build Include="dbo\Tables\tblARSearchStatementCustomer.sql" />
     <Build Include="dbo\User Defined Types\AuditLogStagingTable.sql" />
     <Build Include="dbo\Views\vyuGRGetContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportInventoryMassMaintenancePreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
