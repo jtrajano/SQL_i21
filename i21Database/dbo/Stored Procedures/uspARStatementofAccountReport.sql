@@ -145,7 +145,7 @@ SELECT @strCustomerName
 	 , ISNULL(@ysnPrintZeroBalance, 0)
 	 , ISNULL(@ysnPrintCreditBalance, 1)
 	 , ISNULL(@ysnIncludeBudget, 0)
-	 , ISNULL(@ysnPrintOnlyPastDue, 1)
+	 , ISNULL(@ysnPrintOnlyPastDue, 0)
 	 , ISNULL(@strStatementFormat, 'Open Item')
 	 , @dtmDateFrom
 	 , @dtmDateTo

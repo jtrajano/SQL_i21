@@ -405,8 +405,16 @@ IF @ysnReportDetail = 1
 BEGIN
 	--- Get only valid customers
 	TRUNCATE TABLE tblARSearchStatementCustomer
-	INSERT INTO tblARSearchStatementCustomer (intEntityCustomerId, strCustomerNumber, strCustomerName, dblARBalance, strTransactionId, strTransactionDate, dblTotalAmount, intConcurrencyId)
-	SELECT DISTINCT ABC.intEntityCustomerId, ABC.strCustomerNumber, ABC.strCustomerName, ARC.dblARBalance, '', CONVERT(char(10), GETDATE(),126), 0, 0
+	INSERT INTO tblARSearchStatementCustomer (intEntityCustomerId, strCustomerNumber, strCustomerName, dblARBalance, strTransactionId, strTransactionDate, dblTotalAmount, ysnHasEmailSetup, intConcurrencyId)
+	SELECT DISTINCT ABC.intEntityCustomerId
+				  , ABC.strCustomerNumber
+				  , ABC.strCustomerName
+				  , ARC.dblARBalance
+				  , ''
+				  , CONVERT(char(10), GETDATE(),126)
+				  , 0
+				  , CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+				  , 0
 	FROM
 	(
 	--- Without CF Report
@@ -505,8 +513,18 @@ BEGIN
 					@temp_cf_table) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
 	WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
 	AND STATEMENTREPORT.intInvoiceId IN (SELECT intInvoiceId FROM @temp_cf_table)) ABC 
-	INNER JOIN 
-		(SELECT intEntityId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityId
+	INNER JOIN (
+		SELECT intEntityId
+			 , dblARBalance 
+		FROM dbo.tblARCustomer WITH (NOLOCK)
+	) ARC ON ABC.intEntityCustomerId = ARC.intEntityId
+	OUTER APPLY (
+		SELECT intEmailSetupCount = COUNT(*) 
+		FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+		WHERE CC.intCustomerEntityId = ABC.intEntityCustomerId 
+		  AND ISNULL(CC.strEmail, '') <> '' 
+		  AND CC.strEmailDistributionOption LIKE '%Statements%'
+	) EMAILSETUP
 END
 
 ELSE
