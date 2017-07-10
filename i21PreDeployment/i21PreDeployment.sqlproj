@@ -289,4 +289,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\4_UpdateInvoicePaymentMethod.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\8_AP\1730_Remove_ysnVoid_tblAPPayment.sql" />
+  </ItemGroup>
 </Project>
