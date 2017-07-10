@@ -173,7 +173,7 @@ ELSE
 							,@intVoidBankTransactionTypeId = intBankTransactionTypeId 
 				FROM #tmpCMBankTransactionReversal
 
-				IF (@intVoidBankTransactionTypeId = @AP_PAYMENT OR @intVoidBankTransactionTypeId = @PAYCHECK OR @intVoidBankTransactionTypeId = @DIRECT_DEPOSIT OR @intVoidBankTransactionTypeId = @ACH)
+				IF (@intVoidBankTransactionTypeId = @AP_PAYMENT OR @intVoidBankTransactionTypeId = @ACH)
 					BEGIN
 						/* If Void Check entry for AP Payment, do not post the reversal*/
 						UPDATE tblCMBankTransaction 
