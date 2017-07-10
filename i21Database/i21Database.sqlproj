@@ -176,6 +176,7 @@
     <Folder Include="Scripts\Post-Deployment\TR\" />
     <Folder Include="Scripts\Post-Deployment\CRM" />
     <Folder Include="Scripts\Post-Deployment\LG" />
+    <Folder Include="Scripts\Post-Deployment\RM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -5409,6 +5410,10 @@
     <Build Include="dbo\Views\vyuGRGetContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportInventoryMassMaintenancePreview.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePickOrderValidation.sql" />
+    <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetInvoicedQty.sql" />
+    <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
+    <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
