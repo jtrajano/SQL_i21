@@ -5319,6 +5319,7 @@
     <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotSplitOnHandHeld.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePickOrderValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAlertNotificationCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -876,14 +876,22 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  WHERE vyu.strType = ''Contracts w/o shipping instruction'' AND ER.intEntityId = {0}'
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Contracts w/o shipping instruction'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20shipping%20instruction'
 		,[intSort]			= ISNULL(@intMaxSortOrder,0)+1
 END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET [strMessage] = N'{0} Contracts are w/o shipping instruction.'
+	SET [strMessage] = N'{0} Contracts are w/o shipping instruction.',
+		[strQuery]	 = N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Contracts w/o shipping instruction'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Contract w/o shipping instruction'
 END
@@ -906,14 +914,22 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  WHERE vyu.strType = ''Contracts w/o shipping advice'' AND ER.intEntityId = {0}'
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Contracts w/o shipping advice'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20shipping%20advice'
 		,[intSort]			= @intMaxSortOrder+1
 END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET [strMessage] = N'{0} Contracts are w/o shipping advice.'
+	SET [strMessage] = N'{0} Contracts are w/o shipping advice.',
+		[strQuery]	 = N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Contracts w/o shipping advice'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Contracts without Shipping Advice'
 END
@@ -937,14 +953,22 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  WHERE vyu.strType = ''Contracts w/o document'' AND ER.intEntityId = {0}'
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Contracts w/o document'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20document'
 		,[intSort]			= @intMaxSortOrder+1
 END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET [strMessage] = N'{0} Contracts are w/o document.'
+	SET [strMessage] = N'{0} Contracts are w/o document.',
+		[strQuery]	 = N' SELECT intContractHeaderId
+						  FROM vyuLGNotifications vyu
+						  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+						  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+						  WHERE vyu.strType = ''Contracts w/o document'' AND ER.intEntityId = {0}
+						  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Contracts w/o document'
 END
@@ -968,14 +992,22 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  WHERE vyu.strType = ''Contracts w/o weight claim'' AND ER.intEntityId = {0}'
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Contracts w/o weight claim'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20weight%20claim'
 		,[intSort]			= ISNULL(@intMaxSortOrder,0)+1
 END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET [strMessage] = N'{0} Contracts are w/o weight claim.'
+	SET [strMessage] = N'{0} Contracts are w/o weight claim.',
+	[strQuery]		 = N' SELECT intContractHeaderId
+					   FROM vyuLGNotifications vyu
+					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+					   WHERE vyu.strType = ''Contracts w/o weight claim'' AND ER.intEntityId = {0}
+					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Contracts w/o weight claim'
 END
@@ -999,14 +1031,22 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  WHERE vyu.strType = ''Weight claims w/o debit note'' AND ER.intEntityId = {0}'
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Weight claims w/o debit note'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Weight%20claim%20w%2Fo%20debit%20note'
 		,[intSort]			= @intMaxSortOrder+1
 END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET [strMessage] = N'{0} Weight claims are w/o debit note.'
+	SET [strMessage] = N'{0} Weight claims are w/o debit note.',
+		[strQuery]	 = N' SELECT intContractHeaderId
+					   FROM vyuLGNotifications vyu
+					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+					   WHERE vyu.strType = ''Weight claims w/o debit note'' AND ER.intEntityId = {0}
+					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Weight claims w/o debit note'
 END
@@ -1030,14 +1070,22 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  WHERE vyu.strType = ''Contracts w/o TC'' AND ER.intEntityId = {0}'
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Contracts w/o TC'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20TC'
 		,[intSort]			= @intMaxSortOrder+1
 END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET [strMessage] = N'{0} Contracts are w/o TC.'
+	SET [strMessage] = N'{0} Contracts are w/o TC.'		,
+	[strQuery]		 = N' SELECT intContractHeaderId
+					   FROM vyuLGNotifications vyu
+					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+					   WHERE vyu.strType = ''Contracts w/o TC'' AND ER.intEntityId = {0}
+					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Contracts w/o TC'
 END
@@ -1061,14 +1109,22 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  WHERE vyu.strType = ''Contracts w/o 4C'' AND ER.intEntityId = {0}'
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  WHERE vyu.strType = ''Contracts w/o 4C'' AND ER.intEntityId = {0}
+							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%204C'
 		,[intSort]			= @intMaxSortOrder+1
 END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET [strMessage] = N'{0} Contracts are w/o 4C.'
+	SET [strMessage] = N'{0} Contracts are w/o 4C.',
+ 		[strQuery]	 = N' SELECT intContractHeaderId
+					   FROM vyuLGNotifications vyu
+					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+					   WHERE vyu.strType = ''Contracts w/o 4C'' AND ER.intEntityId = {0}
+					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Contracts w/o 4C'
 END
