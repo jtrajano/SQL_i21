@@ -3,7 +3,7 @@
 	[intM2MInquiryId] INT IDENTITY(1,1) NOT NULL,	
 	[intConcurrencyId] INT NOT NULL, 
 	[strRecordName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
-    [intM2MBasisId] INT NOT NULL, 
+    [intM2MBasisId] INT NULL, 
     [intFutureSettlementPriceId] INT NOT NULL, 
     [intUnitMeasureId] INT NOT NULL, 
     [intPriceItemUOMId] INT NOT NULL, 
