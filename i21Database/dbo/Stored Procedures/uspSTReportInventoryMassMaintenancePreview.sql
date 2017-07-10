@@ -155,8 +155,6 @@ BEGIN TRY
 								+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 								+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 								+ ', ''Sale Price'' AS strChangeDescription' + CHAR(13)
-								--+ ', adj1.dblSalePrice AS strOldData' + CHAR(13)
-								--+ ', ''' + CAST(@dblSalePrice AS NVARCHAR(50)) + ''' AS strNewData' + CHAR(13)
 								+ ', CAST(adj1.dblSalePrice AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) AS strOldData' + CHAR(13)
 								+ ', CAST(' + CAST(@dblSalePrice AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
 					  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
@@ -189,8 +187,6 @@ BEGIN TRY
 								+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 								+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 								+ ', ''Last Cost'' AS strChangeDescription' + CHAR(13)
-								--+ ', adj1.dblLastCost AS strOldData' + CHAR(13)
-								--+ ', ''' + CAST(@dblLastCost AS NVARCHAR(50)) + ''' AS strNewData' + CHAR(13)
 								+ ', CAST(adj1.dblLastCost AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) AS strOldData' + CHAR(13)
 								+ ', CAST(' + CAST(@dblLastCost AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
 					  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
@@ -317,7 +313,7 @@ BEGIN TRY
 	END
 
 
-
+   DELETE FROM @tblInventoryMassMaintenancePreview WHERE strOldData = strNewData
 
    select strLocation
 		  , strUpc
