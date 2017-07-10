@@ -369,4 +369,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Logistics
 :R .\LG\1_MasterTables.sql
 
+--RiskManagement
+:R .\RM\01_MasterScript.sql
+
 print 'END POST DEPLOYMENT'

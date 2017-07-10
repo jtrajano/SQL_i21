@@ -22,7 +22,8 @@ select @strInternalTradeNo=isnull(intNumber,0)-1 from tblSMStartingNumber where 
 BEGIN TRAN
 IF NOT EXISTS(SELECT intFutOptTransactionId FROM tblRKFutOptTransactionImport_ErrLog)
 BEGIN
-INSERT INTO tblRKFutOptTransactionHeader values (1)
+INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId,dtmTransactionDate,intSelectedInstrumentTypeId,strSelectedInstrumentType) 
+		VALUES (1,getdate(),1,'Exchange Traded')
 SELECT @intFutOptTransactionHeaderId = scope_Identity()
 
 SELECT * INTO #temp FROM(
@@ -37,7 +38,7 @@ JOIN tblRKBrokerageAccount ba on ba.strAccountNumber=ti.strAccountNumber
 JOIN tblEMEntity em on ba.intEntityId=em.intEntityId and em.strName=ti.strName
 JOIN tblICCommodity c on c.strCommodityCode=ti.strCommodityCode
 JOIN tblSMCompanyLocation l on l.strLocationName=ti.strLocationName 
-JOIN vyuHDSalesPerson sp on sp.strName=ti.strSalespersonId and sp.strSalesPersonType=  'Sales Rep Entity'
+JOIN vyuHDSalesPerson sp on sp.strName=ti.strSalespersonId and sp.strSalesPersonType=  'Sales Rep Entity' and sp.ysnActiveSalesPerson=1
 JOIN tblSMCurrency cur on fm.intCurrencyId=cur.intCurrencyID and cur.strCurrency=ti.strCurrency 
 JOIN tblRKFuturesMonth m on m.strFutureMonth=replace(ti.strFutureMonth,'-',' ') and m.intFutureMarketId=fm.intFutureMarketId
 Left JOIN tblRKOptionsMonth om on om.strOptionMonth=replace(ti.strOptionMonth,'-',' ') and om.intFutureMarketId=fm.intFutureMarketId 
