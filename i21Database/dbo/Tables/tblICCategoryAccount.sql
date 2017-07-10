@@ -21,8 +21,8 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICCategoryAccount] PRIMARY KEY ([intCategoryAccountId]), 
 		CONSTRAINT [FK_tblICCategoryAccount_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICCategoryAccount_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-		CONSTRAINT [AK_tblICCategoryAccount] UNIQUE ([intAccountCategoryId], [intCategoryId]), 
-		CONSTRAINT [FK_tblICCategoryAccount_tblGLAccountCategory] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId]) 
+		CONSTRAINT [AK_tblICCategoryAccount] UNIQUE ([intAccountCategoryId], [intCategoryId])--, 
+		--CONSTRAINT [FK_tblICCategoryAccount_tblGLAccountCategory] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId]) 
 	)
 	GO
 

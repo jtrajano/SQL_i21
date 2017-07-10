@@ -78,7 +78,7 @@ BEGIN
 		[intCurrencyId] = A.intCurrencyId,
 		[dblExchangeRate] = 0,
 		[dtmDate] = A.dtmDatePaid,
-		[strPayee] = ISNULL(PayTo.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityVendorId)),
+		[strPayee] = ISNULL(PayTo.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityId)),
 		[intPayeeId] = B.intEntityId,
 		[strAddress] = PayTo.strAddress,
 		[strZipCode] = PayTo.strZipCode,
@@ -103,7 +103,7 @@ BEGIN
 		[intConcurrencyId] = 1
 	FROM tblAPPayment A
 		INNER JOIN tblAPVendor B
-			ON A.intEntityVendorId = B.[intEntityId]
+			ON A.[intEntityId] = B.[intEntityId]
 		CROSS APPLY
 		(
 			SELECT 
