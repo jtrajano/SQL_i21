@@ -5318,6 +5318,7 @@
     <Build Include="dbo\Functions\fnCFForceRounding.sql" />
     <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotSplitOnHandHeld.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickOrderValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
