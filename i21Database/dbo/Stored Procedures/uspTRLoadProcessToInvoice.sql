@@ -37,7 +37,7 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
 	SELECT
-		ROW_NUMBER() OVER(ORDER BY DH.intLoadDistributionHeaderId, DD.intLoadDistributionDetailId DESC) AS intId
+		ROW_NUMBER() OVER(ORDER BY intLoadDistributionHeaderId, intLoadDistributionDetailId DESC) AS intId
 		, *
 	INTO #tmpSourceTable
 	FROM (
