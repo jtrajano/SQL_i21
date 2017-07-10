@@ -242,8 +242,16 @@ IF @ysnReportDetail = 1
 BEGIN
 	--- Get only valid customers
 	TRUNCATE TABLE tblARSearchStatementCustomer
-	INSERT INTO tblARSearchStatementCustomer (intEntityCustomerId, strCustomerNumber, strCustomerName, dblARBalance, strTransactionId, strTransactionDate, dblTotalAmount, intConcurrencyId)
-	SELECT DISTINCT ABC.intEntityCustomerId, ABC.strCustomerNumber, ABC.strName, ARC.dblARBalance, ABC.strReferenceNumber, CONVERT(VARCHAR(10), ABC.dtmDate, 101), ISNULL(ABC.dblTotalAmount,0), 0 	 
+	INSERT INTO tblARSearchStatementCustomer (intEntityCustomerId, strCustomerNumber, strCustomerName, dblARBalance, strTransactionId, strTransactionDate, dblTotalAmount, ysnHasEmailSetup, intConcurrencyId)
+	SELECT DISTINCT ABC.intEntityCustomerId
+				  , ABC.strCustomerNumber
+				  , ABC.strName
+				  , ARC.dblARBalance
+				  , ABC.strReferenceNumber
+				  , CONVERT(VARCHAR(10), ABC.dtmDate, 101)
+				  , ISNULL(ABC.dblTotalAmount,0)
+				  , CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+				  , 0 	 
 	FROM
 	(SELECT STATEMENTREPORT.strReferenceNumber
 		  ,STATEMENTREPORT.strTransactionType
@@ -284,8 +292,18 @@ BEGIN
 	FROM @temp_statement_table AS STATEMENTREPORT
 	LEFT JOIN @temp_aging_table AS AGINGREPORT 
 	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId) ABC 
-	INNER JOIN 
-		(SELECT intEntityCustomerId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+	INNER JOIN (
+		SELECT intEntityCustomerId
+			 , dblARBalance 
+		FROM dbo.tblARCustomer WITH (NOLOCK)
+	) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+	OUTER APPLY (
+		SELECT intEmailSetupCount = COUNT(*) 
+		FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+		WHERE CC.intCustomerEntityId = ABC.intEntityCustomerId 
+		  AND ISNULL(CC.strEmail, '') <> '' 
+		  AND CC.strEmailDistributionOption LIKE '%Statements%'
+	) EMAILSETUP
 END
   
 ELSE

@@ -4,6 +4,7 @@
 	,@strAsOfDate			NVARCHAR(50) 
 	,@strTransactionDate	NVARCHAR(50) 
 	,@ysnDetailedFormat		BIT	= 0
+	,@ysnEmailOnly			BIT = 0
 )
 AS
 
@@ -70,7 +71,7 @@ BEGIN
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintZeroBalance</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintCreditBalance</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
+	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'	
 	SET @strQuery  = 'EXEC uspARCustomerStatementReport ' + '''' +  @xmlParam + ''''	 		
 	EXEC(@strQuery)	 
@@ -126,5 +127,10 @@ BEGIN
 	SET @strQuery  = 'EXEC uspARCustomerStatementDetailReport ' + '''' +  @xmlParam + ''''	
 	EXEC(@strQuery)		
 END
+
+IF @ysnEmailOnly = 1
+	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 0
+ELSE
+	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 1
 
 SELECT * FROM tblARSearchStatementCustomer
