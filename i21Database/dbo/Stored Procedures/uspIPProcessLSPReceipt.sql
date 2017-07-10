@@ -51,6 +51,11 @@ Begin
 		If ISNULL(@intLoadId,0)=0
 			RaisError('Invalid Delivery No',16,1)
 
+		--check if Delivery Item No exists in the load or not
+		If Not Exists (Select 1 from tblIPReceiptItemStage Where intStageReceiptId=@intMinRowNo AND dblQuantity>0 
+					AND strDeliveryItemNo in (Select isnull(strExternalContainerId,'') from tblLGLoadDetailContainerLink where intLoadId=@intLoadId))
+			RaisError('Invalid Delivery Item (90000 series) No',16,1)
+
 		Begin Tran
 
 			EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT

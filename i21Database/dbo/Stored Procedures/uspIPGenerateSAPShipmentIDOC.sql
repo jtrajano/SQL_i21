@@ -200,7 +200,7 @@ Begin
 	--Header
 	Set @strXml += '<E1EDL20 SEGMENT="1">'
 	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
-	Set @strXml += '<BOLNR>'	+ LEFT(LEFT(ISNULL(@strShippingLineName,''),4) + '     ',5) + ISNULL(@strBillOfLading,'') + '</BOLNR>'
+	Set @strXml += '<BOLNR>'	+ LEFT(LEFT(ISNULL(@strShippingLineName,''),4) + '     ',4) + ISNULL(@strBillOfLading,'') + '</BOLNR>'
 	Set @strXml += '<TRAID>'	+ ISNULL(@strShippingLine,'')			+ '</TRAID>'
 	Set @strXml += '<LIFEX>'	+ LTRIM(RTRIM(ISNULL(@strLoadNumber,'') + ' ' + dbo.fnEscapeXML(ISNULL(@strMVessel,'')))) + '</LIFEX>'
 

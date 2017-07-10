@@ -213,6 +213,11 @@ Begin
 			@strLoadingPoint			= strLoadingPoint	
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
+		--Send Create Feed only Once
+		If UPPER(@strCommodityCode)='COFFEE' AND @strHeaderState='ADDED' 
+			AND (Select TOP 1 UPPER(strRowState) from tblCTContractFeed where intContractDetailId=@intContractDetailId AND intContractFeedId<@intContractFeedId ORDER By intContractFeedId)='ADDED'
+			GOTO NEXT_PO
+
 		Set @strSeq=ISNULL(@strSeq,'') + CONVERT(VARCHAR,@intContractSeq) + ','
 
 		--Convert price USC to USD
