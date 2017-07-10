@@ -113,6 +113,7 @@
 	[intGradeId] INT NULL,
 	[intWeightId] INT NULL,
 	[intDeliverySheetId] INT NULL,
+	[intCommodityAttributeId] INT NULL,
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -135,7 +136,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdFrom] FOREIGN KEY (intItemUOMIdFrom) REFERENCES [tblICItemUOM](intItemUOMId),
 	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdTo] FOREIGN KEY (intItemUOMIdTo) REFERENCES [tblICItemUOM](intItemUOMId),
 	CONSTRAINT [FK_tblSCTicket_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY (intTicketTypeId) REFERENCES [tblSCListTicketTypes](intTicketTypeId),
-	CONSTRAINT [FK_tblSCTicket_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY (intDeliverySheetId) REFERENCES [tblSCDeliverySheet](intDeliverySheetId)
+	CONSTRAINT [FK_tblSCTicket_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY (intDeliverySheetId) REFERENCES [tblSCDeliverySheet](intDeliverySheetId),
+	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId)
 )
 
 GO
@@ -1002,7 +1004,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'dblContractCostConvertedUOM'
-	GO
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Contract cost id',
     @level0type = N'SCHEMA',
@@ -1011,3 +1013,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intContractCostId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Delivery Sheet Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeliverySheetId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Commodity Grade Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intCommodityAttributeId'
