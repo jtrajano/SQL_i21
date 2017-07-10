@@ -136,6 +136,7 @@ BEGIN
 		END AS strTicketNumber,
 	INVRCPT.strReceiptNumber,
 	ISNULL(INVRCPTITEM.intInventoryReceiptItemId,0) as intInventoryReceiptItemId,
+	ISNULL(BillDtl.intContractDetailId,0) as intContractDetailId,
 	--LOCATION.strLocationName,
 	Bill.strBillId as RecordId,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
@@ -203,10 +204,10 @@ BEGIN
 	BillDtl.dblQtyOrdered as Net,
 	UOM.strUnitMeasure,
 	BillDtl.dblTotal,
-	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) as dblTax,
+	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND ISNULL(intContractDetailId,0) = ISNULL(BillDtl.intContractDetailId,0)),0) as dblTax,
 	CNTRCT.strContractNumber,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId  AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId   AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND ISNULL(intContractDetailId,0) = ISNULL(BillDtl.intContractDetailId,0)  AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
+	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND ISNULL(intContractDetailId,0) = ISNULL(BillDtl.intContractDetailId,0)),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId   AND ISNULL(intContractDetailId,0) = ISNULL(BillDtl.intContractDetailId,0) AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
@@ -311,6 +312,7 @@ BEGIN
 		END AS strTicketNumber,
 	INVSHIP.strShipmentNumber,
 	0,
+	0 as intContractDetailId,
 	--LOCATION.strLocationName,
 	INV.strInvoiceNumber as RecordId,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
@@ -473,6 +475,7 @@ BEGIN
 	strTicketNumber = (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE GR.intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	'' as strReceiptNumber,
 	0 as intInventoryReceiptItemId,
+	0 as intContractDetailId,
 	Bill.strBillId as RecordId,
 	CASE WHEN StrgHstry.intTransactionTypeId = 4 THEN
 		'Settle Storage'
@@ -594,6 +597,7 @@ BEGIN
 		END AS strTicketNumber,
 	INVRCPT.strReceiptNumber,
 	ISNULL(INVRCPTITEM.intInventoryReceiptItemId,0) as intInventoryReceiptItemId,
+	ISNULL(BillDtl.intContractDetailId,0) as intContractDetailId,
 	--LOCATION.strLocationName,
 	Bill.strBillId as RecordId,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
@@ -661,10 +665,10 @@ BEGIN
 	BillDtl.dblQtyOrdered as Net,
 	UOM.strUnitMeasure,
 	BillDtl.dblTotal,
-	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) as dblTax,
+	ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND ISNULL(intContractDetailId,0) = ISNULL(BillDtl.intContractDetailId,0)),0) as dblTax,
 	CNTRCT.strContractNumber,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId  AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND ISNULL(intContractDetailId,0) = ISNULL(BillDtl.intContractDetailId,0) AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
+	(BillDtl.dblTotal + ISNULL((SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND ISNULL(intContractDetailId,0) = ISNULL(BillDtl.intContractDetailId,0)),0) +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId  AND ISNULL(intContractDetailId,0) = ISNULL(BillDtl.intContractDetailId,0) AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
@@ -769,6 +773,7 @@ BEGIN
 		END AS strTicketNumber,
 	INVSHIP.strShipmentNumber,
 	0,
+	0 as intContractDetailId,
 	--LOCATION.strLocationName,
 	INV.strInvoiceNumber as RecordId,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
@@ -931,6 +936,7 @@ BEGIN
 	strTicketNumber = (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE GR.intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	'' as strReceiptNumber,
 	0 as intInventoryReceiptItemId,
+	0 as intContractDetailId,
 	Bill.strBillId as RecordId,
 	CASE WHEN StrgHstry.intTransactionTypeId = 4 THEN
 		'Settle Storage'
