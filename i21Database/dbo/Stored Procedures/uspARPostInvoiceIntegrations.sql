@@ -86,17 +86,15 @@ EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost]
 
 --Patronage
 DECLARE	@successfulCount INT
-		,@invalidCount INT
-		,@success BIT
-		
+	   ,@strTransactionId NVARCHAR(MAX)
 
-EXEC [dbo].[uspPATInvoiceToCustomerVolume]
-	 @intEntityCustomerId	= @EntityCustomerId
-	,@intInvoiceId			= @intTransactionId
-	,@ysnPosted				= @ysnPost
-	,@successfulCount		= @successfulCount OUTPUT
-	,@invalidCount			= @invalidCount OUTPUT
-	,@success				= @success OUTPUT
+SET @strTransactionId = CONVERT(NVARCHAR(MAX), @intTransactionId)
+
+EXEC [dbo].[uspPATGatherVolumeForPatronage]
+	 @transactionIds	= @strTransactionId
+	,@post				= @ysnPost
+	,@type				= 2
+	,@successfulCount	= @successfulCount OUTPUT
 
 --Audit Log          
 EXEC dbo.uspSMAuditLog 
