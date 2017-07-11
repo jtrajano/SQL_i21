@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -763,6 +762,11 @@ BEGIN
 				OR @strPriceMethod = 'Origin History'
 				OR @strPriceMethod = 'Network Cost')
 				BEGIN
+
+				IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+					BEGIN
+						SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+				END
 
 				INSERT INTO @tblCFOriginalTax	
 				(
@@ -2144,6 +2148,3 @@ BEGIN
 	---------------------------------------------------
 	
 	END
-GO
-
-
