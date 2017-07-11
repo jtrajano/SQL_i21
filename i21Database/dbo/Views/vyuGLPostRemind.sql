@@ -38,17 +38,15 @@ Before as
 	) CurrentFiscal
 	WHERE PostRemind_BeforeAfter = 'Before'
 	AND GETDATE() between CurrentFiscal.dtmMin and CurrentFiscal.dtmEndDate
-	
-	
 ),
-RESULT as (
+rsult as (
 SELECT dtmStartDate DateLimit1, dtmEndDate DateLimit2 FROM After 
 UNION
 SELECT dtmStartDate DateLimit1, dtmEndDate DateLimit2 FROM Before
 )
 SELECT  intJournalId, j.intEntityId, DateLimit1,DateLimit2 FROM tblGLJournal j JOIN 
 	USERS u ON j.intEntityId = u.intEntityId 
-	JOIN RESULT on CONVERT(DATE, j.dtmDate,101) BETWEEN DateLimit1 AND DateLimit2
+	JOIN rsult on CONVERT(DATE, j.dtmDate,101) BETWEEN DateLimit1 AND DateLimit2
 	WHERE j.ysnPosted = 0
 	AND ISNULL(j.ysnRecurringTemplate,0) = 0
 GO
