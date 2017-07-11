@@ -193,350 +193,366 @@ Ext.define('Inventory.view.InventoryCount', {
                             items: [
                                 {
                                     xtype: 'container',
-                                    layout: 'hbox',
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
                                     items: [
                                         {
                                             xtype: 'container',
                                             flex: 1,
                                             layout: {
-                                                type: 'vbox',
+                                                type: 'hbox',
                                                 align: 'stretch'
                                             },
                                             items: [
                                                 {
-                                                    xtype: 'gridcombobox',
-                                                    columns: [
-                                                        {
-                                                            dataIndex: 'intCompanyLocationId',
-                                                            dataType: 'numeric',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'strLocationName',
-                                                            dataType: 'string',
-                                                            text: 'Location Name',
-                                                            flex: 1
-                                                        },
-                                                        {
-                                                            dataIndex: 'strLocationType',
-                                                            dataType: 'string',
-                                                            text: 'Location Type',
-                                                            flex: 1
-                                                        }
-                                                    ],
-                                                    itemId: 'cboLocation',
-                                                    fieldLabel: 'Location',
-                                                    labelWidth: 85,
-                                                    displayField: 'strLocationName',
-                                                    valueField: 'intCompanyLocationId'
-                                                },
-                                                {
-                                                    xtype: 'gridcombobox',
-                                                    columns: [
-                                                        {
-                                                            dataIndex: 'intCategoryId',
-                                                            dataType: 'numeric',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'strCategoryCode',
-                                                            dataType: 'string',
-                                                            text: 'Category',
-                                                            flex: 1
-                                                        },
-                                                        {
-                                                            dataIndex: 'strDescription',
-                                                            dataType: 'string',
-                                                            text: 'Description',
-                                                            flex: 1
-                                                        }
-                                                    ],
-                                                    itemId: 'cboCategory',
-                                                    fieldLabel: 'Category',
-                                                    labelWidth: 85,
-                                                    displayField: 'strCategoryCode',
-                                                    valueField: 'intCategoryId'
-                                                },
-                                                {
-                                                    xtype: 'gridcombobox',
-                                                    columns: [
-                                                        {
-                                                            dataIndex: 'intCommodityId',
-                                                            dataType: 'numeric',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'strCommodityCode',
-                                                            dataType: 'string',
-                                                            text: 'Commodity Code',
-                                                            flex: 1
-                                                        },
-                                                        {
-                                                            dataIndex: 'strDescription',
-                                                            dataType: 'string',
-                                                            text: 'Description',
-                                                            flex: 1
-                                                        }
-                                                    ],
-                                                    itemId: 'cboCommodity',
-                                                    fieldLabel: 'Commodity',
-                                                    labelWidth: 85,
-                                                    displayField: 'strCommodityCode',
-                                                    valueField: 'intCommodityId'
-                                                },
-                                                {
-                                                    xtype: 'gridcombobox',
-                                                    columns: [
-                                                        {
-                                                            dataIndex: 'intCountGroupId',
-                                                            dataType: 'numeric',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'strCountGroup',
-                                                            dataType: 'string',
-                                                            text: 'Count Group',
-                                                            flex: 1
-                                                        },
-                                                        {
-                                                            xtype: 'checkcolumn',
-                                                            dataIndex: 'ysnIncludeOnHand',
-                                                            dataType: 'boolean',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            xtype: 'checkcolumn',
-                                                            dataIndex: 'ysnScannedCountEntry',
-                                                            dataType: 'boolean',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            xtype: 'checkcolumn',
-                                                            dataIndex: 'ysnCountByLots',
-                                                            dataType: 'boolean',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            xtype: 'checkcolumn',
-                                                            dataIndex: 'ysnCountByPallets',
-                                                            dataType: 'boolean',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            xtype: 'checkcolumn',
-                                                            dataIndex: 'ysnRecountMismatch',
-                                                            dataType: 'boolean',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            xtype: 'checkcolumn',
-                                                            dataIndex: 'ysnExternal',
-                                                            dataType: 'boolean',
-                                                            hidden: true
-                                                        }
-                                                    ],
-                                                    itemId: 'cboCountGroup',
-                                                    fieldLabel: 'Count Group',
-                                                    labelWidth: 85,
-                                                    displayField: 'strCountGroup',
-                                                    valueField: 'intCountGroupId'
-                                                },
-                                                {
-                                                    xtype: 'datefield',
+                                                    xtype: 'container',
                                                     flex: 1,
-                                                    itemId: 'dtpCountDate',
-                                                    fieldLabel: 'Count Date',
-                                                    labelWidth: 85
+                                                    itemId: 'cnt1',
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationType',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboLocation',
+                                                            fieldLabel: 'Location',
+                                                            displayField: 'strLocationName',
+                                                            valueField: 'intCompanyLocationId'
+                                                        },
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Storage Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboSubLocation',
+                                                            fieldLabel: 'Storage Location',
+                                                            displayField: 'strSubLocationName',
+                                                            valueField: 'intCompanyLocationSubLocationId'
+                                                        },
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intStorageLocationId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strName',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Unit',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboStorageLocation',
+                                                            fieldLabel: 'Storage Unit',
+                                                            displayField: 'strName',
+                                                            valueField: 'intStorageLocationId'
+                                                        },
+                                                        {
+                                                            xtype: 'datefield',
+                                                            itemId: 'dtpCountDate',
+                                                            fieldLabel: 'Count Date'
+                                                        },
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intStatus',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStatus',
+                                                                    dataType: 'string',
+                                                                    text: 'Status',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboStatus',
+                                                            fieldLabel: 'Status',
+                                                            readOnly: true,
+                                                            displayField: 'strStatus',
+                                                            valueField: 'intStatus'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtCountNumber',
+                                                            fieldLabel: 'Count No',
+                                                            readOnly: true,
+                                                            blankText: 'Created on Save',
+                                                            emptyText: 'Created on Save'
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    itemId: 'cnt4',
+                                                    margin: '0 5 0 5',
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCategoryId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCategoryCode',
+                                                                    dataType: 'string',
+                                                                    text: 'Category',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboCategory',
+                                                            fieldLabel: 'Category',
+                                                            displayField: 'strCategoryCode',
+                                                            valueField: 'intCategoryId'
+                                                        },
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCommodityId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCommodityCode',
+                                                                    dataType: 'string',
+                                                                    text: 'Commodity Code',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboCommodity',
+                                                            fieldLabel: 'Commodity',
+                                                            displayField: 'strCommodityCode',
+                                                            valueField: 'intCommodityId'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtReferenceCountNo',
+                                                            fieldLabel: 'Ref. Count No',
+                                                            readOnly: true
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkExternal',
+                                                            fieldLabel: 'External'
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkRecount',
+                                                            fieldLabel: 'Recount',
+                                                            readOnly: true
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkCountByLots',
+                                                            fieldLabel: 'Count by Lots'
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 0.8,
+                                                    itemId: 'cnt3',
+                                                    margin: '0 5 0 10',
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkCountByPallets',
+                                                            fieldLabel: 'Count by Pallets',
+                                                            labelWidth: 150
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkRecountMismatch',
+                                                            fieldLabel: 'Recount Mismatch',
+                                                            labelWidth: 150
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkScannedCountEntry',
+                                                            fieldLabel: 'Scanned Count Entry',
+                                                            labelWidth: 150
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkIncludeOnHand',
+                                                            fieldLabel: 'Include On Hand',
+                                                            labelWidth: 150
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkIncludeZeroOnHand',
+                                                            fieldLabel: 'Include Zero On Hand',
+                                                            labelWidth: 150
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    itemId: 'cnt2',
+                                                    margin: '0 0 0 10',
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkCountByGroup',
+                                                            fieldLabel: 'Count by Group'
+                                                        },
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCountGroupId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCountGroup',
+                                                                    dataType: 'string',
+                                                                    text: 'Count Group',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnIncludeOnHand',
+                                                                    dataType: 'boolean',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnScannedCountEntry',
+                                                                    dataType: 'boolean',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnCountByLots',
+                                                                    dataType: 'boolean',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnCountByPallets',
+                                                                    dataType: 'boolean',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnRecountMismatch',
+                                                                    dataType: 'boolean',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnExternal',
+                                                                    dataType: 'boolean',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboCountGroup',
+                                                            fieldLabel: 'Count Group',
+                                                            displayField: 'strCountGroup',
+                                                            valueField: 'intCountGroupId'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtShiftCountNo',
+                                                            fieldLabel: 'Shift No'
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
                                         {
                                             xtype: 'container',
                                             flex: 1,
-                                            margin: '0 0 0 10',
-                                            layout: {
-                                                type: 'vbox',
-                                                align: 'stretch'
-                                            },
+                                            layout: 'fit',
                                             items: [
-                                                {
-                                                    xtype: 'textfield',
-                                                    flex: 1,
-                                                    itemId: 'txtCountNumber',
-                                                    fieldLabel: 'Count No',
-                                                    readOnly: true,
-                                                    blankText: 'Created on Save',
-                                                    emptyText: 'Created on Save'
-                                                },
-                                                {
-                                                    xtype: 'gridcombobox',
-                                                    columns: [
-                                                        {
-                                                            dataIndex: 'intCompanyLocationSubLocationId',
-                                                            dataType: 'numeric',
-                                                            text: 'Sub Location Id',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'intCompanyLocationId',
-                                                            dataType: 'numeric',
-                                                            text: 'Location Id',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'strSubLocationName',
-                                                            dataType: 'string',
-                                                            text: 'Sub Location Name',
-                                                            flex: 1
-                                                        },
-                                                        {
-                                                            dataIndex: 'strSubLocationDescription',
-                                                            dataType: 'string',
-                                                            text: 'Description',
-                                                            flex: 1
-                                                        }
-                                                    ],
-                                                    itemId: 'cboSubLocation',
-                                                    fieldLabel: 'Sub Location',
-                                                    displayField: 'strSubLocationName',
-                                                    valueField: 'intCompanyLocationSubLocationId'
-                                                },
-                                                {
-                                                    xtype: 'gridcombobox',
-                                                    columns: [
-                                                        {
-                                                            dataIndex: 'intStorageLocationId',
-                                                            dataType: 'numeric',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'strName',
-                                                            dataType: 'string',
-                                                            text: 'Storage Location',
-                                                            flex: 1
-                                                        },
-                                                        {
-                                                            dataIndex: 'strDescription',
-                                                            dataType: 'string',
-                                                            text: 'Description',
-                                                            flex: 1
-                                                        }
-                                                    ],
-                                                    itemId: 'cboStorageLocation',
-                                                    fieldLabel: 'Storage Location',
-                                                    displayField: 'strName',
-                                                    valueField: 'intStorageLocationId'
-                                                },
                                                 {
                                                     xtype: 'textfield',
                                                     itemId: 'txtDescription',
                                                     fieldLabel: 'Description'
-                                                },
-                                                {
-                                                    xtype: 'button',
-                                                    flex: 1,
-                                                    itemId: 'btnFetch',
-                                                    text: 'Fetch'
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            xtype: 'container',
-                                            flex: 0.8,
-                                            margin: '0 5 0 10',
-                                            layout: {
-                                                type: 'vbox',
-                                                align: 'stretch'
-                                            },
-                                            items: [
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkIncludeZeroOnHand',
-                                                    fieldLabel: 'Include Zero On Hand',
-                                                    labelWidth: 170
-                                                },
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkIncludeOnHand',
-                                                    fieldLabel: 'Include On Hand',
-                                                    labelWidth: 170
-                                                },
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkScannedCountEntry',
-                                                    fieldLabel: 'Scanned Count Entry',
-                                                    labelWidth: 170
-                                                },
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkCountByLots',
-                                                    fieldLabel: 'Count by Lots',
-                                                    labelWidth: 170
-                                                },
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkCountByPallets',
-                                                    fieldLabel: 'Count by Pallets',
-                                                    labelWidth: 170
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            xtype: 'container',
-                                            flex: 1,
-                                            margin: '0 5 0 5',
-                                            layout: {
-                                                type: 'vbox',
-                                                align: 'stretch'
-                                            },
-                                            items: [
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkRecountMismatch',
-                                                    fieldLabel: 'Recount Mismatch',
-                                                    labelWidth: 125
-                                                },
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkExternal',
-                                                    fieldLabel: 'External',
-                                                    labelWidth: 125
-                                                },
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkRecount',
-                                                    fieldLabel: 'Recount',
-                                                    labelWidth: 125,
-                                                    readOnly: true
-                                                },
-                                                {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtReferenceCountNo',
-                                                    fieldLabel: 'Reference Count No',
-                                                    labelWidth: 125,
-                                                    readOnly: true
-                                                },
-                                                {
-                                                    xtype: 'gridcombobox',
-                                                    columns: [
-                                                        {
-                                                            dataIndex: 'intStatus',
-                                                            dataType: 'numeric',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'strStatus',
-                                                            dataType: 'string',
-                                                            text: 'Status',
-                                                            flex: 1
-                                                        }
-                                                    ],
-                                                    itemId: 'cboStatus',
-                                                    fieldLabel: 'Status',
-                                                    labelWidth: 125,
-                                                    readOnly: true,
-                                                    displayField: 'strStatus',
-                                                    valueField: 'intStatus'
                                                 }
                                             ]
                                         }
@@ -605,6 +621,13 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     itemId: 'btnDetachSelectedRows',
                                                     iconCls: 'small-remove',
                                                     text: 'Delete'
+                                                },
+                                                {
+                                                    xtype: 'button',
+                                                    tabIndex: -1,
+                                                    itemId: 'btnFetchDetails',
+                                                    iconCls: 'small-refresh-small',
+                                                    text: 'Refresh'
                                                 }
                                             ]
                                         },
@@ -734,6 +757,33 @@ Ext.define('Inventory.view.InventoryCount', {
                                             width: 150,
                                             dataIndex: 'string',
                                             text: 'Description'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            itemId: 'colCountGroup',
+                                            width: 150,
+                                            dataIndex: 'strCountGroup',
+                                            text: 'Count Group',
+                                            editor: {
+                                                xtype: 'gridcombobox',
+                                                columns: [
+                                                    {
+                                                        dataIndex: 'intCountGroupId',
+                                                        dataType: 'numeric',
+                                                        text: 'Count Group Id',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strCountGroup',
+                                                        dataType: 'string',
+                                                        text: 'Count Group',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                itemId: 'cboGrdCountGroup',
+                                                displayField: 'strCountGroup',
+                                                valueField: 'strCountGroup'
+                                            }
                                         },
                                         {
                                             xtype: 'gridcolumn',
@@ -1002,6 +1052,28 @@ Ext.define('Inventory.view.InventoryCount', {
                                         },
                                         {
                                             xtype: 'numbercolumn',
+                                            itemId: 'colQtyReceived',
+                                            dataIndex: 'string',
+                                            text: 'Qty Received',
+                                            format: '0,000.00####',
+                                            editor: {
+                                                xtype: 'numberfield',
+                                                quantityField: true
+                                            }
+                                        },
+                                        {
+                                            xtype: 'numbercolumn',
+                                            itemId: 'colQtySold',
+                                            dataIndex: 'string',
+                                            text: 'Qty Sold',
+                                            format: '0,000.00####',
+                                            editor: {
+                                                xtype: 'numberfield',
+                                                quantityField: true
+                                            }
+                                        },
+                                        {
+                                            xtype: 'numbercolumn',
                                             itemId: 'colPhysicalCount',
                                             dataIndex: 'string',
                                             text: 'Physical Count',
@@ -1083,7 +1155,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                         {
                                             xtype: 'numbercolumn',
                                             itemId: 'colPhysicalCountStockUnit',
-                                            width: 150,
+                                            width: 158,
                                             dataIndex: 'string',
                                             text: 'Physical Count in Stock Unit',
                                             format: '0,000.00####'

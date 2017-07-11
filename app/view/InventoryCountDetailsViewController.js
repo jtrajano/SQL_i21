@@ -16,14 +16,33 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                         column: 'intLocationId',
                         value: '{inventoryCount.intLocationId}'
                     }
-                ]
+                ],
+                hidden: '{inventoryCount.ysnCountByGroup}'
             },
-            txtDescription: '{current.strItemDescription}',
+            cboCountGroup: {
+                store: '{countGroup}',
+                value: '{current.strCountGroup}',
+                origValueField: 'intCountGroupId',
+                hidden: '{!inventoryCount.ysnCountByGroup}'
+            },
+            txtDescription: {
+                value: '{current.strItemDescription}',
+                hidden: '{inventoryCount.ysnCountByGroup}'
+            },
+            txtQtyReceived: {
+                value: '{current.dblQtyReceived}'   ,
+                hidden: '{!inventoryCount.ysnCountByGroup}'
+            },
+            txtQtySold: {
+                value: '{current.dblQtySold}'   ,
+                hidden: '{!inventoryCount.ysnCountByGroup}'
+            },
             cboStorageLocation: {
                 store: '{storageLocations}',
                 value: '{current.strSubLocationName}',
                 origValueField: 'intSubLocationId',
                 origUpdateField: 'intSubLocationId',
+                hidden: '{inventoryCount.ysnCountByGroup}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -46,6 +65,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{storageUnits}',
                 value: '{current.strStorageLocationName}',
                 origValueField: 'intStorageLocationId',
+                hidden: '{inventoryCount.ysnCountByGroup}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -68,6 +88,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{lots}',
                 value: '{current.strLotNo}',
                 origValueField: 'intLotId',
+                hidden: '{inventoryCount.ysnCountByGroup}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -95,6 +116,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{itemUOMs}',
                 value: '{current.strUOM}',
                 origValueField: 'intItemUOMId',
+                hidden: '{inventoryCount.ysnCountByGroup}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -114,15 +136,36 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                     }
                 ]
             },
-            txtCategory: '{current.strCategory}',
-            txtSystemCount: '{current.dblSystemCount}',
-            txtCost: '{current.dblLastCost}',
-            txtVariance: '{current.dblVariance}',
-            txtCountLineNo: '{current.strCountLine}',
+            txtCategory: {
+                value: '{current.strCategory}',
+                hidden: '{inventoryCount.ysnCountByGroup}'
+            },
+            txtSystemCount: {
+                value: '{current.dblSystemCount}'
+            },
+            txtCost: {
+                value: '{current.dblLastCost}',
+                hidden: '{inventoryCount.ysnCountByGroup}'
+            },
+            txtVariance: {
+                value: '{current.dblVariance}'
+            },
+            txtCountLineNo: {
+                value: '{current.strCountLine}',
+            },
             txtPhysicalCount: '{current.dblPhysicalCount}',
-            txtPhysicalCountInStockUnit: '{current.dblPhysicalCountStockUnit}',
-            txtLotAlias: '{current.strLotAlias}',
-            chkRecount: '{current.ysnRecount}',
+            txtPhysicalCountInStockUnit: {
+                value: '{current.dblPhysicalCountStockUnit}',
+                hidden: '{inventoryCount.ysnCountByGroup}'
+            },
+            txtLotAlias: {
+                value: '{current.strLotAlias}',
+                hidden: '{inventoryCount.ysnCountByGroup}'
+            },
+            chkRecount: {
+                value: '{current.ysnRecount}',
+                hidden: '{inventoryCount.ysnCountByGroup}'
+            },
             lblEnteredBy: '{current.strUserName}'
         }
     },
@@ -169,10 +212,13 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
 
         var rec = Ext.create('Inventory.model.InventoryCountDetail');
         rec.set('intInventoryCountId', intInventoryCountId);
+        rec.set('ysnRecount', false);
+        rec.set('dblLastCost', 0);
+        rec.set('dblSystemCount', 0);
+        
         rec.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
         rec.set('strUserName', 'Entered by ' + iRely.config.Security.UserName);
         rec.set('dblConversionFactor', 1);
-
         ic.utils.ajax({
             url: '../Inventory/api/InventoryCountDetail/GetLastCountDetailId',
             params: {
@@ -199,13 +245,19 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             valid = true,
             message = "";
 
-        
-        if (!vm.get('current.intItemId')) {
-            valid = false;
-            message = "Please select an item.";
-        } else if(!vm.get('current.intItemUOMId')) {
-            valid = false;
-            message = "Please select a UOM.";
+        if(!vm.get('inventoryCount.ysnCountByGroup')) {
+            if (!vm.get('current.intItemId')) {
+                valid = false;
+                message = "Please select an item.";
+            } else if(!vm.get('current.intItemUOMId')) {
+                valid = false;
+                message = "Please select a UOM.";
+            }
+        } else {
+            if (!vm.get('current.intCountGroupId')) {
+                valid = false;
+                message = "Please select a count group.";
+            }    
         }
 
         if(valid) {
@@ -362,6 +414,29 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         vm.set('current.dblSystemCount', rec.get('dblOnHand'));    
     },
 
+    onCountGroupSelect: function(combo, records, opts) {
+        if (records.length <= 0)
+            return;
+        
+        var me = this;
+        var vm = me.getViewModel();
+        var rec = _.first(records);
+        var intCountGroupId = rec.get('intCountGroupId');
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryCountDetail/GetLastCountGroup',
+            params: {
+                intCountGroupId: intCountGroupId
+            }
+        })
+        .subscribe(function(res) {
+            var json = JSON.parse(res.responseText);
+            var data = json.data;
+            if(data) {
+                vm.set('current.dblSystemCount', data.dblPhysicalCount);
+            }  
+        });
+    },
+
     init: function(application) {
         this.control({
             "#btnAdd": {
@@ -381,6 +456,9 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             },
             "#cboUOM": {
                 select: this.onUOMSelect
+            },
+            "#cboCountGroup": {
+                select: this.onCountGroupSelect
             }
         })
     }

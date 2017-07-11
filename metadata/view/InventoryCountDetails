@@ -8,7 +8,7 @@
     "userConfig": {
         "designer|userAlias": "icinventorycountdetails",
         "designer|userClassName": "InventoryCountDetails",
-        "height": 580,
+        "height": 611,
         "layout": "fit",
         "minHeight": 580,
         "modal": true,
@@ -173,6 +173,21 @@
                                     "designerId": "5b257ac4-ac2f-4142-99a4-11948208b1f9",
                                     "cn": [
                                         {
+                                            "type": "Ext.form.field.Text",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "fieldLabel": "Count Line No",
+                                                "itemId": "txtCountLineNo",
+                                                "readOnly": true
+                                            },
+                                            "name": "MyTextField5",
+                                            "designerId": "6de6f6c6-6bff-4048-9763-0b56009e128e"
+                                        },
+                                        {
                                             "type": "Ext.form.field.ComboBox",
                                             "reference": {
                                                 "name": "items",
@@ -250,6 +265,50 @@
                                                 "columns": "array"
                                             },
                                             "designerId": "a8c9fda6-4bf7-44b7-ab0a-23cad6b50198",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intCountGroupId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Count Group Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strCountGroup',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Count Group',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strCountGroup",
+                                                "fieldLabel": "Count Group",
+                                                "itemId": "cboCountGroup",
+                                                "reference": "cboCountGroup",
+                                                "valueField": "strCountGroup"
+                                            },
+                                            "name": "MyComboBox12",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "eeac705e-315a-441c-9a65-24fb2f76fbaf",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -596,19 +655,32 @@
                                             "designerId": "19f5b9e8-43c2-49ba-acfa-b98369a7ade7"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "fieldLabel": "Count Line No",
-                                                "itemId": "txtCountLineNo",
-                                                "readOnly": true
+                                                "fieldLabel": "Qty Received",
+                                                "itemId": "txtQtyReceived"
                                             },
-                                            "name": "MyTextField5",
-                                            "designerId": "6de6f6c6-6bff-4048-9763-0b56009e128e"
+                                            "name": "MyNumberField14",
+                                            "designerId": "5382ac00-dd1a-4ba8-b2f3-b3105e4e6a1c"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "fieldLabel": "Qty Sold",
+                                                "itemId": "txtQtySold"
+                                            },
+                                            "name": "MyNumberField15",
+                                            "designerId": "58c71862-0a11-4e8f-a285-1dca743c4a49"
                                         },
                                         {
                                             "type": "Ext.form.field.Number",
@@ -764,7 +836,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": "lblEnteredBy",
-                                                "text": "Entered by"
+                                                "text": "Entered by",
+                                                "width": 200
                                             },
                                             "name": "MyLabel2",
                                             "designerId": "ce728f84-6000-450d-8993-71346ed1755f"
@@ -786,7 +859,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging13",
                     "designerId": "d4a45d8f-6d6e-4187-b5da-2cab756b3b74",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -28,10 +28,11 @@ Ext.define('Inventory.model.InventoryCountDetail', {
                 }
             }
         },
-        { name: 'intItemId', type: 'int', allowNull: false },
+        { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intItemLocationId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intStorageLocationId', type: 'int', allowNull: true },
+        { name: 'intCountGroupId', type: 'int', allowNull: true },
         { name: 'intLotId', type: 'int', allowNull: true },
         { name: 'dblSystemCount', type: 'float' },
         { name: 'dblLastCost', type: 'float' },
@@ -39,7 +40,7 @@ Ext.define('Inventory.model.InventoryCountDetail', {
         { name: 'dblPallets', type: 'float' },
         { name: 'dblQtyPerPallet', type: 'float' },
         { name: 'dblPhysicalCount', type: 'float' },
-        { name: 'intItemUOMId', type: 'int', allowNull: false },
+        { name: 'intItemUOMId', type: 'int', allowNull: true },
         { name: 'ysnRecount', type: 'boolean' },
         { name: 'intEntityUserSecurityId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true },
@@ -55,6 +56,8 @@ Ext.define('Inventory.model.InventoryCountDetail', {
         { name: 'strLotAlias', type: 'string' },
         { name: 'strUnitMeasure', type: 'string' },
         { name: 'dblConversionFactor', type: 'float' },
+        { name: 'dblQtyReceived', type: 'float' },
+        { name: 'dblQtySold', type: 'float' },
         { name: 'dblPhysicalCountStockUnit', type: 'float',
             persist: false,
             convert: function(value, record){
@@ -70,9 +73,15 @@ Ext.define('Inventory.model.InventoryCountDetail', {
                 var dblPhysicalCount = iRely.Functions.isEmpty(record.get('dblPhysicalCount')) ? 0 : record.get('dblPhysicalCount');
                 var dblSystemCount = iRely.Functions.isEmpty(record.get('dblSystemCount')) ? 0 : record.get('dblSystemCount');
                 var dblVariance = dblPhysicalCount - dblSystemCount;
+
+                if(record.get('intCountGroupId')) {
+                    var dblQtyReceived = iRely.Functions.isEmpty(record.get('dblQtyReceived')) ? 0 : record.get('dblQtyReceived');
+                    var dblQtySold = iRely.Functions.isEmpty(record.get('dblQtySold')) ? 0 : record.get('dblQtySold');
+                    dblVariance = dblPhysicalCount - (dblSystemCount + dblQtyReceived - dblQtySold);
+                }
                 return dblVariance;
             },
-            depends: ['dblPhysicalCount', 'dblSystemCount']},
+            depends: ['dblPhysicalCount', 'dblSystemCount', 'dblQtyReceived', 'dblQtySold']},
         { name: 'strUserName', type: 'string' }
     ],
 

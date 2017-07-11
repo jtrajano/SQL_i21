@@ -22,6 +22,9 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
     },
 
     stores: {
+        countGroup: {
+            type: 'icbufferedcountgroup'
+        },
         items: {
             type: 'icbuffereditemstockview'
         },
@@ -36,6 +39,13 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
         },
         itemUOMs: {
             type: "icbuffereditemstockuomforadjustmentview"
+        }
+    },
+
+    formulas: {
+        isCountByGroup: function(get) {
+            var count = get('inventoryCount');
+            return count && count.get('ysnCountByGroup');
         }
     }
 });

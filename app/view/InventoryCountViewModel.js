@@ -122,7 +122,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
         
         checkPrintCountSheet: function (get) {
-            if (get('current.intStatus') == 4) {
+            if (get('current.intStatus') == 4 || get('hasCountGroup')) {
                 return true;
             }
             else return false;
@@ -141,14 +141,14 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
         hidePostButton: function(get) {
             var posted = get('current.ysnPosted');
-            if (get('current.intStatus') === 3 || get('current.intStatus') === 4) {
+            if (get('current.intStatus') === 3 || get('current.intStatus') === 4 || get('current.ysnCountByGroup')) {
                 return true;
             }
             else return posted;
         },
         hideUnpostButton: function (get) {
             var posted = get('current.ysnPosted');
-            if (get('current.intStatus') === 4) {
+            if (get('current.intStatus') === 4 && !get('current.ysnCountByGroup')) {
                 return false;
             }
             else return true;
@@ -159,12 +159,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             }
             else return false;
         },
-        hasCountGroup: function (get) {
-            if (iRely.Functions.isEmpty(get('current.intCountGroupId'))) {
-                return false;
-            }
-            else return true;
-        },
+        
         getLockInventoryText: function (get) {
             if (get('current.intStatus') === 3) {
                 return 'Unlock Inventory';
@@ -178,7 +173,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             else return 'Post';
         },
         disableCountGridFields: function (get) {
-            if(iRely.Functions.isEmpty(get('grdPhysicalCount.selection.strItemNo')) || get('current.ysnPosted')) {
+            if((iRely.Functions.isEmpty(get('grdPhysicalCount.selection.strItemNo')) && !get('current.ysnCountByGroup')) || get('current.ysnPosted')) {
                 return true;
             }
             else {
@@ -190,7 +185,36 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                 return true;
             else
                 return false;
-        }
+        },
+        hasCountGroup: function (get) {
+            return get('current.ysnCountByGroup');
+        },
+        countByGroup: {
+            get: function(get) {
+                return get('current.ysnCountByGroup');
+            },
+
+            set: function(value) {
+                if(value) {
+                    this.set('current.ysnCountByLots', false);
+                    this.set('current.ysnExternal', false);
+                    this.set('current.ysnRecountMismatch', false);
+                    this.set('current.ysnRecount', false);
+                    this.set('current.ysnCountByPallets', false);
+                    this.set('current.ysnIncludeZeroOnHand', false);
+                    this.set('current.ysnIncludeOnHand', false);
+                }
+                this.set('current.ysnCountByGroup', value);
+            }
+        },
+        getFetchText: function(get) {
+            //return (get('hasCountGroup')) ? "Refresh" : "Fetch";
+            return "Fetch";
+        },
+        getFetchIconCls: function(get) {
+            //return (get('hasCountGroup')) ? "small-refresh-small" : "small-transfer";
+            return "small-transfer";
+        },
     }
 
 });

@@ -49,7 +49,6 @@ namespace iRely.Inventory.WebApi
         [ActionName("UpdateDetails")]
         public async Task<HttpResponseMessage> UpdateDetails([FromBody] InvCountDetailsParams param)
         {
-            var updateResult = new SaveResult();
             try
             {
                 var db = ((InventoryCountBl)_bl).GetRepository().ContextManager.Database;
@@ -69,16 +68,64 @@ namespace iRely.Inventory.WebApi
                     new SqlParameter("@intStorageLocationId", param.intStorageLocationId),
                     new SqlParameter("@ysnIncludeZeroOnHand", param.ysnIncludeZeroOnHand),
                     new SqlParameter("@ysnCountByLots", param.ysnCountByLots));
-                updateResult.HasError = false;
+                var result = new
+                {
+                    success = true,
+                    message = "success",
+                    exception = "",
+                    innerException = ""
+                };
+                return Request.CreateResponse(HttpStatusCode.Accepted, result);
             }
             catch (Exception ex)
             {
-                updateResult.BaseException = ex;
-                updateResult.HasError = true;
-                updateResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+                var result = new
+                {
+                    success = false,
+                    message = "failed",
+                    exception = ex.Message,
+                    innerException = ex.InnerException.Message
+                };
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
             }
+        }
 
-            return Request.CreateResponse(updateResult.HasError ? HttpStatusCode.InternalServerError : HttpStatusCode.Accepted, updateResult);
+        [HttpPut]
+        [ActionName("UpdateShiftCountDetails")]
+        public async Task<HttpResponseMessage> UpdateShiftCountDetails([FromBody] InvCountDetailsParams param)
+        {
+            try
+            {
+                var db = ((InventoryCountBl)_bl).GetRepository().ContextManager.Database;
+                var query = (@"EXEC dbo.uspICUpdateInventoryShiftCountDetails
+	                              @intInventoryCountId, @intEntityUserSecurityId, @strHeaderNo, @intLocationId
+                                , @intCountGroupId");
+                await db.ExecuteSqlCommandAsync(query,
+                    new SqlParameter("@intInventoryCountId", param.intInventoryCountId),
+                    new SqlParameter("@intEntityUserSecurityId", param.intEntityUserSecurityId),
+                    new SqlParameter("@strHeaderNo", param.strHeaderNo),
+                    new SqlParameter("@intLocationId", param.intLocationId),
+                    new SqlParameter("@intCountGroupId", param.intCountGroupId));
+                var result = new
+                {
+                    success = true,
+                    message = "success",
+                    exception = "",
+                    innerException = ""
+                };
+                return Request.CreateResponse(HttpStatusCode.Accepted, result);
+            }
+            catch (Exception ex)
+            {
+                var result = new
+                {
+                    success = false,
+                    message = "failed",
+                    exception = ex.Message,
+                    innerException = ex.InnerException.Message
+                };
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
+            }
         }
 
         [HttpGet]

@@ -265,7 +265,7 @@ namespace iRely.Inventory.Model
         {
             this.HasKey(t => t.intCommodityAttributeId);
 
-            this.ToTable("vyuICGetCommodityGrades");
+            this.ToTable("vyuICGetCommodityGrade");
 
             this.Property(t => t.intCommodityAttributeId).HasColumnName("intCommodityAttributeId");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");

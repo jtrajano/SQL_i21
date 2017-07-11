@@ -30,7 +30,7 @@ Ext.define('Inventory.view.InventoryCountDetails', {
         'Inventory.view.InventoryCountDetailsViewModel'
     ],
 
-    height: 580,
+    height: 611,
     minHeight: 580,
     width: 543,
     layout: 'fit',
@@ -94,6 +94,12 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                     layout: 'form',
                                     items: [
                                         {
+                                            xtype: 'textfield',
+                                            itemId: 'txtCountLineNo',
+                                            fieldLabel: 'Count Line No',
+                                            readOnly: true
+                                        },
+                                        {
                                             xtype: 'gridcombobox',
                                             columns: [
                                                 {
@@ -156,6 +162,28 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                             fieldLabel: 'Item',
                                             displayField: 'strItemNo',
                                             valueField: 'strItemNo'
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intCountGroupId',
+                                                    dataType: 'numeric',
+                                                    text: 'Count Group Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strCountGroup',
+                                                    dataType: 'string',
+                                                    text: 'Count Group',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            reference: 'cboCountGroup',
+                                            itemId: 'cboCountGroup',
+                                            fieldLabel: 'Count Group',
+                                            displayField: 'strCountGroup',
+                                            valueField: 'strCountGroup'
                                         },
                                         {
                                             xtype: 'textfield',
@@ -384,10 +412,14 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                             readOnly: true
                                         },
                                         {
-                                            xtype: 'textfield',
-                                            itemId: 'txtCountLineNo',
-                                            fieldLabel: 'Count Line No',
-                                            readOnly: true
+                                            xtype: 'numberfield',
+                                            itemId: 'txtQtyReceived',
+                                            fieldLabel: 'Qty Received'
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtQtySold',
+                                            fieldLabel: 'Qty Sold'
                                         },
                                         {
                                             xtype: 'numberfield',
@@ -478,6 +510,7 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                         {
                                             xtype: 'label',
                                             itemId: 'lblEnteredBy',
+                                            width: 200,
                                             text: 'Entered by'
                                         }
                                     ]

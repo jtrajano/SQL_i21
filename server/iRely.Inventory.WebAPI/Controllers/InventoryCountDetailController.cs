@@ -77,12 +77,27 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, new { data = data, strCountLine = strCountLine, intCountLine = intCountLine });
         }
 
+        [HttpGet]
+        [ActionName("GetLastCountGroup")]
+        public async Task<HttpResponseMessage> GetLastCountGroup(int intCountGroupId)
+        {
+            var bl = _bl as InventoryCountDetailBl;
+            var repo = bl.GetRepository() as InventoryRepository;
+
+            var last = await repo.GetQuery<tblICInventoryCountDetail>()
+                .Where(p => p.intCountGroupId == intCountGroupId)
+                .OrderByDescending(o => o.intInventoryCountDetailId).FirstOrDefaultAsync();
+
+            return Request.CreateResponse(HttpStatusCode.OK, new { data = last });
+        }
+
         [HttpPut]
         [ActionName("UpdateDetail")]
         public async Task<HttpResponseMessage> UpdateDetail(tblICInventoryCountDetail detail)
         {
             var bl = _bl as InventoryCountDetailBl;
             var repo = bl.GetRepository() as InventoryRepository;
+            
             if (ModelState.IsValid && detail != null)
             {
                 if(detail.intInventoryCountDetailId == 0)
@@ -100,14 +115,54 @@ namespace iRely.Inventory.WebApi
                         d.Property(e => e.intItemUOMId).CurrentValue = detail.intItemUOMId;
                         d.State = System.Data.Entity.EntityState.Modified;
                     }
-                    if(detail.intItemId != null)
+                    if (detail.intItemUOMId == -1)
+                    {
+                        d.Property(e => e.intItemUOMId).CurrentValue = null;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+
+                    if (detail.intItemId != null)
                     {
                         d.Property(e => e.intItemId).CurrentValue = detail.intItemId;
                         d.State = System.Data.Entity.EntityState.Modified;
                     }
+                    if (detail.intItemId == -1)
+                    {
+                        d.Property(e => e.intItemId).CurrentValue = null;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+
+                    if (detail.intCountGroupId != null)
+                    {
+                        d.Property(e => e.intCountGroupId).CurrentValue = detail.intCountGroupId;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+                    if (detail.intCountGroupId == -1)
+                    {
+                        d.Property(e => e.intCountGroupId).CurrentValue = null;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+
+                    if(detail.dblQtyReceived != null)
+                    {
+                        d.Property(e => e.dblQtyReceived).CurrentValue = detail.dblQtyReceived;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+
+                    if (detail.dblQtySold != null)
+                    {
+                        d.Property(e => e.dblQtySold).CurrentValue = detail.dblQtySold;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+
                     if (detail.intLotId != null)
                     {
                         d.Property(e => e.intLotId).CurrentValue = detail.intLotId;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+                    if (detail.intLotId == -1)
+                    {
+                        d.Property(e => e.intLotId).CurrentValue = null;
                         d.State = System.Data.Entity.EntityState.Modified;
                     }
 

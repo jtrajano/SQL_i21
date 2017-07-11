@@ -26,6 +26,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnIncludeOnHand).HasColumnName("ysnIncludeOnHand");
             this.Property(t => t.ysnScannedCountEntry).HasColumnName("ysnScannedCountEntry");
             this.Property(t => t.ysnCountByLots).HasColumnName("ysnCountByLots");
+            this.Property(t => t.ysnCountByGroup).HasColumnName("ysnCountByGroup");
             this.Property(t => t.ysnCountByPallets).HasColumnName("ysnCountByPallets");
             this.Property(t => t.ysnRecountMismatch).HasColumnName("ysnRecountMismatch");
             this.Property(t => t.ysnExternal).HasColumnName("ysnExternal");
@@ -35,6 +36,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
             this.Property(t => t.dtmPosted).HasColumnName("dtmPosted");
             this.Property(t => t.intImportFlagInternal).HasColumnName("intImportFlagInternal");
+            this.Property(t => t.strShiftNo).HasColumnName("strShiftNo");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
@@ -59,7 +61,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intInventoryCountId).HasColumnName("intInventoryCountId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
-            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.intCountGroupId).HasColumnName("intCountGroupId");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(38, 20);
@@ -69,6 +71,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(38, 20);
             this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(38, 20);
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.dblQtyReceived).HasColumnName("dblQtyReceived").HasPrecision(38, 20);
+            this.Property(t => t.dblQtySold).HasColumnName("dblQtySold").HasPrecision(38, 20);
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
             this.Property(t => t.intSort).HasColumnName("intSort");
@@ -108,11 +112,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnIncludeOnHand).HasColumnName("ysnIncludeOnHand");
             this.Property(t => t.ysnScannedCountEntry).HasColumnName("ysnScannedCountEntry");
             this.Property(t => t.ysnCountByLots).HasColumnName("ysnCountByLots");
+            this.Property(t => t.ysnCountByGroup).HasColumnName("ysnCountByGroup");
             this.Property(t => t.ysnCountByPallets).HasColumnName("ysnCountByPallets");
             this.Property(t => t.ysnRecountMismatch).HasColumnName("ysnRecountMismatch");
             this.Property(t => t.ysnExternal).HasColumnName("ysnExternal");
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intRecountReferenceId).HasColumnName("intRecountReferenceId");
+            this.Property(t => t.strShiftNo).HasColumnName("strShiftNo");
             this.Property(t => t.intStatus).HasColumnName("intStatus");
             this.Property(t => t.strStatus).HasColumnName("strStatus");
             this.Property(t => t.intSort).HasColumnName("intSort");
@@ -134,7 +140,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.strCountGroup).HasColumnName("strCountGroup");
             this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.intCountGroupId).HasColumnName("intCountGroupId");
             this.Property(t => t.strCategory).HasColumnName("strCategory");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");
@@ -156,6 +164,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(38, 20);
             this.Property(t => t.dblPhysicalCountStockUnit).HasColumnName("dblPhysicalCountStockUnit").HasPrecision(38, 20);
             this.Property(t => t.dblVariance).HasColumnName("dblVariance").HasPrecision(38, 20);
+            this.Property(t => t.dblQtyReceived).HasColumnName("dblQtyReceived").HasPrecision(38, 20);
+            this.Property(t => t.dblQtySold).HasColumnName("dblQtySold").HasPrecision(38, 20);
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
             this.Property(t => t.strUserName).HasColumnName("strUserName");

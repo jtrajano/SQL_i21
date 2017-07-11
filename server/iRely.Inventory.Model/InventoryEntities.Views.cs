@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets44b507471f9fe72aef75da08f4e44f922f4bf0e26320a2df5be0b693c2dabc05))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4096ac885de525f4cd7ce25bc140745addeea0ca656eb4cd18f82d7b3c5d9b1d))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets44b507471f9fe72aef75da08f4e44f922f4bf0e26320a2df5be0b693c2dabc05 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets4096ac885de525f4cd7ce25bc140745addeea0ca656eb4cd18f82d7b3c5d9b1d : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "44b507471f9fe72aef75da08f4e44f922f4bf0e26320a2df5be0b693c2dabc05"; }
+            get { return "4096ac885de525f4cd7ce25bc140745addeea0ca656eb4cd18f82d7b3c5d9b1d"; }
         }
 
         /// <summary>
@@ -15627,7 +15627,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCount
-        [CodeFirstDatabaseSchema.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intImportFlagInternal, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByGroup, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intImportFlagInternal, T1.tblICInventoryCount_strShiftNo, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountId AS tblICInventoryCount_intInventoryCountId, 
@@ -15644,6 +15644,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnIncludeOnHand AS tblICInventoryCount_ysnIncludeOnHand, 
             T.ysnScannedCountEntry AS tblICInventoryCount_ysnScannedCountEntry, 
             T.ysnCountByLots AS tblICInventoryCount_ysnCountByLots, 
+            T.ysnCountByGroup AS tblICInventoryCount_ysnCountByGroup, 
             T.ysnCountByPallets AS tblICInventoryCount_ysnCountByPallets, 
             T.ysnRecountMismatch AS tblICInventoryCount_ysnRecountMismatch, 
             T.ysnExternal AS tblICInventoryCount_ysnExternal, 
@@ -15654,6 +15655,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dtmPosted AS tblICInventoryCount_dtmPosted, 
             T.intEntityId AS tblICInventoryCount_intEntityId, 
             T.intImportFlagInternal AS tblICInventoryCount_intImportFlagInternal, 
+            T.strShiftNo AS tblICInventoryCount_strShiftNo, 
             T.intSort AS tblICInventoryCount_intSort, 
             T.intConcurrencyId AS tblICInventoryCount_intConcurrencyId, 
             True AS _from0
@@ -15669,12 +15671,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCountDetail
-        [CodeFirstDatabaseSchema.tblICInventoryCountDetail](T1.tblICInventoryCountDetail_intInventoryCountDetailId, T1.tblICInventoryCountDetail_intInventoryCountId, T1.tblICInventoryCountDetail_intItemId, T1.tblICInventoryCountDetail_intItemLocationId, T1.tblICInventoryCountDetail_intSubLocationId, T1.tblICInventoryCountDetail_intStorageLocationId, T1.tblICInventoryCountDetail_intLotId, T1.tblICInventoryCountDetail_dblSystemCount, T1.tblICInventoryCountDetail_dblLastCost, T1.tblICInventoryCountDetail_strCountLine, T1.tblICInventoryCountDetail_dblPallets, T1.tblICInventoryCountDetail_dblQtyPerPallet, T1.tblICInventoryCountDetail_dblPhysicalCount, T1.tblICInventoryCountDetail_intItemUOMId, T1.tblICInventoryCountDetail_ysnRecount, T1.tblICInventoryCountDetail_intEntityUserSecurityId, T1.tblICInventoryCountDetail_intSort, T1.tblICInventoryCountDetail_strAutoCreatedLotNumber, T1.tblICInventoryCountDetail_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryCountDetail](T1.tblICInventoryCountDetail_intInventoryCountDetailId, T1.tblICInventoryCountDetail_intInventoryCountId, T1.tblICInventoryCountDetail_intItemId, T1.tblICInventoryCountDetail_intCountGroupId, T1.tblICInventoryCountDetail_intItemLocationId, T1.tblICInventoryCountDetail_intSubLocationId, T1.tblICInventoryCountDetail_intStorageLocationId, T1.tblICInventoryCountDetail_intLotId, T1.tblICInventoryCountDetail_dblSystemCount, T1.tblICInventoryCountDetail_dblLastCost, T1.tblICInventoryCountDetail_strCountLine, T1.tblICInventoryCountDetail_dblPallets, T1.tblICInventoryCountDetail_dblQtyPerPallet, T1.tblICInventoryCountDetail_dblPhysicalCount, T1.tblICInventoryCountDetail_intItemUOMId, T1.tblICInventoryCountDetail_ysnRecount, T1.tblICInventoryCountDetail_intEntityUserSecurityId, T1.tblICInventoryCountDetail_intSort, T1.tblICInventoryCountDetail_strAutoCreatedLotNumber, T1.tblICInventoryCountDetail_dblQtyReceived, T1.tblICInventoryCountDetail_dblQtySold, T1.tblICInventoryCountDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountDetailId AS tblICInventoryCountDetail_intInventoryCountDetailId, 
             T.intInventoryCountId AS tblICInventoryCountDetail_intInventoryCountId, 
             T.intItemId AS tblICInventoryCountDetail_intItemId, 
+            T.intCountGroupId AS tblICInventoryCountDetail_intCountGroupId, 
             T.intItemLocationId AS tblICInventoryCountDetail_intItemLocationId, 
             T.intSubLocationId AS tblICInventoryCountDetail_intSubLocationId, 
             T.intStorageLocationId AS tblICInventoryCountDetail_intStorageLocationId, 
@@ -15690,6 +15693,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intEntityUserSecurityId AS tblICInventoryCountDetail_intEntityUserSecurityId, 
             T.intSort AS tblICInventoryCountDetail_intSort, 
             T.strAutoCreatedLotNumber AS tblICInventoryCountDetail_strAutoCreatedLotNumber, 
+            T.dblQtyReceived AS tblICInventoryCountDetail_dblQtyReceived, 
+            T.dblQtySold AS tblICInventoryCountDetail_dblQtySold, 
             T.intConcurrencyId AS tblICInventoryCountDetail_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICInventoryCountDetails AS T
@@ -15704,7 +15709,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryCountDetail
-        [CodeFirstDatabaseSchema.vyuICGetInventoryCountDetail](T1.vyuICGetInventoryCountDetail_intInventoryCountDetailId, T1.vyuICGetInventoryCountDetail_intInventoryCountId, T1.vyuICGetInventoryCountDetail_intItemId, T1.vyuICGetInventoryCountDetail_strItemNo, T1.vyuICGetInventoryCountDetail_strItemDescription, T1.vyuICGetInventoryCountDetail_strLotTracking, T1.vyuICGetInventoryCountDetail_intCategoryId, T1.vyuICGetInventoryCountDetail_strCategory, T1.vyuICGetInventoryCountDetail_intItemLocationId, T1.vyuICGetInventoryCountDetail_strLocationName, T1.vyuICGetInventoryCountDetail_intSubLocationId, T1.vyuICGetInventoryCountDetail_strSubLocationName, T1.vyuICGetInventoryCountDetail_intStorageLocationId, T1.vyuICGetInventoryCountDetail_strStorageLocationName, T1.vyuICGetInventoryCountDetail_intLotId, T1.vyuICGetInventoryCountDetail_strLotNumber, T1.vyuICGetInventoryCountDetail_strLotAlias, T1.vyuICGetInventoryCountDetail_dblSystemCount, T1.vyuICGetInventoryCountDetail_dblLastCost, T1.vyuICGetInventoryCountDetail_strCountLine, T1.vyuICGetInventoryCountDetail_dblPallets, T1.vyuICGetInventoryCountDetail_dblQtyPerPallet, T1.vyuICGetInventoryCountDetail_dblPhysicalCount, T1.vyuICGetInventoryCountDetail_intItemUOMId, T1.vyuICGetInventoryCountDetail_strUnitMeasure, T1.vyuICGetInventoryCountDetail_dblConversionFactor, T1.vyuICGetInventoryCountDetail_dblPhysicalCountStockUnit, T1.vyuICGetInventoryCountDetail_dblVariance, T1.vyuICGetInventoryCountDetail_ysnRecount, T1.vyuICGetInventoryCountDetail_intEntityUserSecurityId, T1.vyuICGetInventoryCountDetail_strUserName, T1.vyuICGetInventoryCountDetail_intSort)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryCountDetail](T1.vyuICGetInventoryCountDetail_intInventoryCountDetailId, T1.vyuICGetInventoryCountDetail_intInventoryCountId, T1.vyuICGetInventoryCountDetail_intItemId, T1.vyuICGetInventoryCountDetail_strItemNo, T1.vyuICGetInventoryCountDetail_strItemDescription, T1.vyuICGetInventoryCountDetail_strLotTracking, T1.vyuICGetInventoryCountDetail_strCountGroup, T1.vyuICGetInventoryCountDetail_intCountGroupId, T1.vyuICGetInventoryCountDetail_intCategoryId, T1.vyuICGetInventoryCountDetail_strCategory, T1.vyuICGetInventoryCountDetail_intItemLocationId, T1.vyuICGetInventoryCountDetail_strLocationName, T1.vyuICGetInventoryCountDetail_intSubLocationId, T1.vyuICGetInventoryCountDetail_strSubLocationName, T1.vyuICGetInventoryCountDetail_intStorageLocationId, T1.vyuICGetInventoryCountDetail_strStorageLocationName, T1.vyuICGetInventoryCountDetail_intLotId, T1.vyuICGetInventoryCountDetail_strLotNumber, T1.vyuICGetInventoryCountDetail_strLotAlias, T1.vyuICGetInventoryCountDetail_dblSystemCount, T1.vyuICGetInventoryCountDetail_dblLastCost, T1.vyuICGetInventoryCountDetail_strCountLine, T1.vyuICGetInventoryCountDetail_dblPallets, T1.vyuICGetInventoryCountDetail_dblQtyPerPallet, T1.vyuICGetInventoryCountDetail_dblPhysicalCount, T1.vyuICGetInventoryCountDetail_intItemUOMId, T1.vyuICGetInventoryCountDetail_strUnitMeasure, T1.vyuICGetInventoryCountDetail_dblConversionFactor, T1.vyuICGetInventoryCountDetail_dblPhysicalCountStockUnit, T1.vyuICGetInventoryCountDetail_dblVariance, T1.vyuICGetInventoryCountDetail_ysnRecount, T1.vyuICGetInventoryCountDetail_dblQtyReceived, T1.vyuICGetInventoryCountDetail_dblQtySold, T1.vyuICGetInventoryCountDetail_intEntityUserSecurityId, T1.vyuICGetInventoryCountDetail_strUserName, T1.vyuICGetInventoryCountDetail_intSort)
     FROM (
         SELECT 
             T.intInventoryCountDetailId AS vyuICGetInventoryCountDetail_intInventoryCountDetailId, 
@@ -15713,6 +15718,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strItemNo AS vyuICGetInventoryCountDetail_strItemNo, 
             T.strItemDescription AS vyuICGetInventoryCountDetail_strItemDescription, 
             T.strLotTracking AS vyuICGetInventoryCountDetail_strLotTracking, 
+            T.strCountGroup AS vyuICGetInventoryCountDetail_strCountGroup, 
+            T.intCountGroupId AS vyuICGetInventoryCountDetail_intCountGroupId, 
             T.intCategoryId AS vyuICGetInventoryCountDetail_intCategoryId, 
             T.strCategory AS vyuICGetInventoryCountDetail_strCategory, 
             T.intItemLocationId AS vyuICGetInventoryCountDetail_intItemLocationId, 
@@ -15736,6 +15743,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblPhysicalCountStockUnit AS vyuICGetInventoryCountDetail_dblPhysicalCountStockUnit, 
             T.dblVariance AS vyuICGetInventoryCountDetail_dblVariance, 
             T.ysnRecount AS vyuICGetInventoryCountDetail_ysnRecount, 
+            T.dblQtyReceived AS vyuICGetInventoryCountDetail_dblQtyReceived, 
+            T.dblQtySold AS vyuICGetInventoryCountDetail_dblQtySold, 
             T.intEntityUserSecurityId AS vyuICGetInventoryCountDetail_intEntityUserSecurityId, 
             T.strUserName AS vyuICGetInventoryCountDetail_strUserName, 
             T.intSort AS vyuICGetInventoryCountDetail_intSort, 
@@ -15752,7 +15761,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryCount
-        [CodeFirstDatabaseSchema.vyuICGetInventoryCount](T1.vyuICGetInventoryCount_intInventoryCountId, T1.vyuICGetInventoryCount_intLocationId, T1.vyuICGetInventoryCount_strLocationName, T1.vyuICGetInventoryCount_intCategoryId, T1.vyuICGetInventoryCount_strCategory, T1.vyuICGetInventoryCount_intCommodityId, T1.vyuICGetInventoryCount_strCommodity, T1.vyuICGetInventoryCount_intCountGroupId, T1.vyuICGetInventoryCount_strCountGroup, T1.vyuICGetInventoryCount_dtmCountDate, T1.vyuICGetInventoryCount_strCountNo, T1.vyuICGetInventoryCount_intSubLocationId, T1.vyuICGetInventoryCount_strSubLocationName, T1.vyuICGetInventoryCount_intStorageLocationId, T1.vyuICGetInventoryCount_strStorageLocationName, T1.vyuICGetInventoryCount_strDescription, T1.vyuICGetInventoryCount_ysnIncludeZeroOnHand, T1.vyuICGetInventoryCount_ysnIncludeOnHand, T1.vyuICGetInventoryCount_ysnScannedCountEntry, T1.vyuICGetInventoryCount_ysnCountByLots, T1.vyuICGetInventoryCount_ysnCountByPallets, T1.vyuICGetInventoryCount_ysnRecountMismatch, T1.vyuICGetInventoryCount_ysnExternal, T1.vyuICGetInventoryCount_ysnRecount, T1.vyuICGetInventoryCount_intRecountReferenceId, T1.vyuICGetInventoryCount_intStatus, T1.vyuICGetInventoryCount_strStatus, T1.vyuICGetInventoryCount_intSort)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryCount](T1.vyuICGetInventoryCount_intInventoryCountId, T1.vyuICGetInventoryCount_intLocationId, T1.vyuICGetInventoryCount_strLocationName, T1.vyuICGetInventoryCount_intCategoryId, T1.vyuICGetInventoryCount_strCategory, T1.vyuICGetInventoryCount_intCommodityId, T1.vyuICGetInventoryCount_strCommodity, T1.vyuICGetInventoryCount_intCountGroupId, T1.vyuICGetInventoryCount_strCountGroup, T1.vyuICGetInventoryCount_dtmCountDate, T1.vyuICGetInventoryCount_strCountNo, T1.vyuICGetInventoryCount_intSubLocationId, T1.vyuICGetInventoryCount_strSubLocationName, T1.vyuICGetInventoryCount_intStorageLocationId, T1.vyuICGetInventoryCount_strStorageLocationName, T1.vyuICGetInventoryCount_strDescription, T1.vyuICGetInventoryCount_ysnIncludeZeroOnHand, T1.vyuICGetInventoryCount_ysnIncludeOnHand, T1.vyuICGetInventoryCount_ysnScannedCountEntry, T1.vyuICGetInventoryCount_ysnCountByLots, T1.vyuICGetInventoryCount_ysnCountByGroup, T1.vyuICGetInventoryCount_ysnCountByPallets, T1.vyuICGetInventoryCount_ysnRecountMismatch, T1.vyuICGetInventoryCount_ysnExternal, T1.vyuICGetInventoryCount_ysnRecount, T1.vyuICGetInventoryCount_intRecountReferenceId, T1.vyuICGetInventoryCount_strShiftNo, T1.vyuICGetInventoryCount_intStatus, T1.vyuICGetInventoryCount_strStatus, T1.vyuICGetInventoryCount_intSort)
     FROM (
         SELECT 
             T.intInventoryCountId AS vyuICGetInventoryCount_intInventoryCountId, 
@@ -15775,11 +15784,13 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnIncludeOnHand AS vyuICGetInventoryCount_ysnIncludeOnHand, 
             T.ysnScannedCountEntry AS vyuICGetInventoryCount_ysnScannedCountEntry, 
             T.ysnCountByLots AS vyuICGetInventoryCount_ysnCountByLots, 
+            T.ysnCountByGroup AS vyuICGetInventoryCount_ysnCountByGroup, 
             T.ysnCountByPallets AS vyuICGetInventoryCount_ysnCountByPallets, 
             T.ysnRecountMismatch AS vyuICGetInventoryCount_ysnRecountMismatch, 
             T.ysnExternal AS vyuICGetInventoryCount_ysnExternal, 
             T.ysnRecount AS vyuICGetInventoryCount_ysnRecount, 
             T.intRecountReferenceId AS vyuICGetInventoryCount_intRecountReferenceId, 
+            T.strShiftNo AS vyuICGetInventoryCount_strShiftNo, 
             T.intStatus AS vyuICGetInventoryCount_intStatus, 
             T.strStatus AS vyuICGetInventoryCount_strStatus, 
             T.intSort AS vyuICGetInventoryCount_intSort, 
@@ -15796,7 +15807,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCounts
-        [iRely.Inventory.Model.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intImportFlagInternal, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByGroup, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intImportFlagInternal, T1.tblICInventoryCount_strShiftNo, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountId AS tblICInventoryCount_intInventoryCountId, 
@@ -15813,6 +15824,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnIncludeOnHand AS tblICInventoryCount_ysnIncludeOnHand, 
             T.ysnScannedCountEntry AS tblICInventoryCount_ysnScannedCountEntry, 
             T.ysnCountByLots AS tblICInventoryCount_ysnCountByLots, 
+            T.ysnCountByGroup AS tblICInventoryCount_ysnCountByGroup, 
             T.ysnCountByPallets AS tblICInventoryCount_ysnCountByPallets, 
             T.ysnRecountMismatch AS tblICInventoryCount_ysnRecountMismatch, 
             T.ysnExternal AS tblICInventoryCount_ysnExternal, 
@@ -15823,6 +15835,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dtmPosted AS tblICInventoryCount_dtmPosted, 
             T.intEntityId AS tblICInventoryCount_intEntityId, 
             T.intImportFlagInternal AS tblICInventoryCount_intImportFlagInternal, 
+            T.strShiftNo AS tblICInventoryCount_strShiftNo, 
             T.intSort AS tblICInventoryCount_intSort, 
             T.intConcurrencyId AS tblICInventoryCount_intConcurrencyId, 
             True AS _from0
@@ -15838,12 +15851,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCountDetails
-        [iRely.Inventory.Model.tblICInventoryCountDetail](T1.tblICInventoryCountDetail_intInventoryCountDetailId, T1.tblICInventoryCountDetail_intInventoryCountId, T1.tblICInventoryCountDetail_intItemId, T1.tblICInventoryCountDetail_intItemLocationId, T1.tblICInventoryCountDetail_intSubLocationId, T1.tblICInventoryCountDetail_intStorageLocationId, T1.tblICInventoryCountDetail_intLotId, T1.tblICInventoryCountDetail_dblSystemCount, T1.tblICInventoryCountDetail_dblLastCost, T1.tblICInventoryCountDetail_strCountLine, T1.tblICInventoryCountDetail_dblPallets, T1.tblICInventoryCountDetail_dblQtyPerPallet, T1.tblICInventoryCountDetail_dblPhysicalCount, T1.tblICInventoryCountDetail_intItemUOMId, T1.tblICInventoryCountDetail_ysnRecount, T1.tblICInventoryCountDetail_intEntityUserSecurityId, T1.tblICInventoryCountDetail_intSort, T1.tblICInventoryCountDetail_strAutoCreatedLotNumber, T1.tblICInventoryCountDetail_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryCountDetail](T1.tblICInventoryCountDetail_intInventoryCountDetailId, T1.tblICInventoryCountDetail_intInventoryCountId, T1.tblICInventoryCountDetail_intItemId, T1.tblICInventoryCountDetail_intCountGroupId, T1.tblICInventoryCountDetail_intItemLocationId, T1.tblICInventoryCountDetail_intSubLocationId, T1.tblICInventoryCountDetail_intStorageLocationId, T1.tblICInventoryCountDetail_intLotId, T1.tblICInventoryCountDetail_dblSystemCount, T1.tblICInventoryCountDetail_dblLastCost, T1.tblICInventoryCountDetail_strCountLine, T1.tblICInventoryCountDetail_dblPallets, T1.tblICInventoryCountDetail_dblQtyPerPallet, T1.tblICInventoryCountDetail_dblPhysicalCount, T1.tblICInventoryCountDetail_intItemUOMId, T1.tblICInventoryCountDetail_ysnRecount, T1.tblICInventoryCountDetail_intEntityUserSecurityId, T1.tblICInventoryCountDetail_intSort, T1.tblICInventoryCountDetail_strAutoCreatedLotNumber, T1.tblICInventoryCountDetail_dblQtyReceived, T1.tblICInventoryCountDetail_dblQtySold, T1.tblICInventoryCountDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountDetailId AS tblICInventoryCountDetail_intInventoryCountDetailId, 
             T.intInventoryCountId AS tblICInventoryCountDetail_intInventoryCountId, 
             T.intItemId AS tblICInventoryCountDetail_intItemId, 
+            T.intCountGroupId AS tblICInventoryCountDetail_intCountGroupId, 
             T.intItemLocationId AS tblICInventoryCountDetail_intItemLocationId, 
             T.intSubLocationId AS tblICInventoryCountDetail_intSubLocationId, 
             T.intStorageLocationId AS tblICInventoryCountDetail_intStorageLocationId, 
@@ -15859,6 +15873,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intEntityUserSecurityId AS tblICInventoryCountDetail_intEntityUserSecurityId, 
             T.intSort AS tblICInventoryCountDetail_intSort, 
             T.strAutoCreatedLotNumber AS tblICInventoryCountDetail_strAutoCreatedLotNumber, 
+            T.dblQtyReceived AS tblICInventoryCountDetail_dblQtyReceived, 
+            T.dblQtySold AS tblICInventoryCountDetail_dblQtySold, 
             T.intConcurrencyId AS tblICInventoryCountDetail_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICInventoryCountDetail AS T
@@ -15873,7 +15889,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryCountDetails
-        [iRely.Inventory.Model.vyuICGetInventoryCountDetail](T1.vyuICGetInventoryCountDetail_intInventoryCountDetailId, T1.vyuICGetInventoryCountDetail_intInventoryCountId, T1.vyuICGetInventoryCountDetail_intItemId, T1.vyuICGetInventoryCountDetail_strItemNo, T1.vyuICGetInventoryCountDetail_strItemDescription, T1.vyuICGetInventoryCountDetail_strLotTracking, T1.vyuICGetInventoryCountDetail_intCategoryId, T1.vyuICGetInventoryCountDetail_strCategory, T1.vyuICGetInventoryCountDetail_intItemLocationId, T1.vyuICGetInventoryCountDetail_strLocationName, T1.vyuICGetInventoryCountDetail_intSubLocationId, T1.vyuICGetInventoryCountDetail_strSubLocationName, T1.vyuICGetInventoryCountDetail_intStorageLocationId, T1.vyuICGetInventoryCountDetail_strStorageLocationName, T1.vyuICGetInventoryCountDetail_intLotId, T1.vyuICGetInventoryCountDetail_strLotNumber, T1.vyuICGetInventoryCountDetail_strLotAlias, T1.vyuICGetInventoryCountDetail_dblSystemCount, T1.vyuICGetInventoryCountDetail_dblLastCost, T1.vyuICGetInventoryCountDetail_strCountLine, T1.vyuICGetInventoryCountDetail_dblPallets, T1.vyuICGetInventoryCountDetail_dblQtyPerPallet, T1.vyuICGetInventoryCountDetail_dblPhysicalCount, T1.vyuICGetInventoryCountDetail_intItemUOMId, T1.vyuICGetInventoryCountDetail_strUnitMeasure, T1.vyuICGetInventoryCountDetail_dblConversionFactor, T1.vyuICGetInventoryCountDetail_dblPhysicalCountStockUnit, T1.vyuICGetInventoryCountDetail_dblVariance, T1.vyuICGetInventoryCountDetail_ysnRecount, T1.vyuICGetInventoryCountDetail_intEntityUserSecurityId, T1.vyuICGetInventoryCountDetail_strUserName, T1.vyuICGetInventoryCountDetail_intSort)
+        [iRely.Inventory.Model.vyuICGetInventoryCountDetail](T1.vyuICGetInventoryCountDetail_intInventoryCountDetailId, T1.vyuICGetInventoryCountDetail_intInventoryCountId, T1.vyuICGetInventoryCountDetail_intItemId, T1.vyuICGetInventoryCountDetail_strItemNo, T1.vyuICGetInventoryCountDetail_strItemDescription, T1.vyuICGetInventoryCountDetail_strLotTracking, T1.vyuICGetInventoryCountDetail_strCountGroup, T1.vyuICGetInventoryCountDetail_intCountGroupId, T1.vyuICGetInventoryCountDetail_intCategoryId, T1.vyuICGetInventoryCountDetail_strCategory, T1.vyuICGetInventoryCountDetail_intItemLocationId, T1.vyuICGetInventoryCountDetail_strLocationName, T1.vyuICGetInventoryCountDetail_intSubLocationId, T1.vyuICGetInventoryCountDetail_strSubLocationName, T1.vyuICGetInventoryCountDetail_intStorageLocationId, T1.vyuICGetInventoryCountDetail_strStorageLocationName, T1.vyuICGetInventoryCountDetail_intLotId, T1.vyuICGetInventoryCountDetail_strLotNumber, T1.vyuICGetInventoryCountDetail_strLotAlias, T1.vyuICGetInventoryCountDetail_dblSystemCount, T1.vyuICGetInventoryCountDetail_dblLastCost, T1.vyuICGetInventoryCountDetail_strCountLine, T1.vyuICGetInventoryCountDetail_dblPallets, T1.vyuICGetInventoryCountDetail_dblQtyPerPallet, T1.vyuICGetInventoryCountDetail_dblPhysicalCount, T1.vyuICGetInventoryCountDetail_intItemUOMId, T1.vyuICGetInventoryCountDetail_strUnitMeasure, T1.vyuICGetInventoryCountDetail_dblConversionFactor, T1.vyuICGetInventoryCountDetail_dblPhysicalCountStockUnit, T1.vyuICGetInventoryCountDetail_dblVariance, T1.vyuICGetInventoryCountDetail_ysnRecount, T1.vyuICGetInventoryCountDetail_dblQtyReceived, T1.vyuICGetInventoryCountDetail_dblQtySold, T1.vyuICGetInventoryCountDetail_intEntityUserSecurityId, T1.vyuICGetInventoryCountDetail_strUserName, T1.vyuICGetInventoryCountDetail_intSort)
     FROM (
         SELECT 
             T.intInventoryCountDetailId AS vyuICGetInventoryCountDetail_intInventoryCountDetailId, 
@@ -15882,6 +15898,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strItemNo AS vyuICGetInventoryCountDetail_strItemNo, 
             T.strItemDescription AS vyuICGetInventoryCountDetail_strItemDescription, 
             T.strLotTracking AS vyuICGetInventoryCountDetail_strLotTracking, 
+            T.strCountGroup AS vyuICGetInventoryCountDetail_strCountGroup, 
+            T.intCountGroupId AS vyuICGetInventoryCountDetail_intCountGroupId, 
             T.intCategoryId AS vyuICGetInventoryCountDetail_intCategoryId, 
             T.strCategory AS vyuICGetInventoryCountDetail_strCategory, 
             T.intItemLocationId AS vyuICGetInventoryCountDetail_intItemLocationId, 
@@ -15905,6 +15923,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblPhysicalCountStockUnit AS vyuICGetInventoryCountDetail_dblPhysicalCountStockUnit, 
             T.dblVariance AS vyuICGetInventoryCountDetail_dblVariance, 
             T.ysnRecount AS vyuICGetInventoryCountDetail_ysnRecount, 
+            T.dblQtyReceived AS vyuICGetInventoryCountDetail_dblQtyReceived, 
+            T.dblQtySold AS vyuICGetInventoryCountDetail_dblQtySold, 
             T.intEntityUserSecurityId AS vyuICGetInventoryCountDetail_intEntityUserSecurityId, 
             T.strUserName AS vyuICGetInventoryCountDetail_strUserName, 
             T.intSort AS vyuICGetInventoryCountDetail_intSort, 
@@ -15921,7 +15941,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryCounts
-        [iRely.Inventory.Model.vyuICGetInventoryCount](T1.vyuICGetInventoryCount_intInventoryCountId, T1.vyuICGetInventoryCount_intLocationId, T1.vyuICGetInventoryCount_strLocationName, T1.vyuICGetInventoryCount_intCategoryId, T1.vyuICGetInventoryCount_strCategory, T1.vyuICGetInventoryCount_intCommodityId, T1.vyuICGetInventoryCount_strCommodity, T1.vyuICGetInventoryCount_intCountGroupId, T1.vyuICGetInventoryCount_strCountGroup, T1.vyuICGetInventoryCount_dtmCountDate, T1.vyuICGetInventoryCount_strCountNo, T1.vyuICGetInventoryCount_intSubLocationId, T1.vyuICGetInventoryCount_strSubLocationName, T1.vyuICGetInventoryCount_intStorageLocationId, T1.vyuICGetInventoryCount_strStorageLocationName, T1.vyuICGetInventoryCount_strDescription, T1.vyuICGetInventoryCount_ysnIncludeZeroOnHand, T1.vyuICGetInventoryCount_ysnIncludeOnHand, T1.vyuICGetInventoryCount_ysnScannedCountEntry, T1.vyuICGetInventoryCount_ysnCountByLots, T1.vyuICGetInventoryCount_ysnCountByPallets, T1.vyuICGetInventoryCount_ysnRecountMismatch, T1.vyuICGetInventoryCount_ysnExternal, T1.vyuICGetInventoryCount_ysnRecount, T1.vyuICGetInventoryCount_intRecountReferenceId, T1.vyuICGetInventoryCount_intStatus, T1.vyuICGetInventoryCount_strStatus, T1.vyuICGetInventoryCount_intSort)
+        [iRely.Inventory.Model.vyuICGetInventoryCount](T1.vyuICGetInventoryCount_intInventoryCountId, T1.vyuICGetInventoryCount_intLocationId, T1.vyuICGetInventoryCount_strLocationName, T1.vyuICGetInventoryCount_intCategoryId, T1.vyuICGetInventoryCount_strCategory, T1.vyuICGetInventoryCount_intCommodityId, T1.vyuICGetInventoryCount_strCommodity, T1.vyuICGetInventoryCount_intCountGroupId, T1.vyuICGetInventoryCount_strCountGroup, T1.vyuICGetInventoryCount_dtmCountDate, T1.vyuICGetInventoryCount_strCountNo, T1.vyuICGetInventoryCount_intSubLocationId, T1.vyuICGetInventoryCount_strSubLocationName, T1.vyuICGetInventoryCount_intStorageLocationId, T1.vyuICGetInventoryCount_strStorageLocationName, T1.vyuICGetInventoryCount_strDescription, T1.vyuICGetInventoryCount_ysnIncludeZeroOnHand, T1.vyuICGetInventoryCount_ysnIncludeOnHand, T1.vyuICGetInventoryCount_ysnScannedCountEntry, T1.vyuICGetInventoryCount_ysnCountByLots, T1.vyuICGetInventoryCount_ysnCountByGroup, T1.vyuICGetInventoryCount_ysnCountByPallets, T1.vyuICGetInventoryCount_ysnRecountMismatch, T1.vyuICGetInventoryCount_ysnExternal, T1.vyuICGetInventoryCount_ysnRecount, T1.vyuICGetInventoryCount_intRecountReferenceId, T1.vyuICGetInventoryCount_strShiftNo, T1.vyuICGetInventoryCount_intStatus, T1.vyuICGetInventoryCount_strStatus, T1.vyuICGetInventoryCount_intSort)
     FROM (
         SELECT 
             T.intInventoryCountId AS vyuICGetInventoryCount_intInventoryCountId, 
@@ -15944,11 +15964,13 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnIncludeOnHand AS vyuICGetInventoryCount_ysnIncludeOnHand, 
             T.ysnScannedCountEntry AS vyuICGetInventoryCount_ysnScannedCountEntry, 
             T.ysnCountByLots AS vyuICGetInventoryCount_ysnCountByLots, 
+            T.ysnCountByGroup AS vyuICGetInventoryCount_ysnCountByGroup, 
             T.ysnCountByPallets AS vyuICGetInventoryCount_ysnCountByPallets, 
             T.ysnRecountMismatch AS vyuICGetInventoryCount_ysnRecountMismatch, 
             T.ysnExternal AS vyuICGetInventoryCount_ysnExternal, 
             T.ysnRecount AS vyuICGetInventoryCount_ysnRecount, 
             T.intRecountReferenceId AS vyuICGetInventoryCount_intRecountReferenceId, 
+            T.strShiftNo AS vyuICGetInventoryCount_strShiftNo, 
             T.intStatus AS vyuICGetInventoryCount_intStatus, 
             T.strStatus AS vyuICGetInventoryCount_strStatus, 
             T.intSort AS vyuICGetInventoryCount_intSort, 
