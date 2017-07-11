@@ -204,8 +204,8 @@ BEGIN
 		JOIN tblICItemUOM iu ON RSI.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
 		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = RSI.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = RSI.intLastModifiedUserId
+		JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = RSI.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityId] = RSI.intLastModifiedUserId
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = r.intWorkOrderId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
 		WHERE r.intItemId = @intItemId
