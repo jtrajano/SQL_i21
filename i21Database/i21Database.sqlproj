@@ -5320,6 +5320,14 @@
     <Build Include="dbo\Stored Procedures\uspMFLotSplitOnHandHeld.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePickOrderValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAlertNotificationCount.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByVehicleOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByVehicle.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByMiscOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByMisc.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByDeptOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByDept.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByCardOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByCard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
