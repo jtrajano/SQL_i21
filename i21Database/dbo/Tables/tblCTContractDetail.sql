@@ -123,6 +123,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intProducerId] INT NULL,
 	[ysnClaimsToProducer] BIT,
 	[ysnRiskToProducer] BIT,
+    [dblAllocatedQty] NUMERIC(18, 6) NULL, 
+    [dblReservedQty] NUMERIC(18, 6) NULL, 
+    [dblAllocationAdjQty] NUMERIC(18, 6) NULL, 
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
