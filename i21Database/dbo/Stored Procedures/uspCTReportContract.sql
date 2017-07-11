@@ -269,7 +269,7 @@ BEGIN TRY
 				'Subject - Contract Amendment as of '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
 			END strCondition,
 			PO.strPosition +ISNULL(' ('+CASE WHEN SQ.strPackingDescription = '' THEN NULL ELSE SQ.strPackingDescription END+') ','') AS strPositionWithPackDesc,
-			TX.strText+' '+CH.strPrintableRemarks AS strText,
+			ISNULL(TX.strText,'') +' '+ ISNULL(CH.strPrintableRemarks,'') AS strText,
 			SQ.strContractCompanyName,
 			SQ.strContractPrintSignOff,
 			LTRIM(RTRIM(EY.strEntityName))AS strCompanyName,
