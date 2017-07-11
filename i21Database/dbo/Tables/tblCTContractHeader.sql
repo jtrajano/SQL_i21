@@ -69,6 +69,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	intLastModifiedById INT,
 	dtmLastModified DATETIME,
 	ysnMailSent BIT,
+	strAmendmentLog  [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),

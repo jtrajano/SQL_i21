@@ -77,7 +77,7 @@ BEGIN TRY
 	WHERE	[fieldname] = 'intContractHeaderId'
 	
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'--ContractManagement.view.ContractAmendment
-	SELECT @intTransactionId=intTransactionId FROM tblSMTransaction WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
+	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
 	SELECT	@strCommodityCode	=	CM.strCommodityCode,
 			@ysnPrinted			=	CH.ysnPrinted
@@ -85,10 +85,9 @@ BEGIN TRY
 	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
-	IF (SELECT COUNT(1) FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved') >1	
+	IF @IsFullApproved = 1	
 	BEGIN	
 		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one PDF-copy of the signed original by e-mail.'	
-		SET @IsFullApproved=1    
 	END
 	ELSE
 		SET @strApprovalText='This document concerns an unconfirmed agreement. Please check this unconfirmed agreement and let us know if you find any discrepancies; If no notification of discrepancy has been received by us from you within 24 hours after receipt of this document, this unconfirmed agreement becomes confirmed from Supplier side. Once confirmed from Supplier side, KDE will check the document on discrepancies. If no discrepancies are found, a confirmed agreement will be issued by KDE, replacing the unconfirmed agreement. A confirmed agreement will only be binding for KDE once it has been signed by the authorized KDE representatives. Upon receipt of the confirmed agreement signed by KDE, Supplier shall sign the confirmed agreement and return it to KDE'
@@ -269,8 +268,8 @@ BEGIN TRY
 		    ELSE
 				'Subject - Contract Amendment as of '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
 			END strCondition,
-			PO.strPosition +' ('+SQ.strPackingDescription +') ' AS strPositionWithPackDesc,
-			TX.strText+' '+CH.strPrintableRemarks AS strText,
+			PO.strPosition +ISNULL(' ('+CASE WHEN SQ.strPackingDescription = '' THEN NULL ELSE SQ.strPackingDescription END+') ','') AS strPositionWithPackDesc,
+			ISNULL(TX.strText,'') +' '+ ISNULL(CH.strPrintableRemarks,'') AS strText,
 			SQ.strContractCompanyName,
 			SQ.strContractPrintSignOff,
 			LTRIM(RTRIM(EY.strEntityName))AS strCompanyName,

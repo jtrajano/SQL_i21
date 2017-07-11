@@ -30,6 +30,11 @@ BEGIN TRY
 
 	DECLARE	@SCOPE_IDENTITY TABLE (intApprovedContractId INT)
 
+	IF @ysnApproved = 1
+	BEGIN
+		UPDATE tblCTContractHeader SET strAmendmentLog = NULL WHERE intContractHeaderId = @intContractHeaderId
+	END
+
 	INSERT INTO tblCTApprovedContract
 	(
 			intContractHeaderId,	intContractDetailId,	intEntityId,
