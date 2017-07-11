@@ -5429,6 +5429,8 @@
     <Build Include="dbo\Views\vyuCRMOpportunityProspectRequirementLink.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateAllocatedQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateReservedQuantity.sql" />
+    <Build Include="dbo\Tables\tblHDTicketStatusWorkflow.sql" />
+    <Build Include="dbo\Views\vyuHDTicketStatusWorkflowLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
