@@ -41,7 +41,11 @@
 	CONSTRAINT [FK_tblPOPurchaseDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
 	CONSTRAINT [FK_tblPOPurchaseDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
 	CONSTRAINT [FK_tblPOPurchaseDetail_tblSMCompanySubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [dbo].[tblSMCompanyLocationSubLocation] ([intCompanyLocationSubLocationId]),
-	CONSTRAINT [FK_tblPOPurchaseDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+	CONSTRAINT [FK_tblPOPurchaseDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+		
+	CONSTRAINT [FK_tblPOPurchaseDetail_intItemId] FOREIGN KEY ([intItemId]) REFERENCES tblICItem([intItemId]),
+	CONSTRAINT [FK_tblPOPurchaseDetail_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES tblICItemUOM([intItemUOMId]),
+	CONSTRAINT [FK_tblPOPurchaseDetail_intWeightUOMId] FOREIGN KEY ([intWeightUOMId]) REFERENCES tblICItemUOM([intItemUOMId]),
 )
 
 GO

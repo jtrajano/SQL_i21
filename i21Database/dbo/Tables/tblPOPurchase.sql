@@ -62,7 +62,13 @@
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblEMEntityLocation_intShipFromId] FOREIGN KEY (intShipFromId) REFERENCES [tblEMEntityLocation](intEntityLocationId),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipViaId) REFERENCES tblSMShipVia([intEntityId]),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblEMEntityContact_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEMEntity(intEntityId),
-	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor ([intEntityId])
+	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor ([intEntityId]),
+
+	CONSTRAINT [FK_tblPOPurchase_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES tblSMFreightTerms([intFreightTermId]),
+	CONSTRAINT [FK_tblPOPurchase_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES tblSMCurrency([intCurrencyID]),
+	CONSTRAINT [FK_tblPOPurchase_intOrderById] FOREIGN KEY ([intOrderById]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblPOPurchase_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId]),
+	CONSTRAINT [FK_tblPOPurchase_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES tblCTContractHeader([intContractHeaderId]),
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_intPurchaseId]

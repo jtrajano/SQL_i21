@@ -292,4 +292,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\8_AP\1730_Remove_ysnVoid_tblAPPayment.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\8_AP\1730_FixDataBeforeApplyingConstraints.sql" />
+  </ItemGroup>
 </Project>
