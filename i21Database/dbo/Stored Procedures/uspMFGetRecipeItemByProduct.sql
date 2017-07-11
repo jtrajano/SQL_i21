@@ -9,7 +9,10 @@ BEGIN
 	DECLARE @dtmCurrentDate DATETIME
 		,@dtmCurrentDateTime DATETIME
 		,@intDayOfYear INT
-		,@intManufacturingProcessId int,@strPackagingCategory nvarchar(50),@intPMCategoryId int
+		,@intManufacturingProcessId INT
+		,@strPackagingCategory NVARCHAR(50)
+		,@intPMCategoryId INT
+
 	SELECT @dtmCurrentDateTime = GETDATE()
 
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
@@ -40,6 +43,9 @@ BEGIN
 			,ri.dtmLastModified
 			,r.intVersionNo
 			,ri.ysnPartialFillConsumption
+			,CONVERT(BIT, 0) AS ysnSubstituteItem
+			,I.strItemNo AS strMainRecipeItem
+			,ri.intRecipeItemId
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
@@ -69,31 +75,41 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-	
-		Select @intManufacturingProcessId=intManufacturingProcessId
-		from tblMFWorkOrder
-		Where intWorkOrderId =@intWorkOrderId 
+		SELECT @intManufacturingProcessId = intManufacturingProcessId
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
 
-	SELECT @strPackagingCategory = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND intAttributeId = 46--Packaging Category
+		SELECT @strPackagingCategory = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 46 --Packaging Category
 
-	SELECT @intPMCategoryId = intCategoryId
-	FROM tblICCategory
-	WHERE strCategoryCode = @strPackagingCategory
+		SELECT @intPMCategoryId = intCategoryId
+		FROM tblICCategory
+		WHERE strCategoryCode = @strPackagingCategory
 
 		SELECT I.strItemNo
 			,I.strDescription
-			,Case When I.intCategoryId =@intPMCategoryId then CEILING((ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity)
-			else (ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity End AS dblCalculatedQuantity
+			,CASE 
+				WHEN I.intCategoryId = @intPMCategoryId
+					THEN CEILING((ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity)
+				ELSE (ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity
+				END AS dblCalculatedQuantity
 			,UM.strUnitMeasure
 			,ri.strItemGroupName
 			,ri.dblUpperTolerance
 			,ri.dblLowerTolerance
-			,Case When I.intCategoryId =@intPMCategoryId then (ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity Else  CEILING((ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity) End AS dblCalculatedUpperTolerance
-			,Case When I.intCategoryId =@intPMCategoryId then (ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity Else CEILING((ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity) End AS dblCalculatedLowerTolerance
+			,CASE 
+				WHEN I.intCategoryId = @intPMCategoryId
+					THEN (ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity
+				ELSE CEILING((ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity)
+				END AS dblCalculatedUpperTolerance
+			,CASE 
+				WHEN I.intCategoryId = @intPMCategoryId
+					THEN (ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity
+				ELSE CEILING((ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity)
+				END AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled
 			,CM.strName AS strConsumptionMethodName
@@ -107,6 +123,9 @@ BEGIN
 			,ri.dtmLastModified
 			,r.intVersionNo
 			,ri.ysnPartialFillConsumption
+			,CONVERT(BIT, 0) AS ysnSubstituteItem
+			,I.strItemNo AS strMainRecipeItem
+			,ri.intRecipeItemId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -135,9 +154,77 @@ BEGIN
 					)
 				)
 			AND r.intWorkOrderId = @intWorkOrderId
+		
+		UNION
+		
+		SELECT I.strItemNo
+			,I.strDescription
+			,CASE 
+				WHEN I.intCategoryId = @intPMCategoryId
+					THEN CEILING((ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity)
+				ELSE (ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity
+				END AS dblCalculatedQuantity
+			,UM.strUnitMeasure
+			,ri.strItemGroupName
+			,ri.dblUpperTolerance
+			,ri.dblLowerTolerance
+			,CASE 
+				WHEN I.intCategoryId = @intPMCategoryId
+					THEN (ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity
+				ELSE CEILING((ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity)
+				END AS dblCalculatedUpperTolerance
+			,CASE 
+				WHEN I.intCategoryId = @intPMCategoryId
+					THEN (ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity
+				ELSE CEILING((ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity)
+				END AS dblCalculatedLowerTolerance
+			,ri.dblShrinkage
+			,ri.ysnScaled
+			,CM.strName AS strConsumptionMethodName
+			,SL.strName AS strStorageLocationName
+			,ri.dtmValidFrom
+			,ri.dtmValidTo
+			,ri.ysnYearValidationRequired
+			,U.strUserName AS strCreatedUserName
+			,ri.dtmCreated
+			,U1.strUserName AS strLastModifiedUserName
+			,ri.dtmLastModified
+			,r.intVersionNo
+			,ri.ysnPartialFillConsumption
+			,CONVERT(BIT, 1) AS ysnSubstituteItem
+			,I1.strItemNo AS strMainRecipeItem
+			,ri.intRecipeItemId
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = ri.intRecipeItemId
+			AND ri.intWorkOrderId = RSI.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+			AND r.intWorkOrderId = ri.intWorkOrderId
+		JOIN dbo.tblICItem I ON I.intItemId = RSI.intSubstituteItemId
+		JOIN dbo.tblICItem I1 ON I1.intItemId = ri.intItemId
+		JOIN tblICItemUOM iu ON RSI.intItemUOMId = iu.intItemUOMId
+		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
+		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
+		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = RSI.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = RSI.intLastModifiedUserId
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = r.intWorkOrderId
+		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
+		WHERE r.intItemId = @intItemId
+			AND r.intLocationId = @intLocationId
+			AND r.ysnActive = 1
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND r.intWorkOrderId = @intWorkOrderId
 		ORDER BY ri.intRecipeItemId
 	END
 END
-GO
-
-
