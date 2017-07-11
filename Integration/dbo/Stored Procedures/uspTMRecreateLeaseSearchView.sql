@@ -87,7 +87,7 @@ BEGIN
 									  FROM tblTMDeliveryHistory 
 									  WHERE intSiteID = F.intSiteID 
 										AND dtmInvoiceDate >= ISNULL(HH.dtmStartDate, DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))
-										AND dtmInvoiceDate <= ISNULL(HH.dtmStartDate, DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))), 0.0)
+										AND dtmInvoiceDate <=  DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)), 0.0)  
 					,dblLeaseBillingMinimum = (SELECT TOP 1 dblMinimumUsage 
 														FROM tblTMLeaseMinimumUse 
 														WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 
@@ -177,7 +177,7 @@ BEGIN
 												  FROM tblTMDeliveryHistory 
 												  WHERE intSiteID = F.intSiteID 
 													AND dtmInvoiceDate >= ISNULL(HH.dtmStartDate, DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))
-													AND dtmInvoiceDate <= ISNULL(HH.dtmStartDate, DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))), 0.0)
+													AND dtmInvoiceDate <=  DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)), 0.0)  
 						,dblLeaseBillingMinimum = (SELECT TOP 1 dblMinimumUsage 
 															FROM tblTMLeaseMinimumUse 
 															WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 
