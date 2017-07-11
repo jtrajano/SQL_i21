@@ -21,6 +21,7 @@ SELECT InventoryCount.intInventoryCountId,
 	InventoryCount.ysnIncludeOnHand,
 	InventoryCount.ysnScannedCountEntry,
 	InventoryCount.ysnCountByLots,
+	InventoryCount.ysnCountByGroup,
 	InventoryCount.ysnCountByPallets,
 	InventoryCount.ysnRecountMismatch,
 	InventoryCount.ysnExternal,
@@ -32,6 +33,7 @@ SELECT InventoryCount.intInventoryCountId,
 					WHEN InventoryCount.intStatus = 3 THEN 'Inventory Locked'
 					WHEN InventoryCount.intStatus = 4 THEN 'Closed'
 				END),
+	strShiftNo = InventoryCount.strShiftNo,
 	InventoryCount.intSort
 FROM tblICInventoryCount InventoryCount
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = InventoryCount.intLocationId

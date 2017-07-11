@@ -34,9 +34,14 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	InvCountDetail.ysnRecount,
 	InvCountDetail.intEntityUserSecurityId,
 	UserSecurity.strUserName,
+	InvCountDetail.intCountGroupId,
+	CountGroup.strCountGroup,
+	InvCountDetail.dblQtyReceived,
+	InvCountDetail.dblQtySold,
 	InvCountDetail.intSort
 FROM tblICInventoryCountDetail InvCountDetail
 	LEFT JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
+	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InvCountDetail.intCountGroupId
 	LEFT JOIN tblICItem Item ON Item.intItemId = InvCountDetail.intItemId
 	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 	LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = InvCountDetail.intItemLocationId

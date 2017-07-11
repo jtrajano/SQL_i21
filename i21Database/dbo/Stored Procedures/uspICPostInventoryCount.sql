@@ -124,7 +124,7 @@ SELECT TOP 1 @ItemNo = Item.strItemNo
 FROM tblICInventoryCount IC 
 	LEFT JOIN tblICInventoryCountDetail ICDetail ON ICDetail.intInventoryCountId = IC.intInventoryCountId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ICDetail.intItemId
-WHERE IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
+WHERE ISNULL(IC.ysnCountByGroup, 0) = 0 AND IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
 
 IF @ItemNo IS NOT NULL
 	BEGIN
@@ -201,6 +201,7 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 	WHERE	Header.intInventoryCountId = @intTransactionId
+			AND ISNULL(Header.ysnCountByGroup, 0) = 0
 			AND ISNULL(Detail.dblPhysicalCount, 0) <> ISNULL(Detail.dblSystemCount, 0)
 	
 
@@ -367,7 +368,7 @@ BEGIN
 END 
 
 -- Update Status & Inventory Lock
-IF EXISTS (SELECT 1 FROM dbo.tblICInventoryCount WHERE intInventoryCountId = @intTransactionId AND ysnPosted=1)
+IF EXISTS (SELECT 1 FROM dbo.tblICInventoryCount WHERE intInventoryCountId = @intTransactionId AND ysnPosted=1 AND ISNULL(ysnCountByGroup, 0) = 0)
     BEGIN
         UPDATE dbo.tblICInventoryCount 
         SET intStatus = 4 --Closed
@@ -380,6 +381,7 @@ IF EXISTS (SELECT 1 FROM dbo.tblICInventoryCount WHERE intInventoryCountId = @in
 			INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
 				AND il.intItemId = icd.intItemId
 		WHERE ic.intInventoryCountId = @intTransactionId
+			AND ISNULL(ic.ysnCountByGroup, 0) = 0
 	END
 ELSE
 	BEGIN
@@ -394,6 +396,7 @@ ELSE
 			INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
 				AND il.intItemId = icd.intItemId
 		WHERE ic.intInventoryCountId = @intTransactionId
+			AND ISNULL(ic.ysnCountByGroup, 0) = 0
 	END
 
 -- Create an Audit Log

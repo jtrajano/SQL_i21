@@ -5416,6 +5416,7 @@
     <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAlertNotificationCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryCountDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateInventoryShiftCountDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
