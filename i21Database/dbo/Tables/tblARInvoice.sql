@@ -201,3 +201,12 @@ GO
 CREATE NONCLUSTERED INDEX [PIndex]
     ON [dbo].[tblARInvoice]([strInvoiceNumber] ASC, [intEntityCustomerId] ASC, [dtmDate] ASC, [dtmDueDate] ASC, [intCurrencyId] ASC, [intCompanyLocationId] ASC, [intEntitySalespersonId] ASC, [dtmShipDate] ASC, [intShipViaId] ASC, [strPONumber] ASC, [intTermId] ASC);
 
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnPosted]
+ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
+INCLUDE ([strTransactionType],[dtmPostDate],[dblInvoiceSubtotal])
+
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnForgiven]
+ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
+INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoiceTotal],[ysnForgiven])
