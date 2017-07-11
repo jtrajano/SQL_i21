@@ -5425,6 +5425,8 @@
     <Build Include="dbo\Stored Procedures\uspAPBalanceCheck.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateTransactionsFromAR.sql" />
     <Build Include="dbo\Views\vyuAPStatus.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityPropectRequirement.sql" />
+    <Build Include="dbo\Views\vyuCRMOpportunityProspectRequirementLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
