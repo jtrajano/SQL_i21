@@ -7,18 +7,14 @@ SELECT	R.intRefundId,
 		RC.intRefundTypeId,
 		RC.intCustomerId,
 		F.strFiscalYear,
-		dblTotalPurchases = SUM(CASE WHEN RC.strPurchaseSale = 'Purchase' THEN RC.dblVolume ELSE 0 END),
-		dblTotalSales = SUM(CASE WHEN RC.strPurchaseSale = 'Sale' THEN RC.dblVolume ELSE 0 END),
-		dblLessFWT = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN (CASE WHEN APV.ysnWithholding = 1 THEN RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) ELSE 0 END) ELSE 0 END),
-		dblTotalCashRefund = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN RC.dblCashRefund ELSE 0 END),
-		dblLessServiceFee = CASE WHEN RC.ysnEligibleRefund = 1 THEN R.dblServiceFee ELSE 0 END,
-		dblCheckAmount = SUM (CASE WHEN RC.ysnEligibleRefund = 1 THEN (CASE WHEN APV.ysnWithholding = 1 THEN
-					(RC.dblCashRefund) - (RC.dblCashRefund * (R.dblFedWithholdingPercentage/100))
-					ELSE
-					(RC.dblCashRefund)
-					END) ELSE 0 END) - CASE WHEN RC.ysnEligibleRefund = 1 THEN R.dblServiceFee ELSE 0 END,
-		dblTotalVolume = SUM(RC.dblVolume),
-		dblTotalRefund = SUM(CASE WHEN RC.ysnEligibleRefund = 1 THEN RC.dblRefundAmount ELSE 0 END),
+		dblTotalPurchases = SUM(RC.dblTotalPurchases),
+		dblTotalSales = SUM(RC.dblTotalSales),
+		dblLessFWT = SUM(RC.dblLessFWT),
+		dblTotalCashRefund = SUM(RC.dblCashRefund),
+		dblLessServiceFee = SUM(RC.dblLessServiceFee),
+		dblCheckAmount = SUM(RC.dblCheckAmount),
+		dblTotalVolume = SUM(RC.dblTotalPurchases + RC.dblTotalSales),
+		dblTotalRefund = SUM(RC.dblRefundAmount),
 		R.dtmRefundDate,
         R.dblMinimumRefund,
         R.dblServiceFee,
@@ -29,20 +25,7 @@ SELECT	R.intRefundId,
         R.ysnPrinted,
         R.intConcurrencyId
 FROM tblPATRefund R
-LEFT OUTER JOIN (SELECT intRefundId,
-				RC.intRefundCustomerId,
-				RC.intRefundTypeId,
-				RC.ysnEligibleRefund,
-				intCustomerId,
-				RCat.dblVolume,
-				PC.strPurchaseSale,
-				dblRefundAmount = RCat.dblVolume * RCat.dblRefundRate,
-				dblCashRefund = (RCat.dblVolume * RCat.dblRefundRate) * (RC.dblCashPayout/100)
-		FROM tblPATRefundCustomer RC
-		INNER JOIN tblPATRefundCategory RCat
-			ON RCat.intRefundCustomerId = RC.intRefundCustomerId
-		INNER JOIN tblPATPatronageCategory PC
-			ON RCat.intPatronageCategoryId = PC.intPatronageCategoryId) RC
+LEFT OUTER JOIN vyuPATRefundCustomer RC
 	ON RC.intRefundId = R.intRefundId
 LEFT OUTER JOIN tblGLFiscalYear F
 	ON F.intFiscalYearId = R.intFiscalYearId
