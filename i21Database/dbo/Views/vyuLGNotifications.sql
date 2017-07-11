@@ -85,7 +85,7 @@ FROM (
 			,E.strName strVendor
 			,ISNULL(LCI.strCity,L.strOriginPort) AS strLoading
 			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
-			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
+			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETAPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,dblRemainingQty = NULL
 			,CL.strLocationName 
@@ -365,7 +365,9 @@ FROM (
 		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
-		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 0)
+		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments LDOC
+							  JOIN tblICDocument D ON D.intDocumentId = LDOC.intDocumentId
+							  WHERE ISNULL(LDOC.ysnReceived ,0) = 0 AND D.strDocumentName LIKE '%TC')
 			AND CH.intContractTypeId = 1 
 			AND L.dtmBLDate IS NOT NULL
 			AND CD.intContractStatusId IN (1,2,4)
