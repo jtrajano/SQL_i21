@@ -132,7 +132,7 @@ BEGIN
 								BEGIN
 									IF (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = @DiscountEP
+											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, 0.00)/ISNULL(@Deviation,0.00)) * @Price * @Quantity,0.00)/100
 										END
 								END	
 							ELSE IF (@Type = 'Date Driven')
@@ -145,14 +145,14 @@ BEGIN
 			
 									IF (@TempDiscountDate >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = @DiscountEP
+											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, 0.00)/ISNULL(@Deviation,0.00)) * @Price * @Quantity,0.00)/100
 										END		
 								END	
 							ELSE
 								BEGIN
 									IF (@DiscountDate >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = @DiscountEP
+											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, 0.00)/ISNULL(@Deviation,0.00)) * @Price * @Quantity,0.00)/100
 										END
 								END
 						END					
