@@ -4647,11 +4647,11 @@ IF @recap = 1
 				INNER JOIN 
 				(SELECT intAccountId, strDescription FROM tblGLAccount) GLA ON GLPR.intAccountId = GLPR.intAccountId
 				WHERE
-					(ISNULL(GLPR.strDescription, '') = '' OR (GLPR.strDescription = 'Thank you for your business!'))
+					GLPR.strDescription <> GLA.strDescription
 					AND GLPR.strBatchId = @tmpBatchId
 		) ABC ON tblGLPostRecap.intAccountId = ABC.intAccountId
 		WHERE 
-			((ISNULL(tblGLPostRecap.strDescription, '') = '') OR  (tblGLPostRecap.strDescription = 'Thank you for your business!'))
+			tblGLPostRecap.strDescription <> ABC.strDescription
 			AND tblGLPostRecap.strBatchId = @tmpBatchId
 
 		--EXEC uspGLPostRecap @GLEntries, @UserEntityID 
