@@ -1,9 +1,4 @@
-
-IF EXISTS (select top 1 1 from sys.procedures where name = 'uspARImportPTTaxExemption')
-	DROP PROCEDURE uspARImportPTTaxExemption
-GO
-
-CREATE PROCEDURE [dbo].[uspARImportPTTaxExemption]
+﻿CREATE PROCEDURE [dbo].[uspARImportPTTaxExemption]
 		@CustomerId NVARCHAR(50) = NULL
 AS
 BEGIN
@@ -349,4 +344,3 @@ WHILE @cnt < 12
 			   SET @cnt = @cnt + 1;
 			END
 END
-		
