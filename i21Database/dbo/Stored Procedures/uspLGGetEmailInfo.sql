@@ -80,6 +80,7 @@ BEGIN
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'
+		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -119,6 +120,7 @@ BEGIN
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'
+		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -160,6 +162,7 @@ BEGIN
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'
+		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -201,6 +204,7 @@ BEGIN
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'
+		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -257,6 +261,7 @@ BEGIN
         SET @body += 'Thank you for your business. <br><br>'
         SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'
+		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
         SET @body += '</html>'
         SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -298,6 +303,7 @@ BEGIN
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'
+		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
