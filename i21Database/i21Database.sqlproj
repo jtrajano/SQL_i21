@@ -5420,6 +5420,11 @@
     <Build Include="dbo\Tables\tblAPBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBalance.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultDataBalance.sql" />
+    <Build Include="dbo\Functions\fnAPCreateARInvoiceGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPBalanceCheck.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateTransactionsFromAR.sql" />
+    <Build Include="dbo\Views\vyuAPStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
