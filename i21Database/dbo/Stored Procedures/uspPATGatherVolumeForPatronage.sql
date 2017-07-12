@@ -14,7 +14,9 @@ SET ANSI_WARNINGS OFF
 	DECLARE @totalRecords INT = 0;
 	DECLARE @error NVARCHAR(MAX);
 
-	DECLARE @tempTransactionIds as Id;
+	DECLARE @tempTransactionIds TABLE(
+		[intID] INT
+	);
 
 	DECLARE @TransactionName AS VARCHAR(500) = 'GATHERING PATRONAGE VOLUME' + CAST(NEWID() AS NVARCHAR(100));
 
