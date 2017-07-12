@@ -187,6 +187,7 @@ SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTicket.int
 FROM tblSCScaleSetup SCSetup LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
 WHERE SCTicket.intTicketId = @intTicketId
 
+--FOR DISCOUNT CHARGES
 		INSERT INTO @OtherCharges
 		(
 				[intEntityVendorId] 
@@ -224,7 +225,10 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intForexRateTypeId]				= RE.intForexRateTypeId
 		,[dblForexRate]						= RE.dblForexRate
 		,[ysnInventoryCost]					= IC.ysnInventoryCost
-		,[strCostMethod]					= IC.strCostMethod
+		,[strCostMethod]					= CASE
+												WHEN QM.dblDiscountAmount < 0 THEN 1
+												WHEN QM.dblDiscountAmount > 0 THEN 0
+											END
 		,[dblRate]							= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 
 												CASE 
