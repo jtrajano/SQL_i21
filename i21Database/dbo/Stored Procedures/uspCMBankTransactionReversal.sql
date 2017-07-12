@@ -190,8 +190,18 @@ ELSE
 				/* Clear the Void Check entry if successfull posted*/
 				IF (@isPostingSuccessful = 1) 
 					BEGIN
-						UPDATE tblCMBankTransaction SET ysnClr = 1 
-						WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
+						IF (@intVoidBankTransactionTypeId = @PAYCHECK OR @intVoidBankTransactionTypeId = @DIRECT_DEPOSIT)
+						BEGIN
+							UPDATE tblCMBankTransaction 
+								SET ysnPosted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 1 ELSE 0 END, ysnCheckVoid = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, ysnClr = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, 
+									dtmDateReconciled = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, dtmCheckPrinted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, intBankFileAuditId = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE intBankFileAuditId END, @isPostingSuccessful = 1 
+							WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
+						END
+						ELSE
+						BEGIN
+							UPDATE tblCMBankTransaction SET ysnClr = 1 
+							WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
+						END
 					END
 				/* Otherwise Delete the Void Check entry and abort the reversal */
 				ELSE 
