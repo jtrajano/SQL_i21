@@ -130,9 +130,11 @@ END
 BEGIN TRY
 IF(ISNULL(@ysnRecap, 0) = 0)
 BEGIN
-	SELECT * FROM @GLEntries;
-	EXEC uspGLBookEntries @GLEntries, @ysnPosted;
-
+	IF(@ysnRetired = 1)
+	BEGIN
+		SELECT * FROM @GLEntries;
+		EXEC uspGLBookEntries @GLEntries, @ysnPosted;
+	END
 	SET @isGLSucces = 1;
 
 END
@@ -276,8 +278,30 @@ BEGIN
 		END
 		ELSE
 		BEGIN
+
+			DECLARE @voucher AS NVARCHAR(MAX);
+			SELECT @voucher = intBillId FROM tblPATCustomerStock WHERE intCustomerStockId = @intCustomerStockId;
+
+			EXEC [dbo].[uspAPPostBill]
+					@batchId = NULL,
+					@billBatchId = NULL,
+					@transactionType = NULL,
+					@post = 0,
+					@recap = 0,
+					@isBatch = 0,
+					@param = @voucher,
+					@userId = @intUserId,
+					@beginTransaction = NULL,
+					@endTransaction = NULL,
+					@success = @success OUTPUT
+
 			DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tempCustomerStock) AND ysnPaid <> 1;
-			EXEC uspPATProcessVoid @intCustomerStockId, @intUserId;
+
+			UPDATE tblPATCustomerStock
+			SET strActivityStatus = 'Open',
+				dtmRetireDate = null,
+				intBillId = null
+			WHERE intCustomerStockId = @intCustomerStockId
 		END
 		---------- UPDATE CUSTOMER STOCK TABLE ---------------
 		UPDATE tblPATCustomerStock SET ysnRetiredPosted = @ysnPosted WHERE intCustomerStockId = @intCustomerStockId;
