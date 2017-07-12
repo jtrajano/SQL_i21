@@ -607,7 +607,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             )
         };  
 
-
         me.validateTransfer(win, current, function() {
             // Save any unsaved data first before doing the post. 
             if (context.data.hasChanges()) {
