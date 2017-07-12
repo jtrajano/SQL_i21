@@ -605,27 +605,48 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     btnPost.enable();
                 }
             )
-        };           
+        };  
 
-        // Save any unsaved data first before doing the post. 
-        if (context.data.hasChanges()) {
-            context.data.validator.validateRecord({ window: win }, function(valid) {
-                // If records are valid, continue with the save. 
-                if (valid){
-                    context.data.saveRecord({
-                        successFn: function () {
-                            doPost();             
-                        }
-                    });
-                }
-                // If records are invalid, re-enable the post button. 
-                else {
-                    btnPost.enable();
-                }
-            });            
-        }
-        else {
-            doPost();
+
+        me.validateTransfer(win, current, function() {
+            // Save any unsaved data first before doing the post. 
+            if (context.data.hasChanges()) {
+                context.data.validator.validateRecord({ window: win }, function(valid) {
+                    // If records are valid, continue with the save. 
+                    if (valid){
+                        context.data.saveRecord({
+                            successFn: function () {
+                                doPost();             
+                            }
+                        });
+                    }
+                    // If records are invalid, re-enable the post button. 
+                    else {
+                        btnPost.enable();
+                    }
+                });            
+            }
+            else {
+                doPost();
+            }    
+        });        
+    },
+
+    validateTransfer: function(win, current, action) {
+        if(current) {
+            var hasWarnings = false;
+
+            var rx = Rx.Observable.from(current.tblICInventoryTransferDetails().data.items)
+                .filter(function(x) { return !x.dummy && (x.get('intLotId') !== null || x.get('intLotId') !== 0) && x.get('intToStorageLocationId') === null})
+                .subscribe(function(x) {
+                    hasWarnings = true;
+                });
+            
+            if(hasWarnings) {
+                iRely.Functions.showCustomDialog('Warning', 'ok', "Warning: There are lotted items that don't have 'To Storage Location' specified. It might cause an issue during production consumption period.", function(button) {
+                    action();
+                });
+            }
         }
     },
 
@@ -671,22 +692,24 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             )
         };
 
-        // Save any unsaved data first before doing the post. 
-        if (context.data.hasChanges()) {
-            context.data.validator.validateRecord({ window: win }, function(valid) {
-                // If records are valid, continue with the save. 
-                if (valid){
-                    context.data.saveRecord({
-                        successFn: function () {
-                            doRecap();             
-                        }
-                    });
-                }
-            });            
-        }
-        else {
-            doRecap();
-        }        
+        me.validateTransfer(win, current, function() {
+            // Save any unsaved data first before doing the post. 
+            if (context.data.hasChanges()) {
+                context.data.validator.validateRecord({ window: win }, function(valid) {
+                    // If records are valid, continue with the save. 
+                    if (valid){
+                        context.data.saveRecord({
+                            successFn: function () {
+                                doRecap();             
+                            }
+                        });
+                    }
+                });            
+            }
+            else {
+                doRecap();
+            } 
+        });       
     },     
 
     onTransferTabChange: function (tabPanel, newCard, oldCard, eOpts) {
