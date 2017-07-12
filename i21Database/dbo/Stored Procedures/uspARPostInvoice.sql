@@ -4606,7 +4606,7 @@ IF @recap = 1
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
-			,A.[dblExchangeRate]
+			,[dblExchangeRate]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblExchangeRate] END
 			,A.[intUserId]
 			,A.[dtmDateEntered]
 			,A.[strBatchId]
@@ -4616,7 +4616,7 @@ IF @recap = 1
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
-			,A.strRateType
+			,[strRateType]						= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN NULL ELSE A.[strRateType] END
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
@@ -4663,6 +4663,8 @@ BEGIN
 	SET 
 		dblCreditForeign = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN 0.00 ELSE dblDebitForeign END
 		, dblDebitForeign = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN 0.00 ELSE dblDebitForeign END
+		, dblExchangeRate = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN 0.00 ELSE dblExchangeRate END
+		, strRateType = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN NULL ELSE strRateType END
 	WHERE 			
 		tblGLPostRecap.strBatchId = @tmpBatchId
 END
