@@ -149,7 +149,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = ARD.intItemId
 			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
+				ON ARC.intEntityId = ARI.intEntityCustomerId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItemUOM ICU
 				ON ICU.intItemId = IC.intItemId AND ICU.intItemUOMId = ARD.intItemUOMId
 			INNER JOIN tblPATPatronageCategory PC
