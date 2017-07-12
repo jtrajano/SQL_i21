@@ -3,6 +3,9 @@ CREATE VIEW [dbo].[vyuPROriginCheckHistoryEarning]
 AS
 SELECT TOP 0
 	strEmployeeNo		= CAST('' AS NVARCHAR(200))
+	,strLastName		= CAST('' AS NVARCHAR(200))
+	,strFirstName		= CAST('' AS NVARCHAR(200))
+	,strMiddleName		= CAST('' AS NVARCHAR(200))
 	,strCode			= CAST('' AS NVARCHAR(200))
 	,strCheckNumber		= CAST('' AS NVARCHAR(200))
 	,strCheckType		= CAST('' AS NVARCHAR(200))
