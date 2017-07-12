@@ -392,6 +392,8 @@ BEGIN
 
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
+		--PRINT 'Rebuilding stock as periodic.'
+
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				,id2 = intInventoryTransactionId
@@ -440,6 +442,8 @@ BEGIN
 	END
 	ELSE 
 	BEGIN 
+		--PRINT 'Rebuilding stock as perpetual.'
+
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				,id2 = intInventoryTransactionId
@@ -1583,21 +1587,21 @@ BEGIN
 
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
-						INNER JOIN tblICInventoryShipment shipment
-							ON ICTrans.strTransactionId = shipment.strShipmentNumber
-						INNER JOIN tblICInventoryShipmentItem shipmentItem
-							ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
-							AND shipmentItem.intInventoryShipmentItemId = ICTrans.intTransactionDetailId
-							AND shipmentItem.intItemId = ICTrans.intItemId
-							AND shipmentItem.intItemId = ISNULL(@intItemId, shipmentItem.intItemId)
-						LEFT JOIN tblICInventoryShipmentItemLot shipmentItemLot
-							ON shipmentItemLot.intInventoryShipmentItemId = shipmentItem.intInventoryShipmentItemId 
-							AND ISNULL(shipmentItemLot.intLotId, 0) = ICTrans.intLotId
+						--INNER JOIN tblICInventoryShipment shipment
+						--	ON ICTrans.strTransactionId = shipment.strShipmentNumber
+						--INNER JOIN tblICInventoryShipmentItem shipmentItem
+						--	ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
+						--	AND shipmentItem.intInventoryShipmentItemId = ICTrans.intTransactionDetailId
+						--	AND shipmentItem.intItemId = ICTrans.intItemId
+						--	AND shipmentItem.intItemId = ISNULL(@intItemId, shipmentItem.intItemId)
+						--LEFT JOIN tblICInventoryShipmentItemLot shipmentItemLot
+						--	ON shipmentItemLot.intInventoryShipmentItemId = shipmentItem.intInventoryShipmentItemId 
+						--	AND ISNULL(shipmentItemLot.intLotId, 0) = ICTrans.intLotId
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 						LEFT JOIN tblICLot lot
-							ON lot.intLotId = shipmentItemLot.intLotId
+							ON lot.intLotId = ICTrans.intLotId
 				WHERE	strBatchId = @strBatchId
 						AND ICTrans.dblQty < 0 
 						AND ItemLocation.intLocationId IS NOT NULL
@@ -2263,7 +2267,7 @@ BEGIN
 
 				IF @intReturnId <> 0 
 				BEGIN 
-					PRINT 'Error found in uspICCreateReceiptGLEntries'
+					--PRINT 'Error found in uspICCreateReceiptGLEntries'
 					GOTO _EXIT_WITH_ERROR
 				END 				
 
@@ -2327,7 +2331,7 @@ BEGIN
 				
 					IF @intReturnId <> 0 
 					BEGIN 
-						PRINT 'Error found in uspICPostInventoryReceiptOtherCharges'
+						--PRINT 'Error found in uspICPostInventoryReceiptOtherCharges'
 						GOTO _EXIT_WITH_ERROR
 					END 	
 				END 
