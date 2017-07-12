@@ -91,6 +91,7 @@ DECLARE  @ARAccount				INT
 		,@WriteOffAccount		INT
 		,@IncomeInterestAccount	INT
 		,@GainLossAccount		INT
+		,@DefaultCurrencyId		INT
 		
 DECLARE @totalInvalid INT
 DECLARE @totalRecords INT
@@ -112,6 +113,7 @@ SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPrefe
 SET @IncomeInterestAccount = (SELECT TOP 1 intInterestIncomeAccountId FROM tblARCompanyPreference WHERE intInterestIncomeAccountId IS NOT NULL AND intInterestIncomeAccountId <> 0)
 SET @GainLossAccount = (SELECT TOP 1 intAccountsReceivableRealizedId FROM tblSMMultiCurrency WHERE intAccountsReceivableRealizedId IS NOT NULL AND intAccountsReceivableRealizedId <> 0)
 SET @intCFAccount = (SELECT TOP 1 intGLAccountId FROM tblCFCompanyPreference WHERE intGLAccountId IS NOT NULL AND intGLAccountId <> 0)
+SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 
 DECLARE @UserEntityID			INT
 	,@AllowOtherUserToPost		BIT
@@ -2135,7 +2137,7 @@ IF @recap = 1
 			[strTransactionId]
 			,A.[intTransactionId]
 			,A.[intAccountId]
-			,A.[strDescription]
+			,[strDescription]					= B.strDescription
 			,A.[strJournalLineDescription]
 			,A.[strReference]	
 			,A.[dtmTransactionDate]
@@ -2143,8 +2145,8 @@ IF @recap = 1
 			,Credit.Value
 			,A.[dblDebitUnit]
 			,A.[dblCreditUnit]
-			,A.[dblDebitForeign]
-			,A.[dblCreditForeign]
+			,[dblDebitForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblDebitForeign] END
+			,[dblCreditForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblCreditForeign]	 END 		
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
@@ -2169,36 +2171,6 @@ IF @recap = 1
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
 
-		DECLARE @tmpBatchId NVARCHAR(100)
-		SELECT @tmpBatchId = [strBatchId] 
-		FROM @GLEntries A
-		INNER JOIN dbo.tblGLAccount B 
-			ON A.intAccountId = B.intAccountId
-		INNER JOIN dbo.tblGLAccountGroup C
-			ON B.intAccountGroupId = C.intAccountGroupId
-		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Credit
-		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
-
-		UPDATE tblGLPostRecap SET strDescription = ABC.strDescription
-		FROM 
-			tblGLPostRecap
-		INNER JOIN
-		(
-			SELECT GLA.intAccountId, GLA.strDescription 
-			FROM 
-				(SELECT intAccountId, strDescription, strBatchId FROM tblGLPostRecap) GLPR
-				INNER JOIN 
-				(SELECT intAccountId, strDescription FROM tblGLAccount) GLA ON GLPR.intAccountId = GLPR.intAccountId
-				WHERE
-					(ISNULL(GLPR.strDescription, '') = '' OR (GLPR.strDescription = 'Thank you for your business!'))
-					AND GLPR.strBatchId = @tmpBatchId
-		) ABC ON tblGLPostRecap.intAccountId = ABC.intAccountId
-		WHERE 
-			((ISNULL(tblGLPostRecap.strDescription, '') = '') OR  (tblGLPostRecap.strDescription = 'Thank you for your business!'))
-			AND tblGLPostRecap.strBatchId = @tmpBatchId
-
 		--EXEC uspGLPostRecap @GLEntries, @UserEntityID 
 					
 	END TRY
@@ -2214,7 +2186,29 @@ IF @recap = 1
 			RAISERROR(@ErrorMerssage, 11, 1)
 		GOTO Post_Exit
 	END CATCH	
-	END 
+	END
+ELSE
+	BEGIN
+		DECLARE @tmpBatchId NVARCHAR(100)
+		SELECT @tmpBatchId = [strBatchId] 
+		FROM @GLEntries A
+		INNER JOIN dbo.tblGLAccount B 
+			ON A.intAccountId = B.intAccountId
+		INNER JOIN dbo.tblGLAccountGroup C
+			ON B.intAccountGroupId = C.intAccountGroupId
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Credit
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
+
+		UPDATE tblGLPostRecap 
+		SET 
+			dblCreditForeign = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN 0.00 ELSE dblDebitForeign END
+			, dblDebitForeign = CASE WHEN intCurrencyId = @DefaultCurrencyId THEN 0.00 ELSE dblDebitForeign END
+		WHERE 			
+			tblGLPostRecap.strBatchId = @tmpBatchId
+
+	END	 
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is FALSE,
