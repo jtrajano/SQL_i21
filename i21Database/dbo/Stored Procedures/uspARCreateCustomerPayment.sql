@@ -23,7 +23,9 @@
 	,@Discount			NUMERIC(18,6)	= 0.000000	
 	,@Interest			NUMERIC(18,6)	= 0.000000			
 	,@InvoicePrepayment	BIT				= 0
-	,@WriteOffAccountId	INT				= NULL
+	,@WriteOffAccountId	INT				= NULL 
+	,@PaymentOriginalId	NVARCHAR(25)	= NULL		-- Reference to the original/parent record
+	,@UseOriginalIdAsPaymentNumber	BIT	= 0		
 AS
 
 BEGIN
@@ -47,6 +49,19 @@ SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreferen
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 SELECT @TransactionType = strTransactionType FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
 
+IF (@UseOriginalIdAsPaymentNumber = 1 AND RTRIM(LTRIM(ISNULL(@PaymentOriginalId,''))) = '')
+	BEGIN
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR('Payment Original Id is required.', 16, 1);
+		RETURN 0;
+	END
+
+IF (@UseOriginalIdAsPaymentNumber = 1 AND EXISTS (SELECT TOP 1 NULL FROM tblARPayment WHERE [strRecordNumber] = @PaymentOriginalId))
+	BEGIN
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR('Transaction with Record Number - %s is already existing.', 16, 1, @PaymentOriginalId);
+		RETURN 0;
+	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId)
 	BEGIN		
@@ -140,6 +155,7 @@ BEGIN TRY
 		,[dblOverpayment]
 		,[dblBaseOverpayment]
 		,[dblBalance]
+		,[strRecordNumber]
 		,[strPaymentInfo]
 		,[strNotes]
 		,[ysnApplytoBudget]
@@ -164,6 +180,7 @@ BEGIN TRY
 		,[dblOverpayment]				= @ZeroDecimal
 		,[dblBaseOverpayment]			= @ZeroDecimal
 		,[dblBalance]					= @ZeroDecimal
+		,[strRecordNumber]				= CASE WHEN ISNULL(@UseOriginalIdAsPaymentNumber, 0) = 1 THEN @PaymentOriginalId ELSE NULL END
 		,[strPaymentInfo]				= @PaymentInfo
 		,[strNotes]						= @Notes
 		,[ysnApplytoBudget]				= @ApplytoBudget
