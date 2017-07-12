@@ -135,7 +135,7 @@ SET ANSI_WARNINGS OFF
 				INNER JOIN tblPATPatronageCategory PC
 					ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = 'Purchase'
 				WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds)
-		) APB ON APB.intEntityVendorId = ARC.intEntityCustomerId
+		) APB ON APB.intEntityVendorId = ARC.intEntityId
 	END
 	ELSE IF(@type = 2)
 	BEGIN
@@ -155,7 +155,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = 'Sale'
 			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds)
-		) ARI ON ARI.intEntityCustomerId = ARC.intEntityCustomerId
+		) ARI ON ARI.intEntityCustomerId = ARC.intEntityId
 	END
 	
 	END TRY
