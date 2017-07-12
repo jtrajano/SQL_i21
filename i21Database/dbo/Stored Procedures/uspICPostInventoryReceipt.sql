@@ -57,6 +57,11 @@ DECLARE @LotType_Manual AS INT = 1
 
 DECLARE @intReturnValue AS INT 
 
+DECLARE @strUnpostMode AS NVARCHAR(50)
+SELECT	TOP 1
+		@strUnpostMode = strIRUnpostMode
+FROM	tblICCompanyPreference
+
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
@@ -1041,11 +1046,8 @@ BEGIN
 			@intTransactionId
 			,@strBatchId
 			,@intEntityUserSecurityId
-			,@INVENTORY_RECEIPT_TYPE
-			
+			,@INVENTORY_RECEIPT_TYPE			
 	END 
-
-	
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -1053,7 +1055,12 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 0   
 BEGIN   
-	-- Call the unpost routine 
+	-- Call the default unpost routine. 
+	IF ISNULL(@strUnpostMode, 'Default') = 'Default' 
+		OR (
+			ISNULL(@strUnpostMode, 'Default') = 'Force Purchase Contract Unpost' 
+			AND @receiptType <> @RECEIPT_TYPE_PURCHASE_CONTRACT
+		)
 	BEGIN 
 		-- Unpost the company owned stocks. 
 		INSERT INTO @GLEntries (
@@ -1456,6 +1463,12 @@ BEGIN
 				ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
 	WHERE	Header.intInventoryReceiptId = @intTransactionId   
 			AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+
+	-- Allow blank GL entries if unpost mode is not set to 'default'. 
+	IF @ysnAllowBlankGLEntries = 0 AND @ysnPost = 0 AND ISNULL(@strUnpostMode, 'Default') <> 'Default'
+	BEGIN 
+		SET @ysnAllowBlankGLEntries = 1
+	END 
 
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
