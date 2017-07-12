@@ -1076,7 +1076,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				', ''Count Code'''
-				, ', a.strCountCode'
+				, ', d.strCountCode'
 				, ', ''' + CAST(@strNewCountCode AS NVARCHAR(250))  +''''
 				, @strCompanyLocationId
 				, @strVendorId
