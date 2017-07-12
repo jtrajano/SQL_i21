@@ -228,6 +228,9 @@ BEGIN
 	DECLARE @dblWCRate				NUMERIC(18,6)
 	DECLARE @intWC					INT
 
+	DECLARE @ysnEmployeeActive        BIT
+    SET @ysnEmployeeActive = 1
+
 
 	SELECT premp_emp INTO #tmpprempmst 
 	FROM prempmst
@@ -326,6 +329,14 @@ BEGIN
             WHERE premp_emp = @originEmployee
 		END
 		
+		 SET @ysnEmployeeActive = 1
+		IF( (@dtmTerminated is not null and @dtmTerminated > 0) or ( @strTerminatedReason is not null and LTRIM(RTRIM(@strTerminatedReason)) <> '''' ))
+        BEGIN
+            SET @ysnEmployeeActive = 0
+        END
+
+
+
 		IF(@continue = 1)
 		BEGIN
 		PRINT ''INSERT Entity Record''
@@ -400,8 +411,8 @@ BEGIN
 		else 
 			select @intWC = intWorkersCompensationId from tblPRWorkersCompensation where strWCCode = @strWCCode
 		
-		insert into tblPREmployee(intEntityEmployeeId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType, intWorkersCompensationId)
-		values(@EntityId, @originEmployee, @strPhone, 9,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType, @intWC)
+		insert into tblPREmployee(intEntityEmployeeId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType, intWorkersCompensationId, ysnActive)
+		values(@EntityId, @originEmployee, @strPhone, 9,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType, @intWC, @ysnEmployeeActive)
 		
 		
 		insert into tblEMEntityNote(dtmDate,dtmTime,intDuration,strUser,strSubject,strNotes,intEntityId)
