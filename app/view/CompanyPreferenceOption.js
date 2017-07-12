@@ -198,6 +198,54 @@ Ext.define('Inventory.view.CompanyPreferenceOption', {
                         },
                         {
                             xtype: 'panel',
+                            itemId: 'pgeIntegration',
+                            bodyPadding: 10,
+                            title: 'Integration',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'panel',
+                                    flex: 1,
+                                    itemId: 'pnlDefaults',
+                                    bodyPadding: 5,
+                                    title: 'SAP Integration',
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'strIRUnpostMode',
+                                                    dataType: 'string',
+                                                    text: 'Unpost Mode',
+                                                    flex: 2
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 5
+                                                }
+                                            ],
+                                            itemId: 'cboIRUnpostMode',
+                                            fieldLabel: 'Inventory Receipt Unpost Mode',
+                                            labelWidth: 200,
+                                            displayField: 'strIRUnpostMode',
+                                            valueField: 'strIRUnpostMode',
+                                            pickerWidth: 800
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
                             itemId: 'pgeAuditLog',
                             layout: 'fit',
                             title: 'Audit Log',

@@ -21,5 +21,6 @@ namespace iRely.Inventory.Model
         public int? intShipmentSourceType { get; set; }
         public string strOriginLastTask { get; set; }
         public string strOriginLineOfBusiness { get; set; }
+        public string strIRUnpostMode { get; set; }
     }
 }

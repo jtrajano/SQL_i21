@@ -22,6 +22,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intShipmentSourceType).HasColumnName("intShipmentSourceType");
             this.Property(t => t.strOriginLastTask).HasColumnName("strOriginLastTask");
             this.Property(t => t.strOriginLineOfBusiness).HasColumnName("strOriginLineOfBusiness");
+            this.Property(t => t.strIRUnpostMode).HasColumnName("strIRUnpostMode");
         }
     }
 }

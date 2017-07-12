@@ -98,6 +98,17 @@ Ext.define('Inventory.view.CompanyPreferenceOptionViewModel', {
                 name: 'intShipmentSourceType'
             }
         },
+
+        inventoryReceiptUnpostMode: {
+            data: [
+                { strDescription: 'Unpost all from the receipt.', strIRUnpostMode: 'Default' },
+                { strDescription: 'Unpost the receipt and synchronize the contracts. Keep everything else, like stock quantities, as posted.', strIRUnpostMode: 'Force Purchase Contract Unpost' },
+            ],
+            fields: {
+                name: 'strDescription',
+                name: 'strIRUnpostMode'
+            }
+        },        
     },
 
      formulas: {

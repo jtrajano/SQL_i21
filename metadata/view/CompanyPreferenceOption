@@ -381,6 +381,101 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "bodyPadding": 10,
+                                "container|align": "stretch",
+                                "itemId": "pgeIntegration",
+                                "layout": "vbox",
+                                "title": "Integration"
+                            },
+                            "name": "MyPanel",
+                            "designerId": "cd4e68ec-82c2-42b9-bcc7-365e244af159",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig1",
+                                    "designerId": "3d4ef7a0-3e56-4904-a34d-4a9151adf5a9"
+                                },
+                                {
+                                    "type": "Ext.panel.Panel",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bodyPadding": 5,
+                                        "container|align": "stretch",
+                                        "itemId": "pnlDefaults",
+                                        "layout": "vbox",
+                                        "layout|flex": 1,
+                                        "title": "SAP Integration"
+                                    },
+                                    "name": "MyPanel37",
+                                    "designerId": "37f1505d-00df-4ec6-a16c-08cca913b8de",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    " [",
+                                                    "                                                {",
+                                                    "                                                    dataIndex: 'strIRUnpostMode',",
+                                                    "                                                    dataType: 'string',",
+                                                    "                                                    text: 'Unpost Mode',",
+                                                    "                                                    flex: 2",
+                                                    "                                                },",
+                                                    "                                                {",
+                                                    "                                                    dataIndex: 'strDescription',",
+                                                    "                                                    dataType: 'string',",
+                                                    "                                                    text: 'Description',",
+                                                    "                                                    flex: 5",
+                                                    "                                                }",
+                                                    "                                            ]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strIRUnpostMode",
+                                                "fieldLabel": "Inventory Receipt Unpost Mode",
+                                                "itemId": "cboIRUnpostMode",
+                                                "labelWidth": 200,
+                                                "modelValidation": null,
+                                                "valueField": "strIRUnpostMode",
+                                                "pickerWidth": 800
+                                            },
+                                            "name": "MyComboBox94",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "b9635f28-31a6-4633-988a-56722520854d",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
                                 "designer|createAlias": null,
                                 "itemId": "pgeAuditLog",
                                 "layout": "fit",

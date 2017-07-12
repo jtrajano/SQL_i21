@@ -51,7 +51,13 @@ Ext.define('Inventory.view.CompanyPreferenceOptionViewController', {
             cboLotCondition: {
                 value: '{current.strLotCondition}',
                 store: '{lotCondition}'
+            }, 
+
+            cboIRUnpostMode: {
+                value: '{current.strIRUnpostMode}',
+                store: '{inventoryReceiptUnpostMode}'                
             }
+
         }
     },
 
