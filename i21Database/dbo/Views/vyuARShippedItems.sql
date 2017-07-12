@@ -682,7 +682,7 @@ SELECT
 	,[dblQtyOrdered]					= CASE WHEN ARCC.[intContractDetailId] IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END 
 	,[dblShipmentQuantity]				= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) --ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity])
 	,[dblShipmentQtyShippedTotal]		= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) --ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]) 
-	,[dblQtyRemaining]					= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) --ISNULL(ICISI.[dblQuantity], ARCC.[dblShipQuantity]) 
+	,[dblQtyRemaining]					= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) - ISNULL(ID.dblQtyShipped, 0)
 	,[dblDiscount]						= 0 
 	,[dblPrice]							= ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
 	,[dblShipmentUnitPrice]				= ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
@@ -835,7 +835,15 @@ LEFT OUTER JOIN COMPANYLOCATION SMCL ON ICIS.[intShipFromLocationId] = SMCL.[int
 LEFT OUTER JOIN CURRENCY SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]	
 LEFT OUTER JOIN SCALETICKET ON ICISI.[intSourceId] = SCALETICKET.[intTicketId]		
 LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ICISI.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN (SELECT intInventoryShipmentItemId
+					  , dblQtyShipped = SUM(dblQtyShipped)
+					  , strDocumentNumber 
+				 FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+				 GROUP BY intInventoryShipmentItemId, strDocumentNumber
+) ID ON ICISI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId 
+	AND ICIS.strShipmentNumber = ID.strDocumentNumber
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+AND dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) - ISNULL(ID.dblQtyShipped, 0) > 0
 
 UNION ALL
 
