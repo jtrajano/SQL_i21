@@ -5431,6 +5431,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateReservedQuantity.sql" />
     <Build Include="dbo\Tables\tblHDTicketStatusWorkflow.sql" />
     <Build Include="dbo\Views\vyuHDTicketStatusWorkflowLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateEFTNextNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
