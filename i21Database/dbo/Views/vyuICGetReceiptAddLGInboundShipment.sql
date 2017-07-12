@@ -6,28 +6,28 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 FROM (	
 	SELECT  
 		intLocationId				= LogisticsView.intCompanyLocationId
-		, intEntityVendorId			= intEntityVendorId
-		, strVendorId				= strVendor
-		, strVendorName				= strVendor
+		, intEntityVendorId			= LogisticsView.intEntityVendorId
+		, strVendorId				= LogisticsView.strVendor
+		, strVendorName				= LogisticsView.strVendor
 		, strReceiptType			= 'Purchase Contract'
-		, intLineNo					= intPContractDetailId
-		, intOrderId				= intPContractHeaderId
-		, strOrderNumber			= strPContractNumber
+		, intLineNo					= LogisticsView.intPContractDetailId
+		, intOrderId				= LogisticsView.intPContractHeaderId
+		, strOrderNumber			= LogisticsView.strPContractNumber
 		, dblOrdered				= LogisticsView.dblQuantity
-		, dblReceived				= dblDeliveredQuantity
+		, dblReceived				= LogisticsView.dblDeliveredQuantity
 		, intSourceType				= 2
-		, intSourceId				= intLoadDetailId
-		, strSourceNumber			= strLoadNumber
+		, intSourceId				= LogisticsView.intLoadDetailId
+		, strSourceNumber			= LogisticsView.strLoadNumber
 		, intItemId					= LogisticsView.intItemId
-		, strItemNo					= strItemNo
-		, strItemDescription		= strItemDescription
-		, dblQtyToReceive			= LogisticsView.dblQuantity - dblDeliveredQuantity
+		, strItemNo					= LogisticsView.strItemNo
+		, strItemDescription		= LogisticsView.strItemDescription
+		, dblQtyToReceive			= LogisticsView.dblQuantity - LogisticsView.dblDeliveredQuantity
 		, intLoadToReceive			= CAST(0 AS INT) 
-		, dblUnitCost				= dblCost
+		, dblUnitCost				= LogisticsView.dblCost
 		, dblTax					= CAST(0 AS NUMERIC(18, 6)) 
 		, dblLineTotal				= CAST(0 AS NUMERIC(18, 6)) 
-		, strLotTracking			= strLotTracking
-		, intCommodityId			= intPCommodityId
+		, strLotTracking			= LogisticsView.strLotTracking
+		, intCommodityId			= LogisticsView.intPCommodityId
 		, intContainerId			= LogisticsView.intLoadContainerId
 		, strContainer				= LogisticsView.strContainerNumber
 		, intSubLocationId			= LogisticsView.intPSubLocationId
@@ -50,8 +50,8 @@ FROM (
 		, intCostUOMId				= CostUOM.intItemUOMId
 		, strCostUOM				= CostUnitMeasure.strUnitMeasure
 		, dblCostUOMConvFactor		= CostUOM.dblUnitQty
-		, intLifeTime				= intPLifeTime
-		, strLifeTimeType			= strPLifeTimeType
+		, intLifeTime				= LogisticsView.intPLifeTime
+		, strLifeTimeType			= LogisticsView.strPLifeTimeType
 		, ysnLoad					= CAST(0 AS BIT) 
 		, dblAvailableQty			= CAST(0 AS NUMERIC(38, 20))
 		, strBOL					= LogisticsView.strBLNumber
@@ -66,27 +66,18 @@ FROM (
 		, intForexRateTypeId		= CAST(NULL AS INT) -- Add dummy fields for the meantime. 
 		, strForexRateType			= currencyType.strCurrencyExchangeRateType -- Add dummy fields for the meantime. 
 		, dblForexRate				= CAST(NULL AS NUMERIC(18, 6)) -- Add dummy fields for the meantime. 
-	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
-				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
-			LEFT JOIN dbo.tblICItemUOM ItemUOM 
-				ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
-			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure 
-				ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
-			LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
-				ON LogisticsView.intWeightItemUOMId = GrossNetUOM.intItemUOMId
-			LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure 
-				ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
-			LEFT JOIN dbo.tblICItemUOM CostUOM 
-				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intPCostUOMId)
-			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure 
-				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-			LEFT JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intItemId = LogisticsView.intItemId AND ItemLocation.intLocationId = LogisticsView.intCompanyLocationId
-			LEFT JOIN tblLGLoadContainer LC 
-				ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
-			LEFT JOIN tblSMCurrencyExchangeRateType currencyType 
-				ON currencyType.intCurrencyExchangeRateTypeId = NULL 
-			LEFT JOIN tblSMCompanyLocationSubLocation subLocation ON subLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
+	FROM vyuLGLoadContainerReceiptContracts LogisticsView
+		LEFT JOIN dbo.tblSMCurrency Currency ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
+		LEFT JOIN dbo.tblICItemUOM ItemUOM ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
+		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		LEFT JOIN dbo.tblICItemUOM GrossNetUOM ON LogisticsView.intWeightItemUOMId = GrossNetUOM.intItemUOMId
+		LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
+		LEFT JOIN dbo.tblICItemUOM CostUOM ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intPCostUOMId)
+		LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
+		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = LogisticsView.intItemId AND ItemLocation.intLocationId = LogisticsView.intCompanyLocationId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyType ON currencyType.intCurrencyExchangeRateTypeId = NULL 
+		LEFT JOIN tblSMCompanyLocationSubLocation subLocation ON subLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
 	WHERE LogisticsView.dblBalanceToReceive > 0 
 		  AND LogisticsView.intSourceType = 2 
 		  AND LogisticsView.intTransUsedBy = 1 
