@@ -88,8 +88,10 @@ BEGIN
 											--		 ELSE A.dblAmountDue END))
 											--END AS DECIMAL(18,2)),
 											--Subtract the payment on detail total using percentage
-											(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
-													 ELSE Details.dblTotal END) - ((ISNULL(A.dblPayment,0) / Details.dblTotal) * Details.dblTotal) * ISNULL(NULLIF(Details.dblRate,0),1),
+											CAST(((CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+													 ELSE Details.dblTotal END) - (CASE WHEN A.intTransactionType IN (2, 3, 11) 
+																							THEN (ISNULL(A.dblPayment,0) / Details.dblTotal) * Details.dblTotal * -1 
+																							ELSE (ISNULL(A.dblPayment,0) / Details.dblTotal) * Details.dblTotal END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[strDescription]				=	A.strReference,
