@@ -1132,17 +1132,18 @@ BEGIN
 		, strCompanyName		= @strCompanyName
 		, strCompanyAddress		= @strCompanyAddress
 		, strCompanyPhone		= @strCompanyPhone
-		, strCustomerAddress	= [dbo].fnARFormatLetterAddress(Cus.strBillToPhone, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
+		, strCustomerAddress	= [dbo].fnARFormatLetterAddress(Cus.strBillToPhone, NULL, Cus.strCustomerNumber + ' - ' + Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
 								  + CHAR(13) + (SELECT ISNULL(strAccountNumber,'') FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
 		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WITH(NOLOCK) WHERE intEntityCustomerId = SC.intEntityCustomerId)
 		, strCompanyFax			= @strCompanyFax
-		, strCompanyEmail		= @strCompanyEmail			
+		, strCompanyEmail		= @strCompanyEmail		
 	FROM
 		@SelectedCustomer SC
 	INNER JOIN 
 		(
 			SELECT 
 				intEntityCustomerId, 
+				strCustomerNumber,
 				strBillToAddress, 
 				strBillToCity, 
 				strBillToCountry, 
@@ -1222,5 +1223,6 @@ BEGIN
 								tblEMEntityLocation WITH(NOLOCK)
 							) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
 			) Cus
-		) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
+		) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId
 END
+ 
