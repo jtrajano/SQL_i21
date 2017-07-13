@@ -10,6 +10,9 @@ BEGIN
 	AS
 	SELECT
 		strEmployeeNo		= CAST(prhst_emp_no AS NVARCHAR(200))
+		,strLastName		= CAST(premp_last_name AS NVARCHAR(200))
+		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200))
+		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200))
 		,strCode			= CAST(prhst_code AS NVARCHAR(200))
 		,strCheckNumber		= CAST(prhst_no AS NVARCHAR(200))
 		,strCheckType		= CAST(CASE prhst_chk_type WHEN ''I'' THEN ''Individual'' ELSE ''Regular'' END AS NVARCHAR(200))
@@ -29,9 +32,10 @@ BEGIN
 									CAST((prhst_user_rev_dt % 100) AS VARCHAR)
 								END 
 								AS DATETIME)
-		,intIdentityKey		= ISNULL(CAST(A4GLIdentity AS INT), -999)
+		,intIdentityKey		= ISNULL(CAST(prhstmst.A4GLIdentity AS INT), -999)
 	FROM
-		prhstmst')
+		prhstmst
+		left join prempmst on prhstmst.prhst_emp_no = prempmst.premp_emp')
 
 END
 

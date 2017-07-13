@@ -2,6 +2,7 @@
 	@intTicketId INT,
 	@intContractDetailId INT,
 	@dblScheduleQty DECIMAL(38,20),
+	@intEntityId int,
 	@ysnStorage int = null
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -17,8 +18,8 @@ DECLARE @ErrorState INT;
 BEGIN TRY
 	IF NOT EXISTS(SELECT intContractDetailId FROM tblSCTicketContractUsed WHERE intTicketId = @intTicketId AND intContractDetailId = @intContractDetailId)
 	BEGIN
-		INSERT INTO tblSCTicketContractUsed (intTicketId,intContractDetailId,dblScheduleQty)
-		VALUES(@intTicketId,@intContractDetailId,@dblScheduleQty)
+		INSERT INTO tblSCTicketContractUsed (intTicketId,intContractDetailId,dblScheduleQty,intEntityId)
+		VALUES(@intTicketId,@intContractDetailId,@dblScheduleQty,@intEntityId)
 	END
 	IF(ISNULL(@ysnStorage,0) = 0)
 		BEGIN

@@ -869,7 +869,7 @@ BEGIN TRY
 		SET @strCompanyName = 'Not Set'
 	END
 
-
+	DELETE FROM @tblMassUpdatePreview WHERE strOldData = strNewData
 
    select @strCompanyName as CompanyName
 		  , LEFT(DATENAME(DW,GETDATE()),10) + ' ' + DATENAME(MONTH, SYSDATETIME())+ ' ' + RIGHT('0' + DATENAME(DAY, SYSDATETIME()), 2) + ', ' + DATENAME(YEAR, SYSDATETIME()) as DateToday

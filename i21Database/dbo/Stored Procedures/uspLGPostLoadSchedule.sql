@@ -20,6 +20,7 @@ BEGIN
 		EXEC uspLGUpdateInboundIntransitQty @intLoadId = @intLoadId
 			,@ysnInventorize = @ysnPost
 			,@ysnUnShip = @ysnUnShip
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
 
 			IF(@ysnPost = 0)
 			BEGIN

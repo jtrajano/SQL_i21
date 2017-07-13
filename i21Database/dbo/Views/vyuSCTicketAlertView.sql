@@ -95,7 +95,6 @@
     ,SCTicket.intSplitInvoiceOption
     ,SCTicket.intDriverEntityId
     ,SCTicket.intStorageScheduleId
-    ,SCTicket.intConcurrencyId
     ,SCTicket.dblNetWeightDestination
     ,SCTicket.ysnUseDestinationWeight
     ,SCTicket.ysnUseDestinationGrades
@@ -120,6 +119,8 @@
 	,SCTicket.strShipmentNumber
 	,SCTicket.strFreightSettlement
 	,SCTicket.strFarmDescription
+	,SCTicket.intDeliverySheetId
+	,SCTicket.strDeliverySheetNumber
 	FROM tblSCUncompletedTicketAlert SCAlert,vyuSCTicketView SCTicket
 	WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
 	AND ysnHasGeneratedTicketNumber = 1

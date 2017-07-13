@@ -5440,6 +5440,9 @@
     <Build Include="dbo\Views\vyuCFInvoiceGroupByCardOdometer.sql" />
     <Build Include="dbo\Views\vyuCFinvoiceGroupByCard.sql" />
     <Build Include="dbo\Functions\fnCFForceRounding.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateEFTNextNo.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
+    <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -221,7 +221,7 @@ BEGIN TRY
 				   -- example).
 				   IF ISNULL(@intLoopContractId,0) != 0
 				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-				   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
+				   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
@@ -439,7 +439,7 @@ BEGIN TRY
 							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
-							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @ysnDPStorage;
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @intEntityId, @ysnDPStorage;
 
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;

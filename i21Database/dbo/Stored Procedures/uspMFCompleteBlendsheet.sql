@@ -2,9 +2,13 @@
 	@strXml NVARCHAR(MAX)
 	,@intLotId INT = 0 OUT
 	,@strLotNumber NVARCHAR(50) = '' OUT
-	)
+	,@strActualCost NVARCHAR(20) = NULL
+	,@dtmCurrentDate DATETIME = NULL 
+)
 AS
 BEGIN TRY
+	SET @dtmCurrentDate = ISNULL(@dtmCurrentDate, GETDATE()) 
+
 	DECLARE @idoc INT
 		,@strErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
@@ -27,7 +31,7 @@ BEGIN TRY
 		,@intAttributeId INT
 		,@ysnIsNegativeQuantityAllowed BIT
 		,@strIsNegativeQuantityAllowed NVARCHAR(50)
-		,@dtmCurrentDate DATETIME = GetDate()
+		--,@dtmCurrentDate DATETIME = GetDate()
 		,@intLotStatusId INT
 		,@strVesselNo NVARCHAR(50)
 		,@intRetLotId INT
@@ -75,12 +79,7 @@ BEGIN TRY
 			,dblPlannedQuantity NUMERIC(18, 6)
 			)
 
-	SELECT @dtmCurrentDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
-
-	IF @dtmCurrentDate IS NULL
-	BEGIN
-		SELECT @dtmCurrentDate = GetDate()
-	END
+	SELECT @dtmCurrentDate = ISNULL(dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId), GETDATE()) 
 
 	IF @intWorkOrderId > 0
 	BEGIN
@@ -330,6 +329,10 @@ BEGIN TRY
 			,''
 			,''
 			,@dtmCurrentDate
+			,null
+			,null
+			,null
+			,@strActualCost
 	END
 	ELSE
 	BEGIN

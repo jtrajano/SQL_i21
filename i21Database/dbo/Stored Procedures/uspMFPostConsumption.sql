@@ -7,6 +7,7 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@intBatchId INT = NULL
 	,@ysnPostGL BIT=1
 	,@strActualCost NVARCHAR(20) = NULL
+	,@dtmDate DATETIME = NULL 
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -19,7 +20,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@INVENTORY_CONSUME AS INT = 8
 	,@strBatchId AS NVARCHAR(40)
 	,@GLEntries AS RecapTableType
-	,@dtmDate AS DATETIME
+	--,@dtmDate AS DATETIME
 	,@intTransactionId AS INT
 	,@intCreatedEntityId AS INT
 	,@strTransactionId NVARCHAR(50)
@@ -139,7 +140,7 @@ BEGIN
 END
 
 SELECT TOP 1 @strTransactionId = strWorkOrderNo
-	,@dtmDate = GetDate()
+	--,@dtmDate = GETDATE()
 	,@intCreatedEntityId = @intUserId
 	,@intLocationId = intLocationId
 	,@intItemId = intItemId
@@ -168,13 +169,7 @@ BEGIN
 END
 
 SELECT @intTransactionId = @intBatchId
-
-SELECT @dtmDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
-
-IF @dtmDate IS NULL
-BEGIN
-	SELECT @dtmDate = GetDate()
-END
+SELECT @dtmDate = ISNULL(dbo.fnGetBusinessDate(@dtmDate, @intLocationId), GETDATE()) 
 
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH

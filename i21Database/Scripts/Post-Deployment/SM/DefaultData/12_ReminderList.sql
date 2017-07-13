@@ -642,7 +642,7 @@ BEGIN
 							JOIN	tblCTAction	AC	ON	AC.intActionId = EV.intActionId
 							JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
 							JOIN	tblCTContractHeader	CH	ON CH.intContractHeaderId	=	CD.intContractHeaderId
-							LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+							LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							WHERE	intContractStatusId = 2 AND AC.strInternalCode = ''Unconfirmed Sequence'' AND ER.intEntityId = {0}
 							AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)
 							'
@@ -678,7 +678,7 @@ BEGIN
 						JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
 						JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
 						JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
-						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 						WHERE	CD.intContractHeaderId IS NULL AND AC.strInternalCode = ''Contract without Sequence'' AND ER.intEntityId = {0}
 						AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)
 						GROUP BY CH.intContractHeaderId'
@@ -710,7 +710,7 @@ BEGIN
 							CROSS JOIN		tblCTEvent EV
 							JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId											
 							JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
-							LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+							LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							WHERE	ISNULL(ysnSigned,0) = 0 AND EV.strEventName = ''Unsigned Contract Alert'' AND ER.intEntityId = {0}
 							AND CD.intContractStatusId <> 3
 							AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)
@@ -744,7 +744,7 @@ BEGIN
 						FROM	tblCTContractHeader CH	
 						CROSS JOIN tblCTEvent EV											
 						JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
-						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId  AND ER.intEventId = RF.intEventId
 						LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 						WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
 						AND		CH.intContractHeaderId	NOT IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 2)
@@ -826,7 +826,7 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId  AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Contracts w/o shipping instruction'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20shipping%20instruction'
@@ -839,7 +839,7 @@ BEGIN
 		[strQuery]	 = N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Contracts w/o shipping instruction'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
@@ -864,7 +864,7 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Contracts w/o shipping advice'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20shipping%20advice'
@@ -877,7 +877,7 @@ BEGIN
 		[strQuery]	 = N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Contracts w/o shipping advice'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
@@ -903,7 +903,7 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Contracts w/o document'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20document'
@@ -916,7 +916,7 @@ BEGIN
 		[strQuery]	 = N' SELECT intContractHeaderId
 						  FROM vyuLGNotifications vyu
 						  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-						  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+						  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 						  WHERE vyu.strType = ''Contracts w/o document'' AND ER.intEntityId = {0}
 						  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
@@ -942,7 +942,7 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Contracts w/o weight claim'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20weight%20claim'
@@ -955,7 +955,7 @@ BEGIN
 	[strQuery]		 = N' SELECT intContractHeaderId
 					   FROM vyuLGNotifications vyu
 					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 					   WHERE vyu.strType = ''Contracts w/o weight claim'' AND ER.intEntityId = {0}
 					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
@@ -981,7 +981,7 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Weight claims w/o debit note'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Weight%20claim%20w%2Fo%20debit%20note'
@@ -994,7 +994,7 @@ BEGIN
 		[strQuery]	 = N' SELECT intContractHeaderId
 					   FROM vyuLGNotifications vyu
 					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 					   WHERE vyu.strType = ''Weight claims w/o debit note'' AND ER.intEntityId = {0}
 					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
@@ -1020,7 +1020,7 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Contracts w/o TC'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20TC'
@@ -1033,7 +1033,7 @@ BEGIN
 	[strQuery]		 = N' SELECT intContractHeaderId
 					   FROM vyuLGNotifications vyu
 					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 					   WHERE vyu.strType = ''Contracts w/o TC'' AND ER.intEntityId = {0}
 					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
@@ -1059,7 +1059,7 @@ SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 		,[strQuery]			= N' SELECT intContractHeaderId
 							  FROM vyuLGNotifications vyu
 							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+							  LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 							  WHERE vyu.strType = ''Contracts w/o 4C'' AND ER.intEntityId = {0}
 							  AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%204C'
@@ -1072,7 +1072,7 @@ BEGIN
  		[strQuery]	 = N' SELECT intContractHeaderId
 					   FROM vyuLGNotifications vyu
 					   JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
-					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = ER.intEventId
+					   LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 					   WHERE vyu.strType = ''Contracts w/o 4C'' AND ER.intEntityId = {0}
 					   AND vyu.intCommodityId = ISNULL(RF.intCommodityId,vyu.intCommodityId)'
 	WHERE [strReminder] = N''
@@ -1108,7 +1108,7 @@ BEGIN
 						JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
 						JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId
 						JOIN	tblSMScreen			SN	ON	SN.intScreenId	=	TN.intScreenId AND SN.strNamespace IN (''ContractManagement.view.Contract'', ''ContractManagement.view.Amendments'')
-						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEventId = EV.intEventId
+						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 						WHERE	ISNULL(ysnMailSent,0) = 0 AND TN.ysnOnceApproved = 1
 						AND		EV.strEventName  =  ''Approved Contract Mail Not Sent'' AND ER.intEntityId = {0}
 						AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)

@@ -7,7 +7,11 @@
 		,strProjectionMileStone = d.strMileStone
 		,strProjectionType = e.strType
 		,strProjectionStatus = f.strStatus
+		,strProjectionStatusBcColor = f.strBackColor
+		,strProjectionStatusFcColor = f.strFontColor
 		,strProjectionPriority = g.strPriority
+		,strProjectionPriorityBcColor = g.strBackColor
+		,strProjectionPriorityFcColor = g.strFontColor
 		,strProjectionProduct = h.strProduct
 		,strProjectionModule = i2.strModule
 		,strProjectionVersionNo = j.strVersionNo

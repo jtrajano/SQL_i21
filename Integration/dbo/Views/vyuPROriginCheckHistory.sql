@@ -9,10 +9,13 @@ BEGIN
 	CREATE VIEW [dbo].[vyuPROriginCheckHistory]
 	AS
 	SELECT
-		strCode			= CAST(prhsm_code AS NVARCHAR(200))
+		strCode				= CAST(prhsm_code AS NVARCHAR(200))
 		,strCheckNumber		= CAST(prhsm_no AS NVARCHAR(200))
 		,strCheckType		= CAST(CASE prhsm_chk_type WHEN ''I'' THEN ''Individual'' ELSE ''Regular'' END AS NVARCHAR(200))
 		,strEmployeeNo		= CAST(prhsm_emp AS NVARCHAR(200))
+		,strLastName		= CAST(premp_last_name AS NVARCHAR(200))
+		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200))
+		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200))
 		,dtmCheckDate		= CAST(CASE WHEN (ISNULL(prhsm_chk_date, 0) = 0) THEN NULL
 								ELSE CAST((prhsm_chk_date / 10000) AS VARCHAR) + ''-'' + 
 									CAST((prhsm_chk_date % 10000) / 100 AS VARCHAR) + ''-'' + 
@@ -50,9 +53,10 @@ BEGIN
 									CAST((prhsm_user_rev_dt % 100) AS VARCHAR)
 								END 
 								AS DATETIME)
-		,intIdentityKey		= ISNULL(CAST(A4GLIdentity AS INT), -999)
+		,intIdentityKey		= ISNULL(CAST(prhsmmst.A4GLIdentity AS INT), -999)
 	FROM
-		prhsmmst')
+		prhsmmst
+		left join prempmst on prhsmmst.prhsm_emp = prempmst.premp_emp')
 
 END
 

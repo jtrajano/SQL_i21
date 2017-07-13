@@ -3,6 +3,9 @@ CREATE VIEW [dbo].[vyuPROriginEmployeeChangeHistory]
 AS
 SELECT TOP 0
 	strEmployeeNo	= CAST('' AS NVARCHAR(100))
+	,strLastName	= CAST('' AS NVARCHAR(200))
+	,strFirstName	= CAST('' AS NVARCHAR(200))
+	,strMiddleName	= CAST('' AS NVARCHAR(200))
 	,dtmDate		= CAST(NULL AS DATETIME)
 	,dtmTime		= CAST(NULL AS DATETIME)
 	,strFieldName	= CAST('' AS NVARCHAR(100))

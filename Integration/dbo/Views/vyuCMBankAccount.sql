@@ -107,6 +107,12 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,origin.apcbk_auto_assign_trx_yn	-- Y/N
 				-- This is used to check if the bank account have a transaction
 				,ysnHasTransaction = CAST(ISNULL((select TOP 1 1 from dbo.tblCMBankTransaction where intBankAccountId = i21.intBankAccountId),0) AS bit)
+				-- This is used to check if EFT No has been used
+				,ysnEFTNoUsed = CAST(ISNULL(
+						(SELECT TOP 1 1 FROM (
+						SELECT strTransactionId FROM  dbo.tblCMBankTransaction WHERE intBankAccountId = i21.intBankAccountId AND intBankTransactionTypeId IN (22,23,122,123) AND strReferenceNo <> '''' AND intBankFileAuditId IS NOT NULL
+						UNION ALL SELECT strSourceTransactionId FROM dbo.tblCMUndepositedFund WHERE intBankAccountId = i21.intBankAccountId AND (strReferenceNo <> '''' OR strReferenceNo IS NOT NULL) AND intBankFileAuditId IS NOT NULL
+						) tbl),0) AS bit)
 		FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_origin origin
 					ON i21.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
 		')
