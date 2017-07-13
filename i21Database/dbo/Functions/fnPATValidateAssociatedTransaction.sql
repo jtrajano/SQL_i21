@@ -59,8 +59,8 @@ BEGIN
 		INSERT INTO @returnTable
 		SELECT	'This voucher was created from Patronage Retire Stock - '+ CS.strCertificateNo +'. Unpost it from there.',
 				'Voucher',
-				CS.strCertificateNo,
-				CS.intCustomerStockId
+				APB.strBillId,
+				APB.intBillId
 		FROM tblAPBill APB
 		INNER JOIN tblPATCustomerStock CS
 			ON APB.intBillId = CS.intBillId
