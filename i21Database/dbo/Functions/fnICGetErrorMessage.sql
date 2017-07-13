@@ -199,6 +199,7 @@ BEGIN
 		WHEN @msgId = 80183 THEN 'The Freight Terms for customer %s is blank. Please add it at the Entity - Locations.'
 		WHEN @msgId = 80184 THEN 'Invalid customer record.'
 		WHEN @msgId = 80185 THEN 'Post preview is not available. Financials are only booked for company-owned stocks.'
+		WHEN @msgId = 80186 THEN 'The UOM %s is used for %s and not for %s. Please assign the correct UOM id.'
 	END 
 
 	RETURN @msg
