@@ -33,6 +33,7 @@
 	[strMessageType]		NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[strFilter]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDismiss]			[bit] NULL,
+	[intActivitySourceId]	[int] NULL,
 	[intConcurrencyId]		[int] NOT NULL DEFAULT ((1)), 
     CONSTRAINT [FK_tblSMActivity_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMActivity_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
