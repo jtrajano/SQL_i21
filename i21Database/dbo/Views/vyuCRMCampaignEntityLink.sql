@@ -5,7 +5,7 @@
 				intEntityId = a.intEntityContactId
 				,strContactName = b.strName
 				,strEntityName = c.strName
-				,strEntityType = (select top 1 d.strType from tblEMEntityType d where d.intEntityId = a.intEntityId	and d.strType in ('Customer','Prospect'))
+				,strEntityType = (select top 1 d.strType from tblEMEntityType d where d.intEntityId = a.intEntityId)
 				,strEmail = b.strEmail
 			from tblEMEntityToContact a, tblEMEntity b, tblEMEntity c
 			where

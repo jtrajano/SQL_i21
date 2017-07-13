@@ -82,7 +82,13 @@
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipViaId) REFERENCES tblSMShipVia([intEntityId]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMCurrency_intCurrencyID] FOREIGN KEY (intCurrencyId) REFERENCES tblSMCurrency(intCurrencyID),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntityContact_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEMEntity(intEntityId),
-	CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId)
+	CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId),
+
+	CONSTRAINT [FK_tblAPBill_intBankInfoId] FOREIGN KEY ([intBankInfoId]) REFERENCES tblCMBankAccount([intBankAccountId]),
+	CONSTRAINT [FK_tblAPBill_intPurchaseOrderId] FOREIGN KEY ([intPurchaseOrderId]) REFERENCES tblPOPurchase([intPurchaseId]),
+	CONSTRAINT [FK_tblAPBill_intPayToAddressId] FOREIGN KEY ([intPayToAddressId]) REFERENCES tblEMEntityLocation([intEntityLocationId]),
+	CONSTRAINT [FK_tblAPBill_intStoreLocationId] FOREIGN KEY ([intStoreLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId]),
+
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]

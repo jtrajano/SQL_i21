@@ -58,7 +58,10 @@
 	CONSTRAINT [FK_tblAPVendor_tblRKVendorPriceFixationLimit_intRiskVendorPriceFixationLimitId] FOREIGN KEY ([intRiskVendorPriceFixationLimitId]) REFERENCES [dbo].[tblRKVendorPriceFixationLimit] ([intVendorPriceFixationLimitId]),
 	CONSTRAINT [FK_tblAPVendor_tblICUnitMeasure_intRiskUnitOfMeasureId] FOREIGN KEY ([intRiskUnitOfMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblAPVendor_tblSTStore] FOREIGN KEY ([intStoreStoreId]) REFERENCES [dbo].[tblSTStore] ([intStoreId]),
-
+	CONSTRAINT [FK_tblAPVendor_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES tblSMCurrency([intCurrencyID]),
+	CONSTRAINT [FK_tblAPVendor_intPaymentMethodId] FOREIGN KEY ([intPaymentMethodId]) REFERENCES tblSMPaymentMethod([intPaymentMethodID]),
+	CONSTRAINT [FK_tblAPVendor_intBillToId] FOREIGN KEY ([intBillToId]) REFERENCES tblEMEntityLocation([intEntityLocationId]),
+	CONSTRAINT [FK_tblAPVendor_intShipFromId] FOREIGN KEY ([intShipFromId]) REFERENCES tblEMEntityLocation([intEntityLocationId]),
 
 	--CONSTRAINT [FK_tblAPVendor_tblAPVendorToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblAPVendorToContact]([intVendorToContactId])
 );

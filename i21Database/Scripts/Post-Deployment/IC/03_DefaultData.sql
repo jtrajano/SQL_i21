@@ -83,6 +83,15 @@ BEGIN
 	VALUES (1, 1)
 END
 
+-- Ensure the preference is filled-in. 
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICCompanyPreference') AND name = 'strIRUnpostMode')
+BEGIN
+	UPDATE	icPref 
+	SET		icPref.strIRUnpostMode = 'Default'
+	FROM	tblICCompanyPreference icPref 
+	WHERE	strIRUnpostMode IS NULL
+END
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'STOCK' AND strDisplayMember = 'STOCK')
 BEGIN
 	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('STOCK','STOCK',1,1,'dbo',GETDATE())

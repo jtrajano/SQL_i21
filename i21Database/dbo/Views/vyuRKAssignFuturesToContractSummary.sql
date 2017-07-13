@@ -30,7 +30,7 @@ SELECT cs.intAssignFuturesToContractSummaryId,
 		ch.intContractHeaderId,
 		fot.intFutOptTransactionId,
 		cs.ysnIsHedged
-		,fot.intFutOptTransactionHeaderId  	
+		,fot.intFutOptTransactionHeaderId,fot.dtmCreateDateTime   	
 FROM tblRKAssignFuturesToContractSummary cs
 JOIN tblCTContractDetail cd ON  cs.intContractDetailId=cd.intContractDetailId  
 join tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
@@ -80,7 +80,7 @@ SELECT cs.intAssignFuturesToContractSummaryId,
 		ch.intContractHeaderId,
 		fot.intFutOptTransactionId,
 		cs.ysnIsHedged
-		,fot.intFutOptTransactionHeaderId  	
+		,fot.intFutOptTransactionHeaderId,fot.dtmCreateDateTime  	
 FROM tblRKAssignFuturesToContractSummary cs
 JOIN tblCTContractHeader ch on ch.intContractHeaderId= cs.intContractHeaderId 
 join tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId

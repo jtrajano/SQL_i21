@@ -70,7 +70,16 @@
 	CONSTRAINT [FK_tblAPBillDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [dbo].[tblLGLoadDetail] ([intLoadDetailId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCCSiteDetail_intCCSiteDetailId] FOREIGN KEY ([intCCSiteDetailId]) REFERENCES [dbo].[tblCCSiteDetail] ([intSiteDetailId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCTContractCost] FOREIGN KEY ([intContractCostId]) REFERENCES [tblCTContractCost]([intContractCostId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblICInventoryShipmentCharge] FOREIGN KEY ([intInventoryShipmentChargeId]) REFERENCES [tblICInventoryShipmentCharge]([intInventoryShipmentChargeId])
+	CONSTRAINT [FK_tblAPBillDetail_tblICInventoryShipmentCharge] FOREIGN KEY ([intInventoryShipmentChargeId]) REFERENCES [tblICInventoryShipmentCharge]([intInventoryShipmentChargeId]),
+
+	CONSTRAINT [FK_tblAPBillDetail_intUnitOfMeasureId] FOREIGN KEY ([intUnitOfMeasureId]) REFERENCES tblICItemUOM([intItemUOMId]),
+	CONSTRAINT [FK_tblAPBillDetail_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES tblICItemUOM([intItemUOMId]),
+	CONSTRAINT [FK_tblAPBillDetail_intWeightUOMId] FOREIGN KEY ([intWeightUOMId]) REFERENCES tblICItemUOM([intItemUOMId]),
+	CONSTRAINT [FK_tblAPBillDetail_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES tblICInventoryReceiptItem([intInventoryReceiptItemId]),
+	CONSTRAINT [FK_tblAPBillDetail_intPaycheckHeaderId] FOREIGN KEY ([intPaycheckHeaderId]) REFERENCES tblPRPaycheck([intPaycheckId]),
+	CONSTRAINT [FK_tblAPBillDetail_intPurchaseDetailId] FOREIGN KEY ([intPurchaseDetailId]) REFERENCES tblPOPurchaseDetail([intPurchaseDetailId]),
+	CONSTRAINT [FK_tblAPBillDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES tblLGLoadDetail([intLoadDetailId]),
+	CONSTRAINT [FK_tblAPBillDetail_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
 ) ON [PRIMARY];
 
 

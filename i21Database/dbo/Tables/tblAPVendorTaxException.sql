@@ -28,5 +28,10 @@
 
 	CONSTRAINT [FK_tblAPVendorTaxException_tblAPVendor]		FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityId]),
 
-	CONSTRAINT FK_ttblAPVendorTaxExceptiontblEMEntityLocation FOREIGN KEY (intEntityVendorLocationId) REFERENCES [tblEMEntityLocation]([intEntityLocationId])
+	CONSTRAINT FK_ttblAPVendorTaxExceptiontblEMEntityLocation FOREIGN KEY (intEntityVendorLocationId) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
+	CONSTRAINT [FK_tblAPVendorTaxException_intItemId] FOREIGN KEY ([intItemId]) REFERENCES tblICItem([intItemId]),
+	CONSTRAINT [FK_tblAPVendorTaxException_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES tblICCategory([intCategoryId]),
+	CONSTRAINT [FK_tblAPVendorTaxException_intTaxCodeId] FOREIGN KEY ([intTaxCodeId]) REFERENCES tblSMTaxCode([intTaxCodeId]),
+	CONSTRAINT [FK_tblAPVendorTaxException_intTaxClassId] FOREIGN KEY ([intTaxClassId]) REFERENCES tblSMTaxClass([intTaxClassId]),
+	CONSTRAINT [FK_tblAPVendorTaxException_intEntityVendorLocationId] FOREIGN KEY ([intEntityVendorLocationId]) REFERENCES tblEMEntityLocation([intEntityLocationId]),
 )

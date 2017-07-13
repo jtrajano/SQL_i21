@@ -21,6 +21,7 @@ BEGIN TRY
 	DECLARE @intContractHeaderId INT
 	DECLARE @dtmPlannedAvailabilityDate DATETIME
 	DECLARE @intApprovedById INT
+	DECLARE @intShipmentStatus INT
 
 	DECLARE @tblLoadDetail TABLE
 			(intDetailRecordId INT Identity(1, 1),
@@ -33,12 +34,18 @@ BEGIN TRY
 	SELECT @dtmCurrentETAPOD = dtmETAPOD,
 		   @dtmCurrentETSPOL = dtmETSPOL,
 		   @strETAPODReasonCode = PODRC.strReasonCodeDescription,
-		   @strETSPOLReasonCode = POLRC.strReasonCodeDescription
+		   @strETSPOLReasonCode = POLRC.strReasonCodeDescription,
+		   @intShipmentStatus = L.intShipmentStatus
 	FROM tblLGLoad L
 	LEFT JOIN tblLGReasonCode PODRC ON PODRC.intReasonCodeId = L.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode POLRC ON POLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 	WHERE intLoadId = @intLoadId
-	
+
+	IF(ISNULL(@intShipmentStatus,0) IN (4,10) AND @strRowState <> 'Delete')
+	BEGIN
+		RETURN;
+	END	
+
 	SELECT @ysnPOETAFeedToERP = ysnPOETAFeedToERP
 	FROM tblLGCompanyPreference
 	

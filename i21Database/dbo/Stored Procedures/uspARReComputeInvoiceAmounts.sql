@@ -5,7 +5,6 @@ AS
 
 BEGIN
 
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -15,12 +14,14 @@ SET ANSI_WARNINGS OFF
 DECLARE  @ZeroDecimal		DECIMAL(18,6)
 		,@InvoiceIdLocal	INT
 		,@CurrencyId		INT
+		,@strTransType		NVARCHAR(50)
 
 SET @ZeroDecimal = 0.000000	
 SET @InvoiceIdLocal = @InvoiceId
 						
 SELECT
-	@CurrencyId		= [intCurrencyId]
+	@CurrencyId		= [intCurrencyId],
+	@strTransType	= [strTransactionType]
 FROM
 	tblARInvoice
 WHERE
@@ -89,34 +90,38 @@ WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 
 
-UPDATE
-	tblARInvoice
-SET
-	  [dblDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
-	 ,[dblTotalTermDiscount]	= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
-FROM
-	(
-		SELECT 
-			 SUM(
-				CASE WHEN [strItemTermDiscountBy] = 'Percent'
-					THEN
-						([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000)
-					ELSE
-						[dblItemTermDiscount]
-				END
-				)	AS [dblItemTermDiscountTotal]
-			,[intInvoiceId]
-		FROM
-			tblARInvoiceDetail
-		WHERE
-			[intInvoiceId] = @InvoiceIdLocal
-		GROUP BY
-			[intInvoiceId]
-	)
-	 T
-WHERE
-	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
-	AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
+IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
+BEGIN
+	UPDATE
+		tblARInvoice
+	SET
+		  [dblDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
+		 ,[dblTotalTermDiscount]	= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
+	FROM
+		(
+			SELECT 
+				 SUM(
+					CASE WHEN [strItemTermDiscountBy] = 'Percent'
+						THEN
+							([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000)
+						ELSE
+							[dblItemTermDiscount]
+					END
+					)	AS [dblItemTermDiscountTotal]
+				,[intInvoiceId]
+			FROM
+				tblARInvoiceDetail
+			WHERE
+				[intInvoiceId] = @InvoiceIdLocal
+			GROUP BY
+				[intInvoiceId]
+		)
+		 T
+	WHERE
+		tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
+		AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
+END
+
 
 
 IF (@AvailableDiscountOnly = 1)

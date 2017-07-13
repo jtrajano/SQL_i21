@@ -5417,6 +5417,23 @@
     <Build Include="dbo\Stored Procedures\uspLGAlertNotificationCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryCountDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryShiftCountDetails.sql" />
+    <Build Include="dbo\Tables\tblAPBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBalance.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultDataBalance.sql" />
+    <Build Include="dbo\Functions\fnAPCreateARInvoiceGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPBalanceCheck.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateTransactionsFromAR.sql" />
+    <Build Include="dbo\Views\vyuAPStatus.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityPropectRequirement.sql" />
+    <Build Include="dbo\Views\vyuCRMOpportunityProspectRequirementLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateAllocatedQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateReservedQuantity.sql" />
+    <Build Include="dbo\Tables\tblHDTicketStatusWorkflow.sql" />
+    <Build Include="dbo\Views\vyuHDTicketStatusWorkflowLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateEFTNextNo.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
+    <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

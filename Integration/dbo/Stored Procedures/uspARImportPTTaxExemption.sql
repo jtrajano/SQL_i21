@@ -1,9 +1,5 @@
-IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportPTTaxExemption')
-	DROP PROCEDURE uspARImportPTTaxExemption
-GO
-
 CREATE PROCEDURE [dbo].[uspARImportPTTaxExemption]
-	@CustomerId NVARCHAR(50) = NULL
+		@CustomerId NVARCHAR(50) = NULL
 AS
 BEGIN
 

@@ -916,6 +916,8 @@ BEGIN TRY
 		SET @strCompanyName = 'Not Set'
 	END
 
+	DELETE FROM @tblMassUpdatePreview WHERE strOldData = strNewData
+
    select @strCompanyName as CompanyName
 		  --, FORMAT(GETDATE(), 'D', 'en-US' ) as DateToday
 		  --, CONVERT(VARCHAR(8), GETDATE(), 108) + ' ' + RIGHT(CONVERT(VARCHAR(30), GETDATE(), 9), 2) as TimeToday

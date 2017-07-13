@@ -12,6 +12,9 @@ BEGIN
 		intYear				= CAST(premt_year AS INT)
 		,intQuarter			= CAST(premt_qtrno AS INT)
 		,strEmployeeNo		= CAST(premt_emp AS NVARCHAR(200))
+		,strLastName		= CAST(premp_last_name AS NVARCHAR(200))
+		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200))
+		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200))
 		,strType			= CAST(premt_tax_type AS NVARCHAR(200))
 		,strTaxCode			= CAST(premt_code AS NVARCHAR(200))
 		,strCheckLiteral	= CAST(premt_literal AS NVARCHAR(200))
@@ -26,9 +29,10 @@ BEGIN
 									CAST((premt_user_rev_dt % 100) AS VARCHAR)
 								END 
 								AS DATETIME)
-		,intIdentityKey		= ISNULL(CAST(A4GLIdentity AS INT), -999)
+		,intIdentityKey		= ISNULL(CAST(premtmst.A4GLIdentity AS INT), -999)
 	FROM
-		premtmst')
+		premtmst
+		left join prempmst on premtmst.premt_emp = prempmst.premp_emp')
 
 END
 

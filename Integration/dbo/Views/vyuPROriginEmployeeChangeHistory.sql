@@ -10,6 +10,9 @@ BEGIN
 	AS
 	SELECT
 		strEmployeeNo		= CAST(premh_emp AS NVARCHAR(200))
+		,strLastName		= CAST(premp_last_name AS NVARCHAR(200))
+		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200))
+		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200))
 		,dtmDate			= CAST(CASE WHEN (ISNULL(premh_period_date, 0) = 0) THEN NULL
 								ELSE CAST((premh_period_date / 10000) AS VARCHAR) + ''-'' + 
 									CAST((premh_period_date % 10000) / 100 AS VARCHAR) + ''-'' + 
@@ -36,9 +39,10 @@ BEGIN
 									CAST((premh_user_rev_dt % 100) AS VARCHAR)
 								END 
 							AS DATETIME)
-		,intIdentityKey		= ISNULL(CAST(A4GLIdentity AS INT), -999)
+		,intIdentityKey		= ISNULL(CAST(premhmst.A4GLIdentity AS INT), -999)
 	FROM 
-		premhmst')
+		premhmst
+		left join prempmst on premhmst.premh_emp = prempmst.premp_emp')
 
 END
 

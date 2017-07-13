@@ -97,7 +97,6 @@
        tblSCTicket.intSplitInvoiceOption,
        tblSCTicket.intDriverEntityId,
        tblSCTicket.intStorageScheduleId,
-       tblSCTicket.intConcurrencyId,
        tblSCTicket.dblNetWeightDestination,
        tblSCTicket.ysnUseDestinationWeight,
        tblSCTicket.ysnUseDestinationGrades,
@@ -106,6 +105,8 @@
        tblSCTicket.dblShrink,
        tblSCTicket.dblConvertedUOMQty,
 	   tblSCTicket.strFreightSettlement,
+	   tblSCTicket.intDeliverySheetId,
+	   tblSCDeliverySheet.strDeliverySheetNumber,
        tblEMEntity.strName,
        tblSCListTicketTypes.strTicketType,
 	   tblSMCompanyLocation.strLocationName,
@@ -158,3 +159,5 @@
 	   on  tblICInventoryShipment.intInventoryShipmentId = tblSCTicket.intInventoryShipmentId
 	left join tblEMEntityFarm tblEMEntityFarm
 	   on tblEMEntityFarm.intFarmFieldId = tblSCTicket.intFarmFieldId
+	left join tblSCDeliverySheet tblSCDeliverySheet
+	   on tblSCDeliverySheet.intDeliverySheetId = tblSCTicket.intDeliverySheetId

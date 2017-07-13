@@ -175,7 +175,7 @@ OPEN intListCursor;
 							BEGIN
 								IF	ISNULL(@intLoopContractId,0) != 0
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits;
+								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
 							END
 						INSERT INTO @ItemsForItemReceipt (
 								intItemId
@@ -326,7 +326,7 @@ OPEN intListCursor;
 							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
-							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @ysnIsStorage;
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @intEntityId, @ysnIsStorage;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
 					END;

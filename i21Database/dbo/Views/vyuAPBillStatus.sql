@@ -19,9 +19,8 @@ SELECT
 	,A.ysnPosted
 	,A.ysnPaid
 	,A.ysnOrigin
-	,CASE WHEN ((CASE WHEN A.intTransactionType !=1 THEN A.dblPayment * -1 ELSE A.dblPayment END) != Payments.dblPayment
-			OR A.dblPayment > 0 AND Payments.dblPayment IS NULL)
-			THEN 'Invalid Payment'
+	,CASE WHEN (A.dblPayment != Payments.dblPayment OR A.dblPayment != 0 AND Payments.dblPayment IS NULL)
+			THEN 'Invalid Payment' --Invalid tblAPBill.dblPayment
 		  WHEN (CASE WHEN A.intTransactionType !=1 THEN A.dblDiscount * -1 ELSE A.dblDiscount END) != Payments.dblDiscount 
 			THEN 'Invalid Discount'
 		  WHEN (CASE WHEN A.intTransactionType !=1 THEN A.dblInterest * -1 ELSE A.dblInterest END) != Payments.dblInterest 
@@ -30,7 +29,7 @@ SELECT
 			THEN 'Invalid Withheld'
 		WHEN CAST((CASE WHEN A.intTransactionType !=1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END) AS DECIMAL(18,2)) != OpenPayables.dblAmountDue 
 			THEN 'Payables amount due do not matched with voucher amount due.'
-		WHEN A.ysnPosted = 1 AND A.dblTotal != ISNULL(GLData.dblCredit,0) AND A.ysnOrigin = 0 THEN 'Voucher and GL amount do not match.'
+		WHEN A.ysnPosted = 1 AND A.dblTotal != ISNULL(GLData.dblCredit,0) AND A.ysnOrigin = 0 AND A.intTransactionType != 2 THEN 'Voucher and GL amount do not match.'
 		WHEN A.intBillId IS NULL AND GLRecord.intTransactionId IS NOT NULL THEN 'GL Record exists but not in voucher table.'
 		WHEN (A.ysnPaid = 1 AND (CASE WHEN A.intTransactionType !=1 THEN A.dblTotal * -1 ELSE A.dblTotal END)
 				 != ((CASE WHEN A.intTransactionType !=1 THEN A.dblPayment * -1 ELSE A.dblPayment END)
@@ -61,10 +60,10 @@ OUTER APPLY (
 ) Details
 OUTER APPLY (
 	SELECT
-		CASE WHEN A.intTransactionType != 1 THEN SUM(D.dblPayment * -1) ELSE SUM(D.dblPayment) END dblPayment
-		,CASE WHEN A.intTransactionType != 1 THEN SUM(D.dblDiscount * -1) ELSE SUM(D.dblDiscount) END dblDiscount
-		,CASE WHEN A.intTransactionType != 1 THEN SUM(D.dblInterest * -1) ELSE SUM(D.dblInterest) END dblInterest
-		,CASE WHEN A.intTransactionType != 1 THEN SUM(D.dblWithheld * -1) ELSE SUM(D.dblWithheld) END dblWithheld
+		SUM(D.dblPayment) dblPayment
+		,SUM(D.dblDiscount) dblDiscount
+		,SUM(D.dblInterest) dblInterest
+		,SUM(D.dblWithheld) dblWithheld
 	FROM tblAPPayment C
 	INNER JOIN tblAPPaymentDetail D ON C.intPaymentId = D.intPaymentId
 	WHERE D.intBillId = A.intBillId

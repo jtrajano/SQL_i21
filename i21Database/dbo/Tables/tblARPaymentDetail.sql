@@ -32,5 +32,11 @@
 	--CONSTRAINT [FK_tblARPaymentDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId])
 );
 
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARPaymentDetail_intInvoiceId]
+ON [dbo].[tblARPaymentDetail] ([intInvoiceId])
 
-
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARPaymentDetail_intPaymentId]
+ON [dbo].[tblARPaymentDetail] ([intPaymentId])
+INCLUDE ([intInvoiceId],[dblInvoiceTotal],[dblPayment])

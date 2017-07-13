@@ -127,7 +127,10 @@ BEGIN
 					--,@WriteOffAccountId	--INT				= NULL
 					,@AllowPrepayment								= 1--BIT				= 0
 					--,@AllowOverpayment								--BIT				= 0
-			
+
+					,@PaymentOriginalId	= @strPaymentNumber -- Reference to the original/parent record
+					,@UseOriginalIdAsPaymentNumber = 1
+
 			--GEt the created invoice number
 			SET @strNewPaymentNumber = (SELECT TOP 1 strRecordNumber FROM tblARPayment WHERE intPaymentId  = @intNewPaymentId) 
 			--SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARPaymentDetail WHERE intPaymentId = @intNewPaymentId)
