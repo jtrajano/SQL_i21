@@ -142,7 +142,7 @@ BEGIN
 			currencyExchange.strCurrencyExchangeRateType, 
 			voucherDetail.intAccountId
 		FROM dbo.tblAPBillDetail voucherDetail
-		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucher.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
 		WHERE voucherDetail.intBillId = voucher.intBillId
 	) Details
 
