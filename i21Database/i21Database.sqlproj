@@ -5435,6 +5435,8 @@
     <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
     <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
     <Build Include="dbo\Tables\tblSMActivitySource.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPrepayGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostVoucherPrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
