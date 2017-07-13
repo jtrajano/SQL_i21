@@ -12,3 +12,10 @@
 
 
 
+
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [tblCFHost_UniqueNetworkHost]
+    ON [dbo].[tblCFHost]([intNetworkId] ASC, [strHostNumber] ASC);
+

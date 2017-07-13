@@ -1,7 +1,4 @@
-﻿
-
-
-CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
+﻿CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
 
  @CFItemId				INT    
 ,@CFCustomerId			INT     
@@ -1784,6 +1781,18 @@ BEGIN
 				SET @CFPricingOut = 'Price Profile' 
 				RETURN 1;    
 			END
+		ELSE IF(@CFPriceBasis = 'Transfer Cost')
+			BEGIN
+				IF(@CFTransferCost IS NOT NULL)
+					BEGIN
+						SET @CFPriceOut = @CFTransferCost + @Rate
+						SET @CFPricingOut = 'Price Profile' 
+						RETURN 1;    
+					END
+					
+				SET @CFPricingOut = 'Price Profile' 
+				RETURN 1;   
+		END
 		ELSE IF(@CFPriceBasis IS NOT NULL)
 			BEGIN 
 				--SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 

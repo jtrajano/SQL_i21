@@ -71,7 +71,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -133,6 +133,20 @@ BEGIN
 			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 			' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 		END
+		ELSE IF (UPPER(@Condition) = 'GREATER THAN')
+		BEGIN
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+			END
+		END
+		ELSE IF (UPPER(@Condition) = 'LESS THAN')
+		BEGIN
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+			END
+		END
 
 		SET @From = ''
 		SET @To = ''
@@ -162,6 +176,37 @@ BEGIN
 		SET @To = ''
 		SET @Condition = ''
 		SET @Fieldname = ''
+
+
+		DECLARE @ysnReprintInvoice NVARCHAR(MAX)
+		SELECT TOP 1
+			 @ysnReprintInvoice = [from]
+		FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
+
+		DECLARE @InvoiceDate NVARCHAR(MAX)
+		SELECT TOP 1
+			 @InvoiceDate = [from]
+		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
+
+
+		DECLARE @CustomerName NVARCHAR(MAX)
+		DECLARE @CustomerNameValue NVARCHAR(MAX)
+		SELECT TOP 1
+			 @CustomerName = [from]
+			,@CustomerNameValue = [fieldname]
+		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
+
+
+		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
+		BEGIN
+			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strInvoiceReportNumber IS NOT NULL AND strInvoiceReportNumber != '''' )'
+			IF (ISNULL(@CustomerName,'') != '')
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' + 
+				' (' + @CustomerNameValue  + ' = ' + '''' + @CustomerName + '''' + ' )' END
+			END
+		END
+
 
 		EXEC('
 		INSERT INTO tblCFInvoiceSummaryTempTable

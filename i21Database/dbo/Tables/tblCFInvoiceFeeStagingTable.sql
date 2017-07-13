@@ -12,14 +12,16 @@
     [dblQuantity]            NUMERIC (18, 6) NULL,
     [dblFeeAmount]           NUMERIC (18, 6) NULL,
     [dblFeeTotalAmount]      NUMERIC (18, 6) NULL,
-    [strFeeDescription]      NVARCHAR (MAX)  NULL,
-    [strFee]                 NVARCHAR (MAX)  NULL,
-    [strInvoiceFormat]       NVARCHAR (MAX)  NULL,
-    [strInvoiceReportNumber] NVARCHAR (MAX)  NULL,
-    [strCalculationType]     NVARCHAR (MAX)  NULL,
+    [strFeeDescription]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strFee]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceFormat]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceReportNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strCalculationType]     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmTransactionDate]     DATETIME        NULL,
     [dtmInvoiceDate]         DATETIME        NULL,
     [dtmStartDate]           DATETIME        NULL,
     [dtmEndDate]             DATETIME        NULL
 );
+
+
 
