@@ -5434,6 +5434,7 @@
     <Build Include="dbo\Stored Procedures\uspCMUpdateEFTNextNo.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
     <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
+    <Build Include="dbo\Tables\tblSMActivitySource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5564,6 +5565,7 @@
     <None Include="Scripts\Post-Deployment\CT\172To173.sql" />
     <None Include="Scripts\Post-Deployment\IC\20_UpdateContractItemStatuses.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\26_ActivitySource.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
