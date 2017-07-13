@@ -7,7 +7,7 @@
 RETURNS @returntable TABLE
 (
 	[dtmDate]                   DATETIME         NOT NULL,
-	[strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL DEFAULT @batchId,
+	[strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
 	[intAccountId]              INT              NULL,
 	[dblDebit]                  NUMERIC (18, 6)  NULL,
 	[dblCredit]                 NUMERIC (18, 6)  NULL,
@@ -23,8 +23,8 @@ RETURNS @returntable TABLE
 	[strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL DEFAULT 'Posted Vendor Prepayment',
 	[intJournalLineNo]			INT              NULL,
 	[ysnIsUnposted]             BIT              NOT NULL DEFAULT 0,    
-	[intUserId]                 INT              NULL DEFAULT @userId,
-	[intEntityId]				INT              NULL DEFAULT @userId,
+	[intUserId]                 INT              NULL,
+	[intEntityId]				INT              NULL,
 	[strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
 	[intTransactionId]          INT              NULL,
 	[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL DEFAULT 'Vendor Prepayment',
@@ -45,6 +45,7 @@ BEGIN
 	
 	INSERT INTO @returntable (
 		[dtmDate]                   ,
+		[strBatchId]				,
 		[intAccountId]              ,
 		[dblDebit]                  ,
 		[dblCredit]                 ,
@@ -56,6 +57,8 @@ BEGIN
 		[dblExchangeRate]           ,
 		[dtmTransactionDate]        ,
 		[intJournalLineNo]			,
+		[intUserId]                 ,
+		[intEntityId]				,
 		[strTransactionId]          ,
 		[intTransactionId]          ,
 		[dblDebitForeign]           ,
@@ -68,6 +71,7 @@ BEGIN
 	)
 	SELECT
 		[dtmDate]                   =	DATEADD(dd, DATEDIFF(dd, 0, voucher.dtmDate), 0),
+		[strBatchId]				=	@batchId,
 		[intAccountId]              =	voucher.intAccountId,
 		[dblDebit]                  =	0,
 		[dblCredit]                 =	CAST(Details.dblTotal * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
@@ -79,6 +83,8 @@ BEGIN
 		[dblExchangeRate]           =	1,
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	1,
+		[intUserId]                 =	@userId,
+		[intEntityId]				=	@userId,
 		[strTransactionId]          =	voucher.strBillId,
 		[intTransactionId]          =	voucher.intBillId,
 		[dblDebitForeign]           =	0,
@@ -95,12 +101,13 @@ BEGIN
 	(
 		SELECT (voucherDetail.dblTotal + voucherDetail.dblTax) AS dblTotal , voucherDetail.dblRate AS dblRate, currencyExchange.strCurrencyExchangeRateType
 		FROM dbo.tblAPBillDetail voucherDetail
-		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucher.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
 		WHERE voucherDetail.intBillId = voucher.intBillId
 	) Details
 	UNION ALL
 	SELECT
 		[dtmDate]                   =	DATEADD(dd, DATEDIFF(dd, 0, voucher.dtmDate), 0),
+		[strBatchId]				=	@batchId,
 		[intAccountId]              =	Details.intAccountId,
 		[dblDebit]                  =	CAST(Details.dblTotal * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblCredit]                 =	0,
@@ -112,6 +119,8 @@ BEGIN
 		[dblExchangeRate]           =	1,
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	Details.intBillDetailId,
+		[intUserId]                 =	@userId,
+		[intEntityId]				=	@userId,
 		[strTransactionId]          =	voucher.strBillId,
 		[intTransactionId]          =	voucher.intBillId,
 		[dblDebitForeign]           =	(CASE WHEN ISNULL(NULLIF(Details.dblRate,0),1) != 1 THEN Details.dblTotal ELSE 0 END),
