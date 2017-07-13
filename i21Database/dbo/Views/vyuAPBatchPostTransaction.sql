@@ -44,3 +44,18 @@ FROM tblAPBill
 WHERE intTransactionType = 3
   AND ISNULL(ysnPosted, 0) = 0
   AND intTransactionType != 6
+  UNION ALL
+SELECT 'Vendor Prepayment' AS strTransactionType,
+       intBillId,
+       strBillId,
+       dblTotal,
+       strVendorOrderNumber,
+       intEntityVendorId,
+       intEntityId,
+       dtmDate,
+       strComment AS strReference,
+       NULL AS intCompanyLocationId
+FROM tblAPBill
+WHERE intTransactionType = 2
+  AND ISNULL(ysnPosted, 0) = 0
+  AND intTransactionType != 6
