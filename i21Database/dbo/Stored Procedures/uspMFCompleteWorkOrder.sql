@@ -2,9 +2,12 @@
 	@strXML NVARCHAR(MAX)
 	,@strOutputLotNumber NVARCHAR(50) = '' OUTPUT
 	,@intParentLotId INT = 0 OUTPUT
-	)
+	,@dtmCurrentDate DATETIME = NULL 
+)
 AS
 BEGIN TRY
+	SET @dtmCurrentDate = ISNULL(@dtmCurrentDate, GETDATE()) 
+
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
@@ -33,7 +36,7 @@ BEGIN TRY
 		,@intExecutionOrder INT
 		,@dblInputWeight NUMERIC(38, 20)
 		,@intBatchId INT
-		,@dtmCurrentDate DATETIME
+		--,@dtmCurrentDate DATETIME
 		,@intSubLocationId INT
 		,@ysnNegativeQtyAllowed BIT
 		,@ysnSubLotAllowed BIT
@@ -222,9 +225,7 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	SELECT @dtmCurrentDate = GetDate()
-
-	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
+	SELECT @dtmBusinessDate = ISNULL(dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId), GETDATE()) 
 
 	SELECT @intBusinessShiftId = intShiftId
 	FROM dbo.tblMFShift

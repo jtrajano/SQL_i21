@@ -377,6 +377,7 @@ BEGIN TRY
 								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Location'
 									THEN NULL
 								END)
+		, HeaderDistItem.dtmInvoiceDateTime
 	INTO #tmpBlendDistributionItems
 	FROM tblTRLoadDistributionDetail DistItem
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
@@ -393,6 +394,7 @@ BEGIN TRY
 		, dblUnits
 		, Recipe.intItemUOMId
 		, HeaderDistItem.intCompanyLocationId
+		, HeaderDistItem.dtmInvoiceDateTime
 
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpBlendDistributionItems) AND @ysnRecap = 0
 	BEGIN
@@ -404,6 +406,7 @@ BEGIN TRY
 			, @Qty NUMERIC(18, 6)
 			, @QtyBlended NUMERIC(18, 6)
 			, @ActualCost NVARCHAR(20)
+			, @dtmInvoiceDateTime DATETIME 
 
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
 		BEGIN
@@ -414,6 +417,7 @@ BEGIN TRY
 				, @LocationId = intCompanyLocationId
 				, @Qty = dblQty
 				, @ActualCost = strActualCost
+				, @dtmInvoiceDateTime = dtmInvoiceDateTime
 			FROM #tmpBlendDistributionItems
 
 			IF (@ysnPostOrUnPost = 1)
@@ -431,6 +435,7 @@ BEGIN TRY
 					, @intUserId = @intUserId
 					, @strActualCost = @ActualCost
 					, @dblMaxQtyToProduce = @QtyBlended OUTPUT
+					, @dtmDate = @dtmInvoiceDateTime
 				
 				IF (@Qty <> @QtyBlended)
 				BEGIN
