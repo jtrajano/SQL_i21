@@ -51,6 +51,8 @@ BEGIN TRY
 		,@strBarcodeLabel2 NVARCHAR(MAX)
 		,@strBarcode3 NVARCHAR(MAX)
 		,@strBarcodeLabel3 NVARCHAR(MAX)
+		,@intInventoryShipmentId INT
+		,@strGTINNumber NVARCHAR(50)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -109,6 +111,7 @@ BEGIN TRY
 		FROM @tblMFGenerateSSNo
 
 		SELECT @intEntityCustomerId = S.intEntityCustomerId
+			,@intInventoryShipmentId = S.intInventoryShipmentId
 		FROM tblMFOrderManifest OM
 		JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 		JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
@@ -134,6 +137,16 @@ BEGIN TRY
 		WHERE intOwnerId = @intEntityCustomerId
 			AND intCustomerLabelTypeId = @intCustomerLabelTypeId
 
+		SELECT TOP 1 @strGTINNumber = FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'GTIN Number'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = @intInventoryShipmentId
+
 		WHILE @intOrderManifestId IS NOT NULL
 		BEGIN
 			SELECT @strSSCCNo = ''
@@ -153,16 +166,16 @@ BEGIN TRY
 					,@strBarcodeLabel3 = ''
 
 				-- Bar Code 1
-				SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + '0' + I.strGTIN + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(ISNULL((I.intLayerPerPallet * I.intUnitPerLayer), 0))
-					,@strBarcode1 = REPLACE(REPLACE(@strGS1SpecialCode + @strFirstBarcodeStart + '0' + I.strGTIN + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(ISNULL((I.intLayerPerPallet * I.intUnitPerLayer), 0)), '(', ''), ')', '')
+				SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0)))
+					,@strBarcode1 = REPLACE(REPLACE(@strGS1SpecialCode + @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0))), '(', ''), ')', '')
 				FROM tblMFOrderManifest OM
 				JOIN tblICLot L ON L.intLotId = OM.intLotId
 				JOIN tblICItem I ON I.intItemId = L.intItemId
 				WHERE OM.intOrderManifestId = @intOrderManifestId
 
 				-- Bar Code 2
-				SELECT @strBarcodeLabel2 = @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString]((L.dblWeight + ISNULL(WPL.dblTareWeight, 0)), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](L.dblWeight, 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits)
-					,@strBarcode2 = REPLACE(REPLACE(@strGS1SpecialCode + @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString]((L.dblWeight + ISNULL(WPL.dblTareWeight, 0)), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](L.dblWeight, 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits), '(', ''), ')', '')
+				SELECT @strBarcodeLabel2 = @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits)
+					,@strBarcode2 = REPLACE(REPLACE(@strGS1SpecialCode + @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits), '(', ''), ')', '')
 				FROM tblMFOrderManifest OM
 				JOIN tblICLot L ON L.intLotId = OM.intLotId
 				JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -198,7 +211,12 @@ BEGIN TRY
 	SELECT LTRIM(RTRIM(CASE 
 					WHEN ISNULL(CL.strLocationName, '') = ''
 						THEN ''
-					ELSE CL.strLocationName + CHAR(13)
+					ELSE (
+							IsNULL((
+									SELECT TOP 1 strFromLocation
+									FROM tblMFReportLidlUCCPalletLabel
+									), CL.strLocationName)
+							) + CHAR(13)
 					END + CASE 
 					WHEN ISNULL(CL.strAddress, '') = ''
 						THEN ''
@@ -220,27 +238,24 @@ BEGIN TRY
 						THEN ''
 					ELSE CL.strCountry
 					END)) AS strFromShipment
-		,I.strDescription
-		,I.strGTIN AS strOrderGTIN
-		,ISNULL((I.intLayerPerPallet * I.intUnitPerLayer), 0) AS intCasesPerPallet
+		,I.strDescription + ' ' + CHAR(13) + ISNULL(I.strShortName, '') AS strDescription
+		,IsNULL((
+				SELECT TOP 1 FV.strValue
+				FROM tblSMTabRow TR
+				JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+				JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+					AND LOWER(TD.strControlName) = 'GTIN Number'
+				JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+				JOIN tblSMScreen S1 ON S1.intScreenId = T.intScreenId
+					AND S1.strNamespace = 'Inventory.view.InventoryShipment'
+				WHERE T.intRecordId = S.intInventoryShipmentId
+				), I.strGTIN) AS strOrderGTIN
+		,Convert(NUMERIC(18, 0), ISNULL(LOT.dblQty, 0)) AS intCasesPerPallet
 		,I.intInnerUnits AS intUnitsPerCase
-		,(
-			SELECT CONVERT(VARCHAR(10), dtmExpiryDate, 101)
-			FROM tblICLot LOT
-			WHERE LOT.intLotId = OM.intLotId
-			) AS dtmExpiryDate
-		,(
-			SELECT dblWeight
-			FROM tblICLot LOT
-			WHERE LOT.intLotId = OM.intLotId
-			) AS dblNetWeight
-		,(
-			SELECT LOT.dblWeight + ISNULL(WPL.dblTareWeight, 0)
-			FROM tblICLot LOT
-			LEFT JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = LOT.intLotId
-			WHERE LOT.intLotId = OM.intLotId
-			) AS dblGrossWeight
-		,REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', '') AS strSSCCNo -- check with prem
+		,CONVERT(VARCHAR(10), LOT.dtmExpiryDate, 101) AS dtmExpiryDate
+		,Convert(NUMERIC(18, 0), LOT.dblQty * I.dblWeight) AS dblNetWeight
+		,Convert(NUMERIC(18, 0), LOT.dblQty * I.dblUnitPerCase) AS dblGrossWeight
+		,REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', '') AS strSSCCNo
 		,OML.strBarcodeLabel1
 		,OML.strBarcode1
 		,OML.strBarcodeLabel2
@@ -255,6 +270,7 @@ BEGIN TRY
 	JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentId = S.intInventoryShipmentId
 	JOIN tblICItem I ON I.intItemId = SI.intItemId
 		AND I.intItemId = OD.intItemId
+	JOIN tblICLot LOT ON LOT.intLotId = OM.intLotId
 	JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
 		AND OML.ysnPrinted = 0
 		AND OML.intCustomerLabelTypeId = @intCustomerLabelTypeId
