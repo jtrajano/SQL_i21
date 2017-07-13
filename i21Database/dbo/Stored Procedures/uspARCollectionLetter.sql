@@ -1097,7 +1097,7 @@ BEGIN
 		@strCompanyEmail		NVARCHAR(200)
 
 	SELECT TOP 1 
-		@strCompanyName		= @strCompanyName, 
+		@strCompanyName		= strCompanyName, 
 		@strCompanyAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL),
 		@strCompanyPhone	= strPhone,
 		@strCompanyFax		= strFax,
