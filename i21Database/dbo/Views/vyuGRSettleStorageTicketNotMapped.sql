@@ -4,7 +4,7 @@ SELECT
   S.intSettleStorageId
  ,T.intSettleStorageTicketId
  ,T.intCustomerStorageId
- ,CASE WHEN V.dblOpenBalance < T.dblUnits THEN V.dblOpenBalance ELSE T.dblUnits END AS dblUnits
+ ,T.dblUnits AS dblUnits
  ,V.dblOpenBalance
  ,V.strStorageTicketNumber
  ,V.intCompanyLocationId
@@ -19,4 +19,4 @@ SELECT
  ,V.dblStorageUnPaid 
 FROM tblGRSettleStorage S
 JOIN tblGRSettleStorageTicket T ON T.intSettleStorageId=S.intSettleStorageId
-JOIN vyuGRGetStorageTransferTicket V ON V.intCustomerStorageId=T.intCustomerStorageId  
+JOIN vyuGRStorageSearchView V ON V.intCustomerStorageId=T.intCustomerStorageId  
