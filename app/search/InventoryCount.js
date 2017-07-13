@@ -15,13 +15,21 @@ Ext.define('Inventory.search.InventoryCount', {
                 { dataIndex: 'strLocationName', text: 'Location', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCategory', text: 'Category', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCommodity', text: 'Commodity', flex: 1, dataType: 'string' },
-                { dataIndex: 'ysnCountByGroup', xtype: 'checkcolumn', text: 'Count by Group', dataType: 'boolean' },
+                { dataIndex: 'strCountBy', text: 'Count By', dataType: 'string' },
                 { dataIndex: 'strShiftNo', text: 'Shift No', dataType: 'string' },
                 { dataIndex: 'strCountGroup', text: 'Count Group', flex: 1, dataType: 'string' },
                 { dataIndex: 'dtmCountDate', text: 'Count Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
                 { dataIndex: 'strSubLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
                 { dataIndex: 'strStorageLocationName', text: 'Storage Unit', flex: 1, dataType: 'string' },
-                { dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string' }
+                { dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string' },
+                { dataIndex: 'ysnCountByLots', text: 'Count By Lots', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                { dataIndex: 'ysnCountByPallets', text: 'Count By Pallets', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                { dataIndex: 'ysnRecount', text: 'Recount', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                { dataIndex: 'ysnExternal', text: 'External', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                { dataIndex: 'ysnRecountMismatch', text: 'Recount Mismatch', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                { dataIndex: 'ysnScannedCountEntry', text: 'Scanned Count Entry', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                { dataIndex: 'ysnIncludeOnHand', text: 'Include On Hand', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                { dataIndex: 'ysnIncludeZeroOnHand', text: 'Include Zero On Hand', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
             ],
             buttons: [
                 {

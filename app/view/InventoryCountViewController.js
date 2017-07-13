@@ -83,7 +83,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             txtCountNumber: '{current.strCountNo}',
             txtShiftCountNo: {
                 value: '{current.strShiftNo}',
-                hidden: '{!current.ysnCountByGroup}'
+                hidden: '{!hasCountGroup}'
             },
             cboSubLocation: {
                 value: '{current.strSubLocation}',
@@ -136,9 +136,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 value: '{current.ysnScannedCountEntry}',
                 hidden: '{hasCountGroup}'
             },
-            chkCountByGroup: {
+            cboCountBy: {
+                store: '{countBy}',
                 value: '{countByGroup}'
             },
+
             chkCountByLots: {
                 value: '{current.ysnCountByLots}',
                 hidden: '{hasCountGroup}'
@@ -836,13 +838,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         store.sync();
     },
 
-    onCountByGroupChange: function(field, newValue, oldValue, eOpts) {
+    onCountBySelect: function(field, record) {
         var win = field.up('window');
         var vm = win.getViewModel();
         var current = vm.get('current');
         var grid = win.down("grid");
         var store = grid.getStore();
-        if(!newValue) {
+        if(record.get('strName') === 'Pack') {
             var records = store.getRange(0, store.getTotalCount());
             _.each(records, function(r) {
                 r.set('strCountGroup', null);
@@ -895,7 +897,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     ysnCountByLots: current.get('ysnCountByLots')
                 };
 
-                if(current.get('ysnCountByGroup')) {
+                if(current.get('strCountBy') === 'Pack') {
                     resource = "UpdateShiftCountDetails";
                     requestParams = {
                         intInventoryCountId: current.get('intInventoryCountId'),
@@ -917,7 +919,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 }, function(failed) {
                     win.setLoading(false);    
                     var json = JSON.parse(failed.responseText);
-                    iRely.Functions.showCustomDialog('question', 'yesno', json.message, callback);
+                    iRely.Functions.showCustomDialog('question', 'yesno', json.message, function() {
+                        
+                    });
                 });
             }
         } });
@@ -1630,8 +1634,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             "#btnAttachNewRow": {
                 click: this.onAttachNewRow
             },
-            "#chkCountByGroup": {
-                change: this.onCountByGroupChange
+            "#cboCountBy": {
+                select: this.onCountBySelect
             }
         });
     }

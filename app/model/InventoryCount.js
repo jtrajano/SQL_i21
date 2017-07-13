@@ -27,7 +27,7 @@ Ext.define('Inventory.model.InventoryCount', {
         { name: 'ysnIncludeOnHand', type: 'boolean' },
         { name: 'ysnScannedCountEntry', type: 'boolean' },
         { name: 'ysnCountByLots', type: 'boolean' },
-        { name: 'ysnCountByGroup', type: 'boolean' },
+        { name: 'strCountBy', type: 'string', defaultValue: 'Item' },
         { name: 'ysnCountByPallets', type: 'boolean' },
         { name: 'ysnRecountMismatch', type: 'boolean' },
         { name: 'ysnExternal', type: 'boolean' },

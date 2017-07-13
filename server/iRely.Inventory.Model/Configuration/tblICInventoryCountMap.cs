@@ -26,7 +26,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnIncludeOnHand).HasColumnName("ysnIncludeOnHand");
             this.Property(t => t.ysnScannedCountEntry).HasColumnName("ysnScannedCountEntry");
             this.Property(t => t.ysnCountByLots).HasColumnName("ysnCountByLots");
-            this.Property(t => t.ysnCountByGroup).HasColumnName("ysnCountByGroup");
+            this.Property(t => t.strCountBy).HasColumnName("strCountBy");
             this.Property(t => t.ysnCountByPallets).HasColumnName("ysnCountByPallets");
             this.Property(t => t.ysnRecountMismatch).HasColumnName("ysnRecountMismatch");
             this.Property(t => t.ysnExternal).HasColumnName("ysnExternal");
@@ -112,7 +112,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnIncludeOnHand).HasColumnName("ysnIncludeOnHand");
             this.Property(t => t.ysnScannedCountEntry).HasColumnName("ysnScannedCountEntry");
             this.Property(t => t.ysnCountByLots).HasColumnName("ysnCountByLots");
-            this.Property(t => t.ysnCountByGroup).HasColumnName("ysnCountByGroup");
+            this.Property(t => t.strCountBy).HasColumnName("strCountBy");
             this.Property(t => t.ysnCountByPallets).HasColumnName("ysnCountByPallets");
             this.Property(t => t.ysnRecountMismatch).HasColumnName("ysnRecountMismatch");
             this.Property(t => t.ysnExternal).HasColumnName("ysnExternal");

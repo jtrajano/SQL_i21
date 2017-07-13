@@ -30,7 +30,7 @@ namespace iRely.Inventory.Model
         public bool? ysnIncludeOnHand { get; set; }
         public bool? ysnScannedCountEntry { get; set; }
         public bool? ysnCountByLots { get; set; }
-        public bool? ysnCountByGroup { get; set; }
+        public string strCountBy { get; set; }
         public bool? ysnCountByPallets { get; set; }
         public bool? ysnRecountMismatch { get; set; }
         public bool? ysnExternal { get; set; }
@@ -493,7 +493,7 @@ namespace iRely.Inventory.Model
         public bool? ysnIncludeOnHand { get; set; }
         public bool? ysnScannedCountEntry { get; set; }
         public bool? ysnCountByLots { get; set; }
-        public bool? ysnCountByGroup { get; set; }
+        public string strCountBy { get; set; }
         public bool? ysnCountByPallets { get; set; }
         public bool? ysnRecountMismatch { get; set; }
         public bool? ysnExternal { get; set; }

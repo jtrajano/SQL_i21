@@ -45,7 +45,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
     formulas: {
         isCountByGroup: function(get) {
             var count = get('inventoryCount');
-            return count && count.get('ysnCountByGroup');
+            return count && count.get('strCountBy') === 'Pack';
         }
     }
 });

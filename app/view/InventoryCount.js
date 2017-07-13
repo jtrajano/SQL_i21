@@ -475,9 +475,11 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     },
                                                     items: [
                                                         {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkCountByGroup',
-                                                            fieldLabel: 'Count by Group'
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboCountBy',
+                                                            fieldLabel: 'Count By',
+                                                            displayField: 'strName',
+                                                            valueField: 'strName'
                                                         },
                                                         {
                                                             xtype: 'gridcombobox',

@@ -17,32 +17,33 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                         value: '{inventoryCount.intLocationId}'
                     }
                 ],
-                hidden: '{inventoryCount.ysnCountByGroup}'
+                hidden: '{isCountByGroup}'
             },
+            
             cboCountGroup: {
                 store: '{countGroup}',
                 value: '{current.strCountGroup}',
                 origValueField: 'intCountGroupId',
-                hidden: '{!inventoryCount.ysnCountByGroup}'
+                hidden: '{!isCountByGroup}'
             },
             txtDescription: {
                 value: '{current.strItemDescription}',
-                hidden: '{inventoryCount.ysnCountByGroup}'
+                hidden: '{isCountByGroup}'
             },
             txtQtyReceived: {
                 value: '{current.dblQtyReceived}'   ,
-                hidden: '{!inventoryCount.ysnCountByGroup}'
+                hidden: '{!isCountByGroup}'
             },
             txtQtySold: {
                 value: '{current.dblQtySold}'   ,
-                hidden: '{!inventoryCount.ysnCountByGroup}'
+                hidden: '{!isCountByGroup}'
             },
             cboStorageLocation: {
                 store: '{storageLocations}',
                 value: '{current.strSubLocationName}',
                 origValueField: 'intSubLocationId',
                 origUpdateField: 'intSubLocationId',
-                hidden: '{inventoryCount.ysnCountByGroup}',
+                hidden: '{isCountByGroup}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -65,7 +66,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{storageUnits}',
                 value: '{current.strStorageLocationName}',
                 origValueField: 'intStorageLocationId',
-                hidden: '{inventoryCount.ysnCountByGroup}',
+                hidden: '{isCountByGroup}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -88,7 +89,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{lots}',
                 value: '{current.strLotNo}',
                 origValueField: 'intLotId',
-                hidden: '{inventoryCount.ysnCountByGroup}',
+                hidden: '{isCountByGroup}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -116,7 +117,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{itemUOMs}',
                 value: '{current.strUOM}',
                 origValueField: 'intItemUOMId',
-                hidden: '{inventoryCount.ysnCountByGroup}',
+                hidden: '{isCountByGroup}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -138,14 +139,14 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             },
             txtCategory: {
                 value: '{current.strCategory}',
-                hidden: '{inventoryCount.ysnCountByGroup}'
+                hidden: '{isCountByGroup}'
             },
             txtSystemCount: {
                 value: '{current.dblSystemCount}'
             },
             txtCost: {
                 value: '{current.dblLastCost}',
-                hidden: '{inventoryCount.ysnCountByGroup}'
+                hidden: '{isCountByGroup}'
             },
             txtVariance: {
                 value: '{current.dblVariance}'
@@ -156,15 +157,15 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             txtPhysicalCount: '{current.dblPhysicalCount}',
             txtPhysicalCountInStockUnit: {
                 value: '{current.dblPhysicalCountStockUnit}',
-                hidden: '{inventoryCount.ysnCountByGroup}'
+                hidden: '{isCountByGroup}'
             },
             txtLotAlias: {
                 value: '{current.strLotAlias}',
-                hidden: '{inventoryCount.ysnCountByGroup}'
+                hidden: '{isCountByGroup}'
             },
             chkRecount: {
                 value: '{current.ysnRecount}',
-                hidden: '{inventoryCount.ysnCountByGroup}'
+                hidden: '{isCountByGroup}'
             },
             lblEnteredBy: '{current.strUserName}'
         }
@@ -245,7 +246,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             valid = true,
             message = "";
 
-        if(!vm.get('inventoryCount.ysnCountByGroup')) {
+        if(!vm.get('inventoryCount.strCountBy') === 'Pack') {
             if (!vm.get('current.intItemId')) {
                 valid = false;
                 message = "Please select an item.";

@@ -23,6 +23,18 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
     },
 
     stores: {
+        countBy: {
+            fields: [{ name: 'strName' }],
+            autoLoad: true,
+            data: [
+                {
+                    strName: 'Item'
+                },
+                {
+                    strName: 'Pack'
+                }
+            ]
+        },
         location: {
             type: 'companylocationbuffered'
         },
@@ -141,14 +153,14 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
         hidePostButton: function(get) {
             var posted = get('current.ysnPosted');
-            if (get('current.intStatus') === 3 || get('current.intStatus') === 4 || get('current.ysnCountByGroup')) {
+            if (get('current.intStatus') === 3 || get('current.intStatus') === 4 || get('current.strCountBy') === 'Pack') {
                 return true;
             }
             else return posted;
         },
         hideUnpostButton: function (get) {
             var posted = get('current.ysnPosted');
-            if (get('current.intStatus') === 4 && !get('current.ysnCountByGroup')) {
+            if (get('current.intStatus') === 4 && get('current.strCountBy') !== 'Pack') {
                 return false;
             }
             else return true;
@@ -173,7 +185,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             else return 'Post';
         },
         disableCountGridFields: function (get) {
-            if((iRely.Functions.isEmpty(get('grdPhysicalCount.selection.strItemNo')) && !get('current.ysnCountByGroup')) || get('current.ysnPosted')) {
+            if((iRely.Functions.isEmpty(get('grdPhysicalCount.selection.strItemNo')) && get('current.strCountBy') !== 'Pack') || get('current.ysnPosted')) {
                 return true;
             }
             else {
@@ -187,15 +199,15 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                 return false;
         },
         hasCountGroup: function (get) {
-            return get('current.ysnCountByGroup');
+            return get('current.strCountBy') === 'Pack';
         },
         countByGroup: {
             get: function(get) {
-                return get('current.ysnCountByGroup');
+                return get('current.strCountBy');
             },
 
             set: function(value) {
-                if(value) {
+                if(value === 'Pack') {
                     this.set('current.ysnCountByLots', false);
                     this.set('current.ysnExternal', false);
                     this.set('current.ysnRecountMismatch', false);
@@ -204,16 +216,18 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                     this.set('current.ysnIncludeZeroOnHand', false);
                     this.set('current.ysnIncludeOnHand', false);
                 }
-                this.set('current.ysnCountByGroup', value);
+                this.set('current.strCountBy', value);
             }
         },
         getFetchText: function(get) {
             //return (get('hasCountGroup')) ? "Refresh" : "Fetch";
-            return "Fetch";
+            //return "Fetch";
+            return 'Refresh';
         },
         getFetchIconCls: function(get) {
             //return (get('hasCountGroup')) ? "small-refresh-small" : "small-transfer";
-            return "small-transfer";
+            //return "small-transfer";
+            return 'small-refresh-small';
         },
     }
 

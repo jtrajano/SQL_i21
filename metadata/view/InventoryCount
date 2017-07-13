@@ -1013,21 +1013,22 @@
                                                     "designerId": "73079748-187b-49db-ad91-19db84c667d5",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.form.field.Checkbox",
+                                                            "type": "Ext.form.field.ComboBox",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Count by Group",
-                                                                "itemId": "chkCountByGroup",
+                                                                "displayField": "strName",
+                                                                "fieldLabel": "Count By",
+                                                                "itemId": "cboCountBy",
                                                                 "layout|flex": null,
-                                                                "margin": null
+                                                                "store": null,
+                                                                "valueField": "strName"
                                                             },
-                                                            "name": "MyCheckbox2",
-                                                            "designerId": "656a7efc-ac70-49cf-928b-6b73ae08c40e"
+                                                            "name": "MyComboBox15",
+                                                            "designerId": "d0fdf62a-00b2-49ff-8bc8-8e269195e90e"
                                                         },
                                                         {
                                                             "type": "Ext.form.field.ComboBox",
