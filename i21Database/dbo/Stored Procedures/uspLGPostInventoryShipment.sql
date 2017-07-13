@@ -646,7 +646,7 @@ BEGIN
 			
 	EXEC	dbo.uspSMAuditLog 
 			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Shipment. 
-			,@screenName = 'Inventory.view.InventoryShipment'       -- Screen Namespace
+			,@screenName = 'Logistics.view.ShipmentSchedule'       -- Screen Namespace
 			,@entityId = @intEntityUserSecurityId				    -- Entity Id.
 			,@actionType = @actionType                              -- Action Type
 			,@changeDescription = @strDescription					-- Description

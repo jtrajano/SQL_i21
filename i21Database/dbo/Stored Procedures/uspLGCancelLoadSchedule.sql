@@ -15,6 +15,7 @@ BEGIN TRY
 	DECLARE @intExternalId INT
 	DECLARE @strScreenName NVARCHAR(100)
 	DECLARE @intLoadShippingInstructionId INT
+	DECLARE @strAuditLogActionType NVARCHAR(MAX)
 	DECLARE @tblLoadDetail TABLE (intLoadDetailRecordId INT Identity(1, 1)
 								 ,intLoadDetailId INT
 								 ,intContractDetailId INT
@@ -257,6 +258,23 @@ BEGIN TRY
 				,@intShipmentType = @intShipmentType
 		END
 	END
+
+	IF(ISNULL(@ysnCancel,0) = 1)
+	BEGIN
+		SET @strAuditLogActionType  = 'Cancel'
+	END 
+	ELSE 
+	BEGIN
+		SET @strAuditLogActionType  = 'Reverse Cancel'
+	END
+
+	EXEC uspSMAuditLog	
+			@keyValue	=	@intLoadId,
+			@screenName =	'Logistics.view.ShipmentSchedule',
+			@entityId	=	@intEntityUserSecurityId,
+			@actionType =	@strAuditLogActionType,
+			@actionIcon =	'small-tree-modified',
+			@details	=	''
 END TRY
 
 BEGIN CATCH

@@ -5432,6 +5432,8 @@
     <Build Include="dbo\Tables\tblHDTicketStatusWorkflow.sql" />
     <Build Include="dbo\Views\vyuHDTicketStatusWorkflowLink.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateEFTNextNo.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
+    <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

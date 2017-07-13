@@ -2,6 +2,7 @@ CREATE PROCEDURE [dbo].[uspLGUpdateInboundIntransitQty]
 	 @intLoadId AS INT
 	,@ysnInventorize AS BIT
 	,@ysnUnShip AS BIT	
+	,@intEntityUserSecurityId INT = NULL
 
 AS
 
@@ -16,6 +17,7 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @ErrMsg NVARCHAR(MAX);
 DECLARE @ysnDirectShip BIT;
+DECLARE @strAuditLogActionType NVARCHAR(MAX)
 
 DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType,
         @total as int;
@@ -79,6 +81,23 @@ BEGIN TRY
 	BEGIN
 			UPDATE tblLGLoad SET ysnPosted = 0, dtmPostedDate=NULL WHERE intLoadId = @intLoadId
 	END
+
+	IF(ISNULL(@ysnInventorize,0) = 1)
+	BEGIN
+		SET @strAuditLogActionType  = 'Posted'
+	END 
+	ELSE 
+	BEGIN
+		SET @strAuditLogActionType  = 'Unposted'
+	END
+
+	EXEC uspSMAuditLog	
+			@keyValue	=	@intLoadId,
+			@screenName =	'Logistics.view.ShipmentSchedule',
+			@entityId	=	@intEntityUserSecurityId,
+			@actionType =	@strAuditLogActionType,
+			@actionIcon =	'small-tree-modified',
+			@details	=	''
 
 END TRY
 BEGIN CATCH
