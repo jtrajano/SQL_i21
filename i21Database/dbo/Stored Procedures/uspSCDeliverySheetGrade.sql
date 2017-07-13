@@ -8,7 +8,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-IF OBJECT_ID (N'tempdb.dbo.##DeliverySheetGrade') IS NOT NULL
+IF OBJECT_ID (N'tempdb.dbo.#DeliverySheetGrade') IS NOT NULL
    DROP TABLE #DeliverySheetGrade
 
 DECLARE @strItemNo AS NVARCHAR(MAX)
