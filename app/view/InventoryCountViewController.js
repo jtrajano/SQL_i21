@@ -77,7 +77,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             cboCountGroup: {
                 value: '{current.strCountGroup}',
                 origValueField: 'intCountGroupId',
-                store: '{countGroup}'
+                store: '{countGroup}',
+                hidden: '{hasCountGroup}'
             },
             dtpCountDate: '{current.dtmCountDate}',
             txtCountNumber: '{current.strCountNo}',
@@ -920,7 +921,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     win.setLoading(false);    
                     var json = JSON.parse(failed.responseText);
                     iRely.Functions.showCustomDialog('question', 'yesno', json.message, function() {
-                        
+
                     });
                 });
             }
