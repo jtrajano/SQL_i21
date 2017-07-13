@@ -5440,6 +5440,7 @@
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetGrade.sql" />
     <Build Include="dbo\Tables\tblMFReportLidlUCCPalletLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnPostSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
