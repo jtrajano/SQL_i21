@@ -654,12 +654,14 @@ ORDER BY strGroup,PriceStatus,
   WHEN  strFutureMonth ='Total' THEN '01/01/9999'
  else CONVERT(DATETIME,'01 '+strFutureMonth) END
  
-
+ DECLARE @strAccountNumber nvarchar(max)
+ 
+ SELECT TOP 1 @strAccountNumber=strAccountNumber  from #temp where  strGroup='1.Outright Coverage' and PriceStatus='1.Priced / Outright - (Outright position)' order by intRowNumber
  INSERT INTO #temp
  SELECT DISTINCT '1.Outright Coverage',
 'Outright Coverage'	,
-'1.Priced / Outright - (Outright position)',strFutureMonth, 
-NULL, NULL, NULL, GETDATE(), NULL, NULL, NULL, NULL, NULL, NULL, NULL
+'1.Priced / Outright - (Outright position)',strFutureMonth, @strAccountNumber,
+ NULL, NULL, GETDATE(), NULL, NULL, NULL, NULL, NULL, NULL, NULL
 FROM #temp  WHERE strFutureMonth
  NOT IN (SELECT DISTINCT strFutureMonth FROM #temp WHERE strGroup = '1.Outright Coverage' AND PriceStatus = '1.Priced / Outright - (Outright position)')
 
