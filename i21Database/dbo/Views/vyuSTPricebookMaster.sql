@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuSTPricebookMaster]
 AS 
 SELECT        
- NEWID() as strPricebookMasterId
+ CAST(Cast(adj5.intCompanyLocationId AS NVARCHAR) + Cast(adj6.intItemUOMId AS NVARCHAR) + Cast(adj7.intItemId AS NVARCHAR) + Cast(adj2.intItemLocationId AS NVARCHAR) + Cast(adj1.intItemPricingId AS NVARCHAR) + Cast(adj8.intCategoryId AS NVARCHAR) AS BIGINT) AS intUniqueId
 , adj5.intCompanyLocationId
 , adj5.strLocationName
 , adj6.intItemUOMId
