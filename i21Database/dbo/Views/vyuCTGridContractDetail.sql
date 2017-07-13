@@ -37,7 +37,7 @@ AS
 			QA.dtmTestingEndDate,
 			QA.dblApprovedQty,
 			MA.strFutMarketName AS strFutureMarket,
-			REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ')') strFutureMonth,
+			REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') strFutureMonth,
 			CASE WHEN (SELECT COUNT(SA.intSpreadArbitrageId) FROM tblCTSpreadArbitrage SA  WHERE SA.intPriceFixationId = PF.intPriceFixationId) > 0
 			THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnSpreadAvailable, 
 			CASE WHEN intPFDCount > 0

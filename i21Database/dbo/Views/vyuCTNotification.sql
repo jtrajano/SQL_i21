@@ -21,7 +21,7 @@ AS
 				CD.strFutMarketName,	CD.strItemUOM,			CD.strLocationName,		CD.strPriceUOM,
 				CD.strCurrency,			CD.strFutureMonth,		CD.strStorageLocation,	CD.strSubLocation,
 				CD.strItemDescription,	CD.intContractDetailId,	CD.strProductType,		
-				dbo.fnCTGetBasisComponentString(CD.intContractDetailId) strBasisComponent,
+				BC.strBasisComponent,
 				CD.intContractStatusId,	CD.strContractItemName,	CD.strContractItemNo
 				
 		FROM	tblCTContractHeader			CH
@@ -157,9 +157,9 @@ AS
 				CH.strContractItemNo	
 
 		FROM	Header CH
-		JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId
+		JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId AND ysnMailSent = 0 AND TN.ysnOnceApproved = 1 --AND intContractStatusId = 1
 		JOIN	tblSMScreen			SN	ON	SN.intScreenId	=	TN.intScreenId AND SN.strNamespace IN ('ContractManagement.view.Contract', 'ContractManagement.view.Amendments')
-		WHERE	ysnMailSent = 0 AND TN.ysnOnceApproved = 1
+		WHERE	CH.intContractHeaderId IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 1)
 
 	)t
 
