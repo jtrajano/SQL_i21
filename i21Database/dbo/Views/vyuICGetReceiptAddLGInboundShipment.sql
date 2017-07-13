@@ -4,7 +4,7 @@ AS
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intLineNo) AS INT)
 , * 
 FROM (	
-	SELECT  
+	SELECT 
 		intLocationId				= LogisticsView.intCompanyLocationId
 		, intEntityVendorId			= LogisticsView.intEntityVendorId
 		, strVendorId				= LogisticsView.strVendor
@@ -58,16 +58,17 @@ FROM (
 		, dblFranchise				= LogisticsView.dblFranchise
 		, dblContainerWeightPerQty	= LogisticsView.dblContainerWeightPerQty
 		, ysnSubCurrency			= CAST(LogisticsView.ysnSubCurrency AS BIT)
-		, intCurrencyId				= dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
-		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
+		,intCurrencyId				= Currency.intCurrencyID
+		, strSubCurrency			= SubCurrency.strCurrency
 		, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
 		, LC.ysnRejected
 		, intForexRateTypeId		= CAST(NULL AS INT) -- Add dummy fields for the meantime. 
 		, strForexRateType			= currencyType.strCurrencyExchangeRateType -- Add dummy fields for the meantime. 
 		, dblForexRate				= CAST(NULL AS NUMERIC(18, 6)) -- Add dummy fields for the meantime. 
-	FROM vyuLGLoadContainerReceiptContracts LogisticsView
+	from vyuLGLoadContainerReceiptContracts LogisticsView
 		LEFT JOIN dbo.tblSMCurrency Currency ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
+		LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = Currency.intCurrencyID
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN dbo.tblICItemUOM GrossNetUOM ON LogisticsView.intWeightItemUOMId = GrossNetUOM.intItemUOMId
