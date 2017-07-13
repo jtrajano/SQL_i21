@@ -19,6 +19,7 @@
 		WHEN SCFormat.intTicketFormatSelection = 14 THEN '120mm Kiosk (Standard)'
 		WHEN SCFormat.intTicketFormatSelection = 15 THEN 'Full Sheet Kiosk'
 		WHEN SCFormat.intTicketFormatSelection = 16 THEN '80mm Kiosk (Narrow)'
+		WHEN SCFormat.intTicketFormatSelection = 17 THEN 'Combined Elevator Receipt'
 	END as strTicketFormatSelection
 	,SCFormat.ysnSuppressCompanyName
 	,SCFormat.ysnFormFeedEachCopy
