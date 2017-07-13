@@ -39,13 +39,12 @@ BEGIN
 	        SET @tempAddress = '';
 
 
-	SET @tempAddress = @tempAddress
-				 + ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
+	SET @tempAddress = @tempAddress				
 				 + ISNULL(RTRIM(@strEmail) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strLocationName) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strAddress) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strCity), '')
-			
+				 			
     --- Validate City if not null then it will concatenate the comma---
 	IF @strCity is Not Null
 	    SET @tempAddress = @tempAddress + ISNULL(', ' + RTRIM(@strState), '')
@@ -79,6 +78,11 @@ BEGIN
 						SET @tempAddress = @tempAddress + ISNULL('' + RTRIM(@strCountry), '')
 			   END
        END
+
+
+    --- Validate Phone No if not null then it will concatenate the comma---
+    IF @strPhone is Not Null
+	    SET @tempAddress =  ISNULL(RTRIM(@tempAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(@strPhone), '')
 
 	SET @fullAddress = @tempAddress
 
