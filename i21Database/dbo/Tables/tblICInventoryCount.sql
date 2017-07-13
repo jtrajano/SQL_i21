@@ -14,7 +14,7 @@
     [ysnIncludeOnHand] BIT NOT NULL DEFAULT ((0)), 
     [ysnScannedCountEntry] BIT NOT NULL DEFAULT ((0)), 
     [ysnCountByLots] BIT NOT NULL DEFAULT ((0)), 
-	[ysnCountByGroup] BIT NOT NULL DEFAULT ((0)), 
+	[strCountBy]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT(('Item')), 
     [ysnCountByPallets] BIT NOT NULL DEFAULT ((0)), 
     [ysnRecountMismatch] BIT NOT NULL DEFAULT ((0)), 
     [ysnExternal] BIT NOT NULL DEFAULT ((0)), 

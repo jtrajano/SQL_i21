@@ -21,7 +21,7 @@ SELECT InventoryCount.intInventoryCountId,
 	InventoryCount.ysnIncludeOnHand,
 	InventoryCount.ysnScannedCountEntry,
 	InventoryCount.ysnCountByLots,
-	InventoryCount.ysnCountByGroup,
+	InventoryCount.strCountBy,
 	InventoryCount.ysnCountByPallets,
 	InventoryCount.ysnRecountMismatch,
 	InventoryCount.ysnExternal,
@@ -42,4 +42,3 @@ FROM tblICInventoryCount InventoryCount
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InventoryCount.intCountGroupId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = InventoryCount.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = InventoryCount.intStorageLocationId
-
