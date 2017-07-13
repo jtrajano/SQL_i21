@@ -178,5 +178,5 @@ OUTER APPLY (
 WHERE CTCT.strContractType = 'Sale'
  AND (
 	(ID.intContractDetailId IS NULL AND CTPT.strPricingType NOT IN ('Unit','Index')) 
-	OR (ID.intContractDetailId IS NOT NULL AND CTPT.strPricingType IN ('Unit','Index'))
+	OR (ID.intContractDetailId IS NOT NULL)
  )
