@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnPATValidateAssociatedTransaction]
 (
 	@transactionIds NVARCHAR(MAX),
-	@type INT -- 1 = Issued Stock, 2 = Retired Stock, 3 = Equity Payment
+	@type INT -- 1 = Issued Stock, 2 = Retired Stock, 3 = Equity Payment, 4 = Voucher
 )
 RETURNS @returnTable TABLE
 (
@@ -11,12 +11,12 @@ RETURNS @returnTable TABLE
 	intTransactionId INT
 )
 BEGIN
-	DECLARE @tmpTransacions TABLE (
+	DECLARE @tmpTransactions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
 		UNIQUE (intTransactionId)
 	);
 
-	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
+	INSERT INTO @tmpTransactions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
 	IF(@type = 1)
 	BEGIN
@@ -28,7 +28,7 @@ BEGIN
 		FROM tblPATCustomerStock CS
 		INNER JOIN tblARInvoice ARI
 			ON ARI.intInvoiceId = CS.intInvoiceId
-		WHERE ARI.ysnPaid = 1 AND CS.strActivityStatus = 'Open' AND CS.intCustomerStockId IN (SELECT * FROM @tmpTransacions)
+		WHERE ARI.ysnPaid = 1 AND CS.strActivityStatus = 'Open' AND CS.intCustomerStockId IN (SELECT * FROM @tmpTransactions)
 	END
 	ELSE IF(@type = 2)
 	BEGIN
@@ -40,19 +40,31 @@ BEGIN
 		FROM tblPATCustomerStock CS
 		INNER JOIN tblAPBill APB
 			ON APB.intBillId = CS.intBillId
-		WHERE APB.ysnPaid = 1 AND CS.strActivityStatus = 'Retired' AND CS.intCustomerStockId IN (SELECT * FROM @tmpTransacions)
+		WHERE APB.ysnPaid = 1 AND CS.strActivityStatus = 'Retired' AND CS.intCustomerStockId IN (SELECT * FROM @tmpTransactions)
 	END
 	ELSE IF(@type = 3)
 	BEGIN
 		INSERT INTO @returnTable
-		SELECT 'Voucher('+ APB.strBillId +') for Equity Payment is already paid.',
+		SELECT	'Voucher('+ APB.strBillId +') for Equity Payment is already paid.',
 				'Equity Payment',
 				APB.strBillId,
 				APB.intBillId
 		FROM tblPATEquityPaySummary EPS
 		INNER JOIN tblAPBill APB
 			ON APB.intBillId = EPS.intBillId
-		WHERE APB.ysnPaid = 1 AND EPS.intEquityPaySummaryId IN (SELECT * FROM @tmpTransacions)
+		WHERE APB.ysnPaid = 1 AND EPS.intEquityPaySummaryId IN (SELECT * FROM @tmpTransactions)
+	END
+	ELSE IF (@type = 4)
+	BEGIN
+		INSERT INTO @returnTable
+		SELECT	'This voucher was created from Patronage Retire Stock - '+ CS.strCertificateNo +'. Unpost it from there.',
+				'Voucher',
+				CS.strCertificateNo,
+				CS.intCustomerStockId
+		FROM tblAPBill APB
+		INNER JOIN tblPATCustomerStock CS
+			ON APB.intBillId = CS.intBillId
+		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions)
 	END
 
 	RETURN
