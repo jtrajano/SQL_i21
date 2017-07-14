@@ -1157,7 +1157,7 @@ BEGIN TRY
 					END 
 				END
 				
-				SELECT @dblPerUnitFreight = (@dblFreightRate * @dblGrossUnits*@dblContractCostConvertedUOM + @dblFreightAdjustment) / dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CS.intUnitMeasureId, CU.intUnitMeasureId, CS.dblOriginalBalance)
+				SELECT @dblPerUnitFreight = (@dblFreightRate * @dblGrossUnits*@dblContractCostConvertedUOM) / dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CS.intUnitMeasureId, CU.intUnitMeasureId, CS.dblOriginalBalance)
 				FROM tblGRCustomerStorage CS
 				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -1166,7 +1166,7 @@ BEGIN TRY
 
 				INSERT INTO @voucherDetailStorage 
 				(
-					[intCustomerStorageId]
+					 [intCustomerStorageId]
 					,[intItemId]
 					,[intAccountId]
 					,[dblQtyReceived]
@@ -1186,20 +1186,9 @@ BEGIN TRY
 					,@dblUnits AS [dblUnits]
 					,b.[strItemNo]
 					,CASE 
-							WHEN a.strCostMethod = 'Amount'
-								THEN 
-										CASE 
-											WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 0 THEN ROUND(@dblFreightRate + @dblFreightAdjustment, 2)
-											WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 0 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblFreightRate + @dblFreightAdjustment, 2)
-											WHEN a.intEntityVendorId <> @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblFreightRate + @dblFreightAdjustment, 2)
-										 END
-							WHEN a.strCostMethod = 'Per Unit'
-								THEN 
-										CASE 
-											WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 0 THEN ROUND(@dblUnits * @dblPerUnitFreight, 2)
-											WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 0 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblUnits * @dblPerUnitFreight, 2)
-											WHEN a.intEntityVendorId <> @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblUnits * @dblPerUnitFreight, 2)
-										END
+						WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 0 THEN ROUND(@dblPerUnitFreight, 2)
+						WHEN a.intEntityVendorId = @EntityId AND ISNULL(a.ysnAccrue, 0) = 0 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblPerUnitFreight, 2)
+						WHEN a.intEntityVendorId <> @EntityId AND ISNULL(a.ysnAccrue, 0) = 1 AND ISNULL(a.ysnPrice, 0) = 1 THEN - ROUND(@dblPerUnitFreight, 2)
 					 END
 					,NULL [intContractHeaderId]
 					,NULL [intContractDetailId]
