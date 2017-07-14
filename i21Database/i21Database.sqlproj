@@ -5499,6 +5499,8 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetImportingTemplate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrderMsgAndMail.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunitySalesrepAndLob.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidInvoicesForPosting.sql" />
+    <Build Include="dbo\User Defined Types\InvoicePostingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
