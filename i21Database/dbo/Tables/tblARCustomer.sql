@@ -24,6 +24,7 @@
     [ysnPORequired]                   BIT             DEFAULT ((0)) NOT NULL,
     [ysnCreditHold]                   BIT             DEFAULT ((0)) NOT NULL,
     [ysnStatementDetail]              BIT             DEFAULT ((0)) NOT NULL,
+	[ysnStatementCreditLimit]		  BIT             DEFAULT ((0)) NOT NULL,
     [strStatementFormat]              NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intCreditStopDays]               INT             NULL,
     [strTaxAuthority1]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
