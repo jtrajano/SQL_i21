@@ -29,6 +29,7 @@ DECLARE @strTransactionId					NVARCHAR(100)
 	  , @intMessageId						INT
 	  , @intNewTransactionId				INT = NULL
 	  , @strErrorMsg						NVARCHAR(MAX) = ''
+	  , @intStartingNumberId				INT
 
 IF ISNULL(@strPaymentIds, '') != ''
 	BEGIN
@@ -85,12 +86,9 @@ BEGIN TRANSACTION
 EXEC dbo.uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId, @intUserId
 
 --Get the Bank Deposit strTransactionId by using this script.
-SELECT  @strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
-FROM tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_DEPOSIT
+SELECT	@intStartingNumberId = intStartingNumberId FROM	dbo.tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_DEPOSIT
+EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
  
--- Increment the next transaction number
-UPDATE tblSMStartingNumber SET intNumber += 1
-WHERE strTransactionType = @STARTING_NUMBER_BANK_DEPOSIT
 
 --Payment Header
 INSERT INTO @BankTransaction (
