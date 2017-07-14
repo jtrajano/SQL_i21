@@ -160,9 +160,9 @@ FROM (
 		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
-		WHERE L.intLoadId NOT IN (
+		WHERE L.intLoadId IN (
 				SELECT intLoadId
-				FROM tblLGLoadDocuments WHERE ISNULL(ysnReceived,0) = 1
+				FROM tblLGLoadDocuments WHERE ISNULL(ysnReceived,0) = 0
 				)
 			AND CH.intContractTypeId = 1
 			AND CD.intContractStatusId IN (1,2,4)
