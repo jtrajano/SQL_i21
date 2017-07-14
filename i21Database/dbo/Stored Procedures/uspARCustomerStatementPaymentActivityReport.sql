@@ -101,6 +101,7 @@ DECLARE @temp_statement_table TABLE(
     ,[strCompanyName]			NVARCHAR(MAX)
     ,[strCompanyAddress]		NVARCHAR(MAX)
 	,[dblARBalance]				NUMERIC(18,6)
+	,[ysnStatementCreditLimit]	BIT
 )
 
 DECLARE @temp_cf_table TABLE(
@@ -203,54 +204,126 @@ END
 INSERT INTO @temp_aging_table
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, 1
 
-SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
-(SELECT intEntityCustomerId	= C.intEntityId
-	  , C.strCustomerNumber
+SET @query = CAST('' AS NVARCHAR(MAX)) + 
+'SELECT * 
+FROM (
+SELECT intEntityCustomerId	= C.intEntityId
+	  , strCustomerNumber	= C.strCustomerNumber
 	  , strCustomerName		= C.strName
-	  , C.dblCreditLimit
-	  , I.intInvoiceId
+	  , dblCreditLimit		= C.dblCreditLimit
+	  , intInvoiceId		= I.intInvoiceId
 	  , strInvoiceNumber    = CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 THEN I.strInvoiceNumber ELSE ISNULL(I.strInvoiceOriginId, I.strInvoiceNumber) END
 	  , strBOLNumber		= CASE WHEN I.strTransactionType = ''Customer Prepayment'' THEN ''Prepayment: '' + ISNULL(PCREDITS.strPaymentInfo, '''') ELSE ''BOL# '' + I.strBOLNumber END
-      , I.dtmDate
-      , I.dtmDueDate
-	  , I.dtmShipDate
+      , dtmDate				= I.dtmDate
+      , dtmDueDate			= I.dtmDueDate
+	  , dtmShipDate			= I.dtmShipDate
 	  , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END
-	  , intPaymentId		= ISNULL(P.intPaymentId, PCREDITS.intPaymentId)
-	  , strRecordNumber		= ISNULL(P.strRecordNumber, PCREDITS.strRecordNumber)
+	  , intPaymentId		= ISNULL(PD.intPaymentId, PCREDITS.intPaymentId)
+	  , strRecordNumber		= ISNULL(PD.strRecordNumber, PCREDITS.strRecordNumber)
 	  , strTransactionType  = I.strTransactionType
-	  , strPaymentInfo	    = ''PAYMENT REF: '' + P.strPaymentInfo
-	  , dtmDatePaid			= ISNULL(P.dtmDatePaid, PCREDITS.dtmDatePaid)
+	  , strPaymentInfo	    = ''PAYMENT REF: '' + PD.strPaymentInfo
+	  , dtmDatePaid			= ISNULL(PD.dtmDatePaid, PCREDITS.dtmDatePaid)
 	  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
 	  , dblBalance			= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
-	  , strSalespersonName  = ESP.strName
+	  , strSalespersonName  = C.strSalesPersonName
 	  , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= [dbo].fnARFormatCustomerAddress('''', '''', C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-	  , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-	  , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
-	  , dblARBalance		= CUST.dblARBalance
-FROM vyuARCustomer C
-	INNER JOIN tblARCustomer CUST ON C.intEntityId = CUST.intEntityId
-	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityId = CC.intCustomerEntityId AND ysnDefaultContact = 1
-	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityId
-		AND I.ysnPosted  = 1		
-		AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
-		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +' 
-			AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'))
-			 OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) > '+ @strDateTo +'))))
-		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))			
-	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND P.ysnInvoicePrepayment = 0 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= '+ @strDateTo +') ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN tblARPayment PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId AND PCREDITS.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), PCREDITS.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+	  , strCompanyName		= COMPANY.strCompanyName
+	  , strCompanyAddress	= COMPANY.strCompanyAddress
+	  , dblARBalance		= C.dblARBalance
+	  , ysnStatementCreditLimit	= ysnStatementCreditLimit
+FROM vyuARCustomerSearch C
 	LEFT JOIN (
-		(SELECT SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest) AS dblPayment
-			  , intInvoiceId 
-			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND P.ysnInvoicePrepayment = 0 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= '+ @strDateTo +'
-			GROUP BY intInvoiceId)
-		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
-	LEFT JOIN tblSMTerm T ON T.intTermID = I.intTermId	
-	LEFT JOIN tblEMEntity ESP ON C.intSalespersonId = ESP.intEntityId	
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntityId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntityId	
-	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+		SELECT intInvoiceId
+			 , intEntityCustomerId
+			 , intPaymentId
+			 , intCompanyLocationId
+			 , intTermId
+			 , strInvoiceNumber
+			 , strInvoiceOriginId
+			 , strBOLNumber
+			 , strTransactionType
+			 , dblInvoiceTotal
+			 , dtmDate
+			 , dtmDueDate
+			 , dtmShipDate
+			 , ysnImportedFromOrigin
+		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		WHERE ysnPosted = 1
+		AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))		
+		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+				AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId 
+														  FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
+														  INNER JOIN (
+																SELECT intPaymentId
+																FROM dbo.tblARPayment WITH (NOLOCK)
+																WHERE ysnPosted = 1
+																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+														  ) P ON PD.intPaymentId = P.intPaymentId))
+				OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId 
+														 FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+														 INNER JOIN (
+																SELECT intPaymentId
+																FROM dbo.tblARPayment WITH (NOLOCK)
+																WHERE ysnPosted = 1
+																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'
+														 ) P ON PD.intPaymentId = P.intPaymentId))))
+		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))			
+	) I ON I.intEntityCustomerId = C.intEntityId		
+	LEFT JOIN (
+		SELECT intInvoiceId
+			 , dblPayment
+			 , dblDiscount
+			 , dblInterest
+		     , P.*
+		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
+		INNER JOIN (SELECT intPaymentId
+						 , strRecordNumber
+						 , strPaymentInfo
+						 , dtmDatePaid
+					FROM dbo.tblARPayment WITH (NOLOCK)
+					WHERE ysnPosted = 1
+					  AND ysnInvoicePrepayment = 0
+					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
+		) P ON PD.intPaymentId = P.intPaymentId
+	) PD ON I.intInvoiceId = PD.intInvoiceId
+	LEFT JOIN (
+		SELECT intPaymentId
+			 , strPaymentInfo
+			 , strRecordNumber
+			 , dtmDatePaid
+		FROM dbo.tblARPayment WITH (NOLOCK)
+		WHERE ysnPosted = 1
+		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+	) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
+	LEFT JOIN (
+		SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
+			 , intInvoiceId 
+		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+		INNER JOIN (SELECT intPaymentId
+					FROM dbo.tblARPayment WITH (NOLOCK)
+					WHERE ysnPosted = 1
+					  AND ysnInvoicePrepayment = 0 
+					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
+		) P ON PD.intPaymentId = P.intPaymentId
+		GROUP BY intInvoiceId
+	) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
+	LEFT JOIN (
+		SELECT intTermID
+			 , strTerm
+		FROM dbo.tblSMTerm WITH (NOLOCK)
+	) T ON I.intTermId = T.intTermID	
+	LEFT JOIN (
+		SELECT intCompanyLocationId
+			 , strLocationName
+		FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
+	) CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+	OUTER APPLY (
+		SELECT TOP 1 strCompanyName
+				   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) 
+		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+	) COMPANY
 ) MainQuery'
 
 IF ISNULL(@filter,'') != ''
@@ -273,9 +346,9 @@ IF @ysnIncludeBudget = 1
 				  , strBOLNumber                = NULL
 				  , dtmDate						= dtmBudgetDate
 				  , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate))
-				  , dtmShipDate					= CB.intCustomerBudgetId
+				  , dtmShipDate					= NULL
 				  , dblInvoiceTotal				= dblBudgetAmount
-				  , intPaymentId				= NULL
+				  , intPaymentId				= CB.intCustomerBudgetId
 				  , strRecordNumber				= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
 				  , strTransactionType			= ''Customer Budget''
 				  , strPaymentInfo				= NULL
@@ -288,11 +361,11 @@ IF @ysnIncludeBudget = 1
 				  , strFullAddress				= NULL
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
-				  , dblARBalance				= CUST.dblARBalance
+				  , dblARBalance				= C.dblARBalance
+				  , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
             FROM tblARCustomerBudget CB
-                INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityId
-                INNER JOIN tblARCustomer CUST ON C.intEntityId = CUST.intEntityId    
-            WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
+                INNER JOIN vyuARCustomerSearch C ON CB.intEntityCustomerId = C.intEntityId
+            WHERE CB.dtmBudgetDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
               AND CB.dblAmountPaid < CB.dblBudgetAmount'
 
         SET @filter = ''
@@ -553,7 +626,8 @@ BEGIN
 		  ,[strLocationName]			  
 		  ,[strFullAddress]			
 		  ,[strCompanyName]			
-		  ,[strCompanyAddress]		
+		  ,[strCompanyAddress]
+		  ,STATEMENTREPORT.[ysnStatementCreditLimit]		
 		  ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
 		  ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
 		  ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
@@ -599,7 +673,8 @@ BEGIN
 		  ,[strLocationName]			  
 		  ,[strFullAddress]			
 		  ,[strCompanyName]			
-		  ,[strCompanyAddress]		
+		  ,[strCompanyAddress]
+		  ,STATEMENTREPORT.[ysnStatementCreditLimit]		
 		  ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
 		  ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
 		  ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
