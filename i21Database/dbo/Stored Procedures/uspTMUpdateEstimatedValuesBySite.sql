@@ -26,9 +26,12 @@ BEGIN
 	BEGIN 
 
 		SELECT TOP 1 
-			@LastReadingDate	=	dtmDate, 
-			@AccumulatedDD		=	dblAccumulatedDegreeDay
+			@LastReadingDate	=	dtmDate
 		FROM #tmpLatestReading ORDER BY dtmDate DESC
+
+		SELECT @AccumulatedDD		=	SUM(intDegreeDays)
+		FROM #tmpLatestReading 
+		
 
 		--Update dispatch
 		UPDATE tblTMDispatch
@@ -42,12 +45,10 @@ BEGIN
 														 -
 														ISNULL(
 														(	
-															SELECT	TOP 1  
-																	dblAccumulatedDegreeDay 
+															SELECT	
+																	SUM(intDegreeDays) 
 															FROM	#tmpLatestReading 
-															WHERE	DAY(dtmDate) = DAY(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))  
-																	AND MONTH(dtmDate) = MONTH(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))
-																	AND YEAR(dtmDate) = YEAR(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))
+															WHERE	DATEADD(dd, DATEDIFF(dd, 0, dtmDate),0) <= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate)),0)
 														),0))		
 
 														/	(CASE WHEN ISNULL(A.dblBurnRate,1) = 0 THEN 1 ELSE ISNULL(A.dblBurnRate,1) END)
@@ -63,12 +64,10 @@ BEGIN
 															-
 															ISNULL(
 															(	
-																SELECT	TOP 1  
-																		dblAccumulatedDegreeDay 
+																SELECT	
+																		SUM(intDegreeDays) 
 																FROM	#tmpLatestReading 
-																WHERE	DAY(dtmDate) = DAY(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))  
-																		AND MONTH(dtmDate) = MONTH(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))
-																		AND YEAR(dtmDate) = YEAR(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))
+																WHERE	DATEADD(dd, DATEDIFF(dd, 0, dtmDate),0) <= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate)),0)
 															),0))		
 
 															/	(CASE WHEN ISNULL(A.dblBurnRate,1) = 0 THEN 1 ELSE ISNULL(A.dblBurnRate,1) END)
@@ -96,12 +95,10 @@ BEGIN
 														-
 														ISNULL(
 														(	
-															SELECT	TOP 1  
-																   dblAccumulatedDegreeDay 
+															SELECT	  
+																   SUM(intDegreeDays) 
 															FROM	#tmpLatestReading 
-															WHERE	DAY(dtmDate) = DAY(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))  
-																	AND MONTH(dtmDate) = MONTH(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))
-																	AND YEAR(dtmDate) = YEAR(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))
+															WHERE	DATEADD(dd, DATEDIFF(dd, 0, dtmDate),0) <= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate)),0)
 														),0))		
 
 														/	(CASE WHEN ISNULL(dblBurnRate,1) = 0 THEN 1 ELSE ISNULL(dblBurnRate,1) END)
@@ -116,12 +113,10 @@ BEGIN
 														-
 														ISNULL(
 														(	
-															SELECT	TOP 1  
-																	dblAccumulatedDegreeDay 
+															SELECT	
+																	SUM(intDegreeDays) 
 															FROM	#tmpLatestReading 
-															WHERE	DAY(dtmDate) = DAY(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))  
-																	AND MONTH(dtmDate) = MONTH(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))
-																	AND YEAR(dtmDate) = YEAR(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))
+															WHERE	DATEADD(dd, DATEDIFF(dd, 0, dtmDate),0) <= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate)),0)
 														),0))		
 
 														/	(CASE WHEN ISNULL(dblBurnRate,1) = 0 THEN 1 ELSE ISNULL(dblBurnRate,1) END)
@@ -137,12 +132,10 @@ BEGIN
 														 -
 														ISNULL(
 														(	
-															SELECT	TOP 1  
-																	dblAccumulatedDegreeDay 
+															SELECT	
+																	SUM(intDegreeDays) 
 															FROM	#tmpLatestReading 
-															WHERE	DAY(dtmDate) = DAY(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))  
-																	AND MONTH(dtmDate) = MONTH(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))
-																	AND YEAR(dtmDate) = YEAR(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))
+															WHERE	DATEADD(dd, DATEDIFF(dd, 0, dtmDate),0) <= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate)),0)
 														),0))		
 
 														/	(CASE WHEN ISNULL(dblBurnRate,1) = 0 THEN 1 ELSE ISNULL(dblBurnRate,1) END)
@@ -158,12 +151,10 @@ BEGIN
 															-
 															ISNULL(
 															(	
-																SELECT	TOP 1  
-																		dblAccumulatedDegreeDay 
+																SELECT	
+																		SUM(intDegreeDays) 
 																FROM	#tmpLatestReading 
-																WHERE	DAY(dtmDate) = DAY(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))  
-																		AND MONTH(dtmDate) = MONTH(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))
-																		AND YEAR(dtmDate) = YEAR(ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate))
+																WHERE	DATEADD(dd, DATEDIFF(dd, 0, dtmDate),0) <= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate)),0)
 															),0))		
 
 															/	(CASE WHEN ISNULL(dblBurnRate,1) = 0 THEN 1 ELSE ISNULL(dblBurnRate,1) END)
