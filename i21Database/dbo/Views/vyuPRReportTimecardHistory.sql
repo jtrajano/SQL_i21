@@ -8,9 +8,9 @@ SELECT DISTINCT
 	,TE.strEarning
 	,DP.strDepartment
 	,TC.dtmDateIn
-	,TC.dtmTimeIn
+	,dtmTimeIn = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), TC.dtmTimeIn)
 	,TC.dtmDateOut
-	,TC.dtmTimeOut
+	,dtmTimeOut = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), TC.dtmTimeOut)
 	,TC.dblHours
 	,TC.dblRegularHours
 	,TC.dblOvertimeHours
