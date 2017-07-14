@@ -5333,6 +5333,8 @@
     <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
     <Build Include="dbo\Tables\tblMFReportLidlUCCPalletLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOFeed.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidInvoicesForPosting.sql" />
+    <Build Include="dbo\User Defined Types\InvoicePostingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
