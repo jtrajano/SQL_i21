@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuPRReportTimecardHistory]
 AS
-SELECT
+SELECT DISTINCT
 	TC.intTimecardId
 	,TC.dtmDate
 	,EM.strEntityNo
