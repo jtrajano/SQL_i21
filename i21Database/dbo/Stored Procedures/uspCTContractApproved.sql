@@ -110,7 +110,7 @@ BEGIN TRY
 			) CF ON CF.intContractDetailId  =	CD.intContractDetailId
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractDetailId	=	CASE WHEN @intContractDetailId IS NULL THEN CD.intContractDetailId ELSE @intContractDetailId END
-	AND		CD.intContractStatusId	<> 2
+	AND		CD.intContractStatusId	NOT IN (2,5)
 
 	SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY
 

@@ -137,8 +137,22 @@ IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
 	--VALIDATIONS
-	INSERT INTO #tmpInvalidBillData 
+	INSERT INTO #tmpInvalidBillData (
+		strError
+		,strTransactionType
+		,strTransactionId
+		,intTransactionId
+		,intErrorKey
+	)
 	SELECT * FROM fnAPValidatePostBill(@billIds, @post)
+	UNION ALL
+	SELECT
+		strError
+		,strTransactionType
+		,strTransactionNo
+		,intTransactionId
+		,23
+	FROM dbo.fnPATValidateAssociatedTransaction(@billIds, 4)
 
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1)

@@ -98,7 +98,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
+		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'

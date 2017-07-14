@@ -9,7 +9,7 @@ SELECT
 ,V.strEntityName
 ,V.dblAvailableQty
 ,V.strContractType
-,CASE WHEN V.dblAvailableQty < T.dblUnits THEN V.dblAvailableQty ELSE T.dblUnits END AS dblUnits
+,T.dblUnits dblUnits
 ,V.dblCashPrice
 ,V.dblFutures   
 ,V.dtmStartDate  

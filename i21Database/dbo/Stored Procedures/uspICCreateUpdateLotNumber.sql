@@ -33,6 +33,8 @@ DECLARE @LotType_Manual AS INT = 1
 		,@LotType_ManualSerial AS INT = 3
 
 DECLARE @strItemNo AS NVARCHAR(50)
+		,@strItemNo2 AS NVARCHAR(50) 
+
 DECLARE @intParentLotId AS INT = NULL
 DECLARE @intReturnCode AS INT = 0 
 
@@ -96,6 +98,8 @@ DECLARE
 	,@intShiftId				AS INT 
 	,@strContainerNo			AS NVARCHAR(50) 
 	,@strCondition				AS NVARCHAR(50) 
+	,@strUnitMeasure			AS NVARCHAR(50)
+	,@intUnitMeasureId			AS INT
 
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
@@ -127,7 +131,7 @@ BEGIN
 	BEGIN 
 		-- 'Please check for duplicate lot numbers. The lot number {Lot Number} is used more than once in item {Item No} on {Transaction Id}.'
 		EXEC uspICRaiseError 80019, @strLotNumber, @strItemNo, @strReceiptNumber;
-		SET @intReturnCode = -1;
+		SET @intReturnCode = -80019;
 		GOTO _Exit;
 	END
 END 
@@ -261,7 +265,7 @@ BEGIN
 
 		--Please specify the lot numbers for {Item}.
 		EXEC uspICRaiseError 80005, @strItemNo;
-		SET @intReturnCode = -2;
+		SET @intReturnCode = -80005;
 		GOTO _Exit_Loop;
 	END 	
 	
@@ -330,7 +334,7 @@ BEGIN
 
 		--Unable to generate the serial lot number for {Item}.
 		EXEC uspICRaiseError 80009, @strItemNo; 
-		SET @intReturnCode = -3;
+		SET @intReturnCode = -80009;
 		GOTO _Exit_Loop;
 	END 	
 
@@ -348,8 +352,66 @@ BEGIN
 
 		-- '{Item} with lot number {Lot Number} needs to have a weight.'
 		EXEC uspICRaiseError 80015, @strItemNo, @strLotNumber;
-		SET @intReturnCode = -4;
+		SET @intReturnCode = -80015;
 		GOTO _Exit_Loop;
+	END 
+
+	-- Validate if intItemUOM id is valid
+	BEGIN 
+		
+		SELECT	TOP 1 
+				@intUnitMeasureId = u.intUnitMeasureId
+				,@strItemNo = i.strItemNo
+				,@strUnitMeasure = u.strUnitMeasure
+		FROM	tblICItemUOM iu LEFT JOIN tblICItem i
+					ON iu.intItemId = i.intItemId 
+				LEFT JOIN tblICUnitMeasure u
+					ON iu.intUnitMeasureId = u.intUnitMeasureId
+		WHERE	intItemUOMId = @intItemUOMId
+				AND iu.intItemId <> @intItemId
+
+		SET @strUnitMeasure = ISNULL(@strUnitMeasure, '(Unspecified UOM)')
+		IF @intUnitMeasureId IS NOT NULL 
+		BEGIN 
+			SELECT	TOP 1 
+					@strItemNo2 = i.strItemNo
+			FROM	tblICItem i
+			WHERE	intItemId = @intItemId
+
+			-- 'The UOM {Unit Measure Name} is used for {Item No} and not for {Current Item No}. Please assign the correct UOM id.'
+			EXEC uspICRaiseError 80186, @strUnitMeasure, @strItemNo, @strItemNo2;
+			SET @intReturnCode = -80186;
+			GOTO _Exit_Loop;
+		END 
+	END 
+
+	-- Validate if intWeightUOM id is valid
+	IF @intWeightUOMId IS NOT NULL 
+	BEGIN 		
+		SELECT	TOP 1 
+				@intUnitMeasureId = u.intUnitMeasureId
+				,@strItemNo = i.strItemNo
+				,@strUnitMeasure = u.strUnitMeasure
+		FROM	tblICItemUOM iu LEFT JOIN tblICItem i
+					ON iu.intItemId = i.intItemId 
+				LEFT JOIN tblICUnitMeasure u
+					ON iu.intUnitMeasureId = u.intUnitMeasureId
+		WHERE	intItemUOMId = @intWeightUOMId
+				AND iu.intItemId <> @intItemId
+
+		SET @strUnitMeasure = ISNULL(@strUnitMeasure, '(Unspecified UOM)')
+		IF @intUnitMeasureId IS NOT NULL 
+		BEGIN 
+			SELECT	TOP 1 
+					@strItemNo2 = i.strItemNo
+			FROM	tblICItem i
+			WHERE	intItemId = @intItemId
+
+			-- 'The UOM {Unit Measure Name} is used for {Item No} and not for {Current Item No}. Please assign the correct UOM id.'
+			EXEC uspICRaiseError 80186, @strUnitMeasure, @strItemNo, @strItemNo2;
+			SET @intReturnCode = -80186;
+			GOTO _Exit_Loop;
+		END 
 	END 
 
 	-- Setup the Lot Status
@@ -392,7 +454,7 @@ BEGIN
 
 		--'Invalid Owner. {Owner Name} is not configured as an Owner for {Item Name}. Please check the Item setup.'
 		EXEC uspICRaiseError 80105, @strName, @strItemNo;
-		SET @intReturnCode = -11;
+		SET @intReturnCode = -80105;
 		GOTO _Exit_Loop;
 	END 
 
@@ -841,7 +903,7 @@ BEGIN
 
 		-- Lot {Lot number} exists in {Quantity UOM used}. Cannot receive in {Quantity UOM proposed value}. Change the receiveing UOM to {Quantity UOM used} or create a new lot.
 		EXEC uspICRaiseError 80011, @strLotNumber, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo, @strUnitMeasureItemUOMFrom; 
-		SET @intReturnCode = -6;
+		SET @intReturnCode = -80011;
 		GOTO _Exit_Loop;
 	END 
 
@@ -857,7 +919,7 @@ BEGIN
 
 		--'The Weight UOM for {Lot number} cannot be changed from {Weight UOM} to {Weight UOM} because a stock from it has been used from a different transaction.'
 		EXEC uspICRaiseError 80012, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo; 
-		SET @intReturnCode = -7;
+		SET @intReturnCode = -80012;
 		GOTO _Exit_Loop;
 	END 
 
@@ -871,7 +933,7 @@ BEGIN
 
 		--'The Sub-Location for {Lot number} cannot be changed from {Sub Location} to {Sub Location} because a stock from it has been used from a different transaction.'
 		EXEC uspICRaiseError 80013, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo;
-		SET @intReturnCode = -8;
+		SET @intReturnCode = -80013;
 		GOTO _Exit_Loop;
 	END 
 
@@ -885,7 +947,7 @@ BEGIN
 
 		--'The Storage Location for {Lot number} cannot be changed from {Storage Location} to {StorageLocation} because a stock from it has been used from a different transaction.'
 		EXEC uspICRaiseError 80014, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo;
-		SET @intReturnCode = -9;
+		SET @intReturnCode = -80014;
 		GOTO _Exit_Loop;
 	END
 
@@ -899,7 +961,7 @@ BEGIN
 
 		--Failed to process the lot number for {Item}. It may have been used on a different sub-location or storage location.'
 		EXEC uspICRaiseError 80010, @strItemNo
-		SET @intReturnCode = -10;
+		SET @intReturnCode = -80010;
 		GOTO _Exit_Loop;
 	END
 	

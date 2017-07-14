@@ -16,9 +16,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-DECLARE @transCount INT = @@TRANCOUNT;
-IF @transCount = 0 BEGIN TRANSACTION
-
+DECLARE @transCount INT;
 DECLARE @ErrorSeverity INT,
             @ErrorNumber   INT,
             @ErrorMessage nvarchar(4000),
@@ -62,6 +60,9 @@ BEGIN
 	SELECT * FROM dbo.fnAPReverseGLEntries(@Ids, 'Payable', DEFAULT, @userId, @batchId)
 END
 
+--START TRANSACTION AFTER DATA ANALYSIS https://technet.microsoft.com/en-us/library/ms187484(v=sql.105).aspx
+SET @transCount = @@TRANCOUNT;
+IF @transCount = 0 BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------

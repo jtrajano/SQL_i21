@@ -146,6 +146,15 @@ BEGIN TRY
 			WHERE intSampleTypeId = @intSampleTypeId
 				AND intSampleStatusId = @intSampleStatusId
 
+			IF ISNULL(@intDelSampleId,0) = 0
+			BEGIN
+				SELECT @intParentRowNo = MIN(intRowNo)
+				FROM @ParentContractSample
+				WHERE intRowNo > @intParentRowNo
+
+				CONTINUE
+			END
+
 			IF NOT EXISTS (
 					SELECT 1
 					FROM tblCTContractDetail CD

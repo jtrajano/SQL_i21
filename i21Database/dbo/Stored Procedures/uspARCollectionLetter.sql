@@ -1097,7 +1097,7 @@ BEGIN
 		@strCompanyEmail		NVARCHAR(200)
 
 	SELECT TOP 1 
-		@strCompanyName		= @strCompanyName, 
+		@strCompanyName		= strCompanyName, 
 		@strCompanyAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL),
 		@strCompanyPhone	= strPhone,
 		@strCompanyFax		= strFax,
@@ -1132,18 +1132,18 @@ BEGIN
 		, strCompanyName		= @strCompanyName
 		, strCompanyAddress		= @strCompanyAddress
 		, strCompanyPhone		= @strCompanyPhone
-		, strCustomerAddress	= [dbo].fnARFormatLetterAddress(Cus.strBillToPhone, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
+		, strCustomerAddress	= [dbo].fnARFormatLetterAddress(Cus.strBillToPhone, NULL, Cus.strCustomerNumber + ' - ' + Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
 								  + CHAR(13) + (SELECT ISNULL(strAccountNumber,'') FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
 		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WITH(NOLOCK) WHERE intEntityCustomerId = SC.intEntityCustomerId)
 		, strCompanyFax			= @strCompanyFax
-		, strCompanyEmail		= @strCompanyEmail			
-
+		, strCompanyEmail		= @strCompanyEmail		
 	FROM
 		@SelectedCustomer SC
 	INNER JOIN 
 		(
 			SELECT 
 				[intEntityId], 
+				strCustomerNumber,
 				strBillToAddress, 
 				strBillToCity, 
 				strBillToCountry, 

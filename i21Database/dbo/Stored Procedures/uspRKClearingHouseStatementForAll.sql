@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKClearingHouseStatementForAll 
+﻿CREATE PROC [dbo].[uspRKClearingHouseStatementForAll] 
 		@xmlParam NVARCHAR(MAX) = NULL		
 AS
 DECLARE @idoc INT,
@@ -45,7 +45,7 @@ SELECT @dtmTransactionToDate = [from] FROM @temp_xml_table WHERE [fieldname] = '
 SELECT *,'Trades between ''' +Left(replace(convert(varchar(9), @dtmTransactionFromDate, 6), ' ', '-') + ' ' + convert(varchar(8), @dtmTransactionFromDate, 8),9) + ''' and ''' + Left(replace(convert(varchar(9), @dtmTransactionToDate, 6), ' ', '-') + ' ' + convert(varchar(8), @dtmTransactionToDate, 8),9)+'''' as strDateHeading,
 @strAccountNumber strAccountNumber,@strName strBroker,@dtmTransactionFromDate dtmTransactionFromDate ,@dtmTransactionToDate as dtmTransactionToDate FROM 
 (
-SELECT strFutMarketName,dtmTransactionDate,Left(replace(convert(varchar(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) LdtmTransactionDate,
+SELECT strInternalTradeNo,strFutMarketName,dtmTransactionDate,Left(replace(convert(varchar(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) LdtmTransactionDate,
 	   intNoOfContract LintNoOfContract,strFutureMonth LstrFutureMonth,dblPrice LdblPrice,
 		null SdtmTransactionDate,null SintNoOfContract,null SstrFutureMonth,null SdblPrice,CASE WHEN bc.intFuturesRateType= 1 then 0 else  -isnull(bc.dblFutCommission,0) end as dblFutCommission
 		
@@ -55,10 +55,14 @@ JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelec
 JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId= t.intFutureMarketId AND t.intBrokerageAccountId=bc.intBrokerageAccountId  
-WHERE  strName=@strName AND strAccountNumber = @strAccountNumber AND dtmTransactionDate between @dtmTransactionFromDate AND @dtmTransactionToDate 
+WHERE  strName=@strName AND strAccountNumber = @strAccountNumber AND 
+convert(datetime,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionToDate,110),110)
+
+
 UNION
-SELECT strFutMarketName,dtmTransactionDate,null LdtmTransactionDate,null LintNoOfContract,null LstrFutureMonth,null LdblPrice,
-Left(replace(convert(varchar(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) SdtmTransactionDate,
+
+SELECT strInternalTradeNo,strFutMarketName,dtmTransactionDate,null LdtmTransactionDate,null LintNoOfContract,null LstrFutureMonth,null LdblPrice,
+LEFT(REPLACE(CONVERT(VARCHAR(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) SdtmTransactionDate,
 		intNoOfContract SintNoOfContract,strFutureMonth SstrFutureMonth,dblPrice SdblPrice,CASE WHEN bc.intFuturesRateType= 1 then 0 else  -isnull(bc.dblFutCommission,0) end as dblFutCommission  
 FROM tblRKFutOptTransaction t
 JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
@@ -66,5 +70,6 @@ JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelec
 JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId= t.intFutureMarketId AND t.intBrokerageAccountId=bc.intBrokerageAccountId 
-WHERE  strName=@strName AND strAccountNumber = @strAccountNumber AND dtmTransactionDate between @dtmTransactionFromDate AND @dtmTransactionToDate  )t 
+WHERE  strName=@strName AND strAccountNumber = @strAccountNumber AND 
+convert(datetime,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionToDate,110),110) )t 
 ORDER BY dtmTransactionDate
