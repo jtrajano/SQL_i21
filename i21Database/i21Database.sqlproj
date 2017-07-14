@@ -5444,6 +5444,7 @@
     <Build Include="dbo\Tables\tblHDOOPMonitoring.sql" />
     <Build Include="dbo\Functions\fnAPCalculateVoucherDetailUnits.sql" />
     <Build Include="dbo\Tables\tblSMLoginDeviceToken.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
