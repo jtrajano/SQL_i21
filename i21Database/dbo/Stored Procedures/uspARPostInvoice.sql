@@ -930,11 +930,11 @@ IF(@totalInvalid > 0)
 		DELETE @PostInvoiceData
 			FROM @PostInvoiceData A
 				INNER JOIN @InvalidInvoiceData B
-					ON A.intInvoiceId = B.intTransactionId
+					ON A.intInvoiceId = B.intInvoiceId
 				
 		IF @raiseError = 1
 			BEGIN
-				SELECT TOP 1 @ErrorMerssage = strError FROM @InvalidInvoiceData
+				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
 				RAISERROR(@ErrorMerssage, 11, 1)							
 				GOTO Post_Exit
 			END					
@@ -949,7 +949,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			--COMMIT TRAN @TransactionName
 		IF @raiseError = 1
 			BEGIN
-				SELECT TOP 1 @ErrorMerssage = strError FROM @InvalidInvoiceData
+				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
 				RAISERROR(@ErrorMerssage, 11, 1)							
 				GOTO Post_Exit
 			END				
@@ -3125,14 +3125,14 @@ IF @post = 0
 				,GLD.strModuleName
 				,GLD.intConcurrencyId
 			FROM
-				(SELECT intInvoiceId, strTransactionId FROM @PostInvoiceData) PID
+				(SELECT intInvoiceId, strInvoiceNumber FROM @PostInvoiceData) PID
 			INNER JOIN
 				(SELECT dtmDate, intAccountId, intGLDetailId, intTransactionId, strTransactionId, strDescription, strCode, strReference, intCurrencyId, dblExchangeRate, dtmTransactionDate, 
 					strJournalLineDescription, intJournalLineNo, strTransactionType, strTransactionForm, strModuleName, intConcurrencyId, dblCredit, dblDebit, dblCreditUnit, dblDebitUnit, ysnIsUnposted,
 					dblCreditForeign, dblDebitForeign
 				 FROM dbo.tblGLDetail WITH (NOLOCK)) GLD
 					ON PID.intInvoiceId = GLD.intTransactionId
-					AND PID.strTransactionId = GLD.strTransactionId							 
+					AND PID.strInvoiceNumber = GLD.strTransactionId							 
 			WHERE
 				GLD.ysnIsUnposted = 0				
 			ORDER BY
@@ -3154,7 +3154,7 @@ IF @post = 0
 			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
 			SELECT DISTINCT
 				 PID.intInvoiceId
-				,PID.strTransactionId
+				,PID.strInvoiceNumber
 			FROM
 				@PostInvoiceData PID				
 			INNER JOIN
@@ -3194,9 +3194,9 @@ IF @post = 0
 			INSERT INTO @UnPostICInvoiceData(intInvoiceId, strTransactionId)
 			SELECT DISTINCT
 				 PID.intInvoiceId
-				,PID.strTransactionId
+				,PID.strInvoiceNumber
 			FROM
-				(SELECT intInvoiceId, strTransactionId FROM @PostInvoiceData) PID
+				(SELECT intInvoiceId, strInvoiceNumber FROM @PostInvoiceData) PID
 			INNER JOIN
 				(SELECT intInvoiceId, intItemId, intItemUOMId FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID
 					ON PID.intInvoiceId = ARID.intInvoiceId					
@@ -3406,10 +3406,10 @@ IF @recap = 1
 
 		DELETE GLDR  
 		FROM 
-			(SELECT intInvoiceId, strTransactionId FROM @PostInvoiceData) PID  
+			(SELECT intInvoiceId, strInvoiceNumber FROM @PostInvoiceData) PID  
 		INNER JOIN 
 			(SELECT intTransactionId, strTransactionId, strCode FROM dbo.tblGLDetailRecap WITH (NOLOCK)) GLDR 
-				ON (PID.strTransactionId = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  AND GLDR.strCode = @CODE		   
+				ON (PID.strInvoiceNumber = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  AND GLDR.strCode = @CODE		   
 		   
 		BEGIN TRY		
 		 
