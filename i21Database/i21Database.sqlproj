@@ -5442,6 +5442,7 @@
     <Build Include="dbo\Stored Procedures\uspGRPostSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnPostSettleStorage.sql" />
     <Build Include="dbo\Tables\tblHDOOPMonitoring.sql" />
+    <Build Include="dbo\Functions\fnAPCalculateVoucherDetailUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
