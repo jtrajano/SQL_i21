@@ -5332,6 +5332,7 @@
     <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
     <Build Include="dbo\Tables\tblMFReportLidlUCCPalletLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
