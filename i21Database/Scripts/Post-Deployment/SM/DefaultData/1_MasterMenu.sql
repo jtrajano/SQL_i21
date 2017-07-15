@@ -2444,6 +2444,15 @@ ELSE
 DECLARE @RiskManagementMaintenanceParentMenuId INT
 SELECT @RiskManagementMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Reports', N'Risk Management', @RiskManagementParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2 WHERE strMenuName = 'Reports' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId
+
+DECLARE @RiskManagementReportParentMenuId INT
+SELECT @RiskManagementReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */ 
 UPDATE tblSMMasterMenu SET intParentMenuID = @RiskManagementActivitiesParentMenuId WHERE intParentMenuID =  @RiskManagementParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @RiskManagementMaintenanceParentMenuId WHERE intParentMenuID =  @RiskManagementParentMenuId AND strCategory = 'Maintenance'
@@ -2614,6 +2623,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Options T
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'RiskManagement.view.OptionsMonth' WHERE strMenuName = 'Options Trading Months' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Periodic Futures Clearing House Statement' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Periodic Futures Clearing House Statement', N'Risk Management', @RiskManagementReportParentMenuId, N'Periodic Futures Clearing House Statement', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Risk Management&report=PeriodicFutClearingHouseStatement&direct=true', N'small-menu-report', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Reporting.view.ReportManager?group=Risk Management&report=PeriodicFutClearingHouseStatement&direct=true' WHERE strMenuName = 'Periodic Futures Clearing House Statement' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
+
 /* START OF DELETE */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Futures/Options Settlement Prices' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Futures Options Transactions' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
@@ -2678,10 +2693,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tickets' 
 	VALUES (N'Tickets', N'Ticket Management', @TicketManagementActivitiesParentMenuId, N'Tickets', N'Activity', N'Screen', N'Grain.view.ScaleStationSelection?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSelection?showSearch=true', intSort = 0 WHERE strMenuName = 'Tickets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementActivitiesParentMenuId
-
-
-
-
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Delivery Sheets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
