@@ -39,7 +39,7 @@ AS
 			SR.strScheduleDescription,			IM.strShortName,				DP.strCity						AS	strDestinationPoint,
 			SK.intStockUOMId,					SK.strStockUnitMeasure,			DC.strCity						AS	strDestinationCity,
 			SK.intStockUnitMeasureId,			IC.strContractItemName,			PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
-			ST.strSplitNumber,													U4.strUnitMeasure				AS	strStockItemUOM,
+			ST.strSplitNumber,					IM.ysnUseWeighScales,			U4.strUnitMeasure				AS	strStockItemUOM,
 			CU.intMainCurrencyId,				CU.strCurrency,					CY.strCurrency					AS	strMainCurrency,
 																				U7.strUnitMeasure				AS	strNetWeightUOM,
 																				ST.strDescription				AS	strSplitDescription,
