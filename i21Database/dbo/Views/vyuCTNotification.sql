@@ -20,7 +20,7 @@ AS
 				CD.dblScheduleQty,		CD.dblNoOfLots,			CD.strItemNo,			CD.strPricingType,
 				CD.strFutMarketName,	CD.strItemUOM,			CD.strLocationName,		CD.strPriceUOM,
 				CD.strCurrency,			CD.strFutureMonth,		CD.strStorageLocation,	CD.strSubLocation,
-				CD.strItemDescription,	CD.intContractDetailId,	CD.strProductType,		
+				CD.strItemDescription,	CD.intContractDetailId,	CD.strProductType,		PW.intAllStatusId,
 				BC.strBasisComponent,
 				CD.intContractStatusId,	CD.strContractItemName,	CD.strContractItemNo
 				
@@ -51,7 +51,8 @@ AS
 							strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
 							intContractStatusId,			strContractItemName,		strContractItemNo,				intContractHeaderId,
 							ROW_NUMBER() OVER (PARTITION BY intContractHeaderId ORDER BY intContractDetailId ASC) intRowNum
-					FROM	vyuCTContractSequence
+					FROM	vyuCTContractSequence 
+					WHERE	ISNULL(intContractStatusId,1) <> 3
 				)t	WHERE intRowNum = 1			
 
 		)									CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId	LEFT
@@ -63,7 +64,19 @@ AS
 				FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, '')
 				FROM vyuCTContractCostView AS x
 				GROUP BY intContractDetailId
-		)									BC	ON	BC.intContractDetailId			=	CD.intContractDetailId
+		)									BC	ON	BC.intContractDetailId			=	CD.intContractDetailId	LEFT
+		JOIN 
+		(
+				SELECT intContractHeaderId
+				,SUM(POWER(2, intContractStatusId )) intAllStatusId
+				FROM 
+				(
+					SELECT DISTINCT intContractHeaderId
+					,intContractStatusId
+					FROM tblCTContractDetail
+				 ) t
+				GROUP BY intContractHeaderId
+		)									PW	ON	PW.intContractHeaderId			=	CD.intContractHeaderId
 	)
 
 	SELECT	CAST(ROW_NUMBER() OVER(ORDER BY intContractHeaderId DESC) AS INT) AS intUniqueId,
@@ -138,8 +151,8 @@ AS
 				CH.strContractItemNo	
 
 		FROM	Header CH
-		WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted')
-		AND		CH.intContractHeaderId	NOT IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 2)
+		WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted')  AND 4 <> intAllStatusId & 4
+		--AND		CH.intContractHeaderId	NOT IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 2)
 		AND		intContractDetailId IS NOT NULL
 
 		UNION ALL
@@ -157,9 +170,9 @@ AS
 				CH.strContractItemNo	
 
 		FROM	Header CH
-		JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId AND ysnMailSent = 0 AND TN.ysnOnceApproved = 1 --AND intContractStatusId = 1
+		JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId AND ysnMailSent = 0 AND TN.ysnOnceApproved = 1 AND 2 = intAllStatusId & 2
 		JOIN	tblSMScreen			SN	ON	SN.intScreenId	=	TN.intScreenId AND SN.strNamespace IN ('ContractManagement.view.Contract', 'ContractManagement.view.Amendments')
-		WHERE	CH.intContractHeaderId IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 1)
+		--WHERE	CH.intContractHeaderId IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 1)
 
 	)t
 
