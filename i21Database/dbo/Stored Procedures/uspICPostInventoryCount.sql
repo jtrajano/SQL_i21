@@ -2,7 +2,8 @@
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
-	,@intEntityUserSecurityId AS INT = NULL 
+	,@intEntityUserSecurityId AS INT = NULL,
+	@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -22,7 +23,6 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
 
 -- Get the Inventory Count batch number
-DECLARE @strBatchId AS NVARCHAR(40) 
 DECLARE @strItemNo AS NVARCHAR(50)
 
 -- Get the default currency ID
@@ -331,15 +331,23 @@ END
 -- 3. Book the G/L entries
 -- 4. Commit the save point.
 --------------------------------------------------------------------------------------------  
-IF	@ysnRecap = 1	
+IF @ysnRecap = 1
 BEGIN 
-
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspGLPostRecapOld 
+
+	-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
+	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN 
+		EXEC dbo.uspGLPostRecap 
 			@GLEntries
-			,@intTransactionId
-			,@strTransactionId
-			,'IC'
+			,@intEntityUserSecurityId
+	END 
+	ELSE 
+	BEGIN 
+		-- Post preview is not available. Financials are only booked for company-owned stocks.
+		EXEC uspICRaiseError 80185; 
+	END 
+
 	COMMIT TRAN @TransactionName
 END 
 
