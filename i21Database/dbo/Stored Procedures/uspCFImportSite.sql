@@ -252,7 +252,7 @@
 																	else 'FALSE'
 																  end)
 
-					,@intCashCustomerID							= (SELECT intEntityCustomerId 
+					,@intCashCustomerID							= (SELECT intEntityId 
 																   FROM tblARCustomer 
 																   WHERE strCustomerNumber = RTRIM(LTRIM(cfloc_ar_cash_cus_no))
 																   COLLATE Latin1_General_CI_AS)
@@ -485,7 +485,7 @@
 				--	,@strCreditCardPrefix									= LTRIM(RTRIM(cfccd_card_prefix))
 				--	,@intCreditCardCardId									= LTRIM(RTRIM(cfccd_card_no))
 				--	,@strCreditCardCardDescription							= LTRIM(RTRIM(cfccd_card_desc)) 
-				--	,@intCreditCardCustomerId								= ISNULL((SELECT intEntityCustomerId 
+				--	,@intCreditCardCustomerId								= ISNULL((SELECT intEntityId 
 				--																FROM tblARCustomer 
 				--																WHERE strCustomerNumber = LTRIM(RTRIM(cfccd_ar_cus_no))
 				--																COLLATE Latin1_General_CI_AS),0)
