@@ -67,7 +67,7 @@ SELECT
 	,@ShipViaId					= ICIS.[intShipViaId]
 	,@PONumber					= SO.[strPONumber]
 	,@BOLNumber					= ICIS.[strBOLNumber]
-	,@Comments					= ICIS.[strShipmentNumber] + ' : '	+ ICIS.[strReferenceNumber]
+	,@Comments					= ICIS.[strShipmentNumber] + ' : '	+ ISNULL(ICIS.[strReferenceNumber], '')
 	,@SalesOrderComments		= SO.strComments
 	,@ShipToLocationId			= ICIS.intShipToLocationId
 	,@SalesOrderId				= SO.intSalesOrderId
@@ -85,9 +85,9 @@ WHERE ICIS.intInventoryShipmentId = @ShipmentId
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN
-		EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComments OUT
+		EXEC dbo.uspARGetDefaultComment @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComments OUT
 
-		SET @Comments = ISNULL(@InvoiceComments,'') + ' ' + ISNULL(@SalesOrderComments, '')
+		SET @Comments = ISNULL(@Comments, '') + ' ' + ISNULL(@InvoiceComments,'') + ' ' + ISNULL(@SalesOrderComments, '')
 	END
 		
 DECLARE @UnsortedEntriesForInvoice AS InvoiceIntegrationStagingTable
