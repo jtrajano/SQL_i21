@@ -73,7 +73,7 @@ BEGIN TRY
 		,dblQtyReceived
 		,dblCost
 		)
-	SELECT WRMH.intVendorEntityId
+	SELECT ISNULL(SLCL.intVendorId,WRMH.intVendorEntityId)
 		,L.intLoadId
 		,LD.intLoadDetailId
 		,CH.intContractHeaderId
@@ -95,16 +95,17 @@ BEGIN TRY
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-	JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
-	JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
-	JOIN tblICItem Item ON Item.intItemId = LWS.intItemId
-	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = Item.intItemId
+	LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
+	LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
+	LEFT JOIN tblICItem Item ON Item.intItemId = LWS.intItemId
+	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = Item.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SLCL ON SLCL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		AND ItemLoc.intLocationId = SLCL.intCompanyLocationId
 	WHERE L.intLoadId = @intLoadId
 		AND LWS.dblActualAmount > 0
 	GROUP BY LWS.intLoadWarehouseServicesId
 		,WRMH.intVendorEntityId
+		,SLCL.intVendorId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,Item.intItemId
