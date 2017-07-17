@@ -6,7 +6,7 @@
     [strCalculationType]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblAmount]              NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [dblLimit]               NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
-	[dblPaycheckMax]		 NUMERIC (18, 6) NULL DEFAULT ((0)),
+	[dblPaycheckMax]		 NUMERIC (18, 6) NULL DEFAULT ((100)),
     [dtmBeginDate]           DATETIME        NULL,
     [dtmEndDate]             DATETIME        NULL,
     [intAccountId]           INT             NULL,
