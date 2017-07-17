@@ -22,11 +22,18 @@ namespace iRely.Inventory.WebApi
             this.bl = bl;
         }
 
+        //[HttpGet]
+        //[ActionName("GetLots")]
+        //public async Task<HttpResponseMessage> GetLots(GetParameter param)
+        //{
+        //    return Request.CreateResponse(HttpStatusCode.OK, await bl.GetLots(param));
+        //}
+
         [HttpGet]
-        [ActionName("SearchLots")]
-        public async Task<HttpResponseMessage> SearchLots(GetParameter param)
+        [ActionName("GetLots")]
+        public async Task<HttpResponseMessage> GetLots(int? intInventoryReceiptItemId)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await bl.SearchLots(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await bl.GetLots(intInventoryReceiptItemId));
         }
     }
 }
