@@ -53,7 +53,7 @@ BEGIN TRY
 			, strSPInvoice			= SOURCE.strSPInvoice
 			, strSPRunReport		= SOURCE.strSPRunReport
 			, intComponentTypeId	= SOURCE.intComponentTypeId
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxAuthorityId
 			, strFormCode

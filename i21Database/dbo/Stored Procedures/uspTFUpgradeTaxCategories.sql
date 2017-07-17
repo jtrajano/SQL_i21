@@ -28,7 +28,7 @@ BEGIN TRY
 	FROM @TaxCategories Source
 	WHERE tblTFTaxCategory.strTaxCategory COLLATE Latin1_General_CI_AS = Source.strTaxCategory COLLATE Latin1_General_CI_AS
 		AND tblTFTaxCategory.intTaxAuthorityId = @TaxAuthorityId
-		AND ISNULL(tblTFTaxCategory.intMasterId, '') = ''
+		AND tblTFTaxCategory.intMasterId IS NULL
 
 	MERGE	
 	INTO	tblTFTaxCategory
@@ -45,7 +45,7 @@ BEGIN TRY
 			strState = SOURCE.strState
 			, strTaxCategory = SOURCE.strTaxCategory
 			, intTaxAuthorityId = @TaxAuthorityId
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxAuthorityId
 			, strState

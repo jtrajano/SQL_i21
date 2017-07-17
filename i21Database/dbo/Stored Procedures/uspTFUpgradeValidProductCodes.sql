@@ -37,7 +37,7 @@ BEGIN TRY
 	FROM #tmpVPC Source
 	WHERE tblTFReportingComponentProductCode.intProductCodeId = Source.intProductCodeId
 		AND tblTFReportingComponentProductCode.intReportingComponentId = Source.intReportingComponentId
-		AND ISNULL(tblTFReportingComponentProductCode.intMasterId, '') = ''
+		AND tblTFReportingComponentProductCode.intMasterId IS NULL
 
 	MERGE	
 	INTO	tblTFReportingComponentProductCode
@@ -76,7 +76,7 @@ BEGIN TRY
 		LEFT JOIN #tmpVPC tmp ON tmp.intReportingComponentId = RCPC.intReportingComponentId
 			AND tmp.intProductCodeId = RCPC.intProductCodeId
 		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND ISNULL(tmp.intProductCodeId, '') = ''
+			AND tmp.intProductCodeId IS NULL
 	)
 
 	DROP TABLE #tmpVPC

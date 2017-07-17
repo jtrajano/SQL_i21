@@ -83,7 +83,7 @@ WHEN MATCHED THEN
 		strDescription					= SOURCE.strDescription
 		, ysnPaperVersionAvailable		= SOURCE.ysnPaperVersionAvailable
 		, ysnElectronicVersionAvailable	= SOURCE.ysnElectronicVersionAvailable
-WHEN NOT MATCHED THEN 
+WHEN NOT MATCHED BY TARGET THEN 
 	INSERT (
 		intTaxAuthorityId
 		, strTaxAuthorityCode

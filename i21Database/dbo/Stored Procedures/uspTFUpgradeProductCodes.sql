@@ -28,7 +28,7 @@ BEGIN TRY
 	FROM @ProductCodes Source
 	WHERE tblTFProductCode.strProductCode COLLATE Latin1_General_CI_AS = Source.strProductCode COLLATE Latin1_General_CI_AS
 		AND tblTFProductCode.intTaxAuthorityId = @TaxAuthorityId
-		AND ISNULL(tblTFProductCode.intMasterId, '') = ''
+		AND tblTFProductCode.intMasterId IS NULL
 
 	MERGE	
 	INTO	tblTFProductCode 

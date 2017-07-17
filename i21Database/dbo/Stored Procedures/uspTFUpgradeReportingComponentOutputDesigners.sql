@@ -36,7 +36,7 @@ BEGIN TRY
 	FROM #tmpRCOD Source
 	WHERE tblTFReportingComponentField.intReportingComponentId = Source.intReportingComponentId
 		AND tblTFReportingComponentField.strColumn COLLATE Latin1_General_CI_AS = Source.strColumn COLLATE Latin1_General_CI_AS
-		AND ISNULL(tblTFReportingComponentField.intMasterId, '') = ''
+		AND tblTFReportingComponentField.intMasterId IS NULL
 
 	UPDATE tblTFReportingComponentField
 	SET intReportingComponentId	= SOURCE.intReportingComponentId
@@ -66,7 +66,7 @@ BEGIN TRY
 		, SOURCE.intMasterId
 	FROM #tmpRCOD SOURCE
 	LEFT JOIN tblTFReportingComponentField TARGET ON TARGET.intMasterId = SOURCE.intMasterId
-	WHERE ISNULL(TARGET.intReportingComponentFieldId, '') = ''
+	WHERE TARGET.intReportingComponentFieldId IS NULL
 	ORDER BY SOURCE.intScheduleColumnId
 
 	-- Delete existing Reporting Component Output Designers that is not within Source

@@ -31,6 +31,7 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = TaxCrit.strFormCode COLLATE Latin1_General_CI_AS
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = TaxCrit.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = TaxCrit.strType COLLATE Latin1_General_CI_AS
+		AND RC.intMasterId IS NOT NULL
 
 	UPDATE tblTFReportingComponentCriteria
 	SET tblTFReportingComponentCriteria.intMasterId = Source.intMasterId
@@ -54,7 +55,7 @@ BEGIN TRY
 			intTaxCategoryId	= SOURCE.intTaxCategoryId
 			, intReportingComponentId	= SOURCE.intReportingComponentId
 			, strCriteria		= SOURCE.strCriteria
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxCategoryId
 			, intReportingComponentId

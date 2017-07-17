@@ -36,7 +36,7 @@ BEGIN TRY
 	FROM #tmpFP Source
 	WHERE tblTFFilingPacket.intReportingComponentId = Source.intReportingComponentId
 		AND tblTFFilingPacket.intTaxAuthorityId = @TaxAuthorityId
-		AND ISNULL(tblTFFilingPacket.intMasterId, '') = ''
+		AND tblTFFilingPacket.intMasterId IS NULL
 
 	MERGE	
 	INTO	tblTFFilingPacket
@@ -50,8 +50,8 @@ BEGIN TRY
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
-			intFrequency				= SOURCE.intFrequency
-	WHEN NOT MATCHED THEN 
+			intFrequency = SOURCE.intFrequency
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxAuthorityId
 			, intReportingComponentId

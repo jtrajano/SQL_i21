@@ -36,7 +36,7 @@ BEGIN TRY
 	FROM #tmpRCC Source
 	WHERE tblTFReportingComponentConfiguration.intReportingComponentId = Source.intReportingComponentId
 		AND tblTFReportingComponentConfiguration.strTemplateItemId COLLATE Latin1_General_CI_AS = Source.strTemplateItemId COLLATE Latin1_General_CI_AS
-		AND ISNULL(tblTFReportingComponentConfiguration.intMasterId, '') = ''
+		AND tblTFReportingComponentConfiguration.intMasterId IS NULL
 
 	MERGE	
 	INTO	tblTFReportingComponentConfiguration
@@ -62,7 +62,7 @@ BEGIN TRY
 			, strLastIndexOf			= SOURCE.strLastIndexOf
 			, strSegment				= SOURCE.strSegment
 			, intConfigurationSequence	= SOURCE.intSort
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
 			, strTemplateItemId
@@ -105,7 +105,7 @@ BEGIN TRY
 		LEFT JOIN #tmpRCC tmp ON tmp.intReportingComponentId = RCC.intReportingComponentId
 			AND tmp.strTemplateItemId = RCC.strTemplateItemId
 		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND ISNULL(tmp.strTemplateItemId, '') = ''
+			AND tmp.strTemplateItemId IS NULL
 	)
 
 	DELETE FROM tblTFReportingComponentConfiguration

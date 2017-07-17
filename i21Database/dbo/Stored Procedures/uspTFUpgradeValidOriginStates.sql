@@ -36,7 +36,7 @@ BEGIN TRY
 	FROM #tmpVOS Source
 	WHERE tblTFReportingComponentOriginState.intOriginDestinationStateId = Source.intOriginDestinationStateId
 		AND tblTFReportingComponentOriginState.intReportingComponentId = Source.intReportingComponentId
-		AND ISNULL(tblTFReportingComponentOriginState.intMasterId, '') = ''
+		AND tblTFReportingComponentOriginState.intMasterId IS NULL
 
 	MERGE	
 	INTO	tblTFReportingComponentOriginState
@@ -53,7 +53,6 @@ BEGIN TRY
 			intReportingComponentId			= SOURCE.intReportingComponentId
 			, intOriginDestinationStateId	= SOURCE.intOriginDestinationStateId
 			, strType						= SOURCE.strStatus
-
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
@@ -76,7 +75,7 @@ BEGIN TRY
 		LEFT JOIN #tmpVOS tmp ON tmp.intReportingComponentId = RCOrigin.intReportingComponentId
 			AND tmp.intOriginDestinationStateId = RCOrigin.intOriginDestinationStateId
 		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND ISNULL(tmp.intOriginDestinationStateId, '') = ''
+			AND tmp.intOriginDestinationStateId IS NULL
 	)
 
 	DROP TABLE #tmpVOS

@@ -19,7 +19,7 @@ BEGIN TRY
 	SET tblTFOriginDestinationState.intMasterId = Source.intMasterId
 	FROM @OriginDestinationStates Source
 	WHERE tblTFOriginDestinationState.strOriginDestinationState COLLATE Latin1_General_CI_AS = Source.strOriginDestinationState COLLATE Latin1_General_CI_AS
-		AND ISNULL(tblTFOriginDestinationState.intMasterId, '') = ''
+		AND tblTFOriginDestinationState.intMasterId IS NULL
 
 	MERGE	
 	INTO	tblTFOriginDestinationState
@@ -33,7 +33,7 @@ BEGIN TRY
 		UPDATE
 		SET 
 			strOriginDestinationState = SOURCE.strOriginDestinationState
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			strOriginDestinationState
 			, intMasterId

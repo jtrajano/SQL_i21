@@ -28,7 +28,7 @@ BEGIN TRY
 	FROM @TerminalControlNumbers Source
 	WHERE tblTFTerminalControlNumber.strTerminalControlNumber COLLATE Latin1_General_CI_AS = Source.strTerminalControlNumber COLLATE Latin1_General_CI_AS
 		AND tblTFTerminalControlNumber.intTaxAuthorityId = @TaxAuthorityId
-		AND ISNULL(tblTFTerminalControlNumber.intMasterId, '') = ''
+		AND tblTFTerminalControlNumber.intMasterId IS NULL
 	
 	MERGE	
 	INTO	tblTFTerminalControlNumber 
@@ -47,7 +47,7 @@ BEGIN TRY
 			, strCity			= SOURCE.strCity
 			, dtmApprovedDate	= SOURCE.dtmApprovedDate
 			, strZip			= SOURCE.strZip
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxAuthorityId
 			, strTerminalControlNumber
