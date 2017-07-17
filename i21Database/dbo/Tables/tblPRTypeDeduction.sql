@@ -9,6 +9,8 @@
 	[strCalculationType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblPaycheckMax] [numeric](18, 6) NULL DEFAULT ((0)),
+	[strPaycheckMaxType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Fixed'),
 	[strW2Code] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strPaidBy] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Employee'),
 	[ysnCreatePayable] [bit] NULL DEFAULT ((0)),
@@ -94,7 +96,7 @@ GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Limit',
+    @value = N'YTD Limit',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
