@@ -67,6 +67,7 @@
 	[ysnRecurring] BIT NULL DEFAULT 0 ,
 	[ysnExported] BIT NULL DEFAULT 0 ,
 	[ysnForApprovalSubmitted] BIT NOT NULL DEFAULT 0 ,
+	[ysnOldPrepayment] BIT NOT NULL DEFAULT 0 ,
 	[dtmDateDeleted] DATETIME NULL,
 	[dtmExportedDate] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 

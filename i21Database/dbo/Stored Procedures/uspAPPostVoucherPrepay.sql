@@ -3,7 +3,8 @@
 	@post				BIT,
 	@recap				BIT,
 	@userId				INT,
-	@batchId			AS NVARCHAR(20),
+	@batchId			NVARCHAR(20) = NULL,
+	@success			BIT OUTPUT,
 	@batchIdUsed		NVARCHAR(50) OUTPUT
 AS
 
@@ -20,9 +21,11 @@ DECLARE @transCount INT;
 
 INSERT INTO @voucherPrepayIdData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
 
-EXEC uspSMGetStartingNumber 3, @batchId OUT
+IF @batchId IS NULL EXEC uspSMGetStartingNumber 3, @batchId OUT
 
-IF @post = 0
+SET @batchIdUsed = @batchId;
+
+IF @post = 1
 BEGIN
 	INSERT INTO @GLEntries (
 		dtmDate ,
@@ -120,7 +123,7 @@ BEGIN
 	WHERE A.strBatchId = @batchId
 
 	UPDATE prepay
-		SET prepay.ysnPosted = 1
+		SET prepay.ysnPosted = @post
 	FROM tblAPBill prepay
 	INNER JOIN @voucherPrepayIdData prepayIds ON prepay.intBillId = prepayIds.intId
 END
@@ -200,11 +203,12 @@ BEGIN
 END
 
 IF @transCount = 0 COMMIT TRANSACTION --COMMIT IF WE INITIATE THE TRANSACTION
+SET @success = 1;
 END TRY
 BEGIN CATCH
 	ROLLBACK TRANSACTION
 	DECLARE @ErrorMessage NVARCHAR(4000);
 	SET @ErrorMessage  = ERROR_MESSAGE()
-	RAISERROR('Error occurred while posting the transaction', 16, 1);
+	RAISERROR(@ErrorMessage, 16, 1);
 END CATCH
 
