@@ -1,8 +1,8 @@
-﻿CREATE VIEW dbo.vyuCFCardAccount
+﻿CREATE VIEW [dbo].[vyuCFCardAccount]
 AS
 SELECT   A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountScheduleId, A.intInvoiceCycle, A.intSalesPersonId, A.dtmBonusCommissionDate, 
                          A.dblBonusCommissionRate, A.dblRegularCommissionRate, A.ysnPrintTimeOnInvoices, A.ysnPrintTimeOnReports, A.intTermsCode, A.strBillingSite, A.strPrimarySortOptions, 
-                         A.strSecondarySortOptions, A.ysnSummaryByCard, A.ysnSummaryByVehicle, A.ysnSummaryByMiscellaneous, A.ysnSummaryByProduct, A.ysnSummaryByDepartment, 
+                         A.strSecondarySortOptions, A.ysnSummaryByCard, A.ysnSummaryByVehicle, A.ysnSummaryByMiscellaneous, A.ysnSummaryByProduct, A.ysnSummaryByDepartment, A.ysnSummaryByCardProd,A.ysnSummaryByDeptCardProd,
                          A.ysnVehicleRequire, A.intAccountStatusCodeId, A.strPrintRemittancePage, A.strInvoiceProgramName, A.intPriceRuleGroup, A.strPrintPricePerGallon, 
                          A.ysnPPTransferCostForRemote, A.ysnPPTransferCostForNetwork, A.ysnPrintMiscellaneous, A.intFeeProfileId, A.strPrintSiteAddress, A.dtmLastBillingCycleDate, 
                          A.intRemotePriceProfileId, A.intExtRemotePriceProfileId, A.intLocalPriceProfileId, A.intCreatedUserId, A.dtmCreated, A.intLastModifiedUserId, A.dtmLastModified, 
@@ -17,15 +17,17 @@ SELECT   A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountSchedu
                          N.intPPDistributionSite, N.strPPFileImportType, N.ysnRejectExportCard, N.strRejectPath, N.strParticipant, N.strCFNFileVersion, N.ysnPassOnSSTFromRemotes, 
                          N.ysnExemptFETOnRemotes, N.ysnExemptSETOnRemotes, N.ysnExemptLCOnRemotes, N.strExemptLCCode, N.intImportMapperId, N.strLinkNetwork, 
                          N.intConcurrencyId AS EXPR9, D.intDepartmentId AS EXPR10, D.intAccountId AS EXPR11, D.strDepartment, D.strDepartmentDescription, D.intConcurrencyId AS EXPR12, 
-                         Cus.[intEntityId], Cus.strName, Cus.strCustomerNumber, Cus.strType, Cus.strPhone, Cus.strAddress, Cus.strCity, Cus.strState, Cus.strZipCode, 
+                         Cus.intEntityId, Cus.strName, Cus.strCustomerNumber, Cus.strType, Cus.strPhone, Cus.strAddress, Cus.strCity, Cus.strState, Cus.strZipCode, 
                          Cus.ysnActive AS EXPR13, Cus.intSalespersonId AS EXPR14, Cus.intCurrencyId, Cus.intTermsId, Cus.intShipViaId, Cus.strShipToLocationName, Cus.strShipToAddress, 
                          Cus.strShipToCity, Cus.strShipToState, Cus.strShipToZipCode, Cus.strShipToCountry, Cus.strBillToLocationName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState,
-                          Cus.strBillToZipCode, Cus.strBillToCountry, I.strInvoiceCycle, arCustCon.strEmailDistributionOption, arCustCon.strEmail, arCustCon.ysnPortalAccess, arCustCon.ysnDefaultContact
+                          Cus.strBillToZipCode, Cus.strBillToCountry, I.strInvoiceCycle, 
+						  (select top 1 strEmailDistributionOption from vyuARCustomerContacts where [intEntityId] = A.intCustomerId AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '') AS strEmailDistributionOption, 
+						  (select top 1 strEmail from vyuARCustomerContacts where [intEntityId] = A.intCustomerId AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '') AS strEmail 
 FROM         dbo.tblCFAccount AS A LEFT JOIN
                          dbo.tblCFCard AS C ON A.intAccountId = C.intAccountId LEFT OUTER JOIN
                          dbo.tblCFNetwork AS N ON N.intNetworkId = C.intNetworkId LEFT OUTER JOIN
                          dbo.tblCFDepartment AS D ON D.intDepartmentId = C.intDepartmentId LEFT JOIN
                          dbo.vyuCFCustomerEntity AS Cus ON A.intCustomerId = Cus.[intEntityId] INNER JOIN
-                         dbo.tblCFInvoiceCycle AS I ON I.intInvoiceCycleId = A.intInvoiceCycle LEFT JOIN
-                         dbo.vyuARCustomerContacts AS arCustCon ON A.intCustomerId = arCustCon.intCustomerEntityId AND arCustCon.ysnDefaultContact = 1 AND arCustCon.ysnPortalAccess = 0
+                         dbo.tblCFInvoiceCycle AS I ON I.intInvoiceCycleId = A.intInvoiceCycle INNER JOIN
+						 dbo.tblEMEntity AS E ON E.intEntityId = A.intCustomerId
 GO

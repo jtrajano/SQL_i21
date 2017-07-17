@@ -200,14 +200,14 @@ BEGIN
 	END
 
 	--Sales Person
-	SELECT @intSalesPersonId = S.intEntityId  
+	SELECT @intSalesPersonId = E.intEntityId  
 	FROM tblEMEntity E
 	INNER JOIN tblARSalesperson S
 	ON E.intEntityId = S.[intEntityId]
 	WHERE E.strName = @strSalesPersonId
 	IF (@strSalesPersonId != '')
 	BEGIN
-		SELECT @intSalesPersonId = S.intEntityId  
+		SELECT @intSalesPersonId = E.intEntityId  
 		FROM tblEMEntity E
 		INNER JOIN tblARSalesperson S
 		ON E.intEntityId = S.[intEntityId]

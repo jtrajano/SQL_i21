@@ -13,3 +13,10 @@
 
 
 
+
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [tblCFStateCode_UniqueNetworkStateCode]
+    ON [dbo].[tblCFStateCode]([intNetworkId] ASC, [strStateName] ASC);
+

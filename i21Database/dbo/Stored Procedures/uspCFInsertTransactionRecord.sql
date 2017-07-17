@@ -43,6 +43,7 @@
 
 	-------------SITE RELATED-------------
 	,@strSiteId						NVARCHAR(MAX)
+	,@strSiteName					NVARCHAR(MAX)	= NULL
 	,@strTransactionType			NVARCHAR(MAX)	= NULL
 	,@strDeliveryPickupInd			NVARCHAR(MAX)	= NULL
 	,@intSiteId						INT				= 0
@@ -323,7 +324,7 @@ BEGIN
 			SELECT
 				intNetworkId			= @intNetworkId
 				,strSiteNumber			= @strSiteId
-				,strSiteName			= @strSiteId
+				,strSiteName			= @strSiteName
 				,strDeliveryPickup		= 'Pickup'
 				,intARLocationId		= @intNetworkLocation
 				,strControllerType		= (CASE @strNetworkType 
@@ -360,7 +361,7 @@ BEGIN
 
 		IF(@intTaxGroupByState IS NULL)
 		BEGIN
-			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strState
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
 		END
 		
 		IF(@intTaxGroupByState IS NULL)
@@ -385,7 +386,7 @@ BEGIN
 			SELECT
 				intNetworkId			= @intNetworkId
 				,strSiteNumber			= @strSiteId
-				,strSiteName			= @strSiteId
+				,strSiteName			= @strSiteName
 				,strDeliveryPickup		= 'Pickup'
 				,intARLocationId		= @intNetworkLocation
 				,strControllerType		= 'Voyager'
@@ -687,6 +688,7 @@ BEGIN
 		DECLARE @dblPriceIndexRate			NUMERIC(18,6)
 		DECLARE @dtmPriceIndexDate			DATETIME
 		DECLARE @dblMargin					NUMERIC(18,6)
+		DECLARE @dblInventoryCost			NUMERIC(18,6)
 	------------------------------------------------------------
 
 
@@ -713,7 +715,10 @@ BEGIN
 		END
 		IF(@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL)
 		BEGIN
-			SET @ysnInvalid = 1
+			IF (@strTransactionType != 'Foreign Sale')
+			BEGIN
+				SET @ysnInvalid = 1
+			END
 		END
 		IF(@intARItemLocationId = 0 OR @intARItemLocationId IS NULL)
 		BEGIN
@@ -736,7 +741,10 @@ BEGIN
 		IF(@intCardId = 0 OR @intCardId IS NULL)
 		BEGIN
 			SET @intCardId = NULL
-			SET @ysnInvalid = 1
+			IF (@strTransactionType != 'Foreign Sale')
+			BEGIN
+				SET @ysnInvalid = 1
+			END
 		END
 		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
 		BEGIN
@@ -1032,6 +1040,8 @@ BEGIN
 		,@dtmPriceIndexDate				= dtmPriceIndexDate	
 		,@ysnDuplicate					= ysnDuplicate
 		,@ysnRecalculateInvalid			= ysnInvalid
+		,@dblInventoryCost				= dblInventoryCost
+		,@dblMargin						= dblMargin
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1049,10 +1059,11 @@ BEGIN
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')
 		BEGIN
 				UPDATE tblCFTransaction 
-				SET intContractId = null 
-				,strPriceBasis = null
-				,dblTransferCost = 0
-				,strPriceMethod = 'Standard Pricing'
+				SET intContractId		= null 
+				,strPriceBasis			= null
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
+				,strPriceMethod			= 'Standard Pricing'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
 				,intSiteGroupId			= null
@@ -1071,7 +1082,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost = 0
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = 'Import File Price'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1091,7 +1103,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost = @dblTransferCost
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = @strPriceMethod
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1111,7 +1124,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost = 0
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = 'Special Pricing'
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
@@ -1128,19 +1142,20 @@ BEGIN
 		END
 		ELSE IF (@strPriceMethod = 'Price Profile')
 		BEGIN
-				IF(@strPrcPriceBasis = 'Transfer Cost' OR @strPrcPriceBasis = 'Transfer Price' OR @strPrcPriceBasis = 'Discounted Price' OR @strPrcPriceBasis = 'Full Retail')
-				BEGIN
-					SET @dblTransferCost = @dblTransferCost
-				END
-				ELSE
-				BEGIN
-					SET @dblTransferCost = 0
-				END
+				--IF(@strPrcPriceBasis = 'Transfer Cost' OR @strPrcPriceBasis = 'Transfer Price' OR @strPrcPriceBasis = 'Discounted Price' OR @strPrcPriceBasis = 'Full Retail')
+				--BEGIN
+				--	SET @dblTransferCost = @dblTransferCost
+				--END
+				--ELSE
+				--BEGIN
+				--	SET @dblTransferCost = 0
+				--END
 
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis			= @strPrcPriceBasis
-				,dblTransferCost		= @dblTransferCost
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod			= 'Price Profile'
 				,intPriceProfileId 		= @intPriceProfileId 	
 				,intPriceIndexId		= @intPriceIndexId	
@@ -1175,7 +1190,8 @@ BEGIN
 					
 				UPDATE tblCFTransaction 
 				SET strPriceBasis = null 
-				,dblTransferCost = 0 
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = 'Contract Pricing'
 				,intContractId = @intPrcContractHeaderId
 				,intContractDetailId = @intPrcContractDetailId
@@ -1213,7 +1229,8 @@ BEGIN
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
 				,strPriceBasis = null
-				,dblTransferCost = 0
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
 				,strPriceMethod = @strPriceMethod
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null

@@ -153,11 +153,15 @@ BEGIN TRY
 	,ysnSummaryByMiscellaneous
 	,ysnSummaryByProduct
 	,ysnSummaryByVehicle
+	,ysnSummaryByCardProd	 
+	,ysnSummaryByDeptCardProd
 	,ysnPrintTimeOnInvoices
 	,ysnPrintTimeOnReports
 	,ysnInvalid
 	,ysnPosted
 	,ysnIncludeInQuantityDiscount
+	,ysnShowOnCFInvoice
+	,strDiscountSchedule
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -273,11 +277,15 @@ BEGIN TRY
 	,ysnSummaryByMiscellaneous
 	,ysnSummaryByProduct
 	,ysnSummaryByVehicle
+	,ysnSummaryByCardProd	 
+	,ysnSummaryByDeptCardProd
 	,ysnPrintTimeOnInvoices
 	,ysnPrintTimeOnReports
 	,ysnInvalid
 	,ysnPosted
 	,ysnIncludeInQuantityDiscount
+	,cfInvRptDcnt.ysnShowOnCFInvoice
+	,cfInvRptDcnt.strDiscountSchedule
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN tblCFInvoiceSummaryTempTable AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId

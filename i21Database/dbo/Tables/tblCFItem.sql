@@ -48,6 +48,8 @@
 
 
 
+
+
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFItem_intItemId]
     ON [dbo].[tblCFItem]([intItemId] ASC);
@@ -71,4 +73,9 @@ CREATE NONCLUSTERED INDEX [tblCFItem_intItemId]
 GO
 CREATE NONCLUSTERED INDEX [tblCFItem_intARItemId]
     ON [dbo].[tblCFItem]([intARItemId] ASC);
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UniqueNetworkSiteItem]
+    ON [dbo].[tblCFItem]([intNetworkId] ASC, [intSiteId] ASC, [strProductNumber] ASC);
 

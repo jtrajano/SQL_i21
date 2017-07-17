@@ -70,6 +70,8 @@ BEGIN
 		,ysnSummaryByMiscellaneous = CAST(0 AS BIT)
 		,ysnSummaryByProduct	   = CAST(0 AS BIT)
 		,ysnSummaryByVehicle	   = CAST(0 AS BIT)
+		,ysnSummaryByCardProd	   = CAST(0 AS BIT)
+		,ysnSummaryByDeptCardProd  = CAST(0 AS BIT)
 		,ysnPrintTimeOnInvoices	   = CAST(0 AS BIT)
 		,ysnPrintTimeOnReports	   = CAST(0 AS BIT)
 		,strSiteCity			   = ''
@@ -103,7 +105,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -139,37 +141,51 @@ BEGIN
 		DECLARE @strField	NVARCHAR(MAX)
 
 		WHILE (EXISTS(SELECT 1 FROM @tblCFFieldList))
-		BEGIN
-			SELECT @intCounter = [intFieldId] FROM @tblCFFieldList
-			SELECT @strField = [strFieldId] FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
+			BEGIN
+				SELECT @intCounter = [intFieldId] FROM @tblCFFieldList
+				SELECT @strField = [strFieldId] FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
 				
-		--MAIN LOOP			
-		SELECT TOP 1
-			 @From = [from]
-			,@To = [to]
-			,@Condition = [condition]
-			,@Fieldname = [fieldname]
-		FROM @temp_params WHERE [fieldname] = @strField
-		IF (UPPER(@Condition) = 'BETWEEN')
-		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-			' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-		END
-		ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
-		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-			' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
-		END
-		ELSE IF (UPPER(@Condition) = 'IN')
-		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-			' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
-		END
+			--MAIN LOOP			
+			SELECT TOP 1
+				 @From = [from]
+				,@To = [to]
+				,@Condition = [condition]
+				,@Fieldname = [fieldname]
+			FROM @temp_params WHERE [fieldname] = @strField
+			IF (UPPER(@Condition) = 'BETWEEN')
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+			END
+			ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+			END
+			ELSE IF (UPPER(@Condition) = 'IN')
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+			END
+			ELSE IF (UPPER(@Condition) = 'GREATER THAN')
+			BEGIN
+				BEGIN
+					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+				END
+			END
+			ELSE IF (UPPER(@Condition) = 'LESS THAN')
+			BEGIN
+				BEGIN
+					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+				END
+			END
 
-		SET @From = ''
-		SET @To = ''
-		SET @Condition = ''
-		SET @Fieldname = ''
+			SET @From = ''
+			SET @To = ''
+			SET @Condition = ''
+			SET @Fieldname = ''
 
 
 		--MAIN LOOP
@@ -177,18 +193,41 @@ BEGIN
 			DELETE FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
 		END
 
+
 		DECLARE @strPrintTimeStamp NVARCHAR(MAX)
 		SELECT TOP 1
 			 @strPrintTimeStamp = [from]
 		FROM @temp_params WHERE [fieldname] = 'strPrintTimeStamp'
 
+		DECLARE @ysnReprintInvoice NVARCHAR(MAX)
+		SELECT TOP 1
+			 @ysnReprintInvoice = [from]
+		FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
 
 		DECLARE @InvoiceDate NVARCHAR(MAX)
 		SELECT TOP 1
 			 @InvoiceDate = [from]
 		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
-		
 
+		DECLARE @CustomerName NVARCHAR(MAX)
+		DECLARE @CustomerNameValue NVARCHAR(MAX)
+		SELECT TOP 1
+			 @CustomerName = [from]
+			,@CustomerNameValue = [fieldname]
+		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
+
+
+		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
+		BEGIN
+			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strInvoiceReportNumber IS NOT NULL AND strInvoiceReportNumber != '''' )'
+			IF (ISNULL(@CustomerName,'') != '')
+			BEGIN
+				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' + 
+				' (' + @CustomerNameValue  + ' = ' + '''' + @CustomerName + '''' + ' )' END
+			END
+		END
+		
+		
 		--NON DISTRIBUTION LIST
 		SELECT TOP 1
 			 @From = [from]
@@ -208,13 +247,25 @@ BEGIN
 		SET @Condition = ''
 		SET @Fieldname = ''
 
+		IF (@ysnReprintInvoice = 1)
+		BEGIN
 		--INCLUDE PRINTED TRANSACTION
-		SELECT TOP 1
-			 @From = [from]
-			,@To = [to]
-			,@Condition = [condition]
-			,@Fieldname = [fieldname]
-		FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
+		
+			SET @From = ''
+			SET @To = ''
+			SET @Condition = ''
+			SET @Fieldname = ''
+		
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1
+				 @From = [from]
+				,@To = [to]
+				,@Condition = [condition]
+				,@Fieldname = [fieldname]
+			FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
+		END
 
 		DECLARE @tblCFTableCardIds TABLE ([intAccountId]	INT)
 		DECLARE @tblCFTableTransationIds TABLE ([intTransactionId]	INT)
@@ -358,6 +409,9 @@ BEGIN
 
 			INSERT INTO  @tblCFFilterIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
+
+			UPDATE tblCFTransaction SET strTempInvoiceReportNumber = strInvoiceReportNumber where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+
 			---------GET DISTINCT TRANSACTION ID---------
 		END
 
@@ -438,7 +492,9 @@ BEGIN
 		,ysnSummaryByDepartment		
 		,ysnSummaryByMiscellaneous	
 		,ysnSummaryByProduct		
-		,ysnSummaryByVehicle		
+		,ysnSummaryByVehicle
+		,ysnSummaryByCardProd	 
+		,ysnSummaryByDeptCardProd		
 		,ysnPrintTimeOnInvoices		
 		,ysnPrintTimeOnReports		
 		,ysnInvalid					
@@ -517,7 +573,9 @@ BEGIN
 		,ysnSummaryByDepartment		
 		,ysnSummaryByMiscellaneous	
 		,ysnSummaryByProduct		
-		,ysnSummaryByVehicle		
+		,ysnSummaryByVehicle
+		,ysnSummaryByCardProd	 
+		,ysnSummaryByDeptCardProd		
 		,ysnPrintTimeOnInvoices		
 		,ysnPrintTimeOnReports		
 		,ysnInvalid					
