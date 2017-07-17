@@ -193,8 +193,12 @@ namespace iRely.Inventory.WebApi
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = count,
-                success = !result.HasError,
+                data = new
+                {
+                    strBatchId = result.strBatchId,
+                    strTransactionId = count.strTransactionId
+                },
+                success = true,
                 message = new
                 {
                     statusText = result.Exception.Message,

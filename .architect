@@ -8472,12 +8472,14 @@
                             "cn": [
                                 {
                                     "id": "8aa8d6e8-79c2-4333-a1fd-6b25844c5bd6",
+                                    "expanded": false,
                                     "cn": [
                                         {
                                             "id": "a7b9a1b5-b6d8-44ee-9ba4-763a8334ccab"
                                         },
                                         {
                                             "id": "95e1f833-078a-4674-b66d-cc5655c1e96f",
+                                            "expanded": false,
                                             "cn": [
                                                 {
                                                     "id": "947457f1-f21d-4d26-9d77-248b0484357f",
@@ -8577,6 +8579,7 @@
                                         },
                                         {
                                             "id": "9c54d640-b9f9-4f80-bb02-b4561741def1",
+                                            "expanded": false,
                                             "cn": [
                                                 {
                                                     "id": "856bace9-9a5c-4f6c-a3a2-cc89b1793cc5",
@@ -8767,7 +8770,16 @@
                                     ]
                                 },
                                 {
+                                    "id": "1c73849f-0649-447a-ac46-d9ddb99c846b",
+                                    "cn": [
+                                        {
+                                            "id": "73e3d630-24c1-4eb9-87b0-fd812569c387"
+                                        }
+                                    ]
+                                },
+                                {
                                     "id": "a21c6047-e07e-40f8-aed7-395cb9b04f74",
+                                    "expanded": false,
                                     "cn": [
                                         {
                                             "id": "5421049d-fcef-4496-8b93-7a3408110f35"
@@ -11054,7 +11066,7 @@
     },
     "inspectorState": {
         "topInstance": "8ad515cd-82b8-4f02-b203-22aeffb743c9",
-        "selectedInstance": "d0fdf62a-00b2-49ff-8bc8-8e269195e90e"
+        "selectedInstance": "1c73849f-0649-447a-ac46-d9ddb99c846b"
     },
     "editMode": "design",
     "userSettings": {

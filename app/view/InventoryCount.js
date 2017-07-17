@@ -1199,6 +1199,15 @@ Ext.define('Inventory.view.InventoryCount', {
                             ]
                         },
                         {
+                            xtype: 'glrecaptab',
+                            itemId: 'pgePostPreview',
+                            title: 'Post Preview',
+                            tabConfig: {
+                                xtype: 'tab',
+                                itemId: 'tabPostPreview'
+                            }
+                        },
+                        {
                             xtype: 'panel',
                             layout: 'fit',
                             title: 'Activities',

@@ -104,38 +104,50 @@ namespace iRely.Inventory.BusinessLayer
             return postResult;
         }
 
-        public SaveResult PostInventoryCount(Common.Posting_RequestModel count, bool isRecap)
+        public Common.GLPostResult PostInventoryCount(Common.Posting_RequestModel count, bool isRecap)
         {
             // Save the record first 
+            
+            var glPostResult = new Common.GLPostResult();
+            glPostResult.Exception = new ServerException();
+
             var result = _db.Save(false);
 
             if (result.HasError)
             {
-                return result;
+                glPostResult.BaseException = result.BaseException;
+                glPostResult.Exception = result.Exception;
+                glPostResult.HasError = result.HasError;
+                glPostResult.RowsAffected = result.RowsAffected;
+                //glPostResult.strBatchId = null; 
+
+                return glPostResult;
             }
 
-            // Post the receipt transaction 
-            var postResult = new SaveResult();
+            // Post the count transaction 
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                string strBatchId;
                 if (count.isPost)
                 {
-                    db.PostInventoryCount(isRecap, count.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.PostInventoryCount(isRecap, count.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnPostInventoryCount(isRecap, count.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.UnPostInventoryCount(isRecap, count.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
-                postResult.HasError = false;
+
+                glPostResult.HasError = false;
+                glPostResult.strBatchId = strBatchId;
             }
             catch (Exception ex)
             {
-                postResult.BaseException = ex;
-                postResult.HasError = true;
-                postResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+                glPostResult.BaseException = ex;
+                glPostResult.HasError = true;
+                glPostResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
-            return postResult;
+            return glPostResult;
         }
 
         /// <summary>

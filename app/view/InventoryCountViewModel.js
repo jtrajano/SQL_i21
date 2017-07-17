@@ -15,7 +15,8 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         'Inventory.store.BufferedLot',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
-        'Inventory.store.BufferedItemStockUOMForAdjustmentView'
+        'Inventory.store.BufferedItemStockUOMForAdjustmentView',
+        'GeneralLedger.controls.RecapTab'
     ],
 
     data: {
@@ -129,6 +130,13 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
     },
 
     formulas: {
+        pgePreviewTitle: function(get) {
+            var posted = get('current.ysnPosted');
+            if (posted)
+                return 'Unpost Preview';            
+            else 
+                return 'Post Preview';
+        },
         intCurrencyId: function(get) {
             return get('current.intCurrencyId');
         },

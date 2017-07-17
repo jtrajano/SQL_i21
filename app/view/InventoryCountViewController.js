@@ -43,10 +43,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 hidden: '{hideUnpostButton}'
             },
             btnPostPreview: {
-                hidden: '{hidePostButton}'
+                hidden: true
             },
             btnUnpostPreview: {
-                hidden: '{hideUnpostButton}'
+                hidden: true
             },
             btnRecount: {
                 hidden: '{checkRecount}',
@@ -406,6 +406,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     hidden: '{hasCountGroup}'
                 },
                 colEnteredBy: 'strUserName'
+            },
+            pgePostPreview: {
+                title: '{pgePreviewTitle}',
+                hidden: '{hasCountGroup}'
             }
         }
     },
@@ -449,6 +453,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         //     deleteButton: win.down('#btnRemoveDetail'),
 
         // });
+
+        var btnExportGridData = win.down("#btnExportGridData");
+        if(btnExportGridData)
+            btnExportGridData.setText("Export");
 
         me.attachOnEditListener(win, grdPhysicalCount);
 
@@ -1161,7 +1169,133 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         });
     },
 
-    onPostClick: function (button, e, eOpts) {
+    onPostClick: function(button, e, oOpts) {
+        if (btnPost){
+            btnPost.disable();
+        }
+        else {
+            return;
+        }
+
+        var me = this;
+        var win = btnPost.up('window');
+        var context = win.context;
+        var currentRecord = win.viewModel.data.current;
+        var tabInventoryCount = win.down('#tabInventoryCount');
+        var activeTab = tabInventoryCount.getActiveTab();       
+
+        var doPost = function (){
+            var current = currentRecord; 
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryCount/PostTransaction',
+                params:{
+                    strTransactionId: current.get('strCountNo'),
+                    isPost: current.get('ysnPosted') ? false : true,
+                    isRecap: false
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    //me.onAfterShip(true);
+
+                    // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
+                    if (activeTab.itemId == 'pgePostPreview'){
+                        var cfg = {
+                            isAfterPostCall: true,
+                            ysnPosted: current.get('ysnPosted') ? true : false
+                        };
+                        me.doPostPreview(win, cfg);
+                    }                     
+                    btnPost.enable();
+                }
+                ,function(failureResponse) {
+                    var responseText = Ext.decode(failureResponse.responseText);
+                    var message = responseText ? responseText.message : {}; 
+                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the inventory count.';
+
+                    //me.onAfterShip(false, statusText);
+                    btnPost.enable();
+                }
+            )
+        };    
+
+        // Save any unsaved data first before doing the post. 
+        if (context.data.hasChanges()) {
+            context.data.validator.validateRecord({ window: win }, function(valid) {
+                // If records are valid, continue with the save. 
+                if (valid){
+                    context.data.saveRecord({
+                        successFn: function () {
+                            doPost();             
+                        }
+                    });
+                }
+                // If records are invalid, re-enable the post button. 
+                else {
+                    btnPost.enable();
+                }
+            });            
+        }
+        else {
+            doPost();
+        }
+    },
+
+    doPostPreview: function(win, cfg){
+        var me = this;
+
+        if (!win) {return;}
+        cfg = cfg ? cfg : {};
+
+        var isAfterPostCall = cfg.isAfterPostCall;
+        var ysnPosted = cfg.ysnPosted;
+        var context = win.context;
+
+        var doRecap = function (currentRecord){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryCount/PostTransaction',
+                params:{
+                    strTransactionId: currentRecord.get('strCountNo'),
+                    isPost: isAfterPostCall ? ysnPosted : currentRecord.get('ysnPosted') ? false : true,
+                    isRecap: true
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    var postResult = Ext.decode(successResponse.responseText);
+                    if(postResult.success === false) {
+                        iRely.Functions.showErrorDialog(postResult.message.statusText);                    
+                    } else {
+                        var batchId = postResult.data.strBatchId;
+                        if (batchId) {
+                            me.bindRecapGrid(batchId);
+                        }       
+                    }             
+                }
+                ,function(failureResponse) {
+                    // Show Post Preview failed.
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            )
+        };    
+
+        // If there is no data change, calculate the charge and do the recap. 
+        if (!context.data.hasChanges()) {
+            doRecap(win.viewModel.data.current);
+        }
+
+        // Save has data changes first before anything else. 
+        context.data.saveRecord({
+            successFn: function () {
+                doRecap(win.viewModel.data.current);             
+            }
+        });        
+    },    
+
+    onPostClick2: function (button, e, eOpts) {
         var me = this;
         var win = button.up('window');
         var context = win.context;
@@ -1564,6 +1698,17 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         }
     },
 
+    onInventoryCountTabChange: function(tabPanel, newCard, oldCard, eOpts){
+        var me = this;
+        var win = tabPanel.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;        
+        switch (newCard.itemId) {
+            case 'pgePostPreview': 
+                me.doPostPreview(win);
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboUOM": {
@@ -1637,6 +1782,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#cboCountBy": {
                 select: this.onCountBySelect
+            },
+            "#tabInventoryCount": {
+                tabChange: this.onInventoryCountTabChange
             }
         });
     }
