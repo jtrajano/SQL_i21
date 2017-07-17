@@ -99,11 +99,12 @@ BEGIN
 	END
 	ELSE IF @strScreenName = 'Settle Storage'
 	BEGIN
-		SELECT	@intExternalHeaderId	=	HR.intCustomerStorageId,
-				@strNumber				=	HR.strStorageTicketNumber,
-				@strHeaderIdColumn		=	'intCustomerStorageId'
-		FROM	tblGRCustomerStorage	HR	
-		WHERE	HR.intCustomerStorageId	=	@intExternalId
+		SELECT	@intExternalHeaderId	=	HR.intSettleStorageId,
+				@strNumber				=	HR.strStorageTicket,
+				@strHeaderIdColumn		=	'intSettleStorageId'
+		FROM	tblGRSettleStorageTicket	DL
+		JOIN    tblGRSettleStorage      HR 	ON HR.intSettleStorageId=DL.intSettleStorageId
+		WHERE	DL.intSettleStorageTicketId	=	@intExternalId
 	END
 	ELSE IF @strScreenName = 'Transfer Storage'
 	BEGIN
