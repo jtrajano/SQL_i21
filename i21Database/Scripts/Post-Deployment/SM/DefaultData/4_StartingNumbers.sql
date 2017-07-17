@@ -1182,7 +1182,7 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Prepayment Reversal')
 
 	UNION ALL
-	SELECT	 [intStartingNumberId]	= 122
+	SELECT	 [intStartingNumberId]	= 123
 			,[strTransactionType]	= N'Credit Note'
 			,[strPrefix]			= N'CN-'
 			,[intNumber]			= 1
