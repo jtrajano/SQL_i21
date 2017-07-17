@@ -237,6 +237,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             return get('current.intCurrencyId');
         },
         
+        hasCustomerStorage: function(get) {
+            return get('grdInventoryShipment.selection.strStorageTypeDescription');
+        },
+
         getShipButtonText: function(get) {
             if (get('current.ysnPosted')) {
                 return 'Unpost';

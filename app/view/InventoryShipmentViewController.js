@@ -394,6 +394,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strOwnershipType',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}',
+                        readOnly: '{hasCustomerStorage}',
                         origValueField: 'intOwnershipType',
                         origUpdateField: 'intOwnershipType',
                         store: '{ownershipTypes}'
@@ -1377,6 +1378,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         else if (combo.itemId === 'cboCustomerStorage') {
             current.set('intStorageScheduleTypeId', records[0].get('intStorageTypeId'));
+            if(records[0].get('intStorageTypeId')) {
+                current.set('intOwnershipType', 2);
+                current.set('strOwnershipType', 'Storage');
+            }
         }
 
         else if (combo.itemId === 'cboForexRateType') {
