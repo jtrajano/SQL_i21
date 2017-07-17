@@ -10,7 +10,7 @@
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblPaycheckMax] [numeric](18, 6) NULL DEFAULT ((0)),
-	[strPaycheckMaxType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Fixed'),
+	[strPaycheckMaxType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strW2Code] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strPaidBy] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Employee'),
 	[ysnCreatePayable] [bit] NULL DEFAULT ((0)),
