@@ -3,6 +3,7 @@ AS
 
 SELECT 
 *,
+strBankTransactionTypeName = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = tblCMBankTransaction.intBankTransactionTypeId),
 ysnPayeeEFTInfoActive = ISNULL((
 		SELECT TOP 1 ysnActive FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
