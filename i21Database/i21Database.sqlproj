@@ -177,6 +177,8 @@
     <Folder Include="Scripts\Post-Deployment\CRM" />
     <Folder Include="Scripts\Post-Deployment\LG" />
     <Folder Include="Scripts\Post-Deployment\RM" />
+    <Folder Include="Scripts\Post-Deployment\PAT" />
+    <Folder Include="Scripts\Post-Deployment\PAT\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -5451,6 +5453,10 @@
     <Build Include="dbo\Stored Procedures\uspGRPostSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnPostSettleStorage.sql" />
     <Build Include="dbo\Tables\tblHDOOPMonitoring.sql" />
+    <Build Include="dbo\Functions\fnAPCalculateVoucherDetailUnits.sql" />
+    <Build Include="dbo\Tables\tblSMLoginDeviceToken.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOFeed.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\DefaultData\1_AddDefaultLetters.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

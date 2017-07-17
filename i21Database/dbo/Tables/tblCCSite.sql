@@ -17,7 +17,7 @@
 	--
 	--DealerSite	
 	--intCreditCardReceivableAccountId
-	[intAccountId] INT NOT NULL,
+	[intAccountId] INT NULL,
 	[intFeeExpenseAccountId] INT NULL,
 	[ysnPostNetToArCustomer]  BIT  DEFAULT ((0)) NOT NULL,
 	[strMerchantCategory] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,

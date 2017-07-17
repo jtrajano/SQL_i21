@@ -9,11 +9,12 @@ SELECT
     G.strAccountType, 
     S.intAccountStructureId,
     G.intAccountGroupId,
-    G.strAccountGroup
+    G.strAccountGroup,
+    U.intStructureType,
+    U.strStructureName
 FROM            
     dbo.tblGLAccountSegment AS S LEFT OUTER JOIN
     dbo.tblGLAccountGroup AS G ON S.intAccountGroupId = G.intAccountGroupId LEFT OUTER JOIN
     dbo.tblGLAccountCategory AS C ON S.intAccountCategoryId = C.intAccountCategoryId LEFT OUTER JOIN
     dbo.tblGLAccountStructure AS U ON S.intAccountStructureId = U.intAccountStructureId
-
 GO

@@ -71,32 +71,33 @@ DECLARE @temp_aging_table TABLE(
 )
 
 DECLARE @temp_statement_table TABLE(
-	 [strReferenceNumber]	 NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,[strTransactionType]	 NVARCHAR(100)
-	,[intEntityCustomerId]	 INT
-	,[dtmDueDate]			 DATETIME
-	,[dtmDate]				 DATETIME
-	,[intDaysDue]			 INT
-	,[dblTotalAmount]		 NUMERIC(18,6)
-	,[dblAmountPaid]		 NUMERIC(18,6)
-	,[dblAmountDue]			 NUMERIC(18,6)
-	,[dblPastDue]			 NUMERIC(18,6)
-	,[dblMonthlyBudget]		 NUMERIC(18,6)
-	,[strDescription]		 NVARCHAR(100)
-	,[strItemNo]			 NVARCHAR(100)
-	,[dblQtyOrdered]		 NUMERIC(18,6)
-	,[dblQtyShipped]		 NUMERIC(18,6)
-	,[dblTotal]				 NUMERIC(18,6)
-	,[dblPrice]				 NUMERIC(18,6)
-	,[intInvoiceId]			 INT
-	,[strCustomerNumber]	 NVARCHAR(100)
-	,[strName]				 NVARCHAR(100)
-	,[strBOLNumber]			 NVARCHAR(100)
-	,[dblCreditLimit]		 NUMERIC(18,6)
-	,[strFullAddress]		 NVARCHAR(MAX)
-	,[strStatementFooterComment] NVARCHAR(MAX)	
-	,[strCompanyName]		 NVARCHAR(MAX)
-	,[strCompanyAddress]	 NVARCHAR(MAX)
+	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,[strTransactionType]			NVARCHAR(100)
+	,[intEntityCustomerId]			INT
+	,[dtmDueDate]					DATETIME
+	,[dtmDate]						DATETIME
+	,[intDaysDue]					INT
+	,[dblTotalAmount]				NUMERIC(18,6)
+	,[dblAmountPaid]				NUMERIC(18,6)
+	,[dblAmountDue]					NUMERIC(18,6)
+	,[dblPastDue]					NUMERIC(18,6)
+	,[dblMonthlyBudget]				NUMERIC(18,6)
+	,[strDescription]				NVARCHAR(100)
+	,[strItemNo]					NVARCHAR(100)
+	,[dblQtyOrdered]				NUMERIC(18,6)
+	,[dblQtyShipped]				NUMERIC(18,6)
+	,[dblTotal]						NUMERIC(18,6)
+	,[dblPrice]						NUMERIC(18,6)
+	,[intInvoiceId]					INT
+	,[strCustomerNumber]			NVARCHAR(100)
+	,[strName]						NVARCHAR(100)
+	,[strBOLNumber]					NVARCHAR(100)
+	,[dblCreditLimit]				NUMERIC(18,6)
+	,[strFullAddress]				NVARCHAR(MAX)
+	,[strStatementFooterComment]	NVARCHAR(MAX)	
+	,[strCompanyName]				NVARCHAR(MAX)
+	,[strCompanyAddress]			NVARCHAR(MAX)
+	,[ysnStatementCreditLimit]		BIT
 )
 
 -- Prepare the XML 
@@ -178,41 +179,71 @@ BEGIN
 	END
 END
  
-SET @query = 'SELECT * FROM
-(SELECT I.strInvoiceNumber AS strReferenceNumber
-		, strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
-		, I.intEntityCustomerId
-		, dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
-		, I.dtmPostDate
-		, intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
-		, dblTotalAmount = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
-		, dblAmountPaid = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
-		, dblAmountDue = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
-		, dblPastDue = CASE WHEN '+ @strDateTo +' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
-						THEN ISNULL(I.dblAmountDue, 0)
-						ELSE 0
-					END
-		, dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
-		, strDescription = CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE IC.strDescription END
-		, IC.strItemNo
-		, ID.dblQtyOrdered
-		, ID.dblQtyShipped
-		, ID.dblTotal
-		, ID.dblPrice
-		, I.intInvoiceId
-		, C.strCustomerNumber
-		, C.strName
-		, I.strBOLNumber
-		, C.dblCreditLimit
-		, strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
-		, strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
-		, strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-		, strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', 0) FROM tblSMCompanySetup)
-FROM tblARInvoice I
-	INNER JOIN (tblARInvoiceDetail ID 
-		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
-	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
-	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
+SET @query = CAST('' AS NVARCHAR(MAX)) + 
+'SELECT * FROM
+(SELECT strReferenceNumber		= I.strInvoiceNumber
+	  , strTransactionType		= CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
+	  , intEntityCustomerId		= I.intEntityCustomerId
+	  , dtmDueDate				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
+	  , dtmPostDate				= I.dtmPostDate
+	  , intDaysDue				= DATEDIFF(DAY, I.dtmDueDate, '+ @strDateTo +')
+	  , dblTotalAmount			= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+	  , dblAmountPaid			= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
+	  , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
+	  , dblPastDue				= CASE WHEN '+ @strDateTo +' > I.dtmDueDate AND I.strTransactionType IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) ELSE 0 END
+	  , dblMonthlyBudget		= ISNULL(dbo.fnARGetCustomerBudget(I.intEntityCustomerId, I.dtmDate), 0)
+	  , strDescription			= CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE ID.strDescription END
+	  , strItemNo				= ID.strItemNo
+	  , dblQtyOrdered			= ID.dblQtyOrdered
+	  , dblQtyShipped			= ID.dblQtyShipped
+	  , dblTotal				= ID.dblTotal
+	  , dblPrice				= ID.dblPrice
+	  , intInvoiceId			= I.intInvoiceId
+	  , strCustomerNumber		= C.strCustomerNumber
+	  , strName					= C.strName
+	  , strBOLNumber			= I.strBOLNumber
+	  , dblCreditLimit			= C.dblCreditLimit
+	  , strFullAddress			= C.strFullAddress
+	  , strStatementFooterComment = dbo.fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Report'')	 
+	  , strCompanyName			= COMPANY.strCompanyName
+	  , strCompanyAddress		= COMPANY.strCompanyAddress
+	  , ysnStatementCreditLimit = C.ysnStatementCreditLimit
+FROM tblARInvoice I WITH (NOLOCK)
+INNER JOIN (
+	SELECT intInvoiceId
+		 , IC.*
+		 , strSCInvoiceNumber
+		 , strSCBudgetDescription
+		 , dblQtyOrdered
+		 , dblQtyShipped
+		 , dblTotal
+		 , dblPrice
+	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK) 
+	LEFT JOIN (SELECT intItemId
+					, strItemNo
+					, strDescription
+			   FROM dbo.tblICItem WITH (NOLOCK)
+	) IC ON ID.intItemId = IC.intItemId
+) ID ON I.intInvoiceId = ID.intInvoiceId	
+INNER JOIN (
+	SELECT intEntityId
+		 , strName
+		 , strCustomerNumber
+		 , strFullAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strBillToLocationName, strBillToAddress, strBillToCity, strBillToState, strBillToZipCode, strBillToCountry, NULL, 0)
+		 , dblCreditLimit
+		 , ysnStatementCreditLimit
+	FROM vyuARCustomerSearch WITH (NOLOCK)
+) C ON I.intEntityCustomerId = C.intEntityId
+LEFT JOIN (
+	SELECT intTermID
+			, strTerm
+	FROM dbo.tblSMTerm WITH (NOLOCK)
+) T ON I.intTermId = T.intTermID
+OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+				, strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) 
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
@@ -342,7 +373,8 @@ BEGIN
 		  ,STATEMENTREPORT.strFullAddress
 		  ,STATEMENTREPORT.strStatementFooterComment	  
 		  ,STATEMENTREPORT.strCompanyName
-		  ,STATEMENTREPORT.strCompanyAddress	  
+		  ,STATEMENTREPORT.strCompanyAddress
+		  ,STATEMENTREPORT.ysnStatementCreditLimit	  
 		  ,dtmAsOfDate = @dtmDateTo
 	FROM @temp_statement_table AS STATEMENTREPORT
 	LEFT JOIN @temp_aging_table AS AGINGREPORT 

@@ -190,7 +190,7 @@ ELSE
 				/* Clear the Void Check entry if successfull posted*/
 				IF (@isPostingSuccessful = 1) 
 					BEGIN
-						IF (@intVoidBankTransactionTypeId = @PAYCHECK OR @intVoidBankTransactionTypeId = @DIRECT_DEPOSIT)
+						IF (@intVoidBankTransactionTypeId = @DIRECT_DEPOSIT)
 						BEGIN
 							UPDATE tblCMBankTransaction 
 								SET ysnPosted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 1 ELSE 0 END, ysnCheckVoid = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, ysnClr = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, 

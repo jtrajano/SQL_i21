@@ -159,6 +159,13 @@ Begin
 			Else
 				Set @strHeaderState='ADDED'
 		End
+
+		--Send Create Feed only Once
+		If UPPER(@strCommodityCode)='TEA' AND @strHeaderState='ADDED' 
+			AND (Select TOP 1 UPPER(strRowState) from tblCTContractFeed where intContractHeaderId=@intContractHeaderId 
+					AND intContractFeedId < (Select MIN(intContractFeedId) From tblCTContractFeed 
+					Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='') ORDER By intContractFeedId)='ADDED'
+			GOTO NEXT_PO
 	End
 
 	--Donot generate Modified Idoc if PO No is not there
