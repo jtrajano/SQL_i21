@@ -8,6 +8,8 @@ SELECT
 	S.strDescription, 
 	G.strAccountType, 
 	S.intAccountStructureId,
+    G.intAccountGroupId,
+    G.strAccountGroup,
 	U.intStructureType,
 	U.strStructureName 
 FROM            
