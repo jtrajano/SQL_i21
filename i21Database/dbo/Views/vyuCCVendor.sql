@@ -26,11 +26,11 @@ SELECT DISTINCT VendorDefault.intVendorDefaultId
 	, VendorDefault.strImportFilePath
 	, VendorDefault.intImportFileHeaderId
 FROM tblCCVendorDefault VendorDefault
-INNER JOIN tblCCDealerSite DealerSite ON DealerSite.intVendorDefaultId = VendorDefault.intVendorDefaultId
+INNER JOIN tblCCSite DealerSite ON DealerSite.intVendorDefaultId = VendorDefault.intVendorDefaultId
 INNER JOIN tblAPVendor Vendor ON VendorDefault.intVendorId = Vendor.[intEntityId]
 INNER JOIN tblEMEntity Entity ON Vendor.[intEntityId] = Entity.intEntityId
 LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityId = Entity.intEntityId AND EntityLocation.ysnActive = 1 AND EntityLocation.ysnDefaultLocation = 1
 LEFT JOIN tblSMTerm Term ON Term.intTermID = EntityLocation.intTermsId
 LEFT JOIN tblSMPaymentMethod F ON F.intPaymentMethodID = Vendor.intPaymentMethodId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = VendorDefault.intCompanyLocationId
-LEFT JOIN tblCMBankAccount BankAccount ON VendorDefault.intBankAccountId = BankAccount.intBankAccountId
+LEFT JOIN vyuCMBankAccount BankAccount ON VendorDefault.intBankAccountId = BankAccount.intBankAccountId

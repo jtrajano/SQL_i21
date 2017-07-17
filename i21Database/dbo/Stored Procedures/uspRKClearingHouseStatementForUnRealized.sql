@@ -13,5 +13,6 @@ LEFT(REPLACE(CONVERT(VARCHAR(9), dtmTradeDate, 6), ' ', '-') + ' ' + convert(var
 dblLong,dblShort,isnull(dblLong,0) - isnull(dblShort,0) dblNet,dblPrice,
 	IsNull(dbo.fnRKGetLatestClosingPrice (intFutureMarketId,intFutureMonthId ,dtmTradeDate), 0.0) dblClosingPrice,GrossPnL,dblFutCommission
 FROM vyuRKUnrealizedPnL 
-WHERE  strName=@strName AND strAccountNumber = @strAccountNumber AND dtmTradeDate between @dtmTransactionFromDate AND @dtmTransactionToDate  
+WHERE  strName=@strName AND strAccountNumber = @strAccountNumber 
+AND convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionToDate,110),110)
 )t )t1 ORDER BY strFutMarketName,intRowNumber

@@ -97,17 +97,17 @@
 	tblGRStorageScheduleRule.strScheduleId,
 	ICCommodity.strCommodityCode,
 	tblICStorageLocation.strDescription,
-	tblICInventoryReceipt.intInventoryReceiptId,
-	tblICInventoryReceipt.strReceiptNumber,
-	tblICInventoryReceipt.dtmReceiptDate,
 	vyuEMSearchShipVia.strName AS strHaulerName,
 	QM.strDiscountCode,
 	QM.dblGradeReading,
-	(SELECT strCompanyName FROM tblSMCompanySetup) AS strCompanyName,
-	(SELECT strAddress FROM tblSMCompanySetup) AS strCompanyAddress,
-	(SELECT strPhone FROM tblSMCompanySetup) AS strCompanyPhone,
-	(SELECT strCity FROM tblSMCompanySetup) AS strCompanyCity,
-	(SELECT strCountry FROM tblSMCompanySetup) AS strCompanyCountry,
+	tblSMCompanySetup.strCompanyName,
+	tblSMCompanySetup.strCompanyAddress,
+	tblSMCompanySetup.strCompanyPhone,
+	tblSMCompanySetup.strCompanyCity,
+	tblSMCompanySetup.strCompanyCountry,
+	ReceiptItem.intInventoryReceiptId,
+	ReceiptItem.strReceiptNumber,
+	ISNULL(Voucher.dtmDate, ReceiptItem.dtmReceiptDate) AS dtmReceiptDate,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
   FROM tblSCTicket SC
   LEFT JOIN tblICCommodity ICCommodity ON ICCommodity.intCommodityId = SC.intCommodityId
@@ -122,6 +122,26 @@
   LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SC.intDiscountId
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
   LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
-  LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
   LEFT JOIN vyuSCGradeReadingReport QM ON QM.intTicketId = SC.intTicketId AND QM.ysnDryingDiscount = 1
+  OUTER APPLY(
+	SELECT strCompanyName
+		,strAddress AS strCompanyAddress
+		,strPhone AS strCompanyPhone
+		,strCity AS strCompanyCity
+		,strCountry AS strCompanyCountry
+	 FROM tblSMCompanySetup
+  )AS tblSMCompanySetup
+  OUTER APPLY(
+	SELECT TOP 1 ICI.intInventoryReceiptItemId
+		,IC.intInventoryReceiptId
+		,IC.strReceiptNumber
+		,IC.dtmReceiptDate  from tblICInventoryReceipt IC 
+	INNER JOIN tblICInventoryReceiptItem ICI ON IC.intInventoryReceiptId = ICI.intInventoryReceiptId
+	WHERE ICI.intSourceId = SC.intTicketId AND IC.intSourceType = 1
+  )AS ReceiptItem
+  OUTER APPLY(
+	SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 
+	INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId
+	WHERE APD.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+  )AS Voucher
   WHERE SC.strTicketStatus = 'C' AND SC.intEntityId > 0

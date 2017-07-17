@@ -249,6 +249,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\20_UpdateContractItemStatuses.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
 
+-- Patronage
+:r .\PAT\DefaultData\1_AddDefaultLetters.sql 
+
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
 :R .\HD\DefaultData\2_Screen.sql

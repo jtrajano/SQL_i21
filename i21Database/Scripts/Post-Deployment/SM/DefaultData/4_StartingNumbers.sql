@@ -667,7 +667,7 @@ GO
 			,[strTransactionType]	= N'StorageTicketNumber'
 			,[strPrefix]			= N'STR-'
 			,[intNumber]			= 1
-			,[strModule]			= 'Grain'
+			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'StorageTicketNumber')
@@ -677,7 +677,7 @@ GO
 			,[strTransactionType]	= N'TransferTicketNumber'
 			,[strPrefix]			= N'TRA-'
 			,[intNumber]			= 1
-			,[strModule]			= 'Grain'
+			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'TransferTicketNumber')
@@ -748,7 +748,7 @@ GO
             ,[strTransactionType]   = N'ScaleTicket'
             ,[strPrefix]			= N'SCT-'
             ,[intNumber]            = 1
-            ,[strModule]			= 'Grain'
+            ,[strModule]			= 'Ticket Management'
             ,[ysnEnable]			= 1
             ,[intConcurrencyId]		= 1
     WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'ScaleTicket')
@@ -878,7 +878,7 @@ GO
 			,[strTransactionType]	= N'OffSiteTicketNumber'
 			,[strPrefix]			= N'OFF-'
 			,[intNumber]			= 1
-			,[strModule]			= 'Grain'
+			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'OffSiteTicketNumber')
@@ -1006,7 +1006,7 @@ GO
             ,[strTransactionType]   = N'Ticket Management'
             ,[strPrefix]			= N'TKT-'
             ,[intNumber]            = 1
-            ,[strModule]			= 'Grain'
+            ,[strModule]			= 'Ticket Management'
             ,[ysnEnable]			= 1
             ,[intConcurrencyId]		= 1
     WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Ticket Management')
@@ -1136,7 +1136,7 @@ GO
 			,[strTransactionType]	= N'Storage Statement FormNo'
 			,[strPrefix]			= N'L '
 			,[intNumber]			= 1
-			,[strModule]			= 'Grain'
+			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Statement FormNo')
@@ -1156,7 +1156,7 @@ GO
 			,[strTransactionType]	= N'CPE Receipt'
 			,[strPrefix]			= N' '
 			,[intNumber]			= 1
-			,[strModule]			= 'Grain'
+			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'CPE Receipt')
@@ -1166,7 +1166,7 @@ GO
 			,[strTransactionType]	= N'Delivery Sheet'
 			,[strPrefix]			= N' '
 			,[intNumber]			= 1
-			,[strModule]			= 'Grain'
+			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Sheet')
@@ -1180,6 +1180,17 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Prepayment Reversal')
+
+	UNION ALL
+	SELECT	 [intStartingNumberId]	= 123
+			,[strTransactionType]	= N'Credit Note'
+			,[strPrefix]			= N'CN-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Receivable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Note')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

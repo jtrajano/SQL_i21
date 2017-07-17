@@ -51,6 +51,8 @@ SELECT
 ,Cus.strAccountNumber
 ,strShipViaName = ShipViaEnt.strName
 ,strFreightTerm = FT.strFreightTerm
+,Loc.strCheckPayeeName
+,ysnStatementCreditLimit
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 LEFT JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1

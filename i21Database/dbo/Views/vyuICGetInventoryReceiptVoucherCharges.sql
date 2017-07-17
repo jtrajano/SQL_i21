@@ -40,14 +40,34 @@ FROM	tblICInventoryReceipt Receipt
 					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
-					,dblReceiptTax = ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
+					,dblReceiptTax = --ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
+						CASE 
+							WHEN 
+								(ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1)
+								OR (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 0) 							
+							THEN 
+								ISNULL(rc.dblTax, 0)
+							ELSE 
+								-ISNULL(rc.dblTax, 0)
+						END 
+
 					,dblVoucherTax = ISNULL(voucher.TaxTotal, 0) 
 					,dblOpenQty = 1 - ISNULL(voucher.QtyTotal, 0)
 					,dblItemsPayable = 
 						ROUND(rc.dblAmount, 2)
 						- ISNULL(voucher.LineTotal, 0)
 					,dblTaxesPayable = 
-						ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
+						--ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
+						CASE 
+							WHEN 
+								(ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1)
+								OR (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 0) 							
+							THEN 
+								ISNULL(rc.dblTax, 0)
+							ELSE 
+								-ISNULL(rc.dblTax, 0)
+						END 
+
 						- ISNULL(voucher.TaxTotal, 0) 
 					,i.strItemNo
 					,strItemDescription = i.strDescription	
