@@ -252,7 +252,7 @@ BEGIN
 						ri.dblLineTotal 
 				END 					
 			,ri.intGradeId
-			,ri.dblGross
+			,dblGross = ri.dblGross - ISNULL(ri.dblGrossReturned, 0)
 			,dblNet = ri.dblNet - ISNULL(ri.dblNetReturned, 0) 
 			,ri.dblTax
 			,ri.intDiscountSchedule
@@ -477,6 +477,7 @@ BEGIN
 	UPDATE	ri	
 	SET		ri.dblQtyReturned = ISNULL(ri.dblQtyReturned, 0) + rtnItem.dblOpenReceive
 			,ri.dblNetReturned = ISNULL(ri.dblNetReturned, 0) + rtnItem.dblNet
+			,ri.dblGrossReturned = ISNULL(ri.dblGrossReturned, 0) + rtnItem.dblGross
 	FROM	tblICInventoryReceipt rtn INNER JOIN tblICInventoryReceiptItem rtnItem
 				ON rtn.intInventoryReceiptId = rtnItem.intInventoryReceiptId
 			INNER JOIN (
