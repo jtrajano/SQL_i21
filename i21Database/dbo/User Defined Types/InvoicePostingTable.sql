@@ -6,6 +6,7 @@
 	,[strType]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[dtmDate]						DATETIME										NOT NULL
 	,[dtmPostDate]					DATETIME										NOT NULL
+	,[dtmShipDate]					DATETIME										NOT NULL
 	,[intEntityCustomerId]			INT				NULL
 	,[intCompanyLocationId]			INT				NULL
 	,[intAccountId]					INT				NULL
@@ -16,14 +17,22 @@
 	,[dblShipping]					NUMERIC(18, 6)	NULL
 	,[dblTax]						NUMERIC(18, 6)	NULL
 	,[strImportFormat]				NVARCHAR(50)	NULL
+	,[intDistributionHeaderId]		INT				NULL
+	,[intLoadDistributionHeaderId]	INT				NULL
+	,[strActualCostId]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL	
 	,[intPeriodsToAccrue]			INT				NULL
 	,[ysnAccrueLicense]				BIT				NULL	
+	,[intSplitId]					INT				NULL
+	,[dblSplitPercent]				NUMERIC(18, 6)	NULL	
+	,[ysnSplitted]					BIT				NULL
+	,[ysnImpactInventory]			BIT				NULL	
 	,[intEntityId]					INT				NULL
 	,[ysnPost]						BIT				NULL	
 	,[intInvoiceDetailId]			INT				NULL	
 	,[intItemId]					INT				NULL
 	,[intItemUOMId]					INT				NULL
 	,[intDiscountAccountId]			INT				NULL	
+	,[intCustomerStorageId]			INT				NULL
 	,[intStorageScheduleTypeId]		INT				NULL
 	,[intSubLocationId]				INT				NULL
 	,[intStorageLocationId]			INT				NULL

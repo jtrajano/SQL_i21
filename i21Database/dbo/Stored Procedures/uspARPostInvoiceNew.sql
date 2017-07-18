@@ -32,47 +32,109 @@ IF @RaiseError = 0
 	BEGIN TRANSACTION
 DECLARE @totalRecords INT = 0
 DECLARE @totalInvalid INT = 0
- 
-DECLARE @PostInvoiceData TABLE  (
-	 [intInvoiceId]			INT PRIMARY KEY
-	,[intCompanyLocationId]	INT
-	,[strTransactionId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	,[strTransactionType]	NVARCHAR(25) COLLATE Latin1_General_CI_AS
-	,[intEntityId]			INT
-	,[intPeriodsToAccrue]	INT
-	,[ysnAccrueLicense]		BIT
-	,UNIQUE (intInvoiceId)
-);
+
+DECLARE @UserEntityID				INT
+		,@DiscountAccountId			INT
+		,@DeferredRevenueAccountId	INT
+		,@AllowOtherUserToPost		BIT
+
+SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityUserSecurityId] = @UserId),@UserId)
+SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WITH (NOLOCK) WHERE ISNULL([intDiscountAccountId],0) <> 0)
+SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM dbo.tblARCompanyPreference  WITH (NOLOCK)WHERE ISNULL([intDeferredRevenueAccountId],0) <> 0)
+SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WITH (NOLOCK) WHERE intEntityUserSecurityId = @UserEntityID)
+
+DECLARE @ErrorMerssage NVARCHAR(MAX)
+DECLARE @ZeroDecimal DECIMAL(18,6)
+SET @ZeroDecimal = 0.000000	
+DECLARE @PostInvoiceData AS [InvoicePostingTable]
+
+DECLARE @InvalidInvoiceData AS TABLE(
+	 [intInvoiceId]				INT				NOT NULL
+	,[strInvoiceNumber]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[strTransactionType]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,[intInvoiceDetailId]		INT				NULL
+	,[intItemId]				INT				NULL
+	,[strBatchId]				NVARCHAR(40)	COLLATE Latin1_General_CI_AS	NULL
+	,[strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+)
 
 INSERT INTO @PostInvoiceData(
 	 [intInvoiceId]
-	,[intCompanyLocationId]
-	,[strTransactionId]
+	,[strInvoiceNumber]
 	,[strTransactionType]
-	,[intEntityId]
+	,[strType]
+	,[dtmDate]
+	,[dtmPostDate]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intAccountId]
+	,[intDeferredRevenueAccountId]
+	,[intCurrencyId]
+	,[intTermId]
+	,[dblInvoiceTotal]
+	,[dblShipping]
+	,[dblTax]
+	,[strImportFormat]
 	,[intPeriodsToAccrue]
 	,[ysnAccrueLicense]
-)
-SELECT
-	 [intInvoiceId]				= ARI.[intInvoiceId]
-	,[intCompanyLocationId]		= ARI.[intCompanyLocationId]
-	,[strTransactionId]			= ARI.[strInvoiceNumber]
-	,[strTransactionType]		= ARI.[strTransactionType]
-	,[intEntityId]				= ARI.[intEntityId]
-	,[intPeriodsToAccrue]		= ARI.[intPeriodsToAccrue]
-	,[ysnAccrueLicense]			= II.[ysnAccrueLicense]
+	,[intEntityId]
+	,[ysnPost]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[intItemUOMId]
+	,[intDiscountAccountId]
+	,[intStorageScheduleTypeId]
+	,[intSubLocationId]
+	,[intStorageLocationId]
+	,[dblQuantity]
+	,[dblMaxQuantity]
+	,[strOptionType]
+	,[strSourceType]
+	,[strBatchId]
+	,[strPostingMessage]
+	,[intUserId]
+	,[ysnAllowOtherUserToPost]
+	)
+	SELECT DISTINCT
+	 [intInvoiceId]					= ARI.[intInvoiceId]
+	,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
+	,[strTransactionType]			= ARI.[strTransactionType]
+	,[strType]						= ARI.[strType]
+	,[dtmDate]						= ARI.[dtmDate]
+	,[dtmPostDate]					= ARI.[dtmPostDate]
+	,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
+	,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
+	,[intAccountId]					= ARI.[intAccountId]
+	,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+	,[intCurrencyId]				= ARI.[intCurrencyId]
+	,[intTermId]					= ARI.[intTermId]
+	,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
+	,[dblShipping]					= ARI.[dblShipping]
+	,[dblTax]						= ARI.[dblTax]
+	,[strImportFormat]				= ARI.[strImportFormat]
+	,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
+	,[ysnAccrueLicense]				= II.[ysnAccrueLicense]
+	,[intEntityId]					= ARI.[intEntityId]
+	,[ysnPost]						= @Post
+	,[intInvoiceDetailId]			= NULL
+	,[intItemId]					= NULL
+	,[intItemUOMId]					= NULL
+	,[intDiscountAccountId]			= @DiscountAccountId
+	,[intStorageScheduleTypeId]		= NULL
+	,[intSubLocationId]				= NULL
+	,[intStorageLocationId]			= NULL
+	,[dblQuantity]					= @ZeroDecimal
+	,[dblMaxQuantity]				= @ZeroDecimal
+	,[strOptionType]				= NULL
+	,[strSourceType]				= NULL
+	,[strBatchId]					= @BatchIdUsed
+	,[strPostingMessage]			= ''
+	,[intUserId]					= @UserEntityID
+	,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
 FROM
 	tblARInvoice ARI WITH (NOLOCK) 
 INNER JOIN @InvoiceIds II 
 	ON ARI.[intInvoiceId] = II.[intHeaderId] 
-
-DECLARE @InvalidInvoiceData TABLE  (
-	strError NVARCHAR(max),
-	strTransactionType NVARCHAR(50),
-	strTransactionId NVARCHAR(50),
-	strBatchNumber NVARCHAR(50),
-	intTransactionId INT
-);
 
 DECLARE @PostDate AS DATETIME
 SET @PostDate = GETDATE()
@@ -87,17 +149,7 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 
-DECLARE @UserEntityID				INT
-		,@DiscountAccountId			INT
-		,@DeferredRevenueAccountId	INT
-		,@AllowOtherUserToPost		BIT
 
-SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityId] = @UserId),@UserId)
-SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WITH (NOLOCK) WHERE ISNULL([intDiscountAccountId],0) <> 0)
-SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM dbo.tblARCompanyPreference  WITH (NOLOCK)WHERE ISNULL([intDeferredRevenueAccountId],0) <> 0)
-SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WITH (NOLOCK) WHERE intEntityUserSecurityId = @UserEntityID)
-
-DECLARE @ErrorMerssage NVARCHAR(MAX)
 
 SET @Success = 1
 
@@ -110,9 +162,6 @@ SELECT	@INVENTORY_INVOICE_TYPE = intTransactionTypeId
 FROM	tblICInventoryTransactionType WITH (NOLOCK)
 WHERE	strName = @SCREEN_NAME
 
-DECLARE @ZeroDecimal DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000	
-
 -- Ensure @Post and @Recap is not NULL  
 SET @Post = ISNULL(@Post, 0)
 SET @Recap = ISNULL(@Recap, 0)
@@ -123,8 +172,79 @@ IF (@TransType IS NULL OR RTRIM(LTRIM(@TransType)) = '')
 
 IF @IntegrationLogId IS NOT NULL
 	BEGIN
-        INSERT INTO @PostInvoiceData 
-        SELECT DISTINCT ARI.[intInvoiceId], ARI.[intCompanyLocationId], ARI.[strInvoiceNumber], ARI.[strTransactionType], ARI.[intEntityId], ARI.[intPeriodsToAccrue], ARIILD.[ysnAccrueLicense]
+        INSERT INTO @PostInvoiceData(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[strType]
+			,[dtmDate]
+			,[dtmPostDate]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intAccountId]
+			,[intDeferredRevenueAccountId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dblInvoiceTotal]
+			,[dblShipping]
+			,[dblTax]
+			,[strImportFormat]
+			,[intPeriodsToAccrue]
+			,[ysnAccrueLicense]
+			,[intEntityId]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[intDiscountAccountId]
+			,[intStorageScheduleTypeId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQuantity]
+			,[dblMaxQuantity]
+			,[strOptionType]
+			,[strSourceType]
+			,[strBatchId]
+			,[strPostingMessage]
+			,[intUserId]
+			,[ysnAllowOtherUserToPost]
+			)
+			SELECT DISTINCT
+			 [intInvoiceId]					= ARI.[intInvoiceId]
+			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
+			,[strTransactionType]			= ARI.[strTransactionType]
+			,[strType]						= ARI.[strType]
+			,[dtmDate]						= ARI.[dtmDate]
+			,[dtmPostDate]					= ARI.[dtmPostDate]
+			,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
+			,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
+			,[intAccountId]					= ARI.[intAccountId]
+			,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+			,[intCurrencyId]				= ARI.[intCurrencyId]
+			,[intTermId]					= ARI.[intTermId]
+			,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
+			,[dblShipping]					= ARI.[dblShipping]
+			,[dblTax]						= ARI.[dblTax]
+			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
+			,[ysnAccrueLicense]				= ARIILD.[ysnAccrueLicense]
+			,[intEntityId]					= ARI.[intEntityId]
+			,[ysnPost]						= @Post
+			,[intInvoiceDetailId]			= NULL
+			,[intItemId]					= NULL
+			,[intItemUOMId]					= NULL
+			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intStorageScheduleTypeId]		= NULL
+			,[intSubLocationId]				= NULL
+			,[intStorageLocationId]			= NULL
+			,[dblQuantity]					= @ZeroDecimal
+			,[dblMaxQuantity]				= @ZeroDecimal
+			,[strOptionType]				= NULL
+			,[strSourceType]				= NULL
+			,[strBatchId]					= @BatchIdUsed
+			,[strPostingMessage]			= ''
+			,[intUserId]					= @UserEntityID
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
         FROM
             dbo.tblARInvoice ARI WITH (NOLOCK) 
         INNER JOIN
@@ -141,16 +261,160 @@ IF @IntegrationLogId IS NOT NULL
 
 IF(@BeginDate IS NOT NULL)
 	BEGIN
-		INSERT INTO @PostInvoiceData
-		SELECT DISTINCT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue], 0 FROM dbo.tblARInvoice WITH (NOLOCK)
-		WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @BeginDate AND @EndDate
-		AND (strTransactionType = @TransType OR @TransType = 'all')
+		INSERT INTO @PostInvoiceData(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[strType]
+			,[dtmDate]
+			,[dtmPostDate]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intAccountId]
+			,[intDeferredRevenueAccountId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dblInvoiceTotal]
+			,[dblShipping]
+			,[dblTax]
+			,[strImportFormat]
+			,[intPeriodsToAccrue]
+			,[ysnAccrueLicense]
+			,[intEntityId]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[intDiscountAccountId]
+			,[intStorageScheduleTypeId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQuantity]
+			,[dblMaxQuantity]
+			,[strOptionType]
+			,[strSourceType]
+			,[strBatchId]
+			,[strPostingMessage]
+			,[intUserId]
+			,[ysnAllowOtherUserToPost]
+			)
+			SELECT DISTINCT
+			 [intInvoiceId]					= ARI.[intInvoiceId]
+			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
+			,[strTransactionType]			= ARI.[strTransactionType]
+			,[strType]						= ARI.[strType]
+			,[dtmDate]						= ARI.[dtmDate]
+			,[dtmPostDate]					= ARI.[dtmPostDate]
+			,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
+			,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
+			,[intAccountId]					= ARI.[intAccountId]
+			,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+			,[intCurrencyId]				= ARI.[intCurrencyId]
+			,[intTermId]					= ARI.[intTermId]
+			,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
+			,[dblShipping]					= ARI.[dblShipping]
+			,[dblTax]						= ARI.[dblTax]
+			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
+			,[ysnAccrueLicense]				= 0
+			,[intEntityId]					= ARI.[intEntityId]
+			,[ysnPost]						= @Post
+			,[intInvoiceDetailId]			= NULL
+			,[intItemId]					= NULL
+			,[intItemUOMId]					= NULL
+			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intStorageScheduleTypeId]		= NULL
+			,[intSubLocationId]				= NULL
+			,[intStorageLocationId]			= NULL
+			,[dblQuantity]					= @ZeroDecimal
+			,[dblMaxQuantity]				= @ZeroDecimal
+			,[strOptionType]				= NULL
+			,[strSourceType]				= NULL
+			,[strBatchId]					= @BatchIdUsed
+			,[strPostingMessage]			= ''
+			,[intUserId]					= @UserEntityID
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+		WHERE DATEADD(dd, DATEDIFF(dd, 0, ARI.[dtmDate]), 0) BETWEEN @BeginDate AND @EndDate
+		AND (ARI.[strTransactionType] = @TransType OR @TransType = 'all')
 	END
 
 IF(@BeginTransaction IS NOT NULL)
 	BEGIN
-		INSERT INTO @PostInvoiceData
-		SELECT DISTINCT intInvoiceId, [intCompanyLocationId], strInvoiceNumber, [strTransactionType], intEntityId, [intPeriodsToAccrue], 0 FROM dbo.tblARInvoice WITH (NOLOCK)
+		INSERT INTO @PostInvoiceData(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[strType]
+			,[dtmDate]
+			,[dtmPostDate]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intAccountId]
+			,[intDeferredRevenueAccountId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dblInvoiceTotal]
+			,[dblShipping]
+			,[dblTax]
+			,[strImportFormat]
+			,[intPeriodsToAccrue]
+			,[ysnAccrueLicense]
+			,[intEntityId]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[intDiscountAccountId]
+			,[intStorageScheduleTypeId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQuantity]
+			,[dblMaxQuantity]
+			,[strOptionType]
+			,[strSourceType]
+			,[strBatchId]
+			,[strPostingMessage]
+			,[intUserId]
+			,[ysnAllowOtherUserToPost]
+			)
+			SELECT DISTINCT
+			 [intInvoiceId]					= ARI.[intInvoiceId]
+			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
+			,[strTransactionType]			= ARI.[strTransactionType]
+			,[strType]						= ARI.[strType]
+			,[dtmDate]						= ARI.[dtmDate]
+			,[dtmPostDate]					= ARI.[dtmPostDate]
+			,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
+			,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
+			,[intAccountId]					= ARI.[intAccountId]
+			,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+			,[intCurrencyId]				= ARI.[intCurrencyId]
+			,[intTermId]					= ARI.[intTermId]
+			,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
+			,[dblShipping]					= ARI.[dblShipping]
+			,[dblTax]						= ARI.[dblTax]
+			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
+			,[ysnAccrueLicense]				= 0
+			,[intEntityId]					= ARI.[intEntityId]
+			,[ysnPost]						= @Post
+			,[intInvoiceDetailId]			= NULL
+			,[intItemId]					= NULL
+			,[intItemUOMId]					= NULL
+			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intStorageScheduleTypeId]		= NULL
+			,[intSubLocationId]				= NULL
+			,[intStorageLocationId]			= NULL
+			,[dblQuantity]					= @ZeroDecimal
+			,[dblMaxQuantity]				= @ZeroDecimal
+			,[strOptionType]				= NULL
+			,[strSourceType]				= NULL
+			,[strBatchId]					= @BatchIdUsed
+			,[strPostingMessage]			= ''
+			,[intUserId]					= @UserEntityID
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		WHERE intInvoiceId BETWEEN @BeginTransaction AND @EndTransaction
 		AND (strTransactionType = @TransType OR @TransType = 'all')
 	END
@@ -206,9 +470,79 @@ BEGIN TRY
 
 				IF (ISNULL(@invoicesToAdd, '') <> '')
 					BEGIN
-						INSERT INTO @PostInvoiceData 
-												
-						SELECT ARI.[intInvoiceId], ARI.intCompanyLocationId, ARI.[strInvoiceNumber], ARI.strTransactionType, ARI.[intEntityId], ARI.[intPeriodsToAccrue], 0
+						INSERT INTO @PostInvoiceData(
+							 [intInvoiceId]
+							,[strInvoiceNumber]
+							,[strTransactionType]
+							,[strType]
+							,[dtmDate]
+							,[dtmPostDate]
+							,[intEntityCustomerId]
+							,[intCompanyLocationId]
+							,[intAccountId]
+							,[intDeferredRevenueAccountId]
+							,[intCurrencyId]
+							,[intTermId]
+							,[dblInvoiceTotal]
+							,[dblShipping]
+							,[dblTax]
+							,[strImportFormat]
+							,[intPeriodsToAccrue]
+							,[ysnAccrueLicense]
+							,[intEntityId]
+							,[ysnPost]
+							,[intInvoiceDetailId]
+							,[intItemId]
+							,[intItemUOMId]
+							,[intDiscountAccountId]
+							,[intStorageScheduleTypeId]
+							,[intSubLocationId]
+							,[intStorageLocationId]
+							,[dblQuantity]
+							,[dblMaxQuantity]
+							,[strOptionType]
+							,[strSourceType]
+							,[strBatchId]
+							,[strPostingMessage]
+							,[intUserId]
+							,[ysnAllowOtherUserToPost]
+							)
+							SELECT DISTINCT
+							 [intInvoiceId]					= ARI.[intInvoiceId]
+							,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
+							,[strTransactionType]			= ARI.[strTransactionType]
+							,[strType]						= ARI.[strType]
+							,[dtmDate]						= ARI.[dtmDate]
+							,[dtmPostDate]					= ARI.[dtmPostDate]
+							,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
+							,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
+							,[intAccountId]					= ARI.[intAccountId]
+							,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+							,[intCurrencyId]				= ARI.[intCurrencyId]
+							,[intTermId]					= ARI.[intTermId]
+							,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
+							,[dblShipping]					= ARI.[dblShipping]
+							,[dblTax]						= ARI.[dblTax]
+							,[strImportFormat]				= ARI.[strImportFormat]
+							,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
+							,[ysnAccrueLicense]				= 0
+							,[intEntityId]					= ARI.[intEntityId]
+							,[ysnPost]						= @Post
+							,[intInvoiceDetailId]			= NULL
+							,[intItemId]					= NULL
+							,[intItemUOMId]					= NULL
+							,[intDiscountAccountId]			= @DiscountAccountId
+							,[intStorageScheduleTypeId]		= NULL
+							,[intSubLocationId]				= NULL
+							,[intStorageLocationId]			= NULL
+							,[dblQuantity]					= @ZeroDecimal
+							,[dblMaxQuantity]				= @ZeroDecimal
+							,[strOptionType]				= NULL
+							,[strSourceType]				= NULL
+							,[strBatchId]					= @BatchIdUsed
+							,[strPostingMessage]			= ''
+							,[intUserId]					= @UserEntityID
+							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
 						FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 						WHERE ARI.[ysnPosted] = 0 
 							AND intInvoiceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd))
@@ -247,7 +581,7 @@ BEGIN CATCH
 				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 				,ILD.[strPostingMessage]	= @ErrorMerssage
 				,ILD.[strBatchId]			= @BatchId
-				,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+				,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 			FROM
 				tblARInvoiceIntegrationLogDetail ILD  WITH (NOLOCK)
 			INNER JOIN
@@ -363,7 +697,7 @@ BEGIN TRY
 									,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 									,ILD.[strPostingMessage]	= @ErrorMerssage
 									,ILD.[strBatchId]			= @BatchId
-									,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+									,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 								FROM
 									tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 								INNER JOIN
@@ -399,7 +733,7 @@ BEGIN CATCH
 				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 				,ILD.[strPostingMessage]	= @ErrorMerssage
 				,ILD.[strBatchId]			= @BatchId
-				,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+				,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 			FROM
 				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
@@ -420,1450 +754,141 @@ END CATCH
 --------------------------------------------------------------------------------------------  
 -- Validations  
 ----------------------------------------------------------------------------------------------  
---IF @Recap = 0
---	BEGIN
-		--Posting
-		IF @Post = 1
-			BEGIN
-
-				--ALREADY POSTED
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'The transaction is already posted.',
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM 
-					@PostInvoiceData PID
-				INNER JOIN 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, ysnPosted FROM tblARInvoice WITH (NOLOCK)) ARI
-						ON PID.intInvoiceId = ARI.intInvoiceId
-				WHERE  
-					ARI.ysnPosted = 1
+IF @Post = 1
+	BEGIN								
 					
-								
-				-- Tank consumption site
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType,strTransactionId, strBatchNumber, intTransactionId)
-				SELECT TOP 1 
-					'Unable to find a tank consumption site for item no. ' + ICI.strItemNo,
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM
-					@PostInvoiceData PID
-				INNER JOIN
-					 (SELECT intInvoiceId, strInvoiceNumber, strTransactionType, strType FROM dbo.tblARInvoice WITH (NOLOCK)) ARI 
-						ON PID.intInvoiceId = ARI.intInvoiceId						
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, intSiteId FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID 
-						ON ARI.intInvoiceId = ARID.intInvoiceId
-				INNER JOIN 
-					(SELECT intItemId, strItemNo, ysnTankRequired, strType FROM dbo.tblICItem WITH (NOLOCK)) ICI 
-						ON ARID.intItemId = ICI.intItemId	
-				WHERE
-					ARI.strType = 'Tank Delivery'
-					AND ARID.intSiteId IS NULL
-					AND ICI.ysnTankRequired = 1
-					AND ISNULL(ICI.strType,'') <> 'Comment'
-				 							
-				--zero amount
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					CASE WHEN ARI.strTransactionType = 'Invoice ' THEN 'You cannot post an ' + ARI.strTransactionType + ' with zero amount.' 
-					ELSE 'You cannot post a ' + ARI.strTransactionType + ' with zero amount.' END,
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM 
-					@PostInvoiceData PID
-				INNER JOIN 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, dblInvoiceTotal, strImportFormat FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
-						ON PID.intInvoiceId = ARI.intInvoiceId						
-				WHERE
-					ARI.dblInvoiceTotal = @ZeroDecimal
-					AND ISNULL(ARI.strImportFormat, '') <> 'CarQuest'
-					--AND (
-					--	NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0)
-					--	OR (SELECT SUM(ABS(tblARInvoiceDetail.dblQtyShipped)) FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0) = @ZeroDecimal
-					--	)
-                    AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0)
-								
-					
-				--negative amount
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					CASE WHEN ARI.strTransactionType = 'Invoice' THEN 'You cannot post an ' + ARI.strTransactionType + ' with negative amount.' 
-					ELSE 'You cannot post a ' + ARI.strTransactionType + ' with negative amount.' END ,
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM 
-					@PostInvoiceData PID
-				INNER JOIN 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, dblInvoiceTotal FROM dbo.tblARInvoice WITH (NOLOCK)) ARI 
-						ON PID.intInvoiceId = ARI.intInvoiceId
-				WHERE
-					ARI.dblInvoiceTotal < @ZeroDecimal						
-					
-					
-				--Inactive Customer
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'Customer - ' + ARC.strCustomerNumber + ' is not active!',
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM 
-					@PostInvoiceData PID				
-				INNER JOIN 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intEntityCustomerId FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
-						ON PID.intInvoiceId = ARI.intInvoiceId				
-				INNER JOIN
-					(SELECT intEntityId, strCustomerNumber, ysnActive FROM dbo.tblARCustomer WITH (NOLOCK)) ARC
-						ON ARI.intEntityCustomerId = ARC.intEntityId 					
-				WHERE
-					ARC.ysnActive = 0
-								
-				--UOM is required
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'UOM is required for item ' + Detail.strItemDescription + '.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId									
-				FROM 
-					(SELECT intInvoiceId, intItemId, strItemDescription, intItemUOMId, intInventoryShipmentItemId, intSalesOrderDetailId, intShipmentPurchaseSalesContractId
-					 FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) Detail
-				INNER JOIN
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM dbo.tblARInvoice WITH (NOLOCK)) A
-						ON Detail.intInvoiceId = A.intInvoiceId AND A.strTransactionType = 'Invoice'						 
-				INNER JOIN
-					@PostInvoiceData P
-						ON A.intInvoiceId = P.intInvoiceId	
-				LEFT OUTER JOIN
-					(SELECT intItemId, intLocationId, strType FROM dbo.vyuICGetItemStock WITH (NOLOCK)) IST
-						ON Detail.intItemId = IST.intItemId 
-						AND A.intCompanyLocationId = IST.intLocationId
-				WHERE 
-					(Detail.intItemUOMId IS NULL OR Detail.intItemUOMId = 0) 
-					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
-					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
-					AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
-					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
-					AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software')
-
-					
-				--Dsicount Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					CASE WHEN GLA.intAccountId IS NULL THEN ' The Receivable Discount account assigned to item ' + IT.strItemNo + ' is not valid.' ELSE 'Receivable Discount account was not set up for item ' + IT.strItemNo END,
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId							
-				FROM 
-					(SELECT intInvoiceId, intItemId, dblDiscount FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) Detail
-				INNER JOIN
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM dbo.tblARInvoice WITH (NOLOCK)) A
-						ON Detail.intInvoiceId = A.intInvoiceId
-				INNER JOIN
-					@PostInvoiceData P
-						ON A.intInvoiceId = P.intInvoiceId	
-				LEFT OUTER JOIN
-					(SELECT intItemId, intLocationId, intDiscountAccountId FROM dbo.vyuARGetItemAccount WITH (NOLOCK)) IST
-						ON Detail.intItemId = IST.intItemId 
-						AND A.intCompanyLocationId = IST.intLocationId 
-				LEFT OUTER JOIN
-					(SELECT intItemId, strItemNo, strType FROM dbo.tblICItem WITH (NOLOCK)) IT
-						ON Detail.intItemId = IT.intItemId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM dbo.tblGLAccount WITH (NOLOCK)) GLA
-						ON ISNULL(IST.intDiscountAccountId, @DiscountAccountId) = GLA.intAccountId
-				WHERE 
-					((ISNULL(IST.intDiscountAccountId,0) = 0  AND  ISNULL(@DiscountAccountId,0) = 0) OR GLA.intAccountId IS NULL)
-					AND Detail.dblDiscount <> 0		
-					AND ISNULL(IT.strType,'') <> 'Comment'	
-
-				--Currency is required
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'No currency has been specified.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCurrencyId FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				WHERE  
-					ISNULL(A.intCurrencyId, 0) = 0
-
-				--No Terms specified
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'No terms has been specified.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intTermId FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				WHERE  
-					0 = A.intTermId
-
-				--NOT BALANCE
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'The debit and credit amounts are not balanced.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, dblShipping, dblInvoiceTotal, dblTax FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				WHERE  
-					A.dblInvoiceTotal <> ((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = A.intInvoiceId) + ISNULL(A.dblShipping,0.0) + ISNULL(A.dblTax,0.0))				
-
-				--Header Account ID
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The AR account is not valid.' ELSE 'The AR account is not specified.' END,				
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intAccountId FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA 
-						ON ISNULL(A.intAccountId, 0) = GLA.intAccountId
-				WHERE  
-					ISNULL(A.intAccountId, 0) = 0 OR GLA.intAccountId IS NULL
-					
-				--Company Location
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'Company location of ' + A.strInvoiceNumber + ' was not set.'
-					,A.strTransactionType
-					,A.strInvoiceNumber
-					,@BatchId
-					,A.intInvoiceId
-				FROM
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) A
-				INNER JOIN
-					@PostInvoiceData P
-						ON A.intInvoiceId = P.intInvoiceId						 
-				LEFT OUTER JOIN
-					(SELECT intCompanyLocationId FROM tblSMCompanyLocation WITH (NOLOCK)) L
-						ON A.intCompanyLocationId = L.intCompanyLocationId
-				WHERE L.intCompanyLocationId IS NULL
-				
-				--Freight Expenses Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Freight Income account is not valid.' ELSE 'The Freight Income account of Company Location ' + SMCL.strLocationName + ' was not set.' END
-					,ARI.strTransactionType
-					,ARI.strInvoiceNumber
-					,@BatchId
-					,ARI.intInvoiceId
-				FROM
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId, dblShipping FROM tblARInvoice WITH (NOLOCK)) ARI
-				INNER JOIN
-					@PostInvoiceData P
-						ON ARI.intInvoiceId = P.intInvoiceId						 
-				INNER JOIN
-					(SELECT intCompanyLocationId, strLocationName, intFreightIncome FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
-						ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON SMCL.intFreightIncome = GLA.intAccountId						
-				WHERE
-					(ISNULL(SMCL.intFreightIncome, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(ARI.dblShipping,0) <> 0.0
-
-
-				--Undeposited Funds Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Undeposited Funds account of Company Location ' + SMCL.strLocationName + ' is not valid.' ELSE 'The Undeposited Funds account of Company Location ' + SMCL.strLocationName + ' was not set.' END
-					,ARI.strTransactionType
-					,ARI.strInvoiceNumber
-					,@BatchId
-					,ARI.intInvoiceId
-				FROM
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) ARI
-				INNER JOIN
-					@PostInvoiceData P
-						ON ARI.intInvoiceId = P.intInvoiceId						 
-				INNER JOIN
-					(SELECT intCompanyLocationId, strLocationName, intUndepositedFundsId FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
-						ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON SMCL.intUndepositedFundsId = GLA.intAccountId						
-					
-				WHERE
-					(ISNULL(SMCL.intUndepositedFundsId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND (
-						ARI.strTransactionType IN ('Cash','Cash Refund')
-						OR
-						(EXISTS(SELECT NULL FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1 AND tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount <> 0 ))
-						)
-						
-				--Sales Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Sales account of Company Location ' + SMCL.strLocationName + ' is not valid.' ELSE 'The Sales account of Company Location ' + SMCL.strLocationName + ' was not set.' END
-					,ARI.strTransactionType
-					,ARI.strInvoiceNumber
-					,@BatchId
-					,ARI.intInvoiceId
-				FROM
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) ARI
-				INNER JOIN
-					(SELECT intInvoiceId, intServiceChargeAccountId, intSalesAccountId, intItemId, dblTotal FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-						ON ARI.intInvoiceId = ARID.intInvoiceId 
-				INNER JOIN
-					@PostInvoiceData P
-						ON ARI.intInvoiceId = P.intInvoiceId						 
-				INNER JOIN
-					(SELECT intCompanyLocationId, strLocationName, intSalesAccount FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
-						ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON SMCL.intSalesAccount = GLA.intAccountId				
-				WHERE
-					(ISNULL(SMCL.intSalesAccount, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(ARID.intServiceChargeAccountId,0) = 0
-					AND ISNULL(ARID.intSalesAccountId, 0) = 0
-					AND ISNULL(ARID.intItemId,0) = 0
-					AND ARID.dblTotal <> @ZeroDecimal
-	
-					
-				-- Accrual Not in Fiscal Year					
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					A.strInvoiceNumber + ' has an Accrual setup up to ' + CONVERT(NVARCHAR(30),DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), ISNULL(A.dtmPostDate, A.dtmDate)), 101) + ' which does not fall into a valid Fiscal Period.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intPeriodsToAccrue, dtmPostDate, dtmDate FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				WHERE
-					ISNULL(A.intPeriodsToAccrue,0) > 1  
-					AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), ISNULL(A.dtmPostDate, A.dtmDate))), 0) = 0
-
-				--Service Deferred Revenue Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The Deferred Revenue account in the Company Configuration was not set.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					tblARInvoice A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				WHERE
-					ISNULL(A.intPeriodsToAccrue,0) > 1
-					AND ISNULL(@DeferredRevenueAccountId, 0) = 0
-
-				--Service Deferred Revenue Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The Deferred Revenue account is not valid.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intPeriodsToAccrue FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				WHERE
-					ISNULL(A.intPeriodsToAccrue,0) > 1
-					AND ISNULL(@DeferredRevenueAccountId, 0) <> 0
-					AND NOT EXISTS(SELECT NULL FROM tblGLAccount WHERE intAccountId = @DeferredRevenueAccountId)
-
-				--Invoice for accrual with Inventory Items				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'Invoice : ' + A.strInvoiceNumber + ' is for accrual and must not include an inventory item : ' + I.strItemNo + '.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intPeriodsToAccrue FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId	 				
-				WHERE
-					ISNULL(A.intPeriodsToAccrue,0) > 1
-					AND ISNULL(I.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
-								
-				--General Account				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The General Account of item - ' + I.strItemNo + ' is not valid.' ELSE 'The General Account of item - ' + I.strItemNo + ' was not specified.' END,
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId
-				LEFT OUTER JOIN
-					(SELECT intCompanyLocationId FROM tblSMCompanyLocation WITH (NOLOCK)) L
-						ON A.intCompanyLocationId = L.intCompanyLocationId
-				LEFT OUTER JOIN
-					(SELECT intLocationId, intItemId, intGeneralAccountId FROM vyuARGetItemAccount WITH (NOLOCK)) Acct
-						ON A.intCompanyLocationId = Acct.intLocationId 
-						AND D.intItemId = Acct.intItemId 		
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK))GLA
-						ON Acct.intGeneralAccountId = GLA.intAccountId
-				WHERE
-					(ISNULL(Acct.intGeneralAccountId,0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(I.strType,'') IN ('Non-Inventory','Service')
-					AND ISNULL(I.strType,'') <> 'Comment'
-
-				--Software - Maintenance Type				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The Maintenance Type of item - ' + I.strItemNo + ' is not valid.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, strMaintenanceType FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId											
-				WHERE
-					ISNULL(I.strType,'') = 'Software'	
-					AND ISNULL(D.strMaintenanceType, '') NOT IN ('License/Maintenance', 'Maintenance Only', 'SaaS', 'License Only')
-					
-				--Software - Maintenance Frequency				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The Maintenance Frequency of item - ' + I.strItemNo + ' is not valid.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId											
-				WHERE
-					ISNULL(I.strType,'') = 'Software'	
-					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-					AND ISNULL(D.strFrequency, '') NOT IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
-					
-				--Software - Maintenance Date				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The Maintenance Start Date of item - ' + I.strItemNo + ' is required.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId											
-				WHERE
-					ISNULL(I.strType,'') = 'Software'	
-					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
-					AND D.dtmMaintenanceDate IS NULL
-
-
-				--Software - License Amount
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The License Amount of item - ' + I.strItemNo + ' does not match the Price.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblLicenseAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId											
-				WHERE
-					ISNULL(I.strType,'') = 'Software'	
-					AND ISNULL(D.strMaintenanceType, '') IN ('License Only')
-					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
-					AND ISNULL(D.dblLicenseAmount, @ZeroDecimal) <> ISNULL(D.dblPrice, @ZeroDecimal)
-
-				--Software - Maintenance Amount				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The Maintenance Amount of item - ' + I.strItemNo + ' does not match the Price.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblMaintenanceAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId											
-				WHERE
-					ISNULL(I.strType,'') = 'Software'	
-					AND ISNULL(D.strMaintenanceType, '') IN ('Maintenance Only', 'SaaS')
-					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
-					AND ISNULL(D.dblMaintenanceAmount, @ZeroDecimal) <> ISNULL(D.dblPrice, @ZeroDecimal)
-
-
-				--Software - Maintenance Amount + License				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The Maintenance Amount + License Amount of item - ' + I.strItemNo + ' does not match the Price.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, strMaintenanceType, strFrequency, dtmMaintenanceDate, dblMaintenanceAmount, dblLicenseAmount, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId											
-				WHERE
-					ISNULL(I.strType,'') = 'Software'	
-					AND ISNULL(D.strMaintenanceType, '') IN ('License/Maintenance')
-					AND ISNULL(D.strFrequency, '') IN ('Monthly', 'Bi-Monthly', 'Quarterly', 'Semi-Annually', 'Annually')
-					AND ((ISNULL(D.dblMaintenanceAmount, @ZeroDecimal) + ISNULL(D.dblLicenseAmount, @ZeroDecimal)) <> ISNULL(D.dblPrice, @ZeroDecimal))
-
-					
-				--Software - Maintenance Sales				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Maintenance Sales account of item - ' + I.strItemNo + ' is not valid.' ELSE 'The Maintenance Sales of item - ' + I.strItemNo + ' were not specified.' END,				
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, strMaintenanceType FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem  WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId
-				LEFT OUTER JOIN
-					(SELECT intCompanyLocationId FROM tblSMCompanyLocation WITH (NOLOCK)) L
-						ON A.intCompanyLocationId = L.intCompanyLocationId
-				LEFT OUTER JOIN
-					(SELECT intLocationId, intItemId, intMaintenanceSalesAccountId FROM vyuARGetItemAccount WITH (NOLOCK)) Acct
-						ON A.intCompanyLocationId = Acct.intLocationId 
-						AND D.intItemId = Acct.intItemId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON Acct.intMaintenanceSalesAccountId = GLA.intAccountId	 								
-				WHERE
-					(ISNULL(Acct.intMaintenanceSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(I.strType,'') = 'Software'	
-					AND D.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')					
-					
-				--Software - General Account				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The General account of item - ' + I.strItemNo + ' is not valid.' ELSE 'The General Accounts of item - ' + I.strItemNo + ' were not specified.' END,				
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType,intCompanyLocationId  FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, strMaintenanceType FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId
-				LEFT OUTER JOIN
-					(SELECT intCompanyLocationId FROM tblSMCompanyLocation WITH (NOLOCK)) L
-						ON A.intCompanyLocationId = L.intCompanyLocationId
-				LEFT OUTER JOIN
-					(SELECT intLocationId, intItemId, intGeneralAccountId FROM vyuARGetItemAccount WITH (NOLOCK)) Acct
-						ON A.intCompanyLocationId = Acct.intLocationId 
-						AND D.intItemId = Acct.intItemId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON Acct.intGeneralAccountId = GLA.intAccountId	 			
-				WHERE
-					(ISNULL(Acct.intGeneralAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(I.strType,'') = 'Software'	
-					AND D.strMaintenanceType IN ('License/Maintenance', 'License Only')		
-					
-				--Other Charge Income Account	
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Other Charge Income account of item - ' + I.strItemNo + ' is not valid.' ELSE 'The Other Charge Income Account of item - ' + I.strItemNo + ' was not specified.' END,					
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId
-				LEFT OUTER JOIN
-					(SELECT intCompanyLocationId FROM tblSMCompanyLocation WITH (NOLOCK)) L
-						ON A.intCompanyLocationId = L.intCompanyLocationId
-				LEFT OUTER JOIN
-					(SELECT intLocationId, intOtherChargeIncomeAccountId, intItemId FROM vyuARGetItemAccount WITH (NOLOCK)) Acct
-						ON A.intCompanyLocationId = Acct.intLocationId 
-						AND D.intItemId = Acct.intItemId 		 	
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON Acct.intOtherChargeIncomeAccountId = GLA.intAccountId
-				WHERE
-					(ISNULL(Acct.intOtherChargeIncomeAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(I.strType,'') = 'Other Charge'	
-
-				--Sales Account				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Sales Account of item - ' + I.strItemNo + ' is not valid.' ELSE 'The Sales Account of item - ' + I.strItemNo + ' was not specified.' END,
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId, intPeriodsToAccrue, strType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, dblTotal FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId
-				LEFT OUTER JOIN
-					(SELECT intCompanyLocationId FROM tblSMCompanyLocation WITH (NOLOCK)) L
-						ON A.intCompanyLocationId = L.intCompanyLocationId
-				LEFT OUTER JOIN
-					(SELECT intLocationId, intItemId, intSalesAccountId FROM vyuARGetItemAccount WITH (NOLOCK)) Acct
-						ON A.intCompanyLocationId = Acct.intLocationId 
-						AND D.intItemId = Acct.intItemId 	
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON Acct.intSalesAccountId = GLA.intAccountId	
-				WHERE
-					D.dblTotal <> @ZeroDecimal 
-					AND (D.intItemId IS NOT NULL OR D.intItemId <> 0)
-					AND ISNULL(I.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
-					AND (ISNULL(Acct.intSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND ISNULL(A.strType,'') IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
-					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
-
-				--Sales Account				
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Sales Account of line item - ' + D.strItemDescription + ' is not valid.' ELSE 'The Sales Account of line item - ' + D.strItemDescription + ' was not specified.' END,
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intPeriodsToAccrue, strType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intSalesAccountId, strItemDescription, dblTotal FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON D.intSalesAccountId = GLA.intAccountId
-				WHERE
-					D.dblTotal <> @ZeroDecimal 
-					AND (ISNULL(D.intSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND A.strTransactionType = 'Debit Memo'
-					AND A.strType NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
-					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
-
-                --Sales Tax Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Sales Tax account of Tax Code - ' + TC.strTaxCode + ' is not valid.' ELSE 'The Sales Tax account of Tax Code - ' + TC.strTaxCode + ' was not set.' END,					
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM
-					(SELECT intInvoiceDetailId, intTaxCodeId, intSalesTaxAccountId, dblAdjustedTax FROM tblARInvoiceDetailTax WITH (NOLOCK)) DT
-				INNER JOIN
-					(SELECT intInvoiceId , intInvoiceDetailId FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-				INNER JOIN			
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intEntityCustomerId FROM tblARInvoice WITH (NOLOCK)) A 
-						ON D.intInvoiceId = A.intInvoiceId
-				INNER JOIN
-					(SELECT intEntityId FROM tblARCustomer WITH (NOLOCK)) C
-						ON A.intEntityCustomerId = C.intEntityId
-				INNER JOIN 
-					@PostInvoiceData	P
-						ON A.intInvoiceId = P.intInvoiceId				
-				LEFT OUTER JOIN
-					(SELECT intTaxCodeId, intSalesTaxAccountId, strTaxCode FROM tblSMTaxCode WITH (NOLOCK)) TC
-						ON DT.intTaxCodeId = TC.intTaxCodeId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON ISNULL(DT.intSalesTaxAccountId, TC.intSalesTaxAccountId) = GLA.intAccountId	
-				WHERE
-					DT.dblAdjustedTax <> @ZeroDecimal
-					AND (ISNULL(ISNULL(DT.intSalesTaxAccountId, TC.intSalesTaxAccountId), 0) = 0 OR GLA.intAccountId IS NULL)
-
-                --COGS Account -- SHIPPED
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The COGS Account of item - ' + I.strItemNo + ' is not valid.' ELSE 'The COGS Account of item - ' + I.strItemNo + ' was not specified.' END,
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM
-					(SELECT intInvoiceId, intItemId, intItemUOMId, intInventoryShipmentItemId, dblTotal, intShipmentPurchaseSalesContractId 
-					 FROM tblARInvoiceDetail WITH (NOLOCK)) D
-				INNER JOIN			
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intEntityCustomerId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) A 
-						ON D.intInvoiceId = A.intInvoiceId						
-				INNER JOIN
-					(SELECT intItemId, strItemNo FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId 
-				INNER JOIN
-					(SELECT intItemUOMId FROM tblICItemUOM WITH (NOLOCK)) ItemUOM 
-						ON ItemUOM.intItemUOMId = D.intItemUOMId
-				LEFT OUTER JOIN
-					(SELECT intItemId, intCOGSAccountId, intLocationId, strType FROM vyuARGetItemAccount WITH (NOLOCK)) IST
-						ON D.intItemId = IST.intItemId 
-						AND A.intCompanyLocationId = IST.intLocationId 
-				INNER JOIN
-					(SELECT intEntityId FROM tblARCustomer WITH (NOLOCK)) C
-						ON A.intEntityCustomerId = C.intEntityId					
-				INNER JOIN 
-					@PostInvoiceData	P
-						ON A.intInvoiceId = P.intInvoiceId				
-				INNER JOIN
-					(SELECT intInventoryShipmentItemId, intInventoryShipmentId FROM tblICInventoryShipmentItem WITH (NOLOCK)) ISD
-						ON 	D.intInventoryShipmentItemId = ISD.intInventoryShipmentItemId
-				INNER JOIN
-					(SELECT intInventoryShipmentId, strShipmentNumber FROM tblICInventoryShipment WITH (NOLOCK)) ISH
-						ON ISD.intInventoryShipmentId = ISH.intInventoryShipmentId
-				INNER JOIN
-					(SELECT intTransactionId, intTransactionDetailId, strTransactionId FROM tblICInventoryTransaction WITH (NOLOCK)) ICT
-						ON ISD.intInventoryShipmentItemId = ICT.intTransactionDetailId 
-						AND ISH.intInventoryShipmentId = ICT.intTransactionId
-						AND ISH.strShipmentNumber = ICT.strTransactionId						 
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON IST.intCOGSAccountId = GLA.intAccountId
-				WHERE
-					D.dblTotal <> @ZeroDecimal
-					AND (ISNULL(D.intInventoryShipmentItemId,0) <> 0 OR ISNULL(D.intShipmentPurchaseSalesContractId,0) <> 0)
-					AND (ISNULL(IST.intCOGSAccountId,0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(D.intItemId, 0) <> 0
-					AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-					AND A.strTransactionType <> 'Debit Memo'
-
-				--Inventory In-Transit Account Account -- SHIPPED
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Inventory In-Transit Account of item - ' + I.strItemNo + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + I.strItemNo + ' was not specified.' END,
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM
-					(SELECT intInvoiceId, intItemId, intItemUOMId, intInventoryShipmentItemId, dblTotal, intShipmentPurchaseSalesContractId 
-					 FROM tblARInvoiceDetail WITH (NOLOCK)) D
-				INNER JOIN			
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId, intEntityCustomerId FROM tblARInvoice WITH (NOLOCK)) A 
-						ON D.intInvoiceId = A.intInvoiceId						  
-				INNER JOIN
-					(SELECT intItemUOMId FROM tblICItemUOM WITH (NOLOCK)) ItemUOM 
-						ON ItemUOM.intItemUOMId = D.intItemUOMId
-				INNER JOIN
-					(SELECT intItemId, strItemNo FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId
-				LEFT OUTER JOIN
-					(SELECT intLocationId, intItemId, intInventoryInTransitAccountId, strType FROM vyuARGetItemAccount WITH (NOLOCK))IST
-						ON D.intItemId = IST.intItemId 
-						AND A.intCompanyLocationId = IST.intLocationId 
-				INNER JOIN
-					(SELECT intEntityId FROM tblARCustomer WITH (NOLOCK)) C
-						ON A.intEntityCustomerId = C.intEntityId					
-				INNER JOIN 
-					@PostInvoiceData	P
-						ON A.intInvoiceId = P.intInvoiceId				
-				INNER JOIN
-					(SELECT intInventoryShipmentItemId, intInventoryShipmentId FROM tblICInventoryShipmentItem WITH (NOLOCK)) ISD
-						ON 	D.intInventoryShipmentItemId = ISD.intInventoryShipmentItemId
-				INNER JOIN
-					(SELECT intInventoryShipmentId, strShipmentNumber FROM tblICInventoryShipment WITH (NOLOCK)) ISH
-						ON ISD.intInventoryShipmentId = ISH.intInventoryShipmentId
-				INNER JOIN
-					(SELECT intTransactionId, intTransactionDetailId, strTransactionId FROM tblICInventoryTransaction WITH (NOLOCK)) ICT
-						ON ISD.intInventoryShipmentItemId = ICT.intTransactionDetailId 
-						AND ISH.intInventoryShipmentId = ICT.intTransactionId
-						AND ISH.strShipmentNumber = ICT.strTransactionId						  
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON IST.intInventoryInTransitAccountId = GLA.intAccountId				
-				WHERE
-					D.dblTotal <> @ZeroDecimal
-					AND (ISNULL(D.intInventoryShipmentItemId,0) <> 0 OR ISNULL(D.intShipmentPurchaseSalesContractId,0) <> 0)
-					AND ISNULL(D.intItemId, 0) <> 0
-					AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-					AND A.strTransactionType <> 'Debit Memo'	
-					AND (ISNULL(IST.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)					
-					
-				--COGS Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The COGS Account of item - ' + ICI.strItemNo + ' is not valid.' ELSE 'The COGS Account of item - ' + ICI.strItemNo + ' was not specified.' END,
-					Header.strTransactionType,
-					Header.strInvoiceNumber,
-					@BatchId,
-					Header.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, intItemId, dblTotal, intInventoryShipmentItemId, intShipmentPurchaseSalesContractId 
-					 FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
-				INNER JOIN
-					(SELECT intInvoiceId , strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) Header
-						ON Detail.intInvoiceId = Header.intInvoiceId						 
-				INNER JOIN
-					@PostInvoiceData P
-						ON Header.intInvoiceId = P.intInvoiceId	
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem WITH (NOLOCK)) ICI
-						ON Detail.intItemId = ICI.intItemId 
-				LEFT OUTER JOIN
-					(SELECT intCOGSAccountId, intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) ARIA
-						ON Detail.intItemId = ARIA.intItemId 
-						AND Header.intCompanyLocationId = ARIA.intLocationId 
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON ARIA.intCOGSAccountId = GLA.intAccountId	
-				WHERE
-					Detail.dblTotal <> @ZeroDecimal
-					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
-					AND ISNULL(Detail.intItemId, 0) <> 0
-					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(ICI.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-					AND Header.strTransactionType <> 'Debit Memo'
-					
-				--COGS Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The COGS Account of item - ' + ICI.strItemNo + ' is not valid.' ELSE 'The COGS Account of item - ' + ICI.strItemNo + ' was not specified.' END,
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM
-					(SELECT [intItemId], [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId], strType FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, [dblTotal], intInventoryShipmentItemId, intShipmentPurchaseSalesContractId FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-						ON ARIC.[intItemId] = ARID.[intItemId]
-				INNER JOIN
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) ARI
-						ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]
-				INNER JOIN
-					@PostInvoiceData P
-						ON ARI.[intInvoiceId] = P.[intInvoiceId]		
-				INNER JOIN
-					(SELECT [intItemId], strItemNo FROM tblICItem WITH (NOLOCK)) ICI
-						ON ARIC.[intComponentItemId] = ICI.[intItemId]
-				LEFT OUTER JOIN
-					(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
-						ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
-				LEFT OUTER JOIN
-					(SELECT intCOGSAccountId, intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) ARIA
-						ON ARID.intItemId = ARIA.intItemId 
-						AND ARI.intCompanyLocationId = ARIA.intLocationId 	
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON ARIA.intCOGSAccountId = GLA.intAccountId	 
-				WHERE
-					ARID.[dblTotal] <> 0
-					AND (ISNULL(ARID.intInventoryShipmentItemId,0) <> 0 OR ISNULL(ARID.intShipmentPurchaseSalesContractId,0) <> 0)
-					AND ISNULL(ARID.[intItemId],0) <> 0
-					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
-					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ARI.[strTransactionType] <> 'Debit Memo'		
-					AND ISNULL(ARIC.strType,'') NOT IN ('Finished Good','Comment')
-
-				--Inventory In-Transit Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Inventory In-Transit Account of item - ' + ICI.strItemNo + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + ICI.strItemNo + ' was not specified.' END,
-					Header.strTransactionType,
-					Header.strInvoiceNumber,
-					@BatchId,
-					Header.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, intItemId, dblTotal, intInventoryShipmentItemId, intShipmentPurchaseSalesContractId FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
-				INNER JOIN
-					(SELECT intInvoiceId, strInvoiceNumber,  strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) Header
-						ON Detail.intInvoiceId = Header.intInvoiceId						 
-				INNER JOIN
-					@PostInvoiceData P
-						ON Header.intInvoiceId = P.intInvoiceId	
-				INNER JOIN
-					(SELECT intItemId, strItemNo, strType FROM tblICItem WITH (NOLOCK)) ICI
-						ON Detail.intItemId = ICI.intItemId 
-				LEFT OUTER JOIN
-					(SELECT intItemId, intLocationId, intInventoryInTransitAccountId FROM vyuARGetItemAccount WITH (NOLOCK)) ARIA
-						ON Detail.intItemId = ARIA.intItemId 
-						AND Header.intCompanyLocationId = ARIA.intLocationId 
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON ARIA.intInventoryInTransitAccountId = GLA.intAccountId
-				WHERE
-					Detail.dblTotal <> @ZeroDecimal
-					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
-					AND ISNULL(Detail.intItemId, 0) <> 0
-					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ISNULL(ICI.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-					AND Header.strTransactionType <> 'Debit Memo'
-					
-				--Inventory In-Transit Account
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Inventory In-Transit Account of item - ' + ICI.strItemNo + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + ICI.strItemNo + ' was not specified.' END,
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM
-					(SELECT [intCompanyLocationId], [intItemId], [intComponentItemId], [intItemUnitMeasureId], strType FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
-				INNER JOIN
-					(SELECT intInvoiceId, [intItemId], [dblTotal], intInventoryShipmentItemId, intShipmentPurchaseSalesContractId FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-						ON ARIC.[intItemId] = ARID.[intItemId]
-				INNER JOIN
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, [intCompanyLocationId] FROM tblARInvoice WITH (NOLOCK)) ARI
-						ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]
-				INNER JOIN
-					@PostInvoiceData P
-						ON ARI.[intInvoiceId] = P.[intInvoiceId]		
-				INNER JOIN
-					(SELECT [intItemId], strItemNo FROM tblICItem WITH (NOLOCK)) ICI
-						ON ARIC.[intComponentItemId] = ICI.[intItemId]
-				LEFT OUTER JOIN
-					(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
-						ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
-				LEFT OUTER JOIN
-					(SELECT intInventoryInTransitAccountId, intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) ARIA
-						ON ARID.intItemId = ARIA.intItemId 
-						AND ARI.intCompanyLocationId = ARIA.intLocationId
-				LEFT OUTER JOIN
-					(SELECT intAccountId FROM tblGLAccount WITH (NOLOCK)) GLA
-						ON ARIA.intInventoryInTransitAccountId = GLA.intAccountId 		 
-				WHERE
-					ARID.[dblTotal] <> 0
-					AND (ISNULL(ARID.intInventoryShipmentItemId,0) <> 0 OR ISNULL(ARID.intShipmentPurchaseSalesContractId,0) <> 0)
-					AND ISNULL(ARID.[intItemId],0) <> 0
-					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
-					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ARI.[strTransactionType] <> 'Debit Memo'																		
-					AND ISNULL(ARIC.strType,'') NOT IN ('Finished Good','Comment')
-				
-				--Zero Contract Item Price	
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The contract item - ' + I.strItemNo + ' price cannot be zero.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, intContractHeaderId, intContractDetailId, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId
-				INNER JOIN
-					(SELECT intContractHeaderId, intContractDetailId, strPricingType FROM vyuCTContractDetailView WITH (NOLOCK)) CT
-						ON D.intContractHeaderId = CT.intContractHeaderId 
-						AND D.intContractDetailId = CT.intContractDetailId 
-				WHERE
-					D.dblPrice = @ZeroDecimal
-					AND CT.strPricingType <> 'Index'
-					
-				--Contract Item Price not Equal to Contract Sequence Cash Price
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(ARCC.dblCashPrice, @ZeroDecimal) AS MONEY),2) + ').',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				INNER JOIN
-					(SELECT intInvoiceId, intItemId, intContractHeaderId, intContractDetailId, dblPrice FROM tblARInvoiceDetail WITH (NOLOCK)) D
-						ON A.intInvoiceId = D.intInvoiceId
-				INNER JOIN
-					(SELECT intItemId, strItemNo FROM tblICItem WITH (NOLOCK)) I
-						ON D.intItemId = I.intItemId
-				INNER JOIN
-					(SELECT intContractHeaderId, intContractDetailId, dblCashPrice, strPricingType FROM vyuARCustomerContract WITH (NOLOCK)) ARCC
-						ON D.intContractHeaderId = ARCC.intContractHeaderId 
-						AND D.intContractDetailId = ARCC.intContractDetailId 			 				
-				WHERE
-					D.dblPrice <> @ZeroDecimal				
-					AND CAST(ISNULL(ARCC.dblCashPrice, @ZeroDecimal) AS MONEY) <> CAST(ISNULL(D.dblPrice, @ZeroDecimal) AS MONEY)
-					AND ARCC.strPricingType <> 'Index'
-					
-				--Fiscal Year
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'Unable to find an open fiscal year period to match the transaction date.',
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM
-					@PostInvoiceData PID
-				INNER JOIN 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, dtmPostDate, dtmDate FROM tblARInvoice WITH (NOLOCK)) ARI 
-						ON PID.intInvoiceId = ARI.intInvoiceId		
-				WHERE  
-					ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.dtmPostDate, ARI.dtmDate)), 0) = 0
-
-				--If ysnAllowUserSelfPost is True in User Role
-				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
+		BEGIN TRY
+			DECLARE @TankDelivery TABLE (
+					intInvoiceId INT,
+					UNIQUE (intInvoiceId));
+							
+			INSERT INTO @TankDelivery					
+			SELECT DISTINCT
+				I.intInvoiceId
+			FROM
+				(SELECT intInvoiceId FROM tblARInvoice WITH (NOLOCK)) I
+			INNER JOIN
+				(SELECT intInvoiceId, intSiteId FROM tblARInvoiceDetail WITH (NOLOCK)) D
+					ON I.intInvoiceId = D.intInvoiceId		
+			INNER JOIN
+				(SELECT intSiteID FROM tblTMSite WITH (NOLOCK)) TMS
+					ON D.intSiteId = TMS.intSiteID 
+			INNER JOIN 
+				@PostInvoiceData B
+					ON I.intInvoiceId = B.intInvoiceId
+							
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDelivery ORDER BY intInvoiceId)
 				BEGIN
-					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT 
-						'You cannot Post/Unpost transactions you did not create.',
-						ARI.strTransactionType,
-						ARI.strInvoiceNumber,
-						@BatchId,
-						ARI.intInvoiceId
-					FROM 
-						@PostInvoiceData PID
-					INNER JOIN 
-						(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI
-							ON PID.intInvoiceId = ARI.intInvoiceId
-					WHERE  
-						PID.intEntityId <> @UserEntityID
-				END	
-
-				--Invalid Consumption Site
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'Site # ' + CONVERT(NVARCHAR(100),TMS.intSiteID) + ' is not a valid site for customer ' + ARC.strCustomerNumber,
-					ARI.strTransactionType,
-					ARI.strInvoiceNumber,
-					@BatchId,
-					ARI.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, intSiteId FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-				INNER JOIN
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intEntityCustomerId FROM tblARInvoice WITH (NOLOCK)) ARI
-						ON ARID.intInvoiceId = ARI.intInvoiceId
-				INNER JOIN
-					@PostInvoiceData PID
-						ON ARI.intInvoiceId = PID.intInvoiceId
-				INNER JOIN
-					(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) ARC
-						ON ARI.intEntityCustomerId = ARC.intEntityId 
-				LEFT OUTER JOIN
-					(SELECT intSiteID, intCustomerID FROM tblTMSite WITH (NOLOCK)) TMS
-						ON ARID.intSiteId = TMS.intSiteID
-				INNER JOIN
-					(SELECT intCustomerID, intCustomerNumber FROM tblTMCustomer WITH (NOLOCK)) TMC
-						ON TMS.intCustomerID = TMC.intCustomerID					 						
-				WHERE 
-					ARID.intSiteId IS NOT NULL
-					AND ARI.intEntityCustomerId <> TMC.intCustomerNumber 					
-					
-				BEGIN TRY
-					DECLARE @TankDelivery TABLE (
-							intInvoiceId INT,
-							UNIQUE (intInvoiceId));
-							
-					INSERT INTO @TankDelivery					
-					SELECT DISTINCT
-						I.intInvoiceId
-					FROM
-						(SELECT intInvoiceId FROM tblARInvoice WITH (NOLOCK)) I
-					INNER JOIN
-						(SELECT intInvoiceId, intSiteId FROM tblARInvoiceDetail WITH (NOLOCK)) D
-							ON I.intInvoiceId = D.intInvoiceId		
-					INNER JOIN
-						(SELECT intSiteID FROM tblTMSite WITH (NOLOCK)) TMS
-							ON D.intSiteId = TMS.intSiteID 
-					INNER JOIN 
-						@PostInvoiceData B
-							ON I.intInvoiceId = B.intInvoiceId
-							
-					WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDelivery ORDER BY intInvoiceId)
-						BEGIN
 						
-							DECLARE  @intInvoiceId INT
-									,@ResultLog NVARCHAR(MAX)
+					DECLARE  @intInvoiceId INT
+							,@ResultLog NVARCHAR(MAX)
 									
-							SET @ResultLog = 'OK'
+					SET @ResultLog = 'OK'
 							
-							SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @TankDelivery ORDER BY intInvoiceId
+					SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @TankDelivery ORDER BY intInvoiceId
 
-							EXEC dbo.uspTMValidateInvoiceForSync @intInvoiceId, @ResultLog OUT
+					EXEC dbo.uspTMValidateInvoiceForSync @intInvoiceId, @ResultLog OUT
 											
-							DELETE FROM @TankDelivery WHERE intInvoiceId = @intInvoiceId
+					DELETE FROM @TankDelivery WHERE intInvoiceId = @intInvoiceId
 							
-							IF NOT(@ResultLog = 'OK' OR RTRIM(LTRIM(@ResultLog)) = '')
-								BEGIN
-									INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-									SELECT
-										@ResultLog,
-										A.strTransactionType,
-										A.strInvoiceNumber,
-										@BatchId,
-										A.intInvoiceId
-									FROM 
-										(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-									INNER JOIN 
-										@PostInvoiceData B
-											ON A.intInvoiceId = B.intInvoiceId
-									WHERE
-										A.intInvoiceId = @intInvoiceId									
-								END														
-						END 							
+					IF NOT(@ResultLog = 'OK' OR RTRIM(LTRIM(@ResultLog)) = '')
+						BEGIN
+							INSERT INTO @InvalidInvoiceData([strPostingError], [strTransactionType], [strInvoiceNumber], [strBatchId], [intInvoiceId])
+							SELECT
+								@ResultLog,
+								A.strTransactionType,
+								A.strInvoiceNumber,
+								@BatchId,
+								A.intInvoiceId
+							FROM 
+								(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+							INNER JOIN 
+								@PostInvoiceData B
+									ON A.intInvoiceId = B.intInvoiceId
+							WHERE
+								A.intInvoiceId = @intInvoiceId									
+						END														
+				END 							
 							
 															
-				END TRY
-				BEGIN CATCH
-					SELECT @ErrorMerssage = ERROR_MESSAGE()					
-					IF @RaiseError = 0
-						BEGIN
-							IF (XACT_STATE()) = -1
-								ROLLBACK TRANSACTION						
-							BEGIN TRANSACTION
-							--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-							--SELECT @ErrorMerssage, @TransType, @param, @BatchId, 0							
-							--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param															
-							UPDATE ILD
-							SET
-								 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
-								,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
-								,ILD.[strPostingMessage]	= @ErrorMerssage
-								,ILD.[strBatchId]			= @BatchId
-								,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
-							FROM
-								tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
-							INNER JOIN
-								@PostInvoiceData PID
-									ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-							WHERE
-								ILD.[intIntegrationLogId] = @IntegrationLogId
-								AND ILD.[ysnPost] IS NOT NULL
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()					
+			IF @RaiseError = 0
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION						
+					BEGIN TRANSACTION
+					--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					--SELECT @ErrorMerssage, @TransType, @param, @BatchId, 0							
+					--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param															
+					UPDATE ILD
+					SET
+							ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+						,ILD.[strPostingMessage]	= @ErrorMerssage
+						,ILD.[strBatchId]			= @BatchId
+						,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
+					FROM
+						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+					WHERE
+						ILD.[intIntegrationLogId] = @IntegrationLogId
+						AND ILD.[ysnPost] IS NOT NULL
 									
 							
 
-							COMMIT TRANSACTION
-							--COMMIT TRAN @TransactionName
-						END						
-					IF @RaiseError = 1
-						RAISERROR(@ErrorMerssage, 11, 1)
+					COMMIT TRANSACTION
+					--COMMIT TRAN @TransactionName
+				END						
+			IF @RaiseError = 1
+				RAISERROR(@ErrorMerssage, 11, 1)
 						
-					GOTO Post_Exit
-				END CATCH
+			GOTO Post_Exit
+		END CATCH
 
 
-			END 
+	END 
 
-		--unposting
-		IF @Post = 0 And @Recap = 0
-			BEGIN
-				--ALREADY HAVE PAYMENTS
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					A.strRecordNumber + ' payment was already made on this ' + C.strTransactionType + '.',
-					C.strTransactionType,
-					C.strInvoiceNumber,
-					@BatchId,
-					C.intInvoiceId
-				FROM
-					(SELECT intPaymentId, strRecordNumber FROM tblARPayment WITH (NOLOCK)) A
-				INNER JOIN 
-					(SELECT intPaymentId, intInvoiceId FROM tblARPaymentDetail WITH (NOLOCK)) B 
-						ON A.intPaymentId = B.intPaymentId						
-				INNER JOIN 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) C
-						ON B.intInvoiceId = C.intInvoiceId
-				INNER JOIN 
-					@PostInvoiceData D
-						ON C.intInvoiceId = D.intInvoiceId
-
-
-				--Invoice with created Bank Deposit
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'You cannot unpost invoice with created Bank Deposit.'
-					,ARI.strTransactionType
-					,ARI.strInvoiceNumber
-					,@BatchId
-					,ARI.intInvoiceId
-				FROM
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI
-				INNER JOIN
-					@PostInvoiceData P
-						ON ARI.intInvoiceId = P.intInvoiceId
-				INNER JOIN
-					(SELECT intSourceTransactionId, strSourceTransactionId, intUndepositedFundId, strSourceSystem FROM tblCMUndepositedFund WITH (NOLOCK)) B 
-						ON ARI.intInvoiceId = B.intSourceTransactionId 
-						AND ARI.strInvoiceNumber = B.strSourceTransactionId
-				INNER JOIN
-					(SELECT intUndepositedFundId FROM tblCMBankTransactionDetail WITH (NOLOCK)) TD
-						ON B.intUndepositedFundId = TD.intUndepositedFundId
-				WHERE 
-					B.strSourceSystem = 'AR'
-
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'Unable to find an open fiscal year period to match the transaction date.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, dtmPostDate, dtmDate FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				WHERE
-					ISNULL(dbo.isOpenAccountingDate(ISNULL(A.dtmPostDate, A.dtmDate)), 0) = 0
-					
-				--NOT POSTED
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'The transaction has not been posted yet.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@BatchId,
-					A.intInvoiceId
-				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, ysnPosted FROM tblARInvoice WITH (NOLOCK)) A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				WHERE  
-					A.ysnPosted = 0
-
-				--Don't allow Imported Invoice from Origin to be unposted
-				DECLARE @IsAG BIT = 0
-				DECLARE @IsPT BIT = 0
-
-				IF EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'coctlmst')
-					SELECT TOP 1 
-						@IsAG	= CASE WHEN ISNULL(coctl_ag, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst') THEN 1 ELSE 0 END
-						,@IsPT	= CASE WHEN ISNULL(coctl_pt, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst') THEN 1 ELSE 0 END 
-					FROM
-						coctlmst
-
-				IF @IsAG = 1
-				BEGIN					
-					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT 
-						ARI.strInvoiceNumber + ' was imported from origin. Unpost is not allowed!',
-						ARI.strTransactionType,
-						ARI.strInvoiceNumber,
-						@BatchId,
-						ARI.intInvoiceId
-					FROM 
-						(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, strInvoiceOriginId, ysnPosted, ysnImportedAsPosted, ysnImportedFromOrigin FROM tblARInvoice WITH (NOLOCK)) ARI 
-					INNER JOIN 
-						@PostInvoiceData PID
-							ON ARI.intInvoiceId = PID.intInvoiceId
-					INNER JOIN
-						(SELECT agivc_ivc_no FROM agivcmst WITH (NOLOCK)) OI
-							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.agivc_ivc_no COLLATE Latin1_General_CI_AS
-					WHERE  
-						ARI.ysnPosted = 1
-						AND ARI.ysnImportedAsPosted = 1 
-						AND ARI.ysnImportedFromOrigin = 1
-				END
-
-				IF @IsPT = 1
-				BEGIN					
-					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT 
-						ARI.strInvoiceNumber + ' was imported from origin. Unpost is not allowed!',
-						ARI.strTransactionType,
-						ARI.strInvoiceNumber,
-						@BatchId,
-						ARI.intInvoiceId
-					FROM 
-						(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, ysnPosted, strInvoiceOriginId, ysnImportedAsPosted, ysnImportedFromOrigin FROM tblARInvoice WITH (NOLOCK)) ARI 
-					INNER JOIN 
-						@PostInvoiceData PID
-							ON ARI.intInvoiceId = PID.intInvoiceId
-					INNER JOIN
-						(SELECT ptivc_invc_no FROM ptivcmst WITH (NOLOCK)) OI
-							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.ptivc_invc_no COLLATE Latin1_General_CI_AS
-					WHERE   ARI.ysnPosted = 1
-						AND ARI.ysnImportedAsPosted = 1 
-						AND ARI.ysnImportedFromOrigin = 1
-				END
-
-				--If ysnAllowUserSelfPost is True in User Role
-				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
-				BEGIN
-					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT 
-						'You cannot Post/Unpost transactions you did not create.',
-						ARI.strTransactionType,
-						ARI.strInvoiceNumber,
-						@BatchId,
-						ARI.intInvoiceId
-					FROM 
-						@PostInvoiceData PID
-					INNER JOIN 
-						(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI
-							ON PID.intInvoiceId = ARI.intInvoiceId
-					WHERE  
-						PID.intEntityId <> @UserEntityID
-				END	
-
-			END			
+INSERT INTO @InvalidInvoiceData(
+	 [intInvoiceId]
+	,[strInvoiceNumber]
+	,[strTransactionType]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[strBatchId]
+	,[strPostingError])
+SELECT
+	 [intInvoiceId]			= IID.[intInvoiceId]
+	,[strInvoiceNumber]		= IID.[strInvoiceNumber]
+	,[strTransactionType]	= IID.[strTransactionType]
+	,[intInvoiceDetailId]	= IID.[intInvoiceDetailId]
+	,[intItemId]			= IID.[intItemId]
+	,[strBatchId]			= IID.[strBatchId]
+	,[strPostingError]		= IID.[strPostingError]
+FROM 
+	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @Post) AS IID
 		
 		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
 		IF(@totalInvalid > 0)
 			BEGIN
-
-				--Insert Invalid Post transaction result
-				--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				--SELECT 	
-				--	strError
-				--	,strTransactionType
-				--	,strTransactionId
-				--	,strBatchNumber
-				--	,intTransactionId
-				--FROM
 				--	@InvalidInvoiceData
 					
 				UPDATE ILD
 				SET
 					 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
 					,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
-					,ILD.[strPostingMessage]	= PID.[strError]
-					,ILD.[strBatchId]			= PID.[strBatchNumber]
-					,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+					,ILD.[strPostingMessage]	= PID.[strPostingError]
+					,ILD.[strBatchId]			= PID.[strBatchId]
+					,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 				FROM
 					tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 				INNER JOIN
 					@InvalidInvoiceData PID
-						ON ILD.[intInvoiceId] = PID.[intTransactionId]
+						ON ILD.[intInvoiceId] = PID.[strInvoiceNumber]
 				WHERE
 					ILD.[intIntegrationLogId] = @IntegrationLogId
 					AND ILD.[ysnPost] IS NOT NULL
@@ -1872,11 +897,11 @@ END CATCH
 				DELETE @PostInvoiceData
 					FROM @PostInvoiceData A
 						INNER JOIN @InvalidInvoiceData B
-							ON A.intInvoiceId = B.intTransactionId
+							ON A.intInvoiceId = B.[intInvoiceId]
 				
 				IF @RaiseError = 1
 					BEGIN
-						SELECT TOP 1 @ErrorMerssage = strError FROM @InvalidInvoiceData
+						SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
 						RAISERROR(@ErrorMerssage, 11, 1)							
 						GOTO Post_Exit
 					END					
@@ -1891,7 +916,7 @@ END CATCH
 					--COMMIT TRAN @TransactionName
 				IF @RaiseError = 1
 					BEGIN
-						SELECT TOP 1 @ErrorMerssage = strError FROM @InvalidInvoiceData
+						SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
 						RAISERROR(@ErrorMerssage, 11, 1)							
 						GOTO Post_Exit
 					END				
@@ -2011,7 +1036,7 @@ BEGIN TRY
 									,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 									,ILD.[strPostingMessage]	= @ErrorMerssage
 									,ILD.[strBatchId]			= @BatchId
-									,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+									,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 								FROM
 									tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 								INNER JOIN
@@ -2049,7 +1074,7 @@ BEGIN CATCH
 				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 				,ILD.[strPostingMessage]	= @ErrorMerssage
 				,ILD.[strBatchId]			= @BatchId
-				,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+				,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 			FROM
 				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
@@ -2276,8 +1301,8 @@ IF @Post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, strTransactionType, intCurrencyId, dtmDate, dtmPostDate, strComments, dblInvoiceTotal, intAccountId, intPeriodsToAccrue, dblBaseInvoiceTotal
 				 FROM tblARInvoice WITH (NOLOCK)) A
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityId
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
 			LEFT OUTER JOIN
@@ -2351,7 +1376,7 @@ IF @Post = 1
 				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId, strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI1
 					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND ARI1.strTransactionType = 'Credit Memo'				 
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityId
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData ) P ON A.intInvoiceId = P.intInvoiceId
 			WHERE
@@ -2397,7 +1422,7 @@ IF @Post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], intCompanyLocationId, dtmPostDate, dtmDate, strTransactionType, dblPayment, strComments, intCurrencyId, intPeriodsToAccrue, dblBasePayment
 				 FROM tblARInvoice WITH (NOLOCK)) A
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityId
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			INNER JOIN
@@ -2468,7 +1493,7 @@ IF @Post = 1
 			INNER JOIN
 				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)) ARI1 ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND strTransactionType <> 'Credit Memo'		
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityId
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			WHERE
@@ -2516,7 +1541,7 @@ IF @Post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, intCompanyLocationId, dtmDate, dtmPostDate, intCurrencyId, [intEntityCustomerId], strTransactionType, strComments, intPeriodsToAccrue, strType
 				 FROM tblARInvoice WITH (NOLOCK)) A  ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityId		
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 	
 			LEFT OUTER JOIN 
@@ -2655,7 +1680,7 @@ IF @Post = 1
 			INNER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityId		
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
 				(SELECT intInvoiceId, ysnAccrueLicense FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 
 			LEFT OUTER JOIN 
@@ -2791,7 +1816,7 @@ IF @Post = 1
 			INNER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityId		
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
 				(SELECT intInvoiceId, ysnAccrueLicense FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
@@ -2920,8 +1945,8 @@ IF @Post = 1
 			INNER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityId		
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
@@ -2987,8 +2012,8 @@ IF @Post = 1
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityId			
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -3063,8 +2088,8 @@ IF @Post = 1
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityId			
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -3130,8 +2155,8 @@ IF @Post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], intCompanyLocationId, dtmPostDate, dtmDate, dblShipping, strTransactionType, strComments, intCurrencyId, dblBaseShipping
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 			LEFT JOIN 
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityId	
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId	
 			INNER JOIN
 				(SELECT intCompanyLocationId, intFreightIncome FROM tblSMCompanyLocation WITH (NOLOCK)) L
 					ON A.intCompanyLocationId = L.intCompanyLocationId	
@@ -3211,8 +2236,8 @@ IF @Post = 1
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON D.intInvoiceId = A.intInvoiceId
 			INNER JOIN
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.intEntityId
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.intEntityCustomerId = C.intEntityCustomerId
 			INNER JOIN
 				tblSMCompanyLocation SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId 
@@ -3281,8 +2306,8 @@ IF @Post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.intEntityId
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.intEntityCustomerId = C.intEntityCustomerId
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -3349,8 +2374,8 @@ IF @Post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.intEntityId					
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.intEntityCustomerId = C.intEntityCustomerId					
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId				
@@ -3434,8 +2459,8 @@ IF @Post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.intEntityId					
+				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.intEntityCustomerId = C.intEntityCustomerId					
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId				
@@ -4098,14 +3123,14 @@ IF @Post = 0
 				,GLD.strModuleName
 				,GLD.intConcurrencyId
 			FROM
-				(SELECT intInvoiceId, strTransactionId FROM @PostInvoiceData) PID
+				(SELECT intInvoiceId, [strInvoiceNumber] FROM @PostInvoiceData) PID
 			INNER JOIN
 				(SELECT dtmDate, intAccountId, intGLDetailId, intTransactionId, strTransactionId, strDescription, strCode, strReference, intCurrencyId, dblExchangeRate, dtmTransactionDate, 
 					strJournalLineDescription, intJournalLineNo, strTransactionType, strTransactionForm, strModuleName, intConcurrencyId, dblCredit, dblDebit, dblCreditUnit, dblDebitUnit, ysnIsUnposted,
 					dblCreditForeign, dblDebitForeign
 				 FROM dbo.tblGLDetail WITH (NOLOCK)) GLD
 					ON PID.intInvoiceId = GLD.intTransactionId
-					AND PID.strTransactionId = GLD.strTransactionId							 
+					AND PID.[strInvoiceNumber] = GLD.strTransactionId							 
 			WHERE
 				GLD.ysnIsUnposted = 0				
 			ORDER BY
@@ -4127,7 +3152,7 @@ IF @Post = 0
 			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
 			SELECT DISTINCT
 				 PID.intInvoiceId
-				,PID.strTransactionId
+				,PID.[strInvoiceNumber]
 			FROM
 				@PostInvoiceData PID				
 			INNER JOIN
@@ -4167,9 +3192,9 @@ IF @Post = 0
 			INSERT INTO @UnPostICInvoiceData(intInvoiceId, strTransactionId)
 			SELECT DISTINCT
 				 PID.intInvoiceId
-				,PID.strTransactionId
+				,PID.[strInvoiceNumber]
 			FROM
-				(SELECT intInvoiceId, strTransactionId FROM @PostInvoiceData) PID
+				(SELECT intInvoiceId, [strInvoiceNumber] FROM @PostInvoiceData) PID
 			INNER JOIN
 				(SELECT intInvoiceId, intItemId, intItemUOMId FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID
 					ON PID.intInvoiceId = ARID.intInvoiceId					
@@ -4379,10 +3404,10 @@ IF @Recap = 1
 
 		DELETE GLDR  
 		FROM 
-			(SELECT intInvoiceId, strTransactionId FROM @PostInvoiceData) PID  
+			(SELECT intInvoiceId, [strInvoiceNumber] FROM @PostInvoiceData) PID  
 		INNER JOIN 
 			(SELECT intTransactionId, strTransactionId, strCode FROM dbo.tblGLDetailRecap WITH (NOLOCK)) GLDR 
-				ON (PID.strTransactionId = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  AND GLDR.strCode = @CODE		   
+				ON (PID.[strInvoiceNumber] = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  AND GLDR.strCode = @CODE		   
 		   
 		BEGIN TRY		
 		 
@@ -4500,7 +3525,7 @@ IF @Recap = 1
 						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 						,ILD.[strPostingMessage]	= @ErrorMerssage
 						,ILD.[strBatchId]			= @BatchId
-						,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+						,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 					FROM
 						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 					INNER JOIN
@@ -4580,7 +3605,7 @@ IF @Recap = 0
 						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 						,ILD.[strPostingMessage]	= @PostSuccessfulMsg
 						,ILD.[strBatchId]			= @BatchId
-						,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+						,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 					FROM
 						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 					INNER JOIN
@@ -4702,7 +3727,7 @@ IF @Recap = 0
 						,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 						,ILD.[strPostingMessage]	= @PostSuccessfulMsg
 						,ILD.[strBatchId]			= @BatchId
-						,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+						,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 					FROM
 						tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 					INNER JOIN
@@ -4827,7 +3852,7 @@ IF @Recap = 0
 						FROM dbo.tblARInvoice WITH (NOLOCK)
 						WHERE intInvoiceId IN (SELECT [intHeaderId] FROM @InvoiceToUpdate)
 						GROUP BY intEntityCustomerId
-			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
+			) INVOICE ON CUSTOMER.intEntityCustomerId = INVOICE.intEntityCustomerId
 
 		DELETE dbo.tblARPrepaidAndCredit  
 		FROM 
@@ -4916,7 +3941,7 @@ ELSE
 				dblInvoiceTotal, strTransactionType, dtmDate
 			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
 				ON PID.intInvoiceId = ARI.intInvoiceId 	
-	END 
+	END
 
 
 Do_Rollback:
@@ -4936,7 +3961,7 @@ Do_Rollback:
 				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
 				,ILD.[strPostingMessage]	= @ErrorMerssage
 				,ILD.[strBatchId]			= @BatchId
-				,ILD.[strPostedTransactionId] = PID.[strTransactionId] 
+				,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 			FROM
 				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 			INNER JOIN
