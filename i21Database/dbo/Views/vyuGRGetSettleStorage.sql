@@ -18,6 +18,8 @@ AS
 ,dblStorageDue
 ,strStorageTicket
 ,dblSelectedUnits
+,SS.dblUnpaidUnits
+,SS.dblSettleUnits
 ,dblDiscountsDue
 ,dblNetSettlement
 ,SS.intCreatedUserId

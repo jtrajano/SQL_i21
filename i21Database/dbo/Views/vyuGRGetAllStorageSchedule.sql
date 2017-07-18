@@ -7,7 +7,14 @@ SELECT
 ,SR.intStorageType
 ,ST.strStorageTypeDescription
 ,SR.intCommodity
-,COM.strCommodityCode  
+,COM.strCommodityCode
+,SR.strAllowancePeriod
+,SR.intAllowanceDays
+,SR.dtmAllowancePeriodFrom
+,SR.dtmAllowancePeriodTo
+,SR.dtmEffectiveDate
+,SR.dtmTerminationDate
+,SR.strStorageRate  
 ,SR.intCurrencyID
 ,CUR.strCurrency  
 FROM tblGRStorageScheduleRule SR

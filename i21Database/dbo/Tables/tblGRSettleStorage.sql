@@ -15,6 +15,8 @@
 	[dblStorageDue] NUMERIC(18, 6) NULL,
 	[strStorageTicket] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
 	[dblSelectedUnits] NUMERIC(18, 6) NULL,
+	[dblUnpaidUnits] NUMERIC(18, 6) NULL,
+	[dblSettleUnits] NUMERIC(18, 6) NULL,
 	[dblDiscountsDue] NUMERIC(18, 6) NULL,
 	[dblNetSettlement] NUMERIC(18, 6) NULL,
 	[ysnPosted] [bit] NULL DEFAULT ((0)),
