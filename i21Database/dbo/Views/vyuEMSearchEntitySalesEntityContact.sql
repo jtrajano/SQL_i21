@@ -52,6 +52,7 @@ select
 		strContactLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(g.intEntityId),		
 		strContactAreaOfInterest = dbo.fnEMGetEntityAreaOfInterest(g.intEntityId),
 		strEntityCurrentSystem = dbo.fnEMGetEntityCompetitors(a.intEntityId),
+		strEntityLineOfBusinessSalesperson = dbo.fnEMGetEntityLineOfBusinessSalesperson(a.intEntityId),
 		k.ysnOutOfAdvertising,
 		k.dtmOutDate
     FROM         

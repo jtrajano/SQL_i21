@@ -5461,6 +5461,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherTransactionType.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherForm1099.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherCategories1099.sql" />
+    <Build Include="dbo\Functions\fnEMGetEntityLineOfBusinessSalesperson.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

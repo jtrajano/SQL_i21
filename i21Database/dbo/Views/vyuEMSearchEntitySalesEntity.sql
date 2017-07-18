@@ -11,7 +11,8 @@
         e.strCity,  
         e.strState,  
         e.strZipCode,		
-		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId),
+		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId),		
+		strEntityLineOfBusinessSalesperson = dbo.fnEMGetEntityLineOfBusinessSalesperson(a.intEntityId),
 		strContactName = g.strName,
 		strType = 
 			case when Vendor = 1 then 'Vendor, ' else '' end + 
