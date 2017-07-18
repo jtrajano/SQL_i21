@@ -104,21 +104,23 @@ SET ANSI_WARNINGS OFF
 			,[strTransactionId]
 			,[intTransactionTypeId] 		 	
 		)	
-		SELECT 
-			SC.intItemId,
-			intItemLocationId = (SELECT Top(1) intItemLocationId from tblICItemLocation where intItemId=SC.intItemId),
-			CT.intItemUOMId,
-			NULL,
-			SH.intSubLocationId,
-			NULL,
-			-@dblQty,
-			SH.intShipmentId,
-			CAST (SH.intTrackingNumber as VARCHAR(100)),
-			22
-			FROM tblLGShipmentContractQty SC
-			JOIN tblLGShipment SH ON SH.intShipmentId = SC.intShipmentId
-			JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = SC.intContractDetailId
-			WHERE SC.intShipmentContractQtyId = @intSourceId;
+		SELECT LD.intItemId
+			,intItemLocationId = (
+				SELECT TOP (1) intItemLocationId
+				FROM tblICItemLocation
+				WHERE intItemId = LD.intItemId
+				)
+			,LD.intItemUOMId
+			,NULL
+			,LD.intPSubLocationId
+			,NULL
+			,- 160
+			,LD.intLoadId
+			,CAST(L.strLoadNumber AS VARCHAR(100))
+			,22
+		FROM tblLGLoadDetail LD
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		WHERE LD.intLoadDetailId = @intSourceId;
 		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
 
 		SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
