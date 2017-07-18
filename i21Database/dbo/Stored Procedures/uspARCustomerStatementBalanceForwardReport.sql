@@ -261,7 +261,7 @@ FROM (
 		  , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
 		  , strLocationName		= CL.strLocationName
 		  , strFullAddress		= dbo.fnARFormatCustomerAddress('''', '''', C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-		  , strStatementFooterComment	= [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Report'')
+		  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL)
 		  , strCompanyName		= COMPANY.strCompanyName
 		  , strCompanyAddress	= COMPANY.strCompanyAddress
 		  , dblARBalance		= C.dblARBalance

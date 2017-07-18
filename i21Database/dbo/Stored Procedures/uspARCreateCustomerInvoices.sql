@@ -963,8 +963,8 @@ USING
 		,[strPONumber]					= ITG.strPONumber
 		,[strBOLNumber]					= ITG.strBOLNumber
 		,[strDeliverPickup]				= ITG.strDeliverPickup
-		,[strComments]					= CASE WHEN (ITG.strComments IS NULL OR ITG.strComments = '') THEN (SELECT TOP 1 strMessage FROM tblSMDocumentMaintenanceMessage WHERE intDocumentMaintenanceId = ITG.intDocumentMaintenanceId AND strHeaderFooter NOT IN ('Footer')) ELSE ITG.strComments END
-		,[strFooterComments]			= dbo.fnARGetFooterComment(ITG.intCompanyLocationId, ARC.intEntityId, 'Invoice Footer')
+		,[strComments]					= CASE WHEN ISNULL(ITG.strComments, '') = '' THEN dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Header', NULL) ELSE ITG.strComments END
+		,[strFooterComments]			= dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Footer', NULL)
 		,[intShipToLocationId]			= ISNULL(ITG.intShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))

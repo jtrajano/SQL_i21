@@ -2338,7 +2338,6 @@
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
     <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
     <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
-    <Build Include="dbo\Functions\fnARGetFooterComment.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseReservedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitInBoundQty.sql" />
     <Build Include="dbo\User Defined Types\InTransitTableType.sql" />
