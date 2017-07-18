@@ -49,11 +49,11 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intScaleTicketId'
 
-	IF EXISTS (SELECT 1 FROM tblSCCpeReceipt WHERE intScaleTicketId = @intScaleTicketId )
+	IF EXISTS (SELECT 1 FROM tblSCTicket WHERE intTicketId = @intScaleTicketId  AND strElevatorReceiptNumber IS NOT NULL)
 	BEGIN
 		SELECT @strReceiptNumber = strElevatorReceiptNumber
-		FROM tblSCCpeReceipt
-		WHERE intScaleTicketId = @intScaleTicketId
+		FROM tblSCTicket
+		WHERE intTicketId = @intScaleTicketId
 	END
 	ELSE
 	BEGIN
@@ -65,12 +65,10 @@ BEGIN TRY
 		SET intNumber = intNumber + 1
 		WHERE [strTransactionType] = N'CPE Receipt'
 
-		INSERT INTO tblSCCpeReceipt 
-		(
-			 intScaleTicketId
-			,strElevatorReceiptNumber
-		)
-		SELECT @intScaleTicketId,@strReceiptNumber
+		UPDATE tblSCTicket
+		SET strElevatorReceiptNumber=@strReceiptNumber
+		WHERE intTicketId = @intScaleTicketId
+				
 	END
 
 	SELECT @strCompanyName = 
