@@ -43,6 +43,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\23_ApproverConfigurationApprovalFor.sql
 :r .\SM\DefaultData\25_ApprovalHistory.sql
 :r .\SM\DefaultData\26_ActivitySource.sql
+:r .\SM\DefaultData\27_Language.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql

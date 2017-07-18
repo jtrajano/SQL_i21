@@ -2358,6 +2358,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\7_EULA.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\8_Country.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\9_ZipCode.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\27_Language.sql" />
     <None Include="Scripts\Post-Deployment\SM\CustomField.sql" />
     <None Include="Scripts\Post-Deployment\SM\SMDataFixes.sql" />
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
