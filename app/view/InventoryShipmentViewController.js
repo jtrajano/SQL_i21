@@ -3437,6 +3437,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onDestWeightsChange: function(field, newValue, oldValue) {
+        var me = this;
+
+        var win = field.up('window');
+        var grid = field.up('grid');
+        var vm = me.getViewModel();
+        var cboDestWeights = win.down('#cboDestWeights');
+
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        var items = _.filter(vm.get('current.tblICInventoryShipmentItems').data.items, function(x) { 
+            return !x.dummy && (x.get('intDestinationWeightId') !== null || x.get('intDestinationGradeId') !== null) && current.get('intInventoryShipmentItemId') !== x.get('intInventoryShipmentItemId')
+        });
+
+        vm.set('hasDestinationWeights', (items && items.length > 0) || newValue !== null);
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress":{
@@ -3558,7 +3575,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#tabInventoryShipment": {
                 tabChange: this.onShipmentTabChange
-            }            
+            },            
+            "#cboDestWeights": {
+                change: this.onDestWeightsChange
+            },
+            "#cboDestGrades": {
+                change: this.onDestWeightsChange
+            }
         })
     }
 
