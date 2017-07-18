@@ -137,16 +137,15 @@ BEGIN TRY
 		WHERE intOwnerId = @intEntityCustomerId
 			AND intCustomerLabelTypeId = @intCustomerLabelTypeId
 
-		SELECT TOP 1 @strGTINNumber = FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'GTIN Number'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = @intInventoryShipmentId
-
+		--SELECT TOP 1 @strGTINNumber = FV.strValue
+		--FROM tblSMTabRow TR
+		--JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		--JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+		--	AND LOWER(TD.strControlName) = 'GTIN Number'
+		--JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		--JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+		--	AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		--WHERE T.intRecordId = @intInventoryShipmentId
 		WHILE @intOrderManifestId IS NOT NULL
 		BEGIN
 			SELECT @strSSCCNo = ''
@@ -164,6 +163,13 @@ BEGIN TRY
 					,@strBarcodeLabel2 = ''
 					,@strBarcode3 = ''
 					,@strBarcodeLabel3 = ''
+					,@strGTINNumber = ''
+
+				-- Order GTIN No
+				SELECT @strGTINNumber = OD.strOrderGTIN
+				FROM tblMFOrderManifest OM
+				JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
+				WHERE OM.intOrderManifestId = @intOrderManifestId
 
 				-- Bar Code 1
 				SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0)))
@@ -239,17 +245,18 @@ BEGIN TRY
 					ELSE CL.strCountry
 					END)) AS strFromShipment
 		,I.strDescription + ' ' + CHAR(13) + ISNULL(I.strShortName, '') AS strDescription
-		,IsNULL((
-				SELECT TOP 1 FV.strValue
-				FROM tblSMTabRow TR
-				JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-				JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-					AND LOWER(TD.strControlName) = 'GTIN Number'
-				JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-				JOIN tblSMScreen S1 ON S1.intScreenId = T.intScreenId
-					AND S1.strNamespace = 'Inventory.view.InventoryShipment'
-				WHERE T.intRecordId = S.intInventoryShipmentId
-				), I.strGTIN) AS strOrderGTIN
+		--,IsNULL((
+		--		SELECT TOP 1 FV.strValue
+		--		FROM tblSMTabRow TR
+		--		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		--		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+		--			AND LOWER(TD.strControlName) = 'GTIN Number'
+		--		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		--		JOIN tblSMScreen S1 ON S1.intScreenId = T.intScreenId
+		--			AND S1.strNamespace = 'Inventory.view.InventoryShipment'
+		--		WHERE T.intRecordId = S.intInventoryShipmentId
+		--		), I.strGTIN) AS strOrderGTIN
+		,ISNULL(OD.strOrderGTIN, I.strGTIN) AS strOrderGTIN
 		,Convert(NUMERIC(18, 0), ISNULL(LOT.dblQty, 0)) AS intCasesPerPallet
 		,I.intInnerUnits AS intUnitsPerCase
 		,CONVERT(VARCHAR(10), LOT.dtmExpiryDate, 101) AS dtmExpiryDate

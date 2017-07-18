@@ -20,6 +20,7 @@
 		,[intSanitizationOrderDetailsId] INT
 		,[strLineItemNote] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,intStagingLocationId int
+		,strOrderGTIN NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,[intCreatedById] INT NULL
 		,[dtmCreatedOn] DATETIME DEFAULT GETDATE() NULL
 		,[intLastUpdateById] INT NULL
