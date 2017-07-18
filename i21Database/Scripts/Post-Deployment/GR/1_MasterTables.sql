@@ -246,3 +246,8 @@ BEGIN
 	UPDATE tblGRDiscountScheduleCode SET intStorageTypeId= -1 WHERE intStorageTypeId IS NULL
 END
 GO
+IF EXISTS(SELECT 1 FROM tblSCTicketType WHERE intNextTicketNumber = 0)
+BEGIN
+	UPDATE tblSCTicketType set intNextTicketNumber = 1 WHERE intNextTicketNumber = 0
+END
+GO
