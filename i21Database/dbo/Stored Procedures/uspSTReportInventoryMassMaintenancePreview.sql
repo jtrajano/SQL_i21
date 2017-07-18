@@ -109,6 +109,38 @@ BEGIN TRY
 		EXEC (@SqlQuery1)
 	END
 
+	--PosDescription
+		IF (@strDescription != '' AND @strDescription != 'null')
+		BEGIN
+		
+			SET @SqlQuery1 = 'SELECT' + CHAR(13)
+									+ ' adj5.strLocationName AS strLocation' + CHAR(13)
+									+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
+									+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
+									+ ', ''Pos Description'' AS strChangeDescription' + CHAR(13)
+									+ ', adj2.strDescription AS strOldData' + CHAR(13)
+									+ ', ''' + @strPosDescription + ''' AS strNewData' + CHAR(13)
+						  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
+							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
+						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+
+			INSERT @tblInventoryMassMaintenancePreview
+			EXEC (@SqlQuery1)
+		END
+
 	--intEntityId
 	IF (@intEntityId IS NOT NULL AND @intEntityId <> 0)
 	BEGIN
