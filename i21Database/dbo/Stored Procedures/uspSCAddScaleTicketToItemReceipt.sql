@@ -224,11 +224,16 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intChargeId]						= IC.intItemId
 		,[intForexRateTypeId]				= RE.intForexRateTypeId
 		,[dblForexRate]						= RE.dblForexRate
-		,[ysnInventoryCost]					= IC.ysnInventoryCost
-		,[strCostMethod]					= CASE
-												WHEN QM.dblDiscountAmount < 0 THEN 1
-												WHEN QM.dblDiscountAmount > 0 THEN 0
+		,[ysnInventoryCost]					= CASE
+												WHEN IC.ysnInventoryCost = 1
+												THEN 
+													CASE
+														WHEN QM.dblDiscountAmount < 0 THEN 1
+														WHEN QM.dblDiscountAmount > 0 THEN 0
+													END
+												ELSE IC.ysnInventoryCost
 											END
+		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 
 												CASE 
