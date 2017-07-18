@@ -37,7 +37,10 @@ LEFT JOIN (
 	FROM tblTMSiteDevice AA
 	INNER JOIN tblTMDevice BB
 		ON AA.intDeviceId = BB.intDeviceId
+	INNER JOIN tblTMDeviceType CC
+		ON BB.intDeviceTypeId = CC.intDeviceTypeId
 	WHERE ISNULL(BB.ysnAppliance,0) = 0
+		AND CC.strDeviceType = 'Tank'
 ) K
 	ON A.intSiteID = K.intSiteID
 	AND K.intCntId = 1
