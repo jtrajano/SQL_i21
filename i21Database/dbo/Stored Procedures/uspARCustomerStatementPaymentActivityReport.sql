@@ -76,32 +76,33 @@ DECLARE @temp_aging_table TABLE(
 )
 
 DECLARE @temp_statement_table TABLE(
-     [intEntityCustomerId]		INT
-    ,[strCustomerNumber]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
-    ,[strCustomerName]			NVARCHAR(100)
-    ,[dblCreditLimit]			NUMERIC(18,6)
-    ,[intInvoiceId]				INT
-    ,[strInvoiceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
-    ,[strBOLNumber]				NVARCHAR(100)
-    ,[dtmDate]					DATETIME
-    ,[dtmDueDate]				DATETIME
-    ,[dtmShipDate]				DATETIME
-    ,[dblInvoiceTotal]			NUMERIC(18,6)
-    ,[intPaymentId]				INT
-    ,[strRecordNumber]			NVARCHAR(100)
-	,[strTransactionType]		NVARCHAR(100)
-    ,[strPaymentInfo]			NVARCHAR(100)
-    ,[dtmDatePaid]				DATETIME
-    ,[dblPayment]				NUMERIC(18,6)
-    ,[dblBalance]				NUMERIC(18,6)
-    ,[strSalespersonName]		NVARCHAR(100)
-	,[strAccountStatusCode]		NVARCHAR(50)	
-	,[strLocationName]			NVARCHAR(100)    
-    ,[strFullAddress]			NVARCHAR(MAX)
-    ,[strCompanyName]			NVARCHAR(MAX)
-    ,[strCompanyAddress]		NVARCHAR(MAX)
-	,[dblARBalance]				NUMERIC(18,6)
-	,[ysnStatementCreditLimit]	BIT
+     [intEntityCustomerId]			INT
+    ,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+    ,[strCustomerName]				NVARCHAR(100)
+    ,[dblCreditLimit]				NUMERIC(18,6)
+    ,[intInvoiceId]					INT
+    ,[strInvoiceNumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS
+    ,[strBOLNumber]					NVARCHAR(100)
+    ,[dtmDate]						DATETIME
+    ,[dtmDueDate]					DATETIME
+    ,[dtmShipDate]					DATETIME
+    ,[dblInvoiceTotal]				NUMERIC(18,6)
+    ,[intPaymentId]					INT
+    ,[strRecordNumber]				NVARCHAR(100)
+	,[strTransactionType]			NVARCHAR(100)
+    ,[strPaymentInfo]				NVARCHAR(100)
+    ,[dtmDatePaid]					DATETIME
+    ,[dblPayment]					NUMERIC(18,6)
+    ,[dblBalance]					NUMERIC(18,6)
+    ,[strSalespersonName]			NVARCHAR(100)
+	,[strAccountStatusCode]			NVARCHAR(50)	
+	,[strLocationName]				NVARCHAR(100)    
+    ,[strFullAddress]				NVARCHAR(MAX)
+	,[strStatementFooterComment]	NVARCHAR(MAX)
+    ,[strCompanyName]				NVARCHAR(MAX)
+    ,[strCompanyAddress]			NVARCHAR(MAX)
+	,[dblARBalance]					NUMERIC(18,6)
+	,[ysnStatementCreditLimit]		BIT
 )
 
 DECLARE @temp_cf_table TABLE(
@@ -229,6 +230,7 @@ SELECT intEntityCustomerId	= C.intEntityId
 	  , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= [dbo].fnARFormatCustomerAddress('''', '''', C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
+	  , strStatementFooterComment	= [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Report'')
 	  , strCompanyName		= COMPANY.strCompanyName
 	  , strCompanyAddress	= COMPANY.strCompanyAddress
 	  , dblARBalance		= C.dblARBalance
@@ -359,6 +361,7 @@ IF @ysnIncludeBudget = 1
 				  , strAccountStatusCode		= dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
+				  , strStatementFooterComment	= NULL
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= C.dblARBalance
@@ -512,7 +515,8 @@ BEGIN
 		  ,[STATEMENTREPORT].[strSalespersonName]		
 		  ,[strAccountStatusCode]			
 		  ,[strLocationName]			  
-		  ,[strFullAddress]			
+		  ,[strFullAddress]
+		  ,STATEMENTREPORT.strStatementFooterComment			
 		  ,[strCompanyName]			
 		  ,[strCompanyAddress]		
 		  ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
@@ -558,7 +562,8 @@ BEGIN
 		  ,[STATEMENTREPORT].[strSalespersonName]		
 		  ,[strAccountStatusCode]			
 		  ,[strLocationName]			  
-		  ,[strFullAddress]			
+		  ,[strFullAddress]
+		  ,STATEMENTREPORT.strStatementFooterComment			
 		  ,[strCompanyName]			
 		  ,[strCompanyAddress]		
 		  ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
@@ -624,7 +629,8 @@ BEGIN
 		  ,[STATEMENTREPORT].[strSalespersonName]		
 		  ,[strAccountStatusCode]			
 		  ,[strLocationName]			  
-		  ,[strFullAddress]			
+		  ,[strFullAddress]
+		  ,STATEMENTREPORT.strStatementFooterComment			
 		  ,[strCompanyName]			
 		  ,[strCompanyAddress]
 		  ,STATEMENTREPORT.[ysnStatementCreditLimit]		
@@ -671,7 +677,8 @@ BEGIN
 		  ,[STATEMENTREPORT].[strSalespersonName]		
 		  ,[strAccountStatusCode]			
 		  ,[strLocationName]			  
-		  ,[strFullAddress]			
+		  ,[strFullAddress]
+		  ,STATEMENTREPORT.strStatementFooterComment			
 		  ,[strCompanyName]			
 		  ,[strCompanyAddress]
 		  ,STATEMENTREPORT.[ysnStatementCreditLimit]		
