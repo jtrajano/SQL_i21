@@ -171,6 +171,10 @@ Begin
 		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)<>'Ack Rcvd'
 		GOTO NEXT_SHIPMENT
 
+	--Donot send any feed if the Load is Cancelled
+	If UPPER(@strHeaderRowState)<>'DELETE' AND (Select intShipmentStatus from tblLGLoad Where intLoadId=@intLoadId)=10
+		GOTO NEXT_SHIPMENT
+
 	Update tblLGLoadStg Set strMessageState=@strHeaderRowState  Where intLoadStgId=@intLoadStgId
 
 	Set @strXml =  '<DELVRY07>'
