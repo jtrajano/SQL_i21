@@ -5458,6 +5458,10 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOFeed.sql" />
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\1_AddDefaultLetters.sql" />
     <Build Include="dbo\Tables\tblAPPaymentDetailDeleted.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetStartingNumber.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherTransactionType.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherForm1099.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherCategories1099.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
