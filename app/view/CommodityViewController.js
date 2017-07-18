@@ -22,6 +22,24 @@ Ext.define('Inventory.view.CommodityViewController', {
             bind: {
                 title: 'Commodity - {current.strCommodityCode}'
             },
+            cboAdjustInventorySalesBy: {
+                origValueField: 'intId',
+                origUpdateField: 'intAdjustInventorySalesById',
+                store: '{adjInvSalesOrTransfersBy}',
+                value: '{current.strAdjustInventorySalesBy}'
+            },
+            cboAdjustInventoryPurchaseBy: {
+                origValueField: 'intId',
+                origUpdateField: 'intAdjustInventoryPurchaseById',
+                store: '{adjInvPurchaseBy}',
+                value: '{current.strAdjustInventoryPurchaseBy}'
+            },
+            cboAdjustInventoryTransfersBy: {
+                origValueField: 'intId',
+                origUpdateField: 'intAdjustInventoryTransfersById',
+                store: '{adjInvSalesOrTransfersBy}',
+                value: '{current.strAdjustInventoryTransfersBy}'
+            },
             txtCommodityCode: '{current.strCommodityCode}',
             txtDescription: '{current.strDescription}',
             chkExchangeTraded: '{current.ysnExchangeTraded}',

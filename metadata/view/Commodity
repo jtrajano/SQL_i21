@@ -404,7 +404,7 @@
                                                         "fieldLabel": "Default Future Market",
                                                         "itemId": "cboFutureMarket",
                                                         "labelWidth": 140,
-                                                        "layout|flex": 1,
+                                                        "layout|flex": null,
                                                         "valueField": "strFutMarketName"
                                                     },
                                                     "name": "MyComboBox11",
@@ -724,7 +724,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "EDI Code",
                                                         "itemId": "txtEdiCode",
-                                                        "labelWidth": 140,
+                                                        "labelWidth": 180,
                                                         "layout|flex": null
                                                     },
                                                     "name": "MyTextField58",
@@ -768,7 +768,7 @@
                                                         "displayField": "strScheduleId",
                                                         "fieldLabel": "Default Schedule Store",
                                                         "itemId": "cboDefaultScheduleStore",
-                                                        "labelWidth": 140,
+                                                        "labelWidth": 180,
                                                         "layout|flex": null,
                                                         "valueField": "strScheduleId"
                                                     },
@@ -819,7 +819,7 @@
                                                         "displayField": "strDiscountId",
                                                         "fieldLabel": "Discount",
                                                         "itemId": "cboDefaultScheduleDiscount",
-                                                        "labelWidth": 140,
+                                                        "labelWidth": 180,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "valueField": "strDiscountId"
@@ -871,7 +871,7 @@
                                                         "displayField": "strStorageTypeCode",
                                                         "fieldLabel": "Scale Auto Dist Default",
                                                         "itemId": "cboScaleAutoDistDefault",
-                                                        "labelWidth": 140,
+                                                        "labelWidth": 180,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "valueField": "strStorageTypeCode"
@@ -881,6 +881,141 @@
                                                         "columns": "array"
                                                     },
                                                     "designerId": "f6f23f0f-1b97-4117-a0fd-cac15c4336c5",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Adjust By',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strName",
+                                                        "fieldLabel": "Adjust Inventory Sales by",
+                                                        "itemId": "cboAdjustInventorySalesBy",
+                                                        "labelWidth": 180,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "valueField": "strName"
+                                                    },
+                                                    "name": "MyComboBox13",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "fa35e64a-327a-480b-9901-91190c9b0c0b",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Adjust By',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strName",
+                                                        "fieldLabel": "Adjust Inventory Purchase by",
+                                                        "itemId": "cboAdjustInventoryPurchaseBy",
+                                                        "labelWidth": 180,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "valueField": "strName"
+                                                    },
+                                                    "name": "MyComboBox19",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "f8973874-a654-4d35-9157-e0e79fa6964d",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Adjust By',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strName",
+                                                        "fieldLabel": "Adjust Inventory Transfers by",
+                                                        "itemId": "cboAdjustInventoryTransfersBy",
+                                                        "labelWidth": 180,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "valueField": "strName"
+                                                    },
+                                                    "name": "MyComboBox21",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "25995dcf-159a-4d30-b0ae-9b8cee86e1b0",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1071,7 +1206,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter136",
+                                                            "name": "filter112",
                                                             "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2868,7 +3003,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter137",
+                                                    "name": "filter113",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3282,7 +3417,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter138",
+                                                    "name": "filter114",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3559,7 +3694,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter139",
+                                                    "name": "filter115",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3832,7 +3967,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter140",
+                                                    "name": "filter116",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

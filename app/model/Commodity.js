@@ -42,7 +42,13 @@ Ext.define('Inventory.model.Commodity', {
         { name: 'intScaleAutoDistId', type: 'int', allowNull: true },
         { name: 'ysnAllowLoadContracts', type: 'boolean' },
         { name: 'dblMaxUnder', type: 'float' },
-        { name: 'dblMaxOver', type: 'float' }
+        { name: 'dblMaxOver', type: 'float' },
+        { name: 'intAdjustInventorySalesById', type: 'int', allowNull: true },
+        { name: 'intAdjustInventoryPurchaseById', type: 'int', allowNull: true },
+        { name: 'intAdjustInventoryTransfersById', type: 'int', allowNull: true },
+        { name: 'strAdjustInventorySalesBy', type: 'string' },
+        { name: 'strAdjustInventoryPurchaseBy', type: 'string' },
+        { name: 'strAdjustInventoryTransfersBy', type: 'string' }
     ],
 
     validators: [

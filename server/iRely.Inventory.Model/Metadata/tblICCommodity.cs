@@ -49,6 +49,34 @@ namespace iRely.Inventory.Model
         public bool? ysnAllowLoadContracts { get; set; }
         public decimal? dblMaxUnder { get; set; }
         public decimal? dblMaxOver { get; set; }
+        public int? intAdjustInventorySalesById { get; set; }
+        public int? intAdjustInventoryPurchaseById { get; set; }
+        public int? intAdjustInventoryTransfersById { get; set; }
+
+        [NotMapped]
+        public string strAdjustInventorySalesBy
+        {
+            get
+            {
+                return intAdjustInventorySalesById == 2 ? "Shipped Weights & Grades" : "Destination Weights & Grades";
+            }
+        }
+        [NotMapped]
+        public string strAdjustInventoryPurchaseBy
+        {
+            get
+            {
+                return intAdjustInventorySalesById == 2 ? "Received Weights & Grades" : "Origin Weights & Grades";
+            }
+        }
+        [NotMapped]
+        public string strAdjustInventoryTransfersBy
+        {
+            get
+            {
+                return intAdjustInventoryTransfersById == 2 ? "Shipped Weights & Grades" : "Destination Weights & Grades";
+            }
+        }
 
         private string _futureMarketName;
         [NotMapped]
