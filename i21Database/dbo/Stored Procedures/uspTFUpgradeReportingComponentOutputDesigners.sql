@@ -29,14 +29,8 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCOD.strFormCode COLLATE Latin1_General_CI_AS
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCOD.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = RCOD.strType COLLATE Latin1_General_CI_AS
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 	ORDER BY RCOD.intScheduleColumnId
-	
-	UPDATE tblTFReportingComponentField
-	SET tblTFReportingComponentField.intMasterId = Source.intMasterId
-	FROM #tmpRCOD Source
-	WHERE tblTFReportingComponentField.intReportingComponentId = Source.intReportingComponentId
-		AND tblTFReportingComponentField.strColumn COLLATE Latin1_General_CI_AS = Source.strColumn COLLATE Latin1_General_CI_AS
-		AND tblTFReportingComponentField.intMasterId IS NULL
 
 	UPDATE tblTFReportingComponentField
 	SET intReportingComponentId	= SOURCE.intReportingComponentId
@@ -69,16 +63,9 @@ BEGIN TRY
 	WHERE TARGET.intReportingComponentFieldId IS NULL
 	ORDER BY SOURCE.intScheduleColumnId
 
-	-- Delete existing Reporting Component Output Designers that is not within Source
-	DELETE FROM tblTFReportingComponentField
-	WHERE intReportingComponentFieldId IN (
-		SELECT DISTINCT RCF.intReportingComponentFieldId FROM tblTFReportingComponentField RCF
-		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCF.intReportingComponentId
-		LEFT JOIN #tmpRCOD tmp ON tmp.intReportingComponentId = RCF.intReportingComponentId
-			AND tmp.strColumn = RCF.strColumn
-		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND ISNULL(tmp.strColumn, '') = ''
-	)
+	-- Set insMasterId to 0 for records that are not exist in default data
+	DELETE tblTFReportingComponentField
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM @ReportingComponentOutputDesigners)
 
 	DROP TABLE #tmpRCOD
 

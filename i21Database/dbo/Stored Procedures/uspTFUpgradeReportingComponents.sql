@@ -23,15 +23,6 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 	
-	UPDATE tblTFReportingComponent
-	SET tblTFReportingComponent.intMasterId = Source.intMasterId
-	FROM @ReportingComponent Source
-	WHERE tblTFReportingComponent.strFormCode COLLATE Latin1_General_CI_AS = Source.strFormCode COLLATE Latin1_General_CI_AS
-		AND tblTFReportingComponent.strScheduleCode COLLATE Latin1_General_CI_AS = Source.strScheduleCode COLLATE Latin1_General_CI_AS
-		AND tblTFReportingComponent.strType COLLATE Latin1_General_CI_AS = Source.strType COLLATE Latin1_General_CI_AS
-		AND tblTFReportingComponent.intTaxAuthorityId = @TaxAuthorityId
-		AND ISNULL(tblTFReportingComponent.intMasterId, '') = ''
-	
 	MERGE	
 	INTO	tblTFReportingComponent
 	WITH	(HOLDLOCK) 
@@ -86,6 +77,10 @@ BEGIN TRY
 			, SOURCE.intMasterId
 			, SOURCE.intComponentTypeId
 		);
+
+		-- Set insMasterId to 0 for records that are not exist in default data
+		UPDATE tblTFReportingComponent 
+		SET intMasterId = 0 WHERE intTaxAuthorityId = @TaxAuthorityId AND intMasterId NOT IN (SELECT intMasterId FROM @ReportingComponent)
 	
 END TRY
 BEGIN CATCH

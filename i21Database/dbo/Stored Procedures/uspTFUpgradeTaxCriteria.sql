@@ -31,14 +31,8 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = TaxCrit.strFormCode COLLATE Latin1_General_CI_AS
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = TaxCrit.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = TaxCrit.strType COLLATE Latin1_General_CI_AS
-		AND RC.intMasterId IS NOT NULL
-
-	UPDATE tblTFReportingComponentCriteria
-	SET tblTFReportingComponentCriteria.intMasterId = Source.intMasterId
-	FROM #tmpTaxCrit Source
-	WHERE tblTFReportingComponentCriteria.intReportingComponentId = Source.intReportingComponentId
-		AND tblTFReportingComponentCriteria.intTaxCategoryId = Source.intTaxCategoryId
-		AND ISNULL(tblTFReportingComponentCriteria.intMasterId, '') = ''
+		AND RC.intTaxAuthorityId = TaxCat.intTaxAuthorityId
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 
 	MERGE	
 	INTO	tblTFReportingComponentCriteria
@@ -68,6 +62,10 @@ BEGIN TRY
 			, SOURCE.strCriteria
 			, SOURCE.intMasterId
 		);
+
+	-- Set insMasterId to 0 for records that are not exist in default data
+	DELETE tblTFReportingComponentCriteria
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpTaxCrit)
 
 	DROP TABLE #tmpTaxCrit
 

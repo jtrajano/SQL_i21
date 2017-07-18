@@ -29,14 +29,7 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
 		AND ISNULL(RC.strScheduleCode, '') COLLATE Latin1_General_CI_AS = ISNULL(RCC.strScheduleCode, '') COLLATE Latin1_General_CI_AS
 		AND ISNULL(RC.strType, '') COLLATE Latin1_General_CI_AS = ISNULL(RCC.strType, '') COLLATE Latin1_General_CI_AS
-		AND RC.intTaxAuthorityId = @TaxAuthorityId
-
-	UPDATE tblTFReportingComponentConfiguration
-	SET tblTFReportingComponentConfiguration.intMasterId = Source.intMasterId
-	FROM #tmpRCC Source
-	WHERE tblTFReportingComponentConfiguration.intReportingComponentId = Source.intReportingComponentId
-		AND tblTFReportingComponentConfiguration.strTemplateItemId COLLATE Latin1_General_CI_AS = Source.strTemplateItemId COLLATE Latin1_General_CI_AS
-		AND tblTFReportingComponentConfiguration.intMasterId IS NULL
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 
 	MERGE	
 	INTO	tblTFReportingComponentConfiguration
@@ -46,7 +39,7 @@ BEGIN TRY
 		SELECT * FROM #tmpRCC
 	) AS SOURCE
 		ON TARGET.intMasterId = SOURCE.intMasterId
-		
+	
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
@@ -95,30 +88,10 @@ BEGIN TRY
 			, SOURCE.intSort
 			, SOURCE.intMasterId
 		);
-
 	
-	-- Delete existing Reporting Component Configuration that is not within Source
-	DELETE FROM tblTFReportingComponentConfiguration
-	WHERE intReportingComponentConfigurationId IN (
-		SELECT DISTINCT RCC.intReportingComponentConfigurationId FROM tblTFReportingComponentConfiguration RCC
-		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
-		LEFT JOIN #tmpRCC tmp ON tmp.intReportingComponentId = RCC.intReportingComponentId
-			AND tmp.strTemplateItemId = RCC.strTemplateItemId
-		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND tmp.strTemplateItemId IS NULL
-	)
-
-	DELETE FROM tblTFReportingComponentConfiguration
-	WHERE intMasterId IN (SELECT intMasterId 
-						FROM tblTFReportingComponentConfiguration
-						GROUP BY intMasterId
-						HAVING COUNT(*) > 1)
-		AND intReportingComponentConfigurationId NOT IN (SELECT MAX(intReportingComponentConfigurationId) intReportingComponentConfigurationId 
-														FROM tblTFReportingComponentConfiguration
-														GROUP BY intMasterId
-														HAVING COUNT(*) > 1)
-
-	DROP TABLE #tmpRCC
+	-- Set insMasterId to 0 for records that are not exist in default data
+	DELETE tblTFReportingComponentConfiguration
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpRCC)
 
 END TRY
 BEGIN CATCH

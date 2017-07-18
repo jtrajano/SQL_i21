@@ -30,13 +30,7 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = VDS.strFormCode COLLATE Latin1_General_CI_AS
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = VDS.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = VDS.strType COLLATE Latin1_General_CI_AS
-
-	UPDATE tblTFReportingComponentDestinationState
-	SET tblTFReportingComponentDestinationState.intMasterId = Source.intMasterId
-	FROM #tmpVDS Source
-	WHERE tblTFReportingComponentDestinationState.intOriginDestinationStateId = Source.intOriginDestinationStateId
-		AND tblTFReportingComponentDestinationState.intReportingComponentId = Source.intReportingComponentId
-		AND tblTFReportingComponentDestinationState.intMasterId IS NULL
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 
 	MERGE	
 	INTO	tblTFReportingComponentDestinationState
@@ -69,14 +63,7 @@ BEGIN TRY
 
 	-- Delete existing Valid Destination States that is not within Source
 	DELETE FROM tblTFReportingComponentDestinationState
-	WHERE intReportingComponentDestinationStateId IN (
-		SELECT DISTINCT RCDestination.intReportingComponentDestinationStateId FROM tblTFReportingComponentDestinationState RCDestination
-		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCDestination.intReportingComponentId
-		LEFT JOIN #tmpVDS tmp ON tmp.intReportingComponentId = RCDestination.intReportingComponentId
-			AND tmp.intOriginDestinationStateId = RCDestination.intOriginDestinationStateId
-		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND tmp.intOriginDestinationStateId IS NULL
-	)
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpVDS)
 
 	DROP TABLE #tmpVDS
 

@@ -23,13 +23,6 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 	
-	UPDATE tblTFTaxCategory
-	SET tblTFTaxCategory.intMasterId = Source.intMasterId
-	FROM @TaxCategories Source
-	WHERE tblTFTaxCategory.strTaxCategory COLLATE Latin1_General_CI_AS = Source.strTaxCategory COLLATE Latin1_General_CI_AS
-		AND tblTFTaxCategory.intTaxAuthorityId = @TaxAuthorityId
-		AND tblTFTaxCategory.intMasterId IS NULL
-
 	MERGE	
 	INTO	tblTFTaxCategory
 	WITH	(HOLDLOCK) 
@@ -58,6 +51,11 @@ BEGIN TRY
 			, SOURCE.strTaxCategory
 			, SOURCE.intMasterId
 		);
+
+	-- Set insMasterId to 0 for records that are not exist in default data
+	UPDATE tblTFTaxCategory
+	SET intMasterId = 0
+	WHERE intTaxAuthorityId = @TaxAuthorityId AND intMasterId NOT IN (SELECT intMasterId FROM @TaxCategories)
 	
 END TRY
 BEGIN CATCH

@@ -15,12 +15,6 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	UPDATE tblTFOriginDestinationState
-	SET tblTFOriginDestinationState.intMasterId = Source.intMasterId
-	FROM @OriginDestinationStates Source
-	WHERE tblTFOriginDestinationState.strOriginDestinationState COLLATE Latin1_General_CI_AS = Source.strOriginDestinationState COLLATE Latin1_General_CI_AS
-		AND tblTFOriginDestinationState.intMasterId IS NULL
-
 	MERGE	
 	INTO	tblTFOriginDestinationState
 	WITH	(HOLDLOCK) 
@@ -42,6 +36,11 @@ BEGIN TRY
 			SOURCE.strOriginDestinationState
 			, SOURCE.intMasterId
 		);
+
+	-- Set insMasterId to 0 for records that are not exist in default data
+	UPDATE tblTFOriginDestinationState
+	SET intMasterId = 0
+    WHERE intMasterId NOT IN (SELECT intMasterId FROM @OriginDestinationStates)
 	
 END TRY
 BEGIN CATCH

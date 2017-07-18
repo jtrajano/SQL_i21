@@ -17,5 +17,7 @@
 	[intMasterId] INT NULL,
     [intConcurrencyId] INT DEFAULT((1)) NULL, 
     CONSTRAINT [PK_tblTFReportingComponent] PRIMARY KEY ([intReportingComponentId] ASC), 
-    CONSTRAINT [FK_tblTFReportingComponent_tblTFComponentType] FOREIGN KEY ([intComponentTypeId]) REFERENCES [tblTFComponentType]([intComponentTypeId]),
+    CONSTRAINT [FK_tblTFReportingComponent_tblTFComponentType] FOREIGN KEY ([intComponentTypeId]) REFERENCES [tblTFComponentType]([intComponentTypeId]), 
+    CONSTRAINT [UK_tblTFReportingComponent_1] UNIQUE ([intTaxAuthorityId], [strFormCode], [strScheduleCode], [strType]), 
+    CONSTRAINT [FK_tblTFReportingComponent_ToTable] FOREIGN KEY (intTaxAuthorityId) REFERENCES [tblTFTaxAuthority]([intTaxAuthorityId])
 )

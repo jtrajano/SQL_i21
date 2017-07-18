@@ -6048,4 +6048,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intComponentTypeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2356f5d4-9636-4297-9e2c-9c04e9986eec" ChangeDateTime="07/18/2017 07:45:07">
+    <Property Name="ElementName" Value="[dbo].[UK_tblTFReportingComponent_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponent]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UK_tblTFReportingComponent_Code]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e3deba53-d662-453b-93e1-13d15608c92d" ChangeDateTime="07/18/2017 07:53:46">
+    <Property Name="ElementName" Value="[dbo].[UK_tblTFTaxCategory_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UK_tblTFTaxCategory_Category]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5e9625fb-a431-4707-881e-ece0b53c7754" ChangeDateTime="07/18/2017 08:05:09">
+    <Property Name="ElementName" Value="[dbo].[AK_tblTFReportingComponentCriteria_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentCriteria]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UK_tblTFReportingComponentCriteria_1]" />
+  </Operation>
 </Operations>

@@ -31,13 +31,7 @@ BEGIN TRY
 		AND RC.strType COLLATE Latin1_General_CI_AS = VPC.strType COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblTFProductCode PC ON PC.strProductCode COLLATE Latin1_General_CI_AS = VPC.strProductCode COLLATE Latin1_General_CI_AS
 		AND PC.intTaxAuthorityId = RC.intTaxAuthorityId
-
-	UPDATE tblTFReportingComponentProductCode
-	SET tblTFReportingComponentProductCode.intMasterId = Source.intMasterId
-	FROM #tmpVPC Source
-	WHERE tblTFReportingComponentProductCode.intProductCodeId = Source.intProductCodeId
-		AND tblTFReportingComponentProductCode.intReportingComponentId = Source.intReportingComponentId
-		AND tblTFReportingComponentProductCode.intMasterId IS NULL
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 
 	MERGE	
 	INTO	tblTFReportingComponentProductCode
@@ -69,15 +63,8 @@ BEGIN TRY
 		);
 
 	-- Delete existing Valid Product Codes that is not within Source
-	DELETE FROM tblTFReportingComponentProductCode
-	WHERE intReportingComponentProductCodeId IN (
-		SELECT DISTINCT RCPC.intReportingComponentProductCodeId FROM tblTFReportingComponentProductCode RCPC
-		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCPC.intReportingComponentId
-		LEFT JOIN #tmpVPC tmp ON tmp.intReportingComponentId = RCPC.intReportingComponentId
-			AND tmp.intProductCodeId = RCPC.intProductCodeId
-		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND tmp.intProductCodeId IS NULL
-	)
+	DELETE tblTFReportingComponentProductCode
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpVPC)
 
 	DROP TABLE #tmpVPC
 

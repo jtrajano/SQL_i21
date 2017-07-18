@@ -22,13 +22,6 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
-
-	UPDATE tblTFTerminalControlNumber
-	SET tblTFTerminalControlNumber.intMasterId = Source.intMasterId
-	FROM @TerminalControlNumbers Source
-	WHERE tblTFTerminalControlNumber.strTerminalControlNumber COLLATE Latin1_General_CI_AS = Source.strTerminalControlNumber COLLATE Latin1_General_CI_AS
-		AND tblTFTerminalControlNumber.intTaxAuthorityId = @TaxAuthorityId
-		AND tblTFTerminalControlNumber.intMasterId IS NULL
 	
 	MERGE	
 	INTO	tblTFTerminalControlNumber 
@@ -42,7 +35,8 @@ BEGIN TRY
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
-			strName				= SOURCE.strName
+		    strTerminalControlNumber = SOURCE.strTerminalControlNumber
+			,strName				= SOURCE.strName
 			, strAddress		= SOURCE.strAddress  
 			, strCity			= SOURCE.strCity
 			, dtmApprovedDate	= SOURCE.dtmApprovedDate
@@ -68,6 +62,12 @@ BEGIN TRY
 			, SOURCE.strZip
 			, SOURCE.intMasterId
 		);
+
+	-- Set insMasterId to 0 for records that are not exist in default data
+	UPDATE tblTFTerminalControlNumber
+	SET intMasterId = 0
+	WHERE intTaxAuthorityId = @TaxAuthorityId AND intMasterId NOT IN (SELECT intMasterId FROM @TerminalControlNumbers)
+		
 	
 END TRY
 BEGIN CATCH

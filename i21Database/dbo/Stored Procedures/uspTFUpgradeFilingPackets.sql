@@ -29,14 +29,7 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = FP.strFormCode COLLATE Latin1_General_CI_AS
 		AND ISNULL(RC.strScheduleCode, '') COLLATE Latin1_General_CI_AS = ISNULL(FP.strScheduleCode, '') COLLATE Latin1_General_CI_AS
 		AND ISNULL(RC.strType, '') COLLATE Latin1_General_CI_AS = ISNULL(FP.strType, '') COLLATE Latin1_General_CI_AS
-		AND RC.intTaxAuthorityId = @TaxAuthorityId
-
-	UPDATE tblTFFilingPacket
-	SET intMasterId = Source.intMasterId
-	FROM #tmpFP Source
-	WHERE tblTFFilingPacket.intReportingComponentId = Source.intReportingComponentId
-		AND tblTFFilingPacket.intTaxAuthorityId = @TaxAuthorityId
-		AND tblTFFilingPacket.intMasterId IS NULL
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 
 	MERGE	
 	INTO	tblTFFilingPacket
@@ -67,7 +60,9 @@ BEGIN TRY
 			, SOURCE.intMasterId
 		);
 
-	DROP TABLE #tmpFP
+	-- Set insMasterId to 0 for records that are not exist in default data
+	DELETE tblTFFilingPacket
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpFP)
 
 END TRY
 BEGIN CATCH

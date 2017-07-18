@@ -75,7 +75,7 @@ AS		TARGET
 USING (
 	SELECT * FROM #tmpTaxAuthority
 ) AS SOURCE
-	ON TARGET.strTaxAuthorityCode COLLATE Latin1_General_CI_AS = SOURCE.strTaxAuthorityCode COLLATE Latin1_General_CI_AS
+	ON TARGET.intMasterId = SOURCE.intMasterId
 
 WHEN MATCHED THEN 
 	UPDATE
@@ -86,11 +86,12 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED BY TARGET THEN 
 	INSERT (
 		intTaxAuthorityId
-		, strTaxAuthorityCode
-		, strDescription
-		, ysnPaperVersionAvailable
-		, ysnElectronicVersionAvailable
-		, ysnFilingForThisTA
+		,strTaxAuthorityCode
+		,strDescription
+		,ysnPaperVersionAvailable
+		,ysnElectronicVersionAvailable
+		,ysnFilingForThisTA
+		,intMasterId
 	)
 	VALUES (
 		SOURCE.intTaxAuthorityId
@@ -99,7 +100,13 @@ WHEN NOT MATCHED BY TARGET THEN
 		, SOURCE.ysnPaperVersionAvailable
 		, SOURCE.ysnElectronicVersionAvailable
 		, SOURCE.ysnFilingForThisTA
+		, SOURCE.intMasterId
 	);
+
+	-- Set insMasterId to 0 for records that are not exist in SOURCE
+	UPDATE tblTFTaxAuthority
+	SET intMasterId = 0
+    WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpTaxAuthority)
 
 DROP TABLE #tmpTaxAuthority
 
