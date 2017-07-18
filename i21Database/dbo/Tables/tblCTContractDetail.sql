@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	
 	[intItemContractId] INT NULL,
 	[intItemId] [int] NULL,
-	[strItemSpecification] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strItemSpecification] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intCategoryId] INT NULL,
 	[dblQuantity] [numeric](18, 6) NOT NULL,
 	[intItemUOMId] [int] NULL,	
