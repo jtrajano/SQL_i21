@@ -274,6 +274,7 @@ FROM
 			 , ID.intOrderUOMId
 			 , ICIT.dblCost
 			 , ID.intAccountId
+			 , ID.intSalesAccountId
 		FROM 
 			tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
