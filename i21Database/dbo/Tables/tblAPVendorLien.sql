@@ -2,7 +2,7 @@
 (
 	[intEntityVendorLienId] INT NOT NULL IDENTITY(1,1),
 	[intEntityVendorId] INT NOT NULL,
-	[intEntityLienId] INT NOT NULL,
+	[intEntityLienId] INT NULL,
 	[ysnActive] BIT NOT NULL DEFAULT(0),
 	[dtmStartDate] DATETIME NULL,
 	[dtmEndDate] DATETIME NULL,	

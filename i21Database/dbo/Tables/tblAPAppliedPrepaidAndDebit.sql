@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblAPAppliedPrepaidAndDebit]
 (
 	[intId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
-    [intBillId] INT NOT NULL, 
+    [intBillId] INT NULL, 
     [intBillDetailApplied] INT NULL, 
 	[intLineApplied] INT NULL, 
 	[intTransactionId] INT NOT NULL,

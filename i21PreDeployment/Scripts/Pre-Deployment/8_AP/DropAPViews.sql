@@ -29,6 +29,47 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAP
 	DROP VIEW vyuAPPayables
 GO
 
+
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPBillDetail')
+	DROP VIEW vyuAPBillDetail
+GO
+
+
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPBillForApproval')
+	DROP VIEW vyuAPBillForApproval
+GO
+
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPBillPayment')
+	DROP VIEW vyuAPBillPayment
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPBillPaymentActual')
+	DROP VIEW vyuAPBillPaymentActual
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPPurchase')
+	DROP VIEW vyuAPPurchase
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPRecapTransaction')
+	DROP VIEW vyuAPRecapTransaction
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPRptCashRequirements')
+	DROP VIEW vyuAPRptCashRequirements
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPUnpostedTransaction')
+	DROP VIEW vyuAPUnpostedTransaction
+
+GO
+
+
+
+
+
+
+
+
+
+
+
+
 GO
 
 PRINT 'END DROPPING AP VIEWS'

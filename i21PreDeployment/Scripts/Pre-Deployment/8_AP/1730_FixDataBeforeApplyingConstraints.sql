@@ -45,9 +45,7 @@ BEGIN
 
 	INSERT INTO @tbl(strCurTab, strCurCol, strRelTab, strRelCol) SELECT 'tblAPVendorLien', 'intEntityLienId', 'tblEMEntity', 'intEntityId'
  
-	INSERT INTO @tbl(strCurTab, strCurCol, strRelTab, strRelCol) SELECT 'tblAPVendorPricing', 'intEntityLocationId', 'tblEMEntityLocation', 'intEntityLocationId'
-  
-	INSERT INTO @tbl(strCurTab, strCurCol, strRelTab, strRelCol) SELECT 'tblAPVendorPricing', 'intEntityLocationId', 'tblEMEntityLocation', 'intEntityLocationId'
+	INSERT INTO @tbl(strCurTab, strCurCol, strRelTab, strRelCol) SELECT 'tblAPVendorPricing', 'intEntityLocationId', 'tblEMEntityLocation', 'intEntityLocationId'  
 
 
 	INSERT INTO @tbl(strCurTab, strCurCol, strRelTab, strRelCol) SELECT 'tblAPVendorTaxException', 'intItemId', 'tblICItem', 'intItemId'
@@ -83,7 +81,30 @@ BEGIN
 		BEGIN
 			--PRINT 'CONSTRAINT [FK_' + @CurrentTable + '_' + @CurrentColumn + '] FOREIGN KEY ([' + @CurrentColumn  + ']) REFERENCES ' + @RelTable + '([' + @RelColumn + ']),'
 			PRINT '---EXECUTE---'
+
 			EXEC('
+					DECLARE @NewCMD nvarchar(max)
+					set @NewCMD = ''''
+					SELECT @NewCMD = 
+				''ALTER TABLE '' + R.TABLE_NAME + '' DROP CONSTRAINT ['' + R.CONSTRAINT_NAME + '']''
+				
+			FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE U
+			INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS FK
+				ON U.CONSTRAINT_CATALOG = FK.UNIQUE_CONSTRAINT_CATALOG
+				AND U.CONSTRAINT_SCHEMA = FK.UNIQUE_CONSTRAINT_SCHEMA
+				AND U.CONSTRAINT_NAME = FK.UNIQUE_CONSTRAINT_NAME
+			INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE R
+				ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
+				AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
+				AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME
+			WHERE U.TABLE_NAME = ''' + @CurrentTable + '''
+
+					IF @NewCMD <> ''''
+					BEGIN
+						EXEC(@NewCMD)
+					END
+						
+					ALTER TABLE ' + @CurrentTable + ' ALTER COLUMN ' + @CurrentColumn + ' INT NULL
 					UPDATE ' + @CurrentTable + ' 
 						set ' + @CurrentColumn + ' = null 
 					WHERE ' + @CurrentColumn + ' not in (select ' + @RelColumn + ' from ' + @RelTable + ')
