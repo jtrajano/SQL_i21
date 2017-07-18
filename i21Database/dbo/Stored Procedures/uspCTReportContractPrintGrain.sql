@@ -108,7 +108,8 @@ BEGIN TRY
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strCountry)) END,'') strContractBasis ,
 			CH.strWeight,
 			CH.strGrade,
-			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+			strPrintableRemarks
 
 	FROM	vyuCTContractHeaderView CH
 	LEFT
