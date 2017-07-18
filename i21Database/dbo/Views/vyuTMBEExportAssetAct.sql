@@ -43,7 +43,10 @@ SELECT
 FROM tblTMSiteDevice AA
 INNER JOIN tblTMDevice BB
 	ON AA.intDeviceId = BB.intDeviceId
+INNER JOIN tblTMDeviceType CC
+    ON BB.intDeviceTypeId = CC.intDeviceTypeId
 WHERE ISNULL(BB.ysnAppliance,0) = 0
+	AND CC.strDeviceType = 'Tank'
 ) G
 	ON A.intSiteID = G.intSiteID
 	AND G.intCntId = 1
