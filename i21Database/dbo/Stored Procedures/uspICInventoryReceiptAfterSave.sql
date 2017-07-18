@@ -76,6 +76,7 @@ BEGIN
 		ReceiptItemSource.ysnLoad,
 		ReceiptItem.intLoadReceive,
 		ReceiptItem.dblNet,
+		ReceiptItem.dblGross, 
 		intSourceInventoryDetailId = ReceiptItem.intSourceInventoryReceiptItemId
 	INTO #tmpAfterSaveReceiptItems
 	FROM 
@@ -101,6 +102,7 @@ BEGIN
 		,ysnLoad
 		,intLoadReceive
 		,dblNet
+		,dblGross 
 		,intSourceInventoryDetailId
 	INTO #tmpBeforeSaveReceiptItems
 	FROM tblICTransactionDetailLog
@@ -348,6 +350,7 @@ BEGIN
 	UPDATE	ri
 	SET		dblQtyReturned = ISNULL(ri.dblQtyReturned, 0) - beforeSave.dblOpenReceive
 			,dblNetReturned = ISNULL(ri.dblNetReturned, 0) - beforeSave.dblNet
+			,dblGrossReturned  = ISNULL(ri.dblGrossReturned, 0) - beforeSave.dblGross 
 	FROM	tblICInventoryReceiptItem ri 
 			INNER JOIN #tmpBeforeSaveReceiptItems beforeSave
 				ON ri.intInventoryReceiptItemId = beforeSave.intSourceInventoryDetailId
@@ -355,6 +358,7 @@ BEGIN
 	UPDATE	ri
 	SET		dblQtyReturned = ISNULL(ri.dblQtyReturned, 0) + afterSave.dblOpenReceive
 			,dblNetReturned = ISNULL(ri.dblNetReturned, 0) + afterSave.dblNet
+			,dblGrossReturned = ISNULL(ri.dblGrossReturned, 0) + afterSave.dblGross
 	FROM	tblICInventoryReceiptItem ri 
 			INNER JOIN #tmpAfterSaveReceiptItems afterSave
 				ON ri.intInventoryReceiptItemId = afterSave.intSourceInventoryDetailId
