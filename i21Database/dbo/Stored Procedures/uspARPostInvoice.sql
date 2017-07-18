@@ -119,6 +119,7 @@ IF (@param IS NOT NULL)
 				,[strType]
 				,[dtmDate]
 				,[dtmPostDate]
+				,[dtmShipDate]
 				,[intEntityCustomerId]
 				,[intCompanyLocationId]
 				,[intAccountId]
@@ -129,14 +130,22 @@ IF (@param IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]
+				,[strActualCostId]
 				,[intPeriodsToAccrue]
 				,[ysnAccrueLicense]
+				,[intSplitId]
+				,[dblSplitPercent]
+				,[ysnImpactInventory]
+				,[ysnSplitted]
 				,[intEntityId]
 				,[ysnPost]
 				,[intInvoiceDetailId]
 				,[intItemId]
 				,[intItemUOMId]
 				,[intDiscountAccountId]
+				,[intCustomerStorageId]
 				,[intStorageScheduleTypeId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
@@ -149,13 +158,14 @@ IF (@param IS NOT NULL)
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
 			)
-			 SELECT
+			 SELECT DISTINCT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
 				,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 				,[strTransactionType]			= ARI.[strTransactionType]
 				,[strType]						= ARI.[strType]
 				,[dtmDate]						= ARI.[dtmDate]
 				,[dtmPostDate]					= ARI.[dtmPostDate]
+				,[dtmShipDate]					= ARI.[dtmShipDate]
 				,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
 				,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
 				,[intAccountId]					= ARI.[intAccountId]
@@ -166,14 +176,22 @@ IF (@param IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+				,[strActualCostId]				= ARI.[strActualCostId]
 				,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 				,[ysnAccrueLicense]				= @accrueLicense
+				,[intSplitId]					= ARI.[intSplitId]
+				,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+				,[ysnSplitted]					= ARI.[ysnSplitted]
+				,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 				,[intEntityId]					= ARI.[intEntityId]
 				,[ysnPost]						= @post
 				,[intInvoiceDetailId]			= NULL
 				,[intItemId]					= NULL
 				,[intItemUOMId]					= NULL
 				,[intDiscountAccountId]			= @DiscountAccountId
+				,[intCustomerStorageId]			= NULL
 				,[intStorageScheduleTypeId]		= NULL
 				,[intSubLocationId]				= NULL
 				,[intStorageLocationId]			= NULL
@@ -199,6 +217,7 @@ IF (@param IS NOT NULL)
 				,[strType]
 				,[dtmDate]
 				,[dtmPostDate]
+				,[dtmShipDate]
 				,[intEntityCustomerId]
 				,[intCompanyLocationId]
 				,[intAccountId]
@@ -209,14 +228,22 @@ IF (@param IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]
+				,[strActualCostId]
 				,[intPeriodsToAccrue]
 				,[ysnAccrueLicense]
+				,[intSplitId]
+				,[dblSplitPercent]
+				,[ysnImpactInventory]
+				,[ysnSplitted]
 				,[intEntityId]
 				,[ysnPost]
 				,[intInvoiceDetailId]
 				,[intItemId]
 				,[intItemUOMId]
 				,[intDiscountAccountId]
+				,[intCustomerStorageId]
 				,[intStorageScheduleTypeId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
@@ -229,13 +256,14 @@ IF (@param IS NOT NULL)
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
 			)
-			 SELECT
+			 SELECT DISTINCT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
 				,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 				,[strTransactionType]			= ARI.[strTransactionType]
 				,[strType]						= ARI.[strType]
 				,[dtmDate]						= ARI.[dtmDate]
 				,[dtmPostDate]					= ARI.[dtmPostDate]
+				,[dtmShipDate]					= ARI.[dtmShipDate]
 				,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
 				,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
 				,[intAccountId]					= ARI.[intAccountId]
@@ -246,14 +274,22 @@ IF (@param IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+				,[strActualCostId]				= ARI.[strActualCostId]
 				,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 				,[ysnAccrueLicense]				= @accrueLicense
+				,[intSplitId]					= ARI.[intSplitId]
+				,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+				,[ysnSplitted]					= ARI.[ysnSplitted]
+				,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 				,[intEntityId]					= ARI.[intEntityId]
 				,[ysnPost]						= @post
 				,[intInvoiceDetailId]			= NULL
 				,[intItemId]					= NULL
 				,[intItemUOMId]					= NULL
 				,[intDiscountAccountId]			= @DiscountAccountId
+				,[intCustomerStorageId]			= NULL
 				,[intStorageScheduleTypeId]		= NULL
 				,[intSubLocationId]				= NULL
 				,[intStorageLocationId]			= NULL
@@ -281,6 +317,7 @@ IF(@beginDate IS NOT NULL)
 				,[strType]
 				,[dtmDate]
 				,[dtmPostDate]
+				,[dtmShipDate]
 				,[intEntityCustomerId]
 				,[intCompanyLocationId]
 				,[intAccountId]
@@ -291,14 +328,22 @@ IF(@beginDate IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]
+				,[strActualCostId]
 				,[intPeriodsToAccrue]
 				,[ysnAccrueLicense]
+				,[intSplitId]
+				,[dblSplitPercent]
+				,[ysnImpactInventory]
+				,[ysnSplitted]
 				,[intEntityId]
 				,[ysnPost]
 				,[intInvoiceDetailId]
 				,[intItemId]
 				,[intItemUOMId]
 				,[intDiscountAccountId]
+				,[intCustomerStorageId]
 				,[intStorageScheduleTypeId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
@@ -311,13 +356,14 @@ IF(@beginDate IS NOT NULL)
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
 			)
-			 SELECT
+			 SELECT DISTINCT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
 				,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 				,[strTransactionType]			= ARI.[strTransactionType]
 				,[strType]						= ARI.[strType]
 				,[dtmDate]						= ARI.[dtmDate]
 				,[dtmPostDate]					= ARI.[dtmPostDate]
+				,[dtmShipDate]					= ARI.[dtmShipDate]
 				,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
 				,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
 				,[intAccountId]					= ARI.[intAccountId]
@@ -328,14 +374,22 @@ IF(@beginDate IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+				,[strActualCostId]				= ARI.[strActualCostId]
 				,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 				,[ysnAccrueLicense]				= @accrueLicense
+				,[intSplitId]					= ARI.[intSplitId]
+				,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+				,[ysnSplitted]					= ARI.[ysnSplitted]
+				,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 				,[intEntityId]					= ARI.[intEntityId]
 				,[ysnPost]						= @post
 				,[intInvoiceDetailId]			= NULL
 				,[intItemId]					= NULL
 				,[intItemUOMId]					= NULL
 				,[intDiscountAccountId]			= @DiscountAccountId
+				,[intCustomerStorageId]			= NULL
 				,[intStorageScheduleTypeId]		= NULL
 				,[intSubLocationId]				= NULL
 				,[intStorageLocationId]			= NULL
@@ -363,6 +417,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[strType]
 				,[dtmDate]
 				,[dtmPostDate]
+				,[dtmShipDate]
 				,[intEntityCustomerId]
 				,[intCompanyLocationId]
 				,[intAccountId]
@@ -373,14 +428,22 @@ IF(@beginTransaction IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]
+				,[strActualCostId]
 				,[intPeriodsToAccrue]
 				,[ysnAccrueLicense]
+				,[intSplitId]
+				,[dblSplitPercent]
+				,[ysnImpactInventory]
+				,[ysnSplitted]
 				,[intEntityId]
 				,[ysnPost]
 				,[intInvoiceDetailId]
 				,[intItemId]
 				,[intItemUOMId]
 				,[intDiscountAccountId]
+				,[intCustomerStorageId]
 				,[intStorageScheduleTypeId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
@@ -393,13 +456,14 @@ IF(@beginTransaction IS NOT NULL)
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
 			)
-			 SELECT
+			 SELECT DISTINCT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
 				,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 				,[strTransactionType]			= ARI.[strTransactionType]
 				,[strType]						= ARI.[strType]
 				,[dtmDate]						= ARI.[dtmDate]
 				,[dtmPostDate]					= ARI.[dtmPostDate]
+				,[dtmShipDate]					= ARI.[dtmShipDate]
 				,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
 				,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
 				,[intAccountId]					= ARI.[intAccountId]
@@ -410,14 +474,22 @@ IF(@beginTransaction IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+				,[strActualCostId]				= ARI.[strActualCostId]
 				,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 				,[ysnAccrueLicense]				= @accrueLicense
+				,[intSplitId]					= ARI.[intSplitId]
+				,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+				,[ysnSplitted]					= ARI.[ysnSplitted]
+				,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 				,[intEntityId]					= ARI.[intEntityId]
 				,[ysnPost]						= @post
 				,[intInvoiceDetailId]			= NULL
 				,[intItemId]					= NULL
 				,[intItemUOMId]					= NULL
 				,[intDiscountAccountId]			= @DiscountAccountId
+				,[intCustomerStorageId]			= NULL
 				,[intStorageScheduleTypeId]		= NULL
 				,[intSubLocationId]				= NULL
 				,[intStorageLocationId]			= NULL
@@ -450,6 +522,581 @@ IF(@exclude IS NOT NULL)
 		DELETE FROM A
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
+	END
+
+
+--------------------------------------------------------------------------------------------  
+-- Validations  
+----------------------------------------------------------------------------------------------  
+IF @post = 1
+	BEGIN								
+					
+		BEGIN TRY
+			DECLARE @TankDelivery TABLE (
+					intInvoiceId INT,
+					UNIQUE (intInvoiceId));
+							
+			INSERT INTO @TankDelivery					
+			SELECT DISTINCT
+				I.intInvoiceId
+			FROM
+				(SELECT intInvoiceId FROM tblARInvoice WITH (NOLOCK)) I
+			INNER JOIN
+				(SELECT intInvoiceId, intSiteId FROM tblARInvoiceDetail WITH (NOLOCK)) D
+					ON I.intInvoiceId = D.intInvoiceId		
+			INNER JOIN
+				(SELECT intSiteID FROM tblTMSite WITH (NOLOCK)) TMS
+					ON D.intSiteId = TMS.intSiteID 
+			INNER JOIN 
+				@PostInvoiceData B
+					ON I.intInvoiceId = B.intInvoiceId
+							
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDelivery ORDER BY intInvoiceId)
+				BEGIN
+						
+					DECLARE  @intInvoiceId INT
+							,@ResultLog NVARCHAR(MAX)
+									
+					SET @ResultLog = 'OK'
+							
+					SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @TankDelivery ORDER BY intInvoiceId
+
+					EXEC dbo.uspTMValidateInvoiceForSync @intInvoiceId, @ResultLog OUT
+											
+					DELETE FROM @TankDelivery WHERE intInvoiceId = @intInvoiceId
+							
+					IF NOT(@ResultLog = 'OK' OR RTRIM(LTRIM(@ResultLog)) = '')
+						BEGIN
+							INSERT INTO @InvalidInvoiceData([strPostingError], [strTransactionType], [strInvoiceNumber], [strBatchId], [intInvoiceId])
+							SELECT
+								@ResultLog,
+								A.strTransactionType,
+								A.strInvoiceNumber,
+								@batchId,
+								A.intInvoiceId
+							FROM 
+								(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
+							INNER JOIN 
+								@PostInvoiceData B
+									ON A.intInvoiceId = B.intInvoiceId
+							WHERE
+								A.intInvoiceId = @intInvoiceId									
+						END														
+				END 							
+							
+															
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()
+			IF @raiseError = 0
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION							
+					BEGIN TRANSACTION						
+					EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+					COMMIT TRANSACTION
+				END						
+			IF @raiseError = 1
+				RAISERROR(@ErrorMerssage, 11, 1)
+				
+			GOTO Post_Exit
+		END CATCH
+	END
+
+DECLARE @PostInvoiceDataFromIntegration AS [InvoicePostingTable]
+--TM
+DELETE FROM @PostInvoiceDataFromIntegration
+INSERT INTO
+	@PostInvoiceDataFromIntegration
+SELECT
+	PID.*
+FROM
+	(SELECT [intInvoiceId], [intSiteId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+INNER JOIN
+	@PostInvoiceData PID
+		ON ARID.[intInvoiceId] = PID.[intInvoiceId]
+INNER JOIN
+	(SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS
+		ON ARID.[intSiteId] = TMS.[intSiteID] 
+	
+INSERT INTO @InvalidInvoiceData(
+	 [intInvoiceId]
+	,[strInvoiceNumber]
+	,[strTransactionType]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[strBatchId]
+	,[strPostingError])
+SELECT
+	 [intInvoiceId]			= IID.[intInvoiceId]
+	,[strInvoiceNumber]		= IID.[strInvoiceNumber]
+	,[strTransactionType]	= IID.[strTransactionType]
+	,[intInvoiceDetailId]	= IID.[intInvoiceDetailId]
+	,[intItemId]			= IID.[intItemId]
+	,[strBatchId]			= IID.[strBatchId]
+	,[strPostingError]		= IID.[strPostingError]
+FROM 
+	[dbo].[fnTMGetInvalidInvoicesForSync](@PostInvoiceDataFromIntegration, @post) AS IID
+
+--Invoice Split
+DELETE FROM @PostInvoiceDataFromIntegration
+INSERT INTO
+	@PostInvoiceDataFromIntegration
+SELECT
+	PID.*
+FROM
+	@PostInvoiceData PID
+WHERE
+	PID.[ysnSplitted] = 0 
+	AND ISNULL(PID.[intSplitId], 0) > 0
+	
+INSERT INTO @InvalidInvoiceData(
+	 [intInvoiceId]
+	,[strInvoiceNumber]
+	,[strTransactionType]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[strBatchId]
+	,[strPostingError])
+SELECT
+	 [intInvoiceId]			= IID.[intInvoiceId]
+	,[strInvoiceNumber]		= IID.[strInvoiceNumber]
+	,[strTransactionType]	= IID.[strTransactionType]
+	,[intInvoiceDetailId]	= IID.[intInvoiceDetailId]
+	,[intItemId]			= IID.[intItemId]
+	,[strBatchId]			= IID.[strBatchId]
+	,[strPostingError]		= IID.[strPostingError]
+FROM 
+	[dbo].[fnARGetInvalidInvoicesForInvoiceSplits](@PostInvoiceDataFromIntegration, @post) AS IID
+
+--Grain
+DELETE FROM @PostInvoiceDataFromIntegration
+INSERT INTO @PostInvoiceDataFromIntegration(
+				 [intInvoiceId]
+				,[strInvoiceNumber]
+				,[strTransactionType]
+				,[strType]
+				,[dtmDate]
+				,[dtmPostDate]
+				,[dtmShipDate]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intAccountId]
+				,[intDeferredRevenueAccountId]
+				,[intCurrencyId]
+				,[intTermId]
+				,[dblInvoiceTotal]
+				,[dblShipping]
+				,[dblTax]
+				,[strImportFormat]
+				,[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]
+				,[strActualCostId]
+				,[intPeriodsToAccrue]
+				,[ysnAccrueLicense]
+				,[intSplitId]
+				,[dblSplitPercent]
+				,[ysnImpactInventory]
+				,[ysnSplitted]
+				,[intEntityId]
+				,[ysnPost]
+				,[intInvoiceDetailId]
+				,[intItemId]
+				,[intItemUOMId]
+				,[intDiscountAccountId]
+				,[intCustomerStorageId]
+				,[intStorageScheduleTypeId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[dblQuantity]
+				,[dblMaxQuantity]
+				,[strOptionType]
+				,[strSourceType]
+				,[strBatchId]
+				,[strPostingMessage]
+				,[intUserId]
+				,[ysnAllowOtherUserToPost]
+			)
+			 SELECT DISTINCT
+				 [intInvoiceId]					= PID.[intInvoiceId]
+				,[strInvoiceNumber]				= PID.[strInvoiceNumber]
+				,[strTransactionType]			= PID.[strTransactionType]
+				,[strType]						= PID.[strType]
+				,[dtmDate]						= PID.[dtmDate]
+				,[dtmPostDate]					= PID.[dtmPostDate]
+				,[dtmShipDate]					= PID.[dtmShipDate]
+				,[intEntityCustomerId]			= PID.[intEntityCustomerId]
+				,[intCompanyLocationId]			= PID.[intCompanyLocationId]
+				,[intAccountId]					= PID.[intAccountId]
+				,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+				,[intCurrencyId]				= PID.[intCurrencyId]
+				,[intTermId]					= PID.[intTermId]
+				,[dblInvoiceTotal]				= PID.[dblInvoiceTotal]
+				,[dblShipping]					= PID.[dblShipping]
+				,[dblTax]						= PID.[dblTax]
+				,[strImportFormat]				= PID.[strImportFormat]
+				,[intDistributionHeaderId]		= PID.[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]	= PID.[intLoadDistributionHeaderId]
+				,[strActualCostId]				= PID.[strActualCostId]
+				,[intPeriodsToAccrue]			= PID.[intPeriodsToAccrue]
+				,[ysnAccrueLicense]				= @accrueLicense
+				,[intSplitId]					= PID.[intSplitId]
+				,[dblSplitPercent]				= PID.[dblSplitPercent]			
+				,[ysnSplitted]					= PID.[ysnSplitted]
+				,[ysnImpactInventory]			= PID.[ysnImpactInventory]
+				,[intEntityId]					= PID.[intEntityId]
+				,[ysnPost]						= @post
+				,[intInvoiceDetailId]			= ARID.[intInvoiceDetailId]
+				,[intItemId]					= ARID.[intItemId]
+				,[intItemUOMId]					= ARID.[intItemUOMId]
+				,[intDiscountAccountId]			= @DiscountAccountId
+				,[intCustomerStorageId]			= ARID.[intCustomerStorageId]
+				,[intStorageScheduleTypeId]		= ARID.[intStorageScheduleTypeId]
+				,[intSubLocationId]				= NULL
+				,[intStorageLocationId]			= ARID.[intStorageLocationId]
+				,[dblQuantity]					= dbo.fnCalculateStockUnitQty(ARID.[dblQtyShipped], ICIU.[dblUnitQty])
+				,[dblMaxQuantity]				= @ZeroDecimal
+				,[strOptionType]				= 'Update'
+				,[strSourceType]				= 'Invoice'
+				,[strBatchId]					= @batchIdUsed
+				,[strPostingMessage]			= ''
+				,[intUserId]					= @UserEntityID
+				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+FROM
+	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblQtyShipped], [intItemUOMId], [intStorageScheduleTypeId], [intCustomerStorageId], [intStorageLocationId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID 
+INNER JOIN 
+	@PostInvoiceData PID
+		ON PID.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN
+	(SELECT [intItemId], [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ICIU  
+		ON ARID.[intItemId] = ICIU.[intItemId] AND ARID.[intItemUOMId] = ICIU.[intItemUOMId]
+WHERE 
+	ARID.[intStorageScheduleTypeId] IS NOT NULL
+	AND ARID.[dblQtyShipped] <> @ZeroDecimal
+
+INSERT INTO @InvalidInvoiceData(
+	 [intInvoiceId]
+	,[strInvoiceNumber]
+	,[strTransactionType]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[strBatchId]
+	,[strPostingError])
+SELECT
+	 [intInvoiceId]			= IID.[intInvoiceId]
+	,[strInvoiceNumber]		= IID.[strInvoiceNumber]
+	,[strTransactionType]	= IID.[strTransactionType]
+	,[intInvoiceDetailId]	= IID.[intInvoiceDetailId]
+	,[intItemId]			= IID.[intItemId]
+	,[strBatchId]			= IID.[strBatchId]
+	,[strPostingError]		= IID.[strPostingError]
+FROM 
+	[dbo].[fnGRGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @post) AS IID
+
+--AutoBlend
+DELETE FROM @PostInvoiceDataFromIntegration
+INSERT INTO @PostInvoiceDataFromIntegration(
+				 [intInvoiceId]
+				,[strInvoiceNumber]
+				,[strTransactionType]
+				,[strType]
+				,[dtmDate]
+				,[dtmPostDate]
+				,[dtmShipDate]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intAccountId]
+				,[intDeferredRevenueAccountId]
+				,[intCurrencyId]
+				,[intTermId]
+				,[dblInvoiceTotal]
+				,[dblShipping]
+				,[dblTax]
+				,[strImportFormat]
+				,[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]
+				,[strActualCostId]
+				,[intPeriodsToAccrue]
+				,[ysnAccrueLicense]
+				,[intSplitId]
+				,[dblSplitPercent]
+				,[ysnImpactInventory]
+				,[ysnSplitted]
+				,[intEntityId]
+				,[ysnPost]
+				,[intInvoiceDetailId]
+				,[intItemId]
+				,[intItemUOMId]
+				,[intDiscountAccountId]
+				,[intCustomerStorageId]
+				,[intStorageScheduleTypeId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[dblQuantity]
+				,[dblMaxQuantity]
+				,[strOptionType]
+				,[strSourceType]
+				,[strBatchId]
+				,[strPostingMessage]
+				,[intUserId]
+				,[ysnAllowOtherUserToPost]
+			)
+			 SELECT DISTINCT
+				 [intInvoiceId]					= PID.[intInvoiceId]
+				,[strInvoiceNumber]				= PID.[strInvoiceNumber]
+				,[strTransactionType]			= PID.[strTransactionType]
+				,[strType]						= PID.[strType]
+				,[dtmDate]						= PID.[dtmDate]
+				,[dtmPostDate]					= PID.[dtmPostDate]
+				,[dtmShipDate]					= PID.[dtmShipDate]
+				,[intEntityCustomerId]			= PID.[intEntityCustomerId]
+				,[intCompanyLocationId]			= PID.[intCompanyLocationId]
+				,[intAccountId]					= PID.[intAccountId]
+				,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+				,[intCurrencyId]				= PID.[intCurrencyId]
+				,[intTermId]					= PID.[intTermId]
+				,[dblInvoiceTotal]				= PID.[dblInvoiceTotal]
+				,[dblShipping]					= PID.[dblShipping]
+				,[dblTax]						= PID.[dblTax]
+				,[strImportFormat]				= PID.[strImportFormat]
+				,[intDistributionHeaderId]		= PID.[intDistributionHeaderId]
+				,[intLoadDistributionHeaderId]	= PID.[intLoadDistributionHeaderId]
+				,[strActualCostId]				= PID.[strActualCostId]
+				,[intPeriodsToAccrue]			= PID.[intPeriodsToAccrue]
+				,[ysnAccrueLicense]				= @accrueLicense
+				,[intSplitId]					= PID.[intSplitId]
+				,[dblSplitPercent]				= PID.[dblSplitPercent]			
+				,[ysnSplitted]					= PID.[ysnSplitted]
+				,[ysnImpactInventory]			= PID.[ysnImpactInventory]
+				,[intEntityId]					= PID.[intEntityId]
+				,[ysnPost]						= @post
+				,[intInvoiceDetailId]			= ARID.[intInvoiceDetailId]
+				,[intItemId]					= ARID.[intItemId]
+				,[intItemUOMId]					= ARID.[intItemUOMId]
+				,[intDiscountAccountId]			= @DiscountAccountId
+				,[intCustomerStorageId]			= ARID.[intCustomerStorageId]
+				,[intStorageScheduleTypeId]		= ARID.[intStorageScheduleTypeId]
+				,[intSubLocationId]				= NULL
+				,[intStorageLocationId]			= ARID.[intStorageLocationId]
+				,[dblQuantity]					= ARID.[dblQtyShipped]
+				,[dblMaxQuantity]				= @ZeroDecimal
+				,[strOptionType]				= ''
+				,[strSourceType]				= ''
+				,[strBatchId]					= @batchIdUsed
+				,[strPostingMessage]			= ''
+				,[intUserId]					= @UserEntityID
+				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+FROM
+	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblQtyShipped], [intItemUOMId], [intStorageScheduleTypeId], [intCustomerStorageId], [intStorageLocationId], [ysnBlended] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+INNER JOIN 
+	@PostInvoiceData PID
+		ON PID.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN
+	(SELECT [intItemId], [ysnAutoBlend], [strType] FROM tblICItem WITH (NOLOCK)) ICI  
+		ON ARID.[intItemId] = ICI.[intItemId]
+INNER JOIN
+	(SELECT [intItemId], [intLocationId] FROM tblICItemLocation WITH (NOLOCK)) ICIL  
+		ON ARID.[intItemId] = ICIL.[intItemId]
+		AND PID.[intCompanyLocationId] = ICIL.[intLocationId]
+WHERE 
+	ARID.[ysnBlended] <> @post
+	AND ICI.[ysnAutoBlend] = 1
+	AND ISNULL(ICI.[strType],'') = 'Finished Good'
+	
+INSERT INTO @InvalidInvoiceData(
+	 [intInvoiceId]
+	,[strInvoiceNumber]
+	,[strTransactionType]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[strBatchId]
+	,[strPostingError])
+SELECT
+	 [intInvoiceId]			= IID.[intInvoiceId]
+	,[strInvoiceNumber]		= IID.[strInvoiceNumber]
+	,[strTransactionType]	= IID.[strTransactionType]
+	,[intInvoiceDetailId]	= IID.[intInvoiceDetailId]
+	,[intItemId]			= IID.[intItemId]
+	,[strBatchId]			= IID.[strBatchId]
+	,[strPostingError]		= IID.[strPostingError]
+FROM 
+	[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @post) AS IID
+
+----IC Costing
+--DELETE FROM @PostInvoiceDataFromIntegration
+--INSERT INTO @PostInvoiceDataFromIntegration(
+--				 [intInvoiceId]
+--				,[strInvoiceNumber]
+--				,[strTransactionType]
+--				,[strType]
+--				,[dtmDate]
+--				,[dtmPostDate]
+--				,[dtmShipDate]
+--				,[intEntityCustomerId]
+--				,[intCompanyLocationId]
+--				,[intAccountId]
+--				,[intDeferredRevenueAccountId]
+--				,[intCurrencyId]
+--				,[intTermId]
+--				,[dblInvoiceTotal]
+--				,[dblShipping]
+--				,[dblTax]
+--				,[strImportFormat]
+--				,[intDistributionHeaderId]
+--				,[intLoadDistributionHeaderId]
+--				,[strActualCostId]
+--				,[intPeriodsToAccrue]
+--				,[ysnAccrueLicense]
+--				,[intSplitId]
+--				,[dblSplitPercent]
+--				,[ysnImpactInventory]
+--				,[ysnSplitted]
+--				,[intEntityId]
+--				,[ysnPost]
+--				,[intInvoiceDetailId]
+--				,[intItemId]
+--				,[intItemUOMId]
+--				,[intDiscountAccountId]
+--				,[intCustomerStorageId]
+--				,[intStorageScheduleTypeId]
+--				,[intSubLocationId]
+--				,[intStorageLocationId]
+--				,[dblQuantity]
+--				,[dblMaxQuantity]
+--				,[strOptionType]
+--				,[strSourceType]
+--				,[strBatchId]
+--				,[strPostingMessage]
+--				,[intUserId]
+--				,[ysnAllowOtherUserToPost]
+--			)
+--			 SELECT DISTINCT
+--				 [intInvoiceId]					= PID.[intInvoiceId]
+--				,[strInvoiceNumber]				= PID.[strInvoiceNumber]
+--				,[strTransactionType]			= PID.[strTransactionType]
+--				,[strType]						= PID.[strType]
+--				,[dtmDate]						= PID.[dtmDate]
+--				,[dtmPostDate]					= PID.[dtmPostDate]
+--				,[dtmShipDate]					= PID.[dtmShipDate]
+--				,[intEntityCustomerId]			= PID.[intEntityCustomerId]
+--				,[intCompanyLocationId]			= PID.[intCompanyLocationId]
+--				,[intAccountId]					= PID.[intAccountId]
+--				,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+--				,[intCurrencyId]				= PID.[intCurrencyId]
+--				,[intTermId]					= PID.[intTermId]
+--				,[dblInvoiceTotal]				= PID.[dblInvoiceTotal]
+--				,[dblShipping]					= PID.[dblShipping]
+--				,[dblTax]						= PID.[dblTax]
+--				,[strImportFormat]				= PID.[strImportFormat]
+--				,[intDistributionHeaderId]		= PID.[intDistributionHeaderId]
+--				,[intLoadDistributionHeaderId]	= PID.[intLoadDistributionHeaderId]
+--				,[strActualCostId]				= PID.[strActualCostId]
+--				,[intPeriodsToAccrue]			= PID.[intPeriodsToAccrue]
+--				,[ysnAccrueLicense]				= @accrueLicense
+--				,[intSplitId]					= PID.[intSplitId]
+--				,[dblSplitPercent]				= PID.[dblSplitPercent]			
+--				,[ysnSplitted]					= PID.[ysnSplitted]
+--				,[ysnImpactInventory]			= PID.[ysnImpactInventory]
+--				,[intEntityId]					= PID.[intEntityId]
+--				,[ysnPost]						= @post
+--				,[intInvoiceDetailId]			= ARID.[intInvoiceDetailId]
+--				,[intItemId]					= ARID.[intItemId]
+--				,[intItemUOMId]					= ARID.[intItemUOMId]
+--				,[intDiscountAccountId]			= @DiscountAccountId
+--				,[intCustomerStorageId]			= ARID.[intCustomerStorageId]
+--				,[intStorageScheduleTypeId]		= ARID.[intStorageScheduleTypeId]
+--				,[intSubLocationId]				= NULL
+--				,[intStorageLocationId]			= ARID.[intStorageLocationId]
+--				,[dblQuantity]					= ARID.[dblQtyShipped]
+--				,[dblMaxQuantity]				= @ZeroDecimal
+--				,[strOptionType]				= ''
+--				,[strSourceType]				= ''
+--				,[strBatchId]					= @batchIdUsed
+--				,[strPostingMessage]			= ''
+--				,[intUserId]					= @UserEntityID
+--				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+--FROM
+--	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblQtyShipped], [intItemUOMId], [intStorageScheduleTypeId], [intCustomerStorageId], [intStorageLocationId], [ysnBlended] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+--INNER JOIN 
+--	@PostInvoiceData PID
+--		ON PID.[intInvoiceId] = ARID.[intInvoiceId]
+--INNER JOIN
+--	(SELECT [intItemId], [ysnAutoBlend], [strType] FROM tblICItem WITH (NOLOCK)) ICI  
+--		ON ARID.[intItemId] = ICI.[intItemId]
+--INNER JOIN
+--	(SELECT [intItemId], [intLocationId] FROM tblICItemLocation WITH (NOLOCK)) ICIL  
+--		ON ARID.[intItemId] = ICIL.[intItemId]
+--		AND PID.[intCompanyLocationId] = ICIL.[intLocationId]
+--WHERE 
+--	ARID.[ysnBlended] <> @post
+--	AND ICI.[ysnAutoBlend] = 1
+--	AND ISNULL(ICI.[strType],'') = 'Finished Good'
+	
+--INSERT INTO @InvalidInvoiceData(
+--	 [intInvoiceId]
+--	,[strInvoiceNumber]
+--	,[strTransactionType]
+--	,[intInvoiceDetailId]
+--	,[intItemId]
+--	,[strBatchId]
+--	,[strPostingError])
+--SELECT
+--	 [intInvoiceId]			= IID.[intInvoiceId]
+--	,[strInvoiceNumber]		= IID.[strInvoiceNumber]
+--	,[strTransactionType]	= IID.[strTransactionType]
+--	,[intInvoiceDetailId]	= IID.[intInvoiceDetailId]
+--	,[intItemId]			= IID.[intItemId]
+--	,[strBatchId]			= IID.[strBatchId]
+--	,[strPostingError]		= IID.[strPostingError]
+--FROM 
+--	[dbo].[fnICGetInvalidInvoicesForCosting](@PostInvoiceDataFromIntegration, @post) AS IID
+		
+SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
+
+IF(@totalInvalid > 0)
+	BEGIN
+
+		--Insert Invalid Post transaction result
+		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 	
+			 [strPostingError]
+			,[strTransactionType]
+			,[strInvoiceNumber]
+			,[strBatchId]
+			,[intInvoiceId]
+		FROM
+			@InvalidInvoiceData
+
+		SET @invalidCount = @totalInvalid
+
+		--DELETE Invalid Transaction From temp table
+		DELETE @PostInvoiceData
+			FROM @PostInvoiceData A
+				INNER JOIN @InvalidInvoiceData B
+					ON A.intInvoiceId = B.intInvoiceId
+				
+		IF @raiseError = 1
+			BEGIN
+				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
+				RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Post_Exit
+			END					
+	END
+
+SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
+			
+IF(@totalInvalid >= 1 AND @totalRecords <= 0)
+	BEGIN
+		IF @raiseError = 0 
+			COMMIT TRANSACTION
+			--COMMIT TRAN @TransactionName
+		IF @raiseError = 1
+			BEGIN
+				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
+				RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Post_Exit
+			END				
+		GOTO Post_Exit	
 	END
 	
 
@@ -488,6 +1135,7 @@ BEGIN TRY
 							,[strType]
 							,[dtmDate]
 							,[dtmPostDate]
+							,[dtmShipDate]
 							,[intEntityCustomerId]
 							,[intCompanyLocationId]
 							,[intAccountId]
@@ -498,14 +1146,22 @@ BEGIN TRY
 							,[dblShipping]
 							,[dblTax]
 							,[strImportFormat]
+							,[intDistributionHeaderId]
+							,[intLoadDistributionHeaderId]
+							,[strActualCostId]
 							,[intPeriodsToAccrue]
 							,[ysnAccrueLicense]
+							,[intSplitId]
+							,[dblSplitPercent]
+							,[ysnImpactInventory]
+							,[ysnSplitted]
 							,[intEntityId]
 							,[ysnPost]
 							,[intInvoiceDetailId]
 							,[intItemId]
 							,[intItemUOMId]
 							,[intDiscountAccountId]
+							,[intCustomerStorageId]
 							,[intStorageScheduleTypeId]
 							,[intSubLocationId]
 							,[intStorageLocationId]
@@ -518,13 +1174,14 @@ BEGIN TRY
 							,[intUserId]
 							,[ysnAllowOtherUserToPost]
 						)
-						 SELECT
+						 SELECT DISTINCT
 							 [intInvoiceId]					= ARI.[intInvoiceId]
 							,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 							,[strTransactionType]			= ARI.[strTransactionType]
 							,[strType]						= ARI.[strType]
 							,[dtmDate]						= ARI.[dtmDate]
 							,[dtmPostDate]					= ARI.[dtmPostDate]
+							,[dtmShipDate]					= ARI.[dtmShipDate]
 							,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
 							,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
 							,[intAccountId]					= ARI.[intAccountId]
@@ -535,14 +1192,22 @@ BEGIN TRY
 							,[dblShipping]					= ARI.[dblShipping]
 							,[dblTax]						= ARI.[dblTax]
 							,[strImportFormat]				= ARI.[strImportFormat]
+							,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+							,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+							,[strActualCostId]				= ARI.[strActualCostId]
 							,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 							,[ysnAccrueLicense]				= @accrueLicense
+							,[intSplitId]					= ARI.[intSplitId]
+							,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+							,[ysnSplitted]					= ARI.[ysnSplitted]
+							,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 							,[intEntityId]					= ARI.[intEntityId]
 							,[ysnPost]						= @post
 							,[intInvoiceDetailId]			= NULL
 							,[intItemId]					= NULL
 							,[intItemUOMId]					= NULL
 							,[intDiscountAccountId]			= @DiscountAccountId
+							,[intCustomerStorageId]			= NULL
 							,[intStorageScheduleTypeId]		= NULL
 							,[intSubLocationId]				= NULL
 							,[intStorageLocationId]			= NULL
@@ -553,7 +1218,7 @@ BEGIN TRY
 							,[strBatchId]					= @batchIdUsed
 							,[strPostingMessage]			= ''
 							,[intUserId]					= @UserEntityID
-							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost												
+							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost											
 						FROM 
 							dbo.tblARInvoice ARI WITH (NOLOCK)
 						WHERE ARI.[ysnPosted] = 0 
@@ -885,77 +1550,6 @@ BEGIN CATCH
 		
 	GOTO Post_Exit
 END CATCH
-
---------------------------------------------------------------------------------------------  
--- Validations  
-----------------------------------------------------------------------------------------------  
-INSERT INTO @InvalidInvoiceData(
-	 [intInvoiceId]
-	,[strInvoiceNumber]
-	,[strTransactionType]
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[strBatchId]
-	,[strPostingError])
-SELECT
-	 [intInvoiceId]			= IID.[intInvoiceId]
-	,[strInvoiceNumber]		= IID.[strInvoiceNumber]
-	,[strTransactionType]	= IID.[strTransactionType]
-	,[intInvoiceDetailId]	= IID.[intInvoiceDetailId]
-	,[intItemId]			= IID.[intItemId]
-	,[strBatchId]			= IID.[strBatchId]
-	,[strPostingError]		= IID.[strPostingError]
-FROM 
-	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @post) AS IID
-		
-SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
-
-IF(@totalInvalid > 0)
-	BEGIN
-
-		--Insert Invalid Post transaction result
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT 	
-			 [strPostingError]
-			,[strTransactionType]
-			,[intInvoiceId]
-			,[strBatchId]
-			,[intInvoiceId]
-		FROM
-			@InvalidInvoiceData
-
-		SET @invalidCount = @totalInvalid
-
-		--DELETE Invalid Transaction From temp table
-		DELETE @PostInvoiceData
-			FROM @PostInvoiceData A
-				INNER JOIN @InvalidInvoiceData B
-					ON A.intInvoiceId = B.intInvoiceId
-				
-		IF @raiseError = 1
-			BEGIN
-				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
-				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
-			END					
-	END
-
-SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
-			
-IF(@totalInvalid >= 1 AND @totalRecords <= 0)
-	BEGIN
-		IF @raiseError = 0 
-			COMMIT TRANSACTION
-			--COMMIT TRAN @TransactionName
-		IF @raiseError = 1
-			BEGIN
-				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
-				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
-			END				
-		GOTO Post_Exit	
-	END
-
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
@@ -3264,141 +3858,6 @@ IF @post = 0
 	END 
 	
 	
-----Process Finished Good Items
---BEGIN TRY
---	--IF @recap = 0
---		--BEGIN
---			--DECLARE @FinishedGoodItems TABLE(intInvoiceDetailId		INT
---			--							   , intItemId				INT
---			--							   , dblQuantity			NUMERIC(18,6)
---			--							   , intItemUOMId			INT
---			--							   , intLocationId			INT
---			--							   , intSublocationId		INT
---			--							   , intStorageLocationId	INT)
-
---			DELETE FROM @FinishedGoodItems
---			INSERT INTO @FinishedGoodItems
---			SELECT ID.intInvoiceDetailId
---				 , ID.intItemId
---				 , ID.dblQtyShipped
---				 , ID.intItemUOMId
---				 , I.intCompanyLocationId
---				 , ICL.intSubLocationId
---				 , ID.intStorageLocationId 
---			FROM tblARInvoice I
---				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
---				INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
---				INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
---			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
---			AND ID.ysnBlended <> @post
---			AND ICI.ysnAutoBlend = 1
---			AND ICI.strType = 'Finished Good'
-
---			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
---				BEGIN
---					--DECLARE @intInvoiceDetailId		INT
---					--	  , @intItemId				INT
---					--	  , @dblQuantity			NUMERIC(18,6)
---					--	  , @dblMaxQuantity			NUMERIC(18,6) = 0
---					--	  , @intItemUOMId			INT
---					--	  , @intLocationId			INT
---					--	  , @intSublocationId		INT
---					--	  , @intStorageLocationId	INT
-			
---					SELECT TOP 1 
---						  @intInvoiceDetailId	= intInvoiceDetailId
---						, @intItemId			= intItemId
---						, @dblQuantity			= dblQuantity				
---						, @intItemUOMId			= intItemUOMId
---						, @intLocationId		= intLocationId
---						, @intSublocationId		= intSublocationId
---						, @intStorageLocationId	= intStorageLocationId
---					FROM @FinishedGoodItems 
-				  
---					BEGIN TRY
---					IF @post = 0
---					--	BEGIN
---					--		EXEC dbo.uspMFAutoBlend
---					--			@intSalesOrderDetailId	= NULL,
---					--			@intInvoiceDetailId		= @intInvoiceDetailId,
---					--			@intItemId				= @intItemId,
---					--			@dblQtyToProduce		= @dblQuantity,
---					--			@intItemUOMId			= @intItemUOMId,
---					--			@intLocationId			= @intLocationId,
---					--			@intSubLocationId		= @intSublocationId,
---					--			@intStorageLocationId	= @intStorageLocationId,
---					--			@intUserId				= @userId,
---					--			@dblMaxQtyToProduce		= @dblMaxQuantity OUT		
-
---					--		IF ISNULL(@dblMaxQuantity, 0) > 0
---					--			BEGIN
---					--				EXEC dbo.uspMFAutoBlend
---					--					@intSalesOrderDetailId	= NULL,
---					--					@intInvoiceDetailId		= @intInvoiceDetailId,
---					--					@intItemId				= @intItemId,
---					--					@dblQtyToProduce		= @dblMaxQuantity,
---					--					@intItemUOMId			= @intItemUOMId,
---					--					@intLocationId			= @intLocationId,
---					--					@intSubLocationId		= @intSublocationId,
---					--					@intStorageLocationId	= @intStorageLocationId,
---					--					@intUserId				= @userId,
---					--					@dblMaxQtyToProduce		= @dblMaxQuantity OUT
---					--			END
---					--	END
---					----ELSE
---						BEGIN
---							EXEC dbo.uspMFReverseAutoBlend
---								@intSalesOrderDetailId	= NULL,
---								@intInvoiceDetailId		= @intInvoiceDetailId,
---								@intUserId				= @userId 
---						END						
---					END TRY
---					BEGIN CATCH
---						SELECT @ErrorMerssage = ERROR_MESSAGE()
---						IF @raiseError = 0
---							BEGIN
---								IF (XACT_STATE()) = -1
---									ROLLBACK TRANSACTION							
---								BEGIN TRANSACTION						
---								EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
---								COMMIT TRANSACTION
---							END						
---						IF @raiseError = 1
---							RAISERROR(@ErrorMerssage, 11, 1)
-		
---						GOTO Post_Exit
---					END CATCH
-
---					IF @post = 0
---						UPDATE tblARInvoiceDetail SET ysnBlended = 0 WHERE intInvoiceDetailId = @intInvoiceDetailId
-
---					DELETE FROM @FinishedGoodItems WHERE intInvoiceDetailId = @intInvoiceDetailId
---				END	
---		--END	
---END TRY
---BEGIN CATCH
---	SELECT @ErrorMerssage = ERROR_MESSAGE()
---	IF @raiseError = 0
---		BEGIN
---			IF (XACT_STATE()) = -1
---				ROLLBACK TRANSACTION							
---			BEGIN TRANSACTION						
---			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
---			COMMIT TRANSACTION
---		END						
---	IF @raiseError = 1
---		RAISERROR(@ErrorMerssage, 11, 1)
-		
---	GOTO Post_Exit
---END CATCH	  
-
---------------------------------------------------------------------------------------------  
--- If RECAP is TRUE, 
--- 1.	Store all the GL entries in a holding table. It will be used later as data  
---		for the recap screen.
---
--- 2.	Rollback the save point 
---------------------------------------------------------------------------------------------  
 IF @recap = 1		
 	BEGIN
 		IF @raiseError = 0
@@ -3572,14 +4031,12 @@ IF @recap = 0
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					SELECT 
 						@PostSuccessfulMsg
-						,ARI.strTransactionType
-						,ARI.strInvoiceNumber
+						,PID.strTransactionType
+						,PID.strInvoiceNumber
 						,@batchId
-						,ARI.intInvoiceId
+						,PID.intInvoiceId
 					FROM
-						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
-					INNER JOIN						
-						(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId
+						@PostInvoiceData PID					
 												
 					--Update tblHDTicketHoursWorked ysnBilled					
 					UPDATE HDTHW						
@@ -3677,15 +4134,12 @@ IF @recap = 0
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					SELECT 
 						@PostSuccessfulMsg
-						,ARI.strTransactionType
-						,ARI.strInvoiceNumber
+						,PID.strTransactionType
+						,PID.strInvoiceNumber
 						,@batchId
-						,ARI.intInvoiceId
+						,PID.intInvoiceId
 					FROM
-						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
-					INNER JOIN						
-						(SELECT intInvoiceId, strTransactionType, strInvoiceNumber FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
-							ON PID.intInvoiceId = ARI.intInvoiceId
+						@PostInvoiceData PID
 					
 					--Update tblHDTicketHoursWorked ysnBilled					
 					UPDATE HDTHW						

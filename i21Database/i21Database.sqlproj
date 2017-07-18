@@ -5335,6 +5335,14 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOFeed.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidInvoicesForPosting.sql" />
     <Build Include="dbo\User Defined Types\InvoicePostingTable.sql" />
+    <Build Include="dbo\Functions\fnTMGetInvalidInvoicesForSync.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidInvoicesForInvoiceSplits.sql" />
+    <Build Include="dbo\Functions\fnGRGetInvalidInvoicesForPosting.sql" />
+    <Build Include="dbo\Functions\fnMFGetInvalidInvoicesForPosting.sql" />
+    <Build Include="dbo\Functions\fnICGetInvalidInvoicesForCosting.sql" />
+    <Build Include="dbo\Functions\fnICGetInvalidInvoicesForInTransitCosting.sql" />
+    <Build Include="dbo\Functions\fnICGetInvalidInvoicesForItemStorageCosting.sql" />
+    <Build Include="dbo\User Defined Types\fnARGetItemsForCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
