@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
+﻿
+
+CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 SELECT   arInv.strCustomerName, arInv.strCustomerNumber, cfCardAccount.strCardNumber, cfCardAccount.strCardDescription, CASE WHEN cfCardAccount.strDepartment = '' OR
                          cfCardAccount.strDepartment IS NULL THEN 'Unknown' ELSE cfCardAccount.strDepartment END AS strDepartment, cfCardAccount.strDepartmentDescription, 
@@ -14,7 +16,7 @@ SELECT   arInv.strCustomerName, arInv.strCustomerNumber, cfCardAccount.strCardNu
                          AS dblTotalNetAmount, ISNULL(SUM(ROUND(cfTransPrice.dblCalculatedAmount, 2)), 0) AS dblTotalAmount, ISNULL(SUM(FETTaxes_1.dblTaxCalculatedAmount), 0) 
                          + ISNULL(SUM(SETTaxes_1.dblTaxCalculatedAmount), 0) + ISNULL(SUM(SSTTaxes_1.dblTaxCalculatedAmount), 0) + ISNULL(SUM(LCTaxes_1.dblTaxCalculatedAmount), 0) 
                          AS dblTotalTaxAmount, cfTrans.strTransactionId, cfCardAccount.intDiscountScheduleId, cfCardAccount.intTermsCode, cfCardAccount.intTermsId, cfSiteItem.strTaxState, 
-                         cfCardAccount.intAccountId, cfTrans.intCardId, cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.ysnIncludeInQuantityDiscount, 
+                         cfCardAccount.intAccountId, cfTrans.intCardId, cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.ysnIncludeInQuantityDiscount, DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate, cfTrans.strInvoiceReportNumber AS strUpdateInvoiceReportNumber,
                          ISNULL(SUM(FETTaxes_1.dblTaxCalculatedAmount), 0) AS TotalFET, ISNULL(SUM(SETTaxes_1.dblTaxCalculatedAmount), 0) AS TotalSET, 
                          ISNULL(SUM(SSTTaxes_1.dblTaxCalculatedAmount), 0) AS TotalSST, ISNULL(SUM(LCTaxes_1.dblTaxCalculatedAmount), 0) AS TotalLC, cfTrans.intTransactionId, 
                          cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, cfCardAccount.strInvoiceCycle, cfTrans.strTempInvoiceReportNumber AS strInvoiceReportNumber, 
@@ -87,4 +89,5 @@ GROUP BY cfCardAccount.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId
                          cfCardAccount.strNetwork, arInv.dtmPostDate, cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, cfTrans.strTempInvoiceReportNumber, 
                          cfTrans.strPrintTimeStamp, arInv.strCustomerNumber, cfSiteItem.strItemNo, cfSiteItem.strDescription, cfSiteItem.strSiteNumber, cfSiteItem.strSiteAddress, 
                          cfSiteItem.strSiteCity, cfTrans.strTransactionId, cfTrans.intOdometer, cfCardAccount.intCustomerId, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail, 
+						 cfTrans.dtmInvoiceDate, cfTrans.strInvoiceReportNumber,
                          cfSiteItem.strShortName

@@ -48,6 +48,7 @@ BEGIN
 				,ysnLoad
 				,intLoadReceive
 				,dblNet
+				,dblGross
 				,intSourceInventoryDetailId
 			)
 			SELECT 'Inventory Receipt',
@@ -70,6 +71,7 @@ BEGIN
 				ReceiptItemSource.ysnLoad,
 				ReceiptItem.intLoadReceive,
 				ReceiptItem.dblNet,
+				ReceiptItem.dblGross, 
 				ReceiptItem.intSourceInventoryReceiptItemId 
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

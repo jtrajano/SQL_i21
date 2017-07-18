@@ -5433,6 +5433,15 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateReservedQuantity.sql" />
     <Build Include="dbo\Tables\tblHDTicketStatusWorkflow.sql" />
     <Build Include="dbo\Views\vyuHDTicketStatusWorkflowLink.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByVehicleOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByVehicle.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByMiscOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByMisc.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByDeptOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByDept.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByCardOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByCard.sql" />
+    <Build Include="dbo\Functions\fnCFForceRounding.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateEFTNextNo.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceEntityType.sql" />
     <Build Include="dbo\Tables\tblCRMLostRevenue.sql" />
@@ -5448,6 +5457,7 @@
     <Build Include="dbo\Tables\tblSMLoginDeviceToken.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOFeed.sql" />
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\1_AddDefaultLetters.sql" />
+    <Build Include="dbo\Tables\tblAPPaymentDetailDeleted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

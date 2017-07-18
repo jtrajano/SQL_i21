@@ -283,14 +283,14 @@ BEGIN
 		SET		ysnPosted = @post
 	WHERE	intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
 
-	IF @lenOfSuccessPrePay > 0
-	BEGIN
-		UPDATE A
-			SET A.ysnPosted = @post
-		FROM tblAPBill A
-		INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
-		WHERE B.intPaymentId IN (SELECT intId FROM @prepayIds)
-	END
+	--IF @lenOfSuccessPrePay > 0
+	--BEGIN
+	--	UPDATE A
+	--		SET A.ysnPosted = @post
+	--	FROM tblAPBill A
+	--	INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+	--	WHERE B.intPaymentId IN (SELECT intId FROM @prepayIds)
+	--END
 
 	--CREATE BANK TRANSACTION
 	DECLARE @paymentForBankTransaction AS Id

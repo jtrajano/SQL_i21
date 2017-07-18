@@ -15,7 +15,7 @@ SELECT
 	,CH.strContractNumber
 	,Item.intCommodityId
 	,LD.intItemId
-	,CT.intItemUOMId
+	,LD.intItemUOMId --.intItemUOMId
 	,LW.intSubLocationId
 	,intLocationId = L.intCompanyLocationId
 	,LDCL.dblQuantity

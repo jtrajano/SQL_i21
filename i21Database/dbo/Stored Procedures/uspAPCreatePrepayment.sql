@@ -172,7 +172,7 @@ BEGIN
 	SELECT 
 		[intPaymentId]	= @paymentId,
 		[intBillId]		= A.intBillId,
-		[intAccountId]	= A.intAccountId,
+		[intAccountId]	= prepayAccount.intAccountId,
 		[dblDiscount]	= 0,
 		[dblWithheld]	= 0,
 		[dblAmountDue]	= CASE WHEN (A.dblAmountDue < 0) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END,
@@ -180,6 +180,11 @@ BEGIN
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END 
 	FROM tblAPBill A
+	CROSS APPLY
+	(
+		SELECT TOP 1 B.intAccountId FROM tblAPBillDetail B
+		WHERE B.intBillId = A.intBillId
+	) prepayAccount
 	WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 	'
 

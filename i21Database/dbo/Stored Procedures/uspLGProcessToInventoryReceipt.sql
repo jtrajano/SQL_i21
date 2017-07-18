@@ -33,6 +33,31 @@ BEGIN TRY
 	WHERE intLoadId = @intLoadId
 
 	IF EXISTS (
+			SELECT LD.intItemId
+			FROM tblLGLoadDetail LD
+			JOIN tblICItemUOM U ON U.intItemUOMId = LD.intItemUOMId
+			WHERE LD.intLoadId = @intLoadId
+				AND LD.intItemId <> U.intItemId
+			)
+	BEGIN
+		UPDATE LD
+		SET intItemUOMId = IU.intItemUOMId
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblICItemUOM U ON U.intItemUOMId = LD.intItemUOMId
+		JOIN tblICItemUOM IU ON IU.intUnitMeasureId = U.intUnitMeasureId
+			AND IU.intItemId = LD.intItemId
+		WHERE LD.intLoadId = @intLoadId
+			AND LD.intItemId <> U.intItemId
+
+		UPDATE LDCL
+		SET intItemUOMId = LD.intItemUOMId
+		FROM tblLGLoadDetail LD
+		JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+		WHERE LD.intItemUOMId <> LDCL.intItemUOMId AND LD.intLoadId = @intLoadId
+	END
+
+	IF EXISTS (
 			SELECT 1
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId

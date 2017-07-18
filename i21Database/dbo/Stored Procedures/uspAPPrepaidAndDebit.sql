@@ -9,6 +9,7 @@ BEGIN
 END
 
 DECLARE @vendorId INT = (SELECT intEntityVendorId FROM tblAPBill WHERE intBillId = @billId);
+DECLARE @intCurrencyId INT = (SELECT intCurrencyId FROM tblAPBill WHERE intBillId = @billId);
 
 DELETE A
 FROM tblAPAppliedPrepaidAndDebit A 
@@ -121,6 +122,7 @@ AND A.intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0										   --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NULL --GET ONLY THE PREPAYMENT FOR CONTRACT WITHOUT ITEM
 AND B.ysnRestricted = 1
+AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -214,6 +216,7 @@ AND A.intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NOT NULL --GET ONLY THE PREPAYMENT FOR CONTRACT W/ ITEM
 AND B.ysnRestricted = 1
+AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -307,6 +310,7 @@ AND A.intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0										   --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NULL --GET ONLY THE PREPAYMENT FOR CONTRACT WITHOUT ITEM
 AND B.ysnRestricted = 0
+AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -400,6 +404,7 @@ AND A.intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NOT NULL --GET ONLY THE PREPAYMENT FOR CONTRACT W/ ITEM
 AND B.ysnRestricted = 0
+AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -520,6 +525,7 @@ AND B.intContractHeaderId IS NULL
 AND ISNULL(B.intItemId,0) <= 0
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0
+AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -611,6 +617,7 @@ AND B.intItemId != (SELECT TOP 1 ISNULL(intItemId,0) FROM tblAPBillDetail WHERE 
 AND B.ysnRestricted = 0
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0
+AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -704,6 +711,7 @@ AND B.intItemId IS NOT NULL
 AND B.intContractDetailId IS NULL
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0
+AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
