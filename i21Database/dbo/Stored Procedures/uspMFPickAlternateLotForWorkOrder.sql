@@ -34,6 +34,7 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE strLotNumber = @strAlternateLotNo
 		AND intStorageLocationId = @intStorageLocationId
+		AND dblQty > 0
 
 	SELECT @dblRequiredTaskWeight = dblWeight
 		,@dblRequiredTaskQty = dblQty
