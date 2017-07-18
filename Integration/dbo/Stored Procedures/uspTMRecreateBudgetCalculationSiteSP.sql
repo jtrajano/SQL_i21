@@ -111,6 +111,7 @@ BEGIN
 											)
 					,strSiteLocation = D.vwloc_loc_no COLLATE Latin1_General_CI_AS
 					,strSiteItemNumber = K.vwitm_no COLLATE Latin1_General_CI_AS
+					,dblCurrentBudget = ISNULL(C.vwcus_budget_amt,0.0)
 				INTO #tmpStage1
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
@@ -269,6 +270,7 @@ BEGIN
 												(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END) )
 											END
 											)
+					,dblCurrentBudget = ISNULL(G.dblBudgetAmount,0.0)
 				INTO #tmpStage1
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B

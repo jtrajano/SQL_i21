@@ -89,6 +89,7 @@ BEGIN
 									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END) )
 								END
 								)
+		,dblCurrentBudget = ISNULL(G.dblBudgetAmount,0.0)
 	INTO #tmpStage1
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
@@ -118,34 +119,35 @@ BEGIN
 	
 	SELECT 
 		A.* 
-		,dblPrice = ISNULL((CASE WHEN B.intItemId IS NULL
-						THEN  dbo.fnARGetItemPrice(
-									A.intSiteItemId --@ItemId 				
-								,A.intEntityCustomerId	--@CustomerId	
-								,A.intLocationId	--@LocationId		
-								,NULL	--@ItemUOMId
-								,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
-								,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)	 --@TransactionDate	
-								,A.dblRequiredQuantity	--@Quantity			
-								,NULL --@ContractHeaderId		
-								,NULL --@ContractDetailId		
-								,NULL --@ContractNumber		
-								,NULL --@ContractSeq			
-								,NULL --@OriginalQuantity		
-								,NULL --@CustomerPricingOnly
-								,NULL --@ItemPricingOnly
-								,NULL --@ExcludeContractPricing	
-								,NULL --@VendorId			
-								,NULL --@SupplyPointId		
-								,NULL --@LastCost			
-								,NULL --@ShipToLocationId  
-								,NULL --@VendorLocationId
-								,NULL --@InvoiceType
-								,0	  --@GetAllAvailablePricing								
-								)
-						ELSE
-							B.dblPrice
-						END),0.0)
+		--,dblPrice = ISNULL((CASE WHEN B.intItemId IS NULL
+		--				THEN  dbo.fnARGetItemPrice(
+		--							A.intSiteItemId --@ItemId 				
+		--						,A.intEntityCustomerId	--@CustomerId	
+		--						,A.intLocationId	--@LocationId		
+		--						,NULL	--@ItemUOMId
+		--						,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+		--						,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)	 --@TransactionDate	
+		--						,A.dblRequiredQuantity	--@Quantity			
+		--						,NULL --@ContractHeaderId		
+		--						,NULL --@ContractDetailId		
+		--						,NULL --@ContractNumber		
+		--						,NULL --@ContractSeq			
+		--						,NULL --@OriginalQuantity		
+		--						,NULL --@CustomerPricingOnly
+		--						,NULL --@ItemPricingOnly
+		--						,NULL --@ExcludeContractPricing	
+		--						,NULL --@VendorId			
+		--						,NULL --@SupplyPointId		
+		--						,NULL --@LastCost			
+		--						,NULL --@ShipToLocationId  
+		--						,NULL --@VendorLocationId
+		--						,NULL --@InvoiceType
+		--						,0	  --@GetAllAvailablePricing								
+		--						)
+		--				ELSE
+		--					B.dblPrice
+		--				END),0.0)
+		,dblPrice = B.dblPrice
 	INTO #tmpStage2
 	FROM #tmpStage1 A
 	INNER JOIN tblTMBudgetCalculationItemPricing B

@@ -41,6 +41,8 @@ BEGIN
 					,strSiteNumber = RIGHT(''0000'' + CAST(ISNULL(A.intSiteNumber,0)AS NVARCHAR(4)),4) 
 					,dblUnappliedCredits = ISNULL(C.vwcus_cred_reg,0.0) + ISNULL(C.vwcus_cred_ppd,0.0)
 					,E.*
+					,dblCurrentBudget = ISNULL(C.vwcus_budget_amt,0.0)
+					,intEntityCustomerId = C.A4GLIdentity
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -93,6 +95,8 @@ BEGIN
 					,strSiteNumber = RIGHT(''0000'' + CAST(ISNULL(A.intSiteNumber,0)AS NVARCHAR(4)),4) 
 					,dblUnappliedCredits = ISNULL(F.dblUnappliedCredits,0.0) + ISNULL(F.dblPrepaids,0.0)
 					,E.*
+					,dblCurrentBudget = ISNULL(F.dblBudgetAmount,0.0)
+					,intEntityCustomerId = C.intEntityId
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
