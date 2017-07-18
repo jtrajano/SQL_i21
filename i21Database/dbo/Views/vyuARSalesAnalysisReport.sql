@@ -88,8 +88,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , intEntitySalespersonId		= ARI.intEntitySalespersonId
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
-	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARID.intAccountId 
+	  , strItemDescription			= ARID.strItemDescription	  
+	  , intItemAccountId			= ISNULL(ARID.intSalesAccountId, ARID.intAccountId) 
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -218,7 +218,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= ISNULL(INV.intAccountId, SOD.intAccountId)
+	 , intItemAccountId				=  ISNULL(ISNULL(INV.intSalesAccountId, SOD.intSalesAccountId), SOD.intAccountId)  
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -921,8 +921,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , intEntitySalespersonId		= ARI.intEntitySalespersonId
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
-	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARID.intAccountId 
+	  , strItemDescription			= ARID.strItemDescription	  
+	  , intItemAccountId			=  ISNULL(ARID.intSalesAccountId , ARID.intAccountId)   
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
