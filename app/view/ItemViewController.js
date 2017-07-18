@@ -810,7 +810,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUOM: {
-                    hidden: true,
+                    //hidden: true,
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{pricingLevelUOM}',
@@ -872,7 +872,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colSpecialPricingUnit: {
-                    hidden: true,
+                    //hidden: true,
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{specialPricingUOM}',
