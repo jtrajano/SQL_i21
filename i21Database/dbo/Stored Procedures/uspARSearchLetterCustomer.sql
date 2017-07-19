@@ -387,21 +387,12 @@ END
 ELSE IF  @strLetterName = 'Service Charge Invoices Letter'
 BEGIN
 	SET NOCOUNT ON;
-	SELECT I.intEntityCustomerId
-		 , CUST.strCustomerNumber
-		 , CUST.strCustomerName
-	FROM dbo.tblARInvoice I WITH (NOLOCK)
-	INNER JOIN (SELECT intEntityCustomerId
-					 , strCustomerNumber
-					 , strCustomerName  = strName
-				FROM dbo.vyuARCustomer WITH (NOLOCK)
-				WHERE ysnActive = 1
-	) CUST ON I.intEntityCustomerId = CUST.intEntityCustomerId	 
-	WHERE I.strType = 'Service Charge'
-	GROUP BY I.intEntityCustomerId
-		   , CUST.strCustomerNumber
-		   , CUST.strCustomerName
-	ORDER BY CUST.strCustomerName
+	SELECT DISTINCT 
+		   intEntityCustomerId
+		 , strCustomerNumber
+		 , strCustomerName
+	FROM vyuARServiceChargeInvoiceReport
+	ORDER BY strCustomerName
 	SET NOCOUNT OFF;	
 END
 
