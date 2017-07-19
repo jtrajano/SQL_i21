@@ -5462,6 +5462,8 @@
     <Build Include="dbo\Functions\fnAPGetVoucherForm1099.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherCategories1099.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityLineOfBusinessSalesperson.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseVoucherPrepay.sql" />
+    <Build Include="dbo\Functions\fnAPValidateVoucherPrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

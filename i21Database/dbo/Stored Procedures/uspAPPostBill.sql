@@ -201,12 +201,12 @@ BEGIN
 	GOTO Post_Exit
 END
 
-BEGIN TRANSACTION
-
 --CREATE TEMP GL ENTRIES
 SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
+
+BEGIN TRANSACTION
 
 --CREATE DATA FOR COST ADJUSTMENT
 DECLARE @adjustedEntries AS ItemCostAdjustmentTableType

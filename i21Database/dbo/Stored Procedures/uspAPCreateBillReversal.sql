@@ -4,13 +4,19 @@
 	@createdReversal INT OUTPUT
 AS
 
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
 DECLARE @postSuccess BIT = 0;
 DECLARE @postParam NVARCHAR(50);
 DECLARE @batchId NVARCHAR(50);
 DECLARE @error NVARCHAR(200);
 DECLARE @debitMemoRecordNum NVARCHAR(50);
 
-EXEC uspAPDuplicateBill @billId, @userId, @createdReversal OUT
+EXEC uspAPDuplicateBill @billId, @userId, 1, @createdReversal OUT
 EXEC uspSMGetStartingNumber 18, @debitMemoRecordNum OUTPUT
 
 UPDATE A
