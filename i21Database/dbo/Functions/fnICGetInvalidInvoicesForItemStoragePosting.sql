@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnICGetInvalidInvoicesForItemStorageCosting]
+﻿CREATE FUNCTION [dbo].[fnICGetInvalidInvoicesForItemStoragePosting]
 (
 	 @Items	[dbo].[ItemCostingTableType] READONLY
 	,@Post		BIT	= 0

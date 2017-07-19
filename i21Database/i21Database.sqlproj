@@ -5341,7 +5341,7 @@
     <Build Include="dbo\Functions\fnMFGetInvalidInvoicesForPosting.sql" />
     <Build Include="dbo\Functions\fnICGetInvalidInvoicesForCosting.sql" />
     <Build Include="dbo\Functions\fnICGetInvalidInvoicesForInTransitCosting.sql" />
-    <Build Include="dbo\Functions\fnICGetInvalidInvoicesForItemStorageCosting.sql" />
+    <Build Include="dbo\Functions\fnICGetInvalidInvoicesForItemStoragePosting.sql" />
     <Build Include="dbo\User Defined Types\fnARGetItemsForCosting.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForInTransitCosting.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForStoragePosting.sql" />
