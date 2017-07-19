@@ -30,8 +30,8 @@ BEGIN TRY
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = VPC.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = VPC.strType COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblTFProductCode PC ON PC.strProductCode COLLATE Latin1_General_CI_AS = VPC.strProductCode COLLATE Latin1_General_CI_AS
-		AND PC.intTaxAuthorityId = RC.intTaxAuthorityId
-	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
+	WHERE PC.intTaxAuthorityId = @TaxAuthorityId 
+	AND RC.intTaxAuthorityId = @TaxAuthorityId
 
 	MERGE	
 	INTO	tblTFReportingComponentProductCode
