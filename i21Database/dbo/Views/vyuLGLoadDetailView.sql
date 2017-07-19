@@ -206,6 +206,9 @@ SELECT LoadDetail.intLoadDetailId
 														THEN NULL
 													END
 	, LoadDetail.intNumberOfContainers
+	, strDetailVendorReference = LoadDetail.strVendorReference 
+	, strDetailCustomerReference = LoadDetail.strCustomerReference
+
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId

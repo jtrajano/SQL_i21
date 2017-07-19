@@ -55,12 +55,15 @@ DECLARE @LoadDetailTable TABLE
 		ysnPrintLoadDirections BIT,
 		strQuantity NVARCHAR(MAX),
 		strItemNo NVARCHAR(MAX),
-		strItemUOM NVARCHAR(MAX)
+		strItemUOM NVARCHAR(MAX),
+		strVendorReference NVARCHAR(MAX),
+		strCustomerReference NVARCHAR(MAX)
 	)
 
 DECLARE @strOriginName NVARCHAR(MAX), @strOriginLocationName NVARCHAR(MAX), @strOriginAddress NVARCHAR(MAX), @strOriginCity NVARCHAR(MAX), @strOriginCountry NVARCHAR(MAX), @strOriginState NVARCHAR(MAX), @strOriginZipCode NVARCHAR(MAX), @strOriginMapLink NVARCHAR(MAX) 
 DECLARE @strDestinationName NVARCHAR(MAX), @strDestinationLocationName NVARCHAR(MAX), @strDestinationAddress NVARCHAR(MAX), @strDestinationCity NVARCHAR(MAX), @strDestinationCountry NVARCHAR(MAX), @strDestinationState NVARCHAR(MAX), @strDestinationZipCode NVARCHAR(MAX), @strDestinationMapLink NVARCHAR(MAX) 
 DECLARE @strItemNo NVARCHAR(MAX), @strItemUOM NVARCHAR(MAX), @strQuantity NVARCHAR(MAX), @strVendor NVARCHAR(MAX), @strCustomer NVARCHAR(MAX), @strScheduleInfo NVARCHAR(MAX), @strLoadDirections NVARCHAR(MAX)
+DECLARE @strVendorReference NVARCHAR(MAX), @strCustomerReference NVARCHAR(MAX)
 
 BEGIN
 
@@ -135,14 +138,16 @@ BEGIN
 			L.ysnPrintLoadDirections,
 			Convert(NVarchar, Convert(decimal (16, 2), dblQuantity)) as strQuantity,
 			L.strItemNo,
-			L.strItemUOM	
+			L.strItemUOM,
+			L.strDetailVendorReference,
+			L.strDetailCustomerReference
 		FROM vyuLGLoadDetailView L 
 		where L.[strLoadNumber] = @strLoadNumber
 
 	SET @strMailMessage =	N'<HTML> <BODY> <TABLE cellpadding=2 cellspacing=1 border=1>' + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Load #: </B> </TD>' +
-									'<TD colspan=6>' +  LTRIM(@strLoadNumber) + '</TD>' +
+									'<TD colspan=8>' +  LTRIM(@strLoadNumber) + '</TD>' +
 								'</FONT></TR>'
 
 								IF IsNull(@strSupplierLoadNo, '') <> ''
@@ -150,7 +155,7 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Supplier Load#: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(@strSupplierLoadNo, '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(@strSupplierLoadNo, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 								IF IsNull(@strCustomerReferenceNo, '') <> ''
@@ -158,13 +163,13 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Customer Reference: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(@strCustomerReferenceNo, '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(@strCustomerReferenceNo, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Company: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(@strCompanyName, '') + '<BR>' + IsNull(@strCompanyAddress, '') + '<BR>' + IsNull(@strCompanyCity, '') + ', ' + IsNull(@strCompanyState, '') + ' ' + IsNull(@strCompanyZip, '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(@strCompanyName, '') + '<BR>' + IsNull(@strCompanyAddress, '') + '<BR>' + IsNull(@strCompanyCity, '') + ', ' + IsNull(@strCompanyState, '') + ' ' + IsNull(@strCompanyZip, '') + '</TD>' +
 								'</FONT></TR>'
 
 								IF IsNull(@dtmScheduledDate, '') <> ''
@@ -172,7 +177,7 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Scheduled Date: </B> </TD>' +
-									'<TD colspan=6>' +  IsNull(CONVERT(NVARCHAR(20), @dtmScheduledDate, 101), '') + '</TD>' +
+									'<TD colspan=8>' +  IsNull(CONVERT(NVARCHAR(20), @dtmScheduledDate, 101), '') + '</TD>' +
 								'</FONT></TR>'
 								END
 								IF IsNull(@dtmDispatchedDate, '') <> ''
@@ -180,7 +185,7 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' + 
 									'<TD size=210> <B> Dispatch Date: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(CONVERT(NVARCHAR(20), @dtmDispatchedDate, 101), '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(CONVERT(NVARCHAR(20), @dtmDispatchedDate, 101), '') + '</TD>' +
 								'</FONT></TR>'
 								END
 								IF IsNull(@strDispatcher, '') <> ''
@@ -188,20 +193,20 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Dispatcher: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(@strDispatcher, '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(@strDispatcher, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Driver: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(@strDriver, '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(@strDriver, '') + '</TD>' +
 								'</FONT></TR>'
 								IF IsNull(@strHauler, '') <> ''
 								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Hauler: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(@strHauler, '') + '<BR>' + IsNull(@strHaulerAddress, '') + '<BR>' + IsNull(@strHaulerCity, '') + ', ' + IsNull(@strHaulerState, '') + ' ' + IsNull(@strHaulerZip, '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(@strHauler, '') + '<BR>' + IsNull(@strHaulerAddress, '') + '<BR>' + IsNull(@strHaulerCity, '') + ', ' + IsNull(@strHaulerState, '') + ' ' + IsNull(@strHaulerZip, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 								IF IsNull(@strEquipmentType, '') <> ''
@@ -209,7 +214,7 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Equipment: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(@strEquipmentType, '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(@strEquipmentType, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 								IF IsNull(@strComments, '') <> ''
@@ -217,7 +222,7 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Comments: </B> </TD>' +
-									'<TD colspan=6>' + IsNull(@strComments, '') + '</TD>' +
+									'<TD colspan=8>' + IsNull(@strComments, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 
@@ -228,6 +233,8 @@ BEGIN
 									'<TD size=210> <B> Commodity </B> </TD>' +
 									'<TD size=210> <B> Quantity </B> </TD>' +
 									'<TD size=210> <B> UOM </B> </TD>' +
+									'<TD size=210> <B> Vendor Ref. </B> </TD>' +
+									'<TD size=210> <B> Customer Ref. </B> </TD>' +
 									'<TD size=210> <B> Schedule Info </B> </TD>' +
 									'<TD size=210> <B> Load Directions </B> </TD>' +
 								'</FONT></TR>'
@@ -352,6 +359,8 @@ BEGIN
 									ELSE
 										''
 									END
+			,@strVendorReference = L1.strVendorReference
+			,@strCustomerReference = L1.strCustomerReference
 		FROM @LoadDetailTable L1 where L1.intId = @incval
 
 -- Origin Map Link
@@ -407,6 +416,8 @@ BEGIN
 									'<TD>' + IsNull(@strItemNo, '') + '</TD>' +
 									'<TD>' + IsNull(@strQuantity, '') + '</TD>' +
 									'<TD>' + IsNull(@strItemUOM, '') + '</TD>' +
+									'<TD>' + IsNull(@strVendorReference, '') + '</TD>' +
+									'<TD>' + IsNull(@strCustomerReference, '') + '</TD>' +
 									'<TD>' + IsNull(@strScheduleInfo, '') + '</TD>' +
 									'<TD>' + IsNull(@strLoadDirections, '') + '</TD>' +
 								'</FONT></TR>'
