@@ -13,15 +13,15 @@ SET ANSI_WARNINGS OFF
 		[intTempId] INT IDENTITY PRIMARY KEY,
 		[strStockName] NVARCHAR(100),
 		[dblParValue] NUMERIC(18, 6), 
-		[intDividendsPerShare] INT,
+		[dblDividendsPerShare] NUMERIC(18, 6),
 		[intDividendsGLAccount] INT
 	) 
 
 	------------------- BEGIN - INSERT INTO TEMPORARY TABLE ----------------------------
-	INSERT INTO @stockClassificationTable(strStockName, dblParValue, intDividendsPerShare, intDividendsGLAccount)
+	INSERT INTO @stockClassificationTable(strStockName, dblParValue, dblDividendsPerShare, intDividendsGLAccount)
 	SELECT	PDEC.pactl_stock_desc_1 AS [strStockName], 
 			PPAR.pactl_stock_par_value_1 AS [dblParValue], 
-			PSTOCKDIV.pactl_stock_div_1 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_1 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC
 	CROSS JOIN (SELECT pactl_stock_par_value_1 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -39,7 +39,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_2 AS [strStockName],
 			PPAR.pactl_stock_par_value_2 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_2 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_2 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_2 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -57,7 +57,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_3 AS [strStockName],
 			PPAR.pactl_stock_par_value_3 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_3 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_3 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_3 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -75,7 +75,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_4 AS [strStockName],
 			PPAR.pactl_stock_par_value_4 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_4 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_4 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_4 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -93,7 +93,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_5 AS [strStockName],
 			PPAR.pactl_stock_par_value_5 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_5 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_5 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_5 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -111,7 +111,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_6 AS [strStockName],
 			PPAR.pactl_stock_par_value_6 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_6 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_6 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_6 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -129,7 +129,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_7 AS [strStockName],
 			PPAR.pactl_stock_par_value_7 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_7 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_7 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_7 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -147,7 +147,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_8 AS [strStockName],
 			PPAR.pactl_stock_par_value_8 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_8 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_8 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_8 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -165,7 +165,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_9 AS [strStockName],
 			PPAR.pactl_stock_par_value_9 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_9 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_9 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_9 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -183,7 +183,7 @@ SET ANSI_WARNINGS OFF
 	UNION
 	SELECT	PDEC.pactl_stock_desc_10 AS [strStockName],
 			PPAR.pactl_stock_par_value_10 AS [dblParValue],
-			PSTOCKDIV.pactl_stock_div_10 AS [intDividendsPerShare],
+			PSTOCKDIV.pactl_stock_div_10 AS [dblDividendsPerShare],
 			CASE WHEN GL.intAccountId IS NULL THEN CP.intDividendsGLAccount ELSE GL.intAccountId END AS [intDividendsGLAccount]
 	FROM pactlmst PDEC 
 	CROSS JOIN (SELECT pactl_stock_par_value_10 FROM pactlmst WHERE pactl_key ='01') PPAR
@@ -216,8 +216,8 @@ SET ANSI_WARNINGS OFF
 
 
 	---------------------------- BEGIN - INSERT ORIGIN DATA -----------------------
-	INSERT INTO tblPATStockClassification(strStockName, strStockDescription, dblParValue, intDividendsGLAccount, intDividendsPerShare, intSort, intConcurrencyId)
-	SELECT tempSC.strStockName, tempSC.strStockName, tempSC.dblParValue, tempSC.intDividendsGLAccount, tempSC.intDividendsPerShare, 0, 1
+	INSERT INTO tblPATStockClassification(strStockName, strStockDescription, dblParValue, intDividendsGLAccount, dblDividendsPerShare, intSort, intConcurrencyId)
+	SELECT tempSC.strStockName, tempSC.strStockName, tempSC.dblParValue, tempSC.intDividendsGLAccount, tempSC.dblDividendsPerShare, 0, 1
 	FROM @stockClassificationTable tempSC
 	LEFT OUTER JOIN tblPATStockClassification SC
 		ON tempSC.strStockName COLLATE Latin1_General_CI_AS = SC.strStockName
