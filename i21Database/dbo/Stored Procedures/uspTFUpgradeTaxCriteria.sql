@@ -66,6 +66,7 @@ BEGIN TRY
 	-- Set insMasterId to 0 for records that are not exist in default data
 	DELETE tblTFReportingComponentCriteria
 	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpTaxCrit)
+	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpTaxCrit)
 
 	DROP TABLE #tmpTaxCrit
 

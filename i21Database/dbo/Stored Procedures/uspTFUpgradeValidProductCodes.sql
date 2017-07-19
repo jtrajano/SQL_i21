@@ -65,6 +65,7 @@ BEGIN TRY
 	-- Delete existing Valid Product Codes that is not within Source
 	DELETE tblTFReportingComponentProductCode
 	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpVPC)
+	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpVPC)
 
 	DROP TABLE #tmpVPC
 
