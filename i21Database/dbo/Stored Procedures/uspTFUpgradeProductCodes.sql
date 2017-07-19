@@ -60,7 +60,8 @@ BEGIN TRY
 	UPDATE tblTFProductCode
 	SET strNote = 'This Product Code is now obsolete',
 	intMasterId = 0
-	WHERE intTaxAuthorityId = @TaxAuthorityId AND intMasterId NOT IN (SELECT intMasterId FROM @ProductCodes)	
+	WHERE intTaxAuthorityId = @TaxAuthorityId 
+	AND intMasterId NOT IN (SELECT intMasterId FROM @ProductCodes)	
 
 END TRY
 BEGIN CATCH

@@ -63,6 +63,7 @@ BEGIN TRY
 	-- Set insMasterId to 0 for records that are not exist in default data
 	DELETE tblTFFilingPacket
 	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpFP)
+	AND intTaxAuthorityId = @TaxAuthorityId
 
 END TRY
 BEGIN CATCH

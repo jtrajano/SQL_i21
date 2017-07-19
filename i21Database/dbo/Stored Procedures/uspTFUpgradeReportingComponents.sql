@@ -80,7 +80,9 @@ BEGIN TRY
 
 		-- Set insMasterId to 0 for records that are not exist in default data
 		UPDATE tblTFReportingComponent 
-		SET intMasterId = 0 WHERE intTaxAuthorityId = @TaxAuthorityId AND intMasterId NOT IN (SELECT intMasterId FROM @ReportingComponent)
+		SET intMasterId = 0 
+		WHERE intTaxAuthorityId = @TaxAuthorityId 
+		AND intMasterId NOT IN (SELECT intMasterId FROM @ReportingComponent)
 	
 END TRY
 BEGIN CATCH
