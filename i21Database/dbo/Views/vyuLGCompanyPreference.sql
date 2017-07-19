@@ -127,6 +127,51 @@ SELECT CP.intCompanyPreferenceId
 		END strCarrierShipmentOrderReportFormat
 	,CP.strSignature
 	,CP.ysnContractSlspnOnEmail
+	,CP.ysnHighwayOnly
+	,CP.ysnInclTollData
+	,CP.intVehicleType
+	,CP.intRoutingType
+	,CP.intHazMatType
+	,CP.intRouteOptimizationType
+	,CASE CP.intVehicleType
+		WHEN 0
+			THEN 'Truck'
+		WHEN 1
+			THEN 'Light Truck'
+		WHEN 2
+			THEN 'Automobile'
+		END strVehicleType
+	,CASE CP.intRoutingType
+		WHEN 0
+			THEN 'Practical'
+		WHEN 1
+			THEN 'Shortest'
+		END strRoutingType
+	,CASE CP.intHazMatType
+		WHEN 0
+			THEN 'None'
+		WHEN 1
+			THEN 'General'
+		WHEN 2
+			THEN 'Caustic'
+		WHEN 3
+			THEN 'Explosives'
+		WHEN 4
+			THEN 'Flammable'
+		WHEN 5
+			THEN 'Inhalants'
+		WHEN 6
+			THEN 'Radioactive'
+		END strHazMatType
+	,CASE CP.intRouteOptimizationType
+		WHEN 0
+			THEN 'None'
+		WHEN 1
+			THEN 'Optimize All Stops'
+		WHEN 2
+			THEN 'Optimize Intermediate Stops'
+		END strRouteOptimizationType
+
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
