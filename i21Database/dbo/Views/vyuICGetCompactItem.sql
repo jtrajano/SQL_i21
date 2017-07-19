@@ -49,6 +49,7 @@ SELECT Item.intItemId
 , strClass 				= Class.strDescription
 , strProductLine 		= ProductLine.strDescription
 , strHazmatMessage		= HazMat.strDescription
+, ysnUseWeighScales		= Item.ysnUseWeighScales
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
