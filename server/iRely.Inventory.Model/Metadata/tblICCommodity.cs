@@ -49,32 +49,32 @@ namespace iRely.Inventory.Model
         public bool? ysnAllowLoadContracts { get; set; }
         public decimal? dblMaxUnder { get; set; }
         public decimal? dblMaxOver { get; set; }
-        public int? intAdjustInventorySalesById { get; set; }
-        public int? intAdjustInventoryPurchaseById { get; set; }
-        public int? intAdjustInventoryTransfersById { get; set; }
+        public int? intSalesWeightsGradesId { get; set; }
+        public int? intPurchaseWeightsGradesId { get; set; }
+        public int? intTransferWeightsGradesId { get; set; }
 
         [NotMapped]
-        public string strAdjustInventorySalesBy
+        public string strSalesWeightsGrades
         {
             get
             {
-                return intAdjustInventorySalesById == 2 ? "Shipped Weights & Grades" : "Destination Weights & Grades";
+                return intSalesWeightsGradesId == 2 ? "Shipped" : "Destination";
             }
         }
         [NotMapped]
-        public string strAdjustInventoryPurchaseBy
+        public string strPurchaseWeightsGrades
         {
             get
             {
-                return intAdjustInventorySalesById == 2 ? "Received Weights & Grades" : "Origin Weights & Grades";
+                return intPurchaseWeightsGradesId == 2 ? "Received" : "Origin";
             }
         }
         [NotMapped]
-        public string strAdjustInventoryTransfersBy
+        public string strTransferWeightsGrades
         {
             get
             {
-                return intAdjustInventoryTransfersById == 2 ? "Shipped Weights & Grades" : "Destination Weights & Grades";
+                return intTransferWeightsGradesId == 2 ? "Shipped" : "Destination";
             }
         }
 

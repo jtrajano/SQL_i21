@@ -59,8 +59,8 @@ Ext.define('Inventory.view.CommodityViewModel', {
                 { name: 'strName', type: 'string' }
             ],
             data: [
-                { intId: 1, strName: 'Destination Weights & Grades' },
-                { intId: 2, strName: 'Shipped Weights & Grades' }
+                { intId: 1, strName: 'Destination' },
+                { intId: 2, strName: 'Shipped' }
             ]
         },
         adjInvPurchaseBy: {
@@ -70,8 +70,8 @@ Ext.define('Inventory.view.CommodityViewModel', {
                 { name: 'strName', type: 'string' }
             ],
             data: [
-                { intId: 1, strName: 'Origin Weights & Grades' },
-                { intId: 2, strName: 'Received Weights & Grades' }
+                { intId: 1, strName: 'Origin' },
+                { intId: 2, strName: 'Received' }
             ]
         },
         states: {

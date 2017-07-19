@@ -35,9 +35,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnAllowLoadContracts).HasColumnName("ysnAllowLoadContracts");
             this.Property(t => t.dblMaxUnder).HasColumnName("dblMaxUnder").HasPrecision(18, 6);
             this.Property(t => t.dblMaxOver).HasColumnName("dblMaxOver").HasPrecision(18, 6);
-            this.Property(t => t.intAdjustInventorySalesById).HasColumnName("intAdjustInventorySalesById");
-            this.Property(t => t.intAdjustInventoryPurchaseById).HasColumnName("intAdjustInventoryPurchaseById");
-            this.Property(t => t.intAdjustInventoryTransfersById).HasColumnName("intAdjustInventoryTransfersById");
+            this.Property(t => t.intSalesWeightsGradesId).HasColumnName("intSalesWeightsGradesId");
+            this.Property(t => t.intPurchaseWeightsGradesId).HasColumnName("intPurchaseWeightsGradesId");
+            this.Property(t => t.intTransferWeightsGradesId).HasColumnName("intTransferWeightsGradesId");
 
             this.HasMany(p => p.tblICCommodityAccounts)
                 .WithRequired(p => p.tblICCommodity)

@@ -457,7 +457,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     }
                                                                 ],
                                                                 itemId: 'cboAdjustInventorySalesBy',
-                                                                fieldLabel: 'Adjust Inventory Sales by',
+                                                                fieldLabel: 'Sales Weights & Grades',
                                                                 labelWidth: 180,
                                                                 displayField: 'strName',
                                                                 valueField: 'strName'
@@ -478,7 +478,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     }
                                                                 ],
                                                                 itemId: 'cboAdjustInventoryPurchaseBy',
-                                                                fieldLabel: 'Adjust Inventory Purchase by',
+                                                                fieldLabel: 'Purchase Weights & Grades',
                                                                 labelWidth: 180,
                                                                 displayField: 'strName',
                                                                 valueField: 'strName'
@@ -499,7 +499,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     }
                                                                 ],
                                                                 itemId: 'cboAdjustInventoryTransfersBy',
-                                                                fieldLabel: 'Adjust Inventory Transfers by',
+                                                                fieldLabel: 'Transfer Weights & Grades',
                                                                 labelWidth: 180,
                                                                 displayField: 'strName',
                                                                 valueField: 'strName'

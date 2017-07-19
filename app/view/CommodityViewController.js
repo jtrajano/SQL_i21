@@ -24,21 +24,21 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
             cboAdjustInventorySalesBy: {
                 origValueField: 'intId',
-                origUpdateField: 'intAdjustInventorySalesById',
+                origUpdateField: 'intSalesWeightsGradesId',
                 store: '{adjInvSalesOrTransfersBy}',
-                value: '{current.strAdjustInventorySalesBy}'
+                value: '{current.strSalesWeightsGrades}'
             },
             cboAdjustInventoryPurchaseBy: {
                 origValueField: 'intId',
-                origUpdateField: 'intAdjustInventoryPurchaseById',
+                origUpdateField: 'intPurchaseWeightsGradesId',
                 store: '{adjInvPurchaseBy}',
-                value: '{current.strAdjustInventoryPurchaseBy}'
+                value: '{current.strPurchaseWeightsGrades}'
             },
             cboAdjustInventoryTransfersBy: {
                 origValueField: 'intId',
-                origUpdateField: 'intAdjustInventoryTransfersById',
+                origUpdateField: 'intTransferWeightsGradesId',
                 store: '{adjInvSalesOrTransfersBy}',
-                value: '{current.strAdjustInventoryTransfersBy}'
+                value: '{current.strTransferWeightsGrades}'
             },
             txtCommodityCode: '{current.strCommodityCode}',
             txtDescription: '{current.strDescription}',

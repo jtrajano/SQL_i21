@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4bfdd4cbd2cb449df945d0b99346cf420b50b54082fbe0cb365328ac27948f70))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsc2e1ac6ce4d24b41ef25eae6f69a97819d2128799421d043b257c16c78c3d17a))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets4bfdd4cbd2cb449df945d0b99346cf420b50b54082fbe0cb365328ac27948f70 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsc2e1ac6ce4d24b41ef25eae6f69a97819d2128799421d043b257c16c78c3d17a : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "4bfdd4cbd2cb449df945d0b99346cf420b50b54082fbe0cb365328ac27948f70"; }
+            get { return "c2e1ac6ce4d24b41ef25eae6f69a97819d2128799421d043b257c16c78c3d17a"; }
         }
 
         /// <summary>
@@ -2699,7 +2699,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodity
-        [CodeFirstDatabaseSchema.tblICCommodity](T1.tblICCommodity_intCommodityId, T1.tblICCommodity_strCommodityCode, T1.tblICCommodity_strDescription, T1.tblICCommodity_ysnExchangeTraded, T1.tblICCommodity_intFutureMarketId, T1.tblICCommodity_intDecimalDPR, T1.tblICCommodity_dblConsolidateFactor, T1.tblICCommodity_ysnFXExposure, T1.tblICCommodity_dblPriceCheckMin, T1.tblICCommodity_dblPriceCheckMax, T1.tblICCommodity_strCheckoffTaxDesc, T1.tblICCommodity_strCheckoffAllState, T1.tblICCommodity_strInsuranceTaxDesc, T1.tblICCommodity_strInsuranceAllState, T1.tblICCommodity_dtmCropEndDateCurrent, T1.tblICCommodity_dtmCropEndDateNew, T1.tblICCommodity_strEDICode, T1.tblICCommodity_intScheduleStoreId, T1.tblICCommodity_intScheduleDiscountId, T1.tblICCommodity_intScaleAutoDistId, T1.tblICCommodity_ysnAllowLoadContracts, T1.tblICCommodity_dblMaxUnder, T1.tblICCommodity_dblMaxOver, T1.tblICCommodity_intAdjustInventorySalesById, T1.tblICCommodity_intAdjustInventoryPurchaseById, T1.tblICCommodity_intAdjustInventoryTransfersById, T1.tblICCommodity_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICCommodity](T1.tblICCommodity_intCommodityId, T1.tblICCommodity_strCommodityCode, T1.tblICCommodity_strDescription, T1.tblICCommodity_ysnExchangeTraded, T1.tblICCommodity_intFutureMarketId, T1.tblICCommodity_intDecimalDPR, T1.tblICCommodity_dblConsolidateFactor, T1.tblICCommodity_ysnFXExposure, T1.tblICCommodity_dblPriceCheckMin, T1.tblICCommodity_dblPriceCheckMax, T1.tblICCommodity_strCheckoffTaxDesc, T1.tblICCommodity_strCheckoffAllState, T1.tblICCommodity_strInsuranceTaxDesc, T1.tblICCommodity_strInsuranceAllState, T1.tblICCommodity_dtmCropEndDateCurrent, T1.tblICCommodity_dtmCropEndDateNew, T1.tblICCommodity_strEDICode, T1.tblICCommodity_intScheduleStoreId, T1.tblICCommodity_intScheduleDiscountId, T1.tblICCommodity_intScaleAutoDistId, T1.tblICCommodity_ysnAllowLoadContracts, T1.tblICCommodity_dblMaxUnder, T1.tblICCommodity_dblMaxOver, T1.tblICCommodity_intSalesWeightsGradesId, T1.tblICCommodity_intPurchaseWeightsGradesId, T1.tblICCommodity_intTransferWeightsGradesId, T1.tblICCommodity_intConcurrencyId)
     FROM (
         SELECT 
             T.intCommodityId AS tblICCommodity_intCommodityId, 
@@ -2725,9 +2725,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnAllowLoadContracts AS tblICCommodity_ysnAllowLoadContracts, 
             T.dblMaxUnder AS tblICCommodity_dblMaxUnder, 
             T.dblMaxOver AS tblICCommodity_dblMaxOver, 
-            T.intAdjustInventorySalesById AS tblICCommodity_intAdjustInventorySalesById, 
-            T.intAdjustInventoryPurchaseById AS tblICCommodity_intAdjustInventoryPurchaseById, 
-            T.intAdjustInventoryTransfersById AS tblICCommodity_intAdjustInventoryTransfersById, 
+            T.intSalesWeightsGradesId AS tblICCommodity_intSalesWeightsGradesId, 
+            T.intPurchaseWeightsGradesId AS tblICCommodity_intPurchaseWeightsGradesId, 
+            T.intTransferWeightsGradesId AS tblICCommodity_intTransferWeightsGradesId, 
             T.intConcurrencyId AS tblICCommodity_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICCommodities AS T
@@ -6333,7 +6333,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodities
-        [iRely.Inventory.Model.tblICCommodity](T1.tblICCommodity_intCommodityId, T1.tblICCommodity_strCommodityCode, T1.tblICCommodity_strDescription, T1.tblICCommodity_ysnExchangeTraded, T1.tblICCommodity_intFutureMarketId, T1.tblICCommodity_intDecimalDPR, T1.tblICCommodity_dblConsolidateFactor, T1.tblICCommodity_ysnFXExposure, T1.tblICCommodity_dblPriceCheckMin, T1.tblICCommodity_dblPriceCheckMax, T1.tblICCommodity_strCheckoffTaxDesc, T1.tblICCommodity_strCheckoffAllState, T1.tblICCommodity_strInsuranceTaxDesc, T1.tblICCommodity_strInsuranceAllState, T1.tblICCommodity_dtmCropEndDateCurrent, T1.tblICCommodity_dtmCropEndDateNew, T1.tblICCommodity_strEDICode, T1.tblICCommodity_intScheduleStoreId, T1.tblICCommodity_intScheduleDiscountId, T1.tblICCommodity_intScaleAutoDistId, T1.tblICCommodity_ysnAllowLoadContracts, T1.tblICCommodity_dblMaxUnder, T1.tblICCommodity_dblMaxOver, T1.tblICCommodity_intAdjustInventorySalesById, T1.tblICCommodity_intAdjustInventoryPurchaseById, T1.tblICCommodity_intAdjustInventoryTransfersById, T1.tblICCommodity_intConcurrencyId)
+        [iRely.Inventory.Model.tblICCommodity](T1.tblICCommodity_intCommodityId, T1.tblICCommodity_strCommodityCode, T1.tblICCommodity_strDescription, T1.tblICCommodity_ysnExchangeTraded, T1.tblICCommodity_intFutureMarketId, T1.tblICCommodity_intDecimalDPR, T1.tblICCommodity_dblConsolidateFactor, T1.tblICCommodity_ysnFXExposure, T1.tblICCommodity_dblPriceCheckMin, T1.tblICCommodity_dblPriceCheckMax, T1.tblICCommodity_strCheckoffTaxDesc, T1.tblICCommodity_strCheckoffAllState, T1.tblICCommodity_strInsuranceTaxDesc, T1.tblICCommodity_strInsuranceAllState, T1.tblICCommodity_dtmCropEndDateCurrent, T1.tblICCommodity_dtmCropEndDateNew, T1.tblICCommodity_strEDICode, T1.tblICCommodity_intScheduleStoreId, T1.tblICCommodity_intScheduleDiscountId, T1.tblICCommodity_intScaleAutoDistId, T1.tblICCommodity_ysnAllowLoadContracts, T1.tblICCommodity_dblMaxUnder, T1.tblICCommodity_dblMaxOver, T1.tblICCommodity_intSalesWeightsGradesId, T1.tblICCommodity_intPurchaseWeightsGradesId, T1.tblICCommodity_intTransferWeightsGradesId, T1.tblICCommodity_intConcurrencyId)
     FROM (
         SELECT 
             T.intCommodityId AS tblICCommodity_intCommodityId, 
@@ -6359,9 +6359,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnAllowLoadContracts AS tblICCommodity_ysnAllowLoadContracts, 
             T.dblMaxUnder AS tblICCommodity_dblMaxUnder, 
             T.dblMaxOver AS tblICCommodity_dblMaxOver, 
-            T.intAdjustInventorySalesById AS tblICCommodity_intAdjustInventorySalesById, 
-            T.intAdjustInventoryPurchaseById AS tblICCommodity_intAdjustInventoryPurchaseById, 
-            T.intAdjustInventoryTransfersById AS tblICCommodity_intAdjustInventoryTransfersById, 
+            T.intSalesWeightsGradesId AS tblICCommodity_intSalesWeightsGradesId, 
+            T.intPurchaseWeightsGradesId AS tblICCommodity_intPurchaseWeightsGradesId, 
+            T.intTransferWeightsGradesId AS tblICCommodity_intTransferWeightsGradesId, 
             T.intConcurrencyId AS tblICCommodity_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICCommodity AS T
