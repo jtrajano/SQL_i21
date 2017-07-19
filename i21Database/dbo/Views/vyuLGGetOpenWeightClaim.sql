@@ -143,6 +143,6 @@ LEFT JOIN (
 		GROUP BY ReceiptItem.intSourceId, ReceiptItem.intLineNo, ReceiptItem.intOrderId
 	) RI ON RI.intSourceId = LD.intLoadDetailId AND RI.intLineNo = LD.intPContractDetailId AND RI.intOrderId = CH.intContractHeaderId AND Load.intPurchaseSale = 1
 LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = Load.intLoadId
-WHERE Load.intShipmentStatus = CASE Load.intPurchaseSale WHEN  1 THEN 4 ELSE 6 END AND IsNull(WC.intWeightClaimId, 0) = 0
-
+WHERE Load.intShipmentStatus = CASE Load.intPurchaseSale WHEN  1 THEN 4 ELSE 6 END AND ISNULL(WC.intWeightClaimId, 0) = 0
+AND ISNULL(LD.ysnNoClaim,0) = 0
 ) t1
