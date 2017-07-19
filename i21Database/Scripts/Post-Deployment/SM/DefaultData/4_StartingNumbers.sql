@@ -1174,7 +1174,7 @@ GO
 	UNION ALL
 	SELECT	 [intStartingNumberId]	= 122
 			,[strTransactionType]	= N'Prepayment Reversal'
-			,[strPrefix]			= N' '
+			,[strPrefix]			= N''
 			,[intNumber]			= 1
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1

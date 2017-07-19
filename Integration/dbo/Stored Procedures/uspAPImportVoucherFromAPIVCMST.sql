@@ -176,6 +176,7 @@ SELECT
 	[strShipToZipCode]		=	@shipToZipCode,
 	[intCurrencyId]			=	@defaultCurrencyId,
 	[ysnOrigin]				=	1,
+	[ysnOldPrepayment]		=	1,
 	[intBackupId]			=	A.intBackupId
 FROM tmp_apivcmstImport A
 	LEFT JOIN apcbkmst B
@@ -227,7 +228,8 @@ INSERT
 	[strShipToState]	,		
 	[strShipToZipCode],		
 	[intCurrencyId],
-	[ysnOrigin]
+	[ysnOrigin],
+	[ysnOldPrepayment]
 )
 VALUES
 (
@@ -269,7 +271,8 @@ VALUES
 	[strShipToState]	,		
 	[strShipToZipCode],		
 	[intCurrencyId],
-	[ysnOrigin]
+	[ysnOrigin],
+	[ysnOldPrepayment]
 )
 OUTPUT inserted.intBillId intBillId, SourceData.intBackupId intBackupId INTO #tmpVoucherTransactions;
 

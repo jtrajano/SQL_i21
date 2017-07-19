@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPDuplicateBill]
 	@billId INT,
 	@userId INT,
+	@reset BIT = 0,
+	@type INT = NULL,
 	@billCreatedId INT OUTPUT
 AS
 
@@ -17,8 +19,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 DECLARE @generatedBillRecordId NVARCHAR(50);
 DECLARE @tranRecordId INT;
-DECLARE @tranType INT;
+DECLARE @tranType INT = @type;
 DECLARE @isVendorContact INT = 0;
+DECLARE @resetData BIT = @reset;
 
 --DUPLICATING tblAPBill
 IF OBJECT_ID('tempdb..#tmpDuplicateBill') IS NOT NULL DROP TABLE #tmpDuplicateBill
@@ -26,9 +29,12 @@ IF OBJECT_ID('tempdb..#tmpDuplicateBill') IS NOT NULL DROP TABLE #tmpDuplicateBi
 SELECT * INTO #tmpDuplicateBill FROM tblAPBill WHERE intBillId = @billId
 ALTER TABLE #tmpDuplicateBill DROP COLUMN intBillId
 
-SELECT TOP 1 @tranType = intTransactionType FROM #tmpDuplicateBill
+IF @tranType IS NULL
+BEGIN
+	SELECT TOP 1 @tranType = intTransactionType FROM #tmpDuplicateBill
+END
 
-SET @tranRecordId = CASE @tranType WHEN 1 THEN 9 WHEN 2 THEN 20 WHEN 3 THEN 18 WHEN 8 THEN 66 WHEN 9 THEN 77 END
+SET @tranRecordId = CASE @tranType WHEN 1 THEN 9 WHEN 2 THEN 20 WHEN 3 THEN 18 WHEN 8 THEN 66 WHEN 9 THEN 77 WHEN 12 THEN 122 END
 
 IF (EXISTS(SELECT 1 FROM [tblEMEntityToContact] A INNER JOIN [tblEMEntityType] B ON A.intEntityId = B.intEntityId WHERE intEntityContactId = @userId AND strType = 'Vendor'))
 BEGIN
@@ -36,27 +42,33 @@ BEGIN
 END
 
 EXEC uspSMGetStartingNumber @tranRecordId, @generatedBillRecordId OUT
-
 UPDATE A
-	SET ysnPosted = 0
-	,ysnPaid = 0
-	,dblPayment = 0
-	,dblAmountDue = A.dblTotal
-	,dblWithheld = 0
-	,strVendorOrderNumber = NULL
-	,strBillId = @generatedBillRecordId
-	,strReference = A.strReference + ' Duplicate of ' + A.strBillId
-	,intEntityId = @userId
-	,ysnApproved = 0
-	,ysnForApprovalSubmitted = 0
-	,dtmApprovalDate = NULL
-	,ysnForApproval = @isVendorContact
-	,dtmDateCreated = GETDATE()
-	,dtmDate = GETDATE()
-	,dtmBillDate = GETDATE()
-	,dtmDueDate = dbo.fnGetDueDateBasedOnTerm(GETDATE(),A.intTermsId)
+	SET A.strBillId = @generatedBillRecordId,
+	A.intEntityId = @userId
 FROM #tmpDuplicateBill A
 
+IF @reset = 1
+BEGIN
+	UPDATE A
+		SET ysnPosted = 0
+		,ysnPaid = 0
+		,dblPayment = 0
+		,dblAmountDue = A.dblTotal
+		,dblWithheld = 0
+		,strVendorOrderNumber = NULL
+		--,strBillId = @generatedBillRecordId
+		,strReference = A.strReference + ' Duplicate of ' + A.strBillId
+		--,intEntityId = @userId
+		,ysnApproved = 0
+		,ysnForApprovalSubmitted = 0
+		,dtmApprovalDate = NULL
+		,ysnForApproval = @isVendorContact
+		,dtmDateCreated = GETDATE()
+		,dtmDate = GETDATE()
+		,dtmBillDate = GETDATE()
+		,dtmDueDate = dbo.fnGetDueDateBasedOnTerm(GETDATE(),A.intTermsId)
+	FROM #tmpDuplicateBill A
+END
 --INSERT INTO tblAPBill(
 --		[strVendorOrderNumber], 
 --		[intTermsId],

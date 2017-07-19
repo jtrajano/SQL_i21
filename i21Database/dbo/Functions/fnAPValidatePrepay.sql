@@ -72,8 +72,9 @@ BEGIN
 		FROM tblAPPayment A 
 		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblAPAppliedPrepaidAndDebit C ON B.intBillId = C.intBillId
-		INNER JOIN tblAPBill D ON C.intBillId = C.intBillId
+		INNER JOIN tblAPBill D ON C.intBillId = D.intBillId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		
 	END
 
 	RETURN;
