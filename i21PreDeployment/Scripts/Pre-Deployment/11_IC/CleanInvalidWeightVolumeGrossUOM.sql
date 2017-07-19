@@ -7,6 +7,7 @@ BEGIN
 			INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = uom.intUnitMeasureId
 			INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 		WHERE NOT (u.strUnitType = ''Weight'' OR u.strUnitType = ''Volume'')
-			AND ((ri.dblOpenReceive - ri.dblNet) = 0)'
+			AND (((ri.dblOpenReceive - ri.dblNet) = 0)
+			AND ri.intUnitMeasureId = ri.intWeightUOMId)'
 	)
 END
