@@ -309,6 +309,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSeason).HasColumnName("strSeason");
             this.Property(t => t.strClass).HasColumnName("strClass");
             this.Property(t => t.strProductLine).HasColumnName("strProductLine");
+            this.Property(t => t.ysnUseWeighScales).HasColumnName("ysnUseWeighScales");
         }
     }
 
