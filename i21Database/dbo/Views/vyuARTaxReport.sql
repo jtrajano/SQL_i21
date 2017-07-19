@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARTaxReport]
 AS
-SELECT I.intEntityCustomerId
+SELECT DISTINCT I.intEntityCustomerId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , C.strCustomerNumber
@@ -26,10 +26,10 @@ SELECT I.intEntityCustomerId
 	 , dblTaxable       = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') 
 								THEN TAXABLE.dblTaxable * -1
 								ELSE TAXABLE.dblTaxable
-						  END
+						  END 
 	 , dblTotalSales    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN I.dblInvoiceTotal * -1 
-								ELSE I.dblInvoiceTotal
+								THEN (NONTAXABLE.dblNonTaxable * -1) + (TAXABLE.dblTaxable * -1)
+								ELSE (NONTAXABLE.dblNonTaxable) + (TAXABLE.dblTaxable)
 						  END
 	 , dblTaxCollected  = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
 								THEN ISNULL(I.dblTax, 0) * -1 
@@ -140,12 +140,13 @@ OUTER APPLY (SELECT TOP 1 strCompanyName
 						, strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 			 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-OUTER APPLY (SELECT dblNonTaxable = ISNULL(SUM(dblTotal), 0) 
-				 FROM dbo.tblARInvoiceDetail WITH (NOLOCK) 
-				 WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId
-) NONTAXABLE
+INNER JOIN (SELECT intInvoiceId, intItemId, dblNonTaxable = ISNULL((dblQtyShipped * dblPrice),0)
+				 FROM dbo.vyuARInvoiceTaxDetail WITH (NOLOCK) 
+				 
+) NONTAXABLE ON I.intInvoiceId = NONTAXABLE.intInvoiceId AND TAXDETAIL.intInvoiceId = NONTAXABLE.intInvoiceId AND NONTAXABLE.intItemId = TAXDETAIL.intItemId 
+
 OUTER APPLY (SELECT dblTaxable = ISNULL(SUM(dblTotal), 0) 
 			 FROM dbo.tblARInvoiceDetail WITH (NOLOCK) 
 			 WHERE dblTotalTax <> 0 AND intInvoiceId = I.intInvoiceId
 ) TAXABLE
-WHERE I.ysnPosted = 1	
+WHERE I.ysnPosted = 1
