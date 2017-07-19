@@ -36,6 +36,12 @@
 [ysnShowContainersInWarehouseTab] BIT,
 [ysnShowReceivedLoadsInWarehouseTab] BIT,
 [ysnProportionateWeightInContainers] BIT NULL,
+[intVehicleType] INT NULL,
+[intRoutingType] INT NULL,
+[intHazMatType] INT NULL,
+[intRouteOptimizationType] INT NULL,
+[ysnHighwayOnly] BIT NULL,
+[ysnInclTollData] BIT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
