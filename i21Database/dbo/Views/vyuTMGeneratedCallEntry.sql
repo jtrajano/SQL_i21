@@ -37,7 +37,7 @@ AS
 		,dblLatitude = B.dblLatitude
 		,intCustomerId = B.intCustomerID
 		,ysnLeakCheckRequired = A.ysnLeakCheckRequired
-		,dblCustomerBalance = ISNULL(K.dblTotalDue, 0.0)
+		,dblCustomerBalance = ISNULL(K.dblAmountPastDue, 0.0)
 		,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
 		,intFillMethodId = B.intFillMethodId
 		,strFillMethod = L.strFillMethod
