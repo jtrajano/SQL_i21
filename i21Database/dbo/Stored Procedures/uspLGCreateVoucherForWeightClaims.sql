@@ -23,6 +23,7 @@ BEGIN TRY
 	DECLARE @dblTotalForBill NUMERIC(18,6)
 	DECLARE @dblAmountDueForBill NUMERIC(18,6)
 	DECLARE @intBillId INT
+	DECLARE @intVoucherType INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -124,40 +125,27 @@ BEGIN TRY
 		,WCD.intWeightClaimDetailId
 		,WCD.intPartyEntityId
 		,WCD.dblFromNet AS dblNetShippedWeight
-		,WCD.dblWeightLoss AS dblWeightLoss
-		,WCD.dblWeightLoss AS dblNetWeight
-		,WCD.dblFranchiseWt AS dblFranchiseWeight
-		,(WCD.dblWeightLoss - WCD.dblFranchiseWt) AS dblQtyReceived
-		--,CASE 
-		--	WHEN AD.ysnSeqSubCurrency = 1
-		--		THEN dbo.fnCTConvertQtyToTargetItemUOM((
-		--					SELECT TOP (1) IU.intItemUOMId
-		--					FROM tblICItemUOM IU
-		--					WHERE IU.intItemId = CD.intItemId
-		--						AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-		--					), AD.intSeqPriceUOMId, AD.dblSeqPrice) / 100
-		--	ELSE dbo.fnCTConvertQtyToTargetItemUOM((
-		--				SELECT TOP (1) IU.intItemUOMId
-		--				FROM tblICItemUOM IU
-		--				WHERE IU.intItemId = CD.intItemId
-		--					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-		--				), AD.intSeqPriceUOMId, AD.dblSeqPrice)
-		--	END AS dblCost
-		,WCD.dblUnitPrice --.dblSeqPrice
+		,ABS(WCD.dblWeightLoss) AS dblWeightLoss
+		,ABS(WCD.dblWeightLoss) AS dblNetWeight
+		,CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END AS dblFranchiseWeight
+		,(ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END) AS dblQtyReceived
+		,WCD.dblUnitPrice
 		,1 AS dblCostUnitQty
 		,1 AS dblWeightUnitQty
-		,dblClaimAmount 
+		,dblClaimAmount
 		,1 AS dblUnitQty
-		,(SELECT TOP (1) IU.intItemUOMId
+		,(
+			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
 			WHERE IU.intItemId = CD.intItemId
 				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-		 ) AS intWeightUOMId
-		,(SELECT TOP (1) IU.intItemUOMId
+			) AS intWeightUOMId
+		,(
+			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
 			WHERE IU.intItemId = CD.intItemId
 				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-		 ) AS intUOMId
+			) AS intUOMId
 		,WCD.intPriceItemUOMId AS intCostUOMId
 		,WCD.intItemId
 		,CH.intContractHeaderId
@@ -174,7 +162,15 @@ BEGIN TRY
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
-		AND ISNULL(WCD.dblClaimAmount,0) > 0
+		AND ISNULL(WCD.dblClaimAmount, 0) > 0
+
+	SELECT @intVoucherType = CASE 
+							 WHEN WCD.dblWeightLoss < 0
+								THEN 11
+							 ELSE 1 END
+	FROM tblLGWeightClaim WC
+	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
+	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intPartyEntityId
@@ -251,7 +247,7 @@ BEGIN TRY
 			 @userId = @intEntityUserSecurityId
 			,@vendorId = @intVendorEntityId
 			,@voucherDetailClaim = @VoucherDetailClaim
-			,@type = 11
+			,@type = @intVoucherType
 			,@billId = @intBillId OUTPUT
 	
 		IF (@total = @intCount)
@@ -315,13 +311,12 @@ BEGIN TRY
 		,dbl1099 = WCD.dblClaimAmount
 		,dblNetWeight = WCD.dblToNet
 		,intLoadId = WC.intLoadId
-		,intAccountId = IA.intAccountId
+		,intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing')
 	FROM tblAPBill B
 	JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
 	JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
 	JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
-	LEFT JOIN tblICItemAccount IA ON IA.intItemId = WCD.intItemId AND IA.intAccountCategoryId = 27
 	WHERE WCD.intContractDetailId = BD.intContractDetailId
 		AND WC.intWeightClaimId = @intWeightClaimId 
 
