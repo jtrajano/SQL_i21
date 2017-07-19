@@ -10,7 +10,7 @@ SELECT CS.intCustomerStockId,
 	SC.dblParValue,
 	CS.dblSharesNo,
 	CS.ysnPosted,
-	SC.intDividendsPerShare
+	SC.dblDividendsPerShare
 	FROM tblPATStockClassification SC
 INNER JOIN tblPATCustomerStock CS
 	ON CS.intStockId = SC.intStockId

@@ -6,7 +6,7 @@ SELECT	SC.intStockId,
 		SC.dblParValue,
 		SC.intDividendsGLAccount,
 		strDividendsAccount = GL.strAccountId,
-		SC.intDividendsPerShare,
+		SC.dblDividendsPerShare,
 		SC.intConcurrencyId
 FROM tblPATStockClassification SC
 LEFT JOIN tblGLAccount GL
