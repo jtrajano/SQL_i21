@@ -369,15 +369,15 @@ BEGIN
 			EXEC (@SqlQuery1)
 		END
 
-
-	   DELETE FROM @tblTemp WHERE strOldData = strNewData
-
-
+		--Remove data
+	    DELETE FROM @tblTemp WHERE strOldData = strNewData
 
 
 
 
-	   
+
+
+
 
 		--strDescription
 		IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Description')
@@ -400,25 +400,28 @@ BEGIN
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
 
+			 
+			 ----SET @changeDescription = 'Updated - Record: ' + cast(@intUniqueId as nvarchar) + '';
+			 ----SET @children = '{"change":"strDescription","from":' + @oldData + ',"to":"' + @strDescription + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intUniqueId AS NVARCHAR(10)) + ',"changeDescription":"Description","hidden":false}'
+			 ----exec uspSMAuditLog 'Store.view.InventoryMassMaintenance', @intUniqueId, @intEntityId, 'Updated', 'small-tree-modified', 'Description', @oldData, @strDescription, ''
 
-			 SELECT @oldData = strOldData FROM @tblTemp WHERE strChangeDescription = 'Description'
-			 --SET @changeDescription = 'Updated - Record: ' + cast(@intUniqueId as nvarchar) + '';
-			 --SET @children = '{"change":"strDescription","from":' + @oldData + ',"to":"' + @strDescription + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intUniqueId AS NVARCHAR(10)) + ',"changeDescription":"Description","hidden":false}'
-			 --exec uspSMAuditLog 'Store.view.InventoryMassMaintenance', @intUniqueId, @intEntityId, 'Updated', 'small-tree-modified', 'Description', @oldData, @strDescription, ''
+			 ----INSERT to AuditLog
+			 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			 --VALUES(
+				--		'Updated'
+				--		, 'Store.view.InventoryMassMaintenance'
+				--		, @intUniqueId
+				--		, ''
+				--		, null
+				--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @strDescription + '","leaf":true}]}'
+				--		, GETUTCDATE()
+				--		, 1
+				--		, 1
+			 --)
 
-			 --INSERT to AuditLog
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @strDescription + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 --Constract child
+			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Description'
+			 SET @children = '{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 		END
 		
 
@@ -444,20 +447,24 @@ BEGIN
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
 
-			 --INSERT to AuditLog
+			 ----INSERT to AuditLog
+			 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Category'
+			 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			 --VALUES(
+				--		'Updated'
+				--		, 'Store.view.InventoryMassMaintenance'
+				--		, @intUniqueId
+				--		, ''
+				--		, null
+				--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Category","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
+				--		, GETUTCDATE()
+				--		, 1
+				--		, 1
+			 --)
+
+			 --Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Category'
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Category","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 SET @children = @children + '{"change":"Category","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 		END
 		
 
@@ -483,20 +490,24 @@ BEGIN
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
 
-			 --INSERT to AuditLog
+			 ----INSERT to AuditLog
+			 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Pos Description'
+			 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			 --VALUES(
+				--		'Updated'
+				--		, 'Store.view.InventoryMassMaintenance'
+				--		, @intUniqueId
+				--		, ''
+				--		, null
+				--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Pos Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
+				--		, GETUTCDATE()
+				--		, 1
+				--		, 1
+			 --)
+
+			 --Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Pos Description'
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Pos Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 SET @children = @children + '{"change":"Pos Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 		END
 		
 
@@ -523,20 +534,24 @@ BEGIN
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
 
-			 --INSERT to AuditLog
+			 ----INSERT to AuditLog
+			 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor'
+			 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			 --VALUES(
+				--		'Updated'
+				--		, 'Store.view.InventoryMassMaintenance'
+				--		, @intUniqueId
+				--		, ''
+				--		, null
+				--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Vendor","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
+				--		, GETUTCDATE()
+				--		, 1
+				--		, 1
+			 --)
+
+			 --Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor'
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Vendor","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 SET @children = @children + '{"change":"Vendor","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 
 			END
 		END
@@ -564,20 +579,25 @@ BEGIN
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
 
-			 --INSERT to AuditLog
+			 ----INSERT to AuditLog
+			 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Sale Price'
+			 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			 --VALUES(
+				--		'Updated'
+				--		, 'Store.view.InventoryMassMaintenance'
+				--		, @intUniqueId
+				--		, ''
+				--		, null
+				--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Sale Price","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
+				--		, GETUTCDATE()
+				--		, 1
+				--		, 1
+			 --)
+
+			 --Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Sale Price'
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Sale Price","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 SET @children = @children + '{"change":"Sale Price","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+
 		END
 		
 
@@ -604,20 +624,25 @@ BEGIN
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
 
-			 --INSERT to AuditLog
+			 ----INSERT to AuditLog
+			 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Last Cost'
+			 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			 --VALUES(
+				--		'Updated'
+				--		, 'Store.view.InventoryMassMaintenance'
+				--		, @intUniqueId
+				--		, ''
+				--		, null
+				--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Last Cost","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
+				--		, GETUTCDATE()
+				--		, 1
+				--		, 1
+			 --)
+
+			 --Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Last Cost'
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Last Cost","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 SET @children = @children + '{"change":"Last Cost","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+
 		END
 		
 
@@ -644,24 +669,29 @@ BEGIN
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
 
-			 --INSERT to AuditLog
+			 ----INSERT to AuditLog
+			 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor Id'
+			 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			 --VALUES(
+				--		'Updated'
+				--		, 'Store.view.InventoryMassMaintenance'
+				--		, @intUniqueId
+				--		, ''
+				--		, null
+				--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Vendor Id","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
+				--		, GETUTCDATE()
+				--		, 1
+				--		, 1
+			 --)
+
+			 --Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor Id'
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Vendor Id","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 SET @children = @children + '{"change":"Vendor Id","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+
 		END
 		
 
-
+		
 
 		--FamilyId
 		IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Family')
@@ -713,20 +743,25 @@ BEGIN
 			END
 
 
-			--INSERT to AuditLog
+			----INSERT to AuditLog
+			-- SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Family'
+			-- INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			-- VALUES(
+			--			'Updated'
+			--			, 'Store.view.InventoryMassMaintenance'
+			--			, @intUniqueId
+			--			, ''
+			--			, null
+			--			, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Family","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
+			--			, GETUTCDATE()
+			--			, 1
+			--			, 1
+			-- )
+
+			--Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Family'
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Family","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 SET @children = @children + '{"change":"Family","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+
 		END
 		
 		
@@ -780,23 +815,73 @@ BEGIN
 				 AND intSubcategoryId = @ClassId
 			END
 
-			--INSERT to AuditLog
+			--Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Class'
-			 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-			 VALUES(
-						'Updated'
-						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
-						, ''
-						, null
-						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Class","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-						, GETUTCDATE()
-						, 1
-						, 1
-			 )
+			 SET @children = @children + '{"change":"Class","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+
 		END
 		
-		
+
+		--CHECK if temTable has record
+		DECLARE @countRecord INT
+		SELECT @countRecord = COUNT(*) from @tblTemp
+
+
+		IF(@countRecord >= 1)
+		BEGIN
+
+			--INSERT to AuditLog
+			--IF NOT EXISTS (SELECT * FROM tblSMAuditLog WHERE strActionType = 'Created' AND strTransactionType = 'Store.view.InventoryMassMaintenance' AND strRecordNo = @intUniqueId)
+			--BEGIN
+			--	 INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			--	 VALUES(
+			--				'Created'
+			--				, 'Store.view.InventoryMassMaintenance'
+			--				, @intUniqueId
+			--				, ''
+			--				, '#/ST/InventoryMassMaintenance/SearchInventoryMassMaintenance?action=edit&filters%5B0%5D%5Bcolumn%5D=intUniqueId&filters%5B0%5D%5Bvalue%5D=' + CAST(@intUniqueId AS NVARCHAR(50)) + '&activeTab=Audit%20Log&searchTab=InventoryMassMaintenance&searchCommand=SearchInventoryMassMaintenance'
+			--				, '{"action":"Created","change":"Created - Record: ' + CAST(@intUniqueId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intUniqueId AS NVARCHAR(50)) + ', "iconCls":"small-new-plus","leaf":true}'
+			--				, GETUTCDATE()
+			--				, @intEntityId
+			--				, 1
+			--	 )
+			--END
+
+			--DECLARE @intAuditLogId INT
+			--SET @intAuditLogId = 0
+			--IF EXISTS (SELECT * FROM tblSMAuditLog WHERE strActionType = '' AND strJsonData = '{}' AND strTransactionType = 'Store.view.InventoryMassMaintenance' AND strRecordNo = @intUniqueId)
+			--BEGIN
+				 
+			--	 SELECT @intAuditLogId = intAuditLogId FROM tblSMAuditLog WHERE strActionType = '' AND strJsonData = '{}' AND strTransactionType = 'Store.view.InventoryMassMaintenance' AND strRecordNo = @intUniqueId
+
+			--	 UPDATE tblSMAuditLog
+			--	 SET strActionType = 'Created'
+			--	     , strJsonData = '{"action":"Created","change":"Created - Record: ' + CAST(@intUniqueId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intUniqueId AS NVARCHAR(50)) + ', "iconCls":"small-new-plus","leaf":true}'
+			--	 WHERE intAuditLogId = @intAuditLogId
+
+			--END
+
+
+			--Remove last character comma(,)
+			SET @children = left(@children, len(@children)-1)
+
+			--INSERT changes
+			SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Class'
+			INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+			VALUES(
+					'Updated'
+					, 'Store.view.InventoryMassMaintenance'
+					, @intUniqueId
+					, ''
+					, '#/ST/InventoryMassMaintenance/SearchInventoryMassMaintenance?action=edit&filters%5B0%5D%5Bcolumn%5D=intUniqueId&filters%5B0%5D%5Bvalue%5D=' + CAST(@intUniqueId AS NVARCHAR(50)) + '&activeTab=Audit%20Log&searchTab=InventoryMassMaintenance&searchCommand=SearchInventoryMassMaintenance'
+					, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[' + @children + ']}'
+					, GETUTCDATE()
+					, @intEntityId
+					, 1
+			)
+			 
+		END
+
 
 		 SET @strStatusMsg = 'Success'
 	 END
