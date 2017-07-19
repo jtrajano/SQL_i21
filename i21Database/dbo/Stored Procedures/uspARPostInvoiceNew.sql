@@ -756,7 +756,7 @@ END CATCH
 ----------------------------------------------------------------------------------------------  
 IF @Post = 1
 	BEGIN								
-					
+	--delete this part once TM-2455 is done
 		BEGIN TRY
 			DECLARE @TankDelivery TABLE (
 					intInvoiceId INT,
@@ -871,57 +871,57 @@ SELECT
 FROM 
 	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @Post) AS IID
 		
-		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
+SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
-		IF(@totalInvalid > 0)
-			BEGIN
-				--	@InvalidInvoiceData
+IF(@totalInvalid > 0)
+	BEGIN
+		--	@InvalidInvoiceData
 					
-				UPDATE ILD
-				SET
-					 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
-					,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
-					,ILD.[strPostingMessage]	= PID.[strPostingError]
-					,ILD.[strBatchId]			= PID.[strBatchId]
-					,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
-				FROM
-					tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
-				INNER JOIN
-					@InvalidInvoiceData PID
-						ON ILD.[intInvoiceId] = PID.[strInvoiceNumber]
-				WHERE
-					ILD.[intIntegrationLogId] = @IntegrationLogId
-					AND ILD.[ysnPost] IS NOT NULL
+		UPDATE ILD
+		SET
+				ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
+			,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
+			,ILD.[strPostingMessage]	= PID.[strPostingError]
+			,ILD.[strBatchId]			= PID.[strBatchId]
+			,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
+		FROM
+			tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
+		INNER JOIN
+			@InvalidInvoiceData PID
+				ON ILD.[intInvoiceId] = PID.[strInvoiceNumber]
+		WHERE
+			ILD.[intIntegrationLogId] = @IntegrationLogId
+			AND ILD.[ysnPost] IS NOT NULL
 
-				--DELETE Invalid Transaction From temp table
-				DELETE @PostInvoiceData
-					FROM @PostInvoiceData A
-						INNER JOIN @InvalidInvoiceData B
-							ON A.intInvoiceId = B.[intInvoiceId]
+		--DELETE Invalid Transaction From temp table
+		DELETE @PostInvoiceData
+			FROM @PostInvoiceData A
+				INNER JOIN @InvalidInvoiceData B
+					ON A.intInvoiceId = B.[intInvoiceId]
 				
-				IF @RaiseError = 1
-					BEGIN
-						SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
-						RAISERROR(@ErrorMerssage, 11, 1)							
-						GOTO Post_Exit
-					END					
-			END
-
-		SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
-			
-		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
+		IF @RaiseError = 1
 			BEGIN
-				IF @RaiseError = 0 
-					COMMIT TRANSACTION
-					--COMMIT TRAN @TransactionName
-				IF @RaiseError = 1
-					BEGIN
-						SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
-						RAISERROR(@ErrorMerssage, 11, 1)							
-						GOTO Post_Exit
-					END				
-				GOTO Post_Exit	
-			END
+				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
+				RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Post_Exit
+			END					
+	END
+
+SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
+			
+IF(@totalInvalid >= 1 AND @totalRecords <= 0)
+	BEGIN
+		IF @RaiseError = 0 
+			COMMIT TRANSACTION
+			--COMMIT TRAN @TransactionName
+		IF @RaiseError = 1
+			BEGIN
+				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
+				RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Post_Exit
+			END				
+		GOTO Post_Exit	
+	END
 
 	--END
 
