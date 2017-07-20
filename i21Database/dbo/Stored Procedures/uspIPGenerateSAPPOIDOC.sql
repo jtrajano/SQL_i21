@@ -166,6 +166,20 @@ Begin
 					AND intContractFeedId < (Select MIN(intContractFeedId) From tblCTContractFeed 
 					Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='') ORDER By intContractFeedId)='ADDED'
 			GOTO NEXT_PO
+
+		--Sub Location validation
+		If UPPER(@strCommodityCode)='TEA' AND EXISTS (Select 1 From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND ISNULL(strSubLocation,'')='')
+		Begin
+			Update tblCTContractFeed Set strMessage='Sub Location is empty.' Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND ISNULL(strSubLocation,'')=''
+			GOTO NEXT_PO
+		End
+
+		--Storage Location validation
+		If UPPER(@strCommodityCode)='TEA' AND EXISTS (Select 1 From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND ISNULL(strStorageLocation,'')='')
+		Begin
+			Update tblCTContractFeed Set strMessage='Storage Location is empty.' Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND ISNULL(strStorageLocation,'')=''
+			GOTO NEXT_PO
+		End
 	End
 
 	--Donot generate Modified Idoc if PO No is not there
@@ -224,6 +238,20 @@ Begin
 		If UPPER(@strCommodityCode)='COFFEE' AND @strHeaderState='ADDED' 
 			AND (Select TOP 1 UPPER(strRowState) from tblCTContractFeed where intContractDetailId=@intContractDetailId AND intContractFeedId<@intContractFeedId ORDER By intContractFeedId)='ADDED'
 			GOTO NEXT_PO
+
+		--Sub Location validation
+		If UPPER(@strCommodityCode)='COFFEE' AND ISNULL(@strSubLocation,'')=''
+		Begin
+			Update tblCTContractFeed Set strMessage='Sub Location is empty.'  Where intContractFeedId=@intContractFeedId
+			GOTO NEXT_PO
+		End
+
+		--Storage Location validation
+		If UPPER(@strCommodityCode)='COFFEE' AND ISNULL(@strStorageLocation,'')=''
+		Begin
+			Update tblCTContractFeed Set strMessage='Storage Location is empty.'  Where intContractFeedId=@intContractFeedId
+			GOTO NEXT_PO
+		End
 
 		Set @strSeq=ISNULL(@strSeq,'') + CONVERT(VARCHAR,@intContractSeq) + ','
 
