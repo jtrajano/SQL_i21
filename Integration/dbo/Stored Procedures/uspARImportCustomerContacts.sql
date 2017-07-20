@@ -1,4 +1,4 @@
-﻿GO
+GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportCustomerContacts')
 	DROP PROCEDURE uspARImportCustomerContacts
 GO
@@ -32,6 +32,26 @@ DECLARE @Contacts TABLE
 	, sscon_fax_no nvarchar(max)
 	, sscon_fax_ext nvarchar(max)
 )
+
+SELECT ED.coefd_contact_id, ED.coefd_cus_no,
+       STUFF(ISNULL((SELECT ',' + CASE WHEN x.coefd_eform_type = 'INV' THEN 'Invoices'
+								   WHEN x.coefd_eform_type = 'STM' OR x.coefd_eform_type = 'GST' THEN 'Statements'									
+								   WHEN x.coefd_eform_type = 'GTX' THEN 'Scale'
+								   WHEN x.coefd_eform_type = 'GCO' OR x.coefd_eform_type = 'ACO' THEN 'Contracts'
+								   WHEN x.coefd_eform_type = 'RPQ' THEN 'Transport Quote'
+								   WHEN x.coefd_eform_type = 'CFI' THEN 'CF Invoice'
+								   WHEN x.coefd_eform_type = 'EFT' THEN 'AR EFT'
+								   WHEN x.coefd_eform_type = 'CCR' THEN 'Dealer CC Notification'
+								   WHEN x.coefd_eform_type = 'GSE' THEN 'Settlement'
+								   WHEN x.coefd_eform_type = 'POR' THEN 'Purchase Order'
+								   END
+                FROM coefdmst x
+               WHERE x.coefd_contact_id = ED.coefd_contact_id AND x.coefd_cus_no = ED.coefd_cus_no
+            GROUP BY x.coefd_eform_type
+             FOR XML PATH (''), TYPE).value('.','VARCHAR(max)'), ''), 1, 1, '') as Form_type
+  INTO #tmpcoefd
+  FROM coefdmst ED WHERE ED.coefd_by_email = 'Y'  --and ED.coefd_cus_no = 'AIRTEX'
+  GROUP BY ED.coefd_contact_id, ED.coefd_cus_no, ED.coefd_eform_type
 
 	declare @sscon_cus_no nvarchar(200)
 	BEGIN -- Get Customers to be imported to #tmpContacts
@@ -172,7 +192,7 @@ DECLARE @Contacts TABLE
 			END
 			BEGIN --LOCATION
 				insert into tblEMEntityLocation(intEntityId, strLocationName, ysnDefaultLocation)
-				select @intEntityId, @Name + 'Loc', 0
+				select @intEntityId, @Name +'_'+@ContactNumber+ 'Loc', 0
 			END
 			BEGIN -- Create Customer to Contact
 
@@ -186,6 +206,16 @@ DECLARE @Contacts TABLE
 
 
 			END
+			
+
+
+			--UPDATE E-DISTRIBUTION FORM TYPEs
+			UPDATE ENT SET ENT.strEmailDistributionOption = ED.Form_type from tblEMEntityToContact ETC 
+			INNER JOIN tblEMEntity ENT ON ENT.intEntityId = ETC.intEntityContactId
+			INNER JOIN ssconmst CON ON CON.sscon_contact_id COLLATE SQL_Latin1_General_CP1_CS_AS 
+						= ENT.strContactNumber COLLATE SQL_Latin1_General_CP1_CS_AS	AND CON.sscon_cus_no = @sscon_cus_no
+			INNER JOIN #tmpcoefd ED ON ED.coefd_contact_id = CON.sscon_contact_id AND ED.coefd_cus_no = CON.sscon_cus_no
+			
 			
 			----TODO1: remove this select and delete tblEMEntity and tblEMEntityContact
 			--	select * from tblEMEntity where intEntityId = @intEntityId
