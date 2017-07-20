@@ -1,4 +1,4 @@
-﻿ALTER PROC [dbo].[uspRKM2MVendorExposure]  
+﻿CREATE PROC [dbo].[uspRKM2MVendorExposure]  
                   @intM2MBasisId int = null,
                   @intFutureSettlementPriceId int = null,
                   @intQuantityUOMId int = null,
