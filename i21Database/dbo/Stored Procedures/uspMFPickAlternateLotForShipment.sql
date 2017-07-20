@@ -4,25 +4,21 @@
 	,@strShipmentNo NVARCHAR(100)
 AS
 BEGIN TRY
-	--DECLARE @strOrderLotNo NVARCHAR(50)
 	DECLARE @intAlternateLotId INT
-	DECLARE @intStorageLocationId INT
-	--DECLARE @intPickListId INT
-	--DECLARE @intCompanyLocationId INT
-	DECLARE @dblAlternateLotQty NUMERIC(38, 20)
-	--DECLARE @dblReservedLotQtyForPickList NUMERIC(38, 20)
-	--DECLARE @dblAlternateLotReservedQty NUMERIC(38, 20)
-	--DECLARE @dblAlternateLotAvailableQty NUMERIC(38, 20)
-	DECLARE @intTransactionCount INT
-	--DECLARE @strBlendProductionStagingLocation NVARCHAR(100)
-	--DECLARE @strKitStagingArea NVARCHAR(100)
-	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @intLotStatusId INT
-	DECLARE @intTaskId INT
+		,@intStorageLocationId INT
+		,@dblAlternateLotQty NUMERIC(38, 20)
+		,@intTransactionCount INT
+		,@strErrMsg NVARCHAR(MAX)
+		,@intLotStatusId INT
+		,@intTaskId INT
 		,@intBondStatusId INT
 		,@strPrimaryStatus NVARCHAR(50)
-			DECLARE @dblRequiredTaskQty NUMERIC(18,6)
-	DECLARE @dblRequiredTaskWeight NUMERIC(18,6)
+		,@dblRequiredTaskQty NUMERIC(18, 6)
+		,@dblRequiredTaskWeight NUMERIC(18, 6)
+		,@intCustomerLabelTypeId INT
+		,@intEntityCustomerId INT
+		,@strReferenceNo NVARCHAR(50)
+		,@intOrderHeaderId INT
 
 	SELECT @intStorageLocationId = intStorageLocationId
 	FROM tblICStorageLocation
@@ -39,31 +35,19 @@ BEGIN TRY
 		AND intStorageLocationId = @intStorageLocationId
 
 	SELECT @dblRequiredTaskWeight = dblWeight
-		  ,@dblRequiredTaskQty = dblQty
-	FROM tblMFTask WHERE intTaskId = @intTaskId
+		,@dblRequiredTaskQty = dblQty
+	FROM tblMFTask
+	WHERE intTaskId = @intTaskId
 
 	--IF(@dblAlternateLotQty > @dblRequiredTaskQty)
 	--BEGIN
 	--	SET @strErrMsg = 'AVAILABLE QTY IN THE SCANNED LOT IS MORE THAN THE REQUIRED QTY. CANNOT CONTINUE.'
-
 	--	RAISERROR (@strErrMsg,16,1)
 	--END
-
-	--SELECT @strBlendProductionStagingLocation = sl.strName
-	--FROM tblSMCompanyLocation cl
-	--JOIN tblICStorageLocation sl ON cl.intBlendProductionStagingUnitId = sl.intStorageLocationId
-	--WHERE intCompanyLocationId = 1
-	--SELECT @strKitStagingArea = sl.strName
-	--FROM tblMFAttribute a
-	--JOIN tblMFManufacturingProcessAttribute mpa ON mpa.intAttributeId = a.intAttributeId
-	--JOIN tblICStorageLocation sl ON sl.intStorageLocationId = mpa.strAttributeValue
-	--WHERE a.strAttributeName = 'Kit Staging Location'
-	--	AND intManufacturingProcessId = 1
 	IF (@intLotId <> @intAlternateLotId)
 	BEGIN
 		SELECT @intTaskId = intTaskId
 		FROM tblMFTask T
-		--JOIN tblMFOrderHeader O ON O.intOrderHeaderId = T.intOrderHeaderId
 		WHERE intLotId = @intLotId
 	END
 
@@ -117,6 +101,24 @@ BEGIN TRY
 				)
 	END
 
+	SELECT @intEntityCustomerId = intEntityCustomerId
+	FROM tblICInventoryShipment
+	WHERE strShipmentNumber = @strShipmentNo
+
+	SELECT @intCustomerLabelTypeId = intCustomerLabelTypeId
+	FROM tblMFItemOwner
+	WHERE intOwnerId = @intEntityCustomerId
+		AND intCustomerLabelTypeId IS NOT NULL
+
+	IF @intCustomerLabelTypeId IS NULL
+	BEGIN
+		SELECT @intCustomerLabelTypeId = 0
+	END
+
+	SELECT @intOrderHeaderId = intOrderHeaderId
+	FROM tblMFOrderHeader OH
+	WHERE strReferenceNo = @strShipmentNo
+
 	BEGIN TRANSACTION
 
 	IF EXISTS (
@@ -131,6 +133,14 @@ BEGIN TRY
 			,intFromStorageLocationId = @intStorageLocationId
 		WHERE intLotId = @intLotId
 			AND intTaskId = @intTaskId
+	END
+
+	IF @intCustomerLabelTypeId = 2
+	BEGIN
+		UPDATE tblMFOrderManifest
+		SET intLotId = @intAlternateLotId
+		WHERE intOrderHeaderId = @intOrderHeaderId
+			AND intLotId = @intLotId
 	END
 
 	COMMIT TRANSACTION
@@ -151,3 +161,4 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
+Go

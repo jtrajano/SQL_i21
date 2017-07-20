@@ -61,17 +61,20 @@ BEGIN
 	IF @strAttributeValueByWorkOrder = 'True'
 	BEGIN
 		INSERT INTO @tblMFParentLot (intLotId)
-		SELECT DISTINCT L.intLotId
+		SELECT DISTINCT L1.intLotId
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
+		JOIN dbo.tblICLot L1 on L1.strLotNumber =L.strLotNumber 
 		WHERE PL.intWorkOrderId = @intWorkOrderId
-			AND L.intLotStatusId <> 1
-			AND L.dblQty > 0
+			AND L1.intLotStatusId <> 1
+			--AND L1.dblQty > 0
 			AND intShiftId = CASE 
 				WHEN @intReleaseShiftId = - 1
 					THEN intShiftId
 				ELSE @intReleaseShiftId
 				END
+
+		Delete from @tblMFParentLot Where intLotId in (Select  PL1.intLotId from tblMFWorkOrderProducedLot PL1 Where PL1.intWorkOrderId = @intWorkOrderId and ysnReleased = 1)
 	END
 	ELSE
 	BEGIN
@@ -80,7 +83,7 @@ BEGIN
 		FROM dbo.tblICLot L
 		WHERE L.intParentLotId = @intParentLotId
 			AND L.intLotStatusId <> 1
-			AND L.dblQty > 0
+			--AND L.dblQty > 0
 	END
 
 	SELECT @intRecordId = MIN(intRecordId)

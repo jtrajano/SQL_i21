@@ -86,7 +86,7 @@ BEGIN TRY
 
 	SELECT @dblLotAvailableQty = (
 			CASE 
-				WHEN ISNULL(@dblWeight, 0) = 0
+				WHEN @intWeightUOMId is null
 					THEN ISNULL(@dblLotQty, 0)
 				ELSE ISNULL(@dblWeight, 0)
 				END
@@ -147,7 +147,7 @@ BEGIN TRY
 		SET @blnIsPartialMove = 1
 	END
 
-	IF @intNewStorageLocationId = @intStorageLocationId
+	IF @intNewStorageLocationId = @intStorageLocationId and @intNewSubLocationId=@intSubLocationId
 	BEGIN
 		RAISERROR (
 				'The Lot already exists in the selected destination storage location. Please select a different destination storage location.'

@@ -6,6 +6,7 @@
 					@intTaskTypeId INT, 
 					@intAssigneeId INT = 0,
 				    @intItemId int=NULL
+					,@intOrderDetailId int=NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -85,7 +86,7 @@ BEGIN TRY
 			THEN 2
 		 ELSE 1 END
 		,@intOrderHeaderId
-		,NULL
+		,@intOrderDetailId
 		,NULL
 		,NULL
 		,@intAssigneeId

@@ -39,6 +39,8 @@ BEGIN
 		,strNotes NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strUser NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,intTransactionId  int
+		,dtmTransactionDate DATETIME
 		)
 
 	DECLARE @dblPrimaryQty NUMERIC(38, 20)
@@ -48,11 +50,7 @@ BEGIN
 		,@dblPrimaryWeight = 0
 
 	INSERT INTO #tempLotHistory
-	SELECT CASE 
-			WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
-				THEN ilt.dtmCreated
-			ELSE dtmDate
-			END AS dtmDateTime
+	SELECT ilt.dtmCreated AS dtmDateTime
 		,l.strLotNumber AS strLotNo
 		,CASE 
 			WHEN iad.intNewItemId IS NULL
@@ -121,6 +119,8 @@ BEGIN
 		,IA.strDescription  AS strNotes
 		,us.strUserName AS strUser
 		,ilt.strBatchId
+		,ilt.intTransactionId 
+		,Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101)) AS dtmTransactionDate
 	FROM tblICLot l
 	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -254,6 +254,12 @@ BEGIN
 			,IA.strDescription AS strNotes
 			,us.strUserName AS strUser
 			,ilt.strBatchId
+			,ilt.intTransactionId 
+			,CASE 
+				WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
+					THEN Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
+				ELSE Convert(DATETIME, Convert(CHAR, dtmDate, 101)) 
+				END AS dtmDateTime
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -333,12 +339,14 @@ BEGIN
 		,'' AS strOldVendorNo
 		,'' AS strNewVendorLotNo
 		,'' AS strOldVendorLotNo
-		,IA.strDescription AS strNotes
+		,ia.strDescription AS strNotes
 		,us.strUserName AS strUser
 		,ia.strAdjustmentNo AS strBatchId
+		,IsNULL((Select top 1 IT.intTransactionId from tblICInventoryTransaction IT Where IT.strTransactionId=ia.strAdjustmentNo),99999999) as intTransactionId
+		,Convert(DATETIME, Convert(CHAR, ia.dtmPostedDate, 101)) as dtmTransactionDate
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
-	Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
+	--Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
 	LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
 	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 	LEFT JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
@@ -365,12 +373,12 @@ BEGIN
 				AND iad.intNewLotStatusId IS NOT NULL
 				)
 			)
-	ORDER BY 1
+	--ORDER BY 1
 
 	SELECT *
 	INTO #tempLotHistoryFinal
-	FROM #tempLotHistory
-	ORDER BY dtmDateTime
+	FROM #tempLotHistory LH
+	ORDER BY LH.dtmTransactionDate ASC,LH.intTransactionId ASC
 
 	DECLARE @strStorageLocation NVARCHAR(50)
 
@@ -431,5 +439,5 @@ BEGIN
 	END
 
 	SELECT *
-	FROM #tempLotHistoryFinal Order by dtmDateTime
+	FROM #tempLotHistoryFinal-- Order by dtmTransactionDate,intTransactionId 
 END

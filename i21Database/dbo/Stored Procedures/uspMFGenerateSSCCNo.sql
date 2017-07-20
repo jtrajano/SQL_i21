@@ -86,7 +86,7 @@ BEGIN
 					,@ysnProposed = 0
 					,@strPatternString = @strBatchId OUTPUT
 
-				SELECT @strCheckString = @strManufacturerCode + Ltrim(@strBatchId) -- Will be 16 digit (Eg: 0718908 562723189)
+				SELECT @strCheckString = @strPackageType+@strManufacturerCode + Ltrim(@strBatchId) -- Will be 17 digit (Eg: 0 0718908 562723189)
 
 				DELETE
 				FROM @strSplitString
@@ -190,7 +190,7 @@ BEGIN
 					,@ysnProposed = 0
 					,@strPatternString = @strBatchId OUTPUT
 
-				SELECT @strCheckString = @strManufacturerCode + Ltrim(@strBatchId) -- Will be 16 digit (Eg: 0718908 562723189)
+				SELECT @strCheckString = @strPackageType+@strManufacturerCode + Ltrim(@strBatchId) -- Will be 17 digit (Eg: 0 0718908 562723189)
 
 				DELETE
 				FROM @strSplitString
@@ -261,7 +261,7 @@ BEGIN
 				IF @intCheckDigit > 0
 					SELECT @intCheckDigit = 10 - @intCheckDigit
 
-				SELECT @strSSCCNo = '(00) ' + @strPackageType + ' ' + @strManufacturerCode + ' ' + LTRIM(@strBatchId) + ' ' + LTRIM(@intCheckDigit)
+				SELECT @strSSCCNo =  '(00) ' + @strPackageType + ' ' + @strManufacturerCode + ' ' + LTRIM(@strBatchId) + ' ' + LTRIM(@intCheckDigit)
 
 				INSERT INTO tblMFOrderManifestLabel (
 					intConcurrencyId

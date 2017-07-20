@@ -36,19 +36,19 @@ BEGIN
 		RETURN
 	END
 
-	IF EXISTS (
-			SELECT *
-			FROM tblMFOrderHeader
-			WHERE strOrderNo = @strPickNo
-				AND intOrderStatusId <> 6
-			)
-	BEGIN
-		RAISERROR (
-				'PICK ORDER IS NOT STAGED.'
-				,16
-				,1
-				)
+	--IF EXISTS (
+	--		SELECT *
+	--		FROM tblMFOrderHeader
+	--		WHERE strOrderNo = @strPickNo
+	--			AND intOrderStatusId <> 6
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			'PICK ORDER IS NOT STAGED.'
+	--			,16
+	--			,1
+	--			)
 
-		RETURN
-	END
+	--	RETURN
+	--END
 END

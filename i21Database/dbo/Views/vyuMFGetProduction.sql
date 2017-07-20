@@ -1,11 +1,12 @@
 ﻿CREATE VIEW vyuMFGetProduction
 AS
-SELECT Convert(CHAR, W.dtmPlannedDate, 101) AS [Production Date]
+SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 	,I.strItemNo AS Item
 	,I.strDescription AS Description
 	,W.strWorkOrderNo AS [Work Order #]
 	,W.strReferenceNo AS [Job #]
 	,PL.strParentLotNumber AS [Production Lot]
+	,L.strLotNumber [Pallet No]
 	,SUM(WP.dblPhysicalCount) AS [Quantity]
 	,IUM.strUnitMeasure AS [Quantity UOM]
 	,SUM(WP.dblQuantity) AS [Weight]
@@ -27,5 +28,6 @@ GROUP BY W.dtmPlannedDate
 	,W.strWorkOrderNo
 	,W.strReferenceNo
 	,PL.strParentLotNumber
+	,L.strLotNumber
 	,IUM.strUnitMeasure
 	,UM.strUnitMeasure

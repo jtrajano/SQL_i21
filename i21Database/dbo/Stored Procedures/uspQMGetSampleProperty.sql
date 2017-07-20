@@ -105,7 +105,7 @@ BEGIN
 			,@intShiftId INT
 			,@strLotCode1 NVARCHAR(50)
 			,@strScreenSize nvarchar(50)
-			,@strCCPSize nvarchar(50)
+			--,@strCCPSize nvarchar(50)
 
 		SELECT @dtmPlannedDate = dtmPlannedDate
 			,@intPlannedShiftId = intPlannedShiftId
@@ -119,7 +119,7 @@ BEGIN
 		SELECT @strItemNo = strItemNo
 			,@strScreenSize = strWeightControlCode
 			,@strTargetWeight = Convert(numeric(18,0),dblBlendWeight)
-			,@strCCPSize = strExternalGroup
+			--,@strCCPSize = strExternalGroup
 		FROM tblICItem
 		WHERE intItemId = @intItemId
 

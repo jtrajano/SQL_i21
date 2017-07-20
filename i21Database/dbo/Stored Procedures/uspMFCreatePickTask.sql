@@ -5,6 +5,7 @@
 		@intAssigneeId INT = 0, 
 		@dtmReleaseDate NVARCHAR(32) = NULL
 		,@intItemId int=NULL
+		,@intOrderDetailId int=NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -57,6 +58,7 @@ BEGIN TRY
 		,intTaskStateId
 		,intAssigneeId
 		,intOrderHeaderId
+		,intOrderDetailId
 		,intTaskPriorityId
 		,dtmReleaseDate
 		,intFromStorageLocationId
@@ -84,6 +86,7 @@ BEGIN TRY
 			END
 		,@intAssigneeId
 		,@intOrderHeaderId
+		,@intOrderDetailId
 		,2
 		,ISNULL(@dtmReleaseDate, GETDATE())
 		,@intFromStorageLocationId

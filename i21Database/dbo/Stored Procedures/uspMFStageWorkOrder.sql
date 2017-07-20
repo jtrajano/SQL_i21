@@ -60,6 +60,7 @@ BEGIN TRY
 		,@intItemTypeId INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@intInventoryTransactionType AS INT = 8
+		,@intAdjustItemUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -501,7 +502,14 @@ BEGIN TRY
 			PRINT 'Call Lot Adjust routine.'
 		END
 
-		SELECT @dblAdjustByQuantity = - @dblNewWeight
+		IF @dblNewWeight%@dblWeightPerQty>0
+		BEGIN
+			SELECT @dblAdjustByQuantity = - @dblNewWeight,@intAdjustItemUOMId=@intInputWeightUOMId
+		END
+		ELSE
+		BEGIN
+			SELECT @dblAdjustByQuantity = - @dblNewWeight/@dblWeightPerQty,@intAdjustItemUOMId=@intNewItemUOMId
+		END
 
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
 			-- Parameters for filtering:
@@ -522,7 +530,7 @@ BEGIN TRY
 			,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
 			,@intNewWeightUOMId = NULL
 			,@dblNewUnitCost = NULL
-			,@intItemUOMId = @intInputWeightUOMId
+			,@intItemUOMId = @intAdjustItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8

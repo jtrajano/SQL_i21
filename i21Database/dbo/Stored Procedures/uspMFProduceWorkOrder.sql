@@ -277,13 +277,13 @@ BEGIN
 	BEGIN
 		IF EXISTS (
 				SELECT *
-				FROM tblICLot
-				WHERE strLotNumber = @strLotNumber
+				FROM tblICLot L
+				WHERE L.strLotNumber = @strLotNumber and L.dblQty>0
 				)
 		BEGIN
 			SELECT @intParentLotId1 = intParentLotId
 			FROM tblICLot
-			WHERE strLotNumber = @strLotNumber
+			WHERE strLotNumber = @strLotNumber and dblQty>0
 
 			SELECT @strParentLotNumber1 = strParentLotNumber
 			FROM tblICParentLot

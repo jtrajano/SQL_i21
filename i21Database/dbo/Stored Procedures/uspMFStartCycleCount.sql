@@ -29,6 +29,7 @@ BEGIN TRY
 		,@intPMStageLocationId INT
 		,@intNoOfDecimalPlacesOnConsumption INT
 		,@ysnConsumptionByRatio BIT
+		,@intPhysicalItemUOMId int
 
 	SELECT @TRANCOUNT = @@TRANCOUNT
 
@@ -427,6 +428,8 @@ BEGIN TRY
 				AND ysnConsumptionRequired = 1
 				AND intWorkOrderId = @intWorkOrderId
 			)
+	if @dblProduceQty is null
+	Select @dblProduceQty=0
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -443,6 +446,7 @@ BEGIN TRY
 	WHERE strCategoryCode = @strPackagingCategory
 
 	SELECT @dblProduceParialQty = SUM(dblPhysicalCount)
+			,@intPhysicalItemUOMId = MIN(intPhysicalItemUOMId) 
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
@@ -454,6 +458,9 @@ BEGIN TRY
 				AND ysnConsumptionRequired = 1
 				AND intWorkOrderId = @intWorkOrderId
 			)
+
+	if @intProduceUOMId is null
+	Select @intProduceUOMId=@intPhysicalItemUOMId
 
 	IF @dblProduceParialQty IS NULL
 		SELECT @dblProduceParialQty = 0

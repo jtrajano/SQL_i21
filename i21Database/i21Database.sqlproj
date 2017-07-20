@@ -5347,6 +5347,8 @@
     <Build Include="dbo\Functions\fnARGetItemsForStoragePosting.sql" />
     <Build Include="dbo\Views\vyuCTDashboardJDEHistorical.sql" />
     <Build Include="dbo\Tables\tblSMCleanupLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotCodeByProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventoryByItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

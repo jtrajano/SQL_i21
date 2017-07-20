@@ -20,7 +20,7 @@ SELECT InvS.strShipmentNumber
 	,SV.strName AS strCarrier
 	,I.strItemNo
 	,I.strDescription
-	,Right(OML.strSSCCNo,Len(OML.strSSCCNo)-9) As strSSCCNo
+	,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))),18) As strSSCCNo
 	,1 AS dblQty
 FROM dbo.tblICInventoryShipment InvS
 JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId

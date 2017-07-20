@@ -63,6 +63,7 @@ BEGIN TRY
 		,@intProductionStagingId INT
 		,@strStagedLotNumber NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
+		,@dtmProductionDate datetime
 
 	SELECT @strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
@@ -74,6 +75,7 @@ BEGIN TRY
 		,@intNewItemUOMId = intItemUOMId
 		,@intNewStorageLocationId = intStorageLocationId
 		,@intMachineId = intMachineId
+		,@dtmProductionDate=dtmProductionDate
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
@@ -211,7 +213,7 @@ BEGIN TRY
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
-			,@dtmDate = @dtmCurrentDateTime
+			,@dtmDate = @dtmProductionDate
 			,@intLocationId = @intLocationId
 			,@intSubLocationId = @intSubLocationId
 			,@intStorageLocationId = @intStorageLocationId
