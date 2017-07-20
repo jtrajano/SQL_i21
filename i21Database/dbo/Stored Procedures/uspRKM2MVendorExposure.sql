@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKM2MVendorExposure]  
+﻿ALTER PROC [dbo].[uspRKM2MVendorExposure]  
                   @intM2MBasisId int = null,
                   @intFutureSettlementPriceId int = null,
                   @intQuantityUOMId int = null,
@@ -11,6 +11,7 @@
                   @intMarketZoneId int= null,
                   @ysnVendorProducer bit = null
 AS
+
 
 DECLARE @tblFinalDetail TABLE (
        intRowNum INT
@@ -55,7 +56,7 @@ DECLARE @tblFinalDetail TABLE (
        ,intCommodityUnitMeasureId INT
        ,intPriceUOMId INT
        ,intCent int
-	   ,dtmPlannedAvailabilityDate datetime)
+          ,dtmPlannedAvailabilityDate datetime)
 
 INSERT INTO @tblFinalDetail
 EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
@@ -69,21 +70,21 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
                   @intLocationId = @intLocationId,
                   @intMarketZoneId = @intMarketZoneId
 
-SELECT Distinct cd.*,case when isnull(ysnRiskToProducer,0)=1 then e.strName else null end as strProducer,
-			case when isnull(ysnRiskToProducer,0)=1 then ch.intProducerId  else null end intProducerId into #temp FROM @tblFinalDetail cd
+SELECT distinct cd.*,case when isnull(ysnClaimsToProducer,0)=1 then e.strName else null end as strProducer,
+                     case when isnull(ysnClaimsToProducer,0)=1 then ch.intProducerId  else null end intProducerId into #temp FROM @tblFinalDetail cd
 JOIN tblCTContractDetail ch on ch.intContractHeaderId=cd.intContractHeaderId
 LEFT JOIN tblEMEntity e on e.intEntityId=ch.intProducerId
 
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
-	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
+       select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
               CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) dblFixedPurchaseVolume, CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) dblUnfixedPurchaseVolume
-			  , CONVERT(NUMERIC(16,2),dblTotalCommittedVolume) dblTotalCommittedVolume, CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
-			   CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue, CONVERT(NUMERIC(16,2),dblTotalCommittedValue) dblTotalCommittedValue,
-			    CONVERT(NUMERIC(16,2),dblTotalSpend) dblTotalSpend
-			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
-			  case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
-			  from (
+                       , CONVERT(NUMERIC(16,2),dblTotalCommittedVolume) dblTotalCommittedVolume, CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
+                        CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue, CONVERT(NUMERIC(16,2),dblTotalCommittedValue) dblTotalCommittedValue,
+                         CONVERT(NUMERIC(16,2),dblTotalSpend) dblTotalSpend
+                       ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
+                       case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
+                       from (
        SELECT strVendorName,strRating,
               dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue,
                      CONVERT(NUMERIC(16,2),dblTotalSpend) as dblTotalSpend ,
@@ -151,14 +152,11 @@ BEGIN
                                   JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
                                   JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
                                   JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-                                  JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
+                                  JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId 
                                   LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
 
-                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)'
-                                  
-                                  
-                                  ) )t
+                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' )  )t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
        )t3)t4
@@ -168,14 +166,14 @@ ELSE
 
 BEGIN
 
-	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
+       select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
                    CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) dblFixedPurchaseVolume, CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) dblUnfixedPurchaseVolume
-			  , CONVERT(NUMERIC(16,2),dblTotalCommittedVolume) dblTotalCommittedVolume, CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
-			   CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue, CONVERT(NUMERIC(16,2),dblTotalCommittedValue) dblTotalCommittedValue,
-			    CONVERT(NUMERIC(16,2),dblTotalSpend) dblTotalSpend
-			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
-			  case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
-			  from (
+                       , CONVERT(NUMERIC(16,2),dblTotalCommittedVolume) dblTotalCommittedVolume, CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
+                        CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue, CONVERT(NUMERIC(16,2),dblTotalCommittedValue) dblTotalCommittedValue,
+                         CONVERT(NUMERIC(16,2),dblTotalSpend) dblTotalSpend
+                       ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
+                       case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
+                       from (
        SELECT strVendorName,strRating,
               dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue,
                      CONVERT(NUMERIC(16,2),dblTotalSpend) as dblTotalSpend ,
@@ -200,7 +198,7 @@ BEGIN
 
                      , (CASE WHEN ISNULL(dblRiskTotalBusinessVolume,0) =0 then 0 else isnull(dblTotalCommittedVolume,0)/dblRiskTotalBusinessVolume end)*100 as dblShareWithSupplier
                      
-					 ,dblResult as dblMToM,dblCompanyExposurePercentage,dblSupplierSalesPercentage
+                                   ,dblResult as dblMToM,dblCompanyExposurePercentage,dblSupplierSalesPercentage
        FROM (
        SELECT strEntityName,CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) as dblFixedPurchaseVolume,
                                          CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) as dblUnfixedPurchaseVolume,
@@ -256,7 +254,7 @@ BEGIN
                                   LEFT JOIN tblAPVendor e1 on e1.intEntityVendorId=fd.intEntityId 
                                                          LEFT join tblICCommodityUnitMeasure cum1 on cum1.intCommodityId=@intCommodityId and cum1.intUnitMeasureId=  e1.intRiskUnitOfMeasureId        
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf1 on pf1.intVendorPriceFixationLimitId=e1.intRiskVendorPriceFixationLimitId
-                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ) )t
+                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ))t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
        )t3)t4
