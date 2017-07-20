@@ -945,6 +945,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceipt.sql" />
     <Build Include="dbo\Tables\tblICLot.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBookEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertAuditLog.sql" />
     <Build Include="dbo\Functions\fnGetGLEntriesErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLValidateGLEntries.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />

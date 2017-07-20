@@ -93,21 +93,23 @@ BEGIN
             ,[dblForeignRate]
 			,ISNULL([dblReportingRate],0)
 			,[intConcurrencyId]
-	FROM	@GLEntries GLEntries 
+	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
 END
 ;
+
+EXEC uspGLInsertAuditLog @ysnPost, @GLEntries
 --=====================================================================================================================================
--- 	UPSERT DATA TO THE SUMMARY TABLE 
+-- 	UPSERT DATA TO THE SUMMARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	MERGE	
-	INTO	dbo.tblGLSummary 
-	WITH	(HOLDLOCK) 
-	AS		gl_summary 
+BEGIN
+	MERGE
+	INTO	dbo.tblGLSummary
+	WITH	(HOLDLOCK)
+	AS		gl_summary
 	USING (
 				SELECT	intAccountId
 						,dtmDate = dbo.fnRemoveTimeOnDate(GLEntries.dtmDate)
