@@ -57,7 +57,7 @@ namespace iRely.Inventory.Model
         public string strSeason { get; set; }
         public string strClass { get; set; }
         public string strProductLine { get; set; }
-        public string ysnUseWeighScales { get; set; }
+        public bool? ysnUseWeighScales { get; set; }
 
         public tblICItem tblICItem { get; set; }
     }
