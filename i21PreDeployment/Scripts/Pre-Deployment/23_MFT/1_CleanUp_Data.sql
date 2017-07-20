@@ -190,100 +190,101 @@ BEGIN
 		-- Tax Authority
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxAuthority' AND COLUMN_NAME = 'intMasterId') 
 		BEGIN
-			UPDATE tblTFTaxAuthority SET intMasterId = null
+			EXEC('UPDATE tblTFTaxAuthority SET intMasterId = null')
 		END
 
 		-- Reporting Component Criteria
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentCriteria') 
 		BEGIN
-			DELETE FROM tblTFReportingComponentCriteria 
+			EXEC('DELETE FROM tblTFReportingComponentCriteria')
 		END
 
 		-- Reporting Component Configuration
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentConfiguration') 
 		BEGIN
-			DELETE FROM tblTFReportingComponentConfiguration
+			EXEC('DELETE FROM tblTFReportingComponentConfiguration')
 		END
 	
 		-- Reporting Component Field
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentField') 
 		BEGIN
-			DELETE FROM tblTFReportingComponentField
+			EXEC('DELETE FROM tblTFReportingComponentField')
 		END
 
 		-- Reporting Component Destination State
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentDestinationState') 
 		BEGIN
-			DELETE FROM tblTFReportingComponentDestinationState
+			EXEC('DELETE FROM tblTFReportingComponentDestinationState')
 		END
 
 		-- Reporting Component Origin State
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentOriginState') 
 		BEGIN
-			DELETE FROM tblTFReportingComponentOriginState
+			EXEC('DELETE FROM tblTFReportingComponentOriginState')
 		END
 
 		-- Reporting Component Product Code
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentProductCode') 
 		BEGIN
-			DELETE FROM tblTFReportingComponentProductCode
+			EXEC('DELETE FROM tblTFReportingComponentProductCode')
 		END
 
 		-- Filing Packet
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFFilingPacket') 
 		BEGIN
-			DELETE FROM tblTFFilingPacket
+			EXEC('DELETE FROM tblTFFilingPacket')
 		END
 
 		-- Tax Category
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxCategory') 
 		BEGIN
-			DELETE FROM tblTFTaxCategory  WHERE intTaxCategoryId NOT IN(SELECT DISTINCT intTaxCategoryId FROM tblSMTaxCode WHERE intTaxCategoryId IS NOT NULL)	
+			EXEC('DELETE FROM tblTFTaxCategory  WHERE intTaxCategoryId NOT IN(SELECT DISTINCT intTaxCategoryId FROM tblSMTaxCode WHERE intTaxCategoryId IS NOT NULL)')
 		END
 
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxCategory' AND COLUMN_NAME = 'intMasterId') 
 		BEGIN
-			UPDATE tblTFTaxCategory SET intMasterId = NULL
+			EXEC('UPDATE tblTFTaxCategory SET intMasterId = NULL')
 		END
 		
 		-- Product Code
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFProductCode') 
 		BEGIN
-			DELETE FROM tblTFProductCode WHERE intProductCodeId NOT IN (SELECT A.intProductCodeId FROM (
+			EXEC('DELETE FROM tblTFProductCode WHERE intProductCodeId NOT IN (SELECT A.intProductCodeId FROM (
 			SELECT DISTINCT intProductCodeId FROM tblICItemMotorFuelTax WHERE intProductCodeId IS NOT NULL
 			UNION
-			SELECT DISTINCT intProductCodeId FROM tblTFTransaction WHERE intProductCodeId IS NOT NULL) A)
+			SELECT DISTINCT intProductCodeId FROM tblTFTransaction WHERE intProductCodeId IS NOT NULL) A)')	
 		END
 
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFProductCode' AND COLUMN_NAME = 'intMasterId') 
 		BEGIN
-			UPDATE tblTFProductCode SET intMasterId = NULL
+			EXEC('UPDATE tblTFProductCode SET intMasterId = NULL')
 		END
 
 		-- Terminal Control Number
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTerminalControlNumber') 
 		BEGIN
-			DELETE FROM tblTFTerminalControlNumber WHERE intTerminalControlNumberId NOT IN (SELECT DISTINCT intTerminalControlNumberId FROM tblTRSupplyPoint WHERE intTerminalControlNumberId IS NOT NULL)
+			EXEC('DELETE FROM tblTFTerminalControlNumber WHERE intTerminalControlNumberId NOT IN (SELECT DISTINCT intTerminalControlNumberId FROM tblTRSupplyPoint WHERE intTerminalControlNumberId IS NOT NULL)')
 		END
 
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTerminalControlNumber' AND COLUMN_NAME = 'intMasterId') 
 		BEGIN
-			UPDATE tblTFTerminalControlNumber SET intMasterId = NULL
+			EXEC('UPDATE tblTFTerminalControlNumber SET intMasterId = NULL')
 		END
 
 		-- Reporting Component
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent') 
 		BEGIN
-			DELETE FROM tblTFReportingComponent WHERE intReportingComponentId NOT IN (SELECT DISTINCT intReportingComponentId FROM tblTFTransaction WHERE intReportingComponentId IS NOT NULL)
+			EXEC('DELETE FROM tblTFReportingComponent WHERE intReportingComponentId NOT IN (SELECT DISTINCT intReportingComponentId FROM tblTFTransaction WHERE intReportingComponentId IS NOT NULL)')
 		END
 
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND COLUMN_NAME = 'intMasterId') 
 		BEGIN
-			UPDATE tblTFReportingComponent SET intMasterId = NULL
+			EXEC('UPDATE tblTFReportingComponent SET intMasterId = NULL')
 		END
 
 		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)
 
 		PRINT('MFT Cleanup - END')
+
 	END
 END

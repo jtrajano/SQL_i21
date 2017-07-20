@@ -377,7 +377,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\10_Checkout_Commander_Translog.sql
 
 -- Motor Fuel Tax
-:r .\TF\DefaultData\00_Cleanup.sql
+--:r .\TF\DefaultData\00_Cleanup.sql
 :r .\TF\DefaultData\01_TaxAuthority.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\NE_Nebraska.sql

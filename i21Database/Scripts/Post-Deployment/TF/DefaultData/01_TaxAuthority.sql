@@ -1,4 +1,8 @@
-﻿-- Tax Authority
+﻿PRINT ('TAX FORMS - Deployment')
+
+PRINT ('Deploying Tax Authority')
+
+-- Tax Authority
 /* Generate script for Tax Authority 
 select 'UNION ALL SELECT intTaxAuthorityId = ' + CAST(intTaxAuthorityId AS NVARCHAR(10)) 
 	+ ', strTaxAuthorityCode = ''' + ISNULL(strTaxAuthorityCode, 'NULL')
@@ -9,6 +13,7 @@ select 'UNION ALL SELECT intTaxAuthorityId = ' + CAST(intTaxAuthorityId AS NVARC
 	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(intMasterId, '') = '' THEN ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId) ELSE intMasterId END) AS NVARCHAR(20))
 from tblTFTaxAuthority
 */
+
 SELECT *
 INTO #tmpTaxAuthority
 FROM (
@@ -120,6 +125,7 @@ SET IDENTITY_INSERT tblTFTaxAuthority OFF
 
 GO
 
+PRINT ('Deploying Output Designer Fields')
 -- Output Designer Fields
 /*
 SELECT 'UNION ALL SELECT strColumnName = ''' + name + ''''
@@ -233,7 +239,7 @@ DROP TABLE #tmpFields
 
 GO
 
-
+PRINT ('Deploying OriginDestination State')
 -- Origin/Destination State
 /* Generate script for Origin/Destination States.
 select 'UNION ALL SELECT intOriginDestinationStateId = ' + CAST(intOriginDestinationStateId AS NVARCHAR(10))
@@ -305,6 +311,7 @@ EXEC uspTFUpgradeOriginDestinationState @OriginDestinationStates = @OriginDestin
 
 GO
 
+PRINT ('Deploying Component Types')
 -- Component Types
 SELECT * 
 INTO #tmpTypes
