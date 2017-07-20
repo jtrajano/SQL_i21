@@ -5475,6 +5475,8 @@
     <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Tables\tblICPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogPostResult.sql" />
+    <Build Include="dbo\Views\vyuTRSearchQuoteDetail.sql" />
+    <Build Include="dbo\Views\vyuTRSearchQuote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
