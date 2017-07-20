@@ -305,7 +305,8 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		) 
 		
 IF ISNULL(@post,0) = 1
-BEGIN
+BEGIN	
+
 	INSERT INTO @GLEntries (
 		dtmDate ,
 	    strBatchId ,
@@ -375,6 +376,46 @@ BEGIN
 
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN
+		DECLARE @intReturnValue AS INT 
+
+		--INSERT INTO @GLEntries (
+		--	dtmDate						
+		--	,strBatchId					
+		--	,intAccountId				
+		--	,dblDebit					
+		--	,dblCredit					
+		--	,dblDebitUnit				
+		--	,dblCreditUnit				
+		--	,strDescription				
+		--	,strCode					
+		--	,strReference				
+		--	,intCurrencyId				
+		--	,dblExchangeRate			
+		--	,dtmDateEntered				
+		--	,dtmTransactionDate			
+		--	,strJournalLineDescription  
+		--	,intJournalLineNo			
+		--	,ysnIsUnposted				
+		--	,intUserId					
+		--	,intEntityId				
+		--	,strTransactionId			
+		--	,intTransactionId			
+		--	,strTransactionType			
+		--	,strTransactionForm			
+		--	,strModuleName				
+		--	,intConcurrencyId			
+		--	,dblDebitForeign			
+		--	,dblDebitReport				
+		--	,dblCreditForeign			
+		--	,dblCreditReport			
+		--	,dblReportingRate			
+		--	,dblForeignRate						
+		--)
+		EXEC @intReturnValue = uspICPostCostAdjustment 
+				@adjustedEntries
+				, @batchId
+				, @userId
+
 		INSERT INTO @GLEntries (
 			dtmDate						
 			,strBatchId					
@@ -408,7 +449,9 @@ BEGIN
 			,dblReportingRate			
 			,dblForeignRate						
 		)
-		EXEC uspICPostCostAdjustment @adjustedEntries, @batchId, @userId
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+			@strBatchId = @batchId
+			,@intEntityUserSecurityId = @userId
 	END
 END
 ELSE

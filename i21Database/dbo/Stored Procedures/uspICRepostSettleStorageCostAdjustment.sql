@@ -118,40 +118,62 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustCostOfDelayedPricingStock)
 	BEGIN
-		INSERT INTO @GLEntries (
-			dtmDate						
-			,strBatchId					
-			,intAccountId				
-			,dblDebit					
-			,dblCredit					
-			,dblDebitUnit				
-			,dblCreditUnit				
-			,strDescription				
-			,strCode					
-			,strReference				
-			,intCurrencyId				
-			,dblExchangeRate			
-			,dtmDateEntered				
-			,dtmTransactionDate			
-			,strJournalLineDescription  
-			,intJournalLineNo			
-			,ysnIsUnposted				
-			,intUserId					
-			,intEntityId				
-			,strTransactionId			
-			,intTransactionId			
-			,strTransactionType			
-			,strTransactionForm			
-			,strModuleName				
-			,intConcurrencyId			
-			,dblDebitForeign			
-			,dblDebitReport				
-			,dblCreditForeign			
-			,dblCreditReport			
-			,dblReportingRate			
-			,dblForeignRate						
-		)
-		EXEC uspICPostCostAdjustment @adjustCostOfDelayedPricingStock, @strBatchId, @intEntityUserSecurityId
+		DECLARE @intReturnValue AS INT 
+		EXEC @intReturnValue = uspICPostCostAdjustment 
+			@adjustCostOfDelayedPricingStock
+			, @strBatchId
+			, @intEntityUserSecurityId
+
+		IF @intReturnValue <> 0 
+		BEGIN 
+			DECLARE @ErrorMessage AS NVARCHAR(4000)
+			SELECT	TOP 1 
+					@ErrorMessage = strMessage
+			FROM	tblICPostResult
+			WHERE	strBatchNumber = @strBatchId
+
+			RAISERROR(@ErrorMessage, 11, 1);
+			GOTO _Exit
+		END 
+		ELSE 
+		BEGIN 
+			INSERT INTO @GLEntries (
+				dtmDate						
+				,strBatchId					
+				,intAccountId				
+				,dblDebit					
+				,dblCredit					
+				,dblDebitUnit				
+				,dblCreditUnit				
+				,strDescription				
+				,strCode					
+				,strReference				
+				,intCurrencyId				
+				,dblExchangeRate			
+				,dtmDateEntered				
+				,dtmTransactionDate			
+				,strJournalLineDescription  
+				,intJournalLineNo			
+				,ysnIsUnposted				
+				,intUserId					
+				,intEntityId				
+				,strTransactionId			
+				,intTransactionId			
+				,strTransactionType			
+				,strTransactionForm			
+				,strModuleName				
+				,intConcurrencyId			
+				,dblDebitForeign			
+				,dblDebitReport				
+				,dblCreditForeign			
+				,dblCreditReport			
+				,dblReportingRate			
+				,dblForeignRate						
+			)
+			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+				@strBatchId = @strBatchId
+				,@intEntityUserSecurityId = @intEntityUserSecurityId		
+		END 
 	END
 
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)

@@ -33,7 +33,7 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
+SET XACT_ABORT OFF
 SET ANSI_WARNINGS OFF
 
 -- Create the temp table if it does not exists. 
@@ -236,7 +236,7 @@ BEGIN
 
 			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.
 			EXEC uspICRaiseError 80062, @strItemNo, @strSourceTransactionId;
-			RETURN -1  
+			RETURN -80062  
 
 		END
 	END 

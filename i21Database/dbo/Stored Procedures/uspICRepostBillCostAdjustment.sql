@@ -12,6 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @intBillId AS INT
+		,@intReturnValue AS INT 
 		
 SELECT @intBillId = intBillId 
 FROM	tblAPBill b
@@ -148,43 +149,61 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustedEntries)
 	BEGIN
-		INSERT INTO @billGLEntries (
-			dtmDate						
-			,strBatchId					
-			,intAccountId				
-			,dblDebit					
-			,dblCredit					
-			,dblDebitUnit				
-			,dblCreditUnit				
-			,strDescription				
-			,strCode					
-			,strReference				
-			,intCurrencyId				
-			,dblExchangeRate			
-			,dtmDateEntered				
-			,dtmTransactionDate			
-			,strJournalLineDescription  
-			,intJournalLineNo			
-			,ysnIsUnposted				
-			,intUserId					
-			,intEntityId				
-			,strTransactionId			
-			,intTransactionId			
-			,strTransactionType			
-			,strTransactionForm			
-			,strModuleName				
-			,intConcurrencyId			
-			,dblDebitForeign			
-			,dblDebitReport				
-			,dblCreditForeign			
-			,dblCreditReport			
-			,dblReportingRate			
-			,dblForeignRate			
-		)
-		EXEC uspICPostCostAdjustment 
+		EXEC @intReturnValue = uspICPostCostAdjustment 
 			@adjustedEntries
 			, @strBatchId
 			, @intEntityUserSecurityId
+
+		IF @intReturnValue <> 0 
+		BEGIN 
+			DECLARE @ErrorMessage AS NVARCHAR(4000)
+			SELECT	TOP 1 
+					@ErrorMessage = strMessage
+			FROM	tblICPostResult
+			WHERE	strBatchNumber = @strBatchId
+
+			RAISERROR(@ErrorMessage, 11, 1);
+			GOTO _Exit
+		END 
+		ELSE 
+		BEGIN 
+			INSERT INTO @billGLEntries (
+				dtmDate						
+				,strBatchId					
+				,intAccountId				
+				,dblDebit					
+				,dblCredit					
+				,dblDebitUnit				
+				,dblCreditUnit				
+				,strDescription				
+				,strCode					
+				,strReference				
+				,intCurrencyId				
+				,dblExchangeRate			
+				,dtmDateEntered				
+				,dtmTransactionDate			
+				,strJournalLineDescription  
+				,intJournalLineNo			
+				,ysnIsUnposted				
+				,intUserId					
+				,intEntityId				
+				,strTransactionId			
+				,intTransactionId			
+				,strTransactionType			
+				,strTransactionForm			
+				,strModuleName				
+				,intConcurrencyId			
+				,dblDebitForeign			
+				,dblDebitReport				
+				,dblCreditForeign			
+				,dblCreditReport			
+				,dblReportingRate			
+				,dblForeignRate						
+			)
+			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+				@strBatchId = @strBatchId
+				,@intEntityUserSecurityId = @intEntityUserSecurityId		
+		END 
 	END
 END 
 

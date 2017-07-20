@@ -683,51 +683,69 @@ BEGIN TRY
 		DELETE
 		FROM @GLEntries
 
-		INSERT INTO @GLEntries (
-			[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			)
-		EXEC uspICPostCostAdjustment @adjustedEntries
-			,@strBatchId
-			,@userId
+		IF EXISTS (SELECT TOP 1 1 FROM @adjustedEntries)
+		BEGIN 
+			DECLARE @intReturnValue AS INT 
+			EXEC @intReturnValue = uspICPostCostAdjustment 
+				@adjustedEntries
+				, @strBatchId
+				, @userId
 
-		IF EXISTS (
-				SELECT *
-				FROM @GLEntries
+			IF @intReturnValue <> 0 
+			BEGIN 
+				DECLARE @ErrorMessage AS NVARCHAR(4000)
+				SELECT	TOP 1 
+						@ErrorMessage = strMessage
+				FROM	tblICPostResult
+				WHERE	strBatchNumber = @strBatchId
+
+				RAISERROR(@ErrorMessage, 11, 1);
+			END 
+			ELSE 
+			BEGIN 
+				INSERT INTO @GLEntries (
+					dtmDate						
+					,strBatchId					
+					,intAccountId				
+					,dblDebit					
+					,dblCredit					
+					,dblDebitUnit				
+					,dblCreditUnit				
+					,strDescription				
+					,strCode					
+					,strReference				
+					,intCurrencyId				
+					,dblExchangeRate			
+					,dtmDateEntered				
+					,dtmTransactionDate			
+					,strJournalLineDescription  
+					,intJournalLineNo			
+					,ysnIsUnposted				
+					,intUserId					
+					,intEntityId				
+					,strTransactionId			
+					,intTransactionId			
+					,strTransactionType			
+					,strTransactionForm			
+					,strModuleName				
+					,intConcurrencyId			
+					,dblDebitForeign			
+					,dblDebitReport				
+					,dblCreditForeign			
+					,dblCreditReport			
+					,dblReportingRate			
+					,dblForeignRate						
 				)
-		BEGIN
-			EXEC uspGLBookEntries @GLEntries
-				,1
-		END
+				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+					@strBatchId = @strBatchId
+					,@intEntityUserSecurityId = @userId		
+			END 
+
+			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+			BEGIN
+				EXEC uspGLBookEntries @GLEntries ,1
+			END
+		END 
 
 		UPDATE tblMFWorkOrder
 		SET strCostAdjustmentBatchId = @strBatchId
