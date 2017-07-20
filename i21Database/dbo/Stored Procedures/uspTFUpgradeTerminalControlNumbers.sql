@@ -23,6 +23,13 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 	
+	UPDATE tblTFTerminalControlNumber 
+    SET intMasterId = B.intMasterId 
+    FROM @TerminalControlNumbers B 
+    WHERE tblTFTerminalControlNumber.intTaxAuthorityId = @TaxAuthorityId
+    AND tblTFTerminalControlNumber.strTerminalControlNumber COLLATE Latin1_General_CI_AS = B.strTerminalControlNumber COLLATE Latin1_General_CI_AS
+    AND tblTFTerminalControlNumber.intMasterId IS NULL
+
 	MERGE	
 	INTO	tblTFTerminalControlNumber 
 	WITH	(HOLDLOCK) 

@@ -68,6 +68,12 @@ UNION ALL SELECT intTaxAuthorityId = 51, strTaxAuthorityCode = 'US', strDescript
 
 SET IDENTITY_INSERT tblTFTaxAuthority ON
 
+UPDATE tblTFTaxAuthority
+	SET intMasterId = B.intMasterId
+FROM #tmpTaxAuthority B
+    WHERE tblTFTaxAuthority.intMasterId IS NULL
+	AND tblTFTaxAuthority.strTaxAuthorityCode COLLATE Latin1_General_CI_AS = B.strTaxAuthorityCode COLLATE Latin1_General_CI_AS
+
 MERGE	
 INTO	tblTFTaxAuthority 
 WITH	(HOLDLOCK) 

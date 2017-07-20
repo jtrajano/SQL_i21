@@ -23,6 +23,16 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 	
+	UPDATE tblTFReportingComponent 
+    SET intMasterId = B.intMasterId 
+    FROM @ReportingComponent B 
+    WHERE tblTFReportingComponent.intTaxAuthorityId = @TaxAuthorityId
+    AND tblTFReportingComponent.strFormCode COLLATE Latin1_General_CI_AS = B.strFormCode COLLATE Latin1_General_CI_AS
+    AND tblTFReportingComponent.strScheduleCode COLLATE Latin1_General_CI_AS = B.strScheduleCode COLLATE Latin1_General_CI_AS
+    AND tblTFReportingComponent.strType COLLATE Latin1_General_CI_AS = B.strType COLLATE Latin1_General_CI_AS
+    AND tblTFReportingComponent.intMasterId IS NULL
+
+
 	MERGE	
 	INTO	tblTFReportingComponent
 	WITH	(HOLDLOCK) 
