@@ -149,85 +149,61 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustedEntries)
 	BEGIN
-		--INSERT INTO @billGLEntries (
-		--	dtmDate						
-		--	,strBatchId					
-		--	,intAccountId				
-		--	,dblDebit					
-		--	,dblCredit					
-		--	,dblDebitUnit				
-		--	,dblCreditUnit				
-		--	,strDescription				
-		--	,strCode					
-		--	,strReference				
-		--	,intCurrencyId				
-		--	,dblExchangeRate			
-		--	,dtmDateEntered				
-		--	,dtmTransactionDate			
-		--	,strJournalLineDescription  
-		--	,intJournalLineNo			
-		--	,ysnIsUnposted				
-		--	,intUserId					
-		--	,intEntityId				
-		--	,strTransactionId			
-		--	,intTransactionId			
-		--	,strTransactionType			
-		--	,strTransactionForm			
-		--	,strModuleName				
-		--	,intConcurrencyId			
-		--	,dblDebitForeign			
-		--	,dblDebitReport				
-		--	,dblCreditForeign			
-		--	,dblCreditReport			
-		--	,dblReportingRate			
-		--	,dblForeignRate			
-		--)
 		EXEC @intReturnValue = uspICPostCostAdjustment 
 			@adjustedEntries
 			, @strBatchId
 			, @intEntityUserSecurityId
 
 		IF @intReturnValue <> 0 
-		BEGIN
-			GOTO _Exit_with_Error
-		END 
+		BEGIN 
+			DECLARE @ErrorMessage AS NVARCHAR(4000)
+			SELECT	TOP 1 
+					@ErrorMessage = strMessage
+			FROM	tblICPostResult
+			WHERE	strBatchNumber = @strBatchId
 
-		INSERT INTO @billGLEntries (
-			dtmDate						
-			,strBatchId					
-			,intAccountId				
-			,dblDebit					
-			,dblCredit					
-			,dblDebitUnit				
-			,dblCreditUnit				
-			,strDescription				
-			,strCode					
-			,strReference				
-			,intCurrencyId				
-			,dblExchangeRate			
-			,dtmDateEntered				
-			,dtmTransactionDate			
-			,strJournalLineDescription  
-			,intJournalLineNo			
-			,ysnIsUnposted				
-			,intUserId					
-			,intEntityId				
-			,strTransactionId			
-			,intTransactionId			
-			,strTransactionType			
-			,strTransactionForm			
-			,strModuleName				
-			,intConcurrencyId			
-			,dblDebitForeign			
-			,dblDebitReport				
-			,dblCreditForeign			
-			,dblCreditReport			
-			,dblReportingRate			
-			,dblForeignRate			
-		)
-		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
-			@strBatchId = @strBatchId
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			RAISERROR(@ErrorMessage, 11, 1);
+			GOTO _Exit
+		END 
+		ELSE 
+		BEGIN 
+			INSERT INTO @billGLEntries (
+				dtmDate						
+				,strBatchId					
+				,intAccountId				
+				,dblDebit					
+				,dblCredit					
+				,dblDebitUnit				
+				,dblCreditUnit				
+				,strDescription				
+				,strCode					
+				,strReference				
+				,intCurrencyId				
+				,dblExchangeRate			
+				,dtmDateEntered				
+				,dtmTransactionDate			
+				,strJournalLineDescription  
+				,intJournalLineNo			
+				,ysnIsUnposted				
+				,intUserId					
+				,intEntityId				
+				,strTransactionId			
+				,intTransactionId			
+				,strTransactionType			
+				,strTransactionForm			
+				,strModuleName				
+				,intConcurrencyId			
+				,dblDebitForeign			
+				,dblDebitReport				
+				,dblCreditForeign			
+				,dblCreditReport			
+				,dblReportingRate			
+				,dblForeignRate						
+			)
+			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+				@strBatchId = @strBatchId
+				,@intEntityUserSecurityId = @intEntityUserSecurityId		
+		END 
 	END
 END 
 
@@ -243,8 +219,5 @@ SET		dblAmountDue = 0
 FROM	tblAPBill b
 WHERE	b.intBillId = @intBillId 
 		AND @ysnRegenerateBillGLEntries = 1
-
-_Exit_with_Error: 
-
 
 _Exit:
