@@ -4,6 +4,7 @@
 	[intTicketId] [int] NOT NULL,
 	[strTicketCommentImageId] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
 	[strComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strEncryptedComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intCreatedUserId] [int] NULL,
 	[intCreatedUserEntityId] [int] NULL,
 	[dtmCreated] [datetime] NULL,
