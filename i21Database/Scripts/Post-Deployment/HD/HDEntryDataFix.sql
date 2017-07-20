@@ -434,4 +434,14 @@ GO
 
 GO
 	PRINT N'End dropping Help Desk Conatraint.'
+	PRINT N'Start decrypting Help Desk Ticket comment.'
+GO
+
+	if ((select count(*) from tblHDTicketComment where SUBSTRING(strComment, 1,3) = '1AE' and ysnEncoded = convert(bit,1)) > 0)
+	begin
+		update tblHDTicketComment set strEncryptedComment = strComment, strComment = dbo.fnHDDecodeComment(SUBSTRING(strComment, 4,len(strComment))), ysnEncoded = convert(bit,0) where SUBSTRING(strComment, 1,3) = '1AE' and ysnEncoded = convert(bit,1)
+	end
+
+GO
+	PRINT N'End decrypting Help Desk Ticket comment.'
 GO
