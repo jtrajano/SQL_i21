@@ -5351,6 +5351,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryByItem.sql" />
     <Build Include="dbo\Tables\tblICPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogPostResult.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
