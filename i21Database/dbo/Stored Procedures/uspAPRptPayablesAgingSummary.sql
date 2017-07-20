@@ -40,6 +40,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
 DECLARE @dateFrom DATETIME = NULL;
 DECLARE @dateTo DATETIME = NULL;
+DECLARE @dtmDueDate DATETIME = NULL;
 DECLARE @total NUMERIC(18,6), @amountDue NUMERIC(18,6), @amountPad NUMERIC(18,6);
 DECLARE @count INT = 0;
 DECLARE @fieldname NVARCHAR(50)
@@ -122,6 +123,7 @@ WITH (
 --select * from @temp_xml_table
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+SELECT @dtmDueDate = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SET @innerQuery = 'SELECT --DISTINCT
 			intBillId
 			,dblTotal
@@ -130,11 +132,16 @@ SET @innerQuery = 'SELECT --DISTINCT
 			,dblDiscount
 			,dblInterest
 			,dtmDate
+			,dtmDueDate
 		FROM dbo.vyuAPPayables'
 
 IF @dateFrom IS NOT NULL
 BEGIN
 	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+END
+ELSE IF @dtmDueDate IS NOT NULL
+BEGIN
+	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 END
 ELSE
 BEGIN
