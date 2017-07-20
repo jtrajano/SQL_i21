@@ -48,74 +48,78 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------------------------------------------------------
 --** From Class (ptclsmst) table below 3 accounts (Sales, Variance and Inventory accounts) are mapped 
 --   into tblICCategoryAccount table removing duplicates and ignoring the invalid accounts. **
-INSERT INTO tblICCategoryAccount (
-	intCategoryId
-	,intAccountCategoryId
-	,intAccountId
-	,intConcurrencyId
-	) (
-	SELECT cat.intCategoryId
---	,seg.intAccountCategoryId
-	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Sales Account') AccountCategoryId
-	,act.intAccountId
-	,1 ConcurrencyId
+MERGE tblICCategoryAccount AS [Target]
+USING
+(
+	SELECT
+		  intCategoryId			= cat.intCategoryId
+		, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Sales Account')
+		, intAccountId			= act.intAccountId
+		, intConcurrencyId		= 1
 	FROM ptclsmst AS cls 
-	INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_sls_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_sls_acct_no 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
 	WHERE coa.strExternalId = cls.ptcls_sls_acct_no
-	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+		and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 
-UNION
+	UNION
 	
-		SELECT cat.intCategoryId
---	,seg.intAccountCategoryId
-	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Cost of Goods') AccountCategoryId
-	,act.intAccountId
-	,1 ConcurrencyId
-	FROM ptclsmst AS cls 
-	INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_pur_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
-	WHERE coa.strExternalId = cls.ptcls_pur_acct_no
-	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+		SELECT 
+			  intCategoryId			= cat.intCategoryId
+			, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Cost of Goods')
+			, intAccountId			= act.intAccountId
+			, intConcurrencyId		= 1
+		FROM ptclsmst AS cls 
+			INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_pur_acct_no 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		WHERE coa.strExternalId = cls.ptcls_pur_acct_no
+			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 
-UNION
-	
-		SELECT cat.intCategoryId
---	,seg.intAccountCategoryId
-	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory') AccountCategoryId
-	,act.intAccountId
-	,1 ConcurrencyId
-	FROM ptclsmst AS cls 
-	INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_inv_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
-	WHERE coa.strExternalId = cls.ptcls_inv_acct_no
-	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')	)
+	UNION
+		SELECT
+		  intCategoryId			= cat.intCategoryId
+		, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory')
+		, intAccountId			= act.intAccountId
+		, intConcurrencyId		= 1
+		FROM ptclsmst AS cls 
+			INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_inv_acct_no 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		WHERE coa.strExternalId = cls.ptcls_inv_acct_no
+			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+ON [Target].intAccountCategoryId = [Source].intAccountCategoryId
+	AND [Target].intCategoryId = [Source].intCategoryId
+WHEN NOT MATCHED THEN
+INSERT (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+VALUES ([Source].intCategoryId, [Source].intAccountCategoryId, [Source].intAccountId, [Source].intConcurrencyId);
 
 --** From PT Control File (ptmglmst) table below 2 accounts (Pending A/P and COGS account) are mapped into tblICCategoryAccount
 --   table removing duplicates and ignoring the invalid accounts. These accounts are mapped only for inventory classed.
 --   These 2 accounts remains constant for all inventory classes. **
-INSERT INTO tblICCategoryAccount (
-	intCategoryId
-	,intAccountCategoryId
-	,intAccountId
-	,intConcurrencyId
-	) (
-	SELECT cat.intCategoryId
---	,seg.intAccountCategoryId
-	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'AP Clearing') AccountCategoryId
-	,act.intAccountId
-	,1 ConcurrencyId
+MERGE tblICCategoryAccount AS [Target]
+USING
+(
+	SELECT
+		  intCategoryId			= cat.intCategoryId
+		, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'AP Clearing')
+		, intAccountId			= act.intAccountId
+		, intConcurrencyId		= 1
 	FROM ptclsmst AS cls 
-	INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
-	INNER JOIN ptmglmst AS cgl ON cgl.ptmgl_key = 01 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cgl.ptmgl_ap 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+		INNER JOIN ptmglmst AS cgl ON cgl.ptmgl_key = 01 
+		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cgl.ptmgl_ap 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
 	WHERE coa.strExternalId = cgl.ptmgl_ap
-	--and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
-)
+) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+ON [Target].intAccountCategoryId = [Source].intAccountCategoryId
+	AND [Target].intCategoryId = [Source].intCategoryId
+WHEN NOT MATCHED THEN
+INSERT (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+VALUES ([Source].intCategoryId, [Source].intAccountCategoryId, [Source].intAccountId, [Source].intConcurrencyId);
+
 
 --UNION
 	
@@ -128,44 +132,48 @@ INSERT INTO tblICCategoryAccount (
 
 ------------------------------------------------------
 --import gl accounts for 'Other Charge' category
-
-INSERT INTO tblICCategoryAccount (
-	intCategoryId
-	,intAccountCategoryId
-	,intAccountId
-	,intConcurrencyId
-	) (
-	SELECT cat.intCategoryId
---	,seg.intAccountCategoryId
-	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Income') AccountCategoryId
-	,act.intAccountId
-	,1 ConcurrencyId
+MERGE tblICCategoryAccount AS [Target]
+USING
+(
+	SELECT
+		  intCategoryId			= cat.intCategoryId
+		, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Income')
+		, intAccountId			= act.intAccountId
+		, intConcurrencyId		= 1
 	FROM ptclsmst AS cls 
-	INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_sls_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_sls_acct_no 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
 	WHERE coa.strExternalId = cls.ptcls_sls_acct_no
-	and cat.strInventoryType = 'Other Charge'
-)
+		and cat.strInventoryType = 'Other Charge'
+) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+ON [Target].intAccountCategoryId = [Source].intAccountCategoryId
+	AND [Target].intCategoryId = [Source].intCategoryId
+WHEN NOT MATCHED THEN
+INSERT (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+VALUES ([Source].intCategoryId, [Source].intAccountCategoryId, [Source].intAccountId, [Source].intConcurrencyId);
 
-INSERT INTO tblICCategoryAccount (
-	intCategoryId
-	,intAccountCategoryId
-	,intAccountId
-	,intConcurrencyId
-	) (
-	SELECT cat.intCategoryId
---	,seg.intAccountCategoryId
-	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Expense') AccountCategoryId
-	,act.intAccountId
-	,1 ConcurrencyId
+
+MERGE tblICCategoryAccount AS [Target]
+USING
+(
+	SELECT
+		  intCategoryId			= cat.intCategoryId
+		, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Expense') 
+		, intAccountId			= act.intAccountId
+		, intConcurrencyId		= 1
 	FROM ptclsmst AS cls 
-	INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
-	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_pur_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_pur_acct_no 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
 	WHERE coa.strExternalId = cls.ptcls_pur_acct_no
-	and cat.strInventoryType = 'Other Charge'
-)
+		and cat.strInventoryType = 'Other Charge'
+) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+ON [Target].intAccountCategoryId = [Source].intAccountCategoryId
+	AND [Target].intCategoryId = [Source].intCategoryId
+WHEN NOT MATCHED THEN
+INSERT (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+VALUES ([Source].intCategoryId, [Source].intAccountCategoryId, [Source].intAccountId, [Source].intConcurrencyId);
 
 -----------------------------------------------------------------------------------------------------
 --------update the account table with correct account category required for inventory to function

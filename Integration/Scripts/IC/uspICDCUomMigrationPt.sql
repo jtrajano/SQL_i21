@@ -15,30 +15,35 @@ SET ANSI_WARNINGS OFF
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- UnitMeasure data migration from ptuommst origin table to tblICUnitMeasure i21 table 
-
+-- This does not insert duplicates
 --------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO tblICUnitMeasure (
-	strUnitMeasure
-	,strSymbol
-	,intConcurrencyId
-	)
-SELECT RTRIM(ptuom_desc)
-	,RTRIM(ptuom_code)
-	,1
-FROM ptuommst
-WHERE ptuom_code != ' '
+
+MERGE tblICUnitMeasure AS [Target]
+USING 
+(
+	SELECT
+		  strUnitMeasure	= RTRIM(ptuom_desc) COLLATE Latin1_General_CI_AS 
+		, strSymbol			= RTRIM(ptuom_code) COLLATE Latin1_General_CI_AS
+		, intConcurrencyId	= 1
+	FROM ptuommst
+	WHERE ptuom_code != ' '	
+) AS [Source] (strUnitMeasure, strSymbol, intConcurrencyId)
+ON [Target].strUnitMeasure = [Source].strUnitMeasure
+WHEN NOT MATCHED THEN
+INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
+VALUES ([Source].strUnitMeasure, [Source].strSymbol, [Source].intConcurrencyId);
 
 --update the unit type for the imported uoms
-update tblICUnitMeasure set strUnitType = 
-case 
-when upper(strSymbol) in ('BUSHEL','BUSHELS','BU', 'GAL', 'OZ', 'GA', 'QT') then 'Volume'
+UPDATE tblICUnitMeasure
+SET strUnitType = 
+CASE WHEN UPPER(strSymbol) IN ('BUSHEL','BUSHELS','BU', 'GAL', 'OZ', 'GA', 'QT') THEN 'Volume'
 --when upper(strSymbol) in ('BAG', 'BX') then 'Packed' 
-when upper(strSymbol) = 'EA' then 'Quantity'
-when upper(strSymbol) in ('TN', 'TON', 'KG', 'LB') then 'Weight'
-when upper(strSymbol) = 'FT' then 'Length'
-when upper(strSymbol) in ('HOUR', 'HR') then 'Time'
-else 'Quantity'
-End 
+	WHEN UPPER(strSymbol) = 'EA' THEN 'Quantity'
+	WHEN UPPER(strSymbol) IN ('TN', 'TON', 'KG', 'LB') THEN 'Weight'
+	WHEN UPPER(strSymbol) = 'FT' THEN 'Length'
+	WHEN UPPER(strSymbol) IN ('HOUR', 'HR') THEN 'Time'
+	ELSE 'Quantity'
+END 
 
 
 

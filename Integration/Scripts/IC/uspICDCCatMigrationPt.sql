@@ -19,37 +19,23 @@ SET ANSI_WARNINGS OFF
 --** Note: In Origin Category is called as Class and it is referred from ptclsmst table ** 
 -- Section 1
 --------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO tblICCategory (
-	strCategoryCode
-	,strDescription
-	,strMaterialFee
-	,strInventoryType
-	,intCostingMethod
-	,strInventoryTracking
-	,intConcurrencyId
-	,ysnAutoCalculateFreight
-	)
-SELECT RTRIM(ptcls_class)
-	,RTRIM(ptcls_desc)
-	,RTRIM(ptcls_amf_yn)
---** get the inventory type from item 
-	,case	
-		when
-			(select COUNT(*) cnt from ptitmmst where ptitm_class = ptclsmst.ptcls_class and ptitm_phys_inv_yno = 'Y') > 1 then 'Inventory' 
-		else 
-			'Other Charge' 
-		end	'InventoryType'			
-	,'1'
-	,'Item Level'
-	,1
-	,(
-		CASE 
-			WHEN (ptcls_auto_frt_yn = 'Y')
-				THEN 1
-			ELSE 0
-			END
-		)
-FROM ptclsmst
-
+MERGE tblICCategory AS [Target]
+USING 
+(
+	SELECT
+		  strCategoryCode			= RTRIM(ptcls_class) COLLATE Latin1_General_CI_AS
+		, strDescription			= RTRIM(ptcls_desc) COLLATE Latin1_General_CI_AS
+		, strMaterialFee			= RTRIM(ptcls_amf_yn) COLLATE Latin1_General_CI_AS
+		, strInventoryType			= CASE WHEN (SELECT COUNT(*) cnt FROM ptitmmst WHERE ptitm_class = ptclsmst.ptcls_class AND ptitm_phys_inv_yno = 'Y') > 1 THEN 'Inventory' ELSE 'Other Charge' END COLLATE Latin1_General_CI_AS
+		, intCostingMethod			= '1'
+		, strInventoryTracking		= 'Item Level'
+		, intConcurrencyId			= 1
+		,ysnAutoCalculateFreight	= CAST(CASE WHEN (ptcls_auto_frt_yn = 'Y') THEN 1 ELSE 0 END AS BIT)
+	FROM ptclsmst
+) AS [Source] (strCategoryCode, strDescription, strMaterialFee, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId, ysnAutoCalculateFreight)
+ON [Target].strCategoryCode = [Source].strCategoryCode
+WHEN NOT MATCHED THEN
+INSERT (strCategoryCode, strDescription, strMaterialFee, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId, ysnAutoCalculateFreight)
+VALUES ([Source].strCategoryCode, [Source].strDescription, [Source].strMaterialFee, [Source].strInventoryType, [Source].intCostingMethod, [Source].strInventoryTracking, [Source].intConcurrencyId, [Source].ysnAutoCalculateFreight);
 
 GO
