@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdatePricebookItem]
 @intUniqueId Int
 , @intEntityId Int
-, @intCompanyLocationId Int
 , @intItemUOMId int
 , @intItemId int
 , @intItemLocationId int
@@ -92,8 +91,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -124,8 +123,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -156,8 +155,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -193,8 +192,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -225,8 +224,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -257,8 +256,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -289,8 +288,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -324,8 +323,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -359,8 +358,8 @@ BEGIN
 							  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
 							  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-						  + ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-						  + ' AND adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
+						  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
+						  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
 						  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
@@ -394,8 +393,8 @@ BEGIN
 				 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 				 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 				 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-			 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-			 AND adj6.intItemUOMId = @intItemUOMId
+			 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+			 WHERE adj6.intItemUOMId = @intItemUOMId
 			 AND adj7.intItemId = @intItemId
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
@@ -421,7 +420,7 @@ BEGIN
 
 			 --Constract child
 			 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Description'
-			 SET @children = '{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+			 SET @children = @children + '{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 		END
 		
 
@@ -441,8 +440,8 @@ BEGIN
 				 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 				 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 				 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-			 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-			 AND adj6.intItemUOMId = @intItemUOMId
+			 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+			 WHERE adj6.intItemUOMId = @intItemUOMId
 			 AND adj7.intItemId = @intItemId
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
@@ -484,8 +483,8 @@ BEGIN
 				 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 				 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 				 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-			 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-			 AND adj6.intItemUOMId = @intItemUOMId
+			 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+			 WHERE adj6.intItemUOMId = @intItemUOMId
 			 AND adj7.intItemId = @intItemId
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
@@ -528,8 +527,8 @@ BEGIN
 				 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 				 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 				 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-			 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-			 AND adj6.intItemUOMId = @intItemUOMId
+			 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+			 WHERE adj6.intItemUOMId = @intItemUOMId
 			 AND adj7.intItemId = @intItemId
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
@@ -573,8 +572,8 @@ BEGIN
 				 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 				 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 				 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-			 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-			 AND adj6.intItemUOMId = @intItemUOMId
+			 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+			 WHERE adj6.intItemUOMId = @intItemUOMId
 			 AND adj7.intItemId = @intItemId
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
@@ -618,8 +617,8 @@ BEGIN
 				 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 				 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 				 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-			 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-			 AND adj6.intItemUOMId = @intItemUOMId
+			 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+			 WHERE adj6.intItemUOMId = @intItemUOMId
 			 AND adj7.intItemId = @intItemId
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
@@ -663,8 +662,8 @@ BEGIN
 				 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 				 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 				 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-			 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-			 AND adj6.intItemUOMId = @intItemUOMId
+			 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+			 WHERE adj6.intItemUOMId = @intItemUOMId
 			 AND adj7.intItemId = @intItemId
 			 AND adj2.intItemLocationId = @intItemLocationId
 			 AND adj1.intItemPricingId = @intItemPricingId
@@ -710,8 +709,8 @@ BEGIN
 					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-				 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-				 AND adj6.intItemUOMId = @intItemUOMId
+				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+				 WHERE adj6.intItemUOMId = @intItemUOMId
 				 AND adj7.intItemId = @intItemId
 				 AND adj2.intItemLocationId = @intItemLocationId
 				 AND adj1.intItemPricingId = @intItemPricingId
@@ -733,8 +732,8 @@ BEGIN
 					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-				 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-				 AND adj6.intItemUOMId = @intItemUOMId
+				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+				 WHERE adj6.intItemUOMId = @intItemUOMId
 				 AND adj7.intItemId = @intItemId
 				 AND adj2.intItemLocationId = @intItemLocationId
 				 AND adj1.intItemPricingId = @intItemPricingId
@@ -783,8 +782,8 @@ BEGIN
 					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-				 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-				 AND adj6.intItemUOMId = @intItemUOMId
+				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+				 WHERE adj6.intItemUOMId = @intItemUOMId
 				 AND adj7.intItemId = @intItemId
 				 AND adj2.intItemLocationId = @intItemLocationId
 				 AND adj1.intItemPricingId = @intItemPricingId
@@ -806,8 +805,8 @@ BEGIN
 					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
 					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
 					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-				 WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-				 AND adj6.intItemUOMId = @intItemUOMId
+				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+				 WHERE adj6.intItemUOMId = @intItemUOMId
 				 AND adj7.intItemId = @intItemId
 				 AND adj2.intItemLocationId = @intItemLocationId
 				 AND adj1.intItemPricingId = @intItemPricingId
