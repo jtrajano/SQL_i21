@@ -25,18 +25,30 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.ysnDriverOff,
 	SC.ysnSplitWeightTicket,
 	SC.ysnGrossManual,
+	SC.ysnGross1Manual,
+	SC.ysnGross2Manual,
 	SC.dblGrossWeight, 
+	SC.dblGrossWeight1, 
+	SC.dblGrossWeight2, 
 	SC.dblGrossWeightOriginal,
 	SC.dblGrossWeightSplit1,
 	SC.dblGrossWeightSplit2, 
 	SC.dtmGrossDateTime,
+	SC.dtmGrossDateTime1,
+	SC.dtmGrossDateTime2,
 	SC.intGrossUserId, 
 	SC.ysnTareManual,
+	SC.ysnTare1Manual,
+	SC.ysnTare2Manual,
 	SC.dblTareWeight, 
+	SC.dblTareWeight1, 
+	SC.dblTareWeight2, 
 	SC.dblTareWeightOriginal,
 	SC.dblTareWeightSplit1,
 	SC.dblTareWeightSplit2, 
 	SC.dtmTareDateTime,
+	SC.dtmTareDateTime1,
+	SC.dtmTareDateTime2,
 	SC.intTareUserId, 
 	SC.dblGrossUnits,
 	SC.dblNetUnits, 
@@ -73,6 +85,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.strLoadNumber,
 	SC.intLoadLocationId,
 	SC.intAxleCount,
+	SC.intAxleCount1,
+	SC.intAxleCount2,
 	SC.strBinNumber,
 	SC.strPitNumber,
 	SC.intGradingFactor,
@@ -105,6 +119,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.dblShrink,
 	SC.dblConvertedUOMQty,
 	SC.strCostMethod,
+	SC.strElevatorReceiptNumber,
 	(SC.dblUnitPrice + SC.dblUnitBasis) AS dblCashPrice,
 	ISNULL (tblGRStorageType.strStorageTypeDescription, CASE WHEN
 	SC.strDistributionOption = 'CNT' THEN 'Contract' WHEN
@@ -130,7 +145,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	(SELECT strCompanyName FROM tblSMCompanySetup) AS strCompanyName,
 	(SELECT strAddress FROM tblSMCompanySetup) AS strAddress,
 	vyuEMSearchShipVia.strName AS strHaulerName,
-	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
+	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision,
+	tblSCScaleSetup.ysnMultipleWeights
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId

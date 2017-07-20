@@ -121,6 +121,7 @@
 	,SCTicket.strFarmDescription
 	,SCTicket.intDeliverySheetId
 	,SCTicket.strDeliverySheetNumber
+	,SCTicket.strElevatorReceiptNumber
 	FROM tblSCUncompletedTicketAlert SCAlert,vyuSCTicketView SCTicket
 	WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
 	AND ysnHasGeneratedTicketNumber = 1

@@ -29,7 +29,9 @@ BEGIN
 	,@dblQtyToDistribute AS NUMERIC(38, 20);
 
 	SELECT @dblTicketGrossUnit = dblGrossUnits, @dblTicketShrinkUnit = dblShrink, @dblTicketNetUnits = dblNetUnits 
-	,@dblTicketGrossWeight = dblGrossWeight, @dblTicketTareWeight = dblTareWeight, @intItemId = intItemId
+	, @dblTicketGrossWeight = (dblGrossWeight + ISNULL(dblGrossWeight1, 0) + ISNULL(dblGrossWeight2, 0))
+	, @dblTicketTareWeight = (dblTareWeight + ISNULL(dblTareWeight1, 0) + ISNULL(dblTareWeight2, 0))
+	, @intItemId = intItemId
 	FROM tblSCTicket WHERE intTicketId = @intTicketId
 	SELECT @dblDiscountAmount = dblDiscountAmount, @strDiscountCalculationOptionId = strCalcMethod FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId;
 	SELECT @dblSplitPercent = dblSplitPercent FROM tblSCTicketSplit WHERE intCustomerId = @intEntityId AND intTicketId = @intTicketId;
