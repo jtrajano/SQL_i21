@@ -377,6 +377,23 @@ BEGIN
 		AND C.intTransactionType = 2 AND D.ysnRestricted = 1 AND D.intContractDetailId > 0
 		AND B.dblPayment > 0 
 
+		--DO NOT ALLOW TO POST NOT PAY TO ADDRESS SPECIFIED AND MULTIPLE PAY TO HAS BEEN ON THE DETAILS
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Invalid pay to address. Multiple pay to address has been set to payment details.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND EXISTS (
+			SELECT 1 FROM tblAPPaymentDetail B
+			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+			WHERE A.intPaymentId = B.intPaymentId
+			GROUP BY C.intPayToAddressId
+			HAVING COUNT(C.intPayToAddressId) > 1
+		)
+
 	END
 	ELSE
 	BEGIN

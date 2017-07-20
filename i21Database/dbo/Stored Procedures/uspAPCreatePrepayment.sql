@@ -30,6 +30,7 @@ BEGIN
 	DECLARE @location INT;
 	DECLARE @currency INT;
 	DECLARE @paymentRecordNum NVARCHAR(50);
+	DECLARE @payToAddress INT;
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -39,6 +40,7 @@ BEGIN
 	SELECT TOP 1 @vendorId = C.[intEntityId] 
 			,@location = A.intShipToId
 			,@currency = A.intCurrencyId
+			,@payToAddress = A.intPayToAddressId
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
@@ -138,6 +140,7 @@ BEGIN
 		[intAccountId],
 		[intBankAccountId],
 		[intPaymentMethodId],
+		[intPayToAddressId],
 		[intCurrencyId],
 		[intEntityVendorId],
 		[strPaymentInfo],
@@ -155,6 +158,7 @@ BEGIN
 		[intAccountId]			= @bankGLAccountId,
 		[intBankAccountId]		= @bankAccount,
 		[intPaymentMethodId]	= @paymentMethod,
+		[intPayToAddressId]		= @payToAddress,
 		[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount), (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'')),
 		[intEntityVendorId]		= @vendorId,
 		[strPaymentInfo]		= @paymentInfo,
@@ -183,15 +187,15 @@ BEGIN
 		[dblInterest],
 		[dblTotal])
 	SELECT 
-		[intPaymentId]	= @paymentId,
-		[intBillId]		= A.intBillId,
-		[intAccountId]	= prepayAccount.intAccountId,
-		[dblDiscount]	= 0,
-		[dblWithheld]	= 0,
-		[dblAmountDue]	= CASE WHEN (A.dblAmountDue < 0) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END,
-		[dblPayment]	= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END,
-		[dblInterest]	= 0, --TODO
-		[dblTotal]		= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END 
+		[intPaymentId]		= @paymentId,
+		[intBillId]			= A.intBillId,
+		[intAccountId]		= prepayAccount.intAccountId,
+		[dblDiscount]		= 0,
+		[dblWithheld]		= 0,
+		[dblAmountDue]		= CASE WHEN (A.dblAmountDue < 0) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END,
+		[dblPayment]		= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END,
+		[dblInterest]		= 0, --TODO
+		[dblTotal]			= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END 
 	FROM tblAPBill A
 	CROSS APPLY
 	(
@@ -214,6 +218,7 @@ BEGIN
 	 @payment DECIMAL(18, 6),
 	 @datePaid DATETIME,
 	 @isPost BIT,
+	 @payToAddress INT,
 	 @paymentId INT OUTPUT',
 	 @userId = @userId,
 	 @billId = @billId,
@@ -227,6 +232,7 @@ BEGIN
 	 @payment = @amountPaid,
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
+	 @payToAddress = @payToAddress,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 

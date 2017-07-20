@@ -3,6 +3,7 @@
     [intAccountId]        INT             NOT NULL,
     [intBankAccountId]    INT             NOT NULL,
     [intPaymentMethodId]    INT             NOT NULL,
+	[intPayToAddressId]  INT             NULL,
     [intCurrencyId]       INT             NOT NULL,
     [strPaymentInfo]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strNotes]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

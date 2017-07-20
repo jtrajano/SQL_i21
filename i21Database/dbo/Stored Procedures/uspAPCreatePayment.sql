@@ -56,6 +56,7 @@ BEGIN
 	DECLARE @autoPay BIT = 0; --Automatically compute the payment
 	DECLARE @paymentRecordNum NVARCHAR(50)
 	DECLARE @defaultPaymentInfo NVARCHAR(500)
+	DECLARE @payToAddress INT;
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -67,6 +68,7 @@ BEGIN
 		,@vendorWithhold = C.ysnWithholding
 		,@location = A.intShipToId
 		,@paymentMethodId = CASE WHEN @paymentMethodId IS NULL THEN C.intPaymentMethodId ELSE @paymentMethodId END
+		,@payToAddress = A.intPayToAddressId
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
@@ -189,6 +191,7 @@ BEGIN
 		[intAccountId],
 		[intBankAccountId],
 		[intPaymentMethodId],
+		[intPayToAddressId],
 		[intCurrencyId],
 		[intEntityVendorId],
 		[strPaymentInfo],
@@ -205,6 +208,7 @@ BEGIN
 		[intAccountId]			= @bankGLAccountId,
 		[intBankAccountId]		= @bankAccount,
 		[intPaymentMethodId]	= @paymentMethod,
+		[intPayToAddressId]		= @payToAddress,
 		[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount), (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'')),
 		[intEntityVendorId]		= @vendorId,
 		[strPaymentInfo]		= @paymentInfo,
@@ -258,6 +262,7 @@ BEGIN
 	 @payment DECIMAL(18, 6),
 	 @datePaid DATETIME,
 	 @isPost BIT,
+	 @payToAddress INT,
 	 @paymentId INT OUTPUT',
 	 @userId = @userId,
 	 @billId = @billId,
@@ -271,6 +276,7 @@ BEGIN
 	 @payment = @amountPaid,
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
+	 @payToAddress = @payToAddress,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 

@@ -78,13 +78,13 @@ BEGIN
 		[intCurrencyId] = A.intCurrencyId,
 		[dblExchangeRate] = 0,
 		[dtmDate] = A.dtmDatePaid,
-		[strPayee] = ISNULL(PayTo.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityId)),
+		[strPayee] = ISNULL(E.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityId)),
 		[intPayeeId] = B.intEntityId,
-		[strAddress] = PayTo.strAddress,
-		[strZipCode] = PayTo.strZipCode,
-		[strCity] = PayTo.strCity,
-		[strState] = PayTo.strState,
-		[strCountry] = PayTo.strCountry,
+		[strAddress] = E.strAddress,
+		[strZipCode] = E.strZipCode,
+		[strCity] = E.strCity,
+		[strState] = E.strState,
+		[strCountry] = E.strCountry,
 		[dblAmount] = A.dblAmountPaid + A.dblWithheld,
 		[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 		[strMemo] = A.strNotes,
@@ -103,22 +103,23 @@ BEGIN
 		[intConcurrencyId] = 1
 	FROM tblAPPayment A
 		INNER JOIN tblAPVendor B
-			ON A.[intEntityId] = B.[intEntityId]
-		CROSS APPLY
-		(
-			SELECT 
-				TOP 1 
-				E.strAddress,
-				E.strCity,
-				E.strZipCode,
-				E.strState,
-				E.strCountry,
-				E.strCheckPayeeName
-			FROM tblAPPaymentDetail C
-			INNER JOIN tblAPBill D ON C.intBillId = D.intBillId
-			INNER JOIN tblEMEntityLocation E ON D.intPayToAddressId = E.intEntityLocationId AND D.intEntityVendorId = E.intEntityId
-			WHERE C.intPaymentId = A.intPaymentId
-		) PayTo
+			ON A.[intEntityVendorId] = B.[intEntityId]
+		INNER JOIN tblEMEntityLocation E ON A.intPayToAddressId = E.intEntityLocationId
+		--CROSS APPLY
+		--(
+		--	SELECT 
+		--		TOP 1 
+		--		E.strAddress,
+		--		E.strCity,
+		--		E.strZipCode,
+		--		E.strState,
+		--		E.strCountry,
+		--		E.strCheckPayeeName
+		--	FROM tblAPPaymentDetail C
+		--	INNER JOIN tblAPBill D ON C.intBillId = D.intBillId
+		--	INNER JOIN tblEMEntityLocation E ON D.intPayToAddressId = E.intEntityLocationId AND D.intEntityVendorId = E.intEntityId
+		--	WHERE C.intPaymentId = A.intPaymentId
+		--) PayTo
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	EXEC uspCMCreateBankTransactionEntries @BankTransactionEntries = @bankTransaction
