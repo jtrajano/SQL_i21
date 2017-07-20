@@ -47,7 +47,7 @@ BEGIN TRY
 
 	SELECT @intScaleTicketId = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'intScaleTicketId'
+	WHERE [fieldname] = 'intTicketId'
 
 	IF EXISTS (SELECT 1 FROM tblSCTicket WHERE intTicketId = @intScaleTicketId  AND strElevatorReceiptNumber IS NOT NULL)
 	BEGIN
