@@ -11,24 +11,33 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-
-
-
 --insert extra inventory accounts to Category GL table
 --run this after class/category is imported
-
-insert into tblICCategoryAccount 
-(intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
-(Select intCategoryId, intAccountCategoryId, intAccountId, 1 from tblICCategory C 
-cross join 
-(select top 1 51 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%adjustment%'
-union
-select top 1 46 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%transit%'
---union
---select top 1 44 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%variance%'
---union
---select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%Clearing%'
-) ac
-where C.strInventoryType = 'Inventory' )
+MERGE tblICCategoryAccount AS [Target]
+USING
+(
+	SELECT
+		  intCategoryId
+		, intAccountCategoryId
+		, intAccountId
+		, intConcurrencyId	= 1
+	FROM tblICCategory C 
+	CROSS JOIN
+	(
+		select top 1 51 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%adjustment%'
+		union
+		select top 1 46 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%transit%'
+		--union
+		--select top 1 44 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%variance%'
+		--union
+		--select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%Clearing%'
+	) ac
+	WHERE C.strInventoryType = 'Inventory'
+) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+ON [Target].intAccountCategoryId = [Source].intAccountCategoryId
+	AND [Target].intCategoryId = [Source].intCategoryId
+WHEN NOT MATCHED THEN
+INSERT (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+VALUES ([Source].intCategoryId, [Source].intAccountCategoryId, [Source].intAccountId, [Source].intConcurrencyId);
 
 GO
