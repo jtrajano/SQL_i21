@@ -5469,6 +5469,8 @@
     <Build Include="dbo\Tables\tblSMMultiCompany.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\28_MultiCompany.sql" />
     <Build Include="dbo\Views\vyuCTDashboardJDEHistorical.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotCodeByProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInventoryByItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

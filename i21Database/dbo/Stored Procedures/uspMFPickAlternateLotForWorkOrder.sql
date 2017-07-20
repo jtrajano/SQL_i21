@@ -6,19 +6,23 @@
 AS
 BEGIN TRY
 	DECLARE @intAlternateLotId INT
-	DECLARE @intStorageLocationId INT
-	DECLARE @dblAlternateLotQty NUMERIC(38, 20)
-	DECLARE @dblAlternateLotWeight NUMERIC(38, 20)
-	DECLARE @dtmAlternateLotExpiryDate DATETIME
-	DECLARE @intTransactionCount INT
-	DECLARE @dblRequiredTaskQty NUMERIC(18, 6)
-	DECLARE @dblRequiredTaskWeight NUMERIC(18, 6)
-	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @intItemId INT
-	DECLARE @intAlternateItemId INT
-	DECLARE @intLotStatusId INT
+		,@intStorageLocationId INT
+		,@dblAlternateLotQty NUMERIC(38, 20)
+		,@dblAlternateLotWeight NUMERIC(38, 20)
+		,@dtmAlternateLotExpiryDate DATETIME
+		,@intTransactionCount INT
+		,@dblRequiredTaskQty NUMERIC(18, 6)
+		,@dblRequiredTaskWeight NUMERIC(18, 6)
+		,@strErrMsg NVARCHAR(MAX)
+		,@intItemId INT
+		,@intAlternateItemId INT
+		,@intLotStatusId INT
 		,@intBondStatusId INT
 		,@strPrimaryStatus NVARCHAR(50)
+		,@intCustomerLabelTypeId INT
+		,@intEntityCustomerId INT
+		,@strReferenceNo NVARCHAR(50)
+		,@dblLotPickQty NUMERIC(18, 6)
 
 	SELECT @intStorageLocationId = intStorageLocationId
 	FROM tblICStorageLocation
@@ -38,6 +42,7 @@ BEGIN TRY
 
 	SELECT @dblRequiredTaskWeight = dblWeight
 		,@dblRequiredTaskQty = dblQty
+		,@dblLotPickQty=dblPickQty 
 	FROM tblMFTask
 	WHERE intTaskId = @intTaskId
 
@@ -99,21 +104,19 @@ BEGIN TRY
 	END
 
 	IF EXISTS (
-			(
+
 				SELECT 1
 				FROM tblMFTask
 				WHERE intLotId = @intAlternateLotId
-				)
-			)
+				AND intTaskStateId <>4
+			) AND @intLotId <> @intAlternateLotId
 	BEGIN
-		IF (@intLotId <> @intAlternateLotId)
-		BEGIN
 			RAISERROR (
 					'SCANNED LOT IS ASSOCIATED WITH A DIFFERENT TASK. CANNOT CONTINUE'
 					,16
 					,1
 					)
-		END
+
 	END
 
 	IF (@strPrimaryStatus <> 'Active')
@@ -138,6 +141,25 @@ BEGIN TRY
 				)
 	END
 
+	SELECT @strReferenceNo = strReferenceNo
+	FROM tblMFOrderHeader OH
+	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
+	WHERE intOrderHeaderId = @intOrderHeaderId
+
+	SELECT @intEntityCustomerId = intEntityCustomerId
+	FROM tblICInventoryShipment
+	WHERE strShipmentNumber = @strReferenceNo
+
+	SELECT @intCustomerLabelTypeId = intCustomerLabelTypeId
+	FROM tblMFItemOwner
+	WHERE intOwnerId = @intEntityCustomerId
+		AND intCustomerLabelTypeId IS NOT NULL
+
+		IF @intCustomerLabelTypeId IS NULL
+	BEGIN
+		SELECT @intCustomerLabelTypeId = 0
+	END
+
 	BEGIN TRANSACTION
 
 	IF @intOrderHeaderId IS NOT NULL
@@ -148,11 +170,11 @@ BEGIN TRY
 				AND intOrderTypeId = 1
 			)
 		AND EXISTS (
-				SELECT 1
-				FROM tblMFTask
-				WHERE intLotId = @intLotId
-					AND intTaskId = @intTaskId
-				)
+			SELECT 1
+			FROM tblMFTask
+			WHERE intLotId = @intLotId
+				AND intTaskId = @intTaskId
+			)
 	BEGIN
 		DECLARE @dblPickQty NUMERIC(38, 20)
 			,@intPickItemUOMId INT
@@ -172,6 +194,14 @@ BEGIN TRY
 			,intItemUOMId = @intPickItemUOMId
 		WHERE intLotId = @intLotId
 			AND intTaskId = @intTaskId
+
+		IF @intCustomerLabelTypeId = 2
+		BEGIN
+			UPDATE tblMFOrderManifest
+			SET intLotId = @intAlternateLotId
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intLotId = @intLotId
+		END
 	END
 	ELSE
 	BEGIN
@@ -187,6 +217,14 @@ BEGIN TRY
 				,intFromStorageLocationId = @intStorageLocationId
 			WHERE intLotId = @intLotId
 				AND intTaskId = @intTaskId
+
+			IF @intCustomerLabelTypeId = 2
+			BEGIN
+				UPDATE tblMFOrderManifest
+				SET intLotId = @intAlternateLotId
+				WHERE intOrderHeaderId = @intOrderHeaderId
+					AND intLotId = @intLotId
+			END
 		END
 	END
 

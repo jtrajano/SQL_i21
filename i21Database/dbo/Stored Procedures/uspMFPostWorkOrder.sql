@@ -28,6 +28,8 @@ BEGIN TRY
 		,@str3rdPartyPalletsItemId NVARCHAR(MAX)
 		,@dblProduceQty1 DECIMAL(38, 24)
 		,@dblPhysicalCount1 DECIMAL(38, 24)
+		,@intItemUOMId1 int
+		,@intPhysicalItemUOMId1 int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -165,8 +167,11 @@ BEGIN TRY
 								AND ysnConsumptionRequired = 1
 								AND intWorkOrderId = @intWorkOrderId
 							)
+					if @dblProduceQty is null
+					Select @dblProduceQty=0
 
 					SELECT @dblProduceQty1 = SUM(dblQuantity)
+							,@intItemUOMId1 = MIN(intItemUOMId) 
 					FROM dbo.tblMFWorkOrderProducedLot WP
 					WHERE WP.intWorkOrderId = @intWorkOrderId
 						AND WP.ysnProductionReversed = 0
@@ -179,7 +184,10 @@ BEGIN TRY
 								AND intWorkOrderId = @intWorkOrderId
 							)
 
-					IF @dblProduceQty > 0
+					if @intItemUOMId is null
+					Select @intItemUOMId=@intItemUOMId1
+
+					IF @dblProduceQty >= 0
 					BEGIN
 						EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 							,@dblProduceQty = @dblProduceQty
@@ -242,8 +250,11 @@ BEGIN TRY
 								AND ysnConsumptionRequired = 1
 								AND intWorkOrderId = @intWorkOrderId
 							)
+					if @dblPhysicalCount is null
+					Select @dblPhysicalCount=0
 
 					SELECT @dblPhysicalCount1 = SUM(dblPhysicalCount)
+					,@intPhysicalItemUOMId1 = MIN(intPhysicalItemUOMId) 
 					FROM dbo.tblMFWorkOrderProducedLot WP
 					WHERE WP.intWorkOrderId = @intWorkOrderId
 						AND WP.ysnProductionReversed = 0
@@ -255,8 +266,10 @@ BEGIN TRY
 								AND ysnConsumptionRequired = 1
 								AND intWorkOrderId = @intWorkOrderId
 							)
+					if @intPhysicalItemUOMId is null
+					Select @intPhysicalItemUOMId=@intPhysicalItemUOMId1
 
-					IF @dblPhysicalCount > 0
+					IF @dblPhysicalCount >= 0
 					BEGIN
 						EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 							,@dblProduceQty = @dblPhysicalCount

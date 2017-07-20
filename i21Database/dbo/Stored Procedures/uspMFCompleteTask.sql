@@ -23,7 +23,6 @@ BEGIN TRY
 		,@dblAllocatedQty NUMERIC(38, 20)
 		,@dblQty NUMERIC(38, 20)
 		,@ysnLoadProcessEnabled BIT
-		,@strReferenceNo NVARCHAR(50)
 		,@intDockDoorId INT
 	DECLARE @tblTasks TABLE (
 		intTaskRecordId INT Identity(1, 1)
@@ -38,6 +37,9 @@ BEGIN TRY
 		,@strOrderType NVARCHAR(50)
 		,@intStagingLocationId INT
 		,@intDefaultShipmentDockDoorLocation INT
+		,@intCustomerLabelTypeId INT
+		,@intEntityCustomerId INT
+		,@strReferenceNo nvarchar(50)
 
 	SELECT @ysnLoadProcessEnabled = ysnLoadProcessEnabled
 		,@intDefaultShipmentDockDoorLocation = intDefaultShipmentDockDoorLocation
@@ -48,15 +50,34 @@ BEGIN TRY
 		SELECT @ysnLoadProcessEnabled = 0
 	END
 
-	BEGIN TRANSACTION
+	DECLARE @intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
 
 	SELECT @strOrderNo = OH.strOrderNo
 		,@strOrderType = OT.strOrderType
-		,@strReferenceNo = strReferenceNo
 		,@intStagingLocationId = OH.intStagingLocationId
+		,@strReferenceNo = strReferenceNo
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
+
+	SELECT @intEntityCustomerId = intEntityCustomerId
+	FROM tblICInventoryShipment
+	WHERE strShipmentNumber = @strReferenceNo
+
+	SELECT @intCustomerLabelTypeId = intCustomerLabelTypeId
+	FROM tblMFItemOwner
+	WHERE intOwnerId = @intEntityCustomerId
+		AND intCustomerLabelTypeId IS NOT NULL
+
+		IF @intCustomerLabelTypeId IS NULL
+	BEGIN
+		SELECT @intCustomerLabelTypeId = 0
+	END
 
 	IF ISNULL(@intTaskId, 0) <> 0
 	BEGIN
@@ -131,7 +152,8 @@ BEGIN TRY
 			AND intSubLocationId = @intNewSubLocationId
 			AND intStorageLocationId = @intNewStorageLocationId
 
-		IF @ysnLoadProcessEnabled = 0 OR @strOrderType <> 'INVENTORY SHIPMENT STAGING'
+		IF @ysnLoadProcessEnabled = 0
+			OR @strOrderType <> 'INVENTORY SHIPMENT STAGING'
 		BEGIN
 			UPDATE tblMFTask
 			SET intTaskStateId = 4
@@ -185,6 +207,7 @@ BEGIN TRY
 			)
 
 		IF @ysnLoad = 0
+			AND @intCustomerLabelTypeId <> 2
 		BEGIN
 			INSERT INTO tblMFOrderManifest (
 				intConcurrencyId
@@ -204,6 +227,10 @@ BEGIN TRY
 				,@intUserId
 				,GetDate()
 				)
+		END
+		Else IF @intCustomerLabelTypeId = 2
+		BEGIN
+			Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
 		END
 
 		IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
@@ -414,7 +441,8 @@ BEGIN TRY
 				AND intSubLocationId = @intNewSubLocationId
 				AND intStorageLocationId = @intNewStorageLocationId
 
-			IF @ysnLoadProcessEnabled = 0 OR @strOrderType <> 'INVENTORY SHIPMENT STAGING'
+			IF @ysnLoadProcessEnabled = 0
+				OR @strOrderType <> 'INVENTORY SHIPMENT STAGING'
 			BEGIN
 				UPDATE tblMFTask
 				SET intTaskStateId = 4
@@ -468,6 +496,7 @@ BEGIN TRY
 				)
 
 			IF @ysnLoad = 0
+				AND @intCustomerLabelTypeId <> 2
 			BEGIN
 				INSERT INTO tblMFOrderManifest (
 					intConcurrencyId
@@ -488,7 +517,10 @@ BEGIN TRY
 					,GetDate()
 					)
 			END
-
+			Else IF @intCustomerLabelTypeId = 2
+			BEGIN
+				Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
+			END
 			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
 				AND (
 					(
@@ -612,39 +644,46 @@ BEGIN TRY
 	END
 	ELSE IF (
 			@intRemainingTasks = 0
-			AND (@ysnLoadProcessEnabled = 0 OR @strOrderType <> 'INVENTORY SHIPMENT STAGING')
-			) 
+			AND (
+				@ysnLoadProcessEnabled = 0
+				OR @strOrderType <> 'INVENTORY SHIPMENT STAGING'
+				)
+			)
 	BEGIN
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 6
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
 	ELSE IF @intRemainingTasks = 0
-		AND @ysnLoadProcessEnabled = 1 and @ysnLoad =0
+		AND @ysnLoadProcessEnabled = 1
+		AND @ysnLoad = 0
 	BEGIN
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 6
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
 	ELSE IF @intRemainingTasks = 0
-		AND @ysnLoadProcessEnabled = 1 and @ysnLoad =1
+		AND @ysnLoadProcessEnabled = 1
+		AND @ysnLoad = 1
 	BEGIN
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 7
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
-
-	COMMIT TRANSACTION
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
-	ROLLBACK TRANSACTION
+	IF XACT_STATE() != 0
+		AND @intTransactionCount = 0
+		ROLLBACK TRANSACTION
 
 	SET @strErrMsg = ERROR_MESSAGE()
 
 	IF @strErrMsg != ''
 	BEGIN
-		SET @strErrMsg =  @strErrMsg
+		SET @strErrMsg = @strErrMsg
 
 		RAISERROR (
 				@strErrMsg

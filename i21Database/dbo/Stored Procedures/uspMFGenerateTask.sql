@@ -40,13 +40,11 @@ BEGIN TRY
 		,@intCategoryId INT
 		,@ysnAllowPartialPallet BIT
 		,@dblSplitAndPickQty NUMERIC(18, 6)
-		,@ysnPickByQty bit
-		,@intRequiredUOMId int
-		,@intLotItemUOMId int
+		,@ysnPickByQty BIT
+		,@intRequiredUOMId INT
+		,@intLotItemUOMId INT
 
-	Select @ysnPickByQty=1
-
-	
+	SELECT @ysnPickByQty = 1
 
 	DECLARE @tblTaskGenerated TABLE (
 		intTaskRecordId INT Identity(1, 1)
@@ -63,6 +61,7 @@ BEGIN TRY
 		,@strPackagingCategory NVARCHAR(50)
 		,@intPMCategoryId INT
 		,@strPickByFullPallet NVARCHAR(50)
+		,@intCustomerLabelTypeId INT
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -245,7 +244,8 @@ BEGIN TRY
 			SET @ysnStrictTracking = NULL
 			SET @dblQty = NULL
 			SET @intLineItemLotId = NULL
-			Select @intRequiredUOMId=NULL
+
+			SELECT @intRequiredUOMId = NULL
 
 			SELECT @intCategoryId = NULL
 
@@ -256,7 +256,7 @@ BEGIN TRY
 				,@intItemId = intItemId
 				,@dblRequiredQty = dblRequiredQty
 				,@dblRequiredWeight = dblRequiredWeight
-				,@intRequiredUOMId=intItemUOMId
+				,@intRequiredUOMId = intItemUOMId
 				,@ysnStrictTracking = ysnStrictTracking
 				,@intLineItemLotId = intLotId
 				,@intCategoryId = intCategoryId
@@ -271,6 +271,7 @@ BEGIN TRY
 
 				SELECT @intReceivedLife = intReceivedLife
 					,@ysnAllowPartialPallet = ysnAllowPartialPallet
+					,@intCustomerLabelTypeId = intCustomerLabelTypeId
 				FROM tblMFItemOwner
 				WHERE intOwnerId = @intEntityCustomerId
 					AND intItemId = @intItemId
@@ -280,6 +281,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @intReceivedLife = intReceivedLife
 						,@ysnAllowPartialPallet = ysnAllowPartialPallet
+						,@intCustomerLabelTypeId = intCustomerLabelTypeId
 					FROM tblMFItemOwner
 					WHERE intOwnerId = @intEntityCustomerId
 				END
@@ -287,6 +289,7 @@ BEGIN TRY
 				IF @ysnAllowPartialPallet IS NULL
 				BEGIN
 					SELECT @ysnAllowPartialPallet = ysnAllowPartialPallet
+						,@intCustomerLabelTypeId = intCustomerLabelTypeId
 					FROM tblMFItemOwner
 					WHERE intOwnerId = @intEntityCustomerId
 				END
@@ -422,6 +425,8 @@ BEGIN TRY
 				,L.dtmManufacturedDate
 				,PL.strParentLotNumber
 				,I.ysnStrictFIFO
+													,I.intUnitPerLayer
+				,I.intLayerPerPallet
 			HAVING (
 					CASE 
 						WHEN L.intWeightUOMId IS NULL
@@ -445,6 +450,18 @@ BEGIN TRY
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 					ELSE '1900-01-01'
+					END ASC
+					,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN CAST(CASE 
+											WHEN (
+													(IsNULL(I.intUnitPerLayer,0) * IsNULL(I.intLayerPerPallet,0) > 0)
+													AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
+													)
+												THEN 0
+											ELSE 1
+											END AS BIT)
+					ELSE '1'
 					END ASC
 				,CASE 
 					WHEN @ysnPickByLotCode = 1
@@ -583,6 +600,8 @@ BEGIN TRY
 				,L.dtmManufacturedDate
 				,PL.strParentLotNumber
 				,I.ysnStrictFIFO
+													,I.intUnitPerLayer
+				,I.intLayerPerPallet
 			HAVING (
 					CASE 
 						WHEN L.intWeightUOMId IS NULL
@@ -606,6 +625,18 @@ BEGIN TRY
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 					ELSE '1900-01-01'
+					END ASC
+					,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN CAST(CASE 
+											WHEN (
+													(IsNULL(I.intUnitPerLayer,0) * IsNULL(I.intLayerPerPallet,0) > 0)
+													AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
+													)
+												THEN 0
+											ELSE 1
+											END AS BIT)
+					ELSE '1'
 					END ASC
 				,CASE 
 					WHEN @ysnPickByLotCode = 1
@@ -750,6 +781,8 @@ BEGIN TRY
 					,L.dtmManufacturedDate
 					,PL.strParentLotNumber
 					,I.ysnStrictFIFO
+														,I.intUnitPerLayer
+				,I.intLayerPerPallet
 				HAVING (
 						CASE 
 							WHEN L.intWeightUOMId IS NULL
@@ -774,6 +807,18 @@ BEGIN TRY
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 						ELSE '1900-01-01'
 						END ASC
+						,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN CAST(CASE 
+											WHEN (
+													(IsNULL(I.intUnitPerLayer,0) * IsNULL(I.intLayerPerPallet,0) > 0)
+													AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
+													)
+												THEN 0
+											ELSE 1
+											END AS BIT)
+					ELSE '1'
+					END ASC
 					,CASE 
 						WHEN @ysnPickByLotCode = 1
 							THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
@@ -904,6 +949,8 @@ BEGIN TRY
 					,L.dtmManufacturedDate
 					,PL.strParentLotNumber
 					,I.ysnStrictFIFO
+														,I.intUnitPerLayer
+				,I.intLayerPerPallet
 				HAVING (
 						CASE 
 							WHEN L.intWeightUOMId IS NULL
@@ -928,6 +975,18 @@ BEGIN TRY
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 						ELSE '1900-01-01'
 						END ASC
+						,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN CAST(CASE 
+											WHEN (
+													(IsNULL(I.intUnitPerLayer,0) * IsNULL(I.intLayerPerPallet,0) > 0)
+													AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
+													)
+												THEN 0
+											ELSE 1
+											END AS BIT)
+					ELSE '1'
+					END ASC
 					,CASE 
 						WHEN @ysnPickByLotCode = 1
 							THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
@@ -966,7 +1025,8 @@ BEGIN TRY
 
 			WHILE (@intLotRecordId IS NOT NULL)
 			BEGIN
-				Select @intLotItemUOMId=NULL
+				SELECT @intLotItemUOMId = NULL
+
 				SELECT @dblQty = dblQty
 					,@intLotId = intLotId
 					,@dblRemainingLotQty = dblRemainingLotQty
@@ -984,7 +1044,7 @@ BEGIN TRY
 							ELSE dblRemainingLotWeight
 							END
 						) --dblRemainingLotWeight
-					,@intLotItemUOMId=intItemUOMId
+					,@intLotItemUOMId = intItemUOMId
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
@@ -1003,7 +1063,8 @@ BEGIN TRY
 						BREAK;
 					END
 				END
-				ELSE IF @strOrderType = 'INVENTORY SHIPMENT STAGING'and @ysnPickByQty=1
+				ELSE IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+					AND @ysnPickByQty = 1
 				BEGIN
 					SELECT @dblSplitAndPickQty = NULL
 
@@ -1021,6 +1082,7 @@ BEGIN TRY
 						,@dblSplitAndPickQty = @dblSplitAndPickQty
 						,@intTaskTypeId = 2
 						,@intItemId = @intItemId
+						,@intOrderDetailId = @intOrderDetailId
 
 					SET @dblRequiredQty = @dblRequiredQty - (
 							CASE 
@@ -1047,6 +1109,7 @@ BEGIN TRY
 						,@dblSplitAndPickWeight = @dblRequiredWeight
 						,@intTaskTypeId = 2
 						,@intItemId = @intItemId
+						,@intOrderDetailId = @intOrderDetailId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 
@@ -1062,6 +1125,7 @@ BEGIN TRY
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@intItemId = @intItemId
+						,@intOrderDetailId = @intOrderDetailId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeight
 
@@ -1085,6 +1149,7 @@ BEGIN TRY
 							,@dblSplitAndPickWeight = @dblRemainingLotWeight
 							,@intTaskTypeId = 2
 							,@intItemId = @intItemId
+							,@intOrderDetailId = @intOrderDetailId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 					END
@@ -1096,6 +1161,7 @@ BEGIN TRY
 							,@dblSplitAndPickWeight = @dblRequiredWeight
 							,@intTaskTypeId = 2
 							,@intItemId = @intItemId
+							,@intOrderDetailId = @intOrderDetailId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblWeight
 					END
@@ -1186,7 +1252,8 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 
-	IF @strOrderType = 'INVENTORY SHIPMENT STAGING' and @ysnPickByQty=1
+	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+		AND @ysnPickByQty = 1
 	BEGIN
 		INSERT INTO @tblTaskGenerated
 		SELECT OD.intItemId
@@ -1265,6 +1332,38 @@ BEGIN TRY
 			FROM @tblTaskGenerated
 			WHERE intTaskRecordId > @intTaskRecordId
 		END
+	END
+
+	IF @intCustomerLabelTypeId = 2
+	BEGIN
+
+		DELETE M
+		FROM tblMFOrderManifest M
+		WHERE intOrderHeaderId = @intOrderHeaderId
+		And (intLotId in (SELECT intLotId
+							FROM tblMFTask
+							WHERE intOrderHeaderId = @intOrderHeaderId
+							AND intTaskStateId<>4) OR Not exists(Select *from tblMFOrderManifestLabel M1 Where M1.intOrderManifestId=M.intOrderManifestId))
+
+		INSERT INTO tblMFOrderManifest (
+			intConcurrencyId
+			,intOrderDetailId
+			,intOrderHeaderId
+			,intLotId
+			,strManifestItemNote
+			,intLastUpdateId
+			,dtmLastUpdateOn
+			)
+		SELECT 1
+			,intOrderDetailId
+			,intOrderHeaderId
+			,intLotId
+			,'Order Staged'
+			,@intEntityUserSecurityId
+			,GetDate()
+		FROM tblMFTask
+		WHERE intOrderHeaderId = @intOrderHeaderId
+		AND intTaskStateId<>4
 	END
 END TRY
 

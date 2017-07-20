@@ -154,8 +154,7 @@ BEGIN TRY
 	--			,@strLotNumber
 	--			)
 	--END
-	IF @dblQty = 0
-		OR EXISTS (
+	IF EXISTS (
 			SELECT 1
 			FROM dbo.tblMFWorkOrderProducedLot
 			WHERE ysnReleased = 1

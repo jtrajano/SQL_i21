@@ -1,41 +1,68 @@
-﻿CREATE PROCEDURE uspMFGetInventoryByParentLot AS
+﻿CREATE PROCEDURE uspMFGetInventoryByParentLot
+AS
+DECLARE @dtmToDate DATETIME
+
+IF @dtmToDate IS NULL
+	SELECT @dtmToDate = DATEADD(MONTH, DATEDIFF(MONTH, - 1, GETDATE()) - 1, - 1) + 1 --First Day of current month
+
+DECLARE @tblMFMultipleLotCode TABLE (
+	strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,dblLotQty NUMERIC(24, 10)
+	,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,dblWOQty NUMERIC(24, 10)
+	,dblWOTotalQty NUMERIC(24, 10)
+	)
+INSERT INTO @tblMFMultipleLotCode (
+	strLotNumber
+	,dblLotQty
+	,strParentLotNumber
+	,dblWOQty
+	,dblWOTotalQty
+	)
+EXEC uspMFGetLotCodeByProduction
+
 SELECT Item
 	,[Item Desc]
 	,[Lot No]
-	,(IsNULl([Active], 0) + IsNULl([On Hold], 0) + IsNULl([Quarantine], 0) + IsNULl([Bond], 0) + IsNULl([Damaged], 0)) AS [On Hand]
+	,(IsNULl([Active], 0) + IsNULl([PR Hold], 0) + IsNULl([QA Hold], 0) + IsNULl([Quarantine], 0) + IsNULl([Bond], 0) + IsNULl([Bond Damaged], 0) + IsNULl([Damaged], 0)) AS [On Hand]
 	,[UOM]
 	,[Active]
-	,[On Hold]
+	,[PR Hold]
+	,[QA Hold]
 	,[Quarantine]
 	,[Bond]
+	,[Bond Damaged]
 	,[Damaged]
 	,intUnitsPerCase AS [Units/Case]
-	,dbo.fnRemoveTrailingZeroes(Ceiling((IsNULl([Active], 0) + IsNULl([On Hold], 0) + IsNULl([Quarantine], 0) + IsNULl([Bond], 0) + IsNULl([Damaged], 0)) / intUnitsPerCase)) AS Pallets
+	,dbo.fnRemoveTrailingZeroes(Ceiling((IsNULl([Active], 0) + IsNULl([PR Hold], 0) + IsNULl([QA Hold], 0) + IsNULl([Quarantine], 0) + IsNULl([Bond], 0) + IsNULl([Bond Damaged], 0) + IsNULl([Damaged], 0)) / intUnitsPerCase)) AS Pallets
 FROM (
 	SELECT I.strItemNo AS [Item]
 		,I.strDescription AS [Item Desc]
-		,PL.strParentLotNumber AS [Lot No]
-		,Convert(decimal(24,0),ROUND(IsNULL((
-			SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU.intItemUOMId, L.dblQty)
-			FROM tblICItemUOM IU
-			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-				AND IU.intItemId = I.intItemId
-				AND UM.strUnitType <> 'Weight'
-			),L.dblQty),0)) AS [Quantity]
-		,IsNULL((
-			SELECT TOP 1 UM.strUnitMeasure
-			FROM tblICItemUOM IU
-			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-				AND IU.intItemId = I.intItemId
-				AND UM.strUnitType <> 'Weight'
-			),UM1.strUnitMeasure) AS [UOM]
+		,ISNULL(MLC.strParentLotNumber, PL.strParentLotNumber) AS [Lot No]
+		,Convert(DECIMAL(24, 0), ROUND(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU.intItemUOMId, ISNULL(MLC.dblLotQty, L.dblQty)), IsNULL((
+							SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU1.intItemUOMId, ISNULL(MLC.dblLotQty, L.dblQty))
+							FROM tblICItemUOM IU1
+							JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
+								AND IU1.intItemId = I.intItemId
+								AND UM1.strUnitType <> 'Weight'
+							), L.dblQty)), 0)) AS [Quantity]
+		,Isnull(I.strExternalGroup, IsNULL((
+					SELECT TOP 1 UM1.strUnitMeasure
+					FROM tblICItemUOM IU1
+					JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
+						AND IU1.intItemId = I.intItemId
+						AND UM1.strUnitType <> 'Weight'
+					), UM2.strUnitMeasure)) AS [UOM]
 		,CASE 
 			WHEN LS1.strSecondaryStatus = 'Bond'
+				AND LS.strSecondaryStatus LIKE '%Damaged'
+				THEN 'Bond Damaged'
+			WHEN LS1.strSecondaryStatus = 'Bond'
 				THEN LS1.strSecondaryStatus
+			WHEN LS.strSecondaryStatus = 'On Hold'
+				THEN 'PR Hold'
 			WHEN LS.strSecondaryStatus LIKE '%Damaged'
 				THEN 'Damaged'
-			WHEN LS.strPrimaryStatus = 'On Hold'
-				THEN LS.strPrimaryStatus
 			ELSE LS.strSecondaryStatus
 			END AS [Lot Status]
 		,(
@@ -47,18 +74,31 @@ FROM (
 			) AS intUnitsPerCase
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+		AND L.intStorageLocationId <> 6
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
-	JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU.intUnitMeasureId
+		AND I.strType = 'Finished Good'
+	--AND intCategoryId NOT IN (
+	--	1
+	--	,4
+	--	)
+	JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
+	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		AND UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 	LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
+	LEFT JOIN @tblMFMultipleLotCode MLC ON MLC.strLotNumber = L.strLotNumber
+	JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = L.intItemUOMId
+	JOIN dbo.tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
 	WHERE dblQty > 0
+		AND L.dtmDateCreated < @dtmToDate
 	) AS SourceTable
 PIVOT(SUM(Quantity) FOR [Lot Status] IN (
 			[Active]
-			,[On Hold]
+			,[PR Hold]
+			,[QA Hold]
 			,[Quarantine]
 			,[Bond]
+			,[Bond Damaged]
 			,[Damaged]
 			)) AS PivotTable;

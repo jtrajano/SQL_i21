@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetPMUsage
 AS
-SELECT DISTINCT Convert(CHAR, W.dtmPlannedDate, 101) [Dump Date]
+SELECT DISTINCT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) [Dump Date]
 	,I.strItemNo [Product]
 	,I.strDescription [Product Description]
 	,(
@@ -12,10 +12,10 @@ SELECT DISTINCT Convert(CHAR, W.dtmPlannedDate, 101) [Dump Date]
 	,W.strWorkOrderNo AS [Job #]
 	,I1.strItemNo AS [WSI Item]
 	,I1.strDescription [WSI Item Description]
-	,SUM(WC.dblIssuedQuantity) + SUM(IsNULL(WC1.dblIssuedQuantity, 0)) AS [Total Consumed Quantity]
+	,Round(SUM(WC.dblIssuedQuantity) + SUM(IsNULL(WC1.dblIssuedQuantity, 0)),0) AS [Total Consumed Quantity]
 	,SUM(WC.dblIssuedQuantity) AS [Used in Packaging]
 	,UM1.strUnitMeasure AS [UOM]
-	,SUM(IsNULL(WC1.dblIssuedQuantity, 0)) AS [Damaged]
+	,Round(SUM(IsNULL(WC1.dblIssuedQuantity, 0)),0) AS [Damaged]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intWorkOrderId = W.intWorkOrderId
 	AND intSequenceNo <> 9999
