@@ -123,7 +123,7 @@ SELECT 	 SQ.intContractDetailId
 		,CH.dtmContractDate
 
 	FROM 		vyuCTContractSequence			 	SQ			
-	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId = 1
+	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId IN(1,2,4)
 	JOIN 		tblCTContractHeader				 	CH	ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
 	LEFT JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=	CH.intContractBasisId
 	LEFT JOIN	tblICItem						 	IM	ON	IM.intItemId						=	SQ.intItemId
