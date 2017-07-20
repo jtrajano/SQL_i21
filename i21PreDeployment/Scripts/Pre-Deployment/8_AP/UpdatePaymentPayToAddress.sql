@@ -3,6 +3,10 @@
 --IF PAY TO ADDRESS IS DISTINCT WE WILL SET IT BY DEFAULT
 IF COL_LENGTH('tblAPPayment','intPayToAddressId') IS NULL
 BEGIN
+
+	ALTER TABLE tblAPPayment
+		ADD intPayToAddressId INT NULL
+
 	UPDATE payment
 		SET payment.intPayToAddressId = details.intPayToAddressId
 	FROM tblAPPayment payment
