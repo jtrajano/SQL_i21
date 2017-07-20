@@ -23,7 +23,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @returnValue AS INT 
+DECLARE @ErrorMessage AS NVARCHAR(4000)
+		,@ErrorSeverity AS INT
+		,@ErrorState AS INT 
+		,@TransactionName AS VARCHAR(32)		
+		,@ReturnValue AS INT 
+		,@TransCount AS INT = @@TRANCOUNT 
 
 -- Clean-up for the temp tables. 
 IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
@@ -64,14 +69,6 @@ BEGIN
 	)
 END 
 
----- Create the temp table if it does not exists. 
---IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevaluedInventoryTransaction')) 
---BEGIN 
---	CREATE TABLE #tmpRevaluedInventoryTransaction (
---		[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED 
---	)
---END 
-
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1
 		--,@INVENTORY_WRITE_OFF_SOLD AS INT = 2
@@ -106,6 +103,8 @@ DECLARE @intId AS INT
 		,@intFobPointId AS TINYINT
 		,@intInTransitSourceLocationId INT 
 
+		,@strTransactionId_Batch AS NVARCHAR(40) 
+
 DECLARE @CostingMethod AS INT 
 		,@TransactionFormName AS NVARCHAR(200)
 		,@InventoryTransactionIdentityId INT
@@ -122,12 +121,6 @@ SELECT	TOP 1
 		@TransactionFormName = strTransactionForm
 FROM	tblICInventoryTransactionType transType INNER JOIN @ItemsToAdjust tmp
 			ON transType.intTransactionTypeId = tmp.intTransactionTypeId
-
------------------------------------------------------------------------------------------------------------------------------
---	EXEC [dbo].[uspICValidateCostingOnPost] 
---		@ItemsToValidate = @ItemsToAdjust
---END
-
 
 BEGIN 
 	DECLARE @Internal_ItemsToAdjust AS ItemCostAdjustmentTableType 
@@ -188,6 +181,10 @@ BEGIN
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
 	FROM	@ItemsToAdjust 
+	ORDER BY	
+		[intItemId]
+		, [intItemLocationId]
+		, [strTransactionId]
 END 
 
 START_LOOP:
@@ -263,6 +260,34 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 -----------------------------------------------------------------------------------------------------------------------------
 WHILE @@FETCH_STATUS = 0
 BEGIN 
+	SET @ReturnValue = 0;
+
+	-- Initialize the @strTransactionId_Batch
+	-- Create a new transaction or do a save point. 
+	IF @strTransactionId_Batch IS NULL 
+	BEGIN 
+		SET @strTransactionId_Batch = @strTransactionId
+		SET @TransactionName = 'Cost Adj ' + @strTransactionId
+
+		-- Create a new transaction if it is missing. 
+		IF ISNULL(@TransCount, 0) = 0 
+		BEGIN 
+			BEGIN TRANSACTION 
+		END 
+
+		-- Do a save point. 
+		SAVE TRAN @TransactionName
+	END 
+	-- If switching from one transaction id to another. 
+	ELSE IF @strTransactionId_Batch <> @strTransactionId
+	BEGIN 
+		-- Create a new save point. 
+		SET @TransactionName = 'Cost Adj ' + @strTransactionId
+		BEGIN 
+			SAVE TRAN @TransactionName
+		END 		
+	END 
+
 	-- Initialize the costing method and negative inventory option. 
 	SET @CostingMethod = NULL;
 
@@ -275,8 +300,8 @@ BEGIN
 	--------------------------------------------------------------------------------
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST) AND (@strActualCostId IS NULL)
-	BEGIN 
-		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnAverageCosting
+	BEGIN TRY
+		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnAverageCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -303,13 +328,23 @@ BEGIN
 			,@intFobPointId
 			,@intInTransitSourceLocationId
 
-		IF @returnValue < 0 RETURN -1;
-	END
+	END TRY
+	BEGIN CATCH
+		-- Get the error details. 
+		SELECT 
+			@ErrorMessage = ERROR_MESSAGE()
+			,@ReturnValue = ERROR_NUMBER()
+			,@ErrorSeverity = ERROR_SEVERITY()
+			,@ErrorState = XACT_STATE()
+
+		-- Rollback to the last save point. 
+		ROLLBACK TRAN @TransactionName
+	END CATCH
 
 	-- FIFO
 	IF (@CostingMethod = @FIFO) AND (@strActualCostId IS NULL)
-	BEGIN 
-		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnFIFOCosting
+	BEGIN TRY
+		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnFIFOCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -335,14 +370,23 @@ BEGIN
 			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
+	END TRY
+	BEGIN CATCH
+		-- Get the error details. 
+		SELECT 
+			@ErrorMessage = ERROR_MESSAGE()
+			,@ReturnValue = ERROR_NUMBER()
+			,@ErrorSeverity = ERROR_SEVERITY()
+			,@ErrorState = XACT_STATE()
 
-		IF @returnValue < 0 RETURN -1;
-	END
+		-- Rollback to the last save point. 
+		ROLLBACK TRAN @TransactionName
+	END CATCH
 
 	-- LIFO
 	IF (@CostingMethod = @LIFO) AND (@strActualCostId IS NULL)
-	BEGIN 
-		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnLIFOCosting
+	BEGIN TRY
+		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnLIFOCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -368,14 +412,23 @@ BEGIN
 			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
+	END TRY
+	BEGIN CATCH
+		-- Get the error details. 
+		SELECT 
+			@ErrorMessage = ERROR_MESSAGE()
+			,@ReturnValue = ERROR_NUMBER()
+			,@ErrorSeverity = ERROR_SEVERITY()
+			,@ErrorState = XACT_STATE()
 
-		IF @returnValue < 0 RETURN -1;
-	END
+		-- Rollback to the last save point. 
+		ROLLBACK TRAN @TransactionName
+	END CATCH
 
 	-- Lot Costing
 	IF (@CostingMethod = @LOTCOST) AND (@strActualCostId IS NULL)
-	BEGIN 
-		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnLotCosting
+	BEGIN TRY
+		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnLotCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -402,14 +455,23 @@ BEGIN
 			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
+	END TRY
+	BEGIN CATCH
+		-- Get the error details. 
+		SELECT 
+			@ErrorMessage = ERROR_MESSAGE()
+			,@ReturnValue = ERROR_NUMBER()
+			,@ErrorSeverity = ERROR_SEVERITY()
+			,@ErrorState = XACT_STATE()
 
-		IF @returnValue < 0 RETURN -1;
-	END
+		-- Rollback to the last save point. 
+		ROLLBACK TRAN @TransactionName
+	END CATCH
 
 	-- Actual Costing
 	IF (ISNULL(@strActualCostId, '') <> '')
-	BEGIN 
-		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnActualCosting
+	BEGIN TRY
+		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnActualCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -436,9 +498,37 @@ BEGIN
 			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
+	END TRY
+	BEGIN CATCH
+		-- Get the error details. 
+		SELECT 
+			@ErrorMessage = ERROR_MESSAGE()
+			,@ReturnValue = ERROR_NUMBER()
+			,@ErrorSeverity = ERROR_SEVERITY()
+			,@ErrorState = XACT_STATE()
 
-		IF @returnValue < 0 RETURN -1;
-	END
+		-- Rollback to the last save point. 
+		ROLLBACK TRAN @TransactionName
+	END CATCH
+
+	-- If there is an error, do a rollback for that particular cost adjustment, 
+	-- log the error, 
+	-- remove that transaction,  
+	-- and continue with loop to process the next item in line. 
+	IF ISNULL(@ReturnValue, 0) <> 0 
+	BEGIN 
+		EXEC uspICLogPostResult
+			@strMessage = @ErrorMessage
+			,@intErrorId = @ReturnValue
+			,@strTransactionType = 'Cost Adjustment'
+			,@strTransactionId = @strTransactionId
+			,@intTransactionId = @intTransactionId
+			,@strBatchNumber = @strBatchId
+			,@intItemId = @intItemId
+			,@intItemLocationId = @intItemLocationId
+
+		DELETE FROM @Internal_ItemsToAdjust WHERE strTransactionId = @strTransactionId
+	END 
 
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItemsToAdjust INTO 
@@ -475,6 +565,18 @@ END;
 
 CLOSE loopItemsToAdjust;
 DEALLOCATE loopItemsToAdjust;
+
+-- Do the final save point. 
+IF @TransactionName IS NOT NULL 
+BEGIN 
+	SAVE TRAN @TransactionName	
+END 
+
+-- Do the commit if this sp created the transaction. 
+IF ISNULL(@TransCount, 0) = 0 AND @@TRANCOUNT > 0 
+BEGIN 
+	COMMIT TRANSACTION 
+END 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Create the Auto Variance
@@ -685,6 +787,9 @@ BEGIN
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
 	FROM	#tmpRevalueProducedItems
+	ORDER BY [intItemId]
+			,[intItemLocationId]
+			,[strTransactionId]
 
 	-- Clear the contents of the temp table.
 	DELETE FROM #tmpRevalueProducedItems
@@ -693,10 +798,21 @@ BEGIN
 	GOTO START_LOOP
 END 
 
------------------------------------------
--- Generate the g/l entries
------------------------------------------
-EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
-	@strBatchId
-	,@intEntityUserSecurityId
+-- Comment it out because of: "Cannot use the ROLLBACK statement within an INSERT-EXEC statement"
+-- Caller module will have manually call uspICCreateGLEntriesOnCostAdjustment after calling uspICPostCostAdjustment. 
+-------------------------------------------------
+---------- Generate the g/l entries
+-------------------------------------------------
+----------EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+----------	@strBatchId
+----------	,@intEntityUserSecurityId
 
+-- If there is an error, return top error code id back to the caller to inform about the error. 
+-- The caller can now do the roll back or ignore those records with error. 
+SET @ReturnValue = NULL 
+SELECT	TOP 1 
+		@ReturnValue = intErrorId
+FROM	tblICPostResult 
+WHERE	strBatchNumber = @strBatchId
+
+RETURN ISNULL(@ReturnValue, 0);

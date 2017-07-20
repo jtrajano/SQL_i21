@@ -12,6 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @intBillId AS INT
+		,@intReturnValue AS INT 
 		
 SELECT @intBillId = intBillId 
 FROM	tblAPBill b
@@ -148,6 +149,49 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustedEntries)
 	BEGIN
+		--INSERT INTO @billGLEntries (
+		--	dtmDate						
+		--	,strBatchId					
+		--	,intAccountId				
+		--	,dblDebit					
+		--	,dblCredit					
+		--	,dblDebitUnit				
+		--	,dblCreditUnit				
+		--	,strDescription				
+		--	,strCode					
+		--	,strReference				
+		--	,intCurrencyId				
+		--	,dblExchangeRate			
+		--	,dtmDateEntered				
+		--	,dtmTransactionDate			
+		--	,strJournalLineDescription  
+		--	,intJournalLineNo			
+		--	,ysnIsUnposted				
+		--	,intUserId					
+		--	,intEntityId				
+		--	,strTransactionId			
+		--	,intTransactionId			
+		--	,strTransactionType			
+		--	,strTransactionForm			
+		--	,strModuleName				
+		--	,intConcurrencyId			
+		--	,dblDebitForeign			
+		--	,dblDebitReport				
+		--	,dblCreditForeign			
+		--	,dblCreditReport			
+		--	,dblReportingRate			
+		--	,dblForeignRate			
+		--)
+		EXEC @intReturnValue = uspICPostCostAdjustment 
+			@adjustedEntries
+			, @strBatchId
+			, @intEntityUserSecurityId
+
+		IF @intReturnValue <> 0 
+		BEGIN
+			GOTO _Exit_with_Error
+		END 
+
 		INSERT INTO @billGLEntries (
 			dtmDate						
 			,strBatchId					
@@ -181,10 +225,9 @@ BEGIN
 			,dblReportingRate			
 			,dblForeignRate			
 		)
-		EXEC uspICPostCostAdjustment 
-			@adjustedEntries
-			, @strBatchId
-			, @intEntityUserSecurityId
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+			@strBatchId = @strBatchId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
 	END
 END 
 
@@ -200,5 +243,8 @@ SET		dblAmountDue = 0
 FROM	tblAPBill b
 WHERE	b.intBillId = @intBillId 
 		AND @ysnRegenerateBillGLEntries = 1
+
+_Exit_with_Error: 
+
 
 _Exit:
