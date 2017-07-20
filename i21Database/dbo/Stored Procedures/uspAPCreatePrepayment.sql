@@ -28,6 +28,7 @@ BEGIN
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @intGLBankAccountId INT;
 	DECLARE @location INT;
+	DECLARE @currency INT;
 	DECLARE @paymentRecordNum NVARCHAR(50);
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
@@ -37,6 +38,7 @@ BEGIN
 
 	SELECT TOP 1 @vendorId = C.[intEntityId] 
 			,@location = A.intShipToId
+			,@currency = A.intCurrencyId
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
@@ -71,9 +73,11 @@ BEGIN
 	END
 
 	--Make sure there is bank account to use
+	--if no value has been passed
 	IF @intBankAccountId IS NULL
 	BEGIN
 
+		--if no location setup on transaction
 		IF @location IS NULL
 		BEGIN
 			SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId) --USER USER LOCATION
@@ -83,19 +87,28 @@ BEGIN
 			FROM tblSMCompanyLocation A
 		WHERE A.intCompanyLocationId = @location
 		
-		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
+		SELECT TOP 1 
+			@intBankAccountId = intBankAccountId
+		FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
+		AND intCurrencyId = @currency
 
 	END
 
+	--if no bank account with same currency on transaction
 	IF @intBankAccountId IS NULL
 	BEGIN
-		RAISERROR('Cash account setup is missing.', 16, 1);
-		RETURN;
-	END
+		--TRY TO GET THE FIRST BANK ACCOUNT ON SAME CURRENCY
+		SELECT TOP 1
+			@intBankAccountId = bankAccnt.intBankAccountId
+			,@intGLBankAccountId = bankAccnt.intGLAccountId
+		FROM tblCMBankAccount bankAccnt
+		WHERE bankAccnt.intCurrencyId = @currency
 
-	IF @intGLBankAccountId IS NULL
-	BEGIN
-		SET @intGLBankAccountId = (SELECT TOP 1 intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId);
+		IF @intGLBankAccountId IS NULL
+		BEGIN
+			RAISERROR('No available bank account for this transaction.', 16, 1);
+			RETURN;
+		END
 	END
 		
 	--Make sure there is payment method to user
