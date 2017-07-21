@@ -56,6 +56,12 @@ namespace iRely.Inventory.Model
         public string strGrade { get; set; }
         public string strDestinationGrades { get; set; }
         public string strDestinationWeights { get; set; }
+        public int? intDestinationWeightId { get; set; }
+        public int? intDestinationGradeId { get; set; }
+        public decimal? dblDestinationGrossQty { get; set; }
+        public decimal? dblDestinationNetQty { get; set; }
+        public int? intDestinationQtyUOMId { get; set; }
+        public string strDestinationQtyUOM { get; set; }
         public int? intDiscountSchedule { get; set; }
         public string strDiscountSchedule { get; set; }
         public string strStorageTypeDescription { get; set; }

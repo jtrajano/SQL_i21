@@ -26,6 +26,7 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
         'Ext.form.field.ComboBox',
+        'Ext.form.FieldSet',
         'Ext.grid.Panel',
         'Ext.grid.column.Check',
         'Ext.grid.View',
@@ -224,6 +225,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             },
                                                             {
                                                                 xtype: 'container',
+                                                                hidden: true,
                                                                 margin: '0 0 5 0',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -233,6 +235,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         quantityField: true,
+                                                                        hidden: true,
                                                                         itemId: 'txtConsolidateFactor',
                                                                         width: 280,
                                                                         fieldLabel: 'Consolidate Factor',
@@ -242,6 +245,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
+                                                                        hidden: true,
                                                                         itemId: 'chkFxExposure',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'FX Exposure',
@@ -442,67 +446,78 @@ Ext.define('Inventory.view.Commodity', {
                                                                 valueField: 'strStorageTypeCode'
                                                             },
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
+                                                                xtype: 'fieldset',
+                                                                flex: 1,
+                                                                title: 'Adjust Inventory for Weights & Grades',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
-                                                                        dataIndex: 'intId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strName',
+                                                                                dataType: 'string',
+                                                                                text: 'Adjust By',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboAdjustInventorySalesBy',
+                                                                        fieldLabel: 'Sales',
+                                                                        labelWidth: 170,
+                                                                        displayField: 'strName',
+                                                                        valueField: 'strName'
                                                                     },
                                                                     {
-                                                                        dataIndex: 'strName',
-                                                                        dataType: 'string',
-                                                                        text: 'Adjust By',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboAdjustInventorySalesBy',
-                                                                fieldLabel: 'Sales Weights & Grades',
-                                                                labelWidth: 180,
-                                                                displayField: 'strName',
-                                                                valueField: 'strName'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strName',
+                                                                                dataType: 'string',
+                                                                                text: 'Adjust By',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboAdjustInventoryPurchaseBy',
+                                                                        fieldLabel: 'Purchase',
+                                                                        labelWidth: 170,
+                                                                        displayField: 'strName',
+                                                                        valueField: 'strName'
                                                                     },
                                                                     {
-                                                                        dataIndex: 'strName',
-                                                                        dataType: 'string',
-                                                                        text: 'Adjust By',
-                                                                        flex: 1
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strName',
+                                                                                dataType: 'string',
+                                                                                text: 'Adjust By',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboAdjustInventoryTransfersBy',
+                                                                        fieldLabel: 'Transfer',
+                                                                        labelWidth: 170,
+                                                                        displayField: 'strName',
+                                                                        valueField: 'strName'
                                                                     }
-                                                                ],
-                                                                itemId: 'cboAdjustInventoryPurchaseBy',
-                                                                fieldLabel: 'Purchase Weights & Grades',
-                                                                labelWidth: 180,
-                                                                displayField: 'strName',
-                                                                valueField: 'strName'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strName',
-                                                                        dataType: 'string',
-                                                                        text: 'Adjust By',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboAdjustInventoryTransfersBy',
-                                                                fieldLabel: 'Transfer Weights & Grades',
-                                                                labelWidth: 180,
-                                                                displayField: 'strName',
-                                                                valueField: 'strName'
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'container',
