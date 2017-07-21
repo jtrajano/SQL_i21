@@ -79,6 +79,7 @@ GROUP BY
 	tblPRPaycheck.dtmPayDate,
 	tblPRPaycheckDeduction.intEmployeeDeductionId,
 	tblPRPaycheckDeduction.intTypeDeductionId,
+	tblPRPaycheckDeduction.dblPaycheckMax,
 	tblPRPaycheckDeduction.strDeductFrom,
 	tblPRPaycheckDeduction.strCalculationType,
 	tblPRPaycheckDeduction.dblAmount,
