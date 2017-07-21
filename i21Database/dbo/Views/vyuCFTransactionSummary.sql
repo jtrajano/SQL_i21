@@ -55,8 +55,17 @@ END) AS strName
 ,ISNULL(cfTransaction.dblTransferCost,0) AS dblTransferCost
 
 ,ROUND(ISNULL(cfTransGrossPrice.dblCalculatedAmount,0),2) AS dblSalesAmount
-,ROUND(ISNULL(cfTransNetPrice.dblCalculatedAmount,0),2) AS dblCost
 
+--,ROUND(ISNULL(cfTransNetPrice.dblCalculatedAmount,0),2) AS dblCost
+
+,(CASE strTransactionType 
+
+		WHEN 'Local/Network' 
+		THEN ROUND(ISNULL(cfTransaction.dblInventoryCost,0) + (ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0)),2)
+		ELSE
+		ROUND(ISNULL(cfTransaction.dblTransferCost,0),2)
+
+END) AS dblCost
 
 
 FROM         dbo.tblCFTransaction AS cfTransaction 
@@ -138,6 +147,6 @@ FROM         dbo.tblCFTransaction AS cfTransaction
 			--WHERE ISNULL(cfTransaction.ysnPosted,0) = 1
 
 			where ISNULL(cfTransaction.ysnPosted,0) = 1
-
+GO
 
 
