@@ -24,9 +24,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
-
-
- 
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -550,10 +547,8 @@ SELECT
 FROM 
 	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @post)
 
-IF @post = 1
-	BEGIN
-	--delete this part once TM-2455 is done								
-					
+IF @post = 1 --delete this part once TM-2455 is done		-start
+	BEGIN											
 		BEGIN TRY
 			DECLARE @TankDelivery TABLE (
 					intInvoiceId INT,
@@ -624,7 +619,7 @@ IF @post = 1
 				
 			GOTO Post_Exit
 		END CATCH
-	END
+	END --delete this part once TM-2455 is done		-end
 		
 SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
@@ -2680,172 +2675,50 @@ IF @post = 1
 			DECLARE @ItemsForPost AS ItemCostingTableType  			
 
 			INSERT INTO @ItemsForPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId 
-				,intTransactionDetailId
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-				,strActualCostId
-				,intForexRateTypeId
-				,dblForexRate
+				 [intItemId]  
+				,[intItemLocationId] 
+				,[intItemUOMId]  
+				,[dtmDate]  
+				,[dblQty]  
+				,[dblUOMQty]  
+				,[dblCost] 
+				,[dblSalesPrice]  
+				,[intCurrencyId]  
+				,[dblExchangeRate]  
+				,[intTransactionId] 
+				,[intTransactionDetailId]
+				,[strTransactionId]  
+				,[intTransactionTypeId]  
+				,[intLotId] 
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[strActualCostId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
 			) 
 			SELECT 
-				 intItemId					= Detail.intItemId  
-				,intItemLocationId			= IST.intItemLocationId
-				,intItemUOMId				= Detail.intItemUOMId
-				,dtmDate					= Header.dtmShipDate
-				,dblQty						= (Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
-				,dblUOMQty					= ItemUOM.dblUnitQty
-				-- If item is using average costing, it must use the average cost. 
-				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ISNULL(IST.strType,'') = 'Finished Good' AND Detail.ysnBlended = 1 
-																				THEN (
-																					SELECT SUM(ICIT.[dblCost]) 
-																					FROM
-																						(SELECT [intTransactionId], [strTransactionId], [dblCost], [ysnIsUnposted], [strTransactionForm] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-																					INNER JOIN
-																						(SELECT [intWorkOrderId], [intBatchID], [strWorkOrderNo] FROM tblMFWorkOrder WITH (NOLOCK)) MFWO
-																							ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
-																							AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
-																					WHERE
-																						MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.intWorkOrderId)FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.intInvoiceDetailId = Detail.intInvoiceDetailId)
-																						AND ICIT.[ysnIsUnposted] = 0
-																						AND ICIT.[strTransactionForm] = 'Produce'
-																				)
-																				ELSE
-																					CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-																								dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
-																							ELSE 
-																								IST.dblLastCost  
-																					END 
-																			END
-																			,Header.dblSplitPercent)
-																		,ItemUOM.dblUnitQty
-																	),@ZeroDecimal)
-				,dblSalesPrice				= Detail.dblPrice 
-				,intCurrencyId				= Header.intCurrencyId
-				,dblExchangeRate			= 1.00
-				,intTransactionId			= Header.intInvoiceId
-				,intTransactionDetailId		= Detail.intInvoiceDetailId
-				,strTransactionId			= Header.strInvoiceNumber 
-				,intTransactionTypeId		= @INVENTORY_INVOICE_TYPE
-				,intLotId					= Detail.intLotId  
-				,intSubLocationId			= Detail.intCompanyLocationSubLocationId 
-				,intStorageLocationId		= Detail.intStorageLocationId
-				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
-				,intForexRateTypeId			= Detail.intCurrencyExchangeRateTypeId
-				,dblForexRate				= Detail.dblCurrencyExchangeRate
+				 [intItemId]  
+				,[intItemLocationId] 
+				,[intItemUOMId]  
+				,[dtmDate]  
+				,[dblQty]  
+				,[dblUOMQty]  
+				,[dblCost] 
+				,[dblSalesPrice]  
+				,[intCurrencyId]  
+				,[dblExchangeRate]  
+				,[intTransactionId] 
+				,[intTransactionDetailId]
+				,[strTransactionId]  
+				,[intTransactionTypeId]  
+				,[intLotId] 
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[strActualCostId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
 			FROM 
-				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblPrice, intCompanyLocationSubLocationId, intStorageLocationId, intItemUOMId, intLoadDetailId, dblTotal, ysnBlended,
-					dblQtyShipped, intInventoryShipmentItemId, intShipmentPurchaseSalesContractId, intStorageScheduleTypeId, intItemWeightUOMId, intCurrencyExchangeRateTypeId, dblCurrencyExchangeRate, dblShipmentNetWt, intLotId
-				 FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
-			INNER JOIN
-				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCurrencyId, strImportFormat, intCompanyLocationId, intDistributionHeaderId, 
-					intLoadDistributionHeaderId, strActualCostId, dtmShipDate, intPeriodsToAccrue, ysnImpactInventory, dblSplitPercent
-				 FROM tblARInvoice WITH (NOLOCK)) Header
-					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
-						AND ISNULL(intPeriodsToAccrue,0) <= 1
-						AND 1 = CASE	
-									WHEN strTransactionType = 'Credit Memo'
-										THEN ysnImpactInventory
-										ELSE 1
-									END					 
-			INNER JOIN
-				(SELECT intInvoiceId FROM @PostInvoiceData ) P
-					ON Header.intInvoiceId = P.intInvoiceId	
-			INNER JOIN
-				(SELECT intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ItemUOM 
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-			LEFT OUTER JOIN
-				(SELECT intItemId, intLocationId, intItemLocationId, strType, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK)) IST
-					ON Detail.intItemId = IST.intItemId 
-					AND Header.intCompanyLocationId = IST.intLocationId
-			WHERE				
-				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND (Detail.dblTotal <> 0 OR dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) <> 0)) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
-				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
-				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
-				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND (ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ISNULL(IST.strType,'') = 'Finished Good' AND Detail.ysnBlended = 1))
-				AND Header.strTransactionType <> 'Debit Memo'							
-				AND (Detail.intStorageScheduleTypeId IS NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) = 0)				
-
-			UNION ALL
-
-			SELECT
-				 intItemId					= ARIC.[intComponentItemId]
-				,intItemLocationId			= IST.intItemLocationId
-				,intItemUOMId				= ARIC.[intItemUnitMeasureId] 
-				,dtmDate					= ARI.[dtmShipDate]
-				,dblQty						= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
-				,dblUOMQty					= ICIUOM.[dblUnitQty]
-				-- If item is using average costing, it must use the average cost. 
-				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.intItemLocationId) = @AVERAGECOST THEN 
-																										dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId, ARIC.[intItemUnitMeasureId]) 
-																									ELSE 
-																										IST.dblLastCost  
-																							END 
-																							,ARI.[dblSplitPercent]
-																					), ICIUOM.dblUnitQty
-																),@ZeroDecimal)
-				,dblSalesPrice				= ARID.[dblPrice]
-				,intCurrencyId				= ARI.[intCurrencyId]
-				,dblExchangeRate			= 1.00
-				,intTransactionId			= ARI.[intInvoiceId]
-				,intTransactionDetailId		= ARID.[intInvoiceDetailId]
-				,strTransactionId			= ARI.[strInvoiceNumber]
-				,intTransactionTypeId		= @INVENTORY_INVOICE_TYPE
-				,intLotId					= NULL 
-				,intSubLocationId			= ARID.intCompanyLocationSubLocationId
-				,intStorageLocationId		= ARID.intStorageLocationId
-				,strActualCostId			= CASE WHEN (ISNULL(ARI.intDistributionHeaderId,0) <> 0 OR ISNULL(ARI.intLoadDistributionHeaderId,0) <> 0) THEN ARI.strActualCostId ELSE NULL END
-				,intForexRateTypeId			= ARID.intCurrencyExchangeRateTypeId
-				,dblForexRate				= ARID.dblCurrencyExchangeRate
-			FROM
-				(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], strType FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
-			INNER JOIN
-				(SELECT [intInvoiceId], [intInvoiceDetailId], intItemId, intItemUOMId, [dblQtyShipped], [dblPrice], intCompanyLocationSubLocationId, intStorageLocationId, [dblTotal] 
-					,[intInventoryShipmentItemId] ,[intShipmentPurchaseSalesContractId] ,intStorageScheduleTypeId, intCurrencyExchangeRateTypeId, dblCurrencyExchangeRate
-				 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-					ON ARIC.[intItemId] = ARID.[intItemId]
-			INNER JOIN
-				(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, [strImportFormat], [dblSplitPercent]
-				 FROM tblARInvoice WITH (NOLOCK)) ARI
-					ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]
-			INNER JOIN
-				(SELECT [intInvoiceId] FROM @PostInvoiceData ) P
-					ON ARI.[intInvoiceId] = P.[intInvoiceId]		
-			INNER JOIN
-				(SELECT [intItemId] FROM tblICItem WITH (NOLOCK)) ICI
-					ON ARIC.[intComponentItemId] = ICI.[intItemId]
-			LEFT OUTER JOIN
-				(SELECT [intItemUOMId], dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
-					ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
-			LEFT OUTER JOIN
-				(SELECT intItemId, intItemLocationId, intLocationId, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK)) IST
-					ON ARIC.[intComponentItemId] = IST.intItemId 
-					AND ARI.[intCompanyLocationId] = IST.intLocationId 			 				 
-			WHERE
-				((ISNULL(ARI.strImportFormat, '') <> 'CarQuest' AND (ARID.dblTotal <> 0 OR dbo.fnGetItemAverageCost(ARID.intItemId, IST.intItemLocationId, ARID.intItemUOMId) <> 0)) OR ISNULL(ARI.strImportFormat, '') = 'CarQuest') 
-				AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
-				AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
-				AND ISNULL(ARID.[intItemId],0) <> 0
-				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
-				AND ARI.[strTransactionType] <> 'Debit Memo'
-				AND ISNULL(ARIC.strType,'') NOT IN ('Finished Good','Comment')
-				AND (ARID.intStorageScheduleTypeId IS NULL OR ISNULL(ARID.intStorageScheduleTypeId,0) = 0)			
+				[fnARGetItemsForCosting](@PostInvoiceData, @post)
 			
 		END TRY
 		BEGIN CATCH
@@ -2926,69 +2799,56 @@ IF @post = 1
 					,@FOB_DESTINATION AS INT = 2
 
 			INSERT INTO @InTransitItems (
-					[intItemId] 
-					,[intItemLocationId] 
-					,[intItemUOMId] 
-					,[dtmDate] 
-					,[dblQty] 
-					,[dblUOMQty] 
-					,[dblCost] 
-					,[dblValue] 
-					,[dblSalesPrice] 
-					,[intCurrencyId] 
-					,[dblExchangeRate] 
-					,[intTransactionId] 
-					,[intTransactionDetailId] 
-					,[strTransactionId] 
-					,[intTransactionTypeId] 
-					,[intLotId] 
-					,[intSourceTransactionId] 
-					,[strSourceTransactionId] 
-					,[intSourceTransactionDetailId] 
-					,[intFobPointId] 
-					,[intInTransitSourceLocationId]
-					,[intForexRateTypeId]
-					,[dblForexRate]
+				 [intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[dtmDate] 
+				,[dblQty] 
+				,[dblUOMQty] 
+				,[dblCost] 
+				,[dblValue] 
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[intTransactionDetailId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intLotId] 
+				,[intSourceTransactionId] 
+				,[strSourceTransactionId] 
+				,[intSourceTransactionDetailId] 
+				,[intFobPointId] 
+				,[intInTransitSourceLocationId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
 			)
 			SELECT
-					[intItemId]					= t.intItemId
-					,[intItemLocationId]		= t.intItemLocationId
-					,[intItemUOMId]				= t.intItemUOMId
-					,[dtmDate]					= i.dtmShipDate
-					,[dblQty]					= -t.dblQty
-					,[dblUOMQty]				= t.dblUOMQty
-					,[dblCost]					= t.dblCost
-					,[dblValue]					= 0
-					,[dblSalesPrice]			= id.dblPrice
-					,[intCurrencyId]			= i.intCurrencyId
-					,[dblExchangeRate]			= 1.00
-					,[intTransactionId]			= i.intInvoiceId
-					,[intTransactionDetailId]	= id.intInvoiceDetailId
-					,[strTransactionId]			= i.strInvoiceNumber
-					,[intTransactionTypeId]		= @INVENTORY_INVOICE_TYPE
-					,[intLotId]					= t.intLotId
-					,[intSourceTransactionId]	= t.intTransactionId
-					,[strSourceTransactionId]		= t.strTransactionId
-					,[intSourceTransactionDetailId] = t.intTransactionDetailId
-					,[intFobPointId]				= t.intFobPointId
-					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-					,intForexRateTypeId			= id.intCurrencyExchangeRateTypeId
-					,dblForexRate				= id.dblCurrencyExchangeRate
+				 [intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[dtmDate] 
+				,[dblQty] 
+				,[dblUOMQty] 
+				,[dblCost] 
+				,[dblValue] 
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[intTransactionDetailId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intLotId] 
+				,[intSourceTransactionId] 
+				,[strSourceTransactionId] 
+				,[intSourceTransactionDetailId] 
+				,[intFobPointId] 
+				,[intInTransitSourceLocationId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
 			FROM 
-				(SELECT intInvoiceId, strInvoiceNumber, dtmShipDate, intCurrencyId FROM tblARInvoice WITH (NOLOCK)) i 
-			INNER JOIN 
-				(SELECT intInvoiceId, intInvoiceDetailId, intInventoryShipmentItemId, dblPrice, intCurrencyExchangeRateTypeId, dblCurrencyExchangeRate FROM tblARInvoiceDetail WITH (NOLOCK)) id
-						ON i.intInvoiceId = id.intInvoiceId
-			INNER JOIN 
-				(SELECT intInventoryShipmentId, intInventoryShipmentItemId FROM tblICInventoryShipmentItem WITH (NOLOCK)) si
-						ON si.intInventoryShipmentItemId = id.intInventoryShipmentItemId
-			INNER JOIN (SELECT intItemId, intItemLocationId, intItemUOMId, intTransactionId, dblQty, intTransactionDetailId, dblUOMQty, dblCost, intLotId, strTransactionId, intFobPointId,
-							intInTransitSourceLocationId, ysnIsUnposted
-						FROM tblICInventoryTransaction WITH (NOLOCK)) t
-							ON t.intTransactionId = si.intInventoryShipmentId AND t.intTransactionDetailId = si.intInventoryShipmentItemId AND ysnIsUnposted = 0			 
-			INNER JOIN (SELECT intInvoiceId FROM @PostInvoiceData ) p
-				ON i.[intInvoiceId] = p.[intInvoiceId]
-			WHERE t.intFobPointId = @FOB_DESTINATION
+				[fnARGetItemsForInTransitCosting](@PostInvoiceData, @post)
 
 			IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 			BEGIN 
@@ -3056,96 +2916,46 @@ IF @post = 1
 			DECLARE @StorageItemsForPost AS ItemCostingTableType  			
 
 			INSERT INTO @StorageItemsForPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId 
-				,intTransactionDetailId
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-				,strActualCostId
+				 [intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId]
+				,[dtmDate]
+				,[dblQty]
+				,[dblUOMQty]
+				,[dblCost]
+				,[dblSalesPrice]
+				,[intCurrencyId] 
+				,[dblExchangeRate]
+				,[intTransactionId] 
+				,[intTransactionDetailId]
+				,[strTransactionId]  
+				,[intTransactionTypeId]  
+				,[intLotId] 
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[strActualCostId]
 			) 
 			SELECT 
-				 intItemId					= Detail.intItemId  
-				,intItemLocationId			= IST.intItemLocationId
-				,intItemUOMId				= Detail.intItemUOMId  
-				,dtmDate					= Header.dtmShipDate
-				,dblQty						= (Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
-				,dblUOMQty					= ItemUOM.dblUnitQty
-				-- If item is using average costing, it must use the average cost. 
-				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN ISNULL(IST.strType,'') = 'Finished Good' AND Detail.ysnBlended = 1 
-																			THEN (
-																				SELECT SUM(ICIT.[dblCost]) 
-																				FROM
-																					(SELECT [intTransactionId], [strTransactionId], [dblCost], [ysnIsUnposted], [strTransactionForm] FROM tblICInventoryTransaction WITH (NOLOCK))ICIT
-																				INNER JOIN
-																					(SELECT [intWorkOrderId], [strWorkOrderNo], [intBatchID] FROM tblMFWorkOrder WITH (NOLOCK)) MFWO
-																						ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
-																						AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
-																				WHERE
-																					MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.intWorkOrderId) FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.intInvoiceDetailId = Detail.intInvoiceDetailId)
-																					AND ICIT.[ysnIsUnposted] = 0
-																					AND ICIT.[strTransactionForm] = 'Produce'
-																			)
-																			ELSE
-																				CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-																							dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
-																						ELSE 
-																							IST.dblLastCost  
-																				END 
-																		END
-																		,ItemUOM.dblUnitQty
-																	),@ZeroDecimal)
-				,dblSalesPrice				= Detail.dblPrice 
-				,intCurrencyId				= Header.intCurrencyId
-				,dblExchangeRate			= 1.00
-				,intTransactionId			= Header.intInvoiceId
-				,intTransactionDetailId		= Detail.intInvoiceDetailId
-				,strTransactionId			= Header.strInvoiceNumber 
-				,intTransactionTypeId		= @INVENTORY_INVOICE_TYPE
-				,intLotId					= NULL 
-				,intSubLocationId			= Detail.intCompanyLocationSubLocationId 
-				,intStorageLocationId		= Detail.intStorageLocationId
-				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
+				 [intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId]
+				,[dtmDate]
+				,[dblQty]
+				,[dblUOMQty]
+				,[dblCost]
+				,[dblSalesPrice]
+				,[intCurrencyId] 
+				,[dblExchangeRate]
+				,[intTransactionId] 
+				,[intTransactionDetailId]
+				,[strTransactionId]  
+				,[intTransactionTypeId]  
+				,[intLotId] 
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[strActualCostId]
 			FROM 
-				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, intItemUOMId, dblQtyShipped, ysnBlended, dblPrice, intCompanyLocationSubLocationId, 
-					intStorageLocationId, dblTotal, intInventoryShipmentItemId, intShipmentPurchaseSalesContractId, intStorageScheduleTypeId
-				 FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
-			INNER JOIN
-				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, dtmShipDate, intCurrencyId, intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, intCompanyLocationId,
-					strImportFormat, ysnImpactInventory, intPeriodsToAccrue
-				 FROM tblARInvoice WITH (NOLOCK)) Header
-					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund') AND ISNULL(intPeriodsToAccrue,0) <= 1 
-						AND 1 = CASE WHEN strTransactionType = 'Credit Memo' THEN ysnImpactInventory ELSE 1 END
-			INNER JOIN
-				(SELECT intInvoiceId FROM @PostInvoiceData ) P
-					ON Header.intInvoiceId = P.intInvoiceId	
-			INNER JOIN
-				(SELECT intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK) ) ItemUOM 
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-			LEFT OUTER JOIN
-				(SELECT intItemId, intLocationId, strType, intItemLocationId, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK) ) IST
-					ON Detail.intItemId = IST.intItemId 
-					AND Header.intCompanyLocationId = IST.intLocationId 
-			WHERE				
-				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND (Detail.dblTotal <> 0 OR Detail.dblQtyShipped <> 0)) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
-				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
-				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
-				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND (ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ISNULL(IST.strType,'') = 'Finished Good' AND Detail.ysnBlended = 1))
-				AND Header.strTransactionType <> 'Debit Memo'
-				AND (Detail.intStorageScheduleTypeId IS NOT NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) <> 0)		
+				[fnARGetItemsForStoragePosting](@PostInvoiceData, @post)
 		
 		END TRY
 		BEGIN CATCH
