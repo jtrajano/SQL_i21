@@ -5355,6 +5355,7 @@
     <Build Include="dbo\Functions\fnARGetItemsForCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteOrderLabels.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
