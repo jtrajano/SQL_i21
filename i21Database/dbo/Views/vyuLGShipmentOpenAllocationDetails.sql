@@ -1,6 +1,6 @@
 CREATE VIEW vyuLGShipmentOpenAllocationDetails
 AS
-	SELECT	AH.[strAllocationNumber],
+		SELECT	AH.[strAllocationNumber],
 			AH.intAllocationHeaderId,
 			AD.intAllocationDetailId,
 			AD.intPContractDetailId,
@@ -12,8 +12,7 @@ AS
 			CDP.intItemId AS intPItemId,
 			CAST (CHP.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber, 
 			AD.dblPAllocatedQty,
-			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
-								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) AS dblPUnAllocatedQty,
+			AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) - IsNull(PL.dblLotPickedQty, 0) AS dblPUnAllocatedQty,
 			AD.intPUnitMeasureId,
 			UP.strUnitMeasure as strPUnitMeasure,
 			ENP.strName AS strVendor,
@@ -36,8 +35,7 @@ AS
 			CDS.intItemId AS intSItemId,
 			CAST (CHS.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
 			AD.dblSAllocatedQty,
-			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
-								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0)  AS dblSUnAllocatedQty,
+			AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)  AS dblSUnAllocatedQty,
 			AD.intSUnitMeasureId,
 			US.strUnitMeasure as strSUnitMeasure,
 			ENS.strName AS strCustomer,
@@ -60,6 +58,17 @@ AS
 
 	FROM 	tblLGAllocationDetail AD
 	JOIN	tblLGAllocationHeader	AH	ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
+	LEFT JOIN (SELECT SP.intAllocationDetailId, SUM (SP.dblQuantity) dblPShippedQuantity, SUM (SP.dblDeliveredQuantity) dblSShippedQuantity
+					FROM tblLGLoadDetail SP 
+					JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId AND L.intPurchaseSale=3 AND L.ysnPosted=1
+				GROUP BY SP.intAllocationDetailId) 
+				LD ON AD.intAllocationDetailId = LD.intAllocationDetailId AND AD.intPContractDetailId = AD.intSContractDetailId
+	LEFT JOIN (SELECT PL.intAllocationDetailId, SUM (PL.dblSalePickedQty) dblSalePickedQty 
+				FROM tblLGPickLotDetail PL GROUP BY PL.intAllocationDetailId
+			) PLS ON AD.intAllocationDetailId = PLS.intAllocationDetailId
+	LEFT JOIN (SELECT PL.intAllocationDetailId, SUM (PL.dblLotPickedQty) dblLotPickedQty 
+				FROM tblLGPickLotDetail PL GROUP BY PL.intAllocationDetailId
+			) PL ON AD.intAllocationDetailId = PL.intAllocationDetailId
 	JOIN	tblCTContractDetail 	CDP	ON CDP.intContractDetailId = AD.intPContractDetailId
 	JOIN	tblCTContractHeader		CHP	ON	CHP.intContractHeaderId		=	CDP.intContractHeaderId
 	JOIN	tblCTContractDetail 	CDS	ON CDS.intContractDetailId = AD.intSContractDetailId
@@ -79,9 +88,6 @@ AS
 	LEFT JOIN	tblCTPosition			PS	ON	PS.intPositionId			= CHS.intPositionId
 	LEFT JOIN	tblSMCountry			CP	ON	CP.intCountryID				= ITP.intOriginId
 	LEFT JOIN	tblSMCountry			CS	ON	CS.intCountryID				= ITS.intOriginId
-	WHERE	(
-			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
-								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0 AND
-			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
-								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0
-			)
+	WHERE	
+		(AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) - IsNull(PL.dblLotPickedQty, 0) > 0) AND
+		(AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0) > 0)
