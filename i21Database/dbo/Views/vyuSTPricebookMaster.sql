@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuSTPricebookMaster]
 AS 
 SELECT  
-CAST(ROW_NUMBER() over(order by adj1.intItemPricingId, ISNULL(CAST(adj5.intCompanyLocationId AS INT), 0), adj6.intItemUOMId, adj2.intItemLocationId, adj7.intItemId) AS int) as intUniqueId
+CAST(ROW_NUMBER() over(order by adj1.intItemPricingId, adj6.intItemUOMId, adj2.intItemLocationId, adj7.intItemId) AS int) as intUniqueId
 , adj5.intCompanyLocationId
 , adj5.strLocationName
 , adj6.intItemUOMId
