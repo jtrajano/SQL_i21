@@ -1031,6 +1031,7 @@ BEGIN
 		SET A.dblSubtotal = Details.dblSubtotal--ISNULL(dblTotal - (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @currentVoucher),0)--AP-3180 Update the subtotal when posting directly from Scale
 		,A.dblTotal = Details.dblTotal--ISNULL(dblTotal - (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @currentVoucher),0)--AP-3180 Update the subtotal when posting directly from Scale
 		,A.dblAmountDue = Details.dblTotal
+		,A.dblDiscount = dbo.fnGetDiscountBasedOnTerm(GETDATE(), A.dtmDate, A.intTermsId, Details.dblTotal)
 	FROM tblAPBill A
 	CROSS APPLY (
 		SELECT

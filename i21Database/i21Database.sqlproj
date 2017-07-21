@@ -5478,6 +5478,7 @@
     <Build Include="dbo\Views\vyuTRSearchQuoteDetail.sql" />
     <Build Include="dbo\Views\vyuTRSearchQuote.sql" />
     <Build Include="dbo\Views\vyuAPVoucherCommodity.sql" />
+    <Build Include="dbo\Functions\fnAPGetReceiptTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -176,7 +176,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		 Voucher.dtmDueDate = CASE WHEN @contractTermId > 0
 									THEN ISNULL(dbo.fnGetDueDateBasedOnTerm(Voucher.dtmDate, @contractTermId), Voucher.dtmDueDate)
 									ELSE ISNULL(dbo.fnGetDueDateBasedOnTerm(Voucher.dtmDate, Voucher.intTermsId), Voucher.dtmDueDate)
-								END
+								END,
+		Voucher.dblDiscount = dbo.fnGetDiscountBasedOnTerm(GETDATE(), Voucher.dtmDate, (CASE WHEN @contractTermId > 0 THEN @contractTermId ELSE Voucher.intTermsId END), Voucher.dblTotal)
 	FROM tblAPBill Voucher
 	WHERE Voucher.intBillId = @billId
 
