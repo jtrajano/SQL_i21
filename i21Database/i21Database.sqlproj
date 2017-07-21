@@ -5353,6 +5353,8 @@
     <Build Include="dbo\Views\vyuCFTransactionSummary.sql" />
     <Build Include="dbo\Functions\fnARGetInvoicesPostingEntries.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetOrderLabels.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeleteOrderLabels.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -36,6 +36,7 @@ BEGIN TRY
 		,@strSSCCNo NVARCHAR(50)
 		,@intOrderManifestId INT
 		,@intEntityCustomerId INT
+		,@strOrderManifestLabelId NVARCHAR(MAX) = ''
 	DECLARE @tblMFGenerateSSNo TABLE (intOrderManifestId INT)
 	DECLARE @strGS1SpecialCode NVARCHAR(10)
 		,@strFirstBarcodeStart NVARCHAR(10)
@@ -96,123 +97,147 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intCustomerLabelTypeId'
 
-	EXEC dbo.uspMFGenerateSSCCNo @strOrderManifestId = @strOrderManifestId
-		,@intNoOfLabel = @intNoOfLabel
-		,@intCustomerLabelTypeId = @intCustomerLabelTypeId
+	SELECT @strOrderManifestLabelId = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'intOrderManifestLabelId'
 
-	IF @intCustomerLabelTypeId = 1 -- Pallet Label
+	-- only for print mode
+	IF ISNULL(@strOrderManifestLabelId, '') = ''
 	BEGIN
-		INSERT INTO @tblMFGenerateSSNo
-		SELECT *
-		FROM dbo.fnSplitString(@strOrderManifestId, '^')
-		WHERE Item <> ''
+		EXEC dbo.uspMFGenerateSSCCNo @strOrderManifestId = @strOrderManifestId
+			,@intNoOfLabel = @intNoOfLabel
+			,@intCustomerLabelTypeId = @intCustomerLabelTypeId
+	END
 
-		SELECT @intOrderManifestId = min(intOrderManifestId)
-		FROM @tblMFGenerateSSNo
-
-		SELECT @intEntityCustomerId = S.intEntityCustomerId
-			,@intInventoryShipmentId = S.intInventoryShipmentId
-		FROM tblMFOrderManifest OM
-		JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
-		JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
-		WHERE intOrderManifestId = @intOrderManifestId
-
-		IF NOT EXISTS (
-				SELECT 1
-				FROM tblMFItemOwner
-				WHERE intOwnerId = @intEntityCustomerId
-					AND intCustomerLabelTypeId = @intCustomerLabelTypeId
-				)
-			RETURN
-
-		SELECT TOP 1 @strGS1SpecialCode = strGS1SpecialCode
-			,@strFirstBarcodeStart = strFirstBarcodeStart
-			,@strFirstBarcodeFollowGTIN = strFirstBarcodeFollowGTIN
-			,@strFirstBarcodeEnd = strFirstBarcodeEnd
-			,@strSecondBarcodeStart = strSecondBarcodeStart
-			,@strSecondBarcodeFollowGrossWeight = strSecondBarcodeFollowGrossWeight
-			,@strSecondBarcodeEnd = strSecondBarcodeEnd
-			,@strThirdBarcodeStart = strThirdBarcodeStart
-		FROM tblMFItemOwner
-		WHERE intOwnerId = @intEntityCustomerId
-			AND intCustomerLabelTypeId = @intCustomerLabelTypeId
-
-		SELECT TOP 1 @strGTINNumber = FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'GTIN Number'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = @intInventoryShipmentId
-
-		WHILE @intOrderManifestId IS NOT NULL
+	-- only for print mode
+	IF ISNULL(@strOrderManifestLabelId, '') = ''
+	BEGIN
+		IF @intCustomerLabelTypeId = 1 -- Pallet Label
 		BEGIN
-			SELECT @strSSCCNo = ''
+			INSERT INTO @tblMFGenerateSSNo
+			SELECT *
+			FROM dbo.fnSplitString(@strOrderManifestId, '^')
+			WHERE Item <> ''
 
-			SELECT @strSSCCNo = strSSCCNo
-			FROM tblMFOrderManifestLabel
+			SELECT @intOrderManifestId = min(intOrderManifestId)
+			FROM @tblMFGenerateSSNo
+
+			SELECT @intEntityCustomerId = S.intEntityCustomerId
+				,@intInventoryShipmentId = S.intInventoryShipmentId
+			FROM tblMFOrderManifest OM
+			JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
+			JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
 			WHERE intOrderManifestId = @intOrderManifestId
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblMFItemOwner
+					WHERE intOwnerId = @intEntityCustomerId
+						AND intCustomerLabelTypeId = @intCustomerLabelTypeId
+					)
+				RETURN
+
+			SELECT TOP 1 @strGS1SpecialCode = strGS1SpecialCode
+				,@strFirstBarcodeStart = strFirstBarcodeStart
+				,@strFirstBarcodeFollowGTIN = strFirstBarcodeFollowGTIN
+				,@strFirstBarcodeEnd = strFirstBarcodeEnd
+				,@strSecondBarcodeStart = strSecondBarcodeStart
+				,@strSecondBarcodeFollowGrossWeight = strSecondBarcodeFollowGrossWeight
+				,@strSecondBarcodeEnd = strSecondBarcodeEnd
+				,@strThirdBarcodeStart = strThirdBarcodeStart
+			FROM tblMFItemOwner
+			WHERE intOwnerId = @intEntityCustomerId
 				AND intCustomerLabelTypeId = @intCustomerLabelTypeId
 
-			IF ISNULL(@strSSCCNo, '') <> ''
+			SELECT TOP 1 @strGTINNumber = FV.strValue
+			FROM tblSMTabRow TR
+			JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+			JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+				AND LOWER(TD.strControlName) = 'GTIN Number'
+			JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+			JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+				AND S.strNamespace = 'Inventory.view.InventoryShipment'
+			WHERE T.intRecordId = @intInventoryShipmentId
+
+			WHILE @intOrderManifestId IS NOT NULL
 			BEGIN
-				SELECT @strBarcode1 = ''
-					,@strBarcodeLabel1 = ''
-					,@strBarcode2 = ''
-					,@strBarcodeLabel2 = ''
-					,@strBarcode3 = ''
-					,@strBarcodeLabel3 = ''
-					,@strGTINNumber = ''
+				SELECT @strSSCCNo = ''
 
-				-- Order GTIN No
-				SELECT @strGTINNumber = OD.strOrderGTIN
-				FROM tblMFOrderManifest OM
-				JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
-				WHERE OM.intOrderManifestId = @intOrderManifestId
-
-				-- Bar Code 1
-				SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0)))
-					,@strBarcode1 = REPLACE(REPLACE(@strGS1SpecialCode + @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0))), '(', ''), ')', '')
-				FROM tblMFOrderManifest OM
-				JOIN tblICLot L ON L.intLotId = OM.intLotId
-				JOIN tblICItem I ON I.intItemId = L.intItemId
-				WHERE OM.intOrderManifestId = @intOrderManifestId
-
-				-- Bar Code 2
-				SELECT @strBarcodeLabel2 = @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits)
-					,@strBarcode2 = REPLACE(REPLACE(@strGS1SpecialCode + @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits), '(', ''), ')', '')
-				FROM tblMFOrderManifest OM
-				JOIN tblICLot L ON L.intLotId = OM.intLotId
-				JOIN tblICItem I ON I.intItemId = L.intItemId
-				LEFT JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
-				WHERE OM.intOrderManifestId = @intOrderManifestId
-
-				-- Bar Code 3
-				SELECT @strBarcodeLabel3 = @strThirdBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))),18)
-					,@strBarcode3 = REPLACE(REPLACE(@strGS1SpecialCode + @strThirdBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))),18), '(', ''), ')', '')
-				FROM tblMFOrderManifest OM
-				JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
-					AND OML.ysnPrinted = 0
-					AND OML.intCustomerLabelTypeId = @intCustomerLabelTypeId
-				WHERE OM.intOrderManifestId = @intOrderManifestId
-
-				UPDATE tblMFOrderManifestLabel
-				SET strBarcode1 = @strBarcode1
-					,strBarcodeLabel1 = @strBarcodeLabel1
-					,strBarcode2 = @strBarcode2
-					,strBarcodeLabel2 = @strBarcodeLabel2
-					,strBarcode3 = @strBarcode3
-					,strBarcodeLabel3 = @strBarcodeLabel3
+				SELECT @strSSCCNo = strSSCCNo
+				FROM tblMFOrderManifestLabel
 				WHERE intOrderManifestId = @intOrderManifestId
 					AND intCustomerLabelTypeId = @intCustomerLabelTypeId
-			END
 
-			SELECT @intOrderManifestId = MIN(intOrderManifestId)
-			FROM @tblMFGenerateSSNo
-			WHERE intOrderManifestId > @intOrderManifestId
+				IF ISNULL(@strSSCCNo, '') <> ''
+				BEGIN
+					SELECT @strBarcode1 = ''
+						,@strBarcodeLabel1 = ''
+						,@strBarcode2 = ''
+						,@strBarcodeLabel2 = ''
+						,@strBarcode3 = ''
+						,@strBarcodeLabel3 = ''
+						,@strGTINNumber = ''
+
+					-- Order GTIN No
+					SELECT @strGTINNumber = OD.strOrderGTIN
+					FROM tblMFOrderManifest OM
+					JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
+					WHERE OM.intOrderManifestId = @intOrderManifestId
+
+					-- Bar Code 1
+					SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0)))
+						,@strBarcode1 = REPLACE(REPLACE(@strGS1SpecialCode + @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0))), '(', ''), ')', '')
+					FROM tblMFOrderManifest OM
+					JOIN tblICLot L ON L.intLotId = OM.intLotId
+					JOIN tblICItem I ON I.intItemId = L.intItemId
+					WHERE OM.intOrderManifestId = @intOrderManifestId
+
+					-- Bar Code 2
+					SELECT @strBarcodeLabel2 = @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits)
+						,@strBarcode2 = REPLACE(REPLACE(@strGS1SpecialCode + @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits), '(', ''), ')', '')
+					FROM tblMFOrderManifest OM
+					JOIN tblICLot L ON L.intLotId = OM.intLotId
+					JOIN tblICItem I ON I.intItemId = L.intItemId
+					LEFT JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
+					WHERE OM.intOrderManifestId = @intOrderManifestId
+
+					-- Bar Code 3
+					SELECT @strBarcodeLabel3 = @strThirdBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18)
+						,@strBarcode3 = REPLACE(REPLACE(@strGS1SpecialCode + @strThirdBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18), '(', ''), ')', '')
+					FROM tblMFOrderManifest OM
+					JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
+						AND OML.ysnPrinted = 0
+						AND OML.intCustomerLabelTypeId = @intCustomerLabelTypeId
+					WHERE OM.intOrderManifestId = @intOrderManifestId
+
+					UPDATE tblMFOrderManifestLabel
+					SET strBarcode1 = @strBarcode1
+						,strBarcodeLabel1 = @strBarcodeLabel1
+						,strBarcode2 = @strBarcode2
+						,strBarcodeLabel2 = @strBarcodeLabel2
+						,strBarcode3 = @strBarcode3
+						,strBarcodeLabel3 = @strBarcodeLabel3
+					WHERE intOrderManifestId = @intOrderManifestId
+						AND intCustomerLabelTypeId = @intCustomerLabelTypeId
+				END
+
+				SELECT @intOrderManifestId = MIN(intOrderManifestId)
+				FROM @tblMFGenerateSSNo
+				WHERE intOrderManifestId > @intOrderManifestId
+			END
 		END
+	END
+
+	-- only for re-print mode
+	IF ISNULL(@strOrderManifestLabelId, '') <> ''
+	BEGIN
+		UPDATE tblMFOrderManifestLabel
+		SET ysnPrinted = 0
+		WHERE ysnPrinted = 1
+			AND intOrderManifestLabelId IN (
+				SELECT *
+				FROM dbo.fnSplitString(@strOrderManifestLabelId, '^')
+				)
 	END
 
 	SELECT LTRIM(RTRIM(CASE 
@@ -252,7 +277,7 @@ BEGIN TRY
 		,CONVERT(VARCHAR(10), LOT.dtmExpiryDate, 101) AS dtmExpiryDate
 		,Convert(NUMERIC(18, 0), LOT.dblQty * I.dblWeight) AS dblNetWeight
 		,Convert(NUMERIC(18, 0), LOT.dblQty * I.dblUnitPerCase) AS dblGrossWeight
-		,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))),18) AS strSSCCNo
+		,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18) AS strSSCCNo
 		,OML.strBarcodeLabel1
 		,OML.strBarcode1
 		,OML.strBarcodeLabel2
@@ -295,4 +320,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-Go

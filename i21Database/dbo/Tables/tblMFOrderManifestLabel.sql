@@ -11,6 +11,9 @@
 	,strBarcodeLabel2 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strBarcode3 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strBarcodeLabel3 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,ysnDeleted BIT NOT NULL CONSTRAINT [DF_tblMFOrderManifestLabel_ysnDeleted] DEFAULT 0
+	,intLastModifiedUserId INT NULL
+	,dtmLastModified DATETIME NULL CONSTRAINT [DF_tblMFOrderManifestLabel_dtmLastModified] DEFAULT GETDATE()
 
 	,CONSTRAINT PK_tblMFOrderManifestLabel PRIMARY KEY (intOrderManifestLabelId)
 	,CONSTRAINT FK_tblMFOrderManifestLabel_tblMFOrderManifest FOREIGN KEY (intOrderManifestId) REFERENCES tblMFOrderManifest(intOrderManifestId) ON DELETE CASCADE
