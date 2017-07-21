@@ -241,7 +241,7 @@ BEGIN
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
-		[dblAmountDue]	= (A.dblAmountDue - A.dblDiscount - A.dblPayment + A.dblInterest),
+		[dblAmountDue]	= A.dblAmountDue,
 		[dblPayment]	= CAST((CASE WHEN ISNULL(@paymentDetail,0) = 0 THEN A.dblAmountDue - A.dblDiscount ELSE @paymentDetail END) AS DECIMAL(18,2)),
 		[dblInterest]	= A.dblInterest, --TODO
 		[dblTotal]		= A.dblTotal
