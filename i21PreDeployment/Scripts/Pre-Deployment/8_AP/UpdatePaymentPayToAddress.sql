@@ -7,7 +7,8 @@ BEGIN
 	EXEC ('
 	ALTER TABLE tblAPPayment
 		ADD intPayToAddressId INT NULL
-
+	')
+	EXEC ('
 	UPDATE payment
 		SET payment.intPayToAddressId = details.intPayToAddressId
 	FROM tblAPPayment payment

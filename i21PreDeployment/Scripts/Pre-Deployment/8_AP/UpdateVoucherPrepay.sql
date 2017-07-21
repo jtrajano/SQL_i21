@@ -8,8 +8,9 @@ BEGIN
 
 	EXEC ('
 		ALTER TABLE tblAPBill
-			ADD [ysnOldPrepayment] BIT NOT NULL DEFAULT 0
-
+			ADD ysnOldPrepayment BIT NOT NULL DEFAULT(0)
+		')
+	EXEC('
 		--SET THE ysnPosted AND ysnOldPrepayment to 1
 		UPDATE voucherPrepay
 			SET voucherPrepay.ysnPosted = 1, voucherPrepay.ysnOldPrepayment = 1
