@@ -70,6 +70,7 @@
 	[ysnImportedFromOrigin]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedFromOrigin] DEFAULT ((0)),		
 	[ysnImportedAsPosted]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedAsPosted] DEFAULT ((0)),		
 	[ysnExported]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnExported] DEFAULT ((0)),
+	[ysnCancelled]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCancelled] DEFAULT ((0)),	
 	[intPaymentId]					INT												NULL,
 	[intSplitId]					INT												NULL,
 	[intDistributionHeaderId]		INT												NULL,
@@ -165,6 +166,7 @@ BEGIN
 									WHEN @strTransactionType = 'Overpayment' THEN 'Customer Overpayment'
 									WHEN @strTransactionType = 'Invoice' AND @strType = 'Service Charge' THEN 'Service Charge'
 									WHEN @strTransactionType = 'Invoice' AND @strType = 'Provisional' THEN 'Provisional'
+									WHEN @strTransactionType = 'Credit Note' THEN 'Credit Note' 
 									ELSE 'Invoice' END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId

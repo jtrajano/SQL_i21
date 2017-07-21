@@ -284,6 +284,7 @@ FROM (
 			 , ysnImportedFromOrigin
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		WHERE ysnPosted = 1
+		  AND I.ysnCancelled = 0
 		  AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
 		  AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 				AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId 

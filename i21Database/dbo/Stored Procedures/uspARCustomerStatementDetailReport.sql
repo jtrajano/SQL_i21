@@ -245,6 +245,7 @@ OUTER APPLY (
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 WHERE I.ysnPosted = 1
+    AND I.ysnCancelled = 0
 	AND I.ysnPaid = 0
 	AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
 	'+ @innerQuery +'

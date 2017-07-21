@@ -1560,8 +1560,10 @@ END CATCH
 					(SELECT intInvoiceId, intItemId, dblTotal, intInventoryShipmentItemId, intShipmentPurchaseSalesContractId 
 					 FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
 				INNER JOIN
-					(SELECT intInvoiceId , strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) Header
-						ON Detail.intInvoiceId = Header.intInvoiceId						 
+					(SELECT intInvoiceId , strInvoiceNumber, strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)
+						WHERE strTransactionType IN ('Invoice', 'Credit Memo', 'Credit Note')
+						AND ISNULL(intPeriodsToAccrue,0) <= 1) Header
+						ON Detail.intInvoiceId = Header.intInvoiceId
 				INNER JOIN
 					@PostInvoiceData P
 						ON Header.intInvoiceId = P.intInvoiceId	
@@ -1635,7 +1637,9 @@ END CATCH
 				FROM 
 					(SELECT intInvoiceId, intItemId, dblTotal, intInventoryShipmentItemId, intShipmentPurchaseSalesContractId FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
 				INNER JOIN
-					(SELECT intInvoiceId, strInvoiceNumber,  strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) Header
+					(SELECT intInvoiceId, strInvoiceNumber,  strTransactionType, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)
+					WHERE strTransactionType IN ('Invoice', 'Credit Memo', 'Credit Note')
+						AND ISNULL(intPeriodsToAccrue,0) <= 1) Header
 						ON Detail.intInvoiceId = Header.intInvoiceId						 
 				INNER JOIN
 					@PostInvoiceData P
@@ -2466,8 +2470,9 @@ IF @post = 1
 						ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
 						
 				INNER JOIN
-					(SELECT [intInvoiceId], strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI1
-						ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND ARI1.strTransactionType = 'Credit Memo'				
+					(SELECT [intInvoiceId], strTransactionType FROM tblARInvoice WITH (NOLOCK)
+						WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1
+						ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
 				GROUP BY
 					A.[intInvoiceId]
 				) CM
@@ -2520,7 +2525,7 @@ IF @post = 1
 					ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
 			INNER JOIN
 				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId, strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI1
-					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND ARI1.strTransactionType = 'Credit Memo'				 
+					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND ARI1.strTransactionType IN ('Credit Memo', 'Credit Note')
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
@@ -2586,7 +2591,7 @@ IF @post = 1
 				INNER JOIN
 					(SELECT [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) A ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal						  
 				INNER JOIN
-					(SELECT [intInvoiceId], strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI1 ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND ARI1.strTransactionType = 'Credit Memo'
+					(SELECT [intInvoiceId], strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI1 ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND ARI1.strTransactionType IN ('Credit Memo', 'Credit Note')
 				GROUP BY
 					A.[intInvoiceId]
 				) CM
@@ -2637,7 +2642,7 @@ IF @post = 1
 				(SELECT [intInvoiceId], strInvoiceNumber, dtmPostDate, dtmDate, [intEntityCustomerId], strTransactionType, intCurrencyId, strComments, intPeriodsToAccrue
 				 FROM tblARInvoice WITH (NOLOCK) ) A ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND  ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal				 
 			INNER JOIN
-				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)) ARI1 ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND strTransactionType <> 'Credit Memo'		
+				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK) WHERE strTransactionType NOT IN ('Credit Memo', 'Credit Note')) ARI1 ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
@@ -3731,7 +3736,7 @@ IF @post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCurrencyId, strImportFormat, intCompanyLocationId, intDistributionHeaderId, 
 					intLoadDistributionHeaderId, strActualCostId, dtmShipDate, intPeriodsToAccrue, ysnImpactInventory, dblSplitPercent
 				 FROM tblARInvoice WITH (NOLOCK)) Header
-					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
+					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund', 'Credit Note')
 						AND ISNULL(intPeriodsToAccrue,0) <= 1
 						AND 1 = CASE	
 									WHEN strTransactionType = 'Credit Memo'
@@ -4102,7 +4107,7 @@ IF @post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, dtmShipDate, intCurrencyId, intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, intCompanyLocationId,
 					strImportFormat, ysnImpactInventory, intPeriodsToAccrue
 				 FROM tblARInvoice WITH (NOLOCK)) Header
-					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund') AND ISNULL(intPeriodsToAccrue,0) <= 1 
+					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund', 'Credit Note') AND ISNULL(intPeriodsToAccrue,0) <= 1 
 						AND 1 = CASE WHEN strTransactionType = 'Credit Memo' THEN ysnImpactInventory ELSE 1 END
 			INNER JOIN
 				(SELECT intInvoiceId FROM @PostInvoiceData ) P
@@ -4346,7 +4351,7 @@ IF @post = 0
 					ON PID.intInvoiceId = ARID.intInvoiceId					
 			INNER JOIN
 				(SELECT intInvoiceId, intCompanyLocationId, strTransactionType FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
-					ON ARID.intInvoiceId = ARI.intInvoiceId	AND strTransactionType IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')				 	
+					ON ARID.intInvoiceId = ARI.intInvoiceId	AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund', 'Credit Note')					
 			INNER JOIN
 				(SELECT intItemUOMId FROM dbo.tblICItemUOM WITH (NOLOCK) ) ItemUOM 
 					ON ItemUOM.intItemUOMId = ARID.intItemUOMId

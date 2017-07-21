@@ -4,6 +4,7 @@
 	,@UserId			INT				= NULL
 	,@NewInvoiceNumber	NVARCHAR(25)	= NULL	OUTPUT
 	,@NewInvoiceId		INT				= NULL	OUTPUT
+	,@IsCancel			BIT				= 0
 	,@RaiseError		BIT				= 0
 	,@ErrorMessage		NVARCHAR(250)	= NULL	OUTPUT
 	,@ForRecurring		BIT				= 0	
@@ -96,7 +97,9 @@ SELECT
 	,@BOLNumber						= [strBOLNumber]
 	,@DeliverPickup					= [strDeliverPickup]
 	,@Comments						= CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
-										THEN [strComments]
+												THEN [strComments]
+										   WHEN @IsCancel = 1
+												THEN 'Invoice Cancelled: ' + [strInvoiceNumber] 
 										ELSE [strComments] + ' DUP: ' + [strInvoiceNumber] 
 									  END
 	,@FooterComments				= [strFooterComments]
@@ -251,6 +254,8 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
 --		RETURN 0;
 --	END
 
+IF @IsCancel = 1
+	SET @TransactionType = 'Credit Note'
 
 BEGIN TRY
 	EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -353,7 +358,7 @@ END CATCH
 SET @NewInvoiceId = @CreatedInvoiceId
 SET @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewInvoiceId)
 
-
+--INSERT INVOICE DETAILS
 BEGIN TRY
 	INSERT INTO tblARInvoiceDetail
 		([intInvoiceId]
@@ -529,7 +534,7 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
-
+--INSERT INVOICE TAX DETAILS
 BEGIN TRY
 	INSERT INTO [tblARInvoiceDetailTax]
 		([intInvoiceDetailId]
@@ -651,6 +656,10 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
+--UPDATE INVOICE IF CREDIT NOTE
+IF @IsCancel = 1
+	UPDATE tblARInvoice SET ysnCancelled = 1 WHERE intInvoiceId = @InvoiceId
+
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION 
 	
@@ -658,5 +667,3 @@ RETURN 1;
 
 END
 GO
-
-

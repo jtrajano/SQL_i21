@@ -126,7 +126,7 @@ SELECT intPaymentId
 	 , ysnInvoicePrepayment
 INTO #ARPOSTEDPAYMENT
 FROM dbo.tblARPayment WITH (NOLOCK)
-WHERE ysnPosted = 1
+WHERE ysnPosted = 1	
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 --#INVOICETOTALPAYMENT
@@ -212,6 +212,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE ysnPosted = 1
+	AND ysnCancelled = 0
 	AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) > @dtmDateToLocal		
 	AND intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
@@ -298,6 +299,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
+	AND I.ysnCancelled = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Invoice', 'Debit Memo')
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
@@ -332,6 +334,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
+	AND I.ysnCancelled = 0
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
@@ -366,6 +369,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
+	AND I.ysnCancelled = 0
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
@@ -439,6 +443,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
+	AND I.ysnCancelled = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal        
 	AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
@@ -515,6 +520,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
+	AND I.ysnCancelled = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Invoice', 'Debit Memo')
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    	
@@ -543,6 +549,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
+	AND I.ysnCancelled = 0
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
@@ -570,6 +577,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
+	AND I.ysnCancelled = 0
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
@@ -629,6 +637,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
     LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted  = 1
+	AND I.ysnCancelled = 0
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
