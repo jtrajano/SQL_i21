@@ -114,7 +114,7 @@ SET ANSI_WARNINGS OFF
 			,NULL
 			,LD.intPSubLocationId
 			,NULL
-			,- 160
+			,- @dblQty
 			,LD.intLoadId
 			,CAST(L.strLoadNumber AS VARCHAR(100))
 			,22
