@@ -72,25 +72,31 @@ AS
 			
 			BK.strBook,
 			SK.strSubBook,
-			BT.strName	AS	strBillTo,
-			SH.strName	AS	strShipper,
-			SN.strName	AS	strShippingLine,
+			BT.strName						AS	strBillTo,
+			SH.strName						AS	strShipper,
+			SN.strName						AS	strShippingLine,
 			EF.strFarmNumber,
 			ES.strSplitNumber,
 			DS.strDiscountDescription,
-			SI.strDescription AS strScheduleCode,
+			SI.strDescription				AS	strScheduleCode,
 			SR.strScheduleDescription,
 			CG.strCategoryCode,
 			CQ.strContainerType,
-			DY.strCity	AS	strDestinationCity,
+			DY.strCity						AS	strDestinationCity,
 			IY.strCurrency AS strInvoiceCurrency,
 			FY.strCurrency + '/' + TY.strCurrency AS strExchangeRate,
-			PG.strName	AS	strPurchasingGroup,
-			FM.strUnitMeasure AS strFXPriceUOM,
+			PG.strName						AS	strPurchasingGroup,
+			FM.strUnitMeasure				AS	strFXPriceUOM,
 			RT.strCurrencyExchangeRateType,
-			PR.strName AS strProducer,
-			CU.intCent AS intPriceCurrencyCent,
-			MY.strCurrency	AS	strMarketCurrency
+			PR.strName						AS	strProducer,
+			CU.intCent						AS	intPriceCurrencyCent,
+			MY.strCurrency					AS	strMarketCurrency,
+			BC.strCurrency					AS	strBasisCurrency,
+			BC.ysnSubCurrency				AS	ysnBasisSubCurrency,
+			CC.strCurrency					AS	strConvertedCurrency,
+			CC.ysnSubCurrency				AS	ysnConvertedSubCurrency,
+			BM.strUnitMeasure				AS	strBasisUOM,
+			VM.strUnitMeasure				AS	strConvertedUOM
 
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
@@ -134,6 +140,10 @@ AS
 	LEFT    JOIN	tblICUnitMeasure				XM	ON	XM.intUnitMeasureId					=		XU.intUnitMeasureId			--strAdjustmentUOM
 	LEFT    JOIN	tblICItemUOM					FU	ON	FU.intItemUOMId						=		CD.intFXPriceUOMId
 	LEFT    JOIN	tblICUnitMeasure				FM	ON	FM.intUnitMeasureId					=		FU.intUnitMeasureId			--strFXPriceUOM
+	LEFT    JOIN	tblICItemUOM					BU	ON	BU.intItemUOMId						=		CD.intBasisUOMId
+	LEFT    JOIN	tblICUnitMeasure				BM	ON	BM.intUnitMeasureId					=		BU.intUnitMeasureId			--strBasisUOM
+	LEFT    JOIN	tblICItemUOM					VU	ON	VU.intItemUOMId						=		CD.intConvPriceUOMId
+	LEFT    JOIN	tblICUnitMeasure				VM	ON	VM.intUnitMeasureId					=		VU.intUnitMeasureId			--strConvertedUOM
 	LEFT    JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId				=		CD.intStorageLocationId		--strStorageLocationName
 	
 	LEFT    JOIN	tblRKFutureMarket				MA	ON	MA.intFutureMarketId				=		CD.intFutureMarketId		--strFutureMarket
@@ -146,6 +156,9 @@ AS
 	LEFT    JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId				=		CD.intCompanyLocationId		--strLocationName
 	LEFT    JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID					=		CD.intCurrencyId			--strCurrency
 	LEFT    JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID					=		CU.intMainCurrencyId
+	LEFT    JOIN	tblSMCurrency					BC	ON	BC.intCurrencyID					=		CD.intBasisCurrencyId		--strBasisCurrency
+	LEFT    JOIN	tblSMCurrency					CC	ON	CC.intCurrencyID					=		CD.intConvPriceCurrencyId	--strConvertedCurrency
+
 	LEFT    JOIN	tblSMCurrency					IY	ON	IY.intCurrencyID					=		CD.intInvoiceCurrencyId		--strInvoiceCurrency
 	LEFT    JOIN	tblSMCurrency					MY	ON	MY.intCurrencyID					=		MA.intCurrencyId			--strMarketCurrency
 	LEFT    JOIN	tblSMCurrencyExchangeRate		ER	ON	ER.intCurrencyExchangeRateId		=		CD.intCurrencyExchangeRateId--strExchangeRate
