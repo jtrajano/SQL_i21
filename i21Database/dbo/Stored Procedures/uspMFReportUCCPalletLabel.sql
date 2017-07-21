@@ -31,6 +31,7 @@ BEGIN TRY
 		,@intInventoryShipmentId INT
 		,@strCustomCustomerPO NVARCHAR(50)
 		,@intCustomerLabelTypeId INT
+		,@strOrderManifestLabelId NVARCHAR(MAX) = ''
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -74,9 +75,17 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intCustomerLabelTypeId'
 
-	EXEC dbo.uspMFGenerateSSCCNo @strOrderManifestId = @strOrderManifestId
-		,@intNoOfLabel = @intNoOfLabel
-		,@intCustomerLabelTypeId = @intCustomerLabelTypeId
+	SELECT @strOrderManifestLabelId = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'intOrderManifestLabelId'
+
+	-- only for print mode
+	IF ISNULL(@strOrderManifestLabelId, '') = ''
+	BEGIN
+		EXEC dbo.uspMFGenerateSSCCNo @strOrderManifestId = @strOrderManifestId
+			,@intNoOfLabel = @intNoOfLabel
+			,@intCustomerLabelTypeId = @intCustomerLabelTypeId
+	END
 
 	SELECT TOP 1 @intInventoryShipmentId = intInventoryShipmentId
 	FROM tblMFOrderManifest OM
@@ -97,6 +106,18 @@ BEGIN TRY
 	JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
 		AND S.strNamespace = 'Inventory.view.InventoryShipment'
 	WHERE T.intRecordId = @intInventoryShipmentId
+
+	-- only for re-print mode
+	IF ISNULL(@strOrderManifestLabelId, '') <> ''
+	BEGIN
+		UPDATE tblMFOrderManifestLabel
+		SET ysnPrinted = 0
+		WHERE ysnPrinted = 1
+			AND intOrderManifestLabelId IN (
+				SELECT *
+				FROM dbo.fnSplitString(@strOrderManifestLabelId, '^')
+				)
+	END
 
 	SELECT LTRIM(RTRIM(CASE 
 					WHEN ISNULL(CL.strLocationName, '') = ''

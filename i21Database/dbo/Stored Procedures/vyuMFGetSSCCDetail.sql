@@ -30,3 +30,4 @@ JOIN tblMFOrderDetail OD ON OD.intOrderHeaderId = OH.intOrderHeaderId
 JOIN dbo.tblICItem I ON I.intItemId = OD.intItemId
 JOIN tblMFOrderManifest OM ON OM.intOrderDetailId = OD.intOrderDetailId
 JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
+	AND OML.ysnDeleted <> 1
