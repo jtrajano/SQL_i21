@@ -17,7 +17,6 @@ SCD.intDeliverySheetId
 ,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 FROM vyuSCDeliverySheetView SCD
 OUTER APPLY (
-	--Add the tax from IR
 	SELECT 
 		strCompanyName, strAddress
 	FROM tblSMCompanySetup
