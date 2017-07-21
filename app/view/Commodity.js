@@ -398,7 +398,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         dataIndex: 'strDiscountId',
                                                                         dataType: 'string',
-                                                                        text: 'Storage Type',
+                                                                        text: 'Discount Id',
                                                                         flex: 1
                                                                     },
                                                                     {
