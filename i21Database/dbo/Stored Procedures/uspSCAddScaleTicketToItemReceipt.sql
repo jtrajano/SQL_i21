@@ -385,8 +385,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 			BEGIN
 				SELECT @intLoadContractId = LGLD.intPContractDetailId, @intLoadCostId = LGCOST.intLoadCostId FROM tblLGLoad LGL
 				INNER JOIN tblLGLoadDetail LGLD ON LGL.intLoadId = LGLD.intLoadId
-				INNER JOIN tblLGLoadCost LGCOST ON LGCOST.intLoadId = LGCOST.intLoadId  
-				WHERE LGL.intLoadId = @intLoadId
+				INNER JOIN tblLGLoadCost LGCOST ON LGL.intLoadId = LGCOST.intLoadId  
+				WHERE LGL.intLoadId = @intLoadId AND LGCOST.intItemId = @intFreightItemId
 
 				IF ISNULL(@intFreightItemId,0) != 0
 					BEGIN
@@ -454,7 +454,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 								LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-								WHERE LoadCost.intItemId = @intFreightItemId AND LoadDetail.intPContractDetailId = @intLoadContractId AND LoadCost.dblRate != 0
+								WHERE LoadCost.intItemId = @intLoadCostId AND LoadDetail.intPContractDetailId = @intLoadContractId
+								AND LoadCost.intLoadId = @intLoadId AND LoadCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -515,7 +516,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								FROM tblLGLoadDetail LoadDetail
 								LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = LoadDetail.intPContractDetailId
 								LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
-								WHERE LoadCost.intItemId != @intFreightItemId AND LoadDetail.intPContractDetailId = @intLoadContractId AND LoadCost.dblRate != 0
+								WHERE LoadCost.intItemId != @intLoadCostId AND LoadDetail.intPContractDetailId = @intLoadContractId 
+								AND LoadCost.intLoadId = @intLoadId AND LoadCost.dblRate != 0
 							END
 						ELSE
 							BEGIN
