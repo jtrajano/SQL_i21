@@ -314,6 +314,12 @@ Ext.define('Inventory.view.Commodity', {
                                                                 ]
                                                             },
                                                             {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtEdiCode',
+                                                                fieldLabel: 'EDI Code',
+                                                                labelWidth: 140
+                                                            },
+                                                            {
                                                                 xtype: 'container',
                                                                 margin: '0 0 5 0',
                                                                 layout: {
@@ -353,12 +359,6 @@ Ext.define('Inventory.view.Commodity', {
                                                             align: 'stretch'
                                                         },
                                                         items: [
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtEdiCode',
-                                                                fieldLabel: 'EDI Code',
-                                                                labelWidth: 180
-                                                            },
                                                             {
                                                                 xtype: 'gridcombobox',
                                                                 columns: [

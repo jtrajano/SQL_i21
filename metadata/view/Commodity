@@ -639,6 +639,22 @@
                                                     ]
                                                 },
                                                 {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "EDI Code",
+                                                        "itemId": "txtEdiCode",
+                                                        "labelWidth": 140,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyTextField58",
+                                                    "designerId": "76320594-8f4f-4c37-9dbf-951be8cf3b8d"
+                                                },
+                                                {
                                                     "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
@@ -717,22 +733,6 @@
                                             "name": "MyContainer42",
                                             "designerId": "58d50895-ad8d-4633-a5cf-5d5562fa3af6",
                                             "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "EDI Code",
-                                                        "itemId": "txtEdiCode",
-                                                        "labelWidth": 180,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyTextField58",
-                                                    "designerId": "76320594-8f4f-4c37-9dbf-951be8cf3b8d"
-                                                },
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
                                                     "reference": {

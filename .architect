@@ -5652,6 +5652,9 @@
                                                             ]
                                                         },
                                                         {
+                                                            "id": "76320594-8f4f-4c37-9dbf-951be8cf3b8d"
+                                                        },
+                                                        {
                                                             "id": "3b494419-1904-4efc-9a5f-81edf1dbf566",
                                                             "cn": [
                                                                 {
@@ -5667,9 +5670,6 @@
                                                 {
                                                     "id": "58d50895-ad8d-4633-a5cf-5d5562fa3af6",
                                                     "cn": [
-                                                        {
-                                                            "id": "76320594-8f4f-4c37-9dbf-951be8cf3b8d"
-                                                        },
                                                         {
                                                             "id": "7ebc6492-848b-4ec5-a518-ce87ed99ff71"
                                                         },
@@ -11098,11 +11098,11 @@
         ]
     },
     "canvasState": {
-        "topInstance": "c8873ce8-0312-4503-aed6-fc59e70d1895"
+        "topInstance": "3a59fc7a-16c2-4a32-9f9e-da6a3b7a75c7"
     },
     "inspectorState": {
-        "topInstance": "c8873ce8-0312-4503-aed6-fc59e70d1895",
-        "selectedInstance": "c8873ce8-0312-4503-aed6-fc59e70d1895"
+        "topInstance": "3a59fc7a-16c2-4a32-9f9e-da6a3b7a75c7",
+        "selectedInstance": "76320594-8f4f-4c37-9dbf-951be8cf3b8d"
     },
     "editMode": "design",
     "userSettings": {
