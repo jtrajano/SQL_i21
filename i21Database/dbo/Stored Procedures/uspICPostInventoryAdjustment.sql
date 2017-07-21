@@ -3,6 +3,7 @@
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -22,7 +23,6 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
 
 -- Get the Inventory Adjustment batch number
-DECLARE @strBatchId AS NVARCHAR(40) 
 DECLARE @strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
@@ -142,8 +142,11 @@ BEGIN
 END
 
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
-IF @@ERROR <> 0 GOTO Post_Exit    
+BEGIN 
+	SET @strBatchId = NULL 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+	IF @@ERROR <> 0 GOTO Post_Exit    
+END 
 
 -- Determine if Adjustment requires costing and GL entries. 
 SELECT @adjustmentTypeRequiresGLEntries = 1
@@ -531,11 +534,12 @@ BEGIN
 	IF @adjustmentTypeRequiresGLEntries = 1
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
-		EXEC dbo.uspGLPostRecapOld 
-				@GLEntries
-				,@intTransactionId
-				,@strTransactionId
-				,'IC'
+
+		-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
+		EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityUserSecurityId
+		
 		COMMIT TRAN @TransactionName
 	END 
 	ELSE 
