@@ -5477,6 +5477,7 @@
     <Build Include="dbo\Stored Procedures\uspICLogPostResult.sql" />
     <Build Include="dbo\Views\vyuTRSearchQuoteDetail.sql" />
     <Build Include="dbo\Views\vyuTRSearchQuote.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
