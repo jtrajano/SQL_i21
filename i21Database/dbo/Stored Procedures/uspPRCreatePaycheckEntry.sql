@@ -292,6 +292,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 			([intPaycheckId]
 			,[intEmployeeDeductionId]
 			,[intTypeDeductionId]
+			,[dblPaycheckMax]
 			,[strDeductFrom]
 			,[strCalculationType]
 			,[dblAmount]
@@ -312,6 +313,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 			@intPaycheckId
 			,@intEmployeeDeductionId
 			,[intTypeDeductionId]
+			,[dblPaycheckMax]
 			,[strDeductFrom]
 			,[strCalculationType]
 			,[dblAmount]

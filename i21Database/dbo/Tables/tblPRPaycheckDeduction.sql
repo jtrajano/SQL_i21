@@ -3,6 +3,7 @@
 	[intPaycheckId] [int] NOT NULL,
 	[intEmployeeDeductionId] INT NULL,
 	[intTypeDeductionId] INT NULL,
+	[dblPaycheckMax] [numeric](18, 6) NULL DEFAULT ((100)),
 	[strDeductFrom] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[strCalculationType] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[dblAmount] [numeric](18, 6) NULL,

@@ -9,6 +9,7 @@ SELECT
 	,strDescription = (SELECT TOP 1 strDescription FROM tblPRTypeDeduction WHERE intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId)
 	,tblPRPaycheckDeduction.intEmployeeDeductionId
 	,tblPRPaycheckDeduction.intTypeDeductionId
+	,tblPRPaycheckDeduction.dblPaycheckMax
 	,tblPRPaycheckDeduction.strDeductFrom
 	,tblPRPaycheckDeduction.strCalculationType
 	,tblPRPaycheckDeduction.dblAmount
