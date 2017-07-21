@@ -4,6 +4,7 @@
 IF OBJECT_ID('tblAPPayment') IS NOT NULL AND COL_LENGTH('tblAPPayment','intPayToAddressId') IS NULL
 BEGIN
 
+	EXEC ('
 	ALTER TABLE tblAPPayment
 		ADD intPayToAddressId INT NULL
 
@@ -24,4 +25,5 @@ BEGIN
 		WHERE recordCount.intTotal = 1 AND B.intPaymentId = payment.intPaymentId
 	) details
 	WHERE payment.ysnPosted = 0
+	')
 END
