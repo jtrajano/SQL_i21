@@ -33,7 +33,7 @@ namespace iRely.Inventory.WebApi
                 data = new
                 {
                     strBatchId = result.strBatchId,
-                    strTransactionId = transfer.strTransactionId,
+                    strTransactionId = transfer.strTransactionId
                 },
                 success = result.HasError ? false : true,
                 message = new
