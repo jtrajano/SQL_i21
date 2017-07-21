@@ -113,7 +113,7 @@ BEGIN TRY
 	END
 
 	--PosDescription
-		IF (@strDescription != '' AND @strDescription != 'null')
+		IF (@strPosDescription != '' AND @strPosDescription != 'null')
 		BEGIN
 		
 			SET @SqlQuery1 = 'SELECT' + CHAR(13)

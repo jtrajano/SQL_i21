@@ -71,6 +71,9 @@ BEGIN
 		   DECLARE @VendorXrefCount INT
 		   SET @VendorXrefCount = 0
 
+		   DECLARE @DescriptionAuditLog NVARCHAR(MAX)
+		   SET @DescriptionAuditLog = ''
+
 		   DECLARE @SqlQuery1 as NVARCHAR(MAX)
 
 		   ----intCategoryId
@@ -85,7 +88,7 @@ BEGIN
 										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 										+ ', ''Category'' AS strChangeDescription' + CHAR(13)
-										+ ', adj8.strCategoryCode AS strOldData' + CHAR(13)
+										+ ', ISNULL(adj8.strCategoryCode, '''') AS strOldData' + CHAR(13)
 										+ ', ''' + @strCategoryCode + ''' AS strNewData' + CHAR(13)
 							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
 								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
@@ -117,7 +120,7 @@ BEGIN
 										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 										+ ', ''Description'' AS strChangeDescription' + CHAR(13)
-										+ ', adj7.strDescription AS strOldData' + CHAR(13)
+										+ ', ISNULL(adj7.strDescription, '''') AS strOldData' + CHAR(13)
 										+ ', ''' + @strDescription + ''' AS strNewData' + CHAR(13)
 							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
 								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
@@ -141,7 +144,7 @@ BEGIN
 			END
 
 			--PosDescription
-			IF (@strDescription != '' AND @strDescription != 'null')
+			IF (@PosDescription != '' AND @PosDescription != 'null')
 			BEGIN
 		
 				SET @SqlQuery1 = 'SELECT' + CHAR(13)
@@ -149,7 +152,7 @@ BEGIN
 										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 										+ ', ''Pos Description'' AS strChangeDescription' + CHAR(13)
-										+ ', adj2.strDescription AS strOldData' + CHAR(13)
+										+ ', ISNULL(adj2.strDescription, '''') AS strOldData' + CHAR(13)
 										+ ', ''' + @PosDescription + ''' AS strNewData' + CHAR(13)
 							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
 								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
@@ -186,7 +189,7 @@ BEGIN
 										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 										+ ', ''Vendor'' AS strChangeDescription' + CHAR(13)
-										+ ', adj11.strName AS strOldData' + CHAR(13)
+										+ ', ISNULL(adj11.strName, '''') AS strOldData' + CHAR(13)
 										+ ', ''' + @strVendorName + ''' AS strNewData' + CHAR(13)
 							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
 								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
@@ -337,7 +340,7 @@ BEGIN
 										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 										+ ', ''Vendor Id'' AS strChangeDescription' + CHAR(13)
-										+ ', adj9.strVendorId AS strOldData' + CHAR(13)
+										+ ', ISNULL(adj9.strVendorId, '''') AS strOldData' + CHAR(13)
 										+ ', ''' + CAST(@strVendorId AS NVARCHAR(50)) + ''' AS strNewData' + CHAR(13)
 							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
 								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
@@ -372,7 +375,7 @@ BEGIN
 										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 										+ ', ''Family'' AS strChangeDescription' + CHAR(13)
-										+ ', adj3.strSubcategoryId AS strOldData' + CHAR(13)
+										+ ', ISNULL(adj3.strSubcategoryId, '''') AS strOldData' + CHAR(13)
 										+ ', ''' + CAST(@strFamily AS NVARCHAR(50)) + ''' AS strNewData' + CHAR(13)
 							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
 								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
@@ -407,7 +410,7 @@ BEGIN
 										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
 										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
 										+ ', ''Class'' AS strChangeDescription' + CHAR(13)
-										+ ', adj4.strSubcategoryId AS strOldData' + CHAR(13)
+										+ ', ISNULL(adj4.strSubcategoryId, '''') AS strOldData' + CHAR(13)
 										+ ', ''' + CAST(@strClass AS NVARCHAR(50)) + ''' AS strNewData' + CHAR(13)
 							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
 								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
@@ -461,27 +464,22 @@ BEGIN
 				 AND adj2.intItemLocationId = @intItemLocationId
 				 AND adj1.intItemPricingId = @intItemPricingId
 
-			 
-				 ----SET @changeDescription = 'Updated - Record: ' + cast(@intUniqueId as nvarchar) + '';
-				 ----SET @children = '{"change":"strDescription","from":' + @oldData + ',"to":"' + @strDescription + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intUniqueId AS NVARCHAR(10)) + ',"changeDescription":"Description","hidden":false}'
-				 ----exec uspSMAuditLog 'Store.view.InventoryMassMaintenance', @intUniqueId, @intEntityId, 'Updated', 'small-tree-modified', 'Description', @oldData, @strDescription, ''
-
-				 ----INSERT to AuditLog
-				 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-				 --VALUES(
-					--		'Updated'
-					--		, 'Store.view.InventoryMassMaintenance'
-					--		, @intUniqueId
-					--		, ''
-					--		, null
-					--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @strDescription + '","leaf":true}]}'
-					--		, GETUTCDATE()
-					--		, 1
-					--		, 1
-				 --)
-
-				 --Constract child
+				 --GET OLD and NEW data
 				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Description'
+			 
+			     --AuditLog for corresponding module
+				 SET @DescriptionAuditLog = '{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}'
+				 EXEC uspSMAuditLog 'Inventory.view.Item'
+								   , @intItemId
+								   , @intEntityId
+								   , 'Updated'
+								   , 'small-tree-modified'
+								   , ''
+								   , @oldData
+								   , @newData
+								   , @DescriptionAuditLog
+
+				 --Custom AuditLog Constract child
 				 SET @children = @children + '{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 			END
 		
@@ -508,23 +506,22 @@ BEGIN
 				 AND adj2.intItemLocationId = @intItemLocationId
 				 AND adj1.intItemPricingId = @intItemPricingId
 
-				 ----INSERT to AuditLog
-				 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Category'
-				 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-				 --VALUES(
-					--		'Updated'
-					--		, 'Store.view.InventoryMassMaintenance'
-					--		, @intUniqueId
-					--		, ''
-					--		, null
-					--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Category","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-					--		, GETUTCDATE()
-					--		, 1
-					--		, 1
-				 --)
-
-				 --Constract child
+				 --GET OLD and NEW data
 				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Category'
+
+				 --AuditLog for corresponding module
+				 SET @DescriptionAuditLog = '{"change":"Category","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}'
+				 EXEC uspSMAuditLog 'Inventory.view.Item'
+								   , @intItemId
+								   , @intEntityId
+								   , 'Updated'
+								   , 'small-tree-modified'
+								   , ''
+								   , @oldData
+								   , @newData
+								   , @DescriptionAuditLog
+
+				 --AutoLog for InventoryMass	 
 				 SET @children = @children + '{"change":"Category","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 			END
 		
@@ -551,23 +548,22 @@ BEGIN
 				 AND adj2.intItemLocationId = @intItemLocationId
 				 AND adj1.intItemPricingId = @intItemPricingId
 
-				 ----INSERT to AuditLog
-				 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Pos Description'
-				 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-				 --VALUES(
-					--		'Updated'
-					--		, 'Store.view.InventoryMassMaintenance'
-					--		, @intUniqueId
-					--		, ''
-					--		, null
-					--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Pos Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-					--		, GETUTCDATE()
-					--		, 1
-					--		, 1
-				 --)
-
-				 --Constract child
+				 --GET OLD and NEW data
 				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Pos Description'
+
+				 --AuditLog for corresponding module
+				 SET @DescriptionAuditLog = '{"change":"Pos Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}'
+				 EXEC uspSMAuditLog 'Inventory.view.Item'
+								   , @intItemId
+								   , @intEntityId
+								   , 'Updated'
+								   , 'small-tree-modified'
+								   , ''
+								   , @oldData
+								   , @newData
+								   , @DescriptionAuditLog
+
+				 --AutoLog for InventoryMass
 				 SET @children = @children + '{"change":"Pos Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 			END
 		
@@ -595,23 +591,22 @@ BEGIN
 				 AND adj2.intItemLocationId = @intItemLocationId
 				 AND adj1.intItemPricingId = @intItemPricingId
 
-				 ----INSERT to AuditLog
-				 --SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor'
-				 --INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-				 --VALUES(
-					--		'Updated'
-					--		, 'Store.view.InventoryMassMaintenance'
-					--		, @intUniqueId
-					--		, ''
-					--		, null
-					--		, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[{"change":"Vendor","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}]}'
-					--		, GETUTCDATE()
-					--		, 1
-					--		, 1
-				 --)
-
-				 --Constract child
+				  --GET OLD and NEW data
 				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor'
+
+				 --AuditLog for corresponding module
+				 SET @DescriptionAuditLog = '{"change":"Vendor","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true}'
+				 EXEC uspSMAuditLog 'Inventory.view.Item'
+								   , @intItemId
+								   , @intEntityId
+								   , 'Updated'
+								   , 'small-tree-modified'
+								   , ''
+								   , @oldData
+								   , @newData
+								   , @DescriptionAuditLog
+
+				 --AutoLog for InventoryMass	 				 
 				 SET @children = @children + '{"change":"Vendor","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 
 				END
