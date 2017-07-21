@@ -1,178 +1,185 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketView]
-	AS select tblSCTicket.intTicketId,
+	AS select SCT.intTicketId,
 	   (CASE 
-			WHEN tblSCTicket.strTicketStatus = 'O' THEN 'OPEN'
-			WHEN tblSCTicket.strTicketStatus = 'A' THEN 'PRINTED'
-			WHEN tblSCTicket.strTicketStatus = 'C' THEN 'COMPLETED'
-			WHEN tblSCTicket.strTicketStatus = 'V' THEN 'VOID'
-			WHEN tblSCTicket.strTicketStatus = 'R' THEN 'REOPENED'
-		END) AS strTicketStatusDescription,
-	   tblSCTicket.strTicketStatus,
-       tblSCTicket.strTicketNumber,
-       tblSCTicket.intScaleSetupId,
-       tblSCTicket.intTicketPoolId,
-       tblSCTicket.intTicketLocationId,
-       tblSCTicket.intTicketType,
-       tblSCTicket.strInOutFlag,
-       tblSCTicket.dtmTicketDateTime,
-       tblSCTicket.dtmTicketTransferDateTime,
-       tblSCTicket.dtmTicketVoidDateTime,
-       tblSCTicket.intProcessingLocationId,
-       tblSCTicket.strScaleOperatorUser,
-       tblSCTicket.intEntityScaleOperatorId,
-       tblSCTicket.strPurchaseOrderNumber,
-       tblSCTicket.strTruckName,
-       tblSCTicket.strDriverName,
-       tblSCTicket.ysnDriverOff,
-       tblSCTicket.ysnSplitWeightTicket,
-       tblSCTicket.ysnGrossManual,
-       tblSCTicket.ysnGross1Manual,
-       tblSCTicket.ysnGross2Manual,
-       tblSCTicket.dblGrossWeight,
-       tblSCTicket.dblGrossWeight1,
-       tblSCTicket.dblGrossWeight2,
-       tblSCTicket.dblGrossWeightOriginal,
-       tblSCTicket.dblGrossWeightSplit1,
-       tblSCTicket.dblGrossWeightSplit2,
-       tblSCTicket.dtmGrossDateTime,
-       tblSCTicket.dtmGrossDateTime1,
-       tblSCTicket.dtmGrossDateTime2,
-       tblSCTicket.intGrossUserId,
-       tblSCTicket.ysnTareManual,
-       tblSCTicket.ysnTare1Manual,
-       tblSCTicket.ysnTare2Manual,
-       tblSCTicket.dblTareWeight,
-       tblSCTicket.dblTareWeight1,
-       tblSCTicket.dblTareWeight2,
-       tblSCTicket.dblTareWeightOriginal,
-       tblSCTicket.dblTareWeightSplit1,
-       tblSCTicket.dblTareWeightSplit2,
-       tblSCTicket.dtmTareDateTime,
-       tblSCTicket.dtmTareDateTime1,
-       tblSCTicket.dtmTareDateTime2,
-       tblSCTicket.intTareUserId,
-       tblSCTicket.dblGrossUnits,
-       tblSCTicket.dblNetUnits,
-	   (tblSCTicket.dblGrossWeight - tblSCTicket.dblTareWeight) AS dblNetWeight,
-       tblSCTicket.strItemNumber,
-       tblSCTicket.strItemUOM,
-       tblSCTicket.intCustomerId,
-       tblSCTicket.intSplitId,
-       tblSCTicket.strDistributionOption,
-       tblSCTicket.intDiscountSchedule,
-       tblSCTicket.strDiscountLocation,
-       tblSCTicket.dtmDeferDate,
-       tblSCTicket.strContractNumber,
-       tblSCTicket.intContractSequence,
-       tblSCTicket.strContractLocation,
-       tblSCTicket.dblUnitPrice,
-       tblSCTicket.dblUnitBasis,
-       tblSCTicket.dblTicketFees,
-       tblSCTicket.intCurrencyId,
-       tblSCTicket.dblCurrencyRate,
-       tblSCTicket.strTicketComment,
-       tblSCTicket.strCustomerReference,
-       tblSCTicket.ysnTicketPrinted,
-       tblSCTicket.ysnPlantTicketPrinted,
-       tblSCTicket.ysnGradingTagPrinted,
-       tblSCTicket.intHaulerId,
-       tblSCTicket.intFreightCarrierId,
-       tblSCTicket.dblFreightRate,
-       tblSCTicket.dblFreightAdjustment,
-       tblSCTicket.intFreightCurrencyId,
-       tblSCTicket.dblFreightCurrencyRate,
-       tblSCTicket.strFreightCContractNumber,
-       tblSCTicket.ysnFarmerPaysFreight,
-       tblSCTicket.strLoadNumber,
-       tblSCTicket.intLoadLocationId,
-       tblSCTicket.intAxleCount,
-	   tblSCTicket.intAxleCount1,
-	   tblSCTicket.intAxleCount2,
-       tblSCTicket.strBinNumber,
-       tblSCTicket.strPitNumber,
-       tblSCTicket.intGradingFactor,
-       tblSCTicket.strVarietyType,
-       tblSCTicket.strFarmNumber,
-       tblSCTicket.strFieldNumber,
-       tblSCTicket.strDiscountComment,
-       tblSCTicket.strCommodityCode,
-       tblSCTicket.intCommodityId,
-       tblSCTicket.intDiscountId,
-       tblSCTicket.intContractId,
-       tblSCTicket.intDiscountLocationId,
-       tblSCTicket.intItemId,
-       tblSCTicket.intEntityId,
-       tblSCTicket.intLoadId,
-       tblSCTicket.intMatchTicketId,
-       tblSCTicket.intSubLocationId,
-       tblSCTicket.intStorageLocationId,
-       tblSCTicket.intFarmFieldId,
-       tblSCTicket.intDistributionMethod,
-       tblSCTicket.intSplitInvoiceOption,
-       tblSCTicket.intDriverEntityId,
-       tblSCTicket.intStorageScheduleId,
-       tblSCTicket.dblNetWeightDestination,
-       tblSCTicket.ysnUseDestinationWeight,
-       tblSCTicket.ysnUseDestinationGrades,
-       tblSCTicket.ysnHasGeneratedTicketNumber,
-       tblSCTicket.intInventoryTransferId,
-       tblSCTicket.dblShrink,
-       tblSCTicket.dblConvertedUOMQty,
-	   tblSCTicket.strFreightSettlement,
-	   tblSCTicket.intDeliverySheetId,
-	   tblSCTicket.strElevatorReceiptNumber,
-	   tblSCDeliverySheet.strDeliverySheetNumber,
-       tblEMEntity.strName,
-       tblSCListTicketTypes.strTicketType,
-	   tblSMCompanyLocation.strLocationName,
-	   tblSMCompanyLocationSubLocation.strSubLocationName,
-	   ISNULL(tblGRStorageType.strStorageTypeDescription, 
+			WHEN SCT.strTicketStatus = 'O' THEN 'OPEN'
+			WHEN SCT.strTicketStatus = 'A' THEN 'PRINTED'
+			WHEN SCT.strTicketStatus = 'C' THEN 'COMPLETED'
+			WHEN SCT.strTicketStatus = 'V' THEN 'VOID'
+			WHEN SCT.strTicketStatus = 'R' THEN 'REOPENED'
+		END) AS strTicketStatusDescription
+	   ,SCT.strTicketStatus
+       ,SCT.strTicketNumber
+       ,SCT.intScaleSetupId
+       ,SCT.intTicketPoolId
+       ,SCT.intTicketLocationId
+       ,SCT.intTicketType
+       ,SCT.strInOutFlag
+       ,SCT.dtmTicketDateTime
+       ,SCT.dtmTicketTransferDateTime
+       ,SCT.dtmTicketVoidDateTime
+       ,SCT.intProcessingLocationId
+       ,SCT.strScaleOperatorUser
+       ,SCT.intEntityScaleOperatorId
+       ,SCT.strPurchaseOrderNumber
+       ,SCT.strTruckName
+       ,SCT.strDriverName
+       ,SCT.ysnDriverOff
+       ,SCT.ysnSplitWeightTicket
+       ,SCT.ysnGrossManual
+       ,SCT.ysnGross1Manual
+       ,SCT.ysnGross2Manual
+       ,SCT.dblGrossWeight
+       ,SCT.dblGrossWeight1
+       ,SCT.dblGrossWeight2
+       ,SCT.dblGrossWeightOriginal
+       ,SCT.dblGrossWeightSplit1
+       ,SCT.dblGrossWeightSplit2
+       ,SCT.dtmGrossDateTime
+       ,SCT.dtmGrossDateTime1
+       ,SCT.dtmGrossDateTime2
+       ,SCT.intGrossUserId
+       ,SCT.ysnTareManual
+       ,SCT.ysnTare1Manual
+       ,SCT.ysnTare2Manual
+       ,SCT.dblTareWeight
+       ,SCT.dblTareWeight1
+       ,SCT.dblTareWeight2
+       ,SCT.dblTareWeightOriginal
+       ,SCT.dblTareWeightSplit1
+       ,SCT.dblTareWeightSplit2
+       ,SCT.dtmTareDateTime
+       ,SCT.dtmTareDateTime1
+       ,SCT.dtmTareDateTime2
+       ,SCT.intTareUserId
+       ,SCT.dblGrossUnits
+       ,SCT.dblNetUnits
+	   ,(SCT.dblGrossWeight - SCT.dblTareWeight) AS dblNetWeight
+       ,SCT.strItemNumber
+       ,SCT.strItemUOM
+       ,SCT.intCustomerId
+       ,SCT.intSplitId
+       ,SCT.strDistributionOption
+       ,SCT.intDiscountSchedule
+       ,SCT.strDiscountLocation
+       ,SCT.dtmDeferDate
+       ,SCT.strContractNumber
+       ,SCT.intContractSequence
+       ,SCT.strContractLocation
+       ,SCT.dblUnitPrice
+       ,SCT.dblUnitBasis
+       ,SCT.dblTicketFees
+       ,SCT.intCurrencyId
+       ,SCT.dblCurrencyRate
+       ,SCT.strTicketComment
+       ,SCT.strCustomerReference
+       ,SCT.ysnTicketPrinted
+       ,SCT.ysnPlantTicketPrinted
+       ,SCT.ysnGradingTagPrinted
+       ,SCT.intHaulerId
+       ,SCT.intFreightCarrierId
+       ,SCT.dblFreightRate
+       ,SCT.dblFreightAdjustment
+       ,SCT.intFreightCurrencyId
+       ,SCT.dblFreightCurrencyRate
+       ,SCT.strFreightCContractNumber
+       ,SCT.ysnFarmerPaysFreight
+       ,SCT.strLoadNumber
+       ,SCT.intLoadLocationId
+       ,SCT.intAxleCount
+	   ,SCT.intAxleCount1
+	   ,SCT.intAxleCount2
+       ,SCT.strBinNumber
+       ,SCT.strPitNumber
+       ,SCT.intGradingFactor
+       ,SCT.strVarietyType
+       ,SCT.strFarmNumber
+       ,SCT.strFieldNumber
+       ,SCT.strDiscountComment
+       ,SCT.strCommodityCode
+       ,SCT.intCommodityId
+       ,SCT.intDiscountId
+       ,SCT.intContractId
+       ,SCT.intDiscountLocationId
+       ,SCT.intItemId
+       ,SCT.intEntityId
+       ,SCT.intLoadId
+       ,SCT.intMatchTicketId
+       ,SCT.intSubLocationId
+       ,SCT.intStorageLocationId
+       ,SCT.intFarmFieldId
+       ,SCT.intDistributionMethod
+       ,SCT.intSplitInvoiceOption
+       ,SCT.intDriverEntityId
+       ,SCT.intStorageScheduleId
+       ,SCT.dblNetWeightDestination
+       ,SCT.ysnUseDestinationWeight
+       ,SCT.ysnUseDestinationGrades
+       ,SCT.ysnHasGeneratedTicketNumber
+       ,SCT.intInventoryTransferId
+       ,SCT.dblShrink
+       ,SCT.dblConvertedUOMQty
+	   ,SCT.strFreightSettlement
+	   ,SCT.intDeliverySheetId
+	   ,SCT.strElevatorReceiptNumber
+	   ,(SCT.dblGrossWeight + ISNULL(SCT.dblGrossWeight1, 0) + ISNULL(SCT.dblGrossWeight2, 0)) AS dblTotalGrossWeight
+	   ,(SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0)) AS dblTotalTareWeight
+	   ,((SCT.dblGrossWeight + ISNULL(SCT.dblGrossWeight1, 0) + ISNULL(SCT.dblGrossWeight2, 0)) - (SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0))) AS dblTotalNetWeight
+	   ,(SCT.dblUnitPrice + SCT.dblUnitBasis) AS dblCashPrice
+	   ,SCD.strDeliverySheetNumber
+       ,EMEntity.strName
+       ,SCListTicket.strTicketType
+	   ,SMC.strLocationName
+	   ,SMCSubLocation.strSubLocationName
+	   ,ISNULL(GRStorage.strStorageTypeDescription, 
 	   CASE 
-			WHEN tblSCTicket.strDistributionOption = 'CNT' THEN 'Contract'
-			WHEN tblSCTicket.strDistributionOption = 'LOD' THEN 'Load'
-			WHEN tblSCTicket.strDistributionOption = 'SPT' THEN 'Spot Sale'
-			WHEN tblSCTicket.strDistributionOption = 'SPL' THEN 'Split'
-			WHEN tblSCTicket.strDistributionOption = 'HLD' THEN 'Hold'
-		END) AS strStorageTypeDescription,
-	   tblSCScaleSetup.strStationShortDescription,
-	   [tblEMEntitySplit].strSplitNumber,
-	   tblSCTicketPool.strTicketPool,
-	   tblGRDiscountId.strDiscountId,
-	   tblICStorageLocation.strDescription,
-	   tblGRStorageScheduleRule.strScheduleId,
-	   tblICInventoryReceipt.intInventoryReceiptId,
-	   tblICInventoryReceipt.strReceiptNumber,
-	   tblICInventoryShipment.intInventoryShipmentId,
-	   tblICInventoryShipment.strShipmentNumber,
-	   tblEMEntityFarm.strFarmDescription
-  from ((tblSCTicket tblSCTicket
-	left join tblEMEntity tblEMEntity
-       on (tblEMEntity.intEntityId = tblSCTicket.intEntityId)
-	left join tblEMEntitySplit tblEMEntitySplit
-       on ([tblEMEntitySplit].intSplitId = tblSCTicket.intSplitId)
-	left join tblSCScaleSetup tblSCScaleSetup
-       on (tblSCScaleSetup.intScaleSetupId = tblSCTicket.intScaleSetupId)
-	left join tblSMCompanyLocation tblSMCompanyLocation
-       on (tblSMCompanyLocation.intCompanyLocationId = tblSCTicket.intProcessingLocationId))
-	left join tblSCListTicketTypes tblSCListTicketTypes
-       on (tblSCListTicketTypes.intTicketType = tblSCTicket.intTicketType AND tblSCListTicketTypes.strInOutIndicator = tblSCTicket.strInOutFlag)
-	left join tblGRStorageType tblGRStorageType
-       on (tblGRStorageType.strStorageTypeCode = tblSCTicket.strDistributionOption)
-	left join tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation
-       on (tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = tblSCTicket.intSubLocationId))
-	left join tblSCTicketPool tblSCTicketPool
-       on tblSCTicketPool.intTicketPoolId = tblSCTicket.intTicketPoolId
-	left join tblGRDiscountId tblGRDiscountId
-       on tblGRDiscountId.intDiscountId = tblSCTicket.intDiscountId
-	left join tblICStorageLocation tblICStorageLocation
-       on tblICStorageLocation.intStorageLocationId = tblSCTicket.intStorageLocationId
-	left join tblGRStorageScheduleRule tblGRStorageScheduleRule
-       on tblGRStorageScheduleRule.intStorageScheduleRuleId = tblSCTicket.intStorageScheduleId
-	left join tblICInventoryReceipt tblICInventoryReceipt
-	   on  tblICInventoryReceipt.intInventoryReceiptId = tblSCTicket.intInventoryReceiptId
-	left join tblICInventoryShipment tblICInventoryShipment
-	   on  tblICInventoryShipment.intInventoryShipmentId = tblSCTicket.intInventoryShipmentId
-	left join tblEMEntityFarm tblEMEntityFarm
-	   on tblEMEntityFarm.intFarmFieldId = tblSCTicket.intFarmFieldId
-	left join tblSCDeliverySheet tblSCDeliverySheet
-	   on tblSCDeliverySheet.intDeliverySheetId = tblSCTicket.intDeliverySheetId
+			WHEN SCT.strDistributionOption = 'CNT' THEN 'Contract'
+			WHEN SCT.strDistributionOption = 'LOD' THEN 'Load'
+			WHEN SCT.strDistributionOption = 'SPT' THEN 'Spot Sale'
+			WHEN SCT.strDistributionOption = 'SPL' THEN 'Split'
+			WHEN SCT.strDistributionOption = 'HLD' THEN 'Hold'
+		END) AS strStorageTypeDescription
+	   ,SCSetup.strStationShortDescription
+	   ,[EMSplit].strSplitNumber
+	   ,SCTPool.strTicketPool
+	   ,GRDiscountId.strDiscountId
+	   ,ICStorageLocation.strDescription
+	   ,GRSSR.strScheduleId
+	   ,IR.intInventoryReceiptId
+	   ,IR.strReceiptNumber
+	   ,ICIS.intInventoryShipmentId
+	   ,ICIS.strShipmentNumber
+	   ,EMEntityFarm.strFarmDescription
+	   ,ICCA.strDescription AS strGrade
+  from ((tblSCTicket SCT
+	left join tblEMEntity EMEntity
+       on (EMEntity.intEntityId = SCT.intEntityId)
+	left join tblEMEntitySplit EMSplit
+       on ([EMSplit].intSplitId = SCT.intSplitId)
+	left join tblSCScaleSetup SCSetup
+       on (SCSetup.intScaleSetupId = SCT.intScaleSetupId)
+	left join tblSMCompanyLocation SMC
+       on (SMC.intCompanyLocationId = SCT.intProcessingLocationId))
+	left join tblSCListTicketTypes SCListTicket
+       on (SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag)
+	left join tblGRStorageType GRStorage
+       on (GRStorage.strStorageTypeCode = SCT.strDistributionOption)
+	left join tblSMCompanyLocationSubLocation SMCSubLocation
+       on (SMCSubLocation.intCompanyLocationSubLocationId = SCT.intSubLocationId))
+	left join tblSCTicketPool SCTPool
+       on SCTPool.intTicketPoolId = SCT.intTicketPoolId
+	left join tblGRDiscountId GRDiscountId
+       on GRDiscountId.intDiscountId = SCT.intDiscountId
+	left join tblICStorageLocation ICStorageLocation
+       on ICStorageLocation.intStorageLocationId = SCT.intStorageLocationId
+	left join tblGRStorageScheduleRule GRSSR
+       on GRSSR.intStorageScheduleRuleId = SCT.intStorageScheduleId
+	left join tblICInventoryReceipt IR
+	   on  IR.intInventoryReceiptId = SCT.intInventoryReceiptId
+	left join tblICInventoryShipment ICIS
+	   on  ICIS.intInventoryShipmentId = SCT.intInventoryShipmentId
+	left join tblEMEntityFarm EMEntityFarm
+	   on EMEntityFarm.intFarmFieldId = SCT.intFarmFieldId
+	left join tblSCDeliverySheet SCD
+	   on SCD.intDeliverySheetId = SCT.intDeliverySheetId
+	left join tblICCommodityAttribute ICCA 
+	   on ICCA.intCommodityAttributeId = SCT.intCommodityAttributeId

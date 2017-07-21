@@ -146,7 +146,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	(SELECT strAddress FROM tblSMCompanySetup) AS strAddress,
 	vyuEMSearchShipVia.strName AS strHaulerName,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision,
-	tblSCScaleSetup.ysnMultipleWeights
+	tblSCScaleSetup.ysnMultipleWeights,
+	ICCA.strDescription AS strGrade
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -162,3 +163,4 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
   LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
   LEFT JOIN vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem on vyuICGetInventoryShipmentItem.intSourceId = SC.intTicketId
+  LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SC.intCommodityAttributeId
