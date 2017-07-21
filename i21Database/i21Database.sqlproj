@@ -5485,6 +5485,7 @@
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetGradeReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetSummaryReport.sql" />
     <Build Include="dbo\Views\vyuSCDeliverySheetReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
