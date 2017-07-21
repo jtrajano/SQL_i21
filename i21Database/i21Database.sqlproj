@@ -5482,6 +5482,9 @@
     <Build Include="dbo\Views\vyuCFTransactionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteOrderLabels.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDeliverySheetGradeReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDeliverySheetSummaryReport.sql" />
+    <Build Include="dbo\Views\vyuSCDeliverySheetReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
