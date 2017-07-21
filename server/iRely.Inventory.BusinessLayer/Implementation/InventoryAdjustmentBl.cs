@@ -98,14 +98,23 @@ namespace iRely.Inventory.BusinessLayer
             base.Add(entity);
         }
 
-        public SaveResult PostTransaction(Common.Posting_RequestModel Adjustment, bool isRecap)
+        public Common.GLPostResult PostTransaction(Common.Posting_RequestModel Adjustment, bool isRecap)
         {
+            var glPostResult = new Common.GLPostResult();
+            glPostResult.Exception = new ServerException();
+
             // Save the record first 
             var result = _db.Save(false);
 
             if (result.HasError)
             {
-                return result;
+                glPostResult.BaseException = result.BaseException;
+                glPostResult.Exception = result.Exception;
+                glPostResult.HasError = result.HasError;
+                glPostResult.RowsAffected = result.RowsAffected;
+                //glPostResult.strBatchId = null; 
+
+                return glPostResult;
             }
 
             // Pre-post validation
@@ -118,9 +127,23 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     var updateResult = UpdateOutdatedStockOnHand(Adjustment.strTransactionId);
                     if (updateResult.HasError)
-                        return updateResult;
+                    {
+                        glPostResult.BaseException = updateResult.BaseException;
+                        glPostResult.Exception = updateResult.Exception;
+                        glPostResult.HasError = updateResult.HasError;
+                        glPostResult.RowsAffected = updateResult.RowsAffected;
+
+                        return glPostResult;
+                    }
                     else
-                        return validateResult;
+                    {
+                        glPostResult.BaseException = validateResult.BaseException;
+                        glPostResult.Exception = validateResult.Exception;
+                        glPostResult.HasError = validateResult.HasError;
+                        glPostResult.RowsAffected = validateResult.RowsAffected;
+
+                        return glPostResult;
+                    }
                 }
 
                 // Check for outdated expiry date before the actual posting. 
@@ -130,35 +153,49 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     var updateResult = UpdateOutdatedExpiryDate(Adjustment.strTransactionId);
                     if (updateResult.HasError)
-                        return updateResult;
+                    {
+                        glPostResult.BaseException = updateResult.BaseException;
+                        glPostResult.Exception = updateResult.Exception;
+                        glPostResult.HasError = updateResult.HasError;
+                        glPostResult.RowsAffected = updateResult.RowsAffected;
+
+                        return glPostResult;
+                    }
                     else
-                        return validateResult;
+                    {
+                        glPostResult.BaseException = validateResult.BaseException;
+                        glPostResult.Exception = validateResult.Exception;
+                        glPostResult.HasError = validateResult.HasError;
+                        glPostResult.RowsAffected = validateResult.RowsAffected;
+
+                        return glPostResult;
+                    }
                 }
             }
 
             // Post the Adjustment transaction 
-            var postResult = new SaveResult();
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
-
+                string strBatchId;
                 if (Adjustment.isPost)
                 {
-                    db.PostInventoryAdjustment(isRecap, Adjustment.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.PostInventoryAdjustment(isRecap, Adjustment.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnPostInventoryAdjustment(isRecap, Adjustment.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.UnPostInventoryAdjustment(isRecap, Adjustment.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
-                postResult.HasError = false;
+                glPostResult.HasError = false;
+                glPostResult.strBatchId = strBatchId;
             }
             catch (Exception ex)
             {
-                postResult.BaseException = ex;
-                postResult.HasError = true;
-                postResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+                glPostResult.BaseException = ex;
+                glPostResult.HasError = true;
+                glPostResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
-            return postResult;
+            return glPostResult;
         }
 
         private SaveResult ValidateOutdatedStockOnHand(string transactionId)

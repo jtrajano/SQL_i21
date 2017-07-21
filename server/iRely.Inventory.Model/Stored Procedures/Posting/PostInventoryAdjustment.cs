@@ -15,28 +15,61 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public void PostInventoryAdjustment(bool ysnRecap, string transactionId, int entityId) 
+        //public void PostInventoryAdjustment(bool ysnRecap, string transactionId, int entityId) 
+        //{
+        //    this.Database.ExecuteSqlCommand(
+        //        "dbo.uspICPostInventoryAdjustment @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
+        //        new SqlParameter("@ysnPost", true),
+        //        new SqlParameter("@ysnRecap", ysnRecap),
+        //        new SqlParameter("@strTransactionId", transactionId),
+        //        new SqlParameter("@intEntityUserSecurityId", entityId)
+        //    );            
+        //}
+        public string PostInventoryAdjustment(bool ysnRecap, string transactionId, int entityId)
         {
+            var strBatchId = new SqlParameter("@strBatchId", SqlDbType.NVarChar);
+            strBatchId.Size = 40;
+            strBatchId.Direction = ParameterDirection.Output;
+
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICPostInventoryAdjustment @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
+                "dbo.uspICPostInventoryAdjustment @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId, @strBatchId OUTPUT",
                 new SqlParameter("@ysnPost", true),
                 new SqlParameter("@ysnRecap", ysnRecap),
                 new SqlParameter("@strTransactionId", transactionId),
-                new SqlParameter("@intEntityUserSecurityId", entityId)
-            );            
-        }
+                new SqlParameter("@intEntityUserSecurityId", entityId),
+                strBatchId
+            );
 
-        public void UnPostInventoryAdjustment(bool ysnRecap, string transactionId, int entityId)
+            return (string)strBatchId.Value;
+        }
+        //public void UnPostInventoryAdjustment(bool ysnRecap, string transactionId, int entityId)
+        //{
+        //    this.Database.ExecuteSqlCommand(
+        //        "dbo.uspICPostInventoryAdjustment @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
+        //        new SqlParameter("@ysnPost", false),
+        //        new SqlParameter("@ysnRecap", ysnRecap),
+        //        new SqlParameter("@strTransactionId", transactionId),
+        //        new SqlParameter("@intEntityUserSecurityId", entityId)
+        //    );
+        //}
+
+        public string UnPostInventoryAdjustment(bool ysnRecap, string transactionId, int entityId)
         {
+            var strBatchId = new SqlParameter("@strBatchId", SqlDbType.NVarChar);
+            strBatchId.Size = 40;
+            strBatchId.Direction = ParameterDirection.Output;
+
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICPostInventoryAdjustment @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
+                "dbo.uspICPostInventoryAdjustment @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId, @strBatchId OUTPUT",
                 new SqlParameter("@ysnPost", false),
                 new SqlParameter("@ysnRecap", ysnRecap),
                 new SqlParameter("@strTransactionId", transactionId),
-                new SqlParameter("@intEntityUserSecurityId", entityId)
+                new SqlParameter("@intEntityUserSecurityId", entityId),
+                strBatchId
             );
-        }
 
+            return (string)strBatchId.Value;
+        }
         public bool ValidateOutdatedStockOnHand(string transactionId)
         {
             var param_transactionId = new SqlParameter("@strTransactionId", transactionId);

@@ -17,12 +17,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             btnUnpost: {
                 hidden: '{!current.ysnPosted}'
             },
-            btnPostPreview: {
-                hidden: '{current.ysnPosted}'
-            },
-            btnUnpostPreview: {
-                hidden: '{!current.ysnPosted}'
-            },
             btnSave: {
                 disabled: '{current.ysnPosted}'
             },
@@ -1363,23 +1357,22 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onPostOrUnPostClick: function (btnPost, e, eOpts) {
-        if (btnPost){
-            btnPost.disable();
+    onPostClick: function(button, e, eOpts) {
+        if (button){
+            button.disable();
         }
-        else {
-            return;
-        }
-
         var me = this;
-        var win = btnPost.up('window');
-        var context = win.context;
+        var win = button.up('window');
         var current = win.viewModel.data.current;
 
         if (!current){
-            btnPost.enable();
+            button.enable();
             return;
-        }
+        }        
+
+        var context = win.context;
+        var tabInventoryAdjustment = win.down('#tabInventoryAdjustment');
+        var activeTab = tabInventoryAdjustment.getActiveTab();       
 
         var doPost = function (){
             ic.utils.ajax({
@@ -1394,29 +1387,28 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             .subscribe(
                 function(successResponse) {
                     win.context.data.load();
-                    btnPost.enable();
+                    // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
+                    if (activeTab.itemId == 'pgePostPreview'){
+                        var cfg = {
+                            isAfterPostCall: true,
+                            ysnPosted: current.get('ysnPosted') ? true : false
+                        };
+                        me.doPostPreview(win, cfg);
+                    }                    
+                    button.enable();
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
                     var message = responseText ? responseText.message : {}; 
-                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the adjustment.';
+                    var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the inventory adjustment.';
 
-                    iRely.Functions.showCustomDialog(
-                        iRely.Functions.dialogType.ERROR,
-                        iRely.Functions.dialogButtonType.OK,
-                        statusText,
-                        function () {
-                            if (statusText.indexOf('The stock on hand is outdated for') || statusText.indexOf('The lot expiry dates are outdated for')){
-                                win.context.data.load();
-                            }
-                        }
-                    );
-                    btnPost.enable();
+                    iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, statusText);
+                    button.enable();
                 }
             )
-        };        
-
-        // Save any unsaved data first before doing the post. 
+        };
+        
+        // Save data changes first before doing the post.
         if (context.data.hasChanges()) {
             context.data.validator.validateRecord({ window: win }, function(valid) {
                 // If records are valid, continue with the save. 
@@ -1429,71 +1421,75 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 }
                 // If records are invalid, re-enable the post button. 
                 else {
-                    btnPost.enable();
+                    button.enable();
+                }
+            });            
+        }        
+        // Otherwise, simply post the transaction. 
+        else {
+            doPost();
+        }                
+    },
+
+    doPostPreview: function(win, cfg){
+        var me = this;
+
+        if (!win) {return;}
+        cfg = cfg ? cfg : {};
+
+        var isAfterPostCall = cfg.isAfterPostCall;
+        var ysnPosted = cfg.ysnPosted;
+
+        var context = win.context;
+        var current = win.viewModel.data.current;        
+        var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');        
+
+        //Deselect all rows in Item Grid
+        if (grdInventoryAdjustment) {grdInventoryAdjustment.getSelectionModel().deselectAll();       }
+
+        var doRecap = function (){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryAdjustment/PostTransaction',
+                params:{
+                    strTransactionId: current.get('strAdjustmentNo'),
+                    isPost: isAfterPostCall ? ysnPosted : current.get('ysnPosted') ? false : true,
+                    isRecap: true
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    var postResult = Ext.decode(successResponse.responseText);
+                    var batchId = postResult.data.strBatchId;
+                    if (batchId) {
+                        me.bindRecapGrid(batchId);
+                    }                    
+                }
+                ,function(failureResponse) {
+                    // Show Post Preview failed.
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            )
+        };    
+
+        // Save any unsaved data first before doing the post. 
+        if (context.data.hasChanges()) {
+            context.data.validator.validateRecord({ window: win }, function(valid) {
+                // If records are valid, continue with the save. 
+                if (valid){
+                    context.data.saveRecord({
+                        successFn: function () {
+                            doRecap();             
+                        }
+                    });
                 }
             });            
         }
         else {
-            doPost();
-        }
-    },
-
-    onRecapClick: function (button, e, eOpts) {
-        var me = this;
-        var win = button.up('window');
-        var cboCurrency = null;
-        var context = win.context;
-
-        var doRecap = function (recapButton, currentRecord, currency) {
-
-            // Call the buildRecapData to generate the recap data
-            CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/InventoryAdjustment/PostTransaction',
-                strTransactionId: currentRecord.get('strAdjustmentNo'),
-                ysnPosted: currentRecord.get('ysnPosted'),
-                scope: me,
-                success: function () {
-                    // If data is generated, show the recap screen.
-                    CashManagement.common.BusinessRules.showRecap({
-                        strTransactionId: currentRecord.get('strAdjustmentNo'),
-                        ysnPosted: currentRecord.get('ysnPosted'),
-                        dtmDate: currentRecord.get('dtmAdjustmentDate'),
-                        strCurrencyId: currency,
-                        dblExchangeRate: 1,
-                        scope: me,
-                        postCallback: function () {
-                            me.onPostOrUnPostClick(recapButton);
-                        },
-                        unpostCallback: function () {
-                            me.onPostOrUnPostClick(recapButton);
-                        }
-                    });
-                },
-                failure: function (message) {
-                    // Show why recap failed.
-                    var msgBox = iRely.Functions;
-                    msgBox.showCustomDialog(
-                        msgBox.dialogType.ERROR,
-                        msgBox.dialogButtonType.OK,
-                        message.statusText
-                    );
-                }
-            });
-        };
-
-        // If there is no data change, do the post.
-        if (!context.data.hasChanges()) {
-            doRecap(button, win.viewModel.data.current, cboCurrency);
-            return;
-        }
-
-        // Save has data changes first before doing the post.
-        context.data.saveRecord({
-            successFn: function () {
-                doRecap(button, win.viewModel.data.current, cboCurrency);
-            }
-        });
-    },
+            doRecap();
+        }   
+    },    
 
     onNewUOMChange: function (control, newUOM, oldValue, eOpts) {
         var me = this;
@@ -1621,6 +1617,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
+    onAdjustmentTabChange: function (tabPanel, newCard, oldCard, eOpts) {
+        var me = this;
+        var win = tabPanel.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        switch (newCard.itemId) {
+            case 'pgePostPreview':
+                me.doPostPreview(win);
+        }
+    },     
+
     init: function (application) {
         this.control({
             "#cboItemNo": {
@@ -1672,16 +1680,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 change: this.onNumNewNetWeightChange
             },
             "#btnPost": {
-                click: this.onPostOrUnPostClick
+                click: this.onPostClick
             },
             "#btnUnpost": {
-                click: this.onPostOrUnPostClick
-            },
-            "#btnPostPreview": {
-                click: this.onRecapClick
-            },
-            "#btnUnpostPreview": {
-                click: this.onRecapClick
+                click: this.onPostClick
             },
             "#cboNewLocation": {
                 select: this.onAdjustmentDetailSelect
@@ -1703,7 +1705,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#cboLocation": {
                 drilldown: this.onLocationDrilldown
-            }
+            },
+            "#tabInventoryAdjustment": {
+                tabChange: this.onAdjustmentTabChange
+            }               
         });
     }
 });
