@@ -46,7 +46,13 @@ BEGIN
 		RAISERROR('Cannot process to receipt, PO is for approval.', 16, 1);
 		RETURN;
 	END
-    
+	
+    --Missing Currency
+	IF EXISTS(SELECT intCurrencyId FROM tblPOPurchase WHERE intPurchaseId = @poId AND intCurrencyId = 0)
+	BEGIN
+		RAISERROR('Cannot process to receipt, Currency is missing.', 16, 1);
+		RETURN;
+	END  
 END 
 
 -- Process the PO to IR 
