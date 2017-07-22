@@ -1,7 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblEMEntityCardInformation] (
     [intEntityCardInfoId]	INT			IDENTITY (1, 1) NOT NULL,
     [intEntityId]			INT			NOT NULL,
-    [intBankId]				INT			NOT NULL,
     [strCreditCardNumber]	NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
     [strCardHolderName]		NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
     [strCardType]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
