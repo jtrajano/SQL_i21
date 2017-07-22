@@ -11,9 +11,9 @@ AS
 			L.strCountry		AS strEntityCountry,
 			T.strPhone			AS strEntityPhone,
 			E.intDefaultLocationId,
-			CASE	WHEN Y.strType = 'Vendor' THEN V.ysnPymtCtrlActive 
+			CASE	WHEN Y.strType IN('Vendor','Shipping Line') THEN V.ysnPymtCtrlActive 
 					WHEN Y.strType = 'Customer' THEN U.ysnActive
-					ELSE CAST(1 AS BIT)
+					ELSE E.ysnActive
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
 			CAST(ISNULL(V.intEntityVendorId	,0) AS BIT) ysnVendor,

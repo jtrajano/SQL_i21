@@ -18,7 +18,8 @@ BEGIN TRY
 			@intContractHeaderId	INT,
 			@ysnOnceApproved		BIT,
 			@ysnApprovalExist		BIT,
-			@ysnAllowChangePricing	BIT
+			@ysnAllowChangePricing	BIT,
+			@ysnEnablePriceContractApproval BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -29,7 +30,7 @@ BEGIN TRY
 
 	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
 
-	SELECT @ysnAllowChangePricing = ysnAllowChangePricing FROM tblCTCompanyPreference
+	SELECT @ysnAllowChangePricing = ysnAllowChangePricing, @ysnEnablePriceContractApproval = ISNULL(ysnEnablePriceContractApproval,0) FROM tblCTCompanyPreference
 
 	IF @ScreenName = 'Price Contract'
 	BEGIN
@@ -42,7 +43,9 @@ BEGIN TRY
 		
 		SELECT	@ysnApprovalExist = dbo.fnCTContractApprovalExist(@intUserId,'ContractManagement.view.Amendments')
 
-		IF ISNULL(@ysnOnceApproved,0) = 1 AND ISNULL(@ysnApprovalExist,0) = 0
+		IF ISNULL(@ysnOnceApproved,0) = 1 AND	((@ysnEnablePriceContractApproval = 1 AND ISNULL(@ysnApprovalExist,0) = 0) 
+													OR @ysnEnablePriceContractApproval = 0
+												)
 		BEGIN
 			EXEC [uspCTContractApproved] @intContractHeaderId,@intUserId,@intContractDetailId
 		END
