@@ -12,9 +12,9 @@ AS
 			T.strPhone			AS strEntityPhone,
 			L.intEntityLocationId	AS	 intDefaultLocationId,
 			L.strLocationName	AS	strDefaultLocation,
-			CASE	WHEN Y.strType = 'Vendor' THEN V.ysnPymtCtrlActive 
+			CASE	WHEN Y.strType IN('Vendor','Shipping Line') THEN V.ysnPymtCtrlActive 
 					WHEN Y.strType = 'Customer' THEN U.ysnActive
-					ELSE CAST(1 AS BIT)
+					ELSE E.ysnActive
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
 			CAST(ISNULL(V.intEntityId,0) AS BIT) ysnVendor,
