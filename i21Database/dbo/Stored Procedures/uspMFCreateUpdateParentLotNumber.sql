@@ -22,10 +22,13 @@ BEGIN
 		,@ysnPickByLotCode BIT
 		,@intLotCodeStartingPosition INT
 		,@intLotCodeNoOfDigits INT
+		,@strLotTracking NVARCHAR(50)
+		,@intDamagedStatusId INT
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
 		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
+		,@intDamagedStatusId = intDamagedStatusId
 	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDateTime = GETDATE()
@@ -140,10 +143,36 @@ BEGIN
 		,@strReceiptNumber NVARCHAR(50)
 		,@strTransactionId NVARCHAR(50)
 		,@dtmReceiptDate DATETIME
+		,@strCondition NVARCHAR(50)
+		,@intSplitFromLotId INT
 
 	SELECT @strLotNumber = strLotNumber
+		,@strCondition = strCondition
+		,@intSplitFromLotId = intSplitFromLotId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	IF @intSplitFromLotId IS NULL
+		AND @strCondition = 'Damaged'
+	BEGIN
+		SELECT @strLotTracking = strLotTracking
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
+
+		IF @intDamagedStatusId IS NOT NULL
+			AND NOT EXISTS (
+				SELECT *
+				FROM dbo.tblICLot
+				WHERE intLotId = @intLotId
+					AND intLotStatusId = @intDamagedStatusId
+				)
+			AND @strLotTracking <> 'No'
+		BEGIN
+			EXEC uspMFSetLotStatus @intLotId
+				,@intLotStatusId
+				,@intEntityUserSecurityId
+		END
+	END
 
 	IF NOT EXISTS (
 			SELECT *
