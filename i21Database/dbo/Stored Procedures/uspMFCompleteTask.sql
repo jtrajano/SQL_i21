@@ -40,6 +40,7 @@ BEGIN TRY
 		,@intCustomerLabelTypeId INT
 		,@intEntityCustomerId INT
 		,@strReferenceNo nvarchar(50)
+		,@dblWeightPerQty NUMERIC(18, 6)
 
 	SELECT @ysnLoadProcessEnabled = ysnLoadProcessEnabled
 		,@intDefaultShipmentDockDoorLocation = intDefaultShipmentDockDoorLocation
@@ -250,10 +251,10 @@ BEGIN TRY
 				,@intLotItemId = NULL
 				,@dblLotQty = NULL
 				,@dblLotWeight = NULL
+				,@dblWeightPerQty=NULL
 
-			SELECT @dblLotQty = dblQty
-				,@intLotItemId = intItemId
-				,@dblLotWeight = dblWeight
+			SELECT @intLotItemId = intItemId
+				,@dblWeightPerQty=dblWeightPerQty 
 			FROM tblICLot
 			WHERE intLotId = @intNewLotId
 
@@ -284,16 +285,16 @@ BEGIN TRY
 				VALUES (
 					@intShipmentItemId
 					,@intNewLotId
-					,@dblLotQty
-					,@dblLotWeight
+					,@dblMoveQty
+					,@dblMoveQty*@dblWeightPerQty
 					,0
 					)
 			END
 			ELSE
 			BEGIN
 				UPDATE tblICInventoryShipmentItemLot
-				SET dblQuantityShipped = dblQuantityShipped + @dblLotQty
-					,dblGrossWeight = dblGrossWeight + @dblLotWeight
+				SET dblQuantityShipped = dblQuantityShipped + @dblMoveQty
+					,dblGrossWeight = dblGrossWeight + (@dblMoveQty*@dblWeightPerQty)
 				WHERE intInventoryShipmentItemId = @intShipmentItemId
 					AND intLotId = @intNewLotId
 			END
@@ -539,9 +540,8 @@ BEGIN TRY
 					,@dblLotQty = NULL
 					,@dblLotWeight = NULL
 
-				SELECT @dblLotQty = dblQty
-					,@intLotItemId = intItemId
-					,@dblLotWeight = dblWeight
+				SELECT @intLotItemId = intItemId
+					,@dblWeightPerQty =dblWeightPerQty 
 				FROM tblICLot
 				WHERE intLotId = @intNewLotId
 
@@ -572,16 +572,16 @@ BEGIN TRY
 					VALUES (
 						@intShipmentItemId
 						,@intNewLotId
-						,@dblLotQty
-						,@dblLotWeight
+						,@dblMoveQty
+						,@dblMoveQty*@dblWeightPerQty
 						,0
 						)
 				END
 				ELSE
 				BEGIN
 					UPDATE tblICInventoryShipmentItemLot
-					SET dblQuantityShipped = dblQuantityShipped + @dblLotQty
-						,dblGrossWeight = dblGrossWeight + @dblLotWeight
+					SET dblQuantityShipped = dblQuantityShipped + @dblMoveQty
+						,dblGrossWeight = dblGrossWeight + (@dblMoveQty*@dblWeightPerQty)
 					WHERE intInventoryShipmentItemId = @intShipmentItemId
 						AND intLotId = @intNewLotId
 				END

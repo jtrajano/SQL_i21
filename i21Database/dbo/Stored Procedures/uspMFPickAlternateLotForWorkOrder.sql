@@ -23,26 +23,40 @@ BEGIN TRY
 		,@intEntityCustomerId INT
 		,@strReferenceNo NVARCHAR(50)
 		,@dblLotPickQty NUMERIC(18, 6)
+		,@intAlternateParentLotId INT
+		,@intParentLotId INT
+		,@ysnPickByLotCode BIT
+		,@intLotCodeStartingPosition INT
+		,@intLotCodeNoOfDigits INT
+		,@intLotCode INT
+		,@intAlternateLotCode INT
+		,@intAllowablePickDayRange INT
+		,@dblAlternatePickQty NUMERIC(18, 6)
 
 	SELECT @intStorageLocationId = intStorageLocationId
 	FROM tblICStorageLocation
 	WHERE strName = @strLotSourceLocation
 
 	SELECT @intAlternateLotId = intLotId
-		,@dblAlternateLotQty = CASE 
-			WHEN intWeightUOMId IS NOT NULL
-				THEN dblWeight
-			ELSE dblQty
-			END
+		,@dblAlternateLotQty = dblQty
 		,@dblAlternateLotWeight = dblWeight
+		,@intLotStatusId = intLotStatusId
+		,@intAlternateItemId = intItemId
+		,@dtmAlternateLotExpiryDate = dtmExpiryDate
+		,@intAlternateParentLotId = intParentLotId
 	FROM tblICLot
 	WHERE strLotNumber = @strAlternateLotNo
 		AND intStorageLocationId = @intStorageLocationId
 		AND dblQty > 0
 
+	SELECT @dblAlternatePickQty=SUM(dblPickQty)
+	FROM tblMFTask
+	WHERE intLotId=@intAlternateLotId
+	AND intTaskStateId <> 4
+
 	SELECT @dblRequiredTaskWeight = dblWeight
 		,@dblRequiredTaskQty = dblQty
-		,@dblLotPickQty=dblPickQty 
+		,@dblLotPickQty = dblPickQty
 	FROM tblMFTask
 	WHERE intTaskId = @intTaskId
 
@@ -71,12 +85,6 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @intLotStatusId = intLotStatusId
-		,@intAlternateItemId = intItemId
-		,@dtmAlternateLotExpiryDate = dtmExpiryDate
-	FROM tblICLot
-	WHERE intLotId = @intAlternateLotId
-
 	SELECT @intItemId = intItemId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
@@ -94,7 +102,7 @@ BEGIN TRY
 				)
 	END
 
-	IF (@dtmAlternateLotExpiryDate < GETDATE())
+	IF (GETDATE()>@dtmAlternateLotExpiryDate)
 	BEGIN
 		RAISERROR (
 				'SCANNED LOT HAS EXPIRED.'
@@ -103,20 +111,69 @@ BEGIN TRY
 				)
 	END
 
-	IF EXISTS (
+	SELECT @ysnPickByLotCode = ysnPickByLotCode
+		,@intLotCodeStartingPosition = intLotCodeStartingPosition
+		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
+	FROM tblMFCompanyPreference
 
-				SELECT 1
-				FROM tblMFTask
-				WHERE intLotId = @intAlternateLotId
-				AND intTaskStateId <>4
-			) AND @intLotId <> @intAlternateLotId
+	SELECT @intAllowablePickDayRange = intAllowablePickDayRange
+	FROM tblWHCompanyPreference
+
+	IF @intLotId <> @intAlternateLotId
+		AND @ysnPickByLotCode = 1
 	BEGIN
+		SELECT Top 1 @intLotCode=CONVERT(INT, Substring(strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+		FROM tblICLot L
+		JOIN tblICParentLot PL On PL.intParentLotId = L.intParentLotId
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+				AND UT.ysnAllowPick = 1
+			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
+				AND T.intTaskTypeId NOT IN (
+					5
+					,6
+					,8
+					,9
+					,10
+					,11
+					)
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				AND R.strInternalCode = 'STOCK'
+			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+				AND BS.strPrimaryStatus = 'Active'
+		WHERE L.intItemId = @intItemId
+			AND L.intLotStatusId =1
+			AND L.dblQty > 0
+		Order by CONVERT(INT, Substring(strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)) ASC
+
+		SELECT @intAlternateLotCode = CONVERT(INT, Substring(strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+		FROM tblICParentLot
+		WHERE intParentLotId = @intAlternateParentLotId
+
+		IF @intAlternateLotCode - @intLotCode > @intAllowablePickDayRange
+		BEGIN
 			RAISERROR (
-					'SCANNED LOT IS ASSOCIATED WITH A DIFFERENT TASK. CANNOT CONTINUE'
+					'ALTERNATE PALLET IS NOT ALLOWABLE PICK DAY RANGE.'
 					,16
 					,1
 					)
+		END
+	END
 
+	IF EXISTS (
+			SELECT 1
+			FROM tblMFTask
+			WHERE intLotId = @intAlternateLotId
+				AND intTaskStateId <> 4
+			)
+		AND @intLotId <> @intAlternateLotId and (@dblAlternateLotQty-@dblAlternatePickQty)-@dblLotPickQty<0
+	BEGIN
+		RAISERROR (
+				'SCANNED LOT IS ASSOCIATED WITH A DIFFERENT TASK. CANNOT CONTINUE'
+				,16
+				,1
+				)
 	END
 
 	IF (@strPrimaryStatus <> 'Active')
@@ -155,7 +212,7 @@ BEGIN TRY
 	WHERE intOwnerId = @intEntityCustomerId
 		AND intCustomerLabelTypeId IS NOT NULL
 
-		IF @intCustomerLabelTypeId IS NULL
+	IF @intCustomerLabelTypeId IS NULL
 	BEGIN
 		SELECT @intCustomerLabelTypeId = 0
 	END

@@ -21,7 +21,7 @@ SELECT InvS.strShipmentNumber
 	,I.strItemNo
 	,I.strDescription
 	,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))),18) As strSSCCNo
-	,1 AS dblQty
+	,Case When OML.intCustomerLabelTypeId=1 Then OD.dblQty Else 1 End AS dblQty
 FROM dbo.tblICInventoryShipment InvS
 JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 LEFT JOIN tblSMShipVia SV ON SV.intEntityShipViaId = InvS.intShipViaId

@@ -11,6 +11,7 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@intInventoryTransactionType AS INT = 8
+		,@intRecipeItemUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -258,8 +259,21 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
+	SELECT @intRecipeItemUOMId = RI.intItemUOMId
+	FROM tblMFWorkOrderRecipeItem RI
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND RI.intItemId = @intInputItemId
+
+	IF @intRecipeItemUOMId IS NULL
+	BEGIN
+		SELECT @intRecipeItemUOMId = RS.intItemUOMId
+		FROM tblMFWorkOrderRecipeSubstituteItem RS
+		WHERE RS.intWorkOrderId = @intWorkOrderId
+			AND RS.intSubstituteItemId = @intInputItemId
+	END
+
 	UPDATE tblMFProductionSummary
-	SET dblInputQuantity = dblInputQuantity - @dblNewWeight
+	SET dblInputQuantity = dblInputQuantity -  IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intRecipeItemUOMId, @dblNewWeight), 0)
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intItemId = @intInputItemId
 

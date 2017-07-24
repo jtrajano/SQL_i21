@@ -5356,6 +5356,9 @@
     <Build Include="dbo\Stored Procedures\uspMFGetOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblMFLotSnapshot.sql" />
+    <Build Include="dbo\Tables\tblMFLotSnapshotDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotSnapshot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

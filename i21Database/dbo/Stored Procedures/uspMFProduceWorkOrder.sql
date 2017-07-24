@@ -47,6 +47,7 @@ BEGIN
 		,@strParentLotNumber2 NVARCHAR(50)
 		,@intSpecialPalletItemId INT
 		,@intSpecialPalletCategoryId INT
+		,@ysnProducedQtyByUnitCount BIT
 
 	SELECT @dtmCreated = Getdate()
 
@@ -278,12 +279,14 @@ BEGIN
 		IF EXISTS (
 				SELECT *
 				FROM tblICLot L
-				WHERE L.strLotNumber = @strLotNumber and L.dblQty>0
+				WHERE L.strLotNumber = @strLotNumber
+					AND L.dblQty > 0
 				)
 		BEGIN
 			SELECT @intParentLotId1 = intParentLotId
 			FROM tblICLot
-			WHERE strLotNumber = @strLotNumber and dblQty>0
+			WHERE strLotNumber = @strLotNumber
+				AND dblQty > 0
 
 			SELECT @strParentLotNumber1 = strParentLotNumber
 			FROM tblICParentLot
@@ -302,14 +305,29 @@ BEGIN
 				,@intShiftId = @intShiftId
 				,@dtmDate = @dtmProductionDate
 
-			IF  NOT (@strParentLotNumber1 LIKE '%'+@strParentLotNumber2+'%')
+			IF NOT (@strParentLotNumber1 LIKE '%' + @strParentLotNumber2 + '%')
 			BEGIN
 				SELECT @strParentLotNumber = @strParentLotNumber1 + ' / ' + @strParentLotNumber2
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SELECT @strParentLotNumber = @strParentLotNumber1 
+				SELECT @strParentLotNumber = @strParentLotNumber1
 			END
+		END
+
+		SELECT @ysnProducedQtyByUnitCount = ysnProducedQtyByUnitCount
+		FROM tblMFCompanyPreference
+
+		IF @ysnProducedQtyByUnitCount IS NULL
+			SELECT @ysnProducedQtyByUnitCount = 0
+
+		IF @ysnProducedQtyByUnitCount = 1
+		BEGIN
+			SELECT @dblProduceQty = @dblPhysicalCount
+
+			SELECT @intProduceUOMKey = @intPhysicalItemUOMId
+
+			SELECT @dblUnitQty = 1
 		END
 
 		EXEC uspMFPostProduction 1
