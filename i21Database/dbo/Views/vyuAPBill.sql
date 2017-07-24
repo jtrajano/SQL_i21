@@ -13,6 +13,7 @@ SELECT
 	A.ysnReadyForPayment,
 	ysnRestricted = ISNULL((SELECT TOP 1 ysnRestricted FROM dbo.tblAPBillDetail H WHERE A.intBillId = H.intBillId),0),
 	A.dtmDate,
+	A.dtmDatePaid,
 	A.dtmBillDate,
 	A.dtmDueDate,
 	A.strVendorOrderNumber,
