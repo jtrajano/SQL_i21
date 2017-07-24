@@ -23,10 +23,10 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.form.Panel',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
+        'Ext.form.FieldSet',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
         'Ext.form.field.ComboBox',
-        'Ext.form.FieldSet',
         'Ext.grid.Panel',
         'Ext.grid.column.Check',
         'Ext.grid.View',
@@ -153,198 +153,209 @@ Ext.define('Inventory.view.Commodity', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'container',
+                                                        xtype: 'fieldset',
                                                         flex: 1,
-                                                        margin: '0 5 0 0 ',
+                                                        title: 'Basic',
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtCommodityCode',
-                                                                fieldLabel: 'Commodity Code',
-                                                                labelWidth: 140
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtDescription',
-                                                                fieldLabel: 'Description',
-                                                                labelWidth: 140
-                                                            },
-                                                            {
                                                                 xtype: 'container',
-                                                                margin: '0 0 5 0',
+                                                                flex: 1,
+                                                                margin: '0 5 0 0 ',
                                                                 layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkExchangeTraded',
-                                                                        width: 280,
-                                                                        fieldLabel: 'Exchange Traded',
-                                                                        labelWidth: 140
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        quantityField: true,
-                                                                        flex: 1,
-                                                                        itemId: 'txtDecimalsOnDpr',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'Decimals on DPR',
-                                                                        labelWidth: 101,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intFutureMarketId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strFutMarketName',
-                                                                        dataType: 'string',
-                                                                        text: 'Future Market',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                enableDrillDown: 'true',
-                                                                itemId: 'cboFutureMarket',
-                                                                fieldLabel: 'Default Future Market',
-                                                                labelWidth: 140,
-                                                                displayField: 'strFutMarketName',
-                                                                valueField: 'strFutMarketName'
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                hidden: true,
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        quantityField: true,
-                                                                        hidden: true,
-                                                                        itemId: 'txtConsolidateFactor',
-                                                                        width: 280,
-                                                                        fieldLabel: 'Consolidate Factor',
-                                                                        labelWidth: 140,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        hidden: true,
-                                                                        itemId: 'chkFxExposure',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'FX Exposure',
-                                                                        labelWidth: 164
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        currencyField: true,
-                                                                        itemId: 'txtPriceChecksMin',
-                                                                        width: 280,
-                                                                        fieldLabel: 'Price Checks - Min',
-                                                                        labelWidth: 140,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        currencyField: true,
-                                                                        flex: 1,
-                                                                        itemId: 'txtPriceChecksMax',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'Max',
-                                                                        labelWidth: 60,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
+                                                                    type: 'vbox',
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        hidden: true,
-                                                                        itemId: 'txtCheckoffTaxDesc',
-                                                                        width: 280,
-                                                                        fieldLabel: 'Checkoff Tax Desc',
+                                                                        itemId: 'txtCommodityCode',
+                                                                        fieldLabel: 'Commodity Code',
                                                                         labelWidth: 140
                                                                     },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        flex: 1,
-                                                                        hidden: true,
-                                                                        itemId: 'cboCheckoffTaxAllStates',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'All States',
-                                                                        labelWidth: 60,
-                                                                        displayField: 'strState',
-                                                                        valueField: 'strState'
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtEdiCode',
-                                                                fieldLabel: 'EDI Code',
-                                                                labelWidth: 140
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        hidden: true,
-                                                                        itemId: 'txtInsuranceTaxDesc',
-                                                                        width: 280,
-                                                                        fieldLabel: 'Insurance Tax Desc',
+                                                                        itemId: 'txtDescription',
+                                                                        fieldLabel: 'Description',
                                                                         labelWidth: 140
                                                                     },
                                                                     {
-                                                                        xtype: 'combobox',
-                                                                        flex: 1,
+                                                                        xtype: 'container',
+                                                                        margin: '0 0 5 0',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkExchangeTraded',
+                                                                                width: 240,
+                                                                                fieldLabel: 'Exchange Traded',
+                                                                                labelWidth: 140
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                quantityField: true,
+                                                                                flex: 1,
+                                                                                itemId: 'txtDecimalsOnDpr',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'Decimals on DPR',
+                                                                                labelWidth: 101,
+                                                                                fieldStyle: 'text-align:right',
+                                                                                hideTrigger: true
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intFutureMarketId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strFutMarketName',
+                                                                                dataType: 'string',
+                                                                                text: 'Future Market',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        enableDrillDown: 'true',
+                                                                        itemId: 'cboFutureMarket',
+                                                                        fieldLabel: 'Default Future Market',
+                                                                        labelWidth: 140,
+                                                                        displayField: 'strFutMarketName',
+                                                                        valueField: 'strFutMarketName'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'container',
                                                                         hidden: true,
-                                                                        itemId: 'cboInsuranceTaxAllStates',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'All States',
-                                                                        labelWidth: 60,
-                                                                        displayField: 'strState',
-                                                                        valueField: 'strState'
+                                                                        margin: '0 0 5 0',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                quantityField: true,
+                                                                                hidden: true,
+                                                                                itemId: 'txtConsolidateFactor',
+                                                                                width: 280,
+                                                                                fieldLabel: 'Consolidate Factor',
+                                                                                labelWidth: 140,
+                                                                                fieldStyle: 'text-align:right',
+                                                                                hideTrigger: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                hidden: true,
+                                                                                itemId: 'chkFxExposure',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'FX Exposure',
+                                                                                labelWidth: 164
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'container',
+                                                                        margin: '0 0 5 0',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                currencyField: true,
+                                                                                itemId: 'txtPriceChecksMin',
+                                                                                width: 280,
+                                                                                fieldLabel: 'Price Checks - Min',
+                                                                                labelWidth: 140,
+                                                                                fieldStyle: 'text-align:right',
+                                                                                hideTrigger: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                currencyField: true,
+                                                                                flex: 1,
+                                                                                itemId: 'txtPriceChecksMax',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'Max',
+                                                                                labelWidth: 60,
+                                                                                fieldStyle: 'text-align:right',
+                                                                                hideTrigger: true
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'container',
+                                                                        margin: '0 0 5 0',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'textfield',
+                                                                                hidden: true,
+                                                                                itemId: 'txtCheckoffTaxDesc',
+                                                                                width: 280,
+                                                                                fieldLabel: 'Checkoff Tax Desc',
+                                                                                labelWidth: 140
+                                                                            },
+                                                                            {
+                                                                                xtype: 'combobox',
+                                                                                flex: 1,
+                                                                                hidden: true,
+                                                                                itemId: 'cboCheckoffTaxAllStates',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'All States',
+                                                                                labelWidth: 60,
+                                                                                displayField: 'strState',
+                                                                                valueField: 'strState'
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtEdiCode',
+                                                                        fieldLabel: 'EDI Code',
+                                                                        labelWidth: 140
+                                                                    },
+                                                                    {
+                                                                        xtype: 'container',
+                                                                        margin: '0 0 5 0',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'textfield',
+                                                                                hidden: true,
+                                                                                itemId: 'txtInsuranceTaxDesc',
+                                                                                width: 280,
+                                                                                fieldLabel: 'Insurance Tax Desc',
+                                                                                labelWidth: 140
+                                                                            },
+                                                                            {
+                                                                                xtype: 'combobox',
+                                                                                flex: 1,
+                                                                                hidden: true,
+                                                                                itemId: 'cboInsuranceTaxAllStates',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'All States',
+                                                                                labelWidth: 60,
+                                                                                displayField: 'strState',
+                                                                                valueField: 'strState'
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             }
@@ -360,90 +371,100 @@ Ext.define('Inventory.view.Commodity', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
+                                                                xtype: 'fieldset',
+                                                                title: 'Scale',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
-                                                                        dataIndex: 'intStorageScheduleRuleId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intStorageScheduleRuleId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodity',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strScheduleId',
+                                                                                dataType: 'string',
+                                                                                text: 'Storage Type',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strScheduleDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboDefaultScheduleStore',
+                                                                        fieldLabel: 'Default Schedule Store',
+                                                                        labelWidth: 170,
+                                                                        displayField: 'strScheduleId',
+                                                                        valueField: 'strScheduleId'
                                                                     },
                                                                     {
-                                                                        dataIndex: 'intCommodity',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intDiscountId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDiscountId',
+                                                                                dataType: 'string',
+                                                                                text: 'Discount Id',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDiscountDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboDefaultScheduleDiscount',
+                                                                        fieldLabel: 'Discount',
+                                                                        labelWidth: 170,
+                                                                        displayField: 'strDiscountId',
+                                                                        valueField: 'strDiscountId'
                                                                     },
                                                                     {
-                                                                        dataIndex: 'strScheduleId',
-                                                                        dataType: 'string',
-                                                                        text: 'Storage Type',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strScheduleDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intStorageScheduleTypeId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strStorageTypeCode',
+                                                                                dataType: 'string',
+                                                                                text: 'Storage Type',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strStorageTypeDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboScaleAutoDistDefault',
+                                                                        fieldLabel: 'Auto Dist Default',
+                                                                        labelWidth: 170,
+                                                                        displayField: 'strStorageTypeCode',
+                                                                        valueField: 'strStorageTypeCode'
                                                                     }
-                                                                ],
-                                                                itemId: 'cboDefaultScheduleStore',
-                                                                fieldLabel: 'Default Schedule Store',
-                                                                labelWidth: 180,
-                                                                displayField: 'strScheduleId',
-                                                                valueField: 'strScheduleId'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intDiscountId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDiscountId',
-                                                                        dataType: 'string',
-                                                                        text: 'Discount Id',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDiscountDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboDefaultScheduleDiscount',
-                                                                fieldLabel: 'Discount',
-                                                                labelWidth: 180,
-                                                                displayField: 'strDiscountId',
-                                                                valueField: 'strDiscountId'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intStorageScheduleTypeId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strStorageTypeCode',
-                                                                        dataType: 'string',
-                                                                        text: 'Storage Type',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strStorageTypeDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboScaleAutoDistDefault',
-                                                                fieldLabel: 'Scale Auto Dist Default',
-                                                                labelWidth: 180,
-                                                                displayField: 'strStorageTypeCode',
-                                                                valueField: 'strStorageTypeCode'
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'fieldset',
@@ -490,6 +511,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        hidden: true,
                                                                         itemId: 'cboAdjustInventoryPurchaseBy',
                                                                         fieldLabel: 'Purchase',
                                                                         labelWidth: 170,
