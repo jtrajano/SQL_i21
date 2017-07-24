@@ -4,6 +4,13 @@ BEGIN
 	EXEC('
 		IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLAccountOriginSync'' and type = ''P'') 
 			DROP PROCEDURE [dbo].[uspGLAccountOriginSync];
+			
+		IF EXISTS(SELECT *
+          FROM   INFORMATION_SCHEMA.COLUMNS
+          WHERE  TABLE_NAME = ''tblGLCrossReferenceMapping''
+                 AND COLUMN_NAME = ''inti21AccountId'') 
+		EXEC sp_rename''tblGLCrossReferenceMapping.inti21AccountId'' , ''intAccountId'', ''COLUMN''
+		
 	')
 
 	EXEC('
