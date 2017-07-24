@@ -228,6 +228,15 @@ END;
 CLOSE intListCursor;
 DEALLOCATE intListCursor;
 
+ALTER TABLE #temp
+ADD intDecimalPrecision INT
+
+UPDATE #temp SET intDecimalPrecision = (SELECT intCurrencyDecimal FROM tblSMCompanyPreference)
+
+ALTER TABLE #temp
+ADD strItemUOM NVARCHAR(MAX)
+
+UPDATE #temp SET strItemUOM = (SELECT TOP 1 strItemUOM FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId)
 
 ALTER TABLE #temp
 ADD intDeliverySheetId INT
