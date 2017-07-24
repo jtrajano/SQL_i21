@@ -27,7 +27,7 @@ SELECT
 	B.intGLAccountExpenseId,
 	K.strAccountId,
 	B.intBillToId,
-	C2.strLocationName AS strPayTo
+	C2.strCheckPayeeName AS strPayTo
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
