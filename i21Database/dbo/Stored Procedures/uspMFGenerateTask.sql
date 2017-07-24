@@ -43,6 +43,8 @@ BEGIN TRY
 		,@ysnPickByQty BIT
 		,@intRequiredUOMId INT
 		,@intLotItemUOMId INT
+		,@intPreferenceId int
+		,@intParentLotId int
 
 	SELECT @ysnPickByQty = 1
 
@@ -140,6 +142,8 @@ BEGIN TRY
 			,ysnStrictTracking BIT
 			,intLotId INT
 			,intCategoryId INT
+			,intPreferenceId INT
+			,intParentLotId int
 			)
 		DECLARE @tblLot TABLE (
 			intLotRecordId INT Identity(1, 1)
@@ -193,6 +197,8 @@ BEGIN TRY
 			,ysnStrictTracking
 			,intLotId
 			,intCategoryId
+			,intPreferenceId
+			,intParentLotId
 			)
 		SELECT DISTINCT oh.intOrderHeaderId
 			,oli.intOrderDetailId
@@ -224,6 +230,8 @@ BEGIN TRY
 			,i.ysnStrictFIFO
 			,oli.intLotId
 			,i.intCategoryId
+			,oli.intPreferenceId
+			,oli.intParentLotId 
 		FROM tblMFOrderHeader oh
 		JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 		JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -248,6 +256,8 @@ BEGIN TRY
 			SELECT @intRequiredUOMId = NULL
 
 			SELECT @intCategoryId = NULL
+			Select @intPreferenceId=NULL
+			Select @intParentLotId=NULL
 
 			DELETE
 			FROM @tblLot
@@ -260,6 +270,8 @@ BEGIN TRY
 				,@ysnStrictTracking = ysnStrictTracking
 				,@intLineItemLotId = intLotId
 				,@intCategoryId = intCategoryId
+				,@intPreferenceId=intPreferenceId
+				,@intParentLotId=intParentLotId
 			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
@@ -385,13 +397,21 @@ BEGIN TRY
 							WHERE intItemId = @intItemId
 								AND dblQty > 0
 							)
-				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+				AND ISNULL(L.intLotId, 0) = ISNULL((
 						CASE 
 							WHEN @intLineItemLotId IS NULL
 								THEN L.intParentLotId
 							ELSE @intLineItemLotId
 							END
 						), 0)
+				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+						CASE 
+							WHEN @intParentLotId IS NULL
+								THEN L.intParentLotId
+							ELSE @intParentLotId
+							END
+						), 0)
+				
 				AND IsNULL(LI.intItemOwnerId, 0) = (
 					CASE 
 						WHEN @ysnPickByItemOwner = 1
@@ -447,12 +467,12 @@ BEGIN TRY
 								END, 0))
 					) > 0
 			ORDER BY CASE 
-					WHEN @ysnPickByLotCode = 0
+					WHEN  I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 					ELSE '1900-01-01'
 					END ASC
-					,CASE 
-					WHEN @ysnPickByLotCode = 1
+				,CASE 
+					WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 1
 						THEN CAST(CASE 
 											WHEN (
 													(IsNULL(I.intUnitPerLayer,0) * IsNULL(I.intLayerPerPallet,0) > 0)
@@ -464,12 +484,14 @@ BEGIN TRY
 					ELSE '1'
 					END ASC
 				,CASE 
-					WHEN @ysnPickByLotCode = 1
+					WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 1
 						THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
 					ELSE '1'
 					END ASC
 				,CASE 
-					WHEN I.ysnStrictFIFO = 0
+					WHEN I.ysnStrictFIFO = 0 and @intPreferenceId=2
+						THEN L.dblQty
+					WHEN I.ysnStrictFIFO = 0 and @intPreferenceId in (1,3)
 						THEN ABS((
 									(
 										CASE 
@@ -492,7 +514,7 @@ BEGIN TRY
 										)
 									) - @dblRequiredWeight)
 					ELSE 0
-					END
+					END ASC
 				,L.dtmDateCreated ASC
 
 			--- INSERT ALL THE LOTS OUTSIDE ALLOWABLE PICK DAY RANGE
@@ -560,11 +582,18 @@ BEGIN TRY
 					FROM @tblLot
 					WHERE intLotId = L.intLotId
 					)
-				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+				AND ISNULL(L.intLotId, 0) = ISNULL((
 						CASE 
 							WHEN @intLineItemLotId IS NULL
 								THEN L.intParentLotId
 							ELSE @intLineItemLotId
+							END
+						), 0)
+				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+						CASE 
+							WHEN @intParentLotId IS NULL
+								THEN L.intParentLotId
+							ELSE @intParentLotId
 							END
 						), 0)
 				AND IsNULL(LI.intItemOwnerId, 0) = (
@@ -622,12 +651,12 @@ BEGIN TRY
 								END, 0))
 					) > 0
 			ORDER BY CASE 
-					WHEN @ysnPickByLotCode = 0
+					WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 					ELSE '1900-01-01'
 					END ASC
-					,CASE 
-					WHEN @ysnPickByLotCode = 1
+						,CASE 
+					WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 1
 						THEN CAST(CASE 
 											WHEN (
 													(IsNULL(I.intUnitPerLayer,0) * IsNULL(I.intLayerPerPallet,0) > 0)
@@ -639,12 +668,14 @@ BEGIN TRY
 					ELSE '1'
 					END ASC
 				,CASE 
-					WHEN @ysnPickByLotCode = 1
+					WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 1
 						THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
 					ELSE '1'
 					END ASC
 				,CASE 
-					WHEN I.ysnStrictFIFO = 0
+					WHEN I.ysnStrictFIFO = 0 and @intPreferenceId=2
+							THEN L.dblQty
+					WHEN I.ysnStrictFIFO = 0 and @intPreferenceId in (1,3)
 						THEN ABS((
 									(
 										CASE 
@@ -748,13 +779,20 @@ BEGIN TRY
 								WHERE intItemId = @intItemId
 									AND dblQty > 0
 								)
-					AND ISNULL(L.intParentLotId, 0) = ISNULL((
-							CASE 
-								WHEN @intLineItemLotId IS NULL
-									THEN L.intParentLotId
-								ELSE @intLineItemLotId
-								END
-							), 0)
+					AND ISNULL(L.intLotId, 0) = ISNULL((
+						CASE 
+							WHEN @intLineItemLotId IS NULL
+								THEN L.intParentLotId
+							ELSE @intLineItemLotId
+							END
+						), 0)
+				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+						CASE 
+							WHEN @intParentLotId IS NULL
+								THEN L.intParentLotId
+							ELSE @intParentLotId
+							END
+						), 0)
 					AND (
 						CASE 
 							WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
@@ -803,12 +841,12 @@ BEGIN TRY
 									END, 0))
 						) > 0
 				ORDER BY CASE 
-						WHEN @ysnPickByLotCode = 0
+						WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 0
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 						ELSE '1900-01-01'
 						END ASC
-						,CASE 
-					WHEN @ysnPickByLotCode = 1
+							,CASE 
+					WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 1
 						THEN CAST(CASE 
 											WHEN (
 													(IsNULL(I.intUnitPerLayer,0) * IsNULL(I.intLayerPerPallet,0) > 0)
@@ -820,12 +858,14 @@ BEGIN TRY
 					ELSE '1'
 					END ASC
 					,CASE 
-						WHEN @ysnPickByLotCode = 1
+						WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 1
 							THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
 						ELSE '1'
 						END ASC
 					,CASE 
-						WHEN I.ysnStrictFIFO = 0
+						WHEN I.ysnStrictFIFO = 0 and @intPreferenceId=2
+							THEN L.dblQty
+						WHEN I.ysnStrictFIFO = 0 and @intPreferenceId in (1,3)
 							THEN ABS((
 										(
 											CASE 
@@ -916,13 +956,20 @@ BEGIN TRY
 						FROM @tblLot
 						WHERE intLotId = L.intLotId
 						)
-					AND ISNULL(L.intParentLotId, 0) = ISNULL((
-							CASE 
-								WHEN @intLineItemLotId IS NULL
-									THEN L.intParentLotId
-								ELSE @intLineItemLotId
-								END
-							), 0)
+					AND ISNULL(L.intLotId, 0) = ISNULL((
+						CASE 
+							WHEN @intLineItemLotId IS NULL
+								THEN L.intParentLotId
+							ELSE @intLineItemLotId
+							END
+						), 0)
+				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+						CASE 
+							WHEN @intParentLotId IS NULL
+								THEN L.intParentLotId
+							ELSE @intParentLotId
+							END
+						), 0)
 					AND (
 						CASE 
 							WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
@@ -971,12 +1018,12 @@ BEGIN TRY
 									END, 0))
 						) > 0
 				ORDER BY CASE 
-						WHEN @ysnPickByLotCode = 0
+						WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 0
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 						ELSE '1900-01-01'
 						END ASC
-						,CASE 
-					WHEN @ysnPickByLotCode = 1
+							,CASE 
+					WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 1
 						THEN CAST(CASE 
 											WHEN (
 													(IsNULL(I.intUnitPerLayer,0) * IsNULL(I.intLayerPerPallet,0) > 0)
@@ -988,12 +1035,14 @@ BEGIN TRY
 					ELSE '1'
 					END ASC
 					,CASE 
-						WHEN @ysnPickByLotCode = 1
+						WHEN I.ysnStrictFIFO = 1 and @ysnPickByLotCode = 1
 							THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
 						ELSE '1'
 						END ASC
 					,CASE 
-						WHEN I.ysnStrictFIFO = 0
+						WHEN I.ysnStrictFIFO = 0 and @intPreferenceId=2
+						THEN L.dblQty
+						WHEN I.ysnStrictFIFO = 0 and @intPreferenceId in (1,3)
 							THEN ABS((
 										(
 											CASE 

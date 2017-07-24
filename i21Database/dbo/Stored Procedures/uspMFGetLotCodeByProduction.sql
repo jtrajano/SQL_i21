@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspMFGetLotCodeByProduction
+(@intLotSnapshotId int)
 AS
 	
 DECLARE @tblMFMultipleLotCode TABLE (
@@ -18,12 +19,14 @@ INSERT INTO @tblMFMultipleLotCode (
 SELECT *
 FROM (
 	SELECT L.strLotNumber
-		,L.dblQty
+		,SD.dblQty
 		,WP1.strParentLotNumber
 		,WP1.dblPhysicalCount
 		,SUM(WP1.dblPhysicalCount) OVER (PARTITION BY WP1.strLotNumber) dblTotalPhysicalCount
 	FROM tblICLot L
-	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+	JOIN tblMFLotSnapshotDetail SD ON SD.intLotId = L.intLotId
+	AND SD.intLotSnapshotId = @intLotSnapshotId
+	JOIN tblICParentLot PL ON PL.intParentLotId = SD.intParentLotId
 	LEFT JOIN (
 		SELECT L1.strLotNumber
 			,WP.dblPhysicalCount
@@ -33,7 +36,7 @@ FROM (
 		JOIN tblMFWorkOrderProducedLot WP ON WP.intLotId = L1.intLotId
 			AND WP.ysnProductionReversed = 0
 		) WP1 ON WP1.strLotNumber = L.strLotNumber
-	WHERE L.dblQty > 0
+	WHERE SD.dblQty > 0
 		AND PL.strParentLotNumber LIKE '%/%'
 	) AS DT
 WHERE ROUND(dblQty, 0) = Round(dblTotalPhysicalCount, 0)
@@ -58,13 +61,15 @@ INSERT INTO @tblMFMultipleLotCodeO1 (
 SELECT *
 FROM (
 	SELECT L.strLotNumber
-		,L.intStorageLocationId
-		,L.dblQty
+		,SD.intStorageLocationId
+		,SD.dblQty
 		,WP1.strParentLotNumber
 		,WP1.dblPhysicalCount
 		,SUM(WP1.dblPhysicalCount) OVER (PARTITION BY WP1.strLotNumber) dblTotalPhysicalCount
 	FROM tblICLot L
-	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+	JOIN tblMFLotSnapshotDetail SD ON SD.intLotId = L.intLotId
+	AND SD.intLotSnapshotId = @intLotSnapshotId
+	JOIN tblICParentLot PL ON PL.intParentLotId = SD.intParentLotId
 	LEFT JOIN (
 		SELECT L1.strLotNumber
 			,WP.dblPhysicalCount
@@ -74,7 +79,7 @@ FROM (
 		JOIN tblMFWorkOrderProducedLot WP ON WP.intLotId = L1.intLotId
 			AND WP.ysnProductionReversed = 0
 		) WP1 ON WP1.strLotNumber = L.strLotNumber
-	WHERE L.dblQty > 0
+	WHERE SD.dblQty > 0
 		AND PL.strParentLotNumber LIKE '%/%'
 	) AS DT
 WHERE ROUND(dblQty, 0) <> Round(dblTotalPhysicalCount, 0)

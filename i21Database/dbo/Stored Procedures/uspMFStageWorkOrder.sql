@@ -60,7 +60,8 @@ BEGIN TRY
 		,@intItemTypeId INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@intInventoryTransactionType AS INT = 8
-		,@intAdjustItemUOMId int
+		,@intAdjustItemUOMId INT
+		,@intRecipeItemUOMId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -502,13 +503,15 @@ BEGIN TRY
 			PRINT 'Call Lot Adjust routine.'
 		END
 
-		IF @dblNewWeight%@dblWeightPerQty>0
+		IF @dblNewWeight % @dblWeightPerQty > 0
 		BEGIN
-			SELECT @dblAdjustByQuantity = - @dblNewWeight,@intAdjustItemUOMId=@intInputWeightUOMId
+			SELECT @dblAdjustByQuantity = - @dblNewWeight
+				,@intAdjustItemUOMId = @intInputWeightUOMId
 		END
 		ELSE
 		BEGIN
-			SELECT @dblAdjustByQuantity = - @dblNewWeight/@dblWeightPerQty,@intAdjustItemUOMId=@intNewItemUOMId
+			SELECT @dblAdjustByQuantity = - @dblNewWeight / @dblWeightPerQty
+				,@intAdjustItemUOMId = @intNewItemUOMId
 		END
 
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
@@ -645,6 +648,19 @@ BEGIN TRY
 		END;
 	END
 
+	SELECT @intRecipeItemUOMId = RI.intItemUOMId
+	FROM tblMFWorkOrderRecipeItem RI
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND RI.intItemId = @intInputItemId
+
+	IF @intRecipeItemUOMId IS NULL
+	BEGIN
+		SELECT @intRecipeItemUOMId = RS.intItemUOMId
+		FROM tblMFWorkOrderRecipeSubstituteItem RS
+		WHERE RS.intWorkOrderId = @intWorkOrderId
+			AND RS.intSubstituteItemId = @intInputItemId
+	END
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
@@ -678,7 +694,7 @@ BEGIN TRY
 			,0
 			,0
 			,0
-			,@dblInputWeight
+			,dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight)
 			,0
 			,0
 			,0
@@ -692,7 +708,7 @@ BEGIN TRY
 	ELSE
 	BEGIN
 		UPDATE tblMFProductionSummary
-		SET dblInputQuantity = dblInputQuantity + @dblInputWeight
+		SET dblInputQuantity = dblInputQuantity + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight), 0)
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intInputItemId
 			AND intItemTypeId IN (

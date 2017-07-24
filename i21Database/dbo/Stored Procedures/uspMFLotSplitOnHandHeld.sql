@@ -17,6 +17,7 @@ BEGIN TRY
 		,@intCustomerLabelTypeId int
 		,@strReferenceNo nvarchar(50)
 		,@intEntityCustomerId int
+		,@dblQty DECIMAL(24, 10)
 
 	SELECT @intLotId = intLotId
 		,@dblSplitQty = dblPickQty
@@ -24,6 +25,13 @@ BEGIN TRY
 		,@strTaskNo = strTaskNo
 	FROM tblMFTask
 	WHERE intTaskId = @intTaskId
+
+	Select @dblQty=dblQty from tblICLot Where intLotId=@intLotId
+
+	If @dblQty=@dblSplitQty OR @strNewLotNumber=''
+	Begin
+		Return
+	End
 
 	SELECT @intSplitSubLocationId = intSubLocationId
 		,@intSplitStorageLocationId = intStorageLocationId

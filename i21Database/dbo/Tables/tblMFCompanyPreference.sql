@@ -49,6 +49,7 @@
 	ysnSetDefaultQty BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSetDefaultQty] DEFAULT 0,
 	ysnLoadProcessEnabled Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnLoadProcessEnabled] DEFAULT 0,
 	ysnSplitLotOnPartialQty Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSplitLotOnPartialQty] DEFAULT 0,
-
+	ysnProducedQtyByUnitCount Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnProducedQtyByUnitCount] DEFAULT 0,
+	intDamagedStatusId int,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

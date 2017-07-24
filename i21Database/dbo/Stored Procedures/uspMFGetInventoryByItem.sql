@@ -1,11 +1,37 @@
-﻿CREATE PROCEDURE uspMFGetInventoryByItem
+﻿CREATE PROCEDURE uspMFGetInventoryByItem @strPeriod NVARCHAR(50) = NULL
 AS
-DECLARE @intOwnerId INT
-	,@dtmToDate DATETIME
-	,@strCustomerName NVARCHAR(50)
+DECLARE @intLotSnapshotId INT
+	,@dtmCurrentDate DATETIME
+	,@dtmStartDate DATETIME
 
-IF @dtmToDate IS NULL
-	SELECT @dtmToDate = DATEADD(MONTH, DATEDIFF(MONTH, - 1, GETDATE()) - 1, - 1) + 1 --Last Day of previous month
+SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
+
+IF @strPeriod IS NULL
+BEGIN
+	SELECT @dtmStartDate = dtmStartDate
+	FROM dbo.tblGLFiscalYearPeriod
+	WHERE dtmEndDate IN (
+			SELECT dtmStartDate - 1
+			FROM dbo.tblGLFiscalYearPeriod
+			WHERE @dtmCurrentDate BETWEEN dtmStartDate
+					AND dtmEndDate
+			)
+
+	SELECT @intLotSnapshotId = intLotSnapshotId
+	FROM tblMFLotSnapshot
+	WHERE dtmDate = @dtmStartDate
+END
+ELSE
+BEGIN
+	SELECT @dtmStartDate = dtmStartDate
+	FROM dbo.tblGLFiscalYearPeriod
+	WHERE strPeriod = @strPeriod
+
+	SELECT @intLotSnapshotId = intLotSnapshotId
+	FROM tblMFLotSnapshot
+	WHERE dtmDate = @dtmStartDate
+END
+
 
 SELECT [Item No]
 	,[Item Desc]
@@ -17,8 +43,8 @@ SELECT [Item No]
 FROM (
 	SELECT I.strItemNo AS [Item No]
 		,I.strDescription AS [Item Desc]
-		,Convert(DECIMAL(24, 0), ROUND(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU.intItemUOMId, L.dblQty), IsNULL((
-							SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU1.intItemUOMId, L.dblQty)
+		,Convert(DECIMAL(24, 0), ROUND(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU.intItemUOMId, SD.dblQty), IsNULL((
+							SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU1.intItemUOMId, SD.dblQty)
 							FROM tblICItemUOM IU1
 							JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 								AND IU1.intItemId = I.intItemId
@@ -31,7 +57,7 @@ FROM (
 						AND IU1.intItemId = I.intItemId
 						AND UM1.strUnitType <> 'Weight'
 					), UM2.strUnitMeasure)) AS [UOM]
-		,Convert(DECIMAL(24, 0), L.dblWeight) AS Weight
+		,Convert(DECIMAL(24, 0), SD.dblWeight) AS Weight
 		,CASE 
 			WHEN LS1.strSecondaryStatus = 'Bond'
 				AND LS.strSecondaryStatus LIKE '%Damaged'
@@ -46,19 +72,19 @@ FROM (
 			END AS [Lot Status]
 		,C.strCategoryCode
 	FROM dbo.tblICLot L
-	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-		AND L.intStorageLocationId <> 6
+	JOIN tblMFLotSnapshotDetail SD ON SD.intLotId = L.intLotId
+	AND SD.intLotSnapshotId = @intLotSnapshotId
+	JOIN dbo.tblICItem I ON I.intItemId = SD.intItemId
+		AND SD.intStorageLocationId <> 6
 	JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND UM.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-	LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
+	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = SD.intLotStatusId
+	LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = SD.intBondStatusId
 	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
-	JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = L.intItemUOMId
+	JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = SD.intItemUOMId
 	JOIN dbo.tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
-	WHERE dblQty > 0
-		AND L.dtmDateCreated < @dtmToDate
+	
 	) AS DT
 GROUP BY [Item No]
 	,[Item Desc]

@@ -5487,6 +5487,9 @@
     <Build Include="dbo\Views\vyuSCDeliverySheetReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateDiscountandNetSettlement.sql" />
+    <Build Include="dbo\Tables\tblMFLotSnapshot.sql" />
+    <Build Include="dbo\Tables\tblMFLotSnapshotDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotSnapshot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
