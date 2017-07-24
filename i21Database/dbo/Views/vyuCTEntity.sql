@@ -12,8 +12,9 @@ AS
 			T.strPhone			AS strEntityPhone,
 			L.intEntityLocationId	AS	 intDefaultLocationId,
 			L.strLocationName	AS	strDefaultLocation,
-			CASE	WHEN Y.strType IN('Vendor','Shipping Line') THEN V.ysnPymtCtrlActive 
+			CASE	WHEN Y.strType IN('Vendor','Shipping Line','Producer') THEN V.ysnPymtCtrlActive 
 					WHEN Y.strType = 'Customer' THEN U.ysnActive
+					WHEN Y.strType = 'Salesperson' THEN P.ysnActive
 					ELSE E.ysnActive
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
@@ -35,7 +36,8 @@ AS
 											AND C.ysnDefaultContact		=	1
 	LEFT JOIN	tblEMEntity				T	ON	T.intEntityId			=	C.intEntityContactId	 
 	LEFT JOIN	tblAPVendor				V	ON	V.intEntityId			=	E.intEntityId			
-	LEFT JOIN	tblARCustomer			U	ON	U.intEntityId			=	E.intEntityId			
+	LEFT JOIN	tblARCustomer			U	ON	U.intEntityId			=	E.intEntityId					
+	LEFT JOIN	tblARSalesperson		P	ON	P.intEntityId			=	E.intEntityId
 	OUTER APPLY (
 		SELECT	EY.intEntityId 
 		FROM	tblEMEntity EY INNER JOIN tblEMEntityType ET
