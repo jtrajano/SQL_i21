@@ -2819,7 +2819,7 @@ IF @raiseError = 0
 			SET dblARBalance = dblARBalance - (CASE WHEN @post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
 			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
 			INNER JOIN (SELECT intEntityCustomerId
-							 , dblTotalPayment = SUM(PD.dblPayment)
+							 , dblTotalPayment	= (SUM(PD.dblPayment) + SUM(PD.dblDiscount)) - SUM(PD.dblInterest)
 						FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 							INNER JOIN (SELECT intPaymentId
 											 , intEntityCustomerId
