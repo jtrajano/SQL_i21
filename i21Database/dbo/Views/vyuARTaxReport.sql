@@ -20,23 +20,23 @@ SELECT DISTINCT I.intEntityCustomerId
 								ELSE TAXDETAIL.dblTotalAdjustedTax
 						  END
 	 , dblNonTaxable    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN NONTAXABLE.dblNonTaxable * -1 
-								ELSE NONTAXABLE.dblNonTaxable 
+								THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
+								ELSE (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)
 						  END
 	 , dblTaxable       = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') 
-								THEN TAXABLE.dblTaxable * -1
-								ELSE TAXABLE.dblTaxable
+								THEN TAXDETAIL.dblTax * -1
+								ELSE TAXDETAIL.dblTax
 						  END 
 	 , dblTotalSales    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN (NONTAXABLE.dblNonTaxable * -1) + (TAXABLE.dblTaxable * -1)
-								ELSE (NONTAXABLE.dblNonTaxable) + (TAXABLE.dblTaxable)
+								THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) +  TAXDETAIL.dblTax * -1 
+								ELSE (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) + TAXDETAIL.dblTax
 						  END
 	 , dblTaxCollected  = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
 								THEN ISNULL(I.dblTax, 0) * -1 
 								ELSE ISNULL(I.dblTax, 0)
 						  END
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-INNER JOIN (SELECT TC.intTaxCodeId
+INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , TC.strTaxAgency
 				 , TC.strTaxCode
 				 , TC.intTaxClassId
@@ -88,6 +88,7 @@ INNER JOIN (SELECT TC.intTaxCodeId
 								, intInvoiceDetailId
 								, dblPrice
 								, dblQtyShipped
+								, intTaxGroupId
 						FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 			) ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId	
 			OUTER APPLY (SELECT TOP 1 intItemId
@@ -140,13 +141,5 @@ OUTER APPLY (SELECT TOP 1 strCompanyName
 						, strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 			 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-INNER JOIN (SELECT intInvoiceId, intItemId, dblNonTaxable = ISNULL((dblQtyShipped * dblPrice),0)
-				 FROM dbo.vyuARInvoiceTaxDetail WITH (NOLOCK) 
-				 
-) NONTAXABLE ON I.intInvoiceId = NONTAXABLE.intInvoiceId AND TAXDETAIL.intInvoiceId = NONTAXABLE.intInvoiceId AND NONTAXABLE.intItemId = TAXDETAIL.intItemId 
-
-OUTER APPLY (SELECT dblTaxable = ISNULL(SUM(dblTotal), 0) 
-			 FROM dbo.tblARInvoiceDetail WITH (NOLOCK) 
-			 WHERE dblTotalTax <> 0 AND intInvoiceId = I.intInvoiceId
-) TAXABLE
-WHERE I.ysnPosted = 1
+WHERE 
+	I.ysnPosted = 1
