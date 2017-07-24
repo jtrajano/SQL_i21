@@ -118,7 +118,7 @@ SELECT
 ---- BL details
 		L.strBLNumber,
 		L.dtmBLDate,
-		L.dblQuantity as dblBLQuantity,
+		LD.dblQuantity as dblBLQuantity,
 		LD.dblGross as dblBLGrossWt,
 		LD.dblTare as dblBLTareWt,
 		LD.dblNet as dblBLNetWt,
