@@ -2,6 +2,7 @@
 	[intTypeDeductionId] [int] IDENTITY(1,1) NOT NULL,
 	[strDeduction] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strCategory] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strCheckLiteral] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intAccountId] INT NULL,
 	[intExpenseAccountId] INT NULL,
