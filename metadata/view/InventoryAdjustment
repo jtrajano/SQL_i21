@@ -250,6 +250,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
+                                "hidden": true,
                                 "icon": null,
                                 "itemId": "btnPostPreview",
                                 "layout|flex": null,
@@ -2680,6 +2681,37 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "glrecaptab",
+                                "itemId": "pgePostPreview",
+                                "layout": "fit",
+                                "title": "Post Preview"
+                            },
+                            "name": "MyPanel37",
+                            "designerId": "316afac4-95d9-497f-9172-ad97f97e56a4",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabPostPreview"
+                                    },
+                                    "name": "TabConfig3",
+                                    "designerId": "5abdf437-b4fc-46d5-aac0-dd0adb98ce52"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
                                 "itemId": "pgeAudit",
                                 "layout": "fit",
                                 "title": "Audit Log"
@@ -2729,7 +2761,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging13",
                     "designerId": "fc46f0de-7c8f-4d13-8dd6-f03119153f7d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

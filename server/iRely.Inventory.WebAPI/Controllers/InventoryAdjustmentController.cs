@@ -27,12 +27,13 @@ namespace iRely.Inventory.WebApi
         public HttpResponseMessage PostTransaction(BusinessLayer.Common.Posting_RequestModel adjustment)
         {
             var result = _bl.PostTransaction(adjustment, adjustment.isRecap);
-            
+
             var httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;
             return Request.CreateResponse(httpStatusCode, new
             {
                 data = new
                 {
+                    strBatchId = result.strBatchId,
                     strTransactionId = adjustment.strTransactionId
                 },
                 success = result.HasError ? false : true,

@@ -129,6 +129,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
+                                        hidden: true,
                                         itemId: 'btnPostPreview',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post Preview'
@@ -1335,6 +1336,16 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                 ]
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'glrecaptab',
+                                        itemId: 'pgePostPreview',
+                                        layout: 'fit',
+                                        title: 'Post Preview',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabPostPreview'
+                                        }
                                     },
                                     {
                                         xtype: 'panel',
