@@ -425,5 +425,6 @@
     <None Include="dbo\Views\vyuPROriginEmployeeChangeHistory.sql" />
     <None Include="dbo\Stored Procedures\uspGLSyncGLACTMST.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
+    <None Include="dbo\Stored Procedures\uspEMImportCustomerEFTInfo.sql" />
   </ItemGroup>
 </Project>
