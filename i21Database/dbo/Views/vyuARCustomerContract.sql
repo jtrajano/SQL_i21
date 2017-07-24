@@ -9,7 +9,7 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , dtmEndDate						= CTCD.dtmEndDate
 	 , strContractStatus				= CTCS.strContractStatus
 	 , intEntityCustomerId				= CTCH.intEntityId
-	 , intCurrencyId					= ISNULL(SMC.intMainCurrencyId, CTCD.intCurrencyId)
+	 , intCurrencyId					= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.intInvoiceCurrencyId ELSE ISNULL(SMC.intMainCurrencyId, CTCD.intCurrencyId) END
 	 , strCurrency						= SMC.strCurrency
 	 , intCompanyLocationId				= CTCD.intCompanyLocationId	
 	 , intItemId						= CTCD.intItemId
@@ -21,8 +21,8 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , strUnitMeasure					= ISNULL(ICUMP.strUnitMeasure, ICUMO.strUnitMeasure)
 	 , intPricingTypeId					= CTPT.intPricingTypeId
 	 , strPricingType					= CTPT.strPricingType
-	 , dblOrderPrice					= CTCD.dblCashPrice / (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
-	 , dblCashPrice						= CTCD.dblCashPrice
+	 , dblOrderPrice					= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.dblCashPrice * CTCD.dblRate ELSE CTCD.dblCashPrice END / (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
+	 , dblCashPrice						= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.dblCashPrice * CTCD.dblRate ELSE CTCD.dblCashPrice END
 	 , intCurrencyExchangeRateTypeId	= CTCD.intRateTypeId
 	 , strCurrencyExchangeRateType		= SMCRT.strCurrencyExchangeRateType
 	 , intCurrencyExchangeRateId		= CTCD.intCurrencyExchangeRateId
@@ -72,6 +72,8 @@ FROM (
 		 , intCurrencyExchangeRateId
 		 , dblRate
 		 , intNetWeightUOMId
+		 , intInvoiceCurrencyId
+		 , ysnUseFXPrice
 	FROM dbo.tblCTContractDetail WITH (NOLOCK)
 ) CTCD 
 INNER JOIN (
@@ -168,6 +170,12 @@ LEFT OUTER JOIN (
 		 , strCurrencyExchangeRateType
 	FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
 ) SMCRT ON CTCD.intRateTypeId = SMCRT.intCurrencyExchangeRateTypeId
+LEFT OUTER JOIN (
+	SELECT intCurrencyExchangeRateId
+		 , intFromCurrencyId
+		 , intToCurrencyId
+	FROM dbo.tblSMCurrencyExchangeRate WITH (NOLOCK)
+) SMCER ON CTCD.intCurrencyExchangeRateId = SMCER.intCurrencyExchangeRateId
 OUTER APPLY (
 	SELECT TOP 1 intContractDetailId
 			   , intItemId
