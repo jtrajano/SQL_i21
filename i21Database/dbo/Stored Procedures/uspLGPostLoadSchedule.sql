@@ -3,20 +3,39 @@
 	@intEntityUserSecurityId INT,
 	@ysnPost BIT
 AS
-BEGIN
+BEGIN TRY
 	DECLARE @intPurchaseSale INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ysnUnShip BIT
+	DECLARE @ysnValidateExternalShipmentNo BIT
+	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @strExternalShipmentNumber NVARCHAR(100)
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
+	SELECT @ysnValidateExternalShipmentNo = ISNULL(ysnValidateExternalShipmentNo,0)
+	FROM tblLGCompanyPreference 
+
 	SELECT @ysnUnShip = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 
 	IF @intPurchaseSale = 1
 	BEGIN
+		
+		IF ISNULL(@ysnValidateExternalShipmentNo,0) = 1 
+		BEGIN
+			SELECT @strExternalShipmentNumber = strExternalShipmentNumber
+			FROM tblLGLoad
+			WHERE intLoadId = @intLoadId
+
+			IF(ISNULL(@strExternalShipmentNumber,'') = '')
+			BEGIN
+				RAISERROR('External shipment no. has not been received. Cannot continue.', 16, 1)
+			END
+		END
+
 		EXEC uspLGUpdateInboundIntransitQty @intLoadId = @intLoadId
 			,@ysnInventorize = @ysnPost
 			,@ysnUnShip = @ysnUnShip
@@ -47,4 +66,9 @@ BEGIN
 	BEGIN
 		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
 	END
-END
+END TRY
+
+BEGIN CATCH
+	SET @strErrMsg = ERROR_MESSAGE()
+	RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
+END CATCH
