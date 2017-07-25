@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IInventoryReceiptItemLotBl : IBusinessLayer<tblICInventoryReceiptItemLot>
     {
-        //Task<SearchResult> GetLots(GetParameter param);
+        Task<SearchResult> SearchLots(GetParameter param);
         Task<SearchResult> GetLots(int? intInventoryReceiptItemId);
     }
 }

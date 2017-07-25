@@ -4514,23 +4514,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     pnlLotTracking.setVisible(true);
                 }
 
-                if(!current.phantom && !current.dirty) {
-                    win.down("#grdLotTracking").setLoading("Loading lots...");
-                    var receiptItemLot = current.tblICInventoryReceiptItemLots();
-                    var proxy = receiptItemLot && (receiptItemLot instanceof Ext.data.Store) ? receiptItemLot.getProxy() : null; 
+                // if(!current.phantom && !current.dirty) {
+                //     win.down("#grdLotTracking").setLoading("Loading lots...");
+                //     var receiptItemLot = current.tblICInventoryReceiptItemLots();
+                //     var proxy = receiptItemLot && (receiptItemLot instanceof Ext.data.Store) ? receiptItemLot.getProxy() : null; 
 
-                    if (proxy) {
-                        proxy.extraParams = {
-                            intInventoryReceiptItemId: current.get('intInventoryReceiptItemId')
-                        };
-                        // Manually get the lot records. 
-                        receiptItemLot.load(
-                            function(records, operation, success) {
-                                win.down("#grdLotTracking").setLoading(false);
-                            }
-                        );
-                    }
-                }
+                //     if (proxy) {
+                //         proxy.extraParams = {
+                //             intInventoryReceiptItemId: current.get('intInventoryReceiptItemId')
+                //         };
+                //         // Manually get the lot records. 
+                //         receiptItemLot.load(
+                //             function(records, operation, success) {
+                //                 win.down("#grdLotTracking").setLoading(false);
+                //             }
+                //         );
+                //     }
+                // }
             }
             else {
                 vm.data.currentReceiptItem = null;

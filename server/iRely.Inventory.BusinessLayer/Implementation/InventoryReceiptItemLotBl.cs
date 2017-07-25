@@ -19,26 +19,26 @@ namespace iRely.Inventory.BusinessLayer
             _db.ContextManager.Database.CommandTimeout = 180000;
         }
 
-        //public async Task<SearchResult> GetLots(GetParameter param)
-        //{
-        //    //var query = _db.GetQuery<tblICInventoryReceiptItemLot>()
-        //    //    .Include(p => p.tblICInventoryReceiptItem.vyuICInventoryReceiptItemLookUp)
-        //    //    .Include(p => p.vyuICGetInventoryReceiptItemLot)
-        //    //    .Filter(param, true);
-        //    var query = _db.GetQuery<vyuICGetInventoryReceiptItemLot2>()
-        //        //.Include(p => p.tblICInventoryReceiptItem.vyuICInventoryReceiptItemLookUp)
-        //        //.Include(p => p.vyuICGetInventoryReceiptItemLot)
-        //        .Filter(param, true);
+        public async Task<SearchResult> SearchLots(GetParameter param)
+        {
+            //var query = _db.GetQuery<tblICInventoryReceiptItemLot>()
+            //    .Include(p => p.tblICInventoryReceiptItem.vyuICInventoryReceiptItemLookUp)
+            //    .Include(p => p.vyuICGetInventoryReceiptItemLot)
+            //    .Filter(param, true);
+            var query = _db.GetQuery<vyuICGetInventoryReceiptItemLot2>()
+                //.Include(p => p.tblICInventoryReceiptItem.vyuICInventoryReceiptItemLookUp)
+                //.Include(p => p.vyuICGetInventoryReceiptItemLot)
+                .Filter(param, true);
 
-        //    var data = await query.Execute(param, "intInventoryReceiptItemLotId").ToListAsync();
+            var data = await query.Execute(param, "intInventoryReceiptItemLotId").ToListAsync();
 
-        //    return new SearchResult()
-        //    {
-        //        data = data.AsQueryable(),
-        //        total = await query.CountAsync(),
-        //        summaryData = await query.ToAggregateAsync(param.aggregates)
-        //    };
-        //}
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
 
         public async Task<SearchResult> GetLots(int? intInventoryReceiptItemId)
         {

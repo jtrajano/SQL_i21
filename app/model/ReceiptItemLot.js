@@ -26,11 +26,10 @@ Ext.define('Inventory.model.ReceiptItemLot', {
                             property: 'intSort'
                         },
                         autoLoad: false,
-                        pruneModifiedRecords: false,
                         proxy: {
                             api: {
                                 create: '../Inventory/api/InventoryReceiptItemLot/Post',
-                                read: '../Inventory/api/InventoryReceiptItemLot/GetLots',
+                                read: '../Inventory/api/InventoryReceiptItemLot/SearchLots',
                                 update: '../Inventory/api/InventoryReceiptItemLot/Put',
                                 destroy: '../Inventory/api/InventoryReceiptItemLot/Delete'
                             },
