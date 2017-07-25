@@ -3734,7 +3734,7 @@ IF @post = 1
 				 FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
 			INNER JOIN
 				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCurrencyId, strImportFormat, intCompanyLocationId, intDistributionHeaderId, 
-					intLoadDistributionHeaderId, strActualCostId, dtmShipDate, intPeriodsToAccrue, ysnImpactInventory, dblSplitPercent
+					intLoadDistributionHeaderId, strActualCostId, dtmShipDate, intPeriodsToAccrue, ysnImpactInventory, dblSplitPercent, intLoadId
 				 FROM tblARInvoice WITH (NOLOCK)) Header
 					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund', 'Credit Note')
 						AND ISNULL(intPeriodsToAccrue,0) <= 1
@@ -3753,6 +3753,9 @@ IF @post = 1
 				(SELECT intItemId, intLocationId, intItemLocationId, strType, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK)) IST
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId
+			LEFT OUTER JOIN
+				(SELECT intLoadId, intPurchaseSale FROM tblLGLoad WITH (NOLOCK)) lg
+					ON lg.intLoadId = Header.intLoadId
 			WHERE				
 				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND (Detail.dblTotal <> 0 OR dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) <> 0)) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
@@ -3760,7 +3763,8 @@ IF @post = 1
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND (ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ISNULL(IST.strType,'') = 'Finished Good' AND Detail.ysnBlended = 1))
 				AND Header.strTransactionType <> 'Debit Memo'							
-				AND (Detail.intStorageScheduleTypeId IS NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) = 0)				
+				AND (Detail.intStorageScheduleTypeId IS NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) = 0)
+				AND ISNULL(lg.intPurchaseSale, 0) <> 2		
 
 			UNION ALL
 
@@ -3802,7 +3806,7 @@ IF @post = 1
 				 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 					ON ARIC.[intItemId] = ARID.[intItemId]
 			INNER JOIN
-				(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, [strImportFormat], [dblSplitPercent]
+				(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, [strImportFormat], [dblSplitPercent], intLoadId
 				 FROM tblARInvoice WITH (NOLOCK)) ARI
 					ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]
 			INNER JOIN
@@ -3817,7 +3821,10 @@ IF @post = 1
 			LEFT OUTER JOIN
 				(SELECT intItemId, intItemLocationId, intLocationId, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK)) IST
 					ON ARIC.[intComponentItemId] = IST.intItemId 
-					AND ARI.[intCompanyLocationId] = IST.intLocationId 			 				 
+					AND ARI.[intCompanyLocationId] = IST.intLocationId
+			LEFT OUTER JOIN
+				(SELECT intLoadId, intPurchaseSale FROM tblLGLoad WITH (NOLOCK)) lg
+					ON lg.intLoadId = ARI.intLoadId
 			WHERE
 				((ISNULL(ARI.strImportFormat, '') <> 'CarQuest' AND (ARID.dblTotal <> 0 OR dbo.fnGetItemAverageCost(ARID.intItemId, IST.intItemLocationId, ARID.intItemUOMId) <> 0)) OR ISNULL(ARI.strImportFormat, '') = 'CarQuest') 
 				AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
@@ -3826,7 +3833,8 @@ IF @post = 1
 				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 				AND ARI.[strTransactionType] <> 'Debit Memo'
 				AND ISNULL(ARIC.strType,'') NOT IN ('Finished Good','Comment')
-				AND (ARID.intStorageScheduleTypeId IS NULL OR ISNULL(ARID.intStorageScheduleTypeId,0) = 0)			
+				AND (ARID.intStorageScheduleTypeId IS NULL OR ISNULL(ARID.intStorageScheduleTypeId,0) = 0)
+				AND ISNULL(lg.intPurchaseSale, 0) <> 2
 			
 		END TRY
 		BEGIN CATCH
@@ -3956,7 +3964,7 @@ IF @post = 1
 					,intForexRateTypeId			= id.intCurrencyExchangeRateTypeId
 					,dblForexRate				= id.dblCurrencyExchangeRate
 			FROM 
-				(SELECT intInvoiceId, strInvoiceNumber, dtmShipDate, intCurrencyId FROM tblARInvoice WITH (NOLOCK)) i 
+				(SELECT intInvoiceId, strInvoiceNumber, dtmShipDate, intCurrencyId, intLoadId FROM tblARInvoice WITH (NOLOCK)) i 
 			INNER JOIN 
 				(SELECT intInvoiceId, intInvoiceDetailId, intInventoryShipmentItemId, dblPrice, intCurrencyExchangeRateTypeId, dblCurrencyExchangeRate FROM tblARInvoiceDetail WITH (NOLOCK)) id
 						ON i.intInvoiceId = id.intInvoiceId
@@ -3969,7 +3977,10 @@ IF @post = 1
 							ON t.intTransactionId = si.intInventoryShipmentId AND t.intTransactionDetailId = si.intInventoryShipmentItemId AND ysnIsUnposted = 0			 
 			INNER JOIN (SELECT intInvoiceId FROM @PostInvoiceData ) p
 				ON i.[intInvoiceId] = p.[intInvoiceId]
+			LEFT JOIN (SELECT intLoadId, intPurchaseSale FROM tblLGLoad WITH (NOLOCK)) lg 
+				ON lg.intLoadId = i.intLoadId
 			WHERE t.intFobPointId = @FOB_DESTINATION
+			AND ISNULL(lg.intPurchaseSale, 0) <> 2
 
 			IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 			BEGIN 
@@ -4105,7 +4116,7 @@ IF @post = 1
 				 FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
 			INNER JOIN
 				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, dtmShipDate, intCurrencyId, intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, intCompanyLocationId,
-					strImportFormat, ysnImpactInventory, intPeriodsToAccrue
+					strImportFormat, ysnImpactInventory, intPeriodsToAccrue, intLoadId
 				 FROM tblARInvoice WITH (NOLOCK)) Header
 					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund', 'Credit Note') AND ISNULL(intPeriodsToAccrue,0) <= 1 
 						AND 1 = CASE WHEN strTransactionType = 'Credit Memo' THEN ysnImpactInventory ELSE 1 END
@@ -4118,7 +4129,9 @@ IF @post = 1
 			LEFT OUTER JOIN
 				(SELECT intItemId, intLocationId, strType, intItemLocationId, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK) ) IST
 					ON Detail.intItemId = IST.intItemId 
-					AND Header.intCompanyLocationId = IST.intLocationId 
+					AND Header.intCompanyLocationId = IST.intLocationId
+			LEFT JOIN (SELECT intLoadId, intPurchaseSale FROM tblLGLoad WITH (NOLOCK)) lg 
+					ON lg.intLoadId = Header.intLoadId
 			WHERE				
 				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND (Detail.dblTotal <> 0 OR Detail.dblQtyShipped <> 0)) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
@@ -4127,6 +4140,7 @@ IF @post = 1
 				AND (ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ISNULL(IST.strType,'') = 'Finished Good' AND Detail.ysnBlended = 1))
 				AND Header.strTransactionType <> 'Debit Memo'
 				AND (Detail.intStorageScheduleTypeId IS NOT NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) <> 0)		
+				AND ISNULL(lg.intPurchaseSale, 0) <> 2
 		
 		END TRY
 		BEGIN CATCH
