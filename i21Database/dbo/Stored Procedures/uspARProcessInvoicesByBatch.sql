@@ -902,7 +902,7 @@ BEGIN
 		FROM
 			@LineItemTaxEntries  LITE
 		INNER JOIN
-			(SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId], [ysnInsert] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId], [ysnInsert] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) ARIILD
 				ON LITE.[intTempDetailIdForTaxes] = ARIILD.[intTemporaryDetailIdForTax]
 				AND ISNULL(ARIILD.[ysnHeader], 0) = 0
 				AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
@@ -911,9 +911,6 @@ BEGIN
 		INNER JOIN
 			(SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate] FROM @InvoicesForInsert) IFI
 				ON IFI. [intId] = ARIILD.[intId]
-		WHERE
-			ARIILD.[intIntegrationLogId] = @IntegrationLogId
-
 
 		EXEC	[dbo].[uspARProcessTaxDetailsForLineItems]
 					 @TaxDetails			= @TaxDetails
@@ -960,7 +957,7 @@ BEGIN
 		,[strSourceTransaction]				= IFI.[strSourceTransaction]
 		,[ysnProcessed]						= 0
 		FROM
-		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId], [strTransactionType], [ysnPost], [ysnAccrueLicense] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId], [strTransactionType], [ysnPost], [ysnAccrueLicense] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) ARIILD
 		INNER JOIN
 		(SELECT [intId], [ysnUpdateAvailableDiscount], [strSourceTransaction] FROM @InvoicesForInsert) IFI
 			ON IFI. [intId] = ARIILD.[intId] 
@@ -968,7 +965,6 @@ BEGIN
 			ISNULL(ARIILD.[ysnHeader], 0) = 1
 			AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
 			AND ISNULL(ARIILD.[intInvoiceId], 0) <> 0
-
 
 	EXEC	[dbo].[uspARUpdateInvoicesIntegrations]
 				 @InvoiceIds			= @InsertedInvoiceIds
@@ -1425,7 +1421,7 @@ BEGIN
 		FROM
 			@LineItemTaxEntries  LITE
 		INNER JOIN
-			(SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId], [ysnInsert] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK)) ARIILD
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId], [ysnInsert] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) ARIILD
 				ON LITE.[intTempDetailIdForTaxes] = ARIILD.[intTemporaryDetailIdForTax]
 				AND ISNULL(ARIILD.[ysnHeader], 0) = 0
 				AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
@@ -1434,8 +1430,6 @@ BEGIN
 		INNER JOIN
 			(SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate] FROM @InvoicesForUpdate) IFI
 				ON IFI. [intId] = ARIILD.[intId]
-		WHERE
-			ARIILD.[intIntegrationLogId] = @IntegrationLogId
 
 
 		EXEC	[dbo].[uspARProcessTaxDetailsForLineItems]

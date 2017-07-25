@@ -26,8 +26,11 @@ FROM
 INNER JOIN
 	(SELECT [intInvoiceDetailId], [intInvoiceId] FROM tblARInvoiceDetail) ARID
 		ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-WHERE 
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
+INNER JOIN
+	@InvoiceIds IID
+		ON ARID.[intInvoiceId] = IID.[intHeaderId]
+--WHERE 
+--	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
 	
 	
 UPDATE ARID
@@ -53,8 +56,11 @@ FROM
 INNER JOIN
 	(SELECT [intInvoiceId], [intCurrencyId] FROM tblARInvoice) ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
+INNER JOIN
+	@InvoiceIds IID
+		ON ARID.[intInvoiceId] = IID.[intHeaderId]
+--WHERE
+--	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
 	
 	
 UPDATE
@@ -110,8 +116,11 @@ LEFT OUTER JOIN
 	 T
 	ON ARI.[intInvoiceId] = T.[intInvoiceId]
 	AND ARI.[ysnPaid] = 0
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId])
+INNER JOIN
+	@InvoiceIds IID
+		ON ARI.[intInvoiceId] = IID.[intHeaderId]
+--WHERE
+--	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId])
 
 
 UPDATE ARID
@@ -133,8 +142,12 @@ LEFT OUTER JOIN
 	)
 	 T
 	 ON ARID.[intInvoiceDetailId] = T.[intInvoiceDetailId] 
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
+INNER JOIN
+	@InvoiceIds IID
+		ON ARID.[intInvoiceId] = IID.[intHeaderId]
+		AND ISNULL(IID.[ysnUpdateAvailableDiscountOnly],0) = 0
+--WHERE
+--	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
 
 UPDATE
 	ARID
@@ -155,8 +168,11 @@ FROM
 LEFT OUTER JOIN
 	(SELECT [intItemId], [strType] FROM tblICItem) ICI
 		ON ARID.[intItemId] = ICI.[intItemId] 
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
+INNER JOIN
+	@InvoiceIds IID
+		ON ARID.[intInvoiceId] = IID.[intHeaderId]
+--WHERE
+--	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
 
 UPDATE
 	ARID
@@ -191,8 +207,11 @@ LEFT OUTER JOIN
 	)
 	 T
 	 ON ARI.[intInvoiceId] = T.[intInvoiceId] 
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
+INNER JOIN
+	@InvoiceIds IID
+		ON ARI.[intInvoiceId] = IID.[intHeaderId]
+--WHERE
+--	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
 	
 	
 UPDATE ARI	
@@ -203,7 +222,10 @@ SET
 	,ARI.[dblBaseAmountDue]		= (ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping]) - (ARI.[dblBasePayment] + ARI.[dblBaseDiscount])
 FROM
 	tblARInvoice ARI
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
+INNER JOIN
+	@InvoiceIds IID
+		ON ARI.[intInvoiceId] = IID.[intHeaderId]
+--WHERE
+--	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
 
 END
