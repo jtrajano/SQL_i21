@@ -13,6 +13,7 @@ SELECT
 	J.strTerm,
 	D.intEntityId AS intDefaultContactId,
 	D.strName AS strDefaultContactName,
+	D.strEmail AS strDefaultContactEmail,
 	C.intEntityLocationId AS intDefaultLocationId,
 	C.strLocationName AS strDefaultLocationName,
 	C.strAddress,
