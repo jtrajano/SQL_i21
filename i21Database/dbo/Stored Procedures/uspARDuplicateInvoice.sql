@@ -618,8 +618,11 @@ BEGIN CATCH
 END CATCH
 
 BEGIN TRY
-	UPDATE tblARInvoice SET ysnRecurring =  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END, 
-	ysnImpactInventory = @IsImpactInventory, dblTotalWeight = @TotalWeight
+	UPDATE tblARInvoice 
+	SET ysnRecurring =  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END
+	  , intOriginalInvoiceId = @InvoiceId 
+	  , ysnImpactInventory = @IsImpactInventory
+	  , dblTotalWeight = @TotalWeight
 	WHERE intInvoiceId = @NewInvoiceId
 END TRY
 BEGIN CATCH

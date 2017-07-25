@@ -10,11 +10,24 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
   
-DECLARE @intInvoiceId INT
-	  , @intUserId    INT
-
+DECLARE @intInvoiceId			INT
+	  , @intUserId				INT
+	  , @intOriginalInvoiceId	INT
+	  , @strTransactionType		NVARCHAR(25)
+	  	  
 SET @intInvoiceId = @InvoiceId
 SET @intUserId = @UserId
+
+IF @ForDelete = 1
+	BEGIN
+		SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
+				   , @strTransactionType = strTransactionType
+		FROM tblARInvoice 
+		WHERE intInvoiceId = @InvoiceId 
+
+		IF @strTransactionType = 'Credit Memo' AND @intOriginalInvoiceId IS NOT NULL
+			UPDATE tblARInvoice SET ysnCancelled = 0 WHERE intInvoiceId = @intOriginalInvoiceId
+	END
 
 EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @intInvoiceId, @ForDelete
