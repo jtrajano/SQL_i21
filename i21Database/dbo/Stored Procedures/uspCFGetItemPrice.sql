@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
+﻿
+CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
 
  @CFItemId				INT    
 ,@CFCustomerId			INT     
@@ -189,6 +190,11 @@ ELSE
 
 ---***PRICE PROFILE***---
 
+DECLARE @ysnGlobalProfile	BIT = 0
+DECLARE @intLinkedProfileId INT = NULL
+
+GLOBALPROFILE:
+
 --SITE ITEMS WHERE @CFNETWORKID AND @CFSiteId AND @CFItem
 DECLARE @cfSiteItem TABLE 
 
@@ -331,12 +337,13 @@ DECLARE @cfPriceProfile TABLE
 
 	strBasis				NVARCHAR(MAX),
 
-	strType					NVARCHAR(MAX)
+	strType					NVARCHAR(MAX),
+		
+	intLinkedProfile		INT
 
 )
 
-IF(@CFTransactionType = 'Local/Network')
-
+	IF(@CFTransactionType = 'Local/Network' AND @ysnGlobalProfile = 0)
 	BEGIN
 
 		INSERT INTO @cfPriceProfile 
@@ -371,7 +378,9 @@ IF(@CFTransactionType = 'Local/Network')
 
 		strBasis,				
 
-		strType					
+		strType,
+		
+		intLinkedProfile					
 
 	)		
 
@@ -405,7 +414,9 @@ IF(@CFTransactionType = 'Local/Network')
 
 		strBasis,				
 
-		strType		
+		strType,		
+
+		intLinkedProfile
 
 	FROM tblCFAccount cfAccount
 
@@ -424,11 +435,8 @@ IF(@CFTransactionType = 'Local/Network')
 		cfPProfileHeader.strType = @CFTransactionType
 
 	END
-
-ELSE IF (@CFTransactionType = 'Remote')
-
 	
-
+	ELSE IF (@CFTransactionType = 'Remote' AND @ysnGlobalProfile = 0)
 	BEGIN
 
 		INSERT INTO @cfPriceProfile 
@@ -463,7 +471,9 @@ ELSE IF (@CFTransactionType = 'Remote')
 
 		strBasis,				
 
-		strType					
+		strType,
+		
+		intLinkedProfile						
 
 	)		
 
@@ -497,7 +507,9 @@ ELSE IF (@CFTransactionType = 'Remote')
 
 		strBasis,				
 
-		strType		
+		strType,
+		
+		intLinkedProfile			
 
 	FROM tblCFAccount cfAccount
 
@@ -517,8 +529,7 @@ ELSE IF (@CFTransactionType = 'Remote')
 
 	END
 
-ELSE IF (@CFTransactionType = 'Extended Remote')
-
+	ELSE IF (@CFTransactionType = 'Extended Remote' AND @ysnGlobalProfile = 0)
 	BEGIN
 
 		INSERT INTO @cfPriceProfile 
@@ -553,7 +564,9 @@ ELSE IF (@CFTransactionType = 'Extended Remote')
 
 		strBasis,				
 
-		strType					
+		strType,
+		
+		intLinkedProfile						
 
 	)		
 
@@ -587,7 +600,9 @@ ELSE IF (@CFTransactionType = 'Extended Remote')
 
 		strBasis,				
 
-		strType		
+		strType,
+		
+		intLinkedProfile			
 
 	FROM tblCFAccount cfAccount
 
@@ -606,8 +621,9 @@ ELSE IF (@CFTransactionType = 'Extended Remote')
 		cfPProfileHeader.strType = @CFTransactionType
 
 	END
-
-BEGIN
+	
+	ELSE
+	BEGIN
 
 		INSERT INTO @cfPriceProfile 
 
@@ -641,21 +657,23 @@ BEGIN
 
 		strBasis,				
 
-		strType					
+		strType,
+		
+		intLinkedProfile					
 
 	)		
 
 	SELECT 
 
-		intAccountId,			
+		NULL,			
 
-		intCustomerId,			
+		NULL,			
 
-		intDiscountDays,			
+		NULL,			
 
-		intDiscountScheduleId,	
+		NULL,	
 
-		intSalesPersonId,		
+		NULL,		
 
 		cfPProfileDetail.intPriceProfileDetailId,	
 
@@ -675,13 +693,11 @@ BEGIN
 
 		strBasis,				
 
-		strType		
+		strType,
+		
+		intLinkedProfile		
 
-	FROM tblCFAccount cfAccount
-
-	INNER JOIN tblCFPriceProfileHeader cfPProfileHeader
-
-	ON cfAccount.intExtRemotePriceProfileId = cfPProfileHeader.intPriceProfileHeaderId
+	FROM tblCFPriceProfileHeader cfPProfileHeader
 
 	INNER JOIN tblCFPriceProfileDetail cfPProfileDetail
 
@@ -689,9 +705,9 @@ BEGIN
 
 	WHERE 
 
-		cfAccount.intCustomerId = @CFCustomerId AND 
-
 		cfPProfileHeader.strType = @CFTransactionType
+		AND cfPProfileHeader.intPriceProfileHeaderId = @intLinkedProfileId
+
 
 	END
 
@@ -750,6 +766,7 @@ BEGIN
 	SET @cfMatchProfileCount = 0
 	SET @cfMatchProfileSkip = 0
 
+	SELECT TOP 1 @intLinkedProfileId = intLinkedProfile FROM @cfPriceProfile 
 
 	------------------UPDATED---------------------
 
@@ -1928,6 +1945,12 @@ BEGIN
 END
 
 ---***PRICE PROFILE***---
+
+IF(@CFPricingOut != 'Price Profile' AND ISNULL(@intLinkedProfileId,0) > 0)
+BEGIN
+	SET @ysnGlobalProfile = 1
+	GOTO GLOBALPROFILE
+END
 
 END
 

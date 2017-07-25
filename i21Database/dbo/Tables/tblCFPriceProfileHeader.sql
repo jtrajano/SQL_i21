@@ -5,7 +5,10 @@
     [strType]                 NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [dblMinimumMargin]        NUMERIC (18, 6) NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFPriceProfileHeader_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFPriceProfileHeader] PRIMARY KEY CLUSTERED ([intPriceProfileHeaderId] ASC)
+    [ysnGlobalProfile] BIT NULL, 
+    [intLinkedProfile] INT NULL, 
+    CONSTRAINT [PK_tblCFPriceProfileHeader] PRIMARY KEY CLUSTERED ([intPriceProfileHeaderId] ASC),
+	CONSTRAINT [FK_tblCFPriceProfileHeader_tblCFPriceProfileHeader] FOREIGN KEY([intLinkedProfile]) REFERENCES [dbo].[tblCFPriceProfileHeader] ([intPriceProfileHeaderId])
 );
 
 
