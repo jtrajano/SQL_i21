@@ -5496,6 +5496,7 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetImportingTemplateDetail.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetImportingTemplate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrderMsgAndMail.sql" />
+    <Build Include="dbo\Views\vyuCRMOpportunitySalesrepAndLob.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
