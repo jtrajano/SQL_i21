@@ -2,7 +2,8 @@
 	@DateFrom DATETIME = NULL,
 	@DateTo DATETIME = NULL,
 	@totalAPIVCMST INT OUTPUT,
-	@totalAPHGLMST INT OUTPUT
+	@totalAPHGLMST INT OUTPUT,
+	@hasCCReconciliation BIT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -249,6 +250,12 @@ BEGIN
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
 	) --MAKE SURE TO IMPORT CCD IF NOT YET IMPORTED
+
+	IF EXISTS(SELECT TOP 1 1 FROM tmp_apivcmstImport WHERE apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal'))
+	BEGIN
+		SET @hasCCReconciliation = 1
+	END
+
 END
 
 IF OBJECT_ID('tempdb..#tmpPostedBackupId') IS NOT NULL DROP TABLE #tmpPostedBackupId
