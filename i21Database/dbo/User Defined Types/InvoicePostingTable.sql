@@ -5,7 +5,7 @@
 	,[strTransactionType]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strType]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[dtmDate]						DATETIME										NOT NULL
-	,[dtmPostDate]					DATETIME										NOT NULL
+	,[dtmPostDate]					DATETIME										NULL
 	,[dtmShipDate]					DATETIME										NULL
 	,[intEntityCustomerId]			INT				NULL
 	,[intCompanyLocationId]			INT				NULL
