@@ -36,12 +36,7 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	SELECT
-		ROW_NUMBER() OVER(ORDER BY intLoadDistributionHeaderId, intLoadDistributionDetailId DESC) AS intId
-		, *
-	INTO #tmpSourceTable
-	FROM (
-	SELECT DISTINCT [strSourceTransaction]					= 'Transport Load'
+	SELECT DISTINCT [strSourceTransaction]		= 'Transport Load'
 		,[intLoadDistributionHeaderId]			= DH.intLoadDistributionHeaderId
 		,[intLoadDistributionDetailId]			= DD.intLoadDistributionDetailId
 		,[intSourceId]							= DH.intLoadDistributionHeaderId
@@ -137,29 +132,29 @@ BEGIN TRY
 		,[dblSurcharge]							= DD.dblDistSurcharge
 		,DD.dblFreightRate
 		,DD.ysnFreightInPrice
+	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
-			LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
-			LEFT JOIN tblARCustomer Customer ON Customer.intEntityCustomerId = DH.intEntityCustomerId
-			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
-			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-			LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId
-			LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
-			LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
-			LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
-					SELECT Item 
-					FROM dbo.fnTRSplit(DD.strReceiptLink,','))
-					LEFT JOIN ( 
-							SELECT DISTINCT intLoadDistributionDetailId
-								, STUFF(( SELECT DISTINCT ', ' + CD.strSupplyPoint
-											FROM dbo.vyuTRLinkedReceipts CD
-											WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
-												AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
-											FOR XML PATH('')), 1, 2, '') strSupplyPoint
-							FROM vyuTRLinkedReceipts CH) ee 
-						ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
-		WHERE TL.intLoadHeaderId = @intLoadHeaderId
-			AND DH.strDestination = 'Customer'
-	) tblInvoices
+	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
+	LEFT JOIN tblARCustomer Customer ON Customer.intEntityCustomerId = DH.intEntityCustomerId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
+	LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId
+	LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
+	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
+	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
+		SELECT Item 
+		FROM dbo.fnTRSplit(DD.strReceiptLink,','))
+		LEFT JOIN ( 
+				SELECT DISTINCT intLoadDistributionDetailId
+					, STUFF(( SELECT DISTINCT ', ' + CD.strSupplyPoint
+								FROM dbo.vyuTRLinkedReceipts CD
+								WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
+									AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
+								FOR XML PATH('')), 1, 2, '') strSupplyPoint
+				FROM vyuTRLinkedReceipts CH) ee 
+			ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+	WHERE TL.intLoadHeaderId = @intLoadHeaderId
+		AND DH.strDestination = 'Customer'
 
 	-- Concatenate PO Number, BOL Number, and Comments in cases there are different values and they are not used as a grouping option
 	DECLARE @concatPONumber NVARCHAR(MAX) = ''
@@ -493,9 +488,17 @@ BEGIN TRY
 			RETURN 0
 		END
 	END
+
+	SELECT ROW_NUMBER() OVER(ORDER BY intLoadDistributionHeaderId, intLoadDistributionDetailId DESC) AS intId, * 
+	INTO #tmpSourceTableFinal
+	FROM (
+		SELECT DISTINCT TOP 100 PERCENT *
+		FROM #tmpSourceTable
+	) Invoices
+
 	
 	--Freight Items
-	INSERT INTO #tmpSourceTable(
+	INSERT INTO #tmpSourceTableFinal(
 		[intId] 
 		,[strSourceTransaction]
 		,[intLoadDistributionDetailId]
@@ -651,7 +654,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]				= IE.ysnVirtualMeterReading
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
-	FROM #tmpSourceTable IE
+	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1
 
@@ -808,7 +811,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= TR.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= TR.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
-	FROM #tmpSourceTable TR
+	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
 	DECLARE @FreightSurchargeEntries AS InvoiceIntegrationStagingTable
@@ -965,7 +968,7 @@ BEGIN TRY
 			,[ysnVirtualMeterReading]				= IE.ysnVirtualMeterReading
 			,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
-		FROM #tmpSourceTable IE
+		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE ISNULL(IE.dblFreightRate, 0) != 0
 	END
