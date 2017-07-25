@@ -898,7 +898,7 @@ IF(@totalInvalid > 0)
 			tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
 		INNER JOIN
 			@InvalidInvoiceData PID
-				ON ILD.[intInvoiceId] = PID.[strInvoiceNumber]
+				ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 		WHERE
 			ILD.[intIntegrationLogId] = @IntegrationLogId
 			AND ILD.[ysnPost] IS NOT NULL
