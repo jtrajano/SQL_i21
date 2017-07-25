@@ -35,6 +35,8 @@ SELECT CP.intCompanyPreferenceId
 	,CP.intDefaultPositionId
 	,PO.strPosition
 	,PO.strPositionType
+	,CP.intDefaultFreightTermId
+	,FT.strFreightTerm AS strDefaultFreightTerm
 	,CP.intDefaultLeastCostSourceType
 	,CASE CP.intDefaultLeastCostSourceType
 		WHEN 1
@@ -179,3 +181,4 @@ LEFT JOIN tblCTPosition PO ON PO.intPositionId = CP.intDefaultPositionId
 LEFT JOIN tblLGShippingMode SM ON SM.intShippingModeId = CP.intShippingMode
 LEFT JOIN tblEMEntity EN ON EN.intEntityId = CP.intHaulerEntityId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CP.intCompanyLocationId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CP.intDefaultFreightTermId

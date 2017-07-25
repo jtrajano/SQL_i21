@@ -113,6 +113,12 @@
 [intETAPOLReasonCodeId] INT NULL,
 [intETSPOLReasonCodeId] INT NULL,
 [intETAPODReasonCodeId] INT NULL,
+[intFreightTermId] INT NULL,
+[intCurrencyId] INT NULL,
+[intCreatedById] INT NULL,
+[dtmCreatedOn] DATETIME NULL,
+[intLastUpdateById] INT NULL,
+[dtmLastUpdateOn] DATETIME NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
