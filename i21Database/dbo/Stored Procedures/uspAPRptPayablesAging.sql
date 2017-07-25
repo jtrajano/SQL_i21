@@ -80,6 +80,10 @@ BEGIN
 		NULL AS strAccountId,
 		NULL AS strVendorIdName,
 		NULL AS strAge,
+		NULL AS strReceiptNumber,
+		NULL AS strTicketNumber,
+		NULL AS strShipmentNumber,
+		NULL AS strContractNumber,
 		0 AS intAccountId,
 		0 AS dblTotal,
 		0 AS dblAmountPaid,
@@ -262,6 +266,22 @@ END
 	IF @strTerm IS NOT NULL
 	BEGIN
 		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strTerm, @condition, @from, @to, @join, null, null, @datatype)				  
+	END  
+	
+	--THIS FILTER WILL GET THE CONNECTED BILL ID FROM SOURCE MODULE
+	IF (@fieldname = 'strReceiptNumber' OR @fieldname = 'strTicketNumber' OR @fieldname = 'strShipmentNumber' OR @fieldname = 'strContractNumber')
+	BEGIN 
+		SET @strBillId = (SELECT TOP 1 strBillId FROM vyuAPOpenPayableDetailsFields WHERE (CASE WHEN @fieldname = 'strReceiptNumber' THEN  strReceiptNumber 
+																							    WHEN @fieldname = 'strTicketNumber' THEN  strTicketNumber 
+																								WHEN @fieldname = 'strShipmentNumber' THEN  strShipmentNumber 
+																							ELSE strContractNumber END) = @from)
+		SET @fieldname = 'strBillId'
+		SET @from = @strBillId
+	END
+    
+	IF @strBillId IS NOT NULL
+	BEGIN
+		SET @filter = dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)				  
 	END  
 
 SET @query = '

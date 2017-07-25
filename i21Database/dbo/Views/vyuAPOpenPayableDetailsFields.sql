@@ -22,6 +22,10 @@ FROM (
 		,tmpAgingSummaryTotal.dblInterest
 		,tmpAgingSummaryTotal.dblAmountDue
 		,ISNULL(B.strVendorId, '') + ' - ' + isnull(C.strName, '') AS strVendorIdName
+		,NULL AS strReceiptNumber 
+		,NULL AS strTicketNumber
+		,NULL AS strShipmentNumber
+		,NULL AS strContractNumber
 	FROM (
 		SELECT intBillId
 			,SUM(tmpAPPayables.dblTotal) AS dblTotal
@@ -49,3 +53,57 @@ FROM (
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 	) MainQuery
+
+	UNION ALL
+  
+	SELECT *
+	   FROM (
+		SELECT DISTINCT
+			 NULL AS dtmDate
+			,NULL AS dtmDueDate
+			,NULL AS strVendorId
+			,NULL AS intEntityId
+			,NULL AS intBillId
+			,APB.strBillId AS strBillId
+			,NULL AS strVendorOrderNumber
+			,NULL AS strTerm
+			,NULL AS strCompanyName
+			,NULL AS intAccountId
+			,NULL AS strAccountId
+			,NULL AS dblTotal
+			,NULL AS dblAmountPaid
+			,NULL AS dblDiscount
+			,NULL AS dblInterest
+			,NULL AS dblAmountDue
+			,NULL AS strVendorIdName      
+			,IR.strReceiptNumber 
+			,SC.strTicketNumber
+			,ICS.strShipmentNumber
+			,CH.strContractNumber
+		FROM (
+			SELECT intBillId
+				,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
+			FROM (
+				SELECT intBillId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+				FROM dbo.vyuAPPayables
+				) tmpAPPayables
+			GROUP BY intBillId
+			) AS tmpAgingSummaryTotal
+		INNER JOIN dbo.tblAPBill APB ON APB.intBillId = tmpAgingSummaryTotal.intBillId
+		INNER JOIN dbo.tblAPBillDetail APD ON APB.intBillId = APD.intBillId
+		LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
+		LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
+		LEFT JOIN dbo.tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = APD.intInventoryShipmentChargeId
+		LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
+		LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = IRE.intOrderId
+		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+		) MainQuery  
+
+GO
+
+
