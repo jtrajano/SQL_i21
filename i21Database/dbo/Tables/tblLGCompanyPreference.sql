@@ -29,6 +29,7 @@
 [ysnAlertApprovedQty] [bit] NULL,
 [ysnUpdateVesselInfo] [bit] NULL,
 [ysnValidateExternalPONo] [bit] NULL,
+[ysnValidateExternalShipmentNo] [bit] NULL,
 [ysnETAMandatory] [bit] NULL,
 [ysnPOETAFeedToERP] [bit] NULL,
 [strSignature] NVARCHAR(MAX),
