@@ -13,6 +13,9 @@ BEGIN TRY
 		,@xmlDocumentId INT
 		,@intScaleTicketId INT
 		,@strReceiptNumber NVARCHAR(20)
+		,@GrainUnloadedDecimal DECIMAL(24,10)
+		,@NetWeightDecimal DECIMAL(24,10)
+		,@strItemStockUOM NVARCHAR(30)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -70,6 +73,18 @@ BEGIN TRY
 		WHERE intTicketId = @intScaleTicketId
 				
 	END
+
+	SELECT 
+	@strItemStockUOM = UnitMeasure.strUnitMeasure,
+	@GrainUnloadedDecimal =(SC.dblGrossWeight-SC.dblTareWeight),
+	@NetWeightDecimal=(SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink)
+	FROM   tblICUnitMeasure UnitMeasure
+	JOIN   tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=UnitMeasure.intUnitMeasureId
+	JOIN   tblSCTicket SC ON SC.intItemUOMIdTo=ItemUOM.intItemUOMId
+	WHERE  SC.intTicketId=@intScaleTicketId
+	
+	SET @GrainUnloadedDecimal=@GrainUnloadedDecimal-FLOOR(@GrainUnloadedDecimal)
+	SET @NetWeightDecimal=@NetWeightDecimal-FLOOR(@NetWeightDecimal)
 
 	SELECT @strCompanyName = 
 			CASE 
@@ -142,9 +157,9 @@ BEGIN TRY
 		,[dbo].[fnRemoveTrailingZeroes](SC.dblGrossWeight) AS dblGrossWeight
 		,[dbo].[fnRemoveTrailingZeroes](SC.dblTareWeight) AS dblTareWeight
 		,[dbo].[fnRemoveTrailingZeroes]((SC.dblGrossWeight-SC.dblTareWeight)) AS strUnloadedGrain
-		,[dbo].[fnRemoveTrailingZeroes](ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(SC.intItemId,ItemUOM.intUnitMeasureId,SS.intUnitMeasureId,SC.dblShrink),6)) AS dblDockage
+		,[dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,6)) AS dblDockage
 		,[dbo].[fnRemoveTrailingZeroes](ROUND((SC.dblShrink*100.0/(SC.dblGrossWeight-SC.dblTareWeight)),6)) AS dblDockagePercent
-		,[dbo].[fnRemoveTrailingZeroes](((SC.dblGrossWeight-SC.dblTareWeight)-dbo.fnCTConvertQuantityToTargetItemUOM(SC.intItemId,ItemUOM.intUnitMeasureId,SS.intUnitMeasureId,SC.dblShrink))) AS dblNetWeight	
+		,[dbo].[fnRemoveTrailingZeroes](((SC.dblGrossWeight-SC.dblTareWeight)-SC.dblShrink)) AS dblNetWeight	
 		,Item.strItemNo
 		,1 AS strGrade
 		,EY.strVendorAccountNum		
@@ -153,14 +168,19 @@ BEGIN TRY
 		,SS.strPhone
 		,SC.strBinNumber
 		,NULL AS strBoxNoOfSample
+		,' Scale record in '+ @strItemStockUOM AS ScaleLabel
 		,[dbo].[fnGRConvertNumberToWords](SC.dblGrossWeight-SC.dblTareWeight) 
-		+ ' point ' 
-		+ [dbo].[fnGRConvertDecimalPartToWords]([dbo].[fnRemoveTrailingZeroes](SC.dblGrossWeight-SC.dblTareWeight)) 
-		+ ' Bushel' AS strGrainUnloadedInWords
-		,[dbo].[fnGRConvertNumberToWords](SC.dblGrossWeight-SC.dblTareWeight-dbo.fnCTConvertQuantityToTargetItemUOM(SC.intItemId,ItemUOM.intUnitMeasureId,SS.intUnitMeasureId,SC.dblShrink)) 
-		+ ' point ' 
-		+ [dbo].[fnGRConvertDecimalPartToWords]([dbo].[fnRemoveTrailingZeroes](SC.dblGrossWeight-SC.dblTareWeight-dbo.fnCTConvertQuantityToTargetItemUOM(SC.intItemId,ItemUOM.intUnitMeasureId,SS.intUnitMeasureId,SC.dblShrink)))
-		+ ' Bushel' AS strNetWeightInWords
+		+ CASE 
+			WHEN @GrainUnloadedDecimal >0 THEN ' point ' + [dbo].[fnGRConvertDecimalPartToWords]([dbo].[fnRemoveTrailingZeroes](SC.dblGrossWeight-SC.dblTareWeight))
+			ELSE ''
+		  END		 
+		+ ' '+@strItemStockUOM AS strGrainUnloadedInWords
+		,[dbo].[fnGRConvertNumberToWords](SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink) 
+		+CASE 
+			 WHEN @NetWeightDecimal >0 THEN + ' point ' + [dbo].[fnGRConvertDecimalPartToWords]([dbo].[fnRemoveTrailingZeroes](SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink))
+			 ELSE ''
+		 END	 		
+		+ ' '+@strItemStockUOM AS strNetWeightInWords
 	FROM tblSCTicket SC
 	JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId
 	JOIN tblICItem Item ON Item.intItemId = SC.intItemId
