@@ -39,6 +39,8 @@ BEGIN TRY
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
 
+	DELETE #tmpRC WHERE intReportingComponentId = ''
+
 	SELECT TOP 1 @CompanyName = strCompanyName, @CompanyEIN = strEin FROM tblSMCompanySetup
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)

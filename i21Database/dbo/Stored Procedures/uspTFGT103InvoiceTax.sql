@@ -60,6 +60,8 @@ BEGIN TRY
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
+
+	DELETE #tmpRC WHERE intReportingComponentId = ''
 	
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
