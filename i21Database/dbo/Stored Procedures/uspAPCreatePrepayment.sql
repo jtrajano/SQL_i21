@@ -28,9 +28,12 @@ BEGIN
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @intGLBankAccountId INT;
 	DECLARE @location INT;
-	DECLARE @currency INT;
+	DECLARE @currency INT, @functionalCurrency INT;
 	DECLARE @paymentRecordNum NVARCHAR(50);
 	DECLARE @payToAddress INT;
+	DECLARE @foreignCurrency BIT = 0;
+	DECLARE @rate DECIMAL(18,6) = 0;
+	DECLARE @rateType INT;
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -55,6 +58,26 @@ BEGIN
 		RETURN;
 	END
 
+	SELECT TOP 1 
+		@functionalCurrency = intDefaultCurrencyId 
+		,@foreignCurrency = CASE WHEN intDefaultCurrencyId != @currency THEN 1 ELSE 0 END
+	FROM tblSMCompanyPreference
+
+	IF @foreignCurrency = 1
+	BEGIN
+		SELECT TOP 1
+			@rateType = intAccountsPayableRateTypeId
+		FROM tblSMMultiCurrency
+		 
+		SELECT TOP 1
+			@rate = exchangeRateDetail.dblRate
+		FROM tblSMCurrencyExchangeRate exchangeRate
+		INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
+		WHERE exchangeRateDetail.intRateTypeId = @rateType
+		AND exchangeRate.intFromCurrencyId = @currency AND exchangeRate.intToCurrencyId = @functionalCurrency
+		AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
+	END
+
 	--VALIDATION
 	--Make sure there is user to use
 	IF @userId IS NULL
@@ -63,56 +86,45 @@ BEGIN
 		RETURN;
 	END
 
-	--Make sure there is payment method to user
-	IF @paymentMethodId IS NULL
+	IF @location IS NULL
 	BEGIN
-		SELECT TOP 1 @paymentMethodId = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'check'
-		IF @paymentMethodId IS NULL
+		SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId)
+		IF @location IS NULL
 		BEGIN
-			RAISERROR('There is no check payment method setup.', 16, 1);
+			RAISERROR('Location setup is missing.', 16, 1);
 			RETURN;
 		END
 	END
 
 	--Make sure there is bank account to use
-	--if no value has been passed
 	IF @intBankAccountId IS NULL
 	BEGIN
+		SELECT TOP 1 @intGLBankAccountId = A.intCashAccount FROM tblSMCompanyLocation A
+					WHERE A.intCompanyLocationId = @location
 
-		--if no location setup on transaction
-		IF @location IS NULL
+		--Find available bank account available for the same currency
+		IF @intGLBankAccountId IS NOT NULL
 		BEGIN
-			SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId) --USER USER LOCATION
+			SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId AND intCurrencyId = @currency AND ysnActive = 1
 		END
+	END
 
-		SELECT @intGLBankAccountId = A.intCashAccount 
-			FROM tblSMCompanyLocation A
-		WHERE A.intCompanyLocationId = @location
-		
+	--if no cash account setup on location, just look for the bank account on same currency
+	IF @intGLBankAccountId IS NULL OR @intBankAccountId IS NULL
+	BEGIN
 		SELECT TOP 1 
-			@intBankAccountId = intBankAccountId
-		FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
-		AND intCurrencyId = @currency
-
-	END
-
-	--if no bank account with same currency on transaction
-	IF @intBankAccountId IS NULL
-	BEGIN
-		--TRY TO GET THE FIRST BANK ACCOUNT ON SAME CURRENCY
-		SELECT TOP 1
-			@intBankAccountId = bankAccnt.intBankAccountId
-			,@intGLBankAccountId = bankAccnt.intGLAccountId
-		FROM tblCMBankAccount bankAccnt
-		WHERE bankAccnt.intCurrencyId = @currency
-
-		IF @intGLBankAccountId IS NULL
-		BEGIN
-			RAISERROR('No available bank account for this transaction.', 16, 1);
-			RETURN;
-		END
+			@intGLBankAccountId = intGLAccountId
+			,@intBankAccountId = intBankAccountId
+		FROM tblCMBankAccount WHERE intCurrencyId = @currency AND ysnActive = 1
 	END
 		
+	--if no bank account with same currency on transaction
+	IF @intGLBankAccountId IS NULL OR @intBankAccountId IS NULL
+	BEGIN
+		RAISERROR('No available bank account for this transaction.', 16, 1);
+		RETURN;
+	END
+
 	--Make sure there is payment method to user
 	IF @paymentMethodId IS NULL
 	BEGIN
@@ -142,6 +154,7 @@ BEGIN
 		[intPaymentMethodId],
 		[intPayToAddressId],
 		[intCurrencyId],
+		[intCurrencyExchangeRateTypeId],
 		[intEntityVendorId],
 		[strPaymentInfo],
 		[strPaymentRecordNum],
@@ -149,6 +162,7 @@ BEGIN
 		[dtmDatePaid],
 		[dblAmountPaid],
 		[dblUnapplied],
+		[dblExchangeRate],
 		[ysnPosted],
 		[ysnPrepay],
 		[dblWithheld],
@@ -159,7 +173,8 @@ BEGIN
 		[intBankAccountId]		= @bankAccount,
 		[intPaymentMethodId]	= @paymentMethod,
 		[intPayToAddressId]		= @payToAddress,
-		[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount), (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'')),
+		[intCurrencyId]			= @currency,
+		[intCurrencyExchangeRateTypeId] = @rateType,
 		[intEntityVendorId]		= @vendorId,
 		[strPaymentInfo]		= @paymentInfo,
 		[strPaymentRecordNum]	= @paymentRecordNum,
@@ -167,6 +182,7 @@ BEGIN
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
 		[dblAmountPaid]			= @payment,
 		[dblUnapplied]			= 0,
+		[dblExchangeRate]		= @rate,
 		[ysnPosted]				= @isPost,
 		[ysnPrepay]				= 1,
 		[dblWithheld]			= 0,
@@ -218,7 +234,10 @@ BEGIN
 	 @payment DECIMAL(18, 6),
 	 @datePaid DATETIME,
 	 @isPost BIT,
+	 @rateType INT,
+	 @rate DECIMAL(18,6),
 	 @payToAddress INT,
+	 @currency INT,
 	 @paymentId INT OUTPUT',
 	 @userId = @userId,
 	 @billId = @billId,
@@ -232,7 +251,10 @@ BEGIN
 	 @payment = @amountPaid,
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
+	 @rateType = @rateType,
+	 @rate = @rate,
 	 @payToAddress = @payToAddress,
+	 @currency = @currency,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 

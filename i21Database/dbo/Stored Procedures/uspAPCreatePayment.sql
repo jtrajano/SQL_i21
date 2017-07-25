@@ -57,6 +57,10 @@ BEGIN
 	DECLARE @paymentRecordNum NVARCHAR(50)
 	DECLARE @defaultPaymentInfo NVARCHAR(500)
 	DECLARE @payToAddress INT;
+	DECLARE @foreignCurrency BIT = 0;
+	DECLARE @rate DECIMAL(18,6) = 0;
+	DECLARE @rateType INT;
+	DECLARE @currency INT, @functionalCurrency INT;
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -69,11 +73,33 @@ BEGIN
 		,@location = A.intShipToId
 		,@paymentMethodId = CASE WHEN @paymentMethodId IS NULL THEN C.intPaymentMethodId ELSE @paymentMethodId END
 		,@payToAddress = A.intPayToAddressId
+		,@currency = A.intCurrencyId
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
 			ON A.[intEntityVendorId] = C.[intEntityId]
+
+	SELECT TOP 1 
+		@functionalCurrency = intDefaultCurrencyId 
+		,@foreignCurrency = CASE WHEN intDefaultCurrencyId != @currency THEN 1 ELSE 0 END
+	FROM tblSMCompanyPreference
+
+	IF @foreignCurrency = 1
+	BEGIN
+		SELECT TOP 1
+			@rateType = intAccountsPayableRateTypeId
+		FROM tblSMMultiCurrency
+		 
+		SELECT TOP 1
+			@rate = exchangeRateDetail.dblRate
+		FROM tblSMCurrencyExchangeRate exchangeRate
+		INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
+		WHERE exchangeRateDetail.intRateTypeId = @rateType
+		AND exchangeRate.intFromCurrencyId = @currency AND exchangeRate.intToCurrencyId = @functionalCurrency
+		AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
+	END
+
 
 	--VALIDATION
 	--Make sure there is user to use
@@ -96,23 +122,32 @@ BEGIN
 	--Make sure there is bank account to use
 	IF @intBankAccountId IS NULL
 	BEGIN
-		SELECT @intGLBankAccountId = A.intCashAccount FROM tblSMCompanyLocation A
+		SELECT TOP 1 @intGLBankAccountId = A.intCashAccount FROM tblSMCompanyLocation A
 					WHERE A.intCompanyLocationId = @location
 
-		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
-
-		IF @intBankAccountId IS NULL
+		--Find available bank account available for the same currency
+		IF @intGLBankAccountId IS NOT NULL
 		BEGIN
-			RAISERROR('The Cash Account setup is missing on company location.', 16, 1);
-			RETURN;
+			SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId AND intCurrencyId = @currency AND ysnActive = 1
 		END
 	END
 
-	IF @intGLBankAccountId IS NULL
+	--if no cash account setup on location, just look for the bank account on same currency
+	IF @intGLBankAccountId IS NULL OR @intBankAccountId IS NULL
 	BEGIN
-		SET @intGLBankAccountId = (SELECT TOP 1 intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId);
+		SELECT TOP 1 
+			@intGLBankAccountId = intGLAccountId
+			,@intBankAccountId = intBankAccountId
+		FROM tblCMBankAccount WHERE intCurrencyId = @currency AND ysnActive = 1
 	END
 		
+	--if no bank account with same currency on transaction
+	IF @intGLBankAccountId IS NULL OR @intBankAccountId IS NULL
+	BEGIN
+		RAISERROR('No available bank account for this transaction.', 16, 1);
+		RETURN;
+	END
+
 	--Make sure there is payment method
 	IF @paymentMethodId IS NULL OR @paymentMethodId = 0
 	BEGIN
@@ -194,12 +229,14 @@ BEGIN
 		[intPayToAddressId],
 		[intCurrencyId],
 		[intEntityVendorId],
+		[intCurrencyExchangeRateTypeId],
 		[strPaymentInfo],
 		[strPaymentRecordNum],
 		[strNotes],
 		[dtmDatePaid],
 		[dblAmountPaid],
 		[dblUnapplied],
+		[dblExchangeRate],
 		[ysnPosted],
 		[dblWithheld],
 		[intEntityId],
@@ -209,14 +246,16 @@ BEGIN
 		[intBankAccountId]		= @bankAccount,
 		[intPaymentMethodId]	= @paymentMethod,
 		[intPayToAddressId]		= @payToAddress,
-		[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount), (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'')),
+		[intCurrencyId]			= @currency,
 		[intEntityVendorId]		= @vendorId,
+		[intCurrencyExchangeRateTypeId] = @rateType,
 		[strPaymentInfo]		= @paymentInfo,
 		[strPaymentRecordNum]	= @paymentRecordNum,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
 		[dblAmountPaid]			= CAST(ISNULL(@payment,0) AS DECIMAL(18,2)),
 		[dblUnapplied]			= 0,
+		[dblExchangeRate]		= @rate,
 		[ysnPosted]				= @isPost,
 		[dblWithheld]			= 0,
 		[intEntityId]			= @userId,
@@ -263,6 +302,9 @@ BEGIN
 	 @datePaid DATETIME,
 	 @isPost BIT,
 	 @payToAddress INT,
+	 @rateType INT,
+	 @rate DECIMAL(18,6),
+	 @currency INT,
 	 @paymentId INT OUTPUT',
 	 @userId = @userId,
 	 @billId = @billId,
@@ -277,6 +319,9 @@ BEGIN
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
 	 @payToAddress = @payToAddress,
+	 @rateType = @rateType,
+	 @rate = @rate,
+	 @currency = @currency,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 
