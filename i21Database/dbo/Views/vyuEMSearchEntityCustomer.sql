@@ -1,28 +1,56 @@
 ﻿CREATE VIEW [dbo].[vyuEMSearchEntityCustomer]
-	AS 
-
-	SELECT 
-		b.intEntityId,   
-		b.strEntityNo, 
-		b.strName,
-		phone.strPhone,  
-		e.strAddress,  
-		e.strCity,  
-		e.strState,  
-		e.strZipCode,
-		intWarehouseId = isnull(e.intWarehouseId, -99),
-		b.strFederalTaxId,
-		c.ysnActive
-	from tblEMEntity b			
-		join tblARCustomer c
-			on c.[intEntityId] =b.intEntityId --and c.ysnActive = 1
-		join vyuEMEntityType d
-			on d.intEntityId = b.intEntityId and Customer = 1
-		left join [tblEMEntityLocation] e  
-			on ( ysnDefaultLocation = 1 )AND b.intEntityId = e.intEntityId
-		left join [tblEMEntityToContact] f  
-			on f.intEntityId = b.intEntityId and f.ysnDefaultContact = 1  
-		left join tblEMEntity g  
-			on f.intEntityContactId = g.intEntityId
-		LEFT JOIN tblEMEntityPhoneNumber phone
-			ON phone.intEntityId = g.intEntityId
+AS
+SELECT B.intEntityId
+	 , B.strEntityNo
+	 , B.strName
+	 , PHONE.strPhone 
+	 , E.strAddress
+	 , E.strCity  
+	 , E.strState
+	 , E.strZipCode
+	 , intWarehouseId = ISNULL(E.intWarehouseId, -99)
+	 , B.strFederalTaxId
+	 , CURRENCY.strCurrency
+	 , C.ysnActive
+FROM dbo.tblEMEntity B WITH (NOLOCK)
+JOIN (
+	SELECT intEntityId
+		 , intCurrencyId
+		 , ysnActive
+    FROM dbo.tblARCustomer WITH (NOLOCK)
+) C ON C.intEntityId = B.intEntityId
+JOIN (
+	SELECT intEntityId
+	FROM dbo.vyuEMEntityType WITH (NOLOCK)
+	WHERE Customer = 1
+) D ON D.intEntityId = B.intEntityId
+LEFT JOIN (
+	SELECT intEntityId
+		 , strAddress
+		 , strCity
+		 , strState
+		 , strZipCode
+		 , intWarehouseId
+	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+	WHERE ysnDefaultLocation = 1
+) E ON B.intEntityId = E.intEntityId
+LEFT JOIN (
+	SELECT intEntityId
+		 , intEntityContactId
+	FROM dbo.tblEMEntityToContact WITH (NOLOCK)
+	WHERE ysnDefaultContact = 1
+) F ON F.intEntityId = B.intEntityId
+LEFT JOIN (
+	SELECT intEntityId
+	FROM dbo.tblEMEntity WITH (NOLOCK) 
+) G ON F.intEntityContactId = G.intEntityId
+LEFT JOIN (
+	SELECT intEntityId
+		 , strPhone
+	FROM dbo.tblEMEntityPhoneNumber WITH (NOLOCK)
+) PHONE ON PHONE.intEntityId = G.intEntityId
+LEFT JOIN (
+	SELECT intCurrencyID
+		 , strCurrency
+	FROM dbo.tblSMCurrency WITH (NOLOCK)
+) CURRENCY ON CURRENCY.intCurrencyID = C.intCurrencyId
