@@ -185,6 +185,8 @@ ELSE
 INSERT INTO @temp_aging_table
 EXEC [uspARCustomerAgingDetailAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, @strSourceTransaction
 
+DELETE FROM @temp_aging_table WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM @temp_aging_table GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
+
 DECLARE @temp_open_invoices TABLE (intInvoiceId INT)
 INSERT INTO @temp_open_invoices
 SELECT DISTINCT intInvoiceId FROM @temp_aging_table GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0

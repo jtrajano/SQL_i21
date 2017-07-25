@@ -169,6 +169,8 @@ ELSE
 INSERT INTO @temp_aging_table
 EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, NULL, @strSourceTransaction
 
+DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+
 SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
      , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
      , * 
