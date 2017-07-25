@@ -25,12 +25,17 @@ BEGIN TRY
 	DECLARE @dblUOMQty DECIMAL(24, 10)
 	DECLARE @CommodityStockUomId INT
 	DECLARE @intInventoryItemStockUOMId INT
+	DECLARE @UserName NVARCHAR(100)
 	
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
 	SELECT @intSettleStorageId = intSettleStorageId,@UserId=intEntityUserSecurityId
 	FROM OPENXML(@idoc, 'root', 2) WITH (intSettleStorageId INT,intEntityUserSecurityId INT)
+	
+	SELECT @UserName = strUserName
+	FROM tblSMUserSecurity
+	WHERE [intEntityId] = @UserId
 
 	DECLARE @tblContractIncrement AS TABLE 
 	(
@@ -319,8 +324,44 @@ BEGIN TRY
 		BEGIN
 			--EXEC uspGRDeleteStorageHistory 
 			--	 'Voucher'
-			--	,@BillId
+			--	,@BillId			
+			INSERT INTO [dbo].[tblGRStorageHistory] 
+			(
+				 [intConcurrencyId]
+				,[intCustomerStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[strType]
+				,[strUserName]
+				,[intEntityId]
+				,[strSettleTicket]
+				,[intTransactionTypeId]
+				,[dblPaidAmount]
+				,[intBillId]
+				,[intSettleStorageId]
+				,[strVoucher]
+			)
+			SELECT 
+				 1 AS [intConcurrencyId]
+				,[intCustomerStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,GETDATE() AS [dtmHistoryDate]
+				,'Reverse Settlement' AS [strType]
+				,@UserName AS [strUserName]
+				,intEntityId AS [intEntityId]
+				,strSettleTicket AS [strSettleTicket]
+				,4 AS [intTransactionTypeId]
+				,dblPaidAmount AS [dblPaidAmount]
+				,NULL AS [intBillId]
+				,NULL AS intSettleStorageId
+				,strVoucher AS strVoucher
+			FROM tblGRStorageHistory
+			WHERE intSettleStorageId=@intSettleStorageId
+
 			UPDATE tblGRStorageHistory SET intSettleStorageId=NULL,intBillId=NULL WHERE intSettleStorageId=@intSettleStorageId
+
 		END
 		DELETE tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
 		

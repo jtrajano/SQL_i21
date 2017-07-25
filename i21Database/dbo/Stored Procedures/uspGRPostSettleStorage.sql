@@ -76,6 +76,13 @@ BEGIN TRY
 	DECLARE @dblContractCostConvertedUOM NUMERIC(38, 20)
 	DECLARE @intCreatedBillId AS INT
 	DECLARE @success AS BIT
+	DECLARE @intDepletionKey INT
+	DECLARE @intPricingTypeId INT
+	DECLARE @dblUnits DECIMAL(24, 10)
+	DECLARE @dblCost DECIMAL(24, 10)
+	DECLARE @intFutureMarketId INT
+	DECLARE @dblFutureMarkePrice DECIMAL(24, 10)
+	DECLARE @dblContractBasis DECIMAL(24, 10)
 
 	SET @dtmDate = GETDATE()
 
@@ -84,7 +91,7 @@ BEGIN TRY
 
 	DECLARE @SettleStorage AS TABLE 
 	(
-		intSettleStorageKey INT IDENTITY(1, 1)
+		 intSettleStorageKey INT IDENTITY(1, 1)
 		,intSettleStorageTicketId INT
 		,intCustomerStorageId INT
 		,dblStorageUnits DECIMAL(24, 10)
@@ -99,17 +106,19 @@ BEGIN TRY
 	
 	DECLARE @SettleContract AS TABLE 
 	(
-		intSettleContractKey INT IDENTITY(1, 1)
+		 intSettleContractKey INT IDENTITY(1, 1)
 		,intSettleContractId INT
 		,intContractDetailId INT
 		,dblContractUnits DECIMAL(24, 10)
 		,ContractEntityId INT
 		,dblCashPrice DECIMAL(24, 10)
+		,intPricingTypeId INT
+		,dblBasis DECIMAL(24, 10)
 	)
 	
 	DECLARE @tblDepletion AS TABLE 
 	(
-		intDepletionKey INT IDENTITY(1, 1)
+		 intDepletionKey INT IDENTITY(1, 1)
 		,strDepletionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,intSettleStorageTicketId INT
 		,intPricingTypeId INT
@@ -135,6 +144,8 @@ BEGIN TRY
 		,intItemType INT NULL
 		,IsProcessed BIT
 		,intTicketDiscountId INT NULL
+		,intPricingTypeId INT
+		,dblBasis DECIMAL(24, 10)
 	)
 
 	/*	intItemType
@@ -158,7 +169,26 @@ BEGIN TRY
 		,@CommodityStockUomId = intCommodityStockUomId
 	FROM tblGRSettleStorage
 	WHERE intSettleStorageId = @intSettleStorageId
-
+	
+	SELECT
+	@intFutureMarketId=ISNULL(Com.intFutureMarketId,0)
+	FROM tblICItem Item
+	JOIN tblICCommodity Com ON Com.intCommodityId=Item.intCommodityId
+	WHERE Item.intItemId = @ItemId
+	
+	IF @intFutureMarketId >0
+	BEGIN
+		SELECT TOP 1 @dblFutureMarkePrice=
+		a.dblLastSettle
+		FROM tblRKFutSettlementPriceMarketMap a 
+		JOIN tblRKFuturesSettlementPrice b ON b.intFutureSettlementPriceId=a.intFutureSettlementPriceId
+		JOIN tblRKFuturesMonth c ON c.intFutureMonthId=a.intFutureMonthId
+		JOIN tblRKFutureMarket d ON d.intFutureMarketId=b.intFutureMarketId
+		WHERE b.intFutureMarketId=@intFutureMarketId 
+		ORDER by b.dtmPriceDate DESC
+	END
+	SET @dblFutureMarkePrice=ISNULL(@dblFutureMarkePrice,0)
+	
 	SELECT @ItemLocationId = intItemLocationId
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId AND intLocationId = @LocationId
@@ -242,7 +272,7 @@ BEGIN TRY
 			,SSV.intContractHeaderId
 		FROM tblGRSettleStorageTicket SST
 		JOIN vyuGRStorageSearchView SSV ON SSV.intCustomerStorageId = SST.intCustomerStorageId
-		WHERE SST.intSettleStorageId = @intSettleStorageId
+		WHERE SST.intSettleStorageId = @intSettleStorageId AND SST.dblUnits > 0
 		ORDER BY SST.intSettleStorageTicketId
 
 		INSERT INTO @SettleContract 
@@ -252,6 +282,8 @@ BEGIN TRY
 			,dblContractUnits
 			,ContractEntityId
 			,dblCashPrice
+			,intPricingTypeId
+			,dblBasis
 		)
 		SELECT 
 			 SSC.intSettleContractId AS intSettleContractId
@@ -259,9 +291,11 @@ BEGIN TRY
 			,SSC.dblUnits AS dblContractUnits
 			,CD.intEntityId AS ContractEntityId
 			,CD.dblCashPriceInCommodityStockUOM AS dblCashPrice
+			,CD.intPricingTypeId AS intPricingTypeId
+			,CD.dblBasisInCommodityStockUOM AS dblBasis			
 		FROM tblGRSettleContract SSC
 		JOIN vyuGRGetContracts CD ON CD.intContractDetailId = SSC.intContractDetailId
-		WHERE intSettleStorageId = @intSettleStorageId
+		WHERE intSettleStorageId = @intSettleStorageId AND SSC.dblUnits > 0
 		ORDER BY SSC.intSettleContractId
 
 		SELECT TOP 1 @intStorageChargeItemId = intItemId
@@ -488,6 +522,8 @@ BEGIN TRY
 				SET @dblCashPrice = NULL
 				SET @intContractHeaderId = NULL
 				SET @dblUnitsForContract = NULL
+				SET @intPricingTypeId = NULL
+				SET @dblContractBasis = NULL
 
 				WHILE @SettleContractKey > 0
 				BEGIN
@@ -495,6 +531,8 @@ BEGIN TRY
 						 @intContractDetailId = intContractDetailId
 						,@dblContractUnits = dblContractUnits
 						,@dblCashPrice = dblCashPrice
+						,@intPricingTypeId = intPricingTypeId
+						,@dblContractBasis=dblBasis
 					FROM @SettleContract
 					WHERE intSettleContractKey = @SettleContractKey
 
@@ -528,8 +566,8 @@ BEGIN TRY
 						 )
 						SELECT 
 							@intSettleStorageTicketId AS intSettleStorageTicketId
-							,1 AS intPricingTypeId
-							,'Purchase Contract' AS strDepletionType
+							,@intPricingTypeId AS intPricingTypeId
+							,'Contract' AS strDepletionType
 							,0 AS intContractHeaderId
 							,@intContractDetailId AS intContractDetailId
 							,@intCustomerStorageId AS intCustomerStorageId
@@ -547,10 +585,12 @@ BEGIN TRY
 							,intItemId
 							,intItemType
 							,IsProcessed
+							,intPricingTypeId
+							,dblBasis
 						)
 						SELECT 
 							 @intCustomerStorageId
-							,'Purchase Contract'
+							,'Contract'
 							,@intCompanyLocationId
 							,@intContractHeaderId
 							,@intContractDetailId
@@ -559,6 +599,8 @@ BEGIN TRY
 							,@ItemId
 							,1
 							,0
+							,@intPricingTypeId
+							,@dblContractBasis
 
 						BREAK;
 					END
@@ -578,7 +620,7 @@ BEGIN TRY
 
 						INSERT INTO @tblDepletion 
 						(
-							intSettleStorageTicketId
+							 intSettleStorageTicketId
 							,intPricingTypeId
 							,strDepletionType
 							,intContractHeaderId
@@ -589,7 +631,7 @@ BEGIN TRY
 						SELECT 
 							 @intSettleStorageTicketId AS intSettleStorageTicketId
 							,1 AS intPricingTypeId
-							,'Purchase Contract' AS strDepletionType
+							,'Contract' AS strDepletionType
 							,0 AS intContractHeaderId
 							,@intContractDetailId AS intContractDetailId
 							,@intCustomerStorageId AS intCustomerStorageId
@@ -607,6 +649,8 @@ BEGIN TRY
 							,intItemId
 							,intItemType
 							,IsProcessed
+							,intPricingTypeId
+							,dblBasis
 						)
 						SELECT 
 							 @intCustomerStorageId
@@ -619,6 +663,8 @@ BEGIN TRY
 							,@ItemId
 							,1
 							,0
+							,@intPricingTypeId
+							,@dblContractBasis
 
 						BREAK;
 					END
@@ -750,7 +796,11 @@ BEGIN TRY
 				,dblQty = - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
 				,dblUOMQty = @dblUOMQty
 				,dblCost = CASE 
-								WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice]
+								WHEN St.ysnDPOwnedType = 0 THEN 
+																CASE 
+																	WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+																	ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
+																 END
 								ELSE 0
 						   END
 				,dblSalesPrice = 0.00
@@ -796,7 +846,11 @@ BEGIN TRY
 				,dblQty = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
 				,dblUOMQty = @dblUOMQty
 				,dblCost = CASE 
-								WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice]
+								WHEN St.ysnDPOwnedType = 0 THEN 
+																 CASE 
+																	 WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+																	 ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
+																  END
 								ELSE 0
 						   END
 				,dblSalesPrice = 0.00
@@ -844,6 +898,15 @@ BEGIN TRY
 			FROM @voucherDetailStorage
 
 			SET @intCreatedBillId = 0
+			UPDATE a
+			SET a.dblUnits=b.dblSettleUnits
+			FROM @SettleVoucherCreate a
+			JOIN 
+			(
+				SELECT intCustomerStorageId,SUM(dblUnits) dblSettleUnits FROM @SettleVoucherCreate WHERE intItemType=1 AND (intPricingTypeId=1 OR intPricingTypeId IS NULL)
+				GROUP BY intCustomerStorageId
+			)b ON b.intCustomerStorageId=a.intCustomerStorageId
+			WHERE a.intItemType=3
 
 			INSERT INTO @voucherDetailStorage 
 			(
@@ -877,8 +940,9 @@ BEGIN TRY
 				,0 AS [dblNetWeight]
 			FROM @SettleVoucherCreate a
 			JOIN tblICItemUOM b ON b.intItemId = a.intItemId AND b.intUnitMeasureId = @intUnitMeasureId
-			JOIN tblICItem c ON c.intItemId = a.intItemId --AND c.intItemId=b.intItemId
-			JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = a.intCustomerStorageId
+			JOIN tblICItem c ON c.intItemId = a.intItemId
+			JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = a.intCustomerStorageId			
+			WHERE a.dblCashPrice <> 0 AND SST.intSettleStorageId=@intSettleStorageId
 			ORDER BY SST.intSettleStorageTicketId,a.intItemType
 
 			EXEC [dbo].[uspAPCreateBillData] 
@@ -946,10 +1010,6 @@ BEGIN TRY
 		-------------------------xxxxxxxxxxxxxxxxxx------------------------------
 		---6.DP Contract Depletion, Purchase Contract Depletion,Storage Ticket Depletion
 		BEGIN
-			DECLARE @intDepletionKey INT
-			DECLARE @intPricingTypeId INT
-			DECLARE @dblUnits DECIMAL(24, 10)
-			DECLARE @dblCost DECIMAL(24, 10)
 
 			SELECT @intDepletionKey = MIN(intDepletionKey)
 			FROM @tblDepletion

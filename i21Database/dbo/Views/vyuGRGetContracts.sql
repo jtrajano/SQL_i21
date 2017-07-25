@@ -25,6 +25,7 @@ SELECT
 	,CH.ysnUnlimitedQuantity
 	,CD.dblFutures
 	,CD.dblBasis
+	,dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,BU.intUnitMeasureId,dblBasis) AS dblBasisInCommodityStockUOM
 	FROM	tblCTContractDetail			CD
 	CROSS   JOIN	tblCTCompanyPreference			CP	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
@@ -37,6 +38,7 @@ SELECT
 	JOIN	tblICItem					IM	ON	IM.intItemId				=	CD.intItemId				LEFT
 	JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId				=	CD.intItemUOMId				LEFT
 	JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
+	JOIN	tblICItemUOM				BU	ON	BU.intItemUOMId				=	CD.intBasisUOMId		LEFT
 	JOIN	tblICCommodityUnitMeasure	C1	ON	C1.intCommodityId			=	CH.intCommodityId
 			AND C1.intCommodityId=IM.intCommodityId AND C1.ysnStockUnit=1    
    WHERE CD.intPricingTypeId IN (1,2) 
