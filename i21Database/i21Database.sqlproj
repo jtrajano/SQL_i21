@@ -5359,6 +5359,7 @@
     <Build Include="dbo\Tables\tblMFLotSnapshot.sql" />
     <Build Include="dbo\Tables\tblMFLotSnapshotDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrderMsgAndMail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
