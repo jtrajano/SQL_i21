@@ -3,7 +3,7 @@ This will update all existing voucher prepayment.
 Before, we do not post prepayment.
 Since we do  now post the vendor prepayment, we will update existing records
 **/
-IF OBJECT_ID(N'uspAPPostVoucherPrepay') IS NULL AND OBJECT_ID(N'tblAPBill') IS NOT NULL
+IF OBJECT_ID(N'uspAPPostVoucherPrepay') IS NULL AND OBJECT_ID(N'tblAPBill') IS NOT NULL AND COL_LENGTH('tblAPBill','ysnOldPrepayment') IS NULL
 BEGIN
 
 	EXEC ('
