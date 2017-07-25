@@ -201,6 +201,8 @@ ELSE
 INSERT INTO @temp_aging_table
 EXEC [uspARCustomerAgingDetailAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, @strSourceTransaction
 
+DELETE FROM @temp_aging_table WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM @temp_aging_table GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
+
 IF @strAgedBalances = ''Current''
 	BEGIN DELETE FROM @temp_aging_table WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM @temp_aging_table GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dbl0Days, 0)) = 0)
 END

@@ -185,6 +185,8 @@ ELSE
 INSERT INTO @temp_aging_table
 EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, NULL, @strSourceTransaction
 
+DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+
 IF @strAgedBalances = ''Current''
 	BEGIN DELETE FROM @temp_aging_table WHERE ISNULL(dbl0Days, 0) = 0
 END
