@@ -335,7 +335,18 @@ BEGIN
 		--WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		--AND A.ysnPosted = 0 AND C.intContractDetailId IS NOT NULL AND B1.intPricingTypeId NOT IN (7)
 		--AND ISNULL(B2.dblCashPrice,0) <> ISNULL(E.dblUnitCost,0)
-
+		
+		--Zero cost in one of the details
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'The cost in one of the details is 0.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			26
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND EXISTS(SELECT * FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId AND B.dblCost = 0.000000)
 	END
 	ELSE
 	BEGIN
