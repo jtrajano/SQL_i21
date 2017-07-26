@@ -42,7 +42,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 
 			@Invoices I
 		INNER JOIN 
-			(SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
+			(SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice WITH (NOLOCK)) ARI
 				ON I.[intInvoiceId] = ARI.[intInvoiceId]
 		WHERE  
 			ARI.[ysnPosted] = 1
@@ -256,7 +256,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 
 			@Invoices I			 
 		WHERE
-			I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM tblARInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId]) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0))
+			I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM tblARInvoiceDetail ARID WITH (NOLOCK) WHERE ARID.[intInvoiceId] = I.[intInvoiceId]) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0))
 
 		UNION
 		--Header Account ID
@@ -438,7 +438,7 @@ IF(ISNULL(@Post,0)) = 1
 		WHERE
 			ISNULL(I.[intPeriodsToAccrue], 0) > 1
 			AND ISNULL(I.[intDeferredRevenueAccountId], 0) <> 0
-			AND NOT EXISTS(SELECT NULL FROM tblGLAccount GLA WHERE GLA.[intAccountId] = I.[intDeferredRevenueAccountId])
+			AND NOT EXISTS(SELECT NULL FROM tblGLAccount GLA WITH (NOLOCK) WHERE GLA.[intAccountId] = I.[intDeferredRevenueAccountId])
 
 
 		UNION
@@ -1100,7 +1100,7 @@ IF(ISNULL(@Post,0)) = 1
 			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN
-			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK)) ICI
+			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge') ) ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
 		INNER JOIN
 			(SELECT [intContractHeaderId], [intContractDetailId], [strPricingType] FROM vyuARCustomerContract WITH (NOLOCK)) CTCD
@@ -1127,7 +1127,7 @@ IF(ISNULL(@Post,0)) = 1
 			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN
-			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK)) ICI
+			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge')) ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
 		INNER JOIN
 			(SELECT [intContractHeaderId], [intContractDetailId], [dblCashPrice], [strPricingType] FROM vyuARCustomerContract WITH (NOLOCK)) ARCC
@@ -1162,7 +1162,7 @@ ELSE
 		FROM 
 			@Invoices I
 		INNER JOIN 
-			(SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
+			(SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice WITH (NOLOCK)) ARI
 				ON I.[intInvoiceId] = ARI.[intInvoiceId]
 		WHERE  
 			ARI.[ysnPosted] = 0
@@ -1209,9 +1209,9 @@ ELSE
 			,[strBatchId]			= I.[strBatchId]
 			,[strPostingError]		= ARP.[strRecordNumber] + ' payment was already made on this ' + I.strTransactionType + '.'
 		FROM 
-			(SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment) ARP
+			(SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment WITH (NOLOCK)) ARP
 		INNER JOIN 
-			(SELECT [intPaymentId], [intInvoiceId] FROM tblARPaymentDetail) ARPD 
+			(SELECT [intPaymentId], [intInvoiceId] FROM tblARPaymentDetail WITH (NOLOCK)) ARPD 
 				ON ARP.[intPaymentId] = ARPD.[intPaymentId]						
 		INNER JOIN 
 			@Invoices I
@@ -1230,11 +1230,11 @@ ELSE
 		FROM 
 			@Invoices I
 		INNER JOIN
-			(SELECT [intSourceTransactionId], [strSourceTransactionId], [intUndepositedFundId], [strSourceSystem] FROM tblCMUndepositedFund) CMUF 
+			(SELECT [intSourceTransactionId], [strSourceTransactionId], [intUndepositedFundId], [strSourceSystem] FROM tblCMUndepositedFund WITH (NOLOCK)) CMUF 
 				ON I.[intInvoiceId] = CMUF.[intSourceTransactionId] 
 				AND I.[strInvoiceNumber] = CMUF.[strSourceTransactionId]
 		INNER JOIN
-			(SELECT [intUndepositedFundId] FROM tblCMBankTransactionDetail) CMBTD
+			(SELECT [intUndepositedFundId] FROM tblCMBankTransactionDetail WITH (NOLOCK)) CMBTD
 				ON CMUF.[intUndepositedFundId] = CMBTD.[intUndepositedFundId]
 		WHERE 
 			CMUF.[strSourceSystem] = 'AR'
