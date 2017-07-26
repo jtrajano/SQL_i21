@@ -34,7 +34,10 @@ BEGIN TRY
 			@intConcurrencyId			INT,
 			@intNewItemId				INT,
 			@intNewPricingTypeId		INT,
-			@intNewScheduleRuleId		INT
+			@intNewScheduleRuleId		INT,
+			@intNewSubLocationId		INT,
+			@strSubLocationName			NVARCHAR(100),
+			@strItemNo					NVARCHAR(100)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -53,7 +56,8 @@ BEGIN TRY
 			@dtmCreated					=	dtmCreated,
 			@intConcurrencyId			=	intConcurrencyId,
 			@intNewPricingTypeId		=	intPricingTypeId,
-			@intNewScheduleRuleId		=	intStorageScheduleRuleId
+			@intNewScheduleRuleId		=	intStorageScheduleRuleId,
+			@intNewSubLocationId			=	intSubLocationId
 
 	FROM	OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail',2)
 	WITH
@@ -73,7 +77,8 @@ BEGIN TRY
 			intConcurrencyId			INT,
 			intItemId					INT,
 			intPricingTypeId			INT,
-			intStorageScheduleRuleId	INT
+			intStorageScheduleRuleId	INT,
+			intSubLocationId			INT
 	)  
 
 	IF @RowState  <> 'Added'
@@ -97,6 +102,8 @@ BEGIN TRY
 		WHERE	intContractDetailId	=	ISNULL(@intContractDetailId,0)
 	END
 
+	SELECT @strSubLocationName = strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intNewSubLocationId
+	SELECT @strItemNo = strItemNo FROM tblICItem WHERE intItemId = @intNewItemId
 	SELECT @dblNewQuantityInOldUOM = dbo.fnCTConvertQtyToTargetItemUOM(@intNewItemUOMId,@intOldItemUOMId,@dblNewQuantity)
 
 	IF @RowState  = 'Added'
@@ -270,6 +277,27 @@ BEGIN TRY
 			WHERE	SH.intOrderType = 4 AND SI.intLineNo = @intContractDetailId
 
 			SET @ErrMsg = 'Cannot delete Sequence '+LTRIM(@intContractSeq)+'. As it used in the Inventory Shipment '+@strNumber+'.'
+			RAISERROR(@ErrMsg,16,1) 
+		END
+	END
+
+	IF EXISTS(
+			SELECT	* 
+			FROM	tblICItemSubLocation	SL
+			JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	SL.intItemLocationId	
+			JOIN	tblSMCompanyLocationSubLocation CS	ON CS.intCompanyLocationSubLocationId = SL.intSubLocationId
+			WHERE	IL.intItemId = @intNewItemId AND CS.intCompanyLocationId = @intNewCompanyLocationId 
+	) AND ISNULL(@intNewSubLocationId,0) <> 0
+	BEGIN
+		IF NOT EXISTS(
+			SELECT	* 
+			FROM	tblICItemSubLocation	SL
+			JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	SL.intItemLocationId	
+			JOIN	tblSMCompanyLocationSubLocation CS	ON CS.intCompanyLocationSubLocationId = SL.intSubLocationId
+			WHERE	IL.intItemId = @intNewItemId AND CS.intCompanyLocationId = @intNewCompanyLocationId AND SL.intSubLocationId = @intNewSubLocationId
+		)
+		BEGIN
+			SET @ErrMsg = @strSubLocationName + ' is not configured for Item '+@strItemNo+'.'
 			RAISERROR(@ErrMsg,16,1) 
 		END
 	END
