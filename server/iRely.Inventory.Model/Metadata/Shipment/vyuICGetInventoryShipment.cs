@@ -58,5 +58,6 @@ namespace iRely.Inventory.Model
         public int? intWarehouseInstructionHeaderId { get; set; }
         public int? intCurrencyId { get; set; }
         public string strCurrency { get; set; }
+        public string strFreeTime { get; set; }
     }
 }

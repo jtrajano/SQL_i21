@@ -66,6 +66,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intWarehouseInstructionHeaderId).HasColumnName("intWarehouseInstructionHeaderId");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+            this.Property(t => t.strFreeTime).HasColumnName("strFreeTime");
         }
     }
 }
