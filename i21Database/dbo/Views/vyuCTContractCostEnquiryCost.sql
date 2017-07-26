@@ -9,27 +9,44 @@ AS
 			CC.strCostMethod,
 			CC.dblRate,
 			CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
-						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblDetailQuantity)*CC.dblRate
+						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
 					WHEN	CC.strCostMethod = 'Amount'		THEN
 						CC.dblRate
 					WHEN	CC.strCostMethod = 'Percentage' THEN 
-						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblDetailQuantity)*CD.dblCashPrice*CC.dblRate/100
+						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
 			END  * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) dblAmount,
 			CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,PU.intUnitMeasureId,CC.intUnitMeasureId,CC.dblRate)
 					WHEN	CC.strCostMethod = 'Amount'		THEN
-						CC.dblRate/dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblDetailQuantity)
+						CC.dblRate/dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)
 					WHEN	CC.strCostMethod = 'Percentage' THEN 
-						(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblDetailQuantity)*CD.dblCashPrice*CC.dblRate/100)/
-						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity)
+						(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100)/
+						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)
 			END  dblAmountPer,
 			BD.dblTotal * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) dblActual,
 			BD.dblTotal/ 
-			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity) * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1)dblActualPer,
+			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity) * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1)dblActualPer,
 			BD.strBillTranactionType
 
-	FROM	vyuCTContractCostView		CC 
-	JOIN	vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId	
+	FROM	
+	(
+			SELECT		CC.intContractCostId,
+						CC.intContractDetailId,
+						CC.intItemUOMId,
+						CC.strCostMethod,
+						CC.dblRate,
+						CC.intItemId,
+						IU.intUnitMeasureId,
+						EY.strName strVendorName, 
+						IM.strItemNo
+			FROM		tblCTContractCost	CC
+			JOIN		tblICItem			IM ON IM.intItemId				=	CC.intItemId
+			LEFT JOIN	tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
+			LEFT JOIN	tblICUnitMeasure	UM ON UM.intUnitMeasureId		=	IU.intUnitMeasureId
+			LEFT JOIN	tblSMCurrency		CY ON CY.intCurrencyID			=	CC.intCurrencyId
+			LEFT JOIN	tblEMEntity			EY ON EY.intEntityId			=	CC.intVendorId
+	)		CC 
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId	
 	JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
 	JOIN	tblICItemUOM				CU	ON	CU.intItemUOMId			=	CC.intItemUOMId			LEFT	
 	JOIN	tblICItemUOM				CM	ON	CM.intUnitMeasureId		=	CC.intUnitMeasureId
@@ -55,4 +72,4 @@ AS
 					JOIN	tblAPBill			BL	ON	BL.intBillId	=	BD.intBillId
 
 
-			)BD	ON	BD.intContractHeaderId	=	CC.intContractHeaderId AND CC.intItemId = BD.intItemId
+			)BD	ON	BD.intContractHeaderId	=	CD.intContractHeaderId AND CC.intItemId = BD.intItemId
