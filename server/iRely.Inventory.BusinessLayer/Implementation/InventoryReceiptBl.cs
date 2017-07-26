@@ -202,7 +202,7 @@ namespace iRely.Inventory.BusinessLayer
                         : s.intOwnershipType == 4 ? "Consigned Sale"
                         : "Own",
                     intCommodityId = s.vyuICInventoryReceiptItemLookUp.intCommodityId,
-                    strWeightOUM = s.vyuICInventoryReceiptItemLookUp.strWeightUOM,
+                    strWeightUOM = s.vyuICInventoryReceiptItemLookUp.strWeightUOM, 
                     strContainer = s.vyuICInventoryReceiptItemLookUp.strContainer,
                     dblItemUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblItemUOMConvFactor,
                     dblWeightUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblWeightUOMConvFactor,
