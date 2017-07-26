@@ -405,6 +405,7 @@ BEGIN TRY
 		,[intContractHeaderId]
 		,[intContractDetailId]
 		,[intShipmentId]
+		,[intLoadDetailId]
 		,[intShipmentPurchaseSalesContractId]
 		,[intItemWeightUOMId]
 		,[dblItemWeight]
@@ -435,13 +436,13 @@ BEGIN TRY
 		,[dblCurrencyExchangeRate])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
-		,[strDocumentNumber]			= ''
+		,[strDocumentNumber]			= CASE WHEN @IsCancel = 1 THEN ARID.[strDocumentNumber] ELSE '' END
 		,[intItemId]					= ARID.[intItemId]
 		,[strItemDescription]			= CONVERT(NVARCHAR(100), ARID.[intInvoiceDetailId])		
 		,[intOrderUOMId]				= NULL --ARID.[intOrderUOMId] 																							
 		,[dblQtyOrdered]				= NULL --ARID.[dblQtyOrdered] 
 		,[intItemUOMId]					= ARID.[intItemUOMId]
-		,[dblQtyShipped]				= CASE	WHEN ISNULL(SOSOD.intSalesOrderDetailId,0) = 0 AND ISNULL(ICISI.intInventoryShipmentItemId,0) = 0
+		,[dblQtyShipped]				= CASE	WHEN (ISNULL(SOSOD.intSalesOrderDetailId,0) = 0 AND ISNULL(ICISI.intInventoryShipmentItemId,0) = 0) OR @IsCancel = 1
 													THEN ARID.[dblQtyShipped]
 												WHEN ISNULL(SOSOD.intSalesOrderDetailId,0) <> 0
 													THEN dbo.fnCalculateQtyBetweenUOM(SOSOD.intItemUOMId, ARID.intItemUOMId, (dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped) - SOSOD.dblQtyShipped))
@@ -477,14 +478,15 @@ BEGIN TRY
 		,[intSCBudgetId]				= NULL
 		,[strSCInvoiceNumber]			= ''
 		,[strSCBudgetDescription]		= ''
-		,[intInventoryShipmentItemId]	= NULL-- ARID.[intInventoryShipmentItemId]
-		,[intInventoryShipmentChargeId]	= NULL
-		,[strShipmentNumber]			= ''
-		,[intSalesOrderDetailId]		=  NULL --ARID.[intSalesOrderDetailId]
-		,[strSalesOrderNumber]			= '' --ARID.[strSalesOrderNumber]
+		,[intInventoryShipmentItemId]	= CASE WHEN @IsCancel = 1 THEN ARID.[intInventoryShipmentItemId] ELSE NULL END
+		,[intInventoryShipmentChargeId]	= CASE WHEN @IsCancel = 1 THEN ARID.[intInventoryShipmentChargeId] ELSE NULL END
+		,[strShipmentNumber]			= CASE WHEN @IsCancel = 1 THEN ARID.[strShipmentNumber] ELSE NULL END
+		,[intSalesOrderDetailId]		= CASE WHEN @IsCancel = 1 THEN ARID.[intSalesOrderDetailId] ELSE NULL END
+		,[strSalesOrderNumber]			= CASE WHEN @IsCancel = 1 THEN ARID.[strSalesOrderNumber] ELSE NULL END
 		,[intContractHeaderId]			= ARID.[intContractHeaderId]
 		,[intContractDetailId]			= ARID.[intContractDetailId]
-		,[intShipmentId]				= NULL
+		,[intShipmentId]				= CASE WHEN @IsCancel = 1 THEN ARID.[intShipmentId] ELSE NULL END
+		,[intLoadDetailId]				= CASE WHEN @IsCancel = 1 THEN ARID.[intLoadDetailId] ELSE NULL END
 		,[intShipmentPurchaseSalesContractId] = NULL
 		,[intItemWeightUOMId]			= ARID.[intItemWeightUOMId]
 		,[dblItemWeight]				= ARID.[dblItemWeight]

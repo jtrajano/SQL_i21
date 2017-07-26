@@ -25,7 +25,7 @@ IF @ForDelete = 1
 		FROM tblARInvoice 
 		WHERE intInvoiceId = @InvoiceId 
 
-		IF @strTransactionType = 'Credit Memo' AND @intOriginalInvoiceId IS NOT NULL
+		IF @strTransactionType = 'Credit Note' AND @intOriginalInvoiceId IS NOT NULL
 			UPDATE tblARInvoice SET ysnCancelled = 0 WHERE intInvoiceId = @intOriginalInvoiceId
 	END
 
