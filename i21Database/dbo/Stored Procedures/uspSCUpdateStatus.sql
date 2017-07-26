@@ -11,7 +11,8 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	CREATE TABLE #tmpSC(intTicketId INT)
-	DECLARE @intContractDetailId INT;
+	DECLARE @intContractDetailId INT
+			,@intFromItemUOMId INT;
 
 	IF @status IS NOT NULL
 	BEGIN
@@ -22,9 +23,9 @@ BEGIN
 		FROM tblSCTicket A
 		WHERE A.intTicketId = @scId
 
-		SELECT @intContractDetailId = intContractId FROM tblSCTicket where intTicketId = @scId
+		SELECT @intContractDetailId = intContractId, @intFromItemUOMId = intItemUOMIdTo FROM tblSCTicket where intTicketId = @scId
 
-		UPDATE vyuCTContractDetailView set dblScheduleQty = (CT.dblScheduleQty - SC.dblScheduleQty)
+		UPDATE vyuCTContractDetailView set dblScheduleQty = (CT.dblScheduleQty - dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,CT.intItemUOMId,SC.dblScheduleQty))
 		FROM vyuCTContractDetailView CT 
 		LEFT JOIN tblSCTicketContractUsed SC ON SC.intContractDetailId = CT.intContractDetailId
 		WHERE SC.intTicketId = @scId AND SC.intContractDetailId != ISNULL(@intContractDetailId,0)
