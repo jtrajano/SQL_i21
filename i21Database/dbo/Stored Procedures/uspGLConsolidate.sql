@@ -54,8 +54,8 @@ BEGIN CATCH
 	Declare @ErrorState int
 	Select @ErrorNumber = Error_Number()
            ,@ErrorMessage = 'Error updating consolidation table :' + Error_message()
-           ,@Errorseverity= Error_Severity()
+           ,@ErrorSeverity= Error_Severity()
            ,@ErrorState = Error_State()
-    RaisError (@Errormessage, @ErrorSeverity, @ErrorState)
+    RaisError (@ErrorMessage, @ErrorSeverity, @ErrorState)
 	
 END CATCH
