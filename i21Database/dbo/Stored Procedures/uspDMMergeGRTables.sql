@@ -133,12 +133,12 @@ BEGIN
     -- tblGRDiscountCalculationOption
     SET @SQLString = N'MERGE tblGRDiscountCalculationOption AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblGRDiscountCalculationOption]) AS Source
-        ON (Target.intValueFieldId = Source.intValueFieldId)
+        ON (Target.intDiscountCalculationOptionId  = Source.intDiscountCalculationOptionId )
         WHEN MATCHED THEN
-            UPDATE SET Target.strDisplayField = Source.strDisplayField, Target.intConcurrencyId = Source.intConcurrencyId
+            UPDATE SET Target.strDiscountCalculationOption = Source.strDiscountCalculationOption, Target.intConcurrencyId = Source.intConcurrencyId
         WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intValueFieldId, strDisplayField, intConcurrencyId)
-            VALUES (Source.intValueFieldId, Source.strDisplayField, Source.intConcurrencyId)
+            INSERT (intDiscountCalculationOptionId , strDiscountCalculationOption, intConcurrencyId)
+            VALUES (Source.intDiscountCalculationOptionId , Source.strDiscountCalculationOption, Source.intConcurrencyId)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
