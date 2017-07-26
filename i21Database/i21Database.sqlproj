@@ -5518,6 +5518,10 @@
     <Build Include="dbo\Functions\fnARGetInvoicesPostingEntries.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateInvoicePayment.sql" />
+    <Build Include="dbo\Views\vyuRKBrokersAccountMarketMapping.sql" />
+    <Build Include="dbo\Views\vyuRKGetBuySellTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskReportByType.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskReportByTypeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
