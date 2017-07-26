@@ -5517,6 +5517,7 @@
     <Build Include="dbo\Stored Procedures\uspAPConvertLocationToVendor.sql" />
     <Build Include="dbo\Functions\fnARGetInvoicesPostingEntries.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateInvoicePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
