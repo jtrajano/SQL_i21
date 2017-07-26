@@ -2,6 +2,8 @@
 	,@intNewItemOwnerId INT
 	,@intUserId INT
 	,@strParentLotNumber NVARCHAR(50)
+	,@strVendorRefNo NVARCHAR(50)
+	,@strWarehouseRefNo NVARCHAR(50)
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -21,6 +23,8 @@ BEGIN TRY
 		,@dtmExpiryDate DATETIME
 		,@intParentLotId INT
 		,@strOldParentLotNumber NVARCHAR(50)
+		,@strOldVendorRefNo NVARCHAR(50)
+		,@strOldWarehouseRefNo NVARCHAR(50)
 
 	SELECT @strLotNumber = strLotNumber
 		,@intItemId = intItemId
@@ -200,6 +204,26 @@ BEGIN TRY
 			,@intLocationId = @intLocationId
 			,@dtmDate = NULL
 			,@intShiftId = NULL
+	END
+
+	-- Vendor & Warehouse ref no update
+	SELECT @strOldVendorRefNo = strVendorRefNo
+		,@strOldWarehouseRefNo = strWarehouseRefNo
+	FROM tblMFLotInventory
+	WHERE intLotId = @intLotId
+
+	IF ISNULL(@strOldVendorRefNo, '') <> ISNULL(@strVendorRefNo, '')
+	BEGIN
+		UPDATE tblMFLotInventory
+		SET strVendorRefNo = @strVendorRefNo
+		WHERE intLotId = @intLotId
+	END
+
+	IF ISNULL(@strOldWarehouseRefNo, '') <> ISNULL(@strWarehouseRefNo, '')
+	BEGIN
+		UPDATE tblMFLotInventory
+		SET strWarehouseRefNo = @strWarehouseRefNo
+		WHERE intLotId = @intLotId
 	END
 END TRY
 
