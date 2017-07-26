@@ -5511,6 +5511,11 @@
     <Build Include="dbo\User Defined Types\fnARGetItemsForCosting.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForInTransitCosting.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForStoragePosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportProductionSummaryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportProductionSummary.sql" />
+    <Build Include="dbo\Views\vyuGRProductionSummaryEntity.sql" />
+    <Build Include="dbo\Views\vyuGRProductionSummaryItem.sql" />
+    <Build Include="dbo\Views\vyuGRProductionSummaryStorageType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
