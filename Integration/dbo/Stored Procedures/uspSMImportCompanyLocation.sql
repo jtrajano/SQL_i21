@@ -32,6 +32,16 @@ BEGIN
 						ON RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))										
 				WHERE
 					CL.[strLocationNumber] IS NULL
+					
+				SELECT
+					@Total = @Total + COUNT(GA.[galoc_loc_no])
+				FROM
+					galocmst GA
+				LEFT OUTER JOIN
+					tblSMCompanyLocation CL
+						ON RTRIM(LTRIM(GA.[galoc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))										
+				WHERE
+					CL.[strLocationNumber] IS NULL					
 						
 				RETURN @Total
 			END	
@@ -452,6 +462,210 @@ BEGIN
 			ORDER BY
 				AG.[agloc_loc_no]
 				,AG.[agloc_name]
+				
+			--IMPORT GRAIN LOCATIONS
+			INSERT INTO [tblSMCompanyLocation]
+				([strLocationNumber]
+				,[strLocationName]	
+				,[strLocationType]
+				,[strStateProvince]
+				,[strPhone]
+				,[strFax]
+				,[strEmail]
+				,[strWebsite]
+				,[strInternalNotes]
+				,[strUseLocationAddress]
+				,[strSkipSalesmanDefault]
+				,[ysnSkipTermsDefault]
+				,[strOrderTypeDefault]
+				,[strPrintCashReceipts]
+				,[ysnPrintCashTendered]
+				,[strSalesTaxByLocation]
+				,[strDeliverPickupDefault]
+				,[ysnOverridePatronage]
+				,[strOutOfStockWarning]
+				,[strLotOverdrawnWarning]
+				,[ysnOrderSection2Required]
+				,[strPrintonPO]
+				,[dblMixerSize]
+				,[ysnOverrideMixerSize]
+				,[ysnEvenBatches]
+				,[ysnDefaultCustomBlend]
+				,[ysnAgroguideInterface]
+				,[ysnLocationActive]
+				,[intProfitCenter]
+				,[intCashAccount]
+				,[intDepositAccount]
+				,[intARAccount]
+				,[intAPAccount]
+				,[intSalesAdvAcct]
+				,[intPurchaseAdvAccount]
+				,[intFreightAPAccount]
+				,[intFreightExpenses]
+				,[intFreightIncome]
+				,[intServiceCharges]
+				,[intSalesDiscounts]
+				,[intCashOverShort]
+				,[intWriteOff]
+				,[intCreditCardFee]
+				,[intSalesAccount]
+				,[intCostofGoodsSold]
+				,[intInventory]
+				,[strInvoiceType]
+				,[strPickTicketType]
+				,[strPrintonInvoice]
+				,[ysnPrintContractBalance]
+				,[strInvoiceComments]
+				,[ysnUseOrderNumberforInvoiceNumber]
+				,[ysnOverrideOrderInvoiceNumber]
+				,[ysnPrintInvoiceMedTags]
+				,[ysnPrintPickTicketMedTags]
+				,[ysnSendtoEnergyTrac]
+				,[strDiscountScheduleType]
+				,[strLocationDiscount]
+				,[strLocationStorage]
+				,[strMarketZone]
+				,[strLastTicket]
+				,[ysnDirectShipLocation]
+				,[ysnScaleInstalled]
+				,[strDefaultScaleId]
+				,[ysnActive]
+				,[ysnUsingCashDrawer]
+				,[ysnPrintRegisterTape]
+				,[ysnUseUPConOrders]
+				,[ysnUseUPConPhysical]
+				,[ysnUseUPConPurchaseOrders]
+				,[strUPCSearchSequence]
+				,[ysnOverShortEntries]
+				,[strOverShortCustomer]
+				,[strOverShortAccount]
+				,[ysnAutomaticCashDepositEntries]
+				,[intConcurrencyId])
+
+			SELECT
+				GA.[galoc_loc_no]
+				,RTRIM(LTRIM(GA.[galoc_desc])) + '' - '' + RTRIM(LTRIM(GA.[galoc_loc_no])) --<strLocationName, nvarchar(50),>
+				,''Office''							--<strLocationType, nvarchar(50),>
+				,[galoc_state]						--<strStateProvince, nvarchar(50),>
+				,''''									--<strPhone, nvarchar(50),>
+				,''''									---<strFax, nvarchar(50),>
+				,''''									--<strEmail, nvarchar(50),>
+				,''''									--<strWebsite, nvarchar(50),>
+				,''''									--<strInternalNotes, nvarchar(max),>
+				,''''								--<strUseLocationAddress, nvarchar(50),>
+				,''''								--<strSkipSalesmanDefault, nvarchar(50),>
+				,''''								--<ysnSkipTermsDefault, bit,>
+				,''''								--<strOrderTypeDefault, nvarchar(50),>
+				,''''								--<strPrintCashReceipts, nvarchar(50),>
+				,0								--<ysnPrintCashTendered, bit,>
+				,''''								--<strSalesTaxByLocation, nvarchar(50),>
+				,''''								--<strDeliverPickupDefault, nvarchar(50),>
+				,0								--<ysnOverridePatronage, bit,>
+				,''Not Allowed''					--<strOutOfStockWarning, nvarchar(50),>
+				,''''								--<strLotOverdrawnWarning, nvarchar(50),>			
+				,0								--<ysnOrderSection2Required, bit,>
+				,''''								--<strPrintonPO, nvarchar(50),>
+				,0								--<dblMixerSize, numeric(18,6),>
+				,0								--<ysnOverrideMixerSize, bit,>
+				,0								--<ysnEvenBatches, bit,>
+				,0								--<ysnDefaultCustomBlend, bit,>
+				,0								--<ysnAgroguideInterface, bit,>
+				,(CASE UPPER(GA.[galoc_active_yn])
+					WHEN ''Y''	THEN	1
+					WHEN ''N''	THEN	0
+					ELSE 0
+				  END)								--<ysnLocationActive, bit,>
+				,GL.intAccountSegmentId AS intProfitCenter --GA.[galoc_gl_profit_center]		--<intProfitCenter, int,>				--TODO
+				,CA.[inti21Id]						--<[galoc_gl_cash], int,>
+				,DA.[inti21Id]						--<intDepositAccount, int,>
+				,ARA.[inti21Id]						--<intARAccount, int,>
+				,APA.[inti21Id]						--<intAPAccount, int,>
+				,SAA.[inti21Id]						--<intSalesAdvAcct, int,>
+				,PAA.[inti21Id]						--<intPurchaseAdvAccount, int,>
+				,FAP.[inti21Id]						--<intFreightAPAccount, int,>
+				,0									--<intFreightExpenses, int,>
+				,0									--<intFreightIncome, int,>
+				,0									--<intServiceCharges, int,>
+				,0									--<intSalesDiscounts, int,>
+				,0									--<intCashOverShort, int,>
+				,0									--<intWriteOff, int,>
+				,0									--<intCreditCardFee, int,>
+				,0									--<intSalesAccount, int,>
+				,0									--<intCostofGoodsSold, int,>
+				,0									--<intInventory, int,>
+				,''''									--<strInvoiceType, nvarchar(50),>
+				,''''									--<strPickTicketType, nvarchar(50),>
+				,''''									--<strPrintonInvoice, nvarchar(50),>
+				,0									--<ysnPrintContractBalance, bit,>
+				,''''									--<strInvoiceComments, nvarchar(50),>
+				,0									--<ysnUseOrderNumberforInvoiceNumber, bit,>
+				,0									--<ysnOverrideOrderInvoiceNumber, bit,>
+				,0									--<ysnPrintInvoiceMedTags, bit,>
+				,0									--<ysnPrintPickTicketMedTags, bit,>
+				,0									--<ysnSendtoEnergyTrac, bit,>
+				,''''									--<strDiscountScheduleType, nvarchar(50),>
+				,GA.galoc_disc_schd_loc				--<strLocationDiscount, nvarchar(50),>
+				,GA.galoc_stor_schd_loc				--<strLocationStorage, nvarchar(50),>
+				,GA.galoc_dflt_mkt_zone				--<strMarketZone, nvarchar(50),>
+				,GA.galoc_last_tic_no				--<strLastTicket, nvarchar(50),>
+				,(CASE UPPER(GA.galoc_direct_ship_yn)
+					WHEN ''Y''	THEN	1
+					WHEN ''N''	THEN	0
+					ELSE 0
+				  END)								--<ysnDirectShipLocation, bit,>
+				,(CASE UPPER(GA.galoc_scale_interfaced_yn)
+					WHEN ''Y''	THEN	1
+					WHEN ''N''	THEN	0
+					ELSE 0
+				  END)								--<ysnScaleInstalled, bit,>
+				,''''									--<strDefaultScaleId, nvarchar(50),>
+				,0									--<ysnActive, bit,>
+				,0									--<ysnUsingCashDrawer, bit,>		
+				,0									--<ysnPrintRegisterTape, bit,>
+				,0									--<ysnUseUPConOrders, bit,>
+				,0									--<ysnUseUPConPhysical, bit,>
+				,0									--<ysnUseUPConPurchaseOrders, bit,>
+				,''''									--<strUPCSearchSequence, nvarchar(50),>
+				,0									--<ysnOverShortEntries, bit,>
+				,''''									--<strOverShortCustomer, nvarchar(50),>
+				,''''									--<strOverShortAccount, nvarchar(50),>
+				,0									--<ysnAutomaticCashDepositEntries, bit,>
+				,0
+			FROM
+				galocmst GA	
+			LEFT JOIN
+				tblGLCOACrossReference CA
+					ON GA.[galoc_gl_cash] = CA.strExternalId
+			LEFT JOIN
+				tblGLCOACrossReference DA
+					ON GA.[galoc_gl_dep]    = DA.strExternalId
+			LEFT JOIN
+				tblGLCOACrossReference ARA
+					ON GA.[galoc_gl_ar]     = ARA.strExternalId
+			LEFT JOIN
+				tblGLCOACrossReference APA
+					ON GA.[galoc_gl_ap]     = APA.strExternalId	
+			LEFT JOIN
+				tblGLCOACrossReference SAA
+					ON GA.galoc_gl_sls_adv  = SAA.strExternalId	
+			LEFT JOIN
+				tblGLCOACrossReference PAA
+					ON GA.galoc_gl_pur_adv  = PAA.strExternalId
+			LEFT JOIN
+				tblGLCOACrossReference FAP
+					ON GA.galoc_gl_frt_ap   = FAP.strExternalId	
+			LEFT OUTER JOIN
+				tblSMCompanyLocation CL
+					ON RTRIM(LTRIM(GA.[galoc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))	
+			LEFT JOIN
+				tblGLAccountSegment GL
+					ON GA.galoc_gl_profit_center = CAST(GL.strCode AS INT)									
+			WHERE
+				CL.[strLocationNumber] IS NULL
+				
+			ORDER BY
+				GA.[galoc_loc_no]
+				,GA.[galoc_desc]
 
 			--IMPORTS AG PRICE LEVELS FOR EACH LOCATION
 			-- AG PRICE LEVEL 1--
