@@ -5507,7 +5507,6 @@
     <Build Include="dbo\Functions\fnICGetInvalidInvoicesForCosting.sql" />
     <Build Include="dbo\Functions\fnICGetInvalidInvoicesForInTransitCosting.sql" />
     <Build Include="dbo\Functions\fnICGetInvalidInvoicesForItemStoragePosting.sql" />
-    <Build Include="dbo\User Defined Types\fnARGetItemsForCosting.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForInTransitCosting.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForStoragePosting.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportProductionSummaryDetail.sql" />
@@ -5516,6 +5515,8 @@
     <Build Include="dbo\Views\vyuGRProductionSummaryItem.sql" />
     <Build Include="dbo\Views\vyuGRProductionSummaryStorageType.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertLocationToVendor.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoicesPostingEntries.sql" />
+    <Build Include="dbo\Functions\fnARGetItemsForCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

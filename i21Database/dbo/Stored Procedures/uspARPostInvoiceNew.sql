@@ -38,7 +38,7 @@ DECLARE @UserEntityID				INT
 		,@DeferredRevenueAccountId	INT
 		,@AllowOtherUserToPost		BIT
 
-SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityUserSecurityId] = @UserId),@UserId)
+SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityId] = @UserId),@UserId)
 SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WITH (NOLOCK) WHERE ISNULL([intDiscountAccountId],0) <> 0)
 SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM dbo.tblARCompanyPreference  WITH (NOLOCK)WHERE ISNULL([intDeferredRevenueAccountId],0) <> 0)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WITH (NOLOCK) WHERE intEntityUserSecurityId = @UserEntityID)
@@ -1311,8 +1311,8 @@ IF @Post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, strTransactionType, intCurrencyId, dtmDate, dtmPostDate, strComments, dblInvoiceTotal, intAccountId, intPeriodsToAccrue, dblBaseInvoiceTotal
 				 FROM tblARInvoice WITH (NOLOCK)) A
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.intEntityId
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
 			LEFT OUTER JOIN
@@ -1386,7 +1386,7 @@ IF @Post = 1
 				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId, strTransactionType FROM tblARInvoice WITH (NOLOCK)) ARI1
 					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND ARI1.strTransactionType = 'Credit Memo'				 
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				(SELECT intEntityId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData ) P ON A.intInvoiceId = P.intInvoiceId
 			WHERE
@@ -1432,7 +1432,7 @@ IF @Post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], intCompanyLocationId, dtmPostDate, dtmDate, strTransactionType, dblPayment, strComments, intCurrencyId, intPeriodsToAccrue, dblBasePayment
 				 FROM tblARInvoice WITH (NOLOCK)) A
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			INNER JOIN
@@ -1503,7 +1503,7 @@ IF @Post = 1
 			INNER JOIN
 				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)) ARI1 ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] AND strTransactionType <> 'Credit Memo'		
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			WHERE
@@ -1551,7 +1551,7 @@ IF @Post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, intCompanyLocationId, dtmDate, dtmPostDate, intCurrencyId, [intEntityCustomerId], strTransactionType, strComments, intPeriodsToAccrue, strType
 				 FROM tblARInvoice WITH (NOLOCK)) A  ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 	
 			LEFT OUTER JOIN 
@@ -1690,7 +1690,7 @@ IF @Post = 1
 			INNER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				(SELECT intInvoiceId, ysnAccrueLicense FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 
 			LEFT OUTER JOIN 
@@ -1826,7 +1826,7 @@ IF @Post = 1
 			INNER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				(SELECT intInvoiceId, ysnAccrueLicense FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
@@ -1955,8 +1955,8 @@ IF @Post = 1
 			INNER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
@@ -2022,8 +2022,8 @@ IF @Post = 1
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.[intEntityId]			
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2098,8 +2098,8 @@ IF @Post = 1
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.[intEntityId]			
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2165,8 +2165,8 @@ IF @Post = 1
 				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], intCompanyLocationId, dtmPostDate, dtmDate, dblShipping, strTransactionType, strComments, intCurrencyId, dblBaseShipping
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 			LEFT JOIN 
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId	
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.[intEntityCustomerId] = C.[intEntityId]	
 			INNER JOIN
 				(SELECT intCompanyLocationId, intFreightIncome FROM tblSMCompanyLocation WITH (NOLOCK)) L
 					ON A.intCompanyLocationId = L.intCompanyLocationId	
@@ -2246,8 +2246,8 @@ IF @Post = 1
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON D.intInvoiceId = A.intInvoiceId
 			INNER JOIN
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.intEntityCustomerId
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.intEntityCustomerId = C.[intEntityId]
 			INNER JOIN
 				tblSMCompanyLocation SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId 
@@ -2316,8 +2316,8 @@ IF @Post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.intEntityCustomerId
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.intEntityCustomerId = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2384,8 +2384,8 @@ IF @Post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.intEntityCustomerId					
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.intEntityCustomerId = C.[intEntityId]					
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId				
@@ -2469,8 +2469,8 @@ IF @Post = 1
 					ON D.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
-				(SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.intEntityCustomerId					
+				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+					ON A.intEntityCustomerId = C.[intEntityId]					
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId				
@@ -3672,12 +3672,12 @@ IF @Recap = 0
 			UPDATE CUSTOMER
 			SET dblARBalance = dblARBalance + (CASE WHEN @Post = 1 THEN ISNULL(dblTotalInvoice, 0) ELSE ISNULL(dblTotalInvoice, 0) * -1 END)
 			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-			INNER JOIN (SELECT intEntityCustomerId
+			INNER JOIN (SELECT intEntityId
 							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice, Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
 						FROM dbo.tblARInvoice WITH (NOLOCK)
 						WHERE intInvoiceId IN (SELECT [intHeaderId] FROM @InvoiceToUpdate)
 						GROUP BY intEntityCustomerId
-			) INVOICE ON CUSTOMER.intEntityCustomerId = INVOICE.intEntityCustomerId
+			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 
 		DELETE dbo.tblARPrepaidAndCredit  
 		FROM 

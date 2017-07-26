@@ -148,7 +148,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 
 			@Invoices I	
 		INNER JOIN
-			(SELECT [intEntityCustomerId], [strCustomerNumber], [ysnActive] FROM dbo.tblARCustomer WITH (NOLOCK)) ARC
+			(SELECT [intEntityId], [strCustomerNumber], [ysnActive] FROM dbo.tblARCustomer WITH (NOLOCK)) ARC
 				ON I.[intEntityCustomerId] = ARC.[intEntityCustomerId]						
 		WHERE
 			ARC.[ysnActive] = 0		
