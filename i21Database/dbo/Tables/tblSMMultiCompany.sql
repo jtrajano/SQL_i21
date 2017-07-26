@@ -2,6 +2,7 @@
 (
 	[intMultiCompanyId]			INT NOT NULL PRIMARY KEY IDENTITY, 
     [strCompanyName]			NVARCHAR (150)	COLLATE Latin1_General_CI_AS NULL,
+	[strCompanyCode]			NVARCHAR (10)	COLLATE Latin1_General_CI_AS NULL,
 	[strDatabaseName]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
 	[strServer]					NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
 	[strAuthentication]			NVARCHAR (30)	COLLATE Latin1_General_CI_AS NULL, 
