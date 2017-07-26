@@ -193,6 +193,16 @@ SELECT cv.strFutureMonth,strFutMarketName,intContractDetailId, fm.intFutureMonth
   )t where isnull(dblNoOfLot,0)-isnull(dblFixedLots,0) <> 0)t1 where dblNoOfContract <>0
 
 
+SELECT t.strFutMarketName,t.strFutureMonth, t.intFutureMarketId,t.intFutureMonthId,dblBuy,dblSell,t.dblContractSize,dtmFutureMonthsDate,
+(SELECT TOP 1 strCommodityAttributeId from @BrokerageAttributeFinal b where b.intBrokerageAccountId=t.intBrokerageAccountId) intCommodityAttributeId
+ INTO #FutTranTemp
+FROM vyuRKGetBuySellTransaction t 
+WHERE t.intFutureMarketId IN (select intFutureMarketId from @Market)
+	AND t.intLocationId IN (SELECT intCompanyLocationId FROM @Location)
+	AND strFutureMonth NOT IN(SELECT strFutureMonth FROM #ContractTransaction ct 
+													WHERE ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth)
+	AND t.intBrokerageAccountId in(SELECT intBrokerageAccountId from @BrokerageAttributeFinal)
+
 DECLARE @FinalResult AS TABLE 
 (	    
 	intRowNum INT IDENTITY(1,1) PRIMARY KEY, 
@@ -214,20 +224,39 @@ DECLARE @FinalResult AS TABLE
 	intMarketSumDummyId int
 )
 
+DECLARE @ContractTemp AS TABLE 
+(	    
+	strFutMarketName  nvarchar(100),
+	strFutureMonth nvarchar(100),
+	dblTotalPurchase numeric(24,10),
+	dblTotalSales numeric(24,10),
+	dblUnfixedPurchase numeric(24,10), 
+	dblUnfixedSales numeric(24,10), 
+	dblFutures numeric(24,10),
+	dblTotal numeric(24,10), 
+	intFutureMarketId int,
+	intFutureMonthId int,
+	intMarketSumDummyId int
+)
+	
 DECLARE @intCAttributeId INT = NULL
-SELECT @intCAttributeId= min(intAttributeId) from @CommodityAttribute
+SELECT @intCAttributeId= MIN(intAttributeId) FROM @CommodityAttribute 
 WHILE @intCAttributeId >0
 BEGIN
-	DECLARE @intLCommodityAttributeId int = null
-	DECLARE @strDescription nvarchar(100)= null
+	DECLARE @intLCommodityAttributeId INT = NULL
+	DECLARE @strDescription NVARCHAR(100)= NULL
 
-	SELECT @intLCommodityAttributeId=a.intCommodityAttributeId,@strDescription=ca.strDescription from @CommodityAttribute a
-	JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=a.intCommodityAttributeId  where intAttributeId=@intCAttributeId 
-
-	INSERT INTO @FinalResult(strProductTypeH,strProductType,strColor,intMarketSumDummyId)
-	select @strDescription,@strDescription,'ProductTypeHeader',1
-
-
+	SELECT @intLCommodityAttributeId=a.intCommodityAttributeId,@strDescription=ca.strDescription FROM @CommodityAttribute a
+	JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=a.intCommodityAttributeId  WHERE intAttributeId=@intCAttributeId 
+	
+	IF EXISTS((SELECT intCommodityAttributeId FROM #ContractTransaction WHERE intCommodityAttributeId=@intLCommodityAttributeId
+				UNION
+				SELECT top 1 intCommodityAttributeId FROM #FutTranTemp  WHERE intCommodityAttributeId=@intLCommodityAttributeId
+				)) 			 
+	BEGIN
+		INSERT INTO @FinalResult(strProductTypeH,strProductType,strColor,intMarketSumDummyId,intCAttributeId)
+		SELECT upper(@strDescription),@strDescription,'Over all Total',1,@intLCommodityAttributeId
+    
 		DECLARE @intFMarketId INT= NULL
 		SELECT @intFMarketId= MIN(intMarketId) FROM @Market
 
@@ -245,12 +274,13 @@ BEGIN
 				AND  dtmSpotDate <= GETDATE() AND intFutureMarketId = @intCMarketId ORDER BY intFutureMonthId DESC
 		SELECT TOP 1 @dtmFutureMonthsDate=dtmFutureMonthsDate FROM tblRKFuturesMonth WHERE intFutureMonthId=@intPreviousMonthId
 		
-			
-				INSERT INTO @FinalResult (strProductType,strFutMarketName,strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId,intCAttributeId)
-					SELECT  @strDescription,strFutMarketName,strFutureMonth strFutureMonth,dblPurchase dblTotalPurchase,
-						dblSale dblTotalSales,dblPurchaseUnpriced dblUnfixedPurchase,dblSaleUnpriced dblUnfixedSales,dblBuySell dblFutures,
-						 (dblPurchasePriced-dblSalePriced)+ dblBuySell as dblTotal, t.intFutureMarketId,t.intFutureMonthId,@intLCommodityAttributeId
-					FROM (
+		DELETE FROM @ContractTemp
+
+			INSERT INTO @ContractTemp(strFutMarketName,strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId)
+				SELECT  strFutMarketName,strFutureMonth strFutureMonth,dblPurchase dblTotalPurchase,
+					dblSale dblTotalSales,dblPurchaseUnpriced dblUnfixedPurchase,dblSaleUnpriced dblUnfixedSales,dblBuySell dblFutures,
+						(dblPurchasePriced-dblSalePriced)+ dblBuySell as dblTotal, t.intFutureMarketId,t.intFutureMonthId  
+				FROM (
 					 SELECT ft.strFutMarketName,'Previous' as strFutureMonth,t.intFutureMarketId,t.intFutureMonthId, 
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and ct.TranType='Purchase' and intCommodityAttributeId=@intLCommodityAttributeId and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblPurchase,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId=@intLCommodityAttributeId and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblSale,
@@ -311,7 +341,7 @@ BEGIN
 					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth and ct.dtmFutureMonthsDate >= @dtmFutureMonthsDate),0)*t.dblContractSize dblBuySell 
 					 FROM vyuRKGetBuySellTransaction t 
 					  WHERE t.intFutureMarketId = @intCMarketId
-							AND t.intLocationId in (select intCompanyLocationId from @Location)
+							AND t.intLocationId in (SELECT intCompanyLocationId FROM @Location)
 							AND strFutureMonth NOT IN(SELECT strFutureMonth FROM #ContractTransaction ct 
 																				WHERE ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth)
 							AND t.intBrokerageAccountId in(SELECT intBrokerageAccountId from @BrokerageAttributeFinal									
@@ -322,33 +352,33 @@ BEGIN
 					  WHEN  strFutureMonth ='Total' THEN '01/01/9999'
 					 ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ASC
 			
-				INSERT INTO @FinalResult (strFutMarketName,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
-					SELECT 'Total -' +@strFutMarket,sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total' 
-					FROM @FinalResult 			
-					WHERE  intFutureMarketId=@intCMarketId and intCAttributeId = @intLCommodityAttributeId
-				DELETE FROM @FinalResult where strFutureMonth='Total -' +@strFutMarket and isnull(dblTotalPurchase,0) = 0
-					and isnull(dblTotalSales,0) = 0 and isnull(dblUnfixedPurchase,0) = 0 and isnull(dblUnfixedSales,0) = 0
-					and isnull(dblFutures,0) = 0 and isnull(dblTotal,0) = 0
+			IF EXISTS(SELECT * FROM @ContractTemp)
+			BEGIN
+				INSERT INTO @FinalResult (strFutMarketNameH,strColor) 
+				select upper(@strFutMarket),'Total'
+				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId,intCAttributeId)
+				SELECT strFutureMonth strFutureMonth,dblTotalPurchase,
+							dblTotalSales,dblUnfixedPurchase,dblUnfixedSales,dblFutures,dblTotal,intFutureMarketId,intFutureMonthId,@intLCommodityAttributeId from @ContractTemp
+			
+				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
+				SELECT 'Total -' +@strFutMarket,sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total' 
+				FROM @FinalResult 			
+				WHERE  intFutureMarketId=@intCMarketId and intCAttributeId = @intLCommodityAttributeId
+			END
+
 		SELECT @intFMarketId= min(intMarketId) FROM @Market WHERE intMarketId > @intFMarketId
 		END	
-
-		INSERT INTO @FinalResult (strFutMarketName,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
-					SELECT 'Total -'+@strDescription,sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Over all Total' 
-					FROM @FinalResult 			
-					WHERE  intCAttributeId=@intLCommodityAttributeId 
-		DELETE FROM @FinalResult WHERE strFutureMonth='Total -'+@strDescription and isnull(dblTotalPurchase,0) = 0
-		and isnull(dblTotalSales,0) = 0 and isnull(dblUnfixedPurchase,0) = 0 and isnull(dblUnfixedSales,0) = 0
-		and isnull(dblFutures,0) = 0 and isnull(dblTotal,0) = 0
-
+		INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
+		SELECT 'Total -'+@strDescription,sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Over all Total' 
+		FROM @FinalResult WHERE  intCAttributeId=@intLCommodityAttributeId 
+	END
 SELECT @intCAttributeId= min(intAttributeId) FROM @CommodityAttribute WHERE intAttributeId > @intCAttributeId
 END	
 
-DELETE from @FinalResult
-WHERE strProductType IN (SELECT strProductType FROM @FinalResult GROUP BY strProductType HAVING COUNT(*) <= 1 and strProductType IS NOT NULL) 
 
------------------------------By Market ----------------------
+-------------------------------By Market ----------------------
 
-insert into @FinalResult(strProductTypeH,strColor,intMarketSumDummyId) values ('Over all against market','Total - Over All',1)
+INSERT INTO @FinalResult(strProductTypeH,strColor,intMarketSumDummyId) values (upper('Over all against market'),'Total - Over All',1)
 
 		SELECT @intFMarketId = NULL
 		SELECT @intFMarketId= MIN(intMarketId) FROM @Market
@@ -366,9 +396,12 @@ insert into @FinalResult(strProductTypeH,strColor,intMarketSumDummyId) values ('
 		SELECT TOP 1 @intPreviousMonthId=intFutureMonthId FROM tblRKFuturesMonth WHERE ysnExpired = 0 
 				AND  dtmSpotDate <= GETDATE() AND intFutureMarketId = @intCMarketId ORDER BY intFutureMonthId DESC
 		SELECT TOP 1 @dtmFutureMonthsDate=dtmFutureMonthsDate FROM tblRKFuturesMonth WHERE intFutureMonthId=@intPreviousMonthId
-		insert into @FinalResult(strFutMarketName,strColor,intMarketSumDummyId) values (@strFutMarket,'MarketHeader',1)			
-				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId,intMarketSumDummyId)
-					SELECT  strFutureMonth strFutureMonth,dblPurchase dblTotalPurchase,
+
+		DELETE FROM @ContractTemp
+
+--		INSERT INTO @FinalResult(strFutMarketName,strColor,intMarketSumDummyId) values (@strFutMarket,'MarketHeader',1)			
+		INSERT INTO @ContractTemp(strFutMarketName,strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId,intMarketSumDummyId)
+					SELECT  strFutMarketName,strFutureMonth strFutureMonth,dblPurchase dblTotalPurchase,
 						dblSale dblTotalSales,dblPurchaseUnpriced dblUnfixedPurchase,dblSaleUnpriced dblUnfixedSales,dblBuySell dblFutures,
 						 (dblPurchasePriced-dblSalePriced)+ dblBuySell as dblTotal, t.intFutureMarketId,t.intFutureMonthId,-1
 					FROM (
@@ -444,15 +477,25 @@ insert into @FinalResult(strProductTypeH,strColor,intMarketSumDummyId) values ('
 					  WHEN  strFutureMonth ='Total' THEN '01/01/9999'
 					 ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ASC
 			
-				INSERT INTO @FinalResult (strFutMarketName,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor,intMarketSumDummyId)
+			IF EXISTS(SELECT * FROM @ContractTemp)
+			BEGIN
+				INSERT INTO @FinalResult (strFutMarketNameH,strColor) 
+				select upper(@strFutMarket),'Total'
+
+					INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId,intCAttributeId,intMarketSumDummyId)
+				SELECT strFutureMonth strFutureMonth,dblTotalPurchase,
+							dblTotalSales,dblUnfixedPurchase,dblUnfixedSales,dblFutures,dblTotal,intFutureMarketId,intFutureMonthId,@intLCommodityAttributeId,-1 from @ContractTemp
+
+				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor,intMarketSumDummyId)
 					SELECT 'Total -' +@strFutMarket,sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total',-2 
 					FROM @FinalResult 			
 					WHERE  intFutureMarketId=@intCMarketId and intMarketSumDummyId =-1
+		   	END
 		SELECT @intFMarketId= min(intMarketId) FROM @Market WHERE intMarketId > @intFMarketId
 	END	
 
 
------------------------ END
+------------------------- END
 
 INSERT INTO @FinalResult (strProductTypeH,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
 SELECT 'Total - Over All',sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total - Over All' 
@@ -460,6 +503,6 @@ FROM @FinalResult
 WHERE   intMarketSumDummyId =-2
 
 
-SELECT intRowNum,strProductTypeH strProductType,strFutMarketName,strFutureMonth,round(dblTotalPurchase,@intDecimals) as dblTotalPurchase,
+SELECT intRowNum,strProductTypeH strProductType,strFutMarketNameH strFutMarketName,strFutureMonth,round(dblTotalPurchase,@intDecimals) as dblTotalPurchase,
 		round(dblTotalSales,@intDecimals) dblTotalSales ,round(dblUnfixedPurchase,@intDecimals) dblUnfixedPurchase, round(dblUnfixedSales,@intDecimals) dblUnfixedSales, 
 		round(dblFutures,@intDecimals) dblFutures,round(dblTotal,@intDecimals) dblTotal, intFutureMarketId,intFutureMonthId,intCAttributeId intCommodityAttributeId,strColor,intMarketSumDummyId  FROM @FinalResult order by intRowNum
