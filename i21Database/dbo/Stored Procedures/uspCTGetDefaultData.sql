@@ -62,18 +62,19 @@ BEGIN
 
 		IF	ISNULL(@intFutureMarketId,0) > 0
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency
 			FROM		tblRKFutureMarket M 
 			LEFT JOIN	tblICUnitMeasure	MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemId		=	@intItemId 
 												AND IU.intUnitMeasureId =	M.intUnitMeasureId
 			LEFT JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId =	IU.intUnitMeasureId
 			LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID	=	M.intCurrencyId
+			LEFT JOIN	tblSMCurrency		MY	ON	MY.intCurrencyID	=	CY.intMainCurrencyId
 			WHERE M.intFutureMarketId = @intFutureMarketId
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency 
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency
 			FROM		tblRKFutureMarket			M 
 			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblRKCommodityMarketMapping C	ON	C.intFutureMarketId =	M.intFutureMarketId 
@@ -81,6 +82,7 @@ BEGIN
 														AND IU.intUnitMeasureId =	M.intUnitMeasureId
 			LEFT JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId =	IU.intUnitMeasureId
 			LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID	=	M.intCurrencyId
+			LEFT JOIN	tblSMCurrency				MY	ON	MY.intCurrencyID	=	CY.intMainCurrencyId
 			WHERE C.intCommodityId = @intCommodityId  ORDER BY M.intFutureMarketId ASC
 		END
 	END
