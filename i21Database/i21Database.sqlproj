@@ -424,6 +424,8 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
