@@ -5515,6 +5515,7 @@
     <Build Include="dbo\Views\vyuGRProductionSummaryEntity.sql" />
     <Build Include="dbo\Views\vyuGRProductionSummaryItem.sql" />
     <Build Include="dbo\Views\vyuGRProductionSummaryStorageType.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPConvertLocationToVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
