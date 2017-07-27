@@ -30,6 +30,7 @@ BEGIN TRY
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = VDS.strFormCode COLLATE Latin1_General_CI_AS
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = VDS.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = VDS.strType COLLATE Latin1_General_CI_AS
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 
 	MERGE	
 	INTO	tblTFReportingComponentDestinationState
@@ -38,8 +39,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM #tmpVDS
 	) AS SOURCE
-		ON TARGET.intOriginDestinationStateId = SOURCE.intOriginDestinationStateId
-			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -47,28 +47,24 @@ BEGIN TRY
 			intReportingComponentId			= SOURCE.intReportingComponentId
 			, intOriginDestinationStateId	= SOURCE.intOriginDestinationStateId
 			, strType						= SOURCE.strStatus
-	WHEN NOT MATCHED BY TARGET THEN 
+	WHEN NOT MATCHED BY TARGET THEN
 		INSERT (
 			intReportingComponentId
 			, intOriginDestinationStateId
 			, strType
+			, intMasterId
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.intOriginDestinationStateId
 			, SOURCE.strStatus
+			, SOURCE.intMasterId
 		);
 
 	-- Delete existing Valid Destination States that is not within Source
 	DELETE FROM tblTFReportingComponentDestinationState
-	WHERE intReportingComponentDestinationStateId IN (
-		SELECT DISTINCT RCDestination.intReportingComponentDestinationStateId FROM tblTFReportingComponentDestinationState RCDestination
-		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCDestination.intReportingComponentId
-		LEFT JOIN #tmpVDS tmp ON tmp.intReportingComponentId = RCDestination.intReportingComponentId
-			AND tmp.intOriginDestinationStateId = RCDestination.intOriginDestinationStateId
-		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND ISNULL(tmp.intOriginDestinationStateId, '') = ''
-	)
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpVDS)
+	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpVDS)
 
 	DROP TABLE #tmpVDS
 

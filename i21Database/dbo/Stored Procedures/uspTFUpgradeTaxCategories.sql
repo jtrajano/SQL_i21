@@ -22,6 +22,13 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
+
+	UPDATE tblTFTaxCategory 
+    SET intMasterId = B.intMasterId 
+    FROM @TaxCategories B 
+    WHERE tblTFTaxCategory.intTaxAuthorityId = @TaxAuthorityId
+    AND tblTFTaxCategory.strTaxCategory COLLATE Latin1_General_CI_AS = B.strTaxCategory COLLATE Latin1_General_CI_AS
+    AND tblTFTaxCategory.intMasterId IS NULL
 	
 	MERGE	
 	INTO	tblTFTaxCategory
@@ -30,24 +37,33 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @TaxCategories
 	) AS SOURCE
-		ON TARGET.strTaxCategory COLLATE Latin1_General_CI_AS = SOURCE.strTaxCategory COLLATE Latin1_General_CI_AS
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
 			strState = SOURCE.strState
-	WHEN NOT MATCHED THEN 
+			, strTaxCategory = SOURCE.strTaxCategory
+			, intTaxAuthorityId = @TaxAuthorityId
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxAuthorityId
 			, strState
 			, strTaxCategory
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
 			, SOURCE.strState
 			, SOURCE.strTaxCategory
+			, SOURCE.intMasterId
 		);
+
+	-- Set insMasterId to 0 for records that are not exist in default data
+	UPDATE tblTFTaxCategory
+	SET intMasterId = 0
+	WHERE intTaxAuthorityId = @TaxAuthorityId 
+	AND intMasterId NOT IN (SELECT intMasterId FROM @TaxCategories)
 	
 END TRY
 BEGIN CATCH

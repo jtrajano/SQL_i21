@@ -4,8 +4,8 @@
 @ReportingComponentId NVARCHAR(MAX),
 @DateFrom NVARCHAR(50),
 @DateTo NVARCHAR(50),
-@IsEdi NVARCHAR(10),
-@Refresh NVARCHAR(5)
+@IsEdi BIT,
+@Refresh BIT
 
 AS
 --===================================================== i21 INVENTORY TRANSFER =====================================================
@@ -68,7 +68,7 @@ DECLARE @tblTempTransaction TABLE (
 			strHeaderFederalTaxID NVARCHAR(50)
 		 )
 
-	IF @Refresh = 'true'
+	IF @Refresh = 1
 		BEGIN
 			DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 		END
@@ -240,110 +240,91 @@ DECLARE @tblTempTransaction TABLE (
 					EXEC(@InvTransferQuery)
 
 				IF (@ReportingComponentId <> '')
-					BEGIN
-						INSERT INTO tblTFTransaction (uniqTransactionGuid, 
-																	   intTaxAuthorityId,
-																	   strTaxAuthority,
-																	   strFormCode,
-																	   intReportingComponentId,
-																	   strScheduleCode,
-																	   intProductCodeId,
-																	   strProductCode,
-																	   intItemId,
-																	   dblQtyShipped,
-																	   dblGross,
-																	   dblNet,
-																	   dblBillQty,
-																	   --dblTax,
-																	   strInvoiceNumber,
-																	   strPONumber,
-																	   strBillOfLading,
-																	   dtmDate,
-																	   strDestinationCity,
-																	   strDestinationState,
-																	   strOriginCity,
-																	   strOriginState,
-																	   strCustomerName,
-																	   strCustomerFederalTaxId,
-																	   strShipVia,
-																	   strTransporterLicense,
-																	   strTransportationMode,
-																	   strTransporterName,
-																	   strTransporterFederalTaxId,
-																	   strConsignorName,
-																	   strConsignorFederalTaxId,
-																	   strType,
-																	   strTerminalControlNumber,
-																	   strVendorName,
-																	   strVendorFederalTaxId,
-																	   strTaxPayerName,
-																	   strTaxPayerAddress,
-																	   strCity,
-																	   strState,
-																	   strZipCode,
-																	   strTelephoneNumber,
-																	   strTaxPayerIdentificationNumber,
-																	   strTaxPayerFEIN,
-																	   dtmReportingPeriodBegin,
-																	   dtmReportingPeriodEnd,
-																	   leaf) 
-
-																	   SELECT DISTINCT @Guid, 
-																	    --intInvoiceDetailId
-																		intTaxAuthorityId,
-																		(SELECT strTaxAuthorityCode FROM tblTFTaxAuthority WHERE intTaxAuthorityId = (SELECT DISTINCT TOP 1 intTaxAuthorityId FROM @tblTempTransaction)),
-																		strFormCode,
-																		intReportingComponentId,
-																		strScheduleCode,
-																		intProductCode,
-																		strProductCode,
-																		intItemId,
-																		dblQtyShipped,
-																		dblGross,
-																	    dblNet,
-																	    dblBillQty,
-																		--dblTax,
-																		strInvoiceNumber,
-																		strPONumber,
-																		strBillOfLading,
-																		dtmDate,
-																		strDestinationCity,
-																		strDestinationState,
-																		strOriginCity,
-																		strOriginState,
-																		strCustomerName,
-																		strCustomerFEIN,
-																		--strAccountStatusCode,
-																		strShipVia,
-																		strTransporterLicense,
-																		strTransportationMode,
-																		strTransporterName,
-																		strTransporterFEIN,
-																		strConsignorName,
-																	    strConsignorFEIN,
-																		strType,
-																		strTerminalControlNumber,
-																		strVendorName,
-																	    strVendorFederalTaxId,
-																		--HEADER
-																		strHeaderCompanyName,
-																		strHeaderAddress,
-																		strHeaderCity,
-																		strHeaderState,
-																		strHeaderZip,
-																		strHeaderPhone,
-																		strHeaderStateTaxID,
-																		strHeaderFederalTaxID,
-																		@DateFrom,
-																		@DateTo,
-																		1
-																		FROM @tblTempTransaction
-						
-					END
+				BEGIN
+					INSERT INTO tblTFTransaction (uniqTransactionGuid
+						, intReportingComponentId
+						, intProductCodeId
+						, strProductCode
+						, intItemId
+						, dblQtyShipped
+						, dblGross
+						, dblNet
+						, dblBillQty
+						, strInvoiceNumber
+						, strPONumber
+						, strBillOfLading
+						, dtmDate
+						, strDestinationCity
+						, strDestinationState
+						, strOriginCity
+						, strOriginState
+						, strCustomerName
+						, strCustomerFederalTaxId
+						, strShipVia
+						, strTransporterLicense
+						, strTransportationMode
+						, strTransporterName
+						, strTransporterFederalTaxId
+						, strConsignorName
+						, strConsignorFederalTaxId
+						, strTerminalControlNumber
+						, strVendorName
+						, strVendorFederalTaxId
+						, strTaxPayerName
+						, strTaxPayerAddress
+						, strCity
+						, strState
+						, strZipCode
+						, strTelephoneNumber
+						, strTaxPayerIdentificationNumber
+						, strTaxPayerFEIN
+						, dtmReportingPeriodBegin
+						, dtmReportingPeriodEnd)
+					SELECT DISTINCT @Guid
+						, intReportingComponentId
+						, intProductCode
+						, strProductCode
+						, intItemId
+						, dblQtyShipped
+						, dblGross
+						, dblNet
+						, dblBillQty
+						, strInvoiceNumber
+						, strPONumber
+						, strBillOfLading
+						, dtmDate
+						, strDestinationCity
+						, strDestinationState
+						, strOriginCity
+						, strOriginState
+						, strCustomerName
+						, strCustomerFEIN
+						, strShipVia
+						, strTransporterLicense
+						, strTransportationMode
+						, strTransporterName
+						, strTransporterFEIN
+						, strConsignorName
+						, strConsignorFEIN
+						, strTerminalControlNumber
+						, strVendorName
+						, strVendorFederalTaxId
+						, strHeaderCompanyName
+						, strHeaderAddress
+						, strHeaderCity
+						, strHeaderState
+						, strHeaderZip
+						, strHeaderPhone
+						, strHeaderStateTaxID
+						, strHeaderFederalTaxID
+						, @DateFrom
+						, @DateTo
+					FROM @tblTempTransaction
+				END
 				ELSE
-					BEGIN
-						INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
-					END
+				BEGIN
+					INSERT INTO tblTFTransaction (uniqTransactionGuid, intReportingComponentId, intProductCodeId)VALUES(@Guid, @RCId, NULL)
+				END
 
 			SET @CountRC = @CountRC - 1
 		END
@@ -513,7 +494,7 @@ DECLARE @TRRCId NVARCHAR(50)
 	
 		DECLARE @TRHasResult INT
 		SELECT TOP 1 @TRHasResult = intTransactionId FROM tblTFTransaction
-		IF(@TRHasResult IS NULL AND @IsEdi = 'false')
+		IF(@TRHasResult IS NULL AND @IsEdi = 0)
 		BEGIN
-			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, 'SF-401', 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+			INSERT INTO tblTFTransaction (uniqTransactionGuid, intReportingComponentId, intProductCodeId, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd)VALUES(@Guid, @TRRCId, NULL, GETDATE(), @DateFrom, @DateTo)
 		END

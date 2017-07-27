@@ -3,8 +3,8 @@
 	, @ReportingComponentId NVARCHAR(MAX)
 	, @DateFrom DATETIME
 	, @DateTo DATETIME
-	, @IsEdi NVARCHAR(10)
-	, @Refresh NVARCHAR(5)
+	, @IsEdi BIT
+	, @Refresh BIT
 
 AS
 
@@ -29,7 +29,7 @@ BEGIN TRY
 		, @CompanyName NVARCHAR(250)
 		, @CompanyEIN NVARCHAR(100)
 
-	IF @Refresh = 'true'
+	IF @Refresh = 1
 	BEGIN
 		DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
 	END
@@ -38,6 +38,8 @@ BEGIN TRY
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
+
+	DELETE #tmpRC WHERE intReportingComponentId = ''
 
 	SELECT TOP 1 @CompanyName = strCompanyName, @CompanyEIN = strEin FROM tblSMCompanySetup
 
@@ -52,7 +54,9 @@ BEGIN TRY
 			, intReportingComponentId
 			, strScheduleCode
 			, strType
+			, intProductCodeId
 			, strProductCode
+			, intItemId
 			, strBillOfLading
 			, dblReceived
 			, strTaxCategory
@@ -78,7 +82,20 @@ BEGIN TRY
 			, strHeaderFederalTaxID
 			, strOriginState
 			, strDestinationState
-			, strTerminalControlNumber)
+			, strTerminalControlNumber
+			, strTransporterIdType
+			, strVendorIdType
+			, strCustomerIdType
+			, strVendorInvoiceNumber
+			, strCustomerLicenseNumber
+			, strCustomerAccountStatusCode
+			, strCustomerStreetAddress
+			, strCustomerZipCode
+			, strReportingComponentNote
+			, strDiversionNumber
+			, strDiversionOriginalDestinationState
+			, strTransactionType
+			, intTransactionNumberId)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId
 			, *
 		FROM (
@@ -88,7 +105,9 @@ BEGIN TRY
 			, tblTFReportingComponent.intReportingComponentId
 			, tblTFReportingComponent.strScheduleCode
 			, tblTFReportingComponent.strType
+			, tblTFProductCode.intProductCodeId
 			, tblTFProductCode.strProductCode
+			, tblICInventoryReceiptItem.intItemId
 			, tblICInventoryReceipt.strBillOfLading
 			, tblICInventoryReceiptItem.dblReceived
 			, strTaxCategory = ''
@@ -115,11 +134,23 @@ BEGIN TRY
 			, tblEMEntityLocation.strState AS strOriginState
 			, tblSMCompanyLocation.strStateProvince AS strDestinationState
 			, tblTFTerminalControlNumber.strTerminalControlNumber
+			, strTransporterIdType = 'FEIN'
+			, strVendorIdType = 'FEIN'
+			, strCustomerIdType = 'FEIN'
+			, strVendorInvoiceNumber = NULL
+			, strCustomerLicenseNumber = NULL
+			, strCustomerAccountStatusCode = NULL
+			, strCustomerStreetAddress = NULL
+			, strCustomerZipCode = NULL
+			, strReportingComponentNote = tblTFReportingComponent.strNote
+			, strDiversionNumber = tblTRLoadHeader.strDiversionNumber
+			, strDiversionOriginalDestinationState = tblTRState.strStateAbbreviation
+			, strTransactionType = 'Receipt'
+			, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId
 		FROM tblTFProductCode
 		INNER JOIN tblEMEntityLocation
 		INNER JOIN tblEMEntity
 		INNER JOIN tblSMTaxCode
-		INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 		INNER JOIN tblICItemMotorFuelTax
 		INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 		INNER JOIN tblICInventoryReceiptItem
@@ -138,6 +169,11 @@ BEGIN TRY
 		FULL OUTER JOIN tblSMShipVia
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityId = tblEMEntity_Transporter.intEntityId
 			ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityId
+		LEFT JOIN tblAPBillDetail ON tblAPBillDetail.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+		LEFT JOIN tblAPBill ON tblAPBill.intBillId = tblAPBillDetail.intBillId
+		LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
+		LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+		LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 		CROSS JOIN tblSMCompanySetup 
 		WHERE tblTFReportingComponent.intReportingComponentId = @RCId
 			AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
@@ -182,11 +218,8 @@ BEGIN TRY
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
 				, intItemId
 				, strBillOfLading
-				, intTaxAuthorityId
-				, strTaxAuthority
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
+				, intProductCodeId
 				, strProductCode
 				, dblGross
 				, dblNet
@@ -195,7 +228,6 @@ BEGIN TRY
 				, dtmDate
 				, strVendorName
 				, strVendorFederalTaxId
-				, strType
 				, strTerminalControlNumber
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
@@ -211,15 +243,24 @@ BEGIN TRY
 				, strDestinationState
 				, strCustomerName
 				, strCustomerFederalTaxId
-				, leaf)
+				, strTransporterIdType
+				, strVendorIdType
+				, strCustomerIdType
+				, strVendorInvoiceNumber
+				, strCustomerLicenseNumber
+				, strCustomerAccountStatusCode
+				, strCustomerStreetAddress
+				, strCustomerZipCode
+				, strReportingComponentNote
+				, strDiversionNumber
+				, strDiversionOriginalDestinationState
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT @Guid
-				, intInventoryReceiptItemId
+				, intItemId
 				, strBillOfLading
-				, TRANS.intTaxAuthorityId
-				, strTaxAuthorityCode
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
+				, intProductCodeId
 				, strProductCode
 				, dblGross
 				, dblNet
@@ -228,7 +269,6 @@ BEGIN TRY
 				, dtmReceiptDate
 				, strVendorName
 				, strVendorFEIN
-				, strType
 				, strTerminalControlNumber
 				, @DateFrom
 				, @DateTo
@@ -245,38 +285,44 @@ BEGIN TRY
 				, strDestinationState
 				, @CompanyName
 				, @CompanyEIN
-				, 1
+				, strTransporterIdType
+				, strVendorIdType
+				, strCustomerIdType
+				, strVendorInvoiceNumber
+				, strCustomerLicenseNumber
+				, strCustomerAccountStatusCode
+				, strCustomerStreetAddress
+				, strCustomerZipCode
+				, strReportingComponentNote
+				, strDiversionNumber
+				, strDiversionOriginalDestinationState
+				, strTransactionType
+				, intTransactionNumberId
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
 		END
-		ELSE
-		BEGIN
-			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
-		END
-
+		
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 	END
 
 	DROP TABLE #tmpRC
 	
-	IF (NOT EXISTS(SELECT TOP 1 1 from @TFTransaction) AND @IsEdi = 'false')
+	IF (NOT EXISTS(SELECT TOP 1 1 from @TFTransaction) AND @IsEdi = 0)
 	BEGIN
 		INSERT INTO tblTFTransaction(uniqTransactionGuid
-			, intTaxAuthorityId
-			, strFormCode
+			, intReportingComponentId
 			, strProductCode
 			, dtmDate
 			, dtmReportingPeriodBegin
 			, dtmReportingPeriodEnd
-			, leaf)
+			, strTransactionType)
 		VALUES(@Guid
-			, 0
-			, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId)
+			, @RCId
 			, 'No record found.'
 			, GETDATE()
 			, @DateFrom
 			, @DateTo
-			, 1)
+			, 'Receipt')
 	END
 END TRY
 BEGIN CATCH

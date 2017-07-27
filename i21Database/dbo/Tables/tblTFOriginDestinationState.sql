@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblTFOriginDestinationState](
 	[intOriginDestinationStateId] [int] IDENTITY(1,1) NOT NULL,
 	[strOriginDestinationState] [nvarchar](10) COLLATE Latin1_General_CI_AS NOT NULL,
-	[intConcurrencyId] [int] NULL,
+	[intMasterId] INT NULL,
+	[intConcurrencyId] [int] NULL DEFAULT 0,
  CONSTRAINT [PK_tblTFOriginDestination] PRIMARY KEY CLUSTERED 
 (
 	[intOriginDestinationStateId] ASC

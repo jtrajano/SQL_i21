@@ -2,7 +2,7 @@
 	@Guid NVARCHAR(250)
 	, @FormCodeParam NVARCHAR(MAX)
 	, @ScheduleCodeParam NVARCHAR(MAX)
-	, @Refresh NVARCHAR(5)
+	, @Refresh BIT
 
 AS
 
@@ -33,7 +33,7 @@ BEGIN TRY
 	DECLARE @TempComputedValue NUMERIC(18, 6)
 	DECLARE @QueryTransaction NVARCHAR(MAX)
 
-	IF @Refresh = 'true'
+	IF @Refresh = 1
 	BEGIN
 		DELETE FROM tblTFTransactionSummary
 	END

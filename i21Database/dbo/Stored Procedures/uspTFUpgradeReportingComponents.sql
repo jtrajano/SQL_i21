@@ -23,6 +23,16 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 	
+	UPDATE tblTFReportingComponent 
+    SET intMasterId = B.intMasterId 
+    FROM @ReportingComponent B 
+    WHERE tblTFReportingComponent.intTaxAuthorityId = @TaxAuthorityId
+    AND tblTFReportingComponent.strFormCode COLLATE Latin1_General_CI_AS = B.strFormCode COLLATE Latin1_General_CI_AS
+    AND tblTFReportingComponent.strScheduleCode COLLATE Latin1_General_CI_AS = B.strScheduleCode COLLATE Latin1_General_CI_AS
+    AND tblTFReportingComponent.strType COLLATE Latin1_General_CI_AS = B.strType COLLATE Latin1_General_CI_AS
+    AND tblTFReportingComponent.intMasterId IS NULL
+
+
 	MERGE	
 	INTO	tblTFReportingComponent
 	WITH	(HOLDLOCK) 
@@ -30,10 +40,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @ReportingComponent
 	) AS SOURCE
-		ON TARGET.strFormCode COLLATE Latin1_General_CI_AS = SOURCE.strFormCode COLLATE Latin1_General_CI_AS
-			AND TARGET.strScheduleCode COLLATE Latin1_General_CI_AS = SOURCE.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND TARGET.strType COLLATE Latin1_General_CI_AS = SOURCE.strType COLLATE Latin1_General_CI_AS
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -46,7 +53,8 @@ BEGIN TRY
 			, strSPInventory		= SOURCE.strSPInventory
 			, strSPInvoice			= SOURCE.strSPInvoice
 			, strSPRunReport		= SOURCE.strSPRunReport
-	WHEN NOT MATCHED THEN 
+			, intComponentTypeId	= SOURCE.intComponentTypeId
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxAuthorityId
 			, strFormCode
@@ -60,6 +68,8 @@ BEGIN TRY
 			, strSPInventory
 			, strSPInvoice
 			, strSPRunReport
+			, intMasterId
+			, intComponentTypeId
 		)
 		VALUES (
 			@TaxAuthorityId
@@ -74,7 +84,15 @@ BEGIN TRY
 			, SOURCE.strSPInventory
 			, SOURCE.strSPInvoice
 			, SOURCE.strSPRunReport
+			, SOURCE.intMasterId
+			, SOURCE.intComponentTypeId
 		);
+
+		-- Set insMasterId to 0 for records that are not exist in default data
+		UPDATE tblTFReportingComponent 
+		SET intMasterId = 0 
+		WHERE intTaxAuthorityId = @TaxAuthorityId 
+		AND intMasterId NOT IN (SELECT intMasterId FROM @ReportingComponent)
 	
 END TRY
 BEGIN CATCH

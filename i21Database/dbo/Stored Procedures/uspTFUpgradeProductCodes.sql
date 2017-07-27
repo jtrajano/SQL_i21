@@ -30,8 +30,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @ProductCodes
 	) AS SOURCE
-		ON TARGET.strProductCode COLLATE Latin1_General_CI_AS = SOURCE.strProductCode COLLATE Latin1_General_CI_AS
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -46,6 +45,7 @@ BEGIN TRY
 			, strDescription
 			, strProductCodeGroup
 			, strNote
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
@@ -53,13 +53,15 @@ BEGIN TRY
 			, SOURCE.strDescription
 			, SOURCE.strProductCodeGroup
 			, SOURCE.strNote
+			, SOURCE.intMasterId
 		);
 
-	-- Update existing Product Code associated with Tax Authority Id that is not within Source
+	-- Set insMasterId to 0 for records that are not exist in default data
 	UPDATE tblTFProductCode
-	SET strNote = 'This Product Code is now obsolete'
-	WHERE intTaxAuthorityId = @TaxAuthorityId
-		AND strProductCode NOT IN (SELECT strProductCode FROM @ProductCodes WHERE intTaxAuthorityId = @TaxAuthorityId)
+	SET strNote = 'This Product Code is now obsolete',
+	intMasterId = 0
+	WHERE intTaxAuthorityId = @TaxAuthorityId 
+	AND intMasterId NOT IN (SELECT intMasterId FROM @ProductCodes)	
 
 END TRY
 BEGIN CATCH

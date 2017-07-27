@@ -23,37 +23,48 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 
+	SELECT FP.*, RC.intReportingComponentId
+	INTO #tmpFP
+	FROM @FilingPackets FP
+	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = FP.strFormCode COLLATE Latin1_General_CI_AS
+		AND ISNULL(RC.strScheduleCode, '') COLLATE Latin1_General_CI_AS = ISNULL(FP.strScheduleCode, '') COLLATE Latin1_General_CI_AS
+		AND ISNULL(RC.strType, '') COLLATE Latin1_General_CI_AS = ISNULL(FP.strType, '') COLLATE Latin1_General_CI_AS
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
+
 	MERGE	
 	INTO	tblTFFilingPacket
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT FP.*, RC.intReportingComponentId FROM @FilingPackets FP
-		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = FP.strFormCode COLLATE Latin1_General_CI_AS
-			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = FP.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND RC.strType COLLATE Latin1_General_CI_AS = FP.strType COLLATE Latin1_General_CI_AS
-			AND RC.intTaxAuthorityId = @TaxAuthorityId
+		SELECT * FROM #tmpFP
 	) AS SOURCE
-		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
-			intFrequency				= SOURCE.intFrequency
-	WHEN NOT MATCHED THEN 
+			intFrequency = SOURCE.intFrequency
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxAuthorityId
 			, intReportingComponentId
 			, ysnStatus
 			, intFrequency
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
 			, SOURCE.intReportingComponentId
 			, SOURCE.ysnStatus
 			, SOURCE.intFrequency
+			, SOURCE.intMasterId
 		);
+
+	-- Set insMasterId to 0 for records that are not exist in default data
+	DELETE tblTFFilingPacket
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpFP)
+	AND intTaxAuthorityId = @TaxAuthorityId
+	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpFP)
 
 END TRY
 BEGIN CATCH

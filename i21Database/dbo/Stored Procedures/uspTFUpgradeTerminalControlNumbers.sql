@@ -23,6 +23,13 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 	
+	UPDATE tblTFTerminalControlNumber 
+    SET intMasterId = B.intMasterId 
+    FROM @TerminalControlNumbers B 
+    WHERE tblTFTerminalControlNumber.intTaxAuthorityId = @TaxAuthorityId
+    AND tblTFTerminalControlNumber.strTerminalControlNumber COLLATE Latin1_General_CI_AS = B.strTerminalControlNumber COLLATE Latin1_General_CI_AS
+    AND tblTFTerminalControlNumber.intMasterId IS NULL
+
 	MERGE	
 	INTO	tblTFTerminalControlNumber 
 	WITH	(HOLDLOCK) 
@@ -30,18 +37,18 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @TerminalControlNumbers
 	) AS SOURCE
-		ON TARGET.strTerminalControlNumber COLLATE Latin1_General_CI_AS = SOURCE.strTerminalControlNumber COLLATE Latin1_General_CI_AS
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
-			strName				= SOURCE.strName
+		    strTerminalControlNumber = SOURCE.strTerminalControlNumber
+			,strName				= SOURCE.strName
 			, strAddress		= SOURCE.strAddress  
 			, strCity			= SOURCE.strCity
 			, dtmApprovedDate	= SOURCE.dtmApprovedDate
 			, strZip			= SOURCE.strZip
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intTaxAuthorityId
 			, strTerminalControlNumber
@@ -50,6 +57,7 @@ BEGIN TRY
 			, strCity
 			, dtmApprovedDate
 			, strZip
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
@@ -59,7 +67,15 @@ BEGIN TRY
 			, SOURCE.strCity
 			, SOURCE.dtmApprovedDate
 			, SOURCE.strZip
+			, SOURCE.intMasterId
 		);
+
+	-- Set insMasterId to 0 for records that are not exist in default data
+	UPDATE tblTFTerminalControlNumber
+	SET intMasterId = 0
+	WHERE intTaxAuthorityId = @TaxAuthorityId 
+	AND intMasterId NOT IN (SELECT intMasterId FROM @TerminalControlNumbers)
+		
 	
 END TRY
 BEGIN CATCH

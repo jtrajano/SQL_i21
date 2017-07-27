@@ -4,8 +4,8 @@
 @ReportingComponentId NVARCHAR(MAX),
 @DateFrom DATETIME,
 @DateTo DATETIME,
-@IsEdi NVARCHAR(10),
-@Refresh NVARCHAR(5)
+@IsEdi BIT,
+@Refresh BIT
 
 AS
 
@@ -51,7 +51,7 @@ BEGIN TRY
 	DECLARE @IncludeLocationState NVARCHAR(250)
 	DECLARE @ExcludeLocationState NVARCHAR(250)
 
-	IF (@Refresh = 'true')
+	IF (@Refresh = 1)
 	BEGIN
 		DELETE FROM tblTFTransaction
 	END
@@ -60,6 +60,8 @@ BEGIN TRY
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
+
+	DELETE #tmpRC WHERE intReportingComponentId = ''
 	
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
@@ -104,7 +106,20 @@ BEGIN TRY
 			, strHeaderZip
 			, strHeaderPhone
 			, strHeaderStateTaxID
-			, strHeaderFederalTaxID)
+			, strHeaderFederalTaxID
+			, strTransporterIdType
+			, strVendorIdType
+			, strCustomerIdType
+			, strVendorInvoiceNumber
+			, strCustomerLicenseNumber
+			, strCustomerAccountStatusCode
+			, strCustomerStreetAddress
+			, strCustomerZipCode
+			, strReportingComponentNote
+			, strDiversionNumber
+			, strDiversionOriginalDestinationState
+			, strTransactionType
+			, intTransactionNumberId)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -147,9 +162,21 @@ BEGIN TRY
 			, tblSMCompanySetup.strPhone
 			, tblSMCompanySetup.strStateTaxID
 			, tblSMCompanySetup.strFederalTaxID
+			, strTransporterIdType = 'FEIN'
+			, strVendorIdType = 'FEIN'
+			, strCustomerIdType = 'FEIN'
+			, strVendorInvoiceNumber = NULL
+			, strCustomerLicenseNumber = NULL
+			, strCustomerAccountStatusCode = tblARAccountStatus.strAccountStatusCode
+			, strCustomerStreetAddress = tblEMEntityLocation.strAddress
+			, strCustomerZipCode = tblEMEntityLocation.strZipCode
+			, strReportingComponentNote = tblTFReportingComponent.strNote
+			, strDiversionNumber = NULL
+			, strDiversionOriginalDestinationState = NULL
+			, strTransactionType = 'Invoice'
+			, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 		FROM tblTFProductCode
 		INNER JOIN tblSMTaxCode
-		INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 		INNER JOIN tblARInvoiceDetail
 		INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
 		INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId
@@ -160,6 +187,7 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 		INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 		INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
+		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityId AND tblEMEntityLocation.ysnDefaultLocation = 1
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter
@@ -274,7 +302,20 @@ BEGIN TRY
 			, strHeaderStateTaxID
 			, strHeaderFederalTaxID
 			, dblTax
-			, dblTaxExempt)
+			, dblTaxExempt
+			, strTransporterIdType
+			, strVendorIdType
+			, strCustomerIdType
+			, strVendorInvoiceNumber
+			, strCustomerLicenseNumber
+			, strCustomerAccountStatusCode
+			, strCustomerStreetAddress
+			, strCustomerZipCode
+			, strReportingComponentNote
+			, strDiversionNumber
+			, strDiversionOriginalDestinationState
+			, strTransactionType
+			, intTransactionNumberId)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -321,6 +362,19 @@ BEGIN TRY
 			, tblSMCompanySetup.strFederalTaxID
 			, (ISNULL(tblICInventoryTransferDetail.dblQuantity, 0) * @ConfigGUTRate) AS dblTax
 			, 0.000000 AS dblTaxExempt
+			, strTransporterIdType = 'FEIN'
+			, strVendorIdType = 'FEIN'
+			, strCustomerIdType = 'FEIN'
+			, strVendorInvoiceNumber = NULL
+			, strCustomerLicenseNumber = NULL
+			, strCustomerAccountStatusCode = NULL
+			, strCustomerStreetAddress = NULL
+			, strCustomerZipCode = NULL
+			, strReportingComponentNote = tblTFReportingComponent.strNote
+			, strDiversionNumber = NULL
+			, strDiversionOriginalDestinationState = NULL
+			, strTransactionType = 'Transfer'
+			, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 		FROM tblTFProductCode
 		INNER JOIN tblICInventoryTransferDetail
 		INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
@@ -340,9 +394,7 @@ BEGIN TRY
 		INNER JOIN tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId
 		INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
-		LEFT OUTER JOIN tblTFTaxCategory
-		INNER JOIN tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
-			ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
+		LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
 		LEFT OUTER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId
 		LEFT OUTER JOIN tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId
 		CROSS JOIN tblSMCompanySetup
@@ -360,12 +412,7 @@ BEGIN TRY
 		IF (@ReportingComponentId <> '')
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
-				, intTaxAuthorityId
-				, strTaxAuthority
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
-				, strType
 				, intProductCodeId
 				, strProductCode
 				, intItemId
@@ -406,14 +453,21 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
-				, leaf)
+				, strTransporterIdType
+				, strVendorIdType
+				, strCustomerIdType
+				, strVendorInvoiceNumber
+				, strCustomerLicenseNumber
+				, strCustomerAccountStatusCode
+				, strCustomerStreetAddress
+				, strCustomerZipCode
+				, strReportingComponentNote
+				, strDiversionNumber
+				, strDiversionOriginalDestinationState
+				, strTransactionType
+				, intTransactionNumberId)
 			SELECT DISTINCT @Guid
-				, TRANS.intTaxAuthorityId
-				, strTaxAuthorityCode
-				, strFormCode
 				, intReportingComponentId
-				, strScheduleCode
-				, strType
 				, intProductCode
 				, strProductCode
 				, intItemId
@@ -454,39 +508,45 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, @DateFrom
 				, @DateTo
-				, 1
+				, strTransporterIdType
+				, strVendorIdType
+				, strCustomerIdType
+				, strVendorInvoiceNumber
+				, strCustomerLicenseNumber
+				, strCustomerAccountStatusCode
+				, strCustomerStreetAddress
+				, strCustomerZipCode
+				, strReportingComponentNote
+				, strDiversionNumber
+				, strDiversionOriginalDestinationState
+				, strTransactionType
+				, intTransactionNumberId
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
 
 		END
-		ELSE
-		BEGIN
-			INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
-		END
-
+		
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 	END
 
 	DROP TABLE #tmpRC
 
-	IF (NOT EXISTS(SELECT TOP 1 1 from @TFTransaction) AND @IsEdi = 'false')
+	IF (NOT EXISTS(SELECT TOP 1 1 from @TFTransaction) AND @IsEdi = 0)
 	BEGIN
 		INSERT INTO tblTFTransaction(uniqTransactionGuid
-			, intTaxAuthorityId
-			, strFormCode
+			, intReportingComponentId
 			, strProductCode
 			, dtmDate
 			, dtmReportingPeriodBegin
 			, dtmReportingPeriodEnd
-			, leaf)
+			, strTransactionType)
 		VALUES(@Guid
-			, 0
-			, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId)
+			, @RCId
 			, 'No record found.'
 			, GETDATE()
 			, @DateFrom
 			, @DateTo
-			, 1)
+			, 'Invoice')
 	END
 END TRY
 BEGIN CATCH

@@ -2243,7 +2243,6 @@
     <Build Include="dbo\Tables\tblTFTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityConfiguration.sql" />
     <Build Include="dbo\Tables\tblTFTerminalControlNumber.sql" />
-    <Build Include="dbo\Tables\tblTFDeploymentNote.sql" />
     <Build Include="dbo\Tables\tblCTSpreadArbitrage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStartBlendSheet.sql" />
@@ -2950,8 +2949,6 @@
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentField.sql" />
     <Build Include="dbo\Tables\tblTFTransaction.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionDetail.sql" />
     <Build Include="dbo\Tables\tblTRLoadDistributionHeader.sql" />
     <Build Include="dbo\Tables\tblTRLoadHeader.sql" />
@@ -2987,13 +2984,7 @@
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
-    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
@@ -3903,7 +3894,6 @@
     <Build Include="dbo\Stored Procedures\uspTFGT103InvoiceTax.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMF360.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateGT103.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFDefault.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateSF401.sql" />
     <Build Include="dbo\Stored Procedures\uspTFSF401InvoiceTax.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
@@ -4137,7 +4127,6 @@
     <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
     <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFRefresh.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderDetailReport.sql" />
     <Build Include="dbo\Views\vyuEMBEExportCustomer.sql" />
@@ -4992,7 +4981,6 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherItems.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICPopulateReceiptVoucher.sql" />
-    <Build Include="dbo\Tables\tblTFTransactionException.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetail.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFReceiptItem.sql" />
@@ -5010,7 +4998,6 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentOriginState.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentProductCode.sql" />
     <Build Include="dbo\Views\vyuTFGetTransaction.sql" />
-    <Build Include="dbo\Views\vyuTFGetTransactionException.sql" />
     <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateForm73.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentAccountStatusCode.sql" />
@@ -5019,7 +5006,6 @@
     <Build Include="dbo\Tables\tblICItemSubLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimDM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeSavePriceContract.sql" />
-    <Build Include="dbo\Tables\tblTFTransactionException.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetail.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFReceiptItem.sql" />
@@ -5037,7 +5023,6 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentOriginState.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentProductCode.sql" />
     <Build Include="dbo\Views\vyuTFGetTransaction.sql" />
-    <Build Include="dbo\Views\vyuTFGetTransactionException.sql" />
     <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateForm73.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentAccountStatusCode.sql" />
@@ -5528,6 +5513,19 @@
     <Build Include="dbo\Views\vyuAPBillDetailImport.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherPrepayType.sql" />
     <Build Include="dbo\Views\vyuTMOrderApprovalTransaction.sql" />
+    <Build Include="dbo\Tables\tblSMCleanupLog.sql" />
+    <Build Include="dbo\Tables\tblTFComponentType.sql" />
+    <Build Include="dbo\Tables\tblTFException.sql" />
+    <Build Include="dbo\Views\vyuTFGetTaxAuthorityCustomerLicense.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateILMG.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateILMS.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateRMFT5.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateRMFT5US.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetRCConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFProcessBeforePreview.sql" />
+    <Build Include="dbo\Tables\tblTFOutputDesignerField.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthorityCustomerLicense.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5646,7 +5644,6 @@
     <Build Include="dbo\User Defined Types\TFReportingComponentConfigurations.sql">
       <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
     </Build>
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\00_Cleanup.sql" />
     <None Include="Scripts\Post-Deployment\MF\6_Dashboard.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityCompetitors.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\5_1_MultiCurrency.sql" />
@@ -5720,5 +5717,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\DB\6_PanelOwnerMigration.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\IL_Illinois.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\AfterUpgradeCleanup.sql" />
   </ItemGroup>
 </Project>

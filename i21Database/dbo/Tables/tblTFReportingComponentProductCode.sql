@@ -3,6 +3,7 @@
 	[intReportingComponentId] INT NOT NULL,
 	[intProductCodeId] INT NOT NULL,
 	[strType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intMasterId] INT NULL,
 	[intConcurrencyId] INT DEFAULT((1)) NULL, 
 	CONSTRAINT [PK_tblTFReportingComponentProductCode] PRIMARY KEY ([intReportingComponentProductCodeId]), 
 	CONSTRAINT [AK_tblTFReportingComponentProductCode] UNIQUE ([intReportingComponentId], [intProductCodeId]), 

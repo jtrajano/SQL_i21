@@ -2,6 +2,7 @@
 	AS
 	
 SELECT intReportingComponentConfigurationId
+	, RC.intTaxAuthorityId
 	, RC.intReportingComponentId
 	, RC.strFormCode
 	, RC.strType

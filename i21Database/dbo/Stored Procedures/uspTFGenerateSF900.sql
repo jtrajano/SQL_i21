@@ -3,7 +3,7 @@
 @Guid NVARCHAR(250),
 @FormCodeParam NVARCHAR(MAX),
 @ScheduleCodeParam NVARCHAR(MAX),
-@Refresh NVARCHAR(5)
+@Refresh BIT
 
 AS
 
@@ -40,7 +40,7 @@ DECLARE @tblTempSummaryItem TABLE (
 		Id INT IDENTITY(1,1),
 		TaxReportSummaryItemId INT)
 
-IF @Refresh = 'true'
+IF @Refresh = 1
 		BEGIN
 			DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
 		END

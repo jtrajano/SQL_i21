@@ -27,8 +27,9 @@ BEGIN TRY
 	INTO #tmpRCC
 	FROM @ReportingComponentConfigurations RCC
 	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
-		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
-		AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
+		AND ISNULL(RC.strScheduleCode, '') COLLATE Latin1_General_CI_AS = ISNULL(RCC.strScheduleCode, '') COLLATE Latin1_General_CI_AS
+		AND ISNULL(RC.strType, '') COLLATE Latin1_General_CI_AS = ISNULL(RCC.strType, '') COLLATE Latin1_General_CI_AS
+	WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 
 	MERGE	
 	INTO	tblTFReportingComponentConfiguration
@@ -37,10 +38,8 @@ BEGIN TRY
 	USING (
 		SELECT * FROM #tmpRCC
 	) AS SOURCE
-		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
-			AND TARGET.strTemplateItemId = SOURCE.strTemplateItemId
-		
-
+		ON TARGET.intMasterId = SOURCE.intMasterId
+	
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
@@ -56,7 +55,7 @@ BEGIN TRY
 			, strLastIndexOf			= SOURCE.strLastIndexOf
 			, strSegment				= SOURCE.strSegment
 			, intConfigurationSequence	= SOURCE.intSort
-	WHEN NOT MATCHED THEN 
+	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
 			, strTemplateItemId
@@ -71,6 +70,7 @@ BEGIN TRY
 			, strLastIndexOf
 			, strSegment
 			, intConfigurationSequence
+			, intMasterId
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
@@ -86,21 +86,13 @@ BEGIN TRY
 			, SOURCE.strLastIndexOf
 			, SOURCE.strSegment
 			, SOURCE.intSort
+			, SOURCE.intMasterId
 		);
-
 	
-	-- Delete existing Reporting Component Configuration that is not within Source
-	DELETE FROM tblTFReportingComponentConfiguration
-	WHERE intReportingComponentConfigurationId IN (
-		SELECT DISTINCT RCC.intReportingComponentConfigurationId FROM tblTFReportingComponentConfiguration RCC
-		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
-		LEFT JOIN #tmpRCC tmp ON tmp.intReportingComponentId = RCC.intReportingComponentId
-			AND tmp.strTemplateItemId = RCC.strTemplateItemId
-		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
-			AND ISNULL(tmp.strTemplateItemId, '') = ''
-	)
-
-	DROP TABLE #tmpRCC
+	-- Set insMasterId to 0 for records that are not exist in default data
+	DELETE tblTFReportingComponentConfiguration
+	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpRCC)
+	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpRCC)
 
 END TRY
 BEGIN CATCH

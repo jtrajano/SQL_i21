@@ -8,4 +8,5 @@
 	, strFormat NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	, strFooter NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	, intWidth INT NULL
+	, intMasterId INT NULL
 )
