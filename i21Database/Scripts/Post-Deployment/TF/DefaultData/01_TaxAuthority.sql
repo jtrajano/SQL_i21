@@ -320,7 +320,6 @@ SELECT intComponentTypeId = 1, strComponentType = 'Preview'
 UNION ALL SELECT intComponentTypeId = 2, strComponentType = 'Report'
 UNION ALL SELECT intComponentTypeId = 3, strComponentType = 'EDI'
 UNION ALL SELECT intComponentTypeId = 4, strComponentType = 'EFile'
-UNION ALL SELECT intComponentTypeId = 5, strComponentType = 'EFile Main'
 ) tblPatch
 
 SET IDENTITY_INSERT tblTFComponentType ON
