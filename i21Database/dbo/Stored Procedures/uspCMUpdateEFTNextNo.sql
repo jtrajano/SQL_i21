@@ -25,7 +25,7 @@ BEGIN
 	SELECT * INTO #tmpACHFromCustomer 
 	FROM tblCMUndepositedFund 
 	WHERE intUndepositedFundId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
-		AND intBankFileAuditId IS NULL AND (strReferenceNo = '' OR strReferenceNo IS NULL)
+		AND (strReferenceNo = '' OR strReferenceNo IS NULL)
 
 	WHILE EXISTS (SELECT 1 FROM #tmpACHFromCustomer) 
 	BEGIN
@@ -50,7 +50,7 @@ BEGIN
 	SELECT * INTO #tmpCMBankTransactions 
 	FROM tblCMBankTransaction 
 	WHERE intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
-		AND intBankFileAuditId IS NULL AND (strReferenceNo = '' OR strReferenceNo IS NULL)
+		AND (strReferenceNo = '' OR strReferenceNo IS NULL)
 
 	WHILE EXISTS (SELECT 1 FROM #tmpCMBankTransactions) 
 	BEGIN
