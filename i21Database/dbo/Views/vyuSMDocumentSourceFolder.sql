@@ -4,10 +4,12 @@ AS
 SELECT
 	intDocumentSourceFolderId,
 	intScreenId,
-	strName,
+	A.strName,
 	intSort,
-	intDocumentTypeId,
-	intConcurrencyId,
+	A.intDocumentTypeId,
+	A.intConcurrencyId,
 	intDocumentFolderParentId,
+	strDocumentType = B.strName,
 	leaf = CAST(CASE WHEN (SELECT COUNT(*) FROM tblSMDocumentSourceFolder B WHERE B.intDocumentFolderParentId = A.intDocumentSourceFolderId) = 0 THEN 1 ELSE 0 END AS BIT) 
-from tblSMDocumentSourceFolder A
+FROM tblSMDocumentSourceFolder A
+LEFT JOIN tblSMDocumentType B on A.intDocumentTypeId = B.intDocumentTypeId
