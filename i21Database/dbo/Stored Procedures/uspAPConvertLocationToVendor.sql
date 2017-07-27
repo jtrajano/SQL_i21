@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPConvertLocationToVendor]
 	@EntityLocationId INT,
+	@UserId INT,
 	@ResultMessage NVARCHAR(100) OUTPUT,
 	@EntityIdReturn INT OUTPUT
 AS
@@ -8,16 +9,23 @@ AS
 
 	DECLARE @EntityName AS NVARCHAR(100)
 	DECLARE @DefaultLocation AS BIT
-	SELECT @EntityName = strCheckPayeeName, @DefaultLocation = ysnDefaultLocation FROM tblEMEntityLocation WHERE intEntityLocationId = @EntityLocationId
+	DECLARE @CurrentEntityId AS INT
+	SELECT 
+			@EntityName = strCheckPayeeName, 
+			@DefaultLocation = ysnDefaultLocation,
+			@CurrentEntityId = intEntityId
+		FROM tblEMEntityLocation WHERE intEntityLocationId = @EntityLocationId
 	IF (@EntityName = '')
-	BEGIN
-		SET @ResultMessage = 'Printed name is blank.'
+	BEGIN		
+		RAISERROR('Printed name is blank.', 16, 1);
 		RETURN 0 
 	END
 
 	IF( @DefaultLocation = 1)
 	BEGIN
-		SET @ResultMessage = 'Is set as default location.'
+		
+		RAISERROR('Is set as default location.', 16, 1);
+		
 		RETURN 0
 	END
 
@@ -34,7 +42,7 @@ AS
 
 	IF( @DefaultTerms is null or @DefaultTerms <= 0)
 	BEGIN
-		SET @ResultMessage = 'Default term is not setup in company configuration.'
+		RAISERROR('Default term is not setup in company configuration.', 16, 1);
 		RETURN 0
 	END
 
@@ -74,7 +82,10 @@ AS
 	UPDATE tblEMEntityLocation 
 		SET ysnActive = 0 
 			WHERE intEntityLocationId = @EntityLocationId
-				
+	
+	--RAISERROR('No 1099 setup for vendor', 16, 1);
+	 
+	EXEC uspAPCreateVendor1099Adjustment @UserId, @CurrentEntityId, @EntityNewId			
 	--rollback transaction
 
 	SET @EntityIdReturn = @EntityNewId
