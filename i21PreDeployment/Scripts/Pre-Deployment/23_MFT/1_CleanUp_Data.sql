@@ -193,6 +193,11 @@ BEGIN
 			EXEC('UPDATE tblTFTaxAuthority SET intMasterId = null')
 		END
 
+		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxAuthority' AND COLUMN_NAME = 'ysnFilingForThisTA') 
+		BEGIN
+			EXEC('UPDATE tblTFTaxAuthority SET ysnFilingForThisTA = 0')
+		END
+
 		-- Reporting Component Criteria
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentCriteria') 
 		BEGIN
@@ -223,6 +228,12 @@ BEGIN
 			EXEC('DELETE FROM tblTFReportingComponentOriginState')
 		END
 
+		-- Origin Destination State
+		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFOriginDestinationState') 
+		BEGIN
+			EXEC('DELETE FROM tblTFOriginDestinationState')
+		END
+		
 		-- Reporting Component Product Code
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentProductCode') 
 		BEGIN
