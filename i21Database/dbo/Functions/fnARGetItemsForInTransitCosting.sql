@@ -109,7 +109,7 @@ LEFT OUTER JOIN
 		ON LGL.[intLoadId] = ARI.[intLoadId]
 WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
-	AND ISNULL(LGL.[intPurchaseSale], 0) <> 3
+	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 																												
 	RETURN
 END

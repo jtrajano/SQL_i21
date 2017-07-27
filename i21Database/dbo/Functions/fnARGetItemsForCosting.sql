@@ -153,7 +153,7 @@ WHERE
 	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1))
 	AND ARI.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
-	AND ISNULL(LGL.[intPurchaseSale], 0) <> 3
+	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 
 UNION ALL
 
@@ -219,7 +219,7 @@ WHERE
 	AND ARI.[strTransactionType] <> 'Debit Memo'
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
-	AND ISNULL(LGL.[intPurchaseSale], 0) <> 3		
+	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)		
 																												
 	RETURN
 END
