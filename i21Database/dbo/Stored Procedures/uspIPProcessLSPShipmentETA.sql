@@ -20,7 +20,8 @@ Declare @intMinRowNo int,
 		@strJson NVARCHAR(MAX),
 		@intEntityId INT,
 		@strGMT NVARCHAR(50),
-		@strLoadNumber NVARCHAR(100)
+		@strLoadNumber NVARCHAR(100),
+		@strFinalErrMsg NVARCHAR(MAX)=''
 
 Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
 
@@ -34,8 +35,6 @@ Begin
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
 
 		Select @strLoadNumber=strLoadNumber From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
-
-		Select @strDeliveryNo + ' / ' + ISNULL(@strLoadNumber,'') AS strInfo1,ISNULL(CONVERT(VARCHAR(10),@dtmETA,121),'') AS strInfo2
 
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)
@@ -109,6 +108,7 @@ Begin
 			ROLLBACK TRANSACTION
 
 		SET @ErrMsg = ERROR_MESSAGE()
+		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 		--Move to Error
 		Insert Into tblIPShipmentETAError(strDeliveryNo,dtmETA,strPartnerNo,strImportStatus,strErrorMessage)
@@ -120,6 +120,10 @@ Begin
 
 	Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage Where intStageShipmentETAId>@intMinRowNo
 End
+
+Select @strDeliveryNo + ' / ' + ISNULL(@strLoadNumber,'') AS strInfo1,ISNULL(CONVERT(VARCHAR(10),@dtmETA,121),'') AS strInfo2,@strFinalErrMsg AS strMessage
+
+If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 
 END TRY
 

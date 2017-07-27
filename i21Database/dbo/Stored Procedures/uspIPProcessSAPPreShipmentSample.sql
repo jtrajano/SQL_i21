@@ -48,8 +48,6 @@ Begin
 				@strLotNo=strLotNo
 		From tblIPPreShipmentSampleStage Where intStageSampleId=@intMinRowNo
 
-		Select TOP 1 @strPONo AS strInfo1, @strItemNo + ' / ' +  ISNULL(@strSampleNo,'') AS strInfo2
-
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intContractDetailId=intContractDetailId 
 		From tblCTContractDetail Where strERPPONumber=@strPONo AND intItemId=@intItemId AND CAST(strERPItemNumber AS INT)=CAST(@strPOItemNo AS INT)
@@ -103,6 +101,8 @@ Begin
 	Else
 		Select @intMinRowNo=Min(intStageSampleId) From tblIPPreShipmentSampleStage Where intStageSampleId>@intMinRowNo AND strSessionId=@strSessionId
 End
+
+Select TOP 1 @strPONo AS strInfo1, @strItemNo + ' / ' +  ISNULL(@strSampleNo,'') AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 

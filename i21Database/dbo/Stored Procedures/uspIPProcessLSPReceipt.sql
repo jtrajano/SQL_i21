@@ -52,8 +52,8 @@ Begin
 			RaisError('Invalid Delivery No',16,1)
 
 		--check if Delivery Item No exists in the load or not
-		If Not Exists (Select 1 from tblIPReceiptItemStage Where intStageReceiptId=@intMinRowNo AND dblQuantity>0 
-					AND strDeliveryItemNo in (Select isnull(strExternalContainerId,'') from tblLGLoadDetailContainerLink where intLoadId=@intLoadId))
+		If Exists (Select 1 from tblIPReceiptItemStage Where intStageReceiptId=@intMinRowNo AND dblQuantity>0 
+					AND strDeliveryItemNo not in (Select isnull(strExternalContainerId,'') from tblLGLoadDetailContainerLink where intLoadId=@intLoadId))
 			RaisError('Invalid Delivery Item (90000 series) No',16,1)
 
 		Begin Tran
@@ -168,10 +168,10 @@ Begin
 		Delete From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 	END CATCH
 
-	Select @strDeliveryNo AS strInfo1,@strReceiptNo AS strInfo2
-
 	Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage Where intStageReceiptId>@intMinRowNo
 End
+
+Select @strDeliveryNo AS strInfo1,Case When ISNULL(@strFinalErrMsg,'')<>'' Then @strReceiptNo Else '' End AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 
