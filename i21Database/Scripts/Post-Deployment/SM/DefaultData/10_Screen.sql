@@ -323,6 +323,14 @@ GO
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
         VALUES (N'', N'Contract', N'ContractManagement.view.Contract', N'Contract Management', N'tblCTContractHeader', 1, 1, 1, 0)
 	END	
+
+	--- Tank Management
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'TankManagement.view.Order')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
+        VALUES (N'', N'TM Order', N'TankManagement.view.Order', N'Tank Management', N'', 1,  0)
+    END
+
 	
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
