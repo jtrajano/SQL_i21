@@ -76,8 +76,6 @@ Delete From @tblEntityContactIdOutput
 Select @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency,@strAccountNo=strAccountNo,@ysnDeleted=ISNULL(ysnDeleted,0)
 From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId=@intMinVendor
 
-Select @strAccountNo AS strInfo1,@strVendorName AS strInfo2
-
 Select @intEntityId=intEntityVendorId From tblAPVendor Where strVendorAccountNum=@strAccountNo
 Select @intTermId=intTermID From tblSMTerm Where strTermCode=@strTerm
 Select @intCurrencyId=intCurrencyID From tblSMCurrency Where strCurrency=@strCurrency
@@ -336,6 +334,8 @@ END CATCH
 	Else
 		Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor AND strSessionId=@strSessionId
 End
+
+Select @strAccountNo AS strInfo1,@strVendorName AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 

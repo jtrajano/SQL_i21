@@ -52,8 +52,6 @@ Set @ysnDeleted=0
 Select @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
 @strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage Where intStageItemId=@intMinItem
 
-Select @strItemNo AS strInfo1,@strItemType AS strInfo2
-
 Select @intCategoryId=intCategoryId From tblICCategory Where strCategoryCode=@strItemType
 
 If @strItemType='ZMPN' --Contract Item
@@ -262,6 +260,8 @@ END CATCH
 	Else
 		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem AND strSessionId=@strSessionId
 End
+
+Select @strItemNo AS strInfo1,@strItemType AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 
