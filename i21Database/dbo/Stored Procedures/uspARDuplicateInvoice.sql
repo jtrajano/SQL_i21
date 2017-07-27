@@ -200,19 +200,22 @@ IF @Type = 'Meter Billing'
 		RETURN 0;
 	END
 
---VALIDATE INVOICES THAT HAS CONTRACTS
-IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID 
-			INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
-			INNER JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
-			WHERE ID.intInvoiceId = @InvoiceId
-				AND CH.ysnUnlimitedQuantity = 0
-				AND ISNULL(CD.dblBalance, @ZeroDecimal) - ID.dblQtyShipped < @ZeroDecimal)
+IF @IsCancel = 0
 	BEGIN
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION		
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('There are items that will exceed the contract quantity.', 16, 1)
-		RETURN 0;
+		--VALIDATE INVOICES THAT HAS CONTRACTS
+		IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID 
+					INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
+					INNER JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
+					WHERE ID.intInvoiceId = @InvoiceId
+						AND CH.ysnUnlimitedQuantity = 0
+						AND ISNULL(CD.dblBalance, @ZeroDecimal) - ID.dblQtyShipped < @ZeroDecimal)
+			BEGIN
+				IF ISNULL(@RaiseError,0) = 0
+					ROLLBACK TRANSACTION		
+				IF ISNULL(@RaiseError,0) = 1
+					RAISERROR('There are items that will exceed the contract quantity.', 16, 1)
+				RETURN 0;
+			END
 	END
 
 ----VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Inventory Shipment
