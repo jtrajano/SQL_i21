@@ -15,6 +15,12 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
+	UPDATE tblTFOriginDestinationState
+	SET intMasterId = B.intMasterId
+	FROM @OriginDestinationStates B
+    WHERE tblTFOriginDestinationState.intMasterId IS NULL
+	AND tblTFOriginDestinationState.strOriginDestinationState COLLATE Latin1_General_CI_AS = B.strOriginDestinationState COLLATE Latin1_General_CI_AS
+
 	MERGE	
 	INTO	tblTFOriginDestinationState
 	WITH	(HOLDLOCK) 
