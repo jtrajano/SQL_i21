@@ -553,7 +553,7 @@ SELECT
 	,[strBatchId]
 	,[strPostingError]
 FROM 
-	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @post)
+	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @post, @recap)
 
 IF @post = 1 --delete this part once TM-2455 is done		-start
 	BEGIN											

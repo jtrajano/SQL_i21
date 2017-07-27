@@ -909,7 +909,7 @@ SELECT
 	,[strBatchId]			= IID.[strBatchId]
 	,[strPostingError]		= IID.[strPostingError]
 FROM 
-	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @Post) AS IID
+	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @Post, @Recap) AS IID
 		
 SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 

@@ -2,6 +2,7 @@
 (
 	 @Invoices	[dbo].[InvoicePostingTable] Readonly
 	,@Post		BIT	= 0
+	,@Recap		BIT = 0
 )
 RETURNS @returntable TABLE
 (
@@ -72,12 +73,12 @@ IF(ISNULL(@Post,0)) = 1
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 			,[intItemId]			= I.[intItemId] 
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'You cannot Post transactions you did not create.'
+			,[strPostingError]		= CASE WHEN @Recap = 0 THEN 'You cannot Post transactions you did not create.' ELSE 'You cannot Preview transactions you did not create.' END
 		FROM 					
 			@Invoices I
 		WHERE  
 			I.[intEntityId] <> I.[intUserId]
-			AND (I.[ysnAllowOtherUserToPost] IS NOT NULL AND I.[ysnAllowOtherUserToPost] = 1)
+			AND (I.[ysnAllowOtherUserToPost] IS NOT NULL AND I.[ysnAllowOtherUserToPost] = 1)			
 
 		UNION
 		-- Tank consumption site
@@ -1191,12 +1192,12 @@ ELSE
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'You cannot Unpost transactions you did not create.'
+			,[strPostingError]		=  CASE WHEN @Recap = 0 THEN 'You cannot Unpost transactions you did not create.' ELSE 'You cannot Preview transactions you did not create.' END
 		FROM 					
 			@Invoices I
 		WHERE  
 			I.[intEntityId] <> I.[intUserId]
-			AND (I.[ysnAllowOtherUserToPost] IS NOT NULL AND I.[ysnAllowOtherUserToPost] = 1)
+			AND (I.[ysnAllowOtherUserToPost] IS NOT NULL AND I.[ysnAllowOtherUserToPost] = 1)			
 
 		UNION
 		--ALREADY HAVE PAYMENTS
