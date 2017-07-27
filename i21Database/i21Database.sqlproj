@@ -5522,6 +5522,9 @@
     <Build Include="dbo\Views\vyuRKGetBuySellTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskReportByType.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskReportByTypeDetail.sql" />
+    <Build Include="dbo\Views\vyuAPBillImport.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailImport.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherPrepayType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
