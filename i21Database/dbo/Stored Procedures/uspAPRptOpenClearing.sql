@@ -138,6 +138,8 @@ SET @innerQuery = 'SELECT DISTINCT
 						,strVendorId
 						,strOrderNumber
 						,strTerm
+						,strReceiptNumber
+						,strBillOfLading
 				  FROM dbo.vyuAPClearables'
 
 IF @dateFrom IS NOT NULL
@@ -255,10 +257,10 @@ SET @query = '
 SELECT * FROM (
 	SELECT
 	 DISTINCT
-	 IR.intInventoryReceiptId
-	,IR.dtmReceiptDate
-	,IR.strReceiptNumber
-	,IR.strBillOfLading
+	 tmpAgingSummaryTotal.intInventoryReceiptId
+	,tmpAgingSummaryTotal.dtmReceiptDate
+	,tmpAgingSummaryTotal.strReceiptNumber
+	,tmpAgingSummaryTotal.strBillOfLading
 	,tmpAgingSummaryTotal.strOrderNumber AS strOrderNumber
 	,tmpAgingSummaryTotal.dtmDate
 	,tmpAgingSummaryTotal.dtmDueDate
@@ -298,10 +300,12 @@ SELECT * FROM (
 		,tmpAPClearables.strOrderNumber
 		,tmpAPClearables.strContainer
 		,tmpAPClearables.strVendorId
+		,tmpAPClearables.strReceiptNumber
 		,tmpAPClearables.dtmDate
 		,tmpAPClearables.dtmDueDate
 		,tmpAPClearables.strTerm
 		,tmpAPClearables.dtmReceiptDate
+		,tmpAPClearables.strBillOfLading
 		,SUM(tmpAPClearables.dblVoucherAmount) as dblVoucherAmount
 		,SUM(tmpAPClearables.dblTotal) AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
@@ -315,10 +319,10 @@ SELECT * FROM (
 				+ @innerQuery +
 			   ') tmpAPClearables 
 		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue,strVendorIdName,strContainer,
-				 strVendorId, strBillId ,strOrderNumber,dtmDate,dtmDueDate,dtmReceiptDate,strTerm
+				 strVendorId, strBillId ,strOrderNumber,dtmDate,dtmDueDate,dtmReceiptDate,strTerm,strReceiptNumber,strBillOfLading
 	) AS tmpAgingSummaryTotal
-	INNER JOIN vyuICGetInventoryReceipt IR
-		ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
+	--LEFT JOIN vyuICGetInventoryReceipt IR
+	--	ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
 	--WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
 

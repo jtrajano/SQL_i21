@@ -281,3 +281,77 @@ LEFT JOIN vyuAPVendor Vendor
 WHERE Receipt.ysnPosted = 1 AND ReceiptCharge.ysnAccrue = 1
 	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
+
+UNION ALL  
+--QUERY FOR 3RD PARTY ACRUE VENDOR WITH CHARGES INVENTORY SHIPMENT
+SELECT DISTINCT
+	  dtmReceiptDate = Shipment.dtmShipDate
+	, strReceiptNumber = Shipment.strShipmentNumber 
+	, intInventoryReceiptId = Shipment.intInventoryShipmentId
+	, NULL AS strBillOfLading
+	, '' AS strOrderNumber
+	, dtmDate = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.dtmDate ELSE NULL END 
+	, 0 AS intBillId
+	, strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
+	, dblAmountPaid = 0
+	, dblTotal = (ISNULL(Bill.dblDetailTotal,(ISNULL(dblAmount,0)))) 
+	, ISNULL(CASE 
+		WHEN Bill.intTransactionType != 1 AND Bill.dblDetailTotal > 0 
+		THEN Bill.dblDetailTotal /*+ ISNULL(CASE WHEN ysnCheckoffTax > 0 THEN ReceiptCharge.dblTax ELSE ABS(ReceiptCharge.dblTax) END,0)*/ * -1 
+		ELSE Bill.dblDetailTotal /*+ ISNULL(CASE WHEN ysnCheckoffTax > 0 THEN ReceiptCharge.dblTax ELSE ABS(ReceiptCharge.dblTax) END,0)*/ 
+	  END,0) AS dblAmountDue 
+	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) * -1 ELSE 0 END  
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0 
+	, Vendor.strVendorId 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, Bill.dtmDueDate
+	, Shipment.ysnPosted 
+	, Bill.ysnPaid
+	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
+	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	, dblQtyToReceive = 1
+	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 1 ELSE 0 END 
+	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE 1 END 
+	, dblAmountToVoucher =  CAST(((ISNULL(dblAmount,0)) /*+ (ISNULL(ReceiptCharge.dblTax,0))*/) AS DECIMAL (18,2)) 
+	, 0 AS dblChargeAmount	
+	, ''AS strContainer
+FROM dbo.tblICInventoryShipmentCharge ShipmentCharge
+INNER JOIN tblICInventoryShipment Shipment 
+	ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId AND ShipmentCharge.intEntityVendorId NOT IN (Shipment.intEntityCustomerId)
+LEFT JOIN vyuAPVendor Vendor
+			ON Vendor.intEntityId = ShipmentCharge.intEntityVendorId
+	LEFT JOIN (
+		SELECT DISTINCT 
+			  Header.strBillId
+			, Header.dtmBillDate
+			, Header.dtmDate
+			, Header.dtmDueDate
+			, Header.intBillId
+			, Header.dblAmountDue
+			, Header.intTransactionType
+			, Header.ysnPaid
+			, Header.ysnPosted
+			, Header.intEntityVendorId
+			, Detail.intInventoryShipmentChargeId
+			, Detail.dblQtyReceived
+			, Detail.dblDetailTotal
+			, Header.dblTotal
+			, T.strTerm
+		FROM tblAPBill Header
+		LEFT JOIN dbo.tblSMTerm T  ON Header.intTermsId = T.intTermID
+		OUTER APPLY (
+				SELECT 
+					intInventoryShipmentChargeId,
+					SUM(dblQtyReceived) AS dblQtyReceived,
+					SUM(A.dblTotal)	+ SUM(A.dblTax) AS dblDetailTotal
+				FROM dbo.tblAPBillDetail A
+				WHERE Header.intBillId = A.intBillId AND A.intInventoryShipmentChargeId IS NOT NULL
+				GROUP BY intInventoryShipmentChargeId
+			) Detail		
+		WHERE ISNULL(intInventoryShipmentChargeId, '') <> '' 
+	) Bill ON Bill.intInventoryShipmentChargeId = ShipmentCharge.intInventoryShipmentChargeId AND Bill.intEntityVendorId NOT IN (Shipment.intEntityCustomerId)
+WHERE Shipment.ysnPosted = 1 AND ShipmentCharge.ysnAccrue = 1
+	  AND ShipmentCharge.intInventoryShipmentChargeId NOT IN (SELECT DISTINCT intInventoryShipmentChargeId FROM tblAPBillDetail A
+																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryShipmentChargeId IS NOT NULL AND B.ysnPosted = 1)
