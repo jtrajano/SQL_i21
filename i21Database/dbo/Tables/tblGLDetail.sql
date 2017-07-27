@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblGLDetail] (
     [intGLDetailId]             INT              IDENTITY (1, 1) NOT NULL,
-	[intCompanyId]				INT				 NULL,
+    [intCompanyId] [int] NULL,
+    [intMultiCompanyId] [int] NULL,
     [dtmDate]                   DATETIME         NOT NULL,
     [strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NULL,
@@ -39,7 +40,8 @@
 	[ysnExported] BIT NULL,
 	[dtmExportedDate] DATETIME NULL,
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
-    CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+    CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+    CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])
 );
 GO
 

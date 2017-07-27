@@ -298,4 +298,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\8_AP\1730_FixDataBeforeApplyingConstraints.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\6_GL\MultiCompany.sql" />
+  </ItemGroup>
 </Project>
