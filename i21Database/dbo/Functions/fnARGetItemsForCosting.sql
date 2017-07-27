@@ -126,9 +126,9 @@ FROM
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
-		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent]
+		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId]
 	 FROM @Invoices) ARI
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARI.[strTransactionType]  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
+		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARI.[strTransactionType]  IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
 			AND ISNULL(intPeriodsToAccrue,0) <= 1
 			AND 1 = CASE	
 						WHEN [strTransactionType] = 'Credit Memo'
@@ -142,6 +142,9 @@ LEFT OUTER JOIN
 	(SELECT [intItemId], [intLocationId], [intItemLocationId], [strType], [dblLastCost] FROM vyuICGetItemStock WITH (NOLOCK)) IST
 		ON ARID.[intItemId] = IST.[intItemId]
 		AND ARI.[intCompanyLocationId] = IST.[intLocationId]
+LEFT OUTER JOIN
+    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
+		ON LGL.[intLoadId] = ARI.[intLoadId]
 WHERE				
 	((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], IST.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
@@ -149,7 +152,8 @@ WHERE
 	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
 	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1))
 	AND ARI.[strTransactionType] <> 'Debit Memo'							
-	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)				
+	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
+	AND ISNULL(LGL.[intPurchaseSale], 0) <> 2
 
 UNION ALL
 
@@ -172,7 +176,7 @@ SELECT
 													),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice]
 	,[intCurrencyId]			= ARI.[intCurrencyId]
-	,[dblExchangeRate]			= ARID.intCurrencyExchangeRateTypeId
+	,[dblExchangeRate]			= ARID.[dblCurrencyExchangeRate]
 	,[intTransactionId]			= ARI.[intInvoiceId]
 	,[intTransactionDetailId]	= ARID.[intInvoiceDetailId]
 	,[strTransactionId]			= ARI.[strInvoiceNumber]
@@ -191,7 +195,7 @@ INNER JOIN
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		ON ARIC.[intItemId] = ARID.[intItemId]
 INNER JOIN
-	(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], [intDistributionHeaderId], [intLoadDistributionHeaderId], [strActualCostId], [strImportFormat], [dblSplitPercent] FROM @Invoices) ARI
+	(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], [intDistributionHeaderId], [intLoadDistributionHeaderId], [strActualCostId], [strImportFormat], [dblSplitPercent], [intLoadId] FROM @Invoices) ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]		
 INNER JOIN
 	(SELECT [intItemId] FROM tblICItem WITH (NOLOCK)) ICI
@@ -202,7 +206,10 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	(SELECT [intItemId], [intItemLocationId], intLocationId, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK)) IST
 		ON ARIC.[intComponentItemId] = IST.[intItemId]
-		AND ARI.[intCompanyLocationId] = IST.[intLocationId]			 				 
+		AND ARI.[intCompanyLocationId] = IST.[intLocationId]	
+LEFT OUTER JOIN
+    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
+		ON LGL.[intLoadId] = ARI.[intLoadId]				 				 
 WHERE
 	((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], IST.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest') 
 	AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
@@ -211,7 +218,8 @@ WHERE
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARI.[strTransactionType] <> 'Debit Memo'
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
-	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)			
+	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
+	AND ISNULL(LGL.[intPurchaseSale], 0) <> 2		
 																												
 	RETURN
 END

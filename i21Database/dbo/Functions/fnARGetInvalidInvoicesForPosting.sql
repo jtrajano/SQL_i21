@@ -968,7 +968,7 @@ IF(ISNULL(@Post,0)) = 1
 			AND ISNULL(ARID.[intItemId], 0) <> 0
 			AND (ISNULL(ARIA.[intCOGSAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			AND ISNULL(ICI.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-			AND I.[strTransactionType] <> 'Debit Memo'		
+			AND I.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note')	
 			
 			
 		UNION
@@ -1040,7 +1040,7 @@ IF(ISNULL(@Post,0)) = 1
 			AND ISNULL(ARID.[intItemId], 0) <> 0
 			AND (ISNULL(ARIA.[intInventoryInTransitAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			AND ISNULL(ICI.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-			AND I.[strTransactionType] <> 'Debit Memo'
+			AND I.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note')	
 
 
 		UNION

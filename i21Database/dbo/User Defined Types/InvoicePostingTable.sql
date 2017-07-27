@@ -19,6 +19,7 @@
 	,[strImportFormat]				NVARCHAR(50)	NULL
 	,[intDistributionHeaderId]		INT				NULL
 	,[intLoadDistributionHeaderId]	INT				NULL
+	,[intLoadId]					INT				NULL
 	,[strActualCostId]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL	
 	,[intPeriodsToAccrue]			INT				NULL
 	,[ysnAccrueLicense]				BIT				NULL	

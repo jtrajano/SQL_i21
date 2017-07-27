@@ -114,9 +114,9 @@ FROM
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [dtmShipDate], [intCurrencyId], [intDistributionHeaderId], [intLoadDistributionHeaderId], [strActualCostId], [intCompanyLocationId],
-		[strImportFormat], [ysnImpactInventory], [intPeriodsToAccrue]
+		[strImportFormat], [ysnImpactInventory], [intPeriodsToAccrue], [intLoadId]
 	 FROM @Invoices) ARI
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND [strTransactionType] IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund') AND ISNULL([intPeriodsToAccrue],0) <= 1 
+		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND [strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') AND ISNULL([intPeriodsToAccrue],0) <= 1 
 			AND 1 = CASE WHEN [strTransactionType] = 'Credit Memo' THEN [ysnImpactInventory] ELSE 1 END
 INNER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK) ) ItemUOM 
@@ -125,6 +125,9 @@ LEFT OUTER JOIN
 	(SELECT [intItemId], [intLocationId], [strType], [intItemLocationId], [dblLastCost] FROM vyuICGetItemStock WITH (NOLOCK) ) IST
 		ON ARID.[intItemId] = IST.[intItemId] 
 		AND ARI.[intCompanyLocationId] = IST.[intLocationId]
+LEFT OUTER JOIN
+    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
+		ON LGL.[intLoadId] = ARI.[intLoadId]
 WHERE				
 	((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
@@ -132,7 +135,8 @@ WHERE
 	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
 	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1))
 	AND ARI.[strTransactionType] <> 'Debit Memo'
-	AND (ARID.[intStorageScheduleTypeId] IS NOT NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0)		
+	AND (ARID.[intStorageScheduleTypeId] IS NOT NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0)
+	AND ISNULL(LGL.[intPurchaseSale], 0) <> 2	
 																												
 	RETURN
 END

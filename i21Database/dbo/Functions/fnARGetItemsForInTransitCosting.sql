@@ -104,7 +104,12 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 		[intInTransitSourceLocationId], [ysnIsUnposted]
 	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
 		ON ICIT.[intTransactionId] = ICISI.[intInventoryShipmentId] AND ICIT.[intTransactionDetailId] = ICISI.[intInventoryShipmentItemId] AND [ysnIsUnposted] = 0			 
-WHERE ICIT.[intFobPointId] = @FOB_DESTINATION	
+LEFT OUTER JOIN
+    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
+		ON LGL.[intLoadId] = ARI.[intLoadId]
+WHERE
+	ICIT.[intFobPointId] = @FOB_DESTINATION
+	AND ISNULL(LGL.[intPurchaseSale], 0) <> 2
 																												
 	RETURN
 END
