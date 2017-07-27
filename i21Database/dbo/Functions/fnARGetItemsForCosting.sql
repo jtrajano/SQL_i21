@@ -172,7 +172,7 @@ SELECT
 													),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice]
 	,[intCurrencyId]			= ARI.[intCurrencyId]
-	,[dblExchangeRate]			= ARID.intCurrencyExchangeRateTypeId
+	,[dblExchangeRate]			= ARID.dblCurrencyExchangeRate
 	,[intTransactionId]			= ARI.[intInvoiceId]
 	,[intTransactionDetailId]	= ARID.[intInvoiceDetailId]
 	,[strTransactionId]			= ARI.[strInvoiceNumber]
