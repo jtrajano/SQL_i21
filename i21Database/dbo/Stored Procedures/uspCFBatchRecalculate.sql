@@ -36,7 +36,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intSiteId,intNetworkId,intEntityId,dtmTransactionDate',',') 
+		FROM [fnCFSplitString]('intSiteId,intNetworkId,intCustomerId,dtmTransactionDate',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
