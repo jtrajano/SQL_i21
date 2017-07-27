@@ -6,7 +6,7 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@strRetBatchId NVARCHAR(40) = NULL OUT
 	,@intBatchId INT = NULL
 	,@ysnPostGL BIT=1
-	,@strActualCost NVARCHAR(20) = NULL
+	,@intLoadDistributionDetailId INT = NULL
 	,@dtmDate DATETIME = NULL 
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -182,6 +182,7 @@ SELECT @strRetBatchId = @strBatchId
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
+
 	--Non Lot Tracking
 	INSERT INTO @ItemsForPost (
 		intItemId
@@ -224,13 +225,47 @@ BEGIN
 		,intStorageLocationId = cl.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
-		,strActualCostId=@strActualCost
+		,strActualCostId = BlendItems.strActualCostId
 	FROM dbo.tblMFWorkOrderConsumedLot cl
 	JOIN dbo.tblICItem i ON cl.intItemId = i.intItemId
 	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
 	JOIN dbo.tblICItemLocation il ON i.intItemId = il.intItemId
 		AND il.intLocationId = @intLocationId
 	INNER JOIN dbo.tblICItemPricing IP on IP.intItemId=i.intItemId AND IP.intItemLocationId =il.intItemLocationId
+	JOIN (
+		SELECT DistItem.intLoadDistributionDetailId
+			, DistItem.intItemId
+			, Recipe.intRecipeId
+			, dblQty = dblUnits
+			, Recipe.intItemUOMId
+			, HeaderDistItem.intCompanyLocationId
+			, HeaderDistItem.dtmInvoiceDateTime
+			, strActualCostId = (CASE WHEN MIN(Receipt.strOrigin) = 'Terminal' AND MIN(HeaderDistItem.strDestination) = 'Customer'
+										THEN MIN(LoadHeader.strTransaction)
+									WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) = MIN(HeaderDistItem.intCompanyLocationId)
+										THEN NULL
+									WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) != MIN(HeaderDistItem.intCompanyLocationId)
+										THEN MIN(LoadHeader.strTransaction)
+									WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Location'
+										THEN NULL
+									END)
+		FROM tblTRLoadDistributionDetail DistItem
+		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+		LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+		LEFT JOIN tblMFRecipe Recipe ON Recipe.intItemId = DistItem.intItemId AND Recipe.intLocationId = HeaderDistItem.intCompanyLocationId
+		LEFT JOIN tblMFRecipeItem RecipeItem ON RecipeItem.intRecipeId = Recipe.intRecipeId
+		LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = RecipeItem.intItemId
+		WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
+			AND ysnActive = 1
+			AND ISNULL(DistItem.strReceiptLink, '') = ''
+		GROUP BY DistItem.intLoadDistributionDetailId
+			, DistItem.intItemId
+			, Recipe.intRecipeId
+			, dblUnits
+			, Recipe.intItemUOMId
+			, HeaderDistItem.intCompanyLocationId
+			, HeaderDistItem.dtmInvoiceDateTime
+	) BlendItems ON BlendItems.intItemId = i.intItemId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND ISNULL(cl.intLotId, 0) = 0
 

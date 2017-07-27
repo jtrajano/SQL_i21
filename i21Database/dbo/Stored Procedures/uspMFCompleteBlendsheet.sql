@@ -2,7 +2,7 @@
 	@strXml NVARCHAR(MAX)
 	,@intLotId INT = 0 OUT
 	,@strLotNumber NVARCHAR(50) = '' OUT
-	,@strActualCost NVARCHAR(20) = NULL
+	,@intLoadDistributionDetailId INT = NULL
 	,@dtmCurrentDate DATETIME = NULL 
 )
 AS
@@ -332,7 +332,7 @@ BEGIN TRY
 			,null
 			,null
 			,null
-			,@strActualCost
+			,@intLoadDistributionDetailId
 	END
 	ELSE
 	BEGIN

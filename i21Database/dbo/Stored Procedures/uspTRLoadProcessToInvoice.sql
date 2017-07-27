@@ -363,15 +363,6 @@ BEGIN TRY
 		, dblQty = dblUnits
 		, Recipe.intItemUOMId
 		, HeaderDistItem.intCompanyLocationId
-		, strActualCost = (CASE WHEN MIN(Receipt.strOrigin) = 'Terminal' AND MIN(HeaderDistItem.strDestination) = 'Customer'
-									THEN MIN(LoadHeader.strTransaction)
-								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) = MIN(HeaderDistItem.intCompanyLocationId)
-									THEN NULL
-								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) != MIN(HeaderDistItem.intCompanyLocationId)
-									THEN MIN(LoadHeader.strTransaction)
-								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Location'
-									THEN NULL
-								END)
 		, HeaderDistItem.dtmInvoiceDateTime
 	INTO #tmpBlendDistributionItems
 	FROM tblTRLoadDistributionDetail DistItem
@@ -400,7 +391,6 @@ BEGIN TRY
 			, @LocationId INT
 			, @Qty NUMERIC(18, 6)
 			, @QtyBlended NUMERIC(18, 6)
-			, @ActualCost NVARCHAR(20)
 			, @dtmInvoiceDateTime DATETIME 
 
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
@@ -411,7 +401,6 @@ BEGIN TRY
 				, @ItemUOMId = intItemUOMId
 				, @LocationId = intCompanyLocationId
 				, @Qty = dblQty
-				, @ActualCost = strActualCost
 				, @dtmInvoiceDateTime = dtmInvoiceDateTime
 			FROM #tmpBlendDistributionItems
 
@@ -428,7 +417,6 @@ BEGIN TRY
 					, @intSubLocationId = NULL
 					, @intStorageLocationId = NULL
 					, @intUserId = @intUserId
-					, @strActualCost = @ActualCost
 					, @dblMaxQtyToProduce = @QtyBlended OUTPUT
 					, @dtmDate = @dtmInvoiceDateTime
 				

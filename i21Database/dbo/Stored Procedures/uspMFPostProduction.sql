@@ -23,7 +23,7 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction]
 	,@intTransactionDetailId INT = NULL
 	,@strShiftActivityNo NVARCHAR(50) = NULL
 	,@intShiftId int=NULL
-	,@strActualCost NVARCHAR(20) = NULL
+	,@intLoadDistributionDetailId INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -491,6 +491,34 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
+	DECLARE @strActualCost NVARCHAR(50) = NULL
+
+	SELECT TOP 1 @strActualCost = (CASE WHEN MIN(Receipt.strOrigin) = 'Terminal' AND MIN(HeaderDistItem.strDestination) = 'Customer'
+									THEN MIN(LoadHeader.strTransaction)
+								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) = MIN(HeaderDistItem.intCompanyLocationId)
+									THEN NULL
+								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) != MIN(HeaderDistItem.intCompanyLocationId)
+									THEN MIN(LoadHeader.strTransaction)
+								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Location'
+									THEN NULL
+								END)
+	FROM tblTRLoadDistributionDetail DistItem
+	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+	LEFT JOIN tblMFRecipe Recipe ON Recipe.intItemId = DistItem.intItemId AND Recipe.intLocationId = HeaderDistItem.intCompanyLocationId
+	LEFT JOIN tblMFRecipeItem RecipeItem ON RecipeItem.intRecipeId = Recipe.intRecipeId
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = RecipeItem.intItemId
+	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
+		AND ysnActive = 1
+		AND ISNULL(DistItem.strReceiptLink, '') = ''
+	GROUP BY DistItem.intLoadDistributionDetailId
+		, DistItem.intItemId
+		, Recipe.intRecipeId
+		, dblUnits
+		, Recipe.intItemUOMId
+		, HeaderDistItem.intCompanyLocationId
+		, HeaderDistItem.dtmInvoiceDateTime
+
 	IF @strLotTracking = 'No'
 		INSERT INTO @ItemsForPost (
 			intItemId
@@ -519,25 +547,16 @@ BEGIN
 			,intItemUOMId = @intProduceUOMKey
 			,dtmDate = @dtmProductionDate
 			,dblQty = @dblProduceQty
-			,dblUOMQty =
 			-- Get the unit qty of the Weight UOM or qty UOM
-			CASE 
-				WHEN (@intWeightUOMId = @intProduceUOMKey)
-					THEN (
-							SELECT 1
-							)
-				ELSE (
-						CASE 
-							WHEN @dblUnitQty IS NOT NULL
-								THEN @dblUnitQty
-							ELSE (
-									SELECT TOP 1 dblUnitQty
-									FROM dbo.tblICItemUOM
-									WHERE intItemUOMId = @intProduceUOMKey
-									)
+			,dblUOMQty = CASE WHEN (@intWeightUOMId = @intProduceUOMKey)
+								THEN (SELECT 1)
+							ELSE (CASE WHEN @dblUnitQty IS NOT NULL
+										THEN @dblUnitQty
+									ELSE (SELECT TOP 1 dblUnitQty
+										FROM dbo.tblICItemUOM
+										WHERE intItemUOMId = @intProduceUOMKey)
+									END)
 							END
-						)
-				END
 			,dblCost = @dblNewUnitCost
 			,dblSalesPrice = 0
 			,intCurrencyId = NULL
@@ -580,25 +599,16 @@ BEGIN
 			,intItemUOMId = @intProduceUOMKey
 			,dtmDate = @dtmProductionDate
 			,dblQty = @dblProduceQty
-			,dblUOMQty =
 			-- Get the unit qty of the Weight UOM or qty UOM
-			CASE 
-				WHEN (@intWeightUOMId = @intProduceUOMKey)
-					THEN (
-							SELECT 1
-							)
-				ELSE (
-						CASE 
-							WHEN @dblUnitQty IS NOT NULL
-								THEN @dblUnitQty
-							ELSE (
-									SELECT TOP 1 dblUnitQty
-									FROM dbo.tblICItemUOM
-									WHERE intItemUOMId = @intProduceUOMKey
-									)
-							END
-						)
-				END
+			,dblUOMQty = CASE WHEN (@intWeightUOMId = @intProduceUOMKey)
+								THEN (SELECT 1)
+							ELSE (CASE WHEN @dblUnitQty IS NOT NULL
+										THEN @dblUnitQty
+									ELSE (SELECT TOP 1 dblUnitQty
+										FROM dbo.tblICItemUOM
+										WHERE intItemUOMId = @intProduceUOMKey)
+							END)
+						END
 			,dblCost = @dblNewUnitCost
 			,dblSalesPrice = 0
 			,intCurrencyId = NULL
