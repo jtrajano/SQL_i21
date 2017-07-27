@@ -41,6 +41,7 @@ SELECT
 	strPriceUOM = ItemUOM.strUnitMeasure,
 	AD.ysnSeqSubCurrency,
 	dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM((SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId),AD.intSeqPriceUOMId,AD.dblSeqPrice),
+	AD.dblSeqPrice,
 	WC.ysnPosted,
 	WC.dtmPosted,
 	I.strItemNo,
@@ -71,5 +72,3 @@ LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID = WD.intCurrencyId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = WD.intPriceItemUOMId
 LEFT JOIN tblEMEntity PTEM ON PTEM.intEntityId = WD.intPartyEntityId
 LEFT JOIN tblAPBill BILL ON BILL.intBillId = WD.intBillId
-
-
