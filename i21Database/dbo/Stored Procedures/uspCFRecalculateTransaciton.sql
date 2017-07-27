@@ -45,6 +45,8 @@ CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton]
 ,@strGUID							NVARCHAR(MAX)	= ''
 ,@strProcessDate					NVARCHAR(MAX)	= ''
 
+,@BatchRecalculate					BIT				=	0
+
 AS
 
 BEGIN
@@ -1955,7 +1957,104 @@ BEGIN
 	--	SET @dblTransferCost = @dblCalculatedCost -- calculated based on transaction type. (margin calc)
 
 	--END
+	IF(ISNULL(@BatchRecalculate,0) = 1)
+	BEGIN
+		
 
+		BEGIN TRY
+			BEGIN TRANSACTION
+			---------------------------------------------------------------------------
+			UPDATE tblCFTransaction
+			SET
+			 dblTransferCost		   = @dblTransferCost		
+			,strPriceMethod			   = @strPriceMethod		
+			,intContractId			   = @intContractHeaderId
+			,intContractDetailId	   = @intContractDetailId
+			,strPriceBasis			   = @strPriceBasis			
+			,intPriceProfileId		   = @intPriceProfileId		
+			,intPriceIndexId 		   = @intPriceIndexId 		
+			,dblPriceProfileRate	   = @dblPriceProfileRate
+			,dblPriceIndexRate		   = @dblPriceIndexRate		
+			,dtmPriceIndexDate		   = @dtmPriceIndexDate		
+			,ysnDuplicate			   = @ysnDuplicate			
+			,ysnInvalid				   = @ysnInvalid	
+			WHERE intTransactionId	   = @intTransactionId
+			---------------------------------------------------------------------------
+			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId
+			INSERT INTO tblCFTransactionTax
+			(
+				 dblTaxCalculatedAmount
+				,dblTaxOriginalAmount
+				,intTaxCodeId
+				,dblTaxRate 
+				,intTransactionId
+			)
+			SELECT 
+				dblCalculatedTax AS 'dblTaxCalculatedAmount'
+				,dblOriginalTax AS 'dblTaxOriginalAmount'
+				,intTaxCodeId
+				,dblRate AS 'dblTaxRate'
+				,intTransactionId = @intTransactionId
+			FROM @tblCFTransactionTax AS T
+			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+			---------------------------------------------------------------------------
+			DELETE tblCFTransactionPrice WHERE intTransactionId = @intTransactionId
+			INSERT INTO tblCFTransactionPrice
+			(
+			strTransactionPriceId
+			,dblOriginalAmount
+			,dblCalculatedAmount
+			,intTransactionId
+			)
+			SELECT 
+			[strTransactionPriceId]
+			,[dblOriginalAmount]	
+			,[dblCalculatedAmount]
+			,@intTransactionId
+			FROM @tblTransactionPrice
+			---------------------------------------------------------------------------
+
+			DECLARE @strNewPriceMethod AS NVARCHAR(MAX)
+			DECLARE @dblNewTotalAmount AS NUMERIC(18,6)
+
+			SELECT TOP 1
+			@strNewPriceMethod = cfTrans.strPriceMethod
+			,@dblNewTotalAmount = cfTransPrice.dblCalculatedAmount
+			FROM tblCFTransaction cfTrans
+			LEFT OUTER JOIN 
+			(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			FROM         dbo.tblCFTransactionPrice 
+			WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice 
+			ON cfTrans.intTransactionId = cfTransPrice.intTransactionId
+			WHERE cfTrans.intTransactionId = @intTransactionId
+
+			UPDATE tblCFBatchRecalculateStagingTable 
+			SET strNewPriceMethod = @strNewPriceMethod 
+			,dblNewTotalAmount = @dblNewTotalAmount 
+			,strStatus = 'Done'
+			WHERE intTransactionId = @intTransactionId
+
+			COMMIT TRANSACTION
+
+
+		END TRY
+		BEGIN CATCH
+
+			ROLLBACK TRANSACTION
+
+			UPDATE tblCFBatchRecalculateStagingTable 
+			SET strStatus = 'Error ' + ERROR_MESSAGE()
+			WHERE intTransactionId = @intTransactionId
+
+
+
+
+		END CATCH
+
+
+	END
+	ELSE
+	BEGIN
 	---------------------------------------------------
 	--					PRICING OUT					 --
 	---------------------------------------------------
@@ -2151,6 +2250,7 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT * FROM @tblTransactionPrice
+	END
 	END
 	---------------------------------------------------
 	--					PRICE OUT					 --
