@@ -47,7 +47,7 @@ BEGIN
 					,[intOrder]         				  
 		   			,[strEFTType]				
 		   			,[intConcurrencyId])
-		SELECT CUS.[intEntityCustomerId] --[intEntityId]            
+		SELECT CUS.intEntityId --[intEntityId]            
 		   	,BNK.[intBankId] --[intBankId]              
 		   	,BNK.[strBankName] --[strBankName]            
 		   	,EFT.efeft_account_no--[strAccountNumber]        
@@ -72,7 +72,7 @@ BEGIN
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = EFT.efeft_eft_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		LEFT  JOIN ssbnkmst OBNK ON OBNK.ssbnk_code = EFT.efeft_bnk_no
 		INNER JOIN tblCMBank BNK ON BNK.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS = OBNK.ssbnk_name COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE EFT.efeft_eft_type_cv = 'C' AND  CUS.intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM [tblEMEntityEFTInformation] WHERE intEntityId = CUS.intEntityCustomerId
+		WHERE EFT.efeft_eft_type_cv = 'C' AND  CUS.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = CUS.intEntityId
 		AND (CASE WHEN EFT.efeft_src_sys ='AP' THEN 'Accounts Payable' WHEN EFT.efeft_src_sys ='AR' THEN 'Accounts Receivable' ELSE 'Payroll' END) = [strEFTType])
 
 		INSERT INTO [dbo].[tblEMEntityEFTInformation]
@@ -93,7 +93,7 @@ BEGIN
 					,[intOrder]         				  
 		   			,[strEFTType]				
 		   			,[intConcurrencyId])
-		SELECT VND.intEntityVendorId --[intEntityId]            
+		SELECT VND.intEntityId --[intEntityId]            
 		   	,BNK.[intBankId] --[intBankId]              
 		   	,BNK.[strBankName] --[strBankName]            
 		   	,EFT.efeft_account_no--[strAccountNumber]        
@@ -118,7 +118,7 @@ BEGIN
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = EFT.efeft_eft_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		LEFT  JOIN ssbnkmst OBNK ON OBNK.ssbnk_code = EFT.efeft_bnk_no
 		INNER JOIN tblCMBank BNK ON BNK.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS = OBNK.ssbnk_name COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE EFT.efeft_eft_type_cv = 'V' AND  VND.intEntityVendorId NOT IN (SELECT intEntityVendorId FROM [tblEMEntityEFTInformation] WHERE intEntityId = VND.intEntityVendorId
+		WHERE EFT.efeft_eft_type_cv = 'V' AND  VND.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = VND.intEntityId
 		AND (CASE WHEN EFT.efeft_src_sys ='AP' THEN 'Accounts Payable' WHEN EFT.efeft_src_sys ='AR' THEN 'Accounts Receivable' ELSE 'Payroll' END) = [strEFTType])
 	END
 
@@ -131,7 +131,7 @@ BEGIN
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = EFT.efeft_eft_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		LEFT  JOIN ssbnkmst OBNK ON OBNK.ssbnk_code = EFT.efeft_bnk_no
 		INNER JOIN tblCMBank BNK ON BNK.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS = OBNK.ssbnk_name COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE  EFT.efeft_eft_type_cv = 'C' AND CUS.intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM [tblEMEntityEFTInformation] WHERE intEntityId = CUS.intEntityCustomerId
+		WHERE  EFT.efeft_eft_type_cv = 'C' AND CUS.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = CUS.intEntityId
 		AND (CASE WHEN EFT.efeft_src_sys ='AP' THEN 'Accounts Payable' WHEN EFT.efeft_src_sys ='AR' THEN 'Accounts Receivable' ELSE 'Payroll' END) = [strEFTType])
 
 		SET @Total = @Total + (SELECT COUNT(efeft_eft_no)
@@ -139,7 +139,7 @@ BEGIN
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = EFT.efeft_eft_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		LEFT  JOIN ssbnkmst OBNK ON OBNK.ssbnk_code = EFT.efeft_bnk_no
 		INNER JOIN tblCMBank BNK ON BNK.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS = OBNK.ssbnk_name COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE EFT.efeft_eft_type_cv = 'V' AND  VND.intEntityVendorId NOT IN (SELECT intEntityVendorId FROM [tblEMEntityEFTInformation] WHERE intEntityId = VND.intEntityVendorId
+		WHERE EFT.efeft_eft_type_cv = 'V' AND  VND.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = VND.intEntityId
 		AND (CASE WHEN EFT.efeft_src_sys ='AP' THEN 'Accounts Payable' WHEN EFT.efeft_src_sys ='AR' THEN 'Accounts Receivable' ELSE 'Payroll' END) = [strEFTType]))
 
 		RETURN @Total
