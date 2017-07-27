@@ -3676,8 +3676,8 @@ IF @Recap = 0
 							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice, Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
 						FROM dbo.tblARInvoice WITH (NOLOCK)
 						WHERE intInvoiceId IN (SELECT [intHeaderId] FROM @InvoiceToUpdate)
-						GROUP BY intEntityCustomerId
-			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
+						GROUP BY intEntityId
+			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityId
 
 		DELETE dbo.tblARPrepaidAndCredit  
 		FROM 
