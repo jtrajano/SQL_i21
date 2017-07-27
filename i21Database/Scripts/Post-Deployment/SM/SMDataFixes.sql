@@ -204,6 +204,19 @@ GO
 		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Screens)', 'Arrange User Role Menus - Role Menu (Screens)', GETDATE())
 	END
 
+	/* ARRANGE CONTACT ROLE MENUS SCREENS */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange Contact Role Menus - Role Menu (Screens)')
+	BEGIN
+		UPDATE RoleMenu SET intSort = ISNULL(MasterMenu.intSort, 0)
+		FROM tblSMUserRoleMenu RoleMenu
+		INNER JOIN tblSMMasterMenu MasterMenu ON RoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE intUserRoleId IN (SELECT intUserRoleID FROM tblSMUserRole WHERE strRoleType IN ('Portal Default', 'Contact Admin', 'Contact'))
+
+		PRINT N'ARRANGE CONTACT ROLE MENUS (Screens)'
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Arrange Contact Role Menus - Role Menu (Screens)', 'Arrange Contact Role Menus - Role Menu (Screens)', GETDATE())
+	END
+
 GO
 	/* REPLACE ActivityEmail-1 TO 1 */
 	--UPDATE tblSMTransaction SET strRecordNo = '0'

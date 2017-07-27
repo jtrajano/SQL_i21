@@ -4568,6 +4568,9 @@ INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@AccountsReceivableP
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @AccountsReceivableActivitiesParentMenuId)
 INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@AccountsReceivableActivitiesParentMenuId)
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @AccountsReceivableMaintenanceParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@AccountsReceivableMaintenanceParentMenuId)
+
 DECLARE @InvoicesMenuId INT
 SELECT  @InvoicesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Invoices' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Invoices' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
@@ -4576,19 +4579,11 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@InvoicesMenuId)
 END
 
-DECLARE @CustomerContactListMenuId INT
-SELECT  @CustomerContactListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Customer Contact List' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableMaintenanceParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Customer Contact List' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableMaintenanceParentMenuId)
-BEGIN
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CustomerContactListMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CustomerContactListMenuId)
-END
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Customer', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Customer', N'Activity', N'Screen', N'AccountsReceivable.view.EntityCustomer', N'small-menu-activity', 1, 0, 0, 1, NULL, 1)
+	VALUES (N'Customer', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Customer', N'Activity', N'Screen', N'AccountsReceivable.view.EntityCustomer', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsReceivable.view.EntityCustomer' WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = 'AccountsReceivable.view.EntityCustomer' WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 
 DECLARE @CustomerMenuId INT
 SELECT  @CustomerMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
@@ -4598,6 +4593,28 @@ BEGIN
 		INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CustomerMenuId, 1)
 	ELSE
 		UPDATE tblSMContactMenu SET ysnContactOnly = 1 WHERE intMasterMenuId = @CustomerMenuId
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Make Payments', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Make Payments', N'Activity', N'Screen', N'AccountsReceivable.view.MakePayments', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'AccountsReceivable.view.MakePayments' WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+
+DECLARE @MakePaymentsMenuId INT
+SELECT  @MakePaymentsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @MakePaymentsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@MakePaymentsMenuId, 1)
+END
+
+DECLARE @CustomerContactListMenuId INT
+SELECT  @CustomerContactListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Customer Contact List' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableMaintenanceParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Customer Contact List' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableMaintenanceParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CustomerContactListMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CustomerContactListMenuId)
 END
 
 /* PURCHASING */
