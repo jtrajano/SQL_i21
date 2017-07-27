@@ -3,6 +3,7 @@
 SELECT	A.intEntityId, 
 		D.strName,
 		D.strEntityNo,
+		strEntityAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Loc.strAddress, Loc.strCity, Loc.strState, Loc.strZipCode, Loc.strCountry, NULL, NULL),
 		C.strStockStatus,
 		C.dtmBirthDate,
 		C.dtmDeceasedDate,
@@ -18,4 +19,14 @@ JOIN tblARCustomer C
 	ON A.intEntityId = C.intEntityId
 JOIN tblEMEntity D
 	ON A.intEntityId = D.intEntityId
+LEFT OUTER JOIN (
+	SELECT	intEntityId,
+			strAddress,
+			strCity,
+			strCountry,
+			strState,
+			strZipCode
+	FROM tblEMEntityLocation
+	WHERE ysnDefaultLocation = 1
+) Loc ON Loc.intEntityId = D.intEntityId
 WHERE A.Customer = 1 AND A.Vendor = 1

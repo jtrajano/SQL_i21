@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuPATEquityPaymentDetail]
 	AS
-SELECT	NEWID() as id,
+SELECT	CAST(ROW_NUMBER() OVER (ORDER BY EP.intEquityPayId) AS INT) as id,
 		EP.intEquityPayId,
 		EP.strPaymentNumber,
 		EP.dblPayoutPercent,

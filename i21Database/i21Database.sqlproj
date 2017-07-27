@@ -5526,6 +5526,7 @@
     <Build Include="dbo\Stored Procedures\uspTFProcessBeforePreview.sql" />
     <Build Include="dbo\Tables\tblTFOutputDesignerField.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityCustomerLicense.sql" />
+    <Build Include="dbo\Views\vyuPATDividendsCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
