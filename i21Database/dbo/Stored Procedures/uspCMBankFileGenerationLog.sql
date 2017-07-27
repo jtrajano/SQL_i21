@@ -140,5 +140,22 @@ BEGIN
 		WHERE A.intBankAccountId = @intBankAccountId
 		AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 
+		--Update the reference no of other module's transaction
+		--AP
+		UPDATE tblAPPayment SET strPaymentInfo = B.strReferenceNo 
+		FROM tblAPPayment A
+		INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE B.intBankAccountId = @intBankAccountId 
+			AND B.intBankTransactionTypeId = 16
+			AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+		--PR
+		UPDATE tblPRPaycheck SET strReferenceNo = B.strReferenceNo 
+		FROM tblPRPaycheck A
+		INNER JOIN tblCMBankTransaction B ON A.strPaycheckId = B.strTransactionId
+		WHERE B.intBankAccountId = @intBankAccountId 
+			AND B.intBankTransactionTypeId = 16
+			AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+		
+
 	END
 END
