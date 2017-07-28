@@ -78,9 +78,9 @@ SELECT
 	[strTaxCode]				=	D.strTaxCode
 FROM tblPOPurchaseDetailTax A
 INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
-INNER JOIN tblICItem C ON B.intItemId = C.intItemId
-INNER JOIN tblSMTaxCode D ON D.intTaxCodeId = A.intTaxCodeId
-WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
+LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
+LEFT JOIN tblSMTaxCode D ON D.intTaxCodeId = A.intTaxCodeId
+WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR B.intItemId IS NULL
 UNION ALL
 -- INVENTORY SHIPMENT CHARGES
 SELECT DISTINCT

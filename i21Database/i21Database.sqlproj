@@ -5528,6 +5528,7 @@
     <Build Include="dbo\Tables\tblTFTaxAuthorityCustomerLicense.sql" />
     <Build Include="dbo\Views\vyuPATDividendsCustomer.sql" />
     <Build Include="dbo\Views\vyuMFTask.sql" />
+    <Build Include="dbo\Functions\fnAPGetPaymentAmountFactor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

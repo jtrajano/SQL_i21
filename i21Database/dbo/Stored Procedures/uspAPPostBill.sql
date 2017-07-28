@@ -373,6 +373,7 @@ BEGIN
 	    dblForeignRate ,
 	    strRateType 	 
 	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
+	ORDER BY intTransactionId
 
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN

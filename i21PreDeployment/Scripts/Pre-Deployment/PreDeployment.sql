@@ -89,6 +89,7 @@
 --:r .\8_AP\FixPaymentWithoutVendorId.sql
 :r .\8_AP\UpdateVoucherPrepay.sql
 :r .\8_AP\UpdatePaymentPayToAddress.sql
+:r .\8_AP\UpdateVoucherDetailRate.sql
 
 -- FRD
 :r .\9_FRD\1_1420_to_1430.sql

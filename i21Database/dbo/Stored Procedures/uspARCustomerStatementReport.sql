@@ -485,6 +485,7 @@ BEGIN
 	(
 	SELECT MAINREPORT.* 
 		  ,dblCreditAvailable							= MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+		  ,dblFuture									= ISNULL(AGINGREPORT.dblFuture, 0)
 		  ,dbl0Days										= ISNULL(AGINGREPORT.dbl0Days, 0)
 		  ,dbl10Days									= ISNULL(AGINGREPORT.dbl10Days, 0)
 		  ,dbl30Days									= ISNULL(AGINGREPORT.dbl30Days, 0)
@@ -595,6 +596,7 @@ ELSE
 	--- Without CF Report
 	SELECT MAINREPORT.* 
 		  ,dblCreditAvailable							= MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+		  ,dblFuture									= ISNULL(AGINGREPORT.dblFuture, 0)
 		  ,dbl0Days										= ISNULL(AGINGREPORT.dbl0Days, 0)
 		  ,dbl10Days									= ISNULL(AGINGREPORT.dbl10Days, 0)
 		  ,dbl30Days									= ISNULL(AGINGREPORT.dbl30Days, 0)

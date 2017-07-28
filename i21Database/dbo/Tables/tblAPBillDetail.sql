@@ -31,7 +31,7 @@
     [dblCost] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblOldCost] DECIMAL(18, 6) NULL, 
     [dblLandedCost] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[dblRate] DECIMAL(18, 6) NOT NULL DEFAULT 0,  
+	[dblRate] DECIMAL(18, 6) NOT NULL DEFAULT 1,  
 	[dblTax] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblActual] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblDifference] DECIMAL(18, 6) NOT NULL DEFAULT 0, 

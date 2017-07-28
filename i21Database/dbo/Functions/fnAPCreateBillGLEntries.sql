@@ -55,21 +55,21 @@ BEGIN
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
 	-- Get Total Value of Other Charges Taxes
-	 SELECT @ReceiptId = IRI.intInventoryReceiptId
-	 	 FROM tblAPBillDetail APB
-	 INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = APB.intInventoryReceiptItemId
-	 WHERE APB.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	 --SELECT @ReceiptId = IRI.intInventoryReceiptId
+	 --	 FROM tblAPBillDetail APB
+	 --INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = APB.intInventoryReceiptItemId
+	 --WHERE APB.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	 --print @ReceiptId
 
-	  SELECT TOP 1 @VendorId = intEntityVendorId FROM tblAPBill WHERE intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	  --SELECT TOP 1 @VendorId = intEntityVendorId FROM tblAPBill WHERE intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 
-	 SELECT @OtherChargeTaxes = SUM(CASE 
-			  WHEN ReceiptCharge.ysnPrice = 1
-			   THEN ISNULL(ReceiptCharge.dblTax,0) * -1
-			  ELSE ISNULL(ReceiptCharge.dblTax,0) 
-			 END )
-	 FROM tblICInventoryReceiptCharge ReceiptCharge
-	 WHERE ReceiptCharge.intInventoryReceiptId = @ReceiptId AND ReceiptCharge.intEntityVendorId = @VendorId --get the charges only for that vendor
+	 --SELECT @OtherChargeTaxes = SUM(CASE 
+		--	  WHEN ReceiptCharge.ysnPrice = 1
+		--	   THEN ISNULL(ReceiptCharge.dblTax,0) * -1
+		--	  ELSE ISNULL(ReceiptCharge.dblTax,0) 
+		--	 END )
+	 --FROM tblICInventoryReceiptCharge ReceiptCharge
+	 --WHERE ReceiptCharge.intInventoryReceiptId = @ReceiptId AND ReceiptCharge.intEntityVendorId = @VendorId --get the charges only for that vendor
 	 --print @OtherChargeTaxes
 
 	INSERT INTO @returntable
@@ -90,10 +90,10 @@ BEGIN
 											--Subtract the payment on detail total using percentage
 											CAST(((CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
 													 ELSE Details.dblTotal END) - (CASE WHEN A.intTransactionType IN (2, 3, 11) 
-																							THEN (ISNULL(A.dblPayment,0) / Details.dblTotal) * Details.dblTotal * -1 
-																							ELSE (ISNULL(A.dblPayment,0) / Details.dblTotal) * Details.dblTotal END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+																							THEN (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal * -1 
+																							ELSE (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	0,--ISNULL(units.dblTotalUnits,0),
+		[dblCreditUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
@@ -122,11 +122,13 @@ BEGIN
 		[dblCreditForeign]				=	CAST(
 											(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
 												 ELSE Details.dblTotal END)
-											AS DECIMAL(18,2)),
+											AS DECIMAL(18,2)) -  (CASE WHEN A.intTransactionType IN (2, 3, 11) 
+																							THEN (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal * -1 
+																							ELSE (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal END),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
-		[strRateType]                    =    Details.strCurrencyExchangeRateType,
+		[strRateType]                   =    Details.strCurrencyExchangeRateType,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
 			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
@@ -242,7 +244,7 @@ BEGIN
 														END
 												* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) , --Bill Detail
 		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	0,--ISNULL(units.dblTotalUnits,0),
+		[dblDebitUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
@@ -453,7 +455,7 @@ BEGIN
 													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
 											END AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	0,--ISNULL(units.dblTotalUnits,0),
+		[dblDebitUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
@@ -591,7 +593,7 @@ BEGIN
 				ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
-			INNER JOIN tblICItem B2
+			LEFT JOIN tblICItem B2
 				ON B.intItemId = B2.intItemId
 			LEFT JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
