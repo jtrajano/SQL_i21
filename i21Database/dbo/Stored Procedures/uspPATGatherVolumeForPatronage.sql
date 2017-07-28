@@ -51,7 +51,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblAPBillDetail ABD
 					ON ABD.intBillId = AB.intBillId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityCustomerId = AB.intEntityVendorId AND ARC.strStockStatus != ''
+					ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
 			INNER JOIN vyuEMEntityType ET
 					ON ET.intEntityId = AB.intEntityVendorId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
@@ -81,9 +81,9 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblARInvoiceDetail ARD
 					ON ARD.intInvoiceId = AR.intInvoiceId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityCustomerId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
+					ON ARC.intEntityId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
 			INNER JOIN vyuEMEntityType ET
-					ON ET.intEntityId = ARC.intEntityCustomerId AND Customer = 1 AND Vendor = 1
+					ON ET.intEntityId = ARC.intEntityId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
 					ON IC.intItemId = ARD.intItemId
 			INNER JOIN tblICItemUOM ICU
@@ -127,7 +127,7 @@ SET ANSI_WARNINGS OFF
 				INNER JOIN tblAPBillDetail ABD
 					ON ABD.intBillId = AB.intBillId
 				INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityCustomerId = AB.intEntityVendorId AND ARC.strStockStatus != ''
+					ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
 				INNER JOIN vyuEMEntityType ET
 					ON ET.intEntityId = AB.intEntityVendorId AND Customer = 1 AND Vendor = 1
 				INNER JOIN tblICItem IC
@@ -135,7 +135,7 @@ SET ANSI_WARNINGS OFF
 				INNER JOIN tblPATPatronageCategory PC
 					ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_PURCHASE
 				WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds)
-		) APB ON APB.intEntityVendorId = ARC.intEntityCustomerId
+		) APB ON APB.intEntityVendorId = ARC.intEntityId
 
 		IF(@post = 1)
 		BEGIN
@@ -150,7 +150,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblAPBillDetail ABD
 				ON ABD.intBillId = AB.intBillId
 			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityCustomerId = AB.intEntityVendorId AND ARC.strStockStatus != ''
+				ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
 			INNER JOIN vyuEMEntityType ET
 				ON ET.intEntityId = AB.intEntityVendorId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
@@ -184,7 +184,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_SALE
 			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds)
-		) ARI ON ARI.intEntityCustomerId = ARC.intEntityCustomerId
+		) ARI ON ARI.intEntityCustomerId = ARC.intEntityId
 
 		IF(@post = 1)
 		BEGIN
@@ -199,7 +199,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblARInvoiceDetail ARD
 					ON ARD.intInvoiceId = AR.intInvoiceId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityCustomerId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
+					ON ARC.intEntityId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
 			INNER JOIN vyuEMEntityType ET
 					ON ET.intEntityId = AR.intEntityCustomerId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
