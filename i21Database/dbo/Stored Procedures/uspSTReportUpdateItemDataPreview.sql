@@ -4,17 +4,13 @@ AS
 
 BEGIN TRY
 
-	--INSERT INTO TestDatabase.dbo.tblPerson(strFirstName)
-	--VALUES(@xmlParam)
-	--SELECT * FROM TestDatabase.dbo.tblPerson
-
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	--START Handle xml Param
 	DECLARE @strCompanyLocationId 	   NVARCHAR(MAX),
 			@strVendorId               NVARCHAR(MAX),
 			@strCategoryId             NVARCHAR(MAX),
-			@strFamilyId               NVARCHAR(MAX),
+			@Family               NVARCHAR(MAX),
 			@strClassId                NVARCHAR(MAX),
 			@intUpcCode                INT,
 			@strDescription            NVARCHAR(250),
@@ -109,7 +105,7 @@ BEGIN TRY
 	WHERE [fieldname] = 'strCategoryId'
 
 	--strFamilyId
-	SELECT @strFamilyId = [from]
+	SELECT @Family = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strFamilyId'
 
@@ -337,9 +333,11 @@ BEGIN TRY
 		, strChangeDescription NVARCHAR(100)
 		, strOldData NVARCHAR(MAX)
 		, strNewData NVARCHAR(MAX)
+		, intParentId INT
+		, intChildId INT
 	)
 
-	DECLARE @strFamilyIdId NVARCHAR(250)
+	DECLARE @FamilyId NVARCHAR(250)
 	DECLARE @strClassIdId  NVARCHAR(250)
 	DECLARE @ProductCode NVARCHAR(250)
 	DECLARE @strVendorIdId NVARCHAR(250)
@@ -354,135 +352,159 @@ BEGIN TRY
 	SELECT @CompanyCurrencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 
 	DECLARE @SqlQuery1 as NVARCHAR(MAX)
+
+	 --PRINT '@strTaxFlag1ysn'
 	 -----------------------------------Handle Dynamic Query 1
 	 IF (@strTaxFlag1ysn IS NOT NULL)
 	 BEGIN
-		 IF (@strDepositRequiredysn IS NOT NULL)
-		 BEGIN
-				SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+		 --IF (@strDepositRequiredysn IS NOT NULL)
+		 --BEGIN
+		 --END
+		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
-					', ''Tax Flag1'''
-					, ', CASE WHEN a.ysnTaxFlag1 = 0 THEN ''No'' ELSE ''Yes'' END'
-					, ', ''' + CASE WHEN @strTaxFlag1ysn = 0 THEN 'No' ELSE 'Yes' END +''''
+					'Tax Flag1'
+					, 'CASE WHEN a.ysnTaxFlag1 = 0 THEN ''No'' ELSE ''Yes'' END'
+					, 'CASE WHEN ' + CAST(@strTaxFlag1ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 					, @strCompanyLocationId
 					, @strVendorId
 					, @strCategoryId
-					, @strFamilyId
+					, @Family
 					, @strClassId
 					, @intUpcCode
 					, @strDescription
 					, @dblPriceBetween1
 					, @dblPriceBetween2
+					, 'd.intItemId'
+					, 'a.intItemLocationId' 
 				)
+
+				----TEST
+				--INSERT INTO TestDatabase.dbo.tblPerson(strFirstName, strLastName)
+				--VALUES(@SqlQuery1, 'Tax Flag1')
 
 			INSERT @tblUpdateItemDataPreview
 			EXEC (@SqlQuery1) 
-
-		 END
 	 END 
 
+
+	 --PRINT '@strTaxFlag2ysn'
 	 -----------------------------------Handle Dynamic Query 2
 	 IF (@strTaxFlag2ysn IS NOT NULL)
 	 BEGIN
-		 IF (@strDepositRequiredysn IS NOT NULL)
-		 BEGIN
-				SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+		 --IF (@strDepositRequiredysn IS NOT NULL)
+		 --BEGIN
+		 --END
+		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
-					', ''Tax Flag2'''
-					, ', CASE WHEN a.ysnTaxFlag2 = 0 THEN ''No'' ELSE ''Yes'' END'
-					, ', ''' + CASE WHEN @strTaxFlag2ysn = 0 THEN 'No' ELSE 'Yes' END +''''
+					'Tax Flag2'
+					, 'CASE WHEN a.ysnTaxFlag2 = 0 THEN ''No'' ELSE ''Yes'' END'
+					, 'CASE WHEN ' + CAST(@strTaxFlag2ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 					, @strCompanyLocationId
 					, @strVendorId
 					, @strCategoryId
-					, @strFamilyId
+					, @Family
 					, @strClassId
 					, @intUpcCode
 					, @strDescription
 					, @dblPriceBetween1
 					, @dblPriceBetween2
+					, 'd.intItemId'
+					, 'a.intItemLocationId'
 				)
 
 			INSERT @tblUpdateItemDataPreview
 			EXEC (@SqlQuery1) 
-
-		 END
 	 END 
 
+
+	 --PRINT '@strTaxFlag3ysn'
 	 -----------------------------------Handle Dynamic Query 3
 	 IF (@strTaxFlag3ysn IS NOT NULL)
 	 BEGIN
-		 IF (@strDepositRequiredysn IS NOT NULL)
-		 BEGIN
-				SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+		 --IF (@strDepositRequiredysn IS NOT NULL)
+		 --BEGIN
+		 --END
+		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
-					', ''Tax Flag3'''
-					, ', CASE WHEN a.ysnTaxFlag3 = 0 THEN ''No'' ELSE ''Yes'' END'
-					, ', ''' + CASE WHEN @strTaxFlag3ysn = 0 THEN 'No' ELSE 'Yes' END +''''
+					'Tax Flag3'
+					, 'CASE WHEN a.ysnTaxFlag3 = 0 THEN ''No'' ELSE ''Yes'' END'
+					, 'CASE WHEN ' + CAST(@strTaxFlag3ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 					, @strCompanyLocationId
 					, @strVendorId
 					, @strCategoryId
-					, @strFamilyId
+					, @Family
 					, @strClassId
 					, @intUpcCode
 					, @strDescription
 					, @dblPriceBetween1
 					, @dblPriceBetween2
+					, 'd.intItemId'
+					, 'a.intItemLocationId'
 				)
 
 			INSERT @tblUpdateItemDataPreview
 			EXEC (@SqlQuery1) 
-		 END
 	 END 
 
+
+	 --PRINT '@strTaxFlag4ysn'
 	 -----------------------------------Handle Dynamic Query 4
 	 IF (@strTaxFlag4ysn IS NOT NULL)
 	 BEGIN
-		 IF (@strDepositRequiredysn IS NOT NULL)
-		 BEGIN
-				SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+		 --IF (@strDepositRequiredysn IS NOT NULL)
+		 --BEGIN
+		 --END  
+		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
-					', ''Tax Flag4'''
-					, ', CASE WHEN a.ysnTaxFlag4 = 0 THEN ''No'' ELSE ''Yes'' END'
-					, ', ''' + CASE WHEN @strTaxFlag4ysn = 0 THEN 'No' ELSE 'Yes' END +''''
+					'Tax Flag4'
+					, 'CASE WHEN a.ysnTaxFlag4 = 0 THEN ''No'' ELSE ''Yes'' END'
+					, 'CASE WHEN ' + CAST(@strTaxFlag4ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 					, @strCompanyLocationId
 					, @strVendorId
 					, @strCategoryId
-					, @strFamilyId
+					, @Family
 					, @strClassId
 					, @intUpcCode
 					, @strDescription
 					, @dblPriceBetween1
 					, @dblPriceBetween2
+					, 'd.intItemId'
+					, 'a.intItemLocationId'
 				)
 
 			INSERT @tblUpdateItemDataPreview
 			EXEC (@SqlQuery1) 
-		 END  
 	 END
 
+
+	 --PRINT '@strDepositRequiredysn'
 	 -----------------------------------Handle Dynamic Query 5
 	 IF (@strDepositRequiredysn IS NOT NULL)
 	 BEGIN
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Deposit Required'''
-				, ', CASE WHEN a.ysnDepositRequired = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + case when @strDepositRequiredysn = 0 then 'No' else 'Yes' end +''''
+				'Deposit Required'
+				, 'CASE WHEN a.ysnDepositRequired = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strDepositRequiredysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@intDepositPLU'
 	 -----------------------------------Handle Dynamic Query 6
 	 IF (@intDepositPLU IS NOT NULL)
 	 BEGIN
@@ -491,386 +513,445 @@ BEGIN TRY
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Deposit PLU'''
-				, ', (select strUpcCode from tblICItemUOM where intItemUOMId = a.intDepositPLUId)'
-				, ', ''' + @NewDepositPluId + ''''
+				'Deposit PLU'
+				, '(select strUpcCode from tblICItemUOM where intItemUOMId = a.intDepositPLUId)'
+				, 'CAST(' + CAST(@NewDepositPluId AS NVARCHAR(50)) + ' AS NVARCHAR(50))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
+
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strQuantityRequiredysn'
 	 -----------------------------------Handle Dynamic Query 7
 	 IF (@strQuantityRequiredysn IS NOT NULL)
 	 BEGIN
-
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Quantity Required'''
-				, ', CASE WHEN a.ysnQuantityRequired = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strQuantityRequiredysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Quantity Required'
+				, 'CASE WHEN a.ysnQuantityRequired = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strQuantityRequiredysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT 'strScaleItemysn'
 	 -----------------------------------Handle Dynamic Query 8
 	 IF (@strScaleItemysn IS NOT NULL)
 	 BEGIN
-
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Scale Item'''
-				, ', CASE WHEN a.ysnScaleItem = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strScaleItemysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Scale Item'
+				, 'CASE WHEN a.ysnScaleItem = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strScaleItemysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strFoodStampableysn'
 	 -----------------------------------Handle Dynamic Query 9
 	 IF (@strFoodStampableysn IS NOT NULL)
 	 BEGIN
-
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Food Stampable'''
-				, ', CASE WHEN a.ysnFoodStampable = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strFoodStampableysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Food Stampable'
+				, 'CASE WHEN a.ysnFoodStampable = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strFoodStampableysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strReturnableysn'
 	 -----------------------------------Handle Dynamic Query 10
 	 IF (@strReturnableysn IS NOT NULL)
 	 BEGIN
-
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Returnable'''
-				, ', CASE WHEN a.ysnReturnable = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strReturnableysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Returnable'
+				, 'CASE WHEN a.ysnReturnable = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strReturnableysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strSaleableysn'
 	 -----------------------------------Handle Dynamic Query 11
 	 IF (@strSaleableysn IS NOT NULL)
 	 BEGIN
-
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Saleable'''
-				, ', CASE WHEN a.ysnSaleable = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strSaleableysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Saleable'
+				, 'CASE WHEN a.ysnSaleable = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strSaleableysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strID1Requiredysn'
 	 -----------------------------------Handle Dynamic Query 12
 	 IF (@strID1Requiredysn IS NOT NULL)
 	 BEGIN
-
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Liquor Id Required'''
-				, ', CASE WHEN a.ysnIdRequiredLiquor = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strID1Requiredysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Liquor Id Required'
+				, 'CASE WHEN a.ysnIdRequiredLiquor = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strID1Requiredysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strID2Requiredysn'
 	 -----------------------------------Handle Dynamic Query 13
 	 IF (@strID2Requiredysn IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Cigarette Id Required'''
-				, ', CASE WHEN a.ysnIdRequiredCigarette = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strID2Requiredysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Cigarette Id Required'
+				, 'CASE WHEN a.ysnIdRequiredCigarette = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strID2Requiredysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strPromotionalItemysn'
 	 -----------------------------------Handle Dynamic Query 14
 	 IF (@strPromotionalItemysn IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Promotional Item'''
-				, ', CASE WHEN a.ysnPromotionalItem = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strPromotionalItemysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Promotional Item'
+				, 'CASE WHEN a.ysnPromotionalItem = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strPromotionalItemysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strPrePricedysn'
 	 -----------------------------------Handle Dynamic Query 15
 	 IF (@strPrePricedysn IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Pre Priced'''
-				, ', CASE WHEN a.ysnPrePriced = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strPrePricedysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Pre Priced'
+				, 'CASE WHEN a.ysnPrePriced = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strPrePricedysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strBlueLaw1ysn'
 	 -----------------------------------Handle Dynamic Query 16
 	 IF (@strBlueLaw1ysn IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Blue Law1'''
-				, ', CASE WHEN a.ysnApplyBlueLaw1 = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strBlueLaw1ysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Blue Law1'
+				, 'CASE WHEN a.ysnApplyBlueLaw1 = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strBlueLaw1ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strBlueLaw2ysn'
 	 -----------------------------------Handle Dynamic Query 17
 	 IF (@strBlueLaw2ysn IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Blue Law2'''
-				, ', CASE WHEN a.ysnApplyBlueLaw2 = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strBlueLaw2ysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Blue Law2'
+				, 'CASE WHEN a.ysnApplyBlueLaw2 = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strBlueLaw2ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strCountedDailyysn'
 	 -----------------------------------Handle Dynamic Query 18
 	 IF (@strCountedDailyysn IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Counted Daily'''
-				, ', CASE WHEN a.ysnCountedDaily = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strCountedDailyysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Counted Daily'
+				, 'CASE WHEN a.ysnCountedDaily = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strCountedDailyysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strCounted'
 	 -----------------------------------Handle Dynamic Query 19
 	 IF (@strCounted IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Counted'''
-				, ', a.strCounted'
-				, ', ''' + CAST(@strCounted AS NVARCHAR(250))  +''''
+				'Counted'
+				, 'a.strCounted'
+				, 'CAST(''' + CAST(@strCounted AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@strCountSerialysn'
 	 -----------------------------------Handle Dynamic Query 20
 	 IF (@strCountSerialysn IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Count By Serial No'''
-				, ', CASE WHEN a.ysnCountBySINo = 0 THEN ''No'' ELSE ''Yes'' END'
-				, ', ''' + CASE WHEN @strCountSerialysn = 0 THEN 'No' ELSE 'Yes' END +''''
+				'Count By Serial No'
+				, 'CASE WHEN a.ysnCountBySINo = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN ' + CAST(@strCountSerialysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@intNewFamily'
 	 -----------------------------------Handle Dynamic Query 21
 	 IF (@intNewFamily IS NOT NULL)
 	 BEGIN
 
-		SELECT @strFamilyIdId = strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = @intNewFamily
+		SELECT @FamilyId = strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = @intNewFamily
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Family'''
-				, ', (SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = a.intFamilyId)'
-				, ', ''' + @strFamilyIdId +''''
+				'Family'
+				, '(SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = a.intFamilyId)'
+				, 'CAST(''' + CAST(@FamilyId AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@intNewClass'
 	 -----------------------------------Handle Dynamic Query 22
 	 IF (@intNewClass IS NOT NULL)
 	 BEGIN
@@ -879,24 +960,28 @@ BEGIN TRY
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Class'''
-				, ', (SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = a.intClassId )'
-				, ', ''' + @strClassIdId +''''
+				'Class'
+				, '(SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = a.intClassId )'
+				, 'CAST(''' + CAST(@strClassIdId AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@intNewProductCode'
 	 -----------------------------------Handle Dynamic Query 23
 	 IF (@intNewProductCode IS NOT NULL)
 	 BEGIN
@@ -905,24 +990,28 @@ BEGIN TRY
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Product Code'''
-				, ', ( select strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = a.intProductCodeId )'
-				, ', ''' + @ProductCode +''''
+				'Product Code'
+				, '( select strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = a.intProductCodeId )'
+				, 'CAST(' + CAST(@ProductCode AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@intNewVendor'
 	 -----------------------------------Handle Dynamic Query 24
 	 IF (@intNewVendor IS NOT NULL)
 	 BEGIN
@@ -931,258 +1020,327 @@ BEGIN TRY
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Vendor'''
-				, ', ( select strName from tblEMEntity where intEntityId = a.intVendorId )'
-				, ', ''' + @strVendorIdId +''''
+				'Vendor'
+				, '( select strName from tblEMEntity where intEntityId = a.intVendorId )'
+				, 'CAST(''' + CAST(@strVendorIdId AS NVARCHAR(50)) + ''' AS NVARCHAR(50))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END 
 
+
+	 --PRINT '@intNewMinAge'
 	 -----------------------------------Handle Dynamic Query 25
 	 IF (@intNewMinAge IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Minimum Age'''
-				, ', a.intMinimumAge'
-				, ', ''' + CAST(@intNewMinAge AS NVARCHAR(250))  +''''
+				'Minimum Age'
+				, 'a.intMinimumAge'
+				, 'CAST(' + CAST(@intNewMinAge AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
+
+	 --PRINT '@dblNewMinVendorOrderQty'
 	 -----------------------------------Handle Dynamic Query 26
 	 IF (@dblNewMinVendorOrderQty IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Vendor Minimum Order Qty'''
-				, ', a.dblMinOrder'
-				, ', ''' + CAST(@dblNewMinVendorOrderQty AS NVARCHAR(250))  +''''
+				'Vendor Minimum Order Qty'
+				, 'a.dblMinOrder'
+				, 'CAST(' + CAST(@dblNewMinVendorOrderQty AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
+
+	 --PRINT '@dblNewVendorSuggestedQty'
 	 -----------------------------------Handle Dynamic Query 27
 	 IF (@dblNewVendorSuggestedQty IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Vendor Suggested Qty'''
-				, ', a.dblSuggestedQty'
-				, ', ''' + CAST(@dblNewVendorSuggestedQty AS NVARCHAR(250))  +''''
+				'Vendor Suggested Qty'
+				, 'a.dblSuggestedQty'
+				, 'CAST(' + CAST(@dblNewVendorSuggestedQty AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
+
+	 --PRINT '@dblNewMinQtyOnHand'
 	 -----------------------------------Handle Dynamic Query 28
 	 IF (@dblNewMinQtyOnHand IS NOT NULL)
 	 BEGIN
-
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Min Qty On Hand'''
-				, ', a.dblReorderPoint'
-				, ', ''' + CAST(@dblNewMinQtyOnHand AS NVARCHAR(250))  +''''
+				'Min Qty On Hand'
+				, 'a.dblReorderPoint'
+				, 'CAST(' + CAST(@dblNewMinQtyOnHand AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
+
+	 --PRINT '@intNewInventoryGroup'
 	 -----------------------------------Handle Dynamic Query 29
 	 IF (@intNewInventoryGroup IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Inventory Group'''
-				, ', ( SELECT strCountGroup FROM tblICCountGroup WHERE intCountGroupId = a.intCountGroupId )'
-				, ', ''' + CAST(@intNewInventoryGroup AS NVARCHAR(250))  +''''
+				'Inventory Group'
+				, '( SELECT strCountGroup FROM tblICCountGroup WHERE intCountGroupId = a.intCountGroupId )'
+				, 'CAST(' + CAST(@intNewInventoryGroup AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
+
+	 --PRINT '@strNewCountCode'
 	 -----------------------------------Handle Dynamic Query 30
 	 IF (@strNewCountCode IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Count Code'''
-				, ', d.strCountCode'
-				, ', ''' + CAST(@strNewCountCode AS NVARCHAR(250))  +''''
+				'Count Code'
+				, 'd.strCountCode'
+				, 'CAST(''' + CAST(@strNewCountCode AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
+
+	 --PRINT '@intNewCategory'
 	 -----------------------------------Handle Dynamic Query 31
+	 IF (@intNewCategory IS NOT NULL)
+	 BEGIN
+		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+			(
+				'Category'
+				, '(select strCategoryCode from tblICCategory where intCategoryId = d.intCategoryId)'
+				, '(select strCategoryCode from tblICCategory where intCategoryId = ' + CAST(@intNewCategory AS NVARCHAR(50)) + ')'
+				, @strCompanyLocationId
+				, @strVendorId
+				, @strCategoryId
+				, @Family
+				, @strClassId
+				, @intUpcCode
+				, @strDescription
+				, @dblPriceBetween1
+				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'd.intItemId'
+			)
+
+		INSERT @tblUpdateItemDataPreview
+		EXEC (@SqlQuery1) 
+	 END
+
+
+	 --PRINT '@intNewBinLocation'
+	 -----------------------------------Handle Dynamic Query 32
 	 IF (@intNewBinLocation IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Storage Location'''
-				, ', ( select strName from tblICStorageLocation where intStorageLocationId = a.intStorageLocationId )'
-				, ', ( select strName from tblICStorageLocation where intStorageLocationId =  CAST( ' +  LTRIM(@intNewBinLocation) +' AS INT))'
+				'Storage Location'
+				, '( select strName from tblICStorageLocation where intStorageLocationId = a.intStorageLocationId )'
+				, '( select strName from tblICStorageLocation where intStorageLocationId =  CAST( ' +  LTRIM(CAST(@intNewBinLocation AS NVARCHAR(50))) +' AS INT))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'a.intItemLocationId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
-	 -----------------------------------Handle Dynamic Query 32
+
+	 --PRINT '@intNewGLPurchaseAccount'
+	 -----------------------------------Handle Dynamic Query 33
 	 IF (@intNewGLPurchaseAccount IS NOT NULL)
 	 BEGIN
-
+	 --, '''( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@intNewGLPurchaseAccount) +' AS INT))'''
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Purchase Account'''
-				, ', ( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
-				, ', ( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@intNewGLPurchaseAccount) +' AS INT))'
+				'Purchase Account'
+				, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
+				, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLPurchaseAccount) AS NVARCHAR(50)) +' AS INT))'
+				--, (select strAccountId from tblGLAccount where intAccountId = @intNewGLPurchaseAccount)
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'e.intItemAccountId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
-	 -----------------------------------Handle Dynamic Query 33
+
+	 --PRINT '@intNewGLSalesAccount'
+	 -----------------------------------Handle Dynamic Query 34
 	 IF (@intNewGLSalesAccount IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Sales Account'''
-				, ', ( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
-				, ', ( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@intNewGLSalesAccount) +' AS INT))'
+				'Sales Account'
+				, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
+				, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLSalesAccount) AS NVARCHAR(50)) +' AS INT))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'e.intItemAccountId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
 	 END
 
-	 -----------------------------------Handle Dynamic Query 34
+
+	 --PRINT '@intNewGLVarianceAccount'
+	 -----------------------------------Handle Dynamic Query 35
 	 IF (@intNewGLVarianceAccount IS NOT NULL)
 	 BEGIN
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				', ''Variance Account'''
-				, ', ( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
-				, ', ( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@intNewGLVarianceAccount) +' AS INT))'
+				'Variance Account'
+				, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
+				, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLVarianceAccount) AS NVARCHAR(50)) +' AS INT))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
-				, @strFamilyId
+				, @Family
 				, @strClassId
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
+				, 'd.intItemId'
+				, 'e.intItemAccountId'
 			)
 
 		INSERT @tblUpdateItemDataPreview
@@ -1190,7 +1348,12 @@ BEGIN TRY
 	 END
 
 
+
+
+	 DELETE FROM @tblUpdateItemDataPreview WHERE strOldData = strNewData
+
 	 SELECT @UpdateCount = count(*) from @tblUpdateItemDataPreview WHERE strOldData != strNewData
+
 
 
 
@@ -1676,10 +1839,10 @@ IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
 					 IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
 		         END
 
-             IF (@strFamilyId IS NOT NULL)
+             IF (@Family IS NOT NULL)
 		         BEGIN
   			            set @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemLocation.intFamilyId
-		             	       IN (' + CAST(@strFamilyId as NVARCHAR) + ')' 
+		             	       IN (' + CAST(@Family as NVARCHAR) + ')' 
 		          END
 
              IF (@strClassId IS NOT NULL)
@@ -1769,11 +1932,11 @@ BEGIN
 		             	       IN (' + CAST(@strCategoryId as NVARCHAR) + ')' 
 		     END
 
-         IF (@strFamilyId IS NOT NULL)
+         IF (@Family IS NOT NULL)
 		     BEGIN
   		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItem.intItemId IN 
 			              (select intItemId from tblICItemLocation where intFamilyId IN
-					       (' + CAST(@strFamilyId as NVARCHAR) + ')' + ')'
+					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
 		     END
 
          IF (@strClassId IS NOT NULL)
@@ -1852,11 +2015,11 @@ BEGIN
 		             	       IN (' + CAST(@strCategoryId as NVARCHAR) + ')' 
 		        END
 
-                IF (@strFamilyId IS NOT NULL)
+                IF (@Family IS NOT NULL)
 		        BEGIN
   		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
 			              (select intItemId from tblICItemLocation where intFamilyId IN
-					       (' + CAST(@strFamilyId as NVARCHAR) + ')' + ')'
+					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
 		        END
 
                 IF (@strClassId IS NOT NULL)
@@ -1929,11 +2092,11 @@ BEGIN
 		             	       IN (' + CAST(@strCategoryId as NVARCHAR) + ')' 
 		        END
 
-                IF (@strFamilyId IS NOT NULL)
+                IF (@Family IS NOT NULL)
 		        BEGIN
   		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
 			              (select intItemId from tblICItemLocation where intFamilyId IN
-					       (' + CAST(@strFamilyId as NVARCHAR) + ')' + ')'
+					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
 		        END
 
                 IF (@strClassId IS NOT NULL)
@@ -2006,11 +2169,11 @@ BEGIN
 		             	       IN (' + CAST(@strCategoryId as NVARCHAR) + ')' 
 		        END
 
-                IF (@strFamilyId IS NOT NULL)
+                IF (@Family IS NOT NULL)
 		        BEGIN
   		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
 			              (select intItemId from tblICItemLocation where intFamilyId IN
-					       (' + CAST(@strFamilyId as NVARCHAR) + ')' + ')'
+					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
 		        END
 
                 IF (@strClassId IS NOT NULL)
@@ -2076,9 +2239,10 @@ END
 		SET @strCompanyName = 'Not Set'
 	END
 
-	DELETE FROM @tblUpdateItemDataPreview WHERE strOldData = strNewData
 
-   SELECT @strCompanyName as CompanyName
+
+
+   SELECT DISTINCT @strCompanyName as CompanyName
 		  , LEFT(DATENAME(DW,GETDATE()),10) + ' ' + DATENAME(MONTH, SYSDATETIME())+ ' ' + RIGHT('0' + DATENAME(DAY, SYSDATETIME()), 2) + ', ' + DATENAME(YEAR, SYSDATETIME()) as DateToday
 		  , RIGHT('0' + LTRIM(STUFF(RIGHT(CONVERT(CHAR(26), CURRENT_TIMESTAMP, 109), 14),9, 4, ' ')),11) as TimeToday
 		  , strLocation
