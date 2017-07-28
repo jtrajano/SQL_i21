@@ -17,7 +17,9 @@ SET ANSI_WARNINGS OFF
 	DECLARE @TYPE_SALE NVARCHAR(10) = 'Sale' COLLATE Latin1_General_CI_AS;
 	DECLARE @TYPE_AMOUNT NVARCHAR(10) = 'Amount' COLLATE Latin1_General_CI_AS;
 
-	DECLARE @tempTransactionIds as Id;
+	DECLARE @tempTransactionIds TABLE(
+        [intID] INT
+    );
 
 	DECLARE @TransactionName AS VARCHAR(500) = 'GATHERING PATRONAGE VOLUME' + CAST(NEWID() AS NVARCHAR(100));
 
