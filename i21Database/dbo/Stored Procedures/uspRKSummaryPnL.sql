@@ -1,32 +1,32 @@
 ﻿CREATE PROC [dbo].[uspRKSummaryPnL]
- @dtmFromDate datetime,
- @dtmToDate datetime,
- @intCommodityId int = null,
- @ysnExpired bit,
- @intFutureMarketId int = null
+@dtmFromDate datetime,
+@dtmToDate datetime,
+@intCommodityId int = null,
+@ysnExpired bit,
+@intFutureMarketId int = null
 AS  
    
-IF ISNULL(@ysnExpired,'False' ) = 'False'
+if isnull(@ysnExpired,'False' ) = 'False'
 BEGIN
 SELECT *
- ,dblUnrealized + dblRealized AS dblTotal
+,dblUnrealized + dblRealized AS dblTotal
 FROM (
- SELECT intFutureMarketId
+SELECT intFutureMarketId
   ,intFutureMonthId
   ,strFutMarketName
   ,strFutureMonth
   ,SUM(ISNULL(dblLong, 0)) intLongContracts
-  ,CASE 
+  ,isnull(CASE 
    WHEN SUM(LongWaitedPrice) = 0
     THEN NULL
    ELSE SUM(LongWaitedPrice) / isnull(SUM(ISNULL(dblLong, 0)), NULL)
-   END dblLongAvgPrice
+   END,0) dblLongAvgPrice
   ,SUM(ISNULL(dblShort, 0)) intShortContracts
-  ,CASE 
+  ,isnull(CASE 
    WHEN SUM(ShortWaitedPrice) = 0
     THEN NULL
    ELSE SUM(ShortWaitedPrice) / isnull(SUM(ISNULL(dblShort, 0)), NULL)
-   END dblShortAvgPrice
+   END,0) dblShortAvgPrice
   ,SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0)) AS intNet
   ,isnull(SUM(dblClosing), 0) dblUnrealized
   ,isnull(max(dblClosing1), 0) dblClosing
@@ -38,7 +38,7 @@ FROM (
     WHERE u.intFutureMarketId = r.intFutureMarketId
      AND u.intFutureMonthId = r.intFutureMonthId
     ), 0) AS dblRealized,ysnExpired
- FROM (
+FROM (
   SELECT *
    ,(isnull(GrossPnL, 0) * (isnull(dblClosing1,0) - isnull(dblPrice,0)))-isnull(dblFutCommission,0) AS dblClosing
   FROM (
@@ -95,8 +95,7 @@ FROM (
     ,Sell1
     ,intNet1
     ,dblActual
-    ,(SELECT dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, getdate())
-      ) AS dblClosing1
+    ,(SELECT dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, getdate())) AS dblClosing1
     ,dblPrice
     ,t.dblContractSize
     ,0.intConcurrencyId
@@ -108,39 +107,40 @@ FROM (
    LEFT JOIN vyuRKUnrealizedPnL p on t.intFutureMarketId=p.intFutureMarketId and t.intFutureMonthId=p.intFutureMonthId
 WHERE t.intCommodityId=case when isnull(@intCommodityId,0)=0 then t.intCommodityId else @intCommodityId end 
  AND t.intFutureMarketId=case when isnull(@intFutureMarketId,0)=0 then t.intFutureMarketId else @intFutureMarketId end 
- and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
- AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
+ and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 
+                                                       then intCommodityId else @intCommodityId end 
+                                                       AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
  AND convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmToDate,110),110) )
- and t.ysnExpired=@ysnExpired and dtmTradeDate <= @dtmToDate  
+and t.ysnExpired=@ysnExpired and p.dtmTradeDate <= @dtmToDate  
    ) t
   ) u
- GROUP BY intFutureMonthId
+GROUP BY intFutureMonthId
   ,intFutureMarketId
   ,strFutMarketName
   ,strFutureMonth,ysnExpired
- ) t
- END
+) t
+END
 ELSE
- BEGIN
- SELECT *
- ,dblUnrealized + dblRealized AS dblTotal
- FROM (
- SELECT intFutureMarketId
+BEGIN
+SELECT *
+,dblUnrealized + dblRealized AS dblTotal
+FROM (
+SELECT intFutureMarketId
   ,intFutureMonthId
   ,strFutMarketName
   ,strFutureMonth
   ,SUM(ISNULL(dblLong, 0)) intLongContracts
-  ,CASE 
+  ,isnull(CASE 
    WHEN SUM(LongWaitedPrice) = 0
     THEN NULL
    ELSE SUM(LongWaitedPrice) / isnull(SUM(ISNULL(dblLong, 0)), NULL)
-   END dblLongAvgPrice
+   END,0) dblLongAvgPrice
   ,SUM(ISNULL(dblShort, 0)) intShortContracts
-  ,CASE 
+  ,isnull(CASE 
    WHEN SUM(ShortWaitedPrice) = 0
     THEN NULL
    ELSE SUM(ShortWaitedPrice) / isnull(SUM(ISNULL(dblShort, 0)), NULL)
-   END dblShortAvgPrice
+   END,0) dblShortAvgPrice
   ,SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0)) AS intNet
   ,isnull(SUM(dblClosing), 0) dblUnrealized
   ,isnull(max(dblClosing1), 0) dblClosing
@@ -153,7 +153,7 @@ ELSE
      AND u.intFutureMonthId = r.intFutureMonthId
     ), 0) AS dblRealized,
     ysnExpired
- FROM (
+FROM (
   SELECT *
    ,(isnull(GrossPnL, 0) * (isnull(dblClosing1,0) - isnull(dblPrice,0)))-isnull(dblFutCommission,0) AS dblClosing
   FROM (
@@ -224,10 +224,10 @@ WHERE t.intCommodityId=case when isnull(@intCommodityId,0)=0 then t.intCommodity
  AND t.intFutureMarketId=case when isnull(@intFutureMarketId,0)=0 then t.intFutureMarketId else @intFutureMarketId end 
  and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
  AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end  AND convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmToDate,110),110))
- and dtmTradeDate <= @dtmToDate ) t ) u
- GROUP BY intFutureMonthId
+and p.dtmTradeDate <= @dtmToDate ) t ) u
+GROUP BY intFutureMonthId
   ,intFutureMarketId
   ,strFutMarketName
   ,strFutureMonth,ysnExpired
- ) t
- END
+) t
+END
