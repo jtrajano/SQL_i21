@@ -91,6 +91,12 @@ BEGIN
 		,@intEntityId
 		FROM tblCMBankTransaction
 		WHERE intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
+
+		--Mark the transaction as printed
+		UPDATE tblCMBankTransaction SET dtmCheckPrinted = GETDATE()
+		WHERE  intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
+		AND dtmCheckPrinted IS NULL
+
 	END
 	ELSE
 	BEGIN
@@ -153,7 +159,7 @@ BEGIN
 		FROM tblPRPaycheck A
 		INNER JOIN tblCMBankTransaction B ON A.strPaycheckId = B.strTransactionId
 		WHERE B.intBankAccountId = @intBankAccountId 
-			AND B.intBankTransactionTypeId = 16
+			AND B.intBankTransactionTypeId = 21
 			AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 		
 
