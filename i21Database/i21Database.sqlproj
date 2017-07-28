@@ -5528,6 +5528,7 @@
     <Build Include="dbo\Views\vyuMFTask.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentAmountFactor.sql" />
     <Build Include="dbo\Tables\tblPATCustomerVolumeLog.sql" />
+    <Build Include="dbo\Tables\tblGLDetailSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
