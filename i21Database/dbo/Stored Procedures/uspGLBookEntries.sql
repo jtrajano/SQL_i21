@@ -29,7 +29,7 @@ BEGIN
 	INSERT INTO dbo.tblGLDetail (
 			[dtmDate]
 			,[strBatchId]
-			,[intCompanyId]
+			,[intMultiCompanyId]
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
@@ -148,7 +148,7 @@ BEGIN
 	WHEN NOT MATCHED  THEN 
 		INSERT (
 			intAccountId
-			,intCompanyId
+			,intMultiCompanyId
 			,dtmDate
 			,dblDebit
 			,dblCredit
