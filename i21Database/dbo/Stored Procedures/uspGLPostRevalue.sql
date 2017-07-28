@@ -164,7 +164,7 @@ BEGIN TRY
 			,[intJournalLineNo]		
 			,[strTransactionType]	
 			,[strTransactionForm]
-			,''
+			,'General Ledger'
 		FROM cte1 A
 		OUTER APPLY (
 			SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable() f 
@@ -398,7 +398,7 @@ BEGIN TRY
 						,[intJournalLineNo]
 						,[strTransactionType] = 'Revalue Currency Reversal'
 						,[strTransactionForm]
-						,''
+						,'General Ledger'
 					FROM
 						cte1 A
 					OUTER APPLY (
