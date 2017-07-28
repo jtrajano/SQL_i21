@@ -10,7 +10,7 @@
     [dtmDatePaid]         DATETIME        NOT NULL,
     [dblAmountPaid]       DECIMAL (18, 6) NOT NULL,
 	[dblUnapplied]       DECIMAL (18, 6) NOT NULL,
-    [dblExchangeRate]  DECIMAL (18, 6) NOT NULL DEFAULT(0),
+    [dblExchangeRate]  DECIMAL (18, 6) NOT NULL DEFAULT(1),
     [ysnPosted]           BIT             NOT NULL,
     [strPaymentRecordNum] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblWithheld]   DECIMAL (18, 6) NOT NULL DEFAULT 0,

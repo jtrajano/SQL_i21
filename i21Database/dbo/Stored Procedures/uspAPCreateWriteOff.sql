@@ -4,10 +4,16 @@
 	@paymentCreated INT OUTPUT
 AS
 
+--will not allow to use reserved words, it should have qoute when ON
 SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
+--will not return when filtering records with null, newest sql server default ON
+SET ANSI_NULLS ON 
+--will not display the rows affected
 SET NOCOUNT ON
+--will abort and rolled back all scripts on error, works with THROW
 SET XACT_ABORT ON
+--remove the warnings on aggregate function with NULL values
+--when ON, divide by zero or arithmetic error will return null
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY

@@ -76,6 +76,19 @@ BEGIN
 		WHERE exchangeRateDetail.intRateTypeId = @rateType
 		AND exchangeRate.intFromCurrencyId = @currency AND exchangeRate.intToCurrencyId = @functionalCurrency
 		AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
+		ORDER BY exchangeRateDetail.dtmValidFromDate DESC
+
+		IF @rateType IS NULL 
+		BEGIN
+			RAISERROR('No exchange rate type setup found. Please set on Multi Currency screen.', 16, 1);
+			RETURN;
+		END
+		
+		IF @rate IS NULL OR @rate < 0
+		BEGIN
+			RAISERROR('No exchange rate setup found. Please set on Currency screen.', 16, 1);
+			RETURN;
+		END
 	END
 
 	--VALIDATION
@@ -126,7 +139,7 @@ BEGIN
 	END
 
 	--Make sure there is payment method to user
-	IF @paymentMethodId IS NULL
+	IF @paymentMethodId IS NULL OR @paymentMethodId = 0
 	BEGIN
 		SELECT TOP 1 @paymentMethodId = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'check'
 		IF @paymentMethodId IS NULL
@@ -180,7 +193,7 @@ BEGIN
 		[strPaymentRecordNum]	= @paymentRecordNum,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
-		[dblAmountPaid]			= @payment,
+		[dblAmountPaid]			= CAST(ISNULL(@payment,0) AS DECIMAL(18,2)),
 		[dblUnapplied]			= 0,
 		[dblExchangeRate]		= @rate,
 		[ysnPosted]				= @isPost,
@@ -203,22 +216,31 @@ BEGIN
 		[dblInterest],
 		[dblTotal])
 	SELECT 
-		[intPaymentId]		= @paymentId,
-		[intBillId]			= A.intBillId,
-		[intAccountId]		= prepayAccount.intAccountId,
-		[dblDiscount]		= 0,
-		[dblWithheld]		= 0,
-		[dblAmountDue]		= CASE WHEN (A.dblAmountDue < 0) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END,
-		[dblPayment]		= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END,
-		[dblInterest]		= 0, --TODO
-		[dblTotal]			= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END 
-	FROM tblAPBill A
-	CROSS APPLY
-	(
-		SELECT TOP 1 B.intAccountId FROM tblAPBillDetail B
-		WHERE B.intBillId = A.intBillId
-	) prepayAccount
-	WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
+		[intPaymentId],
+		[intBillId],
+		[intAccountId],
+		[dblDiscount],
+		[dblWithheld],
+		SUM(dblAmountDue),
+		SUM(dblPayment) - dblDiscount + dblInterest,
+		[dblInterest],
+		SUM(dblTotal)
+		FROM (
+			SELECT 
+				[intPaymentId]	= @paymentId,
+				[intBillId]		= A.intBillId,
+				[intAccountId]	= B.intAccountId,
+				[dblDiscount]	= A.dblDiscount,
+				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
+				[dblAmountDue]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)), --handle transaction with prepaid
+				[dblPayment]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)),
+				[dblInterest]	= A.dblInterest,
+				[dblTotal]		= (B.dblTotal + B.dblTax)
+			FROM tblAPBill A
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
+		) vouchers
+	GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld
 	'
 
 	EXEC sp_executesql @queryPayment,

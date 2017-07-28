@@ -43,7 +43,7 @@ BEGIN
 	DECLARE @withHoldAccount INT
 	DECLARE @amountPaid DECIMAL(18,2) = @payment;
 	DECLARE @detailAmountPaid DECIMAL(18,6);
-	DECLARE @withholdAmount DECIMAL(18,6)
+	DECLARE @withholdAmount DECIMAL(18,6) = 0
 	DECLARE @withholdPercent DECIMAL(18,6)
 	DECLARE @discountAmount DECIMAL(18,6) = 0;
 	DECLARE @paymentMethodId INT = @paymentMethod
@@ -58,7 +58,7 @@ BEGIN
 	DECLARE @defaultPaymentInfo NVARCHAR(500)
 	DECLARE @payToAddress INT;
 	DECLARE @foreignCurrency BIT = 0;
-	DECLARE @rate DECIMAL(18,6) = 0;
+	DECLARE @rate DECIMAL(18,6) = 1;
 	DECLARE @rateType INT;
 	DECLARE @currency INT, @functionalCurrency INT;
 	
@@ -98,6 +98,19 @@ BEGIN
 		WHERE exchangeRateDetail.intRateTypeId = @rateType
 		AND exchangeRate.intFromCurrencyId = @currency AND exchangeRate.intToCurrencyId = @functionalCurrency
 		AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
+		ORDER BY exchangeRateDetail.dtmValidFromDate DESC
+
+		IF @rateType IS NULL 
+		BEGIN
+			RAISERROR('No exchange rate type setup found. Please set on Multi Currency screen.', 16, 1);
+			RETURN;
+		END
+		
+		IF @rate IS NULL OR @rate < 0
+		BEGIN
+			RAISERROR('No exchange rate setup found. Please set on Currency screen.', 16, 1);
+			RETURN;
+		END
 	END
 
 
@@ -159,12 +172,14 @@ BEGIN
 		END
 	END
 
-	--Compute Discount Here
-	--UPDATE A
-	--	SET dblDiscount = CAST(dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmBillDate, A.intTermsId, A.dblTotal) AS DECIMAL(18,2))
-	--FROM tblAPBill A
-	--WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId) AND A.intTransactionType = 1
+	--Compute Discount Here, if there is no value computed or added
+	UPDATE A
+		SET dblDiscount = CAST(dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmBillDate, A.intTermsId, A.dblTotal) AS DECIMAL(18,2))
+	FROM tblAPBill A
+	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId) AND A.intTransactionType = 1
+	AND A.dblDiscount = 0
 
+	--This is usually discount from origin or discount calculated in voucher side
 	SELECT
 		@discount = SUM(ISNULL(A.dblDiscount,0))
 	FROM tblAPBill A
@@ -210,8 +225,8 @@ BEGIN
 			RETURN;
 		END
 
-		--SET @withholdAmount = @amountPaid * (@withholdPercent / 100)
-		--SET @amountPaid = @amountPaid - @withholdAmount
+		SET @withholdAmount = @amountPaid * (@withholdPercent / 100)
+		SET @amountPaid = @amountPaid - @withholdAmount
 	END
 
 	EXEC uspSMGetStartingNumber 8, @paymentRecordNum OUT
@@ -257,7 +272,7 @@ BEGIN
 		[dblUnapplied]			= 0,
 		[dblExchangeRate]		= @rate,
 		[ysnPosted]				= @isPost,
-		[dblWithheld]			= 0,
+		[dblWithheld]			= CAST(ISNULL(@withholdAmount,0) AS DECIMAL(18,2)),
 		[intEntityId]			= @userId,
 		[intConcurrencyId]		= 0
 	
@@ -275,17 +290,31 @@ BEGIN
 		[dblInterest],
 		[dblTotal])
 	SELECT 
-		[intPaymentId]	= @paymentId,
-		[intBillId]		= A.intBillId,
-		[intAccountId]	= A.intAccountId,
-		[dblDiscount]	= A.dblDiscount,
-		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
-		[dblAmountDue]	= A.dblAmountDue,
-		[dblPayment]	= CAST((CASE WHEN ISNULL(@paymentDetail,0) = 0 THEN A.dblAmountDue - A.dblDiscount ELSE @paymentDetail END) AS DECIMAL(18,2)),
-		[dblInterest]	= A.dblInterest, --TODO
-		[dblTotal]		= A.dblTotal
-	FROM tblAPBill A
-	WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
+		[intPaymentId],
+		[intBillId],
+		[intAccountId],
+		[dblDiscount],
+		[dblWithheld],
+		SUM(dblAmountDue),
+		SUM(dblPayment) - dblDiscount + dblInterest,
+		[dblInterest],
+		SUM(dblTotal)
+		FROM (
+			SELECT 
+				[intPaymentId]	= @paymentId,
+				[intBillId]		= A.intBillId,
+				[intAccountId]	= A.intAccountId,
+				[dblDiscount]	= A.dblDiscount,
+				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
+				[dblAmountDue]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)), --handle transaction with prepaid
+				[dblPayment]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)),
+				[dblInterest]	= A.dblInterest,
+				[dblTotal]		= (B.dblTotal + B.dblTax)
+			FROM tblAPBill A
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
+		) vouchers
+	GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld
 	'
 
 	EXEC sp_executesql @queryPayment,
@@ -299,6 +328,7 @@ BEGIN
 	 @paymentRecordNum NVARCHAR(50),
 	 @notes NVARCHAR(500),
 	 @payment DECIMAL(18, 6),
+	 @withholdAmount DECIMAL(18, 6),
 	 @datePaid DATETIME,
 	 @isPost BIT,
 	 @payToAddress INT,
@@ -316,6 +346,7 @@ BEGIN
 	 @vendorId = @vendorId,
 	 @notes = @notes,
 	 @payment = @amountPaid,
+	 @withholdAmount = @withholdAmount,
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
 	 @payToAddress = @payToAddress,
@@ -327,9 +358,13 @@ BEGIN
 	EXEC sp_executesql @queryPaymentDetail, 
 	N'@paymentId INT,
 	@withholdPercent DECIMAL(18,6),
+	@rate DECIMAL(18,6),
+	@withholdAmount DECIMAL(18,6),
 	@paymentDetail DECIMAL(18,6)',
 	 @paymentId = @paymentId,
 	 @withholdPercent = @withholdPercent,
+	 @withholdAmount = @withholdAmount,
+	 @rate = @rate,
 	 @paymentDetail = @detailAmountPaid;
 
 	 UPDATE A
