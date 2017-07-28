@@ -171,7 +171,7 @@ Begin
 	Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage Where intStageReceiptId>@intMinRowNo
 End
 
-Select @strDeliveryNo AS strInfo1,Case When ISNULL(@strFinalErrMsg,'')<>'' Then @strReceiptNo Else '' End AS strInfo2,@strFinalErrMsg AS strMessage
+Select @strDeliveryNo AS strInfo1,Case When ISNULL(@strFinalErrMsg,'')='' Then @strReceiptNo Else '' End AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 
