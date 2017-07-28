@@ -64,5 +64,8 @@ AS
 		ON D.intEntityId = K.intEntityCustomerId
 	LEFT JOIN tblTMFillMethod L
 		ON B.intFillMethodId = L.intFillMethodId
+	LEFT JOIN [vyuTMOrderApprovalTransaction] M
+		ON A.intDispatchID = M.intRecordId
 	WHERE ISNULL(A.strOrderNumber,'') <> ''
+		AND ISNULL((M.ysnApproved),1) = 1
 GO

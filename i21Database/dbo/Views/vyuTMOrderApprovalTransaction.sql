@@ -14,7 +14,7 @@ AS
 	FROM tblSMTransaction A
 	INNER JOIN tblSMScreen B
 		ON A.intScreenId = B.intScreenId
-	WHERE strScreenName = 'Order'
+	WHERE strScreenName = 'TM Order'
 		AND strNamespace = 'TankManagement.view.Order'
 		AND strModule = 'Tank Management'
 
