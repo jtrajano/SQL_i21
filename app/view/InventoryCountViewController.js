@@ -1324,7 +1324,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         };
         
         var validatePost = function() {
-            if(countDetail.length == 1) {
+            if(countDetail.length == 0) {
                 //Show error message if there are no items in the grid except for the dummy
                 iRely.Functions.showErrorDialog('There are no items to post.');
                 return;
