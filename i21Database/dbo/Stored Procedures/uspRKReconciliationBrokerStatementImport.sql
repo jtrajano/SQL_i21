@@ -88,15 +88,10 @@ strFutMarketName,
 strCommodityCode,
 strBuySell,
 sum(intNoOfContract) intNoOfContract,
-replace(strFutureMonth,'-',' ') strFutureMonth,
+REPLACE(strFutureMonth,'-',' ') strFutureMonth,
 dblPrice,
-replace(dtmFilledDate,'-','/') dtmFilledDate 
+REPLACE(dtmFilledDate,'-','/') dtmFilledDate 
 FROM [tblRKReconciliationBrokerStatementImport] 
-WHERE strFutMarketName=@strFutMarketName 
-and strCommodityCode=@strCommodityCode 
-and strName = @strName 
-AND strAccountNumber=case when isnull(@strAccountNumber,'')='' then strAccountNumber else @strAccountNumber end 
-AND convert(datetime,(convert(varchar, replace(dtmFilledDate,'-','/'), @ConvertYear)),@ConvertYear) = convert(datetime,(convert(varchar, replace(@dtmFilledDate,'-','/'), @ConvertYear)),@ConvertYear)
 GROUP BY strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
 ORDER BY strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
 
