@@ -99,7 +99,7 @@ BEGIN TRY
 		,dtmDate = GETDATE()
 		,intShipViaId = CD.intShipViaId
 		,dblQty = LDCL.dblQuantity --
-		,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, 0) --
+		,intGrossNetUOMId = ISNULL(CD.intNetWeightUOMId, LD.intWeightItemUOMId) --
 		,dblGross = LDCL.dblLinkGrossWt --
 		,dblNet = LDCL.dblLinkNetWt --
 		,dblCost = ISNULL(AD.dblSeqPrice, 0) --
