@@ -5529,6 +5529,8 @@
     <Build Include="dbo\Functions\fnAPGetPaymentAmountFactor.sql" />
     <Build Include="dbo\Tables\tblPATCustomerVolumeLog.sql" />
     <Build Include="dbo\Tables\tblGLDetailSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetOrderNewLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAddOrderNewLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
