@@ -1209,6 +1209,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                                 source: 'current',
                                                                                                 conjunction: 'and',
                                                                                                 condition: 'eq'
+                                                                                            },
+                                                                                            {
+                                                                                                column: 'ysnAllowPurchase',
+                                                                                                value: true,
+                                                                                                conjunction: 'and',
+                                                                                                condition: 'eq'
                                                                                             }
                                                                                         ],
                                                                                         comboBoxConfig: {

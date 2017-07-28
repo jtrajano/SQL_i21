@@ -404,6 +404,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 column: 'intItemId',
                                 value: '{grdInventoryReceipt.selection.intItemId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'ysnAllowPurchase',
+                                value: true,
+                                conjunction: 'and'
                             }
                         ]
                     }
@@ -430,6 +435,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             {
                                 column: 'intLocationId',
                                 value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'ysnAllowPurchase',
+                                value: true,
                                 conjunction: 'and'
                             }
                         ]
