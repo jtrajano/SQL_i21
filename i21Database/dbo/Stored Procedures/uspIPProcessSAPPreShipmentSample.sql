@@ -59,14 +59,14 @@ Begin
 		If ISNULL(@intContractDetailId,0)=0 RaisError('Contract Sequence not found',16,1)
 
 		Set @strXml = '<root>'
-		Set @strXml += '<strSampleNumber>' + ISNULL(@strSampleNo,'') + '</strSampleNumber>'
+		Set @strXml += '<strSampleNumber>' + ISNULL(dbo.fnEscapeXML(@strSampleNo),'') + '</strSampleNumber>'
 		Set @strXml += '<intContractDetailId>' + CONVERT(VARCHAR,@intContractDetailId) + '</intContractDetailId>'
 		Set @strXml += '<dblRepresentingQty>' + CONVERT(VARCHAR,@dblQuantity) + '</dblRepresentingQty>'
-		Set @strXml += '<strRepresentingUOM>' + ISNULL(@strUOM,'') + '</strRepresentingUOM>'
-		Set @strXml += '<strRefNo>' + ISNULL(@strReferenceNo,'') + '</strRefNo>'
+		Set @strXml += '<strRepresentingUOM>' + ISNULL(dbo.fnEscapeXML(@strUOM),'') + '</strRepresentingUOM>'
+		Set @strXml += '<strRefNo>' + ISNULL(dbo.fnEscapeXML(@strReferenceNo),'') + '</strRefNo>'
 		Set @strXml += '<strSampleStatus>' + ISNULL(CASE WHEN @strStatus='ACC' THEN 'Approved' ELSE 'Rejected' END,'') + '</strSampleStatus>'
 		Set @strXml += '<dtmSampleReceivedDate>' + ISNULL(CONVERT(VARCHAR(10),@dtmSampleDate,112),'') + '</dtmSampleReceivedDate>'
-		Set @strXml += '<strSampleNote>' + ISNULL(@strLotNo,'') + '</strSampleNote>'
+		Set @strXml += '<strSampleNote>' + ISNULL(dbo.fnEscapeXML(@strLotNo),'') + '</strSampleNote>'
 		Set @strXml += '</root>'
 
 		Begin Tran
