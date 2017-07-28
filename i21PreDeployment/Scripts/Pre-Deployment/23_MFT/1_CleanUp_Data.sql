@@ -1,4 +1,10 @@
-﻿IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
+﻿-- Update Component Type from 5(EFile Main) to 4(EFile). EFile Main is obsolete
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND COLUMN_NAME = 'intComponentTypeId') 
+BEGIN
+    EXEC('UPDATE tblTFReportingComponent SET intComponentTypeId = 4 WHERE intComponentTypeId = 5')
+END
+
+IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
 BEGIN
 	CREATE TABLE [dbo].[tblSMCleanupLog]
 	(
