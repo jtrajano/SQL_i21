@@ -10,9 +10,9 @@ CREATE TABLE [dbo].[tblFAFixedAssetDepreciation] (
 	[dtmDepreciationToDate]		DATETIME NULL,
 	[dblDepreciationToDate]		NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[dblSalvageValue]			NUMERIC (18, 6) NULL DEFAULT ((0)),
-	[strTransaction]			NVARCHAR(50)	NULL DEFAULT ((0)),
-	[strType]					NVARCHAR(50)	NULL DEFAULT ((0)),
-	[strConvention]				NVARCHAR(50)	NULL DEFAULT ((0)),
+	[strTransaction]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strType]					NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strConvention]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAssetDepreciation] PRIMARY KEY CLUSTERED ([intAssetDepreciationId] ASC),
