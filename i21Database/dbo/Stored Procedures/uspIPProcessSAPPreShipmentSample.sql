@@ -36,6 +36,9 @@ Else
 While(@intMinRowNo is not null)
 Begin
 	BEGIN TRY
+		Set @intItemId=NULL
+		Set @intContractDetailId=NULL
+
 		Select  @dtmSampleDate=dtmSampleDate,
 				@strPONo=strPONo,
 				@strPOItemNo=strPOItemNo,
@@ -50,7 +53,7 @@ Begin
 
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intContractDetailId=intContractDetailId 
-		From tblCTContractDetail Where strERPPONumber=@strPONo AND intItemId=@intItemId AND CAST(strERPItemNumber AS INT)=CAST(@strPOItemNo AS INT)
+		From tblCTContractDetail Where strERPPONumber=@strPONo AND intItemId=@intItemId
 
 		If ISNULL(@intItemId,0)=0 RaisError('Item not found',16,1)
 		If ISNULL(@intContractDetailId,0)=0 RaisError('Contract Sequence not found',16,1)
@@ -69,6 +72,9 @@ Begin
 		Begin Tran
 
 		Exec uspQMSamplePreShipment @strXml,@strSampleNoOut OUT,@intSampleId OUT
+
+		If Not Exists (Select 1 From tblQMSample Where intSampleId=@intSampleId) 
+			RaisError('Sample not created',16,1)
 
 		--Move to Archive
 		Insert Into tblIPPreShipmentSampleArchive(dtmSampleDate,strPONo,strPOItemNo,strItemNo,dblQuantity,strUOM,strSampleNo,strReferenceNo,strStatus,strLotNo,strImportStatus,strErrorMessage,strSessionId)
