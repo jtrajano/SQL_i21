@@ -5531,6 +5531,8 @@
     <Build Include="dbo\Tables\tblGLDetailSync.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetOrderNewLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAddOrderNewLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOff.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucherCheckOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
