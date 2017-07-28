@@ -6650,4 +6650,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityUserId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="c84906cc-88f2-42d6-831b-84a4a610d507" ChangeDateTime="07/28/2017 12:49:31">
+    <Property Name="ElementName" Value="[dbo].[tblGLSummary].[intCompanyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGLSummary]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMultiCompanyId" />
+  </Operation>
 </Operations>

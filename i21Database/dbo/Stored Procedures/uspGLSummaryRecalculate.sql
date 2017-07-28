@@ -17,7 +17,7 @@ BEGIN
 	DECLARE @intCompanyId INT
 	SELECT TOP 1 @intCompanyId = intCompanySetupID FROM tblSMCompanySetup 
 	INSERT INTO tblGLSummary
-	(intCompanyId,intAccountId,dtmDate,dblDebit,dblCredit,dblDebitForeign, dblCreditForeign,dblDebitUnit,dblCreditUnit,strCode,intConcurrencyId)
+	(intMultiCompanyId,intAccountId,dtmDate,dblDebit,dblCredit,dblDebitForeign, dblCreditForeign,dblDebitUnit,dblCreditUnit,strCode,intConcurrencyId)
 	SELECT
 		 @intCompanyId
 		,intAccountId
