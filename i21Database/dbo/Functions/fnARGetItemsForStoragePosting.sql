@@ -136,7 +136,7 @@ WHERE
 	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1))
 	AND ARI.[strTransactionType] <> 'Debit Memo'
 	AND (ARID.[intStorageScheduleTypeId] IS NOT NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0)
-	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)	
+	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 																												
 	RETURN
 END
