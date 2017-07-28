@@ -285,42 +285,43 @@ BEGIN
 				  , CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 				  , 0 	 
 	FROM
-	(SELECT STATEMENTREPORT.strReferenceNumber
-		  ,STATEMENTREPORT.strTransactionType
-		  ,STATEMENTREPORT.intEntityCustomerId
-		  ,STATEMENTREPORT.dtmDueDate
-		  ,STATEMENTREPORT.dtmDate
-		  ,STATEMENTREPORT.intDaysDue
-		  ,STATEMENTREPORT.dblTotalAmount
-		  ,STATEMENTREPORT.dblAmountPaid
-		  ,STATEMENTREPORT.dblAmountDue
-		  ,STATEMENTREPORT.dblPastDue
-		  ,STATEMENTREPORT.dblMonthlyBudget
-		  ,STATEMENTREPORT.strDescription
-		  ,STATEMENTREPORT.strItemNo
-		  ,STATEMENTREPORT.dblQtyOrdered
-		  ,STATEMENTREPORT.dblQtyShipped
-		  ,STATEMENTREPORT.dblTotal
-		  ,STATEMENTREPORT.dblPrice
-		  ,STATEMENTREPORT.intInvoiceId
-		  ,STATEMENTREPORT.strCustomerNumber
-		  ,STATEMENTREPORT.strName
-		  ,STATEMENTREPORT.strBOLNumber
-		  ,STATEMENTREPORT.dblCreditLimit
-		  ,dblCreditAvailable = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-		  ,dbl0Days = ISNULL(AGINGREPORT.dbl0Days, 0)
-		  ,dbl10Days = ISNULL(AGINGREPORT.dbl10Days, 0)
-		  ,dbl30Days = ISNULL(AGINGREPORT.dbl30Days, 0)
-		  ,dbl60Days = ISNULL(AGINGREPORT.dbl60Days, 0)
-		  ,dbl90Days = ISNULL(AGINGREPORT.dbl90Days, 0)
-		  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
-		  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
-		  ,dblPrepayments = ISNULL(AGINGREPORT.dblPrepayments, 0)
-		  ,STATEMENTREPORT.strFullAddress
-		  ,STATEMENTREPORT.strStatementFooterComment	  
-		  ,STATEMENTREPORT.strCompanyName
-		  ,STATEMENTREPORT.strCompanyAddress	  
-		  ,dtmAsOfDate = @dtmDateTo
+	(SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
+		  , strTransactionType			= STATEMENTREPORT.strTransactionType
+		  , intEntityCustomerId			= STATEMENTREPORT.intEntityCustomerId
+		  , dtmDueDate					= STATEMENTREPORT.dtmDueDate
+		  , dtmDate						= STATEMENTREPORT.dtmDate
+		  , intDaysDue					= STATEMENTREPORT.intDaysDue
+		  , dblTotalAmount				= STATEMENTREPORT.dblTotalAmount
+		  , dblAmountPaid				= STATEMENTREPORT.dblAmountPaid
+		  , dblAmountDue				= STATEMENTREPORT.dblAmountDue
+		  , dblPastDue					= STATEMENTREPORT.dblPastDue
+		  , dblMonthlyBudget			= STATEMENTREPORT.dblMonthlyBudget
+		  , strDescription				= STATEMENTREPORT.strDescription
+		  , strItemNo					= STATEMENTREPORT.strItemNo
+		  , dblQtyOrdered				= STATEMENTREPORT.dblQtyOrdered
+		  , dblQtyShipped				= STATEMENTREPORT.dblQtyShipped
+		  , dblTotal					= STATEMENTREPORT.dblTotal
+		  , dblPrice					= STATEMENTREPORT.dblPrice
+		  , intInvoiceId				= STATEMENTREPORT.intInvoiceId
+		  , strCustomerNumber			= STATEMENTREPORT.strCustomerNumber
+		  , strName						= STATEMENTREPORT.strName
+		  , strBOLNumber				= STATEMENTREPORT.strBOLNumber
+		  , dblCreditLimit				= STATEMENTREPORT.dblCreditLimit
+		  , dblCreditAvailable			= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+		  , dblFuture					= ISNULL(AGINGREPORT.dblFuture, 0)
+		  , dbl0Days					= ISNULL(AGINGREPORT.dbl0Days, 0)
+		  , dbl10Days					= ISNULL(AGINGREPORT.dbl10Days, 0)
+		  , dbl30Days					= ISNULL(AGINGREPORT.dbl30Days, 0)
+		  , dbl60Days					= ISNULL(AGINGREPORT.dbl60Days, 0)
+		  , dbl90Days					= ISNULL(AGINGREPORT.dbl90Days, 0)
+		  , dbl91Days					= ISNULL(AGINGREPORT.dbl91Days, 0)
+		  , dblCredits					= ISNULL(AGINGREPORT.dblCredits, 0)
+		  , dblPrepayments				= ISNULL(AGINGREPORT.dblPrepayments, 0)
+		  , strFullAddress				= STATEMENTREPORT.strFullAddress
+		  , strStatementFooterComment	= STATEMENTREPORT.strStatementFooterComment
+		  , strCompanyName				= STATEMENTREPORT.strCompanyName
+		  , strCompanyAddress			= STATEMENTREPORT.strCompanyAddress
+		  , dtmAsOfDate					= @dtmDateTo
 	FROM @temp_statement_table AS STATEMENTREPORT
 	LEFT JOIN @temp_aging_table AS AGINGREPORT 
 	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId) ABC 
@@ -340,43 +341,43 @@ END
   
 ELSE
 BEGIN
-	SELECT STATEMENTREPORT.strReferenceNumber
-		  ,STATEMENTREPORT.strTransactionType
-		  ,STATEMENTREPORT.intEntityCustomerId
-		  ,STATEMENTREPORT.dtmDueDate
-		  ,STATEMENTREPORT.dtmDate
-		  ,STATEMENTREPORT.intDaysDue
-		  ,STATEMENTREPORT.dblTotalAmount
-		  ,STATEMENTREPORT.dblAmountPaid
-		  ,STATEMENTREPORT.dblAmountDue
-		  ,STATEMENTREPORT.dblPastDue
-		  ,STATEMENTREPORT.dblMonthlyBudget
-		  ,STATEMENTREPORT.strDescription
-		  ,STATEMENTREPORT.strItemNo
-		  ,STATEMENTREPORT.dblQtyOrdered
-		  ,STATEMENTREPORT.dblQtyShipped
-		  ,STATEMENTREPORT.dblTotal
-		  ,STATEMENTREPORT.dblPrice
-		  ,STATEMENTREPORT.intInvoiceId
-		  ,STATEMENTREPORT.strCustomerNumber
-		  ,STATEMENTREPORT.strName
-		  ,STATEMENTREPORT.strBOLNumber
-		  ,STATEMENTREPORT.dblCreditLimit
-		  ,dblCreditAvailable = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-		  ,dbl0Days = ISNULL(AGINGREPORT.dbl0Days, 0)
-		  ,dbl10Days = ISNULL(AGINGREPORT.dbl10Days, 0)
-		  ,dbl30Days = ISNULL(AGINGREPORT.dbl30Days, 0)
-		  ,dbl60Days = ISNULL(AGINGREPORT.dbl60Days, 0)
-		  ,dbl90Days = ISNULL(AGINGREPORT.dbl90Days, 0)
-		  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
-		  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
-		  ,dblPrepayments = ISNULL(AGINGREPORT.dblPrepayments, 0)
-		  ,STATEMENTREPORT.strFullAddress
-		  ,STATEMENTREPORT.strStatementFooterComment	  
-		  ,STATEMENTREPORT.strCompanyName
-		  ,STATEMENTREPORT.strCompanyAddress
-		  ,STATEMENTREPORT.ysnStatementCreditLimit	  
-		  ,dtmAsOfDate = @dtmDateTo
+	SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
+		 , strTransactionType			= STATEMENTREPORT.strTransactionType
+		 , intEntityCustomerId			= STATEMENTREPORT.intEntityCustomerId
+		 , dtmDueDate					= STATEMENTREPORT.dtmDueDate
+		 , dtmDate						= STATEMENTREPORT.dtmDate
+		 , intDaysDue					= STATEMENTREPORT.intDaysDue
+		 , dblTotalAmount				= STATEMENTREPORT.dblTotalAmount
+		 , dblAmountPaid				= STATEMENTREPORT.dblAmountPaid
+		 , dblAmountDue					= STATEMENTREPORT.dblAmountDue
+		 , dblPastDue					= STATEMENTREPORT.dblPastDue
+		 , dblMonthlyBudget				= STATEMENTREPORT.dblMonthlyBudget
+		 , strDescription				= STATEMENTREPORT.strDescription
+		 , strItemNo					= STATEMENTREPORT.strItemNo
+		 , dblQtyOrdered				= STATEMENTREPORT.dblQtyOrdered
+		 , dblQtyShipped				= STATEMENTREPORT.dblQtyShipped
+		 , dblTotal						= STATEMENTREPORT.dblTotal
+		 , dblPrice						= STATEMENTREPORT.dblPrice
+		 , intInvoiceId					= STATEMENTREPORT.intInvoiceId
+		 , strCustomerNumber			= STATEMENTREPORT.strCustomerNumber
+		 , strName						= STATEMENTREPORT.strName
+		 , strBOLNumber					= STATEMENTREPORT.strBOLNumber
+		 , dblCreditLimit				= STATEMENTREPORT.dblCreditLimit
+		 , dblCreditAvailable			= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+		 , dblFuture					= ISNULL(AGINGREPORT.dblFuture, 0)
+		 , dbl0Days						= ISNULL(AGINGREPORT.dbl0Days, 0)
+		 , dbl10Days					= ISNULL(AGINGREPORT.dbl10Days, 0)
+		 , dbl30Days					= ISNULL(AGINGREPORT.dbl30Days, 0)
+		 , dbl60Days					= ISNULL(AGINGREPORT.dbl60Days, 0)
+		 , dbl90Days					= ISNULL(AGINGREPORT.dbl90Days, 0)
+		 , dbl91Days					= ISNULL(AGINGREPORT.dbl91Days, 0)
+		 , dblCredits					= ISNULL(AGINGREPORT.dblCredits, 0)
+		 , dblPrepayments				= ISNULL(AGINGREPORT.dblPrepayments, 0)
+		 , strFullAddress				= STATEMENTREPORT.strFullAddress
+		 , strStatementFooterComment	= STATEMENTREPORT.strStatementFooterComment	  
+		 , strCompanyName				= STATEMENTREPORT.strCompanyName
+		 , strCompanyAddress			= STATEMENTREPORT.strCompanyAddress
+		 , dtmAsOfDate					= @dtmDateTo
 	FROM @temp_statement_table AS STATEMENTREPORT
 	LEFT JOIN @temp_aging_table AS AGINGREPORT 
 	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
