@@ -69,7 +69,7 @@ BEGIN
 		--Missing vendor order number
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
-			'Unable to post. Vendor order number is missing.',
+			'Unable to post. Invoice number is missing.',
 			'Bill',
 			A.strBillId,
 			A.intBillId,
