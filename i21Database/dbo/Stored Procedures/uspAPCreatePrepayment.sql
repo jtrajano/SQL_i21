@@ -231,7 +231,7 @@ BEGIN
 				[intBillId]		= A.intBillId,
 				[intAccountId]	= B.intAccountId,
 				[dblDiscount]	= A.dblDiscount,
-				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
+				[dblWithheld]	= 0,
 				[dblAmountDue]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)), --handle transaction with prepaid
 				[dblPayment]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)),
 				[dblInterest]	= A.dblInterest,
