@@ -100,7 +100,7 @@ FROM
 				,strAccountDesc = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
 				,dblQuantityBilled = SUM(ISNULL(B1.dblBillQty, 0))
 				,ISNULL(B1.dblTax,0) AS dblTax
-				,ISNULL(B1.dblForexRate,0) AS dblRate
+				,ISNULL(B1.dblForexRate,1) AS dblRate
 				,B1.intForexRateTypeId
 				,RT.strCurrencyExchangeRateType
 				,CASE WHEN B1.ysnSubCurrency > 0 THEN 1 ELSE 0 END AS ysnSubCurrency
@@ -225,7 +225,7 @@ FROM
 	,[intContractChargeId]		=	NULL  
 	,[dblUnitCost]				=	B.dblCost
 	,[dblTax]					=	ISNULL(B.dblTax,0)
-	,[dblRate]					=	ISNULL(B.dblForexRate,0)
+	,[dblRate]					=	ISNULL(B.dblForexRate,1)
 	,[strRateType]				=	RT.strCurrencyExchangeRateType
 	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
 	,[ysnSubCurrency]			=	0
@@ -328,7 +328,7 @@ FROM
 												 ELSE B.dblUnitCost
 											END  	
 	,[dblTax]					=	ISNULL(B.dblTax,0)
-	,[dblRate]					=	ISNULL(B.dblForexRate,0)
+	,[dblRate]					=	ISNULL(B.dblForexRate,1)
 	,[strRateType]				=	RT.strCurrencyExchangeRateType
 	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
 	,[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END
@@ -469,7 +469,7 @@ FROM
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
 																				ELSE A.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
 																	 ELSE (CASE WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END ) END),0) -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
-		,[dblRate]									=	ISNULL(A.dblForexRate,0)
+		,[dblRate]									=	ISNULL(A.dblForexRate,1)
 		,[strRateType]								=	RT.strCurrencyExchangeRateType
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
@@ -580,7 +580,7 @@ FROM
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblCashPrice
 		,[dblTax]									=	0
-		,[dblRate]									=	0
+		,[dblRate]									=	1
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	0
@@ -666,10 +666,10 @@ FROM
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
-																ELSE	ISNULL(CC.dblRate,0) 
+																ELSE	ISNULL(CC.dblRate,1) 
 														END,0)
 		,[dblTax]									=	0
-		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,0) ELSE ISNULL(G1.dblRate,0) END
+		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -768,10 +768,10 @@ FROM
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
-																ELSE	ISNULL(CC.dblRate,0) 
+																ELSE	ISNULL(CC.dblRate,1) 
 														END,0)
 		,[dblTax]									=	0
-		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,0) ELSE ISNULL(G1.dblRate,0) END
+		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -868,7 +868,7 @@ FROM
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	ISNULL(A.dblCashPrice,0)
 		,[dblTax]									=	0
-		,[dblRate]									=	0
+		,[dblRate]									=	1
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	0
@@ -954,7 +954,7 @@ FROM
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
 		,[dblTax]									=	ISNULL(Taxes.dblTax,0)
-		,[dblRate]									=	ISNULL(A.dblForexRate,0)
+		,[dblRate]									=	ISNULL(A.dblForexRate,1)
 		,[strRateType]								=	RT.strCurrencyExchangeRateType
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)

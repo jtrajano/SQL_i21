@@ -459,8 +459,8 @@ ELSE
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
-			,A.dblDebitForeign
-			,A.dblCreditForeign
+			,DebitForeign.Value
+			,CreditForeign.Value
 			,''
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
@@ -468,7 +468,9 @@ ELSE
 		INNER JOIN dbo.tblGLAccountGroup C
 			ON B.intAccountGroupId = C.intAccountGroupId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit;
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) CreditForeign;
 	END
 
 IF(ISNULL(@recap,0) = 0)

@@ -526,7 +526,7 @@ BEGIN
 			[dblQtyOrdered]				=	ABS(B.dblOpenReceive - B.dblBillQty),--CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END,
 			[dblQtyReceived]			=	ABS(B.dblOpenReceive - B.dblBillQty),--CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END,
 			[dblTax]					=	ISNULL(B.dblTax,0),
-			[dblForexRate]				=	ISNULL(B.dblForexRate,0),
+			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
 			[intForexRateTypeId]		=	B.intForexRateTypeId,
 			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 			[intTaxGroupId]				=	NULL,
@@ -762,7 +762,7 @@ BEGIN
 				[dblQtyOrdered]				=	A.dblOrderQty,
 				[dblQtyReceived]			=	A.dblQuantityToBill,
 				[dblTax]					=	(CASE WHEN C.ysnPrice = 1 THEN ISNULL(A.dblTax,0) * -1 ELSE ISNULL(A.dblTax,0) END), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN AND NOT CHECK OFF (OR NEGATIVE AMOUNT)
-				[dblForexRate]				=	ISNULL(A.dblForexRate,0),
+				[dblForexRate]				=	ISNULL(A.dblForexRate,1),
 				[intForexRateTypeId]		=   A.intForexRateTypeId,
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 				[intTaxGroupId]				=	NULL,

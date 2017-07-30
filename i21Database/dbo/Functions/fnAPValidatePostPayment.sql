@@ -305,21 +305,21 @@ BEGIN
 		)
 
 
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			A.strPaymentRecordNum + ' payment have vouchers with different pay to address.',
-			'Payable',
-			A.strPaymentRecordNum,
-			A.intPaymentId
-		FROM tblAPPayment A
-			INNER JOIN tblAPPaymentDetail B
-				ON A.intPaymentId = B.intPaymentId
-			INNER JOIN tblAPBill C
-				ON B.intBillId = C.intBillId
-		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		AND B.dblPayment != 0
-		GROUP BY A.strPaymentRecordNum, A.intPaymentId
-		HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		-- SELECT 
+		-- 	A.strPaymentRecordNum + ' payment have vouchers with different pay to address.',
+		-- 	'Payable',
+		-- 	A.strPaymentRecordNum,
+		-- 	A.intPaymentId
+		-- FROM tblAPPayment A
+		-- 	INNER JOIN tblAPPaymentDetail B
+		-- 		ON A.intPaymentId = B.intPaymentId
+		-- 	INNER JOIN tblAPBill C
+		-- 		ON B.intBillId = C.intBillId
+		-- WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		-- AND B.dblPayment != 0
+		-- GROUP BY A.strPaymentRecordNum, A.intPaymentId
+		-- HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
@@ -390,8 +390,10 @@ BEGIN
 			SELECT 1 FROM tblAPPaymentDetail B
 			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 			WHERE A.intPaymentId = B.intPaymentId
+			AND B.dblPayment != 0
+			AND B.intInvoiceId IS NULL --invoice do not have pay to address
 			GROUP BY C.intPayToAddressId
-			HAVING COUNT(C.intPayToAddressId) > 1
+			HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
 		)
 
 	END

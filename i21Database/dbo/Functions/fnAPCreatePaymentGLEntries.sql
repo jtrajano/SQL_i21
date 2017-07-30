@@ -295,8 +295,8 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=   CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment, voucher.dblTotal) * voucherDetail.dblRate)
-											AS DECIMAL(18,2)) 
+													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate)
+											AS DECIMAL(18,2))
 											* (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -321,7 +321,7 @@ BEGIN
 		[intConcurrencyId]				=	1,
 		[dblDebitForeign]				=	CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment, voucher.dblTotal))
+													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal))
 											AS DECIMAL(18,2))
 											* (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),      
 		[dblDebitReport]				=	0,
