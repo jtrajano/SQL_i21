@@ -380,4 +380,7 @@ print 'BEGIN POST DEPLOYMENT'
 --RiskManagement
 :R .\RM\01_MasterScript.sql
 
+--FRM
+:r .\FRM\DefaultData\1_OfflineMenu.sql
+
 print 'END POST DEPLOYMENT'

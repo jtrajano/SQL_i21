@@ -85,6 +85,7 @@
     <Folder Include="Scripts\Pre-Deployment\21_PR" />
     <Folder Include="Scripts\Pre-Deployment\23_MFT" />
     <Folder Include="Scripts\Pre-Deployment\11_IC\" />
+    <Folder Include="Scripts\Pre-Deployment\24_SC" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -149,7 +150,6 @@
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateVoucherPrepay.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\CleanInvalidWeightVolumeGrossUOM.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdatePaymentPayToAddress.sql" />
-    <None Include="Scripts\Pre-Deployment\8_AP\UpdateVoucherDetailRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -300,6 +300,6 @@
     <None Include="Scripts\Pre-Deployment\8_AP\1730_FixDataBeforeApplyingConstraints.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\6_GL\MultiCompany.sql" />
+    <None Include="Scripts\Pre-Deployment\24_SC\1_OfflineGuid.sql" />
   </ItemGroup>
 </Project>

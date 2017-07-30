@@ -179,6 +179,8 @@
     <Folder Include="Scripts\Post-Deployment\RM" />
     <Folder Include="Scripts\Post-Deployment\PAT" />
     <Folder Include="Scripts\Post-Deployment\PAT\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\FRM" />
+    <Folder Include="Scripts\Post-Deployment\FRM\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -5533,6 +5535,7 @@
     <Build Include="dbo\Stored Procedures\uspMFAddOrderNewLot.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOff.sql" />
     <Build Include="dbo\Views\vyuAPRptVoucherCheckOff.sql" />
+    <None Include="Scripts\Post-Deployment\FRM\DefaultData\1_OfflineMenu.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
