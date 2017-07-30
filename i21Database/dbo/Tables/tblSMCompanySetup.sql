@@ -18,9 +18,11 @@
     [strFederalTaxID]   NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strStateTaxID]     NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strBusinessType]   NVARCHAR (15)  COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyId]  INT DEFAULT 1 NOT NULL,
     [ysnScreenControlListingUpdated] BIT NULL,
 	[ysnScreenLabelListingUpdated] BIT NULL, 
-    CONSTRAINT [PK_tblSMCompanySetup] PRIMARY KEY ([intCompanySetupID]) 
+	[intMultiCompanyId] INT NULL,
+    [intConcurrencyId]  INT DEFAULT 1 NOT NULL,
+    CONSTRAINT [PK_tblSMCompanySetup] PRIMARY KEY ([intCompanySetupID]), 
+    CONSTRAINT [FK_tblSMCompanySetup_tblSMMultiCompany] FOREIGN KEY ([intMultiCompanyId]) REFERENCES [tblSMMultiCompany]([intMultiCompanyId])    
 );
 
