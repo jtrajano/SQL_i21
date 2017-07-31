@@ -209,7 +209,7 @@ BEGIN
 	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
 
 	INSERT INTO tblGLSummary (
-		intCompanyId
+		intMultiCompanyId
 		,intAccountId
 		,dtmDate
 		,dblDebit 
@@ -220,7 +220,7 @@ BEGIN
 		,intConcurrencyId 
 	)
 	SELECT
-			intCompanyId
+			intMultiCompanyId
 			,intAccountId
 			,dtmDate
 			,SUM(ISNULL(dblDebit,0)) as dblDebit
@@ -232,5 +232,5 @@ BEGIN
 	FROM	tblGLDetail
 	WHERE	ysnIsUnposted = 0
 			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
-	GROUP BY intCompanyId, intAccountId, dtmDate, strCode
+	GROUP BY intMultiCompanyId, intAccountId, dtmDate, strCode
 END
