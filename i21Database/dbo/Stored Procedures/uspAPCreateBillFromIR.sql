@@ -514,7 +514,8 @@ BEGIN
 			[intCurrencyId],
 			[intStorageLocationId],
 			[int1099Form],
-			[int1099Category]
+			[int1099Category],
+			[strBillOfLading]
 		)
 		OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
 		SELECT 
@@ -607,7 +608,8 @@ BEGIN
 													WHEN (SELECT CHARINDEX('B', D2.str1099Form)) > 0 THEN 3 
 											ELSE 0
 											END,
-			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0)							   
+			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
+			[strBillOfLading]			= A.strBillOfLading
 		FROM #tmpReceiptData A
 		INNER JOIN #tmpReceiptDetailData B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
