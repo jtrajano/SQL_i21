@@ -81,7 +81,7 @@ FROM @BankTransactionBatchDetailEntries
 				--Assemble the transaction id
 				--SELECT @newStrTransactionId = strPrefix + CAST(intNumber AS NVARCHAR) FROM tblSMStartingNumber WHERE strTransactionType = @transactionType
 				SELECT @intStartingNumberId = intStartingNumberId FROM tblSMStartingNumber WHERE strTransactionType = @transactionType
-				EXEC uspSMGetStartingNumber @intStartingNumberId, @newStrTransactionId, @intCompanyLocationId
+				EXEC uspSMGetStartingNumber @intStartingNumberId, @newStrTransactionId OUTPUT, @intCompanyLocationId
 
 				SET @newStrTransactionIds = ISNULL(@newStrTransactionIds,'') + @newStrTransactionId + ','
 
