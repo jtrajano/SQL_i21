@@ -86,19 +86,28 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		
-		SELECT	ItemsToIncreaseConsignedPurchase.intItemId
-				,ItemsToIncreaseConsignedPurchase.intItemLocationId
-				,ItemsToIncreaseConsignedPurchase.intItemUOMId
-				,ItemsToIncreaseConsignedPurchase.intSubLocationId
-				,ItemsToIncreaseConsignedPurchase.intStorageLocationId
+		-- Aggregrate the non-stock-unit UOMs. 
+		SELECT	cp.intItemId
+				,cp.intItemLocationId
+				,cp.intItemUOMId
+				,cp.intSubLocationId
+				,cp.intStorageLocationId
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
-		FROM	@ItemsToIncreaseConsignedPurchase ItemsToIncreaseConsignedPurchase 
-		GROUP BY ItemsToIncreaseConsignedPurchase.intItemId
-				, ItemsToIncreaseConsignedPurchase.intItemLocationId
-				, ItemsToIncreaseConsignedPurchase.intItemUOMId
-				, ItemsToIncreaseConsignedPurchase.intSubLocationId
-				, ItemsToIncreaseConsignedPurchase.intStorageLocationId
+		FROM	@ItemsToIncreaseConsignedPurchase cp 
+				CROSS APPLY (
+					SELECT	TOP 1 
+							intItemUOMId
+							,dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = cp.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM 
+		WHERE	cp.intItemUOMId <> StockUOM.intItemUOMId
+		GROUP BY cp.intItemId
+				, cp.intItemLocationId
+				, cp.intItemUOMId
+				, cp.intSubLocationId
+				, cp.intStorageLocationId
 		-- Convert the Consigned Purchase Qty to the Stock UOM before adding it into tblICItemStockUOM
 		UNION ALL 
 		SELECT	cp.intItemId
@@ -115,8 +124,7 @@ USING (
 					FROM	tblICItemUOM iUOM
 					WHERE	iUOM.intItemId = cp.intItemId
 							AND iUOM.ysnStockUnit = 1 
-				) StockUOM 
-		WHERE	cp.intItemUOMId <> StockUOM.intItemUOMId
+				) StockUOM 		
 		GROUP BY cp.intItemId
 				, cp.intItemLocationId
 				, StockUOM.intItemUOMId

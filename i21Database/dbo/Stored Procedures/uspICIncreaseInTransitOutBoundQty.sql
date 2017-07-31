@@ -96,7 +96,7 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		-- Aggregrate the In-Transit Outbound Qty 'as-is'.
+		-- Aggregrate the non-stock-unit UOMs. 
 		SELECT	ob.intItemId
 				,ob.intItemLocationId
 				,ob.intItemUOMId
@@ -104,13 +104,22 @@ USING (
 				,ob.intStorageLocationId
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
-		WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
+				CROSS APPLY (
+					SELECT	TOP 1 
+							intItemUOMId
+							,dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = ob.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM 
+		WHERE	ob.intItemUOMId <> StockUOM.intItemUOMId
+				AND ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 				, ob.intItemUOMId
 				, ob.intSubLocationId
 				, ob.intStorageLocationId
-		-- Convert the In-Transit Outbound Qty to 'Stock UOM' before doing the aggregrate.
+		-- Convert all the In-Transit Outbound Qty to 'Stock UOM' before doing the aggregrate.
 		UNION ALL 
 		SELECT	ob.intItemId
 				,ob.intItemLocationId
@@ -127,8 +136,7 @@ USING (
 					WHERE	iUOM.intItemId = ob.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
-		WHERE	ob.intItemUOMId <> StockUOM.intItemUOMId
-				AND ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
+		WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 				, StockUOM.intItemUOMId

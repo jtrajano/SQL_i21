@@ -93,15 +93,25 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		SELECT	intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,intSubLocationId
-				,intStorageLocationId
-				,Aggregrate_OnOrderQty = SUM(ISNULL(dblQty, 0))
-		FROM	@ItemsToIncreaseOnOrder
+		-- Aggregrate the non-stock-unit UOMs. 
+		SELECT	o.intItemId
+				,o.intItemLocationId
+				,o.intItemUOMId
+				,o.intSubLocationId
+				,o.intStorageLocationId
+				,Aggregrate_OnOrderQty = SUM(ISNULL(o.dblQty, 0))
+		FROM	@ItemsToIncreaseOnOrder o
+				CROSS APPLY (
+					SELECT	TOP 1 
+							intItemUOMId
+							,dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = o.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM
+		WHERE	o.intItemUOMId <> StockUOM.intItemUOMId 
 		GROUP BY intItemId, intItemLocationId, intItemUOMId, intSubLocationId, intStorageLocationId
-		-- Convert the On Order Qty to the Stock UOM before adding it into tblICItemStockUOM
+		-- Convert all the On Order Qty to the Stock UOM before adding it into tblICItemStockUOM
 		UNION ALL 
 		SELECT	o.intItemId
 				,o.intItemLocationId
@@ -118,7 +128,6 @@ USING (
 					WHERE	iUOM.intItemId = o.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM
-		WHERE	o.intItemUOMId <> StockUOM.intItemUOMId 
 		GROUP BY 
 			o.intItemId
 			, o.intItemLocationId
