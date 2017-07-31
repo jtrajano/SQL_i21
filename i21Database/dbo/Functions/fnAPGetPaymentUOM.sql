@@ -11,13 +11,13 @@ SELECT DISTINCT
 	,uom.strUnitMeasure
 FROM tblICItemUOM itemUOM
 INNER JOIN tblICUnitMeasure uom ON itemUOM.intUnitMeasureId = uom.intUnitMeasureId
-WHERE itemUOM.intItemUOMId IN(
-SELECT DISTINCT
-	intItemUOMId = CASE WHEN voucherDetail.dblNetWeight > 0
-						THEN voucherDetail.intWeightUOMId
-						ELSE voucherDetail.intUnitOfMeasureId
-					END
-FROM tblAPBill voucher
-INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
-WHERE voucher.intEntityVendorId = @vendorId AND voucher.intCurrencyId = @currency
+WHERE itemUOM.intItemId IN(
+	SELECT DISTINCT
+		voucherDetail.intItemId
+	FROM tblAPBill voucher
+	INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
+	WHERE voucher.intEntityVendorId = @vendorId AND voucher.intCurrencyId = @currency
+	AND voucherDetail.intItemId > 0
+	AND voucher.ysnPosted = 1
+	AND voucher.dblAmountDue != 0
 ) 
