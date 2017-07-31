@@ -131,6 +131,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[ysnSeparateOnInvoice]
            ,[ysnCheckoffTax]
            ,[ysnTaxExempt]
+		   ,[ysnTaxOnly]
 		   ,[strNotes] 
            ,[intConcurrencyId])		
 		SELECT
@@ -150,6 +151,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
 			,[ysnTaxExempt]
+			,[ysnTaxOnly]
 			,[strNotes] 
 			,1
 		FROM

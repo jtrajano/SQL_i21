@@ -53,6 +53,7 @@ DECLARE @ItemTaxes AS TABLE(
 ,ysnCheckoffTax			BIT
 ,strTaxCode				NVARCHAR(30)
 ,ysnTaxExempt			BIT
+,ysnTaxOnly				BIT
 ,strTaxGroup			NVARCHAR(100)
 )
 
@@ -77,6 +78,7 @@ INSERT INTO @ItemTaxes (
 	,[ysnCheckoffTax]
 	,[strTaxCode]
 	,[ysnTaxExempt]
+	,[ysnTaxOnly]
 	,[strTaxGroup]
 )
 

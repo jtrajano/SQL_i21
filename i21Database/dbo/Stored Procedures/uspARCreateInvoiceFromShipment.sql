@@ -683,6 +683,7 @@ INSERT INTO @LineItemTaxEntries(
 	,[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]
 	,[ysnTaxExempt]
+	,[ysnTaxOnly]
 	,[strNotes]
 	,[intTempDetailIdForTaxes]
 )
@@ -702,6 +703,7 @@ SELECT
 	,[ysnSeparateOnInvoice]		= SOSODT.[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]			= SOSODT.[ysnCheckoffTax]
 	,[ysnTaxExempt]				= SOSODT.[ysnTaxExempt]
+	,[ysnTaxOnly]				= SOSODT.[ysnTaxOnly]
 	,[strNotes]					= SOSODT.[strNotes]
 	,[intTempDetailIdForTaxes]	= EFI.[intTempDetailIdForTaxes]
 FROM

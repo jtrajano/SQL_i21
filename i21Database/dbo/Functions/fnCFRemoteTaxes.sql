@@ -49,6 +49,7 @@ RETURNS @tblTaxTable TABLE
 		,[ysnCheckoffTax]				BIT
 		,[strTaxCode]					NVARCHAR(100)						
 		,[ysnTaxExempt]					BIT
+		,[ysnTaxOnly]					BIT
 		,[strTaxGroup]					NVARCHAR(100)
 		,[ysnInvalidSetup]				BIT
 		,[strNotes]						NVARCHAR(MAX)
@@ -75,6 +76,7 @@ BEGIN
 		,intSalesTaxAccountId			INT
 		,ysnCheckoffTax					BIT
 		,ysnTaxExempt					BIT
+		,[ysnTaxOnly]					BIT
 		,strNotes						NVARCHAR(MAX)
 		,strReason						NVARCHAR(MAX)
 		,ysnInvalidSetup				BIT
@@ -118,6 +120,7 @@ BEGIN
 		,smTaxCode.intSalesTaxAccountId	
 		,smTaxCode.ysnCheckoffTax
 		,ysnTaxExempt = E.ysnTaxExempt
+		,[ysnTaxOnly] = smTaxCode.ysnTaxOnly 
 		,strNotes = E.strExemptionNotes
 		,strReason = E.strExemptionNotes
 		,E.ysnInvalidSetup
@@ -2329,6 +2332,7 @@ BEGIN
 						,[ysnCheckoffTax]			
 						,[strTaxCode]				
 						,[ysnTaxExempt]				
+						,[ysnTaxOnly]
 						,[strTaxGroup]				
 						,[ysnInvalidSetup]			
 						,[strNotes]					
@@ -2350,7 +2354,8 @@ BEGIN
 						,0		
 						,[ysnCheckoffTax]			
 						,[strTaxCode]				
-						,[ysnTaxExempt]				
+						,[ysnTaxExempt]	
+						,[ysnTaxOnly]		
 						,''				
 						,[ysnInvalidSetup]				
 						,[strNotes]		

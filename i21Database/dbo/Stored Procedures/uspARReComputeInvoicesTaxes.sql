@@ -120,6 +120,7 @@ INSERT INTO [tblARInvoiceDetailTax]
     ,[ysnSeparateOnInvoice]
     ,[ysnCheckoffTax]
     ,[ysnTaxExempt]
+	,[ysnTaxOnly]
 	,[strNotes] 
     ,[intConcurrencyId])		
 SELECT
@@ -139,6 +140,7 @@ SELECT
 	,[ysnSeparateOnInvoice]		= TD.[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]			= TD.[ysnCheckoffTax]
 	,[ysnTaxExempt]				= TD.[ysnTaxExempt]
+	,[ysnTaxOnly]				= TD.[ysnTaxOnly]
 	,[strNotes]					= TD.[strNotes]
 	,[intConcurrencyId]			= 1
 FROM

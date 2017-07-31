@@ -45,6 +45,7 @@ SELECT
 	,[ysnCheckoffTax]
 	,[strTaxCode]
 	,[ysnTaxExempt]
+	,[ysnTaxOnly]
 	,[strTaxGroup]
 	,[ysnInvalidSetup]
 	,[strReason]

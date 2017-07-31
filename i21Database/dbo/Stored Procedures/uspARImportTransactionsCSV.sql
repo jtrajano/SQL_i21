@@ -579,6 +579,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 								  , [ysnSeparateOnInvoice]
 								  , [ysnCheckoffTax]
 								  , [ysnTaxExempt]
+								  , [ysnTaxOnly]
 								  , [strNotes]
 								  , [intTempDetailIdForTaxes])
 								SELECT  TOP 1
@@ -596,6 +597,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 								  , [ysnSeparateOnInvoice]		= 0 
 								  , [ysnCheckoffTax]			= TC.ysnCheckoffTax
 								  , [ysnTaxExempt]				= CASE WHEN ISNULL(@TaxAmount, 0) > 0 THEN 0 ELSE 1 END
+								  , [ysnTaxOnly]				= TC.ysnTaxOnly
 								  , [strNotes]					= NULL
 								  , [intTempDetailIdForTaxes]	= @ImportLogDetailId
 								FROM tblSMTaxGroupCode TGC

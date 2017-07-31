@@ -31,6 +31,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[strNotes]
 		,[intConcurrencyId])
 	SELECT
@@ -49,6 +50,7 @@ BEGIN TRY
 		,ysnSeparateOnInvoice	= ISNULL(TD.[ysnSeparateOnInvoice], 0)
 		,ysnCheckoffTax			= ISNULL(TD.[ysnCheckoffTax], SMTC.[ysnCheckoffTax])
 		,ysnTaxExempt			= ISNULL(TD.[ysnTaxExempt], 0)
+		,[ysnTaxOnly]			= ISNULL(TD.[ysnTaxOnly], 0)
 		,strNotes				= TD.[strNotes]
 		,1
 	FROM

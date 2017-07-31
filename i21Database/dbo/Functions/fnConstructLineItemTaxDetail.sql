@@ -34,6 +34,7 @@ RETURNS @returntable TABLE
 	,[ysnCheckoffTax]				BIT
 	,[strTaxCode]					NVARCHAR(100)						
 	,[ysnTaxExempt]					BIT
+	,[ysnTaxOnly]					BIT
 	,[ysnInvalidSetup]				BIT
 	,[strNotes]						NVARCHAR(500)
 )
@@ -56,6 +57,7 @@ BEGIN
 		,[ysnCheckoffTax]				BIT
 		,[strTaxCode]					NVARCHAR(100)						
 		,[ysnTaxExempt]					BIT
+		,[ysnTaxOnly]					BIT
 		,[ysnInvalidSetup]				BIT
 		,[strTaxGroup]					NVARCHAR(100)
 		,[strNotes]						NVARCHAR(500)
@@ -79,6 +81,7 @@ BEGIN
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnTaxOnly]
 				,[ysnInvalidSetup]
 				,[strNotes]
 			)
@@ -96,6 +99,7 @@ BEGIN
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnTaxOnly]
 				,[ysnInvalidSetup]
 				,[strNotes]
 			FROM
@@ -142,7 +146,8 @@ BEGIN
 		,[intTaxAccountId]
 		,[ysnCheckoffTax]		
 		,[strTaxCode]
-		,[ysnTaxExempt]		
+		,[ysnTaxExempt]	
+		,[ysnTaxOnly]	
 		,[ysnTaxAdjusted]
 		,[ysnComputed]
 	)
@@ -160,7 +165,8 @@ BEGIN
 		,[intTaxAccountId]			= ISNULL(LITE.[intTaxAccountId], SMTC.[intSalesTaxAccountId])
 		,[ysnCheckoffTax]			= ISNULL(LITE.[ysnCheckoffTax], SMTC.[ysnCheckoffTax])
 		,[strTaxCode]				= SMTC.[strTaxCode]
-		,[ysnTaxExempt]				= LITE.[ysnTaxExempt] 		
+		,[ysnTaxExempt]				= LITE.[ysnTaxExempt]
+		,[ysnTaxOnly]				= LITE.[ysnTaxOnly]
 		,[ysnTaxAdjusted]			= LITE.[ysnTaxAdjusted] 
 		,[ysnComputed]				= 0
 	FROM
@@ -205,6 +211,7 @@ BEGIN
 				,[ysnCheckoffTax]				BIT
 				,[strTaxCode]					NVARCHAR(100)						
 				,[ysnTaxExempt]					BIT
+				,[ysnTaxOnly]					BIT
 				,[ysnInvalidSetup]				BIT
 				,[strTaxGroup]					NVARCHAR(100)
 				,[strNotes]						NVARCHAR(500)
@@ -226,6 +233,7 @@ BEGIN
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnTaxOnly]
 				,[ysnInvalidSetup]
 				,[strTaxGroup]
 				,[strNotes]
@@ -246,6 +254,7 @@ BEGIN
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnTaxOnly]
 				,[ysnInvalidSetup]
 				,[strTaxGroup]
 				,[strNotes]
@@ -613,6 +622,7 @@ BEGIN
 		,[intTaxAccountId]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strNotes]
 	)
@@ -629,6 +639,7 @@ BEGIN
 		,[intTaxAccountId]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strNotes]
 	FROM

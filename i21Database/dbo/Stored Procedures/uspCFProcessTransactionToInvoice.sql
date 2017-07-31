@@ -502,6 +502,7 @@ DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[strNotes]
 		,[intTempDetailIdForTaxes]
 		,[ysnClearExisting])
@@ -520,6 +521,7 @@ DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 	,[ysnSeparateOnInvoice]		= 0 
 	,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
 	,[ysnTaxExempt]				= 0
+	,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
 	,[strNotes]					= ''
 	,[intTempDetailIdForTaxes]	= @TransactionId
 	,[ysnClearExisting]			= 1

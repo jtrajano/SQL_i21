@@ -38,6 +38,7 @@ DECLARE @EntriesForProcessing AS TABLE(
 	,[ysnSeparateOnInvoice]			BIT												NULL
 	,[ysnCheckoffTax]				BIT												NULL
 	,[ysnTaxExempt]					BIT												NULL
+	,[ysnTaxOnly]					BIT												NULL
 	,[strNotes]						NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NULL
 	,[ysnAdded]						BIT												NULL	
 	,[ysnUpdated]					BIT												NULL	
@@ -64,6 +65,7 @@ INSERT INTO @EntriesForProcessing
 	,[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]
 	,[ysnTaxExempt]
+	,[ysnTaxOnly]
 	,[strNotes]
 	,[ysnAdded]
 	,[ysnUpdated]
@@ -84,6 +86,7 @@ SELECT
 	,[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]
 	,[ysnTaxExempt]
+	,[ysnTaxOnly]
 	,[strNotes]
 	,0
 	,0

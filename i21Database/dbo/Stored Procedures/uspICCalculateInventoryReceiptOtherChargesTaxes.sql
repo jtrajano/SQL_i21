@@ -40,6 +40,7 @@ BEGIN
 				,ysnCheckoffTax			BIT
 				,strTaxCode				NVARCHAR(50)
 				,ysnTaxExempt			BIT
+				,[ysnTaxOnly]			BIT
 				,[ysnInvalidSetup]		BIT
 				,[strTaxGroup]			NVARCHAR(100)
 				,[strNotes]				NVARCHAR(500)
@@ -97,6 +98,7 @@ BEGIN
 					,ysnCheckoffTax
 					,strTaxCode
 					,ysnTaxExempt
+					,[ysnTaxOnly]
 					,[ysnInvalidSetup]
 					,[strTaxGroup]
 					,[strNotes]

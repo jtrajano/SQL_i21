@@ -43,6 +43,7 @@ AS
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnTaxOnly]
 				,[ysnInvalidSetup] 
 				,[strTaxGroup]
 				,[strNotes]

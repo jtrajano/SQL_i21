@@ -24,12 +24,13 @@ RETURNS @returntable TABLE
 	,[dblRate]						NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
-	,[ysnSeparateOnInvoice]			BIT
+	,[ysnSeparateOnInvoice]			BIT DEFAULT 0
 	,[intTaxAccountId]				INT
 	,[ysnTaxAdjusted]				BIT DEFAULT 0
-	,[ysnCheckoffTax]				BIT
+	,[ysnCheckoffTax]				BIT DEFAULT 0
 	,[strTaxCode]					NVARCHAR(100)						
 	,[ysnTaxExempt]					BIT DEFAULT 0
+	,[ysnTaxOnly]					BIT DEFAULT 0
 	,[ysnInvalidSetup]				BIT DEFAULT 0
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
@@ -53,11 +54,12 @@ BEGIN
 			,[dblTax]						NUMERIC(18,6)
 			,[dblAdjustedTax]				NUMERIC(18,6)
 			,[intTaxAccountId]				INT
-			,[ysnSeparateOnInvoice]			BIT
-			,[ysnCheckoffTax]				BIT
+			,[ysnSeparateOnInvoice]			BIT DEFAULT 0
+			,[ysnCheckoffTax]				BIT DEFAULT 0
 			,[strTaxCode]					NVARCHAR(100)						
 			,[ysnTaxExempt]					BIT
-			,[ysnInvalidSetup]				BIT
+			,[ysnTaxOnly]					BIT DEFAULT 0
+			,[ysnInvalidSetup]				BIT DEFAULT 0
 			,[strTaxGroup]					NVARCHAR(100)
 			,[strNotes]						NVARCHAR(500)
 			,[ysnTaxAdjusted]				BIT DEFAULT 0
@@ -83,6 +85,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
@@ -103,6 +106,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]

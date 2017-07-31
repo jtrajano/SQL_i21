@@ -582,6 +582,7 @@ END
 						,[ysnSeparateOnInvoice]
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
+						,[ysnTaxOnly]
 						,[strNotes]
 						,[intTempDetailIdForTaxes]
 						,[ysnClearExisting])
@@ -600,6 +601,7 @@ END
 					,[ysnSeparateOnInvoice]		= 0 
 					,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
 					,[ysnTaxExempt]				= 0
+					,[ysnTaxOnly]				= cfTaxCode.[ysnTaxOnly]
 					,[strNotes]					= ''
 					,[intTempDetailIdForTaxes]	= TI.RecordKey
 					,[ysnClearExisting]			= 1

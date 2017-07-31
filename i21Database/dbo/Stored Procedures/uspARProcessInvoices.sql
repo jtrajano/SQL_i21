@@ -917,6 +917,7 @@ BEGIN
 							,[ysnSeparateOnInvoice]
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
+							,[ysnTaxOnly]
 							,[strNotes])
 						SELECT
 							 @NewDetailId
@@ -934,6 +935,7 @@ BEGIN
 							,[ysnSeparateOnInvoice]
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
+							,[ysnTaxOnly]
 							,[strNotes]
 						FROM
 							@LineItemTaxEntries
@@ -1532,6 +1534,7 @@ BEGIN TRY
 								,[ysnSeparateOnInvoice]
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
+								,[ysnTaxOnly]
 								,[strNotes])
 							SELECT
 								 @NewDetailId
@@ -1549,6 +1552,7 @@ BEGIN TRY
 								,[ysnSeparateOnInvoice]
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
+								,[ysnTaxOnly]
 								,[strNotes]
 							FROM
 								@LineItemTaxEntries
@@ -1823,6 +1827,7 @@ BEGIN TRY
 						,[ysnSeparateOnInvoice]
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
+						,[ysnTaxOnly]
 						,[strNotes])
 					SELECT
 						 [intDetailId]
@@ -1840,6 +1845,7 @@ BEGIN TRY
 						,[ysnSeparateOnInvoice]
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
+						,[ysnTaxOnly]
 						,[strNotes]
 					FROM
 						@LineItemTaxEntries

@@ -860,6 +860,7 @@ BEGIN
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
 			,[ysnTaxExempt]
+			,[ysnTaxOnly]
 			,[strNotes]
 			,[intTempDetailIdForTaxes]
 			,[dblCurrencyExchangeRate]
@@ -888,6 +889,7 @@ BEGIN
 			,[ysnSeparateOnInvoice]			= LITE.[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]				= LITE.[ysnCheckoffTax]
 			,[ysnTaxExempt]					= LITE.[ysnTaxExempt]
+			,[ysnTaxOnly]					= LITE.[ysnTaxOnly]
 			,[strNotes]						= LITE.[strNotes]
 			,[intTempDetailIdForTaxes]		= LITE.[intTempDetailIdForTaxes]
 			,[dblCurrencyExchangeRate]		= ISNULL(IFI.[dblCurrencyExchangeRate], 1.000000)
@@ -1379,6 +1381,7 @@ BEGIN
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
 			,[ysnTaxExempt]
+			,[ysnTaxOnly]
 			,[strNotes]
 			,[intTempDetailIdForTaxes]
 			,[dblCurrencyExchangeRate]
@@ -1407,6 +1410,7 @@ BEGIN
 			,[ysnSeparateOnInvoice]			= LITE.[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]				= LITE.[ysnCheckoffTax]
 			,[ysnTaxExempt]					= LITE.[ysnTaxExempt]
+			,[ysnTaxOnly]					= LITE.[ysnTaxOnly]
 			,[strNotes]						= LITE.[strNotes]
 			,[intTempDetailIdForTaxes]		= LITE.[intTempDetailIdForTaxes]
 			,[dblCurrencyExchangeRate]		= ISNULL(IFI.[dblCurrencyExchangeRate], 1.000000)

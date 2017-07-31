@@ -501,6 +501,7 @@ BEGIN
 		,[ysnCheckoffTax]					BIT
 		,[strTaxCode]						NVARCHAR(MAX)
 		,[ysnTaxExempt]						BIT		
+		,[ysnTaxOnly]						BIT		
 		,[ysnInvalidSetup]					BIT
 		,[strTaxGroup]						NVARCHAR(MAX)
 		,[ysnInvalid]						BIT
@@ -561,6 +562,7 @@ BEGIN
 		,[ysnCheckoffTax]					BIT
 		,[strTaxCode]						NVARCHAR(MAX)
 		,[ysnTaxExempt]						BIT		
+		,[ysnTaxOnly]						BIT		
 		,[ysnInvalidSetup]					BIT
 		,[strTaxGroup]						NVARCHAR(MAX)
 		,[ysnInvalid]						BIT
@@ -617,6 +619,7 @@ BEGIN
 				,[ysnCheckoffTax]				
 				,[strTaxCode]					
 				,[ysnTaxExempt]			
+				,[ysnTaxOnly]			
 				,[strTaxGroup]					
 				,[ysnInvalidSetup]					
 				,[strReason]					
@@ -729,6 +732,7 @@ BEGIN
 					,[ysnSeparateOnInvoice]			
 					,[ysnCheckoffTax]				
 					,[ysnTaxExempt]			
+					,[ysnTaxOnly]			
 					,[strNotes]				
 				)	
 				SELECT 
@@ -745,7 +749,8 @@ BEGIN
 					,[intSalesTaxAccountId]    	
 					,[ysnSeparateOnInvoice]		
 					,[ysnCheckoffTax]			
-					,[ysnTaxExempt]			
+					,[ysnTaxExempt]		
+					,[ysnTaxOnly]	
 					,[strNotes]  				
 				FROM
 				@tblCFRemoteTax
@@ -1503,6 +1508,7 @@ BEGIN
 				,[ysnCheckoffTax]				
 				,[strTaxCode]					
 				,[ysnTaxExempt]			
+				,[ysnTaxOnly]
 				,[strTaxGroup]					
 				,[ysnInvalidSetup]					
 				,[strReason]					
@@ -1559,7 +1565,8 @@ BEGIN
 					,[ysnSeparateOnInvoice]			
 					,[ysnCheckoffTax]				
 					,[strTaxCode]					
-					,[ysnTaxExempt]			
+					,[ysnTaxExempt]	
+					,[ysnTaxOnly]		
 					,[ysnInvalidSetup]				
 					,[strTaxGroup]					
 					,[strNotes]			
@@ -1584,6 +1591,7 @@ BEGIN
 					,ysnCheckoffTax
 					,strTaxCode
 					,ysnTaxExempt
+					,[ysnTaxOnly]
 					,0
 					,strTaxGroup
 					,strNotes
