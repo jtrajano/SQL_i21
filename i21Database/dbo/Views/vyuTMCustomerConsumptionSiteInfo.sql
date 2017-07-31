@@ -29,4 +29,6 @@ AS
 		ON C.intCustomerNumber = D.intEntityId
 	LEFT JOIN tblSMCompanyLocation I
 		ON B.intLocationId = I.intCompanyLocationId
+	LEFT JOIN tblEMEntity J
+		ON B.intDriverID = J.intEntityId
 GO
