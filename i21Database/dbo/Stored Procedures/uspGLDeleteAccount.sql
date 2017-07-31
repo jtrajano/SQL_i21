@@ -12,10 +12,10 @@ BEGIN TRY
 			DELETE FROM tblGLCOACrossReference where intLegacyReferenceId = @intLegacyReferenceId
 			IF EXISTS (SELECT TOP 1 1 FROM sys.tables where tables.name = 'glactmst')
 				DELETE FROM glactmst where A4GLIdentity = @intLegacyReferenceId 
-			DELETE FROM tblGLCrossReferenceMapping WHERE intAccountId = @intAccountId
-			DELETE FROM tblGLAccountSegmentMapping WHERE intAccountId = @intAccountId
-			DELETE FROM tblGLAccount where intAccountId = @intAccountId
 		END
+		DELETE FROM tblGLCrossReferenceMapping WHERE intAccountId = @intAccountId
+		DELETE FROM tblGLAccountSegmentMapping WHERE intAccountId = @intAccountId
+		DELETE FROM tblGLAccount where intAccountId = @intAccountId
 	IF @@TRANCOUNT > 0 COMMIT TRANSACTION;
 END TRY
 BEGIN CATCH
