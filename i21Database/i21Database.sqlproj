@@ -5561,6 +5561,7 @@
     <Build Include="dbo\Stored Procedures\uspCFBatchRecalculate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrderMsgAndMail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateCompanyLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
