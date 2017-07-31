@@ -64,10 +64,12 @@ BEGIN
 		AND voucherDetail.intUnitOfMeasureId > 0 --get only those have UOM
 		AND voucher.ysnPosted = 1
 		AND voucher.dblAmountDue != 0
-		AND voucher.intBillId IN (CASE WHEN @paymentId > 0  --if it has payment, calculte only on the payment detail records
-										THEN (SELECT intBillId FROM tblAPPaymentDetail WHERE intPaymentId = @paymentId) 
-									ELSE voucher.intBillId END)
-			)
+		AND voucher.intTransactionType = 1
+		AND 1 = (CASE WHEN @paymentId > 0 THEN
+						(CASE WHEN EXISTS(SELECT TOP 1 1 FROM tblAPPaymentDetail paymentDetail WHERE paymentDetail.intPaymentId = @paymentId AND voucher.intBillId = paymentDetail.intBillId) 
+						THEN 1 ELSE 0 END)
+					ELSE 1 END)
+	)
 	SELECT
 		voucherDetailsUOM.intBillId
 		,voucherDetailsUOM.dblQuantityToPay
@@ -106,7 +108,7 @@ BEGIN
 			--CONVERT THE COST TO CORRECT AMOUNT
 			IF(@subCurrency = 1)
 			BEGIN
-				SET @convertedDetailCostFromPaymentUOM = convertedDetailCostFromPaymentUOM / 100;
+				SET @convertedDetailCostFromPaymentUOM = @convertedDetailCostFromPaymentUOM / 100;
 			END
 
 			INSERT INTO @voucherDetailPayment
