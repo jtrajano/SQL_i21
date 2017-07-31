@@ -5538,6 +5538,7 @@
     <None Include="Scripts\Post-Deployment\FRM\DefaultData\1_OfflineMenu.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentUOM.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentByUOM.sql" />
+    <Build Include="dbo\Views\vyuCMUndepositedFund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
