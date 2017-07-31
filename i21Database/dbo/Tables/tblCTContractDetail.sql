@@ -133,6 +133,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblReservedQty] NUMERIC(18, 6) NULL, 
     [dblAllocationAdjQty] NUMERIC(18, 6) NULL, 
 
+    [intSequenceId] INT NULL, 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
 

@@ -36,7 +36,13 @@ SELECT
 	IR.strReceiptNumber,
 	ISNULL(IR.intInventoryReceiptId,0) AS intInventoryReceiptId,
 	SC.strTicketNumber,
-	CH.strContractNumber
+	CH.strContractNumber,
+	CL.strLocationName,
+	CASE WHEN (B.intWeightUOMId > 0) 
+		THEN ( SELECT strUnitMeasure FROM dbo.tblICUnitMeasure WHERE intUnitMeasureId = B.intWeightUOMId)
+		ELSE (SELECT strUnitMeasure FROM dbo.tblICUnitMeasure WHERE intUnitMeasureId = B.intUnitOfMeasureId)
+	END AS strUOM,
+	ISNULL(CD.intSequenceId,0) AS intSequenceId,
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -63,3 +69,7 @@ LEFT JOIN dbo.tblSCTicket SC
 	ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
 INNER JOIN dbo.tblSMCurrency CUR 
 	ON CUR.intCurrencyID = A.intCurrencyId
+LEFT JOIN dbo.tblCTContractDetail CD
+	ON CD.intContractHeaderId = CH.intContractHeaderId
+LEFT JOIN dbo.tblSMCompanyLocation CL
+	ON CL.intCompanyLocationId = A.intShipToId
