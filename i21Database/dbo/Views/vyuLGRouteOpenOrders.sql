@@ -199,7 +199,7 @@ SELECT
 	,dblToLongitude = TMO.dblLongitude
 	,dblToLatitude = TMO.dblLatitude
 	,strOrderStatus = NULL
-	,strDriver = NULL
+	,strDriver = TMO.strDriverName
 	,strItemNo = NULL
 	,dblQuantity = NULL
 	,strCustomerReference = ''
