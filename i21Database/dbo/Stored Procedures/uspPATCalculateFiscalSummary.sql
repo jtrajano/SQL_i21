@@ -64,11 +64,13 @@ SELECT	Total.intFiscalYear,
 					dblRefundAmount = SUM(ROUND(RRD.dblRate * B.dblVolume,2))
 			FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
-					ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
+				ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
 			INNER JOIN tblPATRefundRate RR
-					ON RR.intRefundTypeId = RRD.intRefundTypeId
+				ON RR.intRefundTypeId = RRD.intRefundTypeId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityId = B.intCustomerPatronId
+				ON ARC.intEntityId = B.intCustomerPatronId
+			INNER JOIN vyuEMEntityType EMT
+				ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
 			CROSS APPLY tblPATCompanyPreference ComPref
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0 AND ARC.strStockStatus IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
 			AND B.intFiscalYear = @intFiscalYearId

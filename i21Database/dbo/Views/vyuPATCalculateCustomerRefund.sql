@@ -45,18 +45,20 @@ SELECT	Total.intCustomerId,
 				ON RR.intRefundTypeId = RRD.intRefundTypeId
 			INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
+			INNER JOIN vyuEMEntityType EMT
+				ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
 			CROSS APPLY ComPref
 			CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) CompLoc 
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 		) Total
 	INNER JOIN tblARCustomer AC
-			ON AC.[intEntityId] = Total.intCustomerId
+		ON AC.intEntityId = Total.intCustomerId
 	INNER JOIN tblAPVendor APV
-			ON APV.[intEntityId] = Total.intCustomerId
+		ON APV.intEntityId = Total.intCustomerId
 	LEFT JOIN tblSMTaxCode TC
-			ON TC.intTaxCodeId = AC.intTaxCodeId
+		ON TC.intTaxCodeId = AC.intTaxCodeId
 	INNER JOIN tblEMEntity ENT
-			ON ENT.intEntityId = Total.intCustomerId
+		ON ENT.intEntityId = Total.intCustomerId
 )
 
 SELECT	NEWID() AS id,

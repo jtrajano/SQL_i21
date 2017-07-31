@@ -25,17 +25,19 @@ WITH Refunds AS (
 							dblCashRefund = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100),2)
 				FROM tblPATCustomerVolume B
 				INNER JOIN tblPATRefundRateDetail RRD
-						ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
+					ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
 				INNER JOIN tblPATRefundRate RR
-						ON RR.intRefundTypeId = RRD.intRefundTypeId
+					ON RR.intRefundTypeId = RRD.intRefundTypeId
 				INNER JOIN tblARCustomer AC
-						ON AC.[intEntityId] = B.intCustomerPatronId
+					ON AC.intEntityId = B.intCustomerPatronId
+				INNER JOIN vyuEMEntityType EMT
+					ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
 				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.intFiscalYear = B.intFiscalYear AND B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 					) Total
 			INNER JOIN tblPATRefundRate RR
 					ON RR.intRefundTypeId = Total.intRefundTypeId
 			INNER JOIN tblARCustomer AC
-					ON AC.[intEntityId] = Total.intCustomerId
+					ON AC.intEntityId = Total.intCustomerId
 			CROSS APPLY tblPATCompanyPreference ComPref
 			GROUP BY RR.intRefundTypeId,
 			RR.strRefundType,

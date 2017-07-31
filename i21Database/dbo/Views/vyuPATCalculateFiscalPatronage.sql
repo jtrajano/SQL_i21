@@ -10,9 +10,11 @@ SELECT	DISTINCT RRD.intPatronageCategoryId,
 		dblRefundAmount = SUM(ROUND(ISNULL((RRD.dblRate * CV.dblVolume),0),2))
 		FROM tblPATRefundRate RR
 INNER JOIN tblPATRefundRateDetail RRD
-		ON RRD.intRefundTypeId = RR.intRefundTypeId
+	ON RRD.intRefundTypeId = RR.intRefundTypeId
 INNER JOIN tblPATPatronageCategory PC
-		ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
+	ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 INNER JOIN tblPATCustomerVolume CV
-		ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId AND CV.ysnRefundProcessed <> 1
-	GROUP BY RRD.intPatronageCategoryId, CV.intFiscalYear, PC.strCategoryCode, PC.strDescription, RRD.dblRate
+	ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId AND CV.ysnRefundProcessed <> 1
+INNER JOIN vyuEMEntityType EMType
+	ON EMType.intEntityId = CV.intCustomerPatronId AND EMType.Vendor = 1 AND EMType.Customer = 1
+GROUP BY RRD.intPatronageCategoryId, CV.intFiscalYear, PC.strCategoryCode, PC.strDescription, RRD.dblRate
