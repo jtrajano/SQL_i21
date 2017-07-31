@@ -400,7 +400,7 @@ WHERE
 
 IF @ysnPrintOnlyPastDue = 1
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE dtmDueDate <= @dtmDateTo
+		DELETE FROM @temp_statement_table WHERE dtmDueDate > @dtmDateTo
 		UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
 	END
 
