@@ -172,10 +172,10 @@ BEGIN
 	)  	
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= Detail.intItemUOMId 
+			,intItemUOMId			= CASE Item.strLotTracking WHEN 'No' THEN Detail.intItemUOMId ELSE ISNULL(ItemLot.intWeightUOMId, ItemLot.intItemUOMId) END
 			,dtmDate				= Header.dtmCountDate
 			,dblQty					= ISNULL(Detail.dblPhysicalCount, 0) - CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ISNULL(CASE WHEN ItemLot.intWeightUOMId IS NULL THEN ItemLot.dblQty ELSE ItemLot.dblWeight END, 0) END
-			,dblUOMQty				= ItemUOM.dblUnitQty	
+			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
 			,0
 			,dblSalesPrice			= 0
