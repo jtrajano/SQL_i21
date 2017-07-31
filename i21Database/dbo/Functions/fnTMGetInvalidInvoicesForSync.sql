@@ -16,68 +16,106 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @ZeroDecimal DECIMAL(18,6)
-	SET @ZeroDecimal = 0.000000	
+	INSERT INTO @returntable (intInvoiceId,[strInvoiceNumber],[strTransactionType],[intInvoiceDetailId],[intItemId],[strBatchId],[strPostingError])
+	SELECT * FROM (
+		SELECT
+			intInvoiceId = A.intInvoiceId
+			,[strInvoiceNumber] = C.[strInvoiceNumber]
+			,C.[strTransactionType]		
+			,C.[intInvoiceDetailId]		
+			,C.[intItemId]				
+			,C.[strBatchId]	
+			,[strPostingError] = (CASE WHEN D.ysnActive <> 1 THEN
+										'Site is Inactive.'
+									WHEN D.dblBurnRate = 0 THEN
+										'Burn Rate is Zero.'
+									WHEN ISNULL(D.dblTotalCapacity,0.0) = 0 AND D.strBillingBy = 'Tank'  THEN
+										'Site total capacity is Zero.'
+									WHEN E.intClockID IS NULL THEN
+										'The Site Clock Location does not exists in Tank Management.'
+									WHEN D.strClassFillOption = 'No' AND D.intProduct <> B.intItemId THEN
+										'The Invoice item is different than the site item.'
+									WHEN D.strClassFillOption = 'Product Class' AND F.intCategoryId <> G.intCategoryId THEN
+										'The Invoice item class is different than the site item class.'
+									WHEN G.strType = 'Service' AND B.intPerformerId IS NULL THEN
+										'Performer is not specified for item'
+									WHEN H.intClockID IS NULL THEN
+										'Invoice date does not have a matching Clock Reading record.'
+									ELSE ''
+								END)
+		FROM tblARInvoice A
+		INNER JOIN tblARInvoiceDetail B
+			ON A.intInvoiceId = B.intInvoiceId
+		INNER JOIN @Invoices C
+			ON A.intInvoiceId = C.intInvoiceId
+		INNER JOIN tblTMSite D
+			ON B.intSiteId = D.intSiteID
+		INNER JOIN tblTMClock E
+			ON D.intClockID = E.intClockID
+		INNER JOIN tblTMDegreeDayReading H
+			ON E.intClockID = H.intClockID
+				AND A.dtmDate = H.dtmDate
+		LEFT JOIN tblICItem F
+			ON D.intProduct = F.intItemId
+		LEFT JOIN tblICItem G
+			ON B.intItemId = G.intItemId
+		LEFT JOIN tblTMSiteDevice I
+			ON D.intSiteID = I.intSiteID
+		LEFT JOIN tblTMDevice	J
+			ON I.intDeviceId = J.intDeviceId
+		LEFT JOIN tblTMDeviceType K
+			ON J.intDeviceTypeId = K.intDeviceTypeId
+				AND K.strDeviceType <> 'Flow Meter'
+		WHERE B.intSiteId IS NOT NULL	
+			AND B.ysnLeaseBilling <> 1
+			AND D.strBillingBy <> 'Flow Meter'
 
---IF(ISNULL(@Post,0)) = 1
---	BEGIN
---		INSERT INTO @returntable(
---			 [intInvoiceId]
---			,[strInvoiceNumber]
---			,[strTransactionType]
---			,[intInvoiceDetailId]
---			,[intItemId]
---			,[strBatchId]
---			,[strPostingError])
+		UNION ALL
 
---		--ALREADY POSTED
---		SELECT
---			 [intInvoiceId]			= I.[intInvoiceId]
---			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
---			,[strTransactionType]	= I.[strTransactionType]
---			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
---			,[intItemId]			= I.[intItemId] 
---			,[strBatchId]			= I.[strBatchId]
---			,[strPostingError]		= 'The transaction is already posted.'
---		FROM 
---			@Invoices I
---		INNER JOIN 
---			(SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
---				ON I.[intInvoiceId] = ARI.[intInvoiceId]
---		WHERE  
---			ARI.[ysnPosted] = 1			
-																																			
---	END
---ELSE
---	BEGIN
---		INSERT INTO @returntable(
---			 [intInvoiceId]
---			,[strInvoiceNumber]
---			,[strTransactionType]
---			,[intInvoiceDetailId]
---			,[intItemId]
---			,[strBatchId]
---			,[strPostingError])
+		SELECT
+			intInvoiceId = A.intInvoiceId
+			,[strInvoiceNumber] = C.[strInvoiceNumber]
+			,C.[strTransactionType]		
+			,C.[intInvoiceDetailId]		
+			,C.[intItemId]				
+			,C.[strBatchId]	
+			,[strPostingError] = (CASE WHEN D.strBillingBy = 'Flow Meter' AND J.intDeviceId IS NULL THEN
+										'Site is a Flow Meter but dont have a flow meter type device record.'
+								END)
+		FROM tblARInvoice A
+		INNER JOIN tblARInvoiceDetail B
+			ON A.intInvoiceId = B.intInvoiceId
+		INNER JOIN @Invoices C
+			ON A.intInvoiceId = C.intInvoiceId
+		INNER JOIN tblTMSite D
+			ON B.intSiteId = D.intSiteID
+		INNER JOIN tblTMClock E
+			ON D.intClockID = E.intClockID
+		INNER JOIN tblTMDegreeDayReading H
+			ON E.intClockID = H.intClockID
+				AND A.dtmDate = H.dtmDate
+		LEFT JOIN tblICItem F
+			ON D.intProduct = F.intItemId
+		LEFT JOIN tblICItem G
+			ON B.intItemId = G.intItemId
+		LEFT JOIN (
+			SELECT 
+				I.intSiteID
+				,intDeviceId = (SELECT TOP 1 
+									CC.intDeviceId 
+								FROM tblTMSiteDevice CC
+								INNER JOIN tblTMDevice AA
+									ON CC.intDeviceId = AA.intDeviceId
+								INNER JOIN tblTMDeviceType BB
+									ON AA.intDeviceTypeId = BB.intDeviceTypeId
+								WHERE BB.strDeviceType = 'Flow Meter'
+									AND CC.intSiteID = I.intSiteID)
+							
+			FROM tblTMSite I) J
+			ON D.intSiteID = J.intSiteID
+		WHERE D.strBillingBy = 'Flow Meter'
+	) AA WHERE AA.[strPostingError] <> '' AND AA.[strPostingError] IS NOT NULL
 
---		--NOT YET POSTED
---		SELECT
---			 [intInvoiceId]			= I.[intInvoiceId]
---			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
---			,[strTransactionType]	= I.[strTransactionType]
---			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
---			,[intItemId]			= I.[intItemId]
---			,[strBatchId]			= I.[strBatchId]
---			,[strPostingError]		= 'The transaction has not been posted yet.'
---		FROM 
---			@Invoices I
---		INNER JOIN 
---			(SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
---				ON I.[intInvoiceId] = ARI.[intInvoiceId]
---		WHERE  
---			ARI.[ysnPosted] = 0
-		
-
---	END
 																												
 	RETURN
 END
