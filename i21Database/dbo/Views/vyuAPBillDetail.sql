@@ -42,7 +42,7 @@ SELECT
 		THEN ( SELECT strUnitMeasure FROM dbo.tblICUnitMeasure WHERE intUnitMeasureId = B.intWeightUOMId)
 		ELSE (SELECT strUnitMeasure FROM dbo.tblICUnitMeasure WHERE intUnitMeasureId = B.intUnitOfMeasureId)
 	END AS strUOM,
-	ISNULL(CD.intSequenceId,0) AS intSequenceId
+	ISNULL(CD.intContractSeq,0) AS intSequenceId
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
