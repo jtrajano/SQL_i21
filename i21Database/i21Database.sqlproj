@@ -5366,6 +5366,7 @@
     <Build Include="dbo\Tables\tblPATCustomerVolumeLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetOrderNewLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAddOrderNewLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
