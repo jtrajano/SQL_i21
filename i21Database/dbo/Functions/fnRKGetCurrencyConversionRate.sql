@@ -5,7 +5,8 @@
 	@intItemId int,
 	@intFromUom int,
 	@intToUom int,
-	@Price numeric(18,6) 
+	@Price numeric(18,6) ,
+	@dblRate numeric(18,6) 
 )
 RETURNS NUMERIC(38,20)
 AS 
@@ -27,7 +28,7 @@ BEGIN
 	if (@intFromCurrencyId <>@intToCurrencyId)
 			BEGIN
 
-				SELECT	TOP 1 @dblResult = @Price* RD.[dblRate] 
+				SELECT	TOP 1 @dblResult = @Price* case when isnull(@dblRate,0) = 0 then RD.[dblRate] else @dblRate end
 				FROM	tblSMCurrencyExchangeRate ER
 				JOIN	tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
 				WHERE	(ER.intFromCurrencyId = @intFromCurrencyId AND ER.intToCurrencyId = @intToCurrencyId) 
