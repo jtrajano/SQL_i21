@@ -7,19 +7,18 @@ BEGIN TRY
 		SELECT @intLegacyReferenceId = intLegacyReferenceId
 		FROM tblGLCOACrossReference  WHERE inti21Id = @intAccountId
 			AND ISNULL(ysnOrigin,0) = 0
-		IF @intLegacyReferenceId > 0
+		
+		DELETE FROM tblGLCOACrossReference where intLegacyReferenceId = @intLegacyReferenceId
+		IF EXISTS (SELECT TOP 1 1 FROM sys.tables where tables.name = 'glactmst')
 		BEGIN
-			DELETE FROM tblGLCOACrossReference where intLegacyReferenceId = @intLegacyReferenceId
-			IF EXISTS (SELECT TOP 1 1 FROM sys.tables where tables.name = 'glactmst')
-			BEGIN
-				DECLARE @strSQL NVARCHAR(300)
-				SELECT @strSQL = 'DELETE FROM glactmst where A4GLIdentity = ' + CAST( @intLegacyReferenceId AS NVARCHAR(10))
-				EXEC(@strSQL)
-			END
-			DELETE FROM tblGLCrossReferenceMapping WHERE intAccountId = @intAccountId
-			DELETE FROM tblGLAccountSegmentMapping WHERE intAccountId = @intAccountId
-			DELETE FROM tblGLAccount where intAccountId = @intAccountId
+			DECLARE @strSQL NVARCHAR(300)
+			SELECT @strSQL = 'DELETE FROM glactmst where A4GLIdentity = ' + CAST( @intLegacyReferenceId AS NVARCHAR(10))
+			EXEC(@strSQL)
 		END
+		DELETE FROM tblGLCrossReferenceMapping WHERE intAccountId = @intAccountId
+		DELETE FROM tblGLAccountSegmentMapping WHERE intAccountId = @intAccountId
+		DELETE FROM tblGLAccount where intAccountId = @intAccountId
+		
 	IF @@TRANCOUNT > 0 COMMIT TRANSACTION;
 END TRY
 BEGIN CATCH
