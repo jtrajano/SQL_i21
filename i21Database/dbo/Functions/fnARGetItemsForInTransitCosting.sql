@@ -116,50 +116,27 @@ WHERE
 UNION ALL
 
 SELECT
-	 [intItemId]					= ARID.[intItemId]
-	,[intItemLocationId]			= IST.[intItemLocationId]
-	,[intItemUOMId]					= ARID.[intItemUOMId]
+	 [intItemId]					= ICIT.[intItemId]
+	,[intItemLocationId]			= ICIT.[intItemLocationId]
+	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ARI.[dtmShipDate]
-	,[dblQty]						= (ARID.[dblQtyShipped] * (CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @Post = 0 THEN -1 ELSE 1 END
-	,[dblUOMQty]					= ItemUOM.dblUnitQty
-	,[dblCost]						= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1 
-																	THEN (
-																		SELECT SUM(ICIT.[dblCost]) 
-																		FROM
-																			(SELECT [intTransactionId], [strTransactionId], [dblCost], [ysnIsUnposted], [strTransactionForm] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-																		INNER JOIN
-																			(SELECT [intWorkOrderId], [intBatchID], [strWorkOrderNo] FROM tblMFWorkOrder WITH (NOLOCK)) MFWO
-																				ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
-																				AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
-																		WHERE
-																			MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.[intWorkOrderId])FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.[intInvoiceDetailId] = ARID.[intInvoiceDetailId])
-																			AND ICIT.[ysnIsUnposted] = 0
-																			AND ICIT.[strTransactionForm] = 'Produce'
-																	)
-																	ELSE
-																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], IST.[intItemLocationId]) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(ARID.[intItemId], IST.[intItemLocationId], ARID.intItemUOMId) 
-																				ELSE 
-																					IST.[dblLastCost]  
-																		END 
-																END
-																,ARI.[dblSplitPercent])
-															,ItemUOM.[dblUnitQty]
-														),@ZeroDecimal)
+	,[dblQty]						= -ICIT.[dblQty]
+	,[dblUOMQty]					= ICIT.[dblUOMQty]
+	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
 	,[dblSalesPrice]				= ARID.[dblPrice]
 	,[intCurrencyId]				= ARI.[intCurrencyId]
-	,[dblExchangeRate]				= ARID.[dblCurrencyExchangeRate]
+	,[dblExchangeRate]				= 1.00
 	,[intTransactionId]				= ARI.[intInvoiceId]
 	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
 	,[strTransactionId]				= ARI.[strInvoiceNumber]
 	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
-	,[intLotId]						= ARID.[intLotId]
-	,[intSourceTransactionId]		= LGL.[intLoadId]
-	,[strSourceTransactionId]		= ARI.[intLoadId]
-	,[intSourceTransactionDetailId]	= ARID.[intLoadDetailId]
-	,[intFobPointId]				= @FOB_DESTINATION
-	,[intInTransitSourceLocationId]	= LGLD.[intSCompanyLocationId]
+	,[intLotId]						= ICIT.[intLotId]
+	,[intSourceTransactionId]		= ICIT.[intTransactionId]
+	,[strSourceTransactionId]		= ICIT.[strTransactionId]
+	,[intSourceTransactionDetailId]	= ICIT.[intTransactionDetailId]
+	,[intFobPointId]				= ICIT.[intFobPointId]
+	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 FROM 
@@ -176,27 +153,18 @@ INNER JOIN
     (SELECT [intLoadId], [intLoadDetailId], [intSCompanyLocationId] FROM tblLGLoadDetail WITH (NOLOCK)) LGLD
 		ON LGL.[intLoadId] = ARI.[intLoadId]
 		AND LGLD.[intLoadDetailId] = ARID.[intLoadDetailId]
-INNER JOIN
-	(SELECT [intFreightTermId] FROM tblSMFreightTerms WITH (NOLOCK) WHERE UPPER(LTRIM(RTRIM(ISNULL([strFobPoint],'')))) = UPPER('Destination')) SMFT
-		ON ARI.[intFreightTermId] = SMFT.[intFreightTermId]
-LEFT OUTER JOIN
-	(SELECT [intItemId], [intLocationId], [intItemLocationId], [strType], [dblLastCost] FROM vyuICGetItemStock WITH (NOLOCK)) IST
-		ON ARID.[intItemId] = IST.[intItemId]
-		AND ARI.[intCompanyLocationId] = IST.[intLocationId]
-INNER JOIN
-	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK) ) ItemUOM 
-		ON ItemUOM.[intItemUOMId] = ARID.[intItemUOMId]
+INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [intLotId], [strTransactionId], [intFobPointId],
+		[intInTransitSourceLocationId], [ysnIsUnposted]
+	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+		ON ICIT.[intTransactionId] = LGL.[intLoadId] AND ICIT.[intTransactionDetailId] = LGLD.[intLoadDetailId] AND ICIT.[ysnIsUnposted] = 0			 
 LEFT OUTER JOIN 
 	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
-		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	 
+		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	
 WHERE
-	--(
-	--	(ISNULL(LGL.[intPurchaseSale], 0) = 3 AND ISNULL(ARID.[intLotId],0) = 0)
-	--	OR
-	--	(ISNULL(LGL.[intPurchaseSale], 0) = 2)
-	--)
-	ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
+	ICIT.[intFobPointId] = @FOB_DESTINATION
+	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
-																												
+
+										
 	RETURN
 END
