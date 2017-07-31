@@ -129,8 +129,8 @@
 	[intDeliverySheetId] INT NULL,
 	[intCommodityAttributeId] INT NULL,
 	[strElevatorReceiptNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[ysnRailCar] BIT DEFAULT 0 NOT NULL,
-	[strOfflineGuid] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[ysnRailCar] BIT DEFAULT 0 NOT NULL
+	--[strOfflineGuid] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -154,8 +154,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdTo] FOREIGN KEY (intItemUOMIdTo) REFERENCES [tblICItemUOM](intItemUOMId),
 	CONSTRAINT [FK_tblSCTicket_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY (intTicketTypeId) REFERENCES [tblSCListTicketTypes](intTicketTypeId),
 	CONSTRAINT [FK_tblSCTicket_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY (intDeliverySheetId) REFERENCES [tblSCDeliverySheet](intDeliverySheetId),
-	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId),
-	CONSTRAINT [UK_tblSCTicket_strOfflineGuid] UNIQUE ([strOfflineGuid])
+	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId)
+	--CONSTRAINT [UK_tblSCTicket_strOfflineGuid] UNIQUE ([strOfflineGuid])
 )
 
 GO

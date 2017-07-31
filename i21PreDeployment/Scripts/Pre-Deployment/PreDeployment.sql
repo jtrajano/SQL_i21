@@ -174,3 +174,6 @@
 --MFT
 :r .\23_MFT\1_CleanUp_Data.sql
 :r .\23_MFT\0_Remove_Unused_Tables_FK.sql
+
+--FRM
+--:r .\24_SC\1_OfflineGuid.sql
