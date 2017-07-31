@@ -3,7 +3,8 @@ CREATE PROCEDURE uspCMApplyCheckChangeBankReconciliation
 	@intBankAccountId INT = NULL,
 	@ysnClr BIT = NULL,
 	@strSide AS NVARCHAR(10) = 'DEBIT', 
-	@dtmStatementDate AS DATETIME = NULL
+	@dtmStatementDate AS DATETIME = NULL,
+	@strTransactionIds AS NVARCHAR(MAX) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -43,6 +44,7 @@ SET		ysnClr = @ysnClr
 WHERE	ysnPosted = 1
 		AND dtmDateReconciled IS NULL
 		AND intBankAccountId = @intBankAccountId
+		AND intTransactionId IN (SELECT ISNULL(intID,intTransactionId) FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)
 		AND 1 = 
 			CASE	WHEN	@strSide = 'DEBIT' 
