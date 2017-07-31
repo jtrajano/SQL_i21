@@ -73,6 +73,7 @@ BEGIN
 		NULL AS strAccountId,
 		NULL AS strVendorIdName,
 		NULL AS strAge,
+		NULL AS strClass,
 		0 AS intAccountId,
 		0 AS dblTotal,
 		0 AS dblAmountPaid,
@@ -190,6 +191,7 @@ SET @query = '
 		,strVendorIdName
 		,strCompanyName
 		,strCompanyAddress
+		,strClass
 		,SUM(dblCurrent) dblCurrent
 		,SUM(dbl0) dbl0
 		,SUM(dbl1) dbl1
@@ -213,6 +215,7 @@ SET @query = '
 		,A.strBillId
 		,A.intAccountId
 		,D.strAccountId
+		,EC.strClass
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
@@ -263,6 +266,7 @@ SET @query = '
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityVendorId]
 		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) SubQuery
 	GROUP BY 
@@ -272,7 +276,8 @@ SET @query = '
 		,strVendorIdName
 		,strCompanyName
 		,strCompanyAddress
-	) MainQuery
+		,strClass
+	) MainQuery 
 '
 
 SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');

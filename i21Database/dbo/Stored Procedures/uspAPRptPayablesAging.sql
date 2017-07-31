@@ -84,6 +84,7 @@ BEGIN
 		NULL AS strTicketNumber,
 		NULL AS strShipmentNumber,
 		NULL AS strContractNumber,
+		NULL AS strClass,
 		0 AS intAccountId,
 		0 AS dblTotal,
 		0 AS dblAmountPaid,
@@ -306,6 +307,7 @@ SET @query = '
 	,tmpAgingSummaryTotal.dblInterest
 	,tmpAgingSummaryTotal.dblAmountDue
 	,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
+	,EC.strClass
 	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 THEN 0 
 			ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 0
@@ -349,6 +351,7 @@ SET @query = '
 	ON B.[intEntityId] = A.[intEntityVendorId]
 	LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
+	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
 

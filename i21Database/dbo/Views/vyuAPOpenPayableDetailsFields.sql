@@ -26,6 +26,7 @@ FROM (
 		,NULL AS strTicketNumber
 		,NULL AS strShipmentNumber
 		,NULL AS strContractNumber
+		,EC.strClass
 	FROM (
 		SELECT intBillId
 			,SUM(tmpAPPayables.dblTotal) AS dblTotal
@@ -51,6 +52,7 @@ FROM (
 		) ON B.[intEntityId] = A.[intEntityVendorId]
 	LEFT JOIN dbo.tblGLAccount D ON A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
+	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 	) MainQuery
 
@@ -75,11 +77,12 @@ FROM (
 			,NULL AS dblDiscount
 			,NULL AS dblInterest
 			,NULL AS dblAmountDue
-			,NULL AS strVendorIdName      
+			,NULL AS strVendorIdName
 			,IR.strReceiptNumber 
 			,SC.strTicketNumber
 			,ICS.strShipmentNumber
 			,CH.strContractNumber
+			,NULL AS strClass
 		FROM (
 			SELECT intBillId
 				,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
@@ -102,7 +105,7 @@ FROM (
 		LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
 		LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = IRE.intOrderId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
-		) MainQuery  
+		) MainQuery    
 
 GO
 

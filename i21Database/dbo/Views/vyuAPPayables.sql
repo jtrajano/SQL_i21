@@ -20,9 +20,11 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 	, A.intAccountId
+	, EC.strClass
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2)
 UNION ALL   
 SELECT A.dtmDatePaid AS dtmDate,   
@@ -45,6 +47,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, C.ysnPosted 
 	, C.ysnPaid
 	, B.intAccountId
+	, EC.strClass
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
@@ -52,6 +55,7 @@ FROM dbo.tblAPPayment  A
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	--AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
@@ -73,10 +77,12 @@ SELECT
 	,A.ysnPosted
 	,C.ysnPaid
 	,A.intAccountId
+	,EC.strClass
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = B.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
 WHERE A.ysnPosted = 1
 UNION ALL
 SELECT --OVERPAYMENT
@@ -95,8 +101,10 @@ SELECT --OVERPAYMENT
 	, A.ysnPosted 
 	, A.ysnPaid
 	,A.intAccountId
+	,EC.strClass
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId		
 WHERE intTransactionType IN (8) AND A.ysnPaid != 1
 
