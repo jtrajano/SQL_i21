@@ -31,9 +31,11 @@ SELECT	Total.intCustomerId,
 				RRD.intPatronageCategoryId
 				FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
-					ON RRD.intPatronageCategoryId = B.intPatronageCategoryId
+				ON RRD.intPatronageCategoryId = B.intPatronageCategoryId
 			INNER JOIN tblPATRefundRate RR
-					ON RR.intRefundTypeId = RRD.intRefundTypeId
+				ON RR.intRefundTypeId = RRD.intRefundTypeId
+			INNER JOIN vyuEMEntityType EMType
+				ON EMType.intEntityId = B.intCustomerPatronId AND EMType.Customer = 1 AND EMType.Vendor = 1
 			CROSS APPLY ComPref
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 		) Total
