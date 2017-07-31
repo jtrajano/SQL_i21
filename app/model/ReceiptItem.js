@@ -86,7 +86,9 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strTaxGroup', type: 'string'},        
         { name: 'intForexRateTypeId', type: 'int', allowNull: true },
         { name: 'strForexRateType', type: 'string'},
-        { name: 'dblForexRate', type: 'float', allowNull: true }
+        { name: 'dblForexRate', type: 'float', allowNull: true },
+
+        { name: 'dblOpenReceiveBeforeEdit', type: 'float', allowNull: true}
     ],
 
     validators: [

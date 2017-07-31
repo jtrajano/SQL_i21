@@ -998,9 +998,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var cepItem = grdInventoryReceipt.getPlugin('cepItem');
         if (cepItem) {
             cepItem.on({
-
-                edit: me.onItemValidateEdit,
-                //edit: me.onItemEdit,
+                beforeedit: me.onItemBeforeEdit,
+                edit: me.onItemEdit,
                 scope: me
             });
         }
@@ -1869,70 +1868,73 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             };
             me.getDefaultReceiptTaxGroupId(current, taxCfg);
         }
-        else if (combo.itemId === 'cboItemUOM') {
-            current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
-            current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
-            current.set('strUnitType', records[0].get('strUnitType'));
+        // else if (combo.itemId === 'cboItemUOM') {
+        //     current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
+        //     current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
+        //     current.set('strUnitType', records[0].get('strUnitType'));
 
-            if (current.get('dblWeightUOMConvFactor') === 0) {
-                current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
-            }
+        //     if (current.get('dblWeightUOMConvFactor') === 0) {
+        //         current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
+        //     }
 
-            var origCF = current.get('dblOrderUOMConvFactor');
-            var newCF = current.get('dblItemUOMConvFactor');
-            var received = current.get('dblReceived');
-            var ordered = current.get('dblOrderQty');
-            var qtyToReceive = ordered - received;
-            if (origCF > 0 && newCF > 0) {
-                //qtyToReceive = (qtyToReceive * origCF) / newCF;
-                qtyToReceive = me.convertQtyBetweenUOM(origCF, newCF, qtyToReceive);
-                current.set('dblOpenReceive', qtyToReceive);
-            }
+        //     var origCF = current.get('dblOrderUOMConvFactor');
+        //     var newCF = current.get('dblItemUOMConvFactor');
+        //     var received = current.get('dblReceived');
+        //     var ordered = current.get('dblOrderQty');
+        //     var qtyToReceive = ordered - received;
+        //     if (origCF > 0 && newCF > 0) {
+        //         //qtyToReceive = (qtyToReceive * origCF) / newCF;
+        //         qtyToReceive = me.convertQtyBetweenUOM(origCF, newCF, qtyToReceive);
+        //         current.set('dblOpenReceive', qtyToReceive);
+        //     }
 
-            //current.tblICInventoryReceiptItemLots().store.load();
+        //     //current.tblICInventoryReceiptItemLots().store.load();
 
-            if (current.tblICInventoryReceiptItemLots()) {
-                Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
-                    if (!lot.dummy) {
-                        //Set Default Value for Lot Wgt UOM 
-                        if (lot.get('strWeightUOM') === null || lot.get('strWeightUOM') === '') {
-                            lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
-                            lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
-                        }
-                    }
-                });
-            }
+        //     if (current.tblICInventoryReceiptItemLots()) {
+        //         Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
+        //             if (!lot.dummy) {
+        //                 //Set Default Value for Lot Wgt UOM 
+        //                 if (lot.get('strWeightUOM') === null || lot.get('strWeightUOM') === '') {
+        //                     lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
+        //                     lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
+        //                 }
+        //             }
+        //         });
+        //     }
 
-            if (iRely.Functions.isEmpty(current.get('intCostUOMId'))) {
-                current.set('intCostUOMId', records[0].get('intItemUnitMeasureId'));
-                current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
-                current.set('strCostUOM', records[0].get('strUnitMeasure'));
+        //     if (iRely.Functions.isEmpty(current.get('intCostUOMId'))) {
+        //         current.set('intCostUOMId', records[0].get('intItemUnitMeasureId'));
+        //         current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
+        //         current.set('strCostUOM', records[0].get('strUnitMeasure'));
 
-                var dblCost = records[0].get('dblLastCost');
-                if (win.viewModel.data.current.get('strReceiptType') === 'Purchase Contract') {
-                    dblCost = current.get('dblUnitCost');
-                    if (current.get('strOrderUOM') !== records[0].get('strUnitMeasure')) {
-                        var orderUOMCF = current.get('dblOrderUOMConvFactor');
-                        var receiptUOMCF = records[0].get('dblUnitQty');
-                        if (orderUOMCF !== receiptUOMCF) {
-                            var currentCost = current.get('dblUnitCost');
-                            var perUnitCost = currentCost / orderUOMCF;
-                            dblCost = perUnitCost * receiptUOMCF;
-                        }
-                    }
-                }
-                current.set('dblUnitCost', dblCost);
-                current.set('dblUnitRetail', dblCost);
-            }
+        //         var dblCost = records[0].get('dblLastCost');
+        //         if (win.viewModel.data.current.get('strReceiptType') === 'Purchase Contract') {
+        //             dblCost = current.get('dblUnitCost');
+        //             if (current.get('strOrderUOM') !== records[0].get('strUnitMeasure')) {
+        //                 var orderUOMCF = current.get('dblOrderUOMConvFactor');
+        //                 var receiptUOMCF = records[0].get('dblUnitQty');
+        //                 if (orderUOMCF !== receiptUOMCF) {
+        //                     var currentCost = current.get('dblUnitCost');
+        //                     var perUnitCost = currentCost / orderUOMCF;
+        //                     dblCost = perUnitCost * receiptUOMCF;
+        //                 }
+        //             }
+        //         }
+        //         current.set('dblUnitCost', dblCost);
+        //         current.set('dblUnitRetail', dblCost);
+        //     }
 
-            //Set Default Value for Gross/Net UOM if Receipt Unit Type is Weight or Volume and Gross/Net UOM has no current value
-            if ((records[0].get('strUnitType') === 'Weight' || records[0].get('strUnitType') === 'Volume') &&
-                (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')) {
-                current.set('strWeightUOM', records[0].get('strUnitMeasure'));
-                current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
-                current.set('dblWeightUOMConvFactor', current.get('dblItemUOMConvFactor'));
-            }
-        }
+        //     //Set Default Value for Gross/Net UOM if Receipt Unit Type is Weight or Volume and Gross/Net UOM has no current value
+        //     if ((records[0].get('strUnitType') === 'Weight' || records[0].get('strUnitType') === 'Volume') &&
+        //         (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')) {
+        //         current.set('strWeightUOM', records[0].get('strUnitMeasure'));
+        //         current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+        //         current.set('dblWeightUOMConvFactor', current.get('dblItemUOMConvFactor'));
+        //     }
+
+        //     // Calculate the default gross/net qty. 
+        //     me.calculateGrossNet(current, 1);            
+        // }
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
             //current.tblICInventoryReceiptItemLots().store.load();
@@ -1943,6 +1945,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
+
+            // Calculate the default gross/net qty. 
+            me.calculateGrossNet(current, 1);
         }
         else if (combo.itemId === 'cboCostUOM') {
             var dblLastCost = records[0].get('dblLastCost');
@@ -2590,7 +2595,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 totalGross = 0;
             }
             else {
-                //totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; // TODO: fix this part
                 totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
             }
             totalNet = totalGross;
@@ -3202,7 +3206,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     //    return subCurrencyCents;
     //},
 
-    onItemValidateEdit: function (editor, context, eOpts) {
+    onItemBeforeEdit: function(editor, context, eOpts){
+        var win = editor.grid.up('window');
+        var me = win.controller;
+        var vw = win.viewModel;
+        var currentReceiptItem = context.record;
+
+        // Save the dblOpenReceive value before edit. 
+        if (context.field === 'dblOpenReceive' && currentReceiptItem){
+            var dblOpenReceive = currentReceiptItem.get('dblOpenReceive');
+            dblOpenReceive = Ext.isNumeric(dblOpenReceive) ? dblOpenReceive : 0.00; 
+            currentReceiptItem.set('dblOpenReceiveBeforeEdit', dblOpenReceive);
+        }
+    },
+
+    onItemEdit: function (editor, context, eOpts) {
         var win = editor.grid.up('window');
         var me = win.controller;
         var vw = win.viewModel;
@@ -3221,9 +3239,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (context.field === 'dblOpenReceive' || context.field === 'strUnitMeasure' || context.field === 'strWeightUOM') {
             if (currentReceiptItem) {
-                // Calculate the gross weight.
-                me.calculateGrossNet(currentReceiptItem, 1);
-
                 //set default values to lot
                 var pnlLotTracking = win.down('#pnlLotTracking');
                 if (!pnlLotTracking.hidden) {
@@ -3261,13 +3276,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             }
         }
-
+        
         // If editing the unit retail, update the gross margin too.
         else if (context.field === 'dblUnitRetail') {
             if (currentReceiptItem) {
                 var salesPrice = context.value;
                 var grossMargin = ((salesPrice - currentReceiptItem.get('dblUnitCost')) / (salesPrice)) * 100;
                 currentReceiptItem.set('dblGrossMargin', grossMargin);
+            }
+        }
+
+        // Calculate the default Gross/Net Qty if there is a change in the Open Receive Qty. 
+        if (context.field === 'dblOpenReceive') {            
+            if (currentReceiptItem) {
+                var dblOpenReceiveBeforeEdit = currentReceiptItem.get('dblOpenReceiveBeforeEdit'); 
+                var dblOpenReceive = currentReceiptItem.get('dblOpenReceive');
+
+                dblOpenReceiveBeforeEdit = Ext.isNumeric(dblOpenReceiveBeforeEdit) ? dblOpenReceiveBeforeEdit : 0.00;
+                dblOpenReceive = Ext.isNumeric(dblOpenReceive) ? dblOpenReceive : 0.00;
+
+                if (dblOpenReceiveBeforeEdit !== dblOpenReceive){
+                    me.calculateGrossNet(currentReceiptItem, 1);
+                }
             }
         }
 
@@ -3361,24 +3391,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             //return false;
         }
     },
-
-    //onItemEdit: function (editor, context, eOpts) {
-    //    var win = editor.grid.up('window');
-    //    var me = win.controller;
-    //
-    //    // Update the summary totals
-    //    me.showSummaryTotals(win);
-    //    me.showOtherCharges(win);
-    //},
-
-    //onChargeEdit: function (editor, context, eOpts) {
-    //    var win = editor.grid.up('window');
-    //    var me = win.controller;
-    //
-    //    // Update the summary totals
-    //    me.showSummaryTotals(win);
-    //    me.showOtherCharges(win);
-    //},
 
     onShipFromBeforeQuery: function (obj) {
         if (obj.combo) {
@@ -6633,6 +6645,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
             current.set('dblWeightUOMConvFactor', current.get('dblItemUOMConvFactor'));
         }
+
+        me.calculateGrossNet(current, 1);
     },
 
     onChargeCurrencyBeforeQuery: function (obj) {
