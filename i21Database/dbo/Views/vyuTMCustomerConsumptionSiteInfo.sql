@@ -20,6 +20,8 @@ AS
 		,strSiteComment = B.strComment
 		,strSiteInstruction = B.strInstruction
 		,B.ysnActive
+		,strDriverNumber = J.strEntityNo
+		,strDriverName = J.strName
 	FROM tblTMSite B
 	INNER JOIN tblTMCustomer C
 		ON B.intCustomerID = C.intCustomerID
