@@ -49,6 +49,8 @@ BEGIN
 				,strSiteComment = B.strComment
 				,strSiteInstruction = B.strInstruction
 				,B.ysnActive
+				,strDriverNumber = K.vwsls_slsmn_id
+				,strDriverName = K.vwsls_name
 			FROM tblTMSite B
 			INNER JOIN tblTMCustomer C
 				ON B.intCustomerID = C.intCustomerID
@@ -58,6 +60,8 @@ BEGIN
 				ON B.intLocationId = I.A4GLIdentity
 			LEFT JOIN tblSMCompanyLocation J
 				ON I.vwloc_loc_no  COLLATE Latin1_General_CI_AS = J.strLocationNumber
+			LEFT JOIN vwslsmst K
+				ON B.intDriverID = K.A4GLIdentity
 		')
 	END
 	ELSE
@@ -85,6 +89,8 @@ BEGIN
 					,strSiteComment = B.strComment
 					,strSiteInstruction = B.strInstruction
 					,B.ysnActive
+					,strDriverNumber = J.strEntityNo
+					,strDriverName = J.strName
 				FROM tblTMSite B
 				INNER JOIN tblTMCustomer C
 					ON B.intCustomerID = C.intCustomerID
@@ -92,6 +98,8 @@ BEGIN
 					ON C.intCustomerNumber = D.intEntityId
 				LEFT JOIN tblSMCompanyLocation I
 					ON B.intLocationId = I.intCompanyLocationId
+				LEFT JOIN tblEMEntity J
+					ON B.intDriverID = J.intEntityId
 		')
 	END
 END
