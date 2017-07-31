@@ -125,7 +125,7 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		-- Update reserves with respect to Stock UOM. 
+		-- Aggregrate the non-stock-unit UOMs. 
 		SELECT	r.intItemId
 				,r.intItemLocationId
 				,r.intItemUOMId
@@ -133,34 +133,42 @@ USING (
 				,r.intStorageLocationId
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseReserveUsingStockUOM r 
-		GROUP BY r.intItemId
-				, r.intItemLocationId
-				, r.intItemUOMId
-				, r.intSubLocationId
-				, r.intStorageLocationId
-		-- Update reserves for non Stock UOM. 
-		UNION ALL 
-		SELECT	toReserve.intItemId
-				,toReserve.intItemLocationId
-				,toReserve.intItemUOMId 
-				,toReserve.intSubLocationId
-				,toReserve.intStorageLocationId
-				,Aggregrate_Qty = SUM(ISNULL(toReserve.dblQty, 0))
-		FROM	@ItemsToIncreaseReserve toReserve
 				CROSS APPLY (
 					SELECT	TOP 1 
 							iUOM.intItemUOMId
 							,iUOM.dblUnitQty 
 					FROM	tblICItemUOM iUOM
-					WHERE	iUOM.intItemId = toReserve.intItemId
+					WHERE	iUOM.intItemId = r.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM
-		WHERE	toReserve.intItemUOMId <> StockUOM.intItemUOMId 
-		GROUP BY toReserve.intItemId
-				, toReserve.intItemLocationId
-				, toReserve.intItemUOMId 
-				, toReserve.intSubLocationId
-				, toReserve.intStorageLocationId
+		WHERE	r.intItemUOMId <> StockUOM.intItemUOMId 
+		GROUP BY r.intItemId
+				, r.intItemLocationId
+				, r.intItemUOMId
+				, r.intSubLocationId
+				, r.intStorageLocationId
+		-- Convert the Reserved Qty to 'Stock UOM' before adding it into tblICItemStockUOM
+		UNION ALL 
+		SELECT	r.intItemId
+				,r.intItemLocationId
+				,StockUOM.intItemUOMId 
+				,r.intSubLocationId
+				,r.intStorageLocationId
+				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(r.intItemUOMId, StockUOM.intItemUOMId, r.dblQty)) 
+		FROM	@ItemsToIncreaseReserve r
+				CROSS APPLY (
+					SELECT	TOP 1 
+							iUOM.intItemUOMId
+							,iUOM.dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = r.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM
+		GROUP BY r.intItemId
+				, r.intItemLocationId
+				, StockUOM.intItemUOMId 
+				, r.intSubLocationId
+				, r.intStorageLocationId
 ) AS Source_Query  
 	ON ItemStockUOM.intItemId = Source_Query.intItemId
 	AND ItemStockUOM.intItemLocationId = Source_Query.intItemLocationId

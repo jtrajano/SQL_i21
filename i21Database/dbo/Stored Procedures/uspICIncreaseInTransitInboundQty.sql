@@ -86,6 +86,7 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
+		-- Aggregrate the non-stock-unit UOMs. 
 		SELECT	ib.intItemId
 				,ib.intItemLocationId
 				,ib.intItemUOMId
@@ -93,6 +94,15 @@ USING (
 				,ib.intStorageLocationId
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseInTransitInBound ib 
+				CROSS APPLY (
+					SELECT	TOP 1 
+							intItemUOMId
+							,dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = ib.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM 
+		WHERE	ib.intItemUOMId <> StockUOM.intItemUOMId
 		GROUP BY ib.intItemId
 				, ib.intItemLocationId
 				, ib.intItemUOMId
@@ -115,7 +125,6 @@ USING (
 					WHERE	iUOM.intItemId = ib.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
-		WHERE	ib.intItemUOMId <> StockUOM.intItemUOMId
 		GROUP BY ib.intItemId
 				, ib.intItemLocationId
 				, StockUOM.intItemUOMId
