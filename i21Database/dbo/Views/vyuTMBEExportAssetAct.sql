@@ -4,7 +4,7 @@ AS
 SELECT 
 	 account = C.strEntityNo
 	 ,number = REPLACE(STR(intSiteNumber, 4), SPACE(1), '0') + '-' + ISNULL(G.strSerialNumber,'')
-	 ,reference = ''
+	 ,reference = RTRIM(SUBSTRING(A.strDescription,0,11))
 	 ,priceID = CAST(F.dblSalePrice AS NUMERIC(8,6))
 	 ,priceDiscount = 0.0000
 	 ,cashCode = ''
