@@ -350,16 +350,16 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         vm.set('current.intItemUOMId', rec.get('intStockUOMId'));
         vm.set('current.strUnitMeasure', rec.get('strStockUOM'));
 
-        me.getStockQuantity(vm.get('inventoryCount.intLocationId'), vm.get('current.intItemId'), 
-            vm.get('current.intSubLocationId'), vm.get('current.intStorageLocationId'), function(quantity) {
-                vm.set('current.dblSystemCount', quantity);
-            }
-        );
-        // me.getTotalLocationStockOnHand(vm.get('inventoryCount.intLocationId'), vm.get('current.intItemId'), 
+        // me.getStockQuantity(vm.get('inventoryCount.intLocationId'), vm.get('current.intItemId'), 
         //     vm.get('current.intSubLocationId'), vm.get('current.intStorageLocationId'), function(quantity) {
         //         vm.set('current.dblSystemCount', quantity);
         //     }
         // );
+        me.getTotalLocationStockOnHand(vm.get('inventoryCount.intLocationId'), vm.get('current.intItemId'), 
+            vm.get('current.intSubLocationId'), vm.get('current.intStorageLocationId'), function(quantity) {
+                vm.set('current.dblSystemCount', quantity);
+            }
+        );
     },
 
     onLotSelect: function(combo, records, opts) {
