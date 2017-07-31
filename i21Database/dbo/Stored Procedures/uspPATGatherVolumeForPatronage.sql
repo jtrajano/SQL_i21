@@ -165,7 +165,7 @@ SET ANSI_WARNINGS OFF
 		BEGIN
 			UPDATE tblPATCustomerVolumeLog
 			SET ysnIsUnposted = 1
-			WHERE strPurchaseSale = @TYPE_PURCHASE AND ysnIsUnposted <> 1 AND intTransactionId IN (SELECT [intId] FROM @tempTransactionIds)
+			WHERE strPurchaseSale = @TYPE_PURCHASE AND ysnIsUnposted <> 1 AND intTransactionId IN (SELECT [intID] FROM @tempTransactionIds)
 		END
 	END
 	ELSE IF(@type = 2)
@@ -214,7 +214,7 @@ SET ANSI_WARNINGS OFF
 		BEGIN
 			UPDATE tblPATCustomerVolumeLog
 			SET ysnIsUnposted = 1
-			WHERE strPurchaseSale = @TYPE_SALE AND ysnIsUnposted <> 1 AND intTransactionId IN (SELECT [intId] FROM @tempTransactionIds)
+			WHERE strPurchaseSale = @TYPE_SALE AND ysnIsUnposted <> 1 AND intTransactionId IN (SELECT [intID] FROM @tempTransactionIds)
 		END
 	END
 	
