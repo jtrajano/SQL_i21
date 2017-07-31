@@ -22,7 +22,8 @@ BEGIN
 					ls.strSecondaryStatus SecondaryStatusCode, 
 					ls.strSecondaryStatus AS LotStatus,
 					sl.strName AS Unit,
-					ISNULL(i.intUnitPerLayer,1) * ISNULL(i.intLayerPerPallet,1) AS intCasesPerPallet
+					ISNULL(i.intUnitPerLayer,1) * ISNULL(i.intLayerPerPallet,1) AS intCasesPerPallet,
+					ISNULL(UPPER(ls1.strSecondaryStatus), '') BondSecondaryStatus
 	FROM tblICLot l
 	JOIN tblICItem i ON l.intItemId = i.intItemId
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId 
@@ -33,5 +34,7 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure wum ON wum.intUnitMeasureId = wu.intUnitMeasureId
 	LEFT JOIN tblICLotStatus ls ON ls.intLotStatusId = l.intLotStatusId
 	LEFT JOIN tblSMUserSecurity us ON us.[intEntityId] = l.intCreatedUserId
+	LEFT JOIN tblMFLotInventory li ON li.intLotId = l.intLotId
+	LEFT JOIN tblICLotStatus ls1 ON ls1.intLotStatusId = li.intBondStatusId
 	WHERE l.intLotId = @intLotKey
 END
