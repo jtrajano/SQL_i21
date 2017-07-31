@@ -37,6 +37,7 @@ DECLARE @totalRecords INT = 0
 DECLARE @totalInvalid INT = 0
  
 DECLARE @PostInvoiceData AS [InvoicePostingTable]
+DECLARE @PostProvisionalData AS [InvoicePostingTable]
 
 DECLARE @InvalidInvoiceData AS TABLE(
 	 [intInvoiceId]				INT				NOT NULL
@@ -66,12 +67,16 @@ DECLARE @UserEntityID				INT
 		,@DeferredRevenueAccountId	INT
 		,@AllowOtherUserToPost		BIT
 		,@DefaultCurrencyId			INT
+		,@HasImpactForProvisional   BIT
 
 SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityId] = @userId),@userId)
-SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WITH (NOLOCK) WHERE ISNULL([intDiscountAccountId],0) <> 0)
-SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM dbo.tblARCompanyPreference  WITH (NOLOCK)WHERE ISNULL([intDeferredRevenueAccountId],0) <> 0)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WITH (NOLOCK) WHERE intEntityUserSecurityId = @UserEntityID)
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+
+SELECT TOP 1 @DiscountAccountId = intDiscountAccountId 
+		   , @DeferredRevenueAccountId = intDeferredRevenueAccountId
+		   , @HasImpactForProvisional = ysnImpactForProvisional
+FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 
@@ -127,6 +132,7 @@ IF (@param IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intOriginalInvoiceId]
 				,[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]
 				,[intLoadId]
@@ -175,6 +181,7 @@ IF (@param IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 				,[intLoadId]					= ARI.[intLoadId]
@@ -230,6 +237,7 @@ IF (@param IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intOriginalInvoiceId]
 				,[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]
 				,[intLoadId]
@@ -278,6 +286,7 @@ IF (@param IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 				,[intLoadId]					= ARI.[intLoadId]
@@ -335,6 +344,7 @@ IF(@beginDate IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intOriginalInvoiceId]
 				,[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]
 				,[intLoadId]
@@ -383,6 +393,7 @@ IF(@beginDate IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 				,[intLoadId]					= ARI.[intLoadId]
@@ -440,6 +451,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intOriginalInvoiceId]
 				,[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]
 				,[intLoadId]
@@ -488,6 +500,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 				,[intLoadId]					= ARI.[intLoadId]
@@ -539,6 +552,111 @@ IF(@exclude IS NOT NULL)
 		DELETE FROM A
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
+	END
+
+--Get Provisional Invoices
+IF ISNULL(@HasImpactForProvisional, 0) = 1
+	BEGIN
+		INSERT INTO @PostProvisionalData(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[strType]
+			,[dtmDate]
+			,[dtmPostDate]
+			,[dtmShipDate]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intAccountId]
+			,[intDeferredRevenueAccountId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dblInvoiceTotal]
+			,[dblShipping]
+			,[dblTax]
+			,[strImportFormat]
+			,[intOriginalInvoiceId]
+			,[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]
+			,[intLoadId]
+			,[intFreightTermId]
+			,[strActualCostId]
+			,[intPeriodsToAccrue]
+			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]
+			,[ysnImpactInventory]
+			,[ysnSplitted]
+			,[intEntityId]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[intDiscountAccountId]
+			,[intCustomerStorageId]
+			,[intStorageScheduleTypeId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQuantity]
+			,[dblMaxQuantity]
+			,[strOptionType]
+			,[strSourceType]
+			,[strBatchId]
+			,[strPostingMessage]
+			,[intUserId]
+			,[ysnAllowOtherUserToPost])
+			SELECT
+			 [intInvoiceId]					= ARI.[intInvoiceId]
+			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
+			,[strTransactionType]			= ARI.[strTransactionType]
+			,[strType]						= ARI.[strType]
+			,[dtmDate]						= ARI.[dtmDate]
+			,[dtmPostDate]					= ARI.[dtmPostDate]
+			,[dtmShipDate]					= ARI.[dtmShipDate]
+			,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
+			,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
+			,[intAccountId]					= ARI.[intAccountId]
+			,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+			,[intCurrencyId]				= ARI.[intCurrencyId]
+			,[intTermId]					= ARI.[intTermId]
+			,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
+			,[dblShipping]					= ARI.[dblShipping]
+			,[dblTax]						= ARI.[dblTax]
+			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
+			,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+			,[intLoadId]					= ARI.[intLoadId]
+			,[intFreightTermId]				= ARI.[intFreightTermId]
+			,[strActualCostId]				= ARI.[strActualCostId]
+			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
+			,[ysnAccrueLicense]				= @accrueLicense
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
+			,[intEntityId]					= ARI.[intEntityId]
+			,[ysnPost]						= @post
+			,[intInvoiceDetailId]			= NULL
+			,[intItemId]					= NULL
+			,[intItemUOMId]					= NULL
+			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
+			,[intStorageScheduleTypeId]		= NULL
+			,[intSubLocationId]				= NULL
+			,[intStorageLocationId]			= NULL
+			,[dblQuantity]					= @ZeroDecimal
+			,[dblMaxQuantity]				= @ZeroDecimal
+			,[strOptionType]				= NULL
+			,[strSourceType]				= NULL
+			,[strBatchId]					= @batchIdUsed
+			,[strPostingMessage]			= ''
+			,[intUserId]					= @UserEntityID
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+		FROM dbo.tblARInvoice ARI WITH (NOLOCK) 
+		WHERE strType = 'Provisional'
+		  AND ysnPosted = 1
+		  AND intInvoiceId IN (SELECT intOriginalInvoiceId FROM @PostInvoiceData WHERE ISNULL(intOriginalInvoiceId, 0) <> 0)
 	END
 
 --------------------------------------------------------------------------------------------  
@@ -1280,8 +1398,6 @@ END CATCH
 
 IF @post = 1  
 	BEGIN 
-
-		
 		BEGIN TRY 
 			DECLARE @Ids AS Id
 			INSERT INTO @Ids(intId)
@@ -1297,7 +1413,6 @@ IF @post = 1
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
 		END CATCH
-
 		
 		-- Accruals
 		BEGIN TRY 
@@ -1361,6 +1476,115 @@ IF @post = 1
 		
 		BEGIN TRY
 			-- Call the post routine 
+			IF ISNULL(@HasImpactForProvisional, 0) = 1
+				BEGIN
+					INSERT INTO @GLEntries (
+						 [dtmDate]
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+						,[strRateType]
+					)
+					SELECT dtmDate						= CAST(ISNULL(P.dtmPostDate, P.dtmDate) AS DATE)
+						 , strBatchID					= @batchId
+						 , intAccountId					= GL.intAccountId
+						 , dblDebit						= GL.dblCredit
+						 , dblCredit					= GL.dblDebit
+						 , dblDebitUnit					= GL.dblCreditUnit
+						 , dblCreditUnit				= GL.dblDebitUnit
+						 , strDescription				= GL.strDescription
+						 , strCode						= @CODE
+						 , strReference					= GL.strReference
+						 , intCurrencyId				= GL.intCurrencyId 
+						 , dblExchangeRate				= GL.dblExchangeRate
+						 , dtmDateEntered				= @PostDate
+						 , dtmTransactionDate			= P.dtmDate
+						 , strJournalLineDescription	= 'Provisional Invoice - ' + PROV.strInvoiceNumber
+						 , intJournalLineNo				= PROV.intInvoiceId
+						 , ysnIsUnposted				= 0
+						 , intUserId					= @userId
+						 , intEntityId					= @UserEntityID	
+						 , strTransactionId				= P.strInvoiceNumber
+						 , intTransactionId				= P.intInvoiceId
+						 , strTransactionType			= PROV.strTransactionType
+						 , strTransactionForm			= @SCREEN_NAME
+						 , strModuleName				= @MODULE_NAME
+						 , intConcurrencyId				= 1
+						 , [dblDebitForeign]			= GL.dblCreditForeign
+						 , [dblDebitReport]				= GL.dblCreditReport
+						 , [dblCreditForeign]			= GL.dblDebitForeign
+						 , [dblCreditReport]			= GL.dblDebitReport
+						 , [dblReportingRate]			= GL.dblReportingRate
+						 , [dblForeignRate]				= GL.dblForeignRate
+						 , [strRateType]				= NULL
+					FROM (
+						SELECT intOriginalInvoiceId
+							 , intInvoiceId
+							 , dtmPostDate
+							 , dtmDate
+							 , strInvoiceNumber
+						FROM @PostInvoiceData
+						WHERE ISNULL(intOriginalInvoiceId, 0) <> 0
+					) P
+					INNER JOIN (						
+						SELECT intInvoiceId
+							 , strInvoiceNumber
+							 , strTransactionType
+						FROM @PostProvisionalData
+					) PROV ON P.intOriginalInvoiceId = PROV.intInvoiceId
+					INNER JOIN (
+						SELECT intAccountId
+							 , intGLDetailId
+							 , intTransactionId
+							 , strTransactionId
+							 , dblCredit
+							 , dblDebit
+							 , dblCreditUnit
+							 , dblDebitUnit
+							 , strReference
+							 , strDescription
+							 , intCurrencyId
+							 , dblExchangeRate
+							 , dblCreditForeign
+							 , dblCreditReport
+							 , dblDebitForeign
+							 , dblDebitReport
+							 , dblReportingRate
+							 , dblForeignRate
+						FROM tblGLDetail WITH (NOLOCK)
+						WHERE ysnIsUnposted = 0
+					) GL ON PROV.intInvoiceId = GL.intTransactionId
+						AND PROV.strInvoiceNumber = GL.strTransactionId
+					ORDER BY GL.intGLDetailId
+				END
+						
 			INSERT INTO @GLEntries (
 				 [dtmDate]
 				,[strBatchId]
@@ -2810,9 +3034,6 @@ IF @post = 1
 			END CATCH
 		END
 
-
-
-
 		BEGIN TRY
 			-- Get the items to post  
 			DECLARE @InTransitItems AS ItemInTransitCostingTableType 
@@ -3159,6 +3380,19 @@ IF @post = 0
 			INNER JOIN
 				(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
 					ON PID.intInvoiceId = ARI.intInvoiceId
+
+			IF ISNULL(@HasImpactForProvisional, 0) = 1
+				BEGIN
+					INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
+					SELECT DISTINCT
+						 PID.intInvoiceId
+						,PID.strInvoiceNumber
+					FROM
+						@PostProvisionalData PID				
+					INNER JOIN
+						(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
+							ON PID.intInvoiceId = ARI.intInvoiceId
+				END
 
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
 				BEGIN
