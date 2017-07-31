@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -253,7 +254,7 @@ BEGIN TRY
 	,dblTotalTax
 	,dblTotalSST
 	,dblTaxExceptSST
-	,dblInvoiceTotal
+	,dblAccountTotalAmount --AS dblInvoiceTotal
 	,dblTotalQuantity
 	,dblTotalGrossAmount
 	,dblTotalNetAmount
