@@ -48,6 +48,7 @@
     [dblPrebuyQuantity] NUMERIC(18, 6) NULL DEFAULT 0, 
     [dblContractPrice] NUMERIC(18, 6) NULL DEFAULT 0, 
     [dblContractQuantity] NUMERIC(18, 6) NULL DEFAULT 0, 
+	[intRecordType] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblETImportBaseEngineering] PRIMARY KEY ([intImportBaseEngineeringId]),
 )
 GO
