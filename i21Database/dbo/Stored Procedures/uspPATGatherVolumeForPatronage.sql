@@ -52,8 +52,6 @@ SET ANSI_WARNINGS OFF
 					ON ABD.intBillId = AB.intBillId
 			INNER JOIN tblARCustomer ARC
 					ON ARC.intEntityCustomerId = AB.intEntityVendorId AND ARC.strStockStatus != ''
-			INNER JOIN vyuEMEntityType ET
-					ON ET.intEntityId = AB.intEntityVendorId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
 					ON IC.intItemId = ABD.intItemId
 			INNER JOIN tblICItemUOM UOM
@@ -82,8 +80,6 @@ SET ANSI_WARNINGS OFF
 					ON ARD.intInvoiceId = AR.intInvoiceId
 			INNER JOIN tblARCustomer ARC
 					ON ARC.intEntityCustomerId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
-			INNER JOIN vyuEMEntityType ET
-					ON ET.intEntityId = ARC.intEntityCustomerId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
 					ON IC.intItemId = ARD.intItemId
 			INNER JOIN tblICItemUOM ICU
@@ -128,8 +124,6 @@ SET ANSI_WARNINGS OFF
 					ON ABD.intBillId = AB.intBillId
 				INNER JOIN tblARCustomer ARC
 					ON ARC.intEntityCustomerId = AB.intEntityVendorId AND ARC.strStockStatus != ''
-				INNER JOIN vyuEMEntityType ET
-					ON ET.intEntityId = AB.intEntityVendorId AND Customer = 1 AND Vendor = 1
 				INNER JOIN tblICItem IC
 					ON IC.intItemId = ABD.intItemId
 				INNER JOIN tblPATPatronageCategory PC
@@ -151,8 +145,6 @@ SET ANSI_WARNINGS OFF
 				ON ABD.intBillId = AB.intBillId
 			INNER JOIN tblARCustomer ARC
 				ON ARC.intEntityCustomerId = AB.intEntityVendorId AND ARC.strStockStatus != ''
-			INNER JOIN vyuEMEntityType ET
-				ON ET.intEntityId = AB.intEntityVendorId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = ABD.intItemId
 			INNER JOIN tblICItemUOM UOM
@@ -177,8 +169,6 @@ SET ANSI_WARNINGS OFF
 			SELECT DISTINCT ARI.intEntityCustomerId, MAX(ARI.dtmDate) OVER (PARTITION BY ARI.intEntityCustomerId) AS dtmDate FROM tblARInvoice ARI
 			INNER JOIN tblARInvoiceDetail ARD
 				ON ARD.intInvoiceId = ARI.intInvoiceId
-			INNER JOIN vyuEMEntityType ET
-				ON ET.intEntityId = ARI.intEntityCustomerId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = ARD.intItemId
 			INNER JOIN tblPATPatronageCategory PC
@@ -200,8 +190,6 @@ SET ANSI_WARNINGS OFF
 					ON ARD.intInvoiceId = AR.intInvoiceId
 			INNER JOIN tblARCustomer ARC
 					ON ARC.intEntityCustomerId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
-			INNER JOIN vyuEMEntityType ET
-					ON ET.intEntityId = AR.intEntityCustomerId AND Customer = 1 AND Vendor = 1
 			INNER JOIN tblICItem IC
 					ON IC.intItemId = ARD.intItemId
 			INNER JOIN tblICItemUOM ICU

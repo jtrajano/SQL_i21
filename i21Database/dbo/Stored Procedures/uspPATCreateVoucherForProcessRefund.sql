@@ -22,9 +22,11 @@ BEGIN
 		[dblServiceFee] NUMERIC(18,6),
 		[intRefundCustomerId] INT,
 		[intCustomerId] INT,
+		[strName] NVARCHAR(50),
 		[dblRefundAmount] NUMERIC(18,6),
 		[dblCashRefund] NUMERIC(18,6),
 		[ysnQualified] BIT,
+		[ysnVendor] BIT,
 		[intBillId] INT
 	)
 
@@ -36,13 +38,18 @@ BEGIN
 				R.dblServiceFee,
 				RC.intRefundCustomerId,
 				RC.intCustomerId,
+				EM.strName,
 				RC.dblRefundAmount,
 				RC.dblCashRefund,
 				RC.ysnQualified,
+				ysnVendor = APV.Vendor,
 				RC.intBillId
 		FROM tblPATRefund R
 		INNER JOIN tblPATRefundCustomer RC
 			ON R.intRefundId = RC.intRefundId
+		INNER JOIN tblEMEntity EM
+			ON EM.intEntityId = RC.intCustomerId
+		LEFT OUTER JOIN vyuEMEntityType APV ON APV.intEntityId = RC.intCustomerId
 		WHERE R.intRefundId = @refundId AND RC.intBillId IS NULL AND RC.ysnEligibleRefund = 1 AND RC.dblCashRefund > 0
 	END 
 	ELSE
@@ -53,13 +60,18 @@ BEGIN
 				R.dblServiceFee,
 				RC.intRefundCustomerId,
 				RC.intCustomerId,
+				EM.strName,
 				RC.dblRefundAmount,
 				RC.dblCashRefund,
 				RC.ysnQualified,
+				ysnVendor = APV.Vendor,
 				RC.intBillId
 		FROM tblPATRefund R
 		INNER JOIN tblPATRefundCustomer RC
 			ON R.intRefundId = RC.intRefundId
+		INNER JOIN tblEMEntity EM
+			ON EM.intEntityId = RC.intCustomerId
+		LEFT OUTER JOIN vyuEMEntityType APV ON APV.intEntityId = RC.intCustomerId
 		WHERE RC.intRefundCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@refundCustomerIds)) AND RC.ysnEligibleRefund = 1
 	END
 	
@@ -92,9 +104,20 @@ BEGIN
 	SELECT @dblServiceFee = dblServiceFee FROM #tempRefundCustomer GROUP BY dblServiceFee;
 
 
-	IF EXISTS(SELECT 1 FROM #tempRefundCustomer where dblCashRefund = 0)
+	IF EXISTS(SELECT 1 FROM #tempRefundCustomer WHERE dblCashRefund = 0)
 	BEGIN
 		SET @strErrorMessage = 'Zero Cash Refund cannot be vouchered.';
+		RAISERROR(@strErrorMessage, 16, 1);
+		GOTO Post_Exit;
+	END
+
+	SELECT @invalidCount = COUNT(*) FROM #tempRefundCustomer WHERE ysnVendor = 0;
+
+	IF(@invalidCount > 0)
+	BEGIN
+		DECLARE @customerName NVARCHAR(50);
+		SELECT TOP 1 @customerName = strName FROM #tempRefundCustomer WHERE ysnVendor = 0;
+		SET @strErrorMessage = 'Cannot create voucher for <strong>'+ @customerName +'</strong> as the entity is not marked as vendor';
 		RAISERROR(@strErrorMessage, 16, 1);
 		GOTO Post_Exit;
 	END
@@ -110,8 +133,8 @@ BEGIN
 			@intCustomerId = tempRC.intCustomerId,
 			@dblCashRefund = ROUND(tempRC.dblCashRefund, 2),
 			@dbl1099Amount = CASE WHEN tempRC.ysnQualified = 1 THEN tempRC.dblRefundAmount ELSE tempRC.dblCashRefund END
-		FROM @refundProcessed rp INNER JOIN #tempRefundCustomer tempRC ON rp.intId = tempRC.intRefundCustomerId
-
+		FROM @refundProcessed rp 
+		INNER JOIN #tempRefundCustomer tempRC ON rp.intId = tempRC.intRefundCustomerId
 
 		INSERT INTO @voucherDetailNonInventory
 			([intAccountId], [intItemId], [strMiscDescription], [dblQtyReceived], [dblDiscount], [dblCost], [intTaxGroupId])
@@ -161,7 +184,7 @@ BEGIN
 			@beginTransaction = @intCreatedBillId,
 			@endTransaction = @intCreatedBillId,
 			@success = @bitSuccess OUTPUT;
-			
+
 		DELETE FROM @refundProcessed WHERE intId = @intRefundCustomerId;
 		DELETE FROM @voucherDetailNonInventory;
 		SET @intCreatedBillId = NULL;

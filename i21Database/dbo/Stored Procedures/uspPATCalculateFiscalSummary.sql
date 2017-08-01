@@ -53,7 +53,7 @@ SELECT	Total.intFiscalYear,
 		dblNonRefundAmount = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN 0 ELSE Total.dblRefundAmount END),
 		dblCashRefund = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN (Total.dblRefundAmount * (RR.dblCashPayout/100)) ELSE 0 END),
 		dblEquityRefund = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN (Total.dblRefundAmount - (Total.dblRefundAmount * (RR.dblCashPayout/100))) ELSE 0 END),
-		dblLessFWTPercentage = CASE WHEN Total.ysnEligibleRefund = 1 AND APV.ysnWithholding = 1 THEN CompLoc.dblWithholdPercent ELSE 0 END
+		dblLessFWTPercentage = CASE WHEN Total.ysnEligibleRefund = 1 AND ISNULL(APV.ysnWithholding,0) = 1 THEN CompLoc.dblWithholdPercent ELSE 0 END
 		FROM (
 			SELECT	B.intCustomerPatronId,
 					RRD.intRefundTypeId,
@@ -69,8 +69,6 @@ SELECT	Total.intFiscalYear,
 				ON RR.intRefundTypeId = RRD.intRefundTypeId
 			INNER JOIN tblARCustomer ARC
 				ON ARC.intEntityCustomerId = B.intCustomerPatronId
-			INNER JOIN vyuEMEntityType EMT
-				ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
 			CROSS APPLY tblPATCompanyPreference ComPref
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0 AND ARC.strStockStatus IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
 			AND B.intFiscalYear = @intFiscalYearId
@@ -83,7 +81,7 @@ SELECT	Total.intFiscalYear,
 		) Total
 INNER JOIN tblPATRefundRate RR
             ON RR.intRefundTypeId = Total.intRefundTypeId
-INNER JOIN tblAPVendor APV
+LEFT OUTER JOIN tblAPVendor APV
 	ON APV.intEntityVendorId = Total.intCustomerPatronId
 CROSS APPLY tblPATCompanyPreference ComPref
 CROSS APPLY tblSMCompanyLocation CompLoc WHERE CompLoc.intCompanyLocationId = @intCompanyLocationId

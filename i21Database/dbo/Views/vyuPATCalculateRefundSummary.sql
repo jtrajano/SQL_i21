@@ -30,8 +30,6 @@ WITH Refunds AS (
 					ON RR.intRefundTypeId = RRD.intRefundTypeId
 				INNER JOIN tblARCustomer AC
 					ON AC.intEntityCustomerId = B.intCustomerPatronId
-				INNER JOIN vyuEMEntityType EMT
-					ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
 				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.intFiscalYear = B.intFiscalYear AND B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 					) Total
 			INNER JOIN tblPATRefundRate RR
