@@ -57,9 +57,9 @@
     [intTaxGroupId] INT NULL, 
 	[intInventoryShipmentChargeId] INT NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
-	[intCurrencyId] INT NULL
+	[intCurrencyId] INT NULL,
+	[strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
-    [strBillOfLading] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
