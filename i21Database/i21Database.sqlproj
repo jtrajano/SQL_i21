@@ -5535,6 +5535,8 @@
     <Build Include="dbo\Stored Procedures\uspMFAddOrderNewLot.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOff.sql" />
     <Build Include="dbo\Views\vyuAPRptVoucherCheckOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptPurchaseSettlement.sql" />
+    <Build Include="dbo\Views\vyuAPRptPurchaseCustomerSettlement.sql" />
     <None Include="Scripts\Post-Deployment\FRM\DefaultData\1_OfflineMenu.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentUOM.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentByUOM.sql" />
