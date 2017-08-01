@@ -9,8 +9,8 @@ BEGIN
 	DECLARE @environmentType nvarchar(150)
 	SELECT TOP 1 @environmentType = strEnvironmentType FROM tblSMCompanyPreference ORDER BY intCompanyPreferenceId ASC
 
-	INSERT INTO [dbo].[tblSMMultiCompany] ([intMultiCompanyId], [strCompanyName], [strDatabaseName], [strServer], [strType])
-     VALUES(1, @companyName, db_name(), @@servername, @environmentType)
+	INSERT INTO [dbo].[tblSMMultiCompany] ([intMultiCompanyId], [strCompanyName], [strDatabaseName], [strServer], [strUserName], [strPassword], [strType])
+     VALUES(1, @companyName, db_name(), @@servername, 'irelyinstaller', 'RPWc3BK5', @environmentType)
 
 	SET IDENTITY_INSERT [dbo].[tblSMMultiCompany] OFF
 
