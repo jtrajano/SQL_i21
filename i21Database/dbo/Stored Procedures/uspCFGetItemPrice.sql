@@ -16,7 +16,7 @@ CREATE PROCEDURE [dbo].[uspCFGetItemPrice]
 ,@CFPriceBasis			NVARCHAR(250)	= NULL OUTPUT  
 ,@CFContractHeaderId	INT				= NULL OUTPUT
 ,@CFContractDetailId	INT				= NULL OUTPUT
-,@CFContractNumber		INT				= NULL OUTPUT
+,@CFContractNumber		NVARCHAR(MAX)	= NULL OUTPUT
 ,@CFContractSeq			INT				= NULL OUTPUT
 ,@CFAvailableQuantity	NUMERIC(18,6)   = NULL OUTPUT 
 ,@CFTransferCost		NUMERIC(18,6)   = NULL
