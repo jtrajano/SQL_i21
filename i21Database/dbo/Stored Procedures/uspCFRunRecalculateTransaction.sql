@@ -1,6 +1,7 @@
 ﻿
-CREATE PROCEDURE uspCFRunRecalculateTransaction
+CREATE PROCEDURE [dbo].[uspCFRunRecalculateTransaction]
 @TransactionId					INT	
+,@ContractsOverfill				INT = 0
 AS
 BEGIN
 DECLARE @intTransactionId		INT
@@ -60,6 +61,11 @@ EXEC dbo.uspCFRecalculateTransaciton
 ,@BatchRecalculate		= 1
 
 
-SELECT * FROM tblCFBatchRecalculateStagingTable where intTransactionId =  @intTransactionId
+IF(ISNULL(@ContractsOverfill,0) = 0)
+BEGIN
+	
+	SELECT * FROM tblCFBatchRecalculateStagingTable where intTransactionId =  @intTransactionId
+END
+
 
 END
