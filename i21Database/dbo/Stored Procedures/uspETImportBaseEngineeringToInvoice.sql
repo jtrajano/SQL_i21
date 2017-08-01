@@ -5,6 +5,16 @@
 AS
 BEGIN
 
+--DEBUG
+--DECLARE @EntityUserId INT
+--SET @EntityUserId = 1
+--DECLARE  @strDateSession NVARCHAR(25) = NULL 
+--set @strDateSession  = '2017-08-01 11:46:16.237'
+
+--DECLARE @strAllErrorMessage NVARCHAR(MAX)
+--set @strAllErrorMessage = '' 
+--
+
 	DECLARE @intImportBaseEngineeringId INT 
 	DECLARE @intRecordId INT 
     DECLARE @strCustomerNumber NVARCHAR(100) 
@@ -21,6 +31,8 @@ BEGIN
     DECLARE @dblPrebuyQuantity NUMERIC(18, 6)
     DECLARE @dblContractPrice NUMERIC(18, 6)
     DECLARE @dblContractQuantity NUMERIC(18, 6)
+	DECLARE @intRecordType INT
+	
 
 	DECLARE @intCustomerEntityId					INT
 	DECLARE @intLocationId							INT
@@ -35,7 +47,8 @@ BEGIN
 	DECLARE @dblNonContractQuantity					NUMERIC(18, 6)
 	DECLARE @intContractDetailId					INT
 
-	DECLARE @intSiteTaxId							INT
+	--DECLARE @intSiteTaxId							INT
+	DECLARE @intLineItemTaxId						INT
 	DECLARE @strStatus								NVARCHAR(50)
 	DECLARE @ysnRecomputeTax						BIT
 	
@@ -83,130 +96,277 @@ BEGIN
 	BEGIN
 		SET @strErrorMessage = ''
 		SET @intContractDetailId = NULL
-		--SET @ysnProcessNextAsHeader = 0
-		--Get the first Record and create Invoice
-		SELECT TOP 1 
-			 @intImportBaseEngineeringId  = intImportBaseEngineeringId
-			 ,@intRecordId = intRecordId 
-			 ,@strCustomerNumber = strCustomerNumber
-			 ,@strSiteNumber = strSiteNumber
-			 ,@dblPercentFullAfterDelivery = dblPercentFullAfterDelivery
-			 ,@strLocation = strLocation
-			 ,@strItemNumber = strItemNumber
-			 ,@dtmDate = dtmDate 
-			 ,@intTaxGroupId = intTaxGroupId 
-			 ,@dblQuantity = dblQuantity
-			 ,@dblPrice = dblPrice
-			 ,@strOriginInvoiceNumber = strInvoiceNumber
-			 ,@dblPrebuyPrice = dblPrebuyPrice
-			 ,@dblPrebuyQuantity = dblPrebuyQuantity
-			 ,@dblContractPrice = dblContractPrice
-			 ,@dblContractQuantity = dblContractQuantity
-		FROM #tmpBaseToInvoice
-		ORDER BY intImportBaseEngineeringId ASC
-			 
-		--Get Customer Entity Id
-		SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
-	
-		--Get Location Id
-		SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @strLocation)
+		------------------------------------------------------------------------------------------------------------------------------------------------
+		SELECT TOP 1 @strOriginInvoiceNumber = strInvoiceNumber FROM #tmpBaseToInvoice ORDER BY intImportBaseEngineeringId ASC
 
-		--Get Item id
-		SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
+		DECLARE Cursor_LineItems CURSOR LOCAL FAST_FORWARD
+		FOR SELECT 
+				  intImportBaseEngineeringId
+				 ,intRecordId 
+				 ,strCustomerNumber
+				 ,strSiteNumber
+				 ,dblPercentFullAfterDelivery
+				 ,strLocation
+				 ,strItemNumber
+				 ,dtmDate 
+				 ,intTaxGroupId 
+				 ,dblQuantity
+				 ,dblPrice
+				 ,strInvoiceNumber
+				 ,dblPrebuyPrice
+				 ,dblPrebuyQuantity
+				 ,dblContractPrice
+				 ,dblContractQuantity
+				 ,intRecordType
+			FROM #tmpBaseToInvoice
+			WHERE strInvoiceNumber = @strOriginInvoiceNumber
+			ORDER BY intImportBaseEngineeringId ASC
 
-		--Get Site Info
-		
-		-- Tax id  Mismatch - IET-99 JAN192017
-		SET @intSiteId = NULL
-		SET @intSiteTaxId = NULL
+			OPEN Cursor_LineItems
 
-		SELECT TOP 1 @intSiteId = intSiteID
-		            ,@intSiteTaxId = intTaxStateID 
-					,@strSiteBillingBy = strBillingBy
-		FROM tblTMCustomer A
-			INNER JOIN tblTMSite B
-				ON A.intCustomerID = B.intCustomerID
-			WHERE intCustomerNumber = @intCustomerEntityId
-				AND B.intSiteNumber = CAST(@strSiteNumber AS INT)
+			FETCH NEXT FROM Cursor_LineItems
+			INTO @intImportBaseEngineeringId  
+				 ,@intRecordId 
+				 ,@strCustomerNumber 
+				 ,@strSiteNumber 
+				 ,@dblPercentFullAfterDelivery 
+				 ,@strLocation 
+				 ,@strItemNumber 
+				 ,@dtmDate 
+				 ,@intTaxGroupId 
+				 ,@dblQuantity
+				 ,@dblPrice
+				 ,@strOriginInvoiceNumber
+				 ,@dblPrebuyPrice
+				 ,@dblPrebuyQuantity 
+				 ,@dblContractPrice
+				 ,@dblContractQuantity 
+				 ,@intRecordType
 
-		IF (ISNULL(@intSiteId,0) = 0)
-		BEGIN
-			SET @strErrorMessage = 'Invalid Site.'
-			GOTO LOGERROR
-		END
-		
-		IF ISNULL(@intTaxGroupId,0) = 0
-		BEGIN 
-			SET @ysnRecomputeTax = 0
-		END
-		ELSE
-		BEGIN
-			SET @ysnRecomputeTax = 1
-		END
-		
-		---Check Contracts
-		IF(@dblPrebuyQuantity > 0 OR @dblContractQuantity > 0)
-		BEGIN
-			--IF Contract is used
-			SET @dblNonContractQuantity = 0
-			IF(@dblPrebuyQuantity > 0)
+			SET @strNewInvoiceNumber = ''-- re-initialize invoice number
+			--Get Customer Entity Id
+			SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
+			--Get Location Id
+			SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @strLocation)
+			----------------------------------------------------------------------------------------------------------------------------------------------------------
+			WHILE (@@FETCH_STATUS <> - 1)
+		    BEGIN
+			
+			BEGIN TRANSACTION
+			
+			--Get Item id
+			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
+
+		    --Get Site Info
+			-- Tax id  Mismatch - IET-99 JAN192017
+			SET @intSiteId = NULL
+			--SET @intSiteTaxId = NULL
+			SET @intLineItemTaxId = NULL
+
+			IF (@intRecordType = 5)
 			BEGIN
-				SET @dblNonContractQuantity = @dblQuantity - @dblPrebuyQuantity
-
-				--GEt Contracts				
-				SELECT TOP 1 @intContractDetailId = intContractDetailId 
-				FROM vyuETBEContract
-				WHERE intEntityId = @intCustomerEntityId
-					AND intItemId = @intItemId
-
-				
-				---Insert/Create Invoice 
-				BEGIN TRANSACTION
-				EXEC [dbo].[uspARCreateCustomerInvoice]
-					@EntityCustomerId          = @intCustomerEntityId
-					,@InvoiceDate              = @dtmDate
-					,@CompanyLocationId        = @intLocationId
-					,@EntityId                 = @EntityUserId
-					,@NewInvoiceId             = @intNewInvoiceId OUTPUT
-					,@ErrorMessage             = @strErrorMessage OUTPUT
-					,@ItemId                   = @intItemId
-					,@ItemQtyShipped           = @dblPrebuyQuantity
-					,@ItemPrice                = @dblPrebuyPrice
-					,@ItemSiteId               = @intSiteId
-					,@TransactionType	       = @strTransactionType
-					,@Type					   = 'Tank Delivery'
-					,@ShipDate				   = @dtmDate
-					,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-					,@ItemTaxGroupId		   = @intTaxGroupId	
-					,@RaiseError			   = 1 
-					,@UseOriginIdAsInvoiceNumber = 1
-					,@InvoiceOriginId         = @strOriginInvoiceNumber
-					,@ItemContractDetailId		= @intContractDetailId
-					,@RecomputeTax = @ysnRecomputeTax
-
-				--GEt the created invoice number
-				SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
-				SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
-
-
-				----Update Tax Details
-				EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
-				
-				IF 	LTRIM(@strErrorMessage) != ''
-				BEGIN		
-					ROLLBACK TRANSACTION
-					GOTO LOGERROR
+				SELECT TOP 1 @intSiteId = intSiteID
+							,@intLineItemTaxId = intTaxStateID	
+							,@strSiteBillingBy = strBillingBy
+				FROM tblTMCustomer A
+					INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
+				WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT)
+			END
+			ELSE
+				BEGIN
+					SELECT @intLineItemTaxId =  dbo.fnGetTaxGroupIdForCustomer(@intCustomerEntityId,@intLocationId,@intItemId,null,null,null)
 				END
 
-				IF(@dblNonContractQuantity > 0)
+			
+
+			IF (@intRecordType = 5 AND ISNULL(@intSiteId,0) = 0)
 				BEGIN
-					---- Add as line Item to Existing Invoice
-					EXEC [dbo].[uspARAddInventoryItemToInvoice]
+					SET @strErrorMessage = 'Invalid Site.'
+					GOTO LOGERROR
+				END
+		
+			IF ISNULL(@intTaxGroupId,0) = 0
+				BEGIN 
+					SET @ysnRecomputeTax = 0
+				END
+			ELSE
+				BEGIN
+					SET @ysnRecomputeTax = 1
+				END
+		
+			---Check Contracts
+			IF(@dblPrebuyQuantity > 0 OR @dblContractQuantity > 0)
+				BEGIN 
+				--IF Contract is used
+					SET @dblNonContractQuantity = 0
+					IF(@dblPrebuyQuantity > 0)
+					    BEGIN 
+						--GEt Contracts				
+						SELECT TOP 1 @intContractDetailId = intContractDetailId FROM vyuETBEContract WHERE intEntityId = @intCustomerEntityId AND intItemId = @intItemId
+
+							---Insert/Create Invoice 
+							
+							IF (@strNewInvoiceNumber = '')
+								BEGIN
+								----------------------------------------------------------------------------------------------------------------------------------------
+								----Create Invoice with one item BEGIN
+								----------------------------------------------------------------------------------------------------------------------------------------
+								EXEC [dbo].[uspARCreateCustomerInvoice]
+								@EntityCustomerId          = @intCustomerEntityId
+								,@InvoiceDate              = @dtmDate
+								,@CompanyLocationId        = @intLocationId
+								,@EntityId                 = @EntityUserId
+								,@NewInvoiceId             = @intNewInvoiceId OUTPUT
+								,@ErrorMessage             = @strErrorMessage OUTPUT
+								,@ItemId                   = @intItemId
+								,@ItemQtyShipped           = @dblPrebuyQuantity
+								,@ItemPrice                = @dblPrebuyPrice
+								,@ItemSiteId               = @intSiteId
+								,@TransactionType	       = @strTransactionType
+								,@Type					   = 'Tank Delivery'
+								,@ShipDate				   = @dtmDate
+								,@ItemPercentFull		   = @dblPercentFullAfterDelivery
+								,@ItemTaxGroupId		   = @intTaxGroupId	
+								,@RaiseError			   = 1 
+								,@UseOriginIdAsInvoiceNumber = 1
+								,@InvoiceOriginId         = @strOriginInvoiceNumber
+								,@ItemContractDetailId		= @intContractDetailId
+								,@RecomputeTax = @ysnRecomputeTax
+
+								--GEt the created invoice number
+								SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
+								SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
+
+								----Update Tax Details
+								EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+				
+								IF 	LTRIM(@strErrorMessage) != ''
+								BEGIN		
+									--ROLLBACK TRANSACTION
+									GOTO LOGERROR
+								END
+								----------------------------------------------------------------------------------------------------------------------------------------
+								----Create Invoice with one item END
+								----------------------------------------------------------------------------------------------------------------------------------------
+								END
+							ELSE
+								BEGIN
+									---- Add as line Item to Existing Invoice
+									EXEC [dbo].[uspARAddInventoryItemToInvoice]
+									@InvoiceId = @intNewInvoiceId
+									,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
+									,@ErrorMessage = @strErrorMessage OUTPUT
+									,@ItemId                   = @intItemId
+									,@ItemQtyShipped           = @dblNonContractQuantity
+									,@ItemPrice                = @dblPrice
+									,@ItemSiteId               = @intSiteId
+									,@ItemPercentFull		   = 0
+									,@ItemTaxGroupId		   = @intTaxGroupId	
+									,@ItemContractDetailId     = @intContractDetailId
+									,@RaiseError			   = 1 			
+									,@ItemCurrencyExchangeRateTypeId = NULL			
+									,@ItemCurrencyExchangeRateId = NULL			
+									,@RecomputeTax = @ysnRecomputeTax
+									----Update Tax Details
+									EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+				
+									IF 	LTRIM(@strErrorMessage) != ''
+										BEGIN		
+											--ROLLBACK TRANSACTION
+											GOTO LOGERROR
+										END
+								END
+
+							----------------------------------------------------------------------------------------------------------------------------------------
+							----Contract overfill
+							----------------------------------------------------------------------------------------------------------------------------------------
+							SET @dblNonContractQuantity = @dblQuantity - @dblPrebuyQuantity
+							IF(@dblNonContractQuantity > 0)
+								BEGIN
+									---- Add as line Item to Existing Invoice
+									EXEC [dbo].[uspARAddInventoryItemToInvoice]
+											@InvoiceId = @intNewInvoiceId
+											,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
+											,@ErrorMessage = @strErrorMessage OUTPUT
+											,@ItemId                   = @intItemId
+											,@ItemQtyShipped           = @dblNonContractQuantity
+											,@ItemPrice                = @dblPrice
+											,@ItemSiteId               = @intSiteId
+											,@ItemPercentFull		   = 0
+											,@ItemTaxGroupId		   = @intTaxGroupId	
+											,@ItemContractDetailId     = @intContractDetailId
+											,@RaiseError			   = 1 			
+											,@ItemCurrencyExchangeRateTypeId = NULL			
+											,@ItemCurrencyExchangeRateId = NULL			
+											,@RecomputeTax = @ysnRecomputeTax
+								END
+							EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+							----------------------------------------------------------------------------------------------------------------------------------------
+						
+						IF 	LTRIM(@strErrorMessage) != ''
+							BEGIN		
+								--ROLLBACK TRANSACTION
+								GOTO LOGERROR
+							END
+
+						EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
+						COMMIT TRANSACTION
+						GOTO LOGSUCCESS
+					END
+				    ELSE
+						BEGIN 
+							SET @strErrorMessage = 'Non-Prebuy contracts are not implemented yet'
+							GOTO LOGERROR
+						END
+			    END
+			ELSE
+				BEGIN 
+			    ---Insert/Create Invoice 
+				IF (@strNewInvoiceNumber = '')
+					BEGIN
+						EXEC [dbo].[uspARCreateCustomerInvoice]
+						@EntityCustomerId          = @intCustomerEntityId
+						,@InvoiceDate              = @dtmDate
+						,@CompanyLocationId        = @intLocationId
+						,@EntityId                 = @EntityUserId
+						,@NewInvoiceId             = @intNewInvoiceId OUTPUT
+						,@ErrorMessage             = @strErrorMessage OUTPUT
+						,@ItemId                   = @intItemId
+						,@ItemQtyShipped           = @dblQuantity
+						,@ItemPrice                = @dblPrice
+						,@ItemSiteId               = @intSiteId
+						,@TransactionType	       = @strTransactionType
+						,@Type					   = 'Tank Delivery'
+						,@ShipDate				   = @dtmDate
+						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
+						,@ItemTaxGroupId		   = @intTaxGroupId	
+						,@RaiseError			   = 1 
+						,@UseOriginIdAsInvoiceNumber = 1
+						,@InvoiceOriginId         = @strOriginInvoiceNumber
+						,@RecomputeTax = @ysnRecomputeTax
+						IF 	LTRIM(@strErrorMessage) != ''
+						BEGIN 
+							--ROLLBACK TRANSACTION
+							GOTO LOGERROR
+						END
+
+						--GEt the created invoice number
+						SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
+						SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
+					END
+					
+				ELSE
+				----------------------------------------------------------------------------------------------------------------------------------------
+				----Add other item
+				----------------------------------------------------------------------------------------------------------------------------------------
+					BEGIN
+						---- Add as line Item to Existing Invoice
+						EXEC [dbo].[uspARAddInventoryItemToInvoice]
 							@InvoiceId = @intNewInvoiceId
 							,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
 							,@ErrorMessage = @strErrorMessage OUTPUT
 							,@ItemId                   = @intItemId
-							,@ItemQtyShipped           = @dblNonContractQuantity
+							,@ItemQtyShipped           = @dblQuantity
 							,@ItemPrice                = @dblPrice
 							,@ItemSiteId               = @intSiteId
 							,@ItemPercentFull		   = 0
@@ -216,111 +376,78 @@ BEGIN
 							,@ItemCurrencyExchangeRateTypeId = NULL			
 							,@ItemCurrencyExchangeRateId = NULL			
 							,@RecomputeTax = @ysnRecomputeTax
-				END
-				IF 	LTRIM(@strErrorMessage) != ''
-				BEGIN		
-					ROLLBACK TRANSACTION
-					GOTO LOGERROR
-				END
-
+						IF 	LTRIM(@strErrorMessage) != ''
+						BEGIN		
+							--ROLLBACK TRANSACTION
+							GOTO LOGERROR
+						END
+					END
+				----------------------------------------------------------------------------------------------------------------------------------------
+				----Add other item
+				----------------------------------------------------------------------------------------------------------------------------------------
+				
 				----Update Tax Details
 				EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+				
+                END
 
-				EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
-				COMMIT TRANSACTION
-				GOTO LOGSUCCESS
-
-
-			END
-			ELSE
-			BEGIN
-				SET @strErrorMessage = 'Non-Prebuy contracts are not implemented yet'
-				GOTO LOGERROR
-			END
 			
-		END
-		ELSE
-		BEGIN
-			---Insert/Create Invoice 
-			EXEC [dbo].[uspARCreateCustomerInvoice]
-				@EntityCustomerId          = @intCustomerEntityId
-				,@InvoiceDate              = @dtmDate
-				,@CompanyLocationId        = @intLocationId
-				,@EntityId                 = @EntityUserId
-				,@NewInvoiceId             = @intNewInvoiceId OUTPUT
-				,@ErrorMessage             = @strErrorMessage OUTPUT
-				,@ItemId                   = @intItemId
-				,@ItemQtyShipped           = @dblQuantity
-				,@ItemPrice                = @dblPrice
-				,@ItemSiteId               = @intSiteId
-				,@TransactionType	       = @strTransactionType
-				,@Type					   = 'Tank Delivery'
-				,@ShipDate				   = @dtmDate
-				,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-				,@ItemTaxGroupId		   = @intTaxGroupId	
-				,@RaiseError			   = 1 
-				,@UseOriginIdAsInvoiceNumber = 1
-				,@InvoiceOriginId         = @strOriginInvoiceNumber
-				,@RecomputeTax = @ysnRecomputeTax
-		END
-		--GEt the created invoice number
-		SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
-		SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
 
 		--Check if any error in creating invoice 
 		--Log Entry
-		IF 	LTRIM(@strErrorMessage) != ''
-		BEGIN		
-			GOTO LOGERROR
+			IF 	LTRIM(@strErrorMessage) != ''
+						BEGIN 
+							GOTO LOGERROR
+						END
+					ELSE
+						BEGIN 
+							----Update Tax Details
+							EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+							EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
+							COMMIT TRANSACTION
+
+							LOGSUCCESS:
+							--NOTE: @intSiteTaxId is the current site setup 
+							--NOTE: @intTaxGroupId is the tax from the file
+							--DO NOT Recompute Tax when intTaxGroupId  is NULL
+							IF ISNULL(@intLineItemTaxId,0) <> ISNULL(@intTaxGroupId,0)
+								BEGIN
+									SET @strStatus = 'Tax Mismatch'
+								END
+							Else
+								BEGIN
+									SET @strStatus = 'Created'
+								END
+		
+							INSERT INTO @ResultTableLog (strCustomerNumber ,strRecordId	,strSiteNumber	,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,strInvoiceNumber ,strItemNumber ,intInvoiceId)
+							SELECT strCustomerNumber = @strCustomerNumber ,strRecordId = CAST(@intRecordId AS NVARCHAR(15))	,strSiteNumber = @strSiteNumber ,dtmDate = @dtmDate		,intLineItem = @intRecordId ,strFileName = '' ,strStatus = @strStatus ,ysnSuccessful = 1,strInvoiceNumber = @strNewInvoiceNumber,strItemNumber = @strItemNumber ,intInvoiceId = @intNewInvoiceId
+
+							--GOTO CONTINUELOOP
+						END
+
+			FETCH NEXT FROM Cursor_LineItems 
+			INTO @intImportBaseEngineeringId  
+					,@intRecordId 
+					,@strCustomerNumber 
+					,@strSiteNumber 
+					,@dblPercentFullAfterDelivery 
+					,@strLocation 
+					,@strItemNumber 
+					,@dtmDate 
+					,@intTaxGroupId 
+					,@dblQuantity
+					,@dblPrice
+					,@strOriginInvoiceNumber
+					,@dblPrebuyPrice
+					,@dblPrebuyQuantity 
+					,@dblContractPrice
+					,@dblContractQuantity 
+					,@intRecordType						
 		END
-		ELSE
-		BEGIN
-			----Update Tax Details
-			EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
-			EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
+		------------------------------------------------------------------------------------------------------------------------------------------------
 
-			LOGSUCCESS:
-			--NOTE: @intSiteTaxId is the current site setup 
-			--NOTE: @intTaxGroupId is the tax from the file
-			--DO NOT Recompute Tax when intTaxGroupId  is NULL
-			IF ISNULL(@intSiteTaxId,0) <> ISNULL(@intTaxGroupId,0)
-				BEGIN
-					SET @strStatus = 'Tax Mismatch'
-				END
-			Else
-				BEGIN
-					SET @strStatus = 'Created'
-				END
-				
-
-			INSERT INTO @ResultTableLog (
-				strCustomerNumber			
-				,strRecordId			
-				,strSiteNumber				
-				,dtmDate					
-				,intLineItem				
-				,strFileName				
-				,strStatus
-				,ysnSuccessful
-				,strInvoiceNumber
-				,strItemNumber
-				,intInvoiceId
-			)
-			SELECT
-					strCustomerNumber = @strCustomerNumber		
-					,strRecordId =	CAST(@intRecordId AS NVARCHAR(15))	
-					,strSiteNumber = @strSiteNumber				
-					,dtmDate = @dtmDate					
-					,intLineItem = @intRecordId		
-					,strFileName = ''				
-					,strStatus = @strStatus
-					,ysnSuccessful = 1
-					,strInvoiceNumber = @strNewInvoiceNumber
-					,strItemNumber = @strItemNumber
-					,intInvoiceId = @intNewInvoiceId
-			GOTO CONTINUELOOP
-		END
-
+		GOTO CONTINUELOOP
+		
 		LOGERROR:		 
 		INSERT INTO @ResultTableLog (
 				strCustomerNumber			
@@ -345,14 +472,18 @@ BEGIN
 				,ysnSuccessful = 0
 				,strInvoiceNumber = ''
 				,strItemNumber = @strItemNumber
+		ROLLBACK TRANSACTION
 					
 		GOTO CONTINUELOOP
 		CONTINUELOOP:
-		DELETE FROM #tmpBaseToInvoice WHERE intImportBaseEngineeringId = @intImportBaseEngineeringId
+		DELETE FROM #tmpBaseToInvoice WHERE strInvoiceNumber = @strOriginInvoiceNumber
 		UPDATE tblETImportBaseEngineering
-		SET ysnProcessed = 1 WHERE intImportBaseEngineeringId = @intImportBaseEngineeringId
+		SET ysnProcessed = 1 WHERE strInvoiceNumber = @strOriginInvoiceNumber
+		CLOSE Cursor_LineItems
+		DEALLOCATE Cursor_LineItems
 	END
 
 	SELECT * FROM @ResultTableLog
+
 END
 GO
