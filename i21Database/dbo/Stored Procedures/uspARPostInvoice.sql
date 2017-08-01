@@ -3847,6 +3847,17 @@ IF @recap = 0
 			
 			INSERT INTO @InvoiceToUpdate(intInvoiceId)
 			SELECT DISTINCT intInvoiceId FROM @PostInvoiceData
+
+			--UPDATE tblARCustomer.dblARBalance
+			UPDATE CUSTOMER
+			SET dblARBalance = dblARBalance + (CASE WHEN @post = 1 THEN ISNULL(dblTotalInvoice, 0) ELSE ISNULL(dblTotalInvoice, 0) * -1 END)
+			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+			INNER JOIN (SELECT intEntityCustomerId
+							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice', 'Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
+						FROM dbo.tblARInvoice WITH (NOLOCK)
+						WHERE intInvoiceId IN (SELECT intInvoiceId FROM @InvoiceToUpdate)
+						GROUP BY intEntityCustomerId
+			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 				
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceToUpdate ORDER BY intInvoiceId)
 				BEGIN
@@ -3857,26 +3868,14 @@ IF @recap = 0
 
 					EXEC dbo.uspARPostInvoiceIntegrations @post, @intInvoiceIntegractionId, @userId
 								
-					DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 
-												
+					DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 												
 				END
 
-			--UPDATE tblARCustomer.dblARBalance
-			UPDATE CUSTOMER
-			SET dblARBalance = dblARBalance + (CASE WHEN @post = 1 THEN ISNULL(dblTotalInvoice, 0) ELSE ISNULL(dblTotalInvoice, 0) * -1 END)
-			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-			INNER JOIN (SELECT intEntityCustomerId
-							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice, Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
-						FROM dbo.tblARInvoice WITH (NOLOCK)
-						WHERE intInvoiceId IN (SELECT intInvoiceId FROM @InvoiceToUpdate)
-						GROUP BY intEntityCustomerId
-			) INVOICE ON CUSTOMER.[intEntityId] = INVOICE.intEntityCustomerId
-
-		DELETE dbo.tblARPrepaidAndCredit  
-		FROM 
-			(SELECT intInvoiceId, ysnApplied FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)) A 
-		INNER JOIN (SELECT intInvoiceId FROM @PostInvoiceData ) B  
-		   ON A.intInvoiceId = B.intInvoiceId AND (ISNULL(ysnApplied,0) = 0 OR @post = 0)
+			DELETE dbo.tblARPrepaidAndCredit  
+			FROM 
+				(SELECT intInvoiceId, ysnApplied FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)) A 
+			INNER JOIN (SELECT intInvoiceId FROM @PostInvoiceData ) B  
+			   ON A.intInvoiceId = B.intInvoiceId AND (ISNULL(ysnApplied,0) = 0 OR @post = 0)
 																
 		END TRY
 		BEGIN CATCH	
