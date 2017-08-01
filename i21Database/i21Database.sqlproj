@@ -5547,6 +5547,7 @@
     <Build Include="dbo\Views\vyuLGLoadDetailForVoucher.sql" />
     <Build Include="dbo\Views\vyuMFGetOrderLabels.sql" />
     <Build Include="dbo\Views\vyuMFGetSSCCDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetConsolidateWarnings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
