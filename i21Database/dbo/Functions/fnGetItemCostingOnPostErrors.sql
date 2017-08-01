@@ -7,7 +7,20 @@
 *	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnPostErrors(A.intItemId, A.intLocationId, A.intItemUOMId, A.dblQty) B
 * 
 */
-CREATE FUNCTION fnGetItemCostingOnPostErrors (@intItemId AS INT, @intItemLocationId AS INT, @intItemUOMId AS INT, @intSubLocationId AS INT, @intStorageLocationId AS INT, @dblQty AS NUMERIC(38,20) = 0, @intLotId AS INT)
+CREATE FUNCTION fnGetItemCostingOnPostErrors (
+	@intItemId AS INT
+	, @intItemLocationId AS INT
+	, @intItemUOMId AS INT
+	, @intSubLocationId AS INT
+	, @intStorageLocationId AS INT
+	, @dblQty AS NUMERIC(38,20) = 0
+	, @intLotId AS INT
+	, @strActualCostId AS NVARCHAR(50)
+	, @intTransactionTypeId AS INT 
+	, @strTransactionId AS NVARCHAR(50) 
+	, @intCurrencyId AS INT 
+	, @dblForexRate AS NUMERIC(18, 6) = 0.00 
+)
 RETURNS TABLE 
 AS
 RETURN (
@@ -95,7 +108,7 @@ RETURN (
 							, DEFAULT
 							, DEFAULT
 						) 
-				,intErrorCode = 80022
+				,intErrorCode = 80022				
 		FROM	tblICItem Item
 		WHERE	Item.intItemId = @intItemId
 				AND Item.strStatus = 'Discontinued'
@@ -269,6 +282,84 @@ RETURN (
 								AND Location.intItemLocationId = @intItemLocationId
 					WHERE	ysnLockedInventory = 1
 				)
+
+
+		/*
+			Check if the item is using Average Costing and the transaction is Actual Costing 
+
+			Exception: 
+				Allow it to happen Inventory Transfer. It will reduce the stock first using AVG and transfer it to the new location for ACTUAL COSTING. It will be reduced by the Sale Invoice 
+				using Actual Costing. It will not mess up the inventory valuation because the actual cost is the same average cost. 
+	
+				To illustrate: 
+
+				strTransactionId                         dblQty                                  dblCost                                 intCostingMethod strName             
+				---------------------------------------- --------------------------------------- --------------------------------------- ---------------- --------------------
+				INVTRN-3101                              -9829.00000000000000000000              1.01616662017389385428                  1                Inventory Transfer  
+				INVTRN-3101                              9829.00000000000000000000               1.01616662017389385428                  5                Inventory Transfer  
+				SI-34906                                 -9829.00000000000000000000              1.01616662017389385428                  5                Invoice
+
+				The Average Cost of the item will remain as 1.01616662017389385428. 
+		*/
+		-- '{Item No} is set to use AVG Costing and it will be received in {Receipt Id} as Actual costing. Average cost computation will be messed up. Try receiving the stocks using Inventory Receipt instead of Transport Load.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+								dbo.fnICGetErrorMessage(80094)
+								, i.strItemNo
+								, @strTransactionId 
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+							)
+				,intErrorCode = 80094
+		FROM	tblICItem i 
+				CROSS APPLY dbo.fnGetCostingMethodAsTable(i.intItemId, @intItemLocationId) icm
+				INNER JOIN tblICCostingMethod cm ON cm.intCostingMethodId = icm.CostingMethod
+				INNER JOIN tblICInventoryTransactionType ty ON ty.intTransactionTypeId = @intTransactionTypeId
+		WHERE	i.intItemId = @intItemId 
+				AND @strActualCostId IS NOT NULL 
+				AND cm.strCostingMethod = 'AVERAGE COST'
+				AND @dblQty > 0 
+				AND ty.strName NOT IN ('Inventory Transfer') 
+
+		/*
+			Check if the transaction is using a foreign currency and it has a missing forex rate. 
+		*/
+		-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Trans Currency} to {Functional Currency}.'
+		UNION ALL
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+								dbo.fnICGetErrorMessage(80162)
+								, @strTransactionId
+								, i.strItemNo 
+								, c.strCurrency
+								, fc.strCurrency
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+							)
+				,intErrorCode = 80162
+		FROM	tblICItem i 					
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID = @intCurrencyId
+				LEFT JOIN tblSMCurrency fc
+					ON fc.intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+		WHERE	i.intItemId = @intItemId
+				AND ISNULL(@dblForexRate, 0) = 0 
+				AND @intCurrencyId IS NOT NULL 
+				AND @intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+				AND @intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
 
 	) AS Query		
 )
