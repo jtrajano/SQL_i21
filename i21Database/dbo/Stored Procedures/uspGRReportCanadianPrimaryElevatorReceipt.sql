@@ -83,8 +83,8 @@ BEGIN TRY
 	JOIN   tblSCTicket SC ON SC.intItemUOMIdTo=ItemUOM.intItemUOMId
 	WHERE  SC.intTicketId=@intScaleTicketId
 	
-	SET @GrainUnloadedDecimal=@GrainUnloadedDecimal-FLOOR(@GrainUnloadedDecimal)
-	SET @NetWeightDecimal=@NetWeightDecimal-FLOOR(@NetWeightDecimal)
+	SET @GrainUnloadedDecimal=ROUND(@GrainUnloadedDecimal-FLOOR(@GrainUnloadedDecimal),3)
+	SET @NetWeightDecimal=ROUND(@NetWeightDecimal-FLOOR(@NetWeightDecimal),3)
 
 	SELECT @strCompanyName = 
 			CASE 
@@ -116,40 +116,33 @@ BEGIN TRY
 			WHEN LTRIM(RTRIM(strZip)) = '' THEN NULL
 			ELSE LTRIM(RTRIM(strZip))
 		 END
-		,@strCountry = 
-		 CASE 
-			WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL
-			ELSE LTRIM(RTRIM(strCountry))
-		 END
 	FROM tblSMCompanySetup
 
 	SELECT DISTINCT
-		   @strCompanyName + ', ' 
+		   @strCompanyName + 
 		  + CHAR(13) + CHAR(10) 
-		  + ISNULL(@strAddress, '') + ', ' 
+		  + ISNULL(@strAddress, '') + 
 		  + CHAR(13) + CHAR(10) 
-		  + ISNULL(@strCity, '') + ISNULL(', ' + @strState, '') + ISNULL(', ' + @strZip, '') + ISNULL(', ' + @strCountry, '') 
+		  + ISNULL(@strCity, '') + ISNULL(', ' + @strState, '') +' '+ISNULL(@strZip, '')
 	   AS strCompanyAddress
-		,LTRIM(RTRIM(EY.strEntityName)) + ', ' 
+		,LTRIM(RTRIM(EY.strEntityName)) + 
 		+ CHAR(13) + CHAR(10) 
-		+ ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') + ', ' 
+		+ ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') +
 		+ CHAR(13) + CHAR(10) 
-		+ ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '') + ISNULL(', ' 
-		+ CASE 
-				WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL
-				ELSE LTRIM(RTRIM(EY.strEntityState))
-		  END, '') 
-		  + ISNULL(', ' 
-		  + CASE 
-				WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL
-				ELSE LTRIM(RTRIM(EY.strEntityZipCode))
-			END, '') 
-			+ ISNULL(', ' 
-			+ CASE 
-				WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''THEN NULL
-				ELSE LTRIM(RTRIM(EY.strEntityCountry))
-			  END, '') 
-		AS strEntityAddress
+		+ ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '') 
+		+ ISNULL(', ' 
+					+ CASE 
+							WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL
+							ELSE LTRIM(RTRIM(EY.strEntityState))
+					  END, 
+			     '') 
+		  + ISNULL(' ' 
+					  + CASE 
+							WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL
+							ELSE LTRIM(RTRIM(EY.strEntityZipCode))
+						END, 
+				   '') 			
+		  AS strEntityAddress
 		,@strReceiptNumber AS strReceiptNumer
 		,LTRIM(Year(SC.dtmTicketDateTime)) AS strYear
 		,LTRIM(Month(SC.dtmTicketDateTime)) AS strMonth
@@ -159,7 +152,7 @@ BEGIN TRY
 		,[dbo].[fnRemoveTrailingZeroes]((SC.dblGrossWeight-SC.dblTareWeight)) AS strUnloadedGrain
 		,[dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,6)) AS dblDockage
 		,[dbo].[fnRemoveTrailingZeroes](ROUND((SC.dblShrink*100.0/(SC.dblGrossWeight-SC.dblTareWeight)),6)) AS dblDockagePercent
-		,[dbo].[fnRemoveTrailingZeroes](((SC.dblGrossWeight-SC.dblTareWeight)-SC.dblShrink)) AS dblNetWeight	
+		,[dbo].[fnRemoveTrailingZeroes](ROUND((((SC.dblGrossWeight-SC.dblTareWeight)-SC.dblShrink)),3)) AS dblNetWeight	
 		,Item.strItemNo
 		,1 AS strGrade
 		,EY.strVendorAccountNum		
@@ -177,7 +170,7 @@ BEGIN TRY
 		+ ' '+@strItemStockUOM AS strGrainUnloadedInWords
 		,[dbo].[fnGRConvertNumberToWords](SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink) 
 		+CASE 
-			 WHEN @NetWeightDecimal >0 THEN + ' point ' + [dbo].[fnGRConvertDecimalPartToWords]([dbo].[fnRemoveTrailingZeroes](SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink))
+			 WHEN @NetWeightDecimal >0 THEN + ' point ' + [dbo].[fnGRConvertDecimalPartToWords]([dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink,3)))
 			 ELSE ''
 		 END	 		
 		+ ' '+@strItemStockUOM AS strNetWeightInWords
