@@ -70,7 +70,8 @@ BEGIN TRY
 		,[ysnSplitted]							= 0
 		,[intPaymentId]							= NULL
 		,[intSplitId]							= NULL
-		,[strActualCostId]						= (CASE WHEN (TR.strOrigin) = 'Terminal' AND (DH.strDestination) = 'Customer'
+		,[strActualCostId]						= CASE WHEN ISNULL(DD.strReceiptLink, '') = '' THEN BlendIngredient.strActualCostId ELSE 
+													(CASE WHEN (TR.strOrigin) = 'Terminal' AND (DH.strDestination) = 'Customer'
 														THEN (TL.strTransaction)
 													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Customer' AND (TR.intCompanyLocationId) = (DH.intCompanyLocationId)
 														THEN NULL
@@ -78,7 +79,7 @@ BEGIN TRY
 														THEN (TL.strTransaction)
 													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Location'
 														THEN NULL
-													END)
+													END) END
 		,[intShipmentId]						= NULL
 		,[intTransactionId]						= NULL
 		,[intEntityId]							= @UserEntityId
@@ -153,6 +154,29 @@ BEGIN TRY
 								FOR XML PATH('')), 1, 2, '') strSupplyPoint
 				FROM vyuTRLinkedReceipts CH) ee 
 			ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+	LEFT JOIN (
+		SELECT DistItem.intLoadDistributionDetailId
+			, HeaderDistItem.intLoadDistributionHeaderId
+			, intItemId = BlendIngredient.intIngredientItemId
+			, dblQty = BlendIngredient.dblQuantity
+			, HeaderDistItem.intCompanyLocationId
+			, HeaderDistItem.dtmInvoiceDateTime
+			, strActualCostId = (CASE WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Customer'
+										THEN LoadHeader.strTransaction
+									WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+										THEN NULL
+									WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+										THEN LoadHeader.strTransaction
+									WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location'
+										THEN NULL
+									END)
+		FROM tblTRLoadDistributionDetail DistItem
+		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+		LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+		LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
+		LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
+		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
+	) BlendIngredient ON BlendIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = ''
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
 
@@ -172,6 +196,10 @@ BEGIN TRY
 		, @Comments NVARCHAR(200) = ''
 		, @PONumber NVARCHAR(200) = ''
 		, @BOLNumber NVARCHAR(200) = ''
+		, @concatActualCost NVARCHAR(MAX) = ''
+		, @ActualCost NVARCHAR(200) = ''
+		, @DistributionDetailKey INT
+
 
 	-- Update multiple comment concatenation.
 	SELECT DISTINCT intEntityCustomerId, intSourceId, intCompanyLocationId, dtmDate, intTermId, intShipViaId, intEntitySalespersonId, strComments
@@ -354,7 +382,44 @@ BEGIN TRY
 			AND intEntitySalespersonId = @EntitySalespersonId
 			AND strPONumber = @PONumber
 	END	
-	DROP TABLE #tmpPO	
+	DROP TABLE #tmpPO
+
+	-- Update multiple Actual Cost concatenation.
+	SELECT DISTINCT intLoadDistributionDetailId, strActualCostId
+	INTO #tmpActualCost
+	FROM #tmpSourceTable
+	WHERE ISNULL(strActualCostId, '') <> ''
+	ORDER BY intLoadDistributionDetailId, strActualCostId
+	
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpActualCost)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1
+				FROM #tmpActualCost
+				WHERE intLoadDistributionDetailId = @DistributionDetailKey
+		)
+		BEGIN
+			SET @concatActualCost = ''
+		END
+
+		SELECT TOP 1 @DistributionDetailKey = intLoadDistributionDetailId
+			, @ActualCost = strActualCostId
+		FROM #tmpActualCost
+
+		IF (LEN(@concatActualCost) > 0)
+		BEGIN
+			SET @concatActualCost += ', '
+		END
+		SET @concatActualCost += @ActualCost
+
+		UPDATE #tmpSourceTable
+			SET strActualCostId = @concatActualCost
+		WHERE intLoadDistributionDetailId = @DistributionDetailKey
+
+		DELETE FROM #tmpActualCost
+		WHERE intLoadDistributionDetailId = @DistributionDetailKey
+			AND strActualCostId = @ActualCost
+	END	
+	DROP TABLE #tmpActualCost
 
 	--Auto Blend
 	SELECT DistItem.intLoadDistributionDetailId
@@ -425,14 +490,6 @@ BEGIN TRY
 					RAISERROR('Cannot blend all distribution items', 16, 1)
 				END
 			END
-			ELSE
-			BEGIN
-				EXEC uspMFReverseAutoBlend
-					@intSalesOrderDetailId = NULL
-					, @intInvoiceDetailId = NULL
-					, @intLoadDistributionDetailId = @DistributionItemId
-					, @intUserId = @intUserId
-			END
 
 			DELETE FROM #tmpBlendDistributionItems WHERE intLoadDistributionDetailId = @DistributionItemId
 		END
@@ -484,8 +541,7 @@ BEGIN TRY
 		FROM #tmpSourceTable
 	) Invoices
 
-	
-	--Freight Items
+		--Freight Items
 	INSERT INTO #tmpSourceTableFinal(
 		[intId] 
 		,[strSourceTransaction]
@@ -1174,6 +1230,16 @@ BEGIN TRY
 			,@ErrorMessage		= @ErrorMessage OUTPUT
 			,@CreatedIvoices	= @CreatedInvoices OUTPUT
 			,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
+
+	-- Unpost Blending Transaction
+	IF (ISNULL(@ysnPostOrUnPost, 0) = 0)
+	BEGIN
+		EXEC uspMFReverseAutoBlend
+			@intSalesOrderDetailId = NULL
+			, @intInvoiceDetailId = NULL
+			, @intLoadDistributionDetailId = @DistributionItemId
+			, @intUserId = @intUserId
+	END
 
 	IF (@ErrorMessage IS NULL)
 	BEGIN

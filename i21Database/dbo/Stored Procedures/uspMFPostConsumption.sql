@@ -183,6 +183,32 @@ SELECT @strRetBatchId = @strBatchId
 IF @ysnPost = 1
 BEGIN
 
+	--PRINT 'Load Distribution Detail Id : '
+	--PRINT @intLoadDistributionDetailId
+
+	SELECT DistItem.intLoadDistributionDetailId
+		, intItemId = BlendIngredient.intIngredientItemId
+		, dblQty = BlendIngredient.dblQuantity
+		, HeaderDistItem.intCompanyLocationId
+		, HeaderDistItem.dtmInvoiceDateTime
+		, strActualCostId = (CASE WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Customer'
+									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+									THEN NULL
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location'
+									THEN NULL
+								END)
+	INTO #tmpBlendIngredients
+	FROM tblTRLoadDistributionDetail DistItem
+	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+	LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
+	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
+		AND ISNULL(DistItem.strReceiptLink, '') = ''
+
 	--Non Lot Tracking
 	INSERT INTO @ItemsForPost (
 		intItemId
@@ -232,42 +258,11 @@ BEGIN
 	JOIN dbo.tblICItemLocation il ON i.intItemId = il.intItemId
 		AND il.intLocationId = @intLocationId
 	INNER JOIN dbo.tblICItemPricing IP on IP.intItemId=i.intItemId AND IP.intItemLocationId =il.intItemLocationId
-	JOIN (
-		SELECT DistItem.intLoadDistributionDetailId
-			, DistItem.intItemId
-			, Recipe.intRecipeId
-			, dblQty = dblUnits
-			, Recipe.intItemUOMId
-			, HeaderDistItem.intCompanyLocationId
-			, HeaderDistItem.dtmInvoiceDateTime
-			, strActualCostId = (CASE WHEN MIN(Receipt.strOrigin) = 'Terminal' AND MIN(HeaderDistItem.strDestination) = 'Customer'
-										THEN MIN(LoadHeader.strTransaction)
-									WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) = MIN(HeaderDistItem.intCompanyLocationId)
-										THEN NULL
-									WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) != MIN(HeaderDistItem.intCompanyLocationId)
-										THEN MIN(LoadHeader.strTransaction)
-									WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Location'
-										THEN NULL
-									END)
-		FROM tblTRLoadDistributionDetail DistItem
-		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
-		LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
-		LEFT JOIN tblMFRecipe Recipe ON Recipe.intItemId = DistItem.intItemId AND Recipe.intLocationId = HeaderDistItem.intCompanyLocationId
-		LEFT JOIN tblMFRecipeItem RecipeItem ON RecipeItem.intRecipeId = Recipe.intRecipeId
-		LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = RecipeItem.intItemId
-		WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
-			AND ysnActive = 1
-			AND ISNULL(DistItem.strReceiptLink, '') = ''
-		GROUP BY DistItem.intLoadDistributionDetailId
-			, DistItem.intItemId
-			, Recipe.intRecipeId
-			, dblUnits
-			, Recipe.intItemUOMId
-			, HeaderDistItem.intCompanyLocationId
-			, HeaderDistItem.dtmInvoiceDateTime
-	) BlendItems ON BlendItems.intItemId = i.intItemId
+	LEFT JOIN #tmpBlendIngredients BlendItems ON BlendItems.intItemId = cl.intItemId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND ISNULL(cl.intLotId, 0) = 0
+	
+	DROP TABLE #tmpBlendIngredients
 
 	--Lot Tracking
 	INSERT INTO @ItemsForPost (

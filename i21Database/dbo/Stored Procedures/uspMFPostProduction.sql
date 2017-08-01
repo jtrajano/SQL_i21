@@ -493,31 +493,27 @@ IF @ysnPost = 1
 BEGIN
 	DECLARE @strActualCost NVARCHAR(50) = NULL
 
-	SELECT TOP 1 @strActualCost = (CASE WHEN MIN(Receipt.strOrigin) = 'Terminal' AND MIN(HeaderDistItem.strDestination) = 'Customer'
-									THEN MIN(LoadHeader.strTransaction)
-								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) = MIN(HeaderDistItem.intCompanyLocationId)
+	SELECT strActualCost = (CASE WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Customer'
+									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
 									THEN NULL
-								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Customer' AND MIN(Receipt.intCompanyLocationId) != MIN(HeaderDistItem.intCompanyLocationId)
-									THEN MIN(LoadHeader.strTransaction)
-								WHEN MIN(Receipt.strOrigin) = 'Location' AND MIN(HeaderDistItem.strDestination) = 'Location'
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location'
 									THEN NULL
 								END)
+	INTO #tmpBlendIngredients
 	FROM tblTRLoadDistributionDetail DistItem
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
 	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
-	LEFT JOIN tblMFRecipe Recipe ON Recipe.intItemId = DistItem.intItemId AND Recipe.intLocationId = HeaderDistItem.intCompanyLocationId
-	LEFT JOIN tblMFRecipeItem RecipeItem ON RecipeItem.intRecipeId = Recipe.intRecipeId
-	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = RecipeItem.intItemId
+	LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
-		AND ysnActive = 1
 		AND ISNULL(DistItem.strReceiptLink, '') = ''
-	GROUP BY DistItem.intLoadDistributionDetailId
-		, DistItem.intItemId
-		, Recipe.intRecipeId
-		, dblUnits
-		, Recipe.intItemUOMId
-		, HeaderDistItem.intCompanyLocationId
-		, HeaderDistItem.dtmInvoiceDateTime
+
+	SELECT TOP 1 @strActualCost = strActualCost
+	FROM #tmpBlendIngredients
+	WHERE ISNULL(strActualCost, '') <> ''
 
 	IF @strLotTracking = 'No'
 		INSERT INTO @ItemsForPost (
@@ -672,6 +668,8 @@ BEGIN
 
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,@ysnPost
+
+	DROP TABLE #tmpBlendIngredients
 
 	IF @intWorkOrderId IS NOT NULL
 	BEGIN

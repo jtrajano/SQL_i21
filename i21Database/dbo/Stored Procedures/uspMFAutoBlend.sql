@@ -965,10 +965,11 @@ BEGIN TRY
 
 		EXEC uspMFCompleteBlendSheet 
 			@strXml = @strXml
-			,@intLotId = @intBlendLotId OUT
-			,@strLotNumber = @strLotNumber OUT
 			,@intLoadDistributionDetailId = @intLoadDistributionDetailId
 			,@dtmCurrentDate = @dtmDate
+			,@intLotId = @intBlendLotId OUT
+			,@strLotNumber = @strLotNumber OUT
+			
 
 		IF @strOrderType='SALES ORDER'
 			SELECT	@intWorkOrderId = MIN(intWorkOrderId) 
