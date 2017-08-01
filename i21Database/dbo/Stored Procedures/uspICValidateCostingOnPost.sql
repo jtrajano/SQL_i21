@@ -31,8 +31,8 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
 		,@strLocationName AS NVARCHAR(2000)
 		,@strTransactionId AS NVARCHAR(50) 
-		,@strCurrencyId AS NVARCHAR(50)
-		,@strFunctionalCurrencyId AS NVARCHAR(50)
+		,@strCurrencyId NVARCHAR(50)
+		,@strFunctionalCurrencyId NVARCHAR(50)
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
@@ -45,6 +45,8 @@ CREATE TABLE #FoundErrors (
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
 	,intTransactionTypeId INT
+	,strTransactionId NVARCHAR(50)
+	,intCurrencyId INT 
 )
 
 -- Cross-check each items against the function that does the validation. 
@@ -57,7 +59,23 @@ SELECT	Errors.intItemId
 		,Errors.strText
 		,Errors.intErrorCode
 		,Item.intTransactionTypeId
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.intSubLocationId, Item.intStorageLocationId, Item.dblQty, Item.intLotId) Errors
+		,Item.strTransactionId
+		,Item.intCurrencyId
+FROM	@ItemsToValidate Item 
+		CROSS APPLY dbo.fnGetItemCostingOnPostErrors(
+			Item.intItemId
+			, Item.intItemLocationId
+			, Item.intItemUOMId
+			, Item.intSubLocationId
+			, Item.intStorageLocationId
+			, Item.dblQty
+			, Item.intLotId
+			, Item.strActualCostId
+			, Item.intTransactionTypeId
+			, Item.strTransactionId
+			, Item.intCurrencyId
+			, Item.dblForexRate
+		) Errors
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
@@ -190,42 +208,21 @@ END
 
 /*
 	Check if the item is using Average Costing and the transaction is Actual Costing 
-
-	Exception: 
-		Allow it to happen Inventory Transfer. It will reduce the stock first using AVG and transfer it to the new location for ACTUAL COSTING. It will be reduce by the Sale Invoice 
-		using Actual Costing. It will not mess up the inventory valuation because the actual cost is the same average cost. 
-	
-		To illustrate: 
-
-		strTransactionId                         dblQty                                  dblCost                                 intCostingMethod strName             
-		---------------------------------------- --------------------------------------- --------------------------------------- ---------------- --------------------
-		INVTRN-3101                              -9829.00000000000000000000              1.01616662017389385428                  1                Inventory Transfer  
-		INVTRN-3101                              9829.00000000000000000000               1.01616662017389385428                  5                Inventory Transfer  
-		SI-34906                                 -9829.00000000000000000000              1.01616662017389385428                  5                Invoice
-
-		The Average Cost of the item will remain as 1.01616662017389385428. 
 */
 SELECT @strItemNo = NULL
 		, @intItemId = NULL 
 		, @strTransactionId = NULL 
 
-SELECT TOP 1 
-		@strTransactionId = strTransactionId
-		,@strItemNo = i.strItemNo
-		,@intItemId = iv.intItemId
-FROM	@ItemsToValidate iv 
-		INNER JOIN tblICItem i ON iv.intItemId = i.intItemId
-		CROSS APPLY dbo.fnGetCostingMethodAsTable(iv.intItemId, iv.intItemLocationId) icm
-		INNER JOIN tblICCostingMethod cm ON cm.intCostingMethodId = icm.CostingMethod
-		INNER JOIN tblICInventoryTransactionType ty ON iv.intTransactionTypeId = ty.intTransactionTypeId
-WHERE	strActualCostId IS NOT NULL 
-		AND cm.strCostingMethod = 'AVERAGE COST'
-		AND iv.dblQty > 0 
-		AND ty.strName NOT IN ('Inventory Transfer') 
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT	TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END
+		,@intItemId = Errors.intItemId
+		,@strTransactionId = Errors.strTransactionId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 80094
 
 IF @intItemId IS NOT NULL 
 BEGIN 
-	-- 'Costing method mismatch. {Item No} is set to use Ave Costing. {Trans Id} is going to use Actual costing. It can''t be used together. You can fix it by changing the costing method to FIFO or LIFO.'
 	-- '{Item No} is set to use AVG Costing and it will be received in {Receipt Id} as Actual costing. Average cost computation will be messed up. Try receiving the stocks using Inventory Receipt instead of Transport Load.'
 	EXEC uspICRaiseError 80094, @strItemNo, @strTransactionId;
 	RETURN -1
@@ -238,23 +235,18 @@ SELECT @strItemNo = NULL
 		, @intItemId = NULL 
 		, @strTransactionId = NULL 
 
-SELECT TOP 1 
-		@strTransactionId = strTransactionId
-		,@strItemNo = i.strItemNo
-		,@intItemId = iv.intItemId
+SELECT	TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END
+		,@intItemId = Errors.intItemId
+		,@strTransactionId = Errors.strTransactionId
 		,@strCurrencyId = c.strCurrency
 		,@strFunctionalCurrencyId = fc.strCurrency
-FROM	@ItemsToValidate iv  INNER JOIN tblICItem i 
-			ON iv.intItemId = i.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item ON Errors.intItemId = Item.intItemId
 		LEFT JOIN tblSMCurrency c
-			ON c.intCurrencyID = iv.intCurrencyId
+			ON c.intCurrencyID = Errors.intCurrencyId
 		LEFT JOIN tblSMCurrency fc
 			ON fc.intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
-
-WHERE	ISNULL(iv.dblForexRate, 0) = 0 
-		AND iv.intCurrencyId IS NOT NULL 
-		AND iv.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
-		AND iv.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
+WHERE	intErrorCode = 80162
 
 IF @intItemId IS NOT NULL 
 BEGIN 
