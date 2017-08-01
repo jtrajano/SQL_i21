@@ -30,5 +30,5 @@ BEGIN
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
 	LEFT JOIN tblICItem Item ON Item.intItemId = SC.intCostType
-	WHERE Inv.intInvoiceId = @intInvoiceId
+	WHERE Inv.intInvoiceId = @intInvoiceId AND IsNull(Item.strDescription, '') <> ''
 END
