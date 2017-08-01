@@ -5367,6 +5367,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetOrderNewLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAddOrderNewLot.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateCompanyLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
