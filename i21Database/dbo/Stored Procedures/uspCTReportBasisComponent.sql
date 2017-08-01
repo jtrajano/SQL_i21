@@ -56,7 +56,8 @@ AS
 				1 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition AS Position
+				CD.strPosition AS Position,
+				CD.dtmPlannedAvailabilityDate
 
 		FROM	vyuCTSearchContractDetail	CD
 		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
@@ -138,7 +139,8 @@ AS
 				1 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition AS Position
+				CD.strPosition AS Position,
+				CD.dtmPlannedAvailabilityDate
 
 		FROM	vyuCTSearchContractDetail	CD
 		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
@@ -172,7 +174,8 @@ AS
 				2 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition
+				CD.strPosition,
+				CD.dtmPlannedAvailabilityDate
 
 		FROM	vyuCTSearchContractDetail	CD
 
@@ -203,7 +206,8 @@ AS
 				3 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition
+				CD.strPosition,
+				CD.dtmPlannedAvailabilityDate
 
 		FROM	vyuCTSearchContractDetail	CD
 	)t
