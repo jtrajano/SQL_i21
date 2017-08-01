@@ -110,7 +110,12 @@ USING (
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM
 		WHERE	o.intItemUOMId <> StockUOM.intItemUOMId 
-		GROUP BY intItemId, intItemLocationId, intItemUOMId, intSubLocationId, intStorageLocationId
+		GROUP BY 
+			o.intItemId
+			, o.intItemLocationId
+			, o.intItemUOMId 
+			, o.intSubLocationId
+			, o.intStorageLocationId
 		-- Convert all the On Order Qty to the Stock UOM before adding it into tblICItemStockUOM
 		UNION ALL 
 		SELECT	o.intItemId
