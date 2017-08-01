@@ -5368,6 +5368,7 @@
     <Build Include="dbo\Stored Procedures\uspLGUpdateCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuMFGetOrderLabels.sql" />
     <Build Include="dbo\Views\vyuMFGetSSCCDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryBySummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
