@@ -3603,6 +3603,13 @@ IF @recap = 0
 						WHERE intInvoiceId IN (SELECT intInvoiceId FROM @InvoiceToUpdate)
 						GROUP BY intEntityCustomerId
 			) INVOICE ON CUSTOMER.intEntityCustomerId = INVOICE.intEntityCustomerId
+
+			--UPDATE BatchIds Used
+			UPDATE tblARInvoice 
+			SET strBatchId		= CASE WHEN @post = 1 THEN @batchIdUsed ELSE NULL END
+			  , dtmBatchDate	= CASE WHEN @post = 1 THEN @PostDate ELSE NULL END
+			  , intPostedById	= CASE WHEN @post = 1 THEN @UserEntityID ELSE NULL END
+			WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceToUpdate)
 				
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceToUpdate ORDER BY intInvoiceId)
 				BEGIN

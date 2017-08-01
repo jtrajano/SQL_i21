@@ -18,9 +18,9 @@ SELECT
 	,strInvoices			= dbo.fnARGetInvoiceNumbersFromPayment(intPaymentId)
 	,P.intLocationId 
 	,CL.strLocationName
-	,dtmBatchDate			= GL.dtmDate
-	,GL.strBatchId
-	,strUserEntered			= ISNULL(GL.strName, EM.strName)
+	,dtmBatchDate			= P.dtmBatchDate
+	,strBatchId				= P.strBatchId
+	,strUserEntered			= POSTEDBY.strName
 	,strTicketNumbers		= dbo.fnARGetScaleTicketNumbersFromPayment(P.intPaymentId)
 	,strCustomerReferences	= dbo.fnARGetCustomerReferencesFromPayment(P.intPaymentId)
 	,intCurrencyId			= P.intCurrencyId
@@ -37,7 +37,10 @@ FROM (SELECT intPaymentId
 		   , ysnPosted
 		   , intLocationId
 		   , intAccountId 
-		   , intCurrencyId  
+		   , intCurrencyId
+		   , intPostedById
+		   , strBatchId
+		   , dtmBatchDate
 	  FROM dbo.tblARPayment WITH (NOLOCK)
 ) P 
 LEFT OUTER JOIN (SELECT intEntityId
@@ -65,30 +68,10 @@ LEFT OUTER JOIN (SELECT intCompanyLocationId
 					  , strLocationName 
 				 FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) CL ON P.intLocationId = CL.intCompanyLocationId
-LEFT OUTER JOIN (SELECT G.intTransactionId
-			          , G.strTransactionId
-			          , G.intAccountId
-			          , G.strTransactionType
-			          , G.dtmDate
-			          , G.strBatchId
-			          , E.intEntityId
-			          , E.strName
-				FROM (SELECT intTransactionId
-					       , strTransactionId 
-					       , intAccountId
-					       , strTransactionType
-					       , dtmDate
-					       , strBatchId
-					       , intEntityId 
-					 FROM dbo.tblGLDetail WITH (NOLOCK)
-					 WHERE strTransactionType IN ('Receive Payments') 
-					   AND ysnIsUnposted = 0 
-					   AND strCode = 'AR') G
-				LEFT OUTER JOIN (SELECT intEntityId
-									  , strName 
-								 FROM dbo.tblEMEntity WITH (NOLOCK)
-				) E ON G.intEntityId = E.intEntityId
-) GL ON P.intPaymentId = GL.intTransactionId AND P.intAccountId = GL.intAccountId AND P.strRecordNumber = GL.strTransactionId
+LEFT OUTER JOIN (SELECT intEntityId
+				      , strName
+				 FROM dbo.tblEMEntity WITH (NOLOCK)
+) POSTEDBY ON P.intPostedById = POSTEDBY.intEntityId
 LEFT OUTER JOIN (SELECT intCurrencyID
 					  , strCurrency
 					  , strDescription 

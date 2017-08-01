@@ -44,11 +44,11 @@ SELECT
 	,strCurrency					= CUR.strCurrency
 	,intEntredById					= I.intEntityId
 	,strEnteredBy					= EB.strName
-	,dtmBatchDate					= USERENTERED.dtmDate
+	,dtmBatchDate					= I.dtmBatchDate
 	,strBatchId						= CASE WHEN I.strTransactionType = 'Customer Prepayment' 
 										   THEN PAYMENT.strBatchId
-										   ELSE USERENTERED.strBatchId
-									  END   
+										   ELSE I.strBatchId
+									  END
 	,strUserEntered					= USERENTERED.strName
 	,intEntityContactId				= I.intEntityContactId
 	,strContactName					= EC.strName
@@ -58,7 +58,8 @@ SELECT
 	,strCurrencyDescription			= CUR.strDescription
 FROM (SELECT strType, [intEntityCustomerId], intCompanyLocationId, intTermId, intEntityContactId, intPaymentMethodId, [intEntitySalespersonId], intCurrencyId, intShipViaId,[intEntityId],
 		intInvoiceId, strInvoiceNumber, intAccountId, strTransactionType, strPONumber, strBOLNumber, strComments, dtmDate, dtmDueDate, dtmPostDate, dtmShipDate, ysnPosted, ysnPaid,
-		ysnProcessed, ysnRecurring, ysnForgiven, ysnCalculated, dblInvoiceTotal, dblDiscount, dblDiscountAvailable, dblInterest, dblAmountDue, dblPayment, dblInvoiceSubtotal, dblShipping, dblTax
+		ysnProcessed, ysnRecurring, ysnForgiven, ysnCalculated, dblInvoiceTotal, dblDiscount, dblDiscountAvailable, dblInterest, dblAmountDue, dblPayment, dblInvoiceSubtotal, dblShipping, dblTax,
+	    strBatchId, dtmBatchDate, intPostedById
 	 FROM dbo.tblARInvoice WITH (NOLOCK)) AS I 
 INNER JOIN
 	(SELECT [intEntityCustomerId], strCustomerNumber FROM dbo.tblARCustomer WITH (NOLOCK)) AS C 
@@ -102,22 +103,11 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	(SELECT intEntityId, strName FROM dbo.tblEMEntity WITH (NOLOCK)) AS EB 
 		ON I.[intEntityId] = EB.intEntityId
-OUTER APPLY (
-	SELECT TOP 1 E.strName
-			   , G.dtmDate
-			   , G.strBatchId
-	FROM dbo.tblGLDetail G WITH (NOLOCK)
-	LEFT JOIN (SELECT intEntityId
-				     , strName
-				FROM dbo.tblEMEntity WITH (NOLOCK)
-	) E ON G.intEntityId = E.intEntityId
-	WHERE I.intInvoiceId = G.intTransactionId
-	  AND I.strInvoiceNumber = G.strTransactionId
-	  AND I.intAccountId = G.intAccountId
-	  AND G.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Customer Prepayment')
-	  AND G.ysnIsUnposted = 0
-	  AND G.strCode = 'AR'
-) USERENTERED
+LEFT OUTER JOIN (
+	SELECT intEntityId
+		 , strName 
+	FROM dbo.tblEMEntity WITH (NOLOCK)
+) USERENTERED ON USERENTERED.intEntityId = I.intPostedById
 OUTER APPLY (
 	SELECT TOP 1 strBatchId 
 	FROM dbo.tblARPayment A WITH (NOLOCK)
@@ -125,10 +115,6 @@ OUTER APPLY (
 					 , intInvoiceId 
 				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
 	) B ON A.intPaymentId = B.intPaymentId 
-	INNER JOIN (SELECT strTransactionId
-					 , strBatchId 
-				FROM dbo.tblGLDetail WITH (NOLOCK)
-	) C ON A.strRecordNumber = C.strTransactionId 
 	WHERE B.intInvoiceId = I.intInvoiceId
 ) PAYMENT
 OUTER APPLY (
