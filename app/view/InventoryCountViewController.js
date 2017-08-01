@@ -775,7 +775,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var grdPhysicalCount = win.down("#grdPhysicalCount");
         var pagingtoolbar = win.down("#pgtCount");
         
-        ic.count.loadDetails(me, win, win.context, true);
+        if(!current.phantom)
+            ic.count.loadDetails(me, win, win.context, true);
     },
 
     attachOnEditListener(win, grdPhysicalCount) {
@@ -799,7 +800,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             if (button === 'yes') {
                 var me = this;
                 var win = e.up('window');
-                var grid = win.down('grid');
+                var grid = win.down('#grdPhysicalCount');
                 var store = grid.store;
                 var selection = grid.getSelectionModel().getSelection();
                 var extraParams = store.proxy.extraParams;
