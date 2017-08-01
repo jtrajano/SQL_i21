@@ -19,9 +19,9 @@ SELECT
 	,strInvoices			= dbo.fnARGetInvoiceNumbersFromPayment(P.intPaymentId)
 	,P.intLocationId 
 	,CL.strLocationName
-	,dtmBatchDate			= GL.dtmDate
-	,GL.strBatchId
-	,strUserEntered			= ISNULL(GL.strName, EM.strName)
+	,dtmBatchDate			= P.dtmBatchDate
+	,strBatchId				= P.strBatchId
+	,strUserEntered			= USERENTERED.strName
 	,strTicketNumbers		= dbo.fnARGetScaleTicketNumbersFromPayment(P.intPaymentId)
 	,strCustomerReferences	= dbo.fnARGetCustomerReferencesFromPayment(P.intPaymentId)
 	,intCurrencyId			= P.intCurrencyId
@@ -39,7 +39,10 @@ FROM (
 		 , ysnPosted
 		 , intLocationId
 		 , intAccountId
-		 , intCurrencyId  
+		 , intCurrencyId
+		 , dtmBatchDate
+		 , intPostedById
+		 , strBatchId
 	FROM dbo.tblARPayment WITH (NOLOCK)
 ) P
 LEFT JOIN (
@@ -81,19 +84,8 @@ LEFT OUTER JOIN (
 		 , strDescription 
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) SMC ON P.intCurrencyId = SMC.intCurrencyID
-OUTER APPLY (
-	SELECT TOP 1 E.strName
-			   , G.dtmDate
-			   , G.strBatchId
-	FROM dbo.tblGLDetail G WITH (NOLOCK)
-	LEFT JOIN (SELECT intEntityId
-				     , strName
-				FROM dbo.tblEMEntity WITH (NOLOCK)
-	) E ON G.intEntityId = E.intEntityId
-	WHERE P.intPaymentId = G.intTransactionId
-	  AND P.strRecordNumber = G.strTransactionId
-	  AND P.intAccountId = G.intAccountId
-	  AND G.strTransactionType = 'Receive Payments'
-	  AND G.ysnIsUnposted = 0
-	  AND G.strCode = 'AR'
-) GL
+LEFT OUTER JOIN (
+	SELECT intEntityId
+		 , strName 
+	FROM dbo.tblEMEntity WITH (NOLOCK)
+) USERENTERED ON USERENTERED.intEntityId = P.intPostedById

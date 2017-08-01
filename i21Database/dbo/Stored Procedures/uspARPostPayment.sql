@@ -2842,6 +2842,14 @@ IF @raiseError = 0
 
 					DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
 				END
+
+			--UPDATE BatchIds Used
+			UPDATE tblARPayment 
+			SET strBatchId		= CASE WHEN @post = 1 THEN @batchIdUsed ELSE NULL END
+			  , dtmBatchDate	= CASE WHEN @post = 1 THEN @PostDate ELSE NULL END
+			  , intPostedById	= CASE WHEN @post = 1 THEN @UserEntityID ELSE NULL END
+			WHERE intPaymentId IN (SELECT DISTINCT intPaymentId FROM @ARReceivablePostData)
+			
 		END	
 RETURN 1;
 
