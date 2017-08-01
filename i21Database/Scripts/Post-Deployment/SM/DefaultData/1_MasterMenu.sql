@@ -222,7 +222,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 
 		/* ACCOUNTS PAYABLE */
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (112, N'Purchasing (AP)', N'Accounts Payable', 0, N'Purchasing (AP)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 9, 1)
+		VALUES (112, N'Purchasing (A/P)', N'Accounts Payable', 0, N'Purchasing (A/P)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 9, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (114, N'Pay Voucher Details', N'Accounts Payable', 112, N'Pay Voucher Details', N'Activity', N'Screen', N'AccountsPayable.view.PayVouchersDetail?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -250,7 +250,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 
 		/* ACCOUNTS RECEIVABLE */
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (131, N'Sales (AR)', N'Accounts Receivable', 0, N'Sales (AR)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 10, 1)
+		VALUES (131, N'Sales (A/R)', N'Accounts Receivable', 0, N'Sales (A/R)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 10, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (134, N'Customers', N'Accounts Receivable', 131, N'Customers', N'Maintenance', N'Screen', N'EntityManagement.view.Entity?showSearch=true&searchCommand=searchEntityCustomer', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1298,15 +1298,15 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName IN ('View Stock Details', 'View Lo
 
 /* ACCOUNTS PAYABLE */
 
-/* Rename from Purchasing (Accounts Payable) to Purchasing (AP) */
+/* Rename from Purchasing (Accounts Payable) to Purchasing (A/P) */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (Accounts Payable)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0)
-UPDATE tblSMMasterMenu SET strMenuName = 'Purchasing (AP)', strDescription = 'Purchasing (AP)' WHERE strMenuName = 'Purchasing (Accounts Payable)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
+UPDATE tblSMMasterMenu SET strMenuName = 'Purchasing (A/P)', strDescription = 'Purchasing (A/P)' WHERE strMenuName = 'Purchasing (Accounts Payable)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (AP)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0)
-UPDATE tblSMMasterMenu SET intSort = 9 WHERE strMenuName = 'Purchasing (AP)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (A/P)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0)
+UPDATE tblSMMasterMenu SET intSort = 9 WHERE strMenuName = 'Purchasing (A/P)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
 
 DECLARE @AccountsPayableParentMenuId INT
-SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (AP)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
+SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (A/P)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
 
 /* CATEGORY FOLDERS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
@@ -1487,15 +1487,15 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor History' AND strModuleN
 /* END OF DELETING */
 
 /* ACCOUNTS RECEIVABLE */
-/* Rename Sales (Account Receivables) to Sales (AR) */
+/* Rename Sales (Account Receivables) to Sales (A/R) */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales (Accounts Receivable)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0)
-UPDATE tblSMMasterMenu SET strMenuName = 'Sales (AR)', strDescription = 'Sales (AR)' WHERE strMenuName = 'Sales (Accounts Receivable)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
+UPDATE tblSMMasterMenu SET strMenuName = 'Sales (A/R)', strDescription = 'Sales (A/R)' WHERE strMenuName = 'Sales (Accounts Receivable)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales (AR)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0)
-UPDATE tblSMMasterMenu SET intSort = 10 WHERE strMenuName = 'Sales (AR)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales (A/R)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0)
+UPDATE tblSMMasterMenu SET intSort = 10 WHERE strMenuName = 'Sales (A/R)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
 
 DECLARE @AccountsReceivableParentMenuId INT
-SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales (AR)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
+SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales (A/R)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
 
 /* CATEGORY FOLDERS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
