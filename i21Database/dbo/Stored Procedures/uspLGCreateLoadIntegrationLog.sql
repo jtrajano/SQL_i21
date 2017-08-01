@@ -669,7 +669,7 @@ BEGIN TRY
 
 	IF (ISNULL(@ysnPOETAFeedToERP,0) = 1)
 	BEGIN
-		IF (@intShipmentType = 2 AND @dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete')
+		IF (@dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete')
 		BEGIN
 			SELECT @intMinLoadDetailRecordId  = MIN(intDetailRecordId) FROM @tblLoadDetail
 
