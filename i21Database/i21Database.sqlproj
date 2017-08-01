@@ -5574,6 +5574,7 @@
     <Build Include="dbo\Stored Procedures\uspSCAddDeliverySheetToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPostInTransitCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
+    <Build Include="dbo\Views\vyuCTHeaderForPrepayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
