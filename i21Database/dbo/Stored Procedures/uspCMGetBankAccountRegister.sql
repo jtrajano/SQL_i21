@@ -214,7 +214,7 @@ DEALLOCATE rt_cursor
 				(
 					SELECT
 						*,
-						ROW_NUMBER() OVER (ORDER BY intTransactionId) AS RowNum
+						ROW_NUMBER() OVER (ORDER BY dtmDate,intTransactionId) AS RowNum
 					FROM @BankAccountRegister 
 				)
 				SELECT *
