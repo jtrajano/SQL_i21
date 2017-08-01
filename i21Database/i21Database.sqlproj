@@ -5539,6 +5539,9 @@
     <Build Include="dbo\Functions\fnAPGetPaymentUOM.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentByUOM.sql" />
     <Build Include="dbo\Views\vyuCMUndepositedFund.sql" />
+    <Build Include="dbo\Functions\fnPOPurchaseDetailGetReceiptNumber.sql" />
+    <Build Include="dbo\Views\vyuPOPurchaseDetailReceiptNumber.sql" />
+    <Build Include="dbo\Functions\fnPOPurchaseDetailGetReceiptId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
