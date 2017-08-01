@@ -169,7 +169,7 @@ BEGIN
 			AND @strLotTracking <> 'No'
 		BEGIN
 			EXEC uspMFSetLotStatus @intLotId
-				,@intLotStatusId
+				,@intDamagedStatusId
 				,@intEntityUserSecurityId
 		END
 	END
@@ -183,21 +183,20 @@ BEGIN
 		SELECT @intBondStatusId = NULL
 
 		SELECT @intBondStatusId = LI.intBondStatusId
-			,@intItemOwnerId = LI.intItemOwnerId
-			,@strVendorRefNo = LI.strVendorRefNo
-			,@strWarehouseRefNo = LI.strWarehouseRefNo
-			,@strReceiptNumber = LI.strReceiptNumber
-			,@dtmReceiptDate = dtmReceiptDate
+					,@intItemOwnerId = LI.intItemOwnerId
+					,@strVendorRefNo = LI.strVendorRefNo
+					,@strWarehouseRefNo = LI.strWarehouseRefNo
+					,@strReceiptNumber = LI.strReceiptNumber
+					,@dtmReceiptDate = dtmReceiptDate
 		FROM tblMFLotInventory LI
-		JOIN tblICLot L ON L.intLotId = LI.intLotId
-		WHERE L.strLotNumber = @strLotNumber
+		WHERE LI.intLotId = @intSplitFromLotId
+
+		SELECT @ysnRequireCustomerApproval = ysnRequireCustomerApproval
+		FROM tblICItem
+		WHERE intItemId = @intItemId
 
 		IF @intBondStatusId IS NULL
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblICLot L
-				WHERE L.strLotNumber = @strLotNumber
-				)
+			AND @intSplitFromLotId is null
 		BEGIN
 			SELECT @intBondStatusId = CASE 
 					WHEN @ysnRequireCustomerApproval = 1
@@ -208,10 +207,6 @@ BEGIN
 					ELSE NULL
 					END
 		END
-
-		SELECT @ysnRequireCustomerApproval = ysnRequireCustomerApproval
-		FROM tblICItem
-		WHERE intItemId = @intItemId
 
 		IF @intItemOwnerId IS NULL
 		BEGIN
@@ -254,13 +249,14 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SELECT @strVendorRefNo = LI.strVendorRefNo
+		SELECT Top 1 @strVendorRefNo = LI.strVendorRefNo
 			,@strWarehouseRefNo = LI.strWarehouseRefNo
 			,@strReceiptNumber = LI.strReceiptNumber
 			,@dtmReceiptDate = dtmReceiptDate
 		FROM tblMFLotInventory LI
 		JOIN tblICLot L ON L.intLotId = LI.intLotId
 		WHERE L.strLotNumber = @strLotNumber
+		Order By L.intLotId Desc
 
 		IF @strReceiptNumber IS NULL
 		BEGIN

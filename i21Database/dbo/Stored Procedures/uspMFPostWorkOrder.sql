@@ -636,6 +636,7 @@ BEGIN TRY
 			,[intSourceTransactionId]
 			,[intSourceTransactionDetailId]
 			,[strSourceTransactionId]
+			,intFobPointId
 			)
 		SELECT [intItemId] = PL.intItemId
 			,[intItemLocationId] = L.intItemLocationId
@@ -662,6 +663,7 @@ BEGIN TRY
 			,[intSourceTransactionId] = intBatchId
 			,[intSourceTransactionDetailId] = PL.intWorkOrderProducedLotId
 			,[strSourceTransactionId] = strWorkOrderNo
+			,intFobPointId=2
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
 		JOIN tblICLot L ON L.intLotId = PL.intLotId

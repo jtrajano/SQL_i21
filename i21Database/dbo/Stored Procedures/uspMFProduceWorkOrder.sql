@@ -330,6 +330,15 @@ BEGIN
 			SELECT @dblUnitQty = 1
 		END
 
+		If @ysnFillPartialPallet=1 and Exists(Select *from tblICLot Where strLotNumber =@strLotNumber and dblQty>0 and intWeightUOMId IS NULL)
+		Begin
+			SELECT @dblProduceQty = @dblPhysicalCount
+
+			SELECT @intProduceUOMKey = @intPhysicalItemUOMId
+
+			SELECT @dblUnitQty = 1
+		End
+
 		EXEC uspMFPostProduction 1
 			,0
 			,@intWorkOrderId

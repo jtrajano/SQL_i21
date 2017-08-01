@@ -34,10 +34,13 @@ SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 				AND ISNUMERIC(TR.strPropertyValue) = 1
 			), 0) AS [Overweight Pouches]
 	,IsNULL((
-			SELECT SUM(WP.dblPhysicalCount)
-			FROM tblMFWorkOrderProducedLot WP
-			WHERE WP.intWorkOrderId = W.intWorkOrderId
-				AND WP.intItemId <> W.intItemId
+			SELECT SUM(Convert(DECIMAL(24, 10), TR.strPropertyValue))
+			FROM dbo.tblQMTestResult TR
+			JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+			WHERE P.strPropertyName = 'Sweeps in lbs'
+				AND TR.intProductTypeId = 12
+				AND TR.intProductValueId = W.intWorkOrderId
+				AND ISNUMERIC(TR.strPropertyValue) = 1
 			), 0) [Total sweeps (lb)]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId

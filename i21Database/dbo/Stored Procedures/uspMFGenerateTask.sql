@@ -400,7 +400,7 @@ BEGIN TRY
 				AND ISNULL(L.intLotId, 0) = ISNULL((
 						CASE 
 							WHEN @intLineItemLotId IS NULL
-								THEN L.intParentLotId
+								THEN L.intLotId
 							ELSE @intLineItemLotId
 							END
 						), 0)
@@ -585,7 +585,7 @@ BEGIN TRY
 				AND ISNULL(L.intLotId, 0) = ISNULL((
 						CASE 
 							WHEN @intLineItemLotId IS NULL
-								THEN L.intParentLotId
+								THEN L.intLotId
 							ELSE @intLineItemLotId
 							END
 						), 0)
@@ -782,7 +782,7 @@ BEGIN TRY
 					AND ISNULL(L.intLotId, 0) = ISNULL((
 						CASE 
 							WHEN @intLineItemLotId IS NULL
-								THEN L.intParentLotId
+								THEN L.intLotId
 							ELSE @intLineItemLotId
 							END
 						), 0)
@@ -959,7 +959,7 @@ BEGIN TRY
 					AND ISNULL(L.intLotId, 0) = ISNULL((
 						CASE 
 							WHEN @intLineItemLotId IS NULL
-								THEN L.intParentLotId
+								THEN L.intLotId
 							ELSE @intLineItemLotId
 							END
 						), 0)
