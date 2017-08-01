@@ -5548,6 +5548,7 @@
     <Build Include="dbo\Views\vyuMFGetOrderLabels.sql" />
     <Build Include="dbo\Views\vyuMFGetSSCCDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetConsolidateWarnings.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSpaceUtilization.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

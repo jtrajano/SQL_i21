@@ -22,6 +22,7 @@ SELECT InvS.strReferenceNumber
 	,L.strLotNumber
 	,InvSL.dblQuantityShipped dblQuantityShipped
 	,UM.strUnitMeasure
+	,Case When IU.intUnitMeasureId=I.intWeightUOMId Then InvSL.dblQuantityShipped Else  InvSL.dblQuantityShipped*I.dblWeight End As Weight 
 	,Convert(NVARCHAR(50), (
 			SELECT MAX(dtmCreated)
 			FROM tblICInventoryTransaction IT
@@ -71,6 +72,105 @@ SELECT InvS.strReferenceNumber
 	,InvS.strFreeTime
 	,InvS.strReceivedBy 
 	,SV.strName
+		,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'total pallets loaded'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strTotalPalletsLoaded
+		,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'airbags'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strAirbags
+			,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'case labels'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strCaseLabels
+		,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'number of pallet labels'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strNumberofPalletLabels
+		,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'number of pallet placards'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strNumberofPalletPlacards
+		,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'pallet cap'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strPalletCap
+		,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'wood pallet'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strWoodPallet
+		,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'heat treated pallet'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strHeatTreatedPallet
+		,(
+		SELECT TOP 1 FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'heat treated pallet'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryShipment'
+		WHERE T.intRecordId = InvS.intInventoryShipmentId
+		) AS strBlockAndBrace
 FROM dbo.tblICInventoryShipment InvS
 JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
 JOIN dbo.tblICInventoryShipmentItemLot InvSL ON InvSL.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId

@@ -8,14 +8,10 @@ SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
 
 IF @strPeriod IS NULL
 BEGIN
-	SELECT @dtmStartDate = dtmStartDate
+	SELECT @dtmStartDate=dtmStartDate 
 	FROM dbo.tblGLFiscalYearPeriod
-	WHERE dtmEndDate IN (
-			SELECT dtmStartDate - 1
-			FROM dbo.tblGLFiscalYearPeriod
-			WHERE @dtmCurrentDate BETWEEN dtmStartDate
-					AND dtmEndDate
-			)
+	WHERE @dtmCurrentDate BETWEEN dtmStartDate
+			AND dtmEndDate
 
 	SELECT @intLotSnapshotId = intLotSnapshotId
 	FROM tblMFLotSnapshot
@@ -47,7 +43,7 @@ INSERT INTO @tblMFMultipleLotCode (
 	,dblWOQty
 	,dblWOTotalQty
 	)
-EXEC uspMFGetLotCodeByProduction
+EXEC uspMFGetLotCodeByProduction @intLotSnapshotId
 
 SELECT I.strItemNo AS [Item No]
 	,I.strDescription AS [Item Desc]

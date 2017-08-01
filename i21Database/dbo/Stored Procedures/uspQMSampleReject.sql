@@ -41,6 +41,7 @@ BEGIN TRY
 	DECLARE @strContainerNumber NVARCHAR(100)
 	DECLARE @strLotAlias NVARCHAR(50)
 		,@strWarehouseRefNo NVARCHAR(50)
+		,@intParentLotId int
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -88,11 +89,9 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intProductValueId
 
-	SELECT @strWarehouseRefNo = strWarehouseRefNo
-	FROM dbo.tblICInventoryReceiptItemLot RIL
-	JOIN dbo.tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
-	JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	JOIN dbo.tblICLot L ON L.intLotId = RIL.intLotId
+	SELECT @strWarehouseRefNo = LI.strWarehouseRefNo,@intParentLotId=L.intParentLotId 
+	From dbo.tblICLot L 
+	JOIN dbo.tblMFLotInventory LI on LI.intLotId=L.intLotId
 	WHERE L.strLotNumber = @strLotNumber
 
 	IF @ysnRequireCustomerApproval = 1
@@ -146,10 +145,7 @@ BEGIN TRY
 			SET intBondStatusId = @intLotStatusId
 			FROM dbo.tblICLot AS L
 			JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
-			JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-			JOIN dbo.tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
-			JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-			WHERE R.strWarehouseRefNo = @strWarehouseRefNo
+			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
 		END
 		ELSE
 		BEGIN
@@ -158,7 +154,25 @@ BEGIN TRY
 			WHERE intLotId = @intProductValueId
 		END
 	END
-
+	ELSE IF @ysnRequireCustomerApproval = 1
+		AND @intSampleControlPointId = 14
+		AND @strApprovalBase = 'Warehouse Ref No & Parent Lot'
+	BEGIN
+		IF @strWarehouseRefNo <> ''
+		BEGIN
+			UPDATE LI
+			SET intBondStatusId = @intLotStatusId
+			FROM dbo.tblICLot AS L
+			JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
+			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo AND L.intParentLotId =@intParentLotId
+		END
+		ELSE
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET intBondStatusId = @intLotStatusId
+			WHERE intLotId = @intProductValueId
+		END
+	END
 	SELECT TOP 1 @intUserSampleApproval = ISNULL(intUserSampleApproval, 0)
 	FROM tblQMCompanyPreference
 
@@ -307,10 +321,30 @@ BEGIN TRY
 				,L.intStorageLocationId
 				,L.intLotStatusId
 			FROM tblICLot L
-			JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-			JOIN dbo.tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
-			JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-			WHERE R.strWarehouseRefNo = @strWarehouseRefNo
+			JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+		END
+		ELSE IF @strApprovalBase = 'Warehouse Ref No & Parent Lot'
+		BEGIN
+			INSERT INTO @LotData (
+				intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+				)
+			SELECT L.intLotId
+				,L.strLotNumber
+				,L.intItemId
+				,L.intLocationId
+				,L.intSubLocationId
+				,L.intStorageLocationId
+				,L.intLotStatusId
+			FROM tblICLot L
+			JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo AND L.intParentLotId =@intParentLotId
 		END
 		ELSE IF @strApprovalBase = 'Container'
 		BEGIN

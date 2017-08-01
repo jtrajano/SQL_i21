@@ -86,6 +86,7 @@ BEGIN TRY
 	END
 
 	SELECT @intItemId = intItemId
+		,@intParentLotId=intParentLotId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -122,30 +123,10 @@ BEGIN TRY
 	IF @intLotId <> @intAlternateLotId
 		AND @ysnPickByLotCode = 1
 	BEGIN
-		SELECT Top 1 @intLotCode=CONVERT(INT, Substring(strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
-		FROM tblICLot L
-		JOIN tblICParentLot PL On PL.intParentLotId = L.intParentLotId
-		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
-				AND UT.ysnAllowPick = 1
-			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
-				AND T.intTaskTypeId NOT IN (
-					5
-					,6
-					,8
-					,9
-					,10
-					,11
-					)
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
-				AND R.strInternalCode = 'STOCK'
-			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
-				AND BS.strPrimaryStatus = 'Active'
-		WHERE L.intItemId = @intItemId
-			AND L.intLotStatusId =1
-			AND L.dblQty > 0
-		Order by CONVERT(INT, Substring(strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)) ASC
+
+		SELECT @intLotCode = CONVERT(INT, Substring(strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+		FROM tblICParentLot
+		WHERE intParentLotId = @intParentLotId
 
 		SELECT @intAlternateLotCode = CONVERT(INT, Substring(strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
 		FROM tblICParentLot
