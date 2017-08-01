@@ -5286,7 +5286,6 @@
     <Build Include="dbo\Stored Procedures\uspPATImportCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockOnHand.sql" />
     <None Include="Scripts\Post-Deployment\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql" />
-    <Build Include="dbo\Stored Procedures\vyuMFGetSSCCDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCopyRecipeByWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractSliceByStatus.sql" />
     <Build Include="dbo\Views\vyuCTQualityApprovedRejected.sql" />
@@ -5351,7 +5350,6 @@
     <Build Include="dbo\Views\vyuCFTransactionSummary.sql" />
     <Build Include="dbo\Functions\fnARGetInvoicesPostingEntries.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForCosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrder.sql" />
     <Build Include="dbo\Tables\tblMFLotSnapshot.sql" />
@@ -5368,6 +5366,8 @@
     <Build Include="dbo\Stored Procedures\uspMFAddOrderNewLot.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuMFGetOrderLabels.sql" />
+    <Build Include="dbo\Views\vyuMFGetSSCCDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

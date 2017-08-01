@@ -1,11 +1,5 @@
-﻿CREATE PROCEDURE uspMFGetOrderLabels @intOrderHeaderId INT
+﻿CREATE VIEW vyuMFGetOrderLabels
 AS
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
-
 SELECT OML.intOrderManifestLabelId
 	,OM.intOrderManifestId
 	,L.strLotNumber
@@ -18,9 +12,9 @@ SELECT OML.intOrderManifestLabelId
 	,OML.strBarcodeLabel1
 	,OML.strBarcodeLabel2
 	,OML.strBarcodeLabel3
+	,OH.intOrderHeaderId
 FROM tblMFOrderHeader OH
 JOIN tblMFOrderManifest OM ON OM.intOrderHeaderId = OH.intOrderHeaderId
-	AND OH.intOrderHeaderId = @intOrderHeaderId
 JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
 	AND OML.ysnDeleted <> 1
 JOIN tblICLot L ON L.intLotId = OM.intLotId
