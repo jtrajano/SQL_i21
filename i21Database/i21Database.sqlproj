@@ -5467,7 +5467,6 @@
     <Build Include="dbo\Views\vyuAPVoucherCommodity.sql" />
     <Build Include="dbo\Functions\fnAPGetReceiptTotal.sql" />
     <Build Include="dbo\Views\vyuCFTransactionSummary.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetGradeReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetSummaryReport.sql" />
@@ -5547,6 +5546,8 @@
     <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
     <Build Include="dbo\Tables\tblPREmployeeRank.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailForVoucher.sql" />
+    <Build Include="dbo\Views\vyuMFGetOrderLabels.sql" />
+    <Build Include="dbo\Views\vyuMFGetSSCCDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
