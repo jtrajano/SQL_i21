@@ -30,8 +30,6 @@ WITH ComPref AS(
 					ON RR.intRefundTypeId = RRD.intRefundTypeId
 			INNER JOIN tblPATPatronageCategory PC
 					ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-			INNER JOIN vyuEMEntityType EMT
-				ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
 			CROSS APPLY ComPref
 				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 		) Total
