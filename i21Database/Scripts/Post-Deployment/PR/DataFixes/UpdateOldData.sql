@@ -1,4 +1,4 @@
-﻿/***********************
+﻿﻿/***********************
 * UPDATING OLD DATA
 ************************/
 
@@ -41,27 +41,4 @@ END
 IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRPaycheckDeduction'))
 BEGIN
 	EXEC ('UPDATE tblPRPaycheckDeduction SET intExpenseAccountId = NULL WHERE strPaidBy = ''Employee'' AND intExpenseAccountId IS NOT NULL')
-END
-
-/*
-* Employee Ranks
-* 1. Populate Employee Rank table with existing employee Ranks
-* 2...
-*/
-IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPREmployeeRank'))
-BEGIN
-	EXEC ('
-	INSERT INTO tblPREmployeeRank
-		(intRank
-		,strDescription
-		,intConcurrencyId
-		)
-	SELECT DISTINCT
-		intRank = intRank
-		,strDescription = CASE WHEN (intRank = 0) THEN ''(unranked)'' ELSE ''Rank '' + CAST(intRank AS NVARCHAR(5)) END
-		,intConcurrencyId = 1
-	FROM tblPREmployee
-	WHERE intRank 
-	NOT IN (SELECT DISTINCT intRank FROM tblPREmployeeRank)
-	')
 END
