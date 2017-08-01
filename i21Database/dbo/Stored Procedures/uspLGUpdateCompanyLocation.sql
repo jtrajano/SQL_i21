@@ -15,5 +15,13 @@ BEGIN
 		FROM tblLGLoadDetail  LD
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		WHERE CD.intContractDetailId = @intContractDetailId
+
+		UPDATE LW
+		SET intSubLocationId = CD.intSubLocationId,
+			intStorageLocationId = CD.intStorageLocationId		
+		FROM tblLGLoadDetail LD
+		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = LD.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		WHERE CD.intContractDetailId = @intContractDetailId
 	END
 END
