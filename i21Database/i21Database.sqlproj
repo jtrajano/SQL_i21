@@ -5546,6 +5546,7 @@
     <Build Include="dbo\Functions\fnPOPurchaseDetailGetReceiptId.sql" />
     <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
     <Build Include="dbo\Tables\tblPREmployeeRank.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailForVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
