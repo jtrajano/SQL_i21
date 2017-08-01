@@ -52,7 +52,7 @@ AS
 							intContractStatusId,			strContractItemName,		strContractItemNo,				intContractHeaderId,
 							ROW_NUMBER() OVER (PARTITION BY intContractHeaderId ORDER BY intContractDetailId ASC) intRowNum
 					FROM	vyuCTContractSequence 
-					WHERE	ISNULL(intContractStatusId,1) <> 3
+					WHERE	ISNULL(intContractStatusId,1) NOT IN (3,5)
 				)t	WHERE intRowNum = 1			
 
 		)									CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId	LEFT
@@ -103,21 +103,34 @@ AS
 	
 		UNION ALL
 
-		SELECT	CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
-				CH.dblHdrQuantity,				CH.dblFutures,				CH.dblBasis,					CH.dblCashPrice,
-				CH.dblScheduleQty,				CH.dblNoOfLots,				CH.strItemNo,					CH.strPricingType,
-				CH.strFutMarketName,			CH.strHdrUOM,				CH.strLocationName,				CH.strPriceUOM,
-				CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
-				CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
-				CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				'Empty' AS strNotificationType,
-				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
-				CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
-				CH.strCustomerContract,			strSalesperson,				CD.intContractStatusId,			'' AS strContractItemName,		
+		SELECT	CH.intContractHeaderId,			NULL,							NULL,								NULL,
+				CH.dblQuantity,					CH.dblFutures,					NULL,								NULL,
+				NULL,							CH.dblNoOfLots,					NULL,								NULL,
+				NULL,							UM.strUnitMeasure,				NULL,								NULL,
+				NULL,							NULL,							NULL,								NULL,
+				NULL,							CY.strEntityNo,					CH.strContractNumber,				CH.dtmContractDate,
+				CT.strContractType,				CO.strCommodityCode,			EY.strName,							'Empty' AS strNotificationType,
+				NULL,							dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intCommodityUOMId,SU.intCommodityUnitMeasureId,CH.dblQuantity) dblQtyInStockUOM,		NULL,			NULL,
+				NULL,							PO.strPosition,					CB.strContractBasis,				CR.strCountry,			
+				CH.strCustomerContract,			SP.strName,						CD.intContractStatusId,				'' AS strContractItemName,		
 				'' AS strContractItemNo
 
-		FROM Header CH
-		LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId 
-		WHERE CD.intContractDetailId IS NULL
+		FROM	tblCTContractHeader			CH
+		JOIN	tblICCommodity				CO	ON	CO.intCommodityId				=	CH.intCommodityId
+		JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId				=	CH.intPricingTypeId
+		JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	CH.intEntityId
+		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId			=	CH.intContractTypeId
+		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
+		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId
+		JOIN	tblICCommodityUnitMeasure	SU	ON	SU.intCommodityId				=	CH.intCommodityId
+												AND	SU.ysnStockUnit					=	1						LEFT
+		JOIN	tblCTContractBasis			CB	ON	CB.intContractBasisId			=	CH.intContractBasisId	LEFT
+		JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		LEFT
+		JOIN	tblEMEntity					SP	ON	SP.intEntityId					=	CH.intSalespersonId		LEFT
+		JOIN	tblSMCountry				CR	ON	CR.intCountryID					=	CH.intCountryId			LEFT
+		JOIN	tblEMEntity					CY	ON	CY.intEntityId					=	CH.intCreatedById		LEFT
+		JOIN	tblCTContractDetail			CD	ON CD.intContractHeaderId = CH.intContractHeaderId
+		WHERE intContractDetailId IS NULL
 
 		UNION ALL
 
