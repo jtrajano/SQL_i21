@@ -25,7 +25,9 @@
     [intConcurrencyId]    INT             DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPRTemplateTax] PRIMARY KEY CLUSTERED ([intTemplateTaxId] ASC),
     CONSTRAINT [FK_tblPRTemplateTax_tblPREmployee] FOREIGN KEY ([intTemplateId]) REFERENCES [dbo].[tblPRTemplate] ([intTemplateId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblPRTemplateTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId])
+    CONSTRAINT [FK_tblPRTemplateTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId]), 
+    CONSTRAINT [FK_tblPRTemplateTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPRTemplateTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 );
 
 

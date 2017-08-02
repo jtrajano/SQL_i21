@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspGLSetParentCompany
+CREATE PROCEDURE uspGLSetMultiCompanyId
 	@intMultCompanyId int
 AS
 BEGIN

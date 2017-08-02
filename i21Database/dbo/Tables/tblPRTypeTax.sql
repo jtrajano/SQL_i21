@@ -18,7 +18,9 @@
     CONSTRAINT [PK_tblPRTypeTax] PRIMARY KEY ([intTypeTaxId]), 
     CONSTRAINT [AK_tblPRTypeTax_strTax] UNIQUE ([strTax]),
 	CONSTRAINT [FK_tblPRTypeTax_tblPRTypeTaxState] FOREIGN KEY ([intTypeTaxStateId]) REFERENCES [tblPRTypeTaxState]([intTypeTaxStateId]),
-	CONSTRAINT [FK_tblPRTypeTax_tblPRTypeTaxLocal] FOREIGN KEY ([intTypeTaxLocalId]) REFERENCES [tblPRTypeTaxLocal]([intTypeTaxLocalId])
+	CONSTRAINT [FK_tblPRTypeTax_tblPRTypeTaxLocal] FOREIGN KEY ([intTypeTaxLocalId]) REFERENCES [tblPRTypeTaxLocal]([intTypeTaxLocalId]), 
+    CONSTRAINT [FK_tblPRTypeTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPRTypeTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 ) ON [PRIMARY]
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

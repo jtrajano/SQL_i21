@@ -8,7 +8,8 @@
     [strCalculationType]       NVARCHAR (20)   COLLATE Latin1_General_CI_AS DEFAULT ('Amount') NULL,
     [intConcurrencyId]         INT             DEFAULT ((1)) NULL,
     PRIMARY KEY CLUSTERED ([intWorkersCompensationId] ASC),
-    UNIQUE NONCLUSTERED ([strWCCode] ASC)
+    UNIQUE NONCLUSTERED ([strWCCode] ASC), 
+    CONSTRAINT [FK_tblPRWorkersCompensation_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 );
 
 

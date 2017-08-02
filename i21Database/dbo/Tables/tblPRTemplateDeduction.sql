@@ -16,7 +16,9 @@
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)),
     CONSTRAINT [PK_tblPRTemplateDeduction] PRIMARY KEY ([intTemplateDeductionId]), 
-    CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [tblPRTypeDeduction]([intTypeDeductionId]),
+    CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [tblPRTypeDeduction]([intTypeDeductionId]), 
+    CONSTRAINT [FK_tblPRTemplateDeduction_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPRTemplateDeduction_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 ) ON [PRIMARY]
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

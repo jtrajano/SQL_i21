@@ -169,7 +169,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1j_FiscalYearPeriod.sql
 :r .\GL\DefaultData\1k_AccountCurrency.sql
 :r .\GL\DefaultData\1l_AlterTable.sql
-:r .\GL\DefaultData\1m_UpdateCompany.sql
 :r .\GL\DefaultData\1o_SegmentType.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql

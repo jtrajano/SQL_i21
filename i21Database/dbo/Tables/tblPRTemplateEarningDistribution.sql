@@ -6,7 +6,8 @@
     [dblPercentage]           NUMERIC(18,6) NULL,
     [intConcurrencyId]        INT NULL,
     CONSTRAINT [PK_tblPRTemplateEarningDistribution] PRIMARY KEY CLUSTERED ([intTemplateEarningDistributionId] ASC),
-    CONSTRAINT [FK_tblPRTemplateEarningDistribution_tblPRTemplateEarning] FOREIGN KEY ([intTemplateEarningId]) REFERENCES [dbo].[tblPRTemplateEarning] ([intTemplateEarningId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblPRTemplateEarningDistribution_tblPRTemplateEarning] FOREIGN KEY ([intTemplateEarningId]) REFERENCES [dbo].[tblPRTemplateEarning] ([intTemplateEarningId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblPRTemplateEarningDistribution_ToTable] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 )
 
 GO
