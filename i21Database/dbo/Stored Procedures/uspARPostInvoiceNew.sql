@@ -76,14 +76,22 @@ INSERT INTO @PostInvoiceData(
 	,[dblShipping]
 	,[dblTax]
 	,[strImportFormat]
+	,[intDistributionHeaderId]
+	,[intLoadDistributionHeaderId]
+	,[strActualCostId]
 	,[intPeriodsToAccrue]
 	,[ysnAccrueLicense]
+	,[intSplitId]
+	,[dblSplitPercent]				
+	,[ysnSplitted]
+	,[ysnImpactInventory]
 	,[intEntityId]
 	,[ysnPost]
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[intItemUOMId]
 	,[intDiscountAccountId]
+	,[intCustomerStorageId]
 	,[intStorageScheduleTypeId]
 	,[intSubLocationId]
 	,[intStorageLocationId]
@@ -96,8 +104,8 @@ INSERT INTO @PostInvoiceData(
 	,[intUserId]
 	,[ysnAllowOtherUserToPost]
 	)
-	SELECT DISTINCT
-	 [intInvoiceId]					= ARI.[intInvoiceId]
+SELECT DISTINCT
+	[intInvoiceId]					= ARI.[intInvoiceId]
 	,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 	,[strTransactionType]			= ARI.[strTransactionType]
 	,[strType]						= ARI.[strType]
@@ -114,14 +122,22 @@ INSERT INTO @PostInvoiceData(
 	,[dblShipping]					= ARI.[dblShipping]
 	,[dblTax]						= ARI.[dblTax]
 	,[strImportFormat]				= ARI.[strImportFormat]
+	,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+	,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+	,[strActualCostId]				= ARI.[strActualCostId]
 	,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 	,[ysnAccrueLicense]				= II.[ysnAccrueLicense]
+	,[intSplitId]					= ARI.[intSplitId]
+	,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+	,[ysnSplitted]					= ARI.[ysnSplitted]
+	,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 	,[intEntityId]					= ARI.[intEntityId]
 	,[ysnPost]						= @Post
 	,[intInvoiceDetailId]			= NULL
 	,[intItemId]					= NULL
 	,[intItemUOMId]					= NULL
 	,[intDiscountAccountId]			= @DiscountAccountId
+	,[intCustomerStorageId]			= NULL
 	,[intStorageScheduleTypeId]		= NULL
 	,[intSubLocationId]				= NULL
 	,[intStorageLocationId]			= NULL
@@ -192,14 +208,22 @@ IF @IntegrationLogId IS NOT NULL
 			,[dblShipping]
 			,[dblTax]
 			,[strImportFormat]
+			,[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]
+			,[strActualCostId]
 			,[intPeriodsToAccrue]
 			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]				
+			,[ysnSplitted]
+			,[ysnImpactInventory]
 			,[intEntityId]
 			,[ysnPost]
 			,[intInvoiceDetailId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[intDiscountAccountId]
+			,[intCustomerStorageId]
 			,[intStorageScheduleTypeId]
 			,[intSubLocationId]
 			,[intStorageLocationId]
@@ -212,8 +236,8 @@ IF @IntegrationLogId IS NOT NULL
 			,[intUserId]
 			,[ysnAllowOtherUserToPost]
 			)
-			SELECT DISTINCT
-			 [intInvoiceId]					= ARI.[intInvoiceId]
+		SELECT DISTINCT
+			[intInvoiceId]					= ARI.[intInvoiceId]
 			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 			,[strTransactionType]			= ARI.[strTransactionType]
 			,[strType]						= ARI.[strType]
@@ -230,14 +254,22 @@ IF @IntegrationLogId IS NOT NULL
 			,[dblShipping]					= ARI.[dblShipping]
 			,[dblTax]						= ARI.[dblTax]
 			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+			,[strActualCostId]				= ARI.[strActualCostId]
 			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 			,[ysnAccrueLicense]				= ARIILD.[ysnAccrueLicense]
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 			,[intEntityId]					= ARI.[intEntityId]
 			,[ysnPost]						= @Post
 			,[intInvoiceDetailId]			= NULL
 			,[intItemId]					= NULL
 			,[intItemUOMId]					= NULL
 			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
 			,[intStorageScheduleTypeId]		= NULL
 			,[intSubLocationId]				= NULL
 			,[intStorageLocationId]			= NULL
@@ -283,14 +315,22 @@ IF(@BeginDate IS NOT NULL)
 			,[dblShipping]
 			,[dblTax]
 			,[strImportFormat]
+			,[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]
+			,[strActualCostId]
 			,[intPeriodsToAccrue]
 			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]				
+			,[ysnSplitted]
+			,[ysnImpactInventory]
 			,[intEntityId]
 			,[ysnPost]
 			,[intInvoiceDetailId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[intDiscountAccountId]
+			,[intCustomerStorageId]
 			,[intStorageScheduleTypeId]
 			,[intSubLocationId]
 			,[intStorageLocationId]
@@ -303,8 +343,8 @@ IF(@BeginDate IS NOT NULL)
 			,[intUserId]
 			,[ysnAllowOtherUserToPost]
 			)
-			SELECT DISTINCT
-			 [intInvoiceId]					= ARI.[intInvoiceId]
+		SELECT DISTINCT
+			[intInvoiceId]					= ARI.[intInvoiceId]
 			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 			,[strTransactionType]			= ARI.[strTransactionType]
 			,[strType]						= ARI.[strType]
@@ -321,14 +361,22 @@ IF(@BeginDate IS NOT NULL)
 			,[dblShipping]					= ARI.[dblShipping]
 			,[dblTax]						= ARI.[dblTax]
 			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+			,[strActualCostId]				= ARI.[strActualCostId]
 			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 			,[ysnAccrueLicense]				= 0
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 			,[intEntityId]					= ARI.[intEntityId]
 			,[ysnPost]						= @Post
 			,[intInvoiceDetailId]			= NULL
 			,[intItemId]					= NULL
 			,[intItemUOMId]					= NULL
 			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
 			,[intStorageScheduleTypeId]		= NULL
 			,[intSubLocationId]				= NULL
 			,[intStorageLocationId]			= NULL
@@ -365,14 +413,22 @@ IF(@BeginTransaction IS NOT NULL)
 			,[dblShipping]
 			,[dblTax]
 			,[strImportFormat]
+			,[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]
+			,[strActualCostId]
 			,[intPeriodsToAccrue]
 			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]				
+			,[ysnSplitted]
+			,[ysnImpactInventory]
 			,[intEntityId]
 			,[ysnPost]
 			,[intInvoiceDetailId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[intDiscountAccountId]
+			,[intCustomerStorageId]
 			,[intStorageScheduleTypeId]
 			,[intSubLocationId]
 			,[intStorageLocationId]
@@ -385,8 +441,8 @@ IF(@BeginTransaction IS NOT NULL)
 			,[intUserId]
 			,[ysnAllowOtherUserToPost]
 			)
-			SELECT DISTINCT
-			 [intInvoiceId]					= ARI.[intInvoiceId]
+		SELECT DISTINCT
+			[intInvoiceId]					= ARI.[intInvoiceId]
 			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 			,[strTransactionType]			= ARI.[strTransactionType]
 			,[strType]						= ARI.[strType]
@@ -403,14 +459,22 @@ IF(@BeginTransaction IS NOT NULL)
 			,[dblShipping]					= ARI.[dblShipping]
 			,[dblTax]						= ARI.[dblTax]
 			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+			,[strActualCostId]				= ARI.[strActualCostId]
 			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 			,[ysnAccrueLicense]				= 0
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 			,[intEntityId]					= ARI.[intEntityId]
 			,[ysnPost]						= @Post
 			,[intInvoiceDetailId]			= NULL
 			,[intItemId]					= NULL
 			,[intItemUOMId]					= NULL
 			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
 			,[intStorageScheduleTypeId]		= NULL
 			,[intSubLocationId]				= NULL
 			,[intStorageLocationId]			= NULL
@@ -496,14 +560,22 @@ BEGIN TRY
 							,[dblShipping]
 							,[dblTax]
 							,[strImportFormat]
+							,[intDistributionHeaderId]
+							,[intLoadDistributionHeaderId]
+							,[strActualCostId]
 							,[intPeriodsToAccrue]
 							,[ysnAccrueLicense]
+							,[intSplitId]
+							,[dblSplitPercent]				
+							,[ysnSplitted]
+							,[ysnImpactInventory]
 							,[intEntityId]
 							,[ysnPost]
 							,[intInvoiceDetailId]
 							,[intItemId]
 							,[intItemUOMId]
 							,[intDiscountAccountId]
+							,[intCustomerStorageId]
 							,[intStorageScheduleTypeId]
 							,[intSubLocationId]
 							,[intStorageLocationId]
@@ -516,8 +588,8 @@ BEGIN TRY
 							,[intUserId]
 							,[ysnAllowOtherUserToPost]
 							)
-							SELECT DISTINCT
-							 [intInvoiceId]					= ARI.[intInvoiceId]
+						SELECT DISTINCT
+							[intInvoiceId]					= ARI.[intInvoiceId]
 							,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 							,[strTransactionType]			= ARI.[strTransactionType]
 							,[strType]						= ARI.[strType]
@@ -534,14 +606,22 @@ BEGIN TRY
 							,[dblShipping]					= ARI.[dblShipping]
 							,[dblTax]						= ARI.[dblTax]
 							,[strImportFormat]				= ARI.[strImportFormat]
+							,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+							,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+							,[strActualCostId]				= ARI.[strActualCostId]
 							,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 							,[ysnAccrueLicense]				= 0
+							,[intSplitId]					= ARI.[intSplitId]
+							,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+							,[ysnSplitted]					= ARI.[ysnSplitted]
+							,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 							,[intEntityId]					= ARI.[intEntityId]
 							,[ysnPost]						= @Post
 							,[intInvoiceDetailId]			= NULL
 							,[intItemId]					= NULL
 							,[intItemUOMId]					= NULL
 							,[intDiscountAccountId]			= @DiscountAccountId
+							,[intCustomerStorageId]			= NULL
 							,[intStorageScheduleTypeId]		= NULL
 							,[intSubLocationId]				= NULL
 							,[intStorageLocationId]			= NULL
