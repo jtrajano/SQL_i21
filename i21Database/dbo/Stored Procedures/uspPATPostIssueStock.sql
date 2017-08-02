@@ -27,7 +27,7 @@ DECLARE @totalRecords INT;
 DECLARE @batchId NVARCHAR(40);
 DECLARE @isGLSucces AS BIT = 0;
 DECLARE @intCreatedId INT;
-
+DECLARE @transactionType NVARCHAR(25) = 'Patronage';
 DECLARE @batchId2 AS NVARCHAR(40);
 
 DECLARE @voucherId as Id;
@@ -72,7 +72,7 @@ BEGIN
 	DECLARE @type AS INT = CASE WHEN @ysnRetired = 0 THEN 1 ELSE 2 END;
 
 	INSERT INTO #tempValidateTable
-	SELECT * FROM fnPATValidateAssociatedTransaction((SELECT intCustomerStockId FROM #tempCustomerStock), @type)
+	SELECT * FROM fnPATValidateAssociatedTransaction((SELECT intCustomerStockId FROM #tempCustomerStock), @type, @transactionType)
 
 	SELECT * FROM #tempValidateTable
 	IF EXISTS(SELECT 1 FROM #tempValidateTable)
@@ -286,7 +286,7 @@ BEGIN
 			EXEC [dbo].[uspAPPostBill]
 					@batchId = NULL,
 					@billBatchId = NULL,
-					@transactionType = NULL,
+					@transactionType = @transactionType,
 					@post = 0,
 					@recap = 0,
 					@isBatch = 0,
@@ -296,8 +296,14 @@ BEGIN
 					@endTransaction = NULL,
 					@success = @success OUTPUT
 
+			IF(@success = 0)
+			BEGIN
+				SET @error = 'Unable to unpost transaction';
+				RAISERROR(@error, 16, 1);
+				GOTO Post_Rollback;
+			END
+			
 			DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tempCustomerStock) AND ysnPaid <> 1;
-
 			UPDATE tblPATCustomerStock
 			SET strActivityStatus = 'Open',
 				dtmRetireDate = null,
@@ -530,7 +536,7 @@ END
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF @@ERROR <> 0	GOTO Post_Rollback;
+IF @@ERROR <> 0 GOTO Post_Rollback;
 
 GOTO Post_Commit;
 

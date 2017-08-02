@@ -152,7 +152,7 @@ BEGIN
 		,strTransactionNo
 		,intTransactionId
 		,23
-	FROM dbo.fnPATValidateAssociatedTransaction(@billIds, 4)
+	FROM dbo.fnPATValidateAssociatedTransaction(@billIds, 4, @transactionType)
 
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1)
