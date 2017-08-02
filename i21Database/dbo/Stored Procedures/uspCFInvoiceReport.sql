@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
@@ -352,9 +353,9 @@ BEGIN
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 				IF(@CFID IS NOT NULL)
 				BEGIN
-					EXEC('UPDATE tblCFTransaction SET strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
-					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
-					EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					--EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					--EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 
@@ -390,9 +391,12 @@ BEGIN
 				IF(@CFID IS NOT NULL)
 				BEGIN
 
-					EXEC('UPDATE tblCFTransaction SET strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
-					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
-					EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					--EXEC('UPDATE tblCFTransaction SET strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					--EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					--EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+
+					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+
 
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
@@ -428,7 +432,7 @@ BEGIN
 		,intCardId					
 		,main.intAccountId				
 		,intInvoiceCycle			
-		,intSubAccountId			
+		--,intSubAccountId			
 		,intCustomerId				
 		,strGroupName				
 		,strCustomerNumber			
@@ -486,7 +490,7 @@ BEGIN
 		,dblTotalTax				
 		,dblTotalSST				
 		,dblTaxExceptSST			
-		,dblInvoiceTotal			
+		--,dblInvoiceTotal			
 		,ysnPrintMiscellaneous		
 		,ysnSummaryByCard			
 		,ysnSummaryByDepartment		
@@ -509,7 +513,7 @@ BEGIN
 		,intCardId					
 		,main.intAccountId				
 		,intInvoiceCycle			
-		,intSubAccountId			
+		--,intSubAccountId			
 		,intCustomerId				
 		,strGroupName				
 		,strCustomerNumber			
@@ -567,7 +571,7 @@ BEGIN
 		,dblTotalTax				
 		,dblTotalSST				
 		,dblTaxExceptSST			
-		,dblInvoiceTotal			
+		--,dblInvoiceTotal			
 		,ysnPrintMiscellaneous		
 		,ysnSummaryByCard			
 		,ysnSummaryByDepartment		
@@ -583,13 +587,13 @@ BEGIN
 	    FROM vyuCFInvoiceReport AS main 
 		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
 		on main.intAccountId = cfInvRptNo.intAccountId
-		INNER JOIN 
-		(	SELECT intAccountId AS intSubAccountId,SUM(dblCalculatedTotalAmount) AS dblInvoiceTotal 
-			FROM vyuCFInvoiceReport
-			WHERE intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
-			GROUP BY intAccountId 
-		) AS sub
-		ON main.intAccountId = sub.intSubAccountId 
+		--INNER JOIN 
+		--(	SELECT intAccountId AS intSubAccountId,SUM(dblCalculatedTotalAmount) AS dblInvoiceTotal 
+		--	FROM vyuCFInvoiceReport
+		--	WHERE intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+		--	GROUP BY intAccountId 
+		--) AS sub
+		--ON main.intAccountId = sub.intSubAccountId 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
 		--SELECT * FROM tblCFInvoiceReportTempTable

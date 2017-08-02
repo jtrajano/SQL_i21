@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -45,6 +44,8 @@ CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton]
 ,@strGUID							NVARCHAR(MAX)	= ''
 ,@strProcessDate					NVARCHAR(MAX)	= ''
 
+,@BatchRecalculate					BIT				=	0
+
 AS
 
 BEGIN
@@ -70,7 +71,7 @@ BEGIN
 	DECLARE @strPriceMethod					NVARCHAR(MAX)
 	DECLARE @intContractHeaderId			INT	
 	DECLARE @intContractDetailId			INT
-	DECLARE @intContractNumber				INT
+	DECLARE @strContractNumber				NVARCHAR(MAX)
 	DECLARE @intContractSeq					INT
 	DECLARE @dblAvailableQuantity			NUMERIC(18,6)
 
@@ -132,7 +133,7 @@ BEGIN
 		,dblAvailableQuantity			NUMERIC(18,6)
 		,intContractHeaderId			INT
 		,intContractDetailId			INT
-		,intContractNumber				INT
+		,strContractNumber				NVARCHAR(MAX)
 		,intContractSeq					INT
 		,strPriceBasis					NVARCHAR(MAX)
 		,intPriceProfileId				INT
@@ -364,7 +365,7 @@ BEGIN
 	@CFAvailableQuantity		=	@dblAvailableQuantity	output,
 	@CFContractHeaderId			=	@intContractHeaderId	output,
 	@CFContractDetailId			=	@intContractDetailId	output,
-	@CFContractNumber			=	@intContractNumber		output,
+	@CFContractNumber			=	@strContractNumber		output,
 	@CFContractSeq				=	@intContractSeq			output,
 	@CFPriceBasis				=	@strPriceBasis			output,
 	@CFCreditCard				=	@ysnCreditCardUsed,      
@@ -1955,7 +1956,417 @@ BEGIN
 	--	SET @dblTransferCost = @dblCalculatedCost -- calculated based on transaction type. (margin calc)
 
 	--END
+	IF(ISNULL(@BatchRecalculate,0) = 1)
+	BEGIN
 
+		BEGIN TRY
+
+			
+
+			DECLARE @ysnContractOverfill	AS BIT = 0
+			DECLARE @dblOverfillQuantity	AS NUMERIC(18,6)
+
+			DECLARE @strOldPriceMethod		AS NVARCHAR(MAX)
+			DECLARE @dblOldQuantity			AS NUMERIC(18,6)
+			DECLARE @intOldContractId		AS INT 
+			DECLARE @intOldContractDetailId	AS INT 
+
+			BEGIN TRANSACTION
+
+
+			SELECT TOP 1
+			 @strOldPriceMethod			= strPriceMethod
+			,@dblOldQuantity			= dblQuantity	
+			,@intOldContractId			= intContractId
+			,@intOldContractDetailId	= intContractDetailId
+			FROM tblCFTransaction
+			WHERE intTransactionId = @TransactionId	
+
+
+			IF(@strOldPriceMethod = 'Contracts' OR @strOldPriceMethod = 'Contract Pricing')
+			BEGIN
+				-- 1-1 
+				IF(@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
+				BEGIN
+					--1-1.1
+					IF(@intOldContractId != @intContractDetailId)
+					BEGIN
+						SET @dblOldQuantity = @dblOldQuantity * -1
+						EXEC uspCTUpdateScheduleQuantity 
+						 @intContractDetailId = @intOldContractDetailId
+						,@dblQuantityToUpdate = @dblOldQuantity
+						,@intUserId = 0
+						,@intExternalId = @TransactionId
+						,@strScreenName = 'Card Fueling Transaction Screen'
+
+						
+						IF(@dblAvailableQuantity < @dblQuantity)
+						BEGIN
+							--TODO: CREATE OVERFILL--
+							SET @ysnContractOverfill = 1
+							SET @dblOverfillQuantity = @dblQuantity - @dblAvailableQuantity
+							SET @dblQuantity = @dblAvailableQuantity
+
+							EXEC uspCTUpdateScheduleQuantity 
+							 @intContractDetailId = @intContractDetailId
+							,@dblQuantityToUpdate = @dblAvailableQuantity
+							,@intUserId = 0
+							,@intExternalId = @TransactionId
+							,@strScreenName = 'Card Fueling Transaction Screen'
+						END
+						ELSE
+						BEGIN
+							EXEC uspCTUpdateScheduleQuantity 
+							 @intContractDetailId = @intContractDetailId
+							,@dblQuantityToUpdate = @dblQuantity
+							,@intUserId = 0
+							,@intExternalId = @TransactionId
+							,@strScreenName = 'Card Fueling Transaction Screen'
+						END
+					END
+					--ELSE 
+					-- DO NOTHING SINCE QTY WILL NOT CHANGE
+				END
+				-- 1-0
+				ELSE
+				BEGIN
+					SET @dblOldQuantity = @dblOldQuantity * -1
+					EXEC uspCTUpdateScheduleQuantity 
+						@intContractDetailId = @intOldContractDetailId
+					,@dblQuantityToUpdate = @dblOldQuantity
+					,@intUserId = 0
+					,@intExternalId = @TransactionId
+					,@strScreenName = 'Card Fueling Transaction Screen'
+				END
+			END
+			ELSE
+			--0-1
+			BEGIN
+				IF(@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
+				BEGIN
+						IF(@dblAvailableQuantity < @dblQuantity)
+						BEGIN
+							--TODO: CREATE OVERFILL--
+							SET @ysnContractOverfill = 1
+							SET @dblOverfillQuantity = @dblQuantity - @dblAvailableQuantity
+							SET @dblQuantity = @dblAvailableQuantity
+
+							EXEC uspCTUpdateScheduleQuantity 
+							 @intContractDetailId = @intContractDetailId
+							,@dblQuantityToUpdate = @dblAvailableQuantity
+							,@intUserId = 0
+							,@intExternalId = @TransactionId
+							,@strScreenName = 'Card Fueling Transaction Screen'
+						END
+						ELSE
+						BEGIN
+							
+							EXEC uspCTUpdateScheduleQuantity 
+							 @intContractDetailId = @intContractDetailId
+							,@dblQuantityToUpdate = @dblQuantity
+							,@intUserId = 0
+							,@intExternalId = @TransactionId
+							,@strScreenName = 'Card Fueling Transaction Screen'
+						END
+				END
+				--ELSE 
+				-- DO NOTHING SINCE ITS NOT CONTRACT
+				
+			END
+
+
+			--IF()
+
+			DECLARE @dblCalculatedGrossPrice AS NUMERIC(18,6)
+			SELECT TOP 1 @dblCalculatedGrossPrice = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price'
+
+			DECLARE @dblOriginalGrossPrice AS NUMERIC(18,6)
+			SELECT TOP 1 @dblOriginalGrossPrice = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price'
+
+			UPDATE @tblTransactionPrice 
+			SET 
+			dblCalculatedAmount = ROUND((@dblCalculatedGrossPrice * @dblQuantity),2) 
+			,dblOriginalAmount = ROUND((@dblOriginalGrossPrice * @dblQuantity),2)
+			WHERE strTransactionPriceId = 'Total Amount'
+			
+			--UPDATE @tblTransactionPrice SET dblOriginalAmount = ROUND((@dblOriginalGrossPrice * @dblQuantity),2) WHERE strTransactionPriceId = 'Total Amount'
+
+
+			
+			---------------------------------------------------------------------------
+			UPDATE tblCFTransaction
+			SET
+			 dblTransferCost		   = @dblTransferCost		
+			,strPriceMethod			   = @strPriceMethod		
+			,intContractId			   = @intContractHeaderId
+			,intContractDetailId	   = @intContractDetailId
+			,strPriceBasis			   = @strPriceBasis			
+			,intPriceProfileId		   = @intPriceProfileId		
+			,intPriceIndexId 		   = @intPriceIndexId 		
+			,dblPriceProfileRate	   = @dblPriceProfileRate
+			,dblPriceIndexRate		   = @dblPriceIndexRate		
+			,dtmPriceIndexDate		   = @dtmPriceIndexDate		
+			,ysnDuplicate			   = @ysnDuplicate			
+			,ysnInvalid				   = @ysnInvalid	
+			,dblQuantity			   = @dblQuantity
+			WHERE intTransactionId	   = @intTransactionId
+			---------------------------------------------------------------------------
+			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId
+			INSERT INTO tblCFTransactionTax
+			(
+				 dblTaxCalculatedAmount
+				,dblTaxOriginalAmount
+				,intTaxCodeId
+				,dblTaxRate 
+				,intTransactionId
+			)
+			SELECT 
+				dblCalculatedTax AS 'dblTaxCalculatedAmount'
+				,dblOriginalTax AS 'dblTaxOriginalAmount'
+				,intTaxCodeId
+				,dblRate AS 'dblTaxRate'
+				,intTransactionId = @intTransactionId
+			FROM @tblCFTransactionTax AS T
+			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+			---------------------------------------------------------------------------
+			DELETE tblCFTransactionPrice WHERE intTransactionId = @intTransactionId
+			INSERT INTO tblCFTransactionPrice
+			(
+			strTransactionPriceId
+			,dblOriginalAmount
+			,dblCalculatedAmount
+			,intTransactionId
+			)
+			SELECT 
+			[strTransactionPriceId]
+			,[dblOriginalAmount]	
+			,[dblCalculatedAmount]
+			,@intTransactionId
+			FROM @tblTransactionPrice
+
+			---------------------------------------------------------------------------
+
+			DECLARE @strNewPriceMethod AS NVARCHAR(MAX)
+			DECLARE @dblNewTotalAmount AS NUMERIC(18,6)
+
+			SELECT TOP 1
+			@strNewPriceMethod = cfTrans.strPriceMethod
+			,@dblNewTotalAmount = cfTransPrice.dblCalculatedAmount
+			FROM tblCFTransaction cfTrans
+			LEFT OUTER JOIN 
+			(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			FROM         dbo.tblCFTransactionPrice 
+			WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice 
+			ON cfTrans.intTransactionId = cfTransPrice.intTransactionId
+			WHERE cfTrans.intTransactionId = @intTransactionId
+
+			UPDATE tblCFBatchRecalculateStagingTable 
+			SET strNewPriceMethod = @strNewPriceMethod 
+			,dblNewTotalAmount = @dblNewTotalAmount 
+			,strStatus = 'Done'
+			WHERE intTransactionId = @intTransactionId
+
+			COMMIT TRANSACTION
+
+
+			IF(@ysnContractOverfill = 1)
+			BEGIN
+
+				--TODO-- DUPLICATE PRICING AND TAXING
+				INSERT INTO tblCFTransaction
+				(
+				 intPriceIndexId
+				,intPriceProfileId
+				,intSiteGroupId
+				,strPriceProfileId
+				,strPriceIndexId
+				,strSiteGroup
+				,dblPriceProfileRate
+				,dblPriceIndexRate
+				,dtmPriceIndexDate
+				,intContractDetailId
+				,intContractId
+				,dblQuantity
+				,dtmBillingDate
+				,dtmTransactionDate
+				,intTransTime
+				,strSequenceNumber
+				,strPONumber
+				,strMiscellaneous
+				,intOdometer
+				,intPumpNumber
+				,dblTransferCost
+				,strPriceMethod
+				,strPriceBasis
+				,strTransactionType
+				,strDeliveryPickupInd
+				,intNetworkId
+				,intSiteId
+				,intCardId
+				,intVehicleId
+				,intProductId
+				,intARItemId
+				,intARLocationId
+				,dblOriginalTotalPrice
+				,dblCalculatedTotalPrice
+				,dblOriginalGrossPrice
+				,dblCalculatedGrossPrice
+				,dblCalculatedNetPrice
+				,dblOriginalNetPrice
+				,dblCalculatedPumpPrice
+				,dblOriginalPumpPrice
+				,intSalesPersonId
+				,ysnInvalid
+				,ysnCreditCardUsed
+				,ysnOriginHistory
+				,ysnPosted
+				,strTransactionId
+				,strPrintTimeStamp
+				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
+				,intInvoiceId
+				,ysnPostedCSV
+				,strForeignCardId
+				,ysnDuplicate
+				,dtmInvoiceDate
+				,dtmPostedDate
+				,strOriginalProductNumber
+				,intOverFilledTransactionId
+				,dblInventoryCost
+				,dblMargin
+				)
+				SELECT TOP 1
+				 intPriceIndexId
+				,intPriceProfileId
+				,intSiteGroupId
+				,strPriceProfileId
+				,strPriceIndexId
+				,strSiteGroup
+				,dblPriceProfileRate
+				,dblPriceIndexRate
+				,dtmPriceIndexDate
+				,NULL --intContractDetailId
+				,NULL --intContractId
+				,@dblOverfillQuantity --dblQuantity
+				,dtmBillingDate
+				,dtmTransactionDate
+				,intTransTime
+				,strSequenceNumber
+				,strPONumber
+				,strMiscellaneous
+				,intOdometer
+				,intPumpNumber
+				,dblTransferCost
+				,'Overfill'--strPriceMethod
+				,strPriceBasis
+				,strTransactionType
+				,strDeliveryPickupInd
+				,intNetworkId
+				,intSiteId
+				,intCardId
+				,intVehicleId
+				,intProductId
+				,intARItemId
+				,intARLocationId
+				,dblOriginalTotalPrice
+				,dblCalculatedTotalPrice
+				,dblOriginalGrossPrice
+				,dblCalculatedGrossPrice
+				,dblCalculatedNetPrice
+				,dblOriginalNetPrice
+				,dblCalculatedPumpPrice
+				,dblOriginalPumpPrice
+				,intSalesPersonId
+				,ysnInvalid
+				,ysnCreditCardUsed
+				,ysnOriginHistory
+				,ysnPosted
+				,strTransactionId
+				,strPrintTimeStamp
+				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
+				,intInvoiceId
+				,ysnPostedCSV
+				,strForeignCardId
+				,ysnDuplicate
+				,dtmInvoiceDate
+				,dtmPostedDate
+				,strOriginalProductNumber
+				,@intTransactionId
+				,dblInventoryCost
+				,dblMargin
+				FROM
+				tblCFTransaction
+				WHERE intTransactionId = @intTransactionId
+
+				DECLARE @overfillId AS INT
+				SET @overfillId = SCOPE_IDENTITY()
+
+				INSERT INTO tblCFTransactionPrice
+				(
+					intTransactionId
+					,strTransactionPriceId
+					,dblOriginalAmount
+					,dblCalculatedAmount
+				)
+				SELECT 
+					@overfillId
+					,strTransactionPriceId
+					,dblOriginalAmount
+					,dblCalculatedAmount
+				FROM
+				tblCFTransactionPrice
+				WHERE intTransactionId = @intTransactionId
+
+
+				INSERT INTO tblCFTransactionTax
+				(
+					 intTransactionId
+					,dblTaxOriginalAmount
+					,dblTaxCalculatedAmount
+					,intTaxCodeId
+					,dblTaxRate
+				)
+				SELECT
+					 @overfillId
+					,dblTaxOriginalAmount
+					,dblTaxCalculatedAmount
+					,intTaxCodeId
+					,dblTaxRate
+				FROM
+				tblCFTransactionTax
+				WHERE intTransactionId = @intTransactionId
+
+
+
+
+				--select * from tblCFBatchRecalculateStagingTable
+
+				exec uspCFRunRecalculateTransaction @TransactionId=@overfillId , @ContractsOverfill = 1
+
+
+
+			END
+
+
+		END TRY
+		BEGIN CATCH
+
+			ROLLBACK TRANSACTION
+
+			UPDATE tblCFBatchRecalculateStagingTable 
+			SET strStatus = 'Error ' + ERROR_MESSAGE()
+			WHERE intTransactionId = @intTransactionId
+
+
+
+
+		END CATCH
+
+
+	END
+	ELSE
+	BEGIN
 	---------------------------------------------------
 	--					PRICING OUT					 --
 	---------------------------------------------------
@@ -1983,7 +2394,7 @@ BEGIN
 			,dblAvailableQuantity	
 			,intContractHeaderId	
 			,intContractDetailId	
-			,intContractNumber		
+			,strContractNumber		
 			,intContractSeq		
 			,strPriceBasis	
 			,intPriceProfileId	
@@ -2020,7 +2431,7 @@ BEGIN
 			,@dblAvailableQuantity		AS dblAvailableQuantity	
 			,@intContractHeaderId		AS intContractHeaderId	
 			,@intContractDetailId		AS intContractDetailId	
-			,@intContractNumber			AS intContractNumber		
+			,@strContractNumber			AS strContractNumber		
 			,@intContractSeq			AS intContractSeq		
 			,@strPriceBasis				AS strPriceBasis	
 			,@intPriceProfileId			AS intPriceProfileId	
@@ -2059,7 +2470,7 @@ BEGIN
 			,@dblAvailableQuantity		AS dblAvailableQuantity	
 			,@intContractHeaderId		AS intContractHeaderId	
 			,@intContractDetailId		AS intContractDetailId	
-			,@intContractNumber			AS intContractNumber		
+			,@strContractNumber			AS strContractNumber		
 			,@intContractSeq			AS intContractSeq		
 			,@strPriceBasis				AS strPriceBasis	
 			,@intPriceProfileId			AS intPriceProfileId	
@@ -2151,6 +2562,7 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT * FROM @tblTransactionPrice
+	END
 	END
 	---------------------------------------------------
 	--					PRICE OUT					 --

@@ -5550,6 +5550,16 @@
     <Build Include="dbo\Stored Procedures\uspGLGetConsolidateWarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSpaceUtilization.sql" />
     <Build Include="dbo\Views\vyuCMUndepositedPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeleteOrderLabels.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblMFLotSnapshot.sql" />
+    <Build Include="dbo\Tables\tblMFLotSnapshotDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotSnapshot.sql" />
+    <Build Include="dbo\Tables\tblCFBatchRecalculateStagingTable.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionForBatchRecalculate.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFRunRecalculateTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFBatchRecalculate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrderMsgAndMail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
