@@ -413,7 +413,7 @@
     <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="dbo\Stored Procedures\uspGLSetParentCompany.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSetMultiCompanyId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
@@ -5723,9 +5723,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\18_SecurityPolicy.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\1m_UpdateCompany.sql" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
