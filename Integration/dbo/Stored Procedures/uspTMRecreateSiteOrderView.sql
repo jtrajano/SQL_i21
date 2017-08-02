@@ -57,7 +57,7 @@ BEGIN
 				,intDispatchID AS intDispatchId
 				,F.vwitm_class AS strItemClass
 				,A.intProduct AS intProductId
-				,A.intDeliveryTermID
+				,intDeliveryTermID =  CASE WHEN Z.[ysnUseDeliveryTermOnCS] = 1 THEN A.intDeliveryTermID ELSE N.A4GLIdentity END
 				,ISNULL(G.ysnDispatched,0) AS ysnDispatched
 				,A.intTaxStateID
 				,ISNULL(G.strWillCallStatus,'''') AS strWillCallStatus
@@ -109,6 +109,9 @@ BEGIN
 						GROUP BY intSiteID
 					) M
 				ON A.intSiteID = M.intSiteId
+			LEFT JOIN vwtrmmst N
+				ON C.vwcus_terms_cd = N.vwtrm_key_n
+			,(SELECT TOP 1 [ysnUseDeliveryTermOnCS] = ISNULL([ysnUseDeliveryTermOnCS],0) FROM tblTMPreferenceCompany) Z
 			WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0
 			')	
 		END	
@@ -119,6 +122,8 @@ BEGIN
 		EXEC('
 			CREATE VIEW [dbo].[vyuTMSiteOrder]  
 			AS  
+
+
 			SELECT
 				A.intSiteID 
 				,C.strEntityNo AS strCustomerNumber
@@ -144,7 +149,7 @@ BEGIN
 				,intDispatchID AS intDispatchId
 				,H.strCategoryCode AS strItemClass
 				,A.intProduct AS intProductId
-				,A.intDeliveryTermID
+				,intDeliveryTermID = CASE WHEN Z.[ysnUseDeliveryTermOnCS] = 1 THEN A.intDeliveryTermID ELSE I.intTermsId END
 				,ISNULL(G.ysnDispatched,0) AS ysnDispatched
 				,A.intTaxStateID
 				,ISNULL(G.strWillCallStatus,'''') AS strWillCallStatus
@@ -196,6 +201,7 @@ BEGIN
 					,dblBalance = ISNULL(CI.dblTotalDue,0.0)
 					,dblBudgetAmount = ISNULL(CI.dblBudgetAmount,0.0)
 					,dblCreditLimit = ISNULL(CI.dblCreditLimit,0.0)
+					,Cus.intTermsId
 				FROM tblEMEntity Ent
 				INNER JOIN tblARCustomer Cus 
 					ON Ent.intEntityId = Cus.intEntityId
@@ -203,16 +209,17 @@ BEGIN
 					ON Ent.intEntityId = CI.intEntityCustomerId) I
 				ON B.intCustomerNumber = I.intEntityId
 			LEFT JOIN (
-						SELECT intSiteId = intSiteID
-							,intOpenCount = COUNT(intSiteID)
-						FROM tblTMWorkOrder 
-						WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
-													 FROM tblTMWorkStatusType 
-													 WHERE strWorkStatus = ''Open'' 
-														AND ysnDefault = 1)
-						GROUP BY intSiteID
-					) M
-				ON A.intSiteID = M.intSiteId
+					SELECT intSiteId = intSiteID
+						,intOpenCount = COUNT(intSiteID)
+					FROM tblTMWorkOrder 
+					WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
+													FROM tblTMWorkStatusType 
+													WHERE strWorkStatus = ''Open'' 
+													AND ysnDefault = 1)
+					GROUP BY intSiteID
+				) M
+					ON A.intSiteID = M.intSiteId
+			,(SELECT TOP 1 [ysnUseDeliveryTermOnCS] = ISNULL([ysnUseDeliveryTermOnCS],0) FROM tblTMPreferenceCompany) Z
 			WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0
 			
 		')
