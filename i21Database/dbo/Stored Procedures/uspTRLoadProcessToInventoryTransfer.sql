@@ -229,7 +229,9 @@ _PostOrUnPost:
 	-- Post the Inventory Transfers                                            
 	DECLARE @TransferId INT
 			,@intEntityId INT
-			,@strTransactionId NVARCHAR(50);
+			,@strTransactionId NVARCHAR(50)
+			,@ysnActualCostFromLocation BIT = 1
+			,@ysnActualCostToLocation BIT = 1
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddInventoryTransferResult) 
 	BEGIN
@@ -237,6 +239,37 @@ _PostOrUnPost:
 		SELECT TOP 1 
 				@TransferId = intInventoryTransferId  
 		FROM	#tmpAddInventoryTransferResult 
+
+		IF EXISTS(
+		SELECT TOP 1 1 FROM (
+		SELECT *
+		FROM	tblTRLoadHeader TL 	        
+				JOIN tblTRLoadDistributionHeader DH 
+					ON TL.intLoadHeaderId = DH.intLoadHeaderId		
+				JOIN tblTRLoadDistributionDetail DD 
+					ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+				JOIN tblTRLoadReceipt TR 
+					ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (SELECT Item FROM fnTRSplit(DD.strReceiptLink,','))
+		WHERE	TL.intLoadHeaderId = @intLoadHeaderId
+				AND TR.strOrigin = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId
+				AND TR.intItemId = DD.intItemId /* If distribution item is different from the received item, then this is an auto-blend scenario where received items are blended together to be distributed as a new item (ex. E10 is 10% ethanol and 90% gasoline). */
+		UNION ALL 
+
+		SELECT *
+		FROM	tblTRLoadHeader TL 	        
+				LEFT JOIN tblTRLoadDistributionHeader DH ON TL.intLoadHeaderId = DH.intLoadHeaderId		
+				LEFT JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+				LEFT JOIN vyuTRGetLoadBlendIngredient Blend ON Blend.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+				LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.intItemId = Blend.intIngredientItemId
+		WHERE	TL.intLoadHeaderId = @intLoadHeaderId
+			AND ISNULL(DD.strReceiptLink, '') = ''
+			AND TR.strOrigin = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId
+		) tblTransfers
+		WHERE intInventoryTransferId = @TransferId)
+		BEGIN
+			SET @ysnActualCostFromLocation = 0
+			SET @ysnActualCostToLocation = 1
+		END
   
 		-- Post the Inventory Transfer that was created
 		SELECT	@strTransactionId = strTransferNo 
@@ -248,7 +281,13 @@ _PostOrUnPost:
 		WHERE	[intEntityUserSecurityId] = @intUserId
 		if @ysnRecap = 0
 		BEGIN
-	    	EXEC dbo.uspICPostInventoryTransfer @ysnPostOrUnPost, 0, @strTransactionId, @intEntityId;			
+	    	EXEC dbo.uspICPostInventoryTransfer 
+					@ysnPost = @ysnPostOrUnPost
+					, @ysnRecap = 0
+					, @strTransactionId = @strTransactionId
+					, @intEntityUserSecurityId = @intEntityId
+					, @ysnActualCostFromLocation = @ysnActualCostFromLocation
+					, @ysnActualCostToLocation = @ysnActualCostToLocation
 		END
 		DELETE	FROM #tmpAddInventoryTransferResult 
 		WHERE	intInventoryTransferId = @TransferId
