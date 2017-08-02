@@ -39,7 +39,7 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	
 	UPDATE #DeliverySheetGrade SET Amount = 
-	ISNULL((SELECT SUM(QM.dblDiscountAmount) AS dblAppliedQty FROM tblSCDeliverySheet SCD
+	ISNULL((SELECT AVG(QM.dblGradeReading) AS dblAppliedQty FROM tblSCDeliverySheet SCD
 	LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
 	LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SCT.intTicketId
 	LEFT JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId

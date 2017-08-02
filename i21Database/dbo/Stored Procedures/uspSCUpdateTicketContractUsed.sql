@@ -23,7 +23,7 @@ BEGIN TRY
 	END
 	IF(ISNULL(@ysnStorage,0) = 0)
 		BEGIN
-			UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
+			UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0 AND strDistributionOption != 'SPL'
 			UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
 			, intContractSequence = CT.intContractSeq
 			, strContractLocation = CT.strLocationName
@@ -31,7 +31,7 @@ BEGIN TRY
 			, dblUnitPrice = CT.dblFutures
 			, dblUnitBasis = CT.dblBasis
 			FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
-			WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId
+			WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId AND SC.strDistributionOption != 'SPL'
 		END
 	ELSE
 	BEGIN
