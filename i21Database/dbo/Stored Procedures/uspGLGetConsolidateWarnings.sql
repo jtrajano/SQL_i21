@@ -29,7 +29,7 @@ BETWEEN dtmStartDate and dtmEndDate
 
 IF @intFiscalYearId IS NULL
 BEGIN
-	INSERT INTO ##ConsolidateResult
+	INSERT INTO ##ConsolidateResult ([ysnFiscalOpen] , [ysnUnpostedTrans],[strResult])
 	SELECT  0 , 0, ' Fiscal Period not existing in subsidiary company.' strResult
 	RETURN
 END
@@ -52,6 +52,6 @@ BEGIN
 	SELECT @ysnOpen = CASE WHEN @ysnOpen = 1 THEN 0 ELSE 1 END
 	SELECT @ysnUnpostedTrans = CASE WHEN @ysnUnpostedTrans = 1 THEN 0 ELSE 1 END
 	
-	INSERT INTO ##ConsolidateResult
+	INSERT INTO ##ConsolidateResult ([ysnFiscalOpen] , [ysnUnpostedTrans],[strResult])
 	SELECT @ysnOpen ysnFiscalOpen, @ysnUnpostedTrans ysnUnpostedTrans, @strResult strResult
 END
