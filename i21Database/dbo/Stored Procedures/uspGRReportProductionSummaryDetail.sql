@@ -232,7 +232,7 @@ BEGIN TRY
 	[dbo].[fnRemoveTrailingZeroes](@dblDryingandDiscountsOnLoadsIn) As dblTotalDiscountsBilled,
 	NULL As dblTotalODAFeesBilled,
 	[dbo].[fnRemoveTrailingZeroes](@dblTotalStorageBilled) As dblTotalStorageBilled,
-	[dbo].[fnRemoveTrailingZeroes](0.0) As dblTotalFreightBilled	
+	NULL As dblTotalFreightBilled	
 	FROM @StorageTransaction t1
     JOIN @StorageTransaction t2 ON t1.intSettleStorageKey >= t2.intSettleStorageKey
 	GROUP BY 
