@@ -2,9 +2,9 @@
 GO
 
 DECLARE @intCompanyId INT
-SELECT TOP 1 @intCompanyId =intCompanySetupID FROM tblSMCompanySetup
+SELECT TOP 1 @intCompanyId =intMultiCompanyId FROM tblSMCompanySetup
 
-UPDATE tblGLDetail set intCompanyId = @intCompanyId 
+UPDATE tblGLDetail set intMultiCompanyId = @intCompanyId 
 
 UPDATE tblGLJournal set intCompanyId = @intCompanyId
 
