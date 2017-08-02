@@ -11,7 +11,7 @@
 	, strDescription NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL
 	, strConfiguration NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, ysnConfiguration BIT NULL
-	, ysnDynamicConfiguration BIT NOT NULL
+	, ysnUserDefinedValue BIT NOT NULL
 	, strLastIndexOf NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL
 	, strSegment NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, intMasterId INT NULL

@@ -14,7 +14,7 @@ SELECT intReportingComponentConfigurationId
 	, RCC.strScheduleCode
 	, strConfiguration
 	, ysnConfiguration
-	, ysnDynamicConfiguration
+	, ysnUserDefinedValue
 	, strLastIndexOf
 	, strSegment
 	, intConfigurationSequence
