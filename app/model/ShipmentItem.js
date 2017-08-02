@@ -44,6 +44,7 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'intDockDoorId', type: 'int', allowNull: true },
         { name: 'strNotes', type: 'string' },
         { name: 'intSort', type: 'int', allowNull: true },
+
         { name: 'intDestinationWeightId', type: 'int', allowNull: true },
         { name: 'intDestinationGradeId', type: 'int', allowNull: true },
         { name: 'intDestinationQtyUOMId', type: 'int', allowNull: true },

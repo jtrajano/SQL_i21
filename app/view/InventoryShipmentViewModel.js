@@ -32,8 +32,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
     ],
 
     data: {
-        triggerAddRemoveLineItem: false,
-        hasDestinationWeights: false
+        triggerAddRemoveLineItem: false
     },
 
     stores: {
@@ -487,26 +486,16 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
             return true; 
         },       
-        hidePostButton: {
-            get: function(get) {
-                var posted = get('current.ysnPosted');
+        hidePostButton: function(get) {
+            var posted = get('current.ysnPosted');
 
-                switch (get('current.intSourceType')) {
-                    case 1: // Scale  
-                        if(get('current.tblICInventoryShipmentItems').data.items.length > 0) {
-                            var items = _.filter(get('current.tblICInventoryShipmentItems').data.items, function(d) { 
-                                return d.get('intDestinationWeightId') != null ||  d.get('intDestinationGradeId');
-                            });
-                            if(items && items.length > 0)
-                                return false;
-                        }; 
-                        return !get('hasDestinationWeights');
-                    default:  
-                        return posted;  
-                }
-            }
+            switch (get('current.intSourceType')) {
+                case 1: // Scale  
+                    return true; 
+                default:  
+                    return posted;  
+            }   
         },
-        
         hideUnpostButton: function(get) {
             var posted = get('current.ysnPosted');
 
