@@ -23,6 +23,15 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 
+	UPDATE tblTFProductCode
+	SET intMasterId = B.intMasterId
+	FROM @ProductCodes B
+    WHERE tblTFProductCode.intMasterId IS NULL
+	AND tblTFProductCode.intTaxAuthorityId = @TaxAuthorityId
+	AND tblTFProductCode.strProductCode COLLATE Latin1_General_CI_AS = B.strProductCode COLLATE Latin1_General_CI_AS 
+	AND tblTFProductCode.strProductCodeGroup  COLLATE Latin1_General_CI_AS = B.strProductCodeGroup COLLATE Latin1_General_CI_AS
+	AND tblTFProductCode.strProductCodeGroup  COLLATE Latin1_General_CI_AS = B.strProductCodeGroup COLLATE Latin1_General_CI_AS
+
 	MERGE	
 	INTO	tblTFProductCode 
 	WITH	(HOLDLOCK) 

@@ -50,7 +50,7 @@ BEGIN
 		-- Reporting Component Criteria
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentCriteria') 
 		BEGIN
-			EXEC('DELETE FROM tblTFReportingComponentCriteria')
+			EXEC('TRUNCATE TABLE tblTFReportingComponentCriteria')
 		END
 
 		-- Reporting Component Configuration
@@ -66,19 +66,19 @@ BEGIN
 		-- Reporting Component Field
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentField') 
 		BEGIN
-			EXEC('DELETE FROM tblTFReportingComponentField')
+			EXEC('TRUNCATE TABLE tblTFReportingComponentField')
 		END
 
 		-- Reporting Component Destination State
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentDestinationState') 
 		BEGIN
-			EXEC('DELETE FROM tblTFReportingComponentDestinationState')
+			EXEC('TRUNCATE TABLE tblTFReportingComponentDestinationState')
 		END
 
 		-- Reporting Component Origin State
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentOriginState') 
 		BEGIN
-			EXEC('DELETE FROM tblTFReportingComponentOriginState')
+			EXEC('TRUNCATE TABLE tblTFReportingComponentOriginState')
 		END
 
 		-- Origin Destination State
@@ -90,13 +90,13 @@ BEGIN
 		-- Reporting Component Product Code
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentProductCode') 
 		BEGIN
-			EXEC('DELETE FROM tblTFReportingComponentProductCode')
+			EXEC('TRUNCATE TABLE tblTFReportingComponentProductCode')
 		END
 
 		-- Filing Packet
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFFilingPacket') 
 		BEGIN
-			EXEC('DELETE FROM tblTFFilingPacket')
+			EXEC('TRUNCATE TABLE tblTFFilingPacket')
 		END
 
 		-- Tax Category
