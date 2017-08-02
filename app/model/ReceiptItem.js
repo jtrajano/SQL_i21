@@ -88,7 +88,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strForexRateType', type: 'string'},
         { name: 'dblForexRate', type: 'float', allowNull: true },
 
-        { name: 'dblOpenReceiveBeforeEdit', type: 'float', allowNull: true}
+        { name: 'dblOpenReceiveBeforeEdit', type: 'float', allowNull: true},
+        { name: 'dblGrossBeforeEdit', type: 'float', allowNull: true}
     ],
 
     validators: [

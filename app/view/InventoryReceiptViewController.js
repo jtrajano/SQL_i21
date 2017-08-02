@@ -999,7 +999,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (cepItem) {
             cepItem.on({
                 beforeedit: me.onItemBeforeEdit,
-                edit: me.onItemEdit,
+                edit: me.onItemEdit, // @Todo: This event is fired 
                 scope: me
             });
         }
@@ -3211,12 +3211,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var me = win.controller;
         var vw = win.viewModel;
         var currentReceiptItem = context.record;
-
+        
         // Save the dblOpenReceive value before edit. 
         if (context.field === 'dblOpenReceive' && currentReceiptItem){
             var dblOpenReceive = currentReceiptItem.get('dblOpenReceive');
             dblOpenReceive = Ext.isNumeric(dblOpenReceive) ? dblOpenReceive : 0.00; 
             currentReceiptItem.set('dblOpenReceiveBeforeEdit', dblOpenReceive);
+
+            var dblGross = currentReceiptItem.get('dblGross');
+            dblGross = Ext.isNumeric(dblGross) ? dblGross : 0.00; 
+            currentReceiptItem.set('dblGrossBeforeEdit', dblGross);
+
+            var dblNet = currentReceiptItem.get('dblNet');
+            dblNet = Ext.isNumeric(dblNet) ? dblNet : 0.00; 
+            currentReceiptItem.set('dblNetBeforeEdit', dblNet);
         }
     },
 
@@ -3298,6 +3306,70 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (dblOpenReceiveBeforeEdit !== dblOpenReceive){
                     me.calculateGrossNet(currentReceiptItem, 1);
                 }
+
+                var intItemUOMId = currentReceiptItem.get('intItemUOMId'),
+                    intGrossUOMId = currentReceiptItem.get('intWeightUOMId'),
+                    dblQty = currentReceiptItem.get('dblOpenReceiveBeforeEdit') ? currentReceiptItem.get('dblOpenReceiveBeforeEdit') : currentReceiptItem.get('dblOpenReceive'),
+                    dblProposedQty = context.value,
+                    dblProposedGrossQty = currentReceiptItem.get('dblGross');
+
+                var dblOriginalGross = currentReceiptItem.get('dblGrossBeforeEdit') ? currentReceiptItem.get('dblGrossBeforeEdit') : currentReceiptItem.get('dblGross');
+                var dblOriginalNet = currentReceiptItem.get('dblNetBeforeEdit') ? currentReceiptItem.get('dblNetBeforeEdit') : currentReceiptItem.get('dblNet');
+
+                currentReceiptItem.set('dblGross', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalGross / dblQty), 2));
+                currentReceiptItem.set('dblNet', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalNet / dblQty), 2));
+                // ic.utils.ajax({
+                //     url: '../Inventory/api/InventoryReceipt/CalculateGrossQtyRatio',
+                //     params: {
+                //         intItemUOMId: intItemUOMId,
+                //         intGrossUOMId: intGrossUOMId,
+                //         dblQty: dblQty,
+                //         dblProposedQty: dblProposedQty,
+                //         dblProposedGrossQty: dblProposedGrossQty
+                //     }
+                // })
+                // .subscribe(
+                //     function(response) {
+                //         if(response) {
+                //             var ratio = i21.ModuleMgr.Inventory.roundDecimalFormat(response.responseText, 2);
+                //             currentReceiptItem.set('dblGross', ratio);
+                //         }
+                //     },
+                //     function(response) {
+                //         console.log(response);
+                //     }
+                // )
+            }
+        }
+
+        if(context.field === 'dblGross') {
+            if(currentReceiptItem) {
+                var intItemUOMId = currentReceiptItem.get('intItemUOMId'),
+                    intGrossUOMId = currentReceiptItem.get('intWeightUOMId'),
+                    dblQty = currentReceiptItem.get('dblOpenReceiveBeforeEdit') ? 
+                        currentReceiptItem.get('dblOpenReceiveBeforeEdit') : currentReceiptItem.get('dblOpenReceive'),
+                    dblProposedQty = currentReceiptItem.get('dblOpenReceive'),
+                    dblProposedGrossQty = context.value;
+            
+            //     ic.utils.ajax({
+            //         url: '../Inventory/api/InventoryReceipt/CalculateGrossQtyRatio',
+            //         params: {
+            //             intItemUOMId: intItemUOMId,
+            //             intGrossUOMId: intGrossUOMId,
+            //             dblQty: dblQty,
+            //             dblProposedQty: dblProposedQty,
+            //             dblProposedGrossQty: dblProposedGrossQty
+            //         }
+            //     })
+            //     .subscribe(
+            //         function(response) {
+            //             var ratio = i21.ModuleMgr.Inventory.roundDecimalFormat(response.responseText, 2);
+            //             currentReceiptItem.set('dblGross', ratio);
+            //         },
+            //         function(response) {
+            //             console.log(response);
+            //         }
+            //     )
             }
         }
 

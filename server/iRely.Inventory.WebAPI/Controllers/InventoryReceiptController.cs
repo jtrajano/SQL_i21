@@ -384,5 +384,25 @@ namespace iRely.Inventory.WebApi
 
         }
 
+        [HttpGet]
+        [ActionName("CalculateGrossQtyRatio")]
+        public async Task<HttpResponseMessage> CalculateGrossQtyRatio(int intItemUOMId, int intGrossUOMId, decimal dblQty, decimal dblProposedQty, decimal dblProposedGrossQty)
+        {
+            try
+            {
+                var output = await _bl.CalculateGrossQtyRatio(intItemUOMId, intGrossUOMId, dblQty, dblProposedQty, dblProposedGrossQty);
+                return Request.CreateResponse(HttpStatusCode.OK, output);
+            }
+            catch(Exception ex)
+            {
+                var error = new
+                {
+                    message = ex.Message,
+                    success = false
+                };
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, error);
+            }
+        }
+
     }
 }

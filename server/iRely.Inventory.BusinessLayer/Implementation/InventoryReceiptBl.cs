@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using iRely.Inventory.Model;
 using iRely.Inventory.BusinessLayer;
 using System.Web.Http.ModelBinding;
+using System.Data.Entity.SqlServer;
+using System.Data.Entity.Core.Objects;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -1140,6 +1142,19 @@ namespace iRely.Inventory.BusinessLayer
                 saveResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
             return saveResult;
+        }
+
+        public async Task<decimal> CalculateGrossQtyRatio(int intItemUOMId, int intGrossUOMId, decimal dblQty, decimal dblProposedQty, decimal dblProposedGrossQty)
+        {
+            try
+            {
+                var db = (InventoryEntities)_db.ContextManager;
+                return await db.CalculateGrossQtyRatio(intItemUOMId, intGrossUOMId, dblQty, dblProposedQty, dblProposedGrossQty);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }
