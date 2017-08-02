@@ -24,7 +24,7 @@ END
 BEGIN 
 	-- Add the G/L entries from the temporary table to the permanent table (tblGLDetail)
 	DECLARE @intCompanyId INT
-	SELECT TOP 1 @intCompanyId=intCompanySetupID from tblSMCompanySetup
+	SELECT TOP 1 @intCompanyId=intMultiCompanyId from tblSMCompanySetup
 	DECLARE @dtmDateEntered DATETIME
 	INSERT INTO dbo.tblGLDetail (
 			[dtmDate]

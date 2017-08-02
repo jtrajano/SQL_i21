@@ -93,7 +93,7 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	--	   INSERT JOURNAL [HEADER]
 	--+++++++++++++++++++++++++++++++++
 	DECLARE @intCompanyId INT
-	SELECT TOP 1 @intCompanyId = intCompanySetupID FROM tblSMCompanySetup
+	SELECT TOP 1 @intCompanyId = intMultiCompanyId FROM tblSMCompanySetup
 	INSERT tblGLJournal (intCompanyId, dtmReverseDate,strJournalId,strTransactionType, dtmDate,strReverseLink,intCurrencyId,dblExchangeRate,dtmPosted,strDescription,
 							ysnPosted,intConcurrencyId,dtmDateEntered,intEntityId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
 	SELECT  @intCompanyId,

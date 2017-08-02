@@ -15,7 +15,7 @@ BEGIN
 	END
 	DELETE [dbo].[tblGLSummary]
 	DECLARE @intCompanyId INT
-	SELECT TOP 1 @intCompanyId = intCompanySetupID FROM tblSMCompanySetup 
+	SELECT TOP 1 @intCompanyId = intMultiCompanyId FROM tblSMCompanySetup 
 	INSERT INTO tblGLSummary
 	(intMultiCompanyId,intAccountId,dtmDate,dblDebit,dblCredit,dblDebitForeign, dblCreditForeign,dblDebitUnit,dblCreditUnit,strCode,intConcurrencyId)
 	SELECT
