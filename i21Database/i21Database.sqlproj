@@ -5549,6 +5549,7 @@
     <Build Include="dbo\Views\vyuMFGetSSCCDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetConsolidateWarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSpaceUtilization.sql" />
+    <Build Include="dbo\Views\vyuCMUndepositedPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
