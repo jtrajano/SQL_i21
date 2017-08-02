@@ -673,7 +673,7 @@ BEGIN
 		DECLARE @dblPrcOriginalPrice		NUMERIC(18,6)	
 		DECLARE @intPrcContractHeaderId		INT				
 		DECLARE @intPrcContractDetailId		INT				
-		DECLARE @intPrcContractNumber		INT				
+		DECLARE @intPrcContractNumber		NVARCHAR(MAX)				
 		DECLARE @intPrcContractSeq			INT				
 		DECLARE @strPrcPriceBasis			NVARCHAR(MAX)	
 		DECLARE @dblCalcQuantity			NUMERIC(18,6)
@@ -1021,7 +1021,7 @@ BEGIN
 		,@dblPrcOriginalPrice			= dblOriginalPrice
 		,@intPrcContractHeaderId		= intContractHeaderId
 		,@intPrcContractDetailId		= intContractDetailId
-		,@intPrcContractNumber			= intContractNumber
+		,@intPrcContractNumber			= strContractNumber
 		,@intPrcContractSeq				= intContractSeq
 		,@strPrcPriceBasis				= strPriceBasis
 		,@strPriceMethod   				= strPriceMethod
