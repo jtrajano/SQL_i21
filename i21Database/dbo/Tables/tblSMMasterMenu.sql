@@ -13,6 +13,7 @@
     [ysnIsLegacy]      BIT            DEFAULT ((0)) NOT NULL,
     [ysnLeaf]          BIT            DEFAULT ((1)) NOT NULL,
     [intSort]          INT            NULL,
+    [intRow]		   INT            NULL,
     [intConcurrencyId] INT            DEFAULT (1) NOT NULL,
     CONSTRAINT [PK_tblSMMasterMenu] PRIMARY KEY CLUSTERED ([intMenuID] ASC)
 );

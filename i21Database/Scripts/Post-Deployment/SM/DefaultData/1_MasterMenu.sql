@@ -4555,28 +4555,54 @@ SELECT @IntegrationParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuNa
 
 /* CATEGORY FOLDERS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Activities', N'Integration', @IntegrationParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Activities', N'Integration', @IntegrationParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId
 
+DECLARE @IntegrationActivitiesParentMenuId INT
+SELECT @IntegrationActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Integration', @IntegrationParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId
+
 DECLARE @IntegrationMaintenanceParentMenuId INT
-SELECT @IntegrationMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId
+SELECT @IntegrationMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Create', N'Integration', @IntegrationParentMenuId, N'Create', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0, intRow = 1 WHERE strMenuName = 'Create' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId
+
+DECLARE @IntegrationCreateParentMenuId INT
+SELECT @IntegrationCreateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationParentMenuId
 
 /* ADD TO RESPECTIVE CATEGORY */ 
-UPDATE tblSMMasterMenu SET intParentMenuID = @IntegrationMaintenanceParentMenuId WHERE intParentMenuID =  @IntegrationParentMenuId AND strCategory = 'Activity'
+UPDATE tblSMMasterMenu SET intParentMenuID = @IntegrationActivitiesParentMenuId WHERE intParentMenuID =  @IntegrationParentMenuId AND strCategory = 'Activity'
+UPDATE tblSMMasterMenu SET intParentMenuID = @IntegrationMaintenanceParentMenuId WHERE intParentMenuID =  @IntegrationParentMenuId AND strCategory = 'Maintenance'
+UPDATE tblSMMasterMenu SET intParentMenuID = @IntegrationCreateParentMenuId WHERE intParentMenuID =  @IntegrationParentMenuId AND strCategory = 'Create'
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Processes' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Processes' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Processes', N'Integration', @IntegrationMaintenanceParentMenuId, N'Processes', N'Activity', N'Screen', N'Integration.view.ProcessSetup?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Processes', N'Integration', @IntegrationActivitiesParentMenuId, N'Processes', N'Activity', N'Screen', N'Integration.view.ProcessSetup?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Integration.view.ProcessSetup?showSearch=true' WHERE strMenuName = 'Processes' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Integration.view.ProcessSetup?showSearch=true' WHERE strMenuName = 'Processes' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Connections' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Connections', N'Integration', @IntegrationMaintenanceParentMenuId, N'Connections', N'Activity', N'Screen', N'Integration.view.Connection?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Connections', N'Integration', @IntegrationMaintenanceParentMenuId, N'Connections', N'Maintenance', N'Screen', N'Integration.view.Connection?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Integration.view.Connection?showSearch=true' WHERE strMenuName = 'Connections' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Integration.view.Connection?showSearch=true' WHERE strMenuName = 'Connections' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Process' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'New Process', N'Integration', @IntegrationCreateParentMenuId, N'New Process', N'Activity', N'Screen', N'Integration.view.Connection?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Integration.view.ProcessSetup?action=new' WHERE strMenuName = 'New Process' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationCreateParentMenuId
 
 /* Fixed Assets */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = 0)

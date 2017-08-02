@@ -5,6 +5,7 @@ SELECT ISNULL(intUserRoleID, RoleMenu.intUserRoleId)  as intUserRoleId
 ,Menu.intParentMenuID as intParentMenuId
 ,[dbo].[fnSMHideOriginMenus] (strMenuName, CAST(MAX(CAST(RoleMenu.ysnVisible as INT)) as BIT)) as ysnVisible
 ,MIN(RoleMenu.intSort) as intSort
+,Menu.intRow as intRow
 ,strMenuName
 ,strModuleName
 ,Menu.strDescription
@@ -18,4 +19,4 @@ SELECT ISNULL(intUserRoleID, RoleMenu.intUserRoleId)  as intUserRoleId
 FROM vyuSMUserRoleSubRole SubRole
 RIGHT JOIN tblSMUserRoleMenu RoleMenu ON SubRole.intSubRoleId = RoleMenu.intUserRoleId
 INNER JOIN tblSMMasterMenu Menu ON RoleMenu.intMenuId = Menu.intMenuID
-GROUP BY ISNULL(intUserRoleID, RoleMenu.intUserRoleId), RoleMenu.intMenuId, Menu.intParentMenuID, strMenuName, strModuleName, Menu.strDescription, Menu.strCategory, strType, strCommand, strIcon, ysnExpanded, ysnIsLegacy, ysnLeaf
+GROUP BY ISNULL(intUserRoleID, RoleMenu.intUserRoleId), RoleMenu.intMenuId, Menu.intParentMenuID, strMenuName, strModuleName, Menu.strDescription, Menu.strCategory, strType, strCommand, strIcon, ysnExpanded, ysnIsLegacy, ysnLeaf, intRow
