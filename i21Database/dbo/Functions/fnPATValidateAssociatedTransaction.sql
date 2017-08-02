@@ -1,7 +1,8 @@
 ﻿CREATE FUNCTION [dbo].[fnPATValidateAssociatedTransaction]
 (
 	@transactionIds NVARCHAR(MAX),
-	@type INT -- 1 = Issued Stock, 2 = Retired Stock, 3 = Equity Payment, 4 = Voucher
+	@type INT, -- 1 = Issued Stock, 2 = Retired Stock, 3 = Equity Payment, 4 = Voucher
+	@transaction NVARCHAR(MAX)
 )
 RETURNS @returnTable TABLE
 (
@@ -57,14 +58,14 @@ BEGIN
 	ELSE IF (@type = 4)
 	BEGIN
 		INSERT INTO @returnTable
-		SELECT	'This voucher was created from Patronage Retire Stock - '+ CS.strCertificateNo +'. Unpost it from there.',
+		SELECT	'This voucher was created from Patronage Retire Stock - <strong>'+ CS.strCertificateNo +'</strong>. Unpost it from there.',
 				'Voucher',
 				APB.strBillId,
 				APB.intBillId
 		FROM tblAPBill APB
 		INNER JOIN tblPATCustomerStock CS
 			ON APB.intBillId = CS.intBillId
-		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions)
+		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions) AND @transaction != 'Patronage'
 	END
 
 	RETURN
