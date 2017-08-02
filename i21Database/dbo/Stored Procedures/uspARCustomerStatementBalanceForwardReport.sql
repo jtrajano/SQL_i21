@@ -202,12 +202,16 @@ ELSE
 	SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
 
 IF @dtmDateFrom IS NOT NULL
-	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
-ELSE 			  
-	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+	BEGIN
+		SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
+		SET @dtmDateToBF = DATEADD(DAYOFYEAR, -1, @dtmDateFrom)
+	END
+ELSE
+	BEGIN
+		SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+		SET @dtmDateToBF = DATEADD(DAYOFYEAR, -1, '01/01/1900')
+	END
 
-SET @dtmDateToBF = DATEADD(DAYOFYEAR, -1, @dtmDateFrom)
-	
 DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue', 'ysnReportDetail')
 
 SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
