@@ -15,9 +15,12 @@ SELECT L.intLoadId
 	,LD.dblTare
 	,LD.dblNet
 	,U.strUnitMeasure AS strWeightUnitMeasure
+	,U.intUnitMeasureId as intWeightUnitMeasure
 	,E.strName AS strVendor
+	,E.intEntityId as intEntityVendorId
 	,dblCost = ISNULL(AD.dblSeqPrice, 0)
 	,intCostUOMId = AD.intSeqPriceUOMId
+	,strCostUOM = AD.strSeqPriceUOM
 	,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 	,ysnSubCurrency = ISNULL(SubCurrency.ysnSubCurrency, 0)
 	,intForexRateTypeId = CD.intRateTypeId
