@@ -4,6 +4,8 @@
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
 	,@strBatchId NVARCHAR(40) = NULL OUTPUT
+	,@ysnActualCostFromLocation BIT = 1 
+	,@ysnActualCostToLocation BIT = 1
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -288,7 +290,7 @@ BEGIN
 				,Detail.intLotId 
 				,Detail.intFromSubLocationId
 				,Detail.intFromStorageLocationId
-				,Header.strActualCostId 
+				,CASE WHEN ISNULL(@ysnActualCostFromLocation, 1) = 1 THEN Header.strActualCostId ELSE NULL END 
 		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 				LEFT JOIN dbo.tblICItemUOM ItemUOM
@@ -358,7 +360,7 @@ BEGIN
 				,Detail.intNewLotId
 				,Detail.intToSubLocationId
 				,Detail.intToStorageLocationId
-				,Header.strActualCostId
+				,CASE WHEN ISNULL(@ysnActualCostToLocation, 1) = 1 THEN Header.strActualCostId ELSE NULL END 
 		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 				INNER JOIN dbo.tblICInventoryTransaction FromStock
