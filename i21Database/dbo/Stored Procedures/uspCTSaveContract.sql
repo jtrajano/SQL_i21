@@ -29,7 +29,8 @@ BEGIN TRY
 			@ysnOnceApproved			BIT,
 			@ysnFeedOnApproval			BIT,
 			@intTransactionId			INT,
-			@intApproverId				INT
+			@intApproverId				INT,
+			@intCompanyLocationId		INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber
@@ -71,7 +72,8 @@ BEGIN TRY
 				@intNetWeightUOMId	=	intNetWeightUOMId,
 				@dblNetWeight		=	dblNetWeight,
 				@intItemUOMId		=	intItemUOMId,
-				@intContractStatusId=	intContractStatusId
+				@intContractStatusId=	intContractStatusId,
+				@intCompanyLocationId = intCompanyLocationId
 
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
@@ -94,6 +96,8 @@ BEGIN TRY
 		END
 
 		EXEC uspLGUpdateLoadItem @intContractDetailId
+		EXEC uspLGUpdateCompanyLocation @intContractDetailId
+		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
 
 		EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
 
