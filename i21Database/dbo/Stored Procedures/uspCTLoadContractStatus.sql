@@ -69,8 +69,7 @@ BEGIN TRY
 		JOIn	tblICUnitMeasure					MM	ON	MM.intUnitMeasureId				=	MA.intUnitMeasureId			LEFT
 		JOIN	tblCTPriceFixationDetail			PD	ON	PD.intFutOptTransactionId		=	SY.intFutOptTransactionId	LEFT
 		JOIN	tblCTPriceFixation					PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
-		JOIN	tblCTContractHeader					CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId	
-														AND PF.intContractHeaderId			=	@intContractHeaderId		LEFT
+		JOIN	tblCTContractHeader					CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId		LEFT
 		JOIN	tblCTContractDetail					CD	ON	CD.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN  CD.intContractDetailId	ELSE PF.intContractDetailId	END
 														AND	CD.intContractHeaderId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN  PF.intContractHeaderId	ELSE CD.intContractHeaderId	END	LEFT
 	
@@ -78,7 +77,7 @@ BEGIN TRY
 		JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CD.intItemId				
 														AND	IU.intUnitMeasureId				=	CU.intUnitMeasureId			LEFT
 		JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId	
-		WHERE	PF.intPriceFixationId IS NOT NULL
+		WHERE	PF.intPriceFixationId IS NOT NULL AND PF.intContractHeaderId			=	@intContractHeaderId
 	END
 	ELSE IF @strGrid = 'vyuCTContStsQuality'
 	BEGIN
@@ -191,6 +190,7 @@ BEGIN TRY
 				FROM	tblLGLoadDetailContainerLink		CC  
 				JOIN	tblLGLoadDetail						CQ	ON	CQ.intLoadDetailId				=	CC.intLoadDetailId 
 				JOIN	tblLGAllocationDetail				AD	ON	AD.intPContractDetailId			=	CQ.intPContractDetailId 
+																AND	CQ.intSContractDetailId			=	@intContractDetailId
 				JOIN	tblLGLoad							SH	ON	SH.intLoadId					=	CC.intLoadId  
 				JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CQ.intItemId	 
 																AND	IU.intUnitMeasureId				=	SH.intWeightUnitMeasureId 
