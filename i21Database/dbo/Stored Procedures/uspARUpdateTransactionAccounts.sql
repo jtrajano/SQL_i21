@@ -27,6 +27,16 @@ DECLARE @LineItemAccounts AS TABLE(
 IF ISNULL(@TransactionType, 0) = 1	--Invoice
 	BEGIN
 	
+		UPDATE ARI SET ARI.intAccountId = ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, SMCL.intProfitCenter), ARI.intAccountId)
+		FROM
+			tblARInvoice ARI
+		INNER JOIN
+			tblSMCompanyLocation SMCL
+				ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
+		INNER JOIN
+			@Ids PID
+				ON ARI.[intInvoiceId] = PID.[intId]
+
 		INSERT INTO @LineItemAccounts(
 			 [intDetailId]
 			,[intAccountId]
