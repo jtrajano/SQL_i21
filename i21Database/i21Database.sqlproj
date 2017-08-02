@@ -5551,7 +5551,6 @@
     <Build Include="dbo\Stored Procedures\uspGLGetConsolidateWarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSpaceUtilization.sql" />
     <Build Include="dbo\Views\vyuCMUndepositedPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteOrderLabels.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWorkOrder.sql" />
     <Build Include="dbo\Tables\tblMFLotSnapshot.sql" />
