@@ -441,7 +441,7 @@ BEGIN TRY
 							,[dblUnits] = ARD.dblQtyOrdered
 							,[dtmHistoryDate]=GetDATE()
 							,[dblPaidAmount]=ARD.dblPrice							
-							,[strType]='Generated Invoice'
+							,[strType]='Generated Storage Invoice'
 							,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
 							 FROM tblARInvoice AR
 							 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId

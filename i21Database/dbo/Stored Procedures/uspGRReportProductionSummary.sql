@@ -14,6 +14,8 @@ BEGIN TRY
 			@strCountry				NVARCHAR(500),
 			@intEntityId			INT,
 			@intItemId				INT,
+			@dtmStartDate			DateTime,
+			@dtmEndDate			    DateTime,
 			@strItemNo				NVARCHAR(100),
 			@intStorageTypeId		INT,
 			@strStorageType			NVARCHAR(100),						
@@ -63,7 +65,15 @@ BEGIN TRY
 	SELECT	@intEntityId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intEntityId'
-	
+
+	SELECT	@dtmStartDate = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'dtmStartDate'
+
+	SELECT	@dtmEndDate = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'dtmEndDate'
+
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
 			@strCounty		=	CASE WHEN LTRIM(RTRIM(strCounty)) = '' THEN NULL ELSE LTRIM(RTRIM(strCounty)) END,
@@ -78,25 +88,33 @@ BEGIN TRY
 
 	SELECT	
 	DISTINCT
-		@strCompanyName + ', '  + CHAR(13)+CHAR(10) +
-		ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
-		ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
-		AS	strCompanyAddress,
-		LTRIM(RTRIM(EY.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
-		ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-		ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
-		ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) END,'') + 
-		ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
-		ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'')
+		  @strCompanyName  
+	    + CHAR(13)+CHAR(10)
+		+ ISNULL(@strAddress,'')  
+		+ CHAR(13)+CHAR(10) 
+		+ ISNULL(@strCity,'') + ISNULL(', '+@strState,'') +' '+ISNULL(@strZip, '')
+		AS	strCompanyAddress,		
+		
+		LTRIM(RTRIM(EY.strEntityName)) + 
+		+ CHAR(13)+CHAR(10) 
+		+ ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') 
+		+ CHAR(13)+CHAR(10) 
+		+ ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') 
+		+ ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) END,'')
+		+ ' '+ ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') 		
 		AS	strEntityAddress,			
 		@strItemNo AS strItemNo,			
 		@strStorageType+' Statement' AS strStorageType,
-		@intEntityId AS intEntityId,
+		EY.intEntityId AS intEntityId,
 		@intItemId   AS intItemId,
 		@intStorageTypeId AS intStorageTypeId,
-		EY.strVendorAccountNum AS strVendorAccountNum
+		EY.strVendorAccountNum AS strVendorAccountNum,
+		@dtmStartDate AS dtmStartDate,
+		CASE WHEN @dtmEndDate IS NULL THEN GetDATE()+3650 ELSE @dtmEndDate END AS dtmEndDate
 	FROM vyuCTEntity EY	
-	WHERE EY.intEntityId=@intEntityId
+	JOIN tblGRCustomerStorage CS ON CS.intEntityId =CASE WHEN @intEntityId>0 THEN @intEntityId ELSE EY.intEntityId END
+	AND CS.intStorageTypeId=@intStorageTypeId AND CS.intItemId=@intItemId
+	WHERE EY.intEntityId= CASE WHEN @intEntityId>0 THEN @intEntityId ELSE EY.intEntityId END
 					
 
 END TRY

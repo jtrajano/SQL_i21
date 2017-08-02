@@ -2,7 +2,6 @@
 AS
 SELECT DISTINCT
 ST.intStorageScheduleTypeId
-,CS.intEntityId
 ,CS.intItemId
 ,Item.strItemNo
 ,Item.strDescription
