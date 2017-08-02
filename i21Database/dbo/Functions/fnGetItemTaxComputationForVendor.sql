@@ -128,6 +128,7 @@ BEGIN
 					,@CalculationMethod	NVARCHAR(30)
 					,@CheckoffTax		BIT
 					,@TaxExempt			BIT
+					,@TaxOnly			BIT
 					
 			SELECT TOP 1 
 				 @Id			= [Id]
@@ -146,6 +147,7 @@ BEGIN
 				,@CalculationMethod	= [strCalculationMethod]
 				,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
+				,@TaxOnly			= ISNULL([ysnTaxOnly],0)
 			FROM
 				@ItemTaxes
 			WHERE [Id] = @Id
@@ -207,7 +209,7 @@ BEGIN
 						,@TaxRate					= [dblRate]
 						,@TaxCalculationMethod		= [strCalculationMethod]
 						,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)
-						,@OtherTaxAmount			= 0.000000
+						,@OtherTaxAmount			= @ZeroDecimal
 					FROM
 						@TaxableByOtherTaxes
 					WHERE
@@ -217,6 +219,11 @@ BEGIN
 						
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
 					BEGIN
+						IF @TaxOnly = 1
+							SET @TaxableAmount = @ZeroDecimal
+						ELSE
+							SET @TaxableAmount	= ISNULL(@ItemCost, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
+
 						IF(@TaxAdjustedTax = 1)
 						BEGIN
 							SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax
