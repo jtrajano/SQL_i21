@@ -80,14 +80,20 @@ INSERT INTO @PostInvoiceData(
 	,[intLoadDistributionHeaderId]
 	,[intLoadId]
 	,[intFreightTermId]
+	,[strActualCostId]
 	,[intPeriodsToAccrue]
 	,[ysnAccrueLicense]
+	,[intSplitId]
+	,[dblSplitPercent]
+	,[ysnSplitted]
+	,[ysnImpactInventory]
 	,[intEntityId]
 	,[ysnPost]
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[intItemUOMId]
 	,[intDiscountAccountId]
+	,[intCustomerStorageId]
 	,[intStorageScheduleTypeId]
 	,[intSubLocationId]
 	,[intStorageLocationId]
@@ -100,7 +106,7 @@ INSERT INTO @PostInvoiceData(
 	,[intUserId]
 	,[ysnAllowOtherUserToPost]
 	)
-	SELECT DISTINCT
+SELECT DISTINCT
 	 [intInvoiceId]					= ARI.[intInvoiceId]
 	,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 	,[strTransactionType]			= ARI.[strTransactionType]
@@ -122,14 +128,20 @@ INSERT INTO @PostInvoiceData(
 	,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 	,[intLoadId]					= ARI.[intLoadId]
 	,[intFreightTermId]				= ARI.[intFreightTermId]
+	,[strActualCostId]				= ARI.[strActualCostId]
 	,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 	,[ysnAccrueLicense]				= II.[ysnAccrueLicense]
+	,[intSplitId]					= ARI.[intSplitId]
+	,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+	,[ysnSplitted]					= ARI.[ysnSplitted]
+	,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 	,[intEntityId]					= ARI.[intEntityId]
 	,[ysnPost]						= @Post
 	,[intInvoiceDetailId]			= NULL
 	,[intItemId]					= NULL
 	,[intItemUOMId]					= NULL
 	,[intDiscountAccountId]			= @DiscountAccountId
+	,[intCustomerStorageId]			= NULL
 	,[intStorageScheduleTypeId]		= NULL
 	,[intSubLocationId]				= NULL
 	,[intStorageLocationId]			= NULL
@@ -140,7 +152,7 @@ INSERT INTO @PostInvoiceData(
 	,[strBatchId]					= @BatchIdUsed
 	,[strPostingMessage]			= ''
 	,[intUserId]					= @UserEntityID
-	,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+	,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost		
 FROM
 	tblARInvoice ARI WITH (NOLOCK) 
 INNER JOIN @InvoiceIds II 
@@ -204,14 +216,20 @@ IF @IntegrationLogId IS NOT NULL
 			,[intLoadDistributionHeaderId]
 			,[intLoadId]
 			,[intFreightTermId]
+			,[strActualCostId]
 			,[intPeriodsToAccrue]
 			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]
+			,[ysnSplitted]
+			,[ysnImpactInventory]
 			,[intEntityId]
 			,[ysnPost]
 			,[intInvoiceDetailId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[intDiscountAccountId]
+			,[intCustomerStorageId]
 			,[intStorageScheduleTypeId]
 			,[intSubLocationId]
 			,[intStorageLocationId]
@@ -224,7 +242,7 @@ IF @IntegrationLogId IS NOT NULL
 			,[intUserId]
 			,[ysnAllowOtherUserToPost]
 			)
-			SELECT DISTINCT
+		SELECT DISTINCT
 			 [intInvoiceId]					= ARI.[intInvoiceId]
 			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 			,[strTransactionType]			= ARI.[strTransactionType]
@@ -246,14 +264,20 @@ IF @IntegrationLogId IS NOT NULL
 			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 			,[intLoadId]					= ARI.[intLoadId]
 			,[intFreightTermId]				= ARI.[intFreightTermId]
+			,[strActualCostId]				= ARI.[strActualCostId]
 			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 			,[ysnAccrueLicense]				= ARIILD.[ysnAccrueLicense]
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 			,[intEntityId]					= ARI.[intEntityId]
 			,[ysnPost]						= @Post
 			,[intInvoiceDetailId]			= NULL
 			,[intItemId]					= NULL
 			,[intItemUOMId]					= NULL
 			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
 			,[intStorageScheduleTypeId]		= NULL
 			,[intSubLocationId]				= NULL
 			,[intStorageLocationId]			= NULL
@@ -264,7 +288,7 @@ IF @IntegrationLogId IS NOT NULL
 			,[strBatchId]					= @BatchIdUsed
 			,[strPostingMessage]			= ''
 			,[intUserId]					= @UserEntityID
-			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost		
         FROM
             dbo.tblARInvoice ARI WITH (NOLOCK) 
         INNER JOIN
@@ -303,14 +327,20 @@ IF(@BeginDate IS NOT NULL)
 			,[intLoadDistributionHeaderId]
 			,[intLoadId]
 			,[intFreightTermId]
+			,[strActualCostId]
 			,[intPeriodsToAccrue]
 			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]
+			,[ysnSplitted]
+			,[ysnImpactInventory]
 			,[intEntityId]
 			,[ysnPost]
 			,[intInvoiceDetailId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[intDiscountAccountId]
+			,[intCustomerStorageId]
 			,[intStorageScheduleTypeId]
 			,[intSubLocationId]
 			,[intStorageLocationId]
@@ -323,7 +353,7 @@ IF(@BeginDate IS NOT NULL)
 			,[intUserId]
 			,[ysnAllowOtherUserToPost]
 			)
-			SELECT DISTINCT
+		SELECT DISTINCT
 			 [intInvoiceId]					= ARI.[intInvoiceId]
 			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 			,[strTransactionType]			= ARI.[strTransactionType]
@@ -345,14 +375,20 @@ IF(@BeginDate IS NOT NULL)
 			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 			,[intLoadId]					= ARI.[intLoadId]
 			,[intFreightTermId]				= ARI.[intFreightTermId]
+			,[strActualCostId]				= ARI.[strActualCostId]
 			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 			,[ysnAccrueLicense]				= 0
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 			,[intEntityId]					= ARI.[intEntityId]
 			,[ysnPost]						= @Post
 			,[intInvoiceDetailId]			= NULL
 			,[intItemId]					= NULL
 			,[intItemUOMId]					= NULL
 			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
 			,[intStorageScheduleTypeId]		= NULL
 			,[intSubLocationId]				= NULL
 			,[intStorageLocationId]			= NULL
@@ -363,7 +399,7 @@ IF(@BeginDate IS NOT NULL)
 			,[strBatchId]					= @BatchIdUsed
 			,[strPostingMessage]			= ''
 			,[intUserId]					= @UserEntityID
-			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost		
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		WHERE DATEADD(dd, DATEDIFF(dd, 0, ARI.[dtmDate]), 0) BETWEEN @BeginDate AND @EndDate
 		AND (ARI.[strTransactionType] = @TransType OR @TransType = 'all')
@@ -393,14 +429,20 @@ IF(@BeginTransaction IS NOT NULL)
 			,[intLoadDistributionHeaderId]
 			,[intLoadId]
 			,[intFreightTermId]
+			,[strActualCostId]
 			,[intPeriodsToAccrue]
 			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]
+			,[ysnSplitted]
+			,[ysnImpactInventory]
 			,[intEntityId]
 			,[ysnPost]
 			,[intInvoiceDetailId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[intDiscountAccountId]
+			,[intCustomerStorageId]
 			,[intStorageScheduleTypeId]
 			,[intSubLocationId]
 			,[intStorageLocationId]
@@ -413,7 +455,7 @@ IF(@BeginTransaction IS NOT NULL)
 			,[intUserId]
 			,[ysnAllowOtherUserToPost]
 			)
-			SELECT DISTINCT
+		SELECT DISTINCT
 			 [intInvoiceId]					= ARI.[intInvoiceId]
 			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 			,[strTransactionType]			= ARI.[strTransactionType]
@@ -435,14 +477,20 @@ IF(@BeginTransaction IS NOT NULL)
 			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 			,[intLoadId]					= ARI.[intLoadId]
 			,[intFreightTermId]				= ARI.[intFreightTermId]
+			,[strActualCostId]				= ARI.[strActualCostId]
 			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 			,[ysnAccrueLicense]				= 0
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 			,[intEntityId]					= ARI.[intEntityId]
 			,[ysnPost]						= @Post
 			,[intInvoiceDetailId]			= NULL
 			,[intItemId]					= NULL
 			,[intItemUOMId]					= NULL
 			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
 			,[intStorageScheduleTypeId]		= NULL
 			,[intSubLocationId]				= NULL
 			,[intStorageLocationId]			= NULL
@@ -453,7 +501,7 @@ IF(@BeginTransaction IS NOT NULL)
 			,[strBatchId]					= @BatchIdUsed
 			,[strPostingMessage]			= ''
 			,[intUserId]					= @UserEntityID
-			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost		
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		WHERE intInvoiceId BETWEEN @BeginTransaction AND @EndTransaction
 		AND (strTransactionType = @TransType OR @TransType = 'all')
@@ -532,14 +580,20 @@ BEGIN TRY
 							,[intLoadDistributionHeaderId]
 							,[intLoadId]
 							,[intFreightTermId]
+							,[strActualCostId]
 							,[intPeriodsToAccrue]
 							,[ysnAccrueLicense]
+							,[intSplitId]
+							,[dblSplitPercent]
+							,[ysnSplitted]
+							,[ysnImpactInventory]
 							,[intEntityId]
 							,[ysnPost]
 							,[intInvoiceDetailId]
 							,[intItemId]
 							,[intItemUOMId]
 							,[intDiscountAccountId]
+							,[intCustomerStorageId]
 							,[intStorageScheduleTypeId]
 							,[intSubLocationId]
 							,[intStorageLocationId]
@@ -552,7 +606,7 @@ BEGIN TRY
 							,[intUserId]
 							,[ysnAllowOtherUserToPost]
 							)
-							SELECT DISTINCT
+						SELECT DISTINCT
 							 [intInvoiceId]					= ARI.[intInvoiceId]
 							,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
 							,[strTransactionType]			= ARI.[strTransactionType]
@@ -574,14 +628,20 @@ BEGIN TRY
 							,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 							,[intLoadId]					= ARI.[intLoadId]
 							,[intFreightTermId]				= ARI.[intFreightTermId]
+							,[strActualCostId]				= ARI.[strActualCostId]
 							,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
 							,[ysnAccrueLicense]				= 0
+							,[intSplitId]					= ARI.[intSplitId]
+							,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+							,[ysnSplitted]					= ARI.[ysnSplitted]
+							,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
 							,[intEntityId]					= ARI.[intEntityId]
 							,[ysnPost]						= @Post
 							,[intInvoiceDetailId]			= NULL
 							,[intItemId]					= NULL
 							,[intItemUOMId]					= NULL
 							,[intDiscountAccountId]			= @DiscountAccountId
+							,[intCustomerStorageId]			= NULL
 							,[intStorageScheduleTypeId]		= NULL
 							,[intSubLocationId]				= NULL
 							,[intStorageLocationId]			= NULL
@@ -592,7 +652,7 @@ BEGIN TRY
 							,[strBatchId]					= @BatchIdUsed
 							,[strPostingMessage]			= ''
 							,[intUserId]					= @UserEntityID
-							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost		
 						FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 						WHERE ARI.[ysnPosted] = 0 
 							AND intInvoiceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd))
