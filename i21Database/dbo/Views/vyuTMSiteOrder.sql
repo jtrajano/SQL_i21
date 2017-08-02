@@ -1,5 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuTMSiteOrder]  
 AS  
+
+
 SELECT
 	A.intSiteID 
 	,C.strEntityNo AS strCustomerNumber
@@ -25,7 +27,7 @@ SELECT
 	,intDispatchID AS intDispatchId
 	,H.strCategoryCode AS strItemClass
 	,A.intProduct AS intProductId
-	,A.intDeliveryTermID
+	,intDeliveryTermID = CASE WHEN Z.[ysnUseDeliveryTermOnCS] = 1 THEN A.intDeliveryTermID ELSE I.intTermsId END
 	,ISNULL(G.ysnDispatched,0) AS ysnDispatched
 	,A.intTaxStateID
 	,ISNULL(G.strWillCallStatus,'') AS strWillCallStatus
@@ -77,6 +79,7 @@ INNER JOIN (
 		,dblBalance = ISNULL(CI.dblTotalDue,0.0)
 		,dblBudgetAmount = ISNULL(CI.dblBudgetAmount,0.0)
 		,dblCreditLimit = ISNULL(CI.dblCreditLimit,0.0)
+		,Cus.intTermsId
 	FROM tblEMEntity Ent
 	INNER JOIN tblARCustomer Cus 
 		ON Ent.intEntityId = Cus.intEntityCustomerId
@@ -94,4 +97,5 @@ LEFT JOIN (
 		GROUP BY intSiteID
 	) M
 		ON A.intSiteID = M.intSiteId
+,(SELECT TOP 1 [ysnUseDeliveryTermOnCS] = ISNULL([ysnUseDeliveryTermOnCS],0) FROM tblTMPreferenceCompany) Z
 WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0
