@@ -1,11 +1,22 @@
-﻿-- Update Component Type from 5(EFile Main) to 4(EFile). EFile Main is obsolete
+﻿
+PRINT('MFT Cleanup - Start')
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransaction') 
+BEGIN
+	PRINT('Truncate tblTFTransaction')
+    EXEC('TRUNCATE TABLE tblTFTransaction')
+END
+
+-- Update Component Type from 5(EFile Main) to 4(EFile). EFile Main is obsolete
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND COLUMN_NAME = 'intComponentTypeId') 
 BEGIN
+	PRINT('Update obsolete Component Type')
     EXEC('UPDATE tblTFReportingComponent SET intComponentTypeId = 4 WHERE intComponentTypeId = 5')
 END
 
 IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
 BEGIN
+	PRINT('Create tblSMCleanupLog')
 	CREATE TABLE [dbo].[tblSMCleanupLog]
 	(
 		[intCleanupLogId] INT NOT NULL PRIMARY KEY IDENTITY,
@@ -23,7 +34,7 @@ BEGIN
 	IF NOT EXISTS(SELECT * FROM  tblSMCleanupLog WHERE strModuleName = 'MFT' AND strDesription = 'Overall-Cleanup' AND ysnActive = 1) 
 	BEGIN
 		
-		PRINT('MFT Cleanup - Start')
+		PRINT('Cleanup MFT Tables')
 
 		-- Tax Authority
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxAuthority' AND COLUMN_NAME = 'intMasterId') 
@@ -127,7 +138,7 @@ BEGIN
 		-- Reporting Component
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent') 
 		BEGIN
-			EXEC('DELETE FROM tblTFReportingComponent WHERE intReportingComponentId NOT IN (SELECT DISTINCT intReportingComponentId FROM tblTFTransaction WHERE intReportingComponentId IS NOT NULL)')
+			EXEC('DELETE FROM tblTFReportingComponent')
 		END
 
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND COLUMN_NAME = 'intMasterId') 
@@ -137,7 +148,7 @@ BEGIN
 
 		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)
 
-		PRINT('MFT Cleanup - END')
-
 	END
 END
+
+PRINT('MFT Cleanup - END')
