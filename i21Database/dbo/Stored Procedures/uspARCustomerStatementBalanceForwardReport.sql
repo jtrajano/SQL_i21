@@ -463,20 +463,11 @@ SELECT DISTINCT
 	, 1
 	, ISNULL(BALANCEFORWARD.dblTotalAR, 0)
 	, 0
-	, CUSTOMER.strFullAddress
-	, COMPANY.strCompanyAddress
-	, COMPANY.strCompanyName
-FROM @temp_balanceforward_table BALANCEFORWARD
-INNER JOIN (
-	SELECT intEntityCustomerId
-		 , strFullAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, strBillToLocationName, strBillToAddress, strBillToCity, strBillToState, strBillToZipCode, strBillToCountry, NULL, NULL)
-	FROM dbo.vyuARCustomer C		
-) CUSTOMER ON BALANCEFORWARD.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-OUTER APPLY (
-	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.fnARFormatCustomerAddress(strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL)
-	FROM dbo.tblSMCompanySetup
-) COMPANY
+	, STATEMENTFORWARD.strFullAddress
+	, STATEMENTFORWARD.strCompanyAddress
+	, STATEMENTFORWARD.strCompanyName
+FROM @temp_statement_table STATEMENTFORWARD
+    LEFT JOIN @temp_balanceforward_table BALANCEFORWARD ON STATEMENTFORWARD.intEntityCustomerId = BALANCEFORWARD.intEntityCustomerId    
 
 MERGE INTO tblARStatementOfAccount AS Target
 USING (SELECT strCustomerNumber, @dtmDateTo, SUM(ISNULL(dblBalance, 0))
