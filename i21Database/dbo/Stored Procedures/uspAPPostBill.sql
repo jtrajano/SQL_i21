@@ -66,6 +66,7 @@ DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 DECLARE @validBillIds NVARCHAR(MAX)
 DECLARE @billIds NVARCHAR(MAX)
 DECLARE @totalRecords INT
+DECLARE @costAdjustmentResult INT;
 
 -- Get the functional currency
 BEGIN 
@@ -303,7 +304,7 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 			dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
 		) 
-		
+
 IF ISNULL(@post,0) = 1
 BEGIN	
 
@@ -453,6 +454,20 @@ BEGIN
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
 			,@intEntityUserSecurityId = @userId
+
+		--DELETE FAILED BILLS
+		DELETE A
+		FROM #tmpPostBillData A
+		WHERE EXISTS (
+			SELECT 1
+			FROM tblAPBill B
+			INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intInventoryReceiptItemId > 0
+			INNER JOIN @adjustedEntries D ON B.intBillId = D.intTransactionId AND B.strBillId = D.strTransactionId
+			WHERE A.intBillId = B.intBillId
+			AND EXISTS (
+				SELECT 1 FROM tblICPostResult E WHERE E.strBatchNumber = @batchId AND E.intTransactionId = C.intInventoryReceiptItemId
+			)
+		)
 	END
 END
 ELSE
