@@ -321,7 +321,7 @@ BEGIN
 	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT * FROM temp_availablecustomer_table ORDER BY strCustomerName
+	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
 	SET NOCOUNT OFF;
 END
 
