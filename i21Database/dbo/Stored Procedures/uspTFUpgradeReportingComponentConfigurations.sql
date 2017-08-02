@@ -39,8 +39,7 @@ BEGIN TRY
 		SELECT * FROM #tmpRCC
 	) AS SOURCE
 		ON TARGET.intMasterId = SOURCE.intMasterId
-	
-	WHEN MATCHED THEN 
+	WHEN MATCHED AND SOURCE.ysnUserDefinedValue = 0 THEN 
 		UPDATE
 		SET 
 			intReportingComponentId		= SOURCE.intReportingComponentId
@@ -51,7 +50,8 @@ BEGIN TRY
 			, strDescription			= SOURCE.strDescription
 			, strScheduleCode			= SOURCE.strScheduleList
 			, ysnConfiguration			= SOURCE.ysnConfiguration
-			, ysnDynamicConfiguration	= SOURCE.ysnDynamicConfiguration
+			, ysnUserDefinedValue		= SOURCE.ysnUserDefinedValue
+			, strConfiguration			= CASE WHEN SOURCE.ysnUserDefinedValue = 0 THEN SOURCE.strConfiguration ELSE TARGET.strConfiguration END
 			, strLastIndexOf			= SOURCE.strLastIndexOf
 			, strSegment				= SOURCE.strSegment
 			, intConfigurationSequence	= SOURCE.intSort
@@ -66,7 +66,7 @@ BEGIN TRY
 			, strScheduleCode
 			, strConfiguration
 			, ysnConfiguration
-			, ysnDynamicConfiguration
+			, ysnUserDefinedValue
 			, strLastIndexOf
 			, strSegment
 			, intConfigurationSequence
@@ -82,7 +82,7 @@ BEGIN TRY
 			, SOURCE.strScheduleList
 			, SOURCE.strConfiguration
 			, SOURCE.ysnConfiguration
-			, SOURCE.ysnDynamicConfiguration
+			, SOURCE.ysnUserDefinedValue
 			, SOURCE.strLastIndexOf
 			, SOURCE.strSegment
 			, SOURCE.intSort

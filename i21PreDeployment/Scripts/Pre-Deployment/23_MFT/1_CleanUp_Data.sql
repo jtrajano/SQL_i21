@@ -43,7 +43,11 @@ BEGIN
 		END
 
 		-- Reporting Component Configuration
-		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentConfiguration') 
+		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentConfiguration' AND COLUMN_NAME = 'ysnUserDefinedValue' ) 
+		BEGIN
+			EXEC('DELETE FROM tblTFReportingComponentConfiguration WHERE ysnUserDefinedValue = 0')
+		END
+		ELSE IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentConfiguration' AND COLUMN_NAME = 'ysnDynamicConfiguration' ) 
 		BEGIN
 			EXEC('DELETE FROM tblTFReportingComponentConfiguration')
 		END
