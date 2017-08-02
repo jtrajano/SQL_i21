@@ -17,7 +17,6 @@
 	[intConcurrencyId] [int] NULL DEFAULT ((1)),
     CONSTRAINT [PK_tblPRTemplateDeduction] PRIMARY KEY ([intTemplateDeductionId]), 
     CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [tblPRTypeDeduction]([intTypeDeductionId]), 
-	CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [tblPRTemplate]([intTemplateId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPRTemplateDeduction_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblPRTemplateDeduction_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 ) ON [PRIMARY]
