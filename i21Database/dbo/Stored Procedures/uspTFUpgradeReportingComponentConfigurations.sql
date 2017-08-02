@@ -39,7 +39,7 @@ BEGIN TRY
 		SELECT * FROM #tmpRCC
 	) AS SOURCE
 		ON TARGET.intMasterId = SOURCE.intMasterId
-	WHEN MATCHED AND SOURCE.ysnUserDefinedValue = 0 THEN 
+	WHEN MATCHED THEN 
 		UPDATE
 		SET 
 			intReportingComponentId		= SOURCE.intReportingComponentId
