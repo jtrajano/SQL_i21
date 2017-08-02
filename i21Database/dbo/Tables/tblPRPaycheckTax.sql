@@ -28,6 +28,8 @@
     CONSTRAINT [PK_tblPRPaycheckTax] PRIMARY KEY ([intPaycheckTaxId]), 
 	CONSTRAINT [FK_tblPRPaycheckTax_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPRPaycheckTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId]),
+	CONSTRAINT [FK_tblPRPaycheckTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPRPaycheckTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblPRPaycheckTax_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL
 ) ON [PRIMARY]
 GO

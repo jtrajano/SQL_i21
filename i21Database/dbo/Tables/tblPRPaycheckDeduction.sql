@@ -21,6 +21,8 @@
     CONSTRAINT [PK_tblPRPaycheckDeduction] PRIMARY KEY ([intPaycheckDeductionId]),
 	CONSTRAINT [FK_tblPRPaycheckDeduction_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPRPaycheckDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [dbo].[tblPRTypeDeduction] ([intTypeDeductionId]),
+	CONSTRAINT [FK_tblPRPaycheckDeduction_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblPRPaycheckDeduction_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblPRPaycheckDeduction_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL
 ) ON [PRIMARY]
 GO

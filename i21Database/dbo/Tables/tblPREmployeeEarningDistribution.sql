@@ -5,7 +5,8 @@
     [dblPercentage]           NUMERIC(18,6) NULL,
     [intConcurrencyId]        INT NULL,
     CONSTRAINT [PK_tblPREmployeeEarningDistribution] PRIMARY KEY CLUSTERED ([intEmployeeEarningDistributionId] ASC),
-    CONSTRAINT [FK_tblPREmployeeEarningDistribution_tblPREmployeeEarning] FOREIGN KEY ([intEmployeeEarningId]) REFERENCES [dbo].[tblPREmployeeEarning] ([intEmployeeEarningId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblPREmployeeEarningDistribution_tblPREmployeeEarning] FOREIGN KEY ([intEmployeeEarningId]) REFERENCES [dbo].[tblPREmployeeEarning] ([intEmployeeEarningId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblPREmployeeEarningDistribution_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 );
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
