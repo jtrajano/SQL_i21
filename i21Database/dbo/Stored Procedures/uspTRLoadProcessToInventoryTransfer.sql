@@ -242,7 +242,7 @@ _PostOrUnPost:
 
 		IF EXISTS(
 		SELECT TOP 1 1 FROM (
-		SELECT *
+		SELECT TR.intInventoryTransferId
 		FROM	tblTRLoadHeader TL 	        
 				JOIN tblTRLoadDistributionHeader DH 
 					ON TL.intLoadHeaderId = DH.intLoadHeaderId		
@@ -255,7 +255,7 @@ _PostOrUnPost:
 				AND TR.intItemId = DD.intItemId /* If distribution item is different from the received item, then this is an auto-blend scenario where received items are blended together to be distributed as a new item (ex. E10 is 10% ethanol and 90% gasoline). */
 		UNION ALL 
 
-		SELECT *
+		SELECT TR.intInventoryTransferId
 		FROM	tblTRLoadHeader TL 	        
 				LEFT JOIN tblTRLoadDistributionHeader DH ON TL.intLoadHeaderId = DH.intLoadHeaderId		
 				LEFT JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
