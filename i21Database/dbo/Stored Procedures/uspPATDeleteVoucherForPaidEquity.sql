@@ -25,8 +25,10 @@ BEGIN TRANSACTION
 		UNIQUE([intId])
 	);
 
+	DECLARE @Transaction NVARCHAR(50) = 'Patronage';
+
 	INSERT INTO #tempValidateTable
-	SELECT * FROM fnPATValidateAssociatedTransaction(@equityPaymentIds, 3)
+	SELECT * FROM fnPATValidateAssociatedTransaction(@equityPaymentIds, 3, @Transaction)
 	
 	IF EXISTS(SELECT 1 FROM #tempValidateTable)
 	BEGIN
