@@ -5515,6 +5515,7 @@
     <Build Include="dbo\Tables\tblTFComponentType.sql" />
     <Build Include="dbo\Tables\tblTFException.sql" />
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityCustomerLicense.sql" />
+    <Build Include="dbo\Functions\fnICCalculateGrossQtyRatio.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateILMG.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateILMS.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateRMFT5.sql" />
