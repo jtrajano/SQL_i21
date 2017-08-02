@@ -88,6 +88,7 @@ BEGIN
 	DECLARE @dblCashRefund NUMERIC(18,6);
 	DECLARE @dbl1099Amount NUMERIC(18,6);
 	DECLARE @batchId AS NVARCHAR(40);
+	DECLARE @TransactionName AS VARCHAR(500) = 'CREATE VOUCHER' + CAST(NEWID() AS NVARCHAR(100));
 
 	DECLARE @refundProcessed AS Id;
 	DECLARE @totalRecords AS INT = 0;
@@ -122,7 +123,8 @@ BEGIN
 		GOTO Post_Exit;
 	END
 	
-	BEGIN TRANSACTION
+	BEGIN TRAN @TransactionName;
+	SAVE TRAN @TransactionName;
 
 	BEGIN TRY
 	WHILE EXISTS(SELECT 1 FROM @refundProcessed)
@@ -153,7 +155,8 @@ BEGIN
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT;
 
-		UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 0, dbl1099 = ROUND(@dbl1099Amount, 2) WHERE intBillId = @intCreatedBillId;
+		UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 0, dbl1099 = ROUND(@dbl1099Amount, 2), intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') 
+		WHERE intBillId = @intCreatedBillId;
 		UPDATE tblPATRefundCustomer SET intBillId = @intCreatedBillId WHERE intRefundCustomerId = @intRefundCustomerId;
 
 		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
@@ -185,6 +188,13 @@ BEGIN
 			@endTransaction = @intCreatedBillId,
 			@success = @bitSuccess OUTPUT;
 
+		IF(@bitSuccess = 0)
+		BEGIN
+			SELECT TOP 1 @strErrorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @intCreatedBillId;
+			RAISERROR (@strErrorMessage, 16, 1);
+			GOTO Post_Rollback;
+		END
+
 		DELETE FROM @refundProcessed WHERE intId = @intRefundCustomerId;
 		DELETE FROM @voucherDetailNonInventory;
 		SET @intCreatedBillId = NULL;
@@ -210,14 +220,14 @@ BEGIN
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 Post_Commit:
-	COMMIT TRANSACTION
+	COMMIT TRAN @TransactionName;
 	SET @bitSuccess = 1
 	SET @successfulCount = @totalRecords
 	GOTO Post_Exit
 
 Post_Rollback:
 	IF(@@TRANCOUNT > 0)
-		ROLLBACK TRANSACTION	
+		ROLLBACK TRAN @TransactionName;	
 
 	SET @bitSuccess = 0
 	GOTO Post_Exit
