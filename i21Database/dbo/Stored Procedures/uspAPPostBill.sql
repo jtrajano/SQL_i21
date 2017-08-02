@@ -64,6 +64,10 @@ DECLARE @GLEntries AS RecapTableType
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 DECLARE @validBillIds NVARCHAR(MAX)
+DECLARE @failedPostCount INT;
+DECLARE @succesfulPostCount INT;
+DECLARE @failedAdjustment INT
+DECLARE @failedPostValidation INT
 DECLARE @billIds NVARCHAR(MAX)
 DECLARE @totalRecords INT
 DECLARE @costAdjustmentResult INT;
@@ -198,6 +202,7 @@ COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
 IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
 BEGIN
+	SET @successfulCount = 0;
 	SET @success = 0
 	GOTO Post_Exit
 END
@@ -468,6 +473,10 @@ BEGIN
 				SELECT 1 FROM tblICPostResult E WHERE E.strBatchNumber = @batchId AND E.intTransactionId = C.intInventoryReceiptItemId
 			)
 		)
+
+		SET @failedAdjustment = @@ROWCOUNT;
+		SET @invalidCount = @invalidCount + @failedAdjustment;
+		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
 END
 ELSE
@@ -505,6 +514,10 @@ BEGIN
 		FROM #tmpPostBillData A
 		INNER JOIN tblGLPostResult B ON A.intBillId = B.intTransactionId
 		WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+
+		SET @failedPostValidation = @@ROWCOUNT;
+		SET @invalidCount = @invalidCount + @failedPostValidation;
+		SET @totalRecords = @totalRecords - @failedPostValidation;
 
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 

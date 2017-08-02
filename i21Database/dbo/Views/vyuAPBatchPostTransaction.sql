@@ -43,7 +43,6 @@ SELECT 'Debit Memo' AS strTransactionType,
 FROM tblAPBill
 WHERE intTransactionType = 3
   AND ISNULL(ysnPosted, 0) = 0
-  AND intTransactionType != 6
   UNION ALL
 SELECT 'Vendor Prepayment' AS strTransactionType,
        intBillId,
@@ -57,5 +56,3 @@ SELECT 'Vendor Prepayment' AS strTransactionType,
        NULL AS intCompanyLocationId
 FROM tblAPBill
 WHERE intTransactionType = 2
-  AND ISNULL(ysnPosted, 0) = 0
-  AND intTransactionType != 6
