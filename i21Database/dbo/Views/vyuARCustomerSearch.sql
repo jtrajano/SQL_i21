@@ -9,6 +9,7 @@ SELECT
 ,Loc.strCity
 ,Loc.strState
 ,Loc.strZipCode
+,TC.strCounty
 ,Cus.ysnTaxExempt 
 ,Cus.ysnActive
 ,Cus.intSalespersonId
@@ -66,3 +67,4 @@ LEFT JOIN tblSMTaxGroup Tax ON Loc.intTaxGroupId = Tax.intTaxGroupId
 LEFT JOIN tblSMTerm Term on Cus.intTermsId = Term.intTermID
 LEFT JOIN tblEMEntity ShipViaEnt ON Loc.intShipViaId = ShipViaEnt.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON Loc.intFreightTermId = FT.intFreightTermId
+LEFT JOIN tblSMTaxCode TC ON Loc.intCountyTaxCodeId = TC.intTaxCodeId

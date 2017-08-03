@@ -4,7 +4,8 @@ SELECT DISTINCT I.intEntityCustomerId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , C.strCustomerNumber
-	 , C.strName	 
+	 , C.strName
+	 , C.strCounty
 	 , strDisplayName			= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(C.strName, '')
 	 , strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -45,7 +46,6 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , CL.strTaxClass
 				 , TC.strCountry
 				 , TC.strState
-				 , TC.strCounty
 				 , TC.strCity
 				 , TC.intSalesTaxAccountId
 				 , SalesTaxAccount		= SA.strAccountId
@@ -112,7 +112,6 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				,CL.strTaxClass
 				,TC.strCountry
 				,TC.strState
-				,TC.strCounty
 				,TC.strCity
 				,TC.intSalesTaxAccountId
 				,SA.strAccountId
@@ -133,7 +132,8 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 LEFT OUTER JOIN (SELECT intEntityId
 				      , strCustomerNumber
 				      , strName
-				 FROM dbo.vyuARCustomer WITH (NOLOCK)
+					  , strCounty
+				 FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
 ) C ON I.intEntityCustomerId = C.intEntityId	
 LEFT OUTER JOIN (SELECT intCurrencyID
 						, strCurrency
