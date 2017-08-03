@@ -116,6 +116,6 @@ LEFT JOIN tblEMEntity e ON e.intEntityId = l.intEntityVendorId
 LEFT JOIN vyuMFStockReservation S ON S.intLotId = l.intLotId
 Left JOIN dbo.tblICCommodityAttribute CA on CA.intCommodityAttributeId =l.intGradeId 
 LEFT JOIN tblMFLotInventory LI ON LI.intLotId = l.intLotId
-LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = LI.intItemOwnerId 
+LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = l.intItemOwnerId 
 LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
 Left JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId =LI.intBondStatusId
