@@ -5,10 +5,10 @@
 	,@strReasonCode NVARCHAR(1000)
 	,@blnValidateLotReservation BIT = 0
 	,@strNotes NVARCHAR(MAX) = NULL
+	,@dtmDate datetime=NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-		,@dtmDate DATETIME
 		,@intLocationId INT
 		,@intSubLocationId INT
 		,@intStorageLocationId INT
@@ -102,7 +102,8 @@ BEGIN TRY
 		SELECT @intAdjustItemUOMId = @intWeightUOMId
 	END
 
-	SELECT @dtmDate = GETDATE()
+	IF @dtmDate IS NULL
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
