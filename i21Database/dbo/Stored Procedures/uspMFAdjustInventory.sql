@@ -25,6 +25,7 @@ BEGIN TRY
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
 		,@intStorageLocationId int
+		,@intDestinationStorageLocationId int
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
 
@@ -36,12 +37,15 @@ BEGIN TRY
 
 	SELECT @intStorageLocationId=intStorageLocationId FROM dbo.tblICLot WHERE intLotId =@intSourceLotId 
 
+	SELECT @intDestinationStorageLocationId=intStorageLocationId FROM dbo.tblICLot WHERE intLotId =@intDestinationLotId
+
 	INSERT INTO tblMFInventoryAdjustment (
 		dtmDate
 		,intTransactionTypeId
 		,intItemId
 		,intStorageLocationId 
 		,intSourceLotId
+		,intDestinationStorageLocationId
 		,intDestinationLotId
 		,dblQty
 		,intItemUOMId
@@ -65,6 +69,7 @@ BEGIN TRY
 		,@intItemId
 		,@intStorageLocationId
 		,@intSourceLotId
+		,@intDestinationStorageLocationId
 		,@intDestinationLotId
 		,@dblQty
 		,@intItemUOMId

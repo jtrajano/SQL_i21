@@ -5370,6 +5370,8 @@
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryBySummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSpaceUtilization.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetDefaultAccount.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryCountDetail.sql" />
+    <Build Include="dbo\Views\uspMFGetInventoryTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

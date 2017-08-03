@@ -2,10 +2,10 @@
 	,@intNewItemId INT
 	,@intUserId INT
 	,@strNewLotNumber NVARCHAR(100) = NULL OUTPUT
+	,@dtmDate DATETIME
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-		,@dtmDate DATETIME
 		,@intLocationId INT
 		,@intStorageLocationId INT
 		,@intSubLocationId INT
@@ -121,8 +121,10 @@ BEGIN TRY
 				)
 	END
 
+	If @dtmDate=NULL
 	SELECT @dtmDate = GETDATE()
-		,@intSourceId = 1
+
+	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
 
 	EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
