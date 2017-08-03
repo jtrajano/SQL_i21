@@ -13,7 +13,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @openingBalance AS NUMERIC(18,6),
-		@runningBalance AS NUMERIC(18,6) = 0,
+		@runningOpeningBalance AS NUMERIC(18,6) = 0,
+		@runningEndingBalance AS NUMERIC(18,6) = 0,
 		@intTransactionId AS INT,
 		@strTransactionId AS NVARCHAR(50),
 		@dblPayment AS NUMERIC(18,6),
@@ -46,7 +47,8 @@ SELECT TOP 1
 	@ysnMaskEmployeeName = ysnMaskEmployeeName
 FROM tblPRCompanyPreference
 
-SET @runningBalance = ISNULL(@openingBalance,0)
+SET @runningOpeningBalance = ISNULL(@openingBalance,0)
+SET @runningEndingBalance = ISNULL(@openingBalance,0)
 
 DECLARE @BankAccountRegister TABLE (
 intTransactionId INT 
@@ -59,9 +61,10 @@ intTransactionId INT
 ,strPayee NVARCHAR(100)
 ,strReferenceNo NVARCHAR(50)
 ,strTransactionId NVARCHAR(50)
+,dblOpeningBalance NUMERIC(18,6)
 ,dblPayment NUMERIC(18,6)
 ,dblDeposit NUMERIC(18,6)
-,dblBalance NUMERIC(18,6)
+,dblEndingBalance NUMERIC(18,6)
 ,ysnCheckVoid BIT
 ,ysnClr BIT
 ,dtmDate DATETIME
@@ -133,15 +136,16 @@ BEGIN
 	BEGIN
 		IF @dblPayment <> 0 
 		BEGIN
-			SET @runningBalance = @runningBalance + (@dblPayment * -1)
+			SET @runningEndingBalance = @runningEndingBalance + (@dblPayment * -1)
 		END
 
 		IF @dblDeposit <> 0 
 		BEGIN
-			SET @runningBalance = @runningBalance + @dblDeposit 
+			SET @runningEndingBalance = @runningEndingBalance + @dblDeposit 
 		END
 	END
 
+	
 	INSERT INTO @BankAccountRegister
 	(
 	intTransactionId
@@ -155,9 +159,10 @@ BEGIN
 	,strPayee
 	,dtmDate
 	,dtmDateReconciled
+	,dblOpeningBalance
 	,dblPayment
 	,dblDeposit
-	,dblBalance
+	,dblEndingBalance
 	,ysnCheckVoid
 	,ysnClr
 	,intBankAccountId
@@ -175,14 +180,16 @@ BEGIN
 	,@strPayee
 	,@dtmDate
 	,@dtmDateReconciled
+	,@runningOpeningBalance
 	,@dblPayment
 	,@dblDeposit
-	,@runningBalance
+	,@runningEndingBalance
 	,@ysnCheckVoid
 	,@ysnClr
 	,@intBankAccountId
 	)
 
+	SET @runningOpeningBalance = @runningEndingBalance
 
 	FETCH NEXT FROM  rt_cursor INTO 
 	@intTransactionId
