@@ -144,6 +144,7 @@ BEGIN
 							ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 						END)  
 					,dblNextDeliveryGallons = ISNULL(C.dblLastGalsInTank,0.0) - ISNULL(C.dblEstimatedGallonsLeft,0.0)
+					,strRecurringPONumber = C.strRecurringPONumber
 				FROM tblTMCustomer A 
 				INNER JOIN vwcusmst B 
 					ON A.intCustomerNumber = B.A4GLIdentity 
@@ -280,6 +281,7 @@ BEGIN
 							ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 						END) 
 					,dblNextDeliveryGallons = ISNULL(C.dblLastGalsInTank,0.0) - ISNULL(C.dblEstimatedGallonsLeft,0.0) 
+					,strRecurringPONumber = C.strRecurringPONumber
 				FROM tblTMCustomer A 
 				INNER JOIN vyuTMCustomerEntityView B 
 					ON A.intCustomerNumber = B.A4GLIdentity 
