@@ -59,6 +59,8 @@ BEGIN TRY
 		, @intFreightItemId INT
 		, @intSurchargeItemId INT
 		, @ysnItemizeSurcharge BIT
+		, @ReceiptLink NVARCHAR(50)
+		, @BlendedItem BIT = 0
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -324,6 +326,8 @@ BEGIN TRY
 		, DD.dblPrice
 		, dblFreight = DD.dblFreightRate
 		, dblSurcharge = DD.dblDistSurcharge
+		, DD.strReceiptLink
+		, DD.ysnBlendedItem
 	INTO #DistributionDetailTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -339,6 +343,8 @@ BEGIN TRY
 			, @dblPrice = DD.dblPrice
 			, @dblFreight = DD.dblFreight
 			, @dblSurcharge = DD.dblSurcharge
+			, @ReceiptLink = DD.strReceiptLink
+			, @BlendedItem = DD.ysnBlendedItem
 		FROM #DistributionDetailTable DD
 		WHERE intLoadHeaderId = @intLoadHeaderId
 		
@@ -390,6 +396,10 @@ BEGIN TRY
 		IF (@intDistributionItemId IS NULL)
 		BEGIN
 			RAISERROR('Distribution Item is invalid', 16, 1)
+		END
+		IF (@BlendedItem = 0 AND ISNULL(@ReceiptLink, '') = '')
+		BEGIN
+			RAISERROR('Receipt Link cannot be blank for non-blended items', 16, 1)
 		END
 		
 		SELECT @intStockUOMId = intIssueUOMId
