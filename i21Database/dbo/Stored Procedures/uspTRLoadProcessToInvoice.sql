@@ -27,6 +27,7 @@ BEGIN TRY
 	DECLARE @intFreightItemId	INT
 	  , @intSurchargeItemId		INT
 	  , @ysnItemizeSurcharge	BIT
+	  , @HasBlend BIT = 0
 
 	SELECT TOP 1
 		   @intFreightItemId	= intItemForFreightId
@@ -457,6 +458,8 @@ BEGIN TRY
 			, @Qty NUMERIC(18, 6)
 			, @QtyBlended NUMERIC(18, 6)
 			, @dtmInvoiceDateTime DATETIME 
+
+		SET @HasBlend = 1
 
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
 		BEGIN
@@ -1232,7 +1235,7 @@ BEGIN TRY
 			,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
 
 	-- Unpost Blending Transaction
-	IF (ISNULL(@ysnPostOrUnPost, 0) = 0)
+	IF (ISNULL(@ysnPostOrUnPost, 0) = 0 AND @HasBlend = 1)
 	BEGIN
 		EXEC uspMFReverseAutoBlend
 			@intSalesOrderDetailId = NULL
