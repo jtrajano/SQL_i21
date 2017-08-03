@@ -6657,4 +6657,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intMultiCompanyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="310df17b-e4dd-4316-9cd0-a504102f9bf8" ChangeDateTime="08/03/2017 16:47:35">
+    <Property Name="ElementName" Value="[dbo].[tblSCDeliverySheet].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDeliverySheet]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFarmFieldId" />
+  </Operation>
 </Operations>

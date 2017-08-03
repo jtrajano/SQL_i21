@@ -6,6 +6,7 @@
 			WHEN SCT.strTicketStatus = 'C' THEN 'COMPLETED'
 			WHEN SCT.strTicketStatus = 'V' THEN 'VOID'
 			WHEN SCT.strTicketStatus = 'R' THEN 'REOPENED'
+			WHEN SCT.strTicketStatus = 'H' THEN 'HOLD'
 		END) AS strTicketStatusDescription
 	   ,SCT.strTicketStatus
        ,SCT.strTicketNumber

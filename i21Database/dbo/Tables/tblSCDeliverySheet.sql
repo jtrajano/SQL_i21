@@ -7,16 +7,19 @@
     [intDiscountId] INT NULL, 
 	[strDeliverySheetNumber] NVARCHAR(MAX) NULL,
     [dtmDeliverySheetDate] DATETIME NULL DEFAULT GETDATE(), 
+	[intCurrencyId] INT NULL,
 	[intTicketTypeId] INT NULL, 
-    [ysnActive] BIT NULL DEFAULT (0),
+	[intSplitId] INT NULL, 
+    [intFarmFieldId] INT NULL,  
     [ysnPost] BIT NULL DEFAULT (0),
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
-	CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
+    CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
-	CONSTRAINT [FK_tblSCDeliverySheet_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY ([intTicketTypeId]) REFERENCES [tblSCListTicketTypes]([intTicketTypeId])
+	CONSTRAINT [FK_tblSCDeliverySheet_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY ([intTicketTypeId]) REFERENCES [tblSCListTicketTypes]([intTicketTypeId]),
+	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -92,6 +95,33 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intTicketTypeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Vendor/Customer Currency',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCDeliverySheet',
+    @level2type = N'COLUMN',
+    @level2name = N'intCurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Vendor/Customer Split',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCDeliverySheet',
+    @level2type = N'COLUMN',
+    @level2name = N'intSplitId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Vendor/Customer Farm Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCDeliverySheet',
+    @level2type = N'COLUMN',
+    @level2name = N'intFarmFieldId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Posted deliverysheet',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -99,13 +129,4 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCDeliverySheet',
     @level2type = N'COLUMN',
     @level2name = N'ysnPost'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active deliverysheet',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCDeliverySheet',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
 GO

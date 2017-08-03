@@ -4,7 +4,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
     SC.strTicketStatus = 'A' THEN 'PRINTED' WHEN
     SC.strTicketStatus = 'C' THEN 'COMPLETED' WHEN
     SC.strTicketStatus = 'V' THEN 'VOID' WHEN
-    SC.strTicketStatus = 'R' THEN 'REOPENED' END) AS
+    SC.strTicketStatus = 'R' THEN 'REOPENED' WHEN
+	SC.strTicketStatus = 'H' THEN 'HOLD' END) AS
     strTicketStatusDescription, 
 	SC.strTicketStatus,
     SC.strTicketNumber, 
