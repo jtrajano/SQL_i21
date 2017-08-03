@@ -5369,6 +5369,7 @@
     <Build Include="dbo\Views\vyuMFGetSSCCDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryBySummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSpaceUtilization.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetDefaultAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
