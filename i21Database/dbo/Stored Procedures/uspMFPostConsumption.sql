@@ -191,7 +191,7 @@ BEGIN
 		, dblQty = BlendIngredient.dblQuantity
 		, HeaderDistItem.intCompanyLocationId
 		, HeaderDistItem.dtmInvoiceDateTime
-		, strActualCostId = (CASE WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Customer'
+		, strActualCostId = (CASE WHEN Receipt.strOrigin = 'Terminal'
 									THEN LoadHeader.strTransaction
 								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
 									THEN NULL

@@ -495,6 +495,8 @@ BEGIN
 
 	SELECT strActualCost = (CASE WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Customer'
 									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Location'
+									THEN NULL
 								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
 									THEN NULL
 								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId

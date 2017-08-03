@@ -161,8 +161,7 @@ END
 									ON TT.intLoadHeaderId = RR.intLoadHeaderId
 								JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
 								JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
-						WHERE	RR.strOrigin = 'Terminal' 
-								AND HH.strDestination = 'Customer' 	and RR.intItemId = HD.intItemId		
+						WHERE	RR.strOrigin = 'Terminal' AND RR.intItemId = HD.intItemId		
 					  ) TLD	on TLD.intLoadHeaderId = TR.intLoadHeaderId	 and TLD.intLoadReceiptId = TR.intLoadReceiptId and TLD.intItemId = TR.intItemId
 			LEFT JOIN (
 						SELECT DISTINCT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId
@@ -171,8 +170,7 @@ END
 						LEFT JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId
 						LEFT JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId
 						LEFT JOIN vyuTRGetLoadBlendIngredient BI ON BI.intLoadDistributionDetailId = HD.intLoadDistributionDetailId
-						WHERE	RR.strOrigin = 'Terminal' 
-								AND HH.strDestination = 'Customer' and BI.intIngredientItemId = RR.intItemId
+						WHERE	RR.strOrigin = 'Terminal' AND BI.intIngredientItemId = RR.intItemId
 						) BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 			AND TR.strOrigin = 'Terminal'
