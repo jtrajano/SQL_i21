@@ -366,6 +366,7 @@ BEGIN
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnTaxOnly]
 				,[ysnInvalidSetup]
 				,[strTaxGroup]
 				,[strNotes]
@@ -386,6 +387,7 @@ BEGIN
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnTaxOnly]
 				,[ysnInvalidSetup]
 				,[strTaxGroup]
 				,[strNotes]
@@ -501,6 +503,7 @@ BEGIN
 				,[dblAdjustedTax]			NUMERIC(18,6)
 				,[ysnTaxAdjusted]			BIT
 				,[ysnTaxExempt]				BIT
+				,[ysnTaxOnly]				BIT
 				)
 				
 			INSERT INTO @TaxableByOtherTaxes (
@@ -511,7 +514,8 @@ BEGIN
 				,dblRate
 				,dblAdjustedTax
 				,ysnTaxAdjusted	
-				,ysnTaxExempt	
+				,ysnTaxExempt
+				,[ysnTaxOnly]	
 				)
 			SELECT
 				 Id
@@ -522,6 +526,7 @@ BEGIN
 				,dblAdjustedTax
 				,ysnTaxAdjusted
 				,ysnTaxExempt
+				,[ysnTaxOnly]
 			FROM
 				@ItemTaxes
 			WHERE
@@ -538,6 +543,7 @@ BEGIN
 							,@TaxRate					NUMERIC(18,6)
 							,@TaxCalculationMethod		NVARCHAR(30)
 							,@TaxTaxExempt				BIT
+							,@TaxTaxOnly				BIT
 							
 					SELECT TOP 1 @TaxId	= [Id] FROM @TaxableByOtherTaxes
 								
@@ -548,6 +554,7 @@ BEGIN
 						,@TaxRate					= [dblRate]
 						,@TaxCalculationMethod		= [strCalculationMethod]
 						,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)
+						,@TaxTaxOnly				= ISNULL([ysnTaxOnly],0)
 						,@OtherTaxAmount			= 0.000000
 					FROM
 						@TaxableByOtherTaxes
@@ -558,6 +565,11 @@ BEGIN
 						
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
 					BEGIN
+						IF @TaxTaxOnly = 1
+							SET @TaxableAmount = @ZeroDecimal
+						ELSE
+							SET @TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
+
 						IF(@TaxAdjustedTax = 1)
 						BEGIN
 							SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax

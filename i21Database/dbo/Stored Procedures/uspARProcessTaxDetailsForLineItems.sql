@@ -281,6 +281,7 @@ BEGIN TRY
 		,ARIDT.[ysnSeparateOnInvoice]	= EFP.[ysnSeparateOnInvoice]
 		,ARIDT.[ysnCheckoffTax]			= EFP.[ysnCheckoffTax]
 		,ARIDT.[ysnTaxExempt]			= EFP.[ysnTaxExempt]
+		,ARIDT.[ysnTaxOnly]				= EFP.[ysnTaxOnly]
 		,ARIDT.[strNotes]				= EFP.[strNotes]
 		,ARIDT.[intConcurrencyId]		= ARIDT.[intConcurrencyId] + 1
 	FROM

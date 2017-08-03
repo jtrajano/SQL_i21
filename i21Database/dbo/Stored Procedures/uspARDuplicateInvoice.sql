@@ -557,6 +557,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[strNotes]
 		,[intConcurrencyId])
 	SELECT 
@@ -575,6 +576,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]		= ARIDT.[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]			= ARIDT.[ysnCheckoffTax]
 		,[ysnTaxExempt]				= ARIDT.[ysnTaxExempt]
+		,[ysnTaxOnly]				= ARIDT.[ysnTaxOnly]
 		,[strNotes]					= ARIDT.[strNotes]
 		,[intConcurrencyId]			= 1
 	FROM

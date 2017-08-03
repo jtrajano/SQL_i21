@@ -127,8 +127,7 @@ BEGIN
 					,@Rate				NUMERIC(18,6)
 					,@CalculationMethod	NVARCHAR(30)
 					,@CheckoffTax		BIT
-					,@TaxExempt			BIT
-					,@TaxOnly			BIT
+					,@TaxExempt			BIT					
 					
 			SELECT TOP 1 
 				 @Id			= [Id]
@@ -147,7 +146,6 @@ BEGIN
 				,@CalculationMethod	= [strCalculationMethod]
 				,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
-				,@TaxOnly			= ISNULL([ysnTaxOnly],0)
 			FROM
 				@ItemTaxes
 			WHERE [Id] = @Id
@@ -162,6 +160,7 @@ BEGIN
 				,[dblAdjustedTax]			NUMERIC(18,6)
 				,[ysnTaxAdjusted]			BIT
 				,[ysnTaxExempt]				BIT
+				,[ysnTaxOnly]				BIT
 				)
 				
 			INSERT INTO @TaxableByOtherTaxes (
@@ -172,7 +171,8 @@ BEGIN
 				,dblRate
 				,dblAdjustedTax
 				,ysnTaxAdjusted	
-				,ysnTaxExempt	
+				,ysnTaxExempt
+				,ysnTaxOnly
 				)
 			SELECT
 				 Id
@@ -183,6 +183,7 @@ BEGIN
 				,dblAdjustedTax
 				,ysnTaxAdjusted
 				,ysnTaxExempt
+				,ysnTaxOnly
 			FROM
 				@ItemTaxes
 			WHERE
@@ -199,6 +200,7 @@ BEGIN
 							,@TaxRate					NUMERIC(18,6)
 							,@TaxCalculationMethod		NVARCHAR(30)
 							,@TaxTaxExempt				BIT
+							,@TaxOnly					BIT
 							
 					SELECT TOP 1 @TaxId	= [Id] FROM @TaxableByOtherTaxes
 								
@@ -209,6 +211,7 @@ BEGIN
 						,@TaxRate					= [dblRate]
 						,@TaxCalculationMethod		= [strCalculationMethod]
 						,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)
+						,@TaxOnly					= ISNULL([ysnTaxOnly],0)
 						,@OtherTaxAmount			= @ZeroDecimal
 					FROM
 						@TaxableByOtherTaxes

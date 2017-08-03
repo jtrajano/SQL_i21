@@ -975,6 +975,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									,[ysnSeparateOnInvoice]
 									,[ysnCheckoffTax]
 									,[ysnTaxExempt]
+									,[ysnTaxOnly]
 									,[strNotes]
 									,[intConcurrencyId])
 								SELECT
@@ -994,6 +995,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									,[ysnSeparateOnInvoice]
 									,[ysnCheckoffTax]
 									,[ysnTaxExempt]
+									,[ysnTaxOnly]
 									,[strNotes]
 									,0
 								FROM
