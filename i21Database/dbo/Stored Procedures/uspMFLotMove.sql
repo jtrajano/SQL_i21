@@ -6,10 +6,10 @@
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
+	,@dtmDate datetime=NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-		,@dtmDate DATETIME
 		,@intLocationId INT
 		,@intSubLocationId INT
 		,@intStorageLocationId INT
@@ -184,8 +184,9 @@ BEGIN TRY
 	END
 
 	SELECT @strNewLotNumber = @strLotNumber
-
-	SELECT @dtmDate = GETDATE()
+	
+	If @dtmDate Is NULL
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8

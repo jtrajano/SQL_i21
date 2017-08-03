@@ -5,6 +5,7 @@
 	,intItemId INT NOT NULL
 	,intStorageLocationId int NULL
 	,intSourceLotId INT NOT NULL
+	,intDestinationStorageLocationId int NULL
 	,intDestinationLotId INT
 	,dblQty NUMERIC(38, 20)
 	,intItemUOMId INT

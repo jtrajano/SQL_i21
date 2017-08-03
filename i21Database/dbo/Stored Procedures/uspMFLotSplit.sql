@@ -8,10 +8,10 @@
 	,@strNewLotNumber NVARCHAR(100) = NULL
 	,@strNote NVARCHAR(1024) = NULL
 	,@intInventoryAdjustmentId INT = NULL OUTPUT
+	,@dtmDate DATETIME=NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-		,@dtmDate DATETIME
 		,@intLocationId INT
 		,@intSubLocationId INT
 		,@intStorageLocationId INT
@@ -72,9 +72,11 @@ BEGIN TRY
 
 	SELECT @dblAdjustByQuantity = - @dblSplitQty
 		,@intNewItemUOMId = @intItemUOMId
-		,@dtmDate = GETDATE()
 		,@intSourceId = 1
 		,@intSourceTransactionTypeId = 8
+
+	IF @dtmDate IS NULL
+	Select @dtmDate = GETDATE()
 
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))
 	FROM tblICStockReservation
