@@ -366,8 +366,7 @@ FROM (
 		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 	) COMPANY
 ) MainQuery
-WHERE dtmDatePaid BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
-  AND dblBalance > 0'
+WHERE dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +''
 
 IF ISNULL(@filter,'') != ''
 BEGIN
@@ -566,7 +565,7 @@ BEGIN
 		 , strCustomerNumber					= STATEMENTREPORT.strCustomerNumber
 		 , strCustomerName						= STATEMENTREPORT.strCustomerName
 		 , dblCreditLimit						= STATEMENTREPORT.dblCreditLimit
-		 , intInvoiceId							= 1   
+		 , intInvoiceId							= STATEMENTREPORT.intInvoiceId   
 		 , strInvoiceNumber
 		 , strBOLNumber       
 		 , dtmDate
@@ -686,7 +685,7 @@ BEGIN
 		 , strCustomerNumber					= STATEMENTREPORT.strCustomerNumber
 		 , strCustomerName						= STATEMENTREPORT.strCustomerName
 		 , dblCreditLimit						= STATEMENTREPORT.dblCreditLimit
-		 , intInvoiceId							= 1   
+		 , intInvoiceId							= STATEMENTREPORT.intInvoiceId   
 		 , strInvoiceNumber
 		 , strBOLNumber
 		 , dtmDate
