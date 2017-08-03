@@ -13,8 +13,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 
 -- Declare the variables.
 DECLARE  @dtmDateTo					AS DATETIME
-		,@dtmDateFrom				AS DATETIME
-		,@dtmDateToBF				AS DATETIME
+		,@dtmDateFrom				AS DATETIME		
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
 		,@strLocationName			AS NVARCHAR(100)
@@ -203,13 +202,11 @@ ELSE
 
 IF @dtmDateFrom IS NOT NULL
 	BEGIN
-		SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
-		SET @dtmDateToBF = DATEADD(DAYOFYEAR, -1, @dtmDateFrom)
+		SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)			
 	END
 ELSE
 	BEGIN
-		SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-		SET @dtmDateToBF = DATEADD(DAYOFYEAR, -1, '01/01/1900')
+		SET @dtmDateFrom = CAST(-53690 AS DATETIME)		
 	END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue', 'ysnReportDetail')
@@ -240,7 +237,7 @@ INSERT INTO @temp_aging_table
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, 1
 
 INSERT INTO @temp_balanceforward_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateToBF, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateFrom, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -457,7 +454,7 @@ SELECT DISTINCT
 	, BALANCEFORWARD.strEntityNo
 	, 'Balance Forward'
 	, BALANCEFORWARD.dblCreditLimit
-	, @dtmDateToBF
+	, @dtmDateFrom
 	, '01/01/1900'
 	, 1
 	, ISNULL(BALANCEFORWARD.dblTotalAR, 0)
