@@ -571,9 +571,9 @@ BEGIN
          WHEN ''Varies'' THEN ''V''      
          ELSE ''''  
         END)  
-      ,[agloc_tax_state] = CL.[strTaxState]  
-      ,[agloc_tax_auth_id1] = CL.[strTaxAuthorityId1]  
-      ,[agloc_tax_auth_id2] = CL.[strTaxAuthorityId2]  
+      --,[agloc_tax_state] = CL.[strTaxState]  
+      --,[agloc_tax_auth_id1] = CL.[strTaxAuthorityId1]  
+      --,[agloc_tax_auth_id2] = CL.[strTaxAuthorityId2]  
       ,[agloc_csh_drwr_yn] =   
         (CASE CL.[ysnUsingCashDrawer]  
          WHEN 1 THEN ''Y''  
@@ -592,8 +592,8 @@ BEGIN
       ,[agloc_pic_prtr_name] = CL.[strDefaultTicketPrinter]  
       ,[agloc_ivc_prtr_name] = CL.[strDefaultInvoicePrinter]  
       ,[agloc_cnt_prtr_name] = [agloc_cnt_prtr_name]  
-      ,[agloc_last_ivc_no] = dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])
-      ,[agloc_last_ord_no] = dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])
+      --,[agloc_last_ivc_no] = dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])
+      --,[agloc_last_ord_no] = dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])
       ,[agloc_ord_for_ivc_yn] =   
         (CASE CL.[ysnUseOrderNumberforInvoiceNumber]  
          WHEN 1 THEN ''Y''  
@@ -751,9 +751,9 @@ BEGIN
       ,[agloc_prc7_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 7)--[agloc_prc7_desc]  
       ,[agloc_prc8_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 8)--[agloc_prc8_desc]  
       ,[agloc_prc9_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 9)--[agloc_prc9_desc]  
-      ,[agloc_gl_profit_center] = CL.[intProfitCenter]  
-      ,[agloc_frt_exp_acct_no] = FE.[strExternalId]  
-      ,[agloc_frt_inc_acct_no] = FI.[strExternalId]  
+      ,[agloc_gl_profit_center] = GL.strCode--CL.[intProfitCenter]  
+      --,[agloc_frt_exp_acct_no] = FE.[strExternalId]  
+      --,[agloc_frt_inc_acct_no] = FI.[strExternalId]  
       ,[agloc_cash] = CA.[strExternalId]  
       ,[agloc_srvchr] = SC.[strExternalId]  
       ,[agloc_disc_taken] = SD.[strExternalId]  
@@ -887,7 +887,10 @@ BEGIN
        ON CL.intCreditCardFee = CF.[inti21Id]  
      LEFT OUTER JOIN  
       tblSMCountry C  
-       ON CL.strCountry = C.strCountry       
+       ON CL.strCountry = C.strCountry    
+	 LEFT JOIN
+      tblGLAccountSegment GL 
+		ON CL.[intProfitCenter] = GL.[intAccountSegmentId]   
      WHERE
       RTRIM(LTRIM([aglocmst].[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))  
          
@@ -1484,8 +1487,8 @@ BEGIN
       ,[intSalesAdvAcct] = ISNULL([intSalesAdvAcct],0)  
       ,[intPurchaseAdvAccount] = ISNULL([intPurchaseAdvAccount],0)  
       ,[intFreightAPAccount] = ISNULL([intFreightAPAccount],0)  
-      ,[intFreightExpenses] = ISNULL(FE.[inti21Id],0)  
-      ,[intFreightIncome] = ISNULL(FI.[inti21Id],0)  
+      --,[intFreightExpenses] = ISNULL(FE.[inti21Id],0)  
+      --,[intFreightIncome] = ISNULL(FI.[inti21Id],0)  
       ,[intServiceCharges] = ISNULL(SC.[inti21Id],0)  
       ,[intSalesDiscounts] = ISNULL(SD.[inti21Id],0)  
       ,[intCashOverShort] = ISNULL(OS.[inti21Id],0)  
