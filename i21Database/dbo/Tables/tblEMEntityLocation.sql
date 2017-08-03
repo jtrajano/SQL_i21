@@ -24,6 +24,7 @@
     [dblLatitude]          NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,	
     [strTimezone]      NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strCheckPayeeName]      NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[intDefaultCurrencyId] INT NULL,
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblEMEntityLocation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_dbo.tblEMEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
     CONSTRAINT [FK_dbo.tblEMEntityLocation_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
@@ -33,7 +34,8 @@
 	CONSTRAINT [FK_tblEMEntityLocation_tblSMTaxCode_county] FOREIGN KEY([intCountyTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
 	CONSTRAINT [FK_tblEMEntityLocation_tblSMShipVia_intShipViaId] FOREIGN KEY([intShipViaId]) REFERENCES [dbo].[tblSMShipVia] ([intEntityId]),
 	CONSTRAINT [FK_tblEMEntityLocation_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
-	CONSTRAINT [UK_tblEMEntityLocation_strLocationName_intEntityId] UNIQUE NONCLUSTERED ([strLocationName] ASC, [intEntityId] ASC)	
+	CONSTRAINT [UK_tblEMEntityLocation_strLocationName_intEntityId] UNIQUE NONCLUSTERED ([strLocationName] ASC, [intEntityId] ASC)	,
+	CONSTRAINT [FK_tblEMEntityLocation_intCurrencyId] FOREIGN KEY ([intDefaultCurrencyId]) REFERENCES tblSMCurrency([intCurrencyID]),
 
 );
 
