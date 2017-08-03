@@ -172,7 +172,7 @@ SELECT
 FROM
 	@PaymentsToGenerate ITG --WITH (NOLOCK)
 WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityId])
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId])
 
 UNION ALL
 
@@ -186,7 +186,7 @@ SELECT
 FROM
 	@PaymentsToGenerate ITG --WITH (NOLOCK)
 WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityId] AND ARC.[ysnActive] = 1)
+	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
 
 
 UNION ALL
