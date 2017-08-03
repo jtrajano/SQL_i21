@@ -292,6 +292,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[strTaxGroup]
 		,[strNotes]
 	)
@@ -312,6 +313,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnTaxOnly]
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
