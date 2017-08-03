@@ -71,6 +71,7 @@ INNER JOIN dbo.tblSMCurrency CUR
 	ON CUR.intCurrencyID = A.intCurrencyId
 LEFT JOIN dbo.tblCTContractDetail CD
 	ON CD.intContractHeaderId = CH.intContractHeaderId
+	AND CD.intContractDetailId = B.intContractDetailId
 LEFT JOIN dbo.tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = A.intShipToId
 LEFT JOIN (dbo.tblICItemUOM weightItemUOM INNER JOIN dbo.tblICUnitMeasure weightUOM ON weightItemUOM.intUnitMeasureId = weightUOM.intUnitMeasureId)
