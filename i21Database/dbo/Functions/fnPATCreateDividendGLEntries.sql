@@ -54,7 +54,7 @@ BEGIN
 
 	INSERT INTO @returntable
 	--UNDISTRIBUTED EQUITY
-	SELECT	DISTINCT
+	SELECT
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
 		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	D.intDividendsGLAccount,
@@ -62,10 +62,10 @@ BEGIN
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	'Posted Dividend GL - ' + D.strStockName,
+		[strDescription]				=	'Dividend GL - ' + D.strStockName,
 		[strCode]						=	'PAT',
 		[strReference]					=	A.strDividendNo,
-		[intCurrencyId]					=	0,
+		[intCurrencyId]					=	[dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL'),
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmProcessDate,
@@ -88,12 +88,12 @@ BEGIN
 		[strRateType]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblPATDividends A
-		INNER JOIN tblPATDividendsCustomer B
-				ON A.intDividendId = B.intDividendId
-		INNER JOIN tblPATDividendsStock C
-				ON B.intDividendCustomerId = C.intDividendCustomerId
-		INNER JOIN tblPATStockClassification D
-				ON D.intStockId = C.intStockId
+	INNER JOIN tblPATDividendsCustomer B
+			ON A.intDividendId = B.intDividendId
+	INNER JOIN tblPATDividendsStock C
+			ON B.intDividendCustomerId = C.intDividendCustomerId
+	INNER JOIN tblPATStockClassification D
+			ON D.intStockId = C.intStockId
 	WHERE	A.intDividendId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL
 	--AP Clearing
@@ -105,10 +105,10 @@ BEGIN
 		[dblCredit]						=	ROUND(B.dblDividendAmount,2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	'Posted Dividends GL',
+		[strDescription]				=	'AP Clearing',
 		[strCode]						=	'PAT',
 		[strReference]					=	A.strDividendNo,
-		[intCurrencyId]					=	0,
+		[intCurrencyId]					=	[dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL'),
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmProcessDate,

@@ -1,8 +1,9 @@
 ﻿CREATE FUNCTION [dbo].[fnPATReverseGLDividendEntries] 
 (
-	@transactionIds		NVARCHAR(MAX)
-	,@dtmDateReverse	DATETIME = NULL 
-	,@intUserId			INT
+	@transactionIds	NVARCHAR(MAX),
+	@batchId		NVARCHAR(40),
+	@dtmDateReverse	DATETIME = NULL,
+	@intUserId		INT
 )
 RETURNS @returntable TABLE
 (
@@ -88,13 +89,13 @@ BEGIN
 		[strTransactionId]
 		,[intTransactionId]
 		,dtmDate = ISNULL(@dtmDateReverse, [dtmDate])
-		,[strBatchId]
+		,strBatchId = @batchId
 		,[intAccountId]
 		,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
 		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
 		,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
 		,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
-		,'Unposted Dividend GL'
+		,[strDescription]
 		,[strCode]
 		,[strReference]
 		,[intCurrencyId]
