@@ -39,8 +39,8 @@ SELECT
 	CH.strContractNumber,
 	CL.strLocationName,
 	CASE WHEN (B.intWeightUOMId > 0) 
-		THEN ( SELECT strUnitMeasure FROM dbo.tblICUnitMeasure WHERE intUnitMeasureId = B.intWeightUOMId)
-		ELSE (SELECT strUnitMeasure FROM dbo.tblICUnitMeasure WHERE intUnitMeasureId = B.intUnitOfMeasureId)
+		THEN weightUOM.strUnitMeasure
+		ELSE uom.strUnitMeasure
 	END AS strUOM,
 	ISNULL(CD.intContractSeq,0) AS intSequenceId
 FROM dbo.tblAPBill A
@@ -73,3 +73,8 @@ LEFT JOIN dbo.tblCTContractDetail CD
 	ON CD.intContractHeaderId = CH.intContractHeaderId
 LEFT JOIN dbo.tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = A.intShipToId
+LEFT JOIN (dbo.tblICItemUOM weightItemUOM INNER JOIN dbo.tblICUnitMeasure weightUOM ON weightItemUOM.intUnitMeasureId = weightUOM.intUnitMeasureId)
+	ON B.intWeightUOMId = weightItemUOM.intItemUOMId
+LEFT JOIN (dbo.tblICItemUOM itemUOM INNER JOIN dbo.tblICUnitMeasure uom ON itemUOM.intUnitMeasureId = uom.intUnitMeasureId)
+	ON B.intUnitOfMeasureId = itemUOM.intItemUOMId
+WHERE weightItemUOM.intItemUOMId IS NOT NULL OR itemUOM.intItemUOMId IS NOT NULL
