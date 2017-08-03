@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARSearchLetterCustomer]
 (
-	@intLetterId INT
+	@intLetterId	INT,
+	@ysnEmailOnly	BIT = 0
 )
 AS
 DECLARE @strLetterName			NVARCHAR(MAX),
@@ -63,6 +64,13 @@ DECLARE @temp_availablecustomer_table TABLE(
 	 [intEntityCustomerId]		INT
 	,[strCustomerName]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS
 	,[strCustomerNumber]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+)
+
+DECLARE @temp_return_table TABLE(
+	 [intEntityCustomerId]		INT
+	,[strCustomerName]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS
+	,[strCustomerNumber]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS
+	,[ysnHasEmailSetup]			BIT
 )
 
 IF @strLetterName <> 'Service Charge Invoices Letter'
@@ -215,18 +223,6 @@ BEGIN
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 	WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
-
-	DELETE 
-	FROM dbo.tblARCollectionOverdueDetail 
-	WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	DELETE 
-	FROM dbo.tblARCollectionOverdue 
-	WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	SET NOCOUNT ON;
-	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
-	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
@@ -243,14 +239,6 @@ BEGIN
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 	WHERE (ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
-
-	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	SET NOCOUNT ON;
-	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
-	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
@@ -267,14 +255,6 @@ BEGIN
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 	WHERE (ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
-
-	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	SET NOCOUNT ON;
-	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
-	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
@@ -291,14 +271,6 @@ BEGIN
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 	WHERE (ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
-
-	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	SET NOCOUNT ON;
-	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
-	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = 'Final Overdue Collection Letter'
@@ -315,14 +287,6 @@ BEGIN
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 	WHERE (ISNULL(dbl121DaysSum,0) <> 0)
-
-	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	SET NOCOUNT ON;
-	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
-	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = 'Credit Suspension'
@@ -334,14 +298,6 @@ BEGIN
 	FROM dbo.vyuARCustomer WITH (NOLOCK) 
 	WHERE ysnActive = 1
 	  AND dblCreditLimit = 0
-
-	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	SET NOCOUNT ON;
-	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
-	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = 'Expired Credit Card'  
@@ -354,15 +310,6 @@ BEGIN
 	FROM dbo.vyuARCustomer WITH (NOLOCK) 
 	WHERE ysnActive = 1
 	  AND dblCreditLimit = 0
-			
-	DELETE FROM dbo.tblARCollectionOverdueDetail 
-	WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	SET NOCOUNT ON;
-	SELECT * FROM @temp_availablecustomer_table ARC ORDER BY strCustomerName	
-	SET NOCOUNT OFF;
 END
 
 ELSE IF @strLetterName = 'Credit Review'
@@ -374,29 +321,51 @@ BEGIN
 	FROM dbo.vyuARCustomer WITH (NOLOCK) 
 	WHERE ysnActive = 1
 	  AND dblCreditLimit > 0
-
-	DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_availablecustomer_table)
-
-	SET NOCOUNT ON;
-	SELECT * FROM @temp_availablecustomer_table ORDER BY strCustomerName
-	SET NOCOUNT OFF;
 END
 
-ELSE IF  @strLetterName = 'Service Charge Invoices Letter'
+ELSE IF @strLetterName = 'Service Charge Invoices Letter'
 BEGIN
-	SET NOCOUNT ON;
+	INSERT INTO @temp_availablecustomer_table
 	SELECT DISTINCT 
 		   intEntityCustomerId
 		 , strCustomerNumber
 		 , strCustomerName
-	FROM vyuARServiceChargeInvoiceReport
-	ORDER BY strCustomerName
-	SET NOCOUNT OFF;	
+	FROM vyuARServiceChargeInvoiceReport	
 END
 
 ELSE
 BEGIN
 	GOTO GetActiveCustomers
 END
+
+IF ISNULL(@strLetterName, '') <> ''
+	BEGIN
+		INSERT INTO @temp_return_table
+		SELECT intEntityCustomerId
+			 , strCustomerName
+			 , strCustomerNumber
+			 , CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+		FROM @temp_availablecustomer_table C
+		OUTER APPLY (
+			SELECT intEmailSetupCount = COUNT(*) 
+			FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+			WHERE CC.intCustomerEntityId = C.intEntityCustomerId 
+			  AND ISNULL(CC.strEmail, '') <> '' 
+			  AND CC.strEmailDistributionOption LIKE '%Letter%'
+		) EMAILSETUP
+
+		IF @ysnEmailOnly = 1
+			DELETE FROM @temp_return_table WHERE ysnHasEmailSetup = 0
+		ELSE
+			DELETE FROM @temp_return_table WHERE ysnHasEmailSetup = 1
+
+		IF @strLetterName <> 'Service Charge Invoices Letter'
+			BEGIN
+				DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table)
+				DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table)
+			END
+
+		SET NOCOUNT ON;
+		SELECT * FROM @temp_return_table ORDER BY strCustomerName
+		SET NOCOUNT OFF;
+	END
