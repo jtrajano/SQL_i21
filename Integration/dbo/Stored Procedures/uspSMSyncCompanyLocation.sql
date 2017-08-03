@@ -2067,8 +2067,8 @@ BEGIN
 		  ,[ptloc_reg_tape_prtr] = [ptloc_reg_tape_prtr]  
 		  ,[ptloc_bar_code_prtr] = CL.[strBarCodePrinterName]  
 		  ,[ptloc_ivc_prtr_name] = CL.[strDefaultInvoicePrinter]  
-		  ,[ptloc_last_ivc_no] = dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])
-		  ,[ptloc_last_ord_no] = dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])
+		  --,[ptloc_last_ivc_no] = dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])
+		  --,[ptloc_last_ord_no] = dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])
 		  ,[ptloc_upc_rct_yn] = [ptloc_upc_rct_yn]  
 		  ,[ptloc_upc_search_ui] =  
 			(CASE CL.[strUPCSearchSequence]  
@@ -2093,8 +2093,8 @@ BEGIN
 		  ,[ptloc_dlv_tic_prtr] = [ptloc_dlv_tic_prtr]  
 		  ,[ptloc_dlv_tic_no] = [ptloc_dlv_tic_no]            
 		  ,[ptloc_gl_profit_center] = GL.strCode --CL.[intProfitCenter]  
-		  ,[ptloc_frt_exp_acct_no] = FE.[strExternalId]  
-		  ,[ptloc_frt_inc_acct_no] = FI.[strExternalId]  
+		  --,[ptloc_frt_exp_acct_no] = FE.[strExternalId]  
+		  --,[ptloc_frt_inc_acct_no] = FI.[strExternalId]  
 		  ,[ptloc_disc_taken] = SD.[strExternalId]       
 		  ,[ptloc_default_carrier] = CL.[strDefaultCarrier]  
 		  ,[ptloc_merchant] = CL.[strJohnDeereMerchant]  
@@ -2473,8 +2473,9 @@ BEGIN
 		  ,[intSalesAdvAcct] = ISNULL([intSalesAdvAcct],0)  
 		  ,[intPurchaseAdvAccount] = ISNULL([intPurchaseAdvAccount],0)  
 		  ,[intFreightAPAccount] = ISNULL([intFreightAPAccount],0)  
-		  ,[intFreightExpenses] = ISNULL(FE.[inti21Id],0)  
-		  ,[intFreightIncome] = ISNULL(FI.[inti21Id],0)  
+		  --,[intFreightExpenses] = ISNULL(FE.[
+		  ],0)  
+		  --,[intFreightIncome] = ISNULL(FI.[inti21Id],0)  
 		  --,[intServiceCharges] = ISNULL(SC.[inti21Id],0)  
 		  --,[intSalesDiscounts] = ISNULL(SD.[inti21Id],0)  
 		  --,[intCashOverShort] = ISNULL(OS.[inti21Id],0)  
