@@ -19,4 +19,15 @@ GO
 			PRINT 'TABLE tblTFTaxCriteria does NOT EXIST!'
 		END
 
+	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFTransactionException')
+		BEGIN
+			IF EXISTS(SELECT TOP 1 * FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_NAME ='FK_tblTFTransactionException_tblTFTransaction')
+			 BEGIN
+				ALTER TABLE tblTFTransactionException
+				DROP CONSTRAINT FK_tblTFTransactionException_tblTFTransaction
+				PRINT 'FK_tblTFTransactionException_tblTFTransaction Removed'
+			END 
+		END
+
+
 	
