@@ -27,6 +27,9 @@
 		,dtmGoLive = r.dtmGoLive
 		,strOldTicketNumber = null
 		,strAdditionalRecipient = null
+		,strCurrency = s.strCurrency
+		,strCurrencyExchangeRate = u.strCurrency + ' To ' + v.strCurrency
+		,strCurrencyExchangeRateType = w.strCurrencyExchangeRateType
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -46,3 +49,8 @@
 		left join tblEMEntityLocation p on p.intEntityLocationId = a.intEntityLocationId
 		left join tblHDProjectTask q on q.intTicketId = a.intTicketId
 		left join tblHDProject r on r.intProjectId = q.intProjectId
+		left join tblSMCurrency s on s.intCurrencyID = a.intCurrencyId
+		left join tblSMCurrencyExchangeRate t on t.intCurrencyExchangeRateId = a.intCurrencyExchangeRateId
+		left join tblSMCurrency u on u.intCurrencyID = t.intFromCurrencyId
+		left join tblSMCurrency v on v.intCurrencyID = t.intToCurrencyId
+		left join tblSMCurrencyExchangeRateType w on w.intCurrencyExchangeRateTypeId = a.intCurrencyExchangeRateTypeId
