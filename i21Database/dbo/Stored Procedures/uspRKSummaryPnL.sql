@@ -6,12 +6,15 @@
 @intFutureMarketId int = null
 AS  
    
+set @dtmFromDate = convert(datetime,CONVERT(VARCHAR(10),@dtmFromDate,110),110)
+ set @dtmToDate = convert(datetime,CONVERT(VARCHAR(10),@dtmToDate,110),110)
+   
 if isnull(@ysnExpired,'False' ) = 'False'
 BEGIN
 SELECT *
-,dblUnrealized + dblRealized AS dblTotal
+ ,dblUnrealized + dblRealized AS dblTotal
 FROM (
-SELECT intFutureMarketId
+ SELECT intFutureMarketId
   ,intFutureMonthId
   ,strFutMarketName
   ,strFutureMonth
@@ -38,7 +41,7 @@ SELECT intFutureMarketId
     WHERE u.intFutureMarketId = r.intFutureMarketId
      AND u.intFutureMonthId = r.intFutureMonthId
     ), 0) AS dblRealized,ysnExpired
-FROM (
+ FROM (
   SELECT *
    ,(isnull(GrossPnL, 0) * (isnull(dblClosing1,0) - isnull(dblPrice,0)))-isnull(dblFutCommission,0) AS dblClosing
   FROM (
@@ -72,7 +75,7 @@ FROM (
    FROM vyuRKUnrealizedPnL 
    where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
    and intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
-   and ysnExpired=@ysnExpired and convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmToDate,110),110)
+   and ysnExpired=@ysnExpired and convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between @dtmFromDate and  @dtmToDate
 
    union
 
@@ -108,24 +111,24 @@ FROM (
 WHERE t.intCommodityId=case when isnull(@intCommodityId,0)=0 then t.intCommodityId else @intCommodityId end 
  AND t.intFutureMarketId=case when isnull(@intFutureMarketId,0)=0 then t.intFutureMarketId else @intFutureMarketId end 
  and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 
-                                                       then intCommodityId else @intCommodityId end 
-                                                       AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
- AND convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmToDate,110),110) )
-and t.ysnExpired=@ysnExpired and p.dtmTradeDate <= @dtmToDate  
+								then intCommodityId else @intCommodityId end 
+								AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
+ AND convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between @dtmFromDate and  @dtmToDate)
+ and t.ysnExpired=@ysnExpired and p.dtmTradeDate <= @dtmToDate  
    ) t
   ) u
-GROUP BY intFutureMonthId
+ GROUP BY intFutureMonthId
   ,intFutureMarketId
   ,strFutMarketName
   ,strFutureMonth,ysnExpired
-) t
-END
+ ) t
+ END
 ELSE
-BEGIN
-SELECT *
-,dblUnrealized + dblRealized AS dblTotal
-FROM (
-SELECT intFutureMarketId
+ BEGIN
+ SELECT *
+ ,dblUnrealized + dblRealized AS dblTotal
+ FROM (
+ SELECT intFutureMarketId
   ,intFutureMonthId
   ,strFutMarketName
   ,strFutureMonth
@@ -153,7 +156,7 @@ SELECT intFutureMarketId
      AND u.intFutureMonthId = r.intFutureMonthId
     ), 0) AS dblRealized,
     ysnExpired
-FROM (
+ FROM (
   SELECT *
    ,(isnull(GrossPnL, 0) * (isnull(dblClosing1,0) - isnull(dblPrice,0)))-isnull(dblFutCommission,0) AS dblClosing
   FROM (
@@ -187,7 +190,7 @@ FROM (
     ,NetPnL,ysnExpired
    FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
    and intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
-   and convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmToDate,110),110)
+   and convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between @dtmFromDate and  @dtmToDate
    union
 
    SELECT distinct GrossPnL
@@ -223,11 +226,11 @@ FROM (
 WHERE t.intCommodityId=case when isnull(@intCommodityId,0)=0 then t.intCommodityId else @intCommodityId end 
  AND t.intFutureMarketId=case when isnull(@intFutureMarketId,0)=0 then t.intFutureMarketId else @intFutureMarketId end 
  and t.intFutureMonthId not in(select intFutureMonthId from vyuRKUnrealizedPnL WHERE intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
- AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end  AND convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmToDate,110),110))
-and p.dtmTradeDate <= @dtmToDate ) t ) u
-GROUP BY intFutureMonthId
+ AND intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end  AND convert(datetime,CONVERT(VARCHAR(10),dtmTradeDate,110),110) between @dtmFromDate and  @dtmToDate)
+ and p.dtmTradeDate <= @dtmToDate ) t ) u
+ GROUP BY intFutureMonthId
   ,intFutureMarketId
   ,strFutMarketName
   ,strFutureMonth,ysnExpired
-) t
-END
+ ) t
+ END
