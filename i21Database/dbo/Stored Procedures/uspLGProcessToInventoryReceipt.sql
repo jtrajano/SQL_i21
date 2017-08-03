@@ -4,7 +4,7 @@
 	,@intInventoryReceiptId INT OUTPUT
 AS
 BEGIN TRY
-	DECLARE @ErrorMessage NVARCHAR(4000)
+	DECLARE @strErrorMessage NVARCHAR(MAX)
 	DECLARE @ErrorSeverity INT
 	DECLARE @ErrorState INT
 	DECLARE @InventoryReceiptId INT
@@ -57,17 +57,6 @@ BEGIN TRY
 		WHERE LD.intItemUOMId <> LDCL.intItemUOMId AND LD.intLoadId = @intLoadId
 	END
 
-	--IF EXISTS (
-	--		SELECT 1
-	--		FROM tblLGLoad L
-	--		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	--		JOIN tblICInventoryReceiptItem RI ON RI.intSourceId = LD.intLoadDetailId
-	--		WHERE L.intLoadId = @intLoadId
-	--		)
-	--BEGIN
-	--	RAISERROR ('Receipt has already been created for the inbound shipment.',16,1)
-	--END
-
 	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult'))
 	BEGIN
 		CREATE TABLE #tmpAddItemReceiptResult (
@@ -75,108 +64,205 @@ BEGIN TRY
 			,intInventoryReceiptId INT
 			)
 	END
-
-	INSERT INTO @ReceiptStagingTable (
-		strReceiptType
-		,intEntityVendorId
-		,intShipFromId
-		,intLocationId
-		,strBillOfLadding
-		,intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,intContractHeaderId
-		,intContractDetailId
-		,dtmDate
-		,intShipViaId
-		,dblQty
-		,intGrossNetUOMId
-		,dblGross
-		,dblNet
-		,dblCost
-		,intCostUOMId
-		,intCurrencyId
-		,intSubCurrencyCents
-		,dblExchangeRate
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		,ysnIsStorage
-		,intSourceId
-		,intSourceType
-		,strSourceId
-		,strSourceScreenName
-		,ysnSubCurrency
-		,intForexRateTypeId
-		,dblForexRate
-		,intContainerId
-		)
-	SELECT strReceiptType = 'Purchase Contract'
-		,intEntityVendorId = LD.intVendorEntityId --
-		,intShipFromId = EL.intEntityLocationId
-		,intLocationId = CD.intCompanyLocationId
-		,L.strBLNumber --
-		,intItemId = LD.intItemId --
-		,intItemLocationId = CD.intCompanyLocationId
-		,intItemUOMId = LD.intItemUOMId --
-		,intContractHeaderId = CD.intContractHeaderId --
-		,intContractDetailId = LD.intPContractDetailId --
-		,dtmDate = GETDATE()
-		,intShipViaId = CD.intShipViaId
-		,dblQty = LDCL.dblQuantity --
-		,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, 0) --
-		,dblGross = LDCL.dblLinkGrossWt --
-		,dblNet = LDCL.dblLinkNetWt --
-		,dblCost = ISNULL(AD.dblSeqPrice, 0) --
-		,intCostUOMId = AD.intSeqPriceUOMId --
-		,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
-		,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
-		,dblExchangeRate = 1
-		,intLotId = NULL
-		,intSubLocationId = ISNULL(CD.intSubLocationId, LD.intPSubLocationId) --
-		,intStorageLocationId = ISNULL(CD.intStorageLocationId, LW.intStorageLocationId) --
-		,ysnIsStorage = 0
-		,intSourceId = LD.intLoadDetailId --
-		,intSourceType = 2
-		,strSourceId = L.strLoadNumber --
-		,strSourceScreenName = 'Contract'
-		,ysnSubCurrency = SubCurrency.ysnSubCurrency
-		,intForexRateTypeId = CD.intRateTypeId
-		,dblForexRate = CD.dblRate
-		,LC.intLoadContainerId --
-	FROM tblLGLoad L
-	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
-	JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-	JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
-	JOIN tblICItemLocation IL ON IL.intItemId = CD.intItemId
-		AND IL.intLocationId = CD.intCompanyLocationId
-	JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId
-		AND EL.ysnDefaultLocation = 1
-	LEFT JOIN vyuICGetItemStock SK ON SK.intItemId = CD.intItemId
-		AND SK.intLocationId = CD.intCompanyLocationId
-	LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
-	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = CASE 
-			WHEN SC.intMainCurrencyId IS NOT NULL
-				THEN CD.intCurrencyId
-			ELSE NULL
-			END
-	LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
-	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
-	WHERE CAST((CASE 
-				WHEN ISNULL(LDCL.dblReceivedQty, 0) = 0
-					THEN 0
-				ELSE 1
+	
+	IF EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId)
+	BEGIN
+		INSERT INTO @ReceiptStagingTable (
+			strReceiptType
+			,intEntityVendorId
+			,intShipFromId
+			,intLocationId
+			,strBillOfLadding
+			,intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intContractHeaderId
+			,intContractDetailId
+			,dtmDate
+			,intShipViaId
+			,dblQty
+			,intGrossNetUOMId
+			,dblGross
+			,dblNet
+			,dblCost
+			,intCostUOMId
+			,intCurrencyId
+			,intSubCurrencyCents
+			,dblExchangeRate
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,ysnIsStorage
+			,intSourceId
+			,intSourceType
+			,strSourceId
+			,strSourceScreenName
+			,ysnSubCurrency
+			,intForexRateTypeId
+			,dblForexRate
+			,intContainerId
+			)
+		SELECT strReceiptType = 'Purchase Contract'
+			,intEntityVendorId = LD.intVendorEntityId --
+			,intShipFromId = EL.intEntityLocationId
+			,intLocationId = CD.intCompanyLocationId
+			,L.strBLNumber --
+			,intItemId = LD.intItemId --
+			,intItemLocationId = CD.intCompanyLocationId
+			,intItemUOMId = LD.intItemUOMId --
+			,intContractHeaderId = CD.intContractHeaderId --
+			,intContractDetailId = LD.intPContractDetailId --
+			,dtmDate = GETDATE()
+			,intShipViaId = CD.intShipViaId
+			,dblQty = ISNULL(LDCL.dblQuantity, LD.dblQuantity) --
+			,intGrossNetUOMId = ISNULL(CD.intNetWeightUOMId, LD.intWeightItemUOMId) --
+			,dblGross = ISNULL(LDCL.dblLinkGrossWt, LD.dblGross) --
+			,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) --
+			,dblCost = ISNULL(AD.dblSeqPrice, 0) --
+			,intCostUOMId = AD.intSeqPriceUOMId --
+			,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+			,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
+			,dblExchangeRate = 1
+			,intLotId = NULL
+			,intSubLocationId = ISNULL(CD.intSubLocationId, LD.intPSubLocationId) --
+			,intStorageLocationId = ISNULL(CD.intStorageLocationId, LW.intStorageLocationId) --
+			,ysnIsStorage = 0
+			,intSourceId = LD.intLoadDetailId --
+			,intSourceType = 2
+			,strSourceId = L.strLoadNumber --
+			,strSourceScreenName = 'Contract'
+			,ysnSubCurrency = SubCurrency.ysnSubCurrency
+			,intForexRateTypeId = CD.intRateTypeId
+			,dblForexRate = CD.dblRate
+			,ISNULL(LC.intLoadContainerId, - 1) --
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+		JOIN tblICItemLocation IL ON IL.intItemId = CD.intItemId
+			AND IL.intLocationId = CD.intCompanyLocationId
+		JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId
+			AND EL.ysnDefaultLocation = 1
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = CASE 
+				WHEN SC.intMainCurrencyId IS NOT NULL
+					THEN CD.intCurrencyId
+				ELSE NULL
 				END
-				) AS BIT) = 0
-		AND L.intLoadId = @intLoadId
+		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+		WHERE CAST((
+					CASE 
+						WHEN ISNULL(LDCL.dblReceivedQty, 0) = 0
+							THEN 0
+						ELSE 1
+						END
+					) AS BIT) = 0
+			AND L.intLoadId = @intLoadId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @ReceiptStagingTable (
+			strReceiptType
+			,intEntityVendorId
+			,intShipFromId
+			,intLocationId
+			,strBillOfLadding
+			,intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intContractHeaderId
+			,intContractDetailId
+			,dtmDate
+			,intShipViaId
+			,dblQty
+			,intGrossNetUOMId
+			,dblGross
+			,dblNet
+			,dblCost
+			,intCostUOMId
+			,intCurrencyId
+			,intSubCurrencyCents
+			,dblExchangeRate
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,ysnIsStorage
+			,intSourceId
+			,intSourceType
+			,strSourceId
+			,strSourceScreenName
+			,ysnSubCurrency
+			,intForexRateTypeId
+			,dblForexRate
+			,intContainerId
+			)
+		SELECT strReceiptType = 'Purchase Contract'
+			,intEntityVendorId = LD.intVendorEntityId --
+			,intShipFromId = EL.intEntityLocationId
+			,intLocationId = CD.intCompanyLocationId
+			,L.strBLNumber --
+			,intItemId = LD.intItemId --
+			,intItemLocationId = CD.intCompanyLocationId
+			,intItemUOMId = LD.intItemUOMId --
+			,intContractHeaderId = CD.intContractHeaderId --
+			,intContractDetailId = LD.intPContractDetailId --
+			,dtmDate = GETDATE()
+			,intShipViaId = CD.intShipViaId
+			,dblQty = LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) --
+			,intGrossNetUOMId = ISNULL(CD.intNetWeightUOMId, LD.intWeightItemUOMId) --
+			,dblGross =  LD.dblGross - ISNULL(LD.dblDeliveredGross,0) --
+			,dblNet = LD.dblNet -ISNULL(LD.dblDeliveredNet,0) --
+			,dblCost = ISNULL(AD.dblSeqPrice, 0) --
+			,intCostUOMId = AD.intSeqPriceUOMId --
+			,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+			,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
+			,dblExchangeRate = 1
+			,intLotId = NULL
+			,intSubLocationId = ISNULL(CD.intSubLocationId, LD.intPSubLocationId) --
+			,intStorageLocationId = CD.intStorageLocationId --
+			,ysnIsStorage = 0
+			,intSourceId = LD.intLoadDetailId --
+			,intSourceType = 2
+			,strSourceId = L.strLoadNumber --
+			,strSourceScreenName = 'Contract'
+			,ysnSubCurrency = SubCurrency.ysnSubCurrency
+			,intForexRateTypeId = CD.intRateTypeId
+			,dblForexRate = CD.dblRate
+			,- 1 --
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+		JOIN tblICItemLocation IL ON IL.intItemId = CD.intItemId
+			AND IL.intLocationId = CD.intCompanyLocationId
+		JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId
+			AND EL.ysnDefaultLocation = 1
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = CASE 
+				WHEN SC.intMainCurrencyId IS NOT NULL
+					THEN CD.intCurrencyId
+				ELSE NULL
+				END
+		WHERE L.intLoadId = @intLoadId
+			AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
+	END
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM @ReceiptStagingTable)
 	BEGIN
-		--RAISERROR ('All the containers in the inbound shipment has already been received.',16,1)
-		RAISERROR ('All the containers in the inbound shipment has already been received.',16,1)
+		IF EXISTS(SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId)
+		BEGIN
+			SET @strErrorMessage = 'All the containers in the inbound shipment has already been received.'
+		END
+		ELSE 
+		BEGIN
+			SET @strErrorMessage = 'Item has already been received.'			
+		END
+		RAISERROR (@strErrorMessage,16,1)
 	END
 
 	INSERT INTO @OtherCharges (
