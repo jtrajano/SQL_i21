@@ -102,6 +102,9 @@ AS
 		BEGIN
 			DECLARE @asOfDateAging DATETIME = DATEADD(DAYOFYEAR, 1, @asOfDate)
 
+			IF (DATEPART(dd, @asOfDateAging) = 31)
+					SET @asOfDateAging = DATEADD(DAYOFYEAR, -1, @asOfDateAging)
+
 			INSERT INTO @temp_aging_table
 			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDateAging, NULL
 
