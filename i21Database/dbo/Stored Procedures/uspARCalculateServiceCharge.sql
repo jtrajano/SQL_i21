@@ -102,11 +102,11 @@ AS
 		BEGIN
 			DECLARE @asOfDateAging DATETIME = DATEADD(DAYOFYEAR, 1, @asOfDate)
 
-			IF (DATEPART(dd, @asOfDateAging) = 31)
-					SET @asOfDateAging = DATEADD(DAYOFYEAR, -1, @asOfDateAging)
-
 			INSERT INTO @temp_aging_table
 			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDateAging, NULL
+
+			IF (DATEPART(dd, @asOfDate) = 31)
+				DELETE FROM @temp_aging_table WHERE dtmDueDate = @asOfDate
 
 			DELETE FROM @temp_aging_table
 			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('CF Tran'))
