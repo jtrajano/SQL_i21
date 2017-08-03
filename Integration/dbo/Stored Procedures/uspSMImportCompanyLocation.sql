@@ -105,8 +105,8 @@ BEGIN
 				,[strDefaultInvoicePrinter]
 				,[strPickTicketType]
 				,[strDefaultTicketPrinter]
-				,[strLastOrderNumber]
-				,[strLastInvoiceNumber]
+				--,[strLastOrderNumber]
+				--,[strLastInvoiceNumber]
 				,[strPrintonInvoice]
 				,[ysnPrintContractBalance]
 				,[strJohnDeereMerchant]
@@ -313,8 +313,8 @@ BEGIN
 					ELSE ''''
 				  END)								--<strPickTicketType, nvarchar(50),>
 				,AG.[agloc_pic_prtr_name]			--<strDefaultTicketPrinter, nvarchar(50),>
-				,AG.[agloc_last_ord_no]				--<strLastOrderNumber, nvarchar(50),>
-				,AG.[agloc_last_ivc_no]				--<strLastInvoiceNumber, nvarchar(50),>
+				--,AG.[agloc_last_ord_no]				--<strLastOrderNumber, nvarchar(50),>
+				--,AG.[agloc_last_ivc_no]				--<strLastInvoiceNumber, nvarchar(50),>
 				,(CASE UPPER(AG.[agloc_ivc_prt_ipo])
 					WHEN ''I''	THEN	''Item''
 					WHEN ''P''	THEN	''Package''
@@ -914,8 +914,8 @@ BEGIN
     ,[strDefaultInvoicePrinter]  
     ,[strPickTicketType]  
     ,[strDefaultTicketPrinter]  
-    ,[strLastOrderNumber]  
-    ,[strLastInvoiceNumber]  
+    --,[strLastOrderNumber]  
+    --,[strLastInvoiceNumber]  
     ,[strPrintonInvoice]  
     ,[ysnPrintContractBalance]  
     ,[strJohnDeereMerchant]  
@@ -1047,8 +1047,8 @@ BEGIN
     ,PT.[ptloc_ivc_prtr_name]   --<strDefaultInvoicePrinter, nvarchar(50),>  
     ,''''        --<strPickTicketType, nvarchar(50),>  
     ,PT.[ptloc_pik_prtr_name]   --<strDefaultTicketPrinter, nvarchar(50),>  
-    ,PT.[ptloc_last_ord_no]    --<strLastOrderNumber, nvarchar(50),>  
-    ,PT.[ptloc_last_ivc_no]    --<strLastInvoiceNumber, nvarchar(50),>  
+    --,PT.[ptloc_last_ord_no]    --<strLastOrderNumber, nvarchar(50),>  
+    --,PT.[ptloc_last_ivc_no]    --<strLastInvoiceNumber, nvarchar(50),>  
     ,''''        --<strPrintonInvoice, nvarchar(50),>  
     ,0        --<ysnPrintContractBalance, bit,>  
     ,PT.[ptloc_merchant]     --<strJohnDeereMerchant, nvarchar(50),>  
