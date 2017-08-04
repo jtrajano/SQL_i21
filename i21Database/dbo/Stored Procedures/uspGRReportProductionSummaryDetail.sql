@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @ScaleUOMId  INT
 	DECLARE @intUnitMeasureId  INT
 	DECLARE @CommodityStockUomId  INT
+	DECLARE @CommodityStockUom NVARCHAR(50)
 	DECLARE @ScaleUOM NVARCHAR(50)
 	DECLARE @dblDryingandDiscountsOnLoadsIn DECIMAL(24,10)
 	DECLARE @dblDryingPremium DECIMAL(24,10)
@@ -44,6 +45,9 @@ BEGIN TRY
 	FROM	tblICCommodityUnitMeasure a 
 	JOIN	tblICItem b ON b.intCommodityId = a.intCommodityId
 	WHERE	b.intItemId = @intItemId AND a.ysnStockUnit = 1
+
+	SELECT @CommodityStockUom = strSymbol 
+	FROM tblICUnitMeasure WHERE intUnitMeasureId=@intUnitMeasureId
 
 	SELECT	@CommodityStockUomId = intItemUOMId			
 	FROM	tblICItemUOM UOM
@@ -217,21 +221,21 @@ BEGIN TRY
 	,[dbo].[fnRemoveTrailingZeroes](t1.dblScaleUOMIN) AS dblScaleUOMIN
 	,@ScaleUOM+' OUT' AS strScaleUOMOUT
 	,[dbo].[fnRemoveTrailingZeroes](t1.dblScaleUOMOUT) AS dblScaleUOMOUT
-	,[dbo].[fnRemoveTrailingZeroes](@TotalBeginingBalance) AS BeginingBalance
-	,[dbo].[fnRemoveTrailingZeroes](@TotalEndingBalance) AS EndingBalance
+	,[dbo].[fnRemoveTrailingZeroes](@TotalBeginingBalance)+' '+@CommodityStockUom AS BeginingBalance
+	,[dbo].[fnRemoveTrailingZeroes](@TotalEndingBalance)+' '+@CommodityStockUom AS EndingBalance
 	,[dbo].[fnRemoveTrailingZeroes](SUM(t2.dblNetBalance)) dblBalance,
 	@strInvoice AS strInvoice,
-	[dbo].[fnRemoveTrailingZeroes](@dblDryingandDiscountsOnLoadsIn) AS dblDryingandDiscountsOnLoadsIn,
+	'$'+[dbo].[fnRemoveTrailingZeroes](@dblDryingandDiscountsOnLoadsIn) AS dblDryingandDiscountsOnLoadsIn,
 	@strCompanyName AS strCompanyName,
 	@strStorageType AS strStorageType,
 	@strComodity AS strCommodityCode,
 	@strComodity AS strCommodityDescription,
 	0.0 As dblBalanceUnits,
     NULL As dblStorageShrink,
-	[dbo].[fnRemoveTrailingZeroes](@dblTotalStorageBilled+@dblDryingandDiscountsOnLoadsIn) As dblBilled,	
-	[dbo].[fnRemoveTrailingZeroes](@dblDryingandDiscountsOnLoadsIn) As dblTotalDiscountsBilled,
+	'$'+[dbo].[fnRemoveTrailingZeroes](@dblTotalStorageBilled+@dblDryingandDiscountsOnLoadsIn) As dblBilled,	
+	'$'+[dbo].[fnRemoveTrailingZeroes](@dblDryingandDiscountsOnLoadsIn) As dblTotalDiscountsBilled,
 	NULL As dblTotalODAFeesBilled,
-	[dbo].[fnRemoveTrailingZeroes](@dblTotalStorageBilled) As dblTotalStorageBilled,
+	'$'+[dbo].[fnRemoveTrailingZeroes](@dblTotalStorageBilled) As dblTotalStorageBilled,
 	NULL As dblTotalFreightBilled	
 	FROM @StorageTransaction t1
     JOIN @StorageTransaction t2 ON t1.intSettleStorageKey >= t2.intSettleStorageKey
