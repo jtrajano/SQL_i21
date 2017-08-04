@@ -101,7 +101,8 @@ BEGIN
 		 ,intWriteOffAccountId			
 		 ,intBankAccountId				
 		 ,dblAmountPaid					
-		 ,intPaymentMethodId			
+		 ,intPaymentMethodId	
+		 ,strPaymentMethod				
 		 ,strPaymentInfo				
 		 ,ysnApplytoBudget				
 		 ,ysnApplyOnAccount				
@@ -128,7 +129,8 @@ BEGIN
 		,NULL
 		,dblAccountTotalAmount
 		,(SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
-		,strInvoiceReportNumber
+		,'CF Invoice'
+		,strTempInvoiceReportNumber
 		,0
 		,0
 		,''
@@ -167,7 +169,8 @@ BEGIN
 		 ,intWriteOffAccountId			
 		 ,intBankAccountId				
 		 ,dblAmountPaid					
-		 ,intPaymentMethodId			
+		 ,intPaymentMethodId		
+		 ,strPaymentMethod			
 		 ,strPaymentInfo				
 		 ,ysnApplytoBudget				
 		 ,ysnApplyOnAccount				
@@ -195,6 +198,7 @@ BEGIN
 		,intBankAccountId				
 		,dblAmountPaid					
 		,intPaymentMethodId			
+		,strPaymentMethod
 		,strPaymentInfo				
 		,ysnApplytoBudget				
 		,ysnApplyOnAccount				
