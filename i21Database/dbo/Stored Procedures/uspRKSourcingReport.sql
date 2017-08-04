@@ -65,7 +65,7 @@ SELECT e.strName,strContractNumber,
 					 * 
 					dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity)
 					)
-				/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
+				/ case when isnull(c.ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
               JOIN vyuCTSearchPriceContractDetail detcd on det.intPriceFixationId=detcd.intPriceFixationId 
 			  JOIN tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
