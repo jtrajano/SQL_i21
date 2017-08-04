@@ -2473,8 +2473,7 @@ BEGIN
 		  ,[intSalesAdvAcct] = ISNULL([intSalesAdvAcct],0)  
 		  ,[intPurchaseAdvAccount] = ISNULL([intPurchaseAdvAccount],0)  
 		  ,[intFreightAPAccount] = ISNULL([intFreightAPAccount],0)  
-		  --,[intFreightExpenses] = ISNULL(FE.[
-		  ],0)  
+		  --,[intFreightExpenses] = ISNULL(FE.[inti21Id],0)  
 		  --,[intFreightIncome] = ISNULL(FI.[inti21Id],0)  
 		  --,[intServiceCharges] = ISNULL(SC.[inti21Id],0)  
 		  --,[intSalesDiscounts] = ISNULL(SD.[inti21Id],0)  
