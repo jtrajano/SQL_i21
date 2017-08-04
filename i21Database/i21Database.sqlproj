@@ -5568,6 +5568,7 @@
     <Build Include="dbo\Views\uspMFGetInventoryTransaction.sql" />
     <None Include="Scripts\Post-Deployment\EM\1730_Fix_SplitTypeEntry.sql" />
     <Build Include="dbo\Views\vyuCTGridPriceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessHoldTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
