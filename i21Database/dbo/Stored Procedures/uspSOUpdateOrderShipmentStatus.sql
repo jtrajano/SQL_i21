@@ -6,6 +6,7 @@ AS
 BEGIN
 
 DECLARE	@OrderStatus NVARCHAR(50)
+, @ShipmentPosted BIT
 SET @OrderStatus = 'Open'
 
 IF @ysnOpenStatus = 1
@@ -68,8 +69,8 @@ AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ISD
 		GROUP BY
 			ISD.[intSalesOrderDetailId]))
 	SET @IsOpen = 1
-					
-IF @IsOpen <> 0
+			
+IF (@IsOpen <> 0)
 	BEGIN
 		SET @OrderStatus = 'Open'
 		GOTO SET_ORDER_STATUS;
@@ -88,15 +89,15 @@ FROM
 							, ID.intItemUOMId
 							, dblQtyShipped	= CASE WHEN ISNULL(ISHI.dblQuantity, 0) = 0 THEN ID.dblQtyShipped ELSE ID.dblQtyShipped - ISNULL(ISHI.dblQuantity, 0) END
 						FROM tblARInvoiceDetail ID 
-								INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1
+								INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 								LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
-											ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId AND ISH.ysnPosted = 1)
+											ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
 												ON ISHI.intLineNo = ID.intSalesOrderDetailId
 							) ID
 				ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
 			LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
-							ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId AND ISH.ysnPosted = 1)							
-				ON SOD.intSalesOrderDetailId = ISHI.intLineNo
+							ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
+				ON SOD.intSalesOrderDetailId = ISHI.intLineNo AND SOD.intSalesOrderId = ISHI.intOrderId
 		WHERE SOD.dblQtyOrdered > 0
 		GROUP BY SOD.intSalesOrderDetailId
 	) SHP
@@ -112,6 +113,23 @@ SELECT @TotalQtyOrdered = SUM(dblQtyOrdered)
 FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId 
 GROUP BY intSalesOrderId
 
+SELECT 
+	@ShipmentPosted = ysnPosted 
+FROM 
+	tblICInventoryShipment 
+WHERE 
+	intInventoryShipmentId IN (SELECT 
+								intInventoryShipmentId 
+							   FROM 
+								tblICInventoryShipmentItem 
+							   WHERE 
+								intOrderId = @SalesOrderId)
+IF (@ShipmentPosted = 0)
+	BEGIN
+		SET @OrderStatus = 'Pending'
+		GOTO SET_ORDER_STATUS;
+	END	
+
 IF (@TotalQtyShipped = 0)
 	BEGIN
 		SET @OrderStatus = 'Pending'
@@ -123,7 +141,7 @@ IF (@TotalQtyShipped < @TotalQtyOrdered)
 		SET @OrderStatus = 'Partial'
 		GOTO SET_ORDER_STATUS;
 	END	
-		
+
 SET @OrderStatus = 'Closed'
 		
 SET_ORDER_STATUS:	
