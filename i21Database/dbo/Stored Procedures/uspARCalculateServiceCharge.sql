@@ -141,7 +141,7 @@ AS
 								 , I.strInvoiceNumber
 								 , NULL
 								 , dblAmountDue = I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)
-								 , dblTotalAmount = CASE WHEN SC.strCalculationType = 'Percent'
+								 , dblTotalAmount = dbo.fnRoundBanker(CASE WHEN SC.strCalculationType = 'Percent'
 						 								THEN
 						 									CASE WHEN SC.dblServiceChargeAPR > 0
 						 										THEN
@@ -159,7 +159,7 @@ AS
 						 									END
 						 								ELSE 
 						 									SC.dblPercentage
-						 							END
+						 							END, dbo.fnARGetDefaultDecimal())
 							FROM tblARInvoice I
 								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -207,7 +207,7 @@ AS
 										 , strInvoiceNumber		= AGING.strInvoiceNumber
 										 , strBudgetDescription = NULL
 										 , dblAmountDue			= @dblTotalAR
-										 , dblTotalAmount       = CASE WHEN SC.strCalculationType = 'Percent'
+										 , dblTotalAmount       = dbo.fnRoundBanker(CASE WHEN SC.strCalculationType = 'Percent'
 																		THEN
 																			CASE WHEN SC.dblServiceChargeAPR > 0
 																				THEN
@@ -216,7 +216,7 @@ AS
 																			END
 																		ELSE
 																			SC.dblPercentage
-						 											END
+						 											END, dbo.fnARGetDefaultDecimal())
 									FROM @temp_aging_table AGING
 										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
 										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
@@ -234,7 +234,7 @@ AS
 								 , NULL
 								 , 'Customer Budget For: ' + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)     
 								 , CB.dblBudgetAmount				
-								 , dblTotalAmount = CASE WHEN strCalculationType = 'Percent'
+								 , dblTotalAmount = dbo.fnRoundBanker(CASE WHEN strCalculationType = 'Percent'
 								 						THEN
 								 							CASE WHEN dblServiceChargeAPR > 0
 								 								THEN
@@ -246,7 +246,7 @@ AS
 								 							END
 								 						ELSE 
 								 							dblPercentage
-								 					END
+								 					END, dbo.fnARGetDefaultDecimal())
 							FROM tblARCustomerBudget CB
 								INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId	
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
