@@ -55,7 +55,7 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intLocationId AS INT;
 
 BEGIN 
-	SELECT DISTINCT	@intTicketItemUOMId = UM.intItemUOMId
+	SELECT DISTINCT	@intTicketItemUOMId = UM.intItemUOMId, @intItemId = SC.intItemId
 	FROM	dbo.tblICItemUOM UM	
 	INNER JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intDeliverySheetId = @intDeliverySheetId

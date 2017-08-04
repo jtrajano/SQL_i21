@@ -199,7 +199,7 @@ BEGIN
 		ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
 		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
 		WHERE SCT.intStorageScheduleTypeId = -5 OR SCT.strDistributionOption = 'HLD' 
-		AND SCD.intDeliverySheetId = @intDeliverySheetId), 0)
+		AND SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'), 0)
 
 	END
 	
@@ -272,7 +272,7 @@ IF ISNULL(@intEntityId,0) = 0
 		ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
 		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
 		WHERE SCT.intStorageScheduleTypeId = -5 OR SCT.strDistributionOption = 'HLD' 
-		AND SCD.intDeliverySheetId = @intDeliverySheetId), 0)
+		AND SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'), 0)
 
 		INSERT INTO #temp (Id, Contract, Cash, Storage, DP, Basis, WHGB, Hold) 
 		VALUES(@counter, @Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold)
