@@ -18,6 +18,9 @@
 )
 RETURNS VARCHAR(MAX)
 AS BEGIN
+	DECLARE @intAccountCategoryId INT
+	DECLARE @strAccountCategory NVARCHAR(100)
+
     DECLARE @strGeneratedSql VARCHAR(MAX)
 
     SET @strGeneratedSql =  ' SELECT' + CHAR(13)
@@ -91,18 +94,33 @@ AS BEGIN
 
 
 		   --In some cases
-		   IF(@strChangeDescription = 'Purchase Account')
+		   IF(@strChangeDescription = 'Cost of Goods Sold Account')
 		   BEGIN
-				SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 30 ' 
+				SET @strAccountCategory = 'Cost of Goods'
+				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
+				BEGIN
+					--SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 30 '
+
+					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+					SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
+				END 
 		   END
-		   ELSE IF(@strChangeDescription = '''Sales Account''')
+		   ELSE IF(@strChangeDescription = 'Sales Account')
 		   BEGIN
-				SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 33 ' 
+				SET @strAccountCategory = 'Sales Account'
+				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
+				BEGIN
+					--SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 33 '
+
+					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+					SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
+				END 
 		   END
-		   ELSE IF(@strChangeDescription = '''Variance Account''')
-		   BEGIN
-				SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 40 ' 
-		   END
+		   --For now Variance account will be remove
+		  -- ELSE IF(@strChangeDescription = 'Variance Account')
+		  -- BEGIN
+				--SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 40 ' 
+		  -- END
 
     RETURN @strGeneratedSql
 END

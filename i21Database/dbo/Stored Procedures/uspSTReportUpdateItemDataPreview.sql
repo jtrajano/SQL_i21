@@ -52,7 +52,7 @@ BEGIN TRY
 			@intNewBinLocation            INT,
 			@intNewGLPurchaseAccount      INT,
 			@intNewGLSalesAccount         INT,
-			@intNewGLVarianceAccount      INT,
+			--@intNewGLVarianceAccount      INT,
 			@strYsnPreview         NVARCHAR(1)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -314,10 +314,10 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intNewGLSalesAccount'
 
-	--intNewGLVarianceAccount 
-	SELECT @intNewGLVarianceAccount = [from]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'intNewGLVarianceAccount'
+	----intNewGLVarianceAccount 
+	--SELECT @intNewGLVarianceAccount = [from]
+	--FROM @temp_xml_table
+	--WHERE [fieldname] = 'intNewGLVarianceAccount'
 
 	--strYsnPreview 
 	SELECT @strYsnPreview = [from]
@@ -350,6 +350,9 @@ BEGIN TRY
 	DECLARE @CompanyCurrencyDecimal NVARCHAR(1)
 	SET @CompanyCurrencyDecimal = 0
 	SELECT @CompanyCurrencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+
+	DECLARE @intAccountCategoryId INT
+	DECLARE @strAccountCategory NVARCHAR(100)
 
 	DECLARE @SqlQuery1 as NVARCHAR(MAX)
 
@@ -515,7 +518,7 @@ BEGIN TRY
 			(
 				'Deposit PLU'
 				, '(select strUpcCode from tblICItemUOM where intItemUOMId = a.intDepositPLUId)'
-				, 'CAST(' + CAST(@NewDepositPluId AS NVARCHAR(50)) + ' AS NVARCHAR(50))'
+				, 'CAST(''' + CAST(@NewDepositPluId AS NVARCHAR(50)) + ''' AS NVARCHAR(50))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
@@ -528,7 +531,6 @@ BEGIN TRY
 				, 'd.intItemId'
 				, 'a.intItemLocationId'
 			)
-
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
@@ -992,7 +994,7 @@ BEGIN TRY
 			(
 				'Product Code'
 				, '( select strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = a.intProductCodeId )'
-				, 'CAST(' + CAST(@ProductCode AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
+				, 'CAST(''' + CAST(@ProductCode AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
 				, @strCategoryId
@@ -1005,6 +1007,9 @@ BEGIN TRY
 				, 'd.intItemId'
 				, 'a.intItemLocationId'
 			)
+
+			INSERT INTO TestDatabase.dbo.tblPerson(strFirstName, strLastName)
+			VALUES(@SqlQuery1, 'Product Code')
 
 		INSERT @tblUpdateItemDataPreview
 		EXEC (@SqlQuery1) 
@@ -1270,7 +1275,7 @@ BEGIN TRY
 	 --, '''( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@intNewGLPurchaseAccount) +' AS INT))'''
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
-				'Purchase Account'
+				'Cost of Goods Sold Account'
 				, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
 				, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLPurchaseAccount) AS NVARCHAR(50)) +' AS INT))'
 				--, (select strAccountId from tblGLAccount where intAccountId = @intNewGLPurchaseAccount)
@@ -1320,32 +1325,32 @@ BEGIN TRY
 	 END
 
 
-	 --PRINT '@intNewGLVarianceAccount'
-	 -----------------------------------Handle Dynamic Query 35
-	 IF (@intNewGLVarianceAccount IS NOT NULL)
-	 BEGIN
+	 ----PRINT '@intNewGLVarianceAccount'
+	 -------------------------------------Handle Dynamic Query 35
+	 --IF (@intNewGLVarianceAccount IS NOT NULL)
+	 --BEGIN
 
-		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
-			(
-				'Variance Account'
-				, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
-				, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLVarianceAccount) AS NVARCHAR(50)) +' AS INT))'
-				, @strCompanyLocationId
-				, @strVendorId
-				, @strCategoryId
-				, @Family
-				, @strClassId
-				, @intUpcCode
-				, @strDescription
-				, @dblPriceBetween1
-				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'e.intItemAccountId'
-			)
+		--    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+		--	(
+		--		'Variance Account'
+		--		, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
+		--		, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLVarianceAccount) AS NVARCHAR(50)) +' AS INT))'
+		--		, @strCompanyLocationId
+		--		, @strVendorId
+		--		, @strCategoryId
+		--		, @Family
+		--		, @strClassId
+		--		, @intUpcCode
+		--		, @strDescription
+		--		, @dblPriceBetween1
+		--		, @dblPriceBetween2
+		--		, 'd.intItemId'
+		--		, 'e.intItemAccountId'
+		--	)
 
-		INSERT @tblUpdateItemDataPreview
-		EXEC (@SqlQuery1) 
-	 END
+		--INSERT @tblUpdateItemDataPreview
+		--EXEC (@SqlQuery1) 
+	 --END
 
 
 
@@ -1358,7 +1363,7 @@ BEGIN TRY
 
 
 	 ---Update Logic-------
-			      
+PRINT 'Update Logic 01'		      
 IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
    BEGIN
 
@@ -1887,7 +1892,7 @@ IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
 END
 
 
-
+PRINT 'Update Logic 02'	
 IF((@strYsnPreview != 'Y')
 AND(@UpdateCount > 0))
 BEGIN
@@ -1978,244 +1983,253 @@ BEGIN
 	END
 END
 
+PRINT 'Update Logic 03'	
 IF((@strYsnPreview != 'Y')
 AND(@UpdateCount > 0))
 BEGIN
-      IF ((@intNewGLPurchaseAccount IS NOT NULL)
-	  OR (@intNewGLSalesAccount IS NOT NULL)    
-	  OR (@intNewGLVarianceAccount IS NOT NULL))
+      IF ((@intNewGLPurchaseAccount IS NOT NULL) OR (@intNewGLSalesAccount IS NOT NULL))
 	  BEGIN
-	          
+	         PRINT '@intNewGLPurchaseAccount'
 	         IF (@intNewGLPurchaseAccount IS NOT NULL)
 			 BEGIN
-			    
-				SET @SqlQuery1 = ' update tblICItemAccount set '  
+			    SET @strAccountCategory = 'Cost of Goods'
+				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
+				BEGIN
+					SET @SqlQuery1 = ' update tblICItemAccount set '  
 
-			    SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLPurchaseAccount) + '''' 
+					SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLPurchaseAccount) + '''' 
 
-				SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
+					SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
 
-		        IF (@strCompanyLocationId IS NOT NULL)
-		        BEGIN
-	      	      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intLocationId IN
-					      (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + ')'
-   		        END
+					IF (@strCompanyLocationId IS NOT NULL)
+					BEGIN
+	      			  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+							  (select intItemId from tblICItemLocation where intLocationId IN
+							  (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + ')'
+   					END
 
-		        IF (@strVendorId IS NOT NULL)
-		        BEGIN 
-		            SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intVendorId IN
-					       (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
-		        END
+					IF (@strVendorId IS NOT NULL)
+					BEGIN 
+						SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+							  (select intItemId from tblICItemLocation where intVendorId IN
+							   (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
+					END
 
-                IF (@strCategoryId IS NOT NULL)
-		        BEGIN
-     	            SET @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemAccount.intCategoryId
-		             	       IN (' + CAST(@strCategoryId as NVARCHAR) + ')' 
-		        END
+					IF (@strCategoryId IS NOT NULL)
+					BEGIN
+     					SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN (select intItemId from tblICCategory where intCategoryId IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + ')'
+					END
 
-                IF (@Family IS NOT NULL)
-		        BEGIN
-  		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intFamilyId IN
-					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
-		        END
+					IF (@Family IS NOT NULL)
+					BEGIN
+  					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+							  (select intItemId from tblICItemLocation where intFamilyId IN
+							   (' + CAST(@Family as NVARCHAR) + ')' + ')'
+					END
 
-                IF (@strClassId IS NOT NULL)
-		        BEGIN
-  			       SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			           (select intItemId from tblICItemLocation where intClassId IN
-					    (' + CAST(@strClassId as NVARCHAR) + ')' + ')'
-		        END
+					IF (@strClassId IS NOT NULL)
+					BEGIN
+  					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						   (select intItemId from tblICItemLocation where intClassId IN
+							(' + CAST(@strClassId as NVARCHAR) + ')' + ')'
+					END
 		    
-                IF (@intUpcCode IS NOT NULL)
-		        BEGIN
-		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId  
-                        IN (select intItemId from tblICItemUOM where  intItemUOMId IN
-				   	    (' + CAST(@intUpcCode as NVARCHAR) + ')' + ')'
-			    END
+					IF (@intUpcCode IS NOT NULL)
+					BEGIN
+					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId  
+							IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+				   			(' + CAST(@intUpcCode as NVARCHAR) + ')' + ')'
+					END
 
-                IF ((@strDescription IS NOT NULL)
-		        and (@strDescription != ''))
-		 	    BEGIN
-			      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
-			    END
+					IF ((@strDescription IS NOT NULL)
+					and (@strDescription != ''))
+		 			BEGIN
+					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+					END
 
-                IF (@dblPriceBetween1 IS NOT NULL) 
-		        BEGIN
-			      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@dblPriceBetween1)) + '''' + ')'
-		        END 
+					IF (@dblPriceBetween1 IS NOT NULL) 
+					BEGIN
+					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						   (select intItemId from tblICItemPricing where dblSalePrice >= 
+						   ''' + CONVERT(NVARCHAR,(@dblPriceBetween1)) + '''' + ')'
+					END 
 		      
-                IF (@dblPriceBetween2 IS NOT NULL) 
-		        BEGIN
-			        set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-				   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
-		        END     
+					IF (@dblPriceBetween2 IS NOT NULL) 
+					BEGIN
+						set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
+					END     
 
-				SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = 30 '
+					--SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = 30 '
+					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+					SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
 
-                EXEC (@SqlQuery1)
-				
-		        SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+					EXEC (@SqlQuery1)
+					SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+				END 
 			 END
 
+
+			 PRINT '@intNewGLSalesAccount'
              IF (@intNewGLSalesAccount IS NOT NULL)
 			 BEGIN
-			    
-				SET @SqlQuery1 = ' update tblICItemAccount set '  
+			    SET @strAccountCategory = 'Sales Account'
+				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
+				BEGIN
+					SET @SqlQuery1 = ' update tblICItemAccount set '  
 
-			    SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLSalesAccount) + '''' 
+					SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLSalesAccount) + '''' 
 
-				SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
+					SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
 
-		        IF (@strCompanyLocationId IS NOT NULL)
-		        BEGIN
-	      	      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intLocationId IN
-					      (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + ')'
-   		        END
+					IF (@strCompanyLocationId IS NOT NULL)
+					BEGIN
+	      			  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+							  (select intItemId from tblICItemLocation where intLocationId IN
+							  (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + ')'
+   					END
 
-		        IF (@strVendorId IS NOT NULL)
-		        BEGIN 
-		            SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intVendorId IN
-					       (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
-		        END
+					IF (@strVendorId IS NOT NULL)
+					BEGIN 
+						SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN (select intItemId from tblICItemLocation where intVendorId IN (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
+					END
 
-                IF (@strCategoryId IS NOT NULL)
-		        BEGIN
-     	            SET @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemAccount.intCategoryId
-		             	       IN (' + CAST(@strCategoryId as NVARCHAR) + ')' 
-		        END
+					IF (@strCategoryId IS NOT NULL)
+					BEGIN
+     					SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN (select intItemId from tblICCategory where intCategoryId IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + ')'
+					END
 
-                IF (@Family IS NOT NULL)
-		        BEGIN
-  		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intFamilyId IN
-					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
-		        END
+					IF (@Family IS NOT NULL)
+					BEGIN
+  					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+							  (select intItemId from tblICItemLocation where intFamilyId IN
+							   (' + CAST(@Family as NVARCHAR) + ')' + ')'
+					END
 
-                IF (@strClassId IS NOT NULL)
-		        BEGIN
-  			       SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			           (select intItemId from tblICItemLocation where intClassId IN
-					    (' + CAST(@strClassId as NVARCHAR) + ')' + ')'
-		        END
+					IF (@strClassId IS NOT NULL)
+					BEGIN
+  					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						   (select intItemId from tblICItemLocation where intClassId IN
+							(' + CAST(@strClassId as NVARCHAR) + ')' + ')'
+					END
 		    
-                IF (@intUpcCode IS NOT NULL)
-		        BEGIN
-		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId  
-                        IN (select intItemId from tblICItemUOM where  intItemUOMId IN
-				   	    (' + CAST(@intUpcCode as NVARCHAR) + ')' + ')'
-			    END
+					IF (@intUpcCode IS NOT NULL)
+					BEGIN
+					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId  
+							IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+				   			(' + CAST(@intUpcCode as NVARCHAR) + ')' + ')'
+					END
 
-                IF ((@strDescription IS NOT NULL)
-		        and (@strDescription != ''))
-		 	    BEGIN
-			      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
-			    END
+					IF ((@strDescription IS NOT NULL)
+					and (@strDescription != ''))
+		 			BEGIN
+					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+					END
 
-                IF (@dblPriceBetween1 IS NOT NULL) 
-		        BEGIN
-			      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@dblPriceBetween1)) + '''' + ')'
-		        END 
+					IF (@dblPriceBetween1 IS NOT NULL) 
+					BEGIN
+					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						   (select intItemId from tblICItemPricing where dblSalePrice >= 
+						   ''' + CONVERT(NVARCHAR,(@dblPriceBetween1)) + '''' + ')'
+					END 
 		      
-                IF (@dblPriceBetween2 IS NOT NULL) 
-		        BEGIN
-			        set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-				   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
-		        END     
+					IF (@dblPriceBetween2 IS NOT NULL) 
+					BEGIN
+						set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
+					END     
 
-				SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = 33 '
+					--SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = 33 '
+					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+					SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
 
-                EXEC (@SqlQuery1)
+					EXEC (@SqlQuery1)
 				
-		        SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+					SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+				END 
 			 END
              
-			 IF (@intNewGLVarianceAccount IS NOT NULL)
-			 BEGIN
+
+
+
+			 --IF (@intNewGLVarianceAccount IS NOT NULL)
+			 --BEGIN
 			    
-				SET @SqlQuery1 = ' update tblICItemAccount set '  
+				--SET @SqlQuery1 = ' update tblICItemAccount set '  
 
-			    SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLVarianceAccount) + '''' 
+			 --   SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLVarianceAccount) + '''' 
 
-				SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
+				--SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
 
-		        IF (@strCompanyLocationId IS NOT NULL)
-		        BEGIN
-	      	      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intLocationId IN
-					      (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + ')'
-   		        END
+		  --      IF (@strCompanyLocationId IS NOT NULL)
+		  --      BEGIN
+	   --   	      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+			 --             (select intItemId from tblICItemLocation where intLocationId IN
+				--	      (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + ')'
+   	--	        END
 
-		        IF (@strVendorId IS NOT NULL)
-		        BEGIN 
-		            SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intVendorId IN
-					       (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
-		        END
+		  --      IF (@strVendorId IS NOT NULL)
+		  --      BEGIN 
+		  --          SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+			 --             (select intItemId from tblICItemLocation where intVendorId IN
+				--	       (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
+		  --      END
 
-                IF (@strCategoryId IS NOT NULL)
-		        BEGIN
-     	            SET @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemAccount.intCategoryId
-		             	       IN (' + CAST(@strCategoryId as NVARCHAR) + ')' 
-		        END
+    --            IF (@strCategoryId IS NOT NULL)
+		  --      BEGIN
+    -- 	            SET @SqlQuery1 = @SqlQuery1 +  ' and  tblICItemAccount.intCategoryId
+		  --           	       IN (' + CAST(@strCategoryId as NVARCHAR) + ')' 
+		  --      END
 
-                IF (@Family IS NOT NULL)
-		        BEGIN
-  		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			              (select intItemId from tblICItemLocation where intFamilyId IN
-					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
-		        END
+    --            IF (@Family IS NOT NULL)
+		  --      BEGIN
+  		--           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+			 --             (select intItemId from tblICItemLocation where intFamilyId IN
+				--	       (' + CAST(@Family as NVARCHAR) + ')' + ')'
+		  --      END
 
-                IF (@strClassId IS NOT NULL)
-		        BEGIN
-  			       SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-			           (select intItemId from tblICItemLocation where intClassId IN
-					    (' + CAST(@strClassId as NVARCHAR) + ')' + ')'
-		        END
+    --            IF (@strClassId IS NOT NULL)
+		  --      BEGIN
+  		--	       SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+			 --          (select intItemId from tblICItemLocation where intClassId IN
+				--	    (' + CAST(@strClassId as NVARCHAR) + ')' + ')'
+		  --      END
 		    
-                IF (@intUpcCode IS NOT NULL)
-		        BEGIN
-		           SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId  
-                        IN (select intItemId from tblICItemUOM where  intItemUOMId IN
-				   	    (' + CAST(@intUpcCode as NVARCHAR) + ')' + ')'
-			    END
+    --            IF (@intUpcCode IS NOT NULL)
+		  --      BEGIN
+		  --         SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId  
+    --                    IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+				--   	    (' + CAST(@intUpcCode as NVARCHAR) + ')' + ')'
+			 --   END
 
-                IF ((@strDescription IS NOT NULL)
-		        and (@strDescription != ''))
-		 	    BEGIN
-			      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
-			    END
+    --            IF ((@strDescription IS NOT NULL)
+		  --      and (@strDescription != ''))
+		 	--    BEGIN
+			 --     SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+			 --   END
 
-                IF (@dblPriceBetween1 IS NOT NULL) 
-		        BEGIN
-			      SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@dblPriceBetween1)) + '''' + ')'
-		        END 
+    --            IF (@dblPriceBetween1 IS NOT NULL) 
+		  --      BEGIN
+			 --     SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+				--	   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				--	   ''' + CONVERT(NVARCHAR,(@dblPriceBetween1)) + '''' + ')'
+		  --      END 
 		      
-                IF (@dblPriceBetween2 IS NOT NULL) 
-		        BEGIN
-			        set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-				   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
-		        END     
+    --            IF (@dblPriceBetween2 IS NOT NULL) 
+		  --      BEGIN
+			 --       set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+				--	   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				--   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
+		  --      END     
 
-				SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = 40 '
+				--SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = 40 '
 
-                EXEC (@SqlQuery1)
+    --            EXEC (@SqlQuery1)
 				
-		        SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
-			 END
+		  --      SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+			 --END
 	  END
 END
 
