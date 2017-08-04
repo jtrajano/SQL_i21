@@ -256,7 +256,7 @@ FROM (
 		  , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END
 		  , intPaymentId		= ISNULL(PD.intPaymentId, PCREDITS.intPaymentId)
 		  , strRecordNumber		= ISNULL(PD.strRecordNumber, PCREDITS.strRecordNumber)
-		  , strTransactionType  = CASE WHEN I.intInvoiceId IS NOT NULL THEN I.strTransactionType ELSE IF PD.intPaymentID IS NOT NULL THEN ''Payment'' END
+		  , strTransactionType  = I.strTransactionType
 		  , strPaymentInfo	    = ''PAYMENT REF: '' + PD.strPaymentInfo
 		  , dtmDatePaid			= ISNULL(ISNULL(PD.dtmDatePaid, PCREDITS.dtmDatePaid), '+ @strDateFrom +')
 		  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
@@ -309,6 +309,7 @@ FROM (
 														 ) P ON PD.intPaymentId = P.intPaymentId))))
 		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))			
 	) I ON I.intEntityCustomerId = C.intEntityId
+	   AND I.dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 	LEFT JOIN (
 		SELECT intInvoiceId
 			 , dblPayment
@@ -317,6 +318,7 @@ FROM (
 		     , P.*
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 		INNER JOIN (SELECT intPaymentId
+						 , intEntityCustomerId
 						 , strRecordNumber
 						 , strPaymentInfo
 						 , dtmDatePaid
@@ -325,7 +327,7 @@ FROM (
 					  AND ysnPosted = 1
 					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 		) P ON PD.intPaymentId = P.intPaymentId
-	) PD ON I.intInvoiceId = PD.intInvoiceId
+	) PD ON C.intEntityId = PD.intEntityCustomerId
 	LEFT JOIN (
 		SELECT intPaymentId
 			 , strPaymentInfo
@@ -362,12 +364,11 @@ FROM (
 				   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
 		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 	) COMPANY
-) MainQuery
-WHERE dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +''
+) MainQuery'
 
 IF ISNULL(@filter,'') != ''
 BEGIN
-	SET @query = @query + ' AND ' + @filter
+	SET @query = @query + ' WHERE ' + @filter
 END
 
 INSERT INTO @temp_statement_table
