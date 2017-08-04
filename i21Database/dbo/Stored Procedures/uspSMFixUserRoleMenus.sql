@@ -129,6 +129,13 @@ BEGIN TRY
 					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @CustomerMenuId AND intUserRoleId = @UserRoleID
 				END
 
+				DECLARE @MakePaymentsMenuId INT
+				SELECT  @MakePaymentsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
+				BEGIN
+					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @MakePaymentsMenuId AND intUserRoleId = @UserRoleID
+				END
+
 				/* GRAIN */
 				DECLARE @GrainParentMenuId INT
 				SELECT @GrainParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Grain' AND strModuleName = 'Grain' AND intParentMenuID = 0
