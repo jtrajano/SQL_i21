@@ -200,8 +200,8 @@ BEGIN
 			LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = Detail.intLotId
 			LEFT JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
 	WHERE	Header.intInventoryCountId = @intTransactionId
+			AND (ISNULL(Detail.dblPhysicalCount, 0) - CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ISNULL(CASE WHEN ItemLot.intWeightUOMId IS NULL THEN ItemLot.dblQty ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intWeightUOMId, Detail.intItemUOMId, ItemLot.dblWeight) END, 0) END) <> 0
 			AND ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
-			AND ISNULL(Detail.dblPhysicalCount, 0) <> ISNULL(Detail.dblSystemCount, 0)
 	
 
 
