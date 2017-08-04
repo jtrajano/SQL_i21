@@ -96,7 +96,7 @@ BEGIN TRY
 
 				/* PURCHASING */
 				DECLARE @AccountsPayableParentMenuId INT
-				SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (AP)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
+				SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (A/P)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
 
 				DECLARE @AccountsPayableActivitiesParentMenuId INT
 				SELECT @AccountsPayableActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
@@ -117,7 +117,7 @@ BEGIN TRY
 
 				/* SALES */
 				DECLARE @AccountsReceivableParentMenuId INT
-				SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales (AR)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
+				SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales (A/R)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
 				
 				DECLARE @AccountsReceivableActivitiesParentMenuId INT
 				SELECT @AccountsReceivableActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
