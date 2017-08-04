@@ -660,7 +660,7 @@ BEGIN TRY
 		  --,ARI.[intAccountId]					= ITG.[intAccountId]
 		  ,ARI.[intCurrencyId]					= ITG.[intCurrencyId]
 		  ,ARI.[intTermId]						= ISNULL(ITG.[intTermId], ARC.[intTermsId])
-		  ,ARI.[intSourceId]					= dbo.[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
+		  ,ARI.[intSourceId]					= ISNULL(ARI.[intSourceId], dbo.[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId]))
 		  ,ARI.[intPeriodsToAccrue]				= ISNULL(ITG.[intPeriodsToAccrue], 1)
 		  ,ARI.[dtmDate]						= ITG.[dtmDate]
 		  ,ARI.[dtmDueDate]						= ISNULL(ITG.[dtmDueDate], (CAST(dbo.fnGetDueDateBasedOnTerm(ITG.[dtmDate], ISNULL(ISNULL(ITG.[intTermId], ARC.[intTermsId]),0)) AS DATE)))
