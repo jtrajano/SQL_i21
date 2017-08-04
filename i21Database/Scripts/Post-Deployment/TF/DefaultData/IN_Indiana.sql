@@ -2875,10 +2875,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intScheduleColumnId = 3438, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'BoL', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 143438
 	UNION ALL SELECT intScheduleColumnId = 3439, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 143439
 	UNION ALL SELECT intScheduleColumnId = 3440, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strBillOfLading', strCaption = 'BoL', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 143440
-	UNION ALL SELECT intScheduleColumnId = 9558, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'BoL', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 149558
-	UNION ALL SELECT intScheduleColumnId = 9559, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strBillOfLading', strCaption = 'BoL', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 149559
-	UNION ALL SELECT intScheduleColumnId = 9560, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'BoL', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 149560
-	UNION ALL SELECT intScheduleColumnId = 9561, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strBillOfLading', strCaption = 'BoL', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 149561
 
 	EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 
