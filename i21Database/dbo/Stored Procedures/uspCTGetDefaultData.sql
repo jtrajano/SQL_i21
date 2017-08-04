@@ -62,7 +62,7 @@ BEGIN
 
 		IF	ISNULL(@intFutureMarketId,0) > 0
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent
 			FROM		tblRKFutureMarket M 
 			LEFT JOIN	tblICUnitMeasure	MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemId		=	@intItemId 
@@ -74,7 +74,7 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent
 			FROM		tblRKFutureMarket			M 
 			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblRKCommodityMarketMapping C	ON	C.intFutureMarketId =	M.intFutureMarketId 
@@ -153,7 +153,7 @@ BEGIN
 			BEGIN
 				INSERT INTO @Item
 				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null  FROM vyuCTInventoryItem 
-				WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId
+				WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND strStatus <> 'Discontinued'
 				ORDER BY intItemId ASC
 			END
 		END
@@ -161,7 +161,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @Item
 			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null FROM vyuCTInventoryItem 
-			WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId
+			WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND strStatus <> 'Discontinued'
 			ORDER BY intItemId ASC
 		END
 
@@ -190,6 +190,9 @@ BEGIN
 
 	IF @strType = 'Currency'
 	BEGIN
-		SELECT intCurrencyId,strCurrency,ysnSubCurrency,strMainCurrency FROM vyuCTEntity WHERE intEntityId = @intEntityId AND strEntityType = CASE WHEN @intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END
+		SELECT	V.intCurrencyId,V.strCurrency,V.ysnSubCurrency,strMainCurrency,intCent
+		FROM	vyuCTEntity V
+		JOIN	tblSMCurrency C ON C.intCurrencyID = V.intCurrencyId
+		WHERE intEntityId = @intEntityId AND strEntityType = CASE WHEN @intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END
 	END
 END

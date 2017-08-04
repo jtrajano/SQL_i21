@@ -51,7 +51,10 @@ AS
 					CD.strBook,
 					CD.strSubBook,
 					CD.strPriceUOM,
-					NULL						AS strPriceContractNo
+					NULL						AS strPriceContractNo,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
@@ -112,7 +115,10 @@ AS
 					CD.strBook,
 					CD.strSubBook,
 					CD.strPriceUOM,
-					NULL						AS	strPriceContractNo
+					NULL						AS	strPriceContractNo,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
@@ -141,7 +147,10 @@ AS
 					CD.strEntityContract,
 					CD.strBook,
 					CD.strSubBook,
-					CD.strPriceUOM
+					CD.strPriceUOM,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency
 
 		UNION ALL
 
@@ -195,7 +204,10 @@ AS
 					CD.strBook,
 					CD.strSubBook,
 					CD.strPriceUOM,
-					PC.strPriceContractNo
+					PC.strPriceContractNo,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
@@ -259,7 +271,10 @@ AS
 					CD.strBook,
 					CD.strSubBook,
 					CD.strPriceUOM,
-					PC.strPriceContractNo
+					PC.strPriceContractNo,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
@@ -291,5 +306,8 @@ AS
 					CD.strBook,
 					CD.strSubBook,
 					CD.strPriceUOM,
-					PC.strPriceContractNo
+					PC.strPriceContractNo,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency
 	)t
