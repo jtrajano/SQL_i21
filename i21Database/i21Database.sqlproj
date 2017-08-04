@@ -5372,6 +5372,8 @@
     <Build Include="dbo\Stored Procedures\uspARGetDefaultAccount.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryCountDetail.sql" />
     <Build Include="dbo\Views\uspMFGetInventoryTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKSourcingContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSourcingReportByProductType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
