@@ -228,11 +228,11 @@ USING
 		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(IE.[intSubCurrencyId], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblSubCurrencyRate], 1) END
 		,[ysnRestricted]						= ISNULL(IE.[ysnRestricted], 0)
 		,[ysnBlended]							= ISNULL(IE.[ysnBlended], 0)
-		,[intAccountId]							= IE.[intAccountId]
+		,[intAccountId]							= NULL
 		,[intCOGSAccountId]						= NULL
 		,[intSalesAccountId]					= IE.[intSalesAccountId]
 		,[intInventoryAccountId]				= NULL
-		,[intServiceChargeAccountId]			= IE.[intAccountId]
+		,[intServiceChargeAccountId]			= NULL
 		,[intLicenseAccountId]					= NULL
 		,[intMaintenanceAccountId]				= NULL
 		,[strMaintenanceType]					= IE.[strMaintenanceType]

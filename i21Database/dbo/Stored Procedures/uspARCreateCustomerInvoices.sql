@@ -930,7 +930,7 @@ USING
 		,[intAccountId]					= ITG.[intAccountId]
 		,[intCurrencyId]				= ITG.intCurrencyId
 		,[intTermId]					= ISNULL(ITG.intTermId, ARC.[intTermsId])
-		,[intSourceId]					= ITG.[intSourceId] --[dbo].[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
+		,[intSourceId]					= [dbo].[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
 		,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
 		,[dtmDate]						= ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)
 		,[dtmDueDate]					= ISNULL(ITG.dtmDueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly), ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]),0)) AS DATE)))
