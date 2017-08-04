@@ -161,7 +161,7 @@ BEGIN TRY
 	CONVERT(Nvarchar,SH.dtmHistoryDate,101) AS dtmHistoryDate,
 	CASE 
 			WHEN SH.strType='From Scale' THEN 'DELIVERED'				
-			ELSE SH.strType
+			ELSE UPPER(SH.strType)
 	END
 	AS strDescription,
 	
@@ -227,7 +227,7 @@ BEGIN TRY
 	@strInvoice AS strInvoice,
 	'$'+[dbo].[fnRemoveTrailingZeroes](@dblDryingandDiscountsOnLoadsIn) AS dblDryingandDiscountsOnLoadsIn,
 	@strCompanyName AS strCompanyName,
-	@strStorageType AS strStorageType,
+	@strStorageType+' Statement' AS strStorageType,
 	@strComodity AS strCommodityCode,
 	@strComodity AS strCommodityDescription,
 	0.0 As dblBalanceUnits,
