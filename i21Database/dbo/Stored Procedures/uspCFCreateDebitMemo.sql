@@ -137,7 +137,7 @@ BEGIN
 			,[strSCInvoiceNumber]					= ''
 			,[intSalesAccountId]					= @accountId
 			,[strSourceTransaction]					= 'CF Invoice'
-			,[intSourceId]							= 1											-- TEMPORARY
+			,[intSourceId]							= NULL											-- TEMPORARY
 			,[strSourceId]							= strTempInvoiceReportNumber
 			,[intInvoiceId]							= NULL 
 			,[intEntityCustomerId]					= intCustomerId
