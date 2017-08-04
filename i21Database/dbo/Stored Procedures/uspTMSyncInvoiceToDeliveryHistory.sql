@@ -223,12 +223,6 @@ BEGIN
 					
 					-----Get the previous delivery record
 					SELECT TOP 1 @intNewDeliveryHistoryId = intDeliveryHistoryID FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate AND ysnMeterReading <> 1
-
-					-- Check if it has previous delivery record if non consider as new entry with prior date entry
-					IF(@intNewDeliveryHistoryId IS NULL)
-					BEGIN
-						GOTO NEWENTRYPREVIOUSDATE
-					END
 					
 					---Add to detail of the delivery history
 					INSERT INTO tblTMDeliveryHistoryDetail(
@@ -481,7 +475,6 @@ BEGIN
 					END
 					ELSE
 					BEGIN
-						NEWENTRYPREVIOUSDATE:
 						PRINT 'No previous entry'
 						
 						INSERT INTO tblTMDeliveryHistory(
