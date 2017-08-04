@@ -450,11 +450,11 @@ INSERT INTO @temp_statement_table(
 	, strCompanyName
 )
 SELECT DISTINCT
-	  BALANCEFORWARD.intEntityCustomerId
-	, BALANCEFORWARD.strCustomerName
-	, BALANCEFORWARD.strEntityNo
+	  ISNULL(BALANCEFORWARD.intEntityCustomerId, STATEMENTFORWARD.intEntityCustomerId)
+	, ISNULL(BALANCEFORWARD.strCustomerName, STATEMENTFORWARD.strCustomerName)
+	, ISNULL(BALANCEFORWARD.strEntityNo, STATEMENTFORWARD.strCustomerNumber)
 	, 'Balance Forward'
-	, BALANCEFORWARD.dblCreditLimit
+	, ISNULL(BALANCEFORWARD.dblCreditLimit, STATEMENTFORWARD.dblCreditLimit)
 	, @dtmDateFrom
 	, '01/01/1900'
 	, 1
