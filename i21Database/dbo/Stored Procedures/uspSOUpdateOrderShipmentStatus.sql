@@ -6,6 +6,7 @@ AS
 BEGIN
 
 DECLARE	@OrderStatus NVARCHAR(50)
+, @ShipmentPosted BIT
 SET @OrderStatus = 'Open'
 
 IF @ysnOpenStatus = 1
@@ -68,7 +69,7 @@ AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ISD
 		GROUP BY
 			ISD.[intSalesOrderDetailId]))
 	SET @IsOpen = 1
-					
+			
 IF @IsOpen <> 0
 	BEGIN
 		SET @OrderStatus = 'Open'
@@ -112,6 +113,23 @@ SELECT @TotalQtyOrdered = SUM(dblQtyOrdered)
 FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId 
 GROUP BY intSalesOrderId
 
+SELECT 
+	@ShipmentPosted = ysnPosted 
+FROM 
+	tblICInventoryShipment 
+WHERE 
+	intInventoryShipmentId IN (SELECT 
+								intInventoryShipmentId 
+							   FROM 
+								tblICInventoryShipmentItem 
+							   WHERE 
+								intOrderId = @SalesOrderId)
+IF (@ShipmentPosted = 0)
+	BEGIN
+		SET @OrderStatus = 'Pending'
+		GOTO SET_ORDER_STATUS;
+	END	
+
 IF (@TotalQtyShipped = 0)
 	BEGIN
 		SET @OrderStatus = 'Pending'
@@ -123,7 +141,7 @@ IF (@TotalQtyShipped < @TotalQtyOrdered)
 		SET @OrderStatus = 'Partial'
 		GOTO SET_ORDER_STATUS;
 	END	
-		
+
 SET @OrderStatus = 'Closed'
 		
 SET_ORDER_STATUS:	
