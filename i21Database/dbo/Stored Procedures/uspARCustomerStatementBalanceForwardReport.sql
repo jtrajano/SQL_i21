@@ -256,7 +256,7 @@ FROM (
 		  , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END
 		  , intPaymentId		= ISNULL(PD.intPaymentId, PCREDITS.intPaymentId)
 		  , strRecordNumber		= ISNULL(PD.strRecordNumber, PCREDITS.strRecordNumber)
-		  , strTransactionType  = I.strTransactionType
+		  , strTransactionType  = CASE WHEN I.intInvoiceId IS NOT NULL THEN I.strTransactionType ELSE IF PD.intPaymentID IS NOT NULL THEN ''Payment'' END
 		  , strPaymentInfo	    = ''PAYMENT REF: '' + PD.strPaymentInfo
 		  , dtmDatePaid			= ISNULL(ISNULL(PD.dtmDatePaid, PCREDITS.dtmDatePaid), '+ @strDateFrom +')
 		  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
