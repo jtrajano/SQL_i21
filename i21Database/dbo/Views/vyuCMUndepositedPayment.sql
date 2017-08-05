@@ -16,6 +16,7 @@ Undep.intUndepositedFundId
 ,Undep.intCreatedUserId
 ,EM.strName as strUserName
 ,Undep.dtmCreated
+,strBatchId = (SELECT TOP 1 strBatchId FROM vyuGLDetail WHERE intTransactionId = Undep.intSourceTransactionId AND strTransactionType = 'Receive Payments')
 ,SUBSTRING(Pay.strPaymentInfo,1,PATINDEX('% ending%',Pay.strPaymentInfo)) as strCardType
 FROM tblCMUndepositedFund Undep
 INNER JOIN tblEMEntity EM ON Undep.intCreatedUserId = EM.intEntityId
