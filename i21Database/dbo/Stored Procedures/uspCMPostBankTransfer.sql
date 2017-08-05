@@ -403,7 +403,12 @@ BEGIN
 			,strCountry					= ''
 			,dblAmount					= A.dblAmount
 			,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
-			,strMemo					= A.strReferenceFrom
+			,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
+											A.strDescription 
+											WHEN ISNULL(A.strDescription,'') = '' THEN
+											A.strReferenceFrom
+											ELSE A.strDescription + ' / ' + A.strReferenceFrom 
+										  END
 			,strReferenceNo				= ''
 			,dtmCheckPrinted			= NULL
 			,ysnCheckToBePrinted		= 0
@@ -441,7 +446,12 @@ BEGIN
 			,strCountry					= ''
 			,dblAmount					= A.dblAmount
 			,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
-			,strMemo					= A.strReferenceTo
+			,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
+											A.strDescription 
+											WHEN ISNULL(A.strDescription,'') = '' THEN
+											A.strReferenceTo
+											ELSE A.strDescription + ' / ' + A.strReferenceTo 
+										  END
 			,strReferenceNo				= ''
 			,dtmCheckPrinted			= NULL
 			,ysnCheckToBePrinted		= 0
