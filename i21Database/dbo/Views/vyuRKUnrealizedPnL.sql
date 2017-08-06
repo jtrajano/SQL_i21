@@ -32,8 +32,16 @@ SELECT  intFutOptTransactionId,
 		isnull(ot.dblPrice,0) dblPrice,  
 		fm.dblContractSize dblContractSize,0 as intConcurrencyId,  
 		CASE WHEN bc.intFuturesRateType= 1 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission1,  
-	   isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd WHERE psd.intLFutOptTransactionId=ot.intFutOptTransactionId),0)as MatchLong,  
-	   isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId),0)as MatchShort,            
+	   isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd 
+				join tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
+				WHERE psd.intLFutOptTransactionId=ot.intFutOptTransactionId 
+					  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= 
+				(SELECT TOP 1 convert(datetime,CONVERT(VARCHAR(10),dtmToDate,110),110) from tblRKDateFilterFor360 order by 1 desc)),0) as MatchLong,  
+	   isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd
+			   join tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
+			 WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId
+			  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= 
+			  (SELECT TOP 1 convert(datetime,CONVERT(VARCHAR(10),dtmToDate,110),110) from tblRKDateFilterFor360 order by 1 desc)),0) as MatchShort,            
 		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,cur.intCent ComCent,cur.ysnSubCurrency ComSubCurrency            
  FROM tblRKFutOptTransaction ot   
  JOIN tblRKFuturesMonth om on om.intFutureMonthId=ot.intFutureMonthId   and ot.strStatus='Filled'
@@ -51,5 +59,4 @@ SELECT  intFutOptTransactionId,
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId 
   )t1)t1 
 )t1 where (dblLong<>0 or dblShort <>0) ORDER BY RowNum ASC
-
 GO
