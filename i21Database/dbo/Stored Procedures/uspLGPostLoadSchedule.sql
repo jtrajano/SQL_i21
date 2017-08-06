@@ -41,6 +41,12 @@ BEGIN TRY
 			,@ysnUnShip = @ysnUnShip
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
 
+		EXEC uspLGPostInTransitCosting 
+			 @intLoadId = @intLoadId
+			,@ysnPost = @ysnPost
+			,@intPurchaseSale = 1
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
 			IF(@ysnPost = 0)
 			BEGIN
 				UPDATE tblLGLoad SET intShipmentStatus = 2 WHERE intLoadId = @intLoadId
@@ -64,6 +70,12 @@ BEGIN TRY
 	END
 	ELSE IF @intPurchaseSale = 3
 	BEGIN
+		EXEC uspLGPostInTransitCosting 
+			@intLoadId = @intLoadId
+		   ,@ysnPost = @ysnPost
+		   ,@intPurchaseSale = 1
+		   ,@intEntityUserSecurityId = @intEntityUserSecurityId
+
 		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
 	END
 END TRY
