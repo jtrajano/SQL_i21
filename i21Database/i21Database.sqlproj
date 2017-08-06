@@ -5572,6 +5572,7 @@
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetToInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAddDeliverySheetToItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostInTransitCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
