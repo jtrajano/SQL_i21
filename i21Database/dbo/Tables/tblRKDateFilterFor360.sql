@@ -2,6 +2,6 @@
 (
 	[intDateFilterFor360Id] INT NOT NULL IDENTITY,
 	[intConcurrencyId] INT NOT NULL, 
-	[dtmToDate] INT NULL
+	[dtmToDate] DATETIME NULL
 	CONSTRAINT [PK_tblRKDateFilterFor360_intDateFilterFor360Id] PRIMARY KEY ([intDateFilterFor360Id])
 )
