@@ -9,5 +9,8 @@
 	[dblCashPayout] [numeric](18, 6) NOT NULL,
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATRefundRate] PRIMARY KEY ([intRefundTypeId]), 
-    CONSTRAINT [AK_tblPATRefundRate_strRefundType] UNIQUE ([strRefundType])
+    CONSTRAINT [AK_tblPATRefundRate_strRefundType] UNIQUE ([strRefundType]),
+	CONSTRAINT [FK_tblPATRefundRate_tblGLAccount_intGeneralReserveId_intAccountId] FOREIGN KEY ([intGeneralReserveId]) REFERENCEs [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPATRefundRate_tblGLAccount_intAllocatedReserveId_intAccountId] FOREIGN KEY ([intAllocatedReserveId]) REFERENCEs [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPATRefundRate_tblGLAccount_intUndistributedEquityId_intAccountId] FOREIGN KEY ([intUndistributedEquityId]) REFERENCEs [tblGLAccount]([intAccountId])
 )
