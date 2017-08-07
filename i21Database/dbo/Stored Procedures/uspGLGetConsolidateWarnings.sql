@@ -1,16 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLGetConsolidateWarnings]
-(@dtmDate DATETIME)
+(@dtmDate DATETIME,
+@strCompanyName nvarchar(100),
+@resultId  INT OUT
+)
+
 AS
 
-IF object_id('tempdb..##ConsolidateResult') IS NOT NULL
-	BEGIN
-		DROP TABLE ##ConsolidateResult
-	END
-	CREATE TABLE ##ConsolidateResult(
-			[ysnFiscalOpen] [bit] NULL,
-			[ysnUnpostedTrans] [bit] NULL,
-			[strResult] [nvarchar](1000) NULL
-		)
 
 DECLARE @ysnOpen BIT, @ysnUnpostedTrans BIT, 
 	@intFiscalYearId INT,@intFiscalPeriodId INT,
@@ -29,8 +24,9 @@ BETWEEN dtmStartDate and dtmEndDate
 
 IF @intFiscalYearId IS NULL
 BEGIN
-	INSERT INTO ##ConsolidateResult ([ysnFiscalOpen] , [ysnUnpostedTrans],[strResult])
-	SELECT  0 , 0, ' Fiscal Period not existing in subsidiary company.' strResult
+	INSERT INTO tblGLConsolidateResult ([ysnFiscalOpen] , [ysnUnpostedTrans],[strResult], strCompanyName)
+	SELECT  0 , 0, ' Fiscal Period not existing in subsidiary company.', @strCompanyName
+	SELECT @resultId = SCOPE_IDENTITY()
 	RETURN
 END
 
@@ -52,6 +48,10 @@ BEGIN
 	SELECT @ysnOpen = CASE WHEN @ysnOpen = 1 THEN 0 ELSE 1 END
 	SELECT @ysnUnpostedTrans = CASE WHEN @ysnUnpostedTrans = 1 THEN 0 ELSE 1 END
 	
-	INSERT INTO ##ConsolidateResult ([ysnFiscalOpen] , [ysnUnpostedTrans],[strResult])
-	SELECT @ysnOpen ysnFiscalOpen, @ysnUnpostedTrans ysnUnpostedTrans, @strResult strResult
+	INSERT INTO tblGLConsolidateResult ([ysnFiscalOpen] , [ysnUnpostedTrans],[strResult], strCompanyName)
+	SELECT @ysnOpen ysnFiscalOpen, @ysnUnpostedTrans ysnUnpostedTrans, @strResult, @strCompanyName
+
+	
+	SELECT @resultId = SCOPE_IDENTITY()
+	
 END
