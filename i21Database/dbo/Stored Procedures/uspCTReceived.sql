@@ -117,7 +117,8 @@ BEGIN TRY
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
-			IF (@intSourceType IN (0,1,2,3) OR @ysnPO = 1) AND @strReceiptType <> 'Inventory Return'
+			IF ((@intSourceType IN (0,1,2,3) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return')  OR 
+			   (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return')
 			BEGIN					
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,

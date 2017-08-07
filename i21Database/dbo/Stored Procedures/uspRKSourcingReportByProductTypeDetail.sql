@@ -1,16 +1,17 @@
-﻿CREATE PROC [dbo].[uspRKSourcingReportDetail] 
+﻿CREATE PROC [dbo].[uspRKSourcingReportByProductTypeDetail] 
        @dtmFromDate DATETIME = NULL,
        @dtmToDate DATETIME = NULL,
        @intCommodityId int = NULL,
-       @intUnitMeasureId int = NULL,
+       @intUnitMeasureId int = NULL,  
 	   @strEntityName nvarchar(100) = null,
-       @ysnVendorProducer bit = null
-
+	   @ysnVendorProducer bit = null,
+	   @strProductType nvarchar(100) = null,
+	   @strOrigin nvarchar(100) = null
 AS
-
+ 
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
-SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContractDetailId,
+SELECT  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContractDetailId,
 		strName as strEntityName,
 		intContractHeaderId,
 		strContractNumber as strContractSeq, 
@@ -21,12 +22,12 @@ SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContrac
 		CONVERT(NUMERIC(16,6),(case when isnull(dblFullyPricedFutures,0)=0 then dblParPricedAvgPrice else dblFullyPricedFutures end))  dblFuturesPrice,
 		CONVERT(NUMERIC(16,6),dblUnPricedSettlementPrice) dblSettlementPrice,
 		CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,dblUnPricedBasis))) AS dblBasis,
-       CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 0
+        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 0
               WHEN (isnull(dblFullyPriced,0)) <> 0  then (isnull(dblFullyPriced,0))
               WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) <> 0 then (isnull(dblParPriced,0))
-              WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end AS dblTotPurchased 
+              WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end AS dblTotPurchased , strOrigin,strProductType
 FROM(
-SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,intContractDetailId,
+SELECT cd.intContractDetailId,e.strName ,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,
              dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
 			 ,cd.dblNoOfLots
 			,(SELECT round(dblTotalCost,2) FROM tblCTContractDetail det WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(1,6))  dblFullyPriced
@@ -128,19 +129,23 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
 					 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
               WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t) 
-			  as dblReturn
-
+			  as dblReturn,
+			  strOrigin,strProductType
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId 
 JOIN tblEMEntity e on e.intEntityId=ch.intEntityId
+JOIN vyuRKSourcingContractDetail sc on sc.intContractDetailId=cd.intContractDetailId
 WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
-and strName=@strEntityName
-)t
+and strName = @strEntityName AND strOrigin= case when isnull(@strOrigin,'')='' then strOrigin else @strOrigin end
+and strProductType= case when isnull(@strProductType,'')='' then strProductType else @strProductType end 
+)t1 
 END
 ELSE
+
 BEGIN
-SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContractDetailId,
+
+SELECT  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContractDetailId,
 		strName as strEntityName,
 		intContractHeaderId,
 		strContractNumber as strContractSeq, 
@@ -154,9 +159,9 @@ SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContrac
        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 0
               WHEN (isnull(dblFullyPriced,0)) <> 0  then (isnull(dblFullyPriced,0))
               WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) <> 0 then (isnull(dblParPriced,0))
-              WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end AS dblTotPurchased 
+              WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end AS dblTotPurchased , strOrigin,strProductType
 FROM(
-SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,intContractDetailId,
+SELECT e.strName,ch.intContractHeaderId,cd.intContractDetailId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,
              dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
 			 ,cd.dblNoOfLots
 			,(SELECT round(dblTotalCost,2) FROM tblCTContractDetail det WHERE det.intContractDetailId=cd.intContractDetailId and intPricingTypeId in(1,6))  dblFullyPriced
@@ -258,14 +263,16 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
 					 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
               WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t) 
-			  as dblReturn
-
+			  as dblReturn,
+			  strOrigin,strProductType
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
 JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId 
 JOIN tblEMEntity e on e.intEntityId=CASE WHEN ISNULL(cd.intProducerId,0)=0 then ch.intEntityId else 
 							case when isnull(cd.ysnClaimsToProducer,0)=1 then cd.intProducerId else ch.intEntityId end end
+JOIN vyuRKSourcingContractDetail sc on sc.intContractDetailId=cd.intContractDetailId
 WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
-and strName=@strEntityName
+and strName = @strEntityName AND strOrigin= case when isnull(@strOrigin,'')='' then strOrigin else @strOrigin end
+and strProductType= case when isnull(@strProductType,'')='' then strProductType else @strProductType end 
 )t
 END

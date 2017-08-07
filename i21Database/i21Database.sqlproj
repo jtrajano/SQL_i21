@@ -178,6 +178,7 @@
     <Folder Include="Scripts\Post-Deployment\TR\" />
     <Folder Include="Scripts\Post-Deployment\CRM" />
     <Folder Include="Scripts\Post-Deployment\LG" />
+    <Folder Include="Scripts\Post-Deployment\RM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -5372,6 +5373,12 @@
     <Build Include="dbo\Stored Procedures\uspARGetDefaultAccount.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryCountDetail.sql" />
     <Build Include="dbo\Views\uspMFGetInventoryTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKSourcingContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSourcingReportByProductType.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSourcingReportByProductTypeDetail.sql" />
+    <Build Include="dbo\Tables\tblRKDateFilterFor360.sql" />
+    <None Include="Scripts\Post-Deployment\RM\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
