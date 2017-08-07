@@ -85,7 +85,7 @@ BEGIN TRY
 	LEFT	JOIN	tblICUnitMeasure			XM	ON	XM.intUnitMeasureId				=		XU.intUnitMeasureId
 	LEFT	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId			=		CD.intCompanyLocationId
 	LEFT	JOIN	tblSMFreightTerms			FT	ON	FT.intFreightTermId				=		CD.intFreightTermId
-	LEFT	JOIN	tblSMShipVia				SV	ON	SV.intEntityShipViaId			=		CD.intShipViaId
+	LEFT	JOIN	tblSMShipVia				SV	ON	SV.intEntityId					=		CD.intShipViaId
 	LEFT	JOIN	tblCTFreightRate			FR	ON	FR.intFreightRateId				=		CD.intFreightRateId
 	LEFT	JOIN	tblCTRailGrade				RG	ON	RG.intRailGradeId				=		CD.intRailGradeId
 	LEFT	JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId				=		CD.intPricingTypeId
