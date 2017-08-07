@@ -5575,6 +5575,8 @@
     <Build Include="dbo\Stored Procedures\uspLGPostInTransitCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
     <Build Include="dbo\Views\vyuCTHeaderForPrepayment.sql" />
+    <Build Include="dbo\Functions\fnSTDynamicQueryItemPricing.sql" />
+    <Build Include="dbo\Functions\fnSTDynamicQueryRebateOrDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

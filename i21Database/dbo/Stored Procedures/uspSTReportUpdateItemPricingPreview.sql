@@ -11,21 +11,23 @@ BEGIN TRY
 
 	--START Handle xml Param
 	DECLARE @strCompanyLocationId NVARCHAR(MAX)
-	, @strVendorId NVARCHAR(MAX)
-	, @strCategoryId NVARCHAR(MAX)
-	, @strFamilyId NVARCHAR(MAX)
-	, @strClassId NVARCHAR(MAX)
-	, @strDescription NVARCHAR(MAX)
-	, @strRegion NVARCHAR(MAX)
-	, @strDistrict NVARCHAR(MAX)
-	, @strState NVARCHAR(MAX)
-	, @intUpcCode INT
-	, @dblStandardCost DECIMAL (18,6)
-	, @dblRetailPrice DECIMAL (18,6)
-	, @dblSalesPrice DECIMAL (18,6)
-	, @dtmSalesStartingDate DATE
-	, @dtmSalesEndingDate DATE
-	, @ysnPreview NVARCHAR(1)
+			, @strVendorId NVARCHAR(MAX)
+			, @strCategoryId NVARCHAR(MAX)
+			, @strFamilyId NVARCHAR(MAX)
+			, @strClassId NVARCHAR(MAX)
+			, @strDescription NVARCHAR(MAX)
+			, @strRegion NVARCHAR(MAX)
+			, @strDistrict NVARCHAR(MAX)
+			, @strState NVARCHAR(MAX)
+			, @intUpcCode INT
+			, @dblStandardCost DECIMAL (18,6)
+			, @dblRetailPrice DECIMAL (18,6)
+			, @dblSalesPrice DECIMAL (18,6)
+			, @dtmSalesStartingDate DATE
+			, @dtmSalesEndingDate DATE
+			, @ysnPreview NVARCHAR(1)
+			, @intCurrentUserId INT
+
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -140,119 +142,113 @@ BEGIN TRY
 	SELECT @ysnPreview = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'ysnPreview'
+
+	--currentUserId
+	SELECT @intCurrentUserId = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'intCurrentUserId'
 	--END Handle xml Param
 
-   --Declare UpdatePreview holder
-   DECLARE @tblMassUpdatePreview TABLE 
-   (
+   --============================================================
+	-- AUDIT LOGS
+	DECLARE @ItemPricingAuditLog NVARCHAR(MAX)
+	SET @ItemPricingAuditLog = ''
+
+	DECLARE @ItemSpecialPricingAuditLog NVARCHAR(MAX)
+	SET @ItemSpecialPricingAuditLog = ''
+
+	DECLARE @JsonStringAuditLog NVARCHAR(MAX)
+	SET @JsonStringAuditLog = ''
+
+	DECLARE @checkComma bit
+	--============================================================
+
+	--Declare temp01 table holder
+    DECLARE @tblTempOne TABLE 
+    (
 		strLocation NVARCHAR(250)
 		, strUpc NVARCHAR(50)
 		, strItemDescription NVARCHAR(250)
 		, strChangeDescription NVARCHAR(100)
 		, strOldData NVARCHAR(MAX)
 		, strNewData NVARCHAR(MAX)
-   )
+		, intParentId INT
+		, intChildId INT
+    )
+
+	--Declare temp02 table holder (w/ distinct)
+    DECLARE @tblTempTwo TABLE 
+    (
+	    strUpc NVARCHAR(50)
+		, strItemDescription NVARCHAR(250)
+		, strChangeDescription NVARCHAR(100)
+		, strOldData NVARCHAR(MAX)
+		, strNewData NVARCHAR(MAX)
+		, intParentId INT
+		, intChildId INT
+    )
+
+	--Declare ParentId holder
+    DECLARE @tblId TABLE 
+    (
+		intId INT
+    )
+
+	--=======================================================
+	--Use in while loop
+	DECLARE @RowCountMax INT
+	SET @RowCountMax = 0
+
+	DECLARE @RowCountMin INT
+	SET @RowCountMin = 0
+
+	DECLARE @strChangeDescription NVARCHAR(100)
+	SET @strChangeDescription = ''
+
+	DECLARE @strOldData NVARCHAR(100)
+	SET @strOldData = ''
+
+	DECLARE @strNewData NVARCHAR(100)
+	SET @strNewData = ''
+
+	DECLARE @intParentId INT
+	SET @intParentId = 0
+
+	DECLARE @intChildId INT
+	SET @intChildId = 0
+	--=======================================================
 	
 	DECLARE @CompanyCurrencyDecimal NVARCHAR(1)
 	SET @CompanyCurrencyDecimal = 0
 	SELECT @CompanyCurrencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 
 	DECLARE @SqlQuery1 as NVARCHAR(MAX)
+
+	--tblICItemPricing
 	-----------------------------------Handle Dynamic Query 1
 	IF (@dblStandardCost IS NOT NULL)
 		BEGIN
-   
-			SET @SqlQuery1 = 'SELECT' + CHAR(13)
-									 + ' e.strLocationName' + CHAR(13)
-									 + ' ,b.strUpcCode' + CHAR(13)
-									 + ' ,c.strDescription' + CHAR(13)
-									 + ' ,''Standard Cost''' + CHAR(13)
-									 + ', CAST(a.dblStandardCost AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-									 + ', CAST(' + CAST(@dblStandardCost AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-							 + ' FROM tblICItemPricing a' + CHAR(13)
-							 + ' JOIN tblICItemUOM b ON a.intItemId = b.intItemId' + CHAR(13)
-							 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
-							 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
-							 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
+			SET @SqlQuery1 = dbo.fnSTDynamicQueryItemPricing
+				(
+					'Standard Cost'
+					, 'CAST(IP.dblStandardCost AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@dblStandardCost AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @strCompanyLocationId
+					, @strVendorId
+					, @strCategoryId
+					, @strFamilyId
+					, @strClassId
+					, @intUpcCode
+					, @strRegion
+					, @strDistrict
+					, @strState
+					, @strDescription
+					, 'I.intItemId'
+					, 'IP.intItemPricingId'
+					, 'tblICItemPricing' 
+				)
 
-			SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
-
-			IF (@strCompanyLocationId <> '')
-				BEGIN 
-				   SET @SqlQuery1 = @SqlQuery1 + ' AND d.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + CHAR(13)
-				END
-
-			IF (@strVendorId <> '')
-				BEGIN 
-					 set @SqlQuery1 = @SqlQuery1 +  ' and  a.intItemLocationId
-					 IN (select intItemLocationId from tblICItemLocation where intVendorId
-					 IN (select intEntityId from tblEMEntity where intEntityId 
-   					 IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'  + CHAR(13)
-				END
-
-			 IF (@strCategoryId <> '')
-				 BEGIN
-						 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId  
-					 IN (select intItemId from tblICItem where intCategoryId IN
-					 (select intCategoryId from tblICCategory where intCategoryId 
-					 IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))' + CHAR(13)
-				 END
-
-			  IF (@strFamilyId <> '')
-				  BEGIN
-					   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					   (select intItemLocationId from tblICItemLocation where intFamilyId IN
-					   (select intFamilyId from tblICItemLocation where intFamilyId 
-						IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))' + CHAR(13)
-				   END
-
-			   IF (@strClassId  <> '')
-				  BEGIN
-					  set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					  (select intItemLocationId from tblICItemLocation where intClassId IN
-					  (select intClassId from tblICItemLocation where intClassId 
-					  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))' + CHAR(13)
-				  END
-
-			  IF (@intUpcCode IS NOT NULL)
-				   BEGIN
-					   set @SqlQuery1 = @SqlQuery1 +  ' and b.intItemUOMId IN (' + CAST(@intUpcCode as NVARCHAR) + ')' + CHAR(13)
-				   END
-
-
-			 IF (@strRegion != '')
-				 BEGIN
-					 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strRegion 
-					 IN ( ''' + (@strRegion) + ''')' + '))' + CHAR(13)
-				  END
-
-			  IF (@strDistrict != '')
-				  BEGIN
-					 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strDistrict 
-					 IN ( ''' + (@strDistrict) + ''')' + '))' + CHAR(13)
-				  END
-
-			IF (@strState != '')
-			  BEGIN
-				 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-				 (select intCompanyLocationId from tblSTStore where strState 
-				 IN ( ''' + (@strState) + ''')' + '))' + CHAR(13)
-			  END
-
-			 IF (@strDescription != '')
-			BEGIN
-			   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId IN 
-			   (select intItemId from tblICItem where strDescription 
-				like ''%' + LTRIM(@strDescription) + '%'' )' + CHAR(13)
-			END
-
-		INSERT @tblMassUpdatePreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1)
 
 	END 
@@ -261,198 +257,57 @@ BEGIN TRY
 	-----------------------------------Handle Dynamic Query 2
 	IF (@dblRetailPrice IS NOT NULL)
 		BEGIN
+			SET @SqlQuery1 = dbo.fnSTDynamicQueryItemPricing
+				(
+					'Retail Price'
+					, 'CAST(IP.dblSalePrice AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@dblRetailPrice AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @strCompanyLocationId
+					, @strVendorId
+					, @strCategoryId
+					, @strFamilyId
+					, @strClassId
+					, @intUpcCode
+					, @strRegion
+					, @strDistrict
+					, @strState
+					, @strDescription
+					, 'I.intItemId'
+					, 'IP.intItemPricingId'
+					, 'tblICItemPricing' 
+				)
 
-			SET @SqlQuery1 = 'SELECT' + CHAR(13)
-									+ ' e.strLocationName' + CHAR(13)
-									+ ' ,b.strUpcCode' + CHAR(13)
-									+ ' ,c.strDescription' + CHAR(13)
-									+ ' ,''Retail Price''' + CHAR(13)
-									+ ', CAST(a.dblSalePrice AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-							        + ', CAST(' + CAST(@dblRetailPrice AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-							+ ' from tblICItemPricing a' + CHAR(13)
-							+ ' JOIN tblICItemUOM b ON a.intItemId = b.intItemId' + CHAR(13)
-							+ ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							--+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
-							+ ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
-							+ ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-			SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
-
-		 IF (@strCompanyLocationId <> '')
-				BEGIN 
-				   SET @SqlQuery1 = @SqlQuery1 + ' and d.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')'
-				END
-
-		IF (@strVendorId <> '')
-			BEGIN 
-				 set @SqlQuery1 = @SqlQuery1 +  ' and  a.intItemLocationId
-				 IN (select intItemLocationId from tblICItemLocation where intVendorId
-				 IN (select intEntityId from tblEMEntity where intEntityId 
-   				 IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
-			END
-
-		 IF (@strCategoryId <> '')
-			 BEGIN
-				 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId  
-				 IN (select intItemId from tblICItem where intCategoryId IN
-				 (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
-			 END
-
-		  IF (@strFamilyId <> '')
-			  BEGIN
-				   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				   (select intItemLocationId from tblICItemLocation where intFamilyId IN
-				   (select intFamilyId from tblICItemLocation where intFamilyId 
-					IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))'
-			   END
-
-		  IF (@strClassId <> '')
-			  BEGIN
-				  set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				  (select intItemLocationId from tblICItemLocation where intClassId IN
-				  (select intClassId from tblICItemLocation where intClassId 
-				  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
-			  END
-
-		  IF (@intUpcCode IS NOT NULL)
-			   BEGIN
-				   set @SqlQuery1 = @SqlQuery1 +  ' and b.intItemUOMId IN (' + CAST(@intUpcCode as NVARCHAR) + ')'
-			   END
-
-		 IF (@strRegion != '')
-			 BEGIN
-				 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-				 (select intCompanyLocationId from tblSTStore where strRegion 
-				 IN ( ''' + (@strRegion) + ''')' + '))'
-			  END
-
-		 IF (@strDistrict != '')
-			  BEGIN
-				 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-				 (select intCompanyLocationId from tblSTStore where strDistrict 
-				 IN ( ''' + (@strDistrict) + ''')' + '))'
-			  END
-
-         IF (@strState != '')
-			  BEGIN
-				 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-				 (select intCompanyLocationId from tblSTStore where strState 
-				 IN ( ''' + (@strState) + ''')' + '))'
-			  END
-
-         IF (@strDescription != '')
-			BEGIN
-			   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId IN 
-			   (select intItemId from tblICItem where strDescription 
-				like ''%' + LTRIM(@strDescription) + '%'' )'
-			END
-
-		INSERT @tblMassUpdatePreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1)
 
  END 
 
 
+    --tblICItemSpecialPricing
     -----------------------------------Handle Dynamic Query 3
 	IF (@dblSalesPrice IS NOT NULL)
 		BEGIN
+			SET @SqlQuery1 = dbo.fnSTDynamicQueryItemPricing
+				(
+					'Sales Price'
+					, 'CAST(IP.dblUnitAfterDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@dblSalesPrice AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @strCompanyLocationId
+					, @strVendorId
+					, @strCategoryId
+					, @strFamilyId
+					, @strClassId
+					, @intUpcCode
+					, @strRegion
+					, @strDistrict
+					, @strState
+					, @strDescription
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, 'tblICItemSpecialPricing' 
+				)
 
-			SET @SqlQuery1 = 'SELECT' + CHAR(13)
-									+ 'e.strLocationName' + CHAR(13)
-									+ ', b.strUpcCode' + CHAR(13)
-									+ ', c.strDescription' + CHAR(13)
-									+ ', ''Sales Price''' + CHAR(13)
-									+ ', CAST(a.dblUnitAfterDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-							        + ', CAST(' + CAST(@dblSalesPrice AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-							+ ' FROM tblICItemSpecialPricing a' + CHAR(13)
-							+ ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
-							+ ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-							--+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
-							+ ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
-							+ ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-			SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
-
-			IF (@strCompanyLocationId <> '')
-			   BEGIN 
-				   SET @SqlQuery1 = @SqlQuery1 + ' and d.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')'
-			   END 
-
-			IF (@strVendorId <> '')
-			   BEGIN 
-					 set @SqlQuery1 = @SqlQuery1 +  ' and  a.intItemLocationId
-					 IN (select intItemLocationId from tblICItemLocation where intVendorId
-					 IN (select intEntityId from tblEMEntity where intEntityId 
-					 IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
-			   END
-
-			IF (@strCategoryId <> '')
-				BEGIN
-						   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId  
-						  IN (select intItemId from tblICItem where intCategoryId IN
-						  (select intCategoryId from tblICCategory where intCategoryId
-						   IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
-				END
-
-			IF (@strFamilyId <> '')
-				 BEGIN
-					  set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					  (select intItemLocationId from tblICItemLocation where intFamilyId IN
-					  (select intFamilyId from tblICItemLocation where intFamilyId 
-					  IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))'
-				 END
-
-			IF (@strClassId <> '')
-				  BEGIN
-					  set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					  (select intItemLocationId from tblICItemLocation where intClassId IN
-					  (select intClassId from tblICItemLocation where intClassId 
-					  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
-				   END
-
-			IF (@intUpcCode IS NOT NULL)
-				   BEGIN
-					   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemUnitMeasureId IN (' + CAST(@intUpcCode as NVARCHAR) + ')'
-				   END
-
-			IF (@strRegion != '')
-					BEGIN
-					 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strRegion 
-					 IN ( ''' + (@strRegion) + ''')' + '))'
-					END
-
-			IF (@strDistrict != '')
-					BEGIN
-					 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strDistrict 
-					 IN ( ''' + (@strDistrict) + ''')' + '))'
-					END
-
-			IF (@strState != '')
-				BEGIN
-					 set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strState 
-					 IN ( ''' + (@strState) + ''')' + '))'
-				END
-
-      IF (@strDescription != '')
-		BEGIN
-		   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId IN 
-		   (select intItemId from tblICItem where strDescription 
-		    like ''%' + LTRIM(@strDescription) + '%'' )'
-		END
-
-		set @SqlQuery1 = @SqlQuery1 + ' and  a.strPromotionType = ''Discount''' 
-
-		INSERT @tblMassUpdatePreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1)
 	
  END 
@@ -461,206 +316,60 @@ BEGIN TRY
 	-----------------------------------Handle Dynamic Query 4
 	 IF (@dtmSalesStartingDate IS NOT NULL)
 	 BEGIN
+		SET @SqlQuery1 = dbo.fnSTDynamicQueryItemPricing
+				(
+					'Sales start date'
+					, 'REPLACE(CONVERT(NVARCHAR(10),IP.dtmBeginDate,111), ''/'', ''-'')'
+					, '''' + CAST(@dtmSalesStartingDate as NVARCHAR(250)) + ''''
+					, @strCompanyLocationId
+					, @strVendorId
+					, @strCategoryId
+					, @strFamilyId
+					, @strClassId
+					, @intUpcCode
+					, @strRegion
+					, @strDistrict
+					, @strState
+					, @strDescription
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, 'tblICItemSpecialPricing' 
+				)
 
-		SET @dtmSalesStartingDate = CONVERT(VARCHAR(10),@dtmSalesStartingDate,111)
-		  SET @SqlQuery1 = 'SELECT' + CHAR(13)
-								 + ' e.strLocationName' + CHAR(13)
-								 + ', b.strUpcCode' + CHAR(13)
-								 + ', c.strDescription' + CHAR(13)
-								 + ', ''Sales start date''' + CHAR(13)
-								 + ', REPLACE(CONVERT(NVARCHAR(10),a.dtmBeginDate,111), ''/'', ''-'')' + CHAR(13)
-								 + ', ''' + CAST(@dtmSalesStartingDate as NVARCHAR(250)) + '''' + CHAR(13)
-						 + ' FROM tblICItemSpecialPricing a' + CHAR(13)
-						 + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
-						 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-						 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
-						 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
-						 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-		SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
-
-		IF (@strCompanyLocationId <> '')
-			BEGIN 
-			   SET @SqlQuery1 = @SqlQuery1 + ' and d.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')'
-			END
-
-		IF (@strVendorId <> '')
-		   BEGIN 
-				 SET @SqlQuery1 = @SqlQuery1 +  ' and  a.intItemLocationId
-				 IN (select intItemLocationId from tblICItemLocation where intVendorId
-				 IN (select intEntityId from tblEMEntity where intEntityId 
-				 IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
-		   END
-
-		IF (@strCategoryId <> '')
-		   BEGIN
-				  SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId  
-				  IN (select intItemId from tblICItem where intCategoryId IN
-				  (select intCategoryId from tblICCategory where intCategoryId
-				  IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
-			END
-
-		IF (@strFamilyId <> '')
-			BEGIN
-				  SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				  (select intItemLocationId from tblICItemLocation where intFamilyId IN
-				  (select intFamilyId from tblICItemLocation where intFamilyId 
-				  IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))'
-			END
-
-		IF (@strClassId <> '')
-			  BEGIN
-				  SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				  (select intItemLocationId from tblICItemLocation where intClassId IN
-				  (select intClassId from tblICItemLocation where intClassId 
-				  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
-			   END
-
-		IF (@intUpcCode IS NOT NULL)
-			  BEGIN
-				  SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemUnitMeasureId IN (' + CAST(@intUpcCode as NVARCHAR) + ')'
-			  END
-
-		IF (@strRegion != '')
-			  BEGIN
-				 SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-				 (select intCompanyLocationId from tblSTStore where strRegion 
-				 IN ( ''' + (@strRegion) + ''')' + '))'
-			  END
-
-		IF (@strDistrict != '')
-			  BEGIN
-				 SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-				 (select intCompanyLocationId from tblSTStore where strDistrict 
-				 IN ( ''' + (@strDistrict) + ''')' + '))'
-			  END
-
-		IF (@strState != '')
-			  BEGIN
-				 SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-				 (select intCompanyLocationId from tblSTStore where strState 
-				 IN ( ''' + (@strState) + ''')' + '))'
-			  END
-
-		IF (@strDescription != '')
-			  BEGIN
-			   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId IN 
-			   (select intItemId from tblICItem where strDescription 
-				like ''%' + LTRIM(@strDescription) + '%'' )'
-			  END
-
-			set @SqlQuery1 = @SqlQuery1 + ' and  a.strPromotionType = ''Discount''' 
-
-			INSERT @tblMassUpdatePreview
+			INSERT @tblTempOne
 			EXEC (@SqlQuery1)
 	 END 
 
 
-	 -----------------------------------Handle Dynamic Query 5
+	 ----------------------------------Handle Dynamic Query 5
 	 IF (@dtmSalesEndingDate IS NOT NULL)
 	 BEGIN
- 
-		  SET @dtmSalesEndingDate = CONVERT(VARCHAR(10),@dtmSalesEndingDate,111)
-		  SET @SqlQuery1 = 'SELECT' + CHAR(13)
-							 + ' e.strLocationName' + CHAR(13)
-							 + ', b.strUpcCode' + CHAR(13)
-							 + ', c.strDescription' + CHAR(13)
-							 + ', ''Sales end date''' + CHAR(13)
-							 + ', REPLACE(CONVERT(NVARCHAR(10),a.dtmEndDate,111), ''/'', ''-'')' + CHAR(13)
-							 + ', ''' + CAST(@dtmSalesEndingDate as NVARCHAR(250)) + '''' + CHAR(13)
-		                 + ' FROM tblICItemSpecialPricing a' + CHAR(13)
-		                 + ' JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId' + CHAR(13)
-		                 + ' JOIN tblICItem c ON a.intItemId = c.intItemId' + CHAR(13)
-		                 --+ ' JOIN tblICItemLocation d ON a.intItemId = d.intItemId' + CHAR(13)
-						 + ' JOIN tblICItemLocation d ON d.intItemLocationId = a.intItemLocationId' + CHAR(13)
-		                 + ' JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
+		  SET @SqlQuery1 = dbo.fnSTDynamicQueryItemPricing
+				(
+					'Sales end date'
+					, 'REPLACE(CONVERT(NVARCHAR(10),IP.dtmEndDate,111), ''/'', ''-'')'
+					, '''' + CAST(@dtmSalesEndingDate as NVARCHAR(250)) + ''''
+					, @strCompanyLocationId
+					, @strVendorId
+					, @strCategoryId
+					, @strFamilyId
+					, @strClassId
+					, @intUpcCode
+					, @strRegion
+					, @strDistrict
+					, @strState
+					, @strDescription
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, 'tblICItemSpecialPricing' 
+				)
 
-		SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
-
-		IF (@strCompanyLocationId <> '')
-			BEGIN 
-			   SET @SqlQuery1 = @SqlQuery1 + ' and d.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR) + ')'
-			END
-
-		IF (@strVendorId <> '')
-		   BEGIN 
-				 SET @SqlQuery1 = @SqlQuery1 +  ' and  a.intItemLocationId
-				 IN (select intItemLocationId from tblICItemLocation where intVendorId
-				 IN (select intEntityId from tblEMEntity where intEntityId 
-				 IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
-		   END
-
-		IF (@strCategoryId <> '')
-		   BEGIN
-				 SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId  
-				 IN (select intItemId from tblICItem where intCategoryId IN
-				 (select intCategoryId from tblICCategory where intCategoryId
-				 IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
-		   END
-
-		IF (@strFamilyId <> '')
-			 BEGIN
-				  SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				  (select intItemLocationId from tblICItemLocation where intFamilyId IN
-				  (select intFamilyId from tblICItemLocation where intFamilyId 
-				  IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))'
-			 END
-
-		IF (@strClassId <> '')
-			  BEGIN
-				  set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-				  (select intItemLocationId from tblICItemLocation where intClassId IN
-				  (select intClassId from tblICItemLocation where intClassId 
-				  IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
-			  END
-
-		IF (@intUpcCode IS NOT NULL)
-			  BEGIN
-				   set @SqlQuery1 = @SqlQuery1 +  ' and a.intItemUnitMeasureId IN (' + CAST(@intUpcCode as NVARCHAR) + ')'
-			  END
-
-		IF (@strRegion != '')
-				BEGIN
-					 SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strRegion 
-					 IN ( ''' + (@strRegion) + ''')' + '))'
-				END
-
-		IF (@strDistrict != '')
-				BEGIN
-					 SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strDistrict 
-					 IN ( ''' + (@strDistrict) + ''')' + '))'
-				END
-
-		IF (@strState != '')
-				BEGIN
-					 SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemLocationId IN 
-					 (select intItemLocationId from tblICItemLocation where intLocationId IN 
-					 (select intCompanyLocationId from tblSTStore where strState 
-					 IN ( ''' + (@strState) + ''')' + '))'
-				END
-
-		IF (@strDescription != '')
-			BEGIN
-			   SET @SqlQuery1 = @SqlQuery1 +  ' and a.intItemId IN 
-			   (select intItemId from tblICItem where strDescription 
-				like ''%' + LTRIM(@strDescription) + '%'' )'
-			END
-
-			set @SqlQuery1 = @SqlQuery1 + ' and  a.strPromotionType = ''Discount''' 
-
-			INSERT @tblMassUpdatePreview
+			INSERT @tblTempOne
 			EXEC (@SqlQuery1)
 	END 
 
-
-	SELECT @UpdateCount = count(*) from @tblMassUpdatePreview WHERE strOldData != strNewData
+	DELETE FROM @tblTempOne WHERE strOldData = strNewData
+	SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData != strNewData
 
 
 	--Update
@@ -782,8 +491,7 @@ BEGIN TRY
 		  END
 
 
-
-		  IF ((@dblSalesPrice IS NOT NULL)
+		 IF ((@dblSalesPrice IS NOT NULL)
 		  OR (@dtmSalesStartingDate IS NOT NULL)
 		  OR (@dtmSalesEndingDate IS NOT NULL))
 		  BEGIN
@@ -902,6 +610,110 @@ BEGIN TRY
 					EXEC (@SqlQuery1)
 					SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
 		  END
+
+
+		            --AUDIT LOG
+					--use distinct to table Id's
+					INSERT INTO @tblId(intId)
+					SELECT DISTINCT intChildId 
+					--FROM tblSTMassUpdateReportMaster
+					FROM @tblTempOne
+					ORDER BY intChildId ASC
+
+					--==========================================================================================================================================
+					WHILE EXISTS (SELECT TOP (1) 1 FROM @tblId)
+					BEGIN
+						SELECT TOP 1 @intChildId = intId FROM @tblId
+
+						--use distinct to table tempOne
+						DELETE FROM @tblTempTwo
+						INSERT INTO @tblTempTwo(strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId)
+						SELECT DISTINCT strUpc
+										, strItemDescription
+										, strChangeDescription
+										, strOldData
+										, strNewData
+										, intParentId
+										, intChildId 
+						--FROM tblSTMassUpdateReportMaster
+						FROM @tblTempOne
+						WHERE intChildId = @intChildId
+						ORDER BY intChildId ASC
+
+						SET @RowCountMin = 1
+						SELECT @RowCountMax = Count(*) FROM @tblTempTwo
+
+							WHILE(@RowCountMin <= @RowCountMax)
+							BEGIN
+								SELECT TOP(1) @strChangeDescription = strChangeDescription, @strOldData = strOldData, @strNewData = strNewData, @intParentId = intParentId from @tblTempTwo
+			    
+								IF(@strChangeDescription = 'Standard Cost' OR @strChangeDescription = 'Retail Price')
+								BEGIN
+									SET @ItemPricingAuditLog = @ItemPricingAuditLog + '{"change":"dblStandardCost","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
+								END
+
+								ELSE IF(@strChangeDescription = 'Sales Price' OR @strChangeDescription = 'Sales start date' OR @strChangeDescription = 'Sales end date')
+								BEGIN
+									SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblStandardCost","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
+								END
+
+								SET @RowCountMin = @RowCountMin + 1
+								DELETE TOP (1) FROM @tblTempTwo
+							END
+
+
+						--INSERT to AUDITLOG
+						--=================================================================================================
+						--tblICItemPricing
+						IF (@ItemPricingAuditLog != '')
+						BEGIN
+							--Remove last character comma(,)
+							SET @ItemPricingAuditLog = left(@ItemPricingAuditLog, len(@ItemPricingAuditLog)-1)
+
+							SET @ItemPricingAuditLog = '{"change":"tblICItemPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ItemPricingAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Pricing"},'
+						END
+
+						--tblICItemSpecialPricing
+						IF (@ItemSpecialPricingAuditLog != '')
+						BEGIN
+							--Remove last character comma(,)
+							SET @ItemSpecialPricingAuditLog = left(@ItemSpecialPricingAuditLog, len(@ItemSpecialPricingAuditLog)-1)
+
+							SET @ItemSpecialPricingAuditLog = '{"change":"tblICItemSpecialPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ItemSpecialPricingAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Promotional Pricing"},'
+						END
+
+						SET @JsonStringAuditLog = @ItemPricingAuditLog + @ItemSpecialPricingAuditLog
+
+
+						SELECT @checkComma = CASE WHEN RIGHT(@JsonStringAuditLog, 1) IN (',') THEN 1 ELSE 0 END
+						IF(@checkComma = 1)
+						BEGIN
+							--Remove last character comma(,)
+							SET @JsonStringAuditLog = left(@JsonStringAuditLog, len(@JsonStringAuditLog)-1)
+						END
+
+						SET @JsonStringAuditLog = '{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @JsonStringAuditLog + ']}'
+						INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+						VALUES(
+								'Updated'
+								, 'Inventory.view.Item'
+								, @intParentId
+								, ''
+								, null
+								, @JsonStringAuditLog
+								, GETUTCDATE()
+								, @intCurrentUserId
+								, 1
+						)
+						--=================================================================================================
+
+						--Clear
+						SET @ItemPricingAuditLog = ''
+						SET @ItemSpecialPricingAuditLog = ''
+
+						DELETE TOP (1) FROM @tblId
+					END
+					--==========================================================================================================================================
 	 END
 
 
@@ -916,7 +728,7 @@ BEGIN TRY
 		SET @strCompanyName = 'Not Set'
 	END
 
-	DELETE FROM @tblMassUpdatePreview WHERE strOldData = strNewData
+	DELETE FROM @tblTempOne WHERE strOldData = strNewData
 
    select @strCompanyName as CompanyName
 		  --, FORMAT(GETDATE(), 'D', 'en-US' ) as DateToday
@@ -929,9 +741,9 @@ BEGIN TRY
 		  , strChangeDescription
 		  , strOldData
 		  , strNewData
-   from @tblMassUpdatePreview
+   from @tblTempOne
     
-   DELETE FROM @tblMassUpdatePreview
+   DELETE FROM @tblTempOne
 END TRY
 
 BEGIN CATCH

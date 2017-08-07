@@ -75,7 +75,7 @@ BEGIN TRY
 	  SET @UpdateCount = 0
 	  SET @RecCount = 0
 
-	  --============================================================
+	--============================================================
 	-- AUDIT LOGS
 	DECLARE @ItemSpecialPricingAuditLog NVARCHAR(MAX)
 	SET @ItemSpecialPricingAuditLog = ''
@@ -152,7 +152,22 @@ BEGIN TRY
  IF (@BeginDate IS NOT NULL)
    BEGIN
 	    SET @BeginDate = CONVERT(VARCHAR(10),@BeginDate,111)
-        --SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
+        
+		--SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+		--		(
+		--			'Begining Date'
+		--			, 'REPLACE(CONVERT(NVARCHAR(10),IP.dtmBeginDate,111), ''/'', ''-'')'
+		--			, '''' + CAST(@BeginDate as NVARCHAR(250)) + ''''
+		--			, @Location
+		--			, @Vendor
+		--			, @Category
+		--			, @Family
+		--			, @Class
+		--			, 'I.intItemId'
+		--			, 'IP.intItemSpecialPricingId'
+		--			, @PromotionType 
+		--		)
+
         SET @SQL1 = 'SELECT e.strLocationName
 							   , b.strUpcCode
 							   , c.strDescription
@@ -848,7 +863,6 @@ AND(@UpdateCount > 0))
 END
      
     --AUDIT LOG
-
 	--use distinct to table Id's
 	INSERT INTO @tblId(intId)
 	SELECT DISTINCT intChildId 
