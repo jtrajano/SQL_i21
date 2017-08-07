@@ -1,4 +1,5 @@
 ﻿CREATE VIEW vyuRKUnrealizedPnL_Copy
+
 AS  
  
 SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,* from 
@@ -14,7 +15,7 @@ SELECT  intFutOptTransactionId,
 		ot.intFutureMonthId,
 		ot.intCommodityId,
 		ot.intFutureMarketId,  
-		ot.dtmFilledDate as dtmTradeDate,  
+		convert(datetime,CONVERT(VARCHAR(10),ot.dtmFilledDate,110),110)  as dtmTradeDate,  
 		ot.strInternalTradeNo,  
 		e.strName,  
 		acc.strAccountNumber,  
@@ -40,7 +41,7 @@ SELECT  intFutOptTransactionId,
  JOIN tblRKBrokerageAccount acc on acc.intBrokerageAccountId=ot.intBrokerageAccountId  
  JOIN tblICCommodity icc on icc.intCommodityId=ot.intCommodityId  
  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=ot.intLocationId  
- JOIN tblARSalesperson sp on sp.[intEntityId]= ot.intTraderId  
+ JOIN tblARSalesperson sp on sp.intEntityId= ot.intTraderId  
  JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
