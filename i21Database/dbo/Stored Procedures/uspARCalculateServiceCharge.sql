@@ -99,13 +99,8 @@ AS
 	--GET CUSTOMER AGING IF CALCULATION IS BY CUSTOMER BALANCE
 	IF (@calculation = 'By Customer Balance')
 		BEGIN
-			DECLARE @asOfDateAging DATETIME = DATEADD(DAYOFYEAR, 1, @asOfDate)
-
 			INSERT INTO @temp_aging_table
-			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDateAging, NULL
-
-			IF (DATEPART(dd, @asOfDate) = 31)
-				DELETE FROM @temp_aging_table WHERE dtmDueDate = @asOfDate
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDate, NULL
 
 			DELETE FROM @temp_aging_table
 			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('CF Tran'))
