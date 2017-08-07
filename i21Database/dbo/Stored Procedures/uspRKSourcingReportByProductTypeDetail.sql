@@ -8,7 +8,11 @@
 	   @strProductType nvarchar(100) = null,
 	   @strOrigin nvarchar(100) = null
 AS
- 
+
+if @strOrigin = '-1'
+set @strOrigin = null
+ if @strProductType = '-1'
+set @strProductType = null
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
 SELECT  CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,intContractDetailId,
@@ -137,8 +141,9 @@ JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc
 JOIN tblEMEntity e on e.intEntityId=ch.intEntityId
 JOIN vyuRKSourcingContractDetail sc on sc.intContractDetailId=cd.intContractDetailId
 WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
-and strName = @strEntityName AND strOrigin= case when isnull(@strOrigin,'')='' then strOrigin else @strOrigin end
-and strProductType= case when isnull(@strProductType,'')='' then strProductType else @strProductType end 
+AND strName = @strEntityName 
+AND isnull(strOrigin,0)= isnull(@strOrigin,0) 
+AND isnull(strProductType,0)=isnull(@strProductType,0) 
 )t1 
 END
 ELSE
@@ -271,8 +276,10 @@ JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc
 JOIN tblEMEntity e on e.intEntityId=CASE WHEN ISNULL(cd.intProducerId,0)=0 then ch.intEntityId else 
 							case when isnull(cd.ysnClaimsToProducer,0)=1 then cd.intProducerId else ch.intEntityId end end
 JOIN vyuRKSourcingContractDetail sc on sc.intContractDetailId=cd.intContractDetailId
-WHERE ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
-and strName = @strEntityName AND strOrigin= case when isnull(@strOrigin,'')='' then strOrigin else @strOrigin end
-and strProductType= case when isnull(@strProductType,'')='' then strProductType else @strProductType end 
+WHERE 
+strName = @strEntityName and
+ch.dtmContractDate BETWEEN @dtmFromDate AND @dtmToDate and ch.intCommodityId=@intCommodityId
+AND isnull(strOrigin,0)= isnull(@strOrigin,0) 
+AND isnull(strProductType,0)=isnull(@strProductType,0) 
 )t
 END
