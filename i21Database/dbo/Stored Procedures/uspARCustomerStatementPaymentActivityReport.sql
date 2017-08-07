@@ -413,8 +413,8 @@ INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 IF @ysnPrintOnlyPastDue = 1
-    BEGIN
-        DELETE FROM @temp_statement_table WHERE dtmDueDate > @dtmDateTo
+    BEGIN        
+		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateTo) > 0
         UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
     END
 
