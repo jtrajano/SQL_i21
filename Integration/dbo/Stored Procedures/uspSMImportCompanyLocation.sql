@@ -39,10 +39,9 @@ BEGIN
 					galocmst GA
 				LEFT OUTER JOIN
 					tblSMCompanyLocation CL
-						ON RTRIM(LTRIM(GA.[galoc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))										
-				WHERE
-					CL.[strLocationNumber] IS NULL					
-						
+						ON RTRIM(LTRIM(GA.[galoc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))
+				WHERE 	CL.[strLocationNumber] IS NULL AND NOT exists (SELECT * FROM aglocmst AG WHERE AG.agloc_loc_no = GA.galoc_loc_no)									
+				
 				RETURN @Total
 			END	
 				
@@ -275,7 +274,13 @@ BEGIN
 					WHEN ''N''	THEN	0
 					ELSE 0
 				  END)								--<ysnLocationActive, bit,>
-				,GL.intAccountSegmentId AS intProfitCenter --AG.[agloc_gl_profit_center]		--<intProfitCenter, int,>				--TODO
+				,CASE 
+					WHEN (SELECT COUNT(*) FROM galocmst where galoc_loc_no = AG.agloc_loc_no) > 0
+					THEN (SELECT GL.intAccountSegmentId FROM galocmst LEFT OUTER JOIN	tblGLAccountSegment GL 
+						  ON galoc_gl_profit_center = CAST(GL.strCode AS INT) WHERE galoc_loc_no = AG.agloc_loc_no)
+					ELSE 
+						GL.intAccountSegmentId 
+					END --AG.[agloc_gl_profit_center]		--<intProfitCenter, int,>				--TODO
 				,CA.[inti21Id]						--<agloc_cash, int,>
 				,0									--<intDepositAccount, int,>
 				,0									--<intARAccount, int,>
@@ -660,8 +665,7 @@ BEGIN
 			LEFT JOIN
 				tblGLAccountSegment GL
 					ON GA.galoc_gl_profit_center = CAST(GL.strCode AS INT)									
-			WHERE
-				CL.[strLocationNumber] IS NULL
+			WHERE 	CL.[strLocationNumber] IS NULL AND NOT exists (SELECT * FROM aglocmst AG WHERE AG.agloc_loc_no = GA.galoc_loc_no)									
 				
 			ORDER BY
 				GA.[galoc_loc_no]
