@@ -32,7 +32,8 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
   
 -- Declare the variables.  
 DECLARE @intBankAccountId AS INT
-		,@intTransactionId AS INT
+		,@strTransactionId AS NVARCHAR(MAX)
+		,@strBatchId AS NVARCHAR(40)
   
 -- Declare the variables for the XML parameter  
 DECLARE @xmlDocumentId AS INT  
@@ -72,15 +73,17 @@ SELECT @intBankAccountId = [from]
 FROM @temp_xml_table   
 WHERE [fieldname] = 'intBankAccountId'  
 
-SELECT	@intTransactionId = [from]
+SELECT @strTransactionId = [from]
 FROM @temp_xml_table   
-WHERE [fieldname] = 'intTransactionId'
+WHERE [fieldname] = 'strTransactionId'
 
---For Encryption and Decryption
-OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
-	DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
-	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
-
+SELECT @strBatchId = [from]
+FROM @temp_xml_table   
+WHERE [fieldname] = 'strBatchId'
+  
+-- Sanitize the parameters  
+SET @strTransactionId = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL ELSE @strTransactionId END  
+SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL ELSE @strBatchId END  
 -- Report Query:  
 SELECT DISTINCT 
 	tblCMBankTransaction.dtmDate,
@@ -93,7 +96,6 @@ SELECT DISTINCT
 	tblCMBankTransaction.intTransactionId,
 	tblCMBankTransaction.intBankAccountId,
 	tblCMBankTransaction.dtmCheckPrinted,
-	tblCMCheckPrintJobSpool.strBatchId, 
 	strCompanyName = CASE WHEN ISNULL([dbo].fnCMGetBankAccountMICR(tblCMBankTransaction.intBankAccountId, tblCMBankTransaction.strReferenceNo), '') <> '' 
 							THEN tblSMCompanySetup.strCompanyName 
 							ELSE NULL END,
@@ -227,16 +229,10 @@ FROM
 		ON tblCMBankAccount.intBankAccountId = tblCMBankTransaction.intBankAccountId
 	INNER JOIN tblCMBank
 		ON tblCMBank.intBankId = tblCMBankAccount.intBankId
-	INNER JOIN
-       (SELECT DISTINCT 
-			intTransactionId,
-			strTransactionId, 
-			strBatchId
-		FROM 
-			tblCMCheckPrintJobSpool) [tblCMCheckPrintJobSpool]
-	   ON [tblCMBankTransaction].[intTransactionId] = [tblCMCheckPrintJobSpool].[intTransactionId]
 WHERE 
-	tblCMBankTransaction.intBankTransactionTypeId = 21 
+	tblCMBankTransaction.intBankTransactionTypeId = 21
+	AND tblCMBankTransaction.intBankAccountId = @intBankAccountId 
+	AND tblCMBankTransaction.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 GROUP BY 
 	tblSMCompanySetup.strCompanyName,
 	tblSMCompanySetup.strAddress, tblSMCompanySetup.strCity,
@@ -260,7 +256,6 @@ GROUP BY
 	tblCMBankAccount.dblGreaterThanAmount,
 	tblCMBankAccount.ysnShowTwoSignatureLine,
 	tblCMBankAccount.ysnCheckEnableMICRPrint,
-	tblCMCheckPrintJobSpool.strBatchId,
 	tblPREmployeeInfo.strEmployeeId,
 	tblPREmployeeInfo.strFirstName,
 	tblPREmployeeInfo.strMiddleName, tblPREmployeeInfo.strLastName,
@@ -272,5 +267,3 @@ GROUP BY
 	tblPRPaycheck.dblGross, tblPRPaycheck.dblTaxTotal,
 	tblPRPaycheck.dblDeductionTotal, tblPRPaycheck.dblNetPayTotal,
 	tblPRPaycheck.ysnVoid
-
-CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
