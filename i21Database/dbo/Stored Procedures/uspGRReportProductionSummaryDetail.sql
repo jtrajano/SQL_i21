@@ -19,6 +19,7 @@ BEGIN TRY
 	DECLARE @intUnitMeasureId  INT
 	DECLARE @CommodityStockUomId  INT
 	DECLARE @CommodityStockUom NVARCHAR(50)
+	DECLARE @CommodityStockUnitMeasure NVARCHAR(50)
 	DECLARE @ScaleUOM NVARCHAR(50)
 	DECLARE @dblDryingandDiscountsOnLoadsIn DECIMAL(24,10)
 	DECLARE @dblDryingPremium DECIMAL(24,10)
@@ -46,7 +47,7 @@ BEGIN TRY
 	JOIN	tblICItem b ON b.intCommodityId = a.intCommodityId
 	WHERE	b.intItemId = @intItemId AND a.ysnStockUnit = 1
 
-	SELECT @CommodityStockUom = strSymbol 
+	SELECT @CommodityStockUom = strSymbol,@CommodityStockUnitMeasure=strUnitMeasure 
 	FROM tblICUnitMeasure WHERE intUnitMeasureId=@intUnitMeasureId
 
 	SELECT	@CommodityStockUomId = intItemUOMId			
@@ -168,7 +169,7 @@ BEGIN TRY
 	[dbo].[fnRemoveTrailingZeroes]
 	(
 		CASE 
-					WHEN (SH.strType='From Scale' OR SH.strType='Open Balance Adj' OR SH.strType='Reverse Adjustment' OR SH.strType='Reverse By Invoice' OR SH.strType='Reverse Settlement') THEN ISNULL(SH.dblUnits,0)				
+					WHEN (SH.strType='From Scale' OR SH.strType='Open Balance Adj' OR SH.strType='Reverse Adjustment' OR SH.strType='Reverse By Invoice' OR SH.strType='Reverse Settlement') THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,@ScaleUOMId,ISNULL(SH.dblUnits,0))				
 					ELSE NULL
 		END
 	)
@@ -177,7 +178,7 @@ BEGIN TRY
 	[dbo].[fnRemoveTrailingZeroes]
 	(
 		CASE 
-					WHEN (SH.strType='Reduced By Invoice' OR SH.strType='Settlement') THEN ISNULL(SH.dblUnits,0)
+					WHEN (SH.strType='Reduced By Invoice' OR SH.strType='Settlement') THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,@ScaleUOMId,ISNULL(SH.dblUnits,0))
 					ELSE NULL
 		END
     )
