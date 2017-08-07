@@ -2,6 +2,7 @@
 AS
 SELECT DT.strContractNumber
 	,intContractSeq
+	,DT.intContractDetailId
 	,DT.strLoadNumber
 	,strVendorName
 	,E.strName AS strProducer
@@ -67,3 +68,4 @@ GROUP BY DT.strContractNumber
 	,DT.dblQuantity
 	,DT.ysnInvoice
 	,intDaysToETAPOD
+	,DT.intContractDetailId

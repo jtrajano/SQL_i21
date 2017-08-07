@@ -36,6 +36,9 @@ FROM (
 			,CH.intCommodityId
 			,strBookingReference = NULL
 			,strShippingLine = NULL
+			,strMVessel = NULL
+			,strMVoyageNumber = NULL
+			,dtmETAPOL = NULL
 			,'Contracts w/o shipping instruction' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -97,6 +100,9 @@ FROM (
 			,CH.intCommodityId
 			,L.strBookingReference
 			,SL.strName AS strShippingLine
+			,L.strMVessel
+			,L.strMVoyageNumber
+			,L.dtmETAPOL
 			,'Contracts w/o shipping advice' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -153,6 +159,9 @@ FROM (
 			,CH.intCommodityId
 			,strBookingReference = NULL
 			,strShippingLine = NULL
+			,strMVessel = NULL
+			,strMVoyageNumber = NULL
+			,dtmETAPOL = NULL
 			,'Contracts w/o document' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -206,6 +215,9 @@ FROM (
 			,CH.intCommodityId
 			,strBookingReference = NULL
 			,strShippingLine = NULL
+			,strMVessel = NULL
+			,strMVoyageNumber = NULL
+			,dtmETAPOL = NULL
 			,'Contracts w/o weight claim' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -262,6 +274,9 @@ FROM (
 			,CH.intCommodityId
 			,strBookingReference = NULL
 			,strShippingLine = NULL
+			,strMVessel = NULL
+			,strMVoyageNumber = NULL
+			,dtmETAPOL = NULL
 			,'Weight claims w/o debit note' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -314,6 +329,9 @@ FROM (
 			,CH.intCommodityId
 			,strBookingReference = NULL
 			,strShippingLine = NULL
+			,strMVessel = NULL
+			,strMVoyageNumber = NULL
+			,dtmETAPOL = NULL
 			,'Contracts w/o 4C' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -366,6 +384,9 @@ FROM (
 			,CH.intCommodityId
 			,strBookingReference = NULL
 			,strShippingLine = NULL
+			,strMVessel = NULL
+			,strMVoyageNumber = NULL
+			,dtmETAPOL = NULL
 			,'Contracts w/o TC' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId

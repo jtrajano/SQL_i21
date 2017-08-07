@@ -2,6 +2,7 @@
 AS
 SELECT CH.strContractNumber
 	,CH.intContractHeaderId
+	,CD.intContractDetailId
 	,CD.intContractSeq
 	,Vendor.strName AS strVendorName
 	,Customer.strName AS strCustomerName
