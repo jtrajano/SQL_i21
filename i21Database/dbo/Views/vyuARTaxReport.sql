@@ -20,18 +20,40 @@ SELECT DISTINCT I.intEntityCustomerId
 								ELSE TAXDETAIL.dblTotalAdjustedTax
 						  END
 	 , dblNonTaxable    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
-								ELSE (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)
-						  END
+								THEN CASE WHEN TAXDETAIL.dblTax = 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
+									ELSE 0 END
+								ELSE 
+									CASE WHEN TAXDETAIL.dblTax = 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)  
+									ELSE 0 END
+						 END
 	 , dblTaxable       = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') 
-								THEN TAXDETAIL.dblTax * -1
-								ELSE TAXDETAIL.dblTax
-						  END 
-	 , dblTotalSales    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) +  TAXDETAIL.dblTax * -1 
-								ELSE (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) + TAXDETAIL.dblTax
-						  END
-	 , dblTaxCollected  = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
+								THEN CASE WHEN TAXDETAIL.dblTax > 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
+									ELSE 0 END
+								ELSE 
+									CASE WHEN TAXDETAIL.dblTax > 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)  
+									ELSE 0 END
+						 END
+	, dblTotalSales = (CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
+								THEN CASE WHEN TAXDETAIL.dblTax = 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
+									ELSE 0 END
+								ELSE 
+									CASE WHEN TAXDETAIL.dblTax = 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)  
+									ELSE 0 END
+						 END) + 
+						 (CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') 
+								THEN CASE WHEN TAXDETAIL.dblTax > 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
+									ELSE 0 END
+								ELSE 
+									CASE WHEN TAXDETAIL.dblTax > 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)  
+									ELSE 0 END
+						 END
+						 ) + 
+						 (CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
+								THEN ISNULL(TAXDETAIL.dblTotalAdjustedTax, 0) * -1 
+								ELSE ISNULL(TAXDETAIL.dblTotalAdjustedTax, 0)
+						  END)
+
+	, dblTaxCollected  = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
 								THEN ISNULL(I.dblTax, 0) * -1 
 								ELSE ISNULL(I.dblTax, 0)
 						  END
