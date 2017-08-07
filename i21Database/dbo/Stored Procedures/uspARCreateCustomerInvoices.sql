@@ -930,6 +930,7 @@ USING
 		,[intAccountId]					= ITG.[intAccountId]
 		,[intCurrencyId]				= ITG.intCurrencyId
 		,[intTermId]					= ISNULL(ITG.intTermId, ARC.[intTermsId])
+		,[intOriginalSourceId]			= ITG.[intSourceId]
 		,[intSourceId]					= [dbo].[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
 		,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
 		,[dtmDate]						= ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)
@@ -1261,7 +1262,7 @@ VALUES(
 			,INSERTED.[strTransactionType]			--[strTransactionType]
 			,INSERTED.[strType]						--[strType]
 			,Source.[strSourceTransaction]			--[strSourceTransaction]
-			,Source.[intSourceId]					--[intSourceId]
+			,Source.[intOriginalSourceId]			--[intSourceId]
 			,Source.[strSourceId]					--[strSourceId]
 			,Source.[ysnPost]						--[ysnPost]
 			,1										--[ysnInsert]
