@@ -374,37 +374,68 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		DECLARE @strPhone					NVARCHAR (50)
 		DECLARE	@strDispatchNotification	NVARCHAR (50)
 		DECLARE @strTextMessage				NVARCHAR (100)
+		DECLARE @strSystem					NVARCHAR (2)
+		DECLARE @tmpptslsmst TABLE
+		(
+		strSalesManId nvarchar(10),
+		strSystem nvarchar(2)
+		)		
 	
 		DECLARE @Counter INT = 0
     
 		--Import only those are not yet imported
-		SELECT ptsls_slsmn_id INTO #tmpptslsmst 
-			FROM ptslsmst
-		LEFT JOIN tblARSalesperson
-			ON ptslsmst.ptsls_slsmn_id COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
-		WHERE tblARSalesperson.strSalespersonId IS NULL
-		ORDER BY ptslsmst.ptsls_slsmn_id
+		INSERT INTO @tmpptslsmst
+			SELECT ptsls_slsmn_id, ''PT'' FROM ptslsmst
+			LEFT JOIN tblARSalesperson
+				ON ptslsmst.ptsls_slsmn_id COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
+			WHERE tblARSalesperson.strSalespersonId IS NULL
+			UNION ALL 
+			SELECT trdrv_driver, ''TR'' FROM trdrvmst
+			LEFT JOIN tblARSalesperson
+				ON trdrvmst.trdrv_driver COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
+			WHERE tblARSalesperson.strSalespersonId IS NULL		
 
-		WHILE (EXISTS(SELECT 1 FROM #tmpptslsmst))
+		WHILE (EXISTS(SELECT 1 FROM @tmpptslsmst))
 		BEGIN
 		
-			SELECT @originSalespersonId = ptsls_slsmn_id FROM #tmpptslsmst
-
-			SELECT TOP 1
-				@strSalespersonId = ptsls_slsmn_id,
-				@strName = ISNULL(ptsls_name, ''''),
-				@strType = CASE WHEN ptsls_et_driver_yn = ''Y'' THEN ''Driver'' ELSE ''Sales Representative'' END,
-				@strEmail = ISNULL(LTRIM(RTRIM(ptsls_email)),''''),
-				@strAddress = ISNULL(ptsls_addr1,'''') + CHAR(10) + ISNULL(ptsls_addr2,''''),
-				@strZipCode = ptsls_zip,
-				@strCity = ptsls_city,
-				@strState = ptsls_state,
-				@strCountry = (SELECT strCurrency FROM tblSMPreferences A INNER JOIN tblSMCurrency B ON A.strValue = B.intCurrencyID WHERE strPreference = ''defaultCurrency''),
-				@strPhone = ptsls_phone,
-				@strDispatchNotification = CASE WHEN ptsls_dispatch_email = ''Y'' THEN ''Email'' ELSE '''' END,
-				@strTextMessage = ptsls_textmsg_email
-			FROM ptslsmst
-			WHERE ptsls_slsmn_id = @originSalespersonId
+			SELECT @originSalespersonId = strSalesManId,@strSystem = strSystem FROM @tmpptslsmst
+			IF @strSystem = ''PT''
+			BEGIN 
+				SELECT TOP 1
+					@strSalespersonId = ptsls_slsmn_id,
+					@strName = ISNULL(ptsls_name, ''''),
+					@strType = CASE WHEN ptsls_et_driver_yn = ''Y'' THEN ''Driver'' ELSE ''Sales Representative'' END,
+					@strEmail = ISNULL(LTRIM(RTRIM(ptsls_email)),''''),
+					@strAddress = ISNULL(ptsls_addr1,'''') + CHAR(10) + ISNULL(ptsls_addr2,''''),
+					@strZipCode = ptsls_zip,
+					@strCity = ptsls_city,
+					@strState = ptsls_state,
+					@strCountry = (SELECT strCurrency FROM tblSMPreferences A INNER JOIN tblSMCurrency B ON A.strValue = B.intCurrencyID WHERE strPreference = ''defaultCurrency''),
+					@strPhone = ptsls_phone,
+					@strDispatchNotification = CASE WHEN ptsls_dispatch_email = ''Y'' THEN ''Email'' ELSE '''' END,
+					@strTextMessage = ptsls_textmsg_email
+				FROM ptslsmst
+				WHERE ptsls_slsmn_id = @originSalespersonId
+			END
+			
+			IF @strSystem = ''TR''
+			BEGIN 
+				SELECT TOP 1
+					@strSalespersonId = trdrv_driver,
+					@strName = ISNULL(trdrv_name, ''''),
+					@strType = ''Driver'' ,
+					@strEmail = '''',
+					@strAddress = '''',
+					@strZipCode = '''',
+					@strCity = '''',
+					@strState = '''',
+					@strCountry = (SELECT strCurrency FROM tblSMPreferences A INNER JOIN tblSMCurrency B ON A.strValue = B.intCurrencyID WHERE strPreference = ''defaultCurrency''),
+					@strPhone = '''',
+					@strDispatchNotification = '''',
+					@strTextMessage = ''''					
+				FROM trdrvmst
+				WHERE trdrv_driver = @originSalespersonId
+			END			
 		
 			--INSERT Entity record for Salesperson			
 			INSERT [dbo].[tblEMEntity]	
@@ -439,7 +470,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
 			   ([intEntityId]
-			   ,[strSalespersonId]
+			   ,CASE WHEN @strSystem = ''PT'' THEN @strSalespersonId ELSE NULL END
 			   ,[strType]
 			   ,[strPhone]
 			   ,[strAddress]
@@ -488,7 +519,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				RETURN;
 			END
 
-			DELETE FROM #tmpptslsmst WHERE ptsls_slsmn_id = @originSalespersonId
+			DELETE FROM @tmpptslsmst WHERE strSalesManId = @originSalespersonId
 		
 			SET @Counter += 1;
 
@@ -508,6 +539,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		LEFT JOIN tblARSalesperson
 			ON ptslsmst.ptsls_slsmn_id COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
 		WHERE tblARSalesperson.strSalespersonId IS NULL
+		
+		SELECT @Total = @Total + COUNT(trdrv_driver)
+			FROM trdrvmst
+		LEFT JOIN tblARSalesperson
+			ON trdrvmst.trdrv_driver COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
+		WHERE tblARSalesperson.strSalespersonId IS NULL		
 	END
 	END'
 )
