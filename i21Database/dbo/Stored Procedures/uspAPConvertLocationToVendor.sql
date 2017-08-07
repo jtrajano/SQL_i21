@@ -80,7 +80,8 @@ AS
 	INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId) SELECT @EntityNewId, @DefaultTerms
 
 	UPDATE tblEMEntityLocation 
-		SET ysnActive = 0 
+		SET ysnActive = 0,
+			intVendorLinkId = @EntityNewId
 			WHERE intEntityLocationId = @EntityLocationId
 	
 	--RAISERROR('No 1099 setup for vendor', 16, 1);
