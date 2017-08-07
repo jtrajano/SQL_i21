@@ -1113,3 +1113,9 @@ BEGIN
 	END
 END
 GO
+
+GO
+UPDATE tblQMCompanyPreference
+SET ysnValidateMultipleValuesInTestResult = 0
+WHERE ysnValidateMultipleValuesInTestResult IS NULL
+GO
