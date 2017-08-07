@@ -139,8 +139,78 @@ BEGIN
 END
 ELSE
 BEGIN
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(@validVoucherPrepay, 'Bill', DEFAULT, @userId, @batchId)
+	INSERT INTO @GLEntries(
+		dtmDate ,
+	    strBatchId ,
+	    intAccountId ,
+	    dblDebit ,
+	    dblCredit ,
+	    dblDebitUnit ,
+	    dblCreditUnit ,
+	    strDescription ,
+	    strCode ,
+	    strReference ,
+	    intCurrencyId ,
+	    dblExchangeRate ,
+	    dtmDateEntered ,
+	    dtmTransactionDate ,
+	    strJournalLineDescription ,
+	    intJournalLineNo ,
+	    ysnIsUnposted ,
+	    intUserId ,
+	    intEntityId ,
+	    strTransactionId ,
+	    intTransactionId ,
+	    strTransactionType ,
+	    strTransactionForm ,
+	    strModuleName ,
+	    dblDebitForeign ,
+	    dblDebitReport ,
+	    dblCreditForeign ,
+	    dblCreditReport ,
+	    dblReportingRate ,
+	    dblForeignRate ,
+	    strRateType 
+	)
+	SELECT 
+		dtmDate ,
+	    @batchId,
+	    intAccountId ,
+	    dblDebit ,
+	    dblCredit ,
+	    dblDebitUnit ,
+	    dblCreditUnit ,
+	    strDescription ,
+	    strCode ,
+	    strReference ,
+	    intCurrencyId ,
+	    dblExchangeRate ,
+	    dtmDateEntered ,
+	    dtmTransactionDate ,
+	    strJournalLineDescription ,
+	    intJournalLineNo ,
+	    ysnIsUnposted ,
+	    intUserId ,
+	    intEntityId ,
+	    strTransactionId ,
+	    intTransactionId ,
+	    strTransactionType ,
+	    strTransactionForm ,
+	    strModuleName ,
+	    dblDebitForeign ,
+	    dblDebitReport ,
+	    dblCreditForeign ,
+	    dblCreditReport ,
+	    dblReportingRate ,
+	    dblForeignRate ,
+	    ''
+	FROM tblGLDetail A
+	WHERE A.intTransactionId IN (SELECT intId FROM @validVoucherPrepay)
+	AND EXISTS (
+		SELECT 1 FROM tblAPBill B
+		WHERE B.intBillId IN (SELECT intId FROM @validVoucherPrepay)
+		AND B.strBillId = A.strTransactionId
+	)
 END
 
 BEGIN TRY
