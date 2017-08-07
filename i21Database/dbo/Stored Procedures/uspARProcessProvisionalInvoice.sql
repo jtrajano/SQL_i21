@@ -13,36 +13,8 @@ IF ISNULL(@RaiseError,0) = 0
 
 
 DECLARE @UserEntityId				INT
-	   ,@HasImpactForProvisional	BIT
 
 SET @UserEntityId = ISNULL((SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE intEntityId = @UserId), @UserId)
-SET @HasImpactForProvisional = ISNULL((SELECT TOP 1 ysnImpactForProvisional FROM dbo.tblARCompanyPreference WITH (NOLOCK)), 0)
-
-IF ISNULL(@HasImpactForProvisional, 0) = 1
-	BEGIN
-		BEGIN TRY
-		EXEC [dbo].[uspARPostInvoice]
-			 @post				= 1
-			,@recap				= 0
-			,@param				= @InvoiceId
-			,@userId			= @UserId
-			,@beginDate			= NULL
-			,@endDate			= NULL
-			,@beginTransaction	= NULL
-			,@endTransaction	= NULL
-			,@exclude			= NULL
-			,@raiseError		= @RaiseError
-
-		END TRY
-		BEGIN CATCH
-			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
-			SET @ErrorMessage = ERROR_MESSAGE();
-			IF ISNULL(@RaiseError,0) = 1
-				RAISERROR(@ErrorMessage, 16, 1);
-			RETURN 0;
-		END CATCH
-	END
 
 DECLARE  @InvoiceNumber			NVARCHAR(25)
 		,@EntityCustomerId		INT

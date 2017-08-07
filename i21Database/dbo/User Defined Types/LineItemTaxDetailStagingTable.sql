@@ -19,7 +19,7 @@ CREATE TYPE [dbo].[LineItemTaxDetailStagingTable] AS TABLE
 	,[ysnSeparateOnInvoice]					BIT												NULL		
 	,[ysnCheckoffTax]						BIT												NULL		
 	,[ysnTaxExempt]							BIT												NULL		-- Indicate whether the tax code is marked as exempted
-	,[ysnTaxOnly]							BIT												NULL		-- Indicate whether the tax computation will based on Tax only
+	,[ysnTaxOnly]							BIT												NOT NULL	DEFAULT 0 -- Indicate whether the tax computation will based on Tax only
 	,[strNotes]								NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL		-- Details of exemption
 	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id of parent line item detail (InvoiceIntegrationStagingTable) which are also fro processing
 	,[dblCurrencyExchangeRate]				NUMERIC(18, 6)									NULL
