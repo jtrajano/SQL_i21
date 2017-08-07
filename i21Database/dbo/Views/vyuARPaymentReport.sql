@@ -109,6 +109,8 @@ FROM (
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE ysnPosted = 1
 	) I ON ARP.intPaymentId = I.intPaymentId
+	WHERE 
+		ARP.ysnInvoicePrepayment = 0
 ) PAYMENTS
 INNER JOIN (
 	SELECT intEntityId
