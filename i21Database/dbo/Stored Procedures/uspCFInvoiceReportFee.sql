@@ -848,6 +848,54 @@ BEGIN
 											 ELSE
 												NULL
 										END
+								WHEN @dtmInvoiceDate >= cffee.dtmStartDate AND cffee.dtmEndDate IS NULL
+									THEN
+										 CASE 
+											 WHEN cffee.strCalculationType = 'Transaction' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalTransaction,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Unit' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@dblTotalQuantity,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Billed Cards'  AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalBilledCard,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Active Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalActiveCard,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'New Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalNewCard,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Flat' 
+											 AND ((cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Annual' AND @ysnInvoiceAnnualFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Monthy' AND @ysnInvoiceMonthyFee = 1)
+											 )
+												THEN ROUND((ISNULL(cffee.dblFeeRate,0)),2)
+											 WHEN cffee.strCalculationType = 'Percentage' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND(((ISNULL(@dblTotalAmount,0) * (cffee.dblFeeRate / 100))),2)
+											 ELSE
+												NULL
+										END
+								WHEN cffee.dtmStartDate IS NULL AND @dtmInvoiceDate <= cffee.dtmEndDate
+									THEN
+										 CASE 
+											 WHEN cffee.strCalculationType = 'Transaction' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalTransaction,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Unit' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@dblTotalQuantity,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Billed Cards'  AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalBilledCard,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Active Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalActiveCard,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'New Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalNewCard,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Flat' 
+											 AND ((cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Annual' AND @ysnInvoiceAnnualFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Monthy' AND @ysnInvoiceMonthyFee = 1)
+											 )
+												THEN ROUND((ISNULL(cffee.dblFeeRate,0)),2)
+											 WHEN cffee.strCalculationType = 'Percentage' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND(((ISNULL(@dblTotalAmount,0) * (cffee.dblFeeRate / 100))),2)
+											 ELSE
+												NULL
+										END
 							END 
 						)
 						,@strInvoiceReportNumber
