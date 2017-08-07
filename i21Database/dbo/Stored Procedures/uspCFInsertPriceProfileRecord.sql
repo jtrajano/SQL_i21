@@ -94,11 +94,11 @@ BEGIN
 	END
 	ELSE IF(@strType = 'Local/Network')
 	BEGIN
-		IF(@strBasis = 'Local Index Retail' OR @strBasis = 'Local Index Cost')
+		IF(@strBasis = 'Local Index Retail' OR @strBasis = 'Local Index Cost' OR @strBasis = 'Local Index Fixed')
 			BEGIN
 				SET @ysnCheckIndex = 1
 			END
-		ELSE IF(@strBasis = 'Pump Price Adjustment')
+		ELSE IF(@strBasis = 'Pump Price Adjustment' OR @strBasis = 'Transfer Cost')
 			BEGIN
 				SET @ysnCheckIndex = 0
 			END
