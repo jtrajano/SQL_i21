@@ -1,8 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATPostRefund] 
 	@intRefundId INT = NULL,
 	@ysnPosted BIT = NULL,
+	@ysnRecap BIT = NULL,
 	@intUserId INT = NULL,
+	@intAPClearingId INT = NULL,
 	@intFiscalYearId INT = NULL,
+	@batchIdUsed NVARCHAR(40) = NULL OUTPUT,
 	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
 	@success BIT = 0 OUTPUT 
@@ -16,8 +19,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN TRANSACTION -- START TRANSACTION
 
+BEGIN TRANSACTION
 --DECLARE VARIABLES
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.';
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.';
@@ -47,7 +50,6 @@ BEGIN
 		ON R.intRefundId = RC.intRefundId
 	INNER JOIN tblPATCustomerVolume CV
 		ON CV.intRefundCustomerId = RC.intRefundCustomerId
-	WHERE R.intRefundId = @intRefundId
 
 	IF EXISTS(SELECT 1 FROM @validateRefundCustomer)
 	BEGIN
@@ -85,7 +87,6 @@ SELECT R.intRefundId,
 
 SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	where ysnEligibleRefund = 1
 
-COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
 
 IF(@totalRecords = 0)  
@@ -97,7 +98,6 @@ END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
-BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CREATE GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -105,19 +105,12 @@ BEGIN TRANSACTION
 IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
-DECLARE @validRefundIds NVARCHAR(MAX)
-
--- CREATE TEMP GL ENTRIES
-SELECT DISTINCT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT(VARCHAR(12),intRefundId)
-FROM #tmpRefundData
-
-DECLARE @dblDiff NUMERIC(18,6)
-DECLARE @intAdjustmentId INT
+SET @batchIdUsed = @batchId;
 
 IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @batchId)
+	SELECT * FROM [dbo].[fnPATCreateRefundGLEntries](@intRefundId, @intUserId, @batchId)
 
 ----------------------------------------------------------------------------------
 
@@ -125,15 +118,78 @@ END
 ELSE
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnPATReverseGLRefundEntries(@validRefundIds, DEFAULT, @intUserId)
+	SELECT * FROM [dbo].[fnPATReverseGLRefundEntries](@intRefundId, GETDATE(), @intUserId, @batchId)
 
 ----------------------------------------------------------------------------------
 
 END
-
 BEGIN TRY
-	SELECT * FROM @GLEntries
-	EXEC uspGLBookEntries @GLEntries, @ysnPosted
+	IF(ISNULL(@ysnRecap,0) = 0)
+	BEGIN
+		EXEC uspGLBookEntries @GLEntries, @ysnPosted
+	END
+	ELSE
+	BEGIN
+		SELECT * FROM @GLEntries
+			INSERT INTO tblGLPostRecap(
+				[strTransactionId]
+				,[intTransactionId]
+				,[intAccountId]
+				,[strDescription]
+				,[strJournalLineDescription]
+				,[strReference]	
+				,[dtmTransactionDate]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[dtmDate]
+				,[ysnIsUnposted]
+				,[intConcurrencyId]	
+				,[dblExchangeRate]
+				,[intUserId]
+				,[dtmDateEntered]
+				,[strBatchId]
+				,[strCode]
+				,[strModuleName]
+				,[strTransactionForm]
+				,[strTransactionType]
+				,[strAccountId]
+				,[strAccountGroup]
+			)
+			SELECT
+				[strTransactionId]
+				,A.[intTransactionId]
+				,A.[intAccountId]
+				,A.[strDescription]
+				,A.[strJournalLineDescription]
+				,A.[strReference]	
+				,A.[dtmTransactionDate]
+				,A.[dblDebit]
+				,A.[dblCredit]
+				,A.[dblDebitUnit]
+				,A.[dblCreditUnit]
+				,A.[dtmDate]
+				,A.[ysnIsUnposted]
+				,A.[intConcurrencyId]	
+				,A.[dblExchangeRate]
+				,A.[intUserId]
+				,A.[dtmDateEntered]
+				,A.[strBatchId]
+				,A.[strCode]
+				,A.[strModuleName]
+				,A.[strTransactionForm]
+				,A.[strTransactionType]
+				,B.strAccountId
+				,C.strAccountGroup
+			FROM @GLEntries A
+			INNER JOIN dbo.tblGLAccount B 
+				ON A.intAccountId = B.intAccountId
+			INNER JOIN dbo.tblGLAccountGroup C
+				ON B.intAccountGroupId = C.intAccountGroupId
+
+			GOTO Post_Commit;
+	END
 END TRY
 BEGIN CATCH
 	SET @error = ERROR_MESSAGE()
@@ -176,7 +232,7 @@ END CATCH
 	IF(@ysnPosted = 1)
 	BEGIN
 		UPDATE CV
-		SET CV.intRefundCustomerId = tRD.intRefundCustomerId, CV.ysnRefundProcessed = @ysnPosted
+		SET CV.intRefundCustomerId = tRD.intRefundCustomerId
 		FROM tblPATCustomerVolume CV
 		INNER JOIN #tmpRefundData tRD
 			ON CV.intCustomerPatronId = tRD.intCustomerId AND CV.intFiscalYear = tRD.intFiscalYearId 
@@ -185,11 +241,15 @@ END CATCH
 	ELSE
 	BEGIN
 		UPDATE CV
-		SET CV.intRefundCustomerId = null, ysnRefundProcessed = @ysnPosted
+		SET CV.intRefundCustomerId = null
 		FROM tblPATCustomerVolume CV
 		INNER JOIN #tmpRefundData tRD
 			ON CV.intRefundCustomerId = tRD.intRefundCustomerId
 	END
+
+	UPDATE tblPATCustomerVolume
+	SET ysnRefundProcessed = @ysnPosted
+	WHERE intFiscalYear = @intFiscalYearId AND intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
 	
 
 ---------------------------------------------------------------------------------------------------------------------------------------

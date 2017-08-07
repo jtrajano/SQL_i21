@@ -3,6 +3,10 @@
 SELECT	RC.intRefundCustomerId,
         RC.intRefundId,
         RC.intCustomerId,
+		R.strRefundNo,
+		R.dtmRefundDate,
+		R.intFiscalYearId,
+		FY.strFiscalYear,
 		E.strEntityNo,
 		strCustomerName = E.strName,
 		C.strStockStatus,
@@ -23,12 +27,16 @@ SELECT	RC.intRefundCustomerId,
 		dblLessFWT = CASE WHEN APV.ysnWithholding = 0 OR RC.dblCashRefund = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
 		dblLessServiceFee = CASE WHEN ISNULL(RC.ysnEligibleRefund,0) = 1 AND RC.dblCashRefund > 0 THEN R.dblServiceFee ELSE 0 END,
 		dblCheckAmount = CASE WHEN (RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) < 0) AND RC.dblCashRefund = 0 THEN 0 ELSE RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) END,
+		RC.intBillId,
+		APB.strBillId,
 		RC.intConcurrencyId
 	FROM tblPATRefundCustomer RC
 	INNER JOIN tblPATRefund R
 		ON R.intRefundId = RC.intRefundId
 	INNER JOIN tblEMEntity E
 		ON E.intEntityId = RC.intCustomerId
+	INNER JOIN tblGLFiscalYear FY
+		ON FY.intFiscalYearId = R.intFiscalYearId
 	INNER JOIN vyuEMEntityType EMType
 		ON EMType.intEntityId = E.intEntityId
 	INNER JOIN tblARCustomer C
@@ -37,6 +45,8 @@ SELECT	RC.intRefundCustomerId,
 		ON APV.intEntityId = RC.intCustomerId
 	LEFT OUTER JOIN tblSMTaxCode TC
 		ON TC.intTaxCodeId = C.intTaxCodeId
+	LEFT OUTER JOIN tblAPBill APB
+		ON APB.intBillId = RC.intBillId
 	INNER JOIN
 	(
 		SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
@@ -61,6 +71,11 @@ SELECT	RC.intRefundCustomerId,
 	GROUP BY RC.intRefundCustomerId,
         RC.intRefundId,
         RC.intCustomerId,
+		R.strRefundNo,
+		R.dtmRefundDate,
+		APB.strBillId,
+		R.intFiscalYearId,
+		FY.strFiscalYear,
 		E.strEntityNo,
 		E.strName,
 		C.strStockStatus,
