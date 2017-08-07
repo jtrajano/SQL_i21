@@ -85,6 +85,20 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.strSignatureLineCaption
 				,i21.ysnShowTwoSignatureLine
 				,i21.dblGreaterThanAmount
+				,i21.ysnShowFirstSignature
+				,i21.dblFirstAmountIsOver
+				,i21.intFirstUserId
+				,strFirstUserName = (SELECT strUserName FROM dbo.tblSMUserSecurity WHERE intEntityId = i21.intFirstUserId)
+				,i21.intFirstSignatureId
+				,strFirstSignatureName = (SELECT strName FROM dbo.tblSMSignature WHERE intSignatureId = i21.intFirstSignatureId)
+				,blbFirstSignatureDetail = (SELECT blbDetail FROM dbo.tblSMSignature WHERE intSignatureId = i21.intFirstSignatureId)
+				,i21.ysnShowSecondSignature
+				,i21.dblSecondAmountIsOver
+				,i21.intSecondUserId
+				,strSecondUserName = (SELECT strUserName FROM dbo.tblSMUserSecurity WHERE intEntityId = i21.intSecondUserId)
+				,i21.intSecondSignatureId
+				,strSecondSignatureName = (SELECT strName FROM dbo.tblSMSignature WHERE intSignatureId = i21.intSecondSignatureId)
+				,blbSecondSignatureDetail = (SELECT blbDetail FROM dbo.tblSMSignature WHERE intSignatureId = i21.intSecondSignatureId)
 				,i21.intCreatedUserId
 				,i21.dtmCreated
 				,i21.intLastModifiedUserId
@@ -283,6 +297,14 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strSignatureLineCaption
 					,ysnShowTwoSignatureLine
 					,dblGreaterThanAmount
+					,ysnShowFirstSignature
+					,dblFirstAmountIsOver
+					,intFirstUserId						
+					,intFirstSignatureId				
+					,ysnShowSecondSignature				
+					,dblSecondAmountIsOver				
+					,intSecondUserId					
+					,intSecondSignatureId				
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
@@ -357,6 +379,14 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strSignatureLineCaption			= i.strSignatureLineCaption
 					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
 					,dblGreaterThanAmount				= i.dblGreaterThanAmount
+					,ysnShowFirstSignature				= i.ysnShowFirstSignature
+					,dblFirstAmountIsOver				= i.dblFirstAmountIsOver
+					,intFirstUserId						= i.intFirstUserId
+					,intFirstSignatureId				= i.intFirstSignatureId
+					,ysnShowSecondSignature				= i.ysnShowSecondSignature
+					,dblSecondAmountIsOver				= i.dblSecondAmountIsOver
+					,intSecondUserId					= i.intSecondUserId
+					,intSecondSignatureId				= i.intSecondSignatureId
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId
@@ -549,6 +579,14 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strSignatureLineCaption			= i.strSignatureLineCaption
 					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
 					,dblGreaterThanAmount				= i.dblGreaterThanAmount
+					,ysnShowFirstSignature				= i.ysnShowFirstSignature
+					,dblFirstAmountIsOver				= i.dblFirstAmountIsOver
+					,intFirstUserId						= i.intFirstUserId
+					,intFirstSignatureId				= i.intFirstSignatureId
+					,ysnShowSecondSignature				= i.ysnShowSecondSignature
+					,dblSecondAmountIsOver				= i.dblSecondAmountIsOver
+					,intSecondUserId					= i.intSecondUserId
+					,intSecondSignatureId				= i.intSecondSignatureId
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId

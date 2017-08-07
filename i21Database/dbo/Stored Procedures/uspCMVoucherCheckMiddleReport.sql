@@ -166,6 +166,11 @@ SELECT	CHK.dtmDate
 		,BNKACCNT.strUserDefineMessage
 		,BNKACCNT.strSignatureLineCaption
 		,ysnShowTwoSignatureLine = CONVERT(bit,CASE WHEN BNKACCNT.ysnShowTwoSignatureLine = 1 AND CHK.dblAmount >  BNKACCNT.dblGreaterThanAmount THEN 1 ELSE 0 END)
+
+		,ysnShowFirstSignature = CONVERT(bit,CASE WHEN BNKACCNT.ysnShowFirstSignature = 1 AND CHK.dblAmount >  BNKACCNT.dblFirstAmountIsOver THEN 1 ELSE 0 END)
+		,ysnShowSecondSignature = CONVERT(bit,CASE WHEN BNKACCNT.ysnShowSecondSignature = 1 AND CHK.dblAmount >  BNKACCNT.dblSecondAmountIsOver THEN 1 ELSE 0 END)
+		,blbFirstSignatureDetail = (SELECT TOP 1 blbDetail FROM tblSMSignature WHERE intSignatureId = BNKACCNT.intFirstSignatureId)
+		,blbSecondSignatureDetail = (SELECT TOP 1 blbDetail FROM tblSMSignature WHERE intSignatureId = BNKACCNT.intSecondSignatureId)
 		
 		-- A/P Related fields: 
 		,strVendorId = ISNULL(VENDOR.strVendorId, '--')

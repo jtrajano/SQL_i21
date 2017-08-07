@@ -79,6 +79,20 @@ SELECT	i21.intBankAccountId
 		,i21.strSignatureLineCaption
 		,i21.ysnShowTwoSignatureLine
 		,i21.dblGreaterThanAmount
+		,i21.ysnShowFirstSignature
+		,i21.dblFirstAmountIsOver
+		,i21.intFirstUserId
+		,strFirstUserName = (SELECT strUserName FROM dbo.tblSMUserSecurity WHERE intEntityId = i21.intFirstUserId)
+		,i21.intFirstSignatureId
+		,strFirstSignatureName = (SELECT strName FROM dbo.tblSMSignature WHERE intSignatureId = i21.intFirstSignatureId)
+		,blbFirstSignatureDetail = (SELECT blbDetail FROM dbo.tblSMSignature WHERE intSignatureId = i21.intFirstSignatureId)
+		,i21.ysnShowSecondSignature
+		,i21.dblSecondAmountIsOver
+		,i21.intSecondUserId
+		,strSecondUserName = (SELECT strUserName FROM dbo.tblSMUserSecurity WHERE intEntityId = i21.intSecondUserId)
+		,i21.intSecondSignatureId
+		,strSecondSignatureName = (SELECT strName FROM dbo.tblSMSignature WHERE intSignatureId = i21.intSecondSignatureId)
+		,blbSecondSignatureDetail = (SELECT blbDetail FROM dbo.tblSMSignature WHERE intSignatureId = i21.intSecondSignatureId)
 		,i21.intCreatedUserId
 		,i21.dtmCreated
 		,i21.intLastModifiedUserId
@@ -193,6 +207,14 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strSignatureLineCaption
 						,ysnShowTwoSignatureLine
 						,dblGreaterThanAmount
+						,ysnShowFirstSignature
+						,dblFirstAmountIsOver
+						,intFirstUserId
+						,intFirstSignatureId
+						,ysnShowSecondSignature
+						,dblSecondAmountIsOver
+						,intSecondUserId
+						,intSecondSignatureId
 						,intCreatedUserId
 						,dtmCreated
 						,intLastModifiedUserId
@@ -267,6 +289,14 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strSignatureLineCaption			= i.strSignatureLineCaption
 						,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
 						,dblGreaterThanAmount				= i.dblGreaterThanAmount
+						,ysnShowFirstSignature				= i.ysnShowFirstSignature
+						,dblFirstAmountIsOver				= i.dblFirstAmountIsOver
+						,intFirstUserId						= i.intFirstUserId
+						,intFirstSignatureId				= i.intFirstSignatureId
+						,ysnShowSecondSignature				= i.ysnShowSecondSignature
+						,dblSecondAmountIsOver				= i.dblSecondAmountIsOver
+						,intSecondUserId					= i.intSecondUserId
+						,intSecondSignatureId				= i.intSecondSignatureId
 						,intCreatedUserId					= i.intCreatedUserId
 						,dtmCreated							= i.dtmCreated
 						,intLastModifiedUserId				= i.intLastModifiedUserId
@@ -364,6 +394,14 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strSignatureLineCaption			= i.strSignatureLineCaption
 					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
 					,dblGreaterThanAmount				= i.dblGreaterThanAmount
+					,ysnShowFirstSignature				= i.ysnShowFirstSignature
+					,dblFirstAmountIsOver				= i.dblFirstAmountIsOver
+					,intFirstUserId						= i.intFirstUserId
+					,intFirstSignatureId				= i.intFirstSignatureId
+					,ysnShowSecondSignature				= i.ysnShowSecondSignature
+					,dblSecondAmountIsOver				= i.dblSecondAmountIsOver
+					,intSecondUserId					= i.intSecondUserId
+					,intSecondSignatureId				= i.intSecondSignatureId
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId
