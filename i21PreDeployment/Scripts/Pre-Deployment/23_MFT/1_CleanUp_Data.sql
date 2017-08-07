@@ -93,6 +93,24 @@ BEGIN
 			EXEC('TRUNCATE TABLE tblTFReportingComponentProductCode')
 		END
 
+		-- Old Table that rename to tblTFReportingComponentProductCode
+		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidProductCode') 
+		BEGIN
+			EXEC('TRUNCATE TABLE tblTFValidProductCode')
+		END
+
+		-- Old Table that rename to tblTFReportingComponentVendor
+		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidVendor') 
+		BEGIN
+			EXEC('TRUNCATE TABLE tblTFValidVendor')
+		END
+
+		-- Old Table that rename to tblTFReportingComponentField
+		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFScheduleFields') 
+		BEGIN
+			EXEC('TRUNCATE TABLE tblTFScheduleFields')
+		END
+
 		-- Filing Packet
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFFilingPacket') 
 		BEGIN
@@ -146,7 +164,7 @@ BEGIN
 			EXEC('UPDATE tblTFReportingComponent SET intMasterId = NULL')
 		END
 
-		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)
+		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)	
 
 	END
 END
