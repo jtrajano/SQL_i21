@@ -837,7 +837,7 @@ BEGIN
 					AND RawData.strReceiptType = 'Transfer Order'
 
 				-- 4. Logistics
-				LEFT JOIN vyuICLoadContainerReceiptContracts LogisticsView
+				LEFT JOIN vyuLGLoadContainerLookup LogisticsView --vyuICLoadContainerReceiptContracts LogisticsView
 					ON LogisticsView.intLoadDetailId = RawData.intSourceId
 					AND RawData.strReceiptType = 'Purchase Contract'
 					AND RawData.intSourceType = 2
