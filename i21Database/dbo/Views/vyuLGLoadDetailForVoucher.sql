@@ -40,12 +40,15 @@ JOIN tblICItem I ON I.intItemId = LD.intItemId
 LEFT JOIN tblICUnitMeasure U ON U.intUnitMeasureId = L.intWeightUnitMeasureId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+LEFT JOIN tblSMCurrency MSC ON MSC.intCurrencyID = SC.intMainCurrencyId
 LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = CASE 
 		WHEN SC.intMainCurrencyId IS NOT NULL
-			THEN CD.intCurrencyId
+			THEN AD.intSeqCurrencyId
 		ELSE NULL
 		END
-WHERE LD.intLoadDetailId NOT IN (SELECT ISNULL(intLoadDetailId, 0)
-								 FROM tblAPBillDetail BD
-								 JOIN tblAPBill B ON B.intBillId = BD.intBillId
-								 WHERE ISNULL(B.intTransactionType, 0) = 2)
+WHERE LD.intLoadDetailId NOT IN (
+		SELECT ISNULL(intLoadDetailId, 0)
+		FROM tblAPBillDetail BD
+		JOIN tblAPBill B ON B.intBillId = BD.intBillId
+		WHERE ISNULL(B.intTransactionType, 0) = 2
+		)
