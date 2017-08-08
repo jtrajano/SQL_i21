@@ -348,7 +348,7 @@ Begin
 			Else
 				Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 			If UPPER(@strCommodityCode)='COFFEE'
-				Set @strItemXml += '<CHARG>'  +  LTRIM(RTRIM(ISNULL(@strContainerNo,''))) + '</CHARG>' 
+				Set @strItemXml += '<CHARG>'  +  LTRIM(RTRIM(REPLACE(ISNULL(@strContainerNo,''), char(9), ''))) + '</CHARG>' 
 			Else
 				Set @strItemXml += '<CHARG>'  +  '' + '</CHARG>' 
 			Set @strItemXml += '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
@@ -365,7 +365,7 @@ Begin
 			If ISNULL(@ysnBatchSplit,0)=1 AND UPPER(@strHeaderRowState)='MODIFIED'
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
 			If ISNULL(@ysnBatchSplit,0)=0 AND UPPER(@strCommodityCode)='COFFEE'
-				Set @strItemXml += '<LICHN>' + LTRIM(RTRIM(ISNULL(@strContainerNo,''))) + '</LICHN>'
+				Set @strItemXml += '<LICHN>' + LTRIM(RTRIM(REPLACE(ISNULL(@strContainerNo,''), char(9), ''))) + '</LICHN>'
 
 			If UPPER(@strHeaderRowState)='MODIFIED'
 			Begin
@@ -430,12 +430,12 @@ Begin
 							+ '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 							+ '<WERKS>'  +  CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN ISNULL(lc.strSubLocation,'')  ELSE '' END + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(lc.strStorageLocation,'') + '</LGORT>' 
-							+ '<CHARG>'  +  LTRIM(RTRIM(ISNULL(lc.strContainerNo,''))) + '</CHARG>' 
+							+ '<CHARG>'  +  LTRIM(RTRIM(REPLACE(ISNULL(lc.strContainerNo,''), char(9), ''))) + '</CHARG>' 
 							+ '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),lc.dblNetWt)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(lc.strWeightUOM,'')) + '</VRKME>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
-							+ '<LICHN>' + LTRIM(RTRIM(ISNULL(lc.strContainerNo,''))) + '</LICHN>' 
+							+ '<LICHN>' + LTRIM(RTRIM(REPLACE(ISNULL(lc.strContainerNo,''), char(9), ''))) + '</LICHN>' 
 
 							+ '<E1EDL19 SEGMENT="1">'
 							+ '<QUALF>'  + CASE WHEN UPPER(lc.strRowState)='DELETE' Then 'DEL' ELSE 'QUA' END + '</QUALF>' 
@@ -502,7 +502,7 @@ Begin
 				From @tblContainer Where intRowNo=@intMinContainer
 
 					Set @strContainerXml += '<E1EDL37 SEGMENT="1">'
-					Set @strContainerXml += '<EXIDV>'  +  LTRIM(RTRIM(ISNULL(@strContainerNo,''))) + '</EXIDV>' 
+					Set @strContainerXml += '<EXIDV>'  +  LTRIM(RTRIM(REPLACE(ISNULL(@strContainerNo,''), char(9), ''))) + '</EXIDV>' 
 					Set @strContainerXml += '<VHILM>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM>' 
 					Set @strContainerXml += '<VHART>'  +  '0002' + '</VHART>' 
 					Set @strContainerXml += '<VHILM_KU>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM_KU>' 

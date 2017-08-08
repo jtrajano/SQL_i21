@@ -212,7 +212,7 @@ Begin
 			Set @strItemXml += '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 			Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
-			Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
+			Set @strItemXml += '<CHARG>'  +  LTRIM(RTRIM(REPLACE(ISNULL(@strContainerNo,''), char(9), ''))) + '</CHARG>' 
 			Set @strItemXml += '<BWART>'  +  '101' + '</BWART>' 
 			Set @strItemXml += '<ERFMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'') + '</ERFMG>' 
 			Set @strItemXml += '<ERFME>'  +  ISNULL(@strUOM,'') + '</ERFME>' 
@@ -232,7 +232,7 @@ Begin
 			Else
 				Set @strItemXml += '<WERKS>'  +  '' + '</WERKS>' 
 			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
-			Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
+			Set @strItemXml += '<CHARG>'  +  LTRIM(RTRIM(REPLACE(ISNULL(@strContainerNo,''), char(9), ''))) + '</CHARG>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'') + '</LFIMG>'
 			Else
@@ -257,7 +257,7 @@ Begin
 						+ '<MATNR>'  +  ISNULL(ri.strItemNo,'') + '</MATNR>' 
 						+ '<WERKS>'  +  ISNULL(ri.strSubLocationName,'') + '</WERKS>' 
 						+ '<LGORT>'  +  ISNULL(ri.strStorageLocationName,'') + '</LGORT>' 
-						+ '<CHARG>'  +  ISNULL(ri.strContainer,'') + '</CHARG>' 
+						+ '<CHARG>'  +  LTRIM(RTRIM(ISNULL(ri.strContainer,''))) + '</CHARG>' 
 						+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),ri.dblNetWgt)),'') + '</LFIMG>' 
 						+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(ri.strWeightUOM,'')) + '</VRKME>' 
 						+ '<HIPOS>'  +   ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
