@@ -56,13 +56,19 @@ BEGIN TRY
 		,[intPaymentMethodId]					= 0
 		,[strInvoiceOriginId]					= ''
 		,[strPONumber]							= DH.strPurchaseOrder
-		,[strBOLNumber]							= TR.strBillOfLading
+		,[strBOLNumber]							= ISNULL(TR.strBillOfLading, BlendIngredient.strBillOfLading)
 		,[strDeliverPickup]						= 'Deliver'
-		,[strComments]							= (CASE WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
+		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
+														(CASE WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
+															WHEN BlendIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(BlendIngredient.strSupplyPoint, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
+															WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
+															WHEN BlendIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(BlendIngredient.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
+														END))
+													ELSE (CASE WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
 														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
 														WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
 														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, '')) + ' ' + RTRIM(ISNULL(DH.strComments, ''))
-													END)
+													END) END
 		,[intShipToLocationId]					= DH.intShipToLocationId
 		,[intBillToLocationId]					= ISNULL(Customer.intBillToId, EL.intEntityLocationId)
 		,[ysnTemplate]							= 0
@@ -171,11 +177,14 @@ BEGIN TRY
 									WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location'
 										THEN NULL
 									END)
+			, Receipt.strBillOfLading
+			, Receipt.intSupplyPointId
+			, Receipt.strSupplyPoint
 		FROM tblTRLoadDistributionDetail DistItem
 		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
 		LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
 		LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
-		LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
+		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
 	) BlendIngredient ON BlendIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = ''
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
