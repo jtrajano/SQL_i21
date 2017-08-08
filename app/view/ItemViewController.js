@@ -621,6 +621,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 store: '{m2mComputations}'
             },
             chkPrice: '{current.ysnPrice}',
+            chkIsBasket: '{current.ysnIsBasket}',
             chkBasisContract: '{current.ysnBasisContract}',
             cboCostMethod: {
                 readOnly: '{readOnlyCostMethod}',

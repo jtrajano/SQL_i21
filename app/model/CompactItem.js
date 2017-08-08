@@ -41,6 +41,7 @@ Ext.define('Inventory.model.CompactItem', {
         { name: 'strCostType', type: 'string' },
         { name: 'strShortName', type: 'string' },
         { name: 'ysnBasisContract', type: 'boolean' },
-        { name: 'ysnUseWeighScales', type: 'boolean' }
+        { name: 'ysnUseWeighScales', type: 'boolean' },
+        { name: 'ysnIsBasket', type: 'boolean' }
     ]
 });

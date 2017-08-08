@@ -158,6 +158,7 @@ namespace iRely.Inventory.Model
         public bool? ysnBasisContract { get; set; }
         public int? intTonnageTaxUOMId { get; set; }
         public bool? ysnUseWeighScales { get; set; }
+        public bool? ysnIsBasket { get; set; }
 
         private string _strM2MComputation;
         [NotMapped]

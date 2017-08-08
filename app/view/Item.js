@@ -25,6 +25,7 @@ Ext.define('Inventory.view.Item', {
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.TextArea',
+        'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
         'Ext.form.field.Number',
@@ -33,7 +34,6 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.plugin.CellEditing',
         'Ext.selection.CheckboxModel',
         'Ext.form.Label',
-        'Ext.form.field.Checkbox',
         'Ext.form.field.Date',
         'Ext.grid.column.Date',
         'Ext.grid.feature.Summary',
@@ -306,11 +306,11 @@ Ext.define('Inventory.view.Item', {
                                                                 displayField: 'strLotTracking',
                                                                 valueField: 'strLotTracking'
                                                             },
-															{
-																xtype: 'checkboxfield',
-																itemId: 'chkUseWeighScales',
-																fieldLabel: 'Use Weigh Scales'
-															}
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkIsBasket',
+                                                                fieldLabel: 'Is Basket'
+                                                            }
                                                         ]
                                                     },
                                                     {
@@ -1098,7 +1098,7 @@ Ext.define('Inventory.view.Item', {
                                                                 flex: 2,
                                                                 itemId: 'grdItemSubLocations',
                                                                 margin: '0 0 0 10',
-                                                                title: 'Storage Locations',
+                                                                title: 'Sub Locations',
                                                                 forceFit: true,
                                                                 dockedItems: [
                                                                     {
@@ -1132,14 +1132,14 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colsubSubLocationName',
                                                                         width: 244,
-                                                                        text: 'Storage Location',
+                                                                        text: 'Sub Location',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
                                                                                     dataIndex: 'intCompanyLocationSubLocationId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Storage Location Id',
+                                                                                    text: 'Sub Location Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -1151,7 +1151,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 {
                                                                                     dataIndex: 'strSubLocationName',
                                                                                     dataType: 'string',
-                                                                                    text: 'Storage Location Name',
+                                                                                    text: 'Sub Location Name',
                                                                                     flex: 1
                                                                                 },
                                                                                 {
@@ -1178,7 +1178,7 @@ Ext.define('Inventory.view.Item', {
                                                                         hidden: true,
                                                                         itemId: 'colsubSubLocationId',
                                                                         dataIndex: 'intSubLocationId',
-                                                                        text: 'Storage Location Id'
+                                                                        text: 'Sub Location Id'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -3142,7 +3142,6 @@ Ext.define('Inventory.view.Item', {
                                                                             ],
                                                                             itemId: 'cboItemContractStatus',
                                                                             editable: false,
-                                                                            pickerWidth: 200,
                                                                             displayField: 'strStatus',
                                                                             valueField: 'strStatus'
                                                                         }
