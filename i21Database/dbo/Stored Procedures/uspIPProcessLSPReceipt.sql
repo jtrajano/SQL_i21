@@ -77,10 +77,12 @@ Begin
 			--Receipt Items
 			Insert into tblICInventoryReceiptItem (intInventoryReceiptId,intLineNo,intOrderId,intSourceId,
 			intItemId,intContainerId,intSubLocationId,dblOrderQty,dblOpenReceive,intStorageLocationId,
-			intUnitMeasureId,intWeightUOMId,dblUnitCost,dblGross,dblNet,intConcurrencyId,dblLineTotal,dblUnitRetail,intCostUOMId)
+			intUnitMeasureId,intWeightUOMId,dblUnitCost,dblGross,dblNet,intConcurrencyId,dblLineTotal,dblUnitRetail,intCostUOMId,ysnSubCurrency)
 			Select @intReceiptId,ct.intContractDetailId,ct.intContractHeaderId,ld.intLoadDetailId,
 			i.intItemId,cl.intLoadContainerId,csl.intCompanyLocationSubLocationId,cl.dblQuantity,cl.dblQuantity,sl.intStorageLocationId,
-			cl.intItemUOMId,iu.intItemUOMId,ct.dblCashPrice,ri.dblQuantity,ri.dblQuantity,1,ri.dblQuantity * ct.dblCashPrice ,ct.dblCashPrice,ct.intPriceItemUOMId
+			cl.intItemUOMId,iu.intItemUOMId,ct.dblCashPrice,ri.dblQuantity,ri.dblQuantity,1,
+			(dbo.[fnCTConvertQtyToTargetItemUOM](iu.intItemUOMId,ct.intPriceItemUOMId,ri.dblQuantity)) * (ct.dblCashPrice / Case When Isnull(cr.ysnSubCurrency,0)=1 Then 100 Else 1 End) ,
+			ct.dblCashPrice,ct.intPriceItemUOMId,Case When Isnull(cr.ysnSubCurrency,0)=1 Then 1 Else 0 End
 			From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
 			Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
 			Join tblICItemUOM iu on i.intItemId=iu.intItemId
@@ -93,7 +95,12 @@ Begin
 			Join tblCTContractDetail ct on ld.intPContractDetailId=ct.intContractDetailId
 			Join tblLGLoad l on l.intLoadId=ld.intLoadId
 			Join tblLGLoadDetailContainerLink cl on ld.intLoadDetailId=cl.intLoadDetailId AND cl.strExternalContainerId=ri.strDeliveryItemNo
+			Join tblSMCurrency cr on ct.intCurrencyId=cr.intCurrencyID
 			Where ri.intStageReceiptId=@intMinRowNo AND ri.dblQuantity>0 AND l.intLoadId=@intLoadId
+
+			Update rh Set rh.intSubCurrencyCents=(CASE WHEN ISNULL(ri.ysnSubCurrency,0)=1 Then 100 ELSE 1 END) 
+			From tblICInventoryReceipt rh join tblICInventoryReceiptItem ri on rh.intInventoryReceiptId=ri.intInventoryReceiptId
+			Where rh.intInventoryReceiptId=@intReceiptId
 
 			--Lots
 			Insert into tblICInventoryReceiptItemLot (intInventoryReceiptItemId,strLotNumber,intSubLocationId,intStorageLocationId,dblQuantity,
