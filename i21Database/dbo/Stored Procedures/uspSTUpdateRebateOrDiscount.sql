@@ -153,81 +153,20 @@ BEGIN TRY
    BEGIN
 	    SET @BeginDate = CONVERT(VARCHAR(10),@BeginDate,111)
         
-		--SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
-		--		(
-		--			'Begining Date'
-		--			, 'REPLACE(CONVERT(NVARCHAR(10),IP.dtmBeginDate,111), ''/'', ''-'')'
-		--			, '''' + CAST(@BeginDate as NVARCHAR(250)) + ''''
-		--			, @Location
-		--			, @Vendor
-		--			, @Category
-		--			, @Family
-		--			, @Class
-		--			, 'I.intItemId'
-		--			, 'IP.intItemSpecialPricingId'
-		--			, @PromotionType 
-		--		)
-
-        SET @SQL1 = 'SELECT e.strLocationName
-							   , b.strUpcCode
-							   , c.strDescription
-							   , ''Begining Date''
-							   , REPLACE(CONVERT(NVARCHAR(10),a.dtmBeginDate,111), ''/'', ''-'')
-							   , ''' + CAST(@BeginDate as NVARCHAR(250)) + ''' 
-							   , c.intItemId 
-							   , a.intItemSpecialPricingId
-					   FROM tblICItemSpecialPricing a 
-					   JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId 
-					   JOIN tblICItem c ON a.intItemId = c.intItemId 
-					   JOIN tblICItemLocation d ON a.intItemId = d.intItemId 
-					   JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-	    SET @SQL1 = @SQL1 + ' WHERE 1=1 ' 
-
-          IF (@Location IS NOT NULL)
-          BEGIN 
-             SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-          END
-
-          IF (@Vendor IS NOT NULL)
-          BEGIN 
-            SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-            IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEMEntity where intEntityId 
-	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Category IS NOT NULL)
-          BEGIN
-             SET @SQL1 = @SQL1 +  ' and a.intItemId  
-             IN (select intItemId from tblICItem where intCategoryId IN
-           (select intCategoryId from tblICCategory where intCategoryId
-           IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Family IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-            (select intItemLocationId from tblICItemLocation where intFamilyId IN
-            (select intFamilyId from tblICItemLocation where intFamilyId 
-		    IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Class IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-              (select intItemLocationId from tblICItemLocation where intClassId IN
-              (select intClassId from tblICItemLocation where intClassId 
-			  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
-          END
-		IF(@PromotionType = 'Vendor Rebate')
-		BEGIN
-             SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Rebate''' 
-	    END
-		IF (@PromotionType = 'Vendor Discount')
-		BEGIN
-		     SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Vendor Discount''' 
-		END
+		SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+				(
+					'Begining Date'
+					, 'REPLACE(CONVERT(NVARCHAR(10),IP.dtmBeginDate,111), ''/'', ''-'')'
+					, '''' + CAST(@BeginDate as NVARCHAR(250)) + ''''
+					, @Location
+					, @Vendor
+					, @Category
+					, @Family
+					, @Class
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, @PromotionType 
+				)
 
 		INSERT @tblTempOne
         EXEC (@SQL1)
@@ -237,68 +176,21 @@ BEGIN TRY
  IF (@EndDate IS NOT NULL)
    BEGIN
        SET @EndDate = CONVERT(VARCHAR(10),@EndDate,111)
-       --SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-       SET @SQL1 = 'SELECT e.strLocationName
-							, b.strUpcCode
-							, c.strDescription
-							, ''Ending Date''
-							, REPLACE(CONVERT(NVARCHAR(10),a.dtmEndDate,111), ''/'', ''-'')
-							, ''' + CAST(@EndDate as NVARCHAR(250)) + ''' 
-							, c.intItemId 
-						    , a.intItemSpecialPricingId 
-					FROM tblICItemSpecialPricing a 
-					JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId 
-					JOIN tblICItem c ON a.intItemId = c.intItemId 
-					JOIN tblICItemLocation d ON a.intItemId = d.intItemId 
-					JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
 
-	    SET @SQL1 = @SQL1 + ' WHERE 1=1 ' 
-
-          IF (@Location IS NOT NULL)
-          BEGIN 
-             SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-          END
-
-          IF (@Vendor IS NOT NULL)
-          BEGIN 
-            SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-            IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEMEntity where intEntityId 
-	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Category IS NOT NULL)
-          BEGIN
-             SET @SQL1 = @SQL1 +  ' and a.intItemId  
-             IN (select intItemId from tblICItem where intCategoryId IN
-           (select intCategoryId from tblICCategory where intCategoryId
-           IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Family IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-            (select intItemLocationId from tblICItemLocation where intFamilyId IN
-            (select intFamilyId from tblICItemLocation where intFamilyId 
-		    IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Class IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-              (select intItemLocationId from tblICItemLocation where intClassId IN
-              (select intClassId from tblICItemLocation where intClassId 
-			  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
-          END
-
-	    IF(@PromotionType = 'Vendor Rebate')
-		BEGIN
-             SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Rebate''' 
-	    END
-		IF (@PromotionType = 'Vendor Discount')
-		BEGIN
-		     SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Vendor Discount''' 
-		END
+	   SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+				(
+					'Ending Date'
+					, 'REPLACE(CONVERT(NVARCHAR(10),IP.dtmEndDate,111), ''/'', ''-'')'
+					, '''' + CAST(@EndDate as NVARCHAR(250)) + ''''
+					, @Location
+					, @Vendor
+					, @Category
+					, @Family
+					, @Class
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, @PromotionType 
+				)
 
 		INSERT @tblTempOne
         EXEC (@SQL1)
@@ -307,64 +199,24 @@ BEGIN TRY
  --tblICItemSpecialPricing
  IF (@PromotionType = 'Vendor Rebate')
  BEGIN
+
 	 IF (@RebateAmount IS NOT NULL)
 	 BEGIN
 	   
-	    --SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-        SET @SQL1 = 'SELECT e.strLocationName
-							 , b.strUpcCode
-							 , c.strDescription
-							 , ''Rebate Amount''
-							 , CAST(a.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) 
-							 , CAST(' + CAST(@RebateAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) 
-							 , c.intItemId 
-							 , a.intItemSpecialPricingId 
-					 FROM tblICItemSpecialPricing a 
-					 JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId 
-					 JOIN tblICItem c ON a.intItemId = c.intItemId 
-					 JOIN tblICItemLocation d ON a.intItemId = d.intItemId 
-					 JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-	    SET @SQL1 = @SQL1 + ' WHERE 1=1 ' 
-
-          IF (@Location IS NOT NULL)
-          BEGIN 
-             SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-          END
-
-          IF (@Vendor IS NOT NULL)
-          BEGIN 
-            SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-            IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEMEntity where intEntityId 
-	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Category IS NOT NULL)
-          BEGIN
-             SET @SQL1 = @SQL1 +  ' and a.intItemId  
-             IN (select intItemId from tblICItem where intCategoryId IN
-           (select intCategoryId from tblICCategory where intCategoryId
-           IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Family IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-            (select intItemLocationId from tblICItemLocation where intFamilyId IN
-            (select intFamilyId from tblICItemLocation where intFamilyId 
-		    IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Class IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-              (select intItemLocationId from tblICItemLocation where intClassId IN
-              (select intClassId from tblICItemLocation where intClassId 
-			  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
-          END
-
-        SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Rebate''' 
+	    SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+				(
+					'Rebate Amount'
+					, 'CAST(IP.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@RebateAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @Location
+					, @Vendor
+					, @Category
+					, @Family
+					, @Class
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, @PromotionType 
+				)
 
 		INSERT @tblTempOne
         EXEC (@SQL1)
@@ -372,62 +224,20 @@ BEGIN TRY
 
 	 IF (@AccumAmount IS NOT NULL)
 	 BEGIN
-
-	    --SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-        SET @SQL1 = 'SELECT e.strLocationName
-							 , b.strUpcCode
-							 , c.strDescription
-							 , ''Accumlated Amount''
-							 , CAST(a.dblAccumulatedAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))
-							 , CAST(' + CAST(@AccumAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) 
-							 , c.intItemId 
-							 , a.intItemSpecialPricingId 
-					 FROM tblICItemSpecialPricing a 
-					 JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId 
-					 JOIN tblICItem c ON a.intItemId = c.intItemId 
-					 JOIN tblICItemLocation d ON a.intItemId = d.intItemId 
-					 JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-	    SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-          IF (@Location IS NOT NULL)
-          BEGIN 
-             SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-          END
-
-          IF (@Vendor IS NOT NULL)
-          BEGIN 
-            SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-            IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEMEntity where intEntityId 
-	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Category IS NOT NULL)
-          BEGIN
-             SET @SQL1 = @SQL1 +  ' and a.intItemId  
-             IN (select intItemId from tblICItem where intCategoryId IN
-           (select intCategoryId from tblICCategory where intCategoryId
-           IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Family IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-            (select intItemLocationId from tblICItemLocation where intFamilyId IN
-            (select intFamilyId from tblICItemLocation where intFamilyId 
-		    IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Class IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-              (select intItemLocationId from tblICItemLocation where intClassId IN
-              (select intClassId from tblICItemLocation where intClassId 
-			  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
-          END
-
-        SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Rebate''' 
+	    SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+				(
+					'Accumlated Amount'
+					, 'CAST(IP.dblAccumulatedAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@AccumAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @Location
+					, @Vendor
+					, @Category
+					, @Family
+					, @Class
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, @PromotionType 
+				)
 
 		INSERT @tblTempOne
         EXEC (@SQL1)
@@ -436,61 +246,20 @@ BEGIN TRY
 
 	 IF (@AccumlatedQty IS NOT NULL)
 	 BEGIN
-
-         --SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-         SET @SQL1 = 'SELECT e.strLocationName
-							  , b.strUpcCode
-							  , c.strDescription
-							  , ''Accumlated Quantity''
-							  , CAST(a.dblAccumulatedQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))
-							  , CAST(' + CAST(@AccumlatedQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))
-							  , c.intItemId 
-							  , a.intItemSpecialPricingId 
-					  FROM tblICItemSpecialPricing a 
-					  JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId 
-					  JOIN tblICItem c ON a.intItemId = c.intItemId 
-					  JOIN tblICItemLocation d ON a.intItemId = d.intItemId 
-					  JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-	    SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-          IF (@Location IS NOT NULL)
-          BEGIN 
-             SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-          END				    
-
-          IF (@Vendor IS NOT NULL)
-          BEGIN 
-            SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-            IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEMEntity where intEntityId 
-	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Category IS NOT NULL)
-          BEGIN
-             SET @SQL1 = @SQL1 +  ' and a.intItemId  
-             IN (select intItemId from tblICItem where intCategoryId IN
-           (select intCategoryId from tblICCategory where intCategoryId
-           IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Family IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-            (select intItemLocationId from tblICItemLocation where intFamilyId IN
-            (select intFamilyId from tblICItemLocation where intFamilyId 
-		    IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Class IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-              (select intItemLocationId from tblICItemLocation where intClassId IN
-              (select intClassId from tblICItemLocation where intClassId 
-			  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
-          END
-        SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Rebate''' 
+	     SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+				(
+					'Accumlated Quantity'
+					, 'CAST(IP.dblAccumulatedQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@AccumlatedQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @Location
+					, @Vendor
+					, @Category
+					, @Family
+					, @Class
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, @PromotionType 
+				)
 
 		INSERT @tblTempOne
         EXEC (@SQL1)
@@ -503,62 +272,21 @@ BEGIN TRY
 
 	 IF (@DiscAmountUnit  IS NOT NULL)
 	 BEGIN
-
-          --SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-          SET @SQL1 = 'SELECT e.strLocationName
-							   , b.strUpcCode
-							   , c.strDescription
-							   , ''Discount Amount''
-							   , CAST(a.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))
-							   , CAST(' + CAST(@DiscAmountUnit AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) 
-							   , c.intItemId 
-							   , a.intItemSpecialPricingId 
-					   FROM tblICItemSpecialPricing a 
-					   JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId 
-					   JOIN tblICItem c ON a.intItemId = c.intItemId 
-					   JOIN tblICItemLocation d ON a.intItemId = d.intItemId 
-					   JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-	    SET @SQL1 = @SQL1 + ' WHERE 1=1 ' 
-
-          IF (@Location IS NOT NULL)
-          BEGIN 
-             SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-          END				    				   
-
-          IF (@Vendor IS NOT NULL)
-          BEGIN 
-            SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-            IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEMEntity where intEntityId 
-	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Category IS NOT NULL)
-          BEGIN
-             SET @SQL1 = @SQL1 +  ' and a.intItemId  
-             IN (select intItemId from tblICItem where intCategoryId IN
-           (select intCategoryId from tblICCategory where intCategoryId
-           IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Family IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-            (select intItemLocationId from tblICItemLocation where intFamilyId IN
-            (select intFamilyId from tblICItemLocation where intFamilyId 
-		    IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Class IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-              (select intItemLocationId from tblICItemLocation where intClassId IN
-              (select intClassId from tblICItemLocation where intClassId 
-			  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
-          END
-
-        SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Vendor Discount''' 
+	      
+		  SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+				(
+					'Discount Amount'
+					, 'CAST(IP.dblDiscount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@DiscAmountUnit AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @Location
+					, @Vendor
+					, @Category
+					, @Family
+					, @Class
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, @PromotionType 
+				)
 
 		INSERT @tblTempOne
         EXEC (@SQL1)
@@ -566,62 +294,21 @@ BEGIN TRY
 
 	 IF (@DiscThroughAmount IS NOT NULL)
 	 BEGIN
-
-	    --SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-        SET @SQL1 = 'SELECT e.strLocationName
-							, b.strUpcCode
-							, c.strDescription
-							, ''Discoount through amount''
-							, CAST(a.dblDiscountThruAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))
-							, CAST(' + CAST(@DiscThroughAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) 
-							, c.intItemId 
-							, a.intItemSpecialPricingId 
-					FROM tblICItemSpecialPricing a 
-					JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId 
-					JOIN tblICItem c ON a.intItemId = c.intItemId 
-					JOIN tblICItemLocation d ON a.intItemId = d.intItemId 
-					JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-	    SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-          IF (@Location IS NOT NULL)
-          BEGIN 
-             SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-          END				    				   
-			
-          IF (@Vendor IS NOT NULL)
-          BEGIN 
-            SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-            IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEMEntity where intEntityId 
-	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Category IS NOT NULL)
-          BEGIN
-             SET @SQL1 = @SQL1 +  ' and a.intItemId  
-             IN (select intItemId from tblICItem where intCategoryId IN
-           (select intCategoryId from tblICCategory where intCategoryId
-           IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Family IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-            (select intItemLocationId from tblICItemLocation where intFamilyId IN
-            (select intFamilyId from tblICItemLocation where intFamilyId 
-		    IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Class IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-              (select intItemLocationId from tblICItemLocation where intClassId IN
-              (select intClassId from tblICItemLocation where intClassId 
-			  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
-          END
-
-        SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Vendor Discount''' 
+	    
+		SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+				(
+					'Discount through amount'
+					, 'CAST(IP.dblDiscountThruAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@DiscThroughAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @Location
+					, @Vendor
+					, @Category
+					, @Family
+					, @Class
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, @PromotionType 
+				)
 
 		INSERT @tblTempOne
         EXEC (@SQL1)
@@ -629,62 +316,21 @@ BEGIN TRY
 
 	 IF (@DiscThroughQty IS NOT NULL)
 	 BEGIN
-	    
-         --SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-         SET @SQL1 = 'SELECT e.strLocationName
-							 , b.strUpcCode
-							 , c.strDescription
-							 , ''Discoount through quantity''
-							 , CAST(a.dblDiscountThruQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) 
-							 , CAST(' + CAST(@DiscThroughQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) 
-							 , c.intItemId 
-					         , a.intItemSpecialPricingId 
-					 FROM tblICItemSpecialPricing a 
-					 JOIN tblICItemUOM b ON a.intItemUnitMeasureId = b.intItemUOMId 
-					 JOIN tblICItem c ON a.intItemId = c.intItemId 
-				     JOIN tblICItemLocation d ON a.intItemId = d.intItemId 
-					 JOIN tblSMCompanyLocation e ON d.intLocationId = e.intCompanyLocationId '
-
-	    SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-          IF (@Location IS NOT NULL)
-          BEGIN 
-             SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-          END				    	
-
-          IF (@Vendor IS NOT NULL)
-          BEGIN 
-            SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-            IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEMEntity where intEntityId 
-	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Category IS NOT NULL)
-          BEGIN
-             SET @SQL1 = @SQL1 +  ' and a.intItemId  
-             IN (select intItemId from tblICItem where intCategoryId IN
-           (select intCategoryId from tblICCategory where intCategoryId
-           IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Family IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-            (select intItemLocationId from tblICItemLocation where intFamilyId IN
-            (select intFamilyId from tblICItemLocation where intFamilyId 
-		    IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
-          END
-
-          IF (@Class IS NOT NULL)
-          BEGIN
-            SET @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
-              (select intItemLocationId from tblICItemLocation where intClassId IN
-              (select intClassId from tblICItemLocation where intClassId 
-			  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
-          END
-
-        SET @SQL1 = @SQL1 + ' and  a.strPromotionType = ''Vendor Discount''' 
+	     
+		 SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
+				(
+					'Discount through quantity'
+					, 'CAST(IP.dblDiscountThruQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, 'CAST(' + CAST(@DiscThroughQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+					, @Location
+					, @Vendor
+					, @Category
+					, @Family
+					, @Class
+					, 'I.intItemId'
+					, 'IP.intItemSpecialPricingId'
+					, @PromotionType 
+				)
 
 		INSERT @tblTempOne
         EXEC (@SQL1)

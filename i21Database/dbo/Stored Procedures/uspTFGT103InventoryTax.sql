@@ -81,7 +81,9 @@ BEGIN TRY
 			, strHeaderStateTaxID
 			, strHeaderFederalTaxID
 			, strOriginState
+			, strOriginCity
 			, strDestinationState
+			, strDestinationCity
 			, strTerminalControlNumber
 			, strTransporterIdType
 			, strVendorIdType
@@ -132,7 +134,9 @@ BEGIN TRY
 			, tblSMCompanySetup.strStateTaxID
 			, tblSMCompanySetup.strFederalTaxID
 			, tblEMEntityLocation.strState AS strOriginState
+			, tblEMEntityLocation.strCity AS strOriginCity
 			, tblSMCompanyLocation.strStateProvince AS strDestinationState
+			, tblSMCompanyLocation.strCity AS strDestinationCity
 			, tblTFTerminalControlNumber.strTerminalControlNumber
 			, strTransporterIdType = 'FEIN'
 			, strVendorIdType = 'FEIN'
@@ -240,7 +244,9 @@ BEGIN TRY
 				, strTaxPayerIdentificationNumber
 				, strTaxPayerFEIN
 				, strOriginState
+				, strOriginCity
 				, strDestinationState
+				, strDestinationCity
 				, strCustomerName
 				, strCustomerFederalTaxId
 				, strTransporterIdType
@@ -282,7 +288,9 @@ BEGIN TRY
 				, strHeaderStateTaxID
 				, strHeaderFederalTaxID
 				, strOriginState
+				, strOriginCity
 				, strDestinationState
+				, strDestinationCity
 				, @CompanyName
 				, @CompanyEIN
 				, strTransporterIdType
