@@ -233,10 +233,24 @@ BEGIN TRY
 				SET @Margin = @QuotePrice - @RackPrice
 				SET @ExtProfit = @QtyOrdered * @Margin
 
-				SELECT *
+				SELECT intTaxGroupId
+					, intTaxCodeId
+					, intTaxClassId
+					, strTaxableByOtherTaxes
+					, strCalculationMethod
+					, dblRate
+					, dblExemptionPercent
+					, dblTax = CASE WHEN (ISNULL(dblTax, 0) = 0) THEN 0 ELSE (dblTax / 100000) END
+					, dblAdjustedTax = CASE WHEN (ISNULL(dblAdjustedTax, 0) = 0) THEN 0 ELSE (dblAdjustedTax / 100000) END
+					, intTaxAccountId
+					, ysnCheckoffTax
+					, strTaxCode
+					, ysnTaxExempt
+					, ysnInvalidSetup
+					, strNotes
 				INTO #tmpTaxes
 				FROM dbo.fnConstructLineItemTaxDetail (
-					1
+					100000
 					, @QuotePrice
 					, @LineItems
 					, 0
