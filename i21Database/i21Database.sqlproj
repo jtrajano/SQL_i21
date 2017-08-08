@@ -5582,6 +5582,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryBySummary.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportByProductType.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportByProductTypeDetail.sql" />
+    <Build Include="dbo\Tables\tblGLConsolidateResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

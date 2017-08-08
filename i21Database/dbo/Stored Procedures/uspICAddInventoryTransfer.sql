@@ -240,6 +240,8 @@ BEGIN
 				,[dblFreightAmount]
 				,[intOwnershipType]
 				,[ysnWeights]
+				,[strFromLocationActualCostId]
+				,[strToLocationActualCostId]
 				,[intSort]
 				,[intConcurrencyId]		
 		)
@@ -265,6 +267,8 @@ BEGIN
 				,[dblFreightAmount]			= NULL 
 				,[intOwnershipType]			= RawData.intOwnershipType
 				,[ysnWeights]				= RawData.ysnWeights
+				,[strFromLocationActualCostId] = RawData.strFromLocationActualCostId
+				,[strToLocationActualCostId] = RawData.strToLocationActualCostId
 				,[intSort]					= NULL 
 				,[intConcurrencyId]			= 1
 		FROM	@TransferEntries RawData INNER JOIN @DataForInventoryTransferHeader RawHeaderData
