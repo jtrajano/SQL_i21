@@ -77,6 +77,7 @@ BEGIN TRY
 				FROM tblICLot L1
 				WHERE L1.strLotNumber = l.strLotNumber
 				) AS dtmDateCreated
+			,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
 		FROM tblICLot l
 		JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
@@ -108,6 +109,7 @@ BEGIN TRY
 				FROM tblICLot L1
 				WHERE L1.strLotNumber = l.strLotNumber
 				) AS dtmDateCreated
+			,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
 		FROM tblICLot l
 		JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
