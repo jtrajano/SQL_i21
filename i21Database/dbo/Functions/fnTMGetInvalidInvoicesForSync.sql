@@ -52,7 +52,7 @@ BEGIN
 			ON B.intSiteId = D.intSiteID
 		INNER JOIN tblTMClock E
 			ON D.intClockID = E.intClockID
-		INNER JOIN tblTMDegreeDayReading H
+		LEFT JOIN tblTMDegreeDayReading H
 			ON E.intClockID = H.intClockID
 				AND A.dtmDate = H.dtmDate
 		LEFT JOIN tblICItem F
@@ -67,7 +67,7 @@ BEGIN
 			ON J.intDeviceTypeId = K.intDeviceTypeId
 				AND K.strDeviceType <> 'Flow Meter'
 		WHERE B.intSiteId IS NOT NULL	
-			AND B.ysnLeaseBilling <> 1
+			AND ISNULL(B.ysnLeaseBilling,0) <> 1
 			AND D.strBillingBy <> 'Flow Meter'
 
 		UNION ALL
@@ -91,7 +91,7 @@ BEGIN
 			ON B.intSiteId = D.intSiteID
 		INNER JOIN tblTMClock E
 			ON D.intClockID = E.intClockID
-		INNER JOIN tblTMDegreeDayReading H
+		LEFT JOIN tblTMDegreeDayReading H
 			ON E.intClockID = H.intClockID
 				AND A.dtmDate = H.dtmDate
 		LEFT JOIN tblICItem F
@@ -114,6 +114,7 @@ BEGIN
 			FROM tblTMSite I) J
 			ON D.intSiteID = J.intSiteID
 		WHERE D.strBillingBy = 'Flow Meter'
+			AND ISNULL(B.ysnLeaseBilling,0) <> 1
 	) AA WHERE AA.[strPostingError] <> '' AND AA.[strPostingError] IS NOT NULL
 
 																												
