@@ -510,7 +510,7 @@ INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFuture
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 SELECT
 9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Futures Required' PriceStatus,@strParamFutureMonth strFutureMonth,strAccountNumber,  
-abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
+-abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
 dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(7) and strFutureMonth = 'Previous'
 
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
@@ -520,12 +520,11 @@ SELECT
 -abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
 dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(6) and strFutureMonth <> 'Previous'
 
-
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 SELECT
 9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Futures Required' PriceStatus,@strParamFutureMonth,strAccountNumber,  
--abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
+abs(dblQuantity) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
 dblQuantity,9,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(6) and strFutureMonth = 'Previous'
 
 UNION
@@ -653,10 +652,8 @@ ORDER BY strGroup,PriceStatus,
  CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
   WHEN  strFutureMonth ='Total' THEN '01/01/9999'
  else CONVERT(DATETIME,'01 '+strFutureMonth) END
- 
- DECLARE @strAccountNumber nvarchar(max)
- 
- SELECT TOP 1 @strAccountNumber=strAccountNumber  from #temp where  strGroup='1.Outright Coverage' and PriceStatus='1.Priced / Outright - (Outright position)' order by intRowNumber
+ declare @strAccountNumber nvarchar(max)
+ select top 1 @strAccountNumber=strAccountNumber  from #temp where  strGroup='1.Outright Coverage' and PriceStatus='1.Priced / Outright - (Outright position)' order by intRowNumber
  INSERT INTO #temp
  SELECT DISTINCT '1.Outright Coverage',
 'Outright Coverage'	,
@@ -670,7 +667,7 @@ SELECT  intRowNumber ,strGroup,Selection ,
             PriceStatus  ,  
             strFutureMonth ,  
             strAccountNumber ,  
-            CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  dblNoOfContract,  
+            case when CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))=0 then null else CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) end  dblNoOfContract,  
             strTradeNo,  
             TransactionDate  ,  
             TranType,  
