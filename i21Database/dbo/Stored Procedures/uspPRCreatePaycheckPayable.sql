@@ -35,7 +35,7 @@ SELECT DISTINCT intVendorId INTO #tmpVendors FROM
 	AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
  UNION ALL
  SELECT intVendorId FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL AND TD.intVendorId IS NOT NULL 
+	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId IS NOT NULL 
 	AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
 ) PayableTaxesAndDeductions
 
@@ -201,11 +201,11 @@ BEGIN
 		 UNION ALL
 		 SELECT 
 			intVendorId = TD.intVendorId, 
-			intAccountId = CASE WHEN (PD.strPaidBy = 'Company') THEN PD.intAccountId ELSE PD.intExpenseAccountId END,
+			intAccountId = PD.intAccountId,
 			strItem = TD.strDeduction, 
 			dblTotal = SUM(PD.dblTotal)
 			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL
+			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks)
 				AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
 			GROUP BY TD.intVendorId, PD.intExpenseAccountId, PD.intAccountId, TD.strDeduction, PD.strPaidBy
 		) A
@@ -226,7 +226,7 @@ BEGIN
 	/* Update Paycheck Deductions Bill Id */
 	UPDATE tblPRPaycheckDeduction SET intBillId = @intBillId 
 	FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction ON TD.intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId
-	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL AND TD.intVendorId = @intVendorEntityId
+	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId = @intVendorEntityId
 	  AND ((@isVoid = 0 AND tblPRPaycheckDeduction.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckDeduction.intBillId IS NOT NULL))
 
 	DELETE FROM #tmpVendors WHERE intVendorId = @intVendorEntityId
