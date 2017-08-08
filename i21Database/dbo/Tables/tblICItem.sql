@@ -160,6 +160,7 @@ Type the overview for the table here.
 		[intM2MComputationId] INT NULL DEFAULT ((1)),
 		[intTonnageTaxUOMId] INT NULL, 
 		[ysnUseWeighScales] BIT NULL,
+		[ysnIsBasket] BIT NULL DEFAULT((0)),
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
