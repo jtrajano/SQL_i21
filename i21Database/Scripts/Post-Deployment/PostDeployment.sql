@@ -52,6 +52,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\SMDataFixes.SQL
 :r .\SM\1720_Statement_Footer_To_Report.sql
 :r .\SM\1730_UpdatePatronageMenus.sql
+:r .\SM\1730_EntityFavoriteMenu.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
