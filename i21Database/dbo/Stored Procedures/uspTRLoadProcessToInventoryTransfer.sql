@@ -72,7 +72,8 @@ END
         ,[intStatusId]
         ,[intShipViaId]
         ,[intFreightUOMId]
-		,[strActualCostId]
+		,[strFromLocationActualCostId]
+		,[strToLocationActualCostId]
         ,[intItemId]
         ,[intLotId]
         ,[intItemUOMId]
@@ -97,8 +98,19 @@ END
 		,[intStatusId]              = 1
 		,[intShipViaId]             = MIN(TL.intShipViaId)
 		,[intFreightUOMId]          = MIN(ItemUOM.intUnitMeasureId)
-		,[strActualCostId]			= (CASE WHEN MIN(TR.strOrigin) = 'Terminal'
+		,[strFromLocationActualCostId]	= (CASE WHEN MIN(TR.strOrigin) = 'Terminal'
 												THEN MIN(TL.strTransaction)
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
+												THEN NULL
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
+												THEN NULL
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
+												THEN NULL
+											END)
+		,[strToLocationActualCostId]	= (CASE WHEN MIN(TR.strOrigin) = 'Terminal' AND MIN(DH.strDestination) = 'Customer'
+												THEN MIN(TL.strTransaction)
+											WHEN MIN(TR.strOrigin) = 'Terminal' AND MIN(DH.strDestination) = 'Location'
+												THEN NULL
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
 												THEN NULL
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
@@ -152,7 +164,6 @@ END
 		,[intStatusId]              = 1
 		,[intShipViaId]             = MIN(TL.intShipViaId)
 		,[intFreightUOMId]          = MIN(ItemUOM.intUnitMeasureId)
-
 		,[strFromLocationActualCostId]	= (CASE WHEN MIN(TR.strOrigin) = 'Terminal'
 												THEN MIN(TL.strTransaction)
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
@@ -173,7 +184,6 @@ END
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
 												THEN NULL
 											END)
-		
 		,[intItemId]                = MIN(TR.intItemId)
 		,[intLotId]                 = NULL
 		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
@@ -187,8 +197,6 @@ END
 		,[intSourceId]              = TR.intLoadReceiptId
 		,[strSourceId]				= MIN(TL.strTransaction)
 		,[strSourceScreenName]		= 'Transport Loads'
-		,[strFromLocationActualCostId]	= CASE WHEN 0 = 0 THEN 0 END
-		,[strToLocationActualCostId]	= CASE WHEN 0 = 0 THEN 0 END
     FROM	tblTRLoadHeader TL 	        
 			LEFT JOIN tblTRLoadDistributionHeader DH ON TL.intLoadHeaderId = DH.intLoadHeaderId		
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
