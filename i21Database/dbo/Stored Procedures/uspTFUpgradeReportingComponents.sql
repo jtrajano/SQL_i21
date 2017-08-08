@@ -49,7 +49,7 @@ BEGIN TRY
 			, strScheduleName		= SOURCE.strScheduleName
 			, strNote				= SOURCE.strNote
 			, strTransactionType	= SOURCE.strTransactionType
-			, intPositionId			= SOURCE.intPositionId
+			, intSort			= SOURCE.intSort
 			, strSPInventory		= SOURCE.strSPInventory
 			, strSPInvoice			= SOURCE.strSPInvoice
 			, strSPRunReport		= SOURCE.strSPRunReport
@@ -64,7 +64,7 @@ BEGIN TRY
 			, strType
 			, strNote
 			, strTransactionType
-			, intPositionId
+			, intSort
 			, strSPInventory
 			, strSPInvoice
 			, strSPRunReport
@@ -80,7 +80,7 @@ BEGIN TRY
 			, SOURCE.strType
 			, SOURCE.strNote
 			, SOURCE.strTransactionType
-			, SOURCE.intPositionId
+			, SOURCE.intSort
 			, SOURCE.strSPInventory
 			, SOURCE.strSPInvoice
 			, SOURCE.strSPRunReport

@@ -6664,4 +6664,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intFarmFieldId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="90c36f7d-c6f0-4249-8d24-ad3ab5aae8d3" ChangeDateTime="08/08/2017 02:56:31">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponent].[intPositionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponent]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSort" />
+  </Operation>
 </Operations>

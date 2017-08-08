@@ -13,7 +13,7 @@ SELECT RC.intReportingComponentId
 	, RC.strTransactionType
 	, CType.intComponentTypeId
 	, CType.strComponentType
-	, RC.intPositionId
+	, RC.intSort
 	, RC.strSPInventory
 	, RC.strSPInvoice
 	, RC.strSPRunReport
