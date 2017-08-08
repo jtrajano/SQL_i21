@@ -8,7 +8,7 @@
     [strType]                 NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
     [strNote]                 NVARCHAR (300) COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionType]      NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-    [intPositionId]           INT           NULL,
+    intSort           INT           NULL,
     [strSPInventory]        NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strSPInvoice] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strSPRunReport] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
