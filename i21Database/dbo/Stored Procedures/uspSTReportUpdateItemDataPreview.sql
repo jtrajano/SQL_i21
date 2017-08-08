@@ -53,7 +53,8 @@ BEGIN TRY
 			@intNewGLPurchaseAccount      INT,
 			@intNewGLSalesAccount         INT,
 			--@intNewGLVarianceAccount      INT,
-			@strYsnPreview         NVARCHAR(1)
+			@strYsnPreview                NVARCHAR(1),
+			@intCurrentUserId			  INT
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -324,18 +325,14 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strYsnPreview'
 
-	--Declare Table holder
-	DECLARE @tblUpdateItemDataPreview TABLE 
-	(
-		strLocation NVARCHAR(250)
-		, strUpc NVARCHAR(50)
-		, strItemDescription NVARCHAR(250)
-		, strChangeDescription NVARCHAR(100)
-		, strOldData NVARCHAR(MAX)
-		, strNewData NVARCHAR(MAX)
-		, intParentId INT
-		, intChildId INT
-	)
+	--@intCurrentUserId
+	SELECT @intCurrentUserId = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'intCurrentUserId'
+
+
+
+
 
 	DECLARE @FamilyId NVARCHAR(250)
 	DECLARE @strClassIdId  NVARCHAR(250)
@@ -347,6 +344,80 @@ BEGIN TRY
 	DECLARE @UpdateCount INT
 	SET @UpdateCount = 0
 
+
+
+	--============================================================
+			-- AUDIT LOGS
+			DECLARE @ParentTableAuditLog NVARCHAR(MAX)
+			SET @ParentTableAuditLog = ''
+
+			DECLARE @ChildTableAuditLog NVARCHAR(MAX)
+			SET @ChildTableAuditLog = ''
+
+			DECLARE @JsonStringAuditLog NVARCHAR(MAX)
+			SET @JsonStringAuditLog = ''
+
+			DECLARE @checkComma bit
+		 --============================================================
+
+			--Declare temp01 table holder
+			DECLARE @tblTempOne TABLE 
+			(
+				strLocation NVARCHAR(250)
+				, strUpc NVARCHAR(50)
+				, strItemDescription NVARCHAR(250)
+				, strChangeDescription NVARCHAR(100)
+				, strOldData NVARCHAR(MAX)
+				, strNewData NVARCHAR(MAX)
+				, intParentId INT
+				, intChildId INT
+			)
+
+			--Declare temp02 table holder (w/ distinct)
+			DECLARE @tblTempTwo TABLE 
+			(
+				strUpc NVARCHAR(50)
+				, strItemDescription NVARCHAR(250)
+				, strChangeDescription NVARCHAR(100)
+				, strOldData NVARCHAR(MAX)
+				, strNewData NVARCHAR(MAX)
+				, intParentId INT
+				, intChildId INT
+			)
+
+			--Declare ParentId holder
+			DECLARE @tblId TABLE 
+			(
+				intId INT
+			)
+
+			--=======================================================
+			--Use in while loop
+			DECLARE @RowCountMax INT
+			SET @RowCountMax = 0
+
+			DECLARE @RowCountMin INT
+			SET @RowCountMin = 0
+
+			DECLARE @strChangeDescription NVARCHAR(100)
+			SET @strChangeDescription = ''
+
+			DECLARE @strOldData NVARCHAR(100)
+			SET @strOldData = ''
+
+			DECLARE @strNewData NVARCHAR(100)
+			SET @strNewData = ''
+
+			DECLARE @intParentId INT
+			SET @intParentId = 0
+
+			DECLARE @intChildId INT
+			SET @intChildId = 0
+			--=======================================================
+
+
+
+
 	DECLARE @CompanyCurrencyDecimal NVARCHAR(1)
 	SET @CompanyCurrencyDecimal = 0
 	SELECT @CompanyCurrencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
@@ -356,7 +427,7 @@ BEGIN TRY
 
 	DECLARE @SqlQuery1 as NVARCHAR(MAX)
 
-	 --PRINT '@strTaxFlag1ysn'
+	  --PRINT '@strTaxFlag1ysn'
 	 -----------------------------------Handle Dynamic Query 1
 	 IF (@strTaxFlag1ysn IS NOT NULL)
 	 BEGIN
@@ -385,7 +456,7 @@ BEGIN TRY
 				--INSERT INTO TestDatabase.dbo.tblPerson(strFirstName, strLastName)
 				--VALUES(@SqlQuery1, 'Tax Flag1')
 
-			INSERT @tblUpdateItemDataPreview
+			INSERT @tblTempOne
 			EXEC (@SqlQuery1) 
 	 END 
 
@@ -415,7 +486,7 @@ BEGIN TRY
 					, 'a.intItemLocationId'
 				)
 
-			INSERT @tblUpdateItemDataPreview
+			INSERT @tblTempOne
 			EXEC (@SqlQuery1) 
 	 END 
 
@@ -445,7 +516,7 @@ BEGIN TRY
 					, 'a.intItemLocationId'
 				)
 
-			INSERT @tblUpdateItemDataPreview
+			INSERT @tblTempOne
 			EXEC (@SqlQuery1) 
 	 END 
 
@@ -475,7 +546,7 @@ BEGIN TRY
 					, 'a.intItemLocationId'
 				)
 
-			INSERT @tblUpdateItemDataPreview
+			INSERT @tblTempOne
 			EXEC (@SqlQuery1) 
 	 END
 
@@ -502,7 +573,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -532,7 +603,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -559,7 +630,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -586,7 +657,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -613,7 +684,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -640,7 +711,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -667,7 +738,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -694,7 +765,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -722,7 +793,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -750,7 +821,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -778,7 +849,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -806,7 +877,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -834,7 +905,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -862,7 +933,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -890,7 +961,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -918,7 +989,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -948,7 +1019,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -978,7 +1049,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -1008,10 +1079,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-			INSERT INTO TestDatabase.dbo.tblPerson(strFirstName, strLastName)
-			VALUES(@SqlQuery1, 'Product Code')
-
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -1041,7 +1109,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
 
@@ -1069,7 +1137,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1097,7 +1165,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1125,7 +1193,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1152,7 +1220,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1180,7 +1248,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1208,7 +1276,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1235,7 +1303,7 @@ BEGIN TRY
 				, 'd.intItemId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1263,7 +1331,7 @@ BEGIN TRY
 				, 'a.intItemLocationId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1292,7 +1360,7 @@ BEGIN TRY
 				, 'e.intItemAccountId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1320,7 +1388,7 @@ BEGIN TRY
 				, 'e.intItemAccountId'
 			)
 
-		INSERT @tblUpdateItemDataPreview
+		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END
 
@@ -1348,22 +1416,20 @@ BEGIN TRY
 		--		, 'e.intItemAccountId'
 		--	)
 
-		--INSERT @tblUpdateItemDataPreview
+		--INSERT @tblTempOne
 		--EXEC (@SqlQuery1) 
 	 --END
 
 
 
 
-	 DELETE FROM @tblUpdateItemDataPreview WHERE strOldData = strNewData
+	 DELETE FROM @tblTempOne WHERE strOldData = strNewData
 
-	 SELECT @UpdateCount = count(*) from @tblUpdateItemDataPreview WHERE strOldData != strNewData
+	 SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData != strNewData
 
-
-
-
+	  
 	 ---Update Logic-------
-PRINT 'Update Logic 01'		      
+--PRINT 'Update Logic 01'		      
 IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
    BEGIN
 
@@ -1383,8 +1449,9 @@ IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
 			   OR (@dblNewVendorSuggestedQty IS NOT NULL) OR (@intNewInventoryGroup IS NOT NULL)
 			   OR (@intNewBinLocation IS NOT NULL) OR (@dblNewMinQtyOnHand IS NOT NULL))
       BEGIN 
-	     
-		  SET @UpdateCount = 0
+	      
+
+		  --SET @UpdateCount = 0
 
           SET @SqlQuery1 = ' UPDATE tblICItemLocation SET '
 
@@ -1885,14 +1952,15 @@ IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
 					   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
 		        END     
 
+
 		  EXEC (@SqlQuery1)
 
-		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
+		  --SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
 	 END	  
 END
 
 
-PRINT 'Update Logic 02'	
+--PRINT 'Update Logic 02'	
 IF((@strYsnPreview != 'Y')
 AND(@UpdateCount > 0))
 BEGIN
@@ -1979,17 +2047,17 @@ BEGIN
 		      END     
 
           EXEC (@SqlQuery1)
-		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+		  --SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
 	END
 END
 
-PRINT 'Update Logic 03'	
+--PRINT 'Update Logic 03'	
 IF((@strYsnPreview != 'Y')
 AND(@UpdateCount > 0))
 BEGIN
       IF ((@intNewGLPurchaseAccount IS NOT NULL) OR (@intNewGLSalesAccount IS NOT NULL))
 	  BEGIN
-	         PRINT '@intNewGLPurchaseAccount'
+	         --PRINT '@intNewGLPurchaseAccount'
 	         IF (@intNewGLPurchaseAccount IS NOT NULL)
 			 BEGIN
 			    SET @strAccountCategory = 'Cost of Goods'
@@ -2066,12 +2134,12 @@ BEGIN
 					SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
 
 					EXEC (@SqlQuery1)
-					SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+					--SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
 				END 
 			 END
 
 
-			 PRINT '@intNewGLSalesAccount'
+			 --PRINT '@intNewGLSalesAccount'
              IF (@intNewGLSalesAccount IS NOT NULL)
 			 BEGIN
 			    SET @strAccountCategory = 'Sales Account'
@@ -2147,7 +2215,7 @@ BEGIN
 
 					EXEC (@SqlQuery1)
 				
-					SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+					--SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
 				END 
 			 END
              
@@ -2234,10 +2302,142 @@ BEGIN
 END
 
 
+--AUDIT LOG
+IF(@UpdateCount >= 1 AND @strYsnPreview != 'Y' AND (@strNewCountCode IS NOT NULL OR @intNewCategory IS NOT NULL OR @intNewGLPurchaseAccount IS NOT NULL OR @intNewGLSalesAccount IS NOT NULL))
+BEGIN
+			--AUDIT LOG
+
+			--use distinct to table Id's
+			INSERT INTO @tblId(intId)
+			SELECT DISTINCT intChildId 
+			FROM @tblTempOne
+			ORDER BY intChildId ASC
+
+			--==========================================================================================================================================
+			WHILE EXISTS (SELECT TOP (1) 1 FROM @tblId)
+			BEGIN
+				SELECT TOP 1 @intChildId = intId FROM @tblId
+
+				--use distinct to table tempOne
+				DELETE FROM @tblTempTwo
+				INSERT INTO @tblTempTwo(strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId)
+				SELECT DISTINCT strUpc
+								, strItemDescription
+								, strChangeDescription
+								, strOldData
+								, strNewData
+								, intParentId
+								, intChildId 
+				--FROM tblSTMassUpdateReportMaster
+				FROM @tblTempOne
+				WHERE intChildId = @intChildId
+				ORDER BY intChildId ASC
+
+				SET @RowCountMin = 1
+				SELECT @RowCountMax = Count(*) FROM @tblTempTwo
+
+					WHILE(@RowCountMin <= @RowCountMax)
+					BEGIN
+						SELECT TOP(1) @strChangeDescription = strChangeDescription, @strOldData = strOldData, @strNewData = strNewData, @intParentId = intParentId from @tblTempTwo
+			    
+
+
+						IF(@strChangeDescription = 'Count Code')
+						BEGIN
+							SET @ParentTableAuditLog = @ParentTableAuditLog + '{"change":"strCountCode","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"changeDescription":"' + @strChangeDescription + '","hidden":false},'
+						END
+						ELSE IF(@strChangeDescription = 'Category')
+						BEGIN
+							SET @ParentTableAuditLog = @ParentTableAuditLog + '{"change":"intCategoryId","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"changeDescription":"' + @strChangeDescription + '","hidden":false},'
+						END
+
+						ELSE IF(@strChangeDescription = 'Cost of Goods Sold Account' OR @strChangeDescription = 'Sales Account')
+						BEGIN
+							SET @ChildTableAuditLog = @ChildTableAuditLog + '{"change":"intAccountId","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemAccounts","changeDescription":"' + @strChangeDescription + '","hidden":false},'
+						END
+
+
+
+						SET @RowCountMin = @RowCountMin + 1
+						DELETE TOP (1) FROM @tblTempTwo
+					END
+
+
+				--INSERT to AUDITLOG
+				--=================================================================================================
+				----tblICItem
+				--IF (@ParentTableAuditLog != '')
+				--BEGIN
+				--	--Remove last character comma(,)
+				--	SET @ParentTableAuditLog = left(@ParentTableAuditLog, len(@ParentTableAuditLog)-1)
+
+				--	SET @ParentTableAuditLog = '{"change":"tblICItems","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ParentTableAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Pricing"},'
+				--END
+
+
+				--tblICItemAccount
+				IF (@ChildTableAuditLog != '')
+				BEGIN
+					--Remove last character comma(,)
+					SET @ChildTableAuditLog = left(@ChildTableAuditLog, len(@ChildTableAuditLog)-1)
+
+					SET @ChildTableAuditLog = '{"change":"tblICItemPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ChildTableAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"GL Accounts"},'
+				END
+
+
+				SET @JsonStringAuditLog = @ParentTableAuditLog + @ChildTableAuditLog
+
+
+				SELECT @checkComma = CASE WHEN RIGHT(@JsonStringAuditLog, 1) IN (',') THEN 1 ELSE 0 END
+				IF(@checkComma = 1)
+				BEGIN
+					--Remove last character comma(,)
+					SET @JsonStringAuditLog = left(@JsonStringAuditLog, len(@JsonStringAuditLog)-1)
+				END
+
+				SET @JsonStringAuditLog = '{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @JsonStringAuditLog + ']}'
+				INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+				VALUES(
+						'Updated'
+						, 'Inventory.view.Item'
+						, @intParentId
+						, ''
+						, null
+						, @JsonStringAuditLog
+						, GETUTCDATE()
+						, @intCurrentUserId
+						, 1
+				)
+				--=================================================================================================
+
+				--Clear
+				SET @ParentTableAuditLog = ''
+				SET @ChildTableAuditLog = ''
+
+				DELETE TOP (1) FROM @tblId
+			END
+			--==========================================================================================================================================
+
+
+			SELECT @UpdateCount = COUNT(*)
+			FROM 
+			(
+			  SELECT DISTINCT intChildId FROM @tblTempOne --tblSTMassUpdateReportMaster
+			) T1
+	END
 
 
 
 
+	DELETE FROM tblSTMassUpdateReportMaster
+	INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData)
+	SELECT strLocation
+		  , strUpc
+		  , strItemDescription
+		  , strChangeDescription
+		  , strOldData
+		  , strNewData 
+	FROM @tblTempOne
 
 
 
@@ -2265,9 +2465,9 @@ END
 		  , strChangeDescription
 		  , strOldData
 		  , strNewData
-   FROM @tblUpdateItemDataPreview
+   FROM @tblTempOne
     
-   DELETE FROM @tblUpdateItemDataPreview
+   --DELETE FROM @tblTempOne
 
 END TRY
 
