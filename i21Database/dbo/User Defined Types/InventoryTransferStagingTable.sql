@@ -30,6 +30,8 @@ CREATE TYPE [dbo].[InventoryTransferStagingTable] AS TABLE
     ,[intToStorageLocationId]	INT NULL										-- Target storage location id of the item.
 	,[intOwnershipType] INT NULL DEFAULT ((1))									-- Ownership Type. 1 = Own, 2 = Storage, 3 = Consigned Purchase; Default to 1;
 	,[ysnWeights] BIT NULL													-- Destination Weights. This is used by Scale.
+	,[strFromLocationActualCostId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
+	,[strToLocationActualCostId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
 
 	-- Integration Field
 	,[intInventoryTransferId] INT NULL											-- Existing id of an Inventory Transfer

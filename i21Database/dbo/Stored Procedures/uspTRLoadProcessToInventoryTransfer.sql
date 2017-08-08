@@ -296,8 +296,8 @@ _PostOrUnPost:
 					, @ysnRecap = 0
 					, @strTransactionId = @strTransactionId
 					, @intEntityUserSecurityId = @intEntityId
-					, @ysnActualCostFromLocation = @ysnActualCostFromLocation
-					, @ysnActualCostToLocation = @ysnActualCostToLocation
+					--, @ysnActualCostFromLocation = @ysnActualCostFromLocation
+					--, @ysnActualCostToLocation = @ysnActualCostToLocation
 		END
 		DELETE	FROM #tmpAddInventoryTransferResult 
 		WHERE	intInventoryTransferId = @TransferId
