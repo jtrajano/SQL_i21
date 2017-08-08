@@ -36,6 +36,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 													WHEN 4 THEN receipt.strBillOfLading 
 													WHEN 42 THEN receipt.strBillOfLading 
 													WHEN 5 THEN shipment.strBOLNumber 
+													WHEN 33 THEN invoice.strBOLNumber 
 													ELSE NULL 
 											END
 										AS NVARCHAR(100)
