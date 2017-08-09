@@ -1005,10 +1005,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                     case 'Non-Inventory':
                     case 'Service':
                     case 'Software':
-                    //case 'Bundle':
                     case 'Comment':
                         this.data.current.set('intCommodityId', null);
                         return true;
+                        break;
+                    case 'Bundle':
+                        return !get('current.ysnIsBasket');
                         break;
                     default:
                         return false;
@@ -1443,12 +1445,16 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         readOnlyOnBundleItems: function(get) {
             if (get('current.strType') === 'Bundle') {
-                return true;
+                return !get('current.ysnIsBasket');
             }
             else {
                 return false;
             }
         },
+        hideOnBundleItems: function(get) {
+            return get('current.strType') !== 'Bundle';
+        },
+
         readOnlyForDiscountType: function(get) {
             var itemId = get('current.intItemId');
             var me = this;           

@@ -231,6 +231,14 @@ Ext.define('Inventory.model.Item', {
                 })
             }
         }
+
+        if(this.get('strType') !== 'Bundle' && (this.get('intCategoryId') === null || this.get('intCategoryId') === ''))
+        {
+            errors.add({
+                field: 'intCategoryId',
+                message: 'Category must be present' 
+            })
+        }
         
         if(this.get('strType') !== 'Comment' && (this.get('strStatus') === null || this.get('strStatus') === ''))
             {

@@ -157,7 +157,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
-                colAllowPurchase: 'ysnAllowPurchase',
+                colAllowPurchase: {
+                    disabled: '{readOnlyOnBundleItems}',
+                    dataIndex: 'ysnAllowPurchase'
+                },
                 colConvertToStock: 'dblConvertToStock',
                 colConvertFromStock: 'dblConvertFromStock',
                 colDetailLength: 'dblLength',
@@ -621,7 +624,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 store: '{m2mComputations}'
             },
             chkPrice: '{current.ysnPrice}',
-            chkIsBasket: '{current.ysnIsBasket}',
+            chkIsBasket: {
+                value: '{current.ysnIsBasket}',
+                hidden: '{hideOnBundleItems}'
+            },
             chkBasisContract: '{current.ysnBasisContract}',
             cboCostMethod: {
                 readOnly: '{readOnlyCostMethod}',
@@ -1082,7 +1088,12 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colBundleQuantity: 'dblQuantity',
+                colBundleQuantity: {
+                    dataIndex: 'dblQuantity',
+                    editor: {
+                        readOnly: '{current.ysnIsBasket}'
+                    }  
+                },
                 colBundleDescription: 'strDescription',
                 colBundleUOM: {
                     dataIndex: 'strUnitMeasure',
@@ -1381,7 +1392,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemBundles',
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdBundle,
-                        deleteButton : grdBundle.down('#btnDeleteBundle')
+                        deleteButton : grdBundle.down('#btnDeleteBundle'),
+                        createRecord: me.onBundleItemCreateRecord
                     })
                 },
                 {
@@ -1499,6 +1511,11 @@ Ext.define('Inventory.view.ItemViewController', {
         })
     },
 
+    onBundleItemCreateRecord: function(config, action) {
+        var record = Ext.create('Inventory.model.ItemBundle');
+        record.set('dblQuantity', 1.00);
+        action(record);
+    },
 
     createRecord: function(config, action) {
         var me = this;
@@ -1795,9 +1812,14 @@ Ext.define('Inventory.view.ItemViewController', {
                 if (current.tblICItemUOMs()) {
                     Ext.Array.each(current.tblICItemUOMs().data.items, function (uom) {
                         if (!uom.dummy) {
-                            uom.set('ysnAllowPurchase', false);
+                            uom.set('ysnAllowPurchase', !record.get('ysnIsBasket'));
                         }
                     });
+                }
+
+                if(!current.get('ysnIsBasket')) {
+                    current.set('intCommodityId', null);
+                    current.set('strCommodityCode', null);
                 }
             }
             current.set('strCategory', null);
@@ -1836,7 +1858,7 @@ Ext.define('Inventory.view.ItemViewController', {
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
             if (currentItem.get('strType') === 'Bundle') {
-                current.set('ysnAllowPurchase', false);
+                uom.set('ysnAllowPurchase', !records[0].get('ysnIsBasket'));
             }
             else {
                 current.set('ysnAllowPurchase', true);
@@ -3877,6 +3899,32 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onIsBasketChange: function(checkbox, newValue, oldValue) {
+        if(newValue === oldValue) return;
+
+        var win = checkbox.up('window');
+        var viewModel = win.getViewModel();   
+        var current = viewModel.get('current');
+        
+        if(current && newValue === false && current.get('strType') == 'Bundle') {
+            var uoms = current.tblICItemUOMs();
+            if (uoms) {
+                Ext.Array.each(uoms.data.items, function (uom) {
+                    if (!uom.dummy) {
+                        uom.set('ysnAllowPurchase', false);    
+                    }
+                });
+            }     
+        }
+
+        if(current) {
+            if(!newValue) {
+                current.set('intCommodityId', null);
+                current.set('strCommodityCode', null);
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4091,6 +4139,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboStatus": {
                 select: this.onStatusSelect
+            },
+            "#chkIsBasket": {
+                change: this.onIsBasketChange    
             }
         });
 

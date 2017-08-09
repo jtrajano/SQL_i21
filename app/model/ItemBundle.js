@@ -41,7 +41,7 @@ Ext.define('Inventory.model.ItemBundle', {
             }},
         { name: 'intBundleItemId', type: 'int', allowNull: true },
         { name: 'strDescription', type: 'string' },
-        { name: 'dblQuantity', type: 'float' },
+        { name: 'dblQuantity', type: 'float', defaultValue: 1.00 },
         { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblUnit', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },
