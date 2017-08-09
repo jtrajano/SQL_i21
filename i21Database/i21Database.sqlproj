@@ -5585,6 +5585,7 @@
     <Build Include="dbo\Tables\tblGLConsolidateResult.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_EntityFavoriteMenu.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchSyncInvoiceToDeliveryHistory.sql" />
+    <Build Include="dbo\Functions\fnAPBankRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
