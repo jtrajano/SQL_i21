@@ -172,11 +172,14 @@ BEGIN
 	)  	
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= CASE Item.strLotTracking WHEN 'No' THEN Detail.intItemUOMId ELSE ISNULL(ItemLot.intWeightUOMId, ItemLot.intItemUOMId) END
+			,intItemUOMId			= Detail.intItemUOMId --CASE Item.strLotTracking WHEN 'No' THEN Detail.intItemUOMId ELSE ItemLot.intItemUOMId END
 			,dtmDate				= Header.dtmCountDate
-			,dblQty					= ISNULL(Detail.dblPhysicalCount, 0) - CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ISNULL(CASE WHEN ItemLot.intWeightUOMId IS NULL THEN ItemLot.dblQty ELSE ItemLot.dblWeight END, 0) END
+			,dblQty					= Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0)
+									--CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblPhysicalCount, 0) ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblPhysicalCount, 0)) END
+									--	- CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ItemLot.dblQty END
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
+			,dblCost				= dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))
+									--dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
 			,0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= @DefaultCurrencyId 
@@ -197,11 +200,9 @@ BEGIN
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = Detail.intLotId
 		LEFT JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
+		LEFT JOIN dbo.tblICItemUOM StockUOM ON Detail.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
 	WHERE Header.intInventoryCountId = @intTransactionId
-			AND (ISNULL(Detail.dblPhysicalCount, 0) - CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ISNULL(CASE WHEN ItemLot.intWeightUOMId IS NULL THEN ItemLot.dblQty ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intWeightUOMId, Detail.intItemUOMId, ItemLot.dblWeight) END, 0) END) <> 0
-	
-
-
+			AND Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) <> 0
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
