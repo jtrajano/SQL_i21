@@ -483,5 +483,5 @@ INNER JOIN @temp_aging_table AS AGINGREPORT
 INNER JOIN (
 	SELECT intEntityCustomerId
 	FROM dbo.tblARCustomer WITH (NOLOCK)
-	WHERE (ISNULL(strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
+	WHERE (ISNULL(strStatementFormat, '') = '' OR strStatementFormat = @strStatementFormat)
 ) CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
