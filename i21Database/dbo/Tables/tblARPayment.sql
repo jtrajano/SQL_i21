@@ -26,6 +26,8 @@
 	[intEntityId]			INT				NULL DEFAULT ((0)),
 	[intWriteOffAccountId]	INT				NULL,
 	[strPaymentMethod]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+	[intEntityCardInfoId]	INT				NULL,
+	[ysnProcessCreditCard]	BIT				CONSTRAINT [DF_tblARPayment_ysnProcessCreditCard] DEFAULT ((0)) NULL,
 	[dblTotalAR]			NUMERIC (18, 6) NULL,
 	[strBatchId]			NVARCHAR (20)	COLLATE Latin1_General_CI_AS NULL,	
 	[dtmBatchDate]			DATETIME		NULL,
