@@ -27,7 +27,9 @@ SELECT sum(dblUnpaidIn)-sum(dblUnpaidIn-dblUnpaidOut) dblUnpaidBalance,
 				FROM tblICInventoryTransaction it 
 				join tblICItem i on i.intItemId=it.intItemId and it.intTransactionTypeId in(4,5,10,23)
 				JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
-				WHERE intCommodityId=@intCommodityId and dtmDate < @dtmFromTransactionDate and i.intCommodityId=@intCommodityId
+				WHERE intCommodityId=@intCommodityId and 
+				convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110)
+				 < convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) and i.intCommodityId=@intCommodityId
 				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(i.strType,'') <> 'Other Charge'
 				) InventoryBalanceCarryForward 
 from (
@@ -47,7 +49,9 @@ from (
 	  JOIN tblICInventoryReceiptItem ir on bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId
 	  JOIN tblICItem i on i.intItemId=bd.intItemId 
 	  LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
-	  WHERE dtmDate < @dtmFromTransactionDate and i.intCommodityId= @intCommodityId
+	  WHERE 
+	  	convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110)
+				 < convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) and i.intCommodityId= @intCommodityId
 	   and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 	  )t   
   
@@ -68,8 +72,8 @@ INSERT INTO @tblResult (strItemNo,dtmDate,dblUnpaidIn,dblUnpaidOut,dblUnpaidBala
 SELECT strItemNo,dtmDate,dblUnpaidIn,dblUnpaidIn-dblUnpaidOut dblUnpaidOut, dblUnpaidOut dblUnpaidBalance,strDistributionOption,strReceiptNumber,intReceiptId 
 from (
 SELECT *,
-dblInQty  dblUnpaidIn,
-dblOutQty dblUnpaidOut
+round(dblInQty,2)  dblUnpaidIn,
+round(dblOutQty,2) dblUnpaidOut
 FROM (
  SELECT CONVERT(VARCHAR(10),b.dtmDate,110) dtmDate, dblUnitCost dblUnitCost1,
 			 ir.intInventoryReceiptItemId ,i.strItemNo,
@@ -85,7 +89,9 @@ FROM (
   JOIN tblICInventoryReceiptItem ir on bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId
   JOIN tblICItem i on i.intItemId=bd.intItemId 
   LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
-  WHERE dtmDate BETWEEN @dtmFromTransactionDate and @dtmToTransactionDate and i.intCommodityId= @intCommodityId
+    WHERE  convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN 
+  convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110)  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+  and i.intCommodityId= @intCommodityId
    and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
   )t   )t2
 
