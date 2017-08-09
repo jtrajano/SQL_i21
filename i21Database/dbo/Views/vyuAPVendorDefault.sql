@@ -7,8 +7,8 @@ SELECT
 	A.str1099Form,
 	A.str1099Name,
 	A.str1099Type,
-	B.intCurrencyId,
-	E.strCurrency,
+	intCurrencyId = ISNULL(C.intDefaultCurrencyId,B.intCurrencyId),
+	strCurrency = ISNULL(E1.strCurrency, E.strCurrency),
 	B.intTermsId,
 	J.strTerm,
 	D.intEntityId AS intDefaultContactId,
@@ -44,6 +44,7 @@ FROM
 		ON G.intEntityContactId = D.[intEntityId] AND G.ysnDefaultContact = 1
 	LEFT JOIN dbo.tblEMEntityLocation C2
 		ON B.intBillToId = C2.intEntityLocationId
+	LEFT JOIN dbo.tblSMCurrency E1 ON C.intDefaultCurrencyId = E1.intCurrencyID
 	LEFT JOIN dbo.tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN dbo.tblSMShipVia ShipVia
