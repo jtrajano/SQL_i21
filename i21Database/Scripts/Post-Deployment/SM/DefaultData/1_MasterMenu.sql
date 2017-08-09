@@ -4043,15 +4043,15 @@ ELSE
 DECLARE @CRMParentMenuId INT
 SELECT @CRMParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'CRM' AND strModuleName = 'CRM' AND intParentMenuID = 0
 
+/* Mover from Activity To Maintenance - 1730 */
+UPDATE tblSMMasterMenu SET strCategory = N'Maintenance', strIcon = N'small-menu-maintenance' WHERE strMenuName IN ('Sales Pipe Statuses', 'Sources', 'Types', 'Statuses', 'Milestones', 'Prospect Requirements', 'Sales Entities', 'Leads', 'Customer Licenses') AND strModuleName = 'CRM'
+
 /* CATEGORY FOLDERS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
 	VALUES (N'Activities', N'CRM', @CRMParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0, intRow = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
-
-/* Mover from Activity To Maintenance - 1730 */
-UPDATE tblSMMasterMenu SET strCategory = N'Maintenance', strIcon = N'small-menu-maintenance' WHERE strMenuName IN ('Sales Pipe Statuses', 'Sources', 'Types', 'Statuses', 'Milestones', 'Prospect Requirements', 'Sales Entities', 'Leads', 'Customer Licenses') AND strModuleName = 'CRM'
 
 DECLARE @CRMActivitiesParentMenuId INT
 SELECT @CRMActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
@@ -4167,23 +4167,41 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Types' AN
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'CRM.view.Type' WHERE strMenuName = 'Types' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Event' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Activity', N'CRM', @CRMCreateParentMenuId, N'CRM New Activity', N'Create', N'Screen', N'CRM.view.Opportunity?action=new', N'small-menu-create', 0, 0, 0, 1, 0, 1)
+	VALUES (N'New Event', N'CRM', @CRMCreateParentMenuId, N'CRM New Event', N'Create', N'Screen', N'GlobalComponentEngine.view.Activity?type=event&action=new', N'small-menu-create', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CRM.view.Opportunity?action=new', strDescription = N'New Activity' WHERE strMenuName = 'New Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GlobalComponentEngine.view.Activity?type=event&action=new' WHERE strMenuName = 'New Event' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Task' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'New Task', N'CRM', @CRMCreateParentMenuId, N'CRM New Task', N'Create', N'Screen', N'GlobalComponentEngine.view.Activity?type=task&action=new', N'small-menu-create', 0, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GlobalComponentEngine.view.Activity?type=task&action=new' WHERE strMenuName = 'New Task' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Call' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'New Call', N'CRM', @CRMCreateParentMenuId, N'CRM New Call', N'Create', N'Screen', N'GlobalComponentEngine.view.Activity?type=call&action=new', N'small-menu-create', 0, 0, 0, 1, 2, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GlobalComponentEngine.view.Activity?type=call&action=new' WHERE strMenuName = 'New Call' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Email' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'New Email', N'CRM', @CRMCreateParentMenuId, N'CRM New Email', N'Create', N'Screen', N'GlobalComponentEngine.view.Activity?type=email&action=new', N'small-menu-create', 0, 0, 0, 1, 3, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'GlobalComponentEngine.view.Activity?type=email&action=new' WHERE strMenuName = 'New Email' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Opportunity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Opportunity', N'CRM', @CRMCreateParentMenuId, N'CRM New Opportunity', N'Create', N'Screen', N'CRM.view.Opportunity?action=new', N'small-menu-create', 0, 0, 0, 1, 1, 1)
+	VALUES (N'New Opportunity', N'CRM', @CRMCreateParentMenuId, N'CRM New Opportunity', N'Create', N'Screen', N'CRM.view.Opportunity?action=new', N'small-menu-create', 0, 0, 0, 1, 4, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CRM.view.Opportunity?action=new' WHERE strMenuName = 'New Opportunity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'CRM.view.Opportunity?action=new' WHERE strMenuName = 'New Opportunity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Campaign' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Campaign', N'CRM', @CRMCreateParentMenuId, N'CRM New Campaign', N'Create', N'Screen', N'CRM.view.Campaign?action=true', N'small-menu-create', 0, 0, 0, 1, 2, 1)
+	VALUES (N'New Campaign', N'CRM', @CRMCreateParentMenuId, N'CRM New Campaign', N'Create', N'Screen', N'CRM.view.Campaign?action=true', N'small-menu-create', 0, 0, 0, 1, 5, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'CRM.view.Campaign?action=true' WHERE strMenuName = 'New Campaign' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'CRM.view.Campaign?action=true' WHERE strMenuName = 'New Campaign' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMActivitiesParentMenuId
