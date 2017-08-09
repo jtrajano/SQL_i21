@@ -1,6 +1,19 @@
 ﻿
 PRINT('MFT Cleanup - Start')
 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactions') 
+BEGIN
+	-- Old table
+	PRINT('Drop tblTFTransactions')
+    EXEC('DROP TABLE tblTFTransactions')
+END
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactionSummary') 
+BEGIN
+	PRINT('Truncate tblTFTransactionSummary')
+    EXEC('TRUNCATE TABLE tblTFTransactionSummary')
+END	
+
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransaction') 
 BEGIN
 	PRINT('Truncate tblTFTransaction')
