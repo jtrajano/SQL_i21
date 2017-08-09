@@ -95,15 +95,11 @@ DECLARE  @ARAccount				INT
 		
 DECLARE @totalInvalid INT
 DECLARE @totalRecords INT
-DECLARE @intWriteOff INT
 DECLARE @ErrorMerssage NVARCHAR(MAX)
-DECLARE @intWriteOffAccount INT
 DECLARE @intCFAccount INT
 
 SET @WriteOffAccount = NULL
 SET @IncomeInterestAccount = NULL
-SET @intWriteOff = NULL
-SET @intWriteOffAccount = NULL
 SET @GainLossAccount = NULL
 SET @intCFAccount = NULL
 		
@@ -549,10 +545,34 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId
 				INNER JOIN
 					tblSMPaymentMethod PM
-						ON A.intPaymentMethodId = PM.intPaymentMethodID						
+						ON A.intPaymentMethodId = PM.intPaymentMethodID
+						AND ISNULL(A.intWriteOffAccountId, 0) = 0
 				WHERE
-					UPPER(RTRIM(LTRIM(PM.strPaymentMethod))) = UPPER('Write Off')
+					(UPPER(RTRIM(LTRIM(PM.strPaymentMethod))) = UPPER('Write Off') OR UPPER(RTRIM(LTRIM(A.strPaymentMethod))) = UPPER('Write Off'))
 					AND (@WriteOffAccount IS NULL OR @WriteOffAccount = 0)
+
+
+				--CF Invoice Account
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'The CF Invoice Account # in Company Configuration was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblSMPaymentMethod PM
+						ON A.intPaymentMethodId = PM.intPaymentMethodID
+						AND ISNULL(A.intWriteOffAccountId, 0) = 0
+				WHERE
+					(UPPER(RTRIM(LTRIM(PM.strPaymentMethod))) = UPPER('CF Invoice') OR UPPER(RTRIM(LTRIM(A.strPaymentMethod))) = UPPER('CF Invoice'))
+					AND (@intCFAccount IS NULL OR @intCFAccount = 0)
 					
 
 				--NOT BALANCE 
@@ -1307,55 +1327,13 @@ IF @post = 1
 		
 	BEGIN TRY
 
-	SET @intWriteOff = (SELECT TOP 1 intPaymentMethodId FROM tblARPayment WHERE intPaymentMethodId IN (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Write Off') AND intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData) )		
-		
-	IF (@intWriteOff IS NOT NULL)
-		BEGIN 
-			SET @intWriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARPayment WHERE intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData)	AND ISNULL(intWriteOffAccountId,0) <> 0)
-
-			IF (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0)
-				BEGIN
-					UPDATE 
-						tblARPayment
-					SET 
-						intAccountId = C.intUndepositedFundsId
-						,intWriteOffAccountId = @intWriteOffAccount
-					FROM
-						tblARPayment P								
-					INNER JOIN 
-						tblSMCompanyLocation C
-							ON P.intLocationId = C.intCompanyLocationId
-					WHERE
-						P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-						AND ISNULL(C.intUndepositedFundsId,0) <> 0
-						AND ISNULL(P.strPaymentMethod, '') <> 'CF Invoice'
-				END
-			ELSE
-				BEGIN
-					UPDATE 
-						tblARPayment
-					SET 
-						intAccountId = C.intUndepositedFundsId
-						,intWriteOffAccountId = @WriteOffAccount
-					FROM
-						tblARPayment P								
-					INNER JOIN 
-						tblSMCompanyLocation C
-							ON P.intLocationId = C.intCompanyLocationId
-					WHERE
-						P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-						AND ISNULL(C.intUndepositedFundsId,0) <> 0
-						AND ISNULL(P.strPaymentMethod, '') <> 'CF Invoice'
-				END
-		END 
-	ELSE
-		BEGIN
-		IF (@bankAccountId IS NULL)
-		BEGIN
+	IF (@bankAccountId IS NULL)
+			BEGIN
 			UPDATE 
 				tblARPayment
 			SET 
-				intAccountId = C.intUndepositedFundsId
+				 intAccountId			= C.intUndepositedFundsId
+				,intWriteOffAccountId	= CASE WHEN ISNULL(P.intWriteOffAccountId,0) = 0 THEN @WriteOffAccount ELSE P.intWriteOffAccountId END
 			FROM
 				tblARPayment P								
 			INNER JOIN 
@@ -1363,27 +1341,24 @@ IF @post = 1
 					ON P.intLocationId = C.intCompanyLocationId
 			WHERE
 				P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-				AND ISNULL(C.intUndepositedFundsId,0) <> 0	
-		END
+				AND ISNULL(C.intUndepositedFundsId,0) <> 0
+				AND ISNULL(P.strPaymentMethod, '') <> 'CF Invoice'
+			END
 		ELSE
-		BEGIN
+			BEGIN
 			DECLARE @intNewAccountID INT 
 			SELECT @intNewAccountID = intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccountId
 
 				UPDATE 
 					tblARPayment
 				SET 
-					intAccountId = @intNewAccountID
+					 intAccountId			= @intNewAccountID
+					,intWriteOffAccountId	= CASE WHEN ISNULL(intWriteOffAccountId,0) = 0 THEN @WriteOffAccount ELSE intWriteOffAccountId END
 				FROM
-					tblARPayment P								
-				INNER JOIN 
-					tblSMCompanyLocation C
-						ON P.intLocationId = C.intCompanyLocationId
+					tblARPayment												
 				WHERE
-					P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-					AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+					intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)					
 			END
-		END
 					
 	END TRY
 	BEGIN CATCH	
@@ -1431,11 +1406,9 @@ IF @post = 1
 		SELECT
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId			
-			,intAccountId				= CASE WHEN A.strPaymentMethod = '' THEN A.intWriteOffAccountId 
-											ELSE
-												(CASE WHEN (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0) THEN 
-													CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
-												ELSE (CASE WHEN A.strPaymentMethod = 'CF Invoice' AND @intCFAccount IS NOT NULL THEN @intCFAccount ELSE A.intAccountId END) END)
+			,intAccountId				= CASE WHEN UPPER(RTRIM(LTRIM(A.strPaymentMethod))) = UPPER('Write Off') THEN A.intWriteOffAccountId
+											WHEN UPPER(RTRIM(LTRIM(A.strPaymentMethod))) = UPPER('CF Invoice') THEN ISNULL(A.intWriteOffAccountId, @intCFAccount)
+											ELSE A.intAccountId
 											END
 			,dblDebit					=  (A.dblBaseAmountPaid + ISNULL((SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((ARPD.dblPayment - ARPD.dblInterest) + ARPD.dblDiscount)),0))
 			,dblCredit					= 0
