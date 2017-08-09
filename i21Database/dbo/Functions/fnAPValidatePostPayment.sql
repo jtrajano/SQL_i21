@@ -16,7 +16,9 @@ BEGIN
 
 	DECLARE @WithholdAccount INT, @DiscountAccount INT, @InterestAccount INT, @CashAccount INT, @APAccount INT;
 	DECLARE @userLocation INT;
-	
+	DECLARE @intFunctionalCurrencyId  AS INT 
+
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 	--DECLARE @tmpPayments TABLE(
 	--	[intPaymentId] [int]
 	--);
@@ -394,6 +396,24 @@ BEGIN
 			AND B.intInvoiceId IS NULL --invoice do not have pay to address
 			GROUP BY C.intPayToAddressId
 			HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
+		)
+
+		--MAKE SURE GAIN/LOSS ACCOUNT SETUP CONFIGURATION IS EXISTS WHEN GAIN/LOSS ACCOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Gain/Loss account setup is missing on company configuration',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND A.intCurrencyId != @intFunctionalCurrencyId
+		AND EXISTS (
+			SELECT 1 FROM tblAPPaymentDetail B 
+			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+			INNER JOIN tblAPBillDetail C ON B.intBillDetailId = C.intBillDetailId
+			WHERE B.intPaymentId = A.intPaymentId
+			AND C.dblRate <> A.dblExchangeRate
 		)
 
 	END
