@@ -483,9 +483,9 @@ UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'i21.view.OriginConversion
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New User' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'New User', N'System Manager', @SystemManagerCreateParentMenuId, N'New User', N'Create', N'Screen', N'ServicePack.view.Patch', N'small-menu-create', 0, 0, 0, 1, 0, 1)
+	VALUES (N'New User', N'System Manager', @SystemManagerCreateParentMenuId, N'New User', N'Create', N'Screen', N'i21.view.EntityUser?action=new', N'small-menu-create', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'ServicePack.view.Patch' WHERE strMenuName = 'New User' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerCreateParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'i21.view.EntityUser?action=new' WHERE strMenuName = 'New User' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerCreateParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Company Registration' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerLicensingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
