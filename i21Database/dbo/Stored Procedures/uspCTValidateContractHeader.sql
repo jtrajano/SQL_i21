@@ -24,7 +24,15 @@ BEGIN TRY
 			@intPricingTypeId		INT,
 			@intCreatedById			INT,
 			@dtmCreated				DATETIME,
-			@intConcurrencyId		INT
+			@intConcurrencyId		INT,
+			@intContractBasisId		INT,
+			@intTermId				INT,
+			@intContractTextId		INT,
+			@intWeightId			INT,
+			@intGradeId				INT,
+			@intCropYearId			INT,
+			@intAssociationId		INT,
+			@intProducerId			INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -41,7 +49,15 @@ BEGIN TRY
 			@intPricingTypeId	=	intPricingTypeId,
 			@intCreatedById		=	intCreatedById,
 			@dtmCreated			=	dtmCreated,
-			@intConcurrencyId	=	intConcurrencyId
+			@intConcurrencyId	=	intConcurrencyId,
+			@intContractBasisId	=	intContractBasisId,
+			@intTermId			=	intTermId,
+			@intContractTextId	=	intContractTextId,
+			@intWeightId		=	intWeightId,
+			@intGradeId			=	intGradeId,
+			@intCropYearId		=	intCropYearId,
+			@intAssociationId	=	intAssociationId,
+			@intProducerId		=	intProducerId
 
 	FROM	OPENXML(@idoc, 'tblCTContractHeaders/tblCTContractHeader',2)
 	WITH
@@ -59,7 +75,15 @@ BEGIN TRY
 			intPricingTypeId	INT,
 			intCreatedById		INT,
 			dtmCreated			DATETIME,
-			intConcurrencyId	INT
+			intConcurrencyId	INT,
+			intContractBasisId	INT,
+			intTermId			INT,
+			intContractTextId	INT,
+			intWeightId			INT,
+			intGradeId			INT,
+			intCropYearId		INT,
+			intAssociationId	INT,
+			intProducerId		INT
 	);  
 
 	IF @RowState = 'Added'
@@ -134,6 +158,81 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1)
 		END
 
+		--Active check
+		
+		IF	@intEntityId IS NOT NULL AND (
+			(@intContractTypeId = 1 AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intEntityId AND ysnActive = 1 AND strEntityType = 'Vendor') ) OR
+			(@intContractTypeId = 2 AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intEntityId AND ysnActive = 1 AND strEntityType = 'Customer') )
+		)
+		BEGIN
+			SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intEntityId
+			SET @ErrMsg = 'Entity ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intContractBasisId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTContractBasis WHERE intContractBasisId = @intContractBasisId AND ysnActive = 1)
+		BEGIN
+			SELECT @ErrMsg = strContractBasis FROM tblCTContractBasis WHERE intContractBasisId = @intContractBasisId
+			SET @ErrMsg = 'INCO/Ship Term ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intTermId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblSMTerm WHERE intTermID = @intTermId AND ysnActive = 1)
+		BEGIN
+			SELECT @ErrMsg = strTerm FROM tblSMTerm WHERE intTermID = @intTermId
+			SET @ErrMsg = 'Term ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intSalespersonId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intSalespersonId AND ysnActive = 1 AND strEntityType = 'Salesperson')
+		BEGIN
+			SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intSalespersonId
+			SET @ErrMsg = 'Salesperson ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intContractTextId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTContractText WHERE intContractTextId = @intContractTextId AND ysnActive = 1)
+		BEGIN
+			SELECT @ErrMsg = strTextCode FROM tblCTContractText WHERE intContractTextId = @intContractTextId
+			SET @ErrMsg = 'Contract Text ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intGradeId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTWeightGrade WHERE intWeightGradeId = @intGradeId AND ysnActive = 1)
+		BEGIN
+			SELECT @ErrMsg = strWeightGradeDesc FROM tblCTWeightGrade WHERE intWeightGradeId = @intGradeId
+			SET @ErrMsg = 'Geade ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intWeightId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTWeightGrade WHERE intWeightGradeId = @intWeightId AND ysnActive = 1)
+		BEGIN
+			SELECT @ErrMsg = strWeightGradeDesc FROM tblCTWeightGrade WHERE intWeightGradeId = @intWeightId
+			SET @ErrMsg = 'Weight ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intCropYearId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTCropYear WHERE intCropYearId = @intCropYearId AND ysnActive = 1)
+		BEGIN
+			SELECT @ErrMsg = strCropYear FROM tblCTCropYear WHERE intCropYearId = @intCropYearId
+			SET @ErrMsg = 'Crop Year ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intAssociationId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTAssociation WHERE intAssociationId = @intAssociationId AND ysnActive = 1)
+		BEGIN
+			SELECT @ErrMsg = strName FROM tblCTAssociation WHERE intAssociationId = @intAssociationId
+			SET @ErrMsg = 'Association ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		IF	@intProducerId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intProducerId AND strEntityType = 'Producer' AND ysnActive = 1)
+		BEGIN
+			SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intProducerId
+			SET @ErrMsg = 'Producer ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		--End Active check
 	END
 
 END TRY
