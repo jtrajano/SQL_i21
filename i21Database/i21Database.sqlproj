@@ -5584,6 +5584,9 @@
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportByProductTypeDetail.sql" />
     <Build Include="dbo\Tables\tblGLConsolidateResult.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_EntityFavoriteMenu.sql" />
+    <Build Include="dbo\Views\vyuHDCurrency.sql" />
+    <Build Include="dbo\Views\vyuHDCurrencyRate.sql" />
+    <Build Include="dbo\Views\vyuHDCurrencyRateType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
