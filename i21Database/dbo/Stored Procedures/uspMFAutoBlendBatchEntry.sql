@@ -1,23 +1,13 @@
-﻿CREATE FUNCTION [dbo].[fnMFGetInvalidInvoicesForPosting]
-(
-	 @Invoices	[dbo].[InvoicePostingTable] Readonly
-	,@Post		BIT	= 0
-)
-RETURNS @returntable TABLE
-(
-	 [intInvoiceId]				INT				NOT NULL
-	,[strInvoiceNumber]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-	,[strTransactionType]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-	,[intInvoiceDetailId]		INT				NULL
-	,[intItemId]				INT				NULL
-	,[strBatchId]				NVARCHAR(40)	COLLATE Latin1_General_CI_AS	NULL
-	,[strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
-)
+﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendBatchEntry]
+	@Invoices	[dbo].[InvoicePostingTable] Readonly
 AS
-BEGIN
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
-	DECLARE @ZeroDecimal DECIMAL(18,6)
-	SET @ZeroDecimal = 0.000000	
+BEGIN TRY
 	DECLARE @intMinInvoice int
 	DECLARE @intSalesOrderDetailId int=0
 	DECLARE @intInvoiceDetailId int=0
@@ -147,6 +137,9 @@ BEGIN
 			,intStorageLocationId INT
 		)
 
+	DECLARE @tblBlendRequirementOutput table (intBlendRequirementId int,intInvoiceDetailId int)
+	DECLARE @tblWorkOrderOutput table (intWorkOrderId int,intInvoiceDetailId int)
+
 	Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId from tblMFManufacturingProcess Where intAttributeTypeId=2
 
 	--Add records from @Invoices table to @tblInput
@@ -156,6 +149,7 @@ BEGIN
 
 	Select @intMinInvoice=MIN(intInvoiceDetailId) from @Invoices
 
+	--Loop through Invoice Detail
 	While (@intMinInvoice is not null)
 	Begin
 		Set @intBlendItemId=null
@@ -166,31 +160,6 @@ BEGIN
 		Set @intRecipeId=null
 		Set @intCellId=null
 		Set @intMachinId=null
-		Set @ErrMsg=null
-
-		IF EXISTS (SELECT 1 FROM tblMFWorkOrder WHERE intInvoiceDetailId=ISNULL(@intInvoiceDetailId,0))
-			IF EXISTS(
-				SELECT	1 
-				FROM	tblMFWorkOrderProducedLot 
-				WHERE	intWorkOrderId IN (
-							SELECT	intWorkOrderId 
-							From	tblMFWorkOrder 
-							Where	intInvoiceDetailId = ISNULL(@intMinInvoice,0)
-						) 
-						AND ISNULL(ysnProductionReversed,0)=0
-			)
-			--Add the error msg to return table
-			INSERT INTO @returntable(
-					[intInvoiceId]
-				,[strInvoiceNumber]
-				,[strTransactionType]
-				,[intInvoiceDetailId]
-				,[intItemId]
-				,[strBatchId]
-				,[strPostingError])
-			Select intInvoiceId,strInvoiceNumber,strTransactionType,intInvoiceDetailId,intItemId,strBatchId,'Invoice Line is already blended.'
-			From @Invoices 
-			Where intInvoiceDetailId=@intMinInvoice
 
 		Select @dblQtyToProduce=t.dblQuantity,@intBlendItemId=t.intItemId,@intItemUOMId=t.intItemUOMId,@intLocationId=t.intCompanyLocationId,@intSubLocationId=intSubLocationId 
 		From @tblInput t Where t.intInvoiceDetailId=@intMinInvoice
@@ -231,6 +200,30 @@ BEGIN
 		WHERE	mc.intManufacturingCellId=@intCellId
 
 		SELECT	@dblQtyToProduce = dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId,@intBlendItemUOMId,@dblQtyToProduce)
+
+		--Generate Demand No
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+			,@intItemId = @intBlendItemId
+			,@intManufacturingId = NULL
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 46
+			,@ysnProposed = 0
+			,@strPatternString = @strDemandNo OUTPUT
+
+		--Generate WorkOrder No
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		,@intItemId = @intItemId
+		,@intManufacturingId = @intCellId
+		,@intSubLocationId = 0
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 93
+		,@ysnProposed = 0
+		,@strPatternString = @strWorkOrderNo OUTPUT
 
 		--update cell,machine in tblInput table
 		Update @tblInput Set intCellId=@intCellId,intMachineId=@intMachinId,intBlendItemUOMId=@intBlendItemUOMId,dblBlendBinSize=@dblBlendBinSize,
@@ -410,19 +403,7 @@ BEGIN
 				WHERE	intItemId = @intRawItemId
 		
 				SET @ErrMsg = 'Inventory is not available for item ' + @strItemNo + '.'
-
-				--Add the error msg to return table
-				INSERT INTO @returntable(
-					 [intInvoiceId]
-					,[strInvoiceNumber]
-					,[strTransactionType]
-					,[intInvoiceDetailId]
-					,[intItemId]
-					,[strBatchId]
-					,[strPostingError])
-				Select intInvoiceId,strInvoiceNumber,strTransactionType,intInvoiceDetailId,intItemId,strBatchId,@ErrMsg
-				From @Invoices 
-				Where intInvoiceDetailId=@intMinInvoice
+				RAISERROR(@ErrMsg,16,1)
 			END
 
 			SELECT @intMinLot = MIN(intRowNo) 
@@ -502,6 +483,157 @@ BEGIN
 
 	Select @intMinInvoice=MIN(intInvoiceDetailId) from @tblInput Where intInvoiceDetailId>@intMinInvoice
 	End
-																												
-	RETURN
-END
+
+	Begin Tran
+
+	--Create Blend Demands
+	Insert Into tblMFBlendRequirement(strDemandNo,intItemId,dblQuantity,intUOMId,dtmDueDate,intLocationId,intStatusId,dblIssuedQty,
+	intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified,intMachineId,intConcurrencyId)
+	OUTPUT inserted.intBlendRequirementId,inserted.intConcurrencyId INTO @tblBlendRequirementOutput
+	Select t.strDemandNo,t.intItemId,t.dblWOQuantity,iu.intUnitMeasureId,@dtmDate,t.intCompanyLocationId,2,t.dblWOQuantity,
+	t.intUserId,GETDATE(),t.intUserId,GETDATE(),t.intMachineId,t.intInvoiceDetailId
+	From @tblInput t Join tblICItemUOM iu on t.intBlendItemUOMId=iu.intItemUOMId
+
+	--Create Work Orders
+	insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
+	intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,
+	intManufacturingProcessId,intSalesOrderLineItemId,intInvoiceDetailId,intLoadDistributionDetailId,dtmPlannedDate,intConcurrencyId,dtmCompletedDate)
+	OUTPUT inserted.intWorkOrderId,inserted.intInvoiceDetailId INTO @tblWorkOrderOutput
+	Select t.strWorkOrderNo,t.intItemId,t.dblWOQuantity,t.intBlendItemUOMId,13,t.intCellId,t.intMachineId,t.intCompanyLocationId,t.dblBlendBinSize,@dtmDate,1,
+	1,t.dblWOQuantity,o.intBlendRequirementId,GETDATE(),t.intUserId,GETDATE(),t.intUserId,@dtmDate,
+	@intManufacturingProcessId,null,t.intInvoiceDetailId,null,@dtmDate,1,GETDATE()
+	From @tblInput t 
+	join @tblBlendRequirementOutput o on o.intInvoiceDetailId=t.intInvoiceDetailId
+
+	--Add Lots/Items to workorder consume table for all work orders
+	INSERT INTO tblMFWorkOrderConsumedLot(
+			intWorkOrderId
+			,intLotId
+			,intItemId
+			,dblQuantity
+			,intItemUOMId
+			,dblIssuedQuantity
+			,intItemIssuedUOMId
+			,intSequenceNo
+			,dtmCreated
+			,intCreatedUserId
+			,dtmLastModified
+			,intLastModifiedUserId
+			,intRecipeItemId
+			,ysnStaged
+			,intSubLocationId
+			,intStorageLocationId
+	)
+	SELECT	t.intWorkOrderId
+			,p.intLotId
+			,p.intItemId
+			,p.dblQty
+			,p.intItemUOMId
+			,p.dblQty
+			,p.intItemUOMId
+			,null
+			,@dtmDate
+			,@intUserId
+			,@dtmDate
+			,@intUserId
+			,null
+			,1
+			,p.intSubLocationId
+			,p.intStorageLocationId
+	FROM	@tblWorkOrderOutput t join @tblPickedLot p on t.intInvoiceDetailId=p.intInvoiceDetailId
+
+	Select @intMinWorkOrder=MIN(intWorkOrderId) from @tblWorkOrderOutput
+
+	--Loop through WorkOrder for Post Consumption & Production
+	While (@intMinWorkOrder is not null)
+	Begin
+		Set @intStorageLocationId=null
+		Set @intItemUOMId=null
+		Set @intBlendItemUOMId=null
+
+		Select @intBlendItemId=v.intItemId,@intStorageLocationId=v.intStorageLocationId,
+		@dblWOQty=v.dblWOQuantity,@intItemUOMId=v.intItemUOMId,@intBlendItemUOMId=v.intBlendItemUOMId,@intUserId=v.intUserId
+		From @tblWorkOrderOutput w join @tblInput v on w.intInvoiceDetailId=v.intInvoiceDetailId 
+		Where intWorkOrderId=@intMinWorkOrder
+
+		IF @intItemUOMId <> @intBlendItemUOMId
+		BEGIN
+			SELECT	@dblWeightPerUnit = dblUnitQty 
+			FROM	tblICItemUOM 
+			WHERE	intItemUOMId = @intItemUOMId
+		
+			SET @dblIssuedQuantity = @dblWOQty/@dblWeightPerUnit
+			SET @intItemIssuedUOMId = @intItemUOMId
+		END
+		ELSE
+		BEGIN
+			SET @dblWeightPerUnit = 1
+			SET @dblIssuedQuantity = @dblWOQty
+			SET @intItemIssuedUOMId = @intBlendItemUOMId
+		END
+
+		--Post Consumption
+		EXEC uspMFPostConsumption
+			 @ysnPost = 1
+			,@ysnRecap = 0
+			,@intWorkOrderId = @intMinWorkOrder
+			,@intUserId = @intUserId
+			,@intEntityId = NULL
+			,@strRetBatchId = @strRetBatchId OUT
+			,@intBatchId = NULL
+			,@ysnPostGL = 1
+			,@intLoadDistributionDetailId = null
+			,@dtmDate = @dtmDate
+		
+		UPDATE	tblMFWorkOrder 
+		SET		strBatchId = @strRetBatchId 
+		WHERE	intWorkOrderId = @intMinWorkOrder
+
+		SELECT @intBatchId = intBatchID
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intMinWorkOrder
+
+		--Post Production
+		EXEC uspMFPostProduction 1
+			,0
+			,@intMinWorkOrder
+			,@intBlendItemId
+			,@intUserId
+			,NULL
+			,@intStorageLocationId
+			,@dblWOQty
+			,@intBlendItemUOMId
+			,@dblWeightPerUnit
+			,@dblIssuedQuantity
+			,@intItemIssuedUOMId
+			,@strRetBatchId
+			,''
+			,@intBatchId
+			,@intRetLotId OUT
+			,''
+			,''
+			,''
+			,''
+			,@dtmDate
+			,null
+			,null
+			,null
+			,null
+
+		--Add to WorkOrder Produce Lot Table
+		Insert Into tblMFWorkOrderProducedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblPhysicalCount,intPhysicalItemUOMId,dblWeightPerUnit,
+		intStorageLocationId,intBatchId,strBatchId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmProductionDate,intConcurrencyId)
+		Values(@intMinWorkOrder,@intRetLotId,@intBlendItemId,@dblWOQty,@intBlendItemUOMId,@dblIssuedQuantity,@intItemIssuedUOMId,@dblWeightPerUnit,
+		@intStorageLocationId,@intBatchId,@strRetBatchId,@dtmDate,@intUserId,@dtmDate,@intUserId,@dtmDate,1)
+
+		Select @intMinWorkOrder=MIN(intWorkOrderId) From @tblWorkOrderOutput Where intWorkOrderId>@intMinWorkOrder
+	End
+
+	Commit Tran
+
+END TRY   
+BEGIN CATCH  
+	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
+	SET @ErrMsg = ERROR_MESSAGE()  
+	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+END CATCH  
