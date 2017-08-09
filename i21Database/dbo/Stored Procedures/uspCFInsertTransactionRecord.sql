@@ -620,7 +620,8 @@ BEGIN
 				SET @intVehicleId =
 				(SELECT TOP 1 intVehicleId
 				FROM @tblCFNumericVehicle
-				WHERE strVehicleNumber = @strVehicleId)
+				WHERE CAST(strVehicleNumber AS BIGINT) = CAST(@strVehicleId AS BIGINT))
+
 
 			END
 			ELSE
