@@ -70,7 +70,7 @@ BEGIN
 		END
 		IF @intBankTransactionTypeId = 23 OR @intBankTransactionTypeId = 123
 		BEGIN
-			UPDATE tblPRPaycheck SET strReferenceNo = @intEFTNextNo WHERE strPaycheckId = @strTransactionId
+			UPDATE tblPRPaycheck SET strReferenceNo = @intEFTNextNo, ysnPrinted = 1 WHERE strPaycheckId = @strTransactionId
 		END
 
 		SET @intEFTNextNo =  @intEFTNextNo + 1

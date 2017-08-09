@@ -155,7 +155,7 @@ BEGIN
 			AND B.intBankTransactionTypeId = 16
 			AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 		--PR
-		UPDATE tblPRPaycheck SET strReferenceNo = B.strReferenceNo 
+		UPDATE tblPRPaycheck SET strReferenceNo = B.strReferenceNo, ysnPrinted = 1 
 		FROM tblPRPaycheck A
 		INNER JOIN tblCMBankTransaction B ON A.strPaycheckId = B.strTransactionId
 		WHERE B.intBankAccountId = @intBankAccountId 
