@@ -107,7 +107,7 @@ BEGIN TRY
 		SET @ParamDefinition =  N'@Guid NVARCHAR(250), @FormCodeParam NVARCHAR(MAX), @ScheduleCodeParam NVARCHAR(MAX), @Refresh NVARCHAR(5)'
 		SET @SPRunString = @SPRunReport + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
 		
-		EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @FormCodeParam = @FormCode, @ScheduleCodeParam = @ScheduleCode, @Refresh = 0;  
+		EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @FormCodeParam = @FormCode, @ScheduleCodeParam = @ScheduleCode, @Refresh = 1;  
 
 		DELETE FROM #tmpMain WHERE intReportingComponentId = @RCId
 
