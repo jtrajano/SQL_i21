@@ -25,7 +25,7 @@ SELECT L.intLoadId
 	,ysnSubCurrency = ISNULL(SubCurrency.ysnSubCurrency, 0)
 	,intForexRateTypeId = CD.intRateTypeId
 	,dblForexRate = CD.dblRate
-	,SC.strCurrency
+	,ISNULL(MSC.strCurrency,SC.strCurrency) AS strCurrency
 	,SubCurrency.strCurrency AS strSubCurrency
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
