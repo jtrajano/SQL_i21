@@ -5586,6 +5586,8 @@
     <None Include="Scripts\Post-Deployment\SM\1730_EntityFavoriteMenu.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchSyncInvoiceToDeliveryHistory.sql" />
     <Build Include="dbo\Functions\fnAPBankRounding.sql" />
+    <Build Include="dbo\Tables\tblMFAttributeDefaultValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetAttributesByType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
