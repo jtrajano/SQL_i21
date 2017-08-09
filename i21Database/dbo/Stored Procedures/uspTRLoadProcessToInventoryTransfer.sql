@@ -260,8 +260,6 @@ _PostOrUnPost:
 		SELECT TOP 1 
 				@TransferId = intInventoryTransferId  
 		FROM	#tmpAddInventoryTransferResult 
-
-		DROP TABLE #tmpInventoryTransfers
   
 		-- Post the Inventory Transfer that was created
 		SELECT	@strTransactionId = strTransferNo 
