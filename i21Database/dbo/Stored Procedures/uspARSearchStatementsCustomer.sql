@@ -3,6 +3,8 @@
 	 @strStatementFormat	NVARCHAR(50)  
 	,@strAsOfDate			NVARCHAR(50) 
 	,@strTransactionDate	NVARCHAR(50) 
+	,@strCompanyLocation	NVARCHAR(100) = NULL
+	,@strAccountCode		NVARCHAR(50) = NULL
 	,@ysnDetailedFormat		BIT	= 0
 	,@ysnEmailOnly			BIT = 0
 	,@ysnIncludeBudget		BIT = 0
@@ -43,7 +45,7 @@ DECLARE @temp_aging_table TABLE(
 )
 
 INSERT INTO @temp_aging_table
-EXEC dbo.uspARCustomerAgingAsOfDateReport NULL, @strAsOfDate, NULL, NULL, NULL, NULL, @ysnIncludeBudget, @ysnPrintCreditBalance
+EXEC dbo.uspARCustomerAgingAsOfDateReport NULL, @strAsOfDate, NULL, NULL, NULL, @strCompanyLocation, @ysnIncludeBudget, @ysnPrintCreditBalance
 
 UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dblFuture
 
@@ -92,6 +94,14 @@ IF @ysnEmailOnly = 1
 	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 0
 ELSE
 	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 1
+
+IF @strAccountCode IS NOT NULL
+	BEGIN
+		DELETE FROM tblARSearchStatementCustomer
+		WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId 
+										  FROM dbo.tblARCustomer WITH (NOLOCK) 
+										  WHERE dbo.fnARGetCustomerAccountStatusCodes(intEntityCustomerId) LIKE '%' + @strAccountCode + '%')
+	END
 
 IF @ysnDetailedFormat = 0
 	BEGIN
