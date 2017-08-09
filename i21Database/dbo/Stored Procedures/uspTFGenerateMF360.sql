@@ -343,55 +343,44 @@ BEGIN TRY
 	-- ======================== DETAIL ==============================
 	DECLARE @ItemTotal NVARCHAR(MAX)
 	DECLARE @itemQuery NVARCHAR(MAX)
-	DECLARE @CountItems INT
+	DECLARE @intConfigurationId INT
+	DECLARE @DetailTemplateItemId NVARCHAR(MAX)
 
 	DECLARE @ItemDescription nvarchar(MAX)
-	SELECT @QueryScheduleCodeParam = 'SELECT ''' + REPLACE (@ScheduleCodeParam,',',''' UNION SELECT ''') + ''''
-	INSERT INTO @tblTempScheduleCodeParam (strTempScheduleCode)
-	EXEC(@QueryScheduleCodeParam)
 	
-	SELECT @CountItems = COUNT(strFormCode)
+	SELECT TOP 1 @intConfigurationId = intReportingComponentConfigurationId
 	FROM vyuTFGetReportingComponentConfiguration
 	WHERE strSegment = 'Details'
 		AND strFormCode = @FormCodeParam
+	ORDER BY intReportingComponentConfigurationId
 
-	WHILE(@CountItems > 0)
+	WHILE(@intConfigurationId > 0)
 	BEGIN
 		DECLARE @tplScheduleCode NVARCHAR(MAX)
-			, @paramScheduleCode NVARCHAR(MAX)
 
-		-- GET SCHEDULE CODES BY COUNT ID FROM TEMPLATE TABLE
-		SELECT TOP 1 @tplScheduleCode = strScheduleCode
-		FROM vyuTFGetReportingComponentConfiguration
-		WHERE strSegment = 'Details'
-			AND intTemplateItemNumber = @CountItems
-			AND strFormCode = @FormCodeParam
+		SELECT TOP 1 @tplScheduleCode = strScheduleCode, @DetailTemplateItemId = strTemplateItemId FROM vyuTFGetReportingComponentConfiguration
+		WHERE intReportingComponentConfigurationId = @intConfigurationId
 
-		-- GET SCHEDULE CODE BY PASSED PARAM
-		SELECT TOP 1 @paramScheduleCode = strTempScheduleCode
-		FROM @tblTempScheduleCodeParam
-		WHERE strTempScheduleCode = @tplScheduleCode
-
-		IF (@paramScheduleCode = '5' OR @paramScheduleCode = '11' OR @paramScheduleCode = '6D' OR @paramScheduleCode = '6X' OR @paramScheduleCode = '7' OR @paramScheduleCode = '8' OR @paramScheduleCode = '10A' OR @paramScheduleCode = '10B')
+		IF (@tplScheduleCode = '5' OR @tplScheduleCode = '11' OR @tplScheduleCode = '6D' OR @tplScheduleCode = '6X' OR @tplScheduleCode = '7' OR @tplScheduleCode = '8' OR @tplScheduleCode = '10A' OR @tplScheduleCode = '10B')
 		BEGIN
-			SELECT @DetailColumnValue_gas = ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
-			SELECT @DetailColumnValue_kerosene = ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
-			SELECT @DetailColumnValue_others = ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
-			SELECT @ItemTotal = ISNULL(sum(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN(@paramScheduleCode) AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+			SELECT @DetailColumnValue_gas = ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+			SELECT @DetailColumnValue_kerosene = ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+			SELECT @DetailColumnValue_others = ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+			SELECT @ItemTotal = ISNULL(sum(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN(@tplScheduleCode) AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
 		END
 		ELSE
 		BEGIN
-			SELECT @DetailColumnValue_gas = ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
-			SELECT @DetailColumnValue_kerosene = ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
-			SELECT @DetailColumnValue_others = ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
-			SELECT @ItemTotal = ISNULL(sum(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN(@paramScheduleCode) AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+			SELECT @DetailColumnValue_gas = ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+			SELECT @DetailColumnValue_kerosene = ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+			SELECT @DetailColumnValue_others = ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
+			SELECT @ItemTotal = ISNULL(sum(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN(@tplScheduleCode) AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam
 		END
 			
-		SELECT @ItemDescription = strDescription FROM vyuTFGetReportingComponentConfiguration WHERE intTemplateItemNumber = @CountItems AND strSegment = 'Details' AND strFormCode = 'MF-360'
+		SELECT @ItemDescription = strDescription FROM vyuTFGetReportingComponentConfiguration WHERE intReportingComponentConfigurationId = @intConfigurationId AND strSegment = 'Details' AND strFormCode = 'MF-360'
 
 			-- ITEMS THAT HAVE MULTIPLE SCHEDULE CODES TO COMPUTE
 		DECLARE @SchedQuery NVARCHAR(MAX)
-		IF (@CountItems = 8)
+		IF (@DetailTemplateItemId = 'MF-360-Detail-009')
 		BEGIN
 			SELECT @SchedQuery = 'SELECT ''' + REPLACE (@tplScheduleCode,',',''' UNION SELECT ''') + ''''
 			INSERT INTO @tblSchedule (strSchedule)
@@ -402,7 +391,7 @@ BEGIN TRY
 			VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 4, 'Details','TOTAL', '',(SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 			DELETE FROM @tblSchedule
 		END
-		ELSE IF (@CountItems = 9)
+		ELSE IF (@DetailTemplateItemId = 'MF-360-Detail-010')
 		BEGIN
 			SELECT @SchedQuery = 'SELECT ''' + REPLACE (@tplScheduleCode,',',''' UNION SELECT ''') + ''''
 			INSERT INTO @tblSchedule (strSchedule)
@@ -418,7 +407,7 @@ BEGIN TRY
 			VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', 4, 'Details','TOTAL', '',(SELECT ISNULL(SUM(dblGross), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 			DELETE FROM @tblSchedule
 		END
-		ELSE IF (@CountItems = 21)
+		ELSE IF (@DetailTemplateItemId = 'MF-360-Detail-020')
 		BEGIN
 			SELECT @SchedQuery = 'SELECT ''' + REPLACE (@tplScheduleCode,',',''' UNION SELECT ''') + ''''
 			INSERT INTO @tblSchedule (strSchedule)
@@ -434,7 +423,7 @@ BEGIN TRY
 			VALUES(@Guid,@TA,@TACode,@FormCodeParam,'', '', 'Details','TOTAL', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam), @ItemDescription, CAST(GETDATE() AS DATE))
 			DELETE FROM @tblSchedule
 		END
-		ELSE IF (@CountItems = 20)
+		ELSE IF (@DetailTemplateItemId = 'MF-360-Detail-019')
 		BEGIN
 			SELECT @SchedQuery = 'SELECT ''' + REPLACE (@tplScheduleCode,',',''' UNION SELECT ''') + ''''
 			INSERT INTO @tblSchedule (strSchedule)
@@ -451,7 +440,7 @@ BEGIN TRY
 		BEGIN
 			-- GAS
 			DECLARE @SmryDetailItemId NVARCHAR(MAX)
-			SET @SmryDetailItemId = (SELECT strTemplateItemId FROM vyuTFGetReportingComponentConfiguration WHERE strSegment = 'Details' and intTemplateItemNumber = @CountItems AND strFormCode = @FormCodeParam)
+			SET @SmryDetailItemId = (SELECT strTemplateItemId FROM vyuTFGetReportingComponentConfiguration WHERE strSegment = 'Details' and intReportingComponentConfigurationId = @intConfigurationId)
 
 			IF (@tplScheduleCode = 'E-1')
 			BEGIN
@@ -475,8 +464,19 @@ BEGIN TRY
 			INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
 					VALUES(@Guid,@TA,@TACode,@FormCodeParam,@tplScheduleCode, 4, 'Details','TOTAL', '',@ItemTotal, @ItemDescription, CAST(GETDATE() AS DATE))
 		END
-		SET @paramScheduleCode = NULL
-		SET @CountItems = @CountItems - 1
+
+		-- GET next intReportingComponentConfigurationId
+		SELECT TOP 1 @intConfigurationId = intReportingComponentConfigurationId
+		FROM vyuTFGetReportingComponentConfiguration
+		WHERE strSegment = 'Details'
+			AND strFormCode = @FormCodeParam
+			AND intReportingComponentConfigurationId > @intConfigurationId
+		ORDER BY intReportingComponentConfigurationId
+
+		-- Exit if has no next record
+		IF @@ROWCOUNT = 0
+		BREAK
+
 	END
 			
 	DECLARE @isTransactionEmpty NVARCHAR(20)
