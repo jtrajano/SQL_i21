@@ -411,9 +411,9 @@ BEGIN
 		AND EXISTS (
 			SELECT 1 FROM tblAPPaymentDetail B 
 			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-			INNER JOIN tblAPBillDetail C ON B.intBillDetailId = C.intBillDetailId
+			INNER JOIN tblAPBillDetail D ON D.intBillId = C.intBillId
 			WHERE B.intPaymentId = A.intPaymentId
-			AND C.dblRate <> A.dblExchangeRate
+			AND D.dblRate <> A.dblExchangeRate
 		)
 
 	END
