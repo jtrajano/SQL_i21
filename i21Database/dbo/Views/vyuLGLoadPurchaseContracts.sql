@@ -21,10 +21,10 @@ FROM (
 		,Item.intCommodityId
 		,LD.intItemId
 		,CT.intItemUOMId
-		,LW.intSubLocationId
+		,intSubLocationId = NULL
 		,intLocationId = L.intCompanyLocationId
 		,LD.dblQuantity
-		,IsNull(LD.dblDeliveredQuantity, 0) AS dblReceivedQty
+		,dblReceivedQty = 0.0
 		,LD.dblGross
 		,LD.dblTare
 		,LD.dblNet
@@ -68,8 +68,8 @@ FROM (
 				WHERE ysnStockUnit = 1
 					AND ItemUOM.intItemUOMId = CT.intItemUOMId
 				), 0)
-		,SubLocation.strSubLocationName
-		,L.intCompanyLocationId
+		,strSubLocationName = ''
+		,intCompanyLocationId = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
 		,CT.dblCashPrice
 		,dbo.fnCTConvertQtyToTargetItemUOM(CT.intItemUOMId, CT.intPriceItemUOMId, CT.dblCashPrice) AS dblCashPriceInQtyUOM
 		,intWeightItemUOMId = (
@@ -88,6 +88,7 @@ FROM (
 				WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId
 				), 0)
 		,CU.strCurrency
+		,intSubCurrencyCents = CU.intCurrencyID
 		,CY.strCurrency AS strMainCurrency
 		,CAST(ISNULL(CU.intMainCurrencyId, 0) AS BIT) AS ysnSubCurrency
 		,CT.dblCashPrice / CASE 
@@ -95,11 +96,15 @@ FROM (
 				THEN 1
 			ELSE CU.intCent
 			END AS dblMainCashPrice
+		,intContractCurrencyId = CT.intCurrencyId
 		,dblFranchise = CASE 
 			WHEN WG.dblFranchise > 0
 				THEN WG.dblFranchise / 100
 			ELSE 0
 			END
+		,L.ysnPosted
+		,L.intCurrencyId
+		,strLoadCurrency = LC.strCurrency
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -108,15 +113,12 @@ FROM (
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 	JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
-	LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 	LEFT JOIN tblICItem Item ON Item.intItemId = LD.intItemId
-	LEFT JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
-	LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
-	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
-	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = LW.intSubLocationId
 	LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 	LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = CT.intPriceItemUOMId
 	LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CT.intCurrencyId
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CU.intMainCurrencyId
+	LEFT JOIN tblSMCurrency LC ON LC.intCurrencyID = L.intCurrencyId
+	WHERE L.ysnPosted = 1 AND L.intPurchaseSale IN (1, 3) AND L.intShipmentStatus IN (1,3)
 ) t1
