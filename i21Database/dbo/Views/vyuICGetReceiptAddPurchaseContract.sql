@@ -69,6 +69,8 @@ FROM (
 		, ysnBundleItem				= ContractView.ysnBundleItem
 		, intBundledItemId			= CAST(NULL AS INT)
 		, strBundledItemNo			= CAST(NULL AS NVARCHAR(50))
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, ysnIsBasket 				= CAST(0 AS BIT)
 	FROM	vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -83,7 +85,7 @@ FROM (
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 	WHERE	ysnAllowedToShow = 1
 			AND strContractType = 'Purchase'
-			AND ISNULL(ysnBundleItem, 0) = 0
+			AND ISNULL(ysnIsBasket, 0) = 0
 	
 	UNION ALL
 	
@@ -151,7 +153,9 @@ FROM (
 		, dblForexRate				= ContractView.dblRate
 		, ysnBundleItem				= ContractView.ysnBundleItem
 		, intBundledItemId			= ContractItem.intItemId
-		, strBundledItemNo			= ContractItem.strItemNo
+		, strBasketItemNo			= ContractItem.strItemNo
+		, strBundledItemDescription = ContractItem.strDescription
+		, ysnIsBasket 				= ContractView.ysnIsBasket
 	FROM tblICItemBundle BundleDetail
 		INNER JOIN tblICItem BundledItem ON BundledItem.intItemId = BundleDetail.intBundleItemId
 		INNER JOIN tblICItem ContractItem ON ContractItem.intItemId = BundleDetail.intItemId
@@ -162,5 +166,5 @@ FROM (
 			AND BundleDetailUOM.intItemUOMId = BundleDetail.intItemUnitMeasureId
 	WHERE ContractView.strContractType = 'Purchase'
 		AND ContractView.ysnAllowedToShow = 1
-		AND ContractView.ysnBundleItem = 1
+		AND ContractView.ysnIsBasket = 1
 ) tblAddOrders

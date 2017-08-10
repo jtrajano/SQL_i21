@@ -65,6 +65,8 @@ FROM (
 		, ysnBundleItem				= CAST(0 AS BIT)
 		, intBundledItemId			= CAST(NULL AS INT)
 		, strBundledItemNo			= CAST(NULL AS NVARCHAR(50))
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, ysnIsBasket 				= CAST(0 AS BIT)
 	FROM	dbo.tblICInventoryTransfer h INNER JOIN dbo.tblICInventoryTransferDetail d
 				ON d.intInventoryTransferId = h.intInventoryTransferId
 			
