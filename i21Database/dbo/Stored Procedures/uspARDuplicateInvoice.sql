@@ -541,55 +541,63 @@ END CATCH
 
 --INSERT INVOICE TAX DETAILS
 BEGIN TRY
-	INSERT INTO [tblARInvoiceDetailTax]
-		([intInvoiceDetailId]
-		,[intTaxGroupId]
-		,[intTaxCodeId]
-		,[intTaxClassId]
-		,[strTaxableByOtherTaxes]
-		,[strCalculationMethod]
-		,[dblRate]
-		,[intSalesTaxAccountId]
-		,[dblTax]
-		,[dblAdjustedTax]
-		,[dblBaseAdjustedTax]
-		,[ysnTaxAdjusted]
-		,[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]
-		,[ysnTaxExempt]
-		,[ysnTaxOnly]
-		,[strNotes]
-		,[intConcurrencyId])
-	SELECT 
-		 [intInvoiceDetailId]		= ARID1.[intInvoiceDetailId]
-		,[intTaxGroupId]			= ARIDT.[intTaxGroupId]
-		,[intTaxCodeId]				= ARIDT.[intTaxCodeId]
-		,[intTaxClassId]			= ARIDT.[intTaxClassId]
-		,[strTaxableByOtherTaxes]	= ARIDT.[strTaxableByOtherTaxes]
-		,[strCalculationMethod]		= ARIDT.[strCalculationMethod]
-		,[dblRate]					= ARIDT.[dblRate]
-		,[intSalesTaxAccountId]		= ARIDT.[intSalesTaxAccountId]
-		,[dblTax]					= ARIDT.[dblTax]
-		,[dblAdjustedTax]			= ARIDT.[dblAdjustedTax]
-		,[dblBaseAdjustedTax]		= ARIDT.[dblBaseAdjustedTax]
-		,[ysnTaxAdjusted]			= ARIDT.[ysnTaxAdjusted]
-		,[ysnSeparateOnInvoice]		= ARIDT.[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]			= ARIDT.[ysnCheckoffTax]
-		,[ysnTaxExempt]				= ARIDT.[ysnTaxExempt]
-		,[ysnTaxOnly]				= ARIDT.[ysnTaxOnly]
-		,[strNotes]					= ARIDT.[strNotes]
-		,[intConcurrencyId]			= 1
-	FROM
-		tblARInvoiceDetailTax ARIDT
-	INNER JOIN
-		tblARInvoiceDetail ARID
-			ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-	INNER JOIN
-		tblARInvoiceDetail ARID1
-			ON ARID.[intInvoiceDetailId] = CAST(ARID1.[strItemDescription] AS INT)
-	WHERE
-		ARID.[intInvoiceId] = @InvoiceId
-		AND ARID1.[intInvoiceId] = @CreatedInvoiceId
+	IF ISNULL(@ForRecurring, 0) = 1
+		BEGIN
+			UPDATE tblARInvoiceDetail SET intTaxGroupId = NULL WHERE intInvoiceId = @CreatedInvoiceId
+			EXEC [dbo].[uspARReComputeInvoiceTaxes]
+				 @InvoiceId	= @CreatedInvoiceId
+				,@DetailId	= NULL
+		END
+	ELSE	
+		INSERT INTO [tblARInvoiceDetailTax]
+			([intInvoiceDetailId]
+			,[intTaxGroupId]
+			,[intTaxCodeId]
+			,[intTaxClassId]
+			,[strTaxableByOtherTaxes]
+			,[strCalculationMethod]
+			,[dblRate]
+			,[intSalesTaxAccountId]
+			,[dblTax]
+			,[dblAdjustedTax]
+			,[dblBaseAdjustedTax]
+			,[ysnTaxAdjusted]
+			,[ysnSeparateOnInvoice]
+			,[ysnCheckoffTax]
+			,[ysnTaxExempt]
+			,[ysnTaxOnly]
+			,[strNotes]
+			,[intConcurrencyId])
+		SELECT 
+			 [intInvoiceDetailId]		= ARID1.[intInvoiceDetailId]
+			,[intTaxGroupId]			= ARIDT.[intTaxGroupId]
+			,[intTaxCodeId]				= ARIDT.[intTaxCodeId]
+			,[intTaxClassId]			= ARIDT.[intTaxClassId]
+			,[strTaxableByOtherTaxes]	= ARIDT.[strTaxableByOtherTaxes]
+			,[strCalculationMethod]		= ARIDT.[strCalculationMethod]
+			,[dblRate]					= ARIDT.[dblRate]
+			,[intSalesTaxAccountId]		= ARIDT.[intSalesTaxAccountId]
+			,[dblTax]					= ARIDT.[dblTax]
+			,[dblAdjustedTax]			= ARIDT.[dblAdjustedTax]
+			,[dblBaseAdjustedTax]		= ARIDT.[dblBaseAdjustedTax]
+			,[ysnTaxAdjusted]			= ARIDT.[ysnTaxAdjusted]
+			,[ysnSeparateOnInvoice]		= ARIDT.[ysnSeparateOnInvoice]
+			,[ysnCheckoffTax]			= ARIDT.[ysnCheckoffTax]
+			,[ysnTaxExempt]				= ARIDT.[ysnTaxExempt]
+			,[ysnTaxOnly]				= ARIDT.[ysnTaxOnly]
+			,[strNotes]					= ARIDT.[strNotes]
+			,[intConcurrencyId]			= 1
+		FROM
+			tblARInvoiceDetailTax ARIDT
+		INNER JOIN
+			tblARInvoiceDetail ARID
+				ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+		INNER JOIN
+			tblARInvoiceDetail ARID1
+				ON ARID.[intInvoiceDetailId] = CAST(ARID1.[strItemDescription] AS INT)
+		WHERE
+			ARID.[intInvoiceId] = @InvoiceId
+			AND ARID1.[intInvoiceId] = @CreatedInvoiceId
 		
 		
 	UPDATE
