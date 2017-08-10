@@ -17,7 +17,8 @@ BEGIN TRY
 			@dblQuantityToIncrease	NUMERIC(18,6),
 			@ysnUnlimitedQuantity	BIT,
 			@ysnCompleted			BIT	= 0,
-			@intPricingTypeId		INT
+			@intPricingTypeId		INT,
+			@dblTolerance			NUMERIC(18,6) = 0.0001
 	
 	BEGINING:
 
@@ -48,7 +49,15 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			RAISERROR('Balance cannot be less than zero.',16,1)
+			IF ABS(@dblNewBalance) > @dblTolerance
+			BEGIN
+				RAISERROR('Balance cannot be less than zero.',16,1)
+			END
+			ELSE
+			BEGIN
+				SET @dblQuantityToUpdate =  @dblQuantityToUpdate + @dblNewBalance
+				SET	@dblNewBalance		 =	@dblOldBalance - @dblQuantityToUpdate
+			END
 		END
 	END
 	
