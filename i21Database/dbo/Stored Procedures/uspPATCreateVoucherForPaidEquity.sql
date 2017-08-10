@@ -22,11 +22,12 @@ CREATE TABLE #tempEquityPayments(
 	[dtmPaymentDate] DATETIME,
 	[intEquityPaySummaryId] INT,
 	[intCustomerPatronId] INT,
+	[strName] NVARCHAR(100),
+	[ysnVendor] BIT,
 	[dblEquityPaid] NUMERIC(18,6)
 )
 
 
-BEGIN TRANSACTION 
 IF(@equityPaymentIds = 'all')
 BEGIN
 	INSERT INTO #tempEquityPayments
@@ -35,10 +36,16 @@ BEGIN
 			EP.dtmPaymentDate,
 			EPS.intEquityPaySummaryId,
 			EPS.intCustomerPatronId,
+			EM.strName,
+			ysnVendor = APV.Vendor,
 			EPS.dblEquityPaid
 	FROM tblPATEquityPay EP
 	INNER JOIN tblPATEquityPaySummary EPS
 		ON EPS.intEquityPayId = EP.intEquityPayId
+	INNER JOIN tblEMEntity EM
+		ON EM.intEntityId = EPS.intCustomerPatronId
+	LEFT OUTER JOIN vyuEMEntityType APV 
+		ON APV.intEntityId = EPS.intCustomerPatronId
 	WHERE EP.intEquityPayId = @equityPay AND EPS.intBillId IS NULL
 END
 ELSE
@@ -49,10 +56,16 @@ BEGIN
 			EP.dtmPaymentDate,
 			EPS.intEquityPaySummaryId,
 			EPS.intCustomerPatronId,
+			EM.strName,
+			ysnVendor = APV.Vendor,
 			EPS.dblEquityPaid
 	FROM tblPATEquityPay EP
 	INNER JOIN tblPATEquityPaySummary EPS
 		ON EPS.intEquityPayId = EP.intEquityPayId
+	INNER JOIN tblEMEntity EM
+		ON EM.intEntityId = EPS.intCustomerPatronId
+	LEFT OUTER JOIN vyuEMEntityType APV 
+		ON APV.intEntityId = EPS.intCustomerPatronId
 	WHERE EPS.intEquityPaySummaryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@equityPaymentIds))
 END
 
@@ -64,15 +77,30 @@ END
 	DECLARE @strVenderOrderNumber NVARCHAR(MAX);
 	DECLARE @intCreatedBillId INT;
 	DECLARE @batchId AS NVARCHAR(40);
+	DECLARE @TransactionName AS VARCHAR(500) = 'CREATE VOUCHER' + CAST(NEWID() AS NVARCHAR(100));
 
 	DECLARE @equityPayments AS Id;
 	DECLARE @totalRecords AS INT = 0;
+
+	SELECT @invalidCount = COUNT(*) FROM #tempEquityPayments WHERE ysnVendor = 0;
+
+	IF(@invalidCount > 0)
+	BEGIN
+		DECLARE @customerName NVARCHAR(50);
+		SELECT TOP 1 @customerName = strName FROM #tempEquityPayments WHERE ysnVendor = 0;
+		SET @strErrorMessage = 'Cannot create voucher for <strong>'+ @customerName +'</strong> as the entity is not marked as vendor';
+		RAISERROR(@strErrorMessage, 16, 1);
+		GOTO Post_Exit;
+	END
+
 
 	INSERT INTO @equityPayments
 	SELECT intEquityPaySummaryId FROM #tempEquityPayments
 	
 	DECLARE @voucherId AS Id;
-
+	
+	BEGIN TRAN @TransactionName;
+	SAVE TRAN @TransactionName;
 	BEGIN TRY 
 	WHILE EXISTS(SELECT 1 FROM @equityPayments)
 	BEGIN 
@@ -153,13 +181,13 @@ END CATCH
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 Post_Commit:
-	COMMIT TRANSACTION
+	COMMIT TRAN @TransactionName;
 	SET @bitSuccess = 1
 	SET @successfulCount = @totalRecords
 	GOTO Post_Exit
 
 Post_Rollback:
-	ROLLBACK TRANSACTION	
+	ROLLBACK TRAN @TransactionName;	
 	SET @bitSuccess = 0
 	GOTO Post_Exit
 Post_Exit:
