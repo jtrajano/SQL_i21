@@ -95,7 +95,7 @@ IF @ysnEmailOnly = 1
 ELSE
 	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 1
 
-IF @strAccountCode IS NOT NULL
+IF ISNULL(@strAccountCode, '') <> ''
 	BEGIN
 		DELETE FROM tblARSearchStatementCustomer
 		WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId 
