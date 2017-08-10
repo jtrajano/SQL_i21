@@ -20,7 +20,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage'
-DECLARE @SCREEN_NAME NVARCHAR(25) = 'Transfer Instruments'
+DECLARE @SCREEN_NAME NVARCHAR(25) = 'Transfer Instrument'
 DECLARE @totalRecords INT
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @error NVARCHAR(200)
