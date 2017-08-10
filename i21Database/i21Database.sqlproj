@@ -5383,6 +5383,11 @@
     <Build Include="dbo\Tables\tblMFAttributeDefaultValue.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributesByType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendBatchEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetLoadContainerData.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailContainerLinkData.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetLoadData.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetLoadCostData.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
