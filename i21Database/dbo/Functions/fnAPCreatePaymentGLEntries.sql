@@ -139,11 +139,14 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	@GainLossAccount,
-		[dblDebit]						=   CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)) -
+		[dblDebit]						=   --CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)) -
 											CAST(
-												SUM(
-													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment, voucher.dblTotal) * voucherDetail.dblRate)
-											AS DECIMAL(18,2)),
+												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment, voucher.dblTotal) * A.dblExchangeRate
+												AS DECIMAL(18,2))
+											-
+											CAST(
+												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment, voucher.dblTotal) * voucherDetail.dblRate
+												AS DECIMAL(18,2)),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -182,19 +185,19 @@ BEGIN
 	AND B.dblPayment <> 0
 	AND B.intInvoiceId IS NULL
 	AND A.intCurrencyId != @functionalCurrency
-	GROUP BY A.[strPaymentRecordNum],
-	A.dblExchangeRate,
-	A.intPaymentId,
-	rateType.strCurrencyExchangeRateType,
-	voucher.intTransactionType,
-	B.intBillId,
-	D.strVendorId,
-	A.dtmDatePaid,
-	A.intCurrencyId,
-	A.strNotes,
-	B.intPaymentDetailId,
-	A.dblAmountPaid,
-	B.intAccountId
+	-- GROUP BY A.[strPaymentRecordNum],
+	-- A.dblExchangeRate,
+	-- A.intPaymentId,
+	-- rateType.strCurrencyExchangeRateType,
+	-- voucher.intTransactionType,
+	-- B.intBillId,
+	-- D.strVendorId,
+	-- A.dtmDatePaid,
+	-- A.intCurrencyId,
+	-- A.strNotes,
+	-- B.intPaymentDetailId,
+	-- A.dblAmountPaid,
+	-- B.intAccountId
 	UNION ALL
 
 	--Withheld

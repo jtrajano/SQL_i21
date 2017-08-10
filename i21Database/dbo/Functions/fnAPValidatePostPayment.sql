@@ -16,9 +16,11 @@ BEGIN
 
 	DECLARE @WithholdAccount INT, @DiscountAccount INT, @InterestAccount INT, @CashAccount INT, @APAccount INT;
 	DECLARE @userLocation INT;
-	DECLARE @intFunctionalCurrencyId  AS INT 
+	DECLARE @intFunctionalCurrencyId  AS INT;
+	DECLARE @gainLossAccount INT;
 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+	-- SET @gainLossAccount = (SELECT TOP 1 intAccountsPayableRealizedId FROM tblSMMultiCurrency)
 	--DECLARE @tmpPayments TABLE(
 	--	[intPaymentId] [int]
 	--);
@@ -406,6 +408,7 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
+		CROSS APPLY tblSMMultiCurrency B
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.intCurrencyId != @intFunctionalCurrencyId
 		AND EXISTS (
@@ -415,6 +418,7 @@ BEGIN
 			WHERE B.intPaymentId = A.intPaymentId
 			AND D.dblRate <> A.dblExchangeRate
 		)
+		AND (B.intAccountsPayableRealizedId IS NULL OR B.intAccountsPayableRealizedId = 0)
 
 	END
 	ELSE
