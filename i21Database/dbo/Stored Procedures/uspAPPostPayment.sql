@@ -149,58 +149,58 @@ WHERE B.ysnPrepay != 1
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@recap, 0) = 0)
+-- IF (ISNULL(@recap, 0) = 0)
+-- BEGIN
+
+--VALIDATIONS
+INSERT INTO #tmpPayableInvalidData 
+SELECT * FROM [fnAPValidatePostPayment](@payments, @post, @userId)
+UNION ALL
+SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
+
+SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
+
+IF(@totalInvalid > 0)
 BEGIN
 
-	--VALIDATIONS
-	INSERT INTO #tmpPayableInvalidData 
-	SELECT * FROM [fnAPValidatePostPayment](@payments, @post, @userId)
-	UNION ALL
-	SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpPayableInvalidData
 
-	SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
+	SET @invalidCount = @totalInvalid
 
-	IF(@totalInvalid > 0)
-	BEGIN
+	--DELETE Invalid Transaction From temp table
+	DELETE A
+	FROM @payments A
+	INNER JOIN #tmpPayableInvalidData
+		ON A.intId = #tmpPayableInvalidData.intTransactionId
 
-		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpPayableInvalidData
+	DELETE A
+	FROM @prepayIds A
+	INNER JOIN #tmpPayableInvalidData
+		ON A.intId = #tmpPayableInvalidData.intTransactionId
 
-		SET @invalidCount = @totalInvalid
-
-		--DELETE Invalid Transaction From temp table
-		DELETE A
-		FROM @payments A
-		INNER JOIN #tmpPayableInvalidData
-			ON A.intId = #tmpPayableInvalidData.intTransactionId
-
-		DELETE A
-		FROM @prepayIds A
-		INNER JOIN #tmpPayableInvalidData
-			ON A.intId = #tmpPayableInvalidData.intTransactionId
-
-		DELETE A
-		FROM #tmpPayablePostData A
-		INNER JOIN #tmpPayableInvalidData
-			ON A.intPaymentId = #tmpPayableInvalidData.intTransactionId
-
-	END
-
-	DECLARE @totalRecords INT
-	SELECT @totalRecords = COUNT(*) 
-	FROM 
-	(
-		SELECT intId FROM @payments
-		UNION ALL 
-		SELECT intId FROM @prepayIds
-	) PaymentRecords
-	IF(@totalRecords = 0)  
-	BEGIN
-		SET @success = 1
-		RETURN;
-	END
+	DELETE A
+	FROM #tmpPayablePostData A
+	INNER JOIN #tmpPayableInvalidData
+		ON A.intPaymentId = #tmpPayableInvalidData.intTransactionId
 
 END
+
+DECLARE @totalRecords INT
+SELECT @totalRecords = COUNT(*) 
+FROM 
+(
+	SELECT intId FROM @payments
+	UNION ALL 
+	SELECT intId FROM @prepayIds
+) PaymentRecords
+IF(@totalRecords = 0)  
+BEGIN
+	SET @success = 1
+	RETURN;
+END
+
+-- END
 
 --DOUBLE VALIDATE, MAKE SURE TO NOT CONTINUE POSTING WHEN NOT RECORDS TO POST
 IF @totalRecords = 0
