@@ -5600,6 +5600,8 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadData.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadCostData.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailData.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRDuplicateTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
