@@ -64,7 +64,21 @@ WHERE	A.dtmCheckPrinted IS NULL
 		AND B.strTransactionId = ISNULL(@strTransactionId, B.strTransactionId)
 		AND B.strBatchId = ISNULL(@strBatchId, B.strBatchId)
 IF @@ERROR <> 0 GOTO _ROLLBACK
-		
+
+--Update the reference no of other module's transaction
+--AP
+UPDATE	dbo.tblAPPayment 
+SET strPaymentInfo = A.strReferenceNo 
+FROM	dbo.tblCMBankTransaction A INNER JOIN dbo.tblCMCheckPrintJobSpool B
+			ON A.strTransactionId = B.strTransactionId
+			AND A.intBankAccountId = B.intBankAccountId
+		INNER JOIN dbo.tblAPPayment AP ON A.strTransactionId = AP.strPaymentRecordNum
+WHERE	A.ysnClr = 0
+		AND B.intBankAccountId = @intBankAccountId
+		AND B.strTransactionId = ISNULL(@strTransactionId, B.strTransactionId)
+		AND B.strBatchId = ISNULL(@strBatchId, B.strBatchId)
+
+IF @@ERROR <> 0 GOTO _ROLLBACK	
 -- Create the temp table for processing the check number
 SELECT	* 
 INTO	#tmpCheckNumbers
