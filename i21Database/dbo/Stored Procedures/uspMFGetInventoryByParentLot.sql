@@ -8,7 +8,7 @@ SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
 
 IF @strPeriod IS NULL
 BEGIN
-	SELECT @dtmStartDate=dtmStartDate 
+	SELECT @dtmStartDate = dtmStartDate
 	FROM dbo.tblGLFiscalYearPeriod
 	WHERE @dtmCurrentDate BETWEEN dtmStartDate
 			AND dtmEndDate
@@ -28,7 +28,6 @@ BEGIN
 	WHERE dtmDate = @dtmStartDate
 END
 
-
 DECLARE @tblMFMultipleLotCode TABLE (
 	strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblLotQty NUMERIC(24, 10)
@@ -36,6 +35,7 @@ DECLARE @tblMFMultipleLotCode TABLE (
 	,dblWOQty NUMERIC(24, 10)
 	,dblWOTotalQty NUMERIC(24, 10)
 	)
+
 INSERT INTO @tblMFMultipleLotCode (
 	strLotNumber
 	,dblLotQty
@@ -48,7 +48,7 @@ EXEC uspMFGetLotCodeByProduction @intLotSnapshotId
 SELECT Item
 	,[Item Desc]
 	,[Lot No]
-	,(IsNULl([Active], 0) + IsNULl([PR Hold], 0) + IsNULl([QA Hold], 0) + IsNULl([Quarantine], 0) + IsNULl([Bond], 0) + IsNULl([Bond Damaged], 0) + IsNULl([Damaged], 0)) AS [On Hand]
+	,(IsNULl([Active], 0) + IsNULl([PR Hold], 0) + IsNULl([QA Hold], 0) + IsNULl([Quarantine], 0) + IsNULl([Bond], 0) + IsNULl([Bond Damaged], 0) + IsNULl([Damaged], 0) + IsNULl([Other Status], 0)) AS [On Hand]
 	,[UOM]
 	,[Active]
 	,[PR Hold]
@@ -57,8 +57,9 @@ SELECT Item
 	,[Bond]
 	,[Bond Damaged]
 	,[Damaged]
+	,[Other Status]
 	,intUnitsPerCase AS [Units/Case]
-	,dbo.fnRemoveTrailingZeroes(Ceiling((IsNULl([Active], 0) + IsNULl([PR Hold], 0) + IsNULl([QA Hold], 0) + IsNULl([Quarantine], 0) + IsNULl([Bond], 0) + IsNULl([Bond Damaged], 0) + IsNULl([Damaged], 0)) / intUnitsPerCase)) AS Pallets
+	,dbo.fnRemoveTrailingZeroes(Ceiling((IsNULl([Active], 0) + IsNULl([PR Hold], 0) + IsNULl([QA Hold], 0) + IsNULl([Quarantine], 0) + IsNULl([Bond], 0) + IsNULl([Bond Damaged], 0) + IsNULl([Damaged], 0) + IsNULl([Other Status], 0)) / intUnitsPerCase)) AS Pallets
 FROM (
 	SELECT I.strItemNo AS [Item]
 		,I.strDescription AS [Item Desc]
@@ -87,6 +88,14 @@ FROM (
 				THEN 'PR Hold'
 			WHEN LS.strSecondaryStatus LIKE '%Damaged'
 				THEN 'Damaged'
+			WHEN LS.strSecondaryStatus IN (
+					'Inactive'
+					,'Mislabeled'
+					,'Serial Number'
+					,'Used'
+					,'Quality Inspection'
+					)
+				THEN 'Other Status'
 			ELSE LS.strSecondaryStatus
 			END AS [Lot Status]
 		,(
@@ -98,13 +107,11 @@ FROM (
 			) AS intUnitsPerCase
 	FROM dbo.tblICLot L
 	JOIN tblMFLotSnapshotDetail SD ON SD.intLotId = L.intLotId
-	AND SD.intLotSnapshotId = @intLotSnapshotId
+		AND SD.intLotSnapshotId = @intLotSnapshotId
 	JOIN dbo.tblICParentLot PL ON PL.intParentLotId = SD.intParentLotId
-		AND SD.intStorageLocationId <> 6
 	JOIN dbo.tblICItem I ON I.intItemId = SD.intItemId
-		AND I.strType = 'Finished Good'
-	JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
-	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+	Left JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
+	Left JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = SD.intLotStatusId
 	LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = SD.intBondStatusId
@@ -120,4 +127,5 @@ PIVOT(SUM(Quantity) FOR [Lot Status] IN (
 			,[Bond]
 			,[Bond Damaged]
 			,[Damaged]
+			,[Other Status]
 			)) AS PivotTable;

@@ -23,13 +23,14 @@ SELECT InvS.strReferenceNumber
 	,InvSL.dblQuantityShipped dblQuantityShipped
 	,UM.strUnitMeasure
 	,Case When IU.intUnitMeasureId=I.intWeightUOMId Then InvSL.dblQuantityShipped Else  InvSL.dblQuantityShipped*I.dblWeight End As Weight 
-	,Convert(NVARCHAR(50), (
-			SELECT MAX(dtmCreated)
+	,(
+			SELECT MIN(dtmCreated)
 			FROM tblICInventoryTransaction IT
 			WHERE IT.intLotId = L.intLotId
 				AND IT.intTransactionTypeId = 5
 				AND IT.ysnIsUnposted = 0
-			)) AS dtmPostedDate
+				AND IT.strTransactionId =InvS.strShipmentNumber 
+			) AS dtmPostedDate
 	,C.strCategoryCode
 	,C.strDescription AS strCategoryDescription
 	,CAST(CASE 
