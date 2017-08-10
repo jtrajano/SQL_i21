@@ -383,7 +383,7 @@ BEGIN
 						,L.intWeightUOMId
 						,L.intItemUOMId
 				FROM	tblICLot L LEFT JOIN tblSMUserSecurity US 
-							ON L.intCreatedEntityId = US.[intEntityUserSecurityId]
+							ON L.intCreatedEntityId = US.intEntityId
 						JOIN tblICLotStatus LS 
 							ON L.intLotStatusId = LS.intLotStatusId
 						JOIN tblICStorageLocation SL 
