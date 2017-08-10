@@ -5177,9 +5177,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     { dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string' },
                     { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
                     { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, dataType: 'string' },
-                    { xtype: 'checkcolumn', dataIndex: 'ysnBundleItem', text: 'Is Bundled Item', width: 100, dataType: 'boolean', hidden: false, required: true },
-                    { dataIndex: 'intBundledItemId', text: 'Bundle Item Id', width: 100, dataType: 'numeric', hidden: true, required: true },
-                    { dataIndex: 'strBundledItemNo', text: 'Bundled Item No', width: 150, dataType: 'string', required: true },
+                    { xtype: 'checkcolumn', dataIndex: 'ysnIsBasket', text: 'Is Basket', width: 100, dataType: 'boolean', hidden: false, required: true },
+                    { dataIndex: 'intBundledItemId', text: 'Basket Id', width: 100, dataType: 'numeric', hidden: true, required: true },
+                    { dataIndex: 'strBundledItemNo', text: 'Basket No', width: 150, dataType: 'string', required: true },
+                    { dataIndex: 'strBundledItemDescription', text: 'Basket Name', width: 200, dataType: 'string', required: true },
                     { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', width: 100, dataType: 'float' },
                     { xtype: 'numbercolumn', dataIndex: 'intLoadToReceive', text: 'Load to Receive', width: 100, dataType: 'numeric' },
                     { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', width: 100, dataType: 'float' },
@@ -5244,8 +5245,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     openselectedclick: function(button, e, result) {
                         var win = me.getView();
                         var currentVM = me.getViewModel().data.current;
-
+                        var basketErrors = [];
+                        var addedBasketItem = currentVM.tblICInventoryReceiptItems().data;
+                                                
                         Ext.each(result, function (order) {
+                            if(order.get('ysnIsBasket')) {
+                                var filter = _.filter(addedBasketItem.items, function(x) { return x.get('intOrderId') === order.get('intOrderId') && !x.dummy; });
+
+                                if(filter.length > 0) {
+                                    var foundError = _.filter(addedBasketItem, function(x) { return x && x.orderId === order.get('intOrderId'); });
+                                    if(foundError.length === 0) {
+                                        basketErrors.push({
+                                            orderId: order.get('intOrderId'),
+                                            itemNo: order.get('strItemNo'),
+                                            orderNo: order.get('strOrderNumber'),
+                                            basketNo: order.get('strBundledItemNo'),
+                                            msg: 'You should not add bundled item "'
+                                                .concat(order.get('strItemNo'))
+                                                .concat('" from basket "')
+                                                .concat(order.get('strBundledItemNo'))
+                                                .concat('" with an order number: "')
+                                                .concat(order.get('strOrderNumber'))
+                                                .concat('". There is already a bundled item added from this basket. Only one bundled item from a basket per order should be added.')
+                                        });
+                                    }
+                                }
+                            }
+
                             var newRecord = {
                                 intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
                                 intLineNo: order.get('intLineNo'),
@@ -5320,6 +5346,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     }
                                 }
                             }
+
                             // Add the item record.
                             var newReceiptItems = currentVM.tblICInventoryReceiptItems().add(newRecord);
 
@@ -5448,6 +5475,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             }
 
                         });
+
+                        if(basketErrors.length > 0) {
+                            var msgBox = iRely.Functions;
+                            var strMsg = "You should only add one basket item per order.";
+
+                            // if(basketErrors.length <= 5) {
+                            //     strMsg += "\n<table style='font-size: 14px; margin: 0 auto; border:solid 1px grey'>";
+                            //     strMsg += "<tr><th>Order No</th><th>Basket</th><th>Item</th></tr><tr><td>"
+                            //     _.each(basketErrors, function(e) {
+                            //         strMsg += ""
+                            //             .concat(e.orderNo)
+                            //             .concat("</td><td>")
+                            //             .concat(e.basketNo)
+                            //             .concat("</td><td>")
+                            //             .concat(e.itemNo)
+                            //             .concat("</td></tr>");
+                            //     });
+                            //     strMsg = strMsg.concat("</table>");
+                            // }
+                            
+                            msgBox.showCustomDialog(
+                                msgBox.dialogType.WARNING,
+                                msgBox.dialogButtonType.OK,
+                                strMsg,
+                                function(b) { }
+                            );
+                        }
                         //search.close();
                         //win.context.data.saveRecord();
                     } 
