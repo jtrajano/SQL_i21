@@ -134,8 +134,8 @@ BEGIN
 	SELECT @intWorkOrderId
 		,@intItemId
 		,@intLotId
-		,@dblProduceQty
-		,@intProduceUOMKey
+		,Case When @intProduceUOMKey=0 Then @dblPhysicalCount Else @dblProduceQty End
+		,Case When @intProduceUOMKey=0 Then @intPhysicalItemUOMId Else @intProduceUOMKey End
 		,(
 			CASE 
 				WHEN @dblUnitQty IS NOT NULL
@@ -321,7 +321,7 @@ BEGIN
 		IF @ysnProducedQtyByUnitCount IS NULL
 			SELECT @ysnProducedQtyByUnitCount = 0
 
-		IF @ysnProducedQtyByUnitCount = 1
+		IF @ysnProducedQtyByUnitCount = 1 OR @intProduceUOMKey IS NULL OR @intProduceUOMKey=0
 		BEGIN
 			SELECT @dblProduceQty = @dblPhysicalCount
 
