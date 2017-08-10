@@ -129,6 +129,7 @@ END
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT;
 
+		UPDATE tblAPBillDetail SET intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') WHERE intBillId = @intCreatedBillId;
 		IF(@qualified = 0)
 		BEGIN
 			UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 1, dbl1099 = ROUND(@dblEquityPay, 2) WHERE intBillId = @intCreatedBillId;
