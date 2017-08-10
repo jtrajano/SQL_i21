@@ -46,7 +46,7 @@ BEGIN TRY
 		,[intEntityCustomerId]					= DH.intEntityCustomerId
 		,[intCompanyLocationId]					= DH.intCompanyLocationId
 		,[intCurrencyId]						= NULL
-		,[intTermId]							= EL.intTermsId
+		,[intTermId]							= ISNULL(EL.intTermsId, Customer.intTermsId)
 		,[dtmDate]								= DH.dtmInvoiceDateTime
 		,[dtmDueDate]							= NULL
 		,[dtmShipDate]							= DH.dtmInvoiceDateTime
