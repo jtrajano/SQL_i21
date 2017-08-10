@@ -124,6 +124,7 @@ END
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT;
 
+		UPDATE tblAPBillDetail SET intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') WHERE intBillId = @intCreatedBillId;
 		UPDATE tblPATEquityPaySummary SET intBillId = @intCreatedBillId WHERE intEquityPaySummaryId = @intEquityPaySummaryId;
 
 		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
