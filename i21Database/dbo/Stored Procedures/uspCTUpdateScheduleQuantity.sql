@@ -24,7 +24,8 @@ BEGIN TRY
 			@strContractNumber		NVARCHAR(100),
 			@strContractSeq			NVARCHAR(100),
 			@strAvailableQty		NVARCHAR(100),
-			@strQuantityToUpdate	NVARCHAR(100) = LTRIM(@dblQuantityToUpdate)
+			@strQuantityToUpdate	NVARCHAR(100) = LTRIM(@dblQuantityToUpdate),
+			@dblTolerance			NUMERIC(18,6) = 0.0001
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -61,13 +62,28 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			RAISERROR('Available quantity for the contract %s and sequence %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strContractNumber,@strContractSeq,@strAvailableQty,@strQuantityToUpdate)
+			IF ((@dblScheduleQty + @dblQuantityToUpdate) - @dblBalance) > @dblTolerance
+			BEGIN
+				RAISERROR('Available quantity for the contract %s and sequence %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strContractNumber,@strContractSeq,@strAvailableQty,@strQuantityToUpdate)
+			END
+			ELSE
+			BEGIN
+				SET @dblQuantityToUpdate = @dblQuantityToUpdate - ((@dblScheduleQty + @dblQuantityToUpdate) - @dblBalance)
+			END
 		END
 	END
 	
 	IF	@dblScheduleQty + @dblQuantityToUpdate < 0 
 	BEGIN
-		RAISERROR('Total scheduled quantity cannot be less than zero.',16,1)
+		IF ABS(@dblScheduleQty + @dblQuantityToUpdate) > @dblTolerance
+		BEGIN
+			RAISERROR('Total scheduled quantity cannot be less than zero.',16,1)
+		END
+		ELSE
+		BEGIN
+			SET @dblQuantityToUpdate = @dblQuantityToUpdate - (@dblScheduleQty + @dblQuantityToUpdate)
+		END 
+		
 	END
 	
 	SELECT	@dblNewScheduleQty =	@dblScheduleQty + @dblQuantityToUpdate
