@@ -48,6 +48,7 @@ FROM
 		,[strBillOfLading]			=	tblReceived.strBillOfLading
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
+		,[intContractSequence]		=	G2.intContractSeq
 		,[intScaleTicketId]			=	NULL
 		,[strScaleTicketNumber]		=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]			=	0            
@@ -246,6 +247,7 @@ FROM
 	,[strBillOfLading]			=	NULL
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
+	,[intContractSequence]		=	NULL
 	,[intScaleTicketId]			=	NULL
 	,[strScaleTicketNumber]		=	CAST(NULL AS NVARCHAR(50))
 	,[intShipmentId]			=	0    
@@ -345,6 +347,7 @@ FROM
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
+	,[intContractSequence]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN CD.intContractSeq ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(50))
 	,[intShipmentId]			=	0
@@ -486,6 +489,7 @@ FROM
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
+		,[intContractSequence]						=	NULL
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
 		,[intShipmentId]							=	0      
@@ -602,6 +606,7 @@ FROM
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
+		,[intContractSequence]						=	CD.intContractSeq
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	0     
@@ -704,6 +709,7 @@ FROM
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
+		,[intContractSequence]						=	CD.intContractSeq
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	0     
@@ -761,8 +767,8 @@ FROM
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0
 	UNION ALL
-		 SELECT
-		 [intEntityVendorId]							=	A.intVendorEntityId
+		SELECT
+		[intEntityVendorId]							=	A.intVendorEntityId
 		,[dtmDate]									=	A.dtmPostedDate
 		,[strReference]								=	''
 		,[strSourceNumber]							=	LTRIM(A.strLoadNumber)
@@ -801,6 +807,7 @@ FROM
 		,[strBillOfLading]							=	A.strBLNumber
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intPContractDetailId
+		,[intContractSequence]						=	A.intContractSeq
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	A.intLoadId
@@ -892,6 +899,7 @@ FROM
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
+		,[intContractSequence]						=	NULL
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
 		,[intShipmentId]							=	A.intInventoryShipmentId     
