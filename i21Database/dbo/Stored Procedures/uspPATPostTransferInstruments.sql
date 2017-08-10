@@ -20,7 +20,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage'
-DECLARE @SCREEN_NAME NVARCHAR(25) = 'Transfer Instruments'
+DECLARE @SCREEN_NAME NVARCHAR(25) = 'Transfer Instrument'
 DECLARE @totalRecords INT
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @error NVARCHAR(200)
@@ -230,26 +230,35 @@ SET @batchIdUsed = @batchId;
 	BEGIN
 		---------------------  TRANSFER EQUITY TO EQUITY RESERVE ---------------------------------
 
+		-- Apply adjustment to target record
 		MERGE tblPATCustomerEquity CE
 		USING (SELECT * FROM #tempTransferDetails WHERE intTransferType = 5) TD
-			ON (TD.intFiscalYearId = CE.intFiscalYearId AND CE.intCustomerId = TD.intTransferorId AND CE.strEquityType = 'Reserve')
+			ON (CE.intFiscalYearId = TD.intToFiscalYearId AND CE.intCustomerId = TD.intTransfereeId AND CE.intRefundTypeId = TD.intToRefundTypeId
+				AND CE.strEquityType = 'Reserve')
 			WHEN MATCHED
 				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity + TD.dblQuantityTransferred ELSE CE.dblEquity - TD.dblQuantityTransferred END
 			WHEN NOT MATCHED BY TARGET
 				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dblEquityPaid, intConcurrencyId)
-				VALUES (TD.intTransferorId, TD.intFiscalYearId, 'Reserve', TD.intRefundTypeId, TD.dblQuantityTransferred, 0, 1);
+				VALUES (TD.intTransfereeId, TD.intToFiscalYearId, 'Reserve', TD.intToRefundTypeId, TD.dblQuantityTransferred, 0, 1);
 
-		UPDATE CE
-		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
-		FROM tblPATCustomerEquity AS CE
-		INNER JOIN #tempTransferDetails AS tempTD
-			ON CE.intCustomerId = tempTD.intTransferorId AND CE.intFiscalYearId = tempTD.intFiscalYearId AND CE.intRefundTypeId = tempTD.intRefundTypeId AND CE.strEquityType = 'Undistributed' AND tempTD.intTransferType = 5
+		-- Apply adjustment to source record
+		MERGE tblPATCustomerEquity CE
+		USING (SELECT * FROM #tempTransferDetails WHERE intTransferType = 5) tempTD
+			ON (CE.intCustomerId = tempTD.intTransferorId AND CE.intFiscalYearId = tempTD.intFiscalYearId AND CE.intRefundTypeId = tempTD.intRefundTypeId 
+				AND CE.strEquityType = 'Undistributed')
+			WHEN MATCHED
+				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
+			WHEN NOT MATCHED BY TARGET
+				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dblEquityPaid, intConcurrencyId)
+				VALUES (tempTD.intTransfereeId, tempTD.intFiscalYearId, 'Undistributed', tempTD.intRefundTypeId, tempTD.dblQuantityTransferred, 0, 1);
+		
 	END
 
 	IF ExISTS(SELECT 1 FROM #tempTransferDetails WHERE intTransferType = 6)
 	BEGIN
 		---------------------  TRANSFER EQUITY RESERVE TO EQUITY ---------------------------------
-
+		
+		-- Apply adjustment to target record
 		MERGE tblPATCustomerEquity CE
 		USING (SELECT * FROM #tempTransferDetails WHERE intTransferType = 6) TD
 			ON (TD.intToFiscalYearId = CE.intFiscalYearId AND CE.intCustomerId = TD.intTransferorId AND CE.intRefundTypeId = TD.intToRefundTypeId AND CE.strEquityType = 'Undistributed')
@@ -259,12 +268,15 @@ SET @batchIdUsed = @batchId;
 				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
 				VALUES (TD.intTransferorId, TD.intToFiscalYearId, 'Undistributed', TD.intToRefundTypeId, TD.dblQuantityTransferred, 1);
 
-		UPDATE CE
-		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
-		FROM tblPATCustomerEquity AS CE
-		INNER JOIN #tempTransferDetails AS tempTD
-			ON CE.intCustomerId = tempTD.intTransferorId AND CE.intFiscalYearId = tempTD.intFiscalYearId AND CE.intRefundTypeId = tempTD.intRefundTypeId AND CE.strEquityType = 'Reserve' AND tempTD.intTransferType = 6
-			
+		-- Apply adjustment to source record
+		MERGE tblPATCustomerEquity CE
+		USING (SELECT * FROM #tempTransferDetails WHERE intTransferType = 6) tempTD
+			ON (tempTD.intFiscalYearId = CE.intFiscalYearId AND CE.intCustomerId = tempTD.intTransferorId AND CE.intRefundTypeId = tempTD.intRefundTypeId AND CE.strEquityType = 'Reserve')
+			WHEN MATCHED
+				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END
+			WHEN NOT MATCHED BY TARGET
+				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
+				VALUES (tempTD.intTransferorId, tempTD.intFiscalYearId, 'Reserve', tempTD.intRefundTypeId, tempTD.dblQuantityTransferred, 1);			
 	END
 	---------------- END - UPDATE TABLES ----------------
 	

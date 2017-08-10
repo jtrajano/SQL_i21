@@ -449,7 +449,7 @@ ELSE
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
-			,A.[dblExchangeRate]
+			,A.[dblForeignRate]
 			,A.[intUserId]
 			,A.[dtmDateEntered]
 			,A.[strBatchId]
@@ -461,7 +461,7 @@ ELSE
 			,C.strAccountGroup
 			,DebitForeign.Value
 			,CreditForeign.Value
-			,''
+			,A.strRateType
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId

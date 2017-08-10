@@ -5593,6 +5593,7 @@
     <Build Include="dbo\Views\vyuHDCurrencyRate.sql" />
     <Build Include="dbo\Views\vyuHDCurrencyRateType.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountVehicle.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportPurgePromotionsPreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

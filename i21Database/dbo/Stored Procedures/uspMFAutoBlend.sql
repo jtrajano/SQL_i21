@@ -9,7 +9,6 @@
 	@intSubLocationId int=NULL,
 	@intStorageLocationId int=NULL,
 	@intUserId int,
-	@strActualCost NVARCHAR(20) = NULL,
 	@dblMaxQtyToProduce numeric(38,20) OUT,
 	@dtmDate AS DATETIME = NULL 
 AS
@@ -549,7 +548,7 @@ BEGIN TRY
 					,L.intWeightUOMId
 					,L.intItemUOMId
 			FROM	tblICLot L LEFT JOIN tblSMUserSecurity US 
-						ON L.intCreatedEntityId = US.[intEntityId]
+						ON L.intCreatedEntityId = US.intEntityId
 					JOIN tblICLotStatus LS 
 						ON L.intLotStatusId = LS.intLotStatusId
 					JOIN tblICStorageLocation SL 
@@ -892,17 +891,17 @@ BEGIN TRY
 		WHERE	intWorkOrderId = @intWorkOrderId
 
 		--Consume Lots/Items/End Blend Sheet
-		Exec [uspMFPostConsumption] 
-			1
-			,0
-			,@intWorkOrderId
-			,@intUserId
-			,NULL
-			,@strRetBatchId OUT
-			,NULL
-			,1
-			,@strActualCost 
-			,@dtmDate
+		EXEC uspMFPostConsumption
+			@ysnPost = 1
+			,@ysnRecap = 0
+			,@intWorkOrderId = @intWorkOrderId
+			,@intUserId = @intUserId
+			,@intEntityId = NULL
+			,@strRetBatchId = @strRetBatchId OUT
+			,@intBatchId = NULL
+			,@ysnPostGL = 1
+			,@intLoadDistributionDetailId = @intLoadDistributionDetailId
+			,@dtmDate = @dtmDate
 
 		UPDATE	tblMFWorkOrder 
 		SET		intStatusId=12
@@ -965,11 +964,12 @@ BEGIN TRY
 		SET @strXml += '</root>'
 
 		EXEC uspMFCompleteBlendSheet 
-			@strXml
-			,@intBlendLotId OUT
-			,@strLotNumber OUT
-			,@strActualCost
-			,@dtmDate
+			@strXml = @strXml
+			,@intLoadDistributionDetailId = @intLoadDistributionDetailId
+			,@dtmCurrentDate = @dtmDate
+			,@intLotId = @intBlendLotId OUT
+			,@strLotNumber = @strLotNumber OUT
+			
 
 		IF @strOrderType='SALES ORDER'
 			SELECT	@intWorkOrderId = MIN(intWorkOrderId) 

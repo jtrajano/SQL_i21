@@ -6,7 +6,7 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@strRetBatchId NVARCHAR(40) = NULL OUT
 	,@intBatchId INT = NULL
 	,@ysnPostGL BIT=1
-	,@strActualCost NVARCHAR(20) = NULL
+	,@intLoadDistributionDetailId INT = NULL
 	,@dtmDate DATETIME = NULL 
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -182,6 +182,33 @@ SELECT @strRetBatchId = @strBatchId
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
+
+	--PRINT 'Load Distribution Detail Id : '
+	--PRINT @intLoadDistributionDetailId
+
+	SELECT DistItem.intLoadDistributionDetailId
+		, intItemId = BlendIngredient.intIngredientItemId
+		, dblQty = BlendIngredient.dblQuantity
+		, HeaderDistItem.intCompanyLocationId
+		, HeaderDistItem.dtmInvoiceDateTime
+		, strActualCostId = (CASE WHEN Receipt.strOrigin = 'Terminal'
+									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+									THEN NULL
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location'
+									THEN NULL
+								END)
+	INTO #tmpBlendIngredients
+	FROM tblTRLoadDistributionDetail DistItem
+	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+	LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
+	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
+		AND ISNULL(DistItem.strReceiptLink, '') = ''
+
 	--Non Lot Tracking
 	INSERT INTO @ItemsForPost (
 		intItemId
@@ -224,15 +251,18 @@ BEGIN
 		,intStorageLocationId = cl.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
-		,strActualCostId=@strActualCost
+		,strActualCostId = BlendItems.strActualCostId
 	FROM dbo.tblMFWorkOrderConsumedLot cl
 	JOIN dbo.tblICItem i ON cl.intItemId = i.intItemId
 	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
 	JOIN dbo.tblICItemLocation il ON i.intItemId = il.intItemId
 		AND il.intLocationId = @intLocationId
 	INNER JOIN dbo.tblICItemPricing IP on IP.intItemId=i.intItemId AND IP.intItemLocationId =il.intItemLocationId
+	LEFT JOIN #tmpBlendIngredients BlendItems ON BlendItems.intItemId = cl.intItemId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND ISNULL(cl.intLotId, 0) = 0
+	
+	DROP TABLE #tmpBlendIngredients
 
 	--Lot Tracking
 	INSERT INTO @ItemsForPost (

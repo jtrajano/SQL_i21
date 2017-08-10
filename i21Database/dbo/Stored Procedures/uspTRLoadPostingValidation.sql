@@ -59,6 +59,8 @@ BEGIN TRY
 		, @intFreightItemId INT
 		, @intSurchargeItemId INT
 		, @ysnItemizeSurcharge BIT
+		, @ReceiptLink NVARCHAR(50)
+		, @BlendedItem BIT = 0
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -262,13 +264,23 @@ BEGIN TRY
 			AND BlendIngredient.intIngredientItemId = @intItemId
 		GROUP BY BlendIngredient.intIngredientItemId
 
+		UNION ALL 
+
+		SELECT Detail.intItemId
+			, Detail.dblUnits
+		FROM tblTRLoadDistributionDetail Detail
+		LEFT JOIN tblTRLoadDistributionHeader Header ON Header.intLoadDistributionHeaderId = Detail.intLoadDistributionHeaderId
+		WHERE Detail.intLoadDistributionDetailId NOT IN (SELECT DISTINCT intLoadDistributionDetailId FROM vyuTRGetLoadBlendIngredient)
+			AND Header.intLoadHeaderId = @intLoadHeaderId
+			AND Detail.intItemId = @intItemId
+
 		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
 		BEGIN
 			SELECT @dblDistributedQuantity = SUM(dblQuantity) FROM #tmpBlendDistributionItems
 
 			IF (@dblReceivedQuantity != @dblDistributedQuantity)
 			BEGIN
-				SET @strresult = 'Raw Materials ' + @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match required quantity ' + LTRIM(@dblDistributedQuantity) + ' for blending'
+				SET @strresult = 'Raw Materials ' + @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match required quantity ' + LTRIM(@dblDistributedQuantity) + '.'
 				RAISERROR(@strresult, 16, 1)
 			END
 		END
@@ -314,6 +326,8 @@ BEGIN TRY
 		, DD.dblPrice
 		, dblFreight = DD.dblFreightRate
 		, dblSurcharge = DD.dblDistSurcharge
+		, DD.strReceiptLink
+		, DD.ysnBlendedItem
 	INTO #DistributionDetailTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -329,6 +343,8 @@ BEGIN TRY
 			, @dblPrice = DD.dblPrice
 			, @dblFreight = DD.dblFreight
 			, @dblSurcharge = DD.dblSurcharge
+			, @ReceiptLink = DD.strReceiptLink
+			, @BlendedItem = DD.ysnBlendedItem
 		FROM #DistributionDetailTable DD
 		WHERE intLoadHeaderId = @intLoadHeaderId
 		
@@ -380,6 +396,10 @@ BEGIN TRY
 		IF (@intDistributionItemId IS NULL)
 		BEGIN
 			RAISERROR('Distribution Item is invalid', 16, 1)
+		END
+		IF (@BlendedItem = 0 AND ISNULL(@ReceiptLink, '') = '')
+		BEGIN
+			RAISERROR('Receipt Link cannot be blank for non-blended items', 16, 1)
 		END
 		
 		SELECT @intStockUOMId = intIssueUOMId

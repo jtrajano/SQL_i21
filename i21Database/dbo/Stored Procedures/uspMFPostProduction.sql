@@ -1,4 +1,4 @@
-CREATE Procedure [dbo].[uspMFPostProduction] 
+CREATE PROCEDURE [dbo].[uspMFPostProduction] 
 	@ysnPost BIT = 0
 	,@ysnRecap BIT = 0
 	,@intWorkOrderId INT = NULL
@@ -23,6 +23,7 @@ CREATE Procedure [dbo].[uspMFPostProduction]
 	,@intTransactionDetailId INT = NULL
 	,@strShiftActivityNo NVARCHAR(50) = NULL
 	,@intShiftId int=NULL
+	,@intLoadDistributionDetailId INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -490,6 +491,32 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
+	DECLARE @strActualCost NVARCHAR(50) = NULL
+
+	SELECT strActualCost = (CASE WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Customer'
+									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Location'
+									THEN NULL
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+									THEN NULL
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+									THEN LoadHeader.strTransaction
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location'
+									THEN NULL
+								END)
+	INTO #tmpBlendIngredients
+	FROM tblTRLoadDistributionDetail DistItem
+	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+	LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
+	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
+		AND ISNULL(DistItem.strReceiptLink, '') = ''
+
+	SELECT TOP 1 @strActualCost = strActualCost
+	FROM #tmpBlendIngredients
+	WHERE ISNULL(strActualCost, '') <> ''
+
 	IF @strLotTracking = 'No'
 		INSERT INTO @ItemsForPost (
 			intItemId
@@ -511,31 +538,23 @@ BEGIN
 			,intStorageLocationId
 			,intSourceTransactionId
 			,strSourceTransactionId
+			,strActualCostId
 			)
 		SELECT intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
 			,intItemUOMId = @intProduceUOMKey
 			,dtmDate = @dtmProductionDate
 			,dblQty = @dblProduceQty
-			,dblUOMQty =
 			-- Get the unit qty of the Weight UOM or qty UOM
-			CASE 
-				WHEN (@intWeightUOMId = @intProduceUOMKey)
-					THEN (
-							SELECT 1
-							)
-				ELSE (
-						CASE 
-							WHEN @dblUnitQty IS NOT NULL
-								THEN @dblUnitQty
-							ELSE (
-									SELECT TOP 1 dblUnitQty
-									FROM dbo.tblICItemUOM
-									WHERE intItemUOMId = @intProduceUOMKey
-									)
+			,dblUOMQty = CASE WHEN (@intWeightUOMId = @intProduceUOMKey)
+								THEN (SELECT 1)
+							ELSE (CASE WHEN @dblUnitQty IS NOT NULL
+										THEN @dblUnitQty
+									ELSE (SELECT TOP 1 dblUnitQty
+										FROM dbo.tblICItemUOM
+										WHERE intItemUOMId = @intProduceUOMKey)
+									END)
 							END
-						)
-				END
 			,dblCost = @dblNewUnitCost
 			,dblSalesPrice = 0
 			,intCurrencyId = NULL
@@ -549,6 +568,7 @@ BEGIN
 			,intStorageLocationId = @intStorageLocationId
 			,intSourceTransactionId = @INVENTORY_PRODUCE
 			,strSourceTransactionId = @strTransactionId
+			,strActualCostId = @strActualCost
 	ELSE
 		INSERT INTO @ItemsForPost (
 			intItemId
@@ -570,31 +590,23 @@ BEGIN
 			,intStorageLocationId
 			,intSourceTransactionId
 			,strSourceTransactionId
+			,strActualCostId
 			)
 		SELECT intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
 			,intItemUOMId = @intProduceUOMKey
 			,dtmDate = @dtmProductionDate
 			,dblQty = @dblProduceQty
-			,dblUOMQty =
 			-- Get the unit qty of the Weight UOM or qty UOM
-			CASE 
-				WHEN (@intWeightUOMId = @intProduceUOMKey)
-					THEN (
-							SELECT 1
-							)
-				ELSE (
-						CASE 
-							WHEN @dblUnitQty IS NOT NULL
-								THEN @dblUnitQty
-							ELSE (
-									SELECT TOP 1 dblUnitQty
-									FROM dbo.tblICItemUOM
-									WHERE intItemUOMId = @intProduceUOMKey
-									)
-							END
-						)
-				END
+			,dblUOMQty = CASE WHEN (@intWeightUOMId = @intProduceUOMKey)
+								THEN (SELECT 1)
+							ELSE (CASE WHEN @dblUnitQty IS NOT NULL
+										THEN @dblUnitQty
+									ELSE (SELECT TOP 1 dblUnitQty
+										FROM dbo.tblICItemUOM
+										WHERE intItemUOMId = @intProduceUOMKey)
+							END)
+						END
 			,dblCost = @dblNewUnitCost
 			,dblSalesPrice = 0
 			,intCurrencyId = NULL
@@ -608,7 +620,7 @@ BEGIN
 			,intStorageLocationId = @intStorageLocationId
 			,intSourceTransactionId = @INVENTORY_PRODUCE
 			,strSourceTransactionId = @strTransactionId
-
+			,strActualCostId = @strActualCost
 	DELETE
 	FROM @GLEntries
 
@@ -658,6 +670,8 @@ BEGIN
 
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,@ysnPost
+
+	DROP TABLE #tmpBlendIngredients
 
 	IF @intWorkOrderId IS NOT NULL
 	BEGIN
