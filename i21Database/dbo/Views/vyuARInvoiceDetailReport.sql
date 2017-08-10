@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceDetailReport]
 AS
 SELECT I.intInvoiceId
+	 , I.intEntityCustomerId
+	 , I.intCompanyLocationId
 	 , I.strInvoiceNumber
 	 , CT.strContractNumber
 	 , CT.intContractSeq
