@@ -140,7 +140,7 @@ END
 			,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 			,dblSurcharge				= min(TR.dblPurSurcharge)
 			,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
-			,strActualCostId			= min(TLD.strTransaction) 											
+			,strActualCostId			= ISNULL(min(TLD.strTransaction), min(BID.strTransaction))
 			,intTaxGroupId				= min(TR.intTaxGroupId)
 			,strVendorRefNo				= min(TR.strBillOfLading)
 			,strSourceId				= min(TL.strTransaction)
@@ -161,9 +161,17 @@ END
 									ON TT.intLoadHeaderId = RR.intLoadHeaderId
 								JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
 								JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
-						WHERE	RR.strOrigin = 'Terminal' 
-								AND HH.strDestination = 'Customer' 	and RR.intItemId = HD.intItemId		
+						WHERE	RR.strOrigin = 'Terminal' AND HH.strDestination = 'Customer' AND RR.intItemId = HD.intItemId		
 					  ) TLD	on TLD.intLoadHeaderId = TR.intLoadHeaderId	 and TLD.intLoadReceiptId = TR.intLoadReceiptId and TLD.intItemId = TR.intItemId
+			LEFT JOIN (
+						SELECT DISTINCT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId
+						FROM tblTRLoadHeader TT
+						LEFT JOIN tblTRLoadReceipt RR ON TT.intLoadHeaderId = RR.intLoadHeaderId
+						LEFT JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId
+						LEFT JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId
+						LEFT JOIN vyuTRGetLoadBlendIngredient BI ON BI.intLoadDistributionDetailId = HD.intLoadDistributionDetailId
+						WHERE	RR.strOrigin = 'Terminal' AND BI.intIngredientItemId = RR.intItemId
+						) BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
