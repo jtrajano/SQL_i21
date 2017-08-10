@@ -356,6 +356,28 @@ SET @batchIdUsed = @batchId
 				WHERE
 					ISNULL(ARPD.dblPayment,0.00) <> 0.00
 					AND ISNULL(ARI.ysnPosted,0) = 0
+
+				--Invoice Prepayment
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					A.strRecordNumber + '''s payment amount must be equal to ' + B.strTransactionNumber + '''s prepay amount!'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM 
+					tblARPaymentDetail B
+				INNER JOIN 
+					tblARPayment A 
+						ON B.intPaymentId = A.intPaymentId
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						
+				WHERE
+					ISNULL(A.ysnInvoicePrepayment, 0) = 1
+					AND (B.dblInvoiceTotal <> B.dblPayment OR B.dblInvoiceTotal <> A.dblAmountPaid)
+					
 					
 				--Return Payment not allowed
 				INSERT INTO
