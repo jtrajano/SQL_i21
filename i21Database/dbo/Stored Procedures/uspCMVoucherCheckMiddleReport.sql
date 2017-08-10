@@ -59,6 +59,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 DECLARE @intBankAccountId AS INT
 		,@strTransactionId AS NVARCHAR(40)
 		,@strBatchId AS NVARCHAR(40)
+		,@intEntityUserId AS INT
   
 -- Declare the variables for the XML parameter  
 DECLARE @xmlDocumentId AS INT  
@@ -105,6 +106,10 @@ WHERE [fieldname] = 'strTransactionId'
 SELECT	@strBatchId = [from]
 FROM @temp_xml_table   
 WHERE [fieldname] = 'strBatchId'
+
+SELECT	@intEntityUserId = [from]
+FROM @temp_xml_table   
+WHERE [fieldname] = 'intEntityUserId'
   
 -- Sanitize the parameters  
 SET @strTransactionId = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL ELSE @strTransactionId END  
@@ -201,5 +206,6 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
 		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
+		AND PRINTSPOOL.intCreatedUserId = @intEntityUserId
 ORDER BY CHK.strReferenceNo ASC
 
