@@ -107,10 +107,10 @@ IF @ysnDetailedFormat = 0
 	BEGIN
 		SELECT SSC.*
 		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)
-		INNER JOIN (SELECT intEntityCustomerId
+		INNER JOIN (SELECT intEntityId
 					FROM dbo.tblARCustomer WITH (NOLOCK)
 					WHERE ISNULL(strStatementFormat, 'Open Item') = @strStatementFormat
-		) C ON SSC.intEntityCustomerId = C.intEntityCustomerId
+		) C ON SSC.intEntityCustomerId = C.intEntityId
 		ORDER BY SSC.strCustomerName
 	END
 ELSE
