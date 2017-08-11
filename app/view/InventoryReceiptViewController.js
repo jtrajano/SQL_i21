@@ -6979,6 +6979,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onReceiptDateChange: function(field, newValue, oldValue, eOpts){
         if (!oldValue || !newValue) return; 
         if (oldValue == newValue) return; 
+        if (oldValue.toDateString() == newValue.toDateString()) return; 
 
         var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         //var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
