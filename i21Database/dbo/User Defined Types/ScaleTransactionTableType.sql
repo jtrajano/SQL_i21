@@ -5,7 +5,7 @@ CREATE TYPE [dbo].[ScaleTransactionTableType] AS TABLE
 (
 	[intTicketId] INT NULL,
 	[intContractDetailId] INT NULL,
-	[dblUnitsDistributed] NUMERIC(12, 4) NULL,
-	[dblUnitsRemaining] NUMERIC(12, 4) NULL,
-	[dblCost] NUMERIC(9, 4) NULL	
+	[dblUnitsDistributed] NUMERIC(38, 20) NULL,
+	[dblUnitsRemaining] NUMERIC(38, 20) NULL,
+	[dblCost] NUMERIC(38, 20) NULL	
 )

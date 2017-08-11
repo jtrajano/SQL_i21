@@ -30,7 +30,12 @@ BEGIN TRY
 			, dblScheduleQty = @dblScheduleQty
 			, dblUnitPrice = CT.dblFutures
 			, dblUnitBasis = CT.dblBasis
-			FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
+			, dblFreightRate = CTCost.dblRate
+			, intHaulerId = CTCost.intVendorId
+			FROM tblSCTicket SC 
+			INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+			INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
+			INNER JOIN tblCTContractCost CTCost ON CT.intContractDetailId = CTCost.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
 			WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId AND SC.strDistributionOption != 'SPL'
 		END
 	ELSE
