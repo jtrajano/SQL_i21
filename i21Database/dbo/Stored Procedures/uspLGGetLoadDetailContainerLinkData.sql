@@ -24,8 +24,10 @@ BEGIN
 					ELSE 1
 					END
 				) AS BIT) AS ysnReceived
-		,NULL AS dblPContractPrice
-		,NULL AS dblSContractPrice
+		,PDetail.dblCashPrice AS dblPCashPrice
+		,SDetail.dblCashPrice AS dblSCashPrice
+		,PDetail.dblCashPrice AS dblPContractPrice
+		,SDetail.dblCashPrice AS dblSContractPrice
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LC.dblNetWt
 		,NULL AS dblCashPrice

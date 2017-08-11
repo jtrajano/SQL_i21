@@ -38,8 +38,8 @@ BEGIN
 		,UOM.strUnitMeasure AS strItemUOM
 		,intUnitMeasureId = UOM.intUnitMeasureId
 		,WeightUOM.strUnitMeasure AS strWeightItemUOM
-		,dblWeightPerUnit = NULL
-		,dblUnMatchedQty = NULL
+		,dblWeightPerUnit = IsNull(dbo.fnLGGetItemUnitConversion (LoadDetail.intItemId, LoadDetail.intItemUOMId, LOAD.intWeightUnitMeasureId), 0.0)
+		,dblUnMatchedQty = CASE WHEN (SELECT COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadId = LOAD.intLoadId) > 0 THEN 0 ELSE LoadDetail.dblQuantity END
 		,CO.strCountry AS strOrigin
 		,CA.intCommodityAttributeId
 		,Item.intCommodityId

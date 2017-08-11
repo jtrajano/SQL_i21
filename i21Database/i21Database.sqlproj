@@ -5615,6 +5615,7 @@
     <Build Include="dbo\Stored Procedures\uspCTNotification.sql" />
     <None Include="Scripts\Post-Deployment\FRM\1_OfflineGuid.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunitySalesrepFromLob.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailLotData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
