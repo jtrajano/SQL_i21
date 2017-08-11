@@ -76,7 +76,7 @@ BEGIN
 	,intCurrencyId
 	,GETDATE()
 	,11 --For Credit Card
-	,'Credit Card'
+	,@strCreditCardNumber --Payment Method
 	,@strCreditCardNumber --Check weather we can use the payment method cc number
 	,'' --Notes
 	,Inv.intAccountId
@@ -143,6 +143,8 @@ BEGIN
 
 	SET @intPaymentIdNew = @intPaymentId
 	SELECT @strPaymentIdNew = strRecordNumber FROM tblARPayment WHERE intPaymentId = @intPaymentId
+	--Set the Card Info Id and Process Credit Card
+	UPDATE tblARPayment SET intEntityCardInfoId = @intEntityCardInfoId, ysnProcessCreditCard = 1 WHERE intPaymentId = @intPaymentId
 
 	GOTO Exit_Routine
 END
@@ -153,6 +155,7 @@ END
 IF @strAction = 'Delete'
 BEGIN
 	DELETE FROM tblARPayment WHERE intPaymentId = @intPaymentId
+	SET @intPaymentIdNew = @intPaymentId
 
 	GOTO Exit_Routine
 END
