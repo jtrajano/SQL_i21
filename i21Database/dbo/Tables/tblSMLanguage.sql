@@ -4,5 +4,6 @@
     [strLanguage]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[intReportLabelId]			INT  NULL,
 	[ysnDefault]				BIT  NULL,
-    [intConcurrencyId]			INT	 NOT NULL DEFAULT (1)
+    [intConcurrencyId]			INT	 NOT NULL DEFAULT (1), 
+    CONSTRAINT [AK_tblSMLanguage_strLanguage_intReportLabelId] UNIQUE ([strLanguage], [intReportLabelId])
 )
