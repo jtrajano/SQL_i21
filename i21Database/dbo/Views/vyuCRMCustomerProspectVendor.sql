@@ -1,5 +1,18 @@
 ﻿CREATE VIEW [dbo].[vyuCRMCustomerProspectVendor]
 	AS
+		select distinct
+			intEntityCustomerId = a.intEntityId
+			,strCustomerNumber = b.strEntityNo
+			,strName = b.strName
+			,strType = dbo.fnCRMCoalesceEntityType(a.intEntityId)
+			,ysnActive = b.ysnActive
+		from
+			tblEMEntityType a
+			,tblEMEntity b
+		where
+			a.strType in ('Customer','Vendor','Prospect','Competitor','Partner','Employee')
+			and b.intEntityId = a.intEntityId
+		/*
 		select
 			intEntityCustomerId
 			,strCustomerNumber
@@ -40,3 +53,4 @@
 			where
 				a.intEntityId in (select b.[intEntityId] from tblAPVendor b union select c.[intEntityId] from tblARCustomer c)
 		) as result
+		*/
