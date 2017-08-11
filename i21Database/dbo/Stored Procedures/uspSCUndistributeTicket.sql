@@ -63,7 +63,8 @@ BEGIN TRY
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
 					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
-
+					IF OBJECT_ID (N'tempdb.dbo.##tmpVoucherDetail') IS NOT NULL
+                        DROP TABLE #tmpVoucherDetail
 					CREATE TABLE #tmpVoucherDetail (
 						[intBillId] [INT] PRIMARY KEY,
 						UNIQUE ([intBillId])
