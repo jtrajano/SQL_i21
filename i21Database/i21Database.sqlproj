@@ -5390,8 +5390,8 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadCostData.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailData.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDuplicateTransportLoad.sql" />
-    <Build Include="Scripts\Post-Deployment\MF\7_ProcessAttributeDefaultValue.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailLotData.sql" />
+    <None Include="Scripts\Post-Deployment\MF\7_ProcessAttributeDefaultValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
