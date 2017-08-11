@@ -50,6 +50,8 @@ BEGIN
 		ON R.intRefundId = RC.intRefundId
 	INNER JOIN tblPATCustomerVolume CV
 		ON CV.intRefundCustomerId = RC.intRefundCustomerId
+	WHERE CV.ysnRefundProcessed = 0 AND RC.intRefundId <> @intRefundId
+
 
 	IF EXISTS(SELECT 1 FROM @validateRefundCustomer)
 	BEGIN
@@ -232,24 +234,25 @@ END CATCH
 	IF(@ysnPosted = 1)
 	BEGIN
 		UPDATE CV
-		SET CV.intRefundCustomerId = tRD.intRefundCustomerId
+		SET CV.intRefundCustomerId = tRD.intRefundCustomerId, CV.ysnRefundProcessed = 1
 		FROM tblPATCustomerVolume CV
 		INNER JOIN #tmpRefundData tRD
 			ON CV.intCustomerPatronId = tRD.intCustomerId AND CV.intFiscalYear = tRD.intFiscalYearId 
-		WHERE CV.ysnRefundProcessed = 0 AND CV.intRefundCustomerId IS NULL
+		WHERE CV.ysnRefundProcessed = 0
 	END
 	ELSE
 	BEGIN
 		UPDATE CV
-		SET CV.intRefundCustomerId = null
+		--SET CV.intRefundCustomerId = null
+		SET ysnRefundProcessed = 0
 		FROM tblPATCustomerVolume CV
 		INNER JOIN #tmpRefundData tRD
 			ON CV.intRefundCustomerId = tRD.intRefundCustomerId
 	END
 
-	UPDATE tblPATCustomerVolume
-	SET ysnRefundProcessed = @ysnPosted
-	WHERE intFiscalYear = @intFiscalYearId AND intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
+	--UPDATE tblPATCustomerVolume
+	--SET ysnRefundProcessed = @ysnPosted
+	--WHERE intFiscalYear = @intFiscalYearId AND intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
 	
 
 ---------------------------------------------------------------------------------------------------------------------------------------

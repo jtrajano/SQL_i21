@@ -29,6 +29,8 @@ SELECT	RC.intRefundCustomerId,
 		dblCheckAmount = CASE WHEN (RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) < 0) AND RC.dblCashRefund = 0 THEN 0 ELSE RC.dblCashRefund - (CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE RC.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (R.dblServiceFee) END,
 		RC.intBillId,
 		APB.strBillId,
+		APP.intPaymentId,
+		APP.strPaymentRecordNum,
 		RC.intConcurrencyId
 	FROM tblPATRefundCustomer RC
 	INNER JOIN tblPATRefund R
@@ -47,6 +49,10 @@ SELECT	RC.intRefundCustomerId,
 		ON TC.intTaxCodeId = C.intTaxCodeId
 	LEFT OUTER JOIN tblAPBill APB
 		ON APB.intBillId = RC.intBillId
+	LEFT OUTER JOIN tblAPPaymentDetail APPD
+		ON APPD.intBillId = APB.intBillId
+	LEFT OUTER JOIN tblAPPayment APP
+		ON APP.intPaymentId = APPD.intPaymentId
 	INNER JOIN
 	(
 		SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
@@ -74,6 +80,8 @@ SELECT	RC.intRefundCustomerId,
 		R.strRefundNo,
 		R.dtmRefundDate,
 		APB.strBillId,
+		APP.intPaymentId,
+		APP.strPaymentRecordNum,
 		R.intFiscalYearId,
 		FY.strFiscalYear,
 		E.strEntityNo,
