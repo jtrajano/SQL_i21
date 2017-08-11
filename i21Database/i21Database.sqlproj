@@ -5602,6 +5602,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailData.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDuplicateTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomeActivityReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
