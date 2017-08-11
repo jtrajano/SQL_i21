@@ -24,7 +24,7 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , dblOrderPrice					= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.dblCashPrice * CTCD.dblRate ELSE CTCD.dblCashPrice END / (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
 	 , dblCashPrice						= CASE WHEN CTCD.ysnUseFXPrice = 1 
 											   THEN CTCD.dblCashPrice * CTCD.dblRate 
-											   ELSE dbo.fnCalculateQtyBetweenUOM(CTCH.intCommodityUOMId, ISNULL(CTCD.intPriceItemUOMId, CTCH.intCommodityUOMId), 1) * CTCD.dblCashPrice 
+											   ELSE CTCD.dblCashPrice 
 										  END
 	 , intCurrencyExchangeRateTypeId	= CTCD.intRateTypeId
 	 , strCurrencyExchangeRateType		= SMCRT.strCurrencyExchangeRateType
@@ -50,7 +50,7 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , strDestinationGrade				= CTCH.strDestinationGrade
 	 , intDestinationWeightId			= CTCH.intWeightId
 	 , strDestinationWeight				= CTCH.strDestinationWeight
-	 , intItemWeightUOMId				= CTCD.intNetWeightUOMId
+	 , intItemWeightUOMId				= CTCH.intCommodityUOMId
 	 , strWeightUnitMeasure				= ICUMW.strUnitMeasure	 
 FROM (
 	SELECT intContractHeaderId
