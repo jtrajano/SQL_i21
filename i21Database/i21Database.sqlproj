@@ -5585,6 +5585,7 @@
     <Build Include="dbo\Views\vyuCFSearchAccountVehicle.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportPurgePromotionsPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendBatchEntry.sql" />
+    <Build Include="dbo\Tables\tblCFPostForeignTransResult.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadContainerData.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailContainerLinkData.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadData.sql" />
