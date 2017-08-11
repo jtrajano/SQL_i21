@@ -5603,6 +5603,7 @@
     <Build Include="dbo\Stored Procedures\uspTRDuplicateTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomeActivityReport.sql" />
+    <Build Include="Scripts\Post-Deployment\MF\7_ProcessAttributeDefaultValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
