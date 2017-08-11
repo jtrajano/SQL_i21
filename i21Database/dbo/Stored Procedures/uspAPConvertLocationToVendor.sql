@@ -10,10 +10,12 @@ AS
 	DECLARE @EntityName AS NVARCHAR(100)
 	DECLARE @DefaultLocation AS BIT
 	DECLARE @CurrentEntityId AS INT
+	DECLARE @LocationCurrentyId AS INT
 	SELECT 
 			@EntityName = strCheckPayeeName, 
 			@DefaultLocation = ysnDefaultLocation,
-			@CurrentEntityId = intEntityId
+			@CurrentEntityId = intEntityId,
+			@LocationCurrentyId = intDefaultCurrencyId
 		FROM tblEMEntityLocation WHERE intEntityLocationId = @EntityLocationId
 	IF (@EntityName = '')
 	BEGIN		
@@ -59,10 +61,10 @@ AS
 	SET @EntityNewContactId = @@IDENTITY
 
 	INSERT INTO tblEMEntityLocation ( 
-			intEntityId,	strLocationName,	strAddress,		strCity,	strCountry,		strState,	strZipCode,		strPhone,	strFax,		strPricingLevel,	strNotes,	intShipViaId,	intTermsId,		intWarehouseId,		ysnDefaultLocation,		intFreightTermId,	intCountyTaxCodeId,		intTaxGroupId,	intTaxClassId,	ysnActive,	dblLongitude,	dblLatitude,	strTimezone,	strCheckPayeeName,	intConcurrencyId 
+			intEntityId,	strLocationName,	strAddress,		strCity,	strCountry,		strState,	strZipCode,		strPhone,	strFax,		strPricingLevel,	strNotes,	intShipViaId,	intTermsId,		intWarehouseId,		ysnDefaultLocation,		intFreightTermId,	intCountyTaxCodeId,		intTaxGroupId,	intTaxClassId,	ysnActive,	dblLongitude,	dblLatitude,	strTimezone,	strCheckPayeeName,	intConcurrencyId, intDefaultCurrencyId
 	)
 	SELECT TOP 1
-			@EntityNewId,	strLocationName,	strAddress,		strCity,	strCountry,		strState,	strZipCode,		strPhone,	strFax,		strPricingLevel,	strNotes,	intShipViaId,	intTermsId,		intWarehouseId,		1,						intFreightTermId,	intCountyTaxCodeId,		intTaxGroupId,	intTaxClassId,	1,			dblLongitude,	dblLatitude,	strTimezone,	strCheckPayeeName,	1
+			@EntityNewId,	strLocationName,	strAddress,		strCity,	strCountry,		strState,	strZipCode,		strPhone,	strFax,		strPricingLevel,	strNotes,	intShipViaId,	intTermsId,		intWarehouseId,		1,						intFreightTermId,	intCountyTaxCodeId,		intTaxGroupId,	intTaxClassId,	1,			dblLongitude,	dblLatitude,	strTimezone,	strCheckPayeeName,	1				, intDefaultCurrencyId
 		FROM tblEMEntityLocation
 	WHERE intEntityLocationId = @EntityLocationId
 
@@ -76,7 +78,13 @@ AS
 	INSERT INTO tblEMEntityType(	intEntityId,	strType,	intConcurrencyId)
 	SELECT							@EntityNewId,	'Vendor',	1
 
-	INSERT INTO tblAPVendor(intEntityId, intVendorType, ysnWithholding, dblCreditLimit, intTermsId, strVendorId) SELECT @EntityNewId, 0, 0, 0, @DefaultTerms, @EntityNumber
+	if (not exists (select top 1 1 from tblSMCurrency where intCurrencyID = @LocationCurrentyId))
+	begin
+		set @LocationCurrentyId = null
+		select @LocationCurrentyId = intDefaultCurrencyId From tblSMCompanyPreference
+	end
+
+	INSERT INTO tblAPVendor(intEntityId, intVendorType, ysnWithholding, dblCreditLimit, intTermsId, strVendorId, intCurrencyId) SELECT @EntityNewId, 0, 0, 0, @DefaultTerms, @EntityNumber, @LocationCurrentyId
 	INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId) SELECT @EntityNewId, @DefaultTerms
 
 	UPDATE tblEMEntityLocation 
