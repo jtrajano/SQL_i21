@@ -62,20 +62,38 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
-					SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
-					SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
-					IF @ysnPosted =1
-						BEGIN
-							EXEC [dbo].[uspAPPostBill]
-							@post = 0
-							,@recap = 0
-							,@isBatch = 0
-							,@param = @intBillId
-							,@userId = @intUserId
-							,@success = @success OUTPUT
-						END
-					EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
+
+					CREATE TABLE #tmpVoucherDetail (
+						[intBillId] [INT] PRIMARY KEY,
+						UNIQUE ([intBillId])
+					);
+					INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(intBillId) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+					
+					DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
+					FOR
+					SELECT intBillId FROM #tmpVoucherDetail
+
+					OPEN voucherCursor;
+
+					FETCH NEXT FROM voucherCursor INTO @intBillId;
+
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
+						IF @ysnPosted = 1
+							BEGIN
+								EXEC [dbo].[uspAPPostBill]
+								@post = 0
+								,@recap = 0
+								,@isBatch = 0
+								,@param = @intBillId
+								,@userId = @intUserId
+								,@success = @success OUTPUT
+							END
+						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+						FETCH NEXT FROM voucherCursor INTO @intBillId;
+					END
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
