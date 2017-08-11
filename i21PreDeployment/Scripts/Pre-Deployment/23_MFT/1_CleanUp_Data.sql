@@ -8,6 +8,13 @@ BEGIN
     EXEC('DROP TABLE tblTFTransactions')
 END
 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidProductCode') 
+BEGIN
+	-- Old table
+	PRINT('Drop tblTFValidProductCode')
+    EXEC('DROP TABLE tblTFValidProductCode')
+END
+
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactionSummary') 
 BEGIN
 	PRINT('Truncate tblTFTransactionSummary')
