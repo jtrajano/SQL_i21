@@ -76,7 +76,7 @@ AS
 	INSERT INTO tblEMEntityType(	intEntityId,	strType,	intConcurrencyId)
 	SELECT							@EntityNewId,	'Vendor',	1
 
-	INSERT INTO tblAPVendor(intEntityId, intVendorType, ysnWithholding, dblCreditLimit, intTermsId) SELECT @EntityNewId, 0, 0, 0, @DefaultTerms
+	INSERT INTO tblAPVendor(intEntityId, intVendorType, ysnWithholding, dblCreditLimit, intTermsId, strVendorId) SELECT @EntityNewId, 0, 0, 0, @DefaultTerms, @EntityNumber
 	INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId) SELECT @EntityNewId, @DefaultTerms
 
 	UPDATE tblEMEntityLocation 
