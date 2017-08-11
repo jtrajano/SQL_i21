@@ -1,70 +1,181 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerSearch]
 AS
-SELECT     
- Entity.intEntityId
-,Entity.strName
-,strCustomerNumber= case when Cus.strCustomerNumber = '' then Entity.strEntityNo else Cus.strCustomerNumber end 
-,Con.strPhone
-,Loc.strAddress
-,Loc.strCity
-,Loc.strState
-,Loc.strZipCode
-,TC.strCounty
-,Cus.ysnTaxExempt 
-,Cus.ysnActive
-,Cus.intSalespersonId
-,Cus.intCurrencyId
-,Cus.intTermsId
-,Loc.intShipViaId
-,ShipToLoc.strLocationName as strShipToLocationName
-,ShipToLoc.strAddress as strShipToAddress
-,ShipToLoc.strCity as strShipToCity
-,ShipToLoc.strState as strShipToState
-,ShipToLoc.strZipCode as strShipToZipCode
-,ShipToLoc.strCountry as strShipToCountry
-,BillToLoc.strLocationName as strBillToLocationName
-,BillToLoc.strAddress as strBillToAddress
-,BillToLoc.strCity as strBillToCity
-,BillToLoc.strState as strBillToState
-,BillToLoc.strZipCode as strBillToZipCode
-,BillToLoc.strCountry as strBillToCountry
-,Cus.intShipToId
-,Cus.intBillToId
-,Loc.intFreightTermId
-,strSalespersonId =  case when ISNULL(S.strSalespersonId,'') = '' then T.strEntityNo else S.strSalespersonId end
-,ysnPORequired
-,intTaxGroupId = Loc.intTaxGroupId 
-,strTaxGroup = Tax.strTaxGroup
-,Cus.strVatNumber
-,Cus.strFLOId
-,Cus.dtmMembershipDate
-,Cus.dtmBirthDate
-,strSalesPersonName = T.strName
-,Cus.dblCreditLimit
-,Cus.dblARBalance
-,Cus.dtmLastActivityDate
-,Cus.strStockStatus
-,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.[intEntityId]) = 1 then 1 else 0 end as bit)
-,CusToCon.intEntityContactId
-,Cus.ysnIncludeEntityName
-,strTerm 
-,Cus.strStatementFormat
-,Cus.strAccountNumber
-,strShipViaName = ShipViaEnt.strName
-,strFreightTerm = FT.strFreightTerm
-,Loc.strCheckPayeeName
-,ysnStatementCreditLimit
-FROM tblEMEntity as Entity
-INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
-LEFT JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
-LEFT JOIN tblEMEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]
-LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.[intEntityId] = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
-LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId
-LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
-LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.[intEntityId]
-LEFT JOIN tblEMEntity T on S.[intEntityId] = T.intEntityId
-LEFT JOIN tblSMTaxGroup Tax ON Loc.intTaxGroupId = Tax.intTaxGroupId
-LEFT JOIN tblSMTerm Term on Cus.intTermsId = Term.intTermID
-LEFT JOIN tblEMEntity ShipViaEnt ON Loc.intShipViaId = ShipViaEnt.intEntityId
-LEFT JOIN tblSMFreightTerms FT ON Loc.intFreightTermId = FT.intFreightTermId
-LEFT JOIN tblSMTaxCode TC ON Loc.intCountyTaxCodeId = TC.intTaxCodeId
+SELECT intEntityId				= ENTITY.intEntityId
+     , intEntityCustomerId		= ENTITY.intEntityId   	 
+	 , intSalespersonId			= CUSTOMER.intSalespersonId
+	 , intCurrencyId			= CUSTOMER.intCurrencyId
+	 , intTermsId				= CUSTOMER.intTermsId
+	 , intShipToId				= CUSTOMER.intShipToId
+	 , intBillToId				= CUSTOMER.intBillToId
+	 , strName					= ENTITY.strName
+	 , strCustomerNumber		= CASE WHEN ISNULL(CUSTOMER.strCustomerNumber, '') = '' THEN ENTITY.strEntityNo ELSE CUSTOMER.strCustomerNumber END	 
+	 , strVatNumber				= CUSTOMER.strVatNumber
+	 , strFLOId					= CUSTOMER.strFLOId
+	 , strStockStatus			= CUSTOMER.strStockStatus	 
+	 , strStatementFormat		= CUSTOMER.strStatementFormat
+	 , strAccountNumber			= CUSTOMER.strAccountNumber
+	 , strSalespersonId			= CUSTOMER.strSalespersonId
+	 , strSalesPersonName		= CUSTOMER.strSalesPersonName
+	 , strTerm					= CUSTOMER.strTerm
+	 , dtmMembershipDate		= CUSTOMER.dtmMembershipDate
+	 , dtmBirthDate				= CUSTOMER.dtmBirthDate
+	 , dtmLastActivityDate		= CUSTOMER.dtmLastActivityDate
+	 , dblCreditLimit			= CUSTOMER.dblCreditLimit
+	 , dblARBalance				= CUSTOMER.dblARBalance
+	 , ysnIncludeEntityName		= CUSTOMER.ysnIncludeEntityName
+	 , ysnPORequired			= CUSTOMER.ysnPORequired
+	 , ysnStatementCreditLimit	= CUSTOMER.ysnStatementCreditLimit
+	 , ysnTaxExempt				= CUSTOMER.ysnTaxExempt
+	 , ysnActive				= CUSTOMER.ysnActive
+	 , ysnHasBudgetSetup		= CUSTOMER.ysnHasBudgetSetup
+	 , intEntityContactId		= CONTACT.intEntityContactId
+	 , strPhone					= CONTACT.strPhone
+	 , strContactName			= CONTACT.strName
+	 , intShipViaId				= CUSTOMERLOCATION.intShipViaId
+	 , intFreightTermId			= CUSTOMERLOCATION.intFreightTermId
+	 , intTaxGroupId			= CUSTOMERLOCATION.intTaxGroupId 
+	 , strAddress				= CUSTOMERLOCATION.strAddress
+	 , strCity					= CUSTOMERLOCATION.strCity
+	 , strState					= CUSTOMERLOCATION.strState
+	 , strZipCode				= CUSTOMERLOCATION.strZipCode
+	 , strCheckPayeeName		= CUSTOMERLOCATION.strCheckPayeeName
+	 , strTaxGroup				= CUSTOMERLOCATION.strTaxGroup
+	 , strShipViaName			= CUSTOMERLOCATION.strShipVia
+	 , strFreightTerm			= CUSTOMERLOCATION.strFreightTerm
+	 , strCounty				= CUSTOMERLOCATION.strCounty
+     , strShipToLocationName	= SHIPTOLOCATION.strLocationName
+     , strShipToAddress			= SHIPTOLOCATION.strAddress 
+     , strShipToCity			= SHIPTOLOCATION.strCity
+     , strShipToState			= SHIPTOLOCATION.strState
+     , strShipToZipCode			= SHIPTOLOCATION.strZipCode
+     , strShipToCountry			= SHIPTOLOCATION.strCountry
+     , strBillToLocationName	= BILLTOLOCATION.strLocationName
+     , strBillToAddress			= BILLTOLOCATION.strAddress
+     , strBillToCity			= BILLTOLOCATION.strCity
+     , strBillToState			= BILLTOLOCATION.strState
+     , strBillToZipCode			= BILLTOLOCATION.strZipCode
+     , strBillToCountry			= BILLTOLOCATION.strCountry     
+FROM tblEMEntity ENTITY
+INNER JOIN (
+	SELECT C.intEntityId
+		 , intSalespersonId
+		 , intCurrencyId
+		 , intTermsId
+		 , intShipToId
+		 , intBillToId
+		 , strCustomerNumber
+		 , strVatNumber
+		 , strFLOId
+		 , strStockStatus
+		 , strStatementFormat
+		 , strAccountNumber
+		 , dtmMembershipDate
+		 , dtmBirthDate
+		 , dtmLastActivityDate
+		 , dblCreditLimit
+		 , dblARBalance
+		 , ysnIncludeEntityName
+		 , ysnStatementCreditLimit
+		 , ysnPORequired
+		 , C.ysnActive
+		 , ysnTaxExempt
+		 , strSalespersonId		= SALESPERSON.strSalespersonId
+		 , strSalesPersonName	= SALESPERSON.strSalesPersonName
+		 , strTerm				= TERM.strTerm
+		 , ysnHasBudgetSetup	= CAST(CASE WHEN (BUDGET.ysnHasBudgetSetup) = 1 THEN 1 ELSE 0 END AS BIT)
+	FROM dbo.tblARCustomer C WITH (NOLOCK)
+	LEFT JOIN (
+		SELECT S.intEntityId
+			 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END
+			 , strSalesPersonName	= ST.strName
+		FROM dbo.tblARSalesperson S WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+				 , strName
+				 , strEntityNo
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+		) ST on S.intEntityId = ST.intEntityId
+	) SALESPERSON ON C.intSalespersonId = SALESPERSON.intEntityId
+	LEFT JOIN (
+		SELECT intTermID
+			 , strTerm
+		FROM dbo.tblSMTerm WITH (NOLOCK)
+	) TERM ON C.intTermsId = TERM.intTermID
+	OUTER APPLY (
+		SELECT TOP 1 1 AS ysnHasBudgetSetup
+		FROM dbo.tblARCustomerBudget WITH (NOLOCK)
+		WHERE intEntityCustomerId = C.intEntityId
+	) BUDGET
+) CUSTOMER ON ENTITY.intEntityId = CUSTOMER.intEntityId
+LEFT JOIN (
+	SELECT ETC.intEntityId
+		 , ETCE.strPhone
+		 , ETCE.strName
+		 , ETC.intEntityContactId
+	FROM dbo.tblEMEntityToContact ETC WITH (NOLOCK) 
+	INNER JOIN (
+		SELECT intEntityId
+			 , strName
+			 , strPhone
+		FROM dbo.tblEMEntity WITH(NOLOCK)
+	) ETCE ON ETC.intEntityContactId = ETCE.intEntityId	
+	WHERE ETC.ysnDefaultContact = 1
+) CONTACT ON CUSTOMER.intEntityId = CONTACT.intEntityId
+LEFT JOIN (
+	SELECT L.intEntityId
+		 , L.intShipViaId
+		 , L.intFreightTermId
+		 , L.intTaxGroupId 
+		 , L.intCountyTaxCodeId
+		 , L.strAddress
+		 , L.strCity
+		 , L.strState
+		 , L.strZipCode
+		 , L.strCheckPayeeName
+		 , strTaxGroup		= TAXGROUP.strTaxGroup
+		 , strShipVia		= SHIPVIA.strName
+		 , strFreightTerm	= FREIGHTTERM.strFreightTerm
+		 , strCounty		= TAXCODE.strCounty
+	FROM dbo.tblEMEntityLocation L WITH (NOLOCK)
+	LEFT JOIN (
+		SELECT intTaxGroupId
+			 , strTaxGroup
+		FROM dbo.tblSMTaxGroup WITH (NOLOCK)
+	) TAXGROUP ON L.intTaxGroupId = TAXGROUP.intTaxGroupId
+	LEFT JOIN (
+		SELECT intEntityId
+			 , strName
+		FROM dbo.tblEMEntity WITH (NOLOCK)
+	) SHIPVIA ON L.intShipViaId = SHIPVIA.intEntityId
+	LEFT JOIN (
+		SELECT intFreightTermId
+			 , strFreightTerm
+		FROM dbo.tblSMFreightTerms WITH (NOLOCK)
+	) FREIGHTTERM ON L.intFreightTermId = FREIGHTTERM.intFreightTermId
+	LEFT JOIN (
+		SELECT intTaxCodeId
+			 , strCounty
+		FROM dbo.tblSMTaxCode
+	) TAXCODE ON L.intCountyTaxCodeId = TAXCODE.intTaxCodeId
+	WHERE ysnDefaultLocation = 1
+) CUSTOMERLOCATION ON CUSTOMER.intEntityId = CUSTOMERLOCATION.intEntityId
+LEFT JOIN (
+	SELECT intEntityLocationId
+		 , strLocationName
+		 , strAddress
+		 , strCity
+		 , strState
+		 , strZipCode
+		 , strCountry
+	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+) SHIPTOLOCATION ON CUSTOMER.intShipToId = SHIPTOLOCATION.intEntityLocationId
+LEFT JOIN (
+	SELECT intEntityLocationId
+		 , strLocationName
+		 , strAddress
+		 , strCity
+		 , strState
+		 , strZipCode
+		 , strCountry
+	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+) BILLTOLOCATION ON CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId
