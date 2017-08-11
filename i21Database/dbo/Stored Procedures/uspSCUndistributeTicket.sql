@@ -49,7 +49,7 @@ BEGIN TRY
 					UNIQUE ([intInventoryReceiptId])
 				);
 				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
-				
+
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
 				SELECT intInventoryReceiptId,  strReceiptNumber
@@ -62,20 +62,40 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
-					SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
-					SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
-					IF @ysnPosted =1
-						BEGIN
-							EXEC [dbo].[uspAPPostBill]
-							@post = 0
-							,@recap = 0
-							,@isBatch = 0
-							,@param = @intBillId
-							,@userId = @intUserId
-							,@success = @success OUTPUT
-						END
-					EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+					IF OBJECT_ID (N'tempdb.dbo.##tmpVoucherDetail') IS NOT NULL
+						DROP TABLE #tmpVoucherDetail
+					CREATE TABLE #tmpVoucherDetail (
+						[intBillId] [INT] PRIMARY KEY,
+						UNIQUE ([intBillId])
+					);
+					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
+
+					INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(intBillId) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+					
+					DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
+					FOR
+					SELECT intBillId FROM #tmpVoucherDetail
+
+					OPEN voucherCursor;
+
+					FETCH NEXT FROM voucherCursor INTO @intBillId;
+
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
+						IF @ysnPosted = 1
+							BEGIN
+								EXEC [dbo].[uspAPPostBill]
+								@post = 0
+								,@recap = 0
+								,@isBatch = 0
+								,@param = @intBillId
+								,@userId = @intUserId
+								,@success = @success OUTPUT
+							END
+						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+						FETCH NEXT FROM voucherCursor INTO @intBillId;
+					END
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
@@ -108,11 +128,7 @@ BEGIN TRY
 				
 				IF @intEntityId > 0
 					BEGIN
-						CREATE TABLE #tmpItemShipmentIds (
-							[intInventoryShipmentId] [INT] PRIMARY KEY,
-							[strShipmentNumber] [VARCHAR](100),
-							UNIQUE ([intInventoryShipmentId])
-						);
+						
 						INSERT INTO #tmpItemShipmentIds(intInventoryShipmentId,strShipmentNumber) SELECT DISTINCT(intInventoryShipmentId),strShipmentNumber from vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 						DECLARE intListCursor CURSOR LOCAL FAST_FORWARD

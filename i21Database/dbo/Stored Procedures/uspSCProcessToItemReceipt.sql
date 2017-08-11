@@ -202,7 +202,7 @@ BEGIN TRY
 			IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 			BEGIN
 				DECLARE @intLoopContractId INT;
-				DECLARE @dblLoopContractUnits NUMERIC(12,4);
+				DECLARE @dblLoopContractUnits NUMERIC(38,20);
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
 				SELECT intContractDetailId, dblUnitsDistributed
@@ -399,7 +399,7 @@ BEGIN TRY
 					,@ysnDPStorage
 
 					DECLARE @intDPContractId INT;
-					DECLARE @dblDPContractUnits NUMERIC(12,4);
+					DECLARE @dblDPContractUnits NUMERIC(38,20);
 					DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 					FOR
 					SELECT intContractDetailId, dblUnitsDistributed

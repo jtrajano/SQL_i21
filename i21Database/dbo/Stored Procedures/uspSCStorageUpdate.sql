@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	 @intTicketId AS INT
 	,@intUserId AS INT
-	,@dblNetUnits AS DECIMAL (13,3)
+	,@dblNetUnits AS DECIMAL (38,20)
 	,@intEntityId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intDPContractId AS INT
