@@ -4921,7 +4921,7 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Process' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Process', N'Integration', @IntegrationCreateParentMenuId, N'New Process', N'Activity', N'Screen', N'Integration.view.Connection?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'New Process', N'Integration', @IntegrationCreateParentMenuId, N'New Process', N'Activity', N'Screen', N'Integration.view.ProcessSetup?action=new', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Integration.view.ProcessSetup?action=new' WHERE strMenuName = 'New Process' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationCreateParentMenuId
 
