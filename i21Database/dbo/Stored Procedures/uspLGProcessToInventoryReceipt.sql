@@ -108,8 +108,8 @@ BEGIN TRY
 		,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 		,dblExchangeRate = 1
 		,intLotId = NULL
-		,intSubLocationId = ISNULL(CD.intSubLocationId, LD.intPSubLocationId) --
-		,intStorageLocationId = ISNULL(CD.intStorageLocationId, LW.intStorageLocationId) --
+		,intSubLocationId = ISNULL(LW.intSubLocationId , CD.intSubLocationId) --
+		,intStorageLocationId = ISNULL(LW.intStorageLocationId, CD.intStorageLocationId) --
 		,ysnIsStorage = 0
 		,intSourceId = LD.intLoadDetailId --
 		,intSourceType = 2
