@@ -88,7 +88,7 @@ FROM (
 				WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId
 				), 0)
 		,CU.strCurrency
-		,intSubCurrencyCents = CU.intCurrencyID
+		,intSubCurrencyCents = CASE WHEN CU.ysnSubCurrency = 1 THEN CU.intCurrencyID ELSE NULL END
 		,CY.strCurrency AS strMainCurrency
 		,CAST(ISNULL(CU.intMainCurrencyId, 0) AS BIT) AS ysnSubCurrency
 		,CT.dblCashPrice / CASE 
