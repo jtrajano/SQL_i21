@@ -605,12 +605,13 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "boxLabel": null,
-                                                        "fieldLabel": "Is Basket",
-                                                        "itemId": "chkIsBasket",
+                                                        "designer|createAlias": "checkboxfield",
+                                                        "fieldLabel": "Use Weigh Scales",
+                                                        "itemId": "chkUseWeighScales",
                                                         "layout|flex": null
                                                     },
-                                                    "name": "MyCheckbox41",
-                                                    "designerId": "8b4ae360-6df0-4444-bd2a-0048cc5be35f"
+                                                    "name": "MyCheckbox43",
+                                                    "designerId": "612c3330-9f14-4c94-8e45-bc45ff6b7e9c"
                                                 }
                                             ]
                                         },
@@ -837,6 +838,23 @@
                                                             "type": "string"
                                                         }
                                                     ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Is Basket",
+                                                        "itemId": "chkIsBasket",
+                                                        "labelWidth": 116,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox41",
+                                                    "designerId": "8b4ae360-6df0-4444-bd2a-0048cc5be35f"
                                                 }
                                             ]
                                         }
@@ -2414,7 +2432,7 @@
                                                         "layout|flex": 2,
                                                         "margin": "0 0 0 10",
                                                         "padding": null,
-                                                        "title": "Sub Locations"
+                                                        "title": "Storage Locations"
                                                     },
                                                     "name": "MyGridPanel18",
                                                     "configAlternates": {
@@ -2484,7 +2502,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "itemId": "colsubSubLocationName",
-                                                                "text": "Sub Location",
+                                                                "text": "Storage Location",
                                                                 "width": 244
                                                             },
                                                             "name": "MyColumn81",
@@ -2503,7 +2521,7 @@
                                                                             "    {",
                                                                             "        dataIndex: 'intCompanyLocationSubLocationId',",
                                                                             "        dataType: 'numeric',",
-                                                                            "        text: 'Sub Location Id',",
+                                                                            "        text: 'Storage Location Id',",
                                                                             "        hidden: true",
                                                                             "    },",
                                                                             "    {",
@@ -2515,7 +2533,7 @@
                                                                             "    {",
                                                                             "        dataIndex: 'strSubLocationName',",
                                                                             "        dataType: 'string',",
-                                                                            "        text: 'Sub Location Name',",
+                                                                            "        text: 'Storage Location Name',",
                                                                             "        flex: 1",
                                                                             "    },",
                                                                             "    {",
@@ -2573,7 +2591,7 @@
                                                                 "dataIndex": "intSubLocationId",
                                                                 "hidden": true,
                                                                 "itemId": "colsubSubLocationId",
-                                                                "text": "Sub Location Id"
+                                                                "text": "Storage Location Id"
                                                             },
                                                             "name": "MyColumn82",
                                                             "designerId": "07c05b42-b3ef-49c7-9df9-f44886fc6ec7"
@@ -7168,17 +7186,24 @@
                                                                         "displayField": "strStatus",
                                                                         "editable": false,
                                                                         "itemId": "cboItemContractStatus",
+                                                                        "pickerWidth": 200,
                                                                         "valueField": "strStatus"
                                                                     },
                                                                     "name": "MyComboBox92",
                                                                     "configAlternates": {
-                                                                        "columns": "array"
+                                                                        "columns": "array",
+                                                                        "pickerWidth": "number"
                                                                     },
                                                                     "designerId": "16fc89bd-199f-4388-b46e-804c075e5903",
                                                                     "customConfigs": [
                                                                         {
                                                                             "group": "(Custom Properties)",
                                                                             "name": "columns",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "pickerWidth",
                                                                             "type": "string"
                                                                         }
                                                                     ]

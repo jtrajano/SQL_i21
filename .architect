@@ -2681,7 +2681,7 @@
                                                             "id": "3a43a43f-e0cb-4c25-8d07-ede2f4b76de2"
                                                         },
                                                         {
-                                                            "id": "8b4ae360-6df0-4444-bd2a-0048cc5be35f"
+                                                            "id": "612c3330-9f14-4c94-8e45-bc45ff6b7e9c"
                                                         }
                                                     ]
                                                 },
@@ -2699,6 +2699,9 @@
                                                         },
                                                         {
                                                             "id": "8fbc06ee-4a99-4463-a83f-f3bdb93d70eb"
+                                                        },
+                                                        {
+                                                            "id": "8b4ae360-6df0-4444-bd2a-0048cc5be35f"
                                                         }
                                                     ]
                                                 }
@@ -2923,7 +2926,6 @@
                                                 },
                                                 {
                                                     "id": "e93324b2-c1c6-410c-b4d9-e6fa900bce58",
-                                                    "expanded": false,
                                                     "cn": [
                                                         {
                                                             "id": "e2233014-76cd-4dd0-94a7-9fa34da62ba3"
@@ -11117,7 +11119,7 @@
     },
     "inspectorState": {
         "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
-        "selectedInstance": "8b4ae360-6df0-4444-bd2a-0048cc5be35f"
+        "selectedInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
     },
     "editMode": "design",
     "userSettings": {
