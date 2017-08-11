@@ -9,7 +9,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,i.intCategoryId
 		,strCategory				= c.strCategoryCode
 		,t.intItemLocationId
-		,cl.strLocationName
+		,strLocationName			= ISNULL(Location.strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
 		,t.intSubLocationId
 		,subLoc.strSubLocationName
 		,t.intStorageLocationId
@@ -62,10 +62,15 @@ FROM 	tblICItem i
 		LEFT JOIN tblICStorageLocation strgLoc 
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
 		LEFT JOIN (
-			tblICItemLocation il INNER JOIN tblSMCompanyLocation cl 
-				ON il.intLocationId = cl.intCompanyLocationId 						
+			tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation Location 
+				ON Location.intCompanyLocationId = ItemLocation.intLocationId		
 		)
-			ON il.intItemLocationId = COALESCE(t.intInTransitSourceLocationId, t.intItemLocationId) 
+			ON t.intItemLocationId = ItemLocation.intItemLocationId
+		LEFT JOIN (
+			tblICItemLocation InTransitItemLocation INNER JOIN tblSMCompanyLocation InTransitLocation 
+				ON InTransitLocation.intCompanyLocationId = InTransitItemLocation.intLocationId	
+		)
+			ON t.intInTransitSourceLocationId = InTransitItemLocation.intItemLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc
 			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
 		LEFT JOIN tblICCostingMethod CostingMethod
