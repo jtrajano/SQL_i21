@@ -5591,6 +5591,7 @@
     <Build Include="dbo\Stored Procedures\uspTRDuplicateTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
     <Build Include="dbo\Views\vyuARPaymentMethodForReceivePayments.sql" />
+    <Build Include="dbo\Functions\fnRKGetCurrencyExchangeRateType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
