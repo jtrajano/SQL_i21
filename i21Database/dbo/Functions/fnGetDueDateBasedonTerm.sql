@@ -77,13 +77,13 @@ ELSE IF (@Type = 'Date Driven')
 						RETURN @DueDate;						
 					END
 					
-					IF(@dayOfDueMonth <> @daysOfDueMonth)  
-					BEGIN					 
-						SET @dayDueMonthDiff = @daysOfDueMonth - @dayOfDueMonth
-						SET @DueDate = DATEADD(DAY, @dayDueMonthDiff, @DueDate)
+					--IF(@dayOfDueMonth <> @daysOfDueMonth)  
+					--BEGIN					 
+					--	SET @dayDueMonthDiff = @daysOfDueMonth - @dayOfDueMonth
+					--	SET @DueDate = DATEADD(DAY, @dayDueMonthDiff, @DueDate)
 												
-						RETURN @DueDate;						
-					END
+					--	RETURN @DueDate;						
+					--END
 							 
 					RETURN @DueDate;
 					
