@@ -5606,6 +5606,7 @@
     <None Include="Scripts\Post-Deployment\MF\7_ProcessAttributeDefaultValue.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLetter.sql" />
     <Build Include="dbo\Views\vyuARPaymentMethodForReceivePayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceProductRecapReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
