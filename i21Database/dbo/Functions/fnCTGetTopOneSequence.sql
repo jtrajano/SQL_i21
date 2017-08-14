@@ -35,7 +35,11 @@ RETURNS @returntable	TABLE
 	ysnSubCurrency			BIT,
 	intContractStatusId		INT,
 	strContractItemName		NVARCHAR(100) COLLATE Latin1_General_CI_AS,	
-	strContractItemNo		NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	strContractItemNo		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	intBasisCurrencyId		INT,
+	ysnBasisSubCurrency		BIT,
+	intBasisUOMId			INT,
+	intBasisUnitMeasureId	INT
 )
 AS
 BEGIN
@@ -49,7 +53,8 @@ BEGIN
 				strFutMarketName,				strItemUOM,					strLocationName,				strPriceUOM,
 				strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
 				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
-				intContractStatusId,			strContractItemName,		strContractItemNo
+				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
+				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId
 
 		FROM	vyuCTContractSequence WHERE intContractDetailId = @intContractDetailId
 	ELSE
@@ -61,7 +66,8 @@ BEGIN
 				strFutMarketName,				strItemUOM,					strLocationName,				strPriceUOM,
 				strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
 				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
-				intContractStatusId,			strContractItemName,		strContractItemNo
+				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
+				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId
 				
 		FROM	vyuCTContractSequence WHERE intContractHeaderId = @intContractHeaderId
 	RETURN;

@@ -52,16 +52,23 @@ AS
 				CD.intCurrencyId,
 				SY.ysnSubCurrency				AS	ysnSeqSubCurrency,
 				MA.intCurrencyId				AS	intMarketCurrencyId,
-				CY.ysnSubCurrency				AS	ysnMarketSubCurrency
+				CY.ysnSubCurrency				AS	ysnMarketSubCurrency,
+				CD.intBasisCurrencyId,
+				CD.ysnBasisSubCurrency,
+				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId
+
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 												AND	CD.dblNoOfLots IS NOT NULL		 
 												AND	ISNULL(CD.ysnMultiplePriceFixation,0) = 0
-		JOIN	tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
+		JOIN	tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
+												AND PU.intUnitMeasureId =	IM.intUnitMeasureId
 		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId=	CD.intFutureMarketId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID	=	MA.intCurrencyId
 		JOIN	tblSMCurrency				SY	ON	SY.intCurrencyID	=	CD.intCurrencyId
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId	=	MA.intUnitMeasureId	
+LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId	=	CD.intCommodityId 
+												AND BU.intUnitMeasureId =	CD.intBasisUnitMeasureId
 
 		UNION ALL
 
@@ -89,7 +96,10 @@ AS
 				CD.intCurrencyId,
 				CD.ysnSubCurrency				AS	ysnSeqSubCurrency,
 				MA.intCurrencyId				AS	intMarketCurrencyId,
-				CY.ysnSubCurrency				AS	ysnMarketSubCurrency			
+				CY.ysnSubCurrency				AS	ysnMarketSubCurrency,
+				CD.intBasisCurrencyId,
+				CD.ysnBasisSubCurrency,
+				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId			
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
@@ -105,4 +115,6 @@ AS
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	MA.intUnitMeasureId	
 		CROSS APPLY fnCTGetTopOneSequence(CH.intContractHeaderId,0)	CD	
+LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CH.intCommodityId 
+												AND BU.intUnitMeasureId		=	CD.intBasisUnitMeasureId
 	)t

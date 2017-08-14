@@ -12,7 +12,8 @@ AS
 			CD.dblNoOfLots,			CD.intItemUOMId,		CD.dblNetWeight,	
 			CD.intBookId,			CD.intSubBookId,		CD.intDiscountScheduleCodeId,
 			CD.strERPPONumber,		CD.intSplitFromId,		CD.dtmPlannedAvailabilityDate,
-			CD.strERPItemNumber,	CD.strERPBatchNumber,
+			CD.strERPItemNumber,	CD.strERPBatchNumber,	CD.intBasisCurrencyId,
+			CD.intBasisUOMId,
 
 			--Detail Join
 			IM.strItemNo,			PT.strPricingType,		IM.strDescription			AS	strItemDescription,
@@ -20,10 +21,12 @@ AS
 			CL.strLocationName,		IM.strShortName,		PM.strUnitMeasure			AS	strPriceUOM,			
 			CU.intMainCurrencyId,	CU.strCurrency,			PU.intUnitMeasureId			AS	intPriceUnitMeasureId,
 			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,
-			IC.strContractItemNo,	IC.strContractItemName,	REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')AS	strFutureMonth,
+			IC.strContractItemNo,	IC.strContractItemName,	SY.ysnSubCurrency			AS	ysnBasisSubCurrency,
+			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')						AS	strFutureMonth,
 			SL.strName				AS strStorageLocation,	UL.strSubLocationName		AS	strSubLocation,
-			BK.strBook,				SB.strSubBook,			PG.strName	COLLATE Latin1_General_CI_AS		AS strPurchasingGroup ,				
-			CE.strEntityNo			AS	strCreatedByNo,		PA.strDescription AS strProductType,
+			BK.strBook,				SB.strSubBook,			PG.strName					AS	strPurchasingGroup ,				
+			CE.strEntityNo			AS	strCreatedByNo,		PA.strDescription			AS	strProductType,
+			BU.intUnitMeasureId		AS	intBasisUnitMeasureId,
 
 			--Detail Computed Columns
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)									AS	ysnSubCurrency,
@@ -62,11 +65,13 @@ AS
 	JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId			=	PU.intUnitMeasureId			LEFT	
 	JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		LEFT
 	JOIN	tblICUnitMeasure			WM	ON	WM.intUnitMeasureId			=	WU.intUnitMeasureId			LEFT	
-	
+	JOIN	tblICItemUOM				BU	ON	BU.intItemUOMId				=	CD.intBasisUOMId			LEFT
+
 	JOIN	tblRKFutureMarket			FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
 	JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
 	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID			=	CU.intMainCurrencyId		LEFT
+	JOIN	tblSMCurrency				SY	ON	SY.intCurrencyID			=	CD.intBasisCurrencyId		LEFT
 	JOIN	tblICCommodityUnitMeasure	C1	ON	C1.intCommodityId			=	CH.intCommodityId
 											AND	C1.intUnitMeasureId			=	PU.intUnitMeasureId			LEFT
 	--JOIN	tblICCommodityAttribute		CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId

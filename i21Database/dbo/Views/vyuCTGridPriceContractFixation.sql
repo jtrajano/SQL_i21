@@ -58,13 +58,18 @@ AS
 				CD.intCurrencyId,
 				CD.ysnSubCurrency				AS	ysnSeqSubCurrency,
 				MA.intCurrencyId				AS	intMarketCurrencyId,
-				CY.ysnSubCurrency				AS	ysnMarketSubCurrency	
+				CY.ysnSubCurrency				AS	ysnMarketSubCurrency,	
+				CD.intBasisCurrencyId,
+				CD.ysnBasisSubCurrency,
+				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId
 
 		FROM	tblCTPriceFixation	PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
 		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId		=	MA.intUnitMeasureId	
+LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CD.intCommodityId 
+												AND BU.intUnitMeasureId		=	CD.intBasisUnitMeasureId
 
 		UNION ALL
 
@@ -113,9 +118,12 @@ AS
 				UM.strUnitMeasure		AS	strMarketUOM,
 				CH.ysnMultiplePriceFixation,
 				CD.intCurrencyId,
-				CD.ysnSubCurrency				AS	ysnSeqSubCurrency,
-				MA.intCurrencyId				AS	intMarketCurrencyId,
-				CY.ysnSubCurrency				AS	ysnMarketSubCurrency	
+				CD.ysnSubCurrency		AS	ysnSeqSubCurrency,
+				MA.intCurrencyId		AS	intMarketCurrencyId,
+				CY.ysnSubCurrency		AS	ysnMarketSubCurrency,
+				NULL,
+				NULL,
+				NULL
 
 		FROM	tblCTPriceFixation	PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
