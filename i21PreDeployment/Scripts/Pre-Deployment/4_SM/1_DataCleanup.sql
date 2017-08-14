@@ -181,3 +181,6 @@ GO
 		')
 	END
 GO
+GO
+	UPDATE tblSMPaymentMethod SET intAccountId = NULL WHERE intAccountId = 0
+GO
