@@ -36,6 +36,7 @@
 :r "..\dbo\Views\vyuGLtblGLIjemstDifference.sql"
 :r "..\dbo\Views\vyuGLglhstmstDifference.sql"
 :r "..\dbo\Stored Procedures\uspGLSyncGLACTMST.sql"
+:r "..\dbo\Stored Procedures\uspGLFlagOriginAccounts.sql"
 
 -- FINANCIAL REPORT DESIGNER
 :r "..\dbo\Stored Procedures\uspFRDImportOriginDesign.sql"

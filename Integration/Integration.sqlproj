@@ -399,10 +399,10 @@
     <None Include="Scripts\IC\uspICDCUomMigrationPt.sql" />
     <None Include="dbo\Stored Procedures\uspARImportCustomerSpecialPrice.sql" />
     <None Include="dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql" />
-    <None Include="dbo\Stored Procedures\uspTRImportOriginHistory.sql" />	
+    <None Include="dbo\Stored Procedures\uspTRImportOriginHistory.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportTruck.sql" />
     <None Include="dbo\Stored Procedures\uspMFImportRecipe.sql" />
-    <None Include="dbo\Stored Procedures\uspTRImportSupplyPoint.sql" />	
+    <None Include="dbo\Stored Procedures\uspTRImportSupplyPoint.sql" />
     <None Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPointRackPriceEquation.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPointProductSearch.sql" />
@@ -412,7 +412,6 @@
     <Build Include="dbo\Tables\tblARagordmst.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" />
     <None Include="Scripts\TM\CheckOriginTableAndTMPreference.sql" />
-    <None Include="Scripts\GL\1b_FlagCOACrossReferenceAccountsFromOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateTMCustomerView.sql" />
     <None Include="dbo\Views\vyuPROriginEmployee.sql" />
     <None Include="dbo\Views\vyuPROriginTaxTable.sql" />
@@ -427,5 +426,6 @@
     <None Include="dbo\Stored Procedures\uspGLSyncGLACTMST.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
     <None Include="dbo\Stored Procedures\uspEMImportCustomerEFTInfo.sql" />
+    <None Include="dbo\Stored Procedures\uspGLFlagOriginAccounts.sql" />
   </ItemGroup>
 </Project>
