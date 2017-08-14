@@ -86,5 +86,27 @@ namespace iRely.Inventory.WebApi
                 }
             });
         }
+
+        [HttpGet]
+        [ActionName("ValidateSubLocationChange")]
+        public async Task<HttpResponseMessage> ValidateSubLocationChange(int storageLocationId)
+        {
+            var result = new SaveResult(); 
+            result = await _bl.ValidateSubLocationChange(storageLocationId, null);
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 }

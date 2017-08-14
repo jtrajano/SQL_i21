@@ -18,6 +18,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchStorageBinDetails(GetParameter param);
         Task<SearchResult> GetStorageBinMeasurementReading(GetParameter param, int intStorageLocationId);
         StorageLocationBl.DuplicateStorageLocationSaveResult DuplicateStorageLocation(int intStorageLocationId);
+        Task<SaveResult> ValidateSubLocationChange(int storageLocationId, int? newSubLocationId);
     }
 }
 

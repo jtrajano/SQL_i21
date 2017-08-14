@@ -24,15 +24,36 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<BusinessResult<tblICStorageLocation>> SaveAsync(bool continueOnConflict)
         {
-            var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
-            var msg = result.Exception.Message;
-
-            if (result.HasError)
+            SaveResult result = new SaveResult();
+            string statusText = null; 
+            try
             {
-                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICStorageLocation_strName'"))
+                // Validate the modified records if it is okay to change the sub location. 
+                var updatedStorageLocations = _db.ContextManager.Set<tblICStorageLocation>().Local;
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                foreach (var record in updatedStorageLocations)
                 {
-                    msg = "Storage Unit must be unique per Location and Storage Location.";
+                    await db.ValidateSubLocationChange(record.intStorageLocationId, record.intSubLocationId);
                 }
+
+                // Do the Save. 
+                result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+                statusText = result.Exception.Message;
+
+                if (result.HasError)
+                {
+                    if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICStorageLocation_strName'"))
+                    {
+                        statusText = "Storage Location must be unique per Location and Sub Location.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.BaseException = ex;
+                result.Exception = new ServerException(ex);
+                result.HasError = true;
+                statusText = ex.Message;
             }
 
             return new BusinessResult<tblICStorageLocation>()
@@ -40,7 +61,7 @@ namespace iRely.Inventory.BusinessLayer
                 success = !result.HasError,
                 message = new MessageResult()
                 {
-                    statusText = msg,
+                    statusText = statusText,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()
                 }
@@ -240,6 +261,26 @@ namespace iRely.Inventory.BusinessLayer
                 duplicationResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
             return duplicationResult;
+        }
+
+        public async Task<SaveResult> ValidateSubLocationChange(int storageLocationId, int? newSubLocationId)
+        {
+            SaveResult saveResult = new SaveResult();
+
+            // Check if user is allowed to change the sub location within the storage location setup. 
+            try
+            {
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                await db.ValidateSubLocationChange(storageLocationId, newSubLocationId);
+                saveResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                saveResult.BaseException = ex;
+                saveResult.HasError = true;
+                saveResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return saveResult;
         }
     }
 }
