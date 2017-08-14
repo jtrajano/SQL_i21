@@ -795,8 +795,8 @@ ELSE
 		ROLLBACK TRANSACTION; --ROLLBACK CHANGES MADE FROM OTHER STORED PROCEDURE e.g. cost adjustment
 		--TODO:
 		--DELETE TABLE PER Session
-		DELETE FROM tblGLDetailRecap
-			WHERE intTransactionId IN (SELECT intBillId FROM #tmpPostBillData);
+		DELETE FROM tblGLPostRecap
+			WHERE intTransactionId IN (SELECT intBillId FROM #tmpPostBillData) AND strModuleName = 'Accounts Payable';
 
 		INSERT INTO tblGLPostRecap(
 			 [strTransactionId]

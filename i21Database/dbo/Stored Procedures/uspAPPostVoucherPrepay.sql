@@ -210,7 +210,7 @@ BEGIN
 		SELECT 1 FROM tblAPBill B
 		WHERE B.intBillId IN (SELECT intId FROM @validVoucherPrepay)
 		AND B.strBillId = A.strTransactionId
-	)
+	) AND A.ysnIsUnposted = 0
 END
 
 BEGIN TRY
@@ -220,6 +220,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 IF @recap = 0
 BEGIN
+
+	UPDATE A
+		SET A.ysnIsUnposted = CASE WHEN @post = 1 THEN 0 ELSE 1 END
+	FROM @GLEntries A
+
 	EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
 	DELETE ids
 	FROM @validVoucherPrepay ids
@@ -235,6 +240,18 @@ BEGIN
 	FROM tblGLPostResult A
 	WHERE A.strBatchId = @batchId
 
+	IF @post = 0
+	BEGIN
+		UPDATE A
+				SET ysnIsUnposted = 1
+		FROM tblGLDetail A
+		WHERE A.intTransactionId IN (SELECT intId FROM @validVoucherPrepay)
+		AND EXISTS (
+			SELECT 1 FROM tblAPBill B
+			WHERE B.intBillId IN (SELECT intId FROM @validVoucherPrepay)
+			AND B.strBillId = A.strTransactionId
+		) AND A.ysnIsUnposted = 0
+	END
 	UPDATE prepay
 		SET prepay.ysnPosted = @post
 	FROM tblAPBill prepay
@@ -242,7 +259,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	DELETE FROM tblGLDetailRecap WHERE intTransactionId IN (SELECT intId FROM @validVoucherPrepay);
+	DELETE FROM tblGLPostRecap WHERE intTransactionId IN (SELECT intId FROM @validVoucherPrepay) AND strModuleName = 'Accounts Payable';
 
 	INSERT INTO tblGLPostRecap(
 		[strTransactionId]
