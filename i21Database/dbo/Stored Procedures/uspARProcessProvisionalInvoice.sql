@@ -438,6 +438,7 @@ BEGIN CATCH
 END CATCH
 		
 SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
+UPDATE tblARInvoice SET ysnProcessed = 1 WHERE intInvoiceId = @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION 
