@@ -251,8 +251,8 @@ BEGIN
 				,strTransactionId           = Load.strLoadNumber
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
-				,intSubLocationId           = ISNULL(Lot.intSubLocationId,0)--, DetailLot.intSubLocationId)
-				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId,0)--, DetailLot.intStorageLocationId) 
+				,intSubLocationId           = Lot.intSubLocationId--, DetailLot.intSubLocationId)
+				,intStorageLocationId       = Lot.intStorageLocationId--, DetailLot.intStorageLocationId) 
 		FROM tblLGLoad Load --Header 
 		INNER JOIN tblLGLoadDetail LoadDetail ON Load.intLoadId = LoadDetail.intLoadId -- DetailItem
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
@@ -375,8 +375,8 @@ BEGIN
 				,strTransactionId           = Load.strLoadNumber
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
-				,intSubLocationId           = ISNULL(Lot.intSubLocationId,0)--, DetailLot.intSubLocationId)
-				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId,0)--, DetailLot.intStorageLocationId) 
+				,intSubLocationId           = Lot.intSubLocationId --, DetailLot.intSubLocationId)
+				,intStorageLocationId       = Lot.intStorageLocationId --, DetailLot.intStorageLocationId) 
 		FROM tblLGLoad Load --Header 
 		INNER JOIN tblLGLoadDetail LoadDetail ON Load.intLoadId = LoadDetail.intLoadId -- DetailItem
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
