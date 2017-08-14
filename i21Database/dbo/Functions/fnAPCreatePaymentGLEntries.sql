@@ -103,7 +103,7 @@ BEGIN
 		--[dblCredit]						=	CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)),
 		[dblCredit]						=	CAST(
 												dbo.fnAPGetPaymentAmountFactor((Details.dblTotal), paymentDetail.dblPayment, voucher.dblTotal) * A.dblExchangeRate
-												AS DECIMAL(18,2)),
+												AS DECIMAL(18,2)) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strNotes,
@@ -148,6 +148,7 @@ BEGIN
 	) Details
 	LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+	AND paymentDetail.dblPayment != 0
 	UNION ALL
 	--GAIN LOSS
 	SELECT	

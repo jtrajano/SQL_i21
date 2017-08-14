@@ -192,7 +192,7 @@ BEGIN
 		[strPaymentInfo]		= @paymentInfo,
 		[strPaymentRecordNum]	= @paymentRecordNum,
 		[strNotes]				= @notes,
-		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
+		[dtmDatePaid]			= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(@datePaid, GETDATE())), 0),
 		[dblAmountPaid]			= CAST(ISNULL(@payment,0) AS DECIMAL(18,2)),
 		[dblUnapplied]			= 0,
 		[dblExchangeRate]		= @rate,
