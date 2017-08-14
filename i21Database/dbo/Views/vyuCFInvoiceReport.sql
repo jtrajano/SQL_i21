@@ -1,10 +1,57 @@
 ﻿
-
-
-
 CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
-SELECT   ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, arInv.intTransactionId, arInv.strCustomerNumber, cfTrans.dtmTransactionDate, 
+SELECT   
+
+ intCustomerId = (
+
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.intCustomerId
+
+		ELSE cfCardAccount.intCustomerId
+	END),
+
+ intAccountId = (
+
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.intCustomerId
+
+		ELSE cfCardAccount.intAccountId
+	END),
+
+strCustomerName = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strName
+
+		ELSE arInv.strCustomerName
+	END),
+
+strCustomerNumber = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strEntityNo
+
+		ELSE arInv.strCustomerNumber
+	END),
+
+
+strBillTo = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strBillTo
+
+		ELSE arInv.strBillTo
+	END),
+
+
+
+
+cfSiteItem.strNetwork,
+
+ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, cfTrans.intTransactionId, cfTrans.dtmTransactionDate, 
 						DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate,
                          cfTrans.intOdometer, ISNULL
                              ((SELECT   TOP (1) intOdometer
@@ -21,11 +68,11 @@ SELECT   ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.st
                                  FROM         dbo.tblCFTransaction AS tblCFTransaction_1
                                  WHERE     (dtmTransactionDate < cfTrans.dtmTransactionDate) AND (intCardId = cfTrans.intCardId) AND (intCardId = cfTrans.intCardId) AND 
                                                            (intVehicleId = cfTrans.intVehicleId) AND (intProductId = cfTrans.intProductId)
-                                 ORDER BY dtmTransactionDate DESC), 0) ELSE 0 END) AS dblTotalMiles, arInv.strShipTo, arInv.strBillTo, arInv.strCompanyName, arInv.strCompanyAddress, 
-                         arInv.strType, arInv.strCustomerName, arInv.strLocationName, arInv.intInvoiceId, arInv.strInvoiceNumber, arInv.dtmDate, arInv.dtmPostDate AS dtmPostedDate, 
+                                 ORDER BY dtmTransactionDate DESC), 0) ELSE 0 END) AS dblTotalMiles, arInv.strShipTo, arInv.strCompanyName, arInv.strCompanyAddress, 
+                         arInv.strType, arInv.strLocationName, arInv.intInvoiceId, arInv.strInvoiceNumber, arInv.dtmDate, arInv.dtmPostDate AS dtmPostedDate, 
                          cfTrans.intProductId, cfTrans.intCardId, cfTrans.intTransactionId AS EXPR18, cfTrans.strTransactionId, cfTrans.strTransactionType, cfTrans.strInvoiceReportNumber, 
-                         cfTrans.strTempInvoiceReportNumber, cfTrans.dblQuantity, cfCardAccount.intAccountId, cfTrans.strMiscellaneous, cfCardAccount.strName, cfCardAccount.strCardNumber,
-                          cfCardAccount.strCardDescription, cfCardAccount.strNetwork, cfCardAccount.intInvoiceCycle, cfCardAccount.strInvoiceCycle, cfCardAccount.strPrimarySortOptions, 
+                         cfTrans.strTempInvoiceReportNumber, cfTrans.dblQuantity, cfTrans.strMiscellaneous, cfCardAccount.strName, cfCardAccount.strCardNumber,
+                          cfCardAccount.strCardDescription, cfCardAccount.intInvoiceCycle, cfCardAccount.strInvoiceCycle, cfCardAccount.strPrimarySortOptions, 
                          cfCardAccount.strSecondarySortOptions, cfCardAccount.strPrintRemittancePage, cfCardAccount.strPrintPricePerGallon, cfCardAccount.ysnPrintMiscellaneous, 
                          cfCardAccount.strPrintSiteAddress, cfCardAccount.ysnSummaryByCard, cfCardAccount.ysnSummaryByDepartment, cfCardAccount.ysnSummaryByMiscellaneous, 
                          cfCardAccount.ysnSummaryByProduct, cfCardAccount.ysnSummaryByVehicle, cfCardAccount.ysnSummaryByCardProd,cfCardAccount.ysnSummaryByDeptCardProd, cfCardAccount.ysnPrintTimeOnInvoices, cfCardAccount.ysnPrintTimeOnReports, 
@@ -35,7 +82,8 @@ SELECT   ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.st
                          cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount, cfTransNetPrice.dblOriginalAmount AS dblOriginalNetAmount, 
                          cfTransNetPrice.dblCalculatedAmount - cfSiteItem.dblAverageCost AS dblMargin, cfTrans.ysnInvalid, cfTrans.ysnPosted, cfVehicle.strVehicleNumber, 
                          cfVehicle.strVehicleDescription, cfSiteItem.strTaxState, cfDep.strDepartment, cfSiteItem.strSiteType, cfSiteItem.strTaxState AS strState, cfSiteItem.strSiteAddress, 
-                         cfSiteItem.strSiteCity,
+                         cfSiteItem.ysnPostForeignSales,
+						 cfSiteItem.strSiteCity,
                              (SELECT   SUM(dblTaxCalculatedAmount) AS dblTotalTax
                                 FROM         dbo.tblCFTransactionTax
                                 WHERE     (intTransactionId = cfTrans.intTransactionId)) / cfTrans.dblQuantity AS dblTotalTax,
@@ -51,11 +99,11 @@ SELECT   ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.st
                                                          dbo.tblSMTaxClass AS smTCl ON smTCd.intTaxClassId = smTCl.intTaxClassId
                                 WHERE     (smTCl.strTaxClass NOT LIKE '%(SST)%') AND (smTCl.strTaxClass NOT LIKE '%State Sales Tax%') AND (smTCl.strTaxClass <> 'SST') AND 
                                                          (cfTT.intTransactionId = cfTrans.intTransactionId)
-                                GROUP BY cfTT.intTransactionId) / cfTrans.dblQuantity AS dblTaxExceptSST, cfTrans.strPrintTimeStamp, cfCardAccount.intCustomerId, 
+                                GROUP BY cfTT.intTransactionId) / cfTrans.dblQuantity AS dblTaxExceptSST, cfTrans.strPrintTimeStamp, 
                          cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail
 FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
-                         dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
+                         dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId LEFT OUTER JOIN
                          dbo.vyuCFCardAccount AS cfCardAccount ON arInv.intEntityCustomerId = cfCardAccount.intCustomerId AND cfTrans.intCardId = cfCardAccount.intCardId LEFT OUTER JOIN
                              (SELECT   arCustGroupDetail.intCustomerGroupDetailId, arCustGroupDetail.intCustomerGroupId, arCustGroupDetail.intEntityId, arCustGroupDetail.ysnSpecialPricing, 
                                                          arCustGroupDetail.ysnContract, arCustGroupDetail.ysnBuyback, arCustGroupDetail.ysnQuote, arCustGroupDetail.ysnVolumeDiscount, 
@@ -75,9 +123,15 @@ FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
                                                          icfSite.dtmLastTransactionDate, icfSite.ysnEEEStockItemDetail, icfSite.ysnRecalculateTaxesOnRemote, icfSite.strSiteType, icfSite.intCreatedUserId, 
                                                          icfSite.dtmCreated, icfSite.intLastModifiedUserId, icfSite.dtmLastModified, icfSite.intConcurrencyId, icfSite.intImportMapperId, icfItem.intItemId, 
                                                          icfItem.intARItemId, iicItemLoc.intItemLocationId, iicItemLoc.intIssueUOMId, iicItem.strDescription, iicItem.strShortName, iicItem.strItemNo, 
-                                                         icfItem.strProductNumber, iicItemPricing.dblAverageCost
+                                                         icfItem.strProductNumber, iicItemPricing.dblAverageCost, icfNetwork.ysnPostForeignSales, icfNetwork.intCustomerId, iemEnt.strName, iemEnt.strEntityNo, icfNetwork.strNetwork
+														 ,[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, arBillTo.strAddress, arBillTo.strCity, arBillTo.strState, arBillTo.strZipCode, arBillTo.strCountry, NULL, 0) AS strBillTo
+														 
                                 FROM         dbo.tblCFSite AS icfSite INNER JOIN
-                                                         dbo.tblCFNetwork AS icfNetwork ON icfNetwork.intNetworkId = icfSite.intNetworkId INNER JOIN
+                                                         dbo.tblCFNetwork AS icfNetwork ON icfNetwork.intNetworkId = icfSite.intNetworkId LEFT JOIN 
+														 tblEMEntity iemEnt ON iemEnt.intEntityId = icfNetwork.intCustomerId 
+														 INNER JOIN tblARCustomer iarCus ON iarCus.intEntityCustomerId = iemEnt.intEntityId
+														 LEFT JOIN tblEMEntityLocation arBillTo ON arBillTo.intEntityLocationId = iarCus.intBillToId
+														 INNER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId OR icfNetwork.intNetworkId = icfItem.intNetworkId INNER JOIN
                                                          dbo.tblICItem AS iicItem ON icfItem.intARItemId = iicItem.intItemId LEFT OUTER JOIN
                                                          dbo.tblICItemLocation AS iicItemLoc ON iicItemLoc.intLocationId = icfSite.intARLocationId AND iicItemLoc.intItemId = icfItem.intARItemId INNER JOIN
@@ -95,3 +149,7 @@ FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
                                 WHERE     (strTransactionPriceId = 'Net Price') AND cfTrans.intTransactionId = intTransactionId) AS cfTransNetPrice LEFT OUTER JOIN
                          dbo.tblCFDepartment AS cfDep ON cfDep.intDepartmentId = cfCardAccount.intDepartmentId
 WHERE     (cfTrans.ysnPosted = 1)
+--GO
+GO
+
+

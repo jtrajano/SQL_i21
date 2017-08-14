@@ -78,8 +78,11 @@
     [ysnPrintTimeOnInvoices]     BIT             NULL,
     [ysnPrintTimeOnReports]      BIT             NULL,
     [ysnInvalid]                 BIT             NULL,
-    [ysnPosted]                  BIT             NULL
+    [ysnPosted]                  BIT             NULL,
+    [ysnPostForeignSales]        BIT             NULL
 );
+
+
 
 
 
