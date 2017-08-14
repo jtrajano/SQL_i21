@@ -211,8 +211,11 @@ BEGIN
 	--Reversed gl entries of void check should be posted
 	UPDATE A
 		SET A.ysnIsUnposted = 0,
-		A.dtmDate = @voidDate
+		A.dtmDate = @voidDate,
+		A.strTransactionId = A.strTransactionId + 'V',
+		A.intTransactionId = B.intNewPaymentId
 	FROM @GLEntries A
+	INNER JOIN #tmpPayables B ON A.intTransactionId = B.intPaymentId
 
 	BEGIN TRY
 		EXEC uspGLBookEntries @GLEntries, 1
