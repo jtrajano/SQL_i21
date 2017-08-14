@@ -82,8 +82,8 @@ BEGIN TRY
 
 	SELECT @dblSeqQty = dblQuantity FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
-	IF(@dblTotalSIQty >= @dblSeqQty)
-	BEGIN
+	--IF(@dblTotalSIQty >= @dblSeqQty)
+	--BEGIN
 		IF (ISNULL(@intCountSILoads, 0) > 1)
 		BEGIN
 			SET @strErrMsg = 'More than one shipping instruction is available for contract ' + @strContractNumber + ' sequence ' + LTRIM(@intContractSeq) +'. Cannot reduce qty.'
@@ -93,14 +93,41 @@ BEGIN TRY
 		BEGIN
 			UPDATE LD
 				SET dblQuantity = CD.dblQuantity,
-					dblNet = dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId,LD.intWeightItemUOMId,LD.dblQuantity),
-					dblGross = dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId,LD.intWeightItemUOMId,LD.dblQuantity)
+					dblNet = dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId,LD.intWeightItemUOMId,CD.dblQuantity),
+					dblGross = dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId,LD.intWeightItemUOMId,CD.dblQuantity)
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale IN (1,3) THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
 			WHERE CD.intContractDetailId = @intContractDetailId
+
+			UPDATE L
+			SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CASE 
+							WHEN ISNULL(CASE 
+										WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bags'
+											THEN CTCQ.dblQuantity
+										ELSE CTCQ.dblBulkQuantity
+										END, 0) = 0
+								THEN LD.dblNet
+							ELSE CASE 
+									WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bulk'
+										THEN CTCQ.dblQuantity
+									ELSE CTCQ.dblBulkQuantity
+									END
+							END, LD.dblNet))
+			FROM tblCTContractDetail CD
+			JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+			LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
+			LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId
+				AND IC.intItemContractId = CD.intItemContractId
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId, I.intOriginId)
+				AND I.intCommodityId = CA.intCommodityId
+			LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
+				AND CTCQ.intContainerTypeId = CT.intContainerTypeId
+			WHERE CD.intContractDetailId = @intContractDetailId
 		END
-	END
+	--END
 
 	IF (ISNULL(@intCountSALoads, 0) > 1)
 	BEGIN
