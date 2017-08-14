@@ -74,7 +74,7 @@ IF OBJECT_ID('tempdb..#tmpReceiptDetailData') IS NOT NULL DROP TABLE #tmpReceipt
 SELECT IRDetail.* INTO #tmpReceiptDetailData 
 FROM tblICInventoryReceiptItem IRDetail 
 INNER JOIN #tmpReceiptIds tIR ON IRDetail.intInventoryReceiptId = tIR.intInventoryReceiptId
-WHERE IRDetail.dblBillQty < IRDetail.dblOpenReceive
+WHERE IRDetail.dblBillQty < IRDetail.dblOpenReceive AND IRDetail.intOwnershipType != 1
 
 IF OBJECT_ID('tempdb..#tmpReceiptChargeData') IS NOT NULL DROP TABLE #tmpReceiptChargeData
 SELECT charges.* INTO #tmpReceiptChargeData
