@@ -42,9 +42,9 @@ SELECT
 	,[strStorageLocationName]		= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS	
 	,[intTaxGroupId]				= NULL
 	,[strTaxGroup]					= NULL
-	,[dblWeight]					= [dbo].[fnCalculateQtyBetweenUOM](ICUOM2.[intItemUOMId],ICUOM.[intItemUOMId],1) --ICUOM.[dblWeight]
-	,[intWeightUOMId]				= LGSPS.[intWeightUnitMeasureId]
-	,[strWeightUnitMeasure]			= LGSPS.[strWeightUOM] 
+	,[dblWeight]					= [dbo].[fnCalculateQtyBetweenUOM](ARCC.intItemWeightUOMId,ICUOM.[intItemUOMId],1) --ICUOM.[dblWeight]
+	,[intWeightUOMId]				= ARCC.intPriceItemUOMId
+	,[strWeightUnitMeasure]			= ARCC.strUnitMeasure
 	,[dblGrossWt]					= LGSPS.[dblGrossWt] 
 	,[dblTareWt]					= LGSPS.[dblTareWt] 
 	,[dblNetWt]						= LGSPS.[dblNetWt]
