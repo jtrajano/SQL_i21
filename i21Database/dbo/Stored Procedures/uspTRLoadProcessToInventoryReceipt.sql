@@ -229,7 +229,13 @@ END
 																					AND TempDist.strDestination = 'Location') THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END)
 														END)
-			,[strCostMethod]					= 'Per Unit'
+			,[strCostMethod]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Per Unit'
+														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
+																				FROM tblTRLoadDistributionHeader TempDist
+																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
+																					AND TempDist.strDestination = 'Location') THEN 'Per Unit'
+																ELSE 'Amount' END)
+														END)
 			,[dblRate]							= min(RE.dblFreightRate)
 			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
 			,[intOtherChargeEntityVendorId]		= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
