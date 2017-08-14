@@ -161,7 +161,8 @@ END
 									ON TT.intLoadHeaderId = RR.intLoadHeaderId
 								JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
 								JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
-						WHERE	RR.strOrigin = 'Terminal' AND HH.strDestination = 'Customer' AND RR.intItemId = HD.intItemId		
+						WHERE	((RR.strOrigin = 'Terminal' AND HH.strDestination = 'Customer') OR (RR.strOrigin = 'Terminal' AND HH.strDestination = 'Location' AND RR.intCompanyLocationId != HH.intCompanyLocationId))
+							AND RR.intItemId = HD.intItemId
 					  ) TLD	on TLD.intLoadHeaderId = TR.intLoadHeaderId	 and TLD.intLoadReceiptId = TR.intLoadReceiptId and TLD.intItemId = TR.intItemId
 			LEFT JOIN (
 						SELECT DISTINCT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId
