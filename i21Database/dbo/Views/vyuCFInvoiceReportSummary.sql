@@ -2,7 +2,53 @@
 
 CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
-SELECT   arInv.strCustomerName, arInv.strCustomerNumber, cfCardAccount.strCardNumber, cfCardAccount.strCardDescription, CASE WHEN cfCardAccount.strDepartment = '' OR
+SELECT   
+
+
+ intCustomerId = (
+
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.intCustomerId
+
+		ELSE cfCardAccount.intCustomerId
+	END),
+
+ intAccountId = (
+
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.intCustomerId
+
+		ELSE cfCardAccount.intAccountId
+	END),
+
+strCustomerName = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strName
+
+		ELSE arInv.strCustomerName
+	END),
+
+strCustomerNumber = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strEntityNo
+
+		ELSE arInv.strCustomerNumber
+	END),
+
+
+strBillTo = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strBillTo
+
+		ELSE arInv.strBillTo
+	END),
+
+ cfCardAccount.strCardNumber, cfCardAccount.strCardDescription, CASE WHEN cfCardAccount.strDepartment = '' OR
                          cfCardAccount.strDepartment IS NULL THEN 'Unknown' ELSE cfCardAccount.strDepartment END AS strDepartment, cfCardAccount.strDepartmentDescription, 
                          CASE WHEN cfTrans.strMiscellaneous = '' OR
                          cfTrans.strMiscellaneous IS NULL THEN 'Unknown' ELSE cfTrans.strMiscellaneous END AS strMiscellaneous, CASE WHEN cfVehicle.strVehicleNumber = '' OR
@@ -16,14 +62,14 @@ SELECT   arInv.strCustomerName, arInv.strCustomerNumber, cfCardAccount.strCardNu
                          AS dblTotalNetAmount, ISNULL(SUM(ROUND(cfTransPrice.dblCalculatedAmount, 2)), 0) AS dblTotalAmount, ISNULL(SUM(FETTaxes_1.dblTaxCalculatedAmount), 0) 
                          + ISNULL(SUM(SETTaxes_1.dblTaxCalculatedAmount), 0) + ISNULL(SUM(SSTTaxes_1.dblTaxCalculatedAmount), 0) + ISNULL(SUM(LCTaxes_1.dblTaxCalculatedAmount), 0) 
                          AS dblTotalTaxAmount, cfTrans.strTransactionId, cfCardAccount.intDiscountScheduleId, cfCardAccount.intTermsCode, cfCardAccount.intTermsId, cfSiteItem.strTaxState, 
-                         cfCardAccount.intAccountId, cfTrans.intCardId, cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.ysnIncludeInQuantityDiscount, DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate, cfTrans.strInvoiceReportNumber AS strUpdateInvoiceReportNumber,
+                          cfTrans.intCardId, cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.ysnIncludeInQuantityDiscount, DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate, cfTrans.strInvoiceReportNumber AS strUpdateInvoiceReportNumber,
                          ISNULL(SUM(FETTaxes_1.dblTaxCalculatedAmount), 0) AS TotalFET, ISNULL(SUM(SETTaxes_1.dblTaxCalculatedAmount), 0) AS TotalSET, 
                          ISNULL(SUM(SSTTaxes_1.dblTaxCalculatedAmount), 0) AS TotalSST, ISNULL(SUM(LCTaxes_1.dblTaxCalculatedAmount), 0) AS TotalLC, cfTrans.intTransactionId, 
                          cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, cfCardAccount.strInvoiceCycle, cfTrans.strTempInvoiceReportNumber AS strInvoiceReportNumber, 
-                         cfTrans.strPrintTimeStamp, cfCardAccount.intCustomerId, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail
-FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
+                         cfTrans.strPrintTimeStamp, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail
+FROM         dbo.vyuCFInvoice AS arInv RIGHT JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
-                         dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
+                         dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId LEFT OUTER JOIN
                          dbo.vyuCFCardAccount AS cfCardAccount ON cfTrans.intCardId = cfCardAccount.intCardId INNER JOIN
                              (SELECT   icfSite.intSiteId, icfSite.intNetworkId, icfSite.intTaxGroupId, icfSite.strSiteNumber, icfSite.intARLocationId, icfSite.intCardId, icfSite.strTaxState, 
                                                          icfSite.strAuthorityId1, icfSite.strAuthorityId2, icfSite.ysnFederalExciseTax, icfSite.ysnStateExciseTax, icfSite.ysnStateSalesTax, icfSite.ysnLocalTax1, 
@@ -37,9 +83,14 @@ FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                                                          icfSite.dtmLastTransactionDate, icfSite.ysnEEEStockItemDetail, icfSite.ysnRecalculateTaxesOnRemote, icfSite.strSiteType, icfSite.intCreatedUserId, 
                                                          icfSite.dtmCreated, icfSite.intLastModifiedUserId, icfSite.dtmLastModified, icfSite.intConcurrencyId, icfSite.intImportMapperId, icfItem.intItemId, 
                                                          icfItem.intARItemId, iicItemLoc.intItemLocationId, iicItemLoc.intIssueUOMId, iicItem.strDescription, iicItem.strShortName, iicItem.strItemNo, 
-                                                         icfItem.strProductNumber, iicItemPricing.dblAverageCost, icfItem.strProductDescription, icfItem.ysnIncludeInQuantityDiscount
+                                                         icfItem.strProductNumber, iicItemPricing.dblAverageCost, icfItem.strProductDescription, icfItem.ysnIncludeInQuantityDiscount,icfNetwork.ysnPostForeignSales, icfNetwork.intCustomerId, iemEnt.strName, iemEnt.strEntityNo, icfNetwork.strNetwork
+														 ,[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, arBillTo.strAddress, arBillTo.strCity, arBillTo.strState, arBillTo.strZipCode, arBillTo.strCountry, NULL, 0) AS strBillTo
                                 FROM         dbo.tblCFSite AS icfSite INNER JOIN
-                                                         dbo.tblCFNetwork AS icfNetwork ON icfNetwork.intNetworkId = icfSite.intNetworkId INNER JOIN
+                                                         dbo.tblCFNetwork AS icfNetwork ON icfNetwork.intNetworkId = icfSite.intNetworkId LEFT JOIN
+														 tblEMEntity iemEnt ON iemEnt.intEntityId = icfNetwork.intCustomerId 
+														 INNER JOIN tblARCustomer iarCus ON iarCus.intEntityCustomerId = iemEnt.intEntityId
+														 LEFT JOIN tblEMEntityLocation arBillTo ON arBillTo.intEntityLocationId = iarCus.intBillToId
+														 INNER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId OR icfNetwork.intNetworkId = icfItem.intNetworkId INNER JOIN
                                                          dbo.tblICItem AS iicItem ON icfItem.intARItemId = iicItem.intItemId LEFT OUTER JOIN
                                                          dbo.tblICItemLocation AS iicItemLoc ON iicItemLoc.intLocationId = icfSite.intARLocationId AND iicItemLoc.intItemId = icfItem.intARItemId INNER JOIN
@@ -90,4 +141,4 @@ GROUP BY cfCardAccount.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId
                          cfTrans.strPrintTimeStamp, arInv.strCustomerNumber, cfSiteItem.strItemNo, cfSiteItem.strDescription, cfSiteItem.strSiteNumber, cfSiteItem.strSiteAddress, 
                          cfSiteItem.strSiteCity, cfTrans.strTransactionId, cfTrans.intOdometer, cfCardAccount.intCustomerId, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail, 
 						 cfTrans.dtmInvoiceDate, cfTrans.strInvoiceReportNumber,
-                         cfSiteItem.strShortName
+                         cfSiteItem.strShortName, cfTrans.strTransactionType,cfSiteItem.intCustomerId,cfSiteItem.strName,cfSiteItem.strEntityNo, cfSiteItem.strBillTo,arInv.strBillTo

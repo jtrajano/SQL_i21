@@ -180,7 +180,7 @@ BEGIN
 			,[dblQtyOrdered]						= NULL
 			,[dblQtyShipped]						= 1 -- DEFAULT TO 1
 			,[dblDiscount]							= NULL
-			,[dblPrice]								= dblAccountTotalAmount
+			,[dblPrice]								= SUM(ISNULL(dblCalculatedTotalAmount,0)) -- dblAccountTotalAmount
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= ''
 			,[strFrequency]							= ''
@@ -216,10 +216,11 @@ BEGIN
 			,[dblItemTermDiscount]					= dblAccountTotalDiscount
 			,[strDocumentNumber]					= strTempInvoiceReportNumber
 		FROM tblCFInvoiceStagingTable
+		WHERE intInvoiceId IS NOT NULL AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
 		GROUP BY 
 		intCustomerId
 		,strTempInvoiceReportNumber
-		,dblAccountTotalAmount
+		,dblCalculatedTotalAmount
 		,dblAccountTotalDiscount
 		,intTermID
 		,dtmInvoiceDate
@@ -399,6 +400,7 @@ BEGIN
 			,[dblItemTermDiscount]					= 0
 			,[strDocumentNumber]					= strInvoiceReportNumber
 		FROM tblCFInvoiceFeeStagingTable
+
 		--GROUP BY 
 		--intCustomerId
 		--,strTempInvoiceReportNumber
@@ -599,6 +601,8 @@ BEGIN
 
 		----------CREATE DEBIT MEMOS------------
 
+		SELECT * FROM @InvoiceEntriesTEMP
+
 		DECLARE @LogId INT
 
 		--select * from @InvoiceEntriesTEMP
@@ -682,14 +686,14 @@ BEGIN
 			SELECT TOP 1 
 			 @strInvoiceReportNumber = strTempInvoiceReportNumber 
 			,@dblTotalQuantity = SUM(dblQuantity)
-			,@dblAccountTotalAmount = dblAccountTotalAmount
+			,@dblAccountTotalAmount = SUM(dblCalculatedTotalAmount)
 			,@dblAccountTotalDiscount = dblAccountTotalDiscount
 			FROM tblCFInvoiceStagingTable 
-			WHERE intCustomerId = @intEntityCustomerId
+			WHERE intCustomerId = @intEntityCustomerId AND intInvoiceId IS NOT NULL AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
 			GROUP BY
 			 intCustomerId
 			,strTempInvoiceReportNumber
-			,dblAccountTotalAmount
+			,dblCalculatedTotalAmount
 			,dblAccountTotalDiscount
 			,intTermID
 			,dtmInvoiceDate

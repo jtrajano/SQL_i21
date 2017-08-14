@@ -33,8 +33,16 @@ BEGIN TRY
 	-- EXECUTING THIS SP's WILL INSERT RECORDS ON TEMP TABLES--
 	-----------------------------------------------------------
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam
+
+	SELECT * FROM tblCFInvoiceReportTempTable
+
 	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam
+
+	SELECT * FROM tblCFInvoiceSummaryTempTable
+
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam
+
+	SELECT * FROM tblCFInvoiceDiscountTempTable
 	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
@@ -163,6 +171,7 @@ BEGIN TRY
 	,ysnIncludeInQuantityDiscount
 	,ysnShowOnCFInvoice
 	,strDiscountSchedule
+	,ysnPostForeignSales
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -207,8 +216,8 @@ BEGIN TRY
 	,strCardDescription
 	,strNetwork
 	,strInvoiceCycle
-	,strPrimarySortOptions
-	,strSecondarySortOptions
+	,ISNULL(strPrimarySortOptions,'Vehicle') AS strPrimarySortOptions
+	,ISNULL(strSecondarySortOptions,'Vehicle') AS strSecondarySortOptions
 	,strPrintRemittancePage
 	,strPrintPricePerGallon
 	,strPrintSiteAddress
@@ -272,21 +281,22 @@ BEGIN TRY
 	,dblAccountTotalLessDiscount
 	,dblDiscountEP
 	,dblAPR
-	,ysnPrintMiscellaneous
-	,ysnSummaryByCard
-	,ysnSummaryByDepartment
-	,ysnSummaryByMiscellaneous
-	,ysnSummaryByProduct
-	,ysnSummaryByVehicle
-	,ysnSummaryByCardProd	 
-	,ysnSummaryByDeptCardProd
-	,ysnPrintTimeOnInvoices
-	,ysnPrintTimeOnReports
+	,ISNULL(ysnPrintMiscellaneous,1) AS ysnPrintMiscellaneous
+	,ISNULL(ysnSummaryByCard,1)	AS ysnSummaryByCard			
+	,ISNULL(ysnSummaryByDepartment,1) AS ysnSummaryByDepartment		
+	,ISNULL(ysnSummaryByMiscellaneous,1) AS ysnSummaryByMiscellaneous	
+	,ISNULL(ysnSummaryByProduct,1) AS ysnSummaryByProduct			
+	,ISNULL(ysnSummaryByVehicle,1) AS ysnSummaryByVehicle			
+	,ISNULL(ysnSummaryByCardProd,1) AS ysnSummaryByCardProd	 	
+	,ISNULL(ysnSummaryByDeptCardProd,1) AS ysnSummaryByDeptCardProd	
+	,ISNULL(ysnPrintTimeOnInvoices,1) AS ysnPrintTimeOnInvoices		
+	,ISNULL(ysnPrintTimeOnReports,1) AS ysnPrintTimeOnReports		
 	,ysnInvalid
 	,ysnPosted
 	,ysnIncludeInQuantityDiscount
 	,cfInvRptDcnt.ysnShowOnCFInvoice
 	,cfInvRptDcnt.strDiscountSchedule
+	,cfInvRpt.ysnPostForeignSales
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN tblCFInvoiceSummaryTempTable AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId

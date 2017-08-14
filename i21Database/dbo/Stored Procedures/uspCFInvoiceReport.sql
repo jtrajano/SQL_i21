@@ -1,4 +1,6 @@
 ﻿
+
+
 CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	@xmlParam NVARCHAR(MAX)=null
 )
@@ -340,13 +342,25 @@ BEGIN
 			---------GET DISTINCT TRANSACTION ID---------
 
 
+			--SELECT * FROM @tblCFInvoiceNunber
+
 			WHILE (EXISTS(SELECT 1 FROM @tblCFTableTransationIds))
 			BEGIN
 
 				SELECT @intTempTransactionCounter = [intTransactionId] FROM @tblCFTableTransationIds
 				SELECT @intTempTransactionId = [intTransactionId] FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
-				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intAccountId = (SELECT TOP 1 cfCardAcct.intAccountId FROM tblCFTransaction as cfTrans
-																											INNER JOIN vyuCFCardAccount as cfCardAcct
+				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intAccountId = (SELECT TOP 1
+																											intAccountId = (
+																											CASE cfTrans.strTransactionType 
+																												WHEN 'Foreign Sale' 
+																												THEN cfNet.intCustomerId
+
+																												ELSE cfCardAcct.intAccountId 
+																											END)
+																											FROM tblCFTransaction as cfTrans
+																											INNER JOIN tblCFNetwork as cfNet
+																											ON cfTrans.intNetworkId = cfNet.intNetworkId
+																											LEFT JOIN vyuCFCardAccount as cfCardAcct
 																											ON cfTrans.intCardId = cfCardAcct.intCardId
 																											WHERE cfTrans.intTransactionId = @intTempTransactionId)
 
@@ -382,8 +396,18 @@ BEGIN
 
 				SELECT @intTempTransactionCounter = [intTransactionId] FROM @tblCFTableTransationIds
 				SELECT @intTempTransactionId = [intTransactionId] FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
-				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intAccountId = (SELECT TOP 1 cfCardAcct.intAccountId FROM tblCFTransaction as cfTrans
-																											INNER JOIN vyuCFCardAccount as cfCardAcct
+				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intAccountId = (SELECT TOP 1
+																											intAccountId = (
+																											CASE cfTrans.strTransactionType 
+																												WHEN 'Foreign Sale' 
+																												THEN cfNet.intCustomerId
+
+																												ELSE cfCardAcct.intAccountId 
+																											END)
+																											FROM tblCFTransaction as cfTrans
+																											INNER JOIN tblCFNetwork as cfNet
+																											ON cfTrans.intNetworkId = cfNet.intNetworkId
+																											LEFT JOIN vyuCFCardAccount as cfCardAcct
 																											ON cfTrans.intCardId = cfCardAcct.intCardId
 																											WHERE cfTrans.intTransactionId = @intTempTransactionId)
 
@@ -502,7 +526,8 @@ BEGIN
 		,ysnPrintTimeOnInvoices		
 		,ysnPrintTimeOnReports		
 		,ysnInvalid					
-		,ysnPosted)
+		,ysnPosted
+		,ysnPostForeignSales)
 		SELECT
 		 intCustomerGroupId			
 		,intTransactionId			
@@ -583,7 +608,8 @@ BEGIN
 		,ysnPrintTimeOnInvoices		
 		,ysnPrintTimeOnReports		
 		,ysnInvalid					
-		,ysnPosted					
+		,ysnPosted		
+		,ysnPostForeignSales			
 	    FROM vyuCFInvoiceReport AS main 
 		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
 		on main.intAccountId = cfInvRptNo.intAccountId

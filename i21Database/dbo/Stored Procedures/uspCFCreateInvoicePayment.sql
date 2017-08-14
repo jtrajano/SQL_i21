@@ -123,7 +123,7 @@ BEGIN
 		SELECT 
 		 intCustomerId
 		,@companyLocationId
-		,I.intCurrencyId
+		,ISNULL(I.intCurrencyId,dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
 		,dtmInvoiceDate
 		,@accountId
 		,NULL
@@ -153,6 +153,7 @@ BEGIN
 		FROM tblCFInvoiceStagingTable cfTrans
 		LEFT OUTER JOIN tblARInvoice I
 		ON cfTrans.intInvoiceId = I.intInvoiceId
+		WHERE cfTrans.intInvoiceId IS NOT NULL AND (cfTrans.strTransactionType != 'Foreign Sale' OR ISNULL(cfTrans.ysnPostForeignSales,0) != 0)
 		--------------------------------------
 
 		--select * From @EntriesForPayment
@@ -418,6 +419,8 @@ BEGIN
 
 
 		--select '[uspARProcessPayments]',* from @PaymentEntriesTEMP
+
+		SELECT * FROM @PaymentEntriesTEMP
 
 		SET @executedLine = 5
 		DECLARE @LogId INT
