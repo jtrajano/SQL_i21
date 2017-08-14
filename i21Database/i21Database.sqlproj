@@ -5590,6 +5590,7 @@
     <Build Include="dbo\Views\vyuCFSearchAccountVehicle.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDuplicateTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
+    <Build Include="dbo\Views\vyuARPaymentMethodForReceivePayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
