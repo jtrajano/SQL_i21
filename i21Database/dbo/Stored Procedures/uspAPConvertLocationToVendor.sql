@@ -50,8 +50,8 @@ AS
 
 	EXEC uspSMGetStartingNumber 43, @EntityNumber OUTPUT
 
-	INSERT INTO tblEMEntity(strName, strContactNumber, strEntityNo, intConcurrencyId)
-	SELECT @EntityName, '', @EntityNumber, 1
+	INSERT INTO tblEMEntity(strName, strContactNumber, strEntityNo, intConcurrencyId, ysnPrint1099)
+	SELECT @EntityName, '', @EntityNumber, 1, 1
 
 	SET @EntityNewId = @@IDENTITY
 
