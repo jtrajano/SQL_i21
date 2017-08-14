@@ -5607,6 +5607,7 @@
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLetter.sql" />
     <Build Include="dbo\Views\vyuARPaymentMethodForReceivePayments.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceProductRecapReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFOBatchEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
