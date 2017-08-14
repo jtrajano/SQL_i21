@@ -20,6 +20,7 @@
 	ReceiptChargeTax.dblAdjustedTax,
 	ReceiptChargeTax.intTaxAccountId,
 	ReceiptChargeTax.ysnTaxAdjusted,
+	ReceiptChargeTax.ysnTaxOnly,
 	ReceiptChargeTax.ysnCheckoffTax,
 	ReceiptChargeTax.intSort
 FROM tblICInventoryReceiptChargeTax ReceiptChargeTax

@@ -20,6 +20,7 @@
 	ReceiptItemTax.dblAdjustedTax,
 	ReceiptItemTax.intTaxAccountId,
 	ReceiptItemTax.ysnTaxAdjusted,
+	ReceiptItemTax.ysnTaxOnly,
 	ReceiptItemTax.ysnSeparateOnInvoice,
 	ReceiptItemTax.ysnCheckoffTax,
 	ReceiptItemTax.intSort
