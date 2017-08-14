@@ -367,16 +367,16 @@ BEGIN
 	 @rate = @rate,
 	 @paymentDetail = @detailAmountPaid;
 
-	 UPDATE A
-		SET A.dblWithheld = Withheld.dblWithheld
-		,A.dblAmountPaid = CAST((A.dblAmountPaid - Withheld.dblWithheld) AS DECIMAL(18,2))
-	 FROM tblAPPayment A
-	 CROSS APPLY 
-	 (
-		SELECT SUM(dblWithheld) dblWithheld FROM tblAPPaymentDetail B
-		WHERE B.intPaymentId = A.intPaymentId
-	 ) Withheld
-	WHERE A.intPaymentId = @paymentId
+	--  UPDATE A
+	-- 	SET A.dblWithheld = Withheld.dblWithheld
+	-- 	,A.dblAmountPaid = CAST((A.dblAmountPaid - Withheld.dblWithheld) AS DECIMAL(18,2))
+	--  FROM tblAPPayment A
+	--  CROSS APPLY 
+	--  (
+	-- 	SELECT SUM(dblWithheld) dblWithheld FROM tblAPPaymentDetail B
+	-- 	WHERE B.intPaymentId = A.intPaymentId
+	--  ) Withheld
+	-- WHERE A.intPaymentId = @paymentId
 
 	--UNDO THE DISCOUNT AFTER CREATING PAYMENT AS WE ARE UPDATING THE DISCOUNT OF VOUCHER ONCE PAYMENT IS POSTED
 	--UPDATE A

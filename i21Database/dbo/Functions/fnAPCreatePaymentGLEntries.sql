@@ -102,7 +102,9 @@ BEGIN
 		[dblDebit]						=	0,
 		--[dblCredit]						=	CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)),
 		[dblCredit]						=	CAST(
-												dbo.fnAPGetPaymentAmountFactor((Details.dblTotal), paymentDetail.dblPayment, voucher.dblTotal) * A.dblExchangeRate
+												dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+													- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+													paymentDetail.dblPayment, voucher.dblTotal) * A.dblExchangeRate
 												AS DECIMAL(18,2)) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -146,6 +148,9 @@ BEGIN
 		FROM dbo.tblAPBillDetail R
 		WHERE R.intBillId = voucher.intBillId AND R.dblTax != 0
 	) Details
+	OUTER APPLY (
+		SELECT dblWithholdPercent / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
+	) withHoldData
 	LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND paymentDetail.dblPayment != 0
