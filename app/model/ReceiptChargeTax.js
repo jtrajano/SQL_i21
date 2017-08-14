@@ -49,6 +49,7 @@ Ext.define('Inventory.model.ReceiptChargeTax', {
         { name: 'dblAdjustedTax', type: 'float' },
         { name: 'intTaxAccountId', type: 'int', allowNull: true },
         { name: 'ysnTaxAdjusted', type: 'boolean' },
+        { name: 'ysnTaxOnly', type: 'boolean' },
         { name: 'ysnCheckoffTax', type: 'boolean' },
         { name: 'strTaxCode', type: 'string' },
         { name: 'intSort', type: 'int', allowNull: true }

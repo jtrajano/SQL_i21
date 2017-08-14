@@ -2378,6 +2378,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         Ext.Array.each(itemTaxes, function (itemDetailTax) {
             if (itemDetailTax.strTaxableByOtherTaxes && itemDetailTax.strTaxableByOtherTaxes !== String.empty) {
                 if (itemDetailTax.strTaxableByOtherTaxes.split(",").indexOf(currentItemTax.intTaxClassId.toString()) > -1) {
+                    if(itemDetailTax.data.ysnTaxOnly)
+                        taxableAmount = 0.000000;
+                    else
+                        taxableAmount = ((quantity * price) - ((quantity * price) * (itemDetailTax.dblRate/100.0)));
+
                     if (itemDetailTax.ysnTaxAdjusted) {
                         taxableAmount = (quantity * price) + (itemDetailTax.dblAdjustedTax);
                     } else {

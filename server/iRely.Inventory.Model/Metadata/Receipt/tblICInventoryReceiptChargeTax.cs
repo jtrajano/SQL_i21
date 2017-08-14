@@ -21,6 +21,7 @@ namespace iRely.Inventory.Model
         public decimal? dblAdjustedTax { get; set; }
         public int? intTaxAccountId { get; set; }
         public bool? ysnTaxAdjusted { get; set; }
+        public bool? ysnTaxOnly { get; set; }
         public bool? ysnCheckoffTax { get; set; }
         public string strTaxCode { get; set; }
         public int? intSort { get; set; }

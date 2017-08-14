@@ -29,6 +29,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblAdjustedTax).HasColumnName("dblAdjustedTax").HasPrecision(18, 6);
             this.Property(t => t.intTaxAccountId).HasColumnName("intTaxAccountId");
             this.Property(t => t.ysnTaxAdjusted).HasColumnName("ysnTaxAdjusted");
+            this.Property(t => t.ysnTaxOnly).HasColumnName("ysnTaxOnly");
             this.Property(t => t.ysnCheckoffTax).HasColumnName("ysnCheckoffTax");
             this.Property(t => t.strTaxCode).HasColumnName("strTaxCode");
             this.Property(t => t.intSort).HasColumnName("intSort");
