@@ -191,7 +191,8 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
 
             grdGrade: {
-                colGrade: 'strDescription'
+                colGrade: 'strDescription',
+                hidden: '{gradeHidden}'
             },
 
             grdProductLine: {
