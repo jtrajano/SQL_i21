@@ -24,6 +24,7 @@ Type the overview for the table here.
 		[dblAdjustedTax] NUMERIC(18, 6) NULL DEFAULT ((0)),		
 		[intTaxAccountId] INT NULL,
 		[ysnTaxAdjusted] BIT NULL DEFAULT ((0)),
+		[ysnTaxOnly] BIT NULL DEFAULT ((0)),
 		[ysnCheckoffTax] BIT NULL DEFAULT ((0)),
 		[strTaxCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intSort] INT NULL, 
