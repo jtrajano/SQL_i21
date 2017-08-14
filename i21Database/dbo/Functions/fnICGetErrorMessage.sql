@@ -200,6 +200,8 @@ BEGIN
 		WHEN @msgId = 80184 THEN 'Invalid customer record.'
 		WHEN @msgId = 80185 THEN 'Post preview is not available. Financials are only booked for company-owned stocks.'
 		WHEN @msgId = 80186 THEN 'The UOM %s is used for %s and not for %s. Please assign the correct UOM id.'
+		WHEN @msgId = 80187 THEN 'You are not allowed to change the Sub Location. Item %s still has stock at %s.'
+		WHEN @msgId = 80188 THEN 'You are not allowed to change the Sub Location. Item %s, plus %i more, still has stock at %s.'
 	END 
 
 	RETURN @msg
