@@ -5608,6 +5608,7 @@
     <Build Include="dbo\Views\vyuARPaymentMethodForReceivePayments.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceProductRecapReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFOBatchEntry.sql" />
+    <Build Include="dbo\Functions\fnRKGetCurrencyExchangeRateType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
