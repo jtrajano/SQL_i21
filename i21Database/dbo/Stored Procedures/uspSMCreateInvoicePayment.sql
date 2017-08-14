@@ -4,6 +4,7 @@
 	,@strCreditCardNumber AS NVARCHAR(50)
 	,@intUserId INT
 	,@strAction NVARCHAR(50)
+	,@intEntityCardInfoId INT = NULL
 	,@intPaymentId INT = NULL
 	,@strPaymentIdNew NVARCHAR(50) OUTPUT
 	,@intPaymentIdNew INT OUTPUT
