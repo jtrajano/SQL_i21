@@ -20,6 +20,7 @@ namespace iRely.Inventory.WebApi
 
             var provider = new SimpleModelBinderProvider(typeof(GetParameter), new GetParameterBinder());
             config.Services.Insert(typeof(ModelBinderProvider), 0, provider);
+            config.MessageHandlers.Add(new HttpOptionsMessageHandler());
         }
     }
 }
