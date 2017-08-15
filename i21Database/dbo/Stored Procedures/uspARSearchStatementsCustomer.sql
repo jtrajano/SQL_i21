@@ -3,8 +3,14 @@
 	 @strStatementFormat	NVARCHAR(50)  
 	,@strAsOfDate			NVARCHAR(50) 
 	,@strTransactionDate	NVARCHAR(50) 
+	,@strCompanyLocation	NVARCHAR(100) = NULL
+	,@strAccountCode		NVARCHAR(50) = NULL
 	,@ysnDetailedFormat		BIT	= 0
 	,@ysnEmailOnly			BIT = 0
+	,@ysnIncludeBudget		BIT = 0
+	,@ysnPrintCreditBalance BIT = 1
+	,@ysnPrintOnlyPastDue	BIT = 0
+	,@ysnPrintZeroBalance	BIT = 0
 )
 AS
 
@@ -15,122 +21,101 @@ DECLARE @tmpstrStatementFormat	NVARCHAR(50)
 		,@strQuery1				NVARCHAR(MAX)
 		,@tmpysnDetailedFormat	BIT
   
-DECLARE @temp_statement_table TABLE (
-	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,[intEntityCustomerId]			INT
-	,[strTransactionType]			NVARCHAR(100) COLLATE Latin1_General_CI_AS	
-	,[dtmDueDate]					DATETIME
-	,[dtmDate]						DATETIME
-	,[intDaysDue]					INT
-	,[dblTotalAmount]				NUMERIC(18,6)
-	,[dblAmountPaid]				NUMERIC(18,6)
-	,[dblAmountDue]					NUMERIC(18,6)
-	,[dblPastDue]					NUMERIC(18,6)
-	,[dblMonthlyBudget]				NUMERIC(18,6)
-	,[dblRunningBalance]			NUMERIC(18,6)
-	,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,[strName]						NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,[strBOLNumber]					NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,[dblCreditLimit]				NUMERIC(18,6)
-	,[strAccountStatusCode]			NVARCHAR(5)	  COLLATE Latin1_General_CI_AS
-	,[strLocationName]				NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,[strFullAddress]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-	,[strStatementFooterComment]	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	
-	,[strCompanyName]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-	,[strCompanyAddress]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-	,[dblARBalance]					NUMERIC(18,6)  
-	,[blbLogo]						VARBINARY (MAX)
-	,[dblCreditAvailable]			NUMERIC(18,6)
-	,[dbl0Days]						NUMERIC(18,6)
-	,[dbl10Days]					NUMERIC(18,6)
-	,[dbl30Days]					NUMERIC(18,6)
-	,[dbl60Days]					NUMERIC(18,6)
-	,[dbl90Days]					NUMERIC(18,6)
-	,[dbl91Days]					NUMERIC(18,6)
-	,[dblCredits]					NUMERIC(18,6)
-	,[dblPrepayments]				NUMERIC(18,6)
+DECLARE @temp_aging_table TABLE(	
+	 [strCustomerName]			NVARCHAR(100)
+	,[strEntityNo]				NVARCHAR(100)
+	,[intEntityCustomerId]		INT
+	,[dblCreditLimit]			NUMERIC(18,6)
+	,[dblTotalAR]				NUMERIC(18,6)
+	,[dblFuture]				NUMERIC(18,6)
+	,[dbl0Days]					NUMERIC(18,6)
+	,[dbl10Days]				NUMERIC(18,6)
+	,[dbl30Days]				NUMERIC(18,6)
+	,[dbl60Days]				NUMERIC(18,6)
+	,[dbl90Days]				NUMERIC(18,6)
+	,[dbl91Days]				NUMERIC(18,6)
+	,[dblTotalDue]				NUMERIC(18,6)
+	,[dblAmountPaid]			NUMERIC(18,6)
+	,[dblCredits]				NUMERIC(18,6)
+	,[dblPrepayments]			NUMERIC(18,6)
+	,[dblPrepaids]				NUMERIC(18,6)
+	,[dtmAsOfDate]				DATETIME
+	,[strSalespersonName]		NVARCHAR(100)
+	,[strSourceTransaction]		NVARCHAR(100)
 )
- 
+
+INSERT INTO @temp_aging_table
+EXEC dbo.uspARCustomerAgingAsOfDateReport NULL, @strAsOfDate, NULL, NULL, NULL, @strCompanyLocation, @ysnIncludeBudget, @ysnPrintCreditBalance
+
+UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dblFuture
+
+IF @ysnPrintOnlyPastDue = 1
+	UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days, dbl0Days = 0
+
+IF @ysnPrintZeroBalance = 0
+	DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+
+IF @ysnPrintCreditBalance = 0
+	DELETE FROM @temp_aging_table WHERE dblTotalAR < 0 
+
 SET @tmpstrStatementFormat = @strStatementFormat
-SET @tmpysnDetailedFormat = @ysnDetailedFormat
 
-IF (@tmpysnDetailedFormat = 1)
-BEGIN
-	SET @tmpDate = @strAsOfDate
-END
-ELSE
-BEGIN
-	SET @tmpDate = @strTransactionDate
-END
-
-IF (@tmpstrStatementFormat = 'Open Item')
-BEGIN
-	SET @xmlParam =N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmAsOfDate</fieldname><condition>As Of</condition><from>1900-01-01</from><to>'
-	SET @xmlParam = @xmlParam + @tmpDate + '</to><join>AND</join><begingroup /><endgroup /><datatype>DateTime</datatype></filter>'	
-	SET @xmlParam = @xmlParam + '<filter><fieldname>strStatementFormat</fieldname><condition>Equal To</condition><from>Open Item</from><join>AND</join><begingroup /><endgroup /><datatype>String</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintZeroBalance</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintCreditBalance</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'	
-	SET @strQuery  = 'EXEC uspARCustomerStatementReport ' + '''' +  @xmlParam + ''''	 		
-	EXEC(@strQuery)	 
-END 
-
-ELSE IF (@tmpstrStatementFormat = 'Balance Forward')
-BEGIN 
-	SET @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmAsOfDate</fieldname><condition>Between</condition><from>01/01/1900</from><to>'
-	SET @xmlParam = @xmlParam + @tmpDate + '</to><join /><begingroup /><endgroup /><datatype>DateTime</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>strStatementFormat</fieldname><condition>Equal To</condition><from>Balance Forward</from><join>AND</join><begingroup /><endgroup /><datatype>String</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintZeroBalance</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintCreditBalance</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'
-	SET @strQuery  = 'EXEC uspARCustomerStatementBalanceForwardReport ' + '''' +  @xmlParam + ''''	 
-	EXEC(@strQuery) 
-END
-
-ELSE IF (@tmpstrStatementFormat = 'Payment Activity')
-BEGIN
-	SET @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmAsOfDate</fieldname><condition>Between</condition><from>01/01/1900</from><to>'
-	SET @xmlParam = @xmlParam + @tmpDate + '</to><join /><begingroup /><endgroup /><datatype>DateTime</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>strStatementFormat</fieldname><condition>Equal To</condition><from>Payment Activity</from><join>AND</join><begingroup /><endgroup /><datatype>String</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintZeroBalance</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintCreditBalance</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'
-	SET @strQuery  = 'EXEC uspARCustomerStatementPaymentActivityReport ' + '''' +  @xmlParam + ''''	
-	EXEC(@strQuery)		
-END
-
-ELSE IF (@tmpstrStatementFormat = 'Running Balance')
-BEGIN
-	SET @xmlParam =N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from>01/01/1900</from><to>'	
-	SET @xmlParam = @xmlParam + @tmpDate + '</to><join /><begingroup /><endgroup /><datatype>DateTime</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>strStatementFormat</fieldname><condition>Equal To</condition><from>Running Balance</from><join>AND</join><begingroup /><endgroup /><datatype>String</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintZeroBalance</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintCreditBalance</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'
-	SET @strQuery  = 'EXEC uspARCustomerStatementReport ' + '''' +  @xmlParam + ''''	
-	EXEC(@strQuery)	
-END
-
-ELSE
-BEGIN
-	SET @xmlParam =N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmDate</fieldname><condition>As Of</condition><from>1900-01-01</from><to>'
-	SET @xmlParam = @xmlParam + @tmpDate + '</to><join>AND</join><begingroup /><endgroup /><datatype>DateTime</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'
-	SET @strQuery  = 'EXEC uspARCustomerStatementDetailReport ' + '''' +  @xmlParam + ''''	
-	EXEC(@strQuery)		
-END
+TRUNCATE TABLE tblARSearchStatementCustomer
+INSERT INTO tblARSearchStatementCustomer (
+	  intEntityCustomerId
+	, strCustomerNumber
+	, strCustomerName
+	, dblARBalance
+	, strTransactionId
+	, strTransactionDate
+	, dblTotalAmount
+	, ysnHasEmailSetup
+	, intConcurrencyId
+)
+SELECT intEntityCustomerId		= AGING.intEntityCustomerId
+	 , strCustomerNumber		= AGING.strEntityNo
+	 , strCustomerName			= AGING.strCustomerName
+	 , dblARBalance				= AGING.dblTotalAR
+	 , strTransactionId			= NULL
+	 , strTransactionDate		= NULL
+	 , dblTotalAmount			= AGING.dblTotalAR
+	 , ysnHasEmailSetup			= CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , intConcurrencyId			= 1
+FROM @temp_aging_table AGING
+OUTER APPLY (
+	SELECT intEmailSetupCount = COUNT(*) 
+	FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+	WHERE CC.intCustomerEntityId = AGING.intEntityCustomerId 
+		AND ISNULL(CC.strEmail, '') <> '' 
+		AND CC.strEmailDistributionOption LIKE '%Statements%'
+) EMAILSETUP
 
 IF @ysnEmailOnly = 1
 	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 0
 ELSE
 	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 1
 
-SELECT * FROM tblARSearchStatementCustomer
+IF ISNULL(@strAccountCode, '') <> ''
+	BEGIN
+		DELETE FROM tblARSearchStatementCustomer
+		WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId 
+										  FROM dbo.tblARCustomer WITH (NOLOCK) 
+										  WHERE dbo.fnARGetCustomerAccountStatusCodes(intEntityCustomerId) LIKE '%' + @strAccountCode + '%')
+	END
+
+IF @ysnDetailedFormat = 0
+	BEGIN
+		SELECT SSC.*
+		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)
+		INNER JOIN (SELECT intEntityId
+					FROM dbo.tblARCustomer WITH (NOLOCK)
+					WHERE ISNULL(strStatementFormat, 'Open Item') = @strStatementFormat
+		) C ON SSC.intEntityCustomerId = C.intEntityId
+		ORDER BY SSC.strCustomerName
+	END
+ELSE
+	BEGIN
+		SELECT SSC.*
+		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)
+		ORDER BY SSC.strCustomerName
+	END
