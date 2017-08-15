@@ -5656,6 +5656,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGenerateContractNumber.sql" />
     <Build Include="dbo\Tables\tblRKM2MGrainBasis.sql" />
+    <Build Include="dbo\Views\vyuCFAccountCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

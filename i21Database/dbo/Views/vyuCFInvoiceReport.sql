@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 SELECT   
@@ -46,13 +47,155 @@ strBillTo = (
 		ELSE arInv.strBillTo
 	END),
 
-
-
-
 cfSiteItem.strNetwork,
 
-ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, cfTrans.intTransactionId, cfTrans.dtmTransactionDate, 
-						DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate,
+ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, 
+
+intInvoiceCycle = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.intInvoiceCycle
+
+		ELSE cfCardAccount.intInvoiceCycle
+	END),
+
+strInvoiceCycle = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strInvoiceCycle
+
+		ELSE cfCardAccount.strInvoiceCycle
+	END),
+
+
+strPrimarySortOptions = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strPrimarySortOptions
+
+		ELSE cfCardAccount.strPrimarySortOptions
+	END),
+
+	
+strSecondarySortOptions = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strSecondarySortOptions
+
+		ELSE cfCardAccount.strSecondarySortOptions
+	END),
+
+strPrintRemittancePage = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strPrintRemittancePage
+
+		ELSE cfCardAccount.strPrintRemittancePage
+	END),
+
+strPrintPricePerGallon = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strPrintPricePerGallon
+
+		ELSE cfCardAccount.strPrintPricePerGallon
+	END),
+
+ysnPrintMiscellaneous = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnPrintMiscellaneous
+
+		ELSE cfCardAccount.ysnPrintMiscellaneous
+	END),
+
+strPrintSiteAddress = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strPrintSiteAddress
+
+		ELSE cfCardAccount.strPrintSiteAddress
+	END),
+
+ysnSummaryByCard = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnSummaryByCard
+
+		ELSE cfCardAccount.ysnSummaryByCard
+	END),
+
+ysnSummaryByDepartment = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnSummaryByDepartment
+
+		ELSE cfCardAccount.ysnSummaryByDepartment
+	END),
+
+ysnSummaryByMiscellaneous = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnSummaryByMiscellaneous
+
+		ELSE cfCardAccount.ysnSummaryByMiscellaneous
+	END),
+
+ysnSummaryByProduct = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnSummaryByProduct
+
+		ELSE cfCardAccount.ysnSummaryByProduct
+	END),
+
+ysnSummaryByVehicle = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnSummaryByVehicle
+
+		ELSE cfCardAccount.ysnSummaryByVehicle
+	END),
+
+ysnSummaryByCardProd = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnSummaryByCardProd
+
+		ELSE cfCardAccount.ysnSummaryByCardProd
+	END),
+
+ysnSummaryByDeptCardProd = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnSummaryByDeptCardProd
+
+		ELSE cfCardAccount.ysnSummaryByDeptCardProd
+	END),
+
+ysnPrintTimeOnInvoices = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnPrintTimeOnInvoices
+
+		ELSE cfCardAccount.ysnPrintTimeOnInvoices
+	END),
+
+ysnPrintTimeOnReports = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnPrintTimeOnReports
+
+		ELSE cfCardAccount.ysnPrintTimeOnReports
+	END),
+
+emGroup.strGroupName, 
+
+cfTrans.intTransactionId, 
+
+cfTrans.dtmTransactionDate, 
+
+DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate,
                          cfTrans.intOdometer, ISNULL
                              ((SELECT   TOP (1) intOdometer
                                  FROM         dbo.tblCFTransaction
@@ -72,10 +215,7 @@ ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupNam
                          arInv.strType, arInv.strLocationName, arInv.intInvoiceId, arInv.strInvoiceNumber, arInv.dtmDate, arInv.dtmPostDate AS dtmPostedDate, 
                          cfTrans.intProductId, cfTrans.intCardId, cfTrans.intTransactionId AS EXPR18, cfTrans.strTransactionId, cfTrans.strTransactionType, cfTrans.strInvoiceReportNumber, 
                          cfTrans.strTempInvoiceReportNumber, cfTrans.dblQuantity, cfTrans.strMiscellaneous, cfCardAccount.strName, cfCardAccount.strCardNumber,
-                          cfCardAccount.strCardDescription, cfCardAccount.intInvoiceCycle, cfCardAccount.strInvoiceCycle, cfCardAccount.strPrimarySortOptions, 
-                         cfCardAccount.strSecondarySortOptions, cfCardAccount.strPrintRemittancePage, cfCardAccount.strPrintPricePerGallon, cfCardAccount.ysnPrintMiscellaneous, 
-                         cfCardAccount.strPrintSiteAddress, cfCardAccount.ysnSummaryByCard, cfCardAccount.ysnSummaryByDepartment, cfCardAccount.ysnSummaryByMiscellaneous, 
-                         cfCardAccount.ysnSummaryByProduct, cfCardAccount.ysnSummaryByVehicle, cfCardAccount.ysnSummaryByCardProd,cfCardAccount.ysnSummaryByDeptCardProd, cfCardAccount.ysnPrintTimeOnInvoices, cfCardAccount.ysnPrintTimeOnReports, 
+                          cfCardAccount.strCardDescription, 
                          cfSiteItem.strSiteNumber, cfSiteItem.strSiteName, cfSiteItem.strProductNumber, cfSiteItem.strItemNo, cfSiteItem.strShortName AS strDescription, 
                          ROUND(cfTransPrice.dblCalculatedAmount,2) AS dblCalculatedTotalAmount, cfTransPrice.dblOriginalAmount AS dblOriginalTotalAmount, 
                          cfTransGrossPrice.dblCalculatedAmount AS dblCalculatedGrossAmount, cfTransGrossPrice.dblOriginalAmount AS dblOriginalGrossAmount, 
@@ -125,11 +265,29 @@ FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
                                                          icfItem.intARItemId, iicItemLoc.intItemLocationId, iicItemLoc.intIssueUOMId, iicItem.strDescription, iicItem.strShortName, iicItem.strItemNo, 
                                                          icfItem.strProductNumber, iicItemPricing.dblAverageCost, icfNetwork.ysnPostForeignSales, icfNetwork.intCustomerId, iemEnt.strName, iemEnt.strEntityNo, icfNetwork.strNetwork
 														 ,[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, arBillTo.strAddress, arBillTo.strCity, arBillTo.strState, arBillTo.strZipCode, arBillTo.strCountry, NULL, 0) AS strBillTo
-														 
+														 ,cfAcct.intInvoiceCycle, 
+														 cfInvCycle.strInvoiceCycle, 
+														 cfAcct.strPrimarySortOptions, 
+														 cfAcct.strSecondarySortOptions, 
+														 cfAcct.strPrintRemittancePage, 
+														 cfAcct.strPrintPricePerGallon, 
+														 cfAcct.ysnPrintMiscellaneous, 
+														 cfAcct.strPrintSiteAddress, 
+														 cfAcct.ysnSummaryByCard, 
+														 cfAcct.ysnSummaryByDepartment, 
+														 cfAcct.ysnSummaryByMiscellaneous, 
+														 cfAcct.ysnSummaryByProduct, 
+														 cfAcct.ysnSummaryByVehicle, 
+														 cfAcct.ysnSummaryByCardProd,
+														 cfAcct.ysnSummaryByDeptCardProd, 
+														 cfAcct.ysnPrintTimeOnInvoices, 
+														 cfAcct.ysnPrintTimeOnReports
                                 FROM         dbo.tblCFSite AS icfSite INNER JOIN
-                                                         dbo.tblCFNetwork AS icfNetwork ON icfNetwork.intNetworkId = icfSite.intNetworkId LEFT JOIN 
-														 tblEMEntity iemEnt ON iemEnt.intEntityId = icfNetwork.intCustomerId 
+                                                         dbo.tblCFNetwork AS icfNetwork ON icfNetwork.intNetworkId = icfSite.intNetworkId 
+														 LEFT JOIN tblEMEntity iemEnt ON iemEnt.intEntityId = icfNetwork.intCustomerId 
 														 INNER JOIN tblARCustomer iarCus ON iarCus.intEntityCustomerId = iemEnt.intEntityId
+														 INNER JOIN tblCFAccount cfAcct ON iarCus.intEntityCustomerId = cfAcct.intCustomerId
+														 INNER JOIN tblCFInvoiceCycle cfInvCycle ON cfAcct.intInvoiceCycle = cfInvCycle.intInvoiceCycleId
 														 LEFT JOIN tblEMEntityLocation arBillTo ON arBillTo.intEntityLocationId = iarCus.intBillToId
 														 INNER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId OR icfNetwork.intNetworkId = icfItem.intNetworkId INNER JOIN
