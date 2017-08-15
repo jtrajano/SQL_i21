@@ -47,27 +47,27 @@
 			SET IDENTITY_INSERT tblSMPaymentMethod ON
 
 			INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
-			SELECT 1, ''Write Off'', NULL, 0, NULL, 1, 0
+			SELECT 1, ''Write Off'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 2, ''ACH'', NULL, 0, NULL, 1, 0
+			SELECT 2, ''ACH'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
 			SELECT 3, ''Debit memos and Payments'', NULL, 0, NULL, 1, 0
 			UNION ALL 
-			SELECT 4, ''Credit'', NULL, 0, NULL, 1, 0
+			SELECT 4, ''Credit'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 5, ''Refund'', NULL, 0, NULL, 1, 0
+			SELECT 5, ''Refund'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 6, ''eCheck'', NULL, 0, NULL, 1, 0
+			SELECT 6, ''eCheck'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 7, ''Check'', NULL, 0, NULL, 1, 0
+			SELECT 7, ''Check'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 8, ''Prepay'', NULL, 0, NULL, 1, 0
+			SELECT 8, ''Prepay'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 9, ''CF Invoice'', NULL, 0, NULL, 1, 0
+			SELECT 9, ''CF Invoice'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 10, ''Cash'', NULL, 0, NULL, 1, 0
+			SELECT 10, ''Cash'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 11, ''Credit Card'', NULL, 0, NULL, 1, 0
+			SELECT 11, ''Credit Card'', NULL, NULL, NULL, 1, 0
 
 			SET IDENTITY_INSERT tblSMPaymentMethod OFF
 
@@ -149,7 +149,7 @@
 					ELSE
 					BEGIN
 						INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
-						SELECT 8, ''Prepay'', NULL, 0, NULL, 1, 0
+						SELECT 8, ''Prepay'', NULL, NULL, NULL, 1, 0
 					END
 	
 					DECLARE @add INT
@@ -232,7 +232,7 @@
 					ELSE
 					BEGIN
 						INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
-						SELECT 9, ''CF Invoice'', NULL, 0, NULL, 1, 0
+						SELECT 9, ''CF Invoice'', NULL, NULL, NULL, 1, 0
 					END
 	
 					DECLARE @add INT
@@ -315,7 +315,7 @@
 					ELSE
 					BEGIN
 						INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
-						SELECT 10, ''Cash'', NULL, 0, NULL, 1, 0
+						SELECT 10, ''Cash'', NULL, NULL, NULL, 1, 0
 					END
 	
 					DECLARE @add INT
@@ -398,7 +398,7 @@
 					ELSE
 					BEGIN
 						INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
-						SELECT 11, ''Credit Card'', NULL, 0, NULL, 1, 0
+						SELECT 11, ''Credit Card'', NULL, NULL, NULL, 1, 0
 					END
 	
 					DECLARE @add INT
