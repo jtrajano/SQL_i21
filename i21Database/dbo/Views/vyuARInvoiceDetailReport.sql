@@ -3,6 +3,10 @@ AS
 SELECT I.intInvoiceId
 	 , I.intEntityCustomerId
 	 , I.intCompanyLocationId
+	 , strType				= CASE WHEN ISNULL(I.intOriginalInvoiceId, 0) <> 0 THEN 'Final'
+								   WHEN I.strType = 'Provisional' THEN 'Provisional'
+								   ELSE 'Direct' 
+							  END
 	 , I.strInvoiceNumber
 	 , CT.strContractNumber
 	 , CT.intContractSeq
