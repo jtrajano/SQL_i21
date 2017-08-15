@@ -7,7 +7,7 @@
 	[intSellerId] INT NULL,
 	[strRackPriceToUse] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [ysnItemizeSurcharge] BIT NULL,		
-	[intFreightCostAllocationMethod] INT NULL DEFAULT ((1)),
+	[intFreightCostAllocationMethod] INT NULL DEFAULT ((3)),
 	[intRackPriceImportMappingId] INT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	CONSTRAINT [PK_tblTRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC), 
