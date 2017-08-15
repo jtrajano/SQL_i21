@@ -386,5 +386,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 --FRM
 :r .\FRM\DefaultData\1_OfflineMenu.sql
+:r .\FRM\1_OfflineGuid.sql
 
 print 'END POST DEPLOYMENT'

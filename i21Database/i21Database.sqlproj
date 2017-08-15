@@ -5613,6 +5613,7 @@
     <Build Include="dbo\Views\vyuPATChangeStockStatusDetail.sql" />
     <Build Include="dbo\Views\vyuCTNotificationHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspCTNotification.sql" />
+    <None Include="Scripts\Post-Deployment\FRM\1_OfflineGuid.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
