@@ -614,6 +614,7 @@ DECLARE
 	,@dblAmount AS NUMERIC(18,6)
 	,@dblAmountDetailTotal AS NUMERIC(18,6)
 	,@ysnTransactionPostedFlag AS BIT
+	,@ysnTransactionCommittedFlag AS BIT	
 	,@ysnTransactionClearedFlag AS BIT	
 	,@ysnBankAccountIdInactive AS BIT
 	,@ysnCheckVoid AS BIT	
@@ -636,6 +637,7 @@ SELECT	TOP 1
 		,@dtmDate = dtmDate
 		,@dblAmount = dblAmount
 		,@ysnTransactionPostedFlag = ysnPosted
+		,@ysnTransactionCommittedFlag = CASE WHEN (dtmCheckPrinted IS NOT NULL) THEN 1 ELSE 0 END
 		,@ysnTransactionClearedFlag = ysnClr
 		,@ysnCheckVoid = ysnCheckVoid		
 		,@intBankAccountId = intBankAccountId
@@ -691,6 +693,14 @@ IF @ysnPost = 1 AND @ysnRecap = 0 AND @ysnTransactionPostedFlag = 1
 BEGIN 
 	-- The transaction is already posted.
 	RAISERROR('The transaction is already posted.', 11, 1)
+	GOTO Post_Rollback
+END 
+
+-- Check if the transaction is already committed and cannot be unposted
+IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionCommittedFlag = 1
+BEGIN 
+	-- The transaction is already unposted.
+	RAISERROR('The transaction is already committed.', 11, 1)
 	GOTO Post_Rollback
 END 
 
