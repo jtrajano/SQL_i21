@@ -4,7 +4,7 @@
 	[strPaymentMethodCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [strPrefix] NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '',
     [intNumber] INT NOT NULL DEFAULT 1,
-    [intAccountId] INT NULL DEFAULT 0, 
+    [intAccountId] INT NULL , 
     [strPrintOption] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnActive] BIT DEFAULT ((1)) NOT NULL,
     [intSort] INT NOT NULL DEFAULT 0,
