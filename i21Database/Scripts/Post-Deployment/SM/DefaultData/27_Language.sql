@@ -6,6 +6,6 @@
 		INSERT INTO [tblSMLanguage] ([intLanguageId], [strLanguage], [ysnDefault], [intConcurrencyId])
 		VALUES (1, 'English', 1, 1)
 
-		SET IDENTITY_INSERT [dbo].[tblSMUserRole] OFF
+		SET IDENTITY_INSERT [dbo].[tblSMLanguage] OFF
 	END
 GO
