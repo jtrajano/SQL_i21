@@ -53,7 +53,7 @@ SELECT INV.intInvoiceId
 									CASE WHEN ID.dblContractBalance = 0 THEN CD.dblBalance ELSE ID.dblContractBalance END
 								  ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END				
-	 , strItem					= CASE WHEN ISNULL(I.strItemNo, '') = '' THEN ID.strItemDescription ELSE LTRIM(RTRIM(I.strItemNo)) + ' - ' + ISNULL(ID.strItemDescription, '') END
+	 , strItem					= CASE WHEN ISNULL(I.strItemNo, '') = '' THEN ISNULL(ID.strItemDescription, ID.strSCInvoiceNumber) ELSE LTRIM(RTRIM(I.strItemNo)) + ' - ' + ISNULL(ID.strItemDescription, '') END
 	 , strItemDescription		= ID.strItemDescription
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped			= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
