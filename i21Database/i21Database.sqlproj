@@ -5395,6 +5395,7 @@
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLetter.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFOBatchEntry.sql" />
     <Build Include="dbo\Functions\fnRKGetCurrencyExchangeRateType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateSubLocationChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
