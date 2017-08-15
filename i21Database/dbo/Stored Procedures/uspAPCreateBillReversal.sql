@@ -16,7 +16,7 @@ DECLARE @batchId NVARCHAR(50);
 DECLARE @error NVARCHAR(200);
 DECLARE @debitMemoRecordNum NVARCHAR(50);
 
-EXEC uspAPDuplicateBill @billId, @userId, 1, @createdReversal OUT
+EXEC uspAPDuplicateBill @billId = @billId, @userId = @userId, @type = 3, @billCreatedId = @createdReversal OUT
 EXEC uspSMGetStartingNumber 18, @debitMemoRecordNum OUTPUT
 
 UPDATE A
