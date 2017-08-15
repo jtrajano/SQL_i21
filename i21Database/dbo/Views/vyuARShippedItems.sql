@@ -34,11 +34,11 @@ SELECT id							= NEWID()
 	 , strItemNo					= ITEM.strItemNo 
 	 , strItemDescription			= ISNULL(SHIPPEDITEMS.strItemDescription, ITEM.strDescription)
 	 , intItemUOMId					= SHIPPEDITEMS.intItemUOMId
-	 , strUnitMeasure				= ITEMUNITMEASURE.strUnitMeasure
+	 , strUnitMeasure				= ITEMUOM.strUnitMeasure
 	 , intOrderUOMId				= SHIPPEDITEMS.intItemUOMId
-	 , strOrderUnitMeasure			= ITEMUNITMEASURE.strUnitMeasure
-	 , intShipmentItemUOMId			= SHIPPEDITEMS.intItemUOMId
-	 , strShipmentUnitMeasure		= ITEMUNITMEASURE.strUnitMeasure
+	 , strOrderUnitMeasure			= ITEMUOM.strUnitMeasure
+	 , intShipmentItemUOMId			= SHIPPEDITEMS.intItemUOMId	 
+	 , strShipmentUnitMeasure		= ITEMUOM.strUnitMeasure
 	 , dblQtyShipped				= SHIPPEDITEMS.dblQtyShipped	
 	 , dblQtyOrdered				= SHIPPEDITEMS.dblQtyOrdered 
 	 , dblShipmentQuantity			= SHIPPEDITEMS.dblShipmentQuantity
@@ -61,10 +61,10 @@ SELECT id							= NEWID()
 	 , strCustomerReference			= SCALETICKET.strCustomerReference
 	 , intTicketId					= SHIPPEDITEMS.intTicketId
 	 , intTaxGroupId				= SHIPPEDITEMS.intTaxGroupId
-	 , strTaxGroup					= TAXGROUP.strTaxGroup
-	 , dblWeight					= dbo.fnCalculateQtyBetweenUOM(ITEMUOM2.intItemUOMId, SHIPPEDITEMS.intItemUOMId, 1)
-	 , intWeightUOMId				= ITEMUOM.intWeightUOMId
-	 , strWeightUnitMeasure			= ITEMUNITMEASURE2.strUnitMeasure
+	 , strTaxGroup					= TAXGROUP.strTaxGroup	 
+	 , dblWeight					= SHIPPEDITEMS.dblWeight
+	 , intWeightUOMId				= SHIPPEDITEMS.intWeightUOMId
+	 , strWeightUnitMeasure			= WEIGHTUOM.strUnitMeasure
 	 , dblGrossWt					= SHIPPEDITEMS.dblGrossWt
 	 , dblTareWt					= SHIPPEDITEMS.dblTareWt
 	 , dblNetWt						= SHIPPEDITEMS.dblNetWt
@@ -124,6 +124,8 @@ FROM (
 		 , intItemUOMId						= SOD.intItemUOMId
 		 , intOrderUOMId					= SOD.intItemUOMId
 		 , intShipmentItemUOMId				= SOD.intItemUOMId
+		 , intWeightUOMId					= NULL
+		 , dblWeight						= NULL
 		 , dblQtyShipped					= SOD.dblQtyShipped
 		 , dblQtyOrdered					= SOD.dblQtyOrdered
 		 , dblShipmentQuantity				= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)	
@@ -221,6 +223,8 @@ FROM (
 		 , intItemUOMId						= SOD.intItemUOMId
 		 , intOrderUOMId					= SOD.intItemUOMId
 		 , intShipmentItemUOMId				= SOD.intItemUOMId
+		 , intWeightUOMId					= NULL
+		 , dblWeight						= NULL
 		 , dblQtyShipped					= SOD.dblQtyShipped
 		 , dblQtyOrdered					= SOD.dblQtyOrdered
 		 , dblShipmentQuantity				= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
@@ -314,6 +318,8 @@ FROM (
 		 , intItemUOMId						= SHP.intItemUOMId
 		 , intOrderUOMId					= SOD.intItemUOMId
 		 , intShipmentItemUOMId				= SHP.intItemUOMId
+		 , intWeightUOMId					= SHP.intWeightUOMId
+		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(SHP.intWeightUOMId, SHP.intItemUOMId, 1)
 		 , dblQtyShipped					= SHP.dblQuantity
 		 , dblQtyOrdered					= SOD.dblQtyOrdered 
 		 , dblShipmentQuantity				= SHP.dblQuantity	
@@ -464,6 +470,8 @@ FROM (
 	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId)
 	     , intOrderUOMId					= ARCC.intOrderUOMId
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
+		 , intWeightUOMId					= ICISI.intWeightUOMId
+		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), 1)
 	     , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
 	     , dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
 	     , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
@@ -647,6 +655,8 @@ FROM (
 		 , intItemUOMId						= ICISC.intCostUOMId
 		 , intOrderUOMId					= NULL		
 		 , intShipmentItemUOMId				= ICISC.intCostUOMId
+		 , intWeightUOMId					= NULL
+		 , dblWeight						= NULL
 		 , dblQtyShipped					= 1 	
 		 , dblQtyOrdered					= 0 
 		 , dblShipmentQuantity				= 1
@@ -748,6 +758,8 @@ FROM (
 		 , intItemUOMId						= MFG.intItemUOMId
 		 , intOrderUOMId					= MFG.intItemUOMId
 		 , intShipmentItemUOMId				= MFG.intItemUOMId
+		 , intWeightUOMId					= NULL
+		 , dblWeight						= NULL
 		 , dblQtyShipped					= MFG.dblQuantity
 		 , dblQtyOrdered					= MFG.dblQuantity
 		 , dblShipmentQuantity				= MFG.dblQuantity
@@ -851,6 +863,8 @@ FROM (
 		 , intItemUOMId						= MFG.intItemUOMId
 		 , intOrderUOMId					= NULL		
 		 , intShipmentItemUOMId				= MFG.intItemUOMId
+		 , intWeightUOMId					= NULL
+		 , dblWeight						= NULL
 		 , dblQtyShipped					= MFG.dblQuantity 	
 		 , dblQtyOrdered					= 0
 		 , dblShipmentQuantity				= MFG.dblQuantity
@@ -950,6 +964,8 @@ FROM (
 	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
 	     , intOrderUOMId					= ARCC.intOrderUOMId
 	     , intShipmentItemUOMId				= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
+		 , intWeightUOMId					= ARCC.intPriceItemUOMId
+		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(ARCC.intItemWeightUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1)
 	     , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
 	     , dblQtyOrdered					= ISNULL(LD.dblQuantity,0)
 	     , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
@@ -1044,11 +1060,13 @@ FROM (
 		 , intCurrencyId
 		 , strUnitMeasure
 		 , intOrderUOMId
+		 , intPriceItemUOMId
 		 , intItemUOMId
 		 , strOrderUnitMeasure
 		 , dblCashPrice
 		 , dblDetailQuantity
-		 , intFreightTermId
+		 , intFreightTermId	
+		 , intItemWeightUOMId	 
 		 , dblShipQuantity
 		 , dblOrderQuantity
 		 , dblSubCurrencyRate
@@ -1091,6 +1109,8 @@ FROM (
 	     , intItemUOMId						= NULL
 	     , intOrderUOMId					= NULL
 	     , intShipmentItemUOMId				= NULL
+		 , intWeightUOMId					= NULL
+		 , dblWeight						= NULL
 	     , dblQtyShipped					= 1
 	     , dblQtyOrdered					= 1
 	     , dblShipmentQuantity				= 1 
@@ -1202,6 +1222,8 @@ FROM (
 	     , intItemUOMId						= NULL
 	     , intOrderUOMId					= NULL
 	     , intShipmentItemUOMId				= NULL
+		 , intWeightUOMId					= NULL
+		 , dblWeight						= NULL
 	     , dblQtyShipped					= 1
 	     , dblQtyOrdered					= 1
 	     , dblShipmentQuantity				= 1 
@@ -1321,6 +1343,8 @@ FROM (
 		 , intItemUOMId						= NULL
 		 , intOrderUOMId					= NULL
 		 , intShipmentItemUOMId				= NULL
+		 , intWeightUOMId					= NULL
+		 , dblWeight						= NULL
 		 , dblQtyShipped					= 1
 		 , dblQtyOrdered					= 1
 		 , dblShipmentQuantity				= 1 
@@ -1457,28 +1481,28 @@ LEFT OUTER JOIN (
 LEFT OUTER JOIN (
 	SELECT intItemUOMId
 		 , intItemId
-		 , intUnitMeasureId
-		 , intWeightUOMId
-	FROM dbo.tblICItemUOM WITH (NOLOCK)
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
 ) ITEMUOM ON SHIPPEDITEMS.intItemUOMId = ITEMUOM.intItemUOMId
 LEFT OUTER JOIN (
 	SELECT intItemUOMId
 		 , intItemId
-		 , intUnitMeasureId
-		 , intWeightUOMId
-	FROM dbo.tblICItemUOM WITH (NOLOCK)
-) ITEMUOM2 ON ITEMUOM.intWeightUOMId = ITEMUOM2.intUnitMeasureId
-		  AND SHIPPEDITEMS.intItemId = ITEMUOM2.intItemId
-LEFT OUTER JOIN (
-	SELECT intUnitMeasureId
-		 , strUnitMeasure
-	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-) ITEMUNITMEASURE ON ITEMUOM.intUnitMeasureId = ITEMUNITMEASURE.[intUnitMeasureId]
-LEFT OUTER JOIN (
-	SELECT intUnitMeasureId
-		 , strUnitMeasure
-	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-) ITEMUNITMEASURE2 ON ITEMUOM.intUnitMeasureId = ITEMUNITMEASURE2.intUnitMeasureId
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure		 
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+) WEIGHTUOM ON SHIPPEDITEMS.intWeightUOMId = WEIGHTUOM.intItemUOMId
+		   AND SHIPPEDITEMS.intItemId = WEIGHTUOM.intItemId
 LEFT OUTER JOIN (
 	SELECT intTicketId
 		 , strTicketNumber

@@ -15,13 +15,15 @@ DECLARE  @ZeroDecimal		DECIMAL(18,6)
 		,@InvoiceIdLocal	INT
 		,@CurrencyId		INT
 		,@strTransType		NVARCHAR(50)
+		,@OriginalInvoiceId INT
 
 SET @ZeroDecimal = 0.000000	
 SET @InvoiceIdLocal = @InvoiceId
 						
 SELECT
-	@CurrencyId		= [intCurrencyId],
-	@strTransType	= [strTransactionType]
+	@CurrencyId			= [intCurrencyId],
+	@OriginalInvoiceId	= [intOriginalInvoiceId],
+	@strTransType		= [strTransactionType]
 FROM
 	tblARInvoice
 WHERE
@@ -224,3 +226,21 @@ WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 
 END
+
+IF ISNULL(@OriginalInvoiceId, 0) <> 0
+	BEGIN
+		DECLARE @dblProvisionalAmt	NUMERIC(18,6)
+
+		SELECT TOP 1 @dblProvisionalAmt = dblInvoiceTotal 
+		FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE intInvoiceId = @OriginalInvoiceId
+		  AND ysnProcessed = 1
+		  AND strType = 'Provisional'
+
+		UPDATE tblARInvoice
+		SET dblAmountDue		= dblAmountDue - @dblProvisionalAmt
+		  , dblBaseAmountDue	= dblAmountDue - @dblProvisionalAmt
+		  , dblPayment			= @dblProvisionalAmt
+		  , dblBasePayment		= @dblProvisionalAmt
+		WHERE intInvoiceId = @InvoiceIdLocal
+	END

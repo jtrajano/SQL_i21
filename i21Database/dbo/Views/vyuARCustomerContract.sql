@@ -22,7 +22,10 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , intPricingTypeId					= CTPT.intPricingTypeId
 	 , strPricingType					= CTPT.strPricingType
 	 , dblOrderPrice					= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.dblCashPrice * CTCD.dblRate ELSE CTCD.dblCashPrice END / (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
-	 , dblCashPrice						= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.dblCashPrice * CTCD.dblRate ELSE CTCD.dblCashPrice END
+	 , dblCashPrice						= CASE WHEN CTCD.ysnUseFXPrice = 1 
+											   THEN CTCD.dblCashPrice * CTCD.dblRate 
+											   ELSE CTCD.dblCashPrice 
+										  END
 	 , intCurrencyExchangeRateTypeId	= CTCD.intRateTypeId
 	 , strCurrencyExchangeRateType		= SMCRT.strCurrencyExchangeRateType
 	 , intCurrencyExchangeRateId		= CTCD.intCurrencyExchangeRateId
@@ -47,7 +50,7 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , strDestinationGrade				= CTCH.strDestinationGrade
 	 , intDestinationWeightId			= CTCH.intWeightId
 	 , strDestinationWeight				= CTCH.strDestinationWeight
-	 , intItemWeightUOMId				= CTCD.intNetWeightUOMId
+	 , intItemWeightUOMId				= CTCH.intCommodityUOMId
 	 , strWeightUnitMeasure				= ICUMW.strUnitMeasure	 
 FROM (
 	SELECT intContractHeaderId
@@ -87,6 +90,7 @@ INNER JOIN (
 		 , CH.intGradeId
 		 , CTDG.strDestinationGrade
 		 , CH.intWeightId
+		 , CH.intCommodityUOMId
 		 , CTDW.strDestinationWeight
 	FROM dbo.tblCTContractHeader CH WITH (NOLOCK)
 		LEFT OUTER JOIN (
