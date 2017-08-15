@@ -140,13 +140,13 @@ BEGIN
 	INNER JOIN tblAPBill voucher ON paymentDetail.intBillId = voucher.intBillId
 	CROSS APPLY
 	(
-		SELECT (R.dblTotal) AS dblTotal 
+		SELECT (R.dblTotal + R.dblTax) AS dblTotal 
 		FROM dbo.tblAPBillDetail R
 		WHERE R.intBillId = voucher.intBillId
-		UNION ALL --taxes
-		SELECT (R.dblTax) AS dblTotal 
-		FROM dbo.tblAPBillDetail R
-		WHERE R.intBillId = voucher.intBillId AND R.dblTax != 0
+		-- UNION ALL --taxes
+		-- SELECT (R.dblTax) AS dblTotal 
+		-- FROM dbo.tblAPBillDetail R
+		-- WHERE R.intBillId = voucher.intBillId AND R.dblTax != 0
 	) Details
 	OUTER APPLY (
 		SELECT dblWithholdPercent / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
