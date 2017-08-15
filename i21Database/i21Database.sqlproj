@@ -5592,6 +5592,7 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
     <Build Include="dbo\Views\vyuARPaymentMethodForReceivePayments.sql" />
     <Build Include="dbo\Functions\fnRKGetCurrencyExchangeRateType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateSubLocationChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
