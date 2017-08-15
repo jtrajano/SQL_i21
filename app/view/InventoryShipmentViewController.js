@@ -362,33 +362,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         ]
                     }
                 },
-                colDestinationGrossQty: {
-                    dataIndex: 'dblDestinationGrossQty'
-                },
-                colDestinationNetQty: {
-                    dataIndex: 'dblDestinationNetQty'
-                },
-                colDestinationQtyUOM: {
-                    dataIndex: 'strDestinationQtyUOM',
-                    editor: {
-                        readOnly: '{readOnlyWeightsGrades}',
-                        store: '{itemUOM}',
-                        origUpdateField: 'intDestinationQtyUOMId',
-                        origValueField: 'intItemUOMId',
-                        defaultFilters: [
-                            {
-                                column: 'intItemId',
-                                value: '{grdInventoryShipment.selection.intItemId}',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intLocationId',
-                                value: '{current.intShipFromLocationId}',
-                                conjunction: 'and'
-                            }
-                        ] 
-                    }
-                },
                 colDestWeights: {
                     dataIndex: 'strDestinationWeights',
                     editor: {

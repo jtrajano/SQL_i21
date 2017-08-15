@@ -501,14 +501,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
 
             switch (get('current.intSourceType')) {
                 case 1: // Scale  
-                    if(get('current.tblICInventoryShipmentItems').data.items.length > 0) {
-                        var items = _.filter(get('current.tblICInventoryShipmentItems').data.items, function(d) { 
-                            return d.get('intDestinationWeightId') != null ||  d.get('intDestinationGradeId');
-                        });
-                        if(items && items.length > 0)
-                            return true;
-                    }; 
-                    return !get('hasDestinationWeights');
+                    return true; 
                 default:  
                     return !posted;  
             }   

@@ -1614,64 +1614,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'numbercolumn',
-                                                                        dataType: 'numeric',
-                                                                        itemId: 'colDestinationGrossQty',
-                                                                        width: 125,
-                                                                        align: 'right',
-                                                                        text: 'Destination Gross Qty',
-                                                                        format: '0,000.00####',
-                                                                        editor: {
-                                                                            xtype: 'numeric',
-                                                                            quantityField: true
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        dataType: 'numeric',
-                                                                        itemId: 'colDestinationNetQty',
-                                                                        width: 125,
-                                                                        align: 'right',
-                                                                        text: 'Destination Net Qty',
-                                                                        format: '0,000.00####',
-                                                                        editor: {
-                                                                            xtype: 'numeric',
-                                                                            quantityField: true
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colDestinationQtyUOM',
-                                                                        width: 120,
-                                                                        text: 'Destination Qty UOM',
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intUnitMeasureId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Destination Qty UOM Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strUnitMeasure',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Unit Measure',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strUnitType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Type',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboDestinationQtyUOM',
-                                                                            displayField: 'strUnitMeasure',
-                                                                            valueField: 'strUnitMeasure'
-                                                                        }
-                                                                    },
-                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colDiscountSchedule',
                                                                         width: 120,
