@@ -216,8 +216,8 @@ BEGIN TRY
 	,strCardDescription
 	,strNetwork
 	,strInvoiceCycle
-	,ISNULL(strPrimarySortOptions,'Vehicle') AS strPrimarySortOptions
-	,ISNULL(strSecondarySortOptions,'Vehicle') AS strSecondarySortOptions
+	,strPrimarySortOptions
+	,strSecondarySortOptions
 	,strPrintRemittancePage
 	,strPrintPricePerGallon
 	,strPrintSiteAddress
@@ -281,16 +281,16 @@ BEGIN TRY
 	,dblAccountTotalLessDiscount
 	,dblDiscountEP
 	,dblAPR
-	,ISNULL(ysnPrintMiscellaneous,1) AS ysnPrintMiscellaneous
-	,ISNULL(ysnSummaryByCard,1)	AS ysnSummaryByCard			
-	,ISNULL(ysnSummaryByDepartment,1) AS ysnSummaryByDepartment		
-	,ISNULL(ysnSummaryByMiscellaneous,1) AS ysnSummaryByMiscellaneous	
-	,ISNULL(ysnSummaryByProduct,1) AS ysnSummaryByProduct			
-	,ISNULL(ysnSummaryByVehicle,1) AS ysnSummaryByVehicle			
-	,ISNULL(ysnSummaryByCardProd,1) AS ysnSummaryByCardProd	 	
-	,ISNULL(ysnSummaryByDeptCardProd,1) AS ysnSummaryByDeptCardProd	
-	,ISNULL(ysnPrintTimeOnInvoices,1) AS ysnPrintTimeOnInvoices		
-	,ISNULL(ysnPrintTimeOnReports,1) AS ysnPrintTimeOnReports		
+	,ysnPrintMiscellaneous
+	,ysnSummaryByCard			
+	,ysnSummaryByDepartment		
+	,ysnSummaryByMiscellaneous	
+	,ysnSummaryByProduct			
+	,ysnSummaryByVehicle			
+	,ysnSummaryByCardProd	 	
+	,ysnSummaryByDeptCardProd	
+	,ysnPrintTimeOnInvoices		
+	,ysnPrintTimeOnReports		
 	,ysnInvalid
 	,ysnPosted
 	,ysnIncludeInQuantityDiscount
