@@ -5399,6 +5399,7 @@
     <Build Include="dbo\Views\vyuCFAccountCustomer.sql" />
     <Build Include="dbo\Views\vyuCTNotificationHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspCTNotification.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

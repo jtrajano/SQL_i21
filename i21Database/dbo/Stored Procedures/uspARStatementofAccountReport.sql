@@ -138,6 +138,20 @@ SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 IF CHARINDEX('''', @strCustomerName) > 0 
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 
+IF @strStatementFormat = 'Balance Forward'
+	BEGIN
+		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
+			  @dtmDateTo				= @dtmDateTo
+			, @dtmDateFrom				= @dtmDateFrom
+			, @ysnPrintZeroBalance		= @ysnPrintZeroBalance
+			, @ysnPrintCreditBalance	= @ysnPrintCreditBalance
+			, @ysnIncludeBudget			= @ysnIncludeBudget
+			, @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
+			, @strCustomerName			= @strCustomerName
+			, @strAccountStatusCode		= @strAccountStatusCode
+			, @strLocationName			= @strLocationName
+	END
+
 INSERT INTO @temp_SOA_table
 SELECT @strCustomerName
      , @strAccountStatusCode

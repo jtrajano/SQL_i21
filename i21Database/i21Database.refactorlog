@@ -6069,4 +6069,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[UK_tblTFReportingComponentCriteria_1]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="69c8aedc-55d4-40d3-940e-79ab6cefb8e9" ChangeDateTime="08/16/2017 06:30:50">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerStatementStagingTable].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerStatementStagingTable]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityCustomerId" />
+  </Operation>
 </Operations>
