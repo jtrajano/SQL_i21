@@ -24,7 +24,7 @@ BEGIN TRY
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria,'OR OR','OR')
 	END
 
-	SELECT @SQL = 'SELECT '+CASE WHEN ISNULL(@ysnCount,0) = 1 THEN 'COUNT(*),strNotificationType' ELSE 'CAST(ROW_NUMBER() OVER(ORDER BY intContractHeaderId DESC) AS INT) AS intUniqueId,*' END +' FROM ( SELECT * FROM ( '
+	SELECT @SQL = 'SELECT '+CASE WHEN ISNULL(@ysnCount,0) = 1 THEN 'COUNT(*),strNotificationType' ELSE '*' END +' FROM ( SELECT * FROM ( '
 
 	IF @strNotificationType = 'Unconfirmed'
 	BEGIN
@@ -41,6 +41,7 @@ BEGIN TRY
 													CH.strPosition,					CH.strContractBasis,				CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,					CD.intContractStatusId,				CD.strContractItemName,		
 					CD.strContractItemNo,
+					CAST(ROW_NUMBER() OVER(ORDER BY CD.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CD.intContractDetailId DESC) intRankNo					
 				
 
@@ -63,7 +64,8 @@ BEGIN TRY
 					NULL strBasisComponent,			PO.strPosition,					CB.strContractBasis,				CR.strCountry,			
 					CH.strCustomerContract,			SP.strName strSalesperson,		CD.intContractStatusId,				'''' AS strContractItemName,		
 					'''' AS strContractItemNo,
-					DENSE_RANK() OVER (ORDER BY CD.intContractHeaderId DESC) intRankNo	
+					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
+					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo	
 
 			FROM	tblCTContractHeader			CH
 			JOIN	tblICCommodity				CO	ON	CO.intCommodityId				=	CH.intCommodityId
@@ -97,6 +99,7 @@ BEGIN TRY
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
 					CH.strContractItemNo,
+					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo
 
 			FROM	vyuCTNotificationHeader		CH
@@ -117,6 +120,7 @@ BEGIN TRY
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
 					CH.strContractItemNo,
+					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo	
 
 			FROM	vyuCTNotificationHeader CH
@@ -138,6 +142,7 @@ BEGIN TRY
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
 					CH.strContractItemNo,
+					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo		
 
 			FROM	vyuCTNotificationHeader CH
