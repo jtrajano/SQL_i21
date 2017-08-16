@@ -312,7 +312,7 @@ BEGIN
 		END AS strTicketNumber,
 	INVSHIP.strShipmentNumber,
 	0,
-	0 as intContractDetailId,
+	ISNULL(INVDTL.intContractDetailId,0) as intContractDetailId,
 	--LOCATION.strLocationName,
 	INV.strInvoiceNumber as RecordId,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
@@ -475,7 +475,7 @@ BEGIN
 	strTicketNumber = (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE GR.intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	'' as strReceiptNumber,
 	0 as intInventoryReceiptItemId,
-	0 as intContractDetailId,
+	ISNULL(BillDtl.intContractDetailId,0) as intContractDetailId,
 	Bill.strBillId as RecordId,
 	CASE WHEN StrgHstry.intTransactionTypeId = 4 THEN
 		'Settle Storage'
@@ -773,7 +773,7 @@ BEGIN
 		END AS strTicketNumber,
 	INVSHIP.strShipmentNumber,
 	0,
-	0 as intContractDetailId,
+	ISNULL(INVDTL.intContractDetailId,0) as intContractDetailId,
 	--LOCATION.strLocationName,
 	INV.strInvoiceNumber as RecordId,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
@@ -936,7 +936,7 @@ BEGIN
 	strTicketNumber = (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE GR.intCustomerStorageId = StrgHstry.intCustomerStorageId),
 	'' as strReceiptNumber,
 	0 as intInventoryReceiptItemId,
-	0 as intContractDetailId,
+	ISNULL(BillDtl.intContractDetailId,0) as intContractDetailId,
 	Bill.strBillId as RecordId,
 	CASE WHEN StrgHstry.intTransactionTypeId = 4 THEN
 		'Settle Storage'
