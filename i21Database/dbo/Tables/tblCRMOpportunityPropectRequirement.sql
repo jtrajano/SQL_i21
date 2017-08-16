@@ -6,6 +6,7 @@
 	[intEntityId] [int] NOT NULL,
 	[strRespondentAnswer] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmDate] [datetime] null,
+	[strDirection] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCRMOpportunityPropectRequirement_intOpportunityPropectRequirementId] PRIMARY KEY CLUSTERED ([intOpportunityPropectRequirementId] ASC),
 	CONSTRAINT [FK_tblCRMOpportunityPropectRequirement_tblCRMOpportunity_intOpportunityId] FOREIGN KEY ([intOpportunityId]) REFERENCES [dbo].[tblCRMOpportunity] ([intOpportunityId]),
