@@ -370,6 +370,8 @@
     <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblSMCompanyLocationPricingLevel.cs" />
     <Compile Include="Metadata\vyuICGetItemUOM.cs" />
+    <Compile Include="Metadata\vyuICInventoryCountItemStockLookup.cs" />
+    <Compile Include="Metadata\vyuICInventoryCountItemStockLookupMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\ConvertToStockUnit.cs" />
     <Compile Include="Stored Procedures\CopyItemLocation.cs" />

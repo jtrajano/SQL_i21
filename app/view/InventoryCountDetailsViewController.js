@@ -90,6 +90,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 value: '{current.strLotNo}',
                 origValueField: 'intLotId',
                 hidden: '{isCountByGroup}',
+                forceSelection: '{forceSelection}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -128,12 +129,6 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                         column: 'intLocationId',
                         value: '{inventoryCount.intLocationId}',
                         conjunction: 'and'
-                    },
-                    {
-                        column: 'dblOnHand',
-                        value: 0,
-                        conjunction: 'and',
-                        condition: 'noteq'
                     }
                 ]
             },
@@ -161,7 +156,8 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             },
             txtLotAlias: {
                 value: '{current.strLotAlias}',
-                hidden: '{isCountByGroup}'
+                hidden: '{isCountByGroup}',
+				readOnly: '{lotAliasReadOnly}'
             },
             chkRecount: {
                 value: '{current.ysnRecount}',
@@ -187,7 +183,6 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 binding: me.config.binding,
                 createRecord: me.onCreateRecord
             });
-
             win.context = context;
             
             if (config.id) {
@@ -264,7 +259,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         if(valid) {
             win.context.data.saveRecord({
                 successFn: function() {
-                    win.close();
+                    win.close(vm.get('inventoryCount').intInventoryCountId);
                 }
             });
         } else {

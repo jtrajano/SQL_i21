@@ -14,13 +14,19 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
         'Inventory.store.BufferedLot',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
-        'Inventory.store.BufferedItemStockUOMForAdjustmentView'
+        'Inventory.store.BufferedItemStockUOMForAdjustmentView',
+        'Inventory.store.BufferedInventoryCountStockItem'
     ],
 
     data: {
-        inventoryCount: null
+        inventoryCount: null,
+        forceSelection: false
     },
-
+    formulas: {
+        lotAliasReadOnly: function(get) {
+            return get('current.intLotId');
+        }
+    },
     stores: {
         countGroup: {
             type: 'icbufferedcountgroup'
@@ -29,16 +35,16 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
             type: 'icbuffereditemstockview'
         },
         storageLocations: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbufferedinventorycountstockitem'
         },
         storageUnits: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbufferedinventorycountstockitem'
         },
         lots: {
             type: 'icbufferedlot'
         },
         itemUOMs: {
-            type: "icbuffereditemstockuomforadjustmentview"
+            type: "icbufferedinventorycountstockitem"
         }
     },
 

@@ -52,7 +52,7 @@ Ext.define('Inventory.model.InventoryCountDetail', {
         { name: 'strLocationName', type: 'string' },
         { name: 'strSubLocationName', type: 'string' },
         { name: 'strStorageLocationName', type: 'string' },
-        { name: 'strLotNumber', type: 'string' },
+        { name: 'strLotNo', type: 'string' },
         { name: 'strLotAlias', type: 'string' },
         { name: 'strUnitMeasure', type: 'string' },
         { name: 'dblConversionFactor', type: 'float' },

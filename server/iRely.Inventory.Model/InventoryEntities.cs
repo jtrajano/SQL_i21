@@ -33,6 +33,7 @@ namespace iRely.Inventory.Model
         {
             modelBuilder.Configurations.Add(new vyuICLotHistoryMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageUnitStockMap());
+            modelBuilder.Configurations.Add(new vyuICInventoryCountItemStockLookupMap());
             modelBuilder.Configurations.Add(new tblICBrandMap());
             modelBuilder.Configurations.Add(new tblICCategoryMap());
             modelBuilder.Configurations.Add(new tblICCategoryTaxMap());

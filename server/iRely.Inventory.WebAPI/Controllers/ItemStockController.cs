@@ -46,5 +46,11 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemStockUOMForAdjustment(param));
         }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetInventoryCountItemStockLookup(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetInventoryCountItemStockLookup(param));
+        }
     }
 }
