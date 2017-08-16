@@ -229,13 +229,7 @@ END
 																					AND TempDist.strDestination = 'Location') THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END)
 														END)
-			,[strCostMethod]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Per Unit'
-														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
-																				FROM tblTRLoadDistributionHeader TempDist
-																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
-																					AND TempDist.strDestination = 'Location') THEN 'Per Unit'
-																ELSE 'Amount' END)
-														END)
+			,[strCostMethod]					= 'Per Unit'
 			,[dblRate]							= min(RE.dblFreightRate)
 			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
 			,[intOtherChargeEntityVendorId]		= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
@@ -246,13 +240,7 @@ END
 															min(RE.intShipViaId)
 												END
 			,[dblAmount]						= 0
-			,[strAllocateCostBy]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Unit'
-														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
-																				FROM tblTRLoadDistributionHeader TempDist
-																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
-																					AND TempDist.strDestination = 'Location') THEN 'Unit'
-																ELSE NULL END)
-														END)
+			,[strAllocateCostBy]				= 'Unit'
 			,[intContractHeaderId]				= min(RE.intContractHeaderId)
 			,[intContractDetailId]				= min(RE.intContractDetailId)
 			,[ysnAccrue]						= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
@@ -299,13 +287,7 @@ END
 															min(RE.intShipViaId)
 												END
 			,[dblAmount]						= 0
-			,[strAllocateCostBy]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Unit'
-														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
-																				FROM tblTRLoadDistributionHeader TempDist
-																				WHERE TempDist.intLoadHeaderId = MIN(LTE.intLoadHeaderId)
-																					AND TempDist.strDestination = 'Location') THEN 'Unit'
-																ELSE NULL END)
-														END)
+			,[strAllocateCostBy]				= 'Unit'
 			,[intContractHeaderId]				= min(RE.intContractHeaderId)
 			,[intContractDetailId]				= min(RE.intContractDetailId)
 			,[ysnAccrue]						= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
