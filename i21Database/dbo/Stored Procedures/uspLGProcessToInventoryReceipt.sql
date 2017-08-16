@@ -147,6 +147,7 @@ BEGIN TRY
 				END
 				) AS BIT) = 0
 		AND L.intLoadId = @intLoadId
+    ORDER BY LDCL.intLoadDetailContainerLinkId
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM @ReceiptStagingTable)
 	BEGIN
