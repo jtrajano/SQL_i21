@@ -5015,6 +5015,228 @@ ELSE
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------- ALL CONTACT MENUS ONLY MUST BE DELETED IN uspSMFixUserRoleMenus ----------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
+/* Account */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Account' AND strModuleName = 'Account' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Account', N'Account', 0, N'Account', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1 WHERE strMenuName = 'Account' AND strModuleName = 'Account' AND intParentMenuID = 0
+
+DECLARE @AccountParentMenuId INT
+SELECT @AccountParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Account' AND strModuleName = 'Account' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @AccountParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@AccountParentMenuId, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'My Account' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'My Account', N'Account', @AccountParentMenuId, N'My Account', N'Account', N'Screen', N'EntityManagement.view.UserProfile', N'small-menu-account', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'EntityManagement.view.UserProfile' WHERE strMenuName = 'My Account' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId
+
+DECLARE @MyAccountMenuId INT
+SELECT  @MyAccountMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'My Account' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'My Account' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @MyAccountMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@MyAccountMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'My Company' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'My Company', N'Account', @AccountParentMenuId, N'My Company', N'Account', N'Screen', N'AccountsReceivable.view.EntityCustomer', N'small-menu-account', 1, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'AccountsReceivable.view.EntityCustomer' WHERE strMenuName = 'My Company' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId
+
+DECLARE @MyCompanyMenuId INT
+SELECT  @MyCompanyMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'My Company' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'My Company' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @MyCompanyMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@MyCompanyMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User List' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'User List', N'Account', @AccountParentMenuId, N'Sales - User List', N'Account', N'Screen', N'EntityManagement.controller.CustomerContactList', N'small-menu-account', 1, 0, 0, 1, 2, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'EntityManagement.controller.CustomerContactList' WHERE strMenuName = 'User List' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId
+
+DECLARE @SalesUserListMenuId INT
+SELECT  @SalesUserListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'User List' AND strDescription = 'Sales - User List' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'User List' AND strDescription = 'Sales - User List' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @SalesUserListMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@SalesUserListMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User List' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'User List', N'Account', @AccountParentMenuId, N'Purchasing - User List', N'Account', N'Screen', N'EntityManagement.controller.VendorContactList', N'small-menu-account', 1, 0, 0, 1, 2, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'EntityManagement.controller.VendorContactList' WHERE strMenuName = 'User List' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId
+
+DECLARE @PurchasingUserListMenuId INT
+SELECT  @PurchasingUserListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'User List' AND strDescription = 'Purchasing - User List' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'User List' AND strDescription = 'Purchasing - User List' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PurchasingUserListMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PurchasingUserListMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Set Permissions' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Set Permissions', N'Account', @AccountParentMenuId, N'Set Permissions', N'Account', N'Screen', N'i21.view.UserRole?showSearch=true', N'small-menu-account', 1, 0, 0, 1, 3, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'i21.view.UserRole?showSearch=true' WHERE strMenuName = 'Set Permissions' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId
+
+DECLARE @SetPermissionsMenuId INT
+SELECT  @SetPermissionsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Set Permissions' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Set Permissions' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @SetPermissionsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@SetPermissionsMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payment Methods' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Payment Methods', N'Account', @AccountParentMenuId, N'Payment Methods', N'Account', N'Screen', N'AccountsReceivable.view.MakePayments', N'small-menu-account', 1, 0, 0, 1, 4, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'AccountsReceivable.view.MakePayments' WHERE strMenuName = 'Payment Methods' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId
+
+DECLARE @PaymentMethodsMenuId INT
+SELECT  @PaymentMethodsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Payment Methods' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Payment Methods' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PaymentMethodsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PaymentMethodsMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Change Password' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Change Password', N'Account', @AccountParentMenuId, N'Change Password', N'Account', N'Screen', N'EntityManagement.view.ChangePassword', N'small-menu-account', 1, 0, 0, 1, 5, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'EntityManagement.view.ChangePassword' WHERE strMenuName = 'Change Password' AND strModuleName = 'Account' AND intParentMenuID = @AccountParentMenuId
+
+DECLARE @ChangePasswordMenuId INT
+SELECT  @ChangePasswordMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Change Password' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Change Password' AND strModuleName = N'Account' AND intParentMenuID = @AccountParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ChangePasswordMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@ChangePasswordMenuId, 1)
+END
+
+/* Transactions */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transactions' AND strModuleName = 'Transactions' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Transactions', N'Transactions', 0, N'Transactions', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2 WHERE strMenuName = 'Transactions' AND strModuleName = 'Transactions' AND intParentMenuID = 0
+
+DECLARE @TransactionsParentMenuId INT
+SELECT @TransactionsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Transactions' AND strModuleName = 'Transactions' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Orders' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Orders', N'Transactions', @TransactionsParentMenuId, N'Orders', N'Transaction', N'Screen', N'AccountsPayable.view.PurchaseOrder?showSearch=true', N'small-menu-transaction', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'AccountsPayable.view.PurchaseOrder?showSearch=true' WHERE strMenuName = 'Orders' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+
+DECLARE @OrdersMenuId INT
+SELECT  @OrdersMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Orders' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Orders' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @OrdersMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@OrdersMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoices' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Invoices', N'Transactions', @TransactionsParentMenuId, N'Invoices', N'Transaction', N'Screen', N'AccountsReceivable.view.Invoice?showSearch=true', N'small-menu-transaction', 1, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'AccountsReceivable.view.Invoice?showSearch=true' WHERE strMenuName = 'Invoices' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+
+DECLARE @InvoicesMenuId INT
+SELECT  @InvoicesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Invoices' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Invoices' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @InvoicesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@InvoicesMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Make a Payment' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Make a Payment', N'Transactions', @TransactionsParentMenuId, N'Make a Payment', N'Transaction', N'Screen', N'AccountsReceivable.view.MakePayments', N'small-menu-transaction', 1, 0, 0, 1, 2, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'AccountsReceivable.view.MakePayments' WHERE strMenuName = 'Make a Payment' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+
+DECLARE @MakePaymentMenuId INT
+SELECT  @MakePaymentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Make a Payment' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Make a Payment' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @MakePaymentMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@MakePaymentMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payment History' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Payment History', N'Transactions', @TransactionsParentMenuId, N'Payment History', N'Transaction', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=PaymentHistory&direct=true', N'small-menu-transaction', 1, 0, 0, 1, 3, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Reporting.view.ReportManager?group=Sales&report=PaymentHistory&direct=true' WHERE strMenuName = 'Payment History' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+
+DECLARE @PaymentHistoryMenuId INT
+SELECT  @PaymentHistoryMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Payment History' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Payment History' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PaymentHistoryMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PaymentHistoryMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contracts' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Contracts', N'Transactions', @TransactionsParentMenuId, N'Contracts', N'Transaction', N'Screen', N'ContractManagement.view.Contract?showSearch=true', N'small-menu-transaction', 1, 0, 0, 1, 4, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'ContractManagement.view.Contract?showSearch=true' WHERE strMenuName = 'Contracts' AND strModuleName = 'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+
+DECLARE @ContractsMenuId INT
+SELECT  @ContractsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Contracts' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Contracts' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ContractsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@ContractsMenuId, 1)
+END	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* SYSTEM MANAGER */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @SystemManagerParentMenuId)
 INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@SystemManagerParentMenuId)
