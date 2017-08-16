@@ -115,6 +115,29 @@ BEGIN
 	END  
 END   
 
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+BEGIN TRAN @TransactionName
+SAVE TRAN @TransactionName
+
+-- Create and validate the lot numbers
+IF @ysnPost = 1
+BEGIN 	
+	DECLARE @intCreateUpdateLotError AS INT 
+
+	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryInventoryCount 
+			@intTransactionId
+			,@intEntityUserSecurityId
+
+	IF @intCreateUpdateLotError <> 0
+	BEGIN 
+		ROLLBACK TRAN @TransactionName
+		COMMIT TRAN @TransactionName
+		GOTO Post_Exit;
+	END
+END
+
 -- Validate Lot Number for Lot-tracked items
 DECLARE @ItemNo NVARCHAR(50)
 
@@ -134,11 +157,6 @@ IF @ItemNo IS NOT NULL
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 IF @@ERROR <> 0 GOTO Post_Exit    
 
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
-BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
