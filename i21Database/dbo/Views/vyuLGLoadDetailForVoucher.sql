@@ -6,6 +6,7 @@ SELECT L.intLoadId
 	,CH.strContractNumber
 	,CH.intContractHeaderId
 	,CD.intContractSeq
+	,CD.intContractDetailId
 	,I.intItemId
 	,I.strItemNo
 	,I.strDescription AS strItemDescription
