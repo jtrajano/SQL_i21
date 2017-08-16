@@ -61,7 +61,7 @@ END) AS strName
 ,(CASE strTransactionType 
 
 		WHEN 'Local/Network' 
-		THEN ROUND(ISNULL(cfTransaction.dblInventoryCost,0) + (ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0)),2)
+		THEN ROUND(ISNULL(cfTransaction.dblInventoryCost,0) + (ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0) / ISNULL(cfTransaction.dblQuantity,0)),2)
 		ELSE
 		ROUND(ISNULL(cfTransaction.dblTransferCost,0),2)
 
