@@ -7,7 +7,7 @@ FROM sys.indexes
 WHERE name = 'UK_tblSCTicket_strOfflineGuid')
 BEGIN
 PRINT 'NULL strOffline Constraint'
-EXEC('ALTER TABLE tblSCTicket ADD [strOfflineGuid] NVARCHAR(100) COLLATE Latin1_General_CI_AS')
+--EXEC('ALTER TABLE tblSCTicket ADD [strOfflineGuid] NVARCHAR(100) COLLATE Latin1_General_CI_AS')
 EXEC('UPDATE tblSCTicket SET [strOfflineGuid] = NEWID()')
 EXEC('CREATE UNIQUE NONCLUSTERED INDEX UK_tblSCTicket_strOfflineGuid ON tblSCTicket(strOfflineGuid) WHERE strOfflineGuid IS NOT NULL') 
 END
