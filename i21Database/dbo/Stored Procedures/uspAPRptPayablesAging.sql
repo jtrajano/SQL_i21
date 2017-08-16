@@ -355,8 +355,10 @@ SET @query = '
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
 
-
-SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+IF @dateTo IS NOT NULL
+BEGIN
+	SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+END
 
 IF ISNULL(@filter,'') != ''
 BEGIN
