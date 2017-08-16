@@ -399,7 +399,10 @@ BEGIN TRY
 		END
 		IF (@BlendedItem = 0 AND ISNULL(@ReceiptLink, '') = '')
 		BEGIN
-			RAISERROR('Receipt Link cannot be blank for non-blended items', 16, 1)
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblICItem WHERE intItemId = @intDistributionItemId AND strType IN ('Service', 'Other Charge', 'Non-Inventory'))
+			BEGIN
+				RAISERROR('Receipt Link can only be blank for Blended, Service, Other Charge, and Non-Inventory items', 16, 1)
+			END
 		END
 		
 		SELECT @intStockUOMId = intIssueUOMId
