@@ -244,11 +244,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
                             },
-                            {
-                                column: 'ysnReceiveUOMAllowPurchase',
-                                value: true,
-                                conjunction: 'and'
-                            },
+                            // {
+                            //     column: 'ysnReceiveUOMAllowPurchase',
+                            //     value: true,
+                            //     conjunction: 'and'
+                            // },
                             {
                                 column: 'strType',
                                 condition: 'noteq',
