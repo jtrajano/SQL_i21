@@ -377,6 +377,7 @@
     <Compile Include="Stored Procedures\DuplicateStorageLocation.cs" />
     <Compile Include="Stored Procedures\CalculateGrossQtyRatio.cs" />
     <Compile Include="Stored Procedures\GetStartingNumber.cs" />
+    <Compile Include="Stored Procedures\GetTaxGroupIdOnInventoryReceipt.cs" />
     <Compile Include="Stored Procedures\GetUnitConversion.cs" />
     <Compile Include="Stored Procedures\PopulateShipmentInvoice.cs" />
     <Compile Include="Stored Procedures\ProcessBill.cs" />

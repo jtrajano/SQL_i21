@@ -875,40 +875,27 @@ namespace iRely.Inventory.BusinessLayer
         public SaveResult GetTaxGroupId(int receiptId, out int? taxGroup, out string taxGroupName)
         {
             SaveResult saveResult = new SaveResult();
-            int? newTaxGroupId = null;
-            string newTaxGroupName = null;
-
-            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            taxGroup = null;
+            taxGroupName = String.Empty;
+            try
             {
-                var connection = _db.ContextManager.Database.Connection;
-                try
-                {
-                    var idParameter = new SqlParameter("@ReceiptId", receiptId);
-                    var outParam = new SqlParameter("@intTaxGroupId", newTaxGroupId);
-                    outParam.Direction = System.Data.ParameterDirection.Output;
-                    outParam.DbType = System.Data.DbType.Int32;
-                    outParam.SqlDbType = System.Data.SqlDbType.Int;
-                    var outParam2 = new SqlParameter("@strTaxGroup", newTaxGroupName);
-                    outParam2.Direction = System.Data.ParameterDirection.Output;
-                    outParam2.DbType = System.Data.DbType.String;
-                    outParam2.SqlDbType = System.Data.SqlDbType.NVarChar;
-                    outParam2.Size = 50;
+                var taxGroupOnInventoryReceipt = new iRely.Inventory.Model.TaxGroupOnInventoryReceipt();
 
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspICGetTaxGroupIdOnInventoryReceipt @ReceiptId, @intTaxGroupId OUTPUT, @strTaxGroup OUTPUT", idParameter, outParam, outParam2);
-                    newTaxGroupId = (int)outParam.Value;
-                    newTaxGroupName = (string)outParam2.Value;
-                    saveResult = _db.Save(false);
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    saveResult.BaseException = ex;
-                    saveResult.Exception = new ServerException(ex);
-                    saveResult.HasError = true;
-                }
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                taxGroupOnInventoryReceipt = db.GetTaxGroupIdOnInventoryReceipt(receiptId);
+
+                taxGroup = taxGroupOnInventoryReceipt.intTaxGroupId;
+                taxGroupName = taxGroupOnInventoryReceipt.strTaxGroupId;
+
+                saveResult.HasError = false; 
             }
-            taxGroup = newTaxGroupId;
-            taxGroupName = newTaxGroupName;
+            catch (Exception ex)
+            {
+                saveResult.BaseException = ex;
+                saveResult.Exception = new ServerException(ex);
+                saveResult.HasError = true;
+            }
+
             return saveResult;
         }        
 
