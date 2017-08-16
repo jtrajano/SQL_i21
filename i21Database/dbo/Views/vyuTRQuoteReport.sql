@@ -53,6 +53,7 @@ OUTER APPLY (
 		AND PQH.strQuoteStatus in ('Confirmed','Sent')
 		AND PQD.intItemId = QD.intItemId 
 		AND PQD.intShipToLocationId = QD.intShipToLocationId
+		AND PQD.intSupplyPointId = QD.intSupplyPointId
 	ORDER BY PQH.dtmQuoteEffectiveDate DESC, PQH.intQuoteHeaderId DESC
 ) QuotePrice
 WHERE QH.strQuoteStatus = 'Confirmed'
