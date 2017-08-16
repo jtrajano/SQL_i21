@@ -470,7 +470,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
 			   ([intEntityId]
-			   ,CASE WHEN @strSystem = ''PT'' THEN @strSalespersonId ELSE NULL END
+			   ,[strSalespersonId]
 			   ,[strType]
 			   ,[strPhone]
 			   ,[strAddress]
@@ -492,7 +492,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			   ,[strTitle])
 			VALUES
 			   (@EntityId,
-				@strSalespersonId,
+				CASE WHEN @strSystem = ''PT'' THEN @strSalespersonId ELSE NULL END,
 				@strType,
 				ISNULL(LTRIM(RTRIM(@strPhone)),''''),
 				ISNULL(LTRIM(RTRIM(@strAddress)),''''),
