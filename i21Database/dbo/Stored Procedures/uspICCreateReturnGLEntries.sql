@@ -296,42 +296,21 @@ AS
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,i.strItemNo
 			,dblReceiptUnitCost = 
-					CASE	
-						WHEN ISNULL(ri.ysnSubCurrency, 0) = 1 AND ISNULL(r.intSubCurrencyCents, 1) NOT IN (0, 1) THEN 
-							(
-								dbo.fnCalculateReceiptUnitCost(
-									ri.intItemId
-									,ri.intUnitMeasureId		
-									,ri.intCostUOMId
-									,ri.intWeightUOMId
-									,ri.dblUnitCost
-									,ri.dblNet
-									,t.intLotId
-									,t.intItemUOMId
-									,AggregrateItemLots.dblTotalNet
-									,ri.ysnSubCurrency
-									,r.intSubCurrencyCents
-								)
-							)										
-							/			
-							r.intSubCurrencyCents 
-						ELSE 
-							(
-								dbo.fnCalculateReceiptUnitCost(
-									ri.intItemId
-									,ri.intUnitMeasureId		
-									,ri.intCostUOMId
-									,ri.intWeightUOMId
-									,ri.dblUnitCost
-									,ri.dblNet
-									,t.intLotId
-									,t.intItemUOMId
-									,AggregrateItemLots.dblTotalNet
-									,ri.ysnSubCurrency
-									,r.intSubCurrencyCents
-								)
-							)							
-					END	
+					(
+						dbo.fnCalculateReceiptUnitCost(
+							ri.intItemId
+							,ri.intUnitMeasureId		
+							,ri.intCostUOMId
+							,ri.intWeightUOMId
+							,ri.dblUnitCost
+							,ri.dblNet
+							,t.intLotId
+							,t.intItemUOMId
+							,AggregrateItemLots.dblTotalNet
+							,ri.ysnSubCurrency
+							,r.intSubCurrencyCents
+						)
+					)					
 	FROM	tblICInventoryReceipt r INNER JOIN (
 				tblICInventoryReceiptItem ri LEFT JOIN tblICInventoryReceiptItemLot ril
 					ON ri.intInventoryReceiptItemId  = ril.intInventoryReceiptItemId
