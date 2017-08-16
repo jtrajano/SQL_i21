@@ -28,9 +28,13 @@ BEGIN TRY
 	INSERT INTO @NotificationCount
 	EXEC  [uspCTNotification] 'Approved Not Sent',@intEntityId,1
 
-	UPDATE @NotificationCount SET strNotificationCount = 'int'+REPLACE(strNotificationCount,' ','')+'Count'
+	UPDATE @NotificationCount SET strNotificationCount = 'int'+REPLACE(strNotificationCount,' ','')+'Count',intCount = ISNULL(intCount,0)
 
-	SELECT *
+	SELECT  ISNULL(intUnsubmittedCount,0)		AS intUnsubmittedCount,
+			ISNULL(intEmptyCount,0)				AS intEmptyCount,
+			ISNULL(intUnconfirmedCount,0)		AS intUnconfirmedCount,
+			ISNULL(intApprovedNotSentCount,0)	AS intApprovedNotSentCount,
+			ISNULL(intUnsignedCount,0)			AS intUnsignedCount
 	FROM
 	@NotificationCount
 	PIVOT
