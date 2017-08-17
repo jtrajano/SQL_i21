@@ -26,6 +26,7 @@ FROM (
 		,NULL AS strTicketNumber
 		,NULL AS strShipmentNumber
 		,NULL AS strContractNumber
+		,NULL AS strLoadNumber
 		,EC.strClass
 	FROM (
 		SELECT intBillId
@@ -82,6 +83,7 @@ FROM (
 			,SC.strTicketNumber
 			,ICS.strShipmentNumber
 			,CH.strContractNumber
+			,LG.strLoadNumber
 			,NULL AS strClass
 		FROM (
 			SELECT intBillId
@@ -104,6 +106,7 @@ FROM (
 		LEFT JOIN dbo.tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = APD.intInventoryShipmentChargeId
 		LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
 		LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = IRE.intOrderId
+		LEFT JOIN dbo.tblLGLoad LG ON LG.intLoadId = APD.intLoadId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		) MainQuery    
 
