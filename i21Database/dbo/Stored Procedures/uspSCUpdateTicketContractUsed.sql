@@ -22,20 +22,23 @@ BEGIN TRY
 	END
 	IF(ISNULL(@ysnStorage,0) = 0)
 		BEGIN
-			UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
-			UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
-			, intContractSequence = CT.intContractSeq
-			, strContractLocation = CT.strLocationName
-			, dblScheduleQty = @dblScheduleQty
-			, dblUnitPrice = CT.dblFutures
-			, dblUnitBasis = CT.dblBasis
-			, dblFreightRate = CTCost.dblRate
-			, intHaulerId = CTCost.intVendorId
-			FROM tblSCTicket SC 
-			INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
-			INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
-			INNER JOIN tblCTContractCost CTCost ON CT.intContractDetailId = CTCost.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
-			WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId AND SC.strDistributionOption != 'SPL'
+			IF EXISTS(SELECT TOP 1 intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0)
+			BEGIN
+				UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
+				UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
+				, intContractSequence = CT.intContractSeq
+				, strContractLocation = CT.strLocationName
+				, dblScheduleQty = @dblScheduleQty
+				, dblUnitPrice = CT.dblFutures
+				, dblUnitBasis = CT.dblBasis
+				, dblFreightRate = CTCost.dblRate
+				, intHaulerId = CTCost.intVendorId
+				FROM tblSCTicket SC 
+				INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+				INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
+				LEFT JOIN tblCTContractCost CTCost ON CT.intContractDetailId = CTCost.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
+				WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId AND SC.strDistributionOption != 'SPL'
+			END
 		END
 	ELSE
 	BEGIN
