@@ -11,52 +11,18 @@ SELECT DISTINCT I.intEntityCustomerId
 	 , strCurrency				= SMC.strCurrency
 	 , strCurrencyDescription	= SMC.strDescription
 	 , TAXDETAIL.*
-	 , dblTaxDifference = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN (TAXDETAIL.dblTotalAdjustedTax - TAXDETAIL.dblTotalTax) * -1 
-								ELSE (TAXDETAIL.dblTotalAdjustedTax - TAXDETAIL.dblTotalTax) 
-						  END
-	 , dblTaxAmount     = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN TAXDETAIL.dblTotalAdjustedTax * -1 
-								ELSE TAXDETAIL.dblTotalAdjustedTax
-						  END
-	 , dblNonTaxable    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN CASE WHEN TAXDETAIL.dblTax = 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
-									ELSE 0 END
-								ELSE 
-									CASE WHEN TAXDETAIL.dblTax = 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)  
-									ELSE 0 END
-						 END
-	 , dblTaxable       = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') 
-								THEN CASE WHEN TAXDETAIL.dblTax > 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
-									ELSE 0 END
-								ELSE 
-									CASE WHEN TAXDETAIL.dblTax > 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)  
-									ELSE 0 END
-						 END
-	, dblTotalSales = (CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN CASE WHEN TAXDETAIL.dblTax = 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
-									ELSE 0 END
-								ELSE 
-									CASE WHEN TAXDETAIL.dblTax = 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)  
-									ELSE 0 END
-						 END) + 
-						 (CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') 
-								THEN CASE WHEN TAXDETAIL.dblTax > 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * -1 
-									ELSE 0 END
-								ELSE 
-									CASE WHEN TAXDETAIL.dblTax > 0 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice)  
-									ELSE 0 END
-						 END
-						 ) + 
-						 (CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN ISNULL(TAXDETAIL.dblTotalAdjustedTax, 0) * -1 
-								ELSE ISNULL(TAXDETAIL.dblTotalAdjustedTax, 0)
-						  END)
+	 , dblTaxDifference = (TAXDETAIL.dblAdjustedTax - TAXDETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+	 , dblTaxAmount     = TAXDETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+	 , dblNonTaxable    = (CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(TAXTOTAL.intTaxCodeCount, 1.000000) ELSE 0.000000 END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+	 , dblTaxable       = (CASE WHEN TAXDETAIL.dblAdjustedTax > 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+	 , dblTotalSales = (
+						(CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(TAXTOTAL.intTaxCodeCount, 1.000000) ELSE 0.000000 END)
+						+
+						(CASE WHEN TAXDETAIL.dblAdjustedTax > 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END)
+					   )
+					   * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 
-	, dblTaxCollected  = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash')
-								THEN ISNULL(I.dblTax, 0) * -1 
-								ELSE ISNULL(I.dblTax, 0)
-						  END
+	, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , TC.strTaxAgency
@@ -82,8 +48,7 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , strItemCategory		= ITEMDETAIL.strCategoryCode
 				 , IDT.dblAdjustedTax	 				 				 
 				 , IDT.dblTax
-				 , dblTotalAdjustedTax  = SUM(IDT.dblAdjustedTax)
-				 , dblTotalTax			= SUM(IDT.dblTax)
+				 , ID.intInvoiceDetailId
 			FROM dbo.tblSMTaxCode TC WITH (NOLOCK)
 			LEFT OUTER JOIN (SELECT intTaxClassId
 									, strTaxClass 
@@ -124,7 +89,8 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 							) ICC ON ICI.intCategoryId = ICC.intCategoryId
 							WHERE ID.intItemId = ICI.intItemId) ITEMDETAIL	
 			GROUP BY
-				 TC.intTaxCodeId
+				ID.intInvoiceDetailId
+				,TC.intTaxCodeId
 				,TC.strTaxAgency
 				,TC.strTaxCode
 				,TC.intTaxClassId
@@ -149,6 +115,13 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				,ITEMDETAIL.intCategoryId
 				,ITEMDETAIL.strCategoryCode
 ) TAXDETAIL ON I.intInvoiceId = TAXDETAIL.intInvoiceId
+LEFT OUTER JOIN (SELECT intInvoiceDetailId
+				      , dblTotalAdjustedTax	= SUM(dblAdjustedTax)
+				      , dblTotalTax			= SUM(dblTax)
+					  , intTaxCodeCount		= COUNT(intInvoiceDetailTaxId )
+				 FROM tblARInvoiceDetailTax WITH (NOLOCK)
+				 GROUP BY intInvoiceDetailId
+) TAXTOTAL ON TAXDETAIL.intInvoiceDetailId = TAXTOTAL.intInvoiceDetailId
 LEFT OUTER JOIN (SELECT intEntityId
 				      , strCustomerNumber
 				      , strName
