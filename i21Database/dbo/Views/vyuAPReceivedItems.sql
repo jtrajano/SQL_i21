@@ -846,8 +846,8 @@ FROM
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0
 	UNION ALL
-		 SELECT
-		 [intEntityVendorId]							=	A.intVendorEntityId
+	SELECT
+		[intEntityVendorId]							=	A.intVendorEntityId
 		,[dtmDate]									=	A.dtmPostedDate
 		,[strReference]								=	''
 		,[strSourceNumber]							=	LTRIM(A.strLoadNumber)
@@ -872,8 +872,8 @@ FROM
 		,[dblRate]									=	1
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
-		,[ysnSubCurrency]							=	0
-		,[intSubCurrencyCents]						=	0
+		,[ysnSubCurrency]							=	A.ysnSubCurrency
+		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
