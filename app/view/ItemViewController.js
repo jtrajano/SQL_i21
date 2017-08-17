@@ -3921,6 +3921,28 @@ Ext.define('Inventory.view.ItemViewController', {
             if(!newValue) {
                 current.set('intCommodityId', null);
                 current.set('strCommodityCode', null);
+			}
+		}
+	},
+	
+    onAllowPurchaseChange: function(column, index, newValue, record) {
+        if(!newValue) {
+            var current = this.getViewModel().get('current');
+            var locs = _.filter(current.tblICItemLocations().data.items, function(x) { return x.get('intReceiveUOMId') === record.get('intItemUOMId');});
+            if(locs && locs.length > 0) {
+                iRely.Functions.showErrorDialog('You cannot uncheck "Allow Purchase" because this UOM is being used as a default Purchase UOM in the item location "'.concat(locs[0].get('strLocationName')).concat('".'));
+                return false;
+            }
+        }
+    },
+
+    onAllowSaleChange: function(column, index, newValue, record) {
+        if(!newValue) {
+            var current = this.getViewModel().get('current');
+            var locs = _.filter(current.tblICItemLocations().data.items, function(x) { return x.get('intIssueUOMId') === record.get('intItemUOMId');});
+            if(locs && locs.length > 0) {
+                iRely.Functions.showErrorDialog('You cannot uncheck "Allow Sale" because this UOM is being used as a default Sale UOM in the item location "'.concat(locs[0].get('strLocationName')).concat('".'));
+                return false;
             }
         }
     },
@@ -4041,6 +4063,12 @@ Ext.define('Inventory.view.ItemViewController', {
                 itemdblclick: this.onLocationDoubleClick,
                 cellclick: this.onLocationCellClick,
                 //selectionchange: this.onLocationSelectionChange
+            },
+            "#colAllowPurchase": {
+                beforecheckchange: this.onAllowPurchaseChange
+            },
+            "#colAllowSale": {
+                beforecheckchange: this.onAllowSaleChange
             },
             "#cboTracking": {
                 specialKey: this.onSpecialKeyTab
