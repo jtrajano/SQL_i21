@@ -553,6 +553,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 column: 'intItemId',
                                 value: '{grdInventoryReceipt.selection.intItemId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'ysnAllowPurchase',
+                                value: true,
+                                condition: 'eq',
+                                conjunction: 'and'
                             }
                         ]
                     }
@@ -3491,6 +3497,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     {
                         column: 'intItemId',
                         value: win.viewModel.data.currentReceiptItem.get('intItemId')
+                    },
+                    {
+                        column: 'ysnAllowPurchase',
+                        value: true
                     }
                 ];
             }
@@ -4497,6 +4507,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     },
                     {
                         xtype: 'checkcolumn',
+                        dataIndex: 'ysnAllowPurchase',
+                        dataType: 'boolean',
+                        text: 'Stock Unit',
+                        hidden: true,
+                        flex: 1
+                    },
+                    {
+                        xtype: 'checkcolumn',
                         dataIndex: 'ysnStockUnit',
                         dataType: 'boolean',
                         text: 'Stock Unit',
@@ -4518,6 +4536,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         column: 'intItemId',
                         value: currentReceiptItem.get('intItemId'),
                         conjunction: 'and'
+                    },
+                    {
+                        column: 'ysnAllowPurchase',
+                        value: true,
+                        conjunction: 'and',
+                        condition: 'eq'
                     }
                 ]
             });

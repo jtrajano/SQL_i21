@@ -1244,6 +1244,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                                 },
                                                                                                 {
                                                                                                     xtype: 'checkcolumn',
+                                                                                                    dataIndex: 'ysnAllowPurchase',
+                                                                                                    dataType: 'boolean',
+                                                                                                    text: 'Allow Purchase',
+                                                                                                    hidden: true
+                                                                                                },
+                                                                                                {
+                                                                                                    xtype: 'checkcolumn',
                                                                                                     dataIndex: 'ysnStockUnit',
                                                                                                     dataType: 'boolean',
                                                                                                     text: 'Stock Unit',
@@ -1942,6 +1949,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataType: 'string',
                                                                                             text: 'Unit Type',
                                                                                             flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'checkcolumn',
+                                                                                            dataIndex: 'ysnAllowPurchase',
+                                                                                            dataType: 'boolean',
+                                                                                            text: 'Allow Purchase',
+                                                                                            hidden: true
                                                                                         },
                                                                                         {
                                                                                             xtype: 'checkcolumn',
