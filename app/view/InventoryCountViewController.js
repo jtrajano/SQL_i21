@@ -23,6 +23,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             btnSave: {
                 disabled: '{current.ysnPosted}'
             },
+            btnAttachNewRow: {
+                hidden: '{hidePostButton}'
+            },
+            btnDetachSelectedRows: {
+                hidden: '{hidePostButton}'
+            },
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
@@ -291,8 +297,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 },
                 colLotNo: {
                     hidden: '{hasCountGroup}',
-                    dataIndex: 'strLotNumber',
-                    hidden: '{!current.ysnCountByLots}',
+                    dataIndex: 'strLotNo',
+					hidden: '{!current.ysnCountByLots}',
                     editor: {
                         readOnly: '{disableCountGridFields}',
                         store: '{lot}',
@@ -719,7 +725,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 });
             }
             pagingtoolbar.setStore(store);
-
+            
             store.load({
                 filters: filter,
                 params: {
@@ -760,9 +766,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             };
             if(f.value !== "")
                 filters.push(filter);
-            
+            var parentFilter = {
+                column: 'intInventoryCountId',
+                value: win.getViewModel().get('current.intInventoryCountId'),
+                condition: 'eq',
+                conjunction: 'and'
+            };
+            filters.push(parentFilter);
             filters = filters.concat(ic.count.getFilter(win.viewModel.data.current));
-            
             ic.count.loadDetails(me, win, win.context, true, filters);    
         }
     },
@@ -830,8 +841,25 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     iRely.Functions.openScreen('Inventory.view.InventoryCountDetails', { 
                         viewConfig: {
                             listeners: {
-                                close: function() {
-                                    store.load();    
+                                close: function(count) {
+                                    var filter = {
+                                        column: 'intInventoryCountId',
+                                        value: count.viewModel.data.inventoryCount.data.intInventoryCountId,
+                                        condition: 'eq',
+                                        conjunction: 'and'
+                                    };
+                                    store.proxy.extraParams = { filter: iRely.Functions.encodeFilters([filter]) }
+                                    
+                                    store.load({
+                                        filters: filter,
+                                        params: {
+                                            start: 0,
+                                            limit: win.viewModel.data.pageSize
+                                        },
+                                        callback: function(records, opts, success) {
+                                            win.setLoading(false);
+                                        }
+                                    });
                                 }
                             }
                         },
@@ -936,94 +964,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             }
         } });
     },
-
-    /*onPrintCountSheetsClick: function (button) {
-        var win = button.up('window');
-        var me = win.controller;
-        var vm = win.getViewModel();
-        var current = vm.data.current;
-        var CountId = current.get('intInventoryCountId');
-        
-        if (current) {
-            var showAddScreen = function () {
-                var search = i21.ModuleMgr.Search;
-                search.scope = me;
-                search.url = '../Inventory/api/InventoryCount/GetCountSheets?CountId=' + CountId;
-               // search.filter = filters;
-
-                if (current.get('ysnIncludeOnHand')) {
-                    search.columns = [
-                        { dataIndex: 'intInventoryCountDetailId', text: 'Inventory Count Detail Id', dataType: 'numeric', defaultSort: true, hidden: true, key: true},
-                        { dataIndex: 'strLocationName', text: 'Location Name', dataType: 'string', hidden: true },
-                        { dataIndex: 'strCategory', text: 'Category', dataType: 'string', hidden: true },
-                        { dataIndex: 'strCommodity', text: 'Commodity', dataType: 'string', hidden: true },
-                        { dataIndex: 'strCountNo', text: 'Count No', dataType: 'string', hidden: true },
-                        { dataIndex: 'dtmCountDate', text: 'Count Date', dataType: 'date', xtype: 'datecolumn', hidden: true },
-
-                        { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
-                        { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
-                        { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
-                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
-                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
-                        { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
-                        { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
-                        { dataIndex: 'dblSystemCount', text: 'System Count', dataType: 'numeric' },
-                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
-                        { dataIndex: 'dblPalletsBlank', text: 'No of Pallets', dataType: 'numeric' },
-                        { dataIndex: 'dblQtyPerPalletBlank', text: 'Qty Per Pallet', dataType: 'numeric' },
-                        { dataIndex: 'dblPhysicalCountBlank', text: 'Physical Count', dataType: 'numeric' },
-                        { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
-                        { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
-                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true},
-                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
-                    ];
-                }
-                else {
-                    search.columns = [
-                        { dataIndex: 'intInventoryCountDetailId', text: 'Inventory Count Detail Id', dataType: 'numeric', defaultSort: true, hidden: true, key: true},
-                        { dataIndex: 'strLocationName', text: 'Location Name', dataType: 'string', hidden: true },
-                        { dataIndex: 'strCategory', text: 'Category', dataType: 'string', hidden: true },
-                        { dataIndex: 'strCommodity', text: 'Commodity', dataType: 'string', hidden: true },
-                        { dataIndex: 'strCountNo', text: 'Count No', dataType: 'string', hidden: true },
-                        { dataIndex: 'dtmCountDate', text: 'Count Date', dataType: 'date', xtype: 'datecolumn', hidden: true },
-
-                        { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
-                        { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
-                        { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
-                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
-                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
-                        { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
-                        { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
-                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
-                        { dataIndex: 'dblPalletsBlank', text: 'No of Pallets', dataType: 'numeric' },
-                        { dataIndex: 'dblQtyPerPalletBlank', text: 'Qty Per Pallet', dataType: 'numeric' },
-                        { dataIndex: 'dblPhysicalCountBlank', text: 'Physical Count', dataType: 'numeric' },
-                        { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
-                       // { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
-                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true },
-                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
-                    ];
-                }
-
-                search.title = "Print Count Sheets";
-                search.showNew = false;
-                search.showOpenSelected = false;
-                search.showExport = true;
-                search.multi = false;
-                search.show();
-            };
-            if (button.itemId === 'btnPrintCountSheets') {
-                current.set('intStatus', 2);
-            }
-           
-            //Save the record first before showing the Print Count Sheets screen
-            win.context.data.saveRecord ({
-            successFn: function () {
-                showAddScreen();
-                }
-            });
-        }
-    },*/
     
     onPrintVarianceClick: function (button) {
         var win = button.up('window');

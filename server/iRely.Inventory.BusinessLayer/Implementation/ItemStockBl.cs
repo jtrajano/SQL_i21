@@ -64,6 +64,19 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+		public async Task<SearchResult> GetInventoryCountItemStockLookup(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICInventoryCountItemStockLookup>()
+                    .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemStockUOMId", "DESC").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+		
         public async Task<SearchResult> SearchItemStockUOMForAdjustment(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOMForAdjustment>()

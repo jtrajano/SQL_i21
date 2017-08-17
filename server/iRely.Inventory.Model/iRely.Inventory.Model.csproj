@@ -370,6 +370,8 @@
     <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblSMCompanyLocationPricingLevel.cs" />
     <Compile Include="Metadata\vyuICGetItemUOM.cs" />
+    <Compile Include="Metadata\vyuICInventoryCountItemStockLookup.cs" />
+    <Compile Include="Metadata\vyuICInventoryCountItemStockLookupMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\ConvertToStockUnit.cs" />
     <Compile Include="Stored Procedures\CopyItemLocation.cs" />
@@ -377,6 +379,7 @@
     <Compile Include="Stored Procedures\DuplicateStorageLocation.cs" />
     <Compile Include="Stored Procedures\CalculateGrossQtyRatio.cs" />
     <Compile Include="Stored Procedures\GetStartingNumber.cs" />
+    <Compile Include="Stored Procedures\GetTaxGroupIdOnInventoryReceipt.cs" />
     <Compile Include="Stored Procedures\GetUnitConversion.cs" />
     <Compile Include="Stored Procedures\PopulateShipmentInvoice.cs" />
     <Compile Include="Stored Procedures\ProcessBill.cs" />

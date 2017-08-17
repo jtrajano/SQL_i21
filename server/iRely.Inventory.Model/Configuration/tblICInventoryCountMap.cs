@@ -64,6 +64,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCountGroupId).HasColumnName("intCountGroupId");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
+            this.Property(t => t.strLotNo).HasColumnName("strLotNo");
+            this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
             this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(38, 20);
             this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
             this.Property(t => t.strCountLine).HasColumnName("strCountLine");
@@ -151,7 +153,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
-            this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
+            this.Property(t => t.strLotNo).HasColumnName("strLotNo");
             this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
             this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(38, 20);
             this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);

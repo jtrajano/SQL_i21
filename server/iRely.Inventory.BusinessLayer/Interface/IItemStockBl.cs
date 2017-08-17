@@ -15,5 +15,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchItemStockUOMViewTotals(GetParameter param);
         Task<SearchResult> GetLocationStockOnHand(int intLocationId, int intItemId);
         Task<SearchResult> SearchItemStockUOMForAdjustment(GetParameter param);
+        Task<SearchResult> GetInventoryCountItemStockLookup(GetParameter param);
     }
 }

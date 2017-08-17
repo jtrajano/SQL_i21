@@ -178,6 +178,8 @@ namespace iRely.Inventory.Model
         public int? intSubLocationId { get; set; }
         public int? intStorageLocationId { get; set; }
         public int? intLotId { get; set; }
+        public string strLotNo { get; set; }
+        public string strLotAlias { get; set; }
         public decimal? dblSystemCount { get; set; }
         public decimal? dblLastCost { get; set; }
         public string strCountLine { get; set; }
@@ -341,44 +343,8 @@ namespace iRely.Inventory.Model
                 _storageLocation = value;
             }
         }
-        private string _lotNumber;
-        [NotMapped]
-        public string strLotNumber
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_lotNumber))
-                    if (vyuICGetInventoryCountDetail != null)
-                        return vyuICGetInventoryCountDetail.strLotNumber;
-                    else
-                        return null;
-                else
-                    return _lotNumber;
-            }
-            set
-            {
-                _lotNumber = value;
-            }
-        }
-        private string _lotAlias;
-        [NotMapped]
-        public string strLotAlias
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_lotAlias))
-                    if (vyuICGetInventoryCountDetail != null)
-                        return vyuICGetInventoryCountDetail.strLotAlias;
-                    else
-                        return null;
-                else
-                    return _lotAlias;
-            }
-            set
-            {
-                _lotAlias = value;
-            }
-        }
+        
+
         private string _uom;
         [NotMapped]
         public string strUnitMeasure
@@ -525,7 +491,7 @@ namespace iRely.Inventory.Model
         public int? intStorageLocationId { get; set; }
         public string strStorageLocationName { get; set; }
         public int? intLotId { get; set; }
-        public string strLotNumber { get; set; }
+        public string strLotNo { get; set; }
         public string strLotAlias { get; set; }
         public decimal? dblSystemCount { get; set; }
         public decimal? dblLastCost { get; set; }
