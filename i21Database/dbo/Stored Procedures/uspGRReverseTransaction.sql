@@ -36,6 +36,9 @@ BEGIN TRY
 	DECLARE @intStorageLocationId INT
 	DECLARE @ysnDPOwnedType BIT
 	DECLARE @intInventoryItemStockUOMId INT
+	DECLARE @dblOldBalance NUMERIC(18,6)
+	DECLARE @dblOldQuantity NUMERIC(18,6)
+	DECLARE @dblTolerance NUMERIC(18,6) = 0.0001
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -55,7 +58,11 @@ BEGIN TRY
 	FROM tblGRStorageHistory SH
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
 	JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1	
-	WHERE intStorageHistoryId = @intStorageHistoryId	
+	WHERE intStorageHistoryId = @intStorageHistoryId
+	
+	SELECT @dblOldBalance = ISNULL(dblBalance,0),@dblOldQuantity=ISNULL(dblDetailQuantity,0)			
+	FROM   vyuCTContractDetailView 
+	WHERE  intContractDetailId = @ContractId	
 	
 	SELECT
 	 @ItemId = CS.intItemId
@@ -175,7 +182,13 @@ BEGIN TRY
 
 		---3. Increase Purchase Contract Qty
 		IF ISNULL(@ContractId,0) >0
-		BEGIN		
+		BEGIN
+			
+			IF @dblOldBalance-@NegativeUnits-@dblOldQuantity < @dblTolerance AND @dblOldBalance-@NegativeUnits-@dblOldQuantity >0
+			BEGIN
+				SET @NegativeUnits=@dblOldBalance-@dblOldQuantity
+			END
+					
 			EXEC uspCTUpdateSequenceBalance
 				@intContractDetailId	=	@ContractId,
 				@dblQuantityToUpdate	=	@NegativeUnits,
