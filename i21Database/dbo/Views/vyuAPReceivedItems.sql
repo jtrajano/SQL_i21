@@ -768,7 +768,7 @@ FROM
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0
 	UNION ALL
-		SELECT
+	SELECT
 		[intEntityVendorId]							=	A.intVendorEntityId
 		,[dtmDate]									=	A.dtmPostedDate
 		,[strReference]								=	''
@@ -795,7 +795,7 @@ FROM
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	A.ysnSubCurrency
-		,[intSubCurrencyCents]						=	A.intSubCurrencyCents
+		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
