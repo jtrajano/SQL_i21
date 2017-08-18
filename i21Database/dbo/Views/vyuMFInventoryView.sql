@@ -90,7 +90,7 @@ SELECT l.intLotId
 			)) dblAvailableNoOfPacks
 	,um1.strUnitMeasure AS strReservedQtyUOM
 	,CA.strDescription as strGrade
-	,LI.intItemOwnerId
+	,l.intItemOwnerId
 	,R.strDisplayMember As strRestrictionType
 	,LS1.strSecondaryStatus As strBondStatus
 	,LI.strVendorRefNo
