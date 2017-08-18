@@ -11,7 +11,7 @@
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDModule] PRIMARY KEY CLUSTERED ([intModuleId] ASC),
-	CONSTRAINT [UQ_tblHDModule_intTicketProductId_intSMModuleId] UNIQUE ([intTicketProductId],[intSMModuleId]),
+	--CONSTRAINT [UQ_tblHDModule_intTicketProductId_intSMModuleId] UNIQUE ([intTicketProductId],[intSMModuleId]),
     CONSTRAINT [FK_Module_TicketProduct] FOREIGN KEY ([intTicketProductId]) REFERENCES [dbo].[tblHDTicketProduct] ([intTicketProductId]) on delete cascade,
     CONSTRAINT [FK_Module_TicketGroup] FOREIGN KEY ([intTicketGroupId]) REFERENCES [dbo].[tblHDTicketGroup] ([intTicketGroupId]),
 	CONSTRAINT [FK_tblHDModule_tblSMModule_intSMModuleId] FOREIGN KEY ([intSMModuleId]) REFERENCES [dbo].[tblSMModule] ([intModuleId])
