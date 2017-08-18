@@ -49,8 +49,8 @@ BEGIN
 				,strSiteComment = B.strComment
 				,strSiteInstruction = B.strInstruction
 				,B.ysnActive
-				,strDriverNumber = K.vwsls_slsmn_id
-				,strDriverName = K.vwsls_name
+				,strDriverNumber = K.vwsls_slsmn_id COLLATE Latin1_General_CI_AS 
+				,strDriverName = K.vwsls_name COLLATE Latin1_General_CI_AS 
 			FROM tblTMSite B
 			INNER JOIN tblTMCustomer C
 				ON B.intCustomerID = C.intCustomerID
