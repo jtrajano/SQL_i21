@@ -11,7 +11,8 @@
     [dtmEligible]          DATETIME        DEFAULT (getdate()) NULL,
     [intSort]              INT             NULL,
     [intConcurrencyId]     INT             DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblPRTemplateTimeOff] PRIMARY KEY CLUSTERED ([intTemplateTimeOffId] ASC)
+    CONSTRAINT [PK_tblPRTemplateTimeOff] PRIMARY KEY CLUSTERED ([intTemplateTimeOffId] ASC),
+	CONSTRAINT [FK_tblPRTemplateTimeOff_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [tblPRTemplate]([intTemplateId]) ON DELETE CASCADE
 );
 
 
