@@ -28,6 +28,7 @@ SELECT
 ,BillToLoc.strState as strBillToState
 ,BillToLoc.strZipCode as strBillToZipCode
 ,BillToLoc.strCountry as strBillToCountry
+,BillToLoc.strPhone as strBillToPhone
 ,Cus.intShipToId
 ,Cus.intBillToId
 ,Loc.intFreightTermId
