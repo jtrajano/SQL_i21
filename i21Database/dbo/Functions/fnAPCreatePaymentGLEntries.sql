@@ -206,6 +206,13 @@ BEGIN
 	AND B.dblPayment <> 0
 	AND B.intInvoiceId IS NULL
 	AND A.intCurrencyId != @functionalCurrency
+	AND (CAST(
+												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
+												AS DECIMAL(18,2))
+											-
+											CAST(
+												(voucherDetail.dblTotal + voucherDetail.dblTax) * voucherDetail.dblRate
+												AS DECIMAL(18,2))) != 0
 	-- GROUP BY A.[strPaymentRecordNum],
 	-- A.dblExchangeRate,
 	-- A.intPaymentId,
