@@ -119,6 +119,5 @@ FROM (
 	LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CT.intCurrencyId
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CT.intConvPriceCurrencyId
-	LEFT JOIN tblSMCurrency LC ON LC.intCurrencyID = L.intCurrencyId
 	WHERE L.ysnPosted = 1 AND L.intPurchaseSale IN (1, 3) AND L.intShipmentStatus IN (1,3)
 ) t1
