@@ -56,7 +56,7 @@ BEGIN
 			LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 			LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
-			LEFT JOIN tblSMUserSecurity SE ON SE.intEntityUserSecurityId = L.intDispatcherId
+			LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 			LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 			WHERE L.intLoadId IN (
 					SELECT *
@@ -105,7 +105,7 @@ BEGIN
 		LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 		LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 		LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
-		LEFT JOIN tblSMUserSecurity SE ON SE.intEntityUserSecurityId = L.intDispatcherId
+		LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 		WHERE L.strLoadNumber COLLATE Latin1_General_CI_AS IN (
 				SELECT *
