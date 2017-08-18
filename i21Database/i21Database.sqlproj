@@ -5600,7 +5600,7 @@
     <None Include="Scripts\Post-Deployment\FRM\1_OfflineGuid.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunitySalesrepFromLob.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateTicketManagementMenus.sql" />
-    <Build Include="Scripts\Post-Deployment\SM\1730_UpdatePayrollMenus.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdatePayrollMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
