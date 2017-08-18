@@ -19,4 +19,5 @@ SELECT intUserRoleMenuId
 ,RoleMenu.intConcurrencyId
 FROM tblSMUserRoleMenu RoleMenu
 LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
-WHERE  strMenuName NOT IN  (CASE  (SELECT TOP 1 ysnLegacyIntegration FROM tblSMCompanyPreference) WHEN 0 THEN ('Import GL from Subledger') ELSE ('')  END)
+WHERE ISNULL(ysnAvailable, 1) = 1 
+--WHERE  strMenuName NOT IN  (CASE  (SELECT TOP 1 ysnLegacyIntegration FROM tblSMCompanyPreference) WHEN 0 THEN ('Import GL from Subledger') ELSE ('')  END)

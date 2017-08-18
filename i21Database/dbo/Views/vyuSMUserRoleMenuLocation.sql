@@ -20,4 +20,5 @@ SELECT SubRolePermimssion.intCompanyLocationId
 FROM tblSMUserRoleMenu RoleMenu
 LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
 INNER JOIN vyuSMUserLocationSubRolePermission SubRolePermimssion ON SubRolePermimssion.intUserRoleId = RoleMenu.intUserRoleId
+WHERE ISNULL(ysnAvailable, 1) = 1
 GROUP BY SubRolePermimssion.intCompanyLocationId, SubRolePermimssion.intEntityUserSecurityId, RoleMenu.intMenuId, Menu.intParentMenuID, strMenuName, strModuleName, strDescription, Menu.strCategory, strType, strCommand, strIcon, ysnExpanded, ysnIsLegacy, ysnLeaf, intRow

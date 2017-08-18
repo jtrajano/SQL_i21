@@ -19,4 +19,5 @@ SELECT ISNULL(intUserRoleID, RoleMenu.intUserRoleId)  as intUserRoleId
 FROM vyuSMUserRoleSubRole SubRole
 RIGHT JOIN tblSMUserRoleMenu RoleMenu ON SubRole.intSubRoleId = RoleMenu.intUserRoleId
 INNER JOIN tblSMMasterMenu Menu ON RoleMenu.intMenuId = Menu.intMenuID
+WHERE ISNULL(ysnAvailable, 1) = 1
 GROUP BY ISNULL(intUserRoleID, RoleMenu.intUserRoleId), RoleMenu.intMenuId, Menu.intParentMenuID, strMenuName, strModuleName, Menu.strDescription, Menu.strCategory, strType, strCommand, strIcon, ysnExpanded, ysnIsLegacy, ysnLeaf, intRow
