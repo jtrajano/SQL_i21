@@ -173,6 +173,7 @@
 --PR
 :r .\21_PR\1_1620_to_1630.sql
 :r .\21_PR\2_1630_to_1640.sql
+:r .\21_PR\3_1640_to_1710.sql
 
 --PAT
 :r .\22_PAT\1_StaticTable.sql

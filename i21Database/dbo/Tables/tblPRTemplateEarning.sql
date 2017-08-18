@@ -15,7 +15,8 @@
 	[ysnDefault] [bit] NOT NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPRTemplateEarning] PRIMARY KEY ([intTemplateEarningId]), 
+    CONSTRAINT [PK_tblPRTemplateEarning] PRIMARY KEY ([intTemplateEarningId]),
+	CONSTRAINT [FK_tblPRTemplateEarning_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [tblPRTemplate]([intTemplateId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPRTemplateEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [tblPRTypeEarning]([intTypeEarningId]),
 ) ON [PRIMARY]
 GO
