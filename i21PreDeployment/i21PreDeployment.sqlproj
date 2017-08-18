@@ -158,6 +158,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Update_Item_Commodity_Origin_Keys.sql" />
     <None Include="Scripts\Pre-Deployment\22_PAT\4_DefaultBillId.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\CleanInvalidWeightVolumeGrossUOM.sql" />
+    <None Include="Scripts\Pre-Deployment\21_PR\3_1640_to_1710.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

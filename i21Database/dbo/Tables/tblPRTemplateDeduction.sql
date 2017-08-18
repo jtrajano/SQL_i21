@@ -15,6 +15,7 @@
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)),
     CONSTRAINT [PK_tblPRTemplateDeduction] PRIMARY KEY ([intTemplateDeductionId]), 
+	CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [tblPRTemplate]([intTemplateId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [tblPRTypeDeduction]([intTypeDeductionId]),
 ) ON [PRIMARY]
 GO
