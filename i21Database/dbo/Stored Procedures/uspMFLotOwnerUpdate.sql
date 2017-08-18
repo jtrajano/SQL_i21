@@ -25,6 +25,8 @@ BEGIN TRY
 		,@strOldParentLotNumber NVARCHAR(50)
 		,@strOldVendorRefNo NVARCHAR(50)
 		,@strOldWarehouseRefNo NVARCHAR(50)
+		,@intOldLotItemOwnerId INT
+		,@strReceiptNumber NVARCHAR(50)
 
 	SELECT @strLotNumber = strLotNumber
 		,@intItemId = intItemId
@@ -38,7 +40,12 @@ BEGIN TRY
 	WHERE intLotId = @intLotId
 
 	SELECT @intOldItemOwnerId = intItemOwnerId
+		,@strReceiptNumber = strReceiptNumber
 	FROM tblMFLotInventory
+	WHERE intLotId = @intLotId
+
+	SELECT @intOldLotItemOwnerId = intItemOwnerId
+	FROM tblICLot
 	WHERE intLotId = @intLotId
 
 	SELECT @intOwnerId = intOwnerId
@@ -184,6 +191,25 @@ BEGIN TRY
 		END
 	END
 
+	IF @intNewItemOwnerId <> ISNULL(@intOldLotItemOwnerId, 0)
+	BEGIN
+		SELECT @intSourceId = 1
+			,@intSourceTransactionTypeId = 8
+
+		EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
+			,@dtmDate = @dtmDate
+			,@intLocationId = @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			,@intNewOwnerId = @intOwnerId
+			,@intSourceId = @intSourceId
+			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+			,@intEntityUserSecurityId = @intUserId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+			,@strDescription = NULL
+	END
+
 	-- Parent Lot No. Update
 	SELECT @strOldParentLotNumber = PL.strParentLotNumber
 	FROM tblICLot L
@@ -214,16 +240,34 @@ BEGIN TRY
 
 	IF ISNULL(@strOldVendorRefNo, '') <> ISNULL(@strVendorRefNo, '')
 	BEGIN
-		UPDATE tblMFLotInventory
-		SET strVendorRefNo = @strVendorRefNo
-		WHERE intLotId = @intLotId
+		IF ISNULL(@strReceiptNumber, '') = ''
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET strVendorRefNo = @strVendorRefNo
+			WHERE intLotId = @intLotId
+		END
+		ELSE
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET strVendorRefNo = @strVendorRefNo
+			WHERE strReceiptNumber = @strReceiptNumber
+		END
 	END
 
 	IF ISNULL(@strOldWarehouseRefNo, '') <> ISNULL(@strWarehouseRefNo, '')
 	BEGIN
-		UPDATE tblMFLotInventory
-		SET strWarehouseRefNo = @strWarehouseRefNo
-		WHERE intLotId = @intLotId
+		IF ISNULL(@strReceiptNumber, '') = ''
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET strWarehouseRefNo = @strWarehouseRefNo
+			WHERE intLotId = @intLotId
+		END
+		ELSE
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET strWarehouseRefNo = @strWarehouseRefNo
+			WHERE strReceiptNumber = @strReceiptNumber
+		END
 	END
 END TRY
 
