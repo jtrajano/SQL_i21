@@ -5601,6 +5601,7 @@
     <Build Include="dbo\Views\vyuCRMOpportunitySalesrepFromLob.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateTicketManagementMenus.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdatePayrollMenus.sql" />
+    <Build Include="dbo\Views\vyuRKPositionByPeriodContDetView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
