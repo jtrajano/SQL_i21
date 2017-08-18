@@ -5618,6 +5618,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailLotData.sql" />
     <Build Include="dbo\Tables\tblTMLostCustomerReason.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateHandheldUserMenuMap.sql" />
+    <Build Include="dbo\Views\vyuRKPositionByPeriodContDetView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
