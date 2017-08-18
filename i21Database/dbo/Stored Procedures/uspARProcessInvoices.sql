@@ -1035,7 +1035,8 @@ BEGIN TRY
 		ISNULL(EFP.[ysnForUpdate],0) = 1
 		AND ISNULL(EFP.[ysnProcessed],0) = 0
 		AND ISNULL(EFP.[intInvoiceId],0) <> 0
-		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 0
+		AND (IE.[ysnPost] IS NOT NULL AND IE.[ysnPost] = 0)
+		AND ISNULL(IE.[ysnRecap],0) = 0
 		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
 
 	SELECT
@@ -1045,6 +1046,7 @@ BEGIN TRY
 	
 		
 	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
+	BEGIN
 		EXEC [dbo].[uspARPostInvoice]
 			@batchId			= NULL,
 			@post				= 0,
@@ -1063,6 +1065,10 @@ BEGIN TRY
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
 			@raiseError			= @RaiseError
+
+		DELETE FROM #EntriesForProcessing WHERE EXISTS(SELECT NULL FROM @TempInvoiceIdTable T WHERE T.intInvoiceId = #EntriesForProcessing.intInvoiceId)
+	END
+		
 
 END TRY
 BEGIN CATCH
