@@ -5617,6 +5617,7 @@
     <Build Include="dbo\Views\vyuCRMOpportunitySalesrepFromLob.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailLotData.sql" />
     <Build Include="dbo\Tables\tblTMLostCustomerReason.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateHandheldUserMenuMap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
