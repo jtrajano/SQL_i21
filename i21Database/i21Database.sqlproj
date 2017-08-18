@@ -5623,6 +5623,8 @@
     <Build Include="dbo\Tables\tblTMLostCustomerReason.sql" />
     <Build Include="dbo\Views\vyuPATCustomerVolumeLog.sql" />
     <Build Include="dbo\Views\vyuPATCustomerVolumeLogDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdateTicketManagementMenus.sql" />
+    <Build Include="Scripts\Post-Deployment\SM\1730_UpdatePayrollMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
