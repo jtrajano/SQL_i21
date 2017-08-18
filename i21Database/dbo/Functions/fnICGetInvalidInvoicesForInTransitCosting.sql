@@ -38,8 +38,8 @@ BEGIN
 				vi.intItemId
 				, vi.intItemLocationId
 				, vi.intItemUOMId
-				, vi.intSubLocationId
-				, vi.intStorageLocationId
+				-- , vi.intSubLocationId
+				-- , vi.intStorageLocationId
 				, vi.dblQty
 				, vi.intLotId
 			) Errors

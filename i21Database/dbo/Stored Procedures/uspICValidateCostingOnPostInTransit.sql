@@ -49,12 +49,20 @@ CREATE TABLE #FoundErrors (
 INSERT INTO #FoundErrors
 SELECT	Errors.intItemId
 		,Errors.intItemLocationId
-		,Item.intSubLocationId
-		,Item.intStorageLocationId
+		,intSubLocationId = NULL --Item.intSubLocationId
+		,intStorageLocationId = NULL -- Item.intStorageLocationId
 		,Errors.strText
 		,Errors.intErrorCode
 		,Item.intTransactionTypeId
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.intSubLocationId, Item.intStorageLocationId, Item.dblQty, Item.intLotId) Errors
+FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors(
+			Item.intItemId
+			, Item.intItemLocationId
+			, Item.intItemUOMId
+			--, Item.intSubLocationId
+			--, Item.intStorageLocationId
+			, Item.dblQty
+			, Item.intLotId
+		) Errors
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
