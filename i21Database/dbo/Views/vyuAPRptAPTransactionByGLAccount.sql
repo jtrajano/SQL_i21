@@ -24,7 +24,7 @@ AS
 	,APB.dblInterest AS dblInterest
 	,APB.dblWithheld AS dblWithheld
 	,APB.dblDiscount AS dblDiscount
-	,APB.dblTotal
+	,APB.dblTotal * ISNULL(APD.dblRate,0) AS dblTotal
 	,(CASE WHEN APB.intTransactionType = 1 THEN 'Voucher'
 								WHEN APB.intTransactionType = 2 THEN 'Vendor Prepayment'
 								WHEN APB.intTransactionType = 3 THEN 'Debit Memo'
@@ -64,4 +64,4 @@ AS
 	WHERE 
 			APB.ysnForApproval != 1														   --Will not show For Approval Bills
 		AND APB.ysnPosted = 1 OR (APB.dtmApprovalDate IS NOT NULL AND APB.ysnApproved = 1) --Will not show Rejected approval bills but show old Posted Transactions.
-		AND APB.intTransactionType != 6													   --Will not show BillTemplate 
+		AND APB.intTransactionType != 6													   --Will not show BillTemplate
