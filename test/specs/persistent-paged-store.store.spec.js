@@ -1,6 +1,6 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.PersistentPagedStore',
-    storeId: 'PersistentStorage',
+    storeId: 'PersistentPagedStore',
     base: 'Ext.data.Store',
     dependencies: [],
     config: {}
