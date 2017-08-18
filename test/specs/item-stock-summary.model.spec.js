@@ -111,6 +111,14 @@ UnitTestEngine.testModel({
         "name": "dblTotalCost",
         "type": "float",
         "allowNull": false
+    }, {
+        "name": "dblSystemCount",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblPhysicalCount",
+        "type": "float",
+        "allowNull": false
     }],
     validators: [
         []

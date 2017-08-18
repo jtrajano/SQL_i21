@@ -30,7 +30,7 @@ UnitTestEngine.testModel({
     }, {
         "name": "strDescription",
         "type": "string",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "intFromLocationId",
         "type": "int",

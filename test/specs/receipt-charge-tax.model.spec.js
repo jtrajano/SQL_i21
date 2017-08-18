@@ -52,6 +52,10 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "ysnTaxOnly",
+        "type": "boolean",
+        "allowNull": false
+    }, {
         "name": "ysnCheckoffTax",
         "type": "boolean",
         "allowNull": false

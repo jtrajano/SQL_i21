@@ -123,6 +123,14 @@ UnitTestEngine.testModel({
         "name": "ysnBasisContract",
         "type": "boolean",
         "allowNull": false
+    }, {
+        "name": "ysnUseWeighScales",
+        "type": "boolean",
+        "allowNull": false
+    }, {
+        "name": "ysnIsBasket",
+        "type": "boolean",
+        "allowNull": false
     }],
     validators: [
         []

@@ -2,9 +2,9 @@ UnitTestEngine.testStore({
     name: 'Inventory.store.BufferedGradeAttribute',
     alias: "store.icbufferedgradeattribute",
     base: 'Ext.data.BufferedStore',
-    dependencies: ["Inventory.model.CommodityGrade"],
+    dependencies: ["Inventory.model.CommodityGradeView"],
     config: {
-        "model": "Inventory.model.CommodityGrade",
+        "model": "Inventory.model.CommodityGradeView",
         "storeId": "BufferedGradeAttribute",
         "pageSize": 50,
         "remoteFilter": true,

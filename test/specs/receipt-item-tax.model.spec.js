@@ -56,6 +56,10 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "ysnTaxOnly",
+        "type": "boolean",
+        "allowNull": false
+    }, {
         "name": "ysnSeparateOnInvoice",
         "type": "boolean",
         "allowNull": false

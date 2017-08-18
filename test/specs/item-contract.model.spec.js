@@ -63,6 +63,10 @@ UnitTestEngine.testModel({
         "name": "strContractItemNo",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "strStatus",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

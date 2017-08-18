@@ -1,12 +1,12 @@
 UnitTestEngine.testStore({
-    name: 'Inventory.store.ItemStockSummaryByLot',
-    alias: "store.icitemstocksummarybylot",
-    base: 'Ext.data.Store',
+    name: 'Inventory.store.BufferedItemStockSummaryByLot',
+    alias: "store.icbuffereditemstocksummary",
+    base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ItemStockSummary"],
     config: {
         "model": "Inventory.model.ItemStockSummary",
-        "storeId": "ItemStockSummaryByLot",
-        "pageSize": 1000000,
+        "storeId": "BufferedItemStockSummary",
+        "pageSize": 50,
         "remoteFilter": true,
         "remoteSort": true,
         "proxy": {

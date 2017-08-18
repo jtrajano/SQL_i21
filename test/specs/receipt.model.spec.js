@@ -46,7 +46,7 @@ UnitTestEngine.testModel({
     }, {
         "name": "intBlanketRelease",
         "type": "int",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "strVendorRefNo",
         "type": "string",
@@ -54,7 +54,7 @@ UnitTestEngine.testModel({
     }, {
         "name": "strBillOfLading",
         "type": "string",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "intShipViaId",
         "type": "int",
@@ -70,7 +70,7 @@ UnitTestEngine.testModel({
     }, {
         "name": "strVessel",
         "type": "string",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "intFreightTermId",
         "type": "int",
@@ -78,23 +78,7 @@ UnitTestEngine.testModel({
     }, {
         "name": "intShiftNumber",
         "type": "int",
-        "allowNull": false
-    }, {
-        "name": "strCalculationBasis",
-        "type": "string",
-        "allowNull": false
-    }, {
-        "name": "dblUnitWeightMile",
-        "type": "float",
-        "allowNull": false
-    }, {
-        "name": "dblFreightRate",
-        "type": "float",
-        "allowNull": false
-    }, {
-        "name": "dblFuelSurcharge",
-        "type": "float",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "dblInvoiceAmount",
         "type": "float",
@@ -130,11 +114,11 @@ UnitTestEngine.testModel({
     }, {
         "name": "strSealNo",
         "type": "string",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "strSealStatus",
         "type": "string",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "dtmReceiveTime",
         "type": "date",
@@ -142,7 +126,7 @@ UnitTestEngine.testModel({
     }, {
         "name": "dblActualTempReading",
         "type": "float",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "intShipmentId",
         "type": "int",
@@ -164,13 +148,9 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
-        "name": "dblClaimableWt",
-        "type": "float",
-        "allowNull": false
-    }, {
         "name": "strWarehouseRefNo",
         "type": "string",
-        "allowNull": false
+        "allowNull": true
     }, {
         "name": "dtmLastFreeWhseDate",
         "type": "date",
