@@ -49,6 +49,8 @@ SELECT
 	,strSiteDescription = ISNULL(A.strDescription,'')
 	,dtmLastDelivery = A.dtmLastDeliveryDate
 	,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
+	,A.intFillGroupId
+	,N.strFillGroupCode
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
@@ -72,6 +74,8 @@ LEFT JOIN tblTMDispatch G
 	ON A.intSiteID = G.intSiteID
 LEFT JOIN tblICCategory H
 	ON D.intCategoryId = H.intCategoryId	
+LEFT JOIN tblTMFillGroup N
+	ON A.intFillGroupId = N.intFillGroupId
 INNER JOIN (
 	SELECT 
 		Ent.intEntityId

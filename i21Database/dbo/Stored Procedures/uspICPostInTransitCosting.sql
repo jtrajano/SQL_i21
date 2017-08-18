@@ -79,14 +79,14 @@ DECLARE @AUTO_VARIANCE AS INT = 1
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
---BEGIN 
---	DECLARE @returnValue AS INT 
+BEGIN 
+	DECLARE @returnValue AS INT 
 
---	EXEC @returnValue = dbo.uspICValidateCostingOnPost
---		@ItemsToValidate = @ItemsToPost
+	EXEC @returnValue = dbo.uspICValidateCostingOnPostInTransit
+		@ItemsToValidate = @ItemsToPost
 
---	IF @returnValue < 0 RETURN -1;
---END
+	IF @returnValue < 0 RETURN -1;
+END
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor

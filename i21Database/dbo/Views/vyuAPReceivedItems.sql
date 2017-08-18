@@ -351,7 +351,7 @@ FROM
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(50))
 	,[intShipmentId]			=	0
-	,[intLoadDetailId]	=	NULL
+	,[intLoadDetailId]			=	NULL
   	,[intUnitMeasureId]			=	B.intUnitMeasureId
 	,[strUOM]					=	UOM.strUnitMeasure
 	,[intWeightUOMId]			=	B.intWeightUOMId
@@ -443,7 +443,7 @@ FROM
 	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
 	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
-	AND B.intOwnershipType != 1
+	AND B.intOwnershipType != 2
 	UNION ALL
 
 	--RECEIPT OTHER CHARGES
@@ -768,7 +768,7 @@ FROM
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0
 	UNION ALL
-		SELECT
+	SELECT
 		[intEntityVendorId]							=	A.intVendorEntityId
 		,[dtmDate]									=	A.dtmPostedDate
 		,[strReference]								=	''
@@ -795,7 +795,7 @@ FROM
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	A.ysnSubCurrency
-		,[intSubCurrencyCents]						=	A.intSubCurrencyCents
+		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))

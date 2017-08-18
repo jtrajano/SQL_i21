@@ -79,6 +79,8 @@ BEGIN
 				,strSiteDescription = ISNULL(A.strDescription,'''')
 				,dtmLastDelivery = A.dtmLastDeliveryDate
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
+				,A.intFillGroupId
+				,O.strFillGroupCode
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -88,6 +90,8 @@ BEGIN
 				ON A.intRouteId = D.intRouteId	
 			LEFT JOIN vwslsmst E
 				ON A.intDriverID = E.A4GLIdentity	
+			LEFT JOIN tblTMFillGroup O
+				ON A.intFillGroupId = O.intFillGroupId
 			LEFT JOIN (SELECT DISTINCT 
 					vwitm_no
 					,vwitm_deflt_percnt
@@ -171,6 +175,8 @@ BEGIN
 				,strSiteDescription = ISNULL(A.strDescription,'''')
 				,dtmLastDelivery = A.dtmLastDeliveryDate
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
+				,A.intFillGroupId
+				,N.strFillGroupCode
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -194,6 +200,8 @@ BEGIN
 				ON A.intSiteID = G.intSiteID
 			LEFT JOIN tblICCategory H
 				ON D.intCategoryId = H.intCategoryId	
+			LEFT JOIN tblTMFillGroup N
+				ON A.intFillGroupId = N.intFillGroupId
 			INNER JOIN (
 				SELECT 
 					Ent.intEntityId

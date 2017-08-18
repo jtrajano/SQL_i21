@@ -84,6 +84,7 @@ BEGIN
 		NULL AS strTicketNumber,
 		NULL AS strShipmentNumber,
 		NULL AS strContractNumber,
+		NULL AS strLoadNumber,
 		NULL AS strClass,
 		0 AS intAccountId,
 		0 AS dblTotal,
@@ -270,11 +271,12 @@ END
 	END  
 	
 	--THIS FILTER WILL GET THE CONNECTED BILL ID FROM SOURCE MODULE
-	IF (@fieldname = 'strReceiptNumber' OR @fieldname = 'strTicketNumber' OR @fieldname = 'strShipmentNumber' OR @fieldname = 'strContractNumber')
+	IF (@fieldname = 'strReceiptNumber' OR @fieldname = 'strTicketNumber' OR @fieldname = 'strShipmentNumber' OR @fieldname = 'strContractNumber' OR @fieldname = 'strLoadNumber')
 	BEGIN 
 		SET @strBillId = (SELECT TOP 1 strBillId FROM vyuAPOpenPayableDetailsFields WHERE (CASE WHEN @fieldname = 'strReceiptNumber' THEN  strReceiptNumber 
 																							    WHEN @fieldname = 'strTicketNumber' THEN  strTicketNumber 
 																								WHEN @fieldname = 'strShipmentNumber' THEN  strShipmentNumber 
+																								WHEN @fieldname = 'strLoadNumber' THEN  strLoadNumber 
 																							ELSE strContractNumber END) = @from)
 		SET @fieldname = 'strBillId'
 		SET @from = @strBillId
