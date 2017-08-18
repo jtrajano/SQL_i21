@@ -134,7 +134,7 @@ INSERT INTO @temp_aging_table
 EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, NULL, NULL, NULL
  
 SELECT DISTINCT
-	strReportDateRange			= 'From ' + @strAsOfDateFrom + ' To ' + @strAsOfDateTo
+		strReportDateRange		= 'From ' + @strAsOfDateFrom + ' To ' + @strAsOfDateTo
 		, dtmLastPaymentDate	= ARCIR.dtmLastPaymentDate
 		, intEntityCustomerId	= I.intEntityCustomerId
 		, strCustomerNumber		=	C.strCustomerNumber
@@ -147,13 +147,14 @@ SELECT DISTINCT
 		, intInvoiceId			= I.intInvoiceId	 
 		, strInvoiceNumber		= I.strInvoiceNumber
 		, strTransactionType	= I.strTransactionType
+		, strType				= I.strType
 		, dtmInvoiceDate		= I.dtmDate
 		, dtmPostDate			= I.dtmPostDate
 		, dtmDatePaid			= PAYMENTS.dtmDatePaid	 
 		, dblPayments			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
-		, dblInvoices			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+		, dblInvoices			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
 		, dblDiscount			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblDiscount, 0) * -1 ELSE ISNULL(I.dblDiscount, 0) END
-		, dblInterest			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInterest, 0) * -1 ELSE ISNULL(I.dblInterest, 0) END
+		, dblInterest			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInterest, 0) * -1 ELSE ISNULL(I.dblInterest, 0) END		
 		, strPaymentMethod		= PM.strPaymentMethod	 
 		, intItemId				= ID.intItemId
 		, strItemDescription	= ID.strItemDescription
@@ -333,9 +334,7 @@ LEFT JOIN (SELECT
 				intEntityCustomerId, 
 				dtmLastPaymentDate 
 			FROM 
-				vyuARCustomerInquiryReport 
-			WHERE 
-				strCustomerName IN (SELECT strName FROM @SelectedCustomer)) ARCIR ON ARCIR.intEntityCustomerId = I.intEntityCustomerId  
+				vyuARCustomerInquiryReport) ARCIR ON ARCIR.intEntityCustomerId = I.intEntityCustomerId  
 WHERE I.ysnPosted = 1
 	AND I.intAccountId IN (SELECT 
 								intAccountId 
@@ -348,10 +347,9 @@ AND
 	AND (@strInvoiceNumber IS NULL OR I.strInvoiceNumber LIKE '%'+@strInvoiceNumber+'%')
 	AND (@strRecordNumber IS NULL OR PAYMENTS.strRecordNumber LIKE '%'+@strRecordNumber+'%')
 	AND (@strPaymentMethod IS NULL OR PM.strPaymentMethod LIKE '%'+@strPaymentMethod+'%')
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), PAYMENTS.dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-		
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), PAYMENTS.dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo		
 ORDER BY 
-	intEntityCustomerId, strRecordNumber, intInvoiceId, intItemId
+	intEntityCustomerId, dtmDatePaid DESC, intInvoiceId, strTransactionType, strType, intItemId
  
 
 
