@@ -351,7 +351,7 @@ FROM
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(50))
 	,[intShipmentId]			=	0
-	,[intLoadDetailId]	=	NULL
+	,[intLoadDetailId]			=	NULL
   	,[intUnitMeasureId]			=	B.intUnitMeasureId
 	,[strUOM]					=	UOM.strUnitMeasure
 	,[intWeightUOMId]			=	B.intWeightUOMId
