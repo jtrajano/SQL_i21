@@ -11,8 +11,8 @@ CREATE FUNCTION fnGetItemCostingOnPostInTransitErrors (
 	@intItemId AS INT
 	, @intItemLocationId AS INT
 	, @intItemUOMId AS INT
-	, @intSubLocationId AS INT
-	, @intStorageLocationId AS INT
+	-- , @intSubLocationId AS INT
+	-- , @intStorageLocationId AS INT
 	, @dblQty AS NUMERIC(38,20) = 0
 	, @intLotId AS INT
 )
