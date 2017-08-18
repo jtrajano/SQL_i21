@@ -31,8 +31,8 @@ BEGIN TRY
 		UPDATE CS
 		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnits
 		FROM tblGRCustomerStorage CS
-		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType
-		
+		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
+
 		INSERT INTO [dbo].[tblGRStorageHistory] 
 		(
 			 [intConcurrencyId]
@@ -57,7 +57,7 @@ BEGIN TRY
 			,[dblPaidAmount] = NULL 
 			,[strType] = 'Reverse By Inventory Shipment'
 			,[strUserName] = @strUserName
-		FROM tblGRStorageHistory WHERE intInventoryShipmentId=@IntSourceKey AND strType=@strType
+		FROM tblGRStorageHistory WHERE intInventoryShipmentId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 
 		(
@@ -92,8 +92,10 @@ BEGIN TRY
 			,[intTransactionTypeId] = @intTransactionTypeId
 			,[intSubLocationId] = CS.intCompanyLocationSubLocationId
 			FROM tblGRCustomerStorage CS
-			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType
+			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
 			JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
+
+		UPDATE tblGRStorageHistory SET intInventoryReceiptId = 0 WHERE intInventoryShipmentId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 	END
 	ELSE IF  @strType='Reduced By Scale'
@@ -101,7 +103,7 @@ BEGIN TRY
 		UPDATE CS
 		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnits
 		FROM tblGRCustomerStorage CS
-		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intTicketId=@IntSourceKey AND SH.strType=@strType
+		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intTicketId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL 
 
 		INSERT INTO [dbo].[tblGRStorageHistory] 
 		(
@@ -127,7 +129,7 @@ BEGIN TRY
 			,[dblPaidAmount] = NULL 
 			,[strType] = 'Reverse By Scale'
 			,[strUserName] = @strUserName
-		FROM tblGRStorageHistory WHERE intTicketId=@IntSourceKey AND strType=@strType
+		FROM tblGRStorageHistory WHERE intTicketId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 
 		(
@@ -162,15 +164,18 @@ BEGIN TRY
 			,[intTransactionTypeId] = @intTransactionTypeId
 			,[intSubLocationId] = CS.intCompanyLocationSubLocationId
 			FROM tblGRCustomerStorage CS
-			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType
+			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
 			JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
+		
+		UPDATE tblGRStorageHistory SET intInventoryReceiptId=0 WHERE intTicketId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
+
 	END
 	ELSE IF  @strType='Reduced By Invoice'
 	BEGIN
 		UPDATE CS
 		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnits
 		FROM tblGRCustomerStorage CS
-		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInvoiceId=@IntSourceKey AND SH.strType=@strType
+		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInvoiceId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
 
 		INSERT INTO [dbo].[tblGRStorageHistory] 
 		(
@@ -196,7 +201,7 @@ BEGIN TRY
 			,[dblPaidAmount] = NULL 
 			,[strType] = 'Reverse By Invoice'
 			,[strUserName] = @strUserName
-		FROM tblGRStorageHistory WHERE intInvoiceId=@IntSourceKey AND strType=@strType
+		FROM tblGRStorageHistory WHERE intInvoiceId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 
 		(
@@ -231,8 +236,11 @@ BEGIN TRY
 			,[intTransactionTypeId] = @intTransactionTypeId
 			,[intSubLocationId] = CS.intCompanyLocationSubLocationId
 			FROM tblGRCustomerStorage CS
-			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType
+			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
 			JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
+
+		UPDATE tblGRStorageHistory SET intInventoryReceiptId=0 WHERE intInvoiceId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
+
 	END
 
 	EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
