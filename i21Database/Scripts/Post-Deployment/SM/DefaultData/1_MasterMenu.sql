@@ -4242,9 +4242,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Email' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Email', N'CRM', @CRMCreateParentMenuId, N'CRM New Email', N'Create', N'Screen', N'GlobalComponentEngine.view.Activity?type=email&action=new', N'small-menu-create', 0, 0, 0, 1, 3, 1)
+	VALUES (N'New Email', N'CRM', @CRMCreateParentMenuId, N'CRM New Email', N'Create', N'Screen', N'GlobalComponentEngine.view.ActivityEmail?type=email&action=new', N'small-menu-create', 0, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'GlobalComponentEngine.view.Activity?type=email&action=new' WHERE strMenuName = 'New Email' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'GlobalComponentEngine.view.ActivityEmail?type=email&action=new' WHERE strMenuName = 'New Email' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Opportunity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
