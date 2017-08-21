@@ -34,7 +34,6 @@ BEGIN TRY
 	DECLARE @intUserSampleApproval INT
 	DECLARE @intApproveRejectUserId INT
 	DECLARE @intSampleItemId INT
-	DECLARE @ysnRequireCustomerApproval BIT
 	DECLARE @intSampleControlPointId INT
 	DECLARE @intSeqNo INT
 	DECLARE @strMainLotNumber NVARCHAR(50)
@@ -85,10 +84,6 @@ BEGIN TRY
 			SET @strApprovalBase = 'Lot'
 	END
 
-	SELECT @ysnRequireCustomerApproval = ISNULL(ysnRequireCustomerApproval, 0)
-	FROM tblICItem
-	WHERE intItemId = @intSampleItemId
-
 	SELECT @strLotNumber = strLotNumber
 	FROM tblICLot
 	WHERE intLotId = @intProductValueId
@@ -98,8 +93,7 @@ BEGIN TRY
 	JOIN dbo.tblMFLotInventory LI on LI.intLotId=L.intLotId
 	WHERE L.strLotNumber = @strLotNumber
 
-	IF @ysnRequireCustomerApproval = 1
-		AND @intProductTypeId = 6
+	IF @intProductTypeId = 6
 		AND @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Lot'
 	BEGIN
@@ -107,8 +101,7 @@ BEGIN TRY
 		SET intBondStatusId = @intLotStatusId
 		WHERE intLotId = @intProductValueId
 	END
-	ELSE IF @ysnRequireCustomerApproval = 1
-		AND @intProductTypeId = 11
+	ELSE IF @intProductTypeId = 11
 		AND @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Parent Lot'
 	BEGIN
@@ -120,8 +113,7 @@ BEGIN TRY
 			AND PL.intParentLotId = @intProductValueId
 		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
 	END
-	ELSE IF @ysnRequireCustomerApproval = 1
-		AND @intSampleControlPointId = 14
+	ELSE IF @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Container'
 	BEGIN
 		IF @strContainerNumber <> ''
@@ -140,8 +132,7 @@ BEGIN TRY
 			WHERE intLotId = @intProductValueId
 		END
 	END
-	ELSE IF @ysnRequireCustomerApproval = 1
-		AND @intSampleControlPointId = 14
+	ELSE IF @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Warehouse Ref No'
 	BEGIN
 		IF @strWarehouseRefNo <> ''
@@ -159,8 +150,7 @@ BEGIN TRY
 			WHERE intLotId = @intProductValueId
 		END
 	END
-	ELSE IF @ysnRequireCustomerApproval = 1
-		AND @intSampleControlPointId = 14
+	ELSE IF @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Warehouse Ref No & Parent Lot'
 	BEGIN
 		IF @strWarehouseRefNo <> ''
