@@ -85,7 +85,19 @@ FROM (
 		,CH.intWeightId
 		,WG.strWeightGradeDesc
 		,dblShippedNetWt = (
-			LD.dblNet - ISNULL((
+			CASE 
+				WHEN (
+						SELECT COUNT(*)
+						FROM tblLGLoadDetailContainerLink
+						WHERE intLoadDetailId = LD.intLoadDetailId
+						) > 0
+					THEN (
+							SELECT SUM(dblLinkNetWt)
+							FROM tblLGLoadDetailContainerLink
+							WHERE intLoadDetailId = LD.intLoadDetailId
+							)
+				ELSE LD.dblNet
+				END - ISNULL((
 					SELECT SUM(IRI.dblNet)
 					FROM tblICInventoryReceipt IR
 					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
@@ -117,8 +129,36 @@ FROM (
 		,dblFranchiseWt = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN CASE 
-						WHEN (LD.dblNet * dblFranchise / 100) > 0.0
-							THEN (LD.dblNet * dblFranchise / 100)
+						WHEN (
+								CASE 
+									WHEN (
+											SELECT COUNT(*)
+											FROM tblLGLoadDetailContainerLink
+											WHERE intLoadDetailId = LD.intLoadDetailId
+											) > 0
+										THEN (
+												SELECT SUM(dblLinkNetWt)
+												FROM tblLGLoadDetailContainerLink
+												WHERE intLoadDetailId = LD.intLoadDetailId
+												)
+									ELSE LD.dblNet
+									END * dblFranchise / 100
+								) > 0.0
+							THEN (
+									CASE 
+										WHEN (
+												SELECT COUNT(*)
+												FROM tblLGLoadDetailContainerLink
+												WHERE intLoadDetailId = LD.intLoadDetailId
+												) > 0
+											THEN (
+													SELECT SUM(dblLinkNetWt)
+													FROM tblLGLoadDetailContainerLink
+													WHERE intLoadDetailId = LD.intLoadDetailId
+													)
+										ELSE LD.dblNet
+										END * dblFranchise / 100
+									)
 						ELSE 0.0
 						END
 			ELSE 0.0
@@ -126,18 +166,106 @@ FROM (
 		,dblWeightLoss = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN CASE 
-						WHEN (RI.dblNet - LD.dblNet) < 0.0
-							THEN (RI.dblNet - LD.dblNet)
-						ELSE (RI.dblNet - LD.dblNet)
+						WHEN (
+								RI.dblNet - CASE 
+									WHEN (
+											SELECT COUNT(*)
+											FROM tblLGLoadDetailContainerLink
+											WHERE intLoadDetailId = LD.intLoadDetailId
+											) > 0
+										THEN (
+												SELECT SUM(dblLinkNetWt)
+												FROM tblLGLoadDetailContainerLink
+												WHERE intLoadDetailId = LD.intLoadDetailId
+												)
+									ELSE LD.dblNet
+									END
+								) < 0.0
+							THEN (
+									RI.dblNet - CASE 
+										WHEN (
+												SELECT COUNT(*)
+												FROM tblLGLoadDetailContainerLink
+												WHERE intLoadDetailId = LD.intLoadDetailId
+												) > 0
+											THEN (
+													SELECT SUM(dblLinkNetWt)
+													FROM tblLGLoadDetailContainerLink
+													WHERE intLoadDetailId = LD.intLoadDetailId
+													)
+										ELSE LD.dblNet
+										END
+									)
+						ELSE (
+								RI.dblNet - CASE 
+									WHEN (
+											SELECT COUNT(*)
+											FROM tblLGLoadDetailContainerLink
+											WHERE intLoadDetailId = LD.intLoadDetailId
+											) > 0
+										THEN (
+												SELECT SUM(dblLinkNetWt)
+												FROM tblLGLoadDetailContainerLink
+												WHERE intLoadDetailId = LD.intLoadDetailId
+												)
+									ELSE LD.dblNet
+									END
+								)
 						END
 			ELSE 0.0
 			END
 		,dblClaimableWt = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN CASE 
-						WHEN ((RI.dblNet - LD.dblNet) + (LD.dblNet * dblFranchise / 100)) < 0.0
-							THEN ((RI.dblNet - LD.dblNet) + (LD.dblNet * dblFranchise / 100))
-						ELSE (RI.dblNet - LD.dblNet)
+						WHEN (
+								(
+									RI.dblNet - CASE 
+										WHEN (
+												SELECT COUNT(*)
+												FROM tblLGLoadDetailContainerLink
+												WHERE intLoadDetailId = LD.intLoadDetailId
+												) > 0
+											THEN (
+													SELECT SUM(dblLinkNetWt)
+													FROM tblLGLoadDetailContainerLink
+													WHERE intLoadDetailId = LD.intLoadDetailId
+													)
+										ELSE LD.dblNet
+										END
+									) + (LD.dblNet * dblFranchise / 100)
+								) < 0.0
+							THEN (
+									(
+										RI.dblNet - CASE 
+											WHEN (
+													SELECT COUNT(*)
+													FROM tblLGLoadDetailContainerLink
+													WHERE intLoadDetailId = LD.intLoadDetailId
+													) > 0
+												THEN (
+														SELECT SUM(dblLinkNetWt)
+														FROM tblLGLoadDetailContainerLink
+														WHERE intLoadDetailId = LD.intLoadDetailId
+														)
+											ELSE LD.dblNet
+											END
+										) + (LD.dblNet * dblFranchise / 100)
+									)
+						ELSE (
+								RI.dblNet - CASE 
+									WHEN (
+											SELECT COUNT(*)
+											FROM tblLGLoadDetailContainerLink
+											WHERE intLoadDetailId = LD.intLoadDetailId
+											) > 0
+										THEN (
+												SELECT SUM(dblLinkNetWt)
+												FROM tblLGLoadDetailContainerLink
+												WHERE intLoadDetailId = LD.intLoadDetailId
+												)
+									ELSE LD.dblNet
+									END
+								)
 						END
 			ELSE 0.0
 			END
@@ -213,4 +341,4 @@ FROM (
 			END
 		AND ISNULL(WC.intWeightClaimId, 0) = 0
 		AND ISNULL(LD.ysnNoClaim, 0) = 0
-	) t1 
+	) t1
