@@ -5026,8 +5026,8 @@ ELSE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @SystemManagerParentMenuId)
 INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@SystemManagerParentMenuId)
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @SystemManagerMaintenanceParentMenuId)
-INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@SystemManagerMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @SystemManagerActivitiesParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@SystemManagerActivitiesParentMenuId)
 
 DECLARE @UserRolesMenuId INT
 SELECT  @UserRolesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'User Roles' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
