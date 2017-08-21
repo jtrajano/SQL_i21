@@ -89,29 +89,6 @@ SELECT LoadDetail.intLoadDetailId
 	, strCustomerMobile = CEN.strMobile
 	, strCustomerPhone = CEN.strPhone
 	, LoadDetail.intSContractDetailId
-	, intSContractHeaderId = SDetail.intContractHeaderId
-	, strSContractNumber = SHeader.strContractNumber
-	, intSContractSeq = SDetail.intContractSeq
-	, intSCommodityId = SHeader.intCommodityId
-	, intSLifeTime = IMS.intLifeTime
-	, strSLifeTimeType = IMS.strLifeTimeType
-	, strCustomerContract = SHeader.strCustomerContract
-	, dblSCashPrice = ADS.dblSeqPrice
-	, ysnSLoad = SHeader.ysnLoad
-	, dblSQuantityPerLoad = SDetail.dblQuantityPerLoad
-	, intSNoOfLoads = SDetail.intNoOfLoad
-	, strSCostUOM = ADS.strSeqPriceUOM
-	, intSCostUOMId = SDetail.intPriceItemUOMId
-	, dblSCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = SDetail.intPriceItemUOMId),0)
-	, intSStockUOM = ISNULL(oSStockUOM.intItemUOMId,0)
-	, strSStockUOM = oSStockUOM.strUnitMeasure
-	, strSStockUOMType = oSStockUOM.strUnitType
-	, dblSStockUOMCF = ISNULL(oSStockUOM.dblUnitQty,0)
-	, strSCurrency = CUS.strCurrency
-	, strSMainCurrency = CUS.strCurrency
-	, ysnSSubCurrency = ADS.ysnSeqSubCurrency
-	, dblSMainCashPrice = SDetail.dblCashPrice / CASE WHEN ISNULL(CUS.intCent,0) = 0 THEN 1 ELSE CUS.intCent END
-	, dblSFranchise = CASE WHEN SWG.dblFranchise > 0 THEN SWG.dblFranchise / 100 ELSE 0 END
 
 -- Outbound Company Location
 	, LoadDetail.intSCompanyLocationId
@@ -189,21 +166,13 @@ SELECT LoadDetail.intLoadDetailId
 	, strOutboundTaxGroup = CustomerTax.strTaxGroup
 	, strZipCode = VEL.strZipCode
 	, strInboundPricingType = PPricingType.strPricingType
-	, strOutboundPricingType = SPricingType.strPricingType
 	, dblInboundAdjustment = ISNULL(PDetail.dblAdjustment, 0.000000)
-	, dblOutboundAdjustment = ISNULL(SDetail.dblAdjustment, 0.000000)
 	, strInboundIndexType = PIndex.strIndexType
-	, strOutboundIndexType = SIndex.strIndexType
 	, intInboundIndexRackPriceSupplyPointId = CASE WHEN ISNULL(PIndex.strIndexType, 0) = 'Fixed'
 													THEN ISNULL(PSP.intRackPriceSupplyPointId, PSP.intSupplyPointId)
 												WHEN ISNULL(PIndex.strIndexType, 0) != 'Fixed'
 													THEN NULL
 												END
-	, intOutboundIndexRackPriceSupplyPointId  = CASE WHEN ISNULL(SIndex.strIndexType, 0) = 'Fixed'
-														THEN ISNULL(SSP.intRackPriceSupplyPointId, SSP.intSupplyPointId)
-													WHEN ISNULL(SIndex.strIndexType, 0) != 'Fixed'
-														THEN NULL
-													END
 	, LoadDetail.intNumberOfContainers
 FROM tblLGLoadDetail LoadDetail
 	JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
@@ -232,22 +201,12 @@ FROM tblLGLoadDetail LoadDetail
 	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(PDetail.intContractDetailId) AD
 	LEFT JOIN tblSMCurrency	CU ON CU.intCurrencyID = PDetail.intCurrencyId			
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId		
-	LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LoadDetail.intSContractDetailId
-	LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
-	LEFT JOIN tblCTPricingType SPricingType ON SPricingType.intPricingTypeId = SDetail.intPricingTypeId
-	LEFT JOIN tblCTIndex SIndex ON SIndex.intIndexId = SDetail.intIndexId
-	LEFT JOIN tblTRSupplyPoint SSP ON SSP.intEntityVendorId = SIndex.intVendorId AND SSP.intEntityLocationId = SIndex.intVendorLocationId
-	LEFT JOIN tblICItem	IMS ON IMS.intItemId = SDetail.intItemId
-	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(SDetail.intContractDetailId) ADS
-	LEFT JOIN tblSMCurrency	CUS ON CUS.intCurrencyID = SDetail.intCurrencyId			
-	LEFT JOIN tblSMCurrency	CYS ON CYS.intCurrencyID = CUS.intMainCurrencyId		
 	LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 	LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
 	LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
 	LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId
 	LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PHeader.intWeightId
-	LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SHeader.intWeightId
-	LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId
 	OUTER APPLY (
 		SELECT TOP 1 intItemUOMId, strUnitMeasure, strUnitType, dblUnitQty
@@ -255,9 +214,3 @@ FROM tblLGLoadDetail LoadDetail
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId
 	) oPStockUOM
-	OUTER APPLY (
-		SELECT TOP 1 intItemUOMId, strUnitMeasure, strUnitType, dblUnitQty
-		FROM tblICItemUOM ItemUOM
-			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-		WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId
-	) oSStockUOM
