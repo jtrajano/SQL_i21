@@ -53,12 +53,14 @@ SELECT
 	,L.strExternalShipmentNumber
 	,CD.strERPPONumber
 	,Shipment.strPosition
+	,Shipment.intLoadId
 FROM vyuLGInboundShipmentView Shipment
 LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
 LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 AND Shipment.ysnInventorized = 1
+AND Shipment.intLoadId NOT IN (SELECT ISNULL(intLoadId,0) FROM tblARInvoice)
 
 UNION ALL
 
@@ -97,6 +99,7 @@ SELECT
 	,L.strExternalShipmentNumber
 	,CD.strERPPONumber
 	,Spot.strPosition
+	,L.intLoadId
 FROM vyuLGPickOpenInventoryLots Spot
 LEFT JOIN tblLGLoad L ON Spot.strLoadNumber = L.strLoadNumber
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
