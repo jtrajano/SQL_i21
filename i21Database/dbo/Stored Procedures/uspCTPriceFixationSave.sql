@@ -47,20 +47,17 @@ BEGIN TRY
 			@intBasisCommodityUOMId		INT,
 			@intCurrencyId				INT,
 			@intBasisCurrencyId			INT,
-			@ysnBasisSubCurrency		INT,
-			@intFinalCurrencyId			INT,
-			@ysnFinalSubCurrency		BIT
+			@ysnBasisSubCurrency		INT
 
 	SET		@ysnMultiplePriceFixation = 0
 
 	SELECT	@dblLotsUnfixed			=	ISNULL([dblTotalLots],0) - ISNULL([dblLotsFixed],0),
 			@intContractDetailId	=	intContractDetailId,
 			@intContractHeaderId	=	intContractHeaderId,
-			@intFinalPriceUOMId		=	PC.intFinalPriceUOMId,
+			@intFinalPriceUOMId		=	intFinalPriceUOMId,
 			@ysnSplit				=	ysnSplit,
 			@dblTotalLots			=	[dblTotalLots]
-	FROM	tblCTPriceFixation		PF
-	JOIN	tblCTPriceContract		PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
+	FROM	tblCTPriceFixation
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
 	SELECT	@dblTotalPFDetailNoOfLots	=	SUM([dblNoOfLots])
@@ -382,26 +379,16 @@ BEGIN TRY
 		BEGIN
 			UPDATE	CD
 			SET		CD.intPricingTypeId		=	1,
-					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
-												CASE WHEN @intFinalCurrencyId <> @intCurrencyId AND @ysnFinalSubCurrency = 1 THEN 100 ELSE 0.01 END,
-					CD.dblCashPrice			=	(
-													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intPriceCommodityUOMId,ISNULL(CD.dblBasis,0)) / 
-													CASE WHEN @intBasisCurrencyId <> @intCurrencyId AND @ysnBasisSubCurrency = 1 THEN 100 ELSE 0.01 END
-												) + 
-												(
-													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)) / 
-													CASE WHEN @intFinalCurrencyId <> @intCurrencyId AND @ysnFinalSubCurrency = 1 THEN 100 ELSE 0.01 END									
-												) ,	
+					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
+					CD.dblCashPrice			=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,ISNULL(CD.dblBasis,0)) / CASE WHEN @intBasisCurrencyId <> @intCurrencyId AND @ysnBasisSubCurrency = 1 THEN 100 ELSE 0.01 END) + 
+												dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),	
 					CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
 												(	
 													(
-														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intPriceCommodityUOMId,ISNULL(CD.dblBasis,0)) / 
+														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,ISNULL(CD.dblBasis,0)) / 
 														CASE WHEN @intBasisCurrencyId <> @intCurrencyId AND @ysnBasisSubCurrency = 1 THEN 100 ELSE 0.01 END
 													) + 
-													(
-														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
-														CASE WHEN @intFinalCurrencyId <> @intCurrencyId AND @ysnFinalSubCurrency = 1 THEN 100 ELSE 0.01 END
-													)
+													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))
 												)/
 												CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
