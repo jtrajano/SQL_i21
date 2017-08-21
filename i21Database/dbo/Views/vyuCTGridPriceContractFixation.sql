@@ -51,7 +51,8 @@ AS
 				CD.strContractType,
 				CD.strEntityName,
 				CD.strContractNumber,
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId, CD.intPriceCommodityUOMId ,CD.dblBasis)	AS dblConvertedBasis,
+				dbo.fnCTConvertQuantityToTargetCommodityUOM(BU.intCommodityUnitMeasureId, CD.intPriceCommodityUOMId ,CD.dblBasis) / 
+				CASE WHEN CD.intBasisCurrencyId <> CD.intCurrencyId AND CD.ysnBasisSubCurrency = 1 THEN 100 ELSE 0.01 END	AS dblConvertedBasis,
 				CY.strCurrency	AS strMarketCurrency,
 				UM.strUnitMeasure AS strMarketUOM,
 				CD.ysnMultiplePriceFixation,
