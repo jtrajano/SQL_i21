@@ -42,7 +42,12 @@ BEGIN TRY
 			@dblTotalLots				NUMERIC(18,6),
 			@dblTotalPFDetailNoOfLots	NUMERIC(18,6),
 			@ysnUnlimitedQuantity		BIT,
-			@intFirstPFDetailId			INT
+			@intFirstPFDetailId			INT,
+			@intBasisUOMId				INT,
+			@intBasisCommodityUOMId		INT,
+			@intCurrencyId				INT,
+			@intBasisCurrencyId			INT,
+			@ysnBasisSubCurrency		INT
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -67,13 +72,23 @@ BEGIN TRY
 	BEGIN
 		ProcessContractDetail:
 
-		SELECT	@intCommodityId				=	intCommodityId,
-				@intPriceItemUOMId			=	intPriceItemUOMId,
-				@strCommodityDescription	=	strCommodityDescription,
-				@intPricingTypeId			=	intPricingTypeId,
-				@dblQuantity				=	dblDetailQuantity
-		FROM	vyuCTContractDetailView 
-		WHERE	intContractDetailId =	@intContractDetailId
+		SELECT	@intCommodityId				=	CH.intCommodityId,
+				@intPriceItemUOMId			=	CD.intPriceItemUOMId,
+				@strCommodityDescription	=	CH.strCommodityDescription,
+				@intPricingTypeId			=	CD.intPricingTypeId,
+				@dblQuantity				=	CD.dblQuantity,
+				@intBasisUOMId				=	BM.intCommodityUnitMeasureId,
+				@intCurrencyId				=	CD.intCurrencyId,
+				@intBasisCurrencyId			=	CD.intBasisCurrencyId,
+				@ysnBasisSubCurrency		=	AY.ysnSubCurrency
+
+		FROM	tblCTContractDetail			CD
+		JOIN	vyuCTContractHeaderView		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
+   LEFT JOIN	tblICItemUOM				BU	ON	BU.intItemUOMId			=	CD.intBasisUOMId
+   LEFT JOIN	tblICCommodityUnitMeasure	BM	ON	BM.intCommodityId		=	CH.intCommodityId
+												AND	BM.intUnitMeasureId		=	BU.intUnitMeasureId
+   LEFT JOIN	tblSMCurrency				AY	ON	AY.intCurrencyID		=	CD.intBasisCurrencyId
+		WHERE	intContractDetailId			=	@intContractDetailId
 			
 		SELECT	@intUnitMeasureId	=	UM.intUnitMeasureId,
 				@strUnitMeasure		=	UM.strUnitMeasure
@@ -317,7 +332,8 @@ BEGIN TRY
 			AND		intTypeRef				=	@intTypeRef
 
 			UPDATE	CD
-			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0)) + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblRollArb,0)),
+			SET		CD.dblBasis				=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0))) / CASE WHEN @intBasisCurrencyId <> @intCurrencyId AND @ysnBasisSubCurrency = 1 THEN 100 ELSE 0.01 END) + 
+												dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblRollArb,0)),
 					CD.intFutureMarketId	=	@intNewFutureMarketId,
 					CD.intFutureMonthId		=	@intNewFutureMonthId,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
@@ -364,9 +380,16 @@ BEGIN TRY
 			UPDATE	CD
 			SET		CD.intPricingTypeId		=	1,
 					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
-					CD.dblCashPrice			=	CD.dblBasis + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),	
+					CD.dblCashPrice			=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,ISNULL(CD.dblBasis,0)) / CASE WHEN @intBasisCurrencyId <> @intCurrencyId AND @ysnBasisSubCurrency = 1 THEN 100 ELSE 0.01 END) + 
+												dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),	
 					CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
-												(CD.dblBasis + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)))/
+												(	
+													(
+														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,ISNULL(CD.dblBasis,0)) / 
+														CASE WHEN @intBasisCurrencyId <> @intCurrencyId AND @ysnBasisSubCurrency = 1 THEN 100 ELSE 0.01 END
+													) + 
+													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))
+												)/
 												CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
 					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 THEN 5 ELSE CD.intContractStatusId END
