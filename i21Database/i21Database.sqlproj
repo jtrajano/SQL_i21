@@ -5619,6 +5619,7 @@
     <Build Include="dbo\Tables\tblTMLostCustomerReason.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateHandheldUserMenuMap.sql" />
     <Build Include="dbo\Views\vyuRKPositionByPeriodContDetView.sql" />
+    <Build Include="dbo\Views\vyuRKMarketDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
