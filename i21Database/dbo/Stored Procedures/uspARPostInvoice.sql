@@ -1034,17 +1034,7 @@ BEGIN TRY
 					BEGIN TRY
 					IF @post = 1
 						BEGIN
-
-							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
-								 @strOptionType		= 'Update'
-								,@strSourceType		= 'Invoice'
-								,@intEntityId		= @EntityCustomerId
-								,@intItemId			= @ItemId
-								,@intStorageTypeId	= @StorageScheduleTypeId
-								,@dblUnitsConsumed	= @Quantity
-								,@IntSourceKey		= @InvoiceId
-								,@intUserId			= @UserEntityID			
-								
+							
 							DECLARE @GrainStorageCharge TABLE  (
 								intCustomerStorageId INT,
 								strStorageTicketNumber NVARCHAR(100),
