@@ -166,7 +166,10 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intSourceId]							= cfTrans.intTransactionId
 					,[strSourceId]							= cfTrans.strTransactionId
 					,[intInvoiceId]							= I.intInvoiceId --cfTrans.intInvoiceId --NULL Value will create new invoice
-					,[intEntityCustomerId]					= cfCardAccount.intCustomerId
+					,[intEntityCustomerId]					= (case
+												when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Foreign Sale' then cfNetwork.intCustomerId
+												else cfCardAccount.intCustomerId
+											  end)
 					,[intCompanyLocationId]					= cfSiteItem.intARLocationId
 					,[intCurrencyId]						= I.intCurrencyId
 					,[intTermId]							= @companyConfigTermId
