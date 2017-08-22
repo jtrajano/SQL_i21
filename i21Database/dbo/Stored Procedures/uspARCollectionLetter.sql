@@ -137,7 +137,7 @@ BEGIN
 			IF @strLetterName IN ('Credit Suspension', 'Expired Credit Card')
 				BEGIN
 					INSERT INTO @SelectedCustomer
-					SELECT intEntityCustomerId
+					SELECT intEntityId
 					FROM tblARCustomer WITH (NOLOCK)
 					WHERE ysnActive = 1
 					  AND dblCreditLimit = 0
@@ -145,7 +145,7 @@ BEGIN
 			ELSE IF @strLetterName = 'Credit Review'
 				BEGIN
 					INSERT INTO @SelectedCustomer
-					SELECT intEntityCustomerId
+					SELECT intEntityId
 					FROM tblARCustomer WITH (NOLOCK)
 					WHERE ysnActive = 1
 					  AND dblCreditLimit > 0
@@ -1129,7 +1129,7 @@ BEGIN
 			IF @strLetterName IN ('Credit Suspension', 'Expired Credit Card')
 				BEGIN
 					INSERT INTO @SelectedCustomer
-					SELECT intEntityCustomerId
+					SELECT intEntityId
 					FROM tblARCustomer WITH (NOLOCK)
 					WHERE ysnActive = 1
 					  AND dblCreditLimit = 0
@@ -1137,7 +1137,7 @@ BEGIN
 			ELSE IF @strLetterName = 'Credit Review'
 				BEGIN
 					INSERT INTO @SelectedCustomer
-					SELECT intEntityCustomerId
+					SELECT intEntityId
 					FROM tblARCustomer WITH (NOLOCK)
 					WHERE ysnActive = 1
 					  AND dblCreditLimit > 0
