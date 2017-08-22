@@ -292,7 +292,7 @@ SELECT inv.intItemId
 	where IU.intItemId = inv.intItemId
 	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
-	,'None' PricingMethod
+	,'Fixed Dollar Amount' PricingMethod
 	,0
 	,ptitm_prc1
 	,1 ConcurrencyId
@@ -321,7 +321,7 @@ SELECT inv.intItemId
 	where IU.intItemId = inv.intItemId
 	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
-	,'None' PricingMethod
+	,'Fixed Dollar Amount' PricingMethod
 	,0
 	,ptitm_prc2
 	,1 ConcurrencyId
@@ -351,7 +351,7 @@ SELECT inv.intItemId
 	where IU.intItemId = inv.intItemId
 	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
-	,'None' PricingMethod
+	,'Fixed Dollar Amount' PricingMethod
 	,0
 	,ptitm_prc3
 	,1 ConcurrencyId
