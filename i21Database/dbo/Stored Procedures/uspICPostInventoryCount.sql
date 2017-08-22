@@ -214,7 +214,7 @@ BEGIN
 			AND Detail.ysnRecount = 0
 		INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Header.intLocationId 
 			AND ItemLocation.intItemId = Detail.intItemId
-		INNER JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+		LEFT JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = Detail.intLotId
 		LEFT JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId

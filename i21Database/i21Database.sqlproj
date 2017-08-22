@@ -5404,6 +5404,8 @@
     <Build Include="dbo\Views\vyuCTNotificationHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspCTNotification.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateHandheldUserMenuMap.sql" />
+    <Build Include="dbo\Views\vyuICGetItemSubLocation.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
