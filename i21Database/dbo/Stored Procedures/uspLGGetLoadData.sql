@@ -43,6 +43,9 @@ BEGIN
 				,intNumberOfLoads = GL.intNumberOfLoads
 				,strDispatcher = SE.strUserName
 				,strShippingInstructionNo = SI.strLoadNumber
+				,FT.strFreightTerm
+				,FT.strFobPoint
+				,CU.strCurrency
 				,DENSE_RANK() OVER (
 					ORDER BY L.intLoadId DESC
 					) intRankNo
@@ -58,6 +61,8 @@ BEGIN
 			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 			LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 			LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
+			LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
 			WHERE L.intLoadId IN (
 					SELECT *
 					FROM dbo.fnSplitString(@strLoadId, ',')
@@ -95,6 +100,9 @@ BEGIN
 			,intNumberOfLoads = GL.intNumberOfLoads
 			,strDispatcher = SE.strUserName
 			,strShippingInstructionNo = SI.strLoadNumber
+			,FT.strFreightTerm
+			,FT.strFobPoint
+			,CU.strCurrency
 		FROM tblLGLoad L
 		LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 		LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -107,6 +115,8 @@ BEGIN
 		LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 		LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
+		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+		LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
 		WHERE L.strLoadNumber COLLATE Latin1_General_CI_AS IN (
 				SELECT *
 				FROM dbo.fnSplitString(@strLoadNumber, ',')
