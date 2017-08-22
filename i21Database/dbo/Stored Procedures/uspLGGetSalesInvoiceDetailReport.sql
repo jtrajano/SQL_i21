@@ -36,11 +36,16 @@ BEGIN
 		CH.strContractNumber,
 		CD.intContractSeq,
 		Cont.strContainerNumber,
-		Cont.strMarks
+		Cont.strMarks,
+		Inv.dblInvoiceSubtotal,
+		Inv.dblTax,
+		Inv.dblInvoiceTotal,
+		strTaxDescription = TaxG.strDescription
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
 	JOIN tblSMCurrency InvCur ON InvCur.intCurrencyID = Inv.intCurrencyId
+	LEFT JOIN tblSMTaxGroup TaxG ON TaxG.intTaxGroupId = InvDet.intTaxGroupId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId 
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
 	LEFT JOIN tblSMCurrency PriceCur ON PriceCur.intCurrencyID = CD.intCurrencyId
