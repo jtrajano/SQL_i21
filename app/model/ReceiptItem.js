@@ -177,6 +177,13 @@ Ext.define('Inventory.model.ReceiptItem', {
                     message: 'Quantity to Receive must not be equal to zero.'
                 });
         }
+
+        else if (this.get('dblOpenReceive') > 9999999999) {
+                errors.add({
+                    field: 'dblOpenReceive',
+                    message: 'Quantity to Receive must not exceed ten billion.'
+                });
+        }
     },
     
     validateGrossNetUOM: function(errors) {
