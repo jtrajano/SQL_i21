@@ -67,7 +67,7 @@ BEGIN
 
 	IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 1
 		BEGIN
-			IF @strLetterName <> 'Service Charge Invoices Letter'
+			IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
 				BEGIN
 					SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
 					FROM (
@@ -76,7 +76,7 @@ BEGIN
 						FOR XML PATH ('')
 					) c (intEntityCustomerId)
 				END
-			ELSE
+			ELSE IF @strLetterName = 'Service Charge Invoices Letter' 
 				BEGIN
 					SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
 					FROM (
@@ -134,9 +134,28 @@ BEGIN
 
 	IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 1
 		BEGIN
-			INSERT INTO @SelectedCustomer
-			SELECT * 
-			FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
+			IF @strLetterName IN ('Credit Suspension', 'Expired Credit Card')
+				BEGIN
+					INSERT INTO @SelectedCustomer
+					SELECT intEntityCustomerId
+					FROM tblARCustomer WITH (NOLOCK)
+					WHERE ysnActive = 1
+					  AND dblCreditLimit = 0
+				END
+			ELSE IF @strLetterName = 'Credit Review'
+				BEGIN
+					INSERT INTO @SelectedCustomer
+					SELECT intEntityCustomerId
+					FROM tblARCustomer WITH (NOLOCK)
+					WHERE ysnActive = 1
+					  AND dblCreditLimit > 0
+				END
+			ELSE
+				BEGIN
+					INSERT INTO @SelectedCustomer
+					SELECT * 
+					FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
+				END
 		END
 	ELSE IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 0
 		BEGIN
@@ -144,6 +163,12 @@ BEGIN
 			SELECT intEntityId
 			FROM tblARCustomer WITH (NOLOCK)
 			WHERE ysnActive = 1
+		END
+	ELSE IF ISNULL(@strCustomerIds, '') <> ''
+		BEGIN
+			INSERT INTO @SelectedCustomer
+			SELECT * 
+			FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
 		END
 
 	INSERT INTO @OriginalMsgInHTMLTable
@@ -1057,11 +1082,8 @@ BEGIN
 							[intPlaceHolderId] = @PlaceHolderId
 					END
 
-					DELETE 
-					FROM 
-						@SelectedCustomer 
-					WHERE 
-						intEntityCustomerId = @CustomerId 
+					DELETE FROM @SelectedCustomer 
+					WHERE intEntityCustomerId = @CustomerId 
 
 					INSERT INTO @SelectedPlaceHolderTable
 					(
@@ -1104,16 +1126,41 @@ BEGIN
 
 	IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 1
 		BEGIN
-			INSERT INTO @SelectedCustomer
-			SELECT * 
-			FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
+			IF @strLetterName IN ('Credit Suspension', 'Expired Credit Card')
+				BEGIN
+					INSERT INTO @SelectedCustomer
+					SELECT intEntityCustomerId
+					FROM tblARCustomer WITH (NOLOCK)
+					WHERE ysnActive = 1
+					  AND dblCreditLimit = 0
+				END
+			ELSE IF @strLetterName = 'Credit Review'
+				BEGIN
+					INSERT INTO @SelectedCustomer
+					SELECT intEntityCustomerId
+					FROM tblARCustomer WITH (NOLOCK)
+					WHERE ysnActive = 1
+					  AND dblCreditLimit > 0
+				END
+			ELSE
+				BEGIN
+					INSERT INTO @SelectedCustomer
+					SELECT * 
+					FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
+				END
 		END
-	ELSE IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 0
+	ELSE IF ISNULL(@strCustomerIds, '') = '' AND (ISNULL(@ysnSystemDefined, 1) = 0 OR @strLetterName IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review'))
 		BEGIN
 			INSERT INTO @SelectedCustomer
 			SELECT intEntityId
 			FROM tblARCustomer WITH (NOLOCK)
 			WHERE ysnActive = 1
+		END
+	ELSE IF ISNULL(@strCustomerIds, '') <> ''
+		BEGIN
+			INSERT INTO @SelectedCustomer
+			SELECT * 
+			FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
 		END
 
 	SELECT SC.*
