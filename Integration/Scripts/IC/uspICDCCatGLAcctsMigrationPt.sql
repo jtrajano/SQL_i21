@@ -186,8 +186,8 @@ join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategor
 join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
 join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
 join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
-where act.strAccountCategory in ('Inventory', 'Sales Account')
-and c.strInventoryType in ('Inventory', 'Raw Material', 'Finished Goods')
+where act.strAccountCategory in ('Inventory', 'Sales Account', 'Inventory In-Transit','Work In Progress','Inventory Adjustment','AP Clearing')
+and c.strInventoryType in ('Inventory', 'Raw Material', 'Finished Good')
 and ast.strType = 'Primary'
 
 GO
