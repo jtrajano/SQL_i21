@@ -1866,7 +1866,7 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Tax', strDescription = 'Tax' WHERE str
 UPDATE tblSMMasterMenu SET strMenuName = 'Customer Aging Detail', strDescription = 'Customer Aging Detail' WHERE strMenuName = 'Customer Aging Detail Report' AND strModuleName = 'Accounts Receivable' AND strCategory = 'Report' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Restricted Chemicals', strDescription = 'Restricted Chemicals' WHERE strMenuName = 'Restricted Chemicals Report' AND strModuleName = 'Accounts Receivable' AND strCategory = 'Report' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'POS End Of Day', strDescription = 'POS End Of Day' WHERE strMenuName = 'POS End Of Day Report' AND strModuleName = 'Accounts Receivable' AND strCategory = 'Report' AND intParentMenuID = @AccountsReceivableReportParentMenuId
-UPDATE tblSMMasterMenu SET strMenuName = 'Receive Multiple Payment', strDescription = 'Receive Multiple Payment' WHERE strMenuName = 'Receive Payment Details' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+UPDATE tblSMMasterMenu SET strMenuName = 'Receive Multiple Payments', strDescription = 'Receive Multiple Payments' WHERE strMenuName = 'Receive Payment Details' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 /* End of Removing Report in Reports - 1730 */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Orders' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
@@ -1887,11 +1887,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Receive P
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'AccountsReceivable.view.ReceivePaymentsDetail?showSearch=true' WHERE strMenuName = 'Receive Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Receive Multiple Payment' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Receive Multiple Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Receive Multiple Payment', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Receive Multiple Payment', N'Activity', N'Screen', N'AccountsReceivable.view.ReceivePayments', N'small-menu-activity', 1, 0, 0, 1, 3, 1)
+	VALUES (N'Receive Multiple Payments', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Receive Multiple Payments', N'Activity', N'Screen', N'AccountsReceivable.view.ReceivePayments', N'small-menu-activity', 1, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'AccountsReceivable.view.ReceivePayments' WHERE strMenuName = 'Receive Multiple Payment' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'AccountsReceivable.view.ReceivePayments' WHERE strMenuName = 'Receive Multiple Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Service Charge' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
