@@ -116,10 +116,10 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	dbo.tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
-			LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
-				ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
+			--LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
+			--	ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 			
-			AND ExemptedList.intTransactionTypeId IS NULL 
+			--AND ExemptedList.intTransactionTypeId IS NULL 
 
 	SELECT	TOP 1 
 			@strLocationName = c.strLocationName
