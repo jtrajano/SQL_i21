@@ -168,6 +168,15 @@ BEGIN TRY
 			WHERE intLotId = @intProductValueId
 		END
 	END
+	ELSE IF @intSampleControlPointId = 14
+		AND @strApprovalBase = 'Item & Parent Lot'
+	BEGIN
+		UPDATE LI
+		SET intBondStatusId = @intLotStatusId
+		FROM dbo.tblICLot AS L
+		JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+		WHERE L.intItemId=@intSampleItemId AND L.intParentLotId =@intParentLotId
+	END
 
 	SELECT TOP 1 @intUserSampleApproval = ISNULL(intUserSampleApproval, 0)
 	FROM tblQMCompanyPreference
@@ -389,6 +398,28 @@ BEGIN TRY
 				,intLotStatusId
 			FROM tblICLot
 			WHERE strLotAlias = @strLotAlias
+		END
+		ELSE IF @strApprovalBase = 'Item & Parent Lot'
+		BEGIN
+			INSERT INTO @LotData (
+				intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+				)
+			SELECT intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+			FROM tblICLot
+			WHERE intParentLotId = @intParentLotId
+				AND intItemId=@intSampleItemId
 		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
