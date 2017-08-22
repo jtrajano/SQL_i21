@@ -186,7 +186,6 @@ BEGIN
 		SELECT @intBondStatusId = NULL
 
 		SELECT @intBondStatusId = LI.intBondStatusId
-			,@intItemOwnerId = LI.intItemOwnerId
 			,@strVendorRefNo = LI.strVendorRefNo
 			,@strWarehouseRefNo = LI.strWarehouseRefNo
 			,@strReceiptNumber = LI.strReceiptNumber
@@ -256,7 +255,6 @@ BEGIN
 		INSERT INTO tblMFLotInventory (
 			intLotId
 			,intBondStatusId
-			,intItemOwnerId
 			,strVendorRefNo
 			,strWarehouseRefNo
 			,strReceiptNumber
@@ -264,7 +262,6 @@ BEGIN
 			)
 		SELECT @intLotId
 			,@intBondStatusId
-			,@intItemOwnerId
 			,@strVendorRefNo
 			,@strWarehouseRefNo
 			,@strReceiptNumber

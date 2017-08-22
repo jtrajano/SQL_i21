@@ -39,12 +39,11 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	SELECT @intOldItemOwnerId = intItemOwnerId
-		,@strReceiptNumber = strReceiptNumber
+	SELECT @strReceiptNumber = strReceiptNumber
 	FROM tblMFLotInventory
 	WHERE intLotId = @intLotId
 
-	SELECT @intOldLotItemOwnerId = intItemOwnerId
+	SELECT @intOldLotItemOwnerId = intItemOwnerId,@intOldItemOwnerId = intItemOwnerId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -70,11 +69,9 @@ BEGIN TRY
 		INSERT INTO tblMFLotInventory (
 			intConcurrencyId
 			,intLotId
-			,intItemOwnerId
 			)
 		SELECT 1
 			,@intLotId
-			,@intNewItemOwnerId
 
 		UPDATE tblMFItemOwnerDetail
 		SET dtmToDate = @dtmDate
@@ -132,10 +129,6 @@ BEGIN TRY
 	BEGIN
 		IF @intNewItemOwnerId <> ISNULL(@intOldItemOwnerId, 0)
 		BEGIN
-			UPDATE tblMFLotInventory
-			SET intItemOwnerId = @intNewItemOwnerId
-				,intConcurrencyId = (intConcurrencyId + 1)
-			WHERE intLotId = @intLotId
 
 			UPDATE tblMFItemOwnerDetail
 			SET dtmToDate = @dtmDate
