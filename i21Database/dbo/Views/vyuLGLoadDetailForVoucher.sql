@@ -20,13 +20,13 @@ SELECT L.intLoadId
 	,LD.dblNet
 	,U.strUnitMeasure AS strWeightUnitMeasure
 	,U.intUnitMeasureId as intWeightUnitMeasure
-	,WeightUOM.dblUnitQty AS dblWeightUnitQty
+	,ISNULL(WeightUOM.dblUnitQty,0) AS dblWeightUnitQty
 	,E.strName AS strVendor
 	,E.intEntityId as intEntityVendorId
 	,dblCost = ISNULL(AD.dblSeqPrice, 0)
 	,intCostUOMId = AD.intSeqPriceUOMId
 	,strCostUOM = AD.strSeqPriceUOM
-	,dblCostUnitQty = AD.dblCostUnitQty
+	,dblCostUnitQty = ISNULL(AD.dblCostUnitQty,0)
 	,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 	,ysnSubCurrency = ISNULL(SubCurrency.ysnSubCurrency, 0)
 	,intForexRateTypeId = CD.intRateTypeId
