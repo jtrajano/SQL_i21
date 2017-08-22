@@ -1200,12 +1200,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Manufacturing':
                 case 'Finished Good' :
                 case 'Raw Material':
+                case 'Inventory Item':
+                case 'Inventory':
                     return false;
                     break;
 
                 case 'Bundle':
-                case 'Inventory Item':
-                case 'Inventory':
                 case 'Kit':
                 case 'Software':
                 case 'Non-Inventory':
@@ -1273,6 +1273,8 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Assembly/Formula/Blend':
                 case 'Manufacturing Item':
                 case 'Manufacturing':
+                case 'Inventory Item':
+                case 'Inventory':
                 case 'Finished Good' :
                 case 'Raw Material':
                     if (get('current.intLotStatusId') === null) {
@@ -1282,8 +1284,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                     break;
 
                 case 'Bundle':
-                case 'Inventory Item':
-                case 'Inventory':
                 case 'Kit':
                 case 'Software':
                 case 'Non-Inventory':
