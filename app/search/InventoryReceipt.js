@@ -142,7 +142,6 @@ Ext.define('Inventory.search.InventoryReceipt', {
                 { dataIndex: 'strBillOfLading', text: 'BOL No.', flex: 1, dataType: 'string' },
                 { dataIndex: 'strContractNumber', text: 'Contract No.', flex: 1, dataType: 'string' },
                 { dataIndex: 'strItemNo', text: 'Other Charges', flex: 1, dataType: 'string' },
-                { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string' },
                 { dataIndex: 'strOnCostType', text: 'On Cost', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCostMethod', text: 'Cost Method', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCurrency', text: 'Cost Currency', flex: 1, dataType: 'string' },
