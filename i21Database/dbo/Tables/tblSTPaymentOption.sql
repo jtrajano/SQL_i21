@@ -1,7 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTPaymentOption]
 (
 	[intPaymentOptionId] INT NOT NULL IDENTITY, 
-    [strPaymentOption] NVARCHAR COLLATE Latin1_General_CI_AS NOT NULL, 
     [intStoreId] INT NOT NULL, 
     [strPaymentOptionId] NVARCHAR(15) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
