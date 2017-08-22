@@ -72,13 +72,21 @@ END
 SELECT * INTO #ContractTransaction from (     
 SELECT fm.intFutureMonthId,cv.strFutureMonth,strFutMarketName,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUnitMeasureId,dblBalance) AS dblNoOfContract,  
+      dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(cv.dblDetailQuantity,0)) -
+  sum(
+  case when intPricingTypeId=1 then 
+  case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else isnull(iq1.dblSalesInvoiceQty,0) end 
+  else 0 END) OVER (PARTITION BY cv.intContractDetailId )AS dblNoOfContract,  
   LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, 
   dtmStartDate as TransactionDate,  
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   dblNoOfLots as dblNoOfLot,
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblBalance,0)) as dblQuantity,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(cv.dblDetailQuantity,0)) -
+  sum(
+  case when intPricingTypeId=1 then 
+  case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else isnull(iq1.dblSalesInvoiceQty,0) end 
+  else 0 END) OVER (PARTITION BY cv.intContractDetailId ) as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,intPricingTypeId
   ,cv.strContractType
@@ -95,6 +103,8 @@ SELECT fm.intFutureMonthId,cv.strFutureMonth,strFutMarketName,
 				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
 										AND ici.intProductLineId=pl.intCommodityProductLineId)
+  LEFT JOIN vyuRKGetInvoicedQty iq on cv.intContractDetailId= iq.intPContractDetailId 
+  LEFT JOIN vyuRKGetInvoicedQty iq1 on cv.intContractDetailId= iq1.intSContractDetailId
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
   LEFT JOIN tblICCommodityUnitMeasure um1 on  um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=@intUnitMeasureId  
@@ -115,7 +125,7 @@ SELECT cv.strFutureMonth,strFutMarketName,fm.intFutureMonthId,
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   dblNoOfLots as dblNoOfLot,
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblBalance,0)) as dblQuantity,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblDetailQuantity,0)) as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,1 intPricingTypeId
   ,cv.strContractType
@@ -126,7 +136,8 @@ SELECT cv.strFutureMonth,strFutMarketName,fm.intFutureMonthId,
   ,ysnExpired
   ,isnull((SELECT sum(dblLotsFixed) dblNoOfLots FROM tblCTPriceFixation pf 
 		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedLots
-  ,isnull((SELECT  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,sum(dblQuantity)) dblQuantity FROM tblCTPriceFixation pf
+  ,isnull((SELECT  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,sum(dblQuantity)) dblQuantity 
+		 FROM tblCTPriceFixation pf
 		 join tblCTPriceFixationDetail pd on pf.intPriceFixationId=pd.intPriceFixationId	 
 		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedQty
 		,ca.intCommodityAttributeId,ca.strDescription
@@ -137,7 +148,7 @@ SELECT cv.strFutureMonth,strFutMarketName,fm.intFutureMonthId,
   JOIN tblICItem ic on ic.intItemId=cv.intItemId 
 				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
-										AND ici.intProductLineId=pl.intCommodityProductLineId)  
+										AND ici.intProductLineId=pl.intCommodityProductLineId) 
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
   LEFT join tblICCommodityUnitMeasure um1 on  um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=@intUnitMeasureId  
@@ -160,7 +171,7 @@ SELECT cv.strFutureMonth,strFutMarketName,intContractDetailId, fm.intFutureMonth
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   dblNoOfLots as dblNoOfLot,
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblBalance,0)) as dblQuantity,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblDetailQuantity,0)) as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,2 as intPricingTypeId
   ,cv.strContractType
@@ -182,7 +193,7 @@ SELECT cv.strFutureMonth,strFutMarketName,intContractDetailId, fm.intFutureMonth
   JOIN tblICItem ic on ic.intItemId=cv.intItemId 
 				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
-										AND ici.intProductLineId=pl.intCommodityProductLineId)  
+										AND ici.intProductLineId=pl.intCommodityProductLineId) 
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
   LEFT JOIN tblARProductType pt on pt.intProductTypeId=ic.intProductTypeId
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
