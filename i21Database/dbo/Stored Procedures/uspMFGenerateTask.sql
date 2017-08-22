@@ -413,11 +413,11 @@ BEGIN TRY
 							ELSE @intParentLotId
 							END
 						), 0)
-				AND IsNULL(LI.intItemOwnerId, 0) = (
+				AND IsNULL(L.intItemOwnerId, 0) = (
 					CASE 
 						WHEN @ysnPickByItemOwner = 1
 							THEN @intItemOwnerId
-						ELSE IsNULL(LI.intItemOwnerId, 0)
+						ELSE IsNULL(L.intItemOwnerId, 0)
 						END
 					)
 			GROUP BY L.intLotId
@@ -613,11 +613,11 @@ BEGIN TRY
 							ELSE @intParentLotId
 							END
 						), 0)
-				AND IsNULL(LI.intItemOwnerId, 0) = (
+				AND IsNULL(L.intItemOwnerId, 0) = (
 					CASE 
 						WHEN @ysnPickByItemOwner = 1
 							THEN @intItemOwnerId
-						ELSE IsNULL(LI.intItemOwnerId, 0)
+						ELSE IsNULL(L.intItemOwnerId, 0)
 						END
 					)
 			GROUP BY L.intLotId

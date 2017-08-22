@@ -431,11 +431,9 @@ BEGIN
 			INSERT INTO tblMFLotInventory (
 				intConcurrencyId
 				,intLotId
-				,intItemOwnerId
 				)
 			SELECT 1
 				,@intLotId
-				,@intItemOwnerId
 
 			INSERT INTO tblMFItemOwnerDetail (
 				intLotId
@@ -447,13 +445,6 @@ BEGIN
 				,@intItemId
 				,@intOwnerId
 				,@dtmProductionDate
-		END
-		ELSE
-		BEGIN
-			UPDATE tblMFLotInventory
-			SET intItemOwnerId = @intItemOwnerId
-				,intConcurrencyId = (intConcurrencyId + 1)
-			WHERE intLotId = @intLotId
 		END
 	END
 
