@@ -44,8 +44,8 @@ JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 JOIN tblICItem I ON I.intItemId = LD.intItemId
-LEFT JOIN tblICUnitMeasure U ON U.intUnitMeasureId = L.intWeightUnitMeasureId
-LEFT JOIN tblICItemUOM WeightUOM ON L.intItemId = LD.intItemId AND WeightUOM.intUnitMeasureId = L.intWeightUnitMeasureId
+LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = L.intWeightItemUOMId
+LEFT JOIN tblICUnitMeasure U ON U.intUnitMeasureId = WeightUOM.intUnitMeasureId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 LEFT JOIN tblSMCurrency MSC ON MSC.intCurrencyID = SC.intMainCurrencyId
