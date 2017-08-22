@@ -137,4 +137,21 @@ ON [Target].intItemId = [Source].intItemId
 WHEN NOT MATCHED THEN
 INSERT (intItemId, intAccountCategoryId, intAccountId, intConcurrencyId)
 VALUES ([Source].intItemId, [Source].intAccountCategoryId, [Source].intAccountId, [Source].intConcurrencyId);
+-----------------------------------------------------------------------------------------------------
+--------update the account table with correct account category required for inventory to function
+UPDATE tgs SET intAccountCategoryId = act.intAccountCategoryId
+--select c.strDescription,ca.intItemId,ac.strAccountId,ac.strDescription, ca.intAccountCategoryId, tgs.intAccountCategoryId,act.intAccountCategoryId
+from tblICItemAccount ca 
+join tblGLAccount ac on ca.intAccountId = ac.intAccountId
+join tblICItem c on ca.intItemId = c.intItemId
+join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategoryId
+join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
+join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
+join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
+where act.strAccountCategory in ('Inventory', 'Sales Account', 'Inventory In-Transit','Work In Progress','Inventory Adjustment','AP Clearing')
+and c.strType in ('Inventory', 'Raw Material', 'Finished Good')
+and ast.strType = 'Primary'
+
+
+GO
 

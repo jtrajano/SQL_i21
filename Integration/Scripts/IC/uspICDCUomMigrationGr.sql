@@ -16,12 +16,15 @@ SET ANSI_WARNINGS OFF
 ----======================================STEP 1 ==============================
 --import unit of measures from commodity setup. Commodity and Ag do not have a UOM master. 
 --Commodity does not have a UOM for conversion. It is assumed to be lb. So insert an lb uom in i21
-insert into tblICUnitMeasure (strUnitMeasure, strSymbol, strUnitType, intConcurrencyId)
-values ('lb', 'lb', 'Weight',1)
+IF NOT EXISTS (select strUnitMeasure from tblICUnitMeasure where strUnitMeasure = 'LB')
+	insert into tblICUnitMeasure (strUnitMeasure, strSymbol, strUnitType, intConcurrencyId)
+	values ('LB', 'LB', 'Weight',1)
 
 --import units of mesaure from the commodity setup. USe distinct to get unit uoms
 insert into tblICUnitMeasure (strUnitMeasure, strSymbol, strUnitType, intConcurrencyId)
 select distinct gacom_un_desc, gacom_un_desc, case gacom_un_desc when 'BU' then 'Volume' End, 1 from gacommst
+where NOT EXISTS (select strUnitMeasure from tblICUnitMeasure where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS 
+					= upper(rtrim(gacom_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS)
 
 
 GO
