@@ -2506,7 +2506,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
         }
 
-        return Math.round(result, 12);
+        //return Math.round(result, 12);
+        return ic.utils.Math.round(result, 12); 
     },
 
     calculateGrossNet: function (record, calculateItemGrossNet) {
