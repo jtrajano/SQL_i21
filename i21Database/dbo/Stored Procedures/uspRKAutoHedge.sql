@@ -2,38 +2,38 @@
    @XML nvarchar(MAX),
    @intFutOptTransactionId INT OUTPUT               
 AS          
-BEGIN   Try       
+BEGIN TRY       
  DECLARE @dtmTransactionDate datetime,
-            @intEntityId int,
-            @intBrokerageAccountId int,
-            @intFutureMarketId int,
-            @intFutureMonthId int,
-            @intInstrumentTypeId int,
-            @intCommodityId int,
-            @intLocationId int,
-            @intTraderId int,
-            @strInternalTradeNo nvarchar(10),
-            @strBrokerTradeNo nvarchar(50),
-            @strBuySell nvarchar(10),
-            @intNoOfContract int,
-            @dblPrice numeric(18,6),
-            @strStatus nvarchar(50),
-            @dtmFilledDate datetime,
-            @strReserveForFix nvarchar(50),
-            @intBookId int,
-            @intSubBookId int,
-            @ysnOffset bit,
-            @intFutOptTransactionHeaderId int,
-            @ErrMsg nvarchar(max),
-            @intCurrencyId INT,
-			@intContractHeaderId INT,
-			@intContractDetailId INT,
-			@strXml  nvarchar(max),
-			@intMatchedLots INT,
-			@ysnMultiplePriceFixation BIT,
-			@strXmlNew  nvarchar(max),
-			@dblNoOfLots numeric(18,6),
-			@intSelectedInstrumentTypeId INT
+        @intEntityId int,
+        @intBrokerageAccountId int,           
+		@intFutureMarketId int,
+        @intFutureMonthId int,
+        @intInstrumentTypeId int,
+        @intCommodityId int,
+        @intLocationId int,
+        @intTraderId int,
+        @strInternalTradeNo nvarchar(10),
+        @strBrokerTradeNo nvarchar(50),
+        @strBuySell nvarchar(10),
+        @intNoOfContract int,
+        @dblPrice numeric(18,6),
+        @strStatus nvarchar(50),
+        @dtmFilledDate datetime,
+        @strReserveForFix nvarchar(50),
+        @intBookId int,
+        @intSubBookId int,
+        @ysnOffset bit,
+        @intFutOptTransactionHeaderId int,
+        @ErrMsg nvarchar(max),
+        @intCurrencyId INT,
+		@intContractHeaderId INT,
+		@intContractDetailId INT,
+		@strXml  nvarchar(max),
+		@intMatchedLots INT,
+		@ysnMultiplePriceFixation BIT,
+		@strXmlNew  nvarchar(max),
+		@dblNoOfLots numeric(18,6),
+		@intSelectedInstrumentTypeId INT
     
 		
 DECLARE @idoc int
@@ -66,7 +66,8 @@ SELECT
 	  @intContractDetailId = intContractDetailId,
 	  @intSelectedInstrumentTypeId = intSelectedInstrumentTypeId
 
-FROM OPENXML(@idoc,'root',2)          
+FROM OPENXML(@idoc,'root',2)
+          
 WITH(
 intFutOptTransactionId INT,
 dtmTransactionDate datetime,
@@ -110,6 +111,7 @@ BEGIN
       intFutureMarketId =     @intFutureMarketId ,
       intFutureMonthId =      @intFutureMonthId ,
       intNoOfContract = @intNoOfContract, 
+	  dtmFilledDate = @dtmFilledDate, 
       dblPrice =  @dblPrice 
       WHERE intFutOptTransactionId = @intFutOptTransactionId
 
@@ -168,6 +170,7 @@ BEGIN
               @intInstrumentTypeId ,
               @intCommodityId ,
               @intLocationId ,
+
               @intTraderId ,
               @strInternalTradeNo ,
               @strBrokerTradeNo ,
@@ -184,13 +187,12 @@ BEGIN
               1,
 			  @intSelectedInstrumentTypeId,
 			  GETDATE()
-      )          
-
+      )    
+      
       SET @intFutOptTransactionId = SCOPE_IDENTITY()
 
 	  SELECT @ysnMultiplePriceFixation = ysnMultiplePriceFixation FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
-
-
+	  
 	SET @strXml = '<root><Transaction>';
 	IF ISNULL(@ysnMultiplePriceFixation,0) = 1
 		SET @strXml = @strXml + '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
@@ -212,4 +214,4 @@ END TRY
 BEGIN CATCH    
  SET @ErrMsg = ERROR_MESSAGE()    
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-END CATCH    
+END CATCH
