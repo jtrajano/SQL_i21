@@ -123,7 +123,7 @@ BEGIN TRY
 				@dblNewBalance			=	ISNULL(@dblNewBalance,CD.dblBalance),
 				@dblNewScheduleQty		=	ISNULL(@dblNewScheduleQty,CD.dblScheduleQty),
 				@intNewNoOfLoad			=	ISNULL(@intNewNoOfLoad,CD.intNoOfLoad),
-
+				@intNewPricingTypeId	=	ISNULL(@intNewPricingTypeId,CD.intPricingTypeId),
 				@ysnLoad				=	ysnLoad
 
 		FROM	tblCTContractDetail	CD
@@ -308,21 +308,24 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1) 
 		END
 
-		IF @ysnLoad = 1
-        BEGIN
-            IF (@intNewNoOfLoad < @intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty)
-			BEGIN
-				SET @ErrMsg = 'No. of Loads for Sequence ' + LTRIM(@intContractSeq) + ' cannot be reduced below ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '. As current no. of load is ' + LTRIM(@intOldNoOfLoad) + ' and no. of load in use is ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '.'
-				RAISERROR(@ErrMsg,16,1) 
-			END
-			
-        END
-		ELSE
+		IF @intNewPricingTypeId <> 5
 		BEGIN
-			IF (@dblNewQuantity < @dblOldQuantity - @dblOldBalance + @dblOldScheduleQty)
+			IF @ysnLoad = 1
 			BEGIN
-				SET @ErrMsg = 'Sequence ' + LTRIM(@intContractSeq) + ' quantity cannot be reduced below ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '. As current contract quantity is ' +  LTRIM(@dblOldQuantity) + ' and quantity in use is ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '.'
-				RAISERROR(@ErrMsg,16,1) 
+				IF (@intNewNoOfLoad < @intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty)
+				BEGIN
+					SET @ErrMsg = 'No. of Loads for Sequence ' + LTRIM(@intContractSeq) + ' cannot be reduced below ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '. As current no. of load is ' + LTRIM(@intOldNoOfLoad) + ' and no. of load in use is ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '.'
+					RAISERROR(@ErrMsg,16,1) 
+				END
+			
+			END
+			ELSE
+			BEGIN
+				IF (@dblNewQuantity < @dblOldQuantity - @dblOldBalance + @dblOldScheduleQty)
+				BEGIN
+					SET @ErrMsg = 'Sequence ' + LTRIM(@intContractSeq) + ' quantity cannot be reduced below ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '. As current contract quantity is ' +  LTRIM(@dblOldQuantity) + ' and quantity in use is ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '.'
+					RAISERROR(@ErrMsg,16,1) 
+				END
 			END
 		END
 	END
