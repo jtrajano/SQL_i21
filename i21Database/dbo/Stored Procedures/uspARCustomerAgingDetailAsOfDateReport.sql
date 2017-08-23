@@ -2,7 +2,8 @@
 	@dtmDateFrom			DATETIME = NULL,
 	@dtmDateTo				DATETIME = NULL,
 	@strSalesperson			NVARCHAR(100) = NULL,
-    @strSourceTransaction	NVARCHAR(100) = NULL
+    @strSourceTransaction	NVARCHAR(100) = NULL,
+	@intEntityCustomerId    INT	= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -14,12 +15,14 @@ SET ANSI_WARNINGS OFF
 DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@dtmDateToLocal				DATETIME = NULL,
 		@strSalespersonLocal		NVARCHAR(100) = NULL,
-		@strSourceTransactionLocal	NVARCHAR(100) = NULL	
+		@strSourceTransactionLocal	NVARCHAR(100) = NULL,
+		@intEntityCustomerIdLocal   INT = NULL
 		
 SET @dtmDateFromLocal			= @dtmDateFrom
 SET	@dtmDateToLocal				= @dtmDateTo
 SET @strSalespersonLocal		= @strSalesperson
 SET @strSourceTransactionLocal	= @strSourceTransaction
+SET @intEntityCustomerIdLocal	= @intEntityCustomerId
 
 IF @dtmDateFromLocal IS NULL
     SET @dtmDateFromLocal = CAST(-53690 AS DATETIME)
@@ -125,6 +128,7 @@ INTO #ARPOSTEDPAYMENT
 FROM dbo.tblARPayment WITH (NOLOCK)
 WHERE ysnPosted = 1
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND (@intEntityCustomerIdLocal IS NULL OR intEntityCustomerId = @intEntityCustomerIdLocal)
 
 --#APPOSTEDPAYMENT
 SELECT intPaymentId
@@ -134,7 +138,7 @@ SELECT intPaymentId
 INTO #APPOSTEDPAYMENT
 FROM dbo.tblAPPayment WITH (NOLOCK)
 WHERE ysnPosted = 1 
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid ))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid ))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 
 --#INVOICETOTALPAYMENT
 SELECT dblPayment = SUM(dblPayment)
@@ -226,6 +230,7 @@ WHERE ysnPosted = 1
 	AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) > @dtmDateToLocal		
 	AND intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
+	AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 --#PREPAIDS
@@ -333,6 +338,7 @@ WHERE I.ysnPosted = 1
   AND I.strTransactionType IN ('Invoice', 'Debit Memo')
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+  AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
   AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
   AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
 
@@ -372,6 +378,7 @@ WHERE I.ysnPosted = 1
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
  AND I.dblInvoiceTotal - (ISNULL(PD.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)) <> 0 
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+ AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
 
@@ -411,6 +418,7 @@ WHERE I.ysnPosted = 1
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+ AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS) 
        
@@ -446,6 +454,7 @@ FROM dbo.tblARPayment P WITH (NOLOCK)
     LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+  AND (@intEntityCustomerIdLocal IS NULL OR P.intEntityCustomerId = @intEntityCustomerIdLocal)
 
 UNION ALL      
       
@@ -498,6 +507,7 @@ WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+ AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  ) AS A    
 
@@ -554,6 +564,7 @@ WHERE I.ysnPosted = 1
  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+ AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
 
@@ -585,6 +596,7 @@ WHERE I.ysnPosted = 1
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
  AND I.dblInvoiceTotal - (ISNULL(PD.dblPayment, 0) + ISNULL(PC.dblAppliedInvoiceAmount, 0)) <> 0 
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+ AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
 
@@ -616,6 +628,7 @@ WHERE I.ysnPosted = 1
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
  AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+ AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)  
 						      
@@ -641,6 +654,7 @@ FROM dbo.tblARPayment P WITH (NOLOCK)
     LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))    	
 WHERE P.ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
+  AND (@intEntityCustomerIdLocal IS NULL OR P.intEntityCustomerId = @intEntityCustomerIdLocal)
 
 UNION ALL      
       
@@ -683,6 +697,7 @@ WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 
  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+ AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
  AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
  ) AS TBL) AS B    
 
