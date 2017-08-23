@@ -147,6 +147,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @ysnPrintCreditBalance	= @ysnPrintCreditBalance
 			, @ysnIncludeBudget			= @ysnIncludeBudget
 			, @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
+			, @ysnPrintFromCF			= 0
 			, @strCustomerName			= @strCustomerName
 			, @strAccountStatusCode		= @strAccountStatusCode
 			, @strLocationName			= @strLocationName
