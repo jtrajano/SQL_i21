@@ -36,10 +36,11 @@ DECLARE @intContractDetailId AS INT,
 		@intFutureMarketId AS INT,
 		@batchId AS NVARCHAR(40),
 		@ticketBatchId AS NVARCHAR(40),
-		@splitDistribution AS NVARCHAR(40);
+		@splitDistribution AS NVARCHAR(40),
+		@ticketStatus AS NVARCHAR(10);
 		
 BEGIN 
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId, @splitDistribution = SC.strDistributionOption
+	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
 	FROM	dbo.tblSCTicket SC 
 	LEFT JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
 	LEFT JOIN dbo.tblICCommodity IC On SC.intCommodityId = IC.intCommodityId
@@ -158,7 +159,10 @@ SELECT
 		,intLotId					= NULL --No LOTS from scale
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
-		,ysnIsStorage				= LI.ysnIsStorage
+		,ysnIsStorage				= CASE 
+										WHEN CNT.intPricingTypeId = 2 THEN 1
+										ELSE LI.ysnIsStorage
+									END
 		,dblFreightRate				= SC.dblFreightRate
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
@@ -1034,7 +1038,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 			END
 	END
 
-SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptType = 'Purchase Contract';
+SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptType = 'Purchase Contract' AND ysnIsStorage = 0;
 IF(@checkContract > 0)
 	UPDATE @ReceiptStagingTable SET strReceiptType = 'Purchase Contract'
 
@@ -1117,13 +1121,18 @@ BEGIN
 	WHERE	intInventoryReceiptId = @ReceiptId
 END
 
+IF @ticketStatus = 'O'
+	SET @ticketStatus = 'Open'
+ELSE IF @ticketStatus = 'R'
+	SET @ticketStatus = 'Reopen'
+
 EXEC dbo.uspSMAuditLog 
 	@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
 	,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
 	,@entityId			= @intUserId						-- Entity Id.
 	,@actionType		= 'Updated'							-- Action Type
 	,@changeDescription	= 'Ticket Status'					-- Description
-	,@fromValue			= 'Open'							-- Previous Value
+	,@fromValue			= @ticketStatus						-- Old Value
 	,@toValue			= 'Completed'						-- New Value
 	,@details			= '';
 
