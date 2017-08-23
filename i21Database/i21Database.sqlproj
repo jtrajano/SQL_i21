@@ -5829,4 +5829,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AfterUpgradeCleanup.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\02_TerminalControl.sql" />
+  </ItemGroup>
 </Project>
