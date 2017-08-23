@@ -312,6 +312,291 @@ BEGIN TRY
 	--INSERT FEE RECORDS--
 	EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam
 
+
+	DECLARE @idoc INT
+	
+	--READ XML
+	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
+
+	--TEMP TABLE FOR PARAMETERS
+	DECLARE @temp_params TABLE (
+		 [fieldname] NVARCHAR(MAX)
+		,[condition] NVARCHAR(MAX)      
+		,[from] NVARCHAR(MAX)
+		,[to] NVARCHAR(MAX)
+		,[join] NVARCHAR(MAX)
+		,[begingroup] NVARCHAR(MAX)
+		,[endgroup] NVARCHAR(MAX) 
+		,[datatype] NVARCHAR(MAX)
+	) 
+
+	--XML DATA TO TABLE
+	INSERT INTO @temp_params
+	SELECT *
+	FROM OPENXML(@idoc, 'xmlparam/filters/filter',2)
+	WITH ([fieldname] NVARCHAR(MAX)
+		, [condition] NVARCHAR(MAX)
+		, [from] NVARCHAR(MAX)
+		, [to] NVARCHAR(MAX)
+		, [join] NVARCHAR(MAX)
+		, [begingroup] NVARCHAR(MAX)
+		, [endgroup] NVARCHAR(MAX)
+		, [datatype] NVARCHAR(MAX))
+
+	
+	DECLARE @ysnIncludeRemittancePage BIT
+	SELECT TOP 1
+			@ysnIncludeRemittancePage = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnIncludeRemittancePage'
+
+	IF(@ysnIncludeRemittancePage = 1)
+	BEGIN
+
+		DECLARE @dtmBalanceForwardDate DATETIME
+		SELECT TOP 1
+				@dtmBalanceForwardDate = [from]
+		FROM @temp_params WHERE [fieldname] = 'dtmBalanceForwardDate'
+
+		DECLARE @strCustomerNumber NVARCHAR(MAX)
+		SELECT TOP 1
+				@strCustomerNumber = ISNULL([from],'')
+		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
+		
+		IF(ISNULL(@strCustomerNumber,'') = '')
+		BEGIN
+			EXEC uspARCustomerStatementBalanceForwardReport 
+			@dtmDateFrom = @dtmBalanceForwardDate
+		END
+		ELSE
+		BEGIN
+			DECLARE @strCustomerName NVARCHAR(MAX)
+
+			SET @strCustomerName = (SELECT TOP 1 strName FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
+
+			EXEC uspARCustomerStatementBalanceForwardReport 
+			 @dtmDateFrom = @dtmBalanceForwardDate
+			,@strCustomerName = @strCustomerName
+
+		END
+
+		INSERT INTO tblARCustomerStatementStagingTable
+		(
+		 intEntityCustomerId
+		,intInvoiceId
+		,intPaymentId
+		,dtmDate
+		,dtmDueDate
+		,dtmShipDate
+		,dtmDatePaid
+		,dtmAsOfDate
+		,strCustomerNumber
+		,strCustomerName
+		,strInvoiceNumber
+		,strBOLNumber
+		,strRecordNumber
+		,strTransactionType
+		,strPaymentInfo
+		,strSalespersonName
+		,strAccountStatusCode
+		,strLocationName
+		,strFullAddress
+		,strStatementFooterComment
+		,strCompanyName
+		,strCompanyAddress
+		,dblCreditLimit
+		,dblInvoiceTotal
+		,dblPayment
+		,dblBalance
+		,dblTotalAR
+		,dblCreditAvailable
+		,dblFuture
+		,dbl0Days
+		,dbl10Days
+		,dbl30Days
+		,dbl60Days
+		,dbl90Days
+		,dbl91Days
+		,dblCredits
+		,dblPrepayments
+		,intCFAccountId	
+		,dblCFDiscount	
+		,dblCFEligableGallon	
+		,strCFGroupDiscoount	
+		,intCFDiscountDay	
+		,strCFTermType	
+		,dtmCFInvoiceDate
+		)
+		SELECT
+		 intCustomerId
+		,intInvoiceId
+		,NULL --intPaymentId
+		,dtmTransactionDate
+		,dtmInvoiceDate
+		,NULL --dtmShipDate
+		,NULL --dtmDatePaid
+		,NULL --dtmAsOfDate
+		,strCustomerNumber
+		,strCustomerName
+		,strTempInvoiceReportNumber
+		,NULL --strBOLNumber
+		,NULL --strRecordNumber
+		,'Debit Memo'
+		,NULL --strPaymentInfo
+		,NULL --strSalespersonName
+		,NULL --strAccountStatusCode
+		,strLocationName
+		,NULL --strFullAddress
+		,NULL --strStatementFooterComment
+		,strCompanyName
+		,strCompanyAddress
+		,NULL --dblCreditLimit
+		,dblCalculatedTotalAmount --dblInvoiceTotal
+		,NULL --dblPayment
+		,NULL --dblBalance
+		,NULL --dblTotalAR
+		,NULL --dblCreditAvailable
+		,NULL --dblFuture
+		,NULL --dbl0Days
+		,NULL --dbl10Days
+		,NULL --dbl30Days
+		,NULL --dbl60Days
+		,NULL --dbl90Days
+		,NULL --dbl91Days
+		,NULL --dblCredits
+		,NULL --dblPrepayments
+		,intAccountId
+		,dblDiscount	
+		,dblEligableGallon	
+		,strGroupName	
+		,intDiscountDay	
+		,strTermType	
+		,dtmInvoiceDate
+		FROM
+		tblCFInvoiceStagingTable AS cfInv
+		
+
+		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1
+
+
+		UPDATE tblARCustomerStatementStagingTable
+		SET 
+				 tblARCustomerStatementStagingTable.intCFAccountId					   = 		cfInv.intAccountId				
+				,tblARCustomerStatementStagingTable.dblCFDiscount					   = 		cfInv.dblDiscount				
+				,tblARCustomerStatementStagingTable.dblCFEligableGallon				   = 		cfInv.dblEligableGallon			
+				,tblARCustomerStatementStagingTable.strCFGroupDiscoount				   = 		cfInv.strGroupName			
+				,tblARCustomerStatementStagingTable.intCFDiscountDay				   = 		cfInv.intDiscountDay			
+				,tblARCustomerStatementStagingTable.strCFTermType					   = 		cfInv.strTermType				
+				,tblARCustomerStatementStagingTable.dtmCFInvoiceDate				   = 		cfInv.dtmInvoiceDate			
+				,tblARCustomerStatementStagingTable.intCFTermID						   = 		cfInv.intTermID					
+				,tblARCustomerStatementStagingTable.dblCFAccountTotalAmount			   = 		cfInv.dblAccountTotalAmount		
+				,tblARCustomerStatementStagingTable.dblCFAccountTotalDiscount		   = 		cfInv.dblAccountTotalDiscount	
+				,tblARCustomerStatementStagingTable.dblCFFeeTotalAmount				   = 		cfInv.dblFeeAmount			
+				,tblARCustomerStatementStagingTable.dblCFInvoiceTotal				   = 		cfInv.dblInvoiceTotal			
+				,tblARCustomerStatementStagingTable.dblCFTotalQuantity				   = 		cfInv.dblTotalQuantity			
+				,tblARCustomerStatementStagingTable.strCFTempInvoiceReportNumber	   = 		cfInv.strTempInvoiceReportNumber
+				,tblARCustomerStatementStagingTable.strCFEmailDistributionOption	   = 		cfInv.strEmailDistributionOption
+				,tblARCustomerStatementStagingTable.strCFEmail						   = 		cfInv.strEmail			
+		FROM tblCFInvoiceStagingTable cfInv
+		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
+
+		UPDATE tblARCustomerStatementStagingTable
+		SET
+				 tblARCustomerStatementStagingTable.intCFAccountId						=	  cfAccntTerm.intAccountId
+				,tblARCustomerStatementStagingTable.intCFDiscountDay					=	  cfAccntTerm.intDiscountDay
+				,tblARCustomerStatementStagingTable.strCFTermType						=	  cfAccntTerm.strType
+				,tblARCustomerStatementStagingTable.intCFTermID							=	  cfAccntTerm.intTermsCode
+				,tblARCustomerStatementStagingTable.strCFEmail							=	  (SELECT TOP (1) strEmail
+																								FROM    dbo.vyuARCustomerContacts
+																								WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+																								AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+																								AND (ISNULL(strEmail, N'') <> ''))
+				,tblARCustomerStatementStagingTable.strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
+																								FROM    dbo.vyuARCustomerContacts
+																								WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+																								AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+																								AND (ISNULL(strEmail, N'') <> ''))	
+		FROM vyuCFAccountTerm cfAccntTerm
+		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfAccntTerm.intCustomerId
+
+		
+		DECLARE @strWebsite NVARCHAR(MAX)
+		SET @strWebsite = (select TOP 1 ISNULL(strWebSite,'') from [tblSMCompanySetup])
+
+		UPDATE tblARCustomerStatementStagingTable
+		SET
+				 dblTotalAR						 = 		tbl1.dblTotalAR					
+				,dblCreditAvailable				 = 		tbl1.dblCreditAvailable			
+				,dblFuture						 = 		tbl1.dblFuture					
+				,dbl0Days						 = 		tbl1.dbl0Days					
+				,dbl10Days						 = 		tbl1.dbl10Days					
+				,dbl30Days						 = 		tbl1.dbl30Days					
+				,dbl60Days						 = 		tbl1.dbl60Days					
+				,dbl90Days						 = 		tbl1.dbl90Days					
+				,dbl91Days						 = 		tbl1.dbl91Days					
+				,dblCredits						 = 		tbl1.dblCredits					
+				,dblPrepayments					 = 		tbl1.dblPrepayments				
+				,strAccountStatusCode			 = 		tbl1.strAccountStatusCode		
+				,strFullAddress					 = 		tbl1.strFullAddress				
+				,strCompanyName					 = 		tbl1.strCompanyName				
+				,strCompanyAddress				 = 		tbl1.strCompanyAddress + CHAR(13) + @strWebsite
+				,dblCreditLimit					 = 		tbl1.dblCreditLimit				
+				,strCustomerName				 = 		tbl1.strCustomerName			
+				,strCustomerNumber				 = 		tbl1.strCustomerNumber			
+				,dtmAsOfDate					 = 		tbl1.dtmAsOfDate				
+		FROM (
+				select 
+				 top 1 
+				 dblTotalAR	
+				,intEntityCustomerId
+				,dblCreditAvailable	
+				,dblFuture	
+				,dbl0Days	
+				,dbl10Days	
+				,dbl30Days	
+				,dbl60Days	
+				,dbl90Days	
+				,dbl91Days	
+				,dblCredits	
+				,dblPrepayments
+				,strAccountStatusCode	
+				,strFullAddress	
+				,strCompanyName	
+				,strCompanyAddress	
+				,dblCreditLimit
+				,strCustomerName
+				,strCustomerNumber
+				,dtmAsOfDate
+				from tblARCustomerStatementStagingTable
+				where dblTotalAR IS NOT NULL
+				group by 
+				dblTotalAR	
+				,intEntityCustomerId
+				,dblCreditAvailable	
+				,dblFuture	
+				,dbl0Days	
+				,dbl10Days	
+				,dbl30Days	
+				,dbl60Days	
+				,dbl90Days	
+				,dbl91Days	
+				,dblCredits	
+				,dblPrepayments
+				,strAccountStatusCode	
+				,strFullAddress	
+				,strCompanyName	
+				,strCompanyAddress	
+				,dblCreditLimit
+				,strCustomerName
+				,strCustomerNumber
+				,dtmAsOfDate) as tbl1
+				WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = tbl1.intEntityCustomerId
+
+	END
+
+	--SELECT * FROM vyuCFAccountTerm
+	--select * from vyuCFCardAccount
+
+
 	IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 
 END TRY 
