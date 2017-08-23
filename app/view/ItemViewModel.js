@@ -44,7 +44,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'TaxForm.store.BufferedTaxAuthority',
         'TaxForm.store.BufferedProductCode',
         'Inventory.store.BufferedM2MComputation',
-        'i21.store.CurrencyBuffered'
+        'i21.store.CurrencyBuffered',
+        'Inventory.store.BufferedItemUOMByType'
     ],
 
     stores: {
@@ -527,11 +528,11 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'whbuffereditemnmfc'
         },
         mfgDimensionUom: {
-            type: 'icbuffereduom'
+            type: 'icbuffereditemuombytype'
         },
         mfgWeightUom: {
-            type: 'icbuffereduom'
-        },
+            type: 'icbuffereditemuombytype'
+		},
         packType: {
             type: 'mfbufferedpacktype'
         },

@@ -553,6 +553,48 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _dimensionUOM;
+
+        [NotMapped]
+        public string strDimensionUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_dimensionUOM))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strDimensionUOM;
+                    else
+                        return null;
+                else
+                    return _dimensionUOM;
+            }
+            set
+            {
+                _dimensionUOM = value;
+            }
+        }
+
+        private string _weightUOM;
+
+        [NotMapped]
+        public string strWeightUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_weightUOM))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strWeightUOM;
+                    else
+                        return null;
+                else
+                    return _weightUOM;
+            }
+            set
+            {
+                _weightUOM = value;
+            }
+        }
+
         public vyuICGetCompactItem vyuICGetCompactItem { get; set; }
 
         public tblICManufacturer tblICManufacturer { get; set; }

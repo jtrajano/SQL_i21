@@ -188,6 +188,7 @@
     <Compile Include="Configuration\vyuICLotHistoryMap.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
     <Compile Include="Metadata\Item\tblICItemSubLocation.cs" />
+    <Compile Include="Metadata\MiscViews\vyuICGetItemUOMByType.cs" />
     <Compile Include="Metadata\Receipt\tblICInventoryReceiptCharge.cs" />
     <Compile Include="Metadata\Receipt\tblICInventoryReceiptChargeTax.cs" />
     <Compile Include="Metadata\Receipt\tblICInventoryReceiptInspection.cs" />

@@ -495,19 +495,38 @@ Ext.define('Inventory.view.ItemViewController', {
             txtWidth: '{current.dblWidth}',
             txtDepth: '{current.dblDepth}',
             cboDimensionUOM: {
-                value: '{current.intDimensionUOMId}',
-                store: '{mfgDimensionUom}'
-            },
-            cboWeightUOM: {
-                value: '{current.intWeightUOMId}',
-                store: '{weightUOMs}',
+                //value: '{current.intDimensionUOMId}',
+                value: '{current.strDimensionUOM}',
+                store: '{mfgDimensionUom}',
                 defaultFilters: [
                     {
-                        name: 'intUnitMeasureId',
-                        condition: 'eq',
-                        value: 0
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strUnitType',
+                        value: 'Packed',
+                        conjunction: 'and'
+                    }                    
+                ],                
+            },
+            cboWeightUOM: {
+                //value: '{current.intWeightUOMId}',
+                value: '{current.strWeightUOM}',
+                store: '{mfgWeightUom}',
+                defaultFilters: [
+                    {
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strUnitType',
+                        value: 'Weight',
+                        conjunction: 'and'
                     }
-                ]
+                ],
             },
             txtWeight: '{current.dblWeight}',
             txtMaterialPack: '{current.intMaterialPackTypeId}',
@@ -3947,6 +3966,26 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onManufacturingUOMSelect: function(combo, records, eOpts) {
+        if (!combo && !records && records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win ? win.viewModel.data.current : null;
+
+        if (!current)
+            return; 
+        
+        if (combo.itemId === 'cboDimensionUOM'){
+            current.set('intDimensionUOMId', records[0].get('intUnitMeasureId'));
+            current.set('strDimensionUOM', records[0].get('strUnitMeasure'));
+        }
+        else if (combo.itemId === 'cboWeightUOM') {
+            current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
+            current.set('strWeightUOM', records[0].get('strUnitMeasure'));
+        }
+    },    
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4170,6 +4209,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#chkIsBasket": {
                 change: this.onIsBasketChange    
+            },
+            "#cboDimensionUOM": {
+                select: this.onManufacturingUOMSelect
+            },
+            "#cboWeightUOM": {
+                select: this.onManufacturingUOMSelect
             }
         });
 

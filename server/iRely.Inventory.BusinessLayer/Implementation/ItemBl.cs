@@ -454,24 +454,18 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<object> GetItemUOMsByType(int? intItemId, string strUnitType)
+        public async Task<SearchResult> GetItemUOMsByType(GetParameter param)
         {
-            var query = @"SELECT DISTINCT um.intUnitMeasureId, um.strUnitMeasure, um.strUnitType, um.strSymbol
-                 FROM tblICUnitMeasure um
-                  INNER JOIN tblICItemUOM uom ON uom.intUnitMeasureId = um.intUnitMeasureId
-                 WHERE uom.intItemId = @intItemId
-                  AND um.strUnitType = @strUnitType";
+            var query = _db.GetQuery<vyuICGetItemUOMByType>()
+                    .Filter(param, true);
 
-            var param = new  SqlParameter("@intItemId", intItemId);
-            var param2 = new SqlParameter("@strUnitType", strUnitType);
-            param.DbType = System.Data.DbType.Int32;
-            param2.DbType = System.Data.DbType.String;
+            var data = await query.Execute(param, "strUnitMeasure").ToListAsync();
 
-            var dbSet = _db.ContextManager.Database.SqlQuery<UnitOfMeasure>(query, param, param2);
-            var list = await dbSet.ToListAsync();
-            return new {
-                data = list,
-                total = list.Count()
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
 

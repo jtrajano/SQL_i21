@@ -312,6 +312,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strProductLine).HasColumnName("strProductLine");
             this.Property(t => t.ysnUseWeighScales).HasColumnName("ysnUseWeighScales");
             this.Property(t => t.ysnIsBasket).HasColumnName("ysnIsBasket");
+            this.Property(t => t.strDimensionUOM).HasColumnName("strDimensionUOM");
+            this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
         }
     }
 
@@ -1094,6 +1096,23 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.strMarketValuation).HasColumnName("strMarketValuation");
             // End: Commodity tab fields
+        }
+    }
+
+    public class vyuICGetItemUOMByTypeMap : EntityTypeConfiguration<vyuICGetItemUOMByType>
+    {
+        public vyuICGetItemUOMByTypeMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemUOMByType");
+            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.strUnitType).HasColumnName("strUnitType");
+            this.Property(t => t.strSymbol).HasColumnName("strSymbol");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
         }
     }
 

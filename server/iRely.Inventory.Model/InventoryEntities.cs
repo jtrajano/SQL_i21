@@ -274,6 +274,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICStockDetailMap());
 
             modelBuilder.Configurations.Add(new vyuICSearchItemMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemUOMByTypeMap());
         }
     }
 }

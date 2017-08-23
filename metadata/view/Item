@@ -5243,7 +5243,7 @@
                                                                                                         "itemId": "cboDimensionUOM",
                                                                                                         "labelWidth": 125,
                                                                                                         "layout|flex": 1.4,
-                                                                                                        "valueField": "intUnitMeasureId"
+                                                                                                        "valueField": "strUnitMeasure"
                                                                                                     },
                                                                                                     "name": "MyComboBox35",
                                                                                                     "configAlternates": {
@@ -5296,7 +5296,7 @@
                                                                                                         "layout|flex": 1,
                                                                                                         "layout|margins": null,
                                                                                                         "margin": "0 0 0 5",
-                                                                                                        "valueField": "intUnitMeasureId"
+                                                                                                        "valueField": "strUnitMeasure"
                                                                                                     },
                                                                                                     "name": "MyComboBox36",
                                                                                                     "configAlternates": {

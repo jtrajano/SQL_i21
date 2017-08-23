@@ -2362,7 +2362,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                                 fieldLabel: 'Dimension UOM',
                                                                                                                 labelWidth: 125,
                                                                                                                 displayField: 'strUnitMeasure',
-                                                                                                                valueField: 'intUnitMeasureId'
+                                                                                                                valueField: 'strUnitMeasure'
                                                                                                             },
                                                                                                             {
                                                                                                                 xtype: 'gridcombobox',
@@ -2392,7 +2392,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                                 fieldLabel: 'Weight UOM',
                                                                                                                 labelWidth: 90,
                                                                                                                 displayField: 'strUnitMeasure',
-                                                                                                                valueField: 'intUnitMeasureId'
+                                                                                                                valueField: 'strUnitMeasure'
                                                                                                             }
                                                                                                         ]
                                                                                                     },
