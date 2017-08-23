@@ -12,5 +12,6 @@
     [strOriginLineOfBusiness] NVARCHAR(50) NULL, 
     [strOriginLastTask] NVARCHAR(50) NULL, 
     [strIRUnpostMode] NVARCHAR(50) NULL DEFAULT 'Default', 
+    [strReturnPostMode] NVARCHAR(50) NULL DEFAULT 'Default',
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

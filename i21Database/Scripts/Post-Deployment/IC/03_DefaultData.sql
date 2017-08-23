@@ -85,6 +85,31 @@ BEGIN
 	WHERE	strIRUnpostMode IS NULL
 END
 
+-- Ensure the preference is filled-in. 
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICCompanyPreference') AND name = 'strReturnPostMode')
+BEGIN
+	IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblSMCompanySetup'))
+	BEGIN 		
+		EXEC ('
+			-- If it is for JDE DB, set it to "Allow Return After Qty Change".
+			IF EXISTS(SELECT * FROM tblSMCompanySetup WHERE strCompanyName LIKE ''%Koninklijke Douwe Egberts B.V.%'' )
+			BEGIN 
+				UPDATE	icPref 
+				SET		icPref.strReturnPostMode = ''Allow Return After Qty Change''
+				FROM	tblICCompanyPreference icPref 
+				WHERE	strReturnPostMode IS NULL		
+			END 
+			ELSE 
+			BEGIN 
+				UPDATE	icPref 
+				SET		icPref.strReturnPostMode = ''Default''
+				FROM	tblICCompanyPreference icPref 
+				WHERE	strReturnPostMode IS NULL		
+			END 
+		')
+	END 
+END
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'STOCK' AND strDisplayMember = 'STOCK')
 BEGIN
 	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('STOCK','STOCK',1,1,'dbo',GETDATE())
