@@ -5633,6 +5633,7 @@
     <Build Include="dbo\Views\vyuHDTicketCommentLink.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_PortalMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
+    <Build Include="dbo\Views\vyuHDTicketCustomerContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
