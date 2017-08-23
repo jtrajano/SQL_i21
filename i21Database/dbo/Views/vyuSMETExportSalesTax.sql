@@ -11,16 +11,8 @@ SELECT
 	,ut_acct = '00000000'
 	,chrTaxCode = REPLACE(tblSMTaxCode.strTaxCode, ' ', '')
 
-from tblSMTaxCode
-inner join 
-(
-	select tblSMTaxGroup.intTaxGroupId, intTaxCodeId 
-	from tblSMTaxGroup 
-	inner join tblSMTaxGroupCode on tblSMTaxGroup.intTaxGroupId = tblSMTaxGroupCode.intTaxGroupId
-	inner join tblETExportFilterTaxGroup on tblETExportFilterTaxGroup.intTaxGroupId = tblSMTaxGroup.intTaxGroupId
-)tblETExportFilterTaxGroup on tblSMTaxCode.intTaxCodeId = tblETExportFilterTaxGroup.intTaxCodeId
-
-inner join 
+FROM tblSMTaxCode
+INNER JOIN 
 (
 	select 
 		 tblSMTaxCodeRate.intTaxCodeId
@@ -34,5 +26,12 @@ inner join
 		on tblSMTaxCodeRate.intTaxCodeId = tblSMTaxCodeEffectivity.intTaxCodeId
 		and tblSMTaxCodeRate.dtmEffectiveDate = tblSMTaxCodeEffectivity.dtmEffectiveDate
 )tblTaxEffect
-on tblSMTaxCode.intTaxCodeId = tblTaxEffect.intTaxCodeId
-inner join tblGLAccount on tblGLAccount.intAccountId = tblSMTaxCode.intSalesTaxAccountId
+ON tblSMTaxCode.intTaxCodeId = tblTaxEffect.intTaxCodeId
+INNER JOIN tblGLAccount on tblGLAccount.intAccountId = tblSMTaxCode.intSalesTaxAccountId
+
+WHERE tblSMTaxCode.intTaxCodeId IN 
+	(select intTaxCodeId 
+	from tblSMTaxGroup 
+	INNER JOIN tblSMTaxGroupCode on tblSMTaxGroup.intTaxGroupId = tblSMTaxGroupCode.intTaxGroupId
+	INNER JOIN tblETExportFilterTaxGroup on tblETExportFilterTaxGroup.intTaxGroupId = tblSMTaxGroup.intTaxGroupId
+	)
