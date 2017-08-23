@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets024e200f51e3942f12b7507555e911ebad5277cc85d020ee3933c86be1c942e3))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetscc79b342fe668ac19c85acc972e9c76527dee83826edc3ae4ad604e4107b4b0f))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets024e200f51e3942f12b7507555e911ebad5277cc85d020ee3933c86be1c942e3 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetscc79b342fe668ac19c85acc972e9c76527dee83826edc3ae4ad604e4107b4b0f : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "024e200f51e3942f12b7507555e911ebad5277cc85d020ee3933c86be1c942e3"; }
+            get { return "cc79b342fe668ac19c85acc972e9c76527dee83826edc3ae4ad604e4107b4b0f"; }
         }
 
         /// <summary>
@@ -12925,7 +12925,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCompanyPreference
-        [CodeFirstDatabaseSchema.tblICCompanyPreference](T1.tblICCompanyPreference_intCompanyPreferenceId, T1.tblICCompanyPreference_intInheritSetup, T1.tblICCompanyPreference_intSort, T1.tblICCompanyPreference_strLotCondition, T1.tblICCompanyPreference_strReceiptType, T1.tblICCompanyPreference_intReceiptSourceType, T1.tblICCompanyPreference_intShipmentOrderType, T1.tblICCompanyPreference_intShipmentSourceType, T1.tblICCompanyPreference_strOriginLastTask, T1.tblICCompanyPreference_strOriginLineOfBusiness, T1.tblICCompanyPreference_strIRUnpostMode, T1.tblICCompanyPreference_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICCompanyPreference](T1.tblICCompanyPreference_intCompanyPreferenceId, T1.tblICCompanyPreference_intInheritSetup, T1.tblICCompanyPreference_intSort, T1.tblICCompanyPreference_strLotCondition, T1.tblICCompanyPreference_strReceiptType, T1.tblICCompanyPreference_intReceiptSourceType, T1.tblICCompanyPreference_intShipmentOrderType, T1.tblICCompanyPreference_intShipmentSourceType, T1.tblICCompanyPreference_strOriginLastTask, T1.tblICCompanyPreference_strOriginLineOfBusiness, T1.tblICCompanyPreference_strIRUnpostMode, T1.tblICCompanyPreference_strReturnPostMode, T1.tblICCompanyPreference_intConcurrencyId)
     FROM (
         SELECT 
             T.intCompanyPreferenceId AS tblICCompanyPreference_intCompanyPreferenceId, 
@@ -12939,6 +12939,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strOriginLastTask AS tblICCompanyPreference_strOriginLastTask, 
             T.strOriginLineOfBusiness AS tblICCompanyPreference_strOriginLineOfBusiness, 
             T.strIRUnpostMode AS tblICCompanyPreference_strIRUnpostMode, 
+            T.strReturnPostMode AS tblICCompanyPreference_strReturnPostMode, 
             T.intConcurrencyId AS tblICCompanyPreference_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICCompanyPreferences AS T
@@ -12953,7 +12954,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCompanyPreferences
-        [iRely.Inventory.Model.tblICCompanyPreference](T1.tblICCompanyPreference_intCompanyPreferenceId, T1.tblICCompanyPreference_intInheritSetup, T1.tblICCompanyPreference_intSort, T1.tblICCompanyPreference_strLotCondition, T1.tblICCompanyPreference_strReceiptType, T1.tblICCompanyPreference_intReceiptSourceType, T1.tblICCompanyPreference_intShipmentOrderType, T1.tblICCompanyPreference_intShipmentSourceType, T1.tblICCompanyPreference_strOriginLastTask, T1.tblICCompanyPreference_strOriginLineOfBusiness, T1.tblICCompanyPreference_strIRUnpostMode, T1.tblICCompanyPreference_intConcurrencyId)
+        [iRely.Inventory.Model.tblICCompanyPreference](T1.tblICCompanyPreference_intCompanyPreferenceId, T1.tblICCompanyPreference_intInheritSetup, T1.tblICCompanyPreference_intSort, T1.tblICCompanyPreference_strLotCondition, T1.tblICCompanyPreference_strReceiptType, T1.tblICCompanyPreference_intReceiptSourceType, T1.tblICCompanyPreference_intShipmentOrderType, T1.tblICCompanyPreference_intShipmentSourceType, T1.tblICCompanyPreference_strOriginLastTask, T1.tblICCompanyPreference_strOriginLineOfBusiness, T1.tblICCompanyPreference_strIRUnpostMode, T1.tblICCompanyPreference_strReturnPostMode, T1.tblICCompanyPreference_intConcurrencyId)
     FROM (
         SELECT 
             T.intCompanyPreferenceId AS tblICCompanyPreference_intCompanyPreferenceId, 
@@ -12967,6 +12968,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strOriginLastTask AS tblICCompanyPreference_strOriginLastTask, 
             T.strOriginLineOfBusiness AS tblICCompanyPreference_strOriginLineOfBusiness, 
             T.strIRUnpostMode AS tblICCompanyPreference_strIRUnpostMode, 
+            T.strReturnPostMode AS tblICCompanyPreference_strReturnPostMode, 
             T.intConcurrencyId AS tblICCompanyPreference_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICCompanyPreference AS T

@@ -22,5 +22,6 @@ namespace iRely.Inventory.Model
         public string strOriginLastTask { get; set; }
         public string strOriginLineOfBusiness { get; set; }
         public string strIRUnpostMode { get; set; }
+        public string strReturnPostMode { get; set; }
     }
 }

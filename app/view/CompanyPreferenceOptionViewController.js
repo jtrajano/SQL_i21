@@ -56,7 +56,12 @@ Ext.define('Inventory.view.CompanyPreferenceOptionViewController', {
             cboIRUnpostMode: {
                 value: '{current.strIRUnpostMode}',
                 store: '{inventoryReceiptUnpostMode}'                
-            }
+            },
+
+            cboReturnPostMode: {
+                value: '{current.strReturnPostMode}',
+                store: '{inventoryReturnPostMode}'                
+            }            
 
         }
     },

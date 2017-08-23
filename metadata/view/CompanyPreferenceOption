@@ -448,14 +448,60 @@
                                                 "itemId": "cboIRUnpostMode",
                                                 "labelWidth": 200,
                                                 "modelValidation": null,
-                                                "valueField": "strIRUnpostMode",
-                                                "pickerWidth": 800
+                                                "pickerWidth": 800,
+                                                "valueField": "strIRUnpostMode"
                                             },
                                             "name": "MyComboBox94",
                                             "configAlternates": {
                                                 "columns": "array"
                                             },
                                             "designerId": "b9635f28-31a6-4633-988a-56722520854d",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "{",
+                                                    "dataIndex: 'strReturnPostMode',",
+                                                    "dataType: 'string',",
+                                                    "text: 'Post Mode',",
+                                                    "flex: 2",
+                                                    "},",
+                                                    "{",
+                                                    "dataIndex: 'strDescription',",
+                                                    "dataType: 'string',",
+                                                    "text: 'Description',",
+                                                    "flex: 5",
+                                                    "}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strReturnPostMode",
+                                                "fieldLabel": "Inventory Return Post Mode",
+                                                "itemId": "cboReturnPostMode",
+                                                "labelWidth": 200,
+                                                "modelValidation": null,
+                                                "pickerWidth": 800,
+                                                "valueField": "strReturnPostMode"
+                                            },
+                                            "name": "MyComboBox17",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "bb221352-2af7-492a-a111-aed11428453f",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",

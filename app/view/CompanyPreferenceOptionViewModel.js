@@ -108,7 +108,18 @@ Ext.define('Inventory.view.CompanyPreferenceOptionViewModel', {
                 name: 'strDescription',
                 name: 'strIRUnpostMode'
             }
-        },        
+        },
+
+        inventoryReturnPostMode: {
+            data: [
+                { strDescription: 'Return only the available stocks from the receipt. It will block the over-return of stocks.', strReturnPostMode: 'Default' },
+                { strDescription: 'You can return the stock even after it shrunk, expanded, or audited using the Inv Adj - Qty Change.', strReturnPostMode: 'Allow Return After Qty Change' },
+            ],
+            fields: {
+                name: 'strDescription',
+                name: 'strReturnPostMode'
+            }            
+        }
     },
 
      formulas: {

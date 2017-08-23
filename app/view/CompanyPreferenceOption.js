@@ -237,8 +237,31 @@ Ext.define('Inventory.view.CompanyPreferenceOption', {
                                             fieldLabel: 'Inventory Receipt Unpost Mode',
                                             labelWidth: 200,
                                             displayField: 'strIRUnpostMode',
-                                            valueField: 'strIRUnpostMode',
-                                            pickerWidth: 800
+                                            pickerWidth: 800,
+                                            valueField: 'strIRUnpostMode'
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'strReturnPostMode',
+                                                    dataType: 'string',
+                                                    text: 'Post Mode',
+                                                    flex: 2
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 5
+                                                }
+                                            ],
+                                            itemId: 'cboReturnPostMode',
+                                            fieldLabel: 'Inventory Return Post Mode',
+                                            labelWidth: 200,
+                                            displayField: 'strReturnPostMode',
+                                            pickerWidth: 800,
+                                            valueField: 'strReturnPostMode'
                                         }
                                     ]
                                 }
