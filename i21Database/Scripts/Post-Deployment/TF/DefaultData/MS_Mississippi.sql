@@ -50,56 +50,6 @@ where intTaxAuthorityId = @TaxAuthorityId
 	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
 
--- Terminal Control Numbers
-/* Generate script for Terminal Control Numbers. Specify Tax Authority Id to filter out specific Terminal Control Numbers only.
-select 'UNION ALL SELECT intTerminalControlNumberId = ' + CAST(intTerminalControlNumberId AS NVARCHAR(10)) 
-	+ CASE WHEN strTerminalControlNumber IS NULL THEN ', strTerminalControlNumber = NULL' ELSE ', strTerminalControlNumber = ''' + strTerminalControlNumber + ''''  END
-	+ CASE WHEN strName IS NULL THEN ', strName = NULL' ELSE ', strName = ''' + strName + ''''  END
-	+ CASE WHEN strAddress IS NULL THEN ', strAddress = NULL' ELSE ', strAddress = ''' + strAddress + ''''  END
-	+ CASE WHEN strCity IS NULL THEN ', strCity = NULL' ELSE ', strCity = ''' + strCity + '''' END 
-	+ CASE WHEN dtmApprovedDate IS NULL THEN ', dtmApprovedDate = NULL' ELSE ', dtmApprovedDate = ''' + CAST(dtmApprovedDate AS NVARCHAR(50)) + '''' END 
-	+ CASE WHEN strZip IS NULL THEN ', strZip = NULL' ELSE ', strZip = ''' + strZip + '''' END 
---	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(intMasterId, '') = '' THEN intTerminalControlNumberId ELSE intMasterId END) AS NVARCHAR(20)) -- Old Format
-	+ ', intMasterId = ' + CASE WHEN intMasterId IS NULL THEN CAST(@TaxAuthorityId AS NVARCHAR(20)) + CAST(intTerminalControlNumberId AS NVARCHAR(20)) ELSE CAST(intMasterId AS NVARCHAR(20)) END -- First 2 digit for TaxAuthorityCodeID
-from tblTFTerminalControlNumber
-where intTaxAuthorityId = @TaxAuthorityId
-*/
-	DECLARE @TerminalControlNumbers AS TFTerminalControlNumbers
-
-	INSERT INTO @TerminalControlNumbers(
-		intTerminalControlNumberId
-		, strTerminalControlNumber
-		, strName
-		, strAddress
-		, strCity
-		, dtmApprovedDate
-		, strZip
-		, intMasterId
-	)
-	SELECT intTerminalControlNumberId = 852, strTerminalControlNumber = 'T-59-MS-0001', strName = 'Scott Petroleum Corporation', strAddress = '942 N. Broadway', strCity = 'Greenville', dtmApprovedDate = NULL, strZip = '38701', intMasterId = 24852
-	UNION ALL SELECT intTerminalControlNumberId = 853, strTerminalControlNumber = 'T-64-MS-2401', strName = 'Chevron USA, Inc.- Collins', strAddress = 'Old Highway 49 South', strCity = 'Collins', dtmApprovedDate = NULL, strZip = '39428-', intMasterId = 24853
-	UNION ALL SELECT intTerminalControlNumberId = 854, strTerminalControlNumber = 'T-64-MS-2402', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '31 Kola Road', strCity = 'Collins', dtmApprovedDate = NULL, strZip = '39428-', intMasterId = 24854
-	UNION ALL SELECT intTerminalControlNumberId = 855, strTerminalControlNumber = 'T-64-MS-2404', strName = 'Motiva Enterprises LLC', strAddress = '49 So. & Kola Rd.', strCity = 'Collins', dtmApprovedDate = NULL, strZip = '39428-', intMasterId = 24855
-	UNION ALL SELECT intTerminalControlNumberId = 856, strTerminalControlNumber = 'T-64-MS-2405', strName = 'TransMontaigne - Collins', strAddress = 'First Avenue South', strCity = 'Collins', dtmApprovedDate = NULL, strZip = '39428-', intMasterId = 24856
-	UNION ALL SELECT intTerminalControlNumberId = 857, strTerminalControlNumber = 'T-64-MS-2406', strName = 'Transmontaigne - Greenville- S', strAddress = '310 Walthall Street', strCity = 'Greenville', dtmApprovedDate = NULL, strZip = '38701-', intMasterId = 24857
-	UNION ALL SELECT intTerminalControlNumberId = 858, strTerminalControlNumber = 'T-64-MS-2408', strName = 'TransMontaigne - Greenville - N', strAddress = '208 Short Clay Street', strCity = 'Greenville', dtmApprovedDate = NULL, strZip = '38701-', intMasterId = 24858
-	UNION ALL SELECT intTerminalControlNumberId = 859, strTerminalControlNumber = 'T-64-MS-2411', strName = 'MGC Terminals', strAddress = '101 65th Avenue', strCity = 'Meridian', dtmApprovedDate = NULL, strZip = '39301-', intMasterId = 24859
-	UNION ALL SELECT intTerminalControlNumberId = 860, strTerminalControlNumber = 'T-64-MS-2412', strName = 'CITGO - Meridian', strAddress = '180 65th Avenue', strCity = 'Meridian', dtmApprovedDate = NULL, strZip = '39305-', intMasterId = 24860
-	UNION ALL SELECT intTerminalControlNumberId = 861, strTerminalControlNumber = 'T-64-MS-2414', strName = 'Murphy Oil USA, Inc. - Meridian', strAddress = '6540 N. Frontage Rd.', strCity = 'Meridian', dtmApprovedDate = NULL, strZip = '39301-', intMasterId = 24861
-	UNION ALL SELECT intTerminalControlNumberId = 862, strTerminalControlNumber = 'T-64-MS-2415', strName = 'TransMontaigne - Meridian', strAddress = '1401 65th Ave S', strCity = 'Meridian', dtmApprovedDate = NULL, strZip = '39307-', intMasterId = 24862
-	UNION ALL SELECT intTerminalControlNumberId = 863, strTerminalControlNumber = 'T-64-MS-2416', strName = 'Chevron USA, Inc.- Pascagoula', strAddress = 'Industrial Road State Hwy 611', strCity = 'Pascagoula', dtmApprovedDate = NULL, strZip = '39568-1300', intMasterId = 24863
-	UNION ALL SELECT intTerminalControlNumberId = 864, strTerminalControlNumber = 'T-64-MS-2418', strName = 'Hunt-Southland Refining Co', strAddress = '2 mi N on Hwy 11 PO Drawer A', strCity = 'Sandersville', dtmApprovedDate = NULL, strZip = '39477-', intMasterId = 24864
-	UNION ALL SELECT intTerminalControlNumberId = 865, strTerminalControlNumber = 'T-64-MS-2419', strName = 'CITGO - Vicksburg', strAddress = '1585 Haining Rd', strCity = 'Vicksburg', dtmApprovedDate = NULL, strZip = '39180-', intMasterId = 24865
-	UNION ALL SELECT intTerminalControlNumberId = 866, strTerminalControlNumber = 'T-64-MS-2423', strName = 'Lone Star NGL Hattiesburg LLC', strAddress = '1234 Highway 11', strCity = 'Petal', dtmApprovedDate = NULL, strZip = '39465', intMasterId = 24866
-	UNION ALL SELECT intTerminalControlNumberId = 867, strTerminalControlNumber = 'T-64-MS-2424', strName = 'Hunt Southland Refining Company', strAddress = '2600 Dorsey Street', strCity = 'Vicksburg', dtmApprovedDate = NULL, strZip = '39180', intMasterId = 24867
-	UNION ALL SELECT intTerminalControlNumberId = 868, strTerminalControlNumber = 'T-64-MS-2425', strName = 'Kior Columbus LLC', strAddress = '600 Industrial Park Acces Rd ', strCity = 'Columbus', dtmApprovedDate = NULL, strZip = '39701', intMasterId = 24868
-	UNION ALL SELECT intTerminalControlNumberId = 869, strTerminalControlNumber = 'T-72-MS-2420', strName = 'Martin Operating Partnership, L.P.', strAddress = '5320 Ingalls Ave.', strCity = 'Pascagoula', dtmApprovedDate = NULL, strZip = '39581', intMasterId = 24869
-	UNION ALL SELECT intTerminalControlNumberId = 870, strTerminalControlNumber = 'T-72-MS-2421', strName = 'Delta Terminal, Inc.', strAddress = '2181 Harbor Front', strCity = 'Greenville', dtmApprovedDate = NULL, strZip = '38701-', intMasterId = 24870
-	UNION ALL SELECT intTerminalControlNumberId = 871, strTerminalControlNumber = 'T-72-MS-2422', strName = 'ERPC Aberdeen ', strAddress = '20096 Norm Connell Drive', strCity = 'Aberdeen', dtmApprovedDate = NULL, strZip = '39730', intMasterId = 24871
-
-	EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = @TaxAuthorityCode, @TerminalControlNumbers = @TerminalControlNumbers
-
-
 -- Tax Category
 /* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
 select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(intTaxCategoryId AS NVARCHAR(10))
