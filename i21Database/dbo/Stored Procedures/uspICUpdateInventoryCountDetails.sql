@@ -30,6 +30,8 @@ BEGIN
 		, intSubLocationId
 		, intStorageLocationId
 		, intLotId
+		, strLotNo
+		, strLotAlias
 		, dblSystemCount
 		, dblLastCost
 		, strCountLine
@@ -45,6 +47,8 @@ BEGIN
 		, intSubLocationId
 		, intStorageLocationId
 		, intLotId
+		, strLotNumber
+		, strLotAlias
 		, dblSystemCount = dblOnHand
 		, dblLastCost
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intKey ASC) AS NVARCHAR(50))
