@@ -1117,6 +1117,16 @@ BEGIN
 	WHERE	intInventoryReceiptId = @ReceiptId
 END
 
+EXEC dbo.uspSMAuditLog 
+	@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
+	,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+	,@entityId			= @intUserId						-- Entity Id.
+	,@actionType		= 'Updated'							-- Action Type
+	,@changeDescription	= 'Ticket Status'					-- Description
+	,@fromValue			= 'Open'							-- Previous Value
+	,@toValue			= 'Completed'						-- New Value
+	,@details			= '';
+
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
        ([intConcurrencyId]     
