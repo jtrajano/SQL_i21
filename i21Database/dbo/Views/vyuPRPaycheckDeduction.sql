@@ -15,6 +15,25 @@ SELECT
 	,tblPRPaycheckDeduction.dblAmount
 	,tblPRPaycheckDeduction.dblLimit
 	,tblPRPaycheckDeduction.dblTotal
+	,dblTotalMTD = (SELECT
+						SUM (dblTotal) 
+				    FROM
+						(SELECT PC2.intPaycheckId, 
+								PC2.intEntityEmployeeId, 
+								PC2.dtmPayDate, 
+								PCD2.intTypeDeductionId, 
+								dblTotal = CASE WHEN (PC2.ysnVoid = 1) THEN 0 ELSE PCD2.dblTotal END
+						   FROM tblPRPaycheckDeduction PCD2 
+						   RIGHT JOIN tblPRPaycheck PC2 
+								ON PC2.intPaycheckId = PCD2.intPaycheckId
+										AND PC2.ysnPosted = 1
+						 ) PCX2
+				    WHERE 
+						YEAR(PCX2.dtmPayDate) = YEAR(tblPRPaycheck.dtmPayDate)
+						AND MONTH(PCX2.dtmPayDate) = MONTH(tblPRPaycheck.dtmPayDate)
+						AND PCX2.dtmPayDate <= tblPRPaycheck.dtmPayDate 
+						AND PCX2.intEntityEmployeeId = tblPRPaycheck.intEntityEmployeeId
+						AND PCX2.intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId)
 	,dblTotalYTD = (SELECT
 						SUM (dblTotal) 
 				    FROM
