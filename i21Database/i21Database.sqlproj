@@ -5606,6 +5606,7 @@
     <Build Include="dbo\Views\vyuRKMarketDetail.sql" />
     <Build Include="dbo\Views\vyuHDTicketCommentLink.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_PortalMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
