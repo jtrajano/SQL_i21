@@ -49,7 +49,8 @@ SELECT
 	GL.strBatchId,
 	EL.strLocationName AS strVendorLocation,
 	ISNULL(Payment.dblWithheld,0) AS dblWithheld,
-	ISNULL(Payment.dblDiscount,0) AS dblDiscount
+	ISNULL(Payment.dblDiscount,0) AS dblDiscount,
+	strPayeeName = (SELECT EL2.strCheckPayeeName FROM dbo.tblEMEntityLocation EL2 WHERE EL2.intEntityLocationId = A.intPayToAddressId)
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 

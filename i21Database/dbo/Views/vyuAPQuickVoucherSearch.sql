@@ -20,7 +20,8 @@ SELECT
 	B1.strName,
 	F.strUserName AS strUserId,
 	G.strLocationName AS strUserLocation,
-	A.ysnPosted
+	A.ysnPosted,
+	EL.strCheckPayeeName AS strPayeeName
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -29,3 +30,5 @@ FROM
 	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId
 	LEFT JOIN dbo.tblSMCompanyLocation G
 		ON A.intStoreLocationId = G.intCompanyLocationId
+	LEFT JOIN dbo.tblEMEntityLocation EL 
+		ON EL.intEntityLocationId = A.intPayToAddressId
