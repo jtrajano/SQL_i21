@@ -2810,11 +2810,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Contr
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'ContractManagement.view.Contract?action=new' WHERE strMenuName = 'New Contract' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementCreateParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rapid Contract Entry' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementCreateParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Rapid Contract Entry', N'Contract Management', @ContractManagementCreateParentMenuId, N'Rapid Contract Entry', N'Create', N'Screen', N'ContractManagement.view.ContractRapidEntry', N'small-menu-create', 0, 0, 0, 1, 1, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'ContractManagement.view.ContractRapidEntry' WHERE strMenuName = 'Rapid Contract Entry' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementCreateParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rapid Contract Entry' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementCreateParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Rapid Contract Entry', N'Contract Management', @ContractManagementCreateParentMenuId, N'Rapid Contract Entry', N'Create', N'Screen', N'ContractManagement.view.ContractRapidEntry', N'small-menu-create', 0, 0, 0, 1, 1, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'ContractManagement.view.ContractRapidEntry' WHERE strMenuName = 'Rapid Contract Entry' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementCreateParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Brokers' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementEntityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
