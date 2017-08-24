@@ -13,7 +13,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
 DECLARE @dblTicketGross AS DECIMAL (38, 20)
@@ -33,22 +32,15 @@ DECLARE @intContractDetailId AS INT,
 		@intHaulerId AS INT,
 		@ysnAccrue AS BIT,
 		@ysnPrice AS BIT,
-		@intFutureMarketId AS INT,
 		@batchId AS NVARCHAR(40),
 		@ticketBatchId AS NVARCHAR(40),
 		@splitDistribution AS NVARCHAR(40),
 		@ticketStatus AS NVARCHAR(10);
 		
 BEGIN 
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
-	FROM	dbo.tblSCTicket SC 
-	LEFT JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-	LEFT JOIN dbo.tblICCommodity IC On SC.intCommodityId = IC.intCommodityId
-	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
-END
-
-BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId, @intContractDetailId = SC.intContractId
+	SELECT @intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
+	, @intContractDetailId = SC.intContractId, @splitDistribution = SC.strDistributionOption
+	, @ticketStatus = SC.strTicketStatus
 	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END

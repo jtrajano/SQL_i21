@@ -29,7 +29,8 @@ DECLARE @intContractDetailId AS INT,
 		@intHaulerId AS INT,
 		@ysnAccrue AS BIT,
 		@ysnPrice AS BIT,
-		@splitDistribution AS NVARCHAR(40);
+		@splitDistribution AS NVARCHAR(40),
+		@ticketStatus AS NVARCHAR(10);
 
 DECLARE @SALES_CONTRACT AS INT = 1
 		,@SALES_ORDER AS INT = 2
@@ -46,21 +47,15 @@ BEGIN
 	RETURN;
 END 
 
-DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
-		@intLotType INT
-BEGIN 
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @splitDistribution = SC.strDistributionOption
-	FROM	dbo.tblSCTicket SC	        
-			JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
-END
+		@intLotType INT;
 
 BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId, @intContractDetailId = SC.intContractId
-	,@intItemId = SC.intItemId
-	FROM	dbo.tblICItemUOM UM	
+	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
+	, @intContractDetailId = SC.intContractId ,@intItemId = SC.intItemId
+	, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
+	FROM dbo.tblICItemUOM UM	
 	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
@@ -1075,7 +1070,23 @@ EXEC dbo.uspICAddItemShipment
 --BEGIN 
 --    EXEC uspICReserveStockForInventoryShipment
 --        @InventoryShipmentId
---END 
+--END
+
+IF @ticketStatus = 'O'
+	SET @ticketStatus = 'Open'
+ELSE IF @ticketStatus = 'R'
+	SET @ticketStatus = 'Reopen'
+
+EXEC dbo.uspSMAuditLog 
+	@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
+	,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+	,@entityId			= @intUserId						-- Entity Id.
+	,@actionType		= 'Updated'							-- Action Type
+	,@changeDescription	= 'Ticket Status'					-- Description
+	,@fromValue			= @ticketStatus						-- Old Value
+	,@toValue			= 'Completed'						-- New Value
+	,@details			= '';
+
 DECLARE @ShipmentId INT
 		,@strTransactionId NVARCHAR(50);
 WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddItemShipmentResult) 
