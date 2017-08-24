@@ -10,12 +10,12 @@ StartTest (function (t) {
 
         .selectSearchRowNumber([1])
         .clickButton('OpenSelected')
-        .waitUntilLoaded('icfueltype')
+        .waitUntilLoaded('')
         .clickButton('Delete')
         .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
         .clickMessageBoxButton('yes')
         .waitUntilLoaded()
-        .waitUntilLoaded('icfueltype')
+        .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded()
 
