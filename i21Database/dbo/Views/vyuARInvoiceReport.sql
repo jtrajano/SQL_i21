@@ -204,7 +204,7 @@ LEFT JOIN (
 	SELECT intEntityId
 		 , strName
 	FROM dbo.tblEMEntity
-) SHIPVIA ON INV.intShipViaId = SALESPERSON.intEntityId
+) SHIPVIA ON INV.intShipViaId = SHIPVIA.intEntityId
 LEFT JOIN (
 	SELECT intFreightTermId
 		 , strFreightTerm
