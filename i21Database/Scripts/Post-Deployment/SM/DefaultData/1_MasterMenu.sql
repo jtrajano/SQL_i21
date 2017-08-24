@@ -369,7 +369,7 @@ DECLARE @SystemManagerParentMenuId INT
 SELECT @SystemManagerParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System Manager' AND strModuleName = 'System Manager' AND intParentMenuID = 0
 
 /* CHANGE SCREEN CATEGORY 1730 TO 1810 */
-UPDATE tblSMMasterMenu SET strCategory = 'Activity', strIcon = 'small-menu-activity' WHERE strMenuName IN ('Users', 'User Roles', 'Security Policies', 'Company Configuration', 'Locked Records', 'Emails') AND strModuleName = N'System Manager'
+UPDATE tblSMMasterMenu SET strCategory = 'Activity', strIcon = 'small-menu-activity' WHERE strMenuName IN ('Users', 'User Roles', 'Security Policies', 'Company Configuration', 'Locked Records', 'Emails', 'Email History') AND strModuleName = N'System Manager'
 UPDATE tblSMMasterMenu SET strCategory = 'Maintenance', strIcon = 'small-menu-maintenance' WHERE strMenuName IN ('Custom Tab Designer', 'File Field Mapping', 'Languages', 'Letters', 'Modules', 'Report Labels', 'Screen Labels', 'Starting Numbers') AND strModuleName = N'System Manager'
 UPDATE tblSMMasterMenu SET strCategory = 'Licensing', strIcon = 'small-menu-licensing' WHERE strMenuName IN ('Company Registration', 'License Generator', 'License Types') AND strModuleName = N'System Manager'
 
