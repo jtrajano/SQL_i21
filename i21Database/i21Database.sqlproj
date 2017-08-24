@@ -5634,6 +5634,8 @@
     <None Include="Scripts\Post-Deployment\SM\1730_PortalMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
     <Build Include="dbo\Views\vyuHDTicketCustomerContact.sql" />
+    <Build Include="dbo\Views\vyuMFGetShipped.sql" />
+    <Build Include="dbo\Views\vyuMFGetReceiving.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
