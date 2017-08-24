@@ -13,6 +13,12 @@ BEGIN TRY
 		,@xmlDocumentId INT
 		,@intScaleTicketId INT
 		,@strReceiptNumber NVARCHAR(20)
+		,@dblGrossWeight DECIMAL(24,10) 
+		,@dblTareWeight DECIMAL(24,10)
+		,@dblUnloadedGrain DECIMAL(24,10)
+		,@dblDockage DECIMAL(24,10)
+		,@dblDockagePercent DECIMAL(24,10)
+		,@dblNetWeight DECIMAL(24,10)
 		,@GrainUnloadedDecimal DECIMAL(24,10)
 		,@NetWeightDecimal DECIMAL(24,10)
 		,@strItemStockUOM NVARCHAR(30)
@@ -76,15 +82,21 @@ BEGIN TRY
 
 	SELECT 
 	@strItemStockUOM = UnitMeasure.strUnitMeasure,
-	@GrainUnloadedDecimal =(SC.dblGrossWeight-SC.dblTareWeight),
-	@NetWeightDecimal=(SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink)
+	@dblGrossWeight  = dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,SC.dblGrossWeight),
+	@dblTareWeight = dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,SC.dblTareWeight),
+	@dblUnloadedGrain = dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)),
+	@dblDockage = ROUND(SC.dblShrink,3),
+	@dblDockagePercent = ROUND((SC.dblShrink*100.0/(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)))),2),
+	@dblNetWeight=ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight))-SC.dblShrink,3)
 	FROM   tblICUnitMeasure UnitMeasure
 	JOIN   tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=UnitMeasure.intUnitMeasureId
 	JOIN   tblSCTicket SC ON SC.intItemUOMIdTo=ItemUOM.intItemUOMId
+	JOIN   tblSCScaleSetup SS ON SS.intScaleSetupId = SC.intScaleSetupId
+	JOIN   tblICItemUOM ItemUOM1 ON ItemUOM1.intUnitMeasureId=SS.intUnitMeasureId AND  ItemUOM1.intItemId=SC.intItemId
 	WHERE  SC.intTicketId=@intScaleTicketId
 	
-	SET @GrainUnloadedDecimal=ROUND(@GrainUnloadedDecimal-FLOOR(@GrainUnloadedDecimal),3)
-	SET @NetWeightDecimal=ROUND(@NetWeightDecimal-FLOOR(@NetWeightDecimal),3)
+	SET @GrainUnloadedDecimal=ROUND(@dblUnloadedGrain-FLOOR(@dblUnloadedGrain),3)
+	SET @NetWeightDecimal=ROUND(@dblNetWeight-FLOOR(@dblNetWeight),3)
 
 	SELECT @strCompanyName = 
 			CASE 
@@ -147,14 +159,14 @@ BEGIN TRY
 		,LTRIM(Year(SC.dtmTicketDateTime)) AS strYear
 		,LTRIM(Month(SC.dtmTicketDateTime)) AS strMonth
 		,LTRIM(Day(SC.dtmTicketDateTime)) AS strDay
-		,[dbo].[fnRemoveTrailingZeroes](SC.dblGrossWeight) AS dblGrossWeight
-		,[dbo].[fnRemoveTrailingZeroes](SC.dblTareWeight) AS dblTareWeight
-		,[dbo].[fnRemoveTrailingZeroes]((SC.dblGrossWeight-SC.dblTareWeight)) AS strUnloadedGrain
-		,[dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,6)) AS dblDockage
-		,[dbo].[fnRemoveTrailingZeroes](ROUND((SC.dblShrink*100.0/(SC.dblGrossWeight-SC.dblTareWeight)),6)) AS dblDockagePercent
-		,[dbo].[fnRemoveTrailingZeroes](ROUND((((SC.dblGrossWeight-SC.dblTareWeight)-SC.dblShrink)),3)) AS dblNetWeight	
+		,[dbo].[fnRemoveTrailingZeroes](@dblGrossWeight) AS dblGrossWeight
+		,[dbo].[fnRemoveTrailingZeroes](@dblTareWeight) AS dblTareWeight
+		,[dbo].[fnRemoveTrailingZeroes](@dblUnloadedGrain) AS strUnloadedGrain
+		,[dbo].[fnRemoveTrailingZeroes](@dblDockage) AS dblDockage
+		,[dbo].[fnRemoveTrailingZeroes](@dblDockagePercent) AS dblDockagePercent
+		,[dbo].[fnRemoveTrailingZeroes](@dblNetWeight) AS dblNetWeight	
 		,Item.strItemNo
-		,1 AS strGrade
+		,Attribute.strDescription AS strGrade
 		,EY.strVendorAccountNum		
 		,SS.strStationShortDescription
 		,SS.strStationDescription
@@ -162,23 +174,46 @@ BEGIN TRY
 		,SC.strBinNumber
 		,NULL AS strBoxNoOfSample
 		,' Scale record in '+ @strItemStockUOM AS ScaleLabel
-		,[dbo].[fnGRConvertNumberToWords](SC.dblGrossWeight-SC.dblTareWeight) 
+		,[dbo].[fnGRConvertNumberToWords](@dblUnloadedGrain) 
 		+ CASE 
-			WHEN @GrainUnloadedDecimal >0 THEN ' point ' + [dbo].[fnGRConvertDecimalPartToWords]([dbo].[fnRemoveTrailingZeroes](SC.dblGrossWeight-SC.dblTareWeight))
+			WHEN @GrainUnloadedDecimal >0 THEN ' point ' + [dbo].[fnGRConvertDecimalPartToWords](@dblUnloadedGrain)
 			ELSE ''
 		  END		 
 		+ ' '+@strItemStockUOM AS strGrainUnloadedInWords
-		,[dbo].[fnGRConvertNumberToWords](SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink) 
+		,[dbo].[fnGRConvertNumberToWords](@dblNetWeight) 
 		+CASE 
-			 WHEN @NetWeightDecimal >0 THEN + ' point ' + [dbo].[fnGRConvertDecimalPartToWords]([dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblGrossWeight-SC.dblTareWeight-SC.dblShrink,3)))
+			 WHEN @NetWeightDecimal >0 THEN + ' point ' + [dbo].[fnGRConvertDecimalPartToWords](@dblNetWeight)
 			 ELSE ''
 		 END	 		
 		+ ' '+@strItemStockUOM AS strNetWeightInWords
+		,'On surrender of this receipt and the payment or tender of all lawful charges in respect of the grain described, the identical grain will be delivered either'		 
+		 +CHAR(13) +CHAR(10)+'(a) by the discharge of the grain into a railway car or other conveyance made available for loading at this elevator; or'		 
+		 +CHAR(13) +CHAR(10)+'(b) by the substitution for this and like receipts, together covering a quantity not less than a carload lot, of an elevator receipt for grain of the identical quantity'
+		 +CHAR(13) +CHAR(10)+'and grade, and subject only to the dockage above specified, issued in the prescribed form by a terminal, process or transfer elevator to which shipment of the said grain,'		 
+		 +CHAR(13) +CHAR(10)+'upon notice or otherwise, is authorized by the Canada Grain Act.' 
+		 AS strSpecialText
+
+		,'Upon the surrender of this receipt after delivery of the Commission report as to the grade and dockage of the above sample, there shall be issued in lieu of this receipt'
+		+ CHAR(13) + CHAR(10)+'a Primary Elevator Receipt or Cash Purchase Ticket for grain of the grade reported by the inspecting officer,subject to the dockage specified.'		
+		 AS strInterimText
+
+		,'Upon surrender of this receipt and the payment or tender of all lawful charges in respect of the grain described, either a cash purchase ticket shall be issued for the'
+		+ CHAR(13) + CHAR(10)+'net weight of grain of the grade specified or like grain described on this receipt will be delivered to the holder of this receipt'		
+		+ CHAR(13) + CHAR(10)+'(a) by the discharge of the grain into a railway car or other conveyance made available for loading at  this elevator; or'		
+		+ CHAR(13) + CHAR(10)+'(b) by the substitution for this and like receipts, together covering a quantity not less than a carload lot, of an elevator receipt for grain of the same quantity'
+		+ CHAR(13) + CHAR(10)+'and grade, and subject only to the dockage above specified, issued in the prescribed form by a terminal, process or transfer elevator to which shipment of the grain,'
+		+ CHAR(13) + CHAR(10)+'upon notice or otherwise, is authorized by the Canada Grain Act.'
+		 AS strPrimaryText
+
+		,'WARNING: The right of the holder of this receipt to obtain delivery of the grain described in the receipt may be altered by the issuer by notice'
+		 + CHAR(13) + CHAR(10)+'altered by the issuer by notice to the last holder known to the issuer. Every holder of a receipt should immediately notify the issuer of their name and address'
+		 AS strWarning
+
 	FROM tblSCTicket SC
 	JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId
 	JOIN tblICItem Item ON Item.intItemId = SC.intItemId
 	JOIN tblSCScaleSetup SS ON SS.intScaleSetupId = SC.intScaleSetupId
-	JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=SC.intItemUOMIdTo
+	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	WHERE SC.intTicketId = @intScaleTicketId
 END TRY
 
