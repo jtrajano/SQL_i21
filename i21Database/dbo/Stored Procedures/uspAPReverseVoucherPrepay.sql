@@ -52,7 +52,8 @@ BEGIN
 	UPDATE glEntries
 		SET glEntries.intTransactionId = @createdReversal,
 		glEntries.strTransactionId = @newBillId,
-		glEntries.dtmDateEntered = GETDATE()
+		glEntries.dtmDateEntered = GETDATE(),
+		glEntries.ysnIsUnposted = 0
 	FROM @GLEntries glEntries
 	EXEC uspGLBookEntries @GLEntries, 1
 END
