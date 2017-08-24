@@ -1056,24 +1056,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onGridAfterLayout: function (grid) {
-        "use strict";
+        // "use strict";
 
-        //TODO: Remove this when we upgrade to Ext 6 - workaround for the flying combo
-        var editor = grid.editingPlugin && grid.editingPlugin.activeEditor;
-        if (editor && editor.field instanceof Ext.form.field.Text) {
-            var plugin = editor.editingPlugin,
-                record = plugin.activeRecord,
-                column = plugin.activeColumn,
-                view = grid.view,
-                row = view.getRow(record);
+        // //TODO: Remove this when we upgrade to Ext 6 - workaround for the flying combo
+        // var editor = grid.editingPlugin && grid.editingPlugin.activeEditor;
+        // if (editor && editor.field instanceof Ext.form.field.Text) {
+        //     var plugin = editor.editingPlugin,
+        //         record = plugin.activeRecord,
+        //         column = plugin.activeColumn,
+        //         view = grid.view,
+        //         row = view.getRow(record);
 
-            if (row && record && column && editor.getXY().toString() !== '0,0') {
-                var cell = plugin.getCell(record, column);
-                if (cell && (editor.getXY() !== cell.getXY())) {
-                    editor.realign();
-                }
-            }
-        }
+        //     if (row && record && column && editor.getXY().toString() !== '0,0') {
+        //         var cell = plugin.getCell(record, column);
+        //         if (cell && (editor.getXY() !== cell.getXY())) {
+        //             editor.realign();
+        //         }
+        //     }
+        // }
     },
 
     show: function (config) {

@@ -715,58 +715,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        hidden: true,
-                                                        itemId: 'colDetailWeight',
-                                                        width: 90,
-                                                        align: 'right',
-                                                        dataIndex: 'number',
-                                                        text: 'Weight',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            quantityField: true,
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true,
-                                                            minValue: 0
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        hidden: true,
-                                                        itemId: 'colDetailWeightUOM',
-                                                        minWidth: 95,
-                                                        width: 100,
-                                                        dataIndex: 'intUnitMeasureId',
-                                                        text: 'Weight UOM',
-                                                        flex: 1.3,
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intUnitMeasureId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Measure',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboDetailWeightUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
                                                         itemId: 'colDetailMaxQty',
                                                         width: 90,
                                                         align: 'right',
