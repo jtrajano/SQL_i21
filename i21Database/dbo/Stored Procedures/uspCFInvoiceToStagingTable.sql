@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -34,15 +33,15 @@ BEGIN TRY
 	-----------------------------------------------------------
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam
 
-	SELECT * FROM tblCFInvoiceReportTempTable
+	--SELECT * FROM tblCFInvoiceReportTempTable
 
 	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam
 
-	SELECT * FROM tblCFInvoiceSummaryTempTable
+	--SELECT * FROM tblCFInvoiceSummaryTempTable
 
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam
 
-	SELECT * FROM tblCFInvoiceDiscountTempTable
+	--SELECT * FROM tblCFInvoiceDiscountTempTable
 	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
@@ -357,6 +356,13 @@ BEGIN TRY
 				@dtmBalanceForwardDate = [from]
 		FROM @temp_params WHERE [fieldname] = 'dtmBalanceForwardDate'
 
+		DECLARE @dtmTransactionDateFrom DATETIME
+		DECLARE @dtmTransactionDateTo DATETIME
+		SELECT TOP 1
+				@dtmTransactionDateFrom = [from]
+				,@dtmTransactionDateFrom = [to]
+		FROM @temp_params WHERE [fieldname] = 'dtmTransactionDate'
+
 		DECLARE @strCustomerNumber NVARCHAR(MAX)
 		SELECT TOP 1
 				@strCustomerNumber = ISNULL([from],'')
@@ -366,6 +372,9 @@ BEGIN TRY
 		BEGIN
 			EXEC uspARCustomerStatementBalanceForwardReport 
 			@dtmDateFrom = @dtmBalanceForwardDate
+			,@dtmDateTo = @dtmTransactionDateTo
+			,@ysnPrintFromCF = 1
+
 		END
 		ELSE
 		BEGIN
@@ -375,6 +384,8 @@ BEGIN TRY
 
 			EXEC uspARCustomerStatementBalanceForwardReport 
 			 @dtmDateFrom = @dtmBalanceForwardDate
+			,@dtmDateTo = @dtmTransactionDateTo
+			,@ysnPrintFromCF = 1
 			,@strCustomerName = @strCustomerName
 
 		END
@@ -428,9 +439,9 @@ BEGIN TRY
 		)
 		SELECT
 		 intCustomerId
-		,intInvoiceId
+		,0
 		,NULL --intPaymentId
-		,dtmTransactionDate
+		,dtmInvoiceDate
 		,dtmInvoiceDate
 		,NULL --dtmShipDate
 		,NULL --dtmDatePaid
@@ -444,15 +455,15 @@ BEGIN TRY
 		,NULL --strPaymentInfo
 		,NULL --strSalespersonName
 		,NULL --strAccountStatusCode
-		,strLocationName
+		,NULL
 		,NULL --strFullAddress
 		,NULL --strStatementFooterComment
 		,strCompanyName
 		,strCompanyAddress
 		,NULL --dblCreditLimit
-		,dblCalculatedTotalAmount --dblInvoiceTotal
-		,NULL --dblPayment
-		,NULL --dblBalance
+		,dblAccountTotalAmount --dblInvoiceTotal
+		,0 --dblPayment
+		,dblAccountTotalAmount --dblBalance
 		,NULL --dblTotalAR
 		,NULL --dblCreditAvailable
 		,NULL --dblFuture
@@ -465,14 +476,31 @@ BEGIN TRY
 		,NULL --dblCredits
 		,NULL --dblPrepayments
 		,intAccountId
-		,dblDiscount	
+		,dblAccountTotalDiscount	
 		,dblEligableGallon	
 		,strGroupName	
 		,intDiscountDay	
 		,strTermType	
 		,dtmInvoiceDate
 		FROM
-		tblCFInvoiceStagingTable AS cfInv
+		tblCFInvoiceStagingTable 
+		AS cfInv
+		GROUP BY 
+		intCustomerId
+		,dtmInvoiceDate
+		,strCustomerNumber
+		,strCustomerName
+		,strTempInvoiceReportNumber
+		,strCompanyName
+		,strCompanyAddress
+		,intAccountId
+		,dblEligableGallon	
+		,strGroupName	
+		,intDiscountDay	
+		,strTermType	
+		,dtmInvoiceDate
+		,dblAccountTotalAmount
+		,dblAccountTotalDiscount
 		
 
 		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1
