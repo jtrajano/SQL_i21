@@ -28,7 +28,7 @@ SELECT	DISTINCT
 			INNER JOIN dbo.tblICItem IE ON IE.intItemId = APBD.intItemId
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
-			INNER JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
+			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			 OUTER APPLY(
 			SELECT TOP 1 
