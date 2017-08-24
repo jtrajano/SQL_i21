@@ -68,7 +68,7 @@ strBillTo = (
                          cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, cfCardAccount.strInvoiceCycle, cfTrans.strTempInvoiceReportNumber AS strInvoiceReportNumber, 
                          cfTrans.strPrintTimeStamp, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail
 FROM         dbo.vyuCFInvoice AS arInv RIGHT JOIN
-                         dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
+                         dbo.tblCFTransaction AS cfTrans ON cfTrans.ysnPosted = 1 AND arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId LEFT OUTER JOIN
                          dbo.vyuCFCardAccount AS cfCardAccount ON cfTrans.intCardId = cfCardAccount.intCardId INNER JOIN
                              (SELECT   icfSite.intSiteId, icfSite.intNetworkId, icfSite.intTaxGroupId, icfSite.strSiteNumber, icfSite.intARLocationId, icfSite.intCardId, icfSite.strTaxState, 
@@ -132,7 +132,7 @@ FROM         dbo.vyuCFInvoice AS arInv RIGHT JOIN
                                                          ISNULL(SUM(dblTaxRate), 0) AS dblTaxRate
                                 FROM         dbo.vyuCFTransactionTax AS TotalTaxes
                                 GROUP BY intTransactionId) AS TotalTaxes_1 ON cfTrans.intTransactionId = TotalTaxes_1.intTransactionId
-WHERE     (cfTrans.ysnPosted = 1)
+--WHERE     (cfTrans.ysnPosted = 1)
 GROUP BY cfCardAccount.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId, cfTrans.intProductId, cfCardAccount.strCardNumber, cfCardAccount.strCardDescription, 
                          cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.strProductNumber, cfSiteItem.strProductDescription, cfCardAccount.strDepartment, 
                          cfCardAccount.strDepartmentDescription, cfSiteItem.strTaxState, cfSiteItem.ysnIncludeInQuantityDiscount, cfVehicle.strVehicleNumber, cfVehicle.strVehicleDescription, 
