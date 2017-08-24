@@ -186,7 +186,7 @@ BEGIN
 	--PRINT 'Load Distribution Detail Id : '
 	--PRINT @intLoadDistributionDetailId
 
-	SELECT DistItem.intLoadDistributionDetailId
+	SELECT DISTINCT DistItem.intLoadDistributionDetailId
 		, intItemId = BlendIngredient.intIngredientItemId
 		, dblQty = BlendIngredient.dblQuantity
 		, HeaderDistItem.intCompanyLocationId
