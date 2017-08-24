@@ -45,7 +45,7 @@ SELECT
 	,[strTransactionId]				= @strTransactionId
 	,[intCurrencyId]				= P.intCurrencyId
 	,[intBankTransactionTypeId]		= 1
-	,[dtmDate]						= GETDATE()
+	,[dtmDate]						= P.dtmDatePaid
 	,[dblAmount]					= UF.dblAmount
 	,[strMemo]						= 'AR ACH'
 	,[intCompanyLocationId]			= UF.intLocationId
