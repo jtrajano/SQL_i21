@@ -180,7 +180,7 @@ BEGIN
 			,[dblQtyOrdered]						= NULL
 			,[dblQtyShipped]						= 1 -- DEFAULT TO 1
 			,[dblDiscount]							= NULL
-			,[dblPrice]								= SUM(ISNULL(dblCalculatedTotalAmount,0)) -- dblAccountTotalAmount
+			,[dblPrice]								= dblAccountTotalAmount -- dblAccountTotalAmount
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= ''
 			,[strFrequency]							= ''
@@ -220,7 +220,7 @@ BEGIN
 		GROUP BY 
 		intCustomerId
 		,strTempInvoiceReportNumber
-		,dblCalculatedTotalAmount
+		,dblAccountTotalAmount
 		,dblAccountTotalDiscount
 		,intTermID
 		,dtmInvoiceDate
@@ -686,14 +686,14 @@ BEGIN
 			SELECT TOP 1 
 			 @strInvoiceReportNumber = strTempInvoiceReportNumber 
 			,@dblTotalQuantity = SUM(dblQuantity)
-			,@dblAccountTotalAmount = SUM(dblCalculatedTotalAmount)
+			,@dblAccountTotalAmount = dblAccountTotalAmount
 			,@dblAccountTotalDiscount = dblAccountTotalDiscount
 			FROM tblCFInvoiceStagingTable 
 			WHERE intCustomerId = @intEntityCustomerId AND intInvoiceId IS NOT NULL AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
 			GROUP BY
 			 intCustomerId
 			,strTempInvoiceReportNumber
-			,dblCalculatedTotalAmount
+			,dblAccountTotalAmount
 			,dblAccountTotalDiscount
 			,intTermID
 			,dtmInvoiceDate
