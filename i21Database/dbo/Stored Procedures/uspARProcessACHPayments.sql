@@ -105,7 +105,7 @@ SELECT
 	,[strTransactionId]				= @strTransactionId
 	,[intCurrencyId]				= P.intCurrencyId
 	,[intBankTransactionTypeId]		= 1
-	,[dtmDate]						= GETDATE()
+	,[dtmDate]						= P.dtmDatePaid
 	,[dblAmount]					= SUM(UF.dblAmount)
 	,[strMemo]						= 'AR ACH'
 	,[intCompanyLocationId]			= UF.intLocationId
@@ -116,6 +116,7 @@ FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 	) P
 GROUP BY UF.intBankAccountId
 	   , P.intCurrencyId
+	   , P.dtmDatePaid
 	   , UF.intLocationId
 
 --Payment Detail
