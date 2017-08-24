@@ -5410,6 +5410,8 @@
     <Build Include="dbo\Views\vyuCFARInvoiceRemittance.sql" />
     <Build Include="dbo\Views\vyuCFAccountTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
+    <Build Include="dbo\Views\vyuMFGetShipped.sql" />
+    <Build Include="dbo\Views\vyuMFGetReceiving.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,6 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetShipped]
+﻿CREATE VIEW [dbo].[vyuMFGetShipped]
 AS
-SELECT InvS.intInventoryShipmentId 
+SELECT InvS.intInventoryShipmentId
 	,InvS.strReferenceNumber
 	,InvS.strShipmentNumber
 	,InvS.dtmShipDate
@@ -23,15 +23,19 @@ SELECT InvS.intInventoryShipmentId
 	,L.strLotNumber
 	,InvSL.dblQuantityShipped dblQuantityShipped
 	,UM.strUnitMeasure
-	,Case When IU.intUnitMeasureId=I.intWeightUOMId Then InvSL.dblQuantityShipped Else  InvSL.dblQuantityShipped*I.dblWeight End As Weight 
+	,CASE 
+		WHEN IU.intUnitMeasureId = I.intWeightUOMId
+			THEN InvSL.dblQuantityShipped
+		ELSE InvSL.dblQuantityShipped * I.dblWeight
+		END AS Weight
 	,(
-			SELECT MIN(dtmCreated)
-			FROM tblICInventoryTransaction IT
-			WHERE IT.intLotId = L.intLotId
-				AND IT.intTransactionTypeId = 5
-				AND IT.ysnIsUnposted = 0
-				AND IT.strTransactionId =InvS.strShipmentNumber 
-			) AS dtmPostedDate
+		SELECT MIN(dtmCreated)
+		FROM tblICInventoryTransaction IT
+		WHERE IT.intLotId = L.intLotId
+			AND IT.intTransactionTypeId = 5
+			AND IT.ysnIsUnposted = 0
+			AND IT.strTransactionId = InvS.strShipmentNumber
+		) AS dtmPostedDate
 	,C.strCategoryCode
 	,C.strDescription AS strCategoryDescription
 	,CAST(CASE 
@@ -59,22 +63,22 @@ SELECT InvS.intInventoryShipmentId
 			ELSE 0
 			END) AS dblNoOfPallet
 	,(I.intUnitPerLayer * I.intLayerPerPallet) AS intCasesPerPallet
-	,IsNULL(I.intInnerUnits,0) AS intUnitsPerCase
-	,InvS.dtmRequestedArrivalDate 
-	,FT.strFreightTerm 
-	,InvS.strComment 
+	,IsNULL(I.intInnerUnits, 0) AS intUnitsPerCase
+	,InvS.dtmRequestedArrivalDate
+	,FT.strFreightTerm
+	,InvS.strComment
 	,InvS.strDeliveryInstruction
 	,InvS.strDriverId
-	,InvS.strVessel 
-	,InvS.strSealNumber 
+	,InvS.strVessel
+	,InvS.strSealNumber
 	,InvS.dtmAppointmentTime
-	,InvS.dtmDepartureTime 
+	,InvS.dtmDepartureTime
 	,InvS.dtmArrivalTime
-	,InvS.dtmDeliveredDate 
+	,InvS.dtmDeliveredDate
 	,InvS.strFreeTime
-	,InvS.strReceivedBy 
+	,InvS.strReceivedBy
 	,SV.strName AS strShipVia
-		,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -85,7 +89,7 @@ SELECT InvS.intInventoryShipmentId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
 		WHERE T.intRecordId = InvS.intInventoryShipmentId
 		) AS strTotalPalletsLoaded
-		,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -96,7 +100,7 @@ SELECT InvS.intInventoryShipmentId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
 		WHERE T.intRecordId = InvS.intInventoryShipmentId
 		) AS strAirbags
-			,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -107,7 +111,7 @@ SELECT InvS.intInventoryShipmentId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
 		WHERE T.intRecordId = InvS.intInventoryShipmentId
 		) AS strCaseLabels
-		,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -118,7 +122,7 @@ SELECT InvS.intInventoryShipmentId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
 		WHERE T.intRecordId = InvS.intInventoryShipmentId
 		) AS strNumberofPalletLabels
-		,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -129,7 +133,7 @@ SELECT InvS.intInventoryShipmentId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
 		WHERE T.intRecordId = InvS.intInventoryShipmentId
 		) AS strNumberofPalletPlacards
-		,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -140,7 +144,7 @@ SELECT InvS.intInventoryShipmentId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
 		WHERE T.intRecordId = InvS.intInventoryShipmentId
 		) AS strPalletCap
-		,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -151,7 +155,7 @@ SELECT InvS.intInventoryShipmentId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
 		WHERE T.intRecordId = InvS.intInventoryShipmentId
 		) AS strWoodPallet
-		,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -162,7 +166,7 @@ SELECT InvS.intInventoryShipmentId
 			AND S.strNamespace = 'Inventory.view.InventoryShipment'
 		WHERE T.intRecordId = InvS.intInventoryShipmentId
 		) AS strHeatTreatedPallet
-		,(
+	,(
 		SELECT TOP 1 FV.strValue
 		FROM tblSMTabRow TR
 		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
@@ -185,6 +189,6 @@ JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = InvS.intShipToLocationId
 JOIN dbo.tblSMCompanyLocation EL1 ON EL1.intCompanyLocationId = InvS.intShipFromLocationId
-JOIN tblSMFreightTerms FT on FT.intFreightTermId =InvS.intFreightTermId
-Left JOIN tblSMShipVia SV on SV.intEntityShipViaId =InvS.intShipViaId
-ORDER BY InvS.strShipmentNumber DESC
+JOIN tblSMFreightTerms FT ON FT.intFreightTermId = InvS.intFreightTermId
+LEFT JOIN tblSMShipVia SV ON SV.intEntityShipViaId = InvS.intShipViaId
+

@@ -90,7 +90,7 @@ BEGIN
 			,@strPackingMaterial NVARCHAR(100)
 			,@strPackingMaterial1 NVARCHAR(100)
 			,@strCountryOfOrigin NVARCHAR(50)
-			,@strPalletId1 NVARCHAR(50)
+			,@strPalletId1 NVARCHAR(MAX)
 			,@intTaskId INT
 			,@intOriginId INT
 			,@intStatusId INT
@@ -292,7 +292,7 @@ BEGIN
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 76--Staging Location
 
-		SELECT @strPalletId1 = @strPalletId1 + DT.strParentLotNumber + ','
+		SELECT @strPalletId1 = @strPalletId1 + DT.strParentLotNumber + ', '
 		FROM (
 			SELECT DISTINCT strParentLotNumber
 			FROM dbo.tblMFWorkOrderRecipe R
@@ -329,6 +329,8 @@ BEGIN
 		BEGIN
 			SELECT @strPalletId1 = Left(@strPalletId1, Len(@strPalletId1) - 1)
 		END
+
+		Select @strPalletId1=@strPalletId1+', N/A'
 
 		SELECT @strPackagingLotCode1 = ''
 			,@strPackagingLotCode2 = ''
