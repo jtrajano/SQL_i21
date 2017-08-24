@@ -56,6 +56,40 @@ BEGIN TRY
 	AND		strStatus = 'Approved' 
 	ORDER BY intApprovalId DESC
 
+	--Correct if UOM are wrong
+
+	UPDATE	CD 
+	SET		CD.intPriceItemUOMId	=	CU.intItemUOMId
+	from	vyuCTContractSequence	CD
+	JOIN	tblICItemUOM			IU	ON	IU.intItemUOMId			=	CD.intPriceItemUOMId
+	JOIN	tblICUnitMeasure		UM	ON	UM.strUnitMeasure		=	strPriceUOM
+	JOIN	tblICItemUOM			CU	ON	CU.intItemId			=	CD.intItemId 
+									AND CU.intUnitMeasureId			=	UM.intUnitMeasureId
+	WHERE	IU.intItemId			<>	CD.intItemId	
+	AND		CD.intContractHeaderId	=	@intContractHeaderId
+
+	UPDATE	CD 
+	SET		CD.intItemUOMId			=	CU.intItemUOMId
+	from	vyuCTContractSequence	CD
+	JOIN	tblICItemUOM			IU	ON	IU.intItemUOMId			=	CD.intItemUOMId
+	JOIN	tblICUnitMeasure		UM	ON	UM.strUnitMeasure		=	strItemUOM
+	JOIN	tblICItemUOM			CU	ON	CU.intItemId			=	CD.intItemId 
+									AND CU.intUnitMeasureId			=	UM.intUnitMeasureId
+	WHERE	IU.intItemId			<>	CD.intItemId	
+	AND		CD.intContractHeaderId	=	@intContractHeaderId
+
+	UPDATE	CD 
+	SET		CD.intNetWeightUOMId	=	CU.intItemUOMId
+	from	vyuCTContractSequence	CD
+	JOIN	tblICItemUOM			IU	ON	IU.intItemUOMId			=	CD.intNetWeightUOMId
+	JOIN	tblICUnitMeasure		UM	ON	UM.strUnitMeasure		=	strNetWeightUOM
+	JOIN	tblICItemUOM			CU	ON	CU.intItemId			=	CD.intItemId 
+										AND CU.intUnitMeasureId		=	UM.intUnitMeasureId
+	WHERE	IU.intItemId			<>	CD.intItemId	
+	AND		CD.intContractHeaderId	=	@intContractHeaderId
+
+	--End Correct if UOM are wrong
+
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 	
 	WHILE ISNULL(@intContractDetailId,0) > 0
