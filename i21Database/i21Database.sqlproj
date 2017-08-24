@@ -5621,6 +5621,8 @@
     <Build Include="dbo\Views\vyuRKPositionByPeriodContDetView.sql" />
     <Build Include="dbo\Views\vyuRKMarketDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
+    <Build Include="dbo\Views\vyuMFGetShipped.sql" />
+    <Build Include="dbo\Views\vyuMFGetReceiving.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
