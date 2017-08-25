@@ -436,6 +436,7 @@ BEGIN TRY
 		,intCFDiscountDay	
 		,strCFTermType	
 		,dtmCFInvoiceDate
+		,ysnCFShowDiscountOnInvoice
 		)
 		SELECT
 		 intCustomerId
@@ -482,6 +483,7 @@ BEGIN TRY
 		,intDiscountDay	
 		,strTermType	
 		,dtmInvoiceDate
+		,ysnShowOnCFInvoice
 		FROM
 		tblCFInvoiceStagingTable 
 		AS cfInv
@@ -501,6 +503,7 @@ BEGIN TRY
 		,dtmInvoiceDate
 		,dblAccountTotalAmount
 		,dblAccountTotalDiscount
+		,ysnShowOnCFInvoice
 		
 
 		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1
@@ -524,6 +527,7 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.strCFTempInvoiceReportNumber	   = 		cfInv.strTempInvoiceReportNumber
 				,tblARCustomerStatementStagingTable.strCFEmailDistributionOption	   = 		cfInv.strEmailDistributionOption
 				,tblARCustomerStatementStagingTable.strCFEmail						   = 		cfInv.strEmail			
+				,tblARCustomerStatementStagingTable.ysnCFShowDiscountOnInvoice		   =		cfInv.ysnShowOnCFInvoice
 		FROM tblCFInvoiceStagingTable cfInv
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
 

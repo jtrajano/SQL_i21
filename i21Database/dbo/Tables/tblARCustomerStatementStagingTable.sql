@@ -53,6 +53,7 @@
     [dblCFTotalQuantity]           NUMERIC (18, 6) NULL,
     [strCFTempInvoiceReportNumber] NVARCHAR (MAX)  NULL,
     [strCFEmailDistributionOption] NVARCHAR (MAX)  NULL,
-    [strCFEmail]                   NVARCHAR (MAX)  NULL
+    [strCFEmail]                   NVARCHAR (MAX)  NULL,
+	[ysnCFShowDiscountOnInvoice]   BIT             NULL
 );
 
