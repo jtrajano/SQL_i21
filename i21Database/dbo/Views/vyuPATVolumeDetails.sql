@@ -34,6 +34,7 @@ FROM (SELECT	CV.intFiscalYear,
 	INNER JOIN tblAPVendor AP
 		ON AP.intEntityId = EM.intEntityId
 	CROSS JOIN tblGLFiscalYear FY
+	WHERE YEAR(FY.dtmDateFrom) <= YEAR(GETDATE())
 	UNION
 	SELECT	FY.intFiscalYearId,
 			EM.intEntityId,
@@ -47,6 +48,7 @@ FROM (SELECT	CV.intFiscalYear,
 		ON AP.intEntityId = EM.intEntityId
 	INNER JOIN tblGLFiscalYear FY
 		ON FY.dtmDateFrom >= AR.dtmMembershipDate
+	WHERE YEAR(FY.dtmDateFrom) <= YEAR(GETDATE())
 ) CustomerVolume
 INNER JOIN tblEMEntity ENT
 	ON ENT.intEntityId = CustomerVolume.intCustomerPatronId
