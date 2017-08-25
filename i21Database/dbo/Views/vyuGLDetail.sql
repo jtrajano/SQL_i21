@@ -11,8 +11,8 @@ AS
             C.strAccountType,
             A.dblDebit,
             A.dblCredit,
-            dblDebitUnit,
-			dblCreditUnit,
+            CASE WHEN ISNULL(U.dblLbsPerUnit,0) > 0 THEN CAST((A.dblDebitUnit/ U.dblLbsPerUnit) AS numeric(18,6)) ELSE 0 END dblDebitUnit,
+			CASE WHEN ISNULL(U.dblLbsPerUnit,0) > 0 THEN CAST((A.dblCreditUnit/ U.dblLbsPerUnit) AS numeric(18,6)) ELSE 0 END dblCreditUnit,
             A.strDescription,
             A.strCode,
             A.strReference,
@@ -54,7 +54,7 @@ AS
 		 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
 	 ) J
 	 OUTER APPLY (
-		SELECT TOP 1 strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
+		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 	 )U
 	 OUTER APPLY(
 		SELECT TOP 1 intEntityId,strUserName FROM [tblEMEntityCredential] WHERE intEntityId = A.intEntityId
