@@ -2,7 +2,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	 @intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT
-	,@dblNetUnits AS DECIMAL (38,20)
+	,@dblNetUnits AS DECIMAL (13,3)
 	,@dblCost AS DECIMAL (9,5)
 	,@intEntityId AS INT
 	,@intContractId AS INT
@@ -28,9 +28,9 @@ DECLARE @SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
 		,@TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
 
 DECLARE @intTicketId AS INT = @intSourceTransactionId
-DECLARE @dblRemainingUnits AS DECIMAL (38,20)
-DECLARE @dblRemainingQuantity AS DECIMAL (38,20)
-DECLARE @dblRemainingUnitStorage AS DECIMAL (38,20)
+DECLARE @dblRemainingUnits AS DECIMAL (13,3)
+DECLARE @dblRemainingQuantity AS DECIMAL (13,3)
+DECLARE @dblRemainingUnitStorage AS DECIMAL (13,3)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @intDirectType AS INT = 3
@@ -133,7 +133,7 @@ BEGIN TRY
 			IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 			BEGIN
 				DECLARE @intLoopContractId INT;
-				DECLARE @dblLoopContractUnits NUMERIC(38,20);
+				DECLARE @dblLoopContractUnits NUMERIC(12,4);
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
 				SELECT intContractDetailId, dblUnitsDistributed
@@ -461,7 +461,7 @@ BEGIN TRY
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 			
 			--INVOICE intergration
-			SELECT @intDestinationWeightId = intDestinationWeightId, @intShipmentOrderId = intOrderId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId
+			SELECT @intDestinationWeightId = intDestinationWeightId, @intShipmentOrderId = intOrderId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ISNULL(intDestinationWeightId, 0) != 0
 
 			SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intShipmentOrderId; 
 			IF ISNULL(@InventoryShipmentId, 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1

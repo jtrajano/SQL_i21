@@ -13,6 +13,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
 DECLARE @dblTicketGross AS DECIMAL (38, 20)
@@ -32,15 +33,21 @@ DECLARE @intContractDetailId AS INT,
 		@intHaulerId AS INT,
 		@ysnAccrue AS BIT,
 		@ysnPrice AS BIT,
+		@intFutureMarketId AS INT,
 		@batchId AS NVARCHAR(40),
 		@ticketBatchId AS NVARCHAR(40),
-		@splitDistribution AS NVARCHAR(40),
-		@ticketStatus AS NVARCHAR(10);
+		@splitDistribution AS NVARCHAR(40);
 		
 BEGIN 
-	SELECT @intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-	, @intContractDetailId = SC.intContractId, @splitDistribution = SC.strDistributionOption
-	, @ticketStatus = SC.strTicketStatus
+	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId, @splitDistribution = SC.strDistributionOption
+	FROM	dbo.tblSCTicket SC 
+	LEFT JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+	LEFT JOIN dbo.tblICCommodity IC On SC.intCommodityId = IC.intCommodityId
+	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+END
+
+BEGIN 
+	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId, @intContractDetailId = SC.intContractId
 	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
@@ -151,10 +158,7 @@ SELECT
 		,intLotId					= NULL --No LOTS from scale
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
-		,ysnIsStorage				= CASE 
-										WHEN CNT.intPricingTypeId = 2 THEN 1
-										ELSE LI.ysnIsStorage
-									END
+		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
@@ -1030,7 +1034,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 			END
 	END
 
-SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptType = 'Purchase Contract' AND ysnIsStorage = 0;
+SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptType = 'Purchase Contract';
 IF(@checkContract > 0)
 	UPDATE @ReceiptStagingTable SET strReceiptType = 'Purchase Contract'
 
@@ -1113,18 +1117,13 @@ BEGIN
 	WHERE	intInventoryReceiptId = @ReceiptId
 END
 
-IF @ticketStatus = 'O'
-	SET @ticketStatus = 'Open'
-ELSE IF @ticketStatus = 'R'
-	SET @ticketStatus = 'Reopen'
-
 EXEC dbo.uspSMAuditLog 
 	@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
 	,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
 	,@entityId			= @intUserId						-- Entity Id.
 	,@actionType		= 'Updated'							-- Action Type
 	,@changeDescription	= 'Ticket Status'					-- Description
-	,@fromValue			= @ticketStatus						-- Old Value
+	,@fromValue			= 'Open'							-- Previous Value
 	,@toValue			= 'Completed'						-- New Value
 	,@details			= '';
 
