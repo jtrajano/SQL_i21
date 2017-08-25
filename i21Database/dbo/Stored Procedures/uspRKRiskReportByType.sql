@@ -72,13 +72,21 @@ END
 SELECT * INTO #ContractTransaction from (     
 SELECT fm.intFutureMonthId,cv.strFutureMonth,strFutMarketName,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUnitMeasureId,dblBalance) AS dblNoOfContract,  
+      dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(cv.dblDetailQuantity,0)) -
+  sum(
+  case when intPricingTypeId=1 then 
+  case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else isnull(iq1.dblSalesInvoiceQty,0) end 
+  else 0 END) OVER (PARTITION BY cv.intContractDetailId )AS dblNoOfContract,  
   LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, 
   dtmStartDate as TransactionDate,  
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   dblNoOfLots as dblNoOfLot,
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblBalance,0)) as dblQuantity,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(cv.dblDetailQuantity,0)) -
+  sum(
+  case when intPricingTypeId=1 then 
+  case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else isnull(iq1.dblSalesInvoiceQty,0) end 
+  else 0 END) OVER (PARTITION BY cv.intContractDetailId ) as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,intPricingTypeId
   ,cv.strContractType
@@ -95,9 +103,11 @@ SELECT fm.intFutureMonthId,cv.strFutureMonth,strFutMarketName,
 				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
 										AND ici.intProductLineId=pl.intCommodityProductLineId)
+  LEFT JOIN vyuRKGetInvoicedQty iq on cv.intContractDetailId= iq.intPContractDetailId 
+  LEFT JOIN vyuRKGetInvoicedQty iq1 on cv.intContractDetailId= iq1.intSContractDetailId
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
-  LEFT JOIN tblICCommodityUnitMeasure um1 on  um1.intCommodityId=cv.intCommodityId and um.intUnitMeasureId=@intUnitMeasureId  
+  LEFT JOIN tblICCommodityUnitMeasure um1 on  um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=@intUnitMeasureId  
   WHERE  cv.intFutureMarketId in (select intFutureMarketId from @Market) and  cv.intContractStatusId <> 3 and cv.intPricingTypeId=1 
 		and cv.intCompanyLocationId in (select intCompanyLocationId from @Location)
 		and ca.intCommodityAttributeId in((SELECT intCommodityAttributeId from @CommodityAttribute ))
@@ -115,7 +125,7 @@ SELECT cv.strFutureMonth,strFutMarketName,fm.intFutureMonthId,
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   dblNoOfLots as dblNoOfLot,
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblBalance,0)) as dblQuantity,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblDetailQuantity,0)) as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,1 intPricingTypeId
   ,cv.strContractType
@@ -126,7 +136,8 @@ SELECT cv.strFutureMonth,strFutMarketName,fm.intFutureMonthId,
   ,ysnExpired
   ,isnull((SELECT sum(dblLotsFixed) dblNoOfLots FROM tblCTPriceFixation pf 
 		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedLots
-  ,isnull((SELECT  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,sum(dblQuantity)) dblQuantity FROM tblCTPriceFixation pf
+  ,isnull((SELECT  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,sum(dblQuantity)) dblQuantity 
+		 FROM tblCTPriceFixation pf
 		 join tblCTPriceFixationDetail pd on pf.intPriceFixationId=pd.intPriceFixationId	 
 		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedQty
 		,ca.intCommodityAttributeId,ca.strDescription
@@ -137,7 +148,7 @@ SELECT cv.strFutureMonth,strFutMarketName,fm.intFutureMonthId,
   JOIN tblICItem ic on ic.intItemId=cv.intItemId 
 				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
-										AND ici.intProductLineId=pl.intCommodityProductLineId)  
+										AND ici.intProductLineId=pl.intCommodityProductLineId) 
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
   LEFT join tblICCommodityUnitMeasure um1 on  um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=@intUnitMeasureId  
@@ -160,7 +171,7 @@ SELECT cv.strFutureMonth,strFutMarketName,intContractDetailId, fm.intFutureMonth
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   dblNoOfLots as dblNoOfLot,
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblBalance,0)) as dblQuantity,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(dblDetailQuantity,0)) as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,2 as intPricingTypeId
   ,cv.strContractType
@@ -182,7 +193,7 @@ SELECT cv.strFutureMonth,strFutMarketName,intContractDetailId, fm.intFutureMonth
   JOIN tblICItem ic on ic.intItemId=cv.intItemId 
 				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
 										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
-										AND ici.intProductLineId=pl.intCommodityProductLineId)  
+										AND ici.intProductLineId=pl.intCommodityProductLineId) 
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
   LEFT JOIN tblARProductType pt on pt.intProductTypeId=ic.intProductTypeId
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
@@ -191,8 +202,7 @@ SELECT cv.strFutureMonth,strFutMarketName,intContractDetailId, fm.intFutureMonth
 		and cv.intCompanyLocationId in (select intCompanyLocationId from @Location)
 		and ca.intCommodityAttributeId in((SELECT intCommodityAttributeId from @CommodityAttribute))
   )t where isnull(dblNoOfLot,0)-isnull(dblFixedLots,0) <> 0)t1 where dblNoOfContract <>0
-
-
+  
 SELECT t.strFutMarketName,t.strFutureMonth, t.intFutureMarketId,t.intFutureMonthId,dblBuy,dblSell,t.dblContractSize,dtmFutureMonthsDate,
 (SELECT TOP 1 strCommodityAttributeId from @BrokerageAttributeFinal b where b.intBrokerageAccountId=t.intBrokerageAccountId) intCommodityAttributeId
  INTO #FutTranTemp
@@ -238,21 +248,23 @@ DECLARE @ContractTemp AS TABLE
 	intFutureMonthId int,
 	intMarketSumDummyId int
 )
+
+DECLARE @intLCommodityAttributeId INT = NULL
+DECLARE @strDescription NVARCHAR(100)= NULL
+DECLARE @intCMarketId INT = NULL
+DECLARE @strFutMarket nvarchar(50)=null
 	
 DECLARE @intCAttributeId INT = NULL
 SELECT @intCAttributeId= MIN(intAttributeId) FROM @CommodityAttribute 
 WHILE @intCAttributeId >0
 BEGIN
-	DECLARE @intLCommodityAttributeId INT = NULL
-	DECLARE @strDescription NVARCHAR(100)= NULL
 
 	SELECT @intLCommodityAttributeId=a.intCommodityAttributeId,@strDescription=ca.strDescription FROM @CommodityAttribute a
 	JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=a.intCommodityAttributeId  WHERE intAttributeId=@intCAttributeId 
-	
+
 	IF EXISTS((SELECT intCommodityAttributeId FROM #ContractTransaction WHERE intCommodityAttributeId=@intLCommodityAttributeId
 				UNION
-				SELECT top 1 intCommodityAttributeId FROM #FutTranTemp  WHERE intCommodityAttributeId=@intLCommodityAttributeId
-				)) 			 
+				SELECT top 1 intCommodityAttributeId FROM #FutTranTemp  WHERE intCommodityAttributeId=@intLCommodityAttributeId)) 			 
 	BEGIN
 		INSERT INTO @FinalResult(strProductTypeH,strProductType,strColor,intMarketSumDummyId,intCAttributeId)
 		SELECT upper(@strDescription),@strDescription,'Over all Total',1,@intLCommodityAttributeId
@@ -261,13 +273,11 @@ BEGIN
 		SELECT @intFMarketId= MIN(intMarketId) FROM @Market
 
 		WHILE @intFMarketId >0
-		BEGIN
+		BEGIN		
 
-		DECLARE @intCMarketId INT = NULL
-		DECLARE @strFutMarket nvarchar(50)=null
-		SELECT @intCMarketId=m.intFutureMarketId,@strFutMarket=strFutMarketName from @Market m
-		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=m.intFutureMarketId where m.intMarketId=@intFMarketId 
-				
+		SELECT @intCMarketId= intFutureMarketId from @Market where intMarketId=@intFMarketId
+		SELECT @strFutMarket=strFutMarketName  FROM tblRKFutureMarket WHERE intFutureMarketId=@intCMarketId
+
 		DECLARE @intPreviousMonthId int = null
 		DECLARE @dtmFutureMonthsDate as datetime = null
 		SELECT TOP 1 @intPreviousMonthId=intFutureMonthId FROM tblRKFuturesMonth WHERE ysnExpired = 0 
@@ -275,101 +285,98 @@ BEGIN
 		SELECT TOP 1 @dtmFutureMonthsDate=dtmFutureMonthsDate FROM tblRKFuturesMonth WHERE intFutureMonthId=@intPreviousMonthId
 		
 		DELETE FROM @ContractTemp
+							
 
-			INSERT INTO @ContractTemp(strFutMarketName,strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId)
-				SELECT  strFutMarketName,strFutureMonth strFutureMonth,dblPurchase dblTotalPurchase,
-					dblSale dblTotalSales,dblPurchaseUnpriced dblUnfixedPurchase,dblSaleUnpriced dblUnfixedSales,dblBuySell dblFutures,
-						(dblPurchasePriced-dblSalePriced)+ dblBuySell as dblTotal, t.intFutureMarketId,t.intFutureMonthId  
+
+		--Physical
+			INSERT INTO @ContractTemp(strFutMarketName,strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId)
+				SELECT  strFutMarketName,strFutureMonth strFutureMonth,sum(dblPurchase) dblTotalPurchase,
+					sum(dblSale) dblTotalSales,sum(dblPurchaseUnpriced) dblUnfixedPurchase,sum(dblSaleUnpriced) dblUnfixedSales,sum(dblBuySell) dblFutures,
+						sum((dblPurchasePriced-dblSalePriced)+ dblBuySell) as dblTotal, t.intFutureMarketId  
 				FROM (
-					 SELECT ft.strFutMarketName,'Previous' as strFutureMonth,t.intFutureMarketId,t.intFutureMonthId, 
+					 SELECT ft.strFutMarketName,'Previous' as strFutureMonth,t.intFutureMarketId, 
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and ct.TranType='Purchase' and intCommodityAttributeId=@intLCommodityAttributeId and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblPurchase,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId=@intLCommodityAttributeId and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblSale,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase' and intCommodityAttributeId=@intLCommodityAttributeId and  strPricingType='UnPriced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblPurchaseUnpriced,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId=@intLCommodityAttributeId and  strPricingType='UnPriced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblSaleUnpriced,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase' and intCommodityAttributeId=@intLCommodityAttributeId and  strPricingType='Priced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblPurchasePriced,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId=@intLCommodityAttributeId and  strPricingType='Priced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblSalePriced,
-					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth   and dtmFutureMonthsDate > @dtmFutureMonthsDate),0)*ft.dblContractSize dblBuySell 
+					 0.0 dblBuySell 
 					 FROM #ContractTransaction t  
 					 JOIN vyuRKGetBuySellTransaction ft ON ft.intFutureMarketId=t.intFutureMarketId and  t.dtmFutureMonthsDate < @dtmFutureMonthsDate 					
-					 WHERE ft.intFutureMarketId=@intCMarketId and intCommodityAttributeId=@intLCommodityAttributeId
-					 GROUP BY ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,ft.dblContractSize,t.intFutureMarketId,t.intFutureMonthId
+					 WHERE ft.intFutureMarketId=@intCMarketId and intCommodityAttributeId=@intLCommodityAttributeId 
+					 and t.intCompanyLocationId in (select intCompanyLocationId from @Location)
+					 GROUP BY ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,ft.dblContractSize,t.intFutureMarketId
 
 					 UNION
 
-					 SELECT ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,t.intFutureMonthId, 
+					 SELECT ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId, 
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and ct.TranType='Purchase'  and intCommodityAttributeId=@intLCommodityAttributeId and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblPurchase,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale'  and intCommodityAttributeId=@intLCommodityAttributeId and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblSale,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase'  and intCommodityAttributeId=@intLCommodityAttributeId and  strPricingType='UnPriced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblPurchaseUnpriced,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale'  and intCommodityAttributeId=@intLCommodityAttributeId and  strPricingType='UnPriced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblSaleUnpriced,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase'  and intCommodityAttributeId=@intLCommodityAttributeId and  strPricingType='Priced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblPurchasePriced,
 					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId=@intLCommodityAttributeId and  strPricingType='Priced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblSalePriced,
-					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth   and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0)*ft.dblContractSize dblBuySell 
+					 --isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth   and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0)*ft.dblContractSize 
+					 0.0 dblBuySell 
 					 FROM #ContractTransaction t  
 					 JOIN vyuRKGetBuySellTransaction ft ON ft.intFutureMarketId=t.intFutureMarketId and t.dtmFutureMonthsDate >= @dtmFutureMonthsDate 					
 					 WHERE ft.intFutureMarketId =@intCMarketId and intCommodityAttributeId=@intLCommodityAttributeId
-					 GROUP BY ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,ft.dblContractSize,t.intFutureMarketId,t.intFutureMonthId
+					  and t.intCompanyLocationId in (select intCompanyLocationId from @Location)
+					 GROUP BY ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,ft.dblContractSize,t.intFutureMarketId
  
 					 UNION
-
-					 SELECT t.strFutMarketName,'Previous' strFutureMonth, t.intFutureMarketId,t.intFutureMonthId,
-					 0.0 dblPurchase,
-					 0.0 dblSale,
-					 0.0 dblPurchaseUnpriced,
-					 0.0 dblSaleUnpriced,
-					 0.0 dblPurchasePriced,
-					 0.0 dblSalePriced,
-					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth and ct.dtmFutureMonthsDate < @dtmFutureMonthsDate),0)*t.dblContractSize dblBuySell 
+	--Futures
+					 SELECT strFutMarketName,strFutureMonth,intFutureMarketId, 0.0 dblPurchase, 0.0 dblSale, 
+							0.0 dblPurchaseUnpriced, 0.0 dblSaleUnpriced, 0.0 dblPurchasePriced, 0.0 dblSalePriced, sum(dblBuy-dblSell)*max(dblContractSize)  dblBuySell 
+					 FROM (
+					 SELECT t.strFutMarketName,'Previous' strFutureMonth, t.intFutureMarketId,
+					 isnull(dblBuy,0) dblBuy, isnull(dblSell,0) dblSell,dblContractSize
 					 FROM vyuRKGetBuySellTransaction t 
 					  WHERE t.intFutureMarketId =@intCMarketId
 							and t.intLocationId in (select intCompanyLocationId from @Location)
-							AND strFutureMonth NOT IN(SELECT strFutureMonth FROM #ContractTransaction ct 
-																				WHERE ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth)
 							and t.intBrokerageAccountId in(SELECT intBrokerageAccountId from @BrokerageAttributeFinal									
 															WHERE strCommodityAttributeId =@intLCommodityAttributeId)
-						and  t.dtmFutureMonthsDate < @dtmFutureMonthsDate									
-					 GROUP BY t.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,t.dblContractSize,t.intFutureMarketId,t.intFutureMonthId
+						and  t.dtmFutureMonthsDate < @dtmFutureMonthsDate)t
+					 GROUP BY  strFutMarketName,strFutureMonth,intFutureMarketId
 
 					 UNION
-
-					 SELECT t.strFutMarketName,t.strFutureMonth, t.intFutureMarketId,t.intFutureMonthId,
-						 0.0 dblPurchase,
-						 0.0 dblSale,
-						 0.0 dblPurchaseUnpriced,
-						 0.0 dblSaleUnpriced,
-						 0.0 dblPurchasePriced,
-						 0.0 dblSalePriced,
-					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth and ct.dtmFutureMonthsDate >= @dtmFutureMonthsDate),0)*t.dblContractSize dblBuySell 
+					 SELECT strFutMarketName,strFutureMonth,intFutureMarketId, 0.0 dblPurchase, 0.0 dblSale, 
+							0.0 dblPurchaseUnpriced, 0.0 dblSaleUnpriced, 0.0 dblPurchasePriced, 0.0 dblSalePriced, sum(dblBuy-dblSell)*max(dblContractSize)  dblBuySell
+					FROM (
+					 SELECT t.strFutMarketName,t.strFutureMonth, t.intFutureMarketId,
+					  isnull(dblBuy,0) dblBuy, isnull(dblSell,0) dblSell,dblContractSize
 					 FROM vyuRKGetBuySellTransaction t 
 					  WHERE t.intFutureMarketId = @intCMarketId
 							AND t.intLocationId in (SELECT intCompanyLocationId FROM @Location)
-							AND strFutureMonth NOT IN(SELECT strFutureMonth FROM #ContractTransaction ct 
-																				WHERE ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth)
 							AND t.intBrokerageAccountId in(SELECT intBrokerageAccountId from @BrokerageAttributeFinal									
 															WHERE strCommodityAttributeId=@intLCommodityAttributeId )
-						AND  t.dtmFutureMonthsDate >= @dtmFutureMonthsDate									
-					 GROUP BY t.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,t.dblContractSize,t.intFutureMarketId,t.intFutureMonthId)t
+						AND  t.dtmFutureMonthsDate >= @dtmFutureMonthsDate)t
+					 GROUP BY  strFutMarketName,strFutureMonth,intFutureMarketId
+					 )t
+					 group by strFutMarketName,strFutureMonth,t.intFutureMarketId
 					 ORDER BY strFutMarketName, CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
-					  WHEN  strFutureMonth ='Total' THEN '01/01/9999'
+					  WHEN  strFutureMonth ='TOTAL' THEN '01/01/9999'
 					 ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ASC
 			
 			IF EXISTS(SELECT * FROM @ContractTemp)
 			BEGIN
 				INSERT INTO @FinalResult (strFutMarketNameH,strColor) 
-				select upper(@strFutMarket),'Total'
-				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId,intCAttributeId)
+				select upper(@strFutMarket),'TOTAL'
+				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intCAttributeId)
 				SELECT strFutureMonth strFutureMonth,dblTotalPurchase,
-							dblTotalSales,dblUnfixedPurchase,dblUnfixedSales,dblFutures,dblTotal,intFutureMarketId,intFutureMonthId,@intLCommodityAttributeId from @ContractTemp
+							dblTotalSales,dblUnfixedPurchase,dblUnfixedSales,dblFutures,dblTotal,intFutureMarketId,@intLCommodityAttributeId from @ContractTemp
 			
-				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
-				SELECT 'Total -' +@strFutMarket,sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total' 
+				INSERT INTO @FinalResult (strFutMarketNameH,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
+				SELECT 'TOTAL',sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total' 
 				FROM @FinalResult 			
 				WHERE  intFutureMarketId=@intCMarketId and intCAttributeId = @intLCommodityAttributeId
 			END
 
 		SELECT @intFMarketId= min(intMarketId) FROM @Market WHERE intMarketId > @intFMarketId
 		END	
-		INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
-		SELECT 'Total -'+@strDescription,sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Over all Total' 
+		INSERT INTO @FinalResult (strProductTypeH,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
+		SELECT 'TOTAL',sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total' 
 		FROM @FinalResult WHERE  intCAttributeId=@intLCommodityAttributeId 
 	END
 SELECT @intCAttributeId= min(intAttributeId) FROM @CommodityAttribute WHERE intAttributeId > @intCAttributeId
@@ -378,131 +385,123 @@ END
 
 -------------------------------By Market ----------------------
 
-INSERT INTO @FinalResult(strProductTypeH,strColor,intMarketSumDummyId) values (upper('Over all against market'),'Total - Over All',1)
+INSERT INTO @FinalResult(strProductTypeH,strColor,intMarketSumDummyId) values (upper('OVER ALL AGAINST MARKET'),'TOTAL - OVER All',1)
+declare @intFMarketId1  int = null
+declare @intPreviousMonthId1 int = null
+declare @dtmFutureMonthsDate1 datetime=null
 
-		SELECT @intFMarketId = NULL
-		SELECT @intFMarketId= MIN(intMarketId) FROM @Market
+		SELECT @intFMarketId1 = NULL
+		SELECT @intFMarketId1= MIN(intMarketId) FROM @Market
 
-		WHILE @intFMarketId >0
+		WHILE @intFMarketId1 >0
 		BEGIN
 
 		SELECT @intCMarketId  = NULL
 		SELECT @strFutMarket =null
 		SELECT @intCMarketId=m.intFutureMarketId,@strFutMarket=strFutMarketName from @Market m
-		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=m.intFutureMarketId where m.intMarketId=@intFMarketId 
+		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=m.intFutureMarketId where m.intMarketId=@intFMarketId1 
 
-		SELECT @intPreviousMonthId  = null
-		SELECT @dtmFutureMonthsDate  = null
-		SELECT TOP 1 @intPreviousMonthId=intFutureMonthId FROM tblRKFuturesMonth WHERE ysnExpired = 0 
+		SELECT @intPreviousMonthId1  = null
+		SELECT @dtmFutureMonthsDate1  = null
+		SELECT TOP 1 @intPreviousMonthId1=intFutureMonthId FROM tblRKFuturesMonth WHERE ysnExpired = 0 
 				AND  dtmSpotDate <= GETDATE() AND intFutureMarketId = @intCMarketId ORDER BY intFutureMonthId DESC
-		SELECT TOP 1 @dtmFutureMonthsDate=dtmFutureMonthsDate FROM tblRKFuturesMonth WHERE intFutureMonthId=@intPreviousMonthId
+		SELECT TOP 1 @dtmFutureMonthsDate1=dtmFutureMonthsDate FROM tblRKFuturesMonth WHERE intFutureMonthId=@intPreviousMonthId1
 
 		DELETE FROM @ContractTemp
 
---		INSERT INTO @FinalResult(strFutMarketName,strColor,intMarketSumDummyId) values (@strFutMarket,'MarketHeader',1)			
-		INSERT INTO @ContractTemp(strFutMarketName,strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId,intMarketSumDummyId)
-					SELECT  strFutMarketName,strFutureMonth strFutureMonth,dblPurchase dblTotalPurchase,
-						dblSale dblTotalSales,dblPurchaseUnpriced dblUnfixedPurchase,dblSaleUnpriced dblUnfixedSales,dblBuySell dblFutures,
-						 (dblPurchasePriced-dblSalePriced)+ dblBuySell as dblTotal, t.intFutureMarketId,t.intFutureMonthId,-1
+
+		INSERT INTO @ContractTemp(strFutMarketName,strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intMarketSumDummyId)
+				SELECT  strFutMarketName,strFutureMonth strFutureMonth,sum(dblPurchase) dblTotalPurchase,
+						sum(dblSale) dblTotalSales,sum(dblPurchaseUnpriced) dblUnfixedPurchase,sum(dblSaleUnpriced) dblUnfixedSales,sum(dblBuySell) dblFutures,
+						 sum((dblPurchasePriced-dblSalePriced)+ dblBuySell) as dblTotal, t.intFutureMarketId,-1
 					FROM (
-					 SELECT ft.strFutMarketName,'Previous' as strFutureMonth,t.intFutureMarketId,t.intFutureMonthId, 
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and ct.TranType='Purchase' and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblPurchase,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblSale,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase' and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='UnPriced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblPurchaseUnpriced,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute)and  strPricingType='UnPriced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblSaleUnpriced,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase' and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='Priced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblPurchasePriced,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='Priced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate),0) dblSalePriced,
-					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth   and dtmFutureMonthsDate > @dtmFutureMonthsDate),0)*ft.dblContractSize dblBuySell 
+					 SELECT ft.strFutMarketName,'Previous' as strFutureMonth,t.intFutureMarketId, 
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and ct.TranType='Purchase' and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) and dtmFutureMonthsDate < @dtmFutureMonthsDate1),0) dblPurchase,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) and dtmFutureMonthsDate < @dtmFutureMonthsDate1),0) dblSale,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase' and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='UnPriced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate1),0) dblPurchaseUnpriced,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute)and  strPricingType='UnPriced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate1),0) dblSaleUnpriced,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase' and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='Priced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate1),0) dblPurchasePriced,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='Priced'  and dtmFutureMonthsDate < @dtmFutureMonthsDate1),0) dblSalePriced,
+					 0.0 dblBuySell 
 					 FROM #ContractTransaction t  
-					 JOIN vyuRKGetBuySellTransaction ft ON ft.intFutureMarketId=t.intFutureMarketId and  t.dtmFutureMonthsDate < @dtmFutureMonthsDate 					
+					 JOIN vyuRKGetBuySellTransaction ft ON ft.intFutureMarketId=t.intFutureMarketId and  t.dtmFutureMonthsDate < @dtmFutureMonthsDate1 					
 					 WHERE ft.intFutureMarketId=@intCMarketId and intCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute)
-					 GROUP BY ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,ft.dblContractSize,t.intFutureMarketId,t.intFutureMonthId
+					  and t.intCompanyLocationId in (select intCompanyLocationId from @Location)
+					 GROUP BY ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,ft.dblContractSize,t.intFutureMarketId
 
 					 UNION
 
-					 SELECT ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,t.intFutureMonthId, 
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and ct.TranType='Purchase'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblPurchase,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblSale,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='UnPriced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblPurchaseUnpriced,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='UnPriced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblSaleUnpriced,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='Priced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblPurchasePriced,
-					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='Priced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0) dblSalePriced,
-					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth   and dtmFutureMonthsDate >= @dtmFutureMonthsDate),0)*ft.dblContractSize dblBuySell 
+					 SELECT ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId, 
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and ct.TranType='Purchase'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and dtmFutureMonthsDate >= @dtmFutureMonthsDate1),0) dblPurchase,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and dtmFutureMonthsDate >= @dtmFutureMonthsDate1),0) dblSale,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='UnPriced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate1),0) dblPurchaseUnpriced,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='UnPriced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate1),0) dblSaleUnpriced,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Purchase'  and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='Priced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate1),0) dblPurchasePriced,
+					 isnull((SELECT SUM(dblQuantity) FROM #ContractTransaction ct WHERE ct.strFutMarketName=ft.strFutMarketName and ct.strFutureMonth=t.strFutureMonth and TranType='Sale' and intCommodityAttributeId  in(SELECT intCommodityAttributeId from @CommodityAttribute) and  strPricingType='Priced'  and dtmFutureMonthsDate >= @dtmFutureMonthsDate1),0) dblSalePriced,
+					 0.0 dblBuySell 
 					 FROM #ContractTransaction t  
-					 JOIN vyuRKGetBuySellTransaction ft ON ft.intFutureMarketId=t.intFutureMarketId and t.dtmFutureMonthsDate >= @dtmFutureMonthsDate 					
+					 JOIN vyuRKGetBuySellTransaction ft ON ft.intFutureMarketId=t.intFutureMarketId and t.dtmFutureMonthsDate >= @dtmFutureMonthsDate1 					
 					 WHERE ft.intFutureMarketId =@intCMarketId and 
 					 intCommodityAttributeId in (SELECT intCommodityAttributeId from @CommodityAttribute)
-					 GROUP BY ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,ft.dblContractSize,t.intFutureMarketId,t.intFutureMonthId
+					 and t.intCompanyLocationId in (select intCompanyLocationId from @Location)
+					 GROUP BY ft.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,ft.dblContractSize,t.intFutureMarketId
  
-					 UNION
-
-					 SELECT t.strFutMarketName,'Previous' strFutureMonth, t.intFutureMarketId,t.intFutureMonthId,
-					 0.0 dblPurchase,
-					 0.0 dblSale,
-					 0.0 dblPurchaseUnpriced,
-					 0.0 dblSaleUnpriced,
-					 0.0 dblPurchasePriced,
-					 0.0 dblSalePriced,
-					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth and ct.dtmFutureMonthsDate < @dtmFutureMonthsDate),0)*t.dblContractSize dblBuySell 
+					UNION
+					SELECT strFutMarketName,strFutureMonth,intFutureMarketId, 0.0 dblPurchase, 0.0 dblSale, 
+							0.0 dblPurchaseUnpriced, 0.0 dblSaleUnpriced, 0.0 dblPurchasePriced, 0.0 dblSalePriced, sum(dblBuy-dblSell)*max(dblContractSize)  dblBuySell
+					FROM (
+					 SELECT t.strFutMarketName,'Previous' strFutureMonth, t.intFutureMarketId, isnull(dblBuy,0) dblBuy, isnull(dblSell,0) dblSell,dblContractSize
 					 FROM vyuRKGetBuySellTransaction t 
 					  WHERE t.intFutureMarketId =@intCMarketId
 							anD t.intLocationId in (select intCompanyLocationId from @Location)
-							AND strFutureMonth NOT IN(SELECT strFutureMonth FROM #ContractTransaction ct 
-																				WHERE ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth)
 							and t.intBrokerageAccountId in(SELECT intBrokerageAccountId from @BrokerageAttributeFinal									
 															WHERE strCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute))
-						and  t.dtmFutureMonthsDate < @dtmFutureMonthsDate									
-					 GROUP BY t.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,t.dblContractSize,t.intFutureMarketId,t.intFutureMonthId
+						and  t.dtmFutureMonthsDate < @dtmFutureMonthsDate1)t
+					 GROUP BY strFutMarketName,strFutureMonth,intFutureMarketId
 
 					 UNION
 
-					 SELECT t.strFutMarketName,t.strFutureMonth, t.intFutureMarketId,t.intFutureMonthId,
-						 0.0 dblPurchase,
-						 0.0 dblSale,
-						 0.0 dblPurchaseUnpriced,
-						 0.0 dblSaleUnpriced,
-						 0.0 dblPurchasePriced,
-						 0.0 dblSalePriced,
-					 isnull((select sum(dblBuy-dblSell) dblNoOfcontract from vyuRKGetBuySellTransaction ct where ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth and ct.dtmFutureMonthsDate >= @dtmFutureMonthsDate),0)*t.dblContractSize dblBuySell 
+					 SELECT strFutMarketName,strFutureMonth,intFutureMarketId, 0.0 dblPurchase, 0.0 dblSale, 
+						0.0 dblPurchaseUnpriced, 0.0 dblSaleUnpriced, 0.0 dblPurchasePriced, 0.0 dblSalePriced, sum(dblBuy-dblSell)*max(dblContractSize)  dblBuySell
+					FROM (
+					 SELECT t.strFutMarketName,t.strFutureMonth, t.intFutureMarketId, isnull(dblBuy,0) dblBuy, isnull(dblSell,0) dblSell,dblContractSize					 
 					 FROM vyuRKGetBuySellTransaction t 
 					  WHERE t.intFutureMarketId = @intCMarketId
 							AND t.intLocationId in (select intCompanyLocationId from @Location)
-							AND strFutureMonth NOT IN(SELECT strFutureMonth FROM #ContractTransaction ct 
-																				WHERE ct.intFutureMarketId=t.intFutureMarketId and ct.strFutureMonth=t.strFutureMonth)
 							AND t.intBrokerageAccountId in(SELECT intBrokerageAccountId from @BrokerageAttributeFinal									
 															WHERE strCommodityAttributeId in(SELECT intCommodityAttributeId from @CommodityAttribute) )
-						AND  t.dtmFutureMonthsDate >= @dtmFutureMonthsDate									
-					 GROUP BY t.strFutMarketName,t.strFutureMonth,t.intFutureMarketId,t.dblContractSize,t.intFutureMarketId,t.intFutureMonthId)t
+						AND  t.dtmFutureMonthsDate >= @dtmFutureMonthsDate1)t
+					 GROUP BY strFutMarketName,strFutureMonth,intFutureMarketId)t
+					 GROUP BY strFutMarketName,strFutureMonth,intFutureMarketId
 					 ORDER BY strFutMarketName, CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
-					  WHEN  strFutureMonth ='Total' THEN '01/01/9999'
+					  WHEN  strFutureMonth ='TOTAL' THEN '01/01/9999'
 					 ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ASC
 			
 			IF EXISTS(SELECT * FROM @ContractTemp)
 			BEGIN
 				INSERT INTO @FinalResult (strFutMarketNameH,strColor) 
-				select upper(@strFutMarket),'Total'
+				select upper(@strFutMarket),'TOTAL'
 
-					INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intFutureMonthId,intCAttributeId,intMarketSumDummyId)
+				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal, intFutureMarketId,intCAttributeId,intMarketSumDummyId)
 				SELECT strFutureMonth strFutureMonth,dblTotalPurchase,
-							dblTotalSales,dblUnfixedPurchase,dblUnfixedSales,dblFutures,dblTotal,intFutureMarketId,intFutureMonthId,@intLCommodityAttributeId,-1 from @ContractTemp
+							dblTotalSales,dblUnfixedPurchase,dblUnfixedSales,dblFutures,dblTotal,intFutureMarketId,0,-1 from @ContractTemp
 
-				INSERT INTO @FinalResult (strFutureMonth,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor,intMarketSumDummyId)
-					SELECT 'Total -' +@strFutMarket,sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total',-2 
+				INSERT INTO @FinalResult (strFutMarketNameH,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor,intMarketSumDummyId)
+					SELECT 'TOTAL',sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'TOTAL',-2 
 					FROM @FinalResult 			
 					WHERE  intFutureMarketId=@intCMarketId and intMarketSumDummyId =-1
 		   	END
-		SELECT @intFMarketId= min(intMarketId) FROM @Market WHERE intMarketId > @intFMarketId
+		SELECT @intFMarketId1= min(intMarketId) FROM @Market WHERE intMarketId > @intFMarketId1
 	END	
 
 
 ------------------------- END
 
 INSERT INTO @FinalResult (strProductTypeH,dblTotalPurchase,dblTotalSales ,dblUnfixedPurchase, dblUnfixedSales, dblFutures,dblTotal,strColor)
-SELECT 'Total - Over All',sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total - Over All' 
+SELECT 'TOTAL',sum(dblTotalPurchase),sum(dblTotalSales) ,sum(dblUnfixedPurchase), sum(dblUnfixedSales), sum(dblFutures),sum(dblTotal),'Total' 
 FROM @FinalResult 			
 WHERE   intMarketSumDummyId =-2
 
-
 SELECT intRowNum,strProductTypeH strProductType,strFutMarketNameH strFutMarketName,strFutureMonth,round(dblTotalPurchase,@intDecimals) as dblTotalPurchase,
 		round(dblTotalSales,@intDecimals) dblTotalSales ,round(dblUnfixedPurchase,@intDecimals) dblUnfixedPurchase, round(dblUnfixedSales,@intDecimals) dblUnfixedSales, 
-		round(dblFutures,@intDecimals) dblFutures,round(dblTotal,@intDecimals) dblTotal, intFutureMarketId,intFutureMonthId,intCAttributeId intCommodityAttributeId,strColor,intMarketSumDummyId  FROM @FinalResult order by intRowNum
+		round(dblFutures,@intDecimals) dblFutures,round(dblTotal,@intDecimals) dblTotal, intFutureMarketId,intCAttributeId intCommodityAttributeId,strColor,intMarketSumDummyId,null as intFutureMonthId  FROM @FinalResult order by intRowNum

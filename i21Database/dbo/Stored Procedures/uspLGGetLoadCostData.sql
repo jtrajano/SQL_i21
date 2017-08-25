@@ -4,7 +4,7 @@ AS
 BEGIN
 	SELECT LC.*
 		,C.strCurrency
-		,E.strName AS strEntityName
+		,E.strName AS strVendorName
 		,L.strLoadNumber
 		,UM.strUnitMeasure
 		,I.strItemNo

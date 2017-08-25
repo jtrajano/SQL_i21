@@ -77,7 +77,7 @@ IF OBJECT_ID('tempdb..#tmpReceiptDetailData') IS NOT NULL DROP TABLE #tmpReceipt
 SELECT IRDetail.* INTO #tmpReceiptDetailData 
 FROM tblICInventoryReceiptItem IRDetail 
 INNER JOIN #tmpReceiptIds tIR ON IRDetail.intInventoryReceiptId = tIR.intInventoryReceiptId
-WHERE IRDetail.dblBillQty < IRDetail.dblOpenReceive AND IRDetail.intOwnershipType != 1
+WHERE IRDetail.dblBillQty < IRDetail.dblOpenReceive AND IRDetail.intOwnershipType != 2
 
 IF OBJECT_ID('tempdb..#tmpReceiptChargeData') IS NOT NULL DROP TABLE #tmpReceiptChargeData
 SELECT charges.* INTO #tmpReceiptChargeData
@@ -515,6 +515,7 @@ BEGIN
 			[intStorageLocationId],
 			[int1099Form],
 			[int1099Category],
+			[intLoadDetailId],
 			[strBillOfLading]
 		)
 		OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
@@ -609,7 +610,8 @@ BEGIN
 											ELSE 0
 											END,
 			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
-			[strBillOfLading]			= A.strBillOfLading
+			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
+			[strBillOfLading]			= 	A.strBillOfLading
 		FROM #tmpReceiptData A
 		INNER JOIN #tmpReceiptDetailData B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId

@@ -49,8 +49,8 @@ BEGIN
 				,strSiteComment = B.strComment
 				,strSiteInstruction = B.strInstruction
 				,B.ysnActive
-				,strDriverNumber = M.vwsls_slsmn_id
-				,strDriverName = M.vwsls_name
+				,strDriverNumber = M.vwsls_slsmn_id COLLATE Latin1_General_CI_AS 
+				,strDriverName = M.vwsls_name COLLATE Latin1_General_CI_AS 
 				,B.intRouteId 
 				,strRoute = K.strRouteId
 			FROM tblTMSite B

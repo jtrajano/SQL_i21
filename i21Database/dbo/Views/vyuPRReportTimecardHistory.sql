@@ -1,17 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuPRReportTimecardHistory]
 AS
-SELECT
+SELECT DISTINCT
 	TC.intTimecardId
-	,TC.intEntityEmployeeId
 	,TC.dtmDate
 	,EM.strEntityNo
 	,EM.strName
 	,TE.strEarning
 	,DP.strDepartment
 	,TC.dtmDateIn
-	,TC.dtmTimeIn
+	,dtmTimeIn = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), TC.dtmTimeIn)
 	,TC.dtmDateOut
-	,TC.dtmTimeOut
+	,dtmTimeOut = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), TC.dtmTimeOut)
 	,TC.dblHours
 	,TC.dblRegularHours
 	,TC.dblOvertimeHours
@@ -50,15 +49,14 @@ SELECT
 						   * dblOvertimeHours)
 				AS NUMERIC (18, 6))
 	,PC.strPaycheckId
-	,TC.intConcurrencyId
 FROM 
 	tblPRTimecard TC
 	LEFT JOIN tblEMEntity EM 
 		ON EM.intEntityId = TC.intEntityEmployeeId
 	LEFT JOIN tblSMUserSecurity USA
-		ON USA.[intEntityId] = TC.intApprovedUserId
+		ON USA.intEntityId = TC.intApprovedUserId
 	LEFT JOIN tblSMUserSecurity USP
-		ON USP.[intEntityId] = TC.intProcessedUserId
+		ON USP.intEntityId = TC.intProcessedUserId
 	LEFT JOIN tblPRPaycheck PC
 		ON TC.intPaycheckId = PC.intPaycheckId
 	LEFT JOIN tblPRPayGroupDetail PGD

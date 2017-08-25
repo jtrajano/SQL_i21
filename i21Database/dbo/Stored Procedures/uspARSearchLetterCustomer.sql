@@ -5,6 +5,7 @@
 )
 AS
 DECLARE @strLetterName			NVARCHAR(MAX),
+		@ysnSystemDefined		BIT,
 	    @intCompanyLocationId	INT,
 		@strCompanyName			NVARCHAR(100),
 		@strCompanyAddress		NVARCHAR(100),
@@ -16,7 +17,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-SELECT @strLetterName = strName 
+SELECT @strLetterName		= strName
+	 , @ysnSystemDefined	= ysnSystemDefined 
 FROM dbo.tblSMLetter WITH (NOLOCK)
 WHERE intLetterId = CAST(@intLetterId AS NVARCHAR(10))
 SET NOCOUNT OFF;
@@ -73,7 +75,7 @@ DECLARE @temp_return_table TABLE(
 	,[ysnHasEmailSetup]			BIT
 )
 
-IF @strLetterName <> 'Service Charge Invoices Letter'
+IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter') AND ISNULL(@ysnSystemDefined, 1) = 1
 BEGIN
 	INSERT INTO @temp_aging_table
 	EXEC uspARCollectionOverdueDetailReport NULL, NULL
@@ -302,7 +304,6 @@ END
 
 ELSE IF @strLetterName = 'Expired Credit Card'  
 BEGIN
-	GetActiveCustomers:
 	INSERT INTO @temp_availablecustomer_table
 	SELECT intEntityId
 		 , strName
@@ -335,7 +336,12 @@ END
 
 ELSE
 BEGIN
-	GOTO GetActiveCustomers
+	INSERT INTO @temp_availablecustomer_table
+	SELECT intEntityId
+		 , strName
+		 , strCustomerNumber
+	FROM dbo.vyuARCustomer WITH (NOLOCK) 
+	WHERE ysnActive = 1
 END
 
 IF ISNULL(@strLetterName, '') <> ''
@@ -359,7 +365,7 @@ IF ISNULL(@strLetterName, '') <> ''
 		ELSE
 			DELETE FROM @temp_return_table WHERE ysnHasEmailSetup = 1
 
-		IF @strLetterName <> 'Service Charge Invoices Letter'
+		IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
 			BEGIN
 				DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table)
 				DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table)

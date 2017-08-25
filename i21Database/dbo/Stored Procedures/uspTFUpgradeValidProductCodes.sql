@@ -32,6 +32,7 @@ BEGIN TRY
 	LEFT JOIN tblTFProductCode PC ON PC.strProductCode COLLATE Latin1_General_CI_AS = VPC.strProductCode COLLATE Latin1_General_CI_AS
 	WHERE PC.intTaxAuthorityId = @TaxAuthorityId 
 	AND RC.intTaxAuthorityId = @TaxAuthorityId
+	AND PC.intMasterId != 0
 
 	MERGE	
 	INTO	tblTFReportingComponentProductCode

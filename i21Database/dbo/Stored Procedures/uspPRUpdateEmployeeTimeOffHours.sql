@@ -33,7 +33,7 @@ BEGIN
 								DATEADD(YY, YEAR(GETDATE()) - YEAR(E.dtmDateHired), E.dtmDateHired)
 							 WHEN (strAwardPeriod = 'Paycheck') THEN
 								(SELECT TOP 1 dtmPayDate FROM tblPRPaycheck WHERE ysnPosted = 1 AND ysnVoid = 0 AND 
-									intEntityEmployeeId = ISNULL(@intEntityEmployeeId, E.intEntityId))
+									intEntityEmployeeId = ISNULL(@intEntityEmployeeId, E.intEntityId) ORDER BY dtmPayDate DESC)
 							 ELSE NULL 
 						END
 		,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
@@ -52,7 +52,7 @@ BEGIN
 
 	--Clean-up Next Award Date
 	UPDATE #tmpEmployees 
-		SET dtmNextAward = CASE WHEN (dtmNextAward = dtmLastAward) THEN
+		SET dtmNextAward = CASE WHEN (dtmNextAward <= dtmLastAward) THEN
 								CASE WHEN (strAwardPeriod IN ('Start of Week', 'End of Week')) THEN
 										DATEADD(WK, 1, dtmNextAward)
 									 WHEN (strAwardPeriod IN ('Start of Month', 'End of Month')) THEN
@@ -133,7 +133,6 @@ BEGIN
 							END * dblRate * dblRateFactor
 						ELSE 0
 						END
-		
 
 	--Update Each Employee Hours
 	DECLARE @intEmployeeId INT

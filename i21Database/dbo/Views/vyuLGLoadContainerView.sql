@@ -95,6 +95,12 @@ SELECT   L.intLoadId
 		,PDetail.dblCashPrice AS dblPCashPrice
 		,SDetail.dblCashPrice AS dblSCashPrice
 		,LDCL.strExternalContainerId
+		,PDetail.intPricingTypeId AS intPPricingTypeId
+		,PTP.strPricingType AS strPPricingType
+		,SDetail.intPricingTypeId AS intSPricingTypeId
+		,PTS.strPricingType AS strSPricingType
+		,PDetail.intContractDetailId AS intPContractDetailId
+		,SDetail.intContractDetailId AS intSContractDetailId
 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -115,3 +121,5 @@ LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId]	= L.intDispatcherId
+LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
+LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId

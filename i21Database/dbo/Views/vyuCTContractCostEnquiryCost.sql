@@ -46,6 +46,7 @@ AS
 			LEFT JOIN	tblICUnitMeasure	UM ON UM.intUnitMeasureId		=	IU.intUnitMeasureId
 			LEFT JOIN	tblSMCurrency		CY ON CY.intCurrencyID			=	CC.intCurrencyId
 			LEFT JOIN	tblEMEntity			EY ON EY.intEntityId			=	CC.intVendorId
+			WHERE	ISNULL(ysnBasis,0) <> 1
 	)		CC 
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId	
 	JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	LEFT

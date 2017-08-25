@@ -12,6 +12,7 @@
                   @ysnVendorProducer bit = null
 AS
 
+
 DECLARE @tblFinalDetail TABLE (
        intRowNum INT
        ,intConcurrencyId INT
@@ -69,8 +70,8 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
                   @intLocationId = @intLocationId,
                   @intMarketZoneId = @intMarketZoneId
 
-SELECT Distinct cd.*,case when isnull(ysnRiskToProducer,0)=1 then e.strName else null end as strProducer,
-			case when isnull(ysnRiskToProducer,0)=1 then ch.intProducerId  else null end intProducerId into #temp FROM @tblFinalDetail cd
+SELECT distinct cd.*,case when isnull(ysnClaimsToProducer,0)=1 then e.strName else null end as strProducer,
+			case when isnull(ysnClaimsToProducer,0)=1 then ch.intProducerId  else null end intProducerId into #temp FROM @tblFinalDetail cd
 JOIN tblCTContractDetail ch on ch.intContractHeaderId=cd.intContractHeaderId
 LEFT JOIN tblEMEntity e on e.intEntityId=ch.intProducerId
 
@@ -151,14 +152,11 @@ BEGIN
                                   JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
                                   JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
                                   JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-                                  JOIN tblAPVendor e on e.[intEntityId]=fd.intEntityId
+                                  JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId 
                                   LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
 
-                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)'
-                                  
-                                  
-                                  ) )t
+                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' )  )t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
        )t3)t4
@@ -245,18 +243,19 @@ BEGIN
                                                                                   case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                                                                                   case when isnull(strProducer,'')='' then e1.dblRiskTotalBusinessVolume else e.dblRiskTotalBusinessVolume end) dblRiskTotalBusinessVolume,
                                                                                   e.intRiskUnitOfMeasureId,
-                                                round(isnull(pf.dblCompanyExposurePercentage,0),2) as dblCompanyExposurePercentage ,round(isnull(pf.dblSupplierSalesPercentage,0),2) as dblSupplierSalesPercentage
+									case when isnull(strProducer,'')='' then round(isnull(pf1.dblCompanyExposurePercentage,0),2) else round(isnull(pf.dblCompanyExposurePercentage,0),2) end dblCompanyExposurePercentage ,
+									case when isnull(strProducer,'')='' then round(isnull(pf1.dblSupplierSalesPercentage,0),2) else round(isnull(pf.dblSupplierSalesPercentage,0),2) end dblSupplierSalesPercentage
                                   FROM #temp  fd
                                   JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
                                   JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
                                   JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-                                  LEFT JOIN tblAPVendor e on e.[intEntityId]=fd.intProducerId
+                                  LEFT JOIN tblAPVendor e on e.intEntityVendorId=fd.intProducerId
                                                          LEFT join tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId 
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
-                                  LEFT JOIN tblAPVendor e1 on e1.[intEntityId]=fd.intEntityId 
+                                  LEFT JOIN tblAPVendor e1 on e1.intEntityVendorId=fd.intEntityId 
                                                          LEFT join tblICCommodityUnitMeasure cum1 on cum1.intCommodityId=@intCommodityId and cum1.intUnitMeasureId=  e1.intRiskUnitOfMeasureId        
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf1 on pf1.intVendorPriceFixationLimitId=e1.intRiskVendorPriceFixationLimitId
-                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ) )t
+                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ))t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
        )t3)t4

@@ -223,6 +223,7 @@ END
 			,[intCurrencyId]  					= min(RE.intCurrencyId)
 			,[intChargeId]						= @intFreightItemId
 			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
+														WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
 														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
 																				FROM tblTRLoadDistributionHeader TempDist
 																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
@@ -282,6 +283,7 @@ END
 			,[intCurrencyId]  					= min(RE.intCurrencyId)
 			,[intChargeId]						= @intSurchargeItemId
 			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
+														WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
 														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
 																				FROM tblTRLoadDistributionHeader TempDist
 																				WHERE TempDist.intLoadHeaderId = MIN(LTE.intLoadHeaderId)

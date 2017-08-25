@@ -6,27 +6,34 @@ SELECT L.intLoadId
 	,CH.strContractNumber
 	,CH.intContractHeaderId
 	,CD.intContractSeq
+	,CD.intContractDetailId
+	,CD.dblBalance
 	,I.intItemId
 	,I.strItemNo
 	,I.strDescription AS strItemDescription
 	,LD.dblQuantity
 	,UM.strUnitMeasure AS strQtyUnitMeasure
+	,LD.intItemUOMId AS intUnitMeasureId
+	,IU.dblUnitQty
 	,LD.dblGross
 	,LD.dblTare
 	,LD.dblNet
 	,U.strUnitMeasure AS strWeightUnitMeasure
 	,U.intUnitMeasureId as intWeightUnitMeasure
+	,ISNULL(WeightUOM.dblUnitQty,0) AS dblWeightUnitQty
 	,E.strName AS strVendor
 	,E.intEntityId as intEntityVendorId
 	,dblCost = ISNULL(AD.dblSeqPrice, 0)
 	,intCostUOMId = AD.intSeqPriceUOMId
 	,strCostUOM = AD.strSeqPriceUOM
+	,dblCostUnitQty = ISNULL(AD.dblCostUnitQty,0)
 	,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 	,ysnSubCurrency = ISNULL(SubCurrency.ysnSubCurrency, 0)
 	,intForexRateTypeId = CD.intRateTypeId
 	,dblForexRate = CD.dblRate
 	,ISNULL(MSC.strCurrency,SC.strCurrency) AS strCurrency
 	,SubCurrency.strCurrency AS strSubCurrency
+	,ISNULL(SubCurrency.intCent, 0) intCent
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	AND L.intPurchaseSale = 1
@@ -37,7 +44,8 @@ JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 JOIN tblICItem I ON I.intItemId = LD.intItemId
-LEFT JOIN tblICUnitMeasure U ON U.intUnitMeasureId = L.intWeightUnitMeasureId
+LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = LD.intWeightItemUOMId
+LEFT JOIN tblICUnitMeasure U ON U.intUnitMeasureId = WeightUOM.intUnitMeasureId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 LEFT JOIN tblSMCurrency MSC ON MSC.intCurrencyID = SC.intMainCurrencyId

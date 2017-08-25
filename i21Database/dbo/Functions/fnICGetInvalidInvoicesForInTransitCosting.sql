@@ -16,53 +16,33 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
---IF(ISNULL(@Post,0)) = 1
---	BEGIN
---		INSERT INTO @returntable(
---			 [intInvoiceId]
---			,[strInvoiceNumber]
---			,[strTransactionType]
---			,[intInvoiceDetailId]
---			,[intItemId]
---			,[strBatchId]
---			,[strPostingError])
-
---		SELECT
---			 [intInvoiceId]			= I.[intTransactionId]
---			,[strInvoiceNumber]		= I.[strTransactionId]		
---			,[strTransactionType]	= 'Invoice'
---			,[intInvoiceDetailId]	= I.[intTransactionDetailId] 
---			,[intItemId]			= I.[intItemId] 
---			,[strBatchId]			= ''
---			,[strPostingError]		= ''
---		FROM 
---			@Items I			
-																																			
---	END
---ELSE
---	BEGIN
---		INSERT INTO @returntable(
---			 [intInvoiceId]
---			,[strInvoiceNumber]
---			,[strTransactionType]
---			,[intInvoiceDetailId]
---			,[intItemId]
---			,[strBatchId]
---			,[strPostingError])
-
---		SELECT
---			 [intInvoiceId]			= I.[intTransactionId]
---			,[strInvoiceNumber]		= I.[strTransactionId]		
---			,[strTransactionType]	= 'Invoice'
---			,[intInvoiceDetailId]	= I.[intTransactionDetailId] 
---			,[intItemId]			= I.[intItemId] 
---			,[strBatchId]			= ''
---			,[strPostingError]		= ''
---		FROM 
---			@Items I
-		
-
---	END
+	INSERT INTO @returntable (
+			[intInvoiceId]			
+			,[strInvoiceNumber]		
+			,[strTransactionType]	
+			,[intInvoiceDetailId]	
+			,[intItemId]			
+			,[strBatchId]			
+			,[strPostingError]		
+	)
+	SELECT 
+			 [intInvoiceId]			= vi.[intTransactionId]
+			,[strInvoiceNumber]		= vi.[strTransactionId]		
+			,[strTransactionType]	= 'Invoice'
+			,[intInvoiceDetailId]	= vi.[intTransactionDetailId] 
+			,[intItemId]			= vi.[intItemId] 
+			,[strBatchId]			= ''
+			,[strPostingError]		= Errors.strText
+	FROM	@Items vi 
+			CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors(
+				vi.intItemId
+				, vi.intItemLocationId
+				, vi.intItemUOMId
+				-- , vi.intSubLocationId
+				-- , vi.intStorageLocationId
+				, vi.dblQty
+				, vi.intLotId
+			) Errors
 																												
 	RETURN
 END

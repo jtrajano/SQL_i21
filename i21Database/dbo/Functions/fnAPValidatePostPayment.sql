@@ -200,7 +200,7 @@ BEGIN
 		CROSS APPLY (
 			SELECT COUNT(*) intVouchers FROM tblAPPaymentDetail B
 			WHERE B.dblPayment > 0 AND B.intPaymentId = A.intPaymentId
-			GROUP BY B.intBillId
+			GROUP BY B.intBillId, B.intInvoiceId
 		) PaymentDetails
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND PaymentDetails.intVouchers > 1

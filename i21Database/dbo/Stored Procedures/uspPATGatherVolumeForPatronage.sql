@@ -133,11 +133,10 @@ SET ANSI_WARNINGS OFF
 
 		IF(@post = 1)
 		BEGIN
-			INSERT INTO tblPATCustomerVolumeLog([intTransactionId],[strTransactionNo],[dtmTransactionDate],[strPurchaseSale],[dblVolume])
+			INSERT INTO tblPATCustomerVolumeLog([intBillId],[dtmTransactionDate],[intItemId],[dblVolume])
 			SELECT	AB.intBillId,
-					AB.strBillId,
 					AB.dtmDate,
-					PC.strPurchaseSale,
+					IC.intItemId,
 					dblVolume = ROUND((CASE WHEN PC.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN ABD.dblQtyReceived <= 0 THEN 0 ELSE (ABD.dblQtyReceived * ABD.dblCost) END) 
 						ELSE ABD.dblQtyReceived * UOM.dblUnitQty END),2)
 			FROM tblAPBill AB
@@ -157,7 +156,7 @@ SET ANSI_WARNINGS OFF
 		BEGIN
 			UPDATE tblPATCustomerVolumeLog
 			SET ysnIsUnposted = 1
-			WHERE strPurchaseSale = @TYPE_PURCHASE AND ysnIsUnposted <> 1 AND intTransactionId IN (SELECT [intID] FROM @tempTransactionIds)
+			WHERE ysnIsUnposted <> 1 AND intBillId IN (SELECT [intID] FROM @tempTransactionIds)
 		END
 	END
 	ELSE IF(@type = 2)
@@ -178,11 +177,10 @@ SET ANSI_WARNINGS OFF
 
 		IF(@post = 1)
 		BEGIN
-			INSERT INTO tblPATCustomerVolumeLog([intTransactionId],[strTransactionNo],[dtmTransactionDate],[strPurchaseSale],[dblVolume])
+			INSERT INTO tblPATCustomerVolumeLog([intInvoiceId],[dtmTransactionDate],[intItemId],[dblVolume])
 			SELECT	AR.intInvoiceId,
-					AR.strInvoiceNumber,
 					AR.dtmDate,
-					PC.strPurchaseSale,
+					ARD.intItemId,
 					dblVolume = ROUND((CASE WHEN PC.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN ARD.dblQtyShipped <= 0 THEN 0 ELSE (ARD.dblQtyShipped * ARD.dblPrice) END)
 							ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ARD.dblQtyShipped ELSE (ARD.dblQtyShipped * ICU.dblUnitQty) END ) END),2)
 			FROM tblARInvoice AR
@@ -202,7 +200,7 @@ SET ANSI_WARNINGS OFF
 		BEGIN
 			UPDATE tblPATCustomerVolumeLog
 			SET ysnIsUnposted = 1
-			WHERE strPurchaseSale = @TYPE_SALE AND ysnIsUnposted <> 1 AND intTransactionId IN (SELECT [intID] FROM @tempTransactionIds)
+			WHERE ysnIsUnposted <> 1 AND intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds)
 		END
 	END
 	

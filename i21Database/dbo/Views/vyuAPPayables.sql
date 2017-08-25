@@ -5,11 +5,11 @@ CREATE VIEW vyuAPPayables
 WITH SCHEMABINDING
 AS 
 SELECT 
-	A.dtmDate
+	A.dtmDate	
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CASE WHEN A.intTransactionType != 1 AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal
+	, CASE WHEN A.intTransactionType != 1 AND SUM(B.dblTotal) > 0 THEN (SUM(B.dblTotal) + SUM(B.dblTax)) *  ISNULL(B.dblRate,0) * -1 ELSE (SUM(B.dblTotal) + SUM(B.dblTax)) * ISNULL(B.dblRate,0) END AS dblTotal
 	, CASE WHEN A.intTransactionType != 1 AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -25,7 +25,25 @@ FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
+LEFT JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2)
+GROUP BY  
+	 A.dtmDate
+	,A.intBillId 
+	,A.strBillId 
+	,A.intTransactionType
+	,B.dblTotal
+	,A.dblAmountDue
+	,C1.strVendorId 
+	,C1.strVendorId
+	,C2.strName
+	, A.dtmDueDate
+	, A.ysnPosted 
+	, A.ysnPaid
+	, A.intAccountId
+	, EC.strClass
+	, dblRate
+
 UNION ALL   
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   

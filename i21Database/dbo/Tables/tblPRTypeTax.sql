@@ -4,6 +4,7 @@
 	[strDescription] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strCalculationType] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
+	[ysnRoundToDollar] [bit] NOT NULL DEFAULT ((0)),
 	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
 	[strPaidBy] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Employee'),
 	[intTypeTaxStateId] INT NULL,

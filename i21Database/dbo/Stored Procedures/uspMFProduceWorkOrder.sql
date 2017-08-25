@@ -134,8 +134,16 @@ BEGIN
 	SELECT @intWorkOrderId
 		,@intItemId
 		,@intLotId
-		,Case When @intProduceUOMKey=0 Then @dblPhysicalCount Else @dblProduceQty End
-		,Case When @intProduceUOMKey=0 Then @intPhysicalItemUOMId Else @intProduceUOMKey End
+		,CASE 
+			WHEN @intProduceUOMKey = 0
+				THEN @dblPhysicalCount
+			ELSE @dblProduceQty
+			END
+		,CASE 
+			WHEN @intProduceUOMKey = 0
+				THEN @intPhysicalItemUOMId
+			ELSE @intProduceUOMKey
+			END
 		,(
 			CASE 
 				WHEN @dblUnitQty IS NOT NULL
@@ -321,23 +329,30 @@ BEGIN
 		IF @ysnProducedQtyByUnitCount IS NULL
 			SELECT @ysnProducedQtyByUnitCount = 0
 
-		IF @ysnProducedQtyByUnitCount = 1 OR @intProduceUOMKey IS NULL OR @intProduceUOMKey=0
+		IF @ysnProducedQtyByUnitCount = 1
+			OR @intProduceUOMKey IS NULL
+			OR @intProduceUOMKey = 0
 		BEGIN
-			SELECT @dblProduceQty = @dblPhysicalCount
+			SELECT @dblUnitQty = 0
 
-			SELECT @intProduceUOMKey = @intPhysicalItemUOMId
-
-			SELECT @dblUnitQty = 1
+			SELECT @dblProduceQty = 0
+				,@intProduceUOMKey = NULL
 		END
 
-		If @ysnFillPartialPallet=1 and Exists(Select *from tblICLot Where strLotNumber =@strLotNumber and dblQty>0 and intWeightUOMId IS NULL)
-		Begin
-			SELECT @dblProduceQty = @dblPhysicalCount
+		IF @ysnFillPartialPallet = 1
+			AND EXISTS (
+				SELECT *
+				FROM tblICLot
+				WHERE strLotNumber = @strLotNumber
+					AND dblQty > 0
+					AND intWeightUOMId IS NULL
+				)
+		BEGIN
+			SELECT @dblUnitQty = 0
 
-			SELECT @intProduceUOMKey = @intPhysicalItemUOMId
-
-			SELECT @dblUnitQty = 1
-		End
+			SELECT @dblProduceQty = 0
+				,@intProduceUOMKey = NULL
+		END
 
 		EXEC uspMFPostProduction 1
 			,0
@@ -416,11 +431,9 @@ BEGIN
 			INSERT INTO tblMFLotInventory (
 				intConcurrencyId
 				,intLotId
-				,intItemOwnerId
 				)
 			SELECT 1
 				,@intLotId
-				,@intItemOwnerId
 
 			INSERT INTO tblMFItemOwnerDetail (
 				intLotId
@@ -432,13 +445,6 @@ BEGIN
 				,@intItemId
 				,@intOwnerId
 				,@dtmProductionDate
-		END
-		ELSE
-		BEGIN
-			UPDATE tblMFLotInventory
-			SET intItemOwnerId = @intItemOwnerId
-				,intConcurrencyId = (intConcurrencyId + 1)
-			WHERE intLotId = @intLotId
 		END
 	END
 

@@ -80,15 +80,15 @@ intTransactionId
 ,strLocationName = ISNULL((SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = A.intCompanyLocationId),'')
 ,intBankTransactionTypeId
 ,strBankTransactionTypeName = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = A.intBankTransactionTypeId)
-,strReferenceNo
+,ISNULL(strReferenceNo,'') as strReferenceNo
 ,CASE WHEN strMemo = '' AND ysnCheckVoid = 1 THEN  'Void' 
 	ELSE
-		strMemo
+		ISNULL(strMemo,'')
 	END AS strMemo
 ,CASE WHEN @ysnMaskEmployeeName = 1  AND intBankTransactionTypeId IN (21,23) THEN 
 	'(restricted information)'
 	ELSE
-	strPayee
+	ISNULL(strPayee,'')
 	END AS strPayee
 ,CAST(dtmDate AS DATE) AS dtmDate
 ,dtmDateReconciled

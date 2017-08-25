@@ -182,5 +182,49 @@ GO
 	END
 GO
 GO
-	UPDATE tblSMPaymentMethod SET intAccountId = NULL WHERE intAccountId = 0
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMPAYMENTMETHOD')
+	BEGIN
+		EXEC
+		('
+			UPDATE tblSMPaymentMethod SET intAccountId = NULL WHERE intAccountId = 0
+		')
+	END	
+GO
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMCOMPANYLOCATION')
+	BEGIN
+		EXEC
+		('
+			update tblSMCompanyLocation set intProfitCenter = null where intProfitCenter = 0
+			update tblSMCompanyLocation set intCashAccount = null where intCashAccount = 0
+			update tblSMCompanyLocation set intDepositAccount = null where intDepositAccount = 0
+			update tblSMCompanyLocation set intARAccount = null where intARAccount = 0
+			update tblSMCompanyLocation set intAPAccount = null where intAPAccount = 0
+			update tblSMCompanyLocation set intSalesAdvAcct = null where intSalesAdvAcct = 0
+			update tblSMCompanyLocation set intPurchaseAdvAccount = null where intPurchaseAdvAccount = 0
+			update tblSMCompanyLocation set intFreightAPAccount = null where intFreightAPAccount = 0
+			update tblSMCompanyLocation set intFreightExpenses = null where intFreightExpenses = 0
+			update tblSMCompanyLocation set intFreightIncome = null where intFreightIncome = 0
+			update tblSMCompanyLocation set intServiceCharges = null where intServiceCharges = 0
+			update tblSMCompanyLocation set intSalesDiscounts = null where intSalesDiscounts = 0
+			update tblSMCompanyLocation set intCashOverShort = null where intCashOverShort = 0
+			update tblSMCompanyLocation set intWriteOff = null where intWriteOff = 0
+			update tblSMCompanyLocation set intCreditCardFee = null where intCreditCardFee = 0
+			update tblSMCompanyLocation set intSalesAccount = null where intSalesAccount = 0
+			update tblSMCompanyLocation set intCostofGoodsSold = null where intCostofGoodsSold = 0
+			update tblSMCompanyLocation set intInventory = null where intInventory = 0
+			update tblSMCompanyLocation set intWriteOffSold = null where intWriteOffSold = 0
+			update tblSMCompanyLocation set intRevalueSold = null where intRevalueSold = 0
+			update tblSMCompanyLocation set intAutoNegativeSold = null where intAutoNegativeSold = 0
+			update tblSMCompanyLocation set intAPClearing = null where intAPClearing = 0
+			update tblSMCompanyLocation set intInventoryInTransit = null where intInventoryInTransit = 0
+			update tblSMCompanyLocation set intWithholdAccountId = null where intWithholdAccountId = 0
+			update tblSMCompanyLocation set intDiscountAccountId = null where intDiscountAccountId = 0
+			update tblSMCompanyLocation set intInterestAccountId = null where intInterestAccountId = 0
+			update tblSMCompanyLocation set intPrepaidAccountId = null where intPrepaidAccountId = 0
+			update tblSMCompanyLocation set intUndepositedFundsId = null where intUndepositedFundsId = 0
+			update tblSMCompanyLocation set intDeferredPayableId = null where intDeferredPayableId = 0
+			update tblSMCompanyLocation set intPettyCash = null where intPettyCash = 0
+			update tblSMCompanyLocation set intDeferredRevenueId = null where intDeferredRevenueId = 0
+		')
+	END
 GO

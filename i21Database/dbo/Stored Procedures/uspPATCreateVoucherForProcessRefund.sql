@@ -102,8 +102,14 @@ BEGIN
 			@intServiceFeeIncomeId = intServiceFeeIncomeId
 	FROM tblPATCompanyPreference
 
-	SELECT @dblServiceFee = dblServiceFee FROM #tempRefundCustomer GROUP BY dblServiceFee;
+	IF(ISNULL(@intAPClearingGLAccount,0) = 0)
+	BEGIN
+		SET @strErrorMessage = 'Unable to voucher. AP Clearing account is not set.';
+		RAISERROR(@strErrorMessage, 16, 1);
+		GOTO Post_Exit;
+	END
 
+	SELECT @dblServiceFee = dblServiceFee FROM #tempRefundCustomer GROUP BY dblServiceFee;
 
 	IF EXISTS(SELECT 1 FROM #tempRefundCustomer WHERE dblCashRefund = 0)
 	BEGIN
@@ -155,8 +161,9 @@ BEGIN
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT;
 
-		UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 0, dbl1099 = ROUND(@dbl1099Amount, 2), intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') 
-		WHERE intBillId = @intCreatedBillId;
+		UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category = 1, dbl1099 = ROUND(@dbl1099Amount, 2), intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') 
+		WHERE intBillId = @intCreatedBillId AND strMiscDescription != N'Service Fee';
+
 		UPDATE tblPATRefundCustomer SET intBillId = @intCreatedBillId WHERE intRefundCustomerId = @intRefundCustomerId;
 
 		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))

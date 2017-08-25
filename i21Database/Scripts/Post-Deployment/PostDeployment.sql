@@ -53,6 +53,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1720_Statement_Footer_To_Report.sql
 :r .\SM\1730_UpdatePatronageMenus.sql
 :r .\SM\1730_EntityFavoriteMenu.sql
+:r .\SM\1730_UpdateTicketManagementMenus.sql
+:r .\SM\1730_UpdatePayrollMenus.sql
+:r .\SM\1730_PortalMenus.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -366,6 +369,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql
+:r .\TF\DefaultData\02_TerminalControl.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\IL_Illinois.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
@@ -386,5 +390,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 --FRM
 :r .\FRM\DefaultData\1_OfflineMenu.sql
+:r .\FRM\1_OfflineGuid.sql
 
 print 'END POST DEPLOYMENT'

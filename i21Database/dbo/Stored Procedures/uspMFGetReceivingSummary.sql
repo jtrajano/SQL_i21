@@ -66,7 +66,6 @@ FROM (
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IRL.intItemUnitMeasureId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = IRL.intLotId
-	LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
 	WHERE IR.dtmReceiptDate BETWEEN @dtmFromDate
 			AND @dtmToDate
 				--AND IO1.intOwnerId = @intOwnerId

@@ -145,10 +145,13 @@ BEGIN
 		,@dtmReceiptDate DATETIME
 		,@strCondition NVARCHAR(50)
 		,@intSplitFromLotId INT
+		,@ysnBonded BIT
+		,@strLotReceiptNumber NVARCHAR(50)
 
 	SELECT @strLotNumber = strLotNumber
 		,@strCondition = strCondition
 		,@intSplitFromLotId = intSplitFromLotId
+		,@strLotReceiptNumber = strReceiptNumber
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -183,11 +186,10 @@ BEGIN
 		SELECT @intBondStatusId = NULL
 
 		SELECT @intBondStatusId = LI.intBondStatusId
-					,@intItemOwnerId = LI.intItemOwnerId
-					,@strVendorRefNo = LI.strVendorRefNo
-					,@strWarehouseRefNo = LI.strWarehouseRefNo
-					,@strReceiptNumber = LI.strReceiptNumber
-					,@dtmReceiptDate = dtmReceiptDate
+			,@strVendorRefNo = LI.strVendorRefNo
+			,@strWarehouseRefNo = LI.strWarehouseRefNo
+			,@strReceiptNumber = LI.strReceiptNumber
+			,@dtmReceiptDate = dtmReceiptDate
 		FROM tblMFLotInventory LI
 		WHERE LI.intLotId = @intSplitFromLotId
 
@@ -195,11 +197,31 @@ BEGIN
 		FROM tblICItem
 		WHERE intItemId = @intItemId
 
+		SELECT @intInventoryReceiptId = intInventoryReceiptId
+		FROM tblICInventoryReceipt
+		WHERE strReceiptNumber = @strLotReceiptNumber
+
+		SELECT TOP 1 @ysnBonded = FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'Bonded'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryReceipt'
+		WHERE T.intRecordId = @intInventoryReceiptId
+
+		IF @ysnBonded IS NULL
+			SELECT @ysnBonded = 0
+
 		IF @intBondStatusId IS NULL
-			AND @intSplitFromLotId is null
+			AND @intSplitFromLotId IS NULL
 		BEGIN
 			SELECT @intBondStatusId = CASE 
-					WHEN @ysnRequireCustomerApproval = 1
+					WHEN (
+							@ysnRequireCustomerApproval = 1
+							OR @ysnBonded = 1
+							)
 						THEN (
 								SELECT intBondStatusId
 								FROM tblMFCompanyPreference
@@ -233,7 +255,6 @@ BEGIN
 		INSERT INTO tblMFLotInventory (
 			intLotId
 			,intBondStatusId
-			,intItemOwnerId
 			,strVendorRefNo
 			,strWarehouseRefNo
 			,strReceiptNumber
@@ -241,7 +262,6 @@ BEGIN
 			)
 		SELECT @intLotId
 			,@intBondStatusId
-			,@intItemOwnerId
 			,@strVendorRefNo
 			,@strWarehouseRefNo
 			,@strReceiptNumber
@@ -249,21 +269,21 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SELECT Top 1 @strVendorRefNo = LI.strVendorRefNo
+		SELECT TOP 1 @strVendorRefNo = LI.strVendorRefNo
 			,@strWarehouseRefNo = LI.strWarehouseRefNo
 			,@strReceiptNumber = LI.strReceiptNumber
 			,@dtmReceiptDate = dtmReceiptDate
 		FROM tblMFLotInventory LI
 		JOIN tblICLot L ON L.intLotId = LI.intLotId
 		WHERE L.strLotNumber = @strLotNumber
-		Order By L.intLotId Desc
+		ORDER BY L.intLotId DESC
+
+		SELECT @strTransactionId = strTransactionId
+		FROM tblICLot
+		WHERE intLotId = @intLotId
 
 		IF @strReceiptNumber IS NULL
 		BEGIN
-			SELECT @strTransactionId = strTransactionId
-			FROM tblICLot
-			WHERE intLotId = @intLotId
-
 			SELECT @strVendorRefNo = strVendorRefNo
 				,@strWarehouseRefNo = strWarehouseRefNo
 				,@strReceiptNumber = strReceiptNumber
@@ -272,11 +292,51 @@ BEGIN
 			WHERE strReceiptNumber = @strTransactionId
 		END
 
+		SELECT @intInventoryReceiptId = intInventoryReceiptId
+		FROM tblICInventoryReceipt
+		WHERE strReceiptNumber = @strReceiptNumber
+
+		SELECT TOP 1 @ysnBonded = FV.strValue
+		FROM tblSMTabRow TR
+		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			AND LOWER(TD.strControlName) = 'Bonded'
+		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			AND S.strNamespace = 'Inventory.view.InventoryReceipt'
+		WHERE T.intRecordId = @intInventoryReceiptId
+
+		IF @ysnBonded IS NULL
+			SELECT @ysnBonded = 0
+
+		SELECT @intBondStatusId = CASE 
+				WHEN (
+						@ysnRequireCustomerApproval = 1
+						OR @ysnBonded = 1
+						)
+					THEN (
+							SELECT intBondStatusId
+							FROM tblMFCompanyPreference
+							)
+				ELSE NULL
+				END
+
 		UPDATE tblMFLotInventory
 		SET strVendorRefNo = @strVendorRefNo
 			,strWarehouseRefNo = @strWarehouseRefNo
 			,strReceiptNumber = @strReceiptNumber
 			,dtmReceiptDate = @dtmReceiptDate
+			,intBondStatusId = CASE 
+				WHEN @strTransactionId LIKE 'IR-%'
+					THEN (
+							CASE 
+								WHEN @ysnBonded = 1
+									THEN @intBondStatusId
+								ELSE NULL
+								END
+							)
+				ELSE intBondStatusId
+				END
 		WHERE intLotId = @intLotId
 	END
 END

@@ -47,7 +47,10 @@ BEGIN TRY
 			@dblNewBalance				NUMERIC(18,6),
 			@dblNewScheduleQty			NUMERIC(18,6),
 			@intNewNoOfLoad				INT,
-			@ysnLoad					BIT
+			@ysnLoad					BIT,
+			@ysnSlice					BIT,
+			@intNewShipperId			INT,
+			@intNewShippingLineId		INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -73,7 +76,10 @@ BEGIN TRY
 			@intNewNoOfLoad				=	intNoOfLoads,
 			@intNewItemContractId		=	intItemContractId,
 			@intNewFutureMonthId		=	intFutureMonthId,
-			@intNewProducerId			=	intProducerId
+			@intNewProducerId			=	intProducerId,
+			@ysnSlice					=	ysnSlice,
+			@intNewShipperId			=	intShipperId,
+			@intNewShippingLineId		=	intShippingLineId
 
 	FROM	OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail',2)
 	WITH
@@ -100,7 +106,10 @@ BEGIN TRY
 			intNoOfLoads				INT,
 			intItemContractId			INT,
 			intFutureMonthId			INT,
-			intProducerId				INT
+			intProducerId				INT,
+			ysnSlice					BIT,
+			intShipperId				INT,
+			intShippingLineId			INT
 	)  
 
 	IF @RowState  <> 'Added'
@@ -123,7 +132,7 @@ BEGIN TRY
 				@dblNewBalance			=	ISNULL(@dblNewBalance,CD.dblBalance),
 				@dblNewScheduleQty		=	ISNULL(@dblNewScheduleQty,CD.dblScheduleQty),
 				@intNewNoOfLoad			=	ISNULL(@intNewNoOfLoad,CD.intNoOfLoad),
-
+				@intNewPricingTypeId	=	ISNULL(@intNewPricingTypeId,CD.intPricingTypeId),
 				@ysnLoad				=	ysnLoad
 
 		FROM	tblCTContractDetail	CD
@@ -215,34 +224,50 @@ BEGIN TRY
 		END
 
 		--Active check
-
-		IF	@intNewItemId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intNewItemId AND strStatus = 'Active')
+		IF ISNULL(@ysnSlice,0) = 0
 		BEGIN
-			SELECT @ErrMsg = strItemNo FROM tblICItem WHERE intItemId = @intNewItemId
-			SET @ErrMsg = 'Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
-			RAISERROR(@ErrMsg,16,1)
-		END
+			IF	@intNewItemId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intNewItemId AND strStatus = 'Active')
+			BEGIN
+				SELECT @ErrMsg = strItemNo FROM tblICItem WHERE intItemId = @intNewItemId
+				SET @ErrMsg = 'Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+				RAISERROR(@ErrMsg,16,1)
+			END
 
-		IF	@intNewItemContractId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTItemContractView WHERE intItemContractId = @intNewItemContractId AND strStatus = 'Active' AND intLocationId = @intNewCompanyLocationId)
-		BEGIN
-			SELECT @ErrMsg = strContractItemName FROM tblICItemContract WHERE intItemContractId = @intNewItemContractId
-			SET @ErrMsg = REPLACE(@ErrMsg,'%','%%')
-			SET @ErrMsg = 'Contract Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
-			RAISERROR(@ErrMsg,16,1)
-		END
+			IF	@intNewItemContractId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTItemContractView WHERE intItemContractId = @intNewItemContractId AND strStatus = 'Active' AND intLocationId = @intNewCompanyLocationId)
+			BEGIN
+				SELECT @ErrMsg = strContractItemName FROM tblICItemContract WHERE intItemContractId = @intNewItemContractId
+				SET @ErrMsg = REPLACE(@ErrMsg,'%','%%')
+				SET @ErrMsg = 'Contract Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+				RAISERROR(@ErrMsg,16,1)
+			END
 
-		IF	@intNewFutureMonthId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId AND ISNULL(ysnExpired,0) = 0)
-		BEGIN
-			SELECT @ErrMsg = strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId
-			SET @ErrMsg = 'Future Month ' + ISNULL(@ErrMsg,'selected') + ' is expired.'
-			RAISERROR(@ErrMsg,16,1)
-		END
+			IF	@intNewFutureMonthId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId AND ISNULL(ysnExpired,0) = 0)
+			BEGIN
+				SELECT @ErrMsg = strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId
+				SET @ErrMsg = 'Future Month ' + ISNULL(@ErrMsg,'selected') + ' is expired.'
+				RAISERROR(@ErrMsg,16,1)
+			END
 
-		IF	@intNewProducerId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intNewProducerId AND strEntityType = 'Producer' AND ysnActive = 1)
-		BEGIN
-			SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewProducerId
-			SET @ErrMsg = 'Producer ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
-			RAISERROR(@ErrMsg,16,1)
+			IF	@intNewProducerId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intNewProducerId AND strEntityType = 'Producer' AND ysnActive = 1)
+			BEGIN
+				SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewProducerId
+				SET @ErrMsg = 'Producer ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+
+			IF	@intNewShipperId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intNewShipperId AND strEntityType = 'Vendor' AND ysnActive = 1)
+			BEGIN
+				SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewShipperId
+				SET @ErrMsg = 'Shipper ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+
+			IF	@intNewShippingLineId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intNewShippingLineId AND strEntityType = 'Vendor' AND ysnActive = 1)
+			BEGIN
+				SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewShippingLineId
+				SET @ErrMsg = 'Shipping Line ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+				RAISERROR(@ErrMsg,16,1)
+			END
 		END
 		--End Active check
 	END
@@ -308,21 +333,24 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1) 
 		END
 
-		IF @ysnLoad = 1
-        BEGIN
-            IF (@intNewNoOfLoad < @intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty)
-			BEGIN
-				SET @ErrMsg = 'No. of Loads for Sequence ' + LTRIM(@intContractSeq) + ' cannot be reduced below ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '. As current no. of load is ' + LTRIM(@intOldNoOfLoad) + ' and no. of load in use is ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '.'
-				RAISERROR(@ErrMsg,16,1) 
-			END
-			
-        END
-		ELSE
+		IF @intNewPricingTypeId <> 5
 		BEGIN
-			IF (@dblNewQuantity < @dblOldQuantity - @dblOldBalance + @dblOldScheduleQty)
+			IF @ysnLoad = 1
 			BEGIN
-				SET @ErrMsg = 'Sequence ' + LTRIM(@intContractSeq) + ' quantity cannot be reduced below ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '. As current contract quantity is ' +  LTRIM(@dblOldQuantity) + ' and quantity in use is ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '.'
-				RAISERROR(@ErrMsg,16,1) 
+				IF (@intNewNoOfLoad < @intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty)
+				BEGIN
+					SET @ErrMsg = 'No. of Loads for Sequence ' + LTRIM(@intContractSeq) + ' cannot be reduced below ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '. As current no. of load is ' + LTRIM(@intOldNoOfLoad) + ' and no. of load in use is ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '.'
+					RAISERROR(@ErrMsg,16,1) 
+				END
+			
+			END
+			ELSE
+			BEGIN
+				IF (@dblNewQuantity < @dblOldQuantity - @dblOldBalance + @dblOldScheduleQty)
+				BEGIN
+					SET @ErrMsg = 'Sequence ' + LTRIM(@intContractSeq) + ' quantity cannot be reduced below ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '. As current contract quantity is ' +  LTRIM(@dblOldQuantity) + ' and quantity in use is ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '.'
+					RAISERROR(@ErrMsg,16,1) 
+				END
 			END
 		END
 	END

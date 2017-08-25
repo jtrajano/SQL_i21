@@ -116,10 +116,10 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	dbo.tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
-			LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
-				ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
+			--LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
+			--	ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 			
-			AND ExemptedList.intTransactionTypeId IS NULL 
+			--AND ExemptedList.intTransactionTypeId IS NULL 
 
 	SELECT	TOP 1 
 			@strLocationName = c.strLocationName
@@ -296,42 +296,21 @@ AS
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,i.strItemNo
 			,dblReceiptUnitCost = 
-					CASE	
-						WHEN ISNULL(ri.ysnSubCurrency, 0) = 1 AND ISNULL(r.intSubCurrencyCents, 1) NOT IN (0, 1) THEN 
-							(
-								dbo.fnCalculateReceiptUnitCost(
-									ri.intItemId
-									,ri.intUnitMeasureId		
-									,ri.intCostUOMId
-									,ri.intWeightUOMId
-									,ri.dblUnitCost
-									,ri.dblNet
-									,t.intLotId
-									,t.intItemUOMId
-									,AggregrateItemLots.dblTotalNet
-									,ri.ysnSubCurrency
-									,r.intSubCurrencyCents
-								)
-							)										
-							/			
-							r.intSubCurrencyCents 
-						ELSE 
-							(
-								dbo.fnCalculateReceiptUnitCost(
-									ri.intItemId
-									,ri.intUnitMeasureId		
-									,ri.intCostUOMId
-									,ri.intWeightUOMId
-									,ri.dblUnitCost
-									,ri.dblNet
-									,t.intLotId
-									,t.intItemUOMId
-									,AggregrateItemLots.dblTotalNet
-									,ri.ysnSubCurrency
-									,r.intSubCurrencyCents
-								)
-							)							
-					END	
+					(
+						dbo.fnCalculateReceiptUnitCost(
+							ri.intItemId
+							,ri.intUnitMeasureId		
+							,ri.intCostUOMId
+							,ri.intWeightUOMId
+							,ri.dblUnitCost
+							,ri.dblNet
+							,t.intLotId
+							,t.intItemUOMId
+							,AggregrateItemLots.dblTotalNet
+							,ri.ysnSubCurrency
+							,r.intSubCurrencyCents
+						)
+					)					
 	FROM	tblICInventoryReceipt r INNER JOIN (
 				tblICInventoryReceiptItem ri LEFT JOIN tblICInventoryReceiptItemLot ril
 					ON ri.intInventoryReceiptItemId  = ril.intInventoryReceiptItemId

@@ -4,7 +4,7 @@ SELECT
 -- Starts from lower level (Containers)
 		LDCL.intLoadDetailContainerLinkId,
 		LDCL.intLoadDetailId,
-		LDCL.intLoadId,
+		L.intLoadId,
 		LDCL.intLoadContainerId,
 		L.strLoadNumber,
 		L.strLoadNumber AS strTrackingNumber,

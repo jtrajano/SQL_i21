@@ -4,6 +4,7 @@
 	[intFromStatusId] [int] NOT NULL,
 	[intToStatusId] [int] NOT NULL,
 	[strTiggerBy] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL default 'Customer Responds',
+	[ysnActive] [bit] null default 1,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketStatusWorkflow_intTicketStatusWorkflowId] PRIMARY KEY CLUSTERED ([intTicketStatusWorkflowId] ASC),
 	CONSTRAINT [FK_tblHDTicketStatusWorkflow_tblHDTicketStatus_intFromStatusId] FOREIGN KEY ([intFromStatusId]) REFERENCES [dbo].[tblHDTicketStatus] ([intTicketStatusId]),

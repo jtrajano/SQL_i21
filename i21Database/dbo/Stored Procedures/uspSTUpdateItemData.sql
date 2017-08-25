@@ -2263,7 +2263,8 @@ END
 
 
 --NEW
-SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount
+--Remove for displaying changes made
+--SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount
 
 DELETE FROM tblSTMassUpdateReportMaster
 
@@ -2276,6 +2277,15 @@ SELECT strLocation
 	  , strNewData 
 FROM @tblTempOne
 
+
+--For displaying changes made after update
+SELECT DISTINCT strLocation
+	  , strUpc
+	  , strItemDescription
+	  , strChangeDescription
+	  , strOldData
+	  , strNewData 
+FROM @tblTempOne
 
 
 --OLD

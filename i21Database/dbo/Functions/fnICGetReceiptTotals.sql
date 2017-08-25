@@ -3,17 +3,17 @@
 	@intInventoryReceiptId INT
 	,@totalType INT -- 1- SubTotal; 2- Tax; 3- Charges; 4- Gross; 5- Net; 6- GrandTotal 
 )
-RETURNS NUMERIC(38,20)
+RETURNS NUMERIC(38,6)
 AS
 BEGIN
-	DECLARE @returnTotal NUMERIC(38,20) = 0
-			,@subTotal NUMERIC(38,20) = 0
-			,@totalTax NUMERIC(38,20) = 0
-			,@totalGross NUMERIC(38,20) = 0
-			,@totalNet NUMERIC(38,20) = 0
-			,@grandTotal NUMERIC(38,20) = 0
-			,@totalCharges NUMERIC(38,20) = 0
-			,@totalChargesTax NUMERIC(38,20) = 0
+	DECLARE @returnTotal NUMERIC(38,6) = 0
+			,@subTotal NUMERIC(38,6) = 0
+			,@totalTax NUMERIC(38,6) = 0
+			,@totalGross NUMERIC(38,6) = 0
+			,@totalNet NUMERIC(38,6) = 0
+			,@grandTotal NUMERIC(38,6) = 0
+			,@totalCharges NUMERIC(38,6) = 0
+			,@totalChargesTax NUMERIC(38,6) = 0
 			
 	--Get the totals for the receipt
 	SELECT @subTotal = SUM(ReceiptItem.dblLineTotal)

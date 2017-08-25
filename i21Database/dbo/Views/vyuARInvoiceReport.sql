@@ -34,7 +34,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dtmDueDate				= INV.dtmDueDate
 	 , strFreightTerm			= FREIGHT.strFreightTerm
 	 , strDeliverPickup			= INV.strDeliverPickup	 
-	 , strInvoiceHeaderComment	= INV.strComments
+	 , strInvoiceHeaderComment	= ISNULL(Comments.strMessage, INV.strComments)
 	 , strInvoiceFooterComment	= INV.strFooterComments
 	 , dblInvoiceSubtotal		= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceSubtotal, 0) END
 	 , dblShipping				= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblShipping, 0) * -1 ELSE ISNULL(INV.dblShipping, 0) END
@@ -205,12 +205,17 @@ LEFT JOIN (
 	SELECT intEntityId
 		 , strName
 	FROM dbo.tblEMEntity
-) SHIPVIA ON INV.intShipViaId = SALESPERSON.intEntityId
+) SHIPVIA ON INV.intShipViaId = SHIPVIA.intEntityId
 LEFT JOIN (
 	SELECT intFreightTermId
 		 , strFreightTerm
 	FROM dbo.tblSMFreightTerms WITH (NOLOCK)
 ) FREIGHT ON INV.intFreightTermId = FREIGHT.intFreightTermId
+LEFT JOIN (SELECT 
+			strCode,
+			strMessage
+		  FROM	
+		  vyuARDocumentMaintenanceMessage) Comments ON INV.strComments = Comments.strCode
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName 
 			   , strAddress

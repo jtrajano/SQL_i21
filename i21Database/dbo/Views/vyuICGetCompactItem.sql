@@ -1,56 +1,59 @@
 ﻿CREATE VIEW [dbo].[vyuICGetCompactItem]
-	AS
+AS
 
-SELECT Item.intItemId
-, Item.strItemNo
-, Item.strType
-, Item.strDescription
-, Manufacturer.strManufacturer
-, Brand.strBrandCode
-, Brand.strBrandName
-, Item.strStatus
-, Item.strModelNo
-, strTracking = Item.strInventoryTracking
-, Item.strLotTracking
-, Item.intCommodityId
-, strCommodity = Commodity.strCommodityCode
-, Item.intCategoryId
-, strCategory = Category.strCategoryCode
-, Item.ysnInventoryCost
-, Item.ysnAccrue
-, Item.ysnMTM
-, Item.ysnPrice
-, Item.strCostMethod
-, Item.intOnCostTypeId
-, strOnCostType = OnCostType.strItemNo
-, Item.dblAmount
-, Item.intCostUOMId
-, strCostUOM = CostUOM.strUnitMeasure
-, Item.intOriginId
-, strOriginName = CommodityAttrib.strDescription
-, Item.strCostType
-, Item.strShortName
-, Item.strRequired
-, Item.ysnBasisContract
-, Item.intM2MComputationId
-, M2M.strM2MComputation
-, strTonnageTaxUOM = TonnageUOM.strUnitMeasure
-, Item.intTonnageTaxUOMId
-, strFuelCategory 		= FuelCategory.strRinFuelCategoryCode
-, strMedicationTag 		= Medication.strDescription
-, strIngredientTag 		= Ingredient.strDescription
-, strPhysicalItem 		= PhysicalItem.strItemNo
-, strPatronageCategory 	= PatronageCategory.strCategoryCode
-, strPatronageDirect 	= PatronageDirect.strCategoryCode
-, strOrigin 			= Origin.strDescription
-, strProductType		= ProductType.strDescription
-, strRegion 			= Region.strDescription
-, strSeason 			= Season.strDescription
-, strClass 				= Class.strDescription
-, strProductLine 		= ProductLine.strDescription
-, strHazmatMessage		= HazMat.strDescription
-, ysnUseWeighScales		= Item.ysnUseWeighScales
-, ysnIsBasket			= Item.ysnIsBasket
+SELECT 
+	Item.intItemId
+	, Item.strItemNo
+	, Item.strType
+	, Item.strDescription
+	, Manufacturer.strManufacturer
+	, Brand.strBrandCode
+	, Brand.strBrandName
+	, Item.strStatus
+	, Item.strModelNo
+	, strTracking = Item.strInventoryTracking
+	, Item.strLotTracking
+	, Item.intCommodityId
+	, strCommodity = Commodity.strCommodityCode
+	, Item.intCategoryId
+	, strCategory = Category.strCategoryCode
+	, Item.ysnInventoryCost
+	, Item.ysnAccrue
+	, Item.ysnMTM
+	, Item.ysnPrice
+	, Item.strCostMethod
+	, Item.intOnCostTypeId
+	, strOnCostType = OnCostType.strItemNo
+	, Item.dblAmount
+	, Item.intCostUOMId
+	, strCostUOM = CostUOM.strUnitMeasure
+	, Item.intOriginId
+	, strOriginName = CommodityAttrib.strDescription
+	, Item.strCostType
+	, Item.strShortName
+	, Item.strRequired
+	, Item.ysnBasisContract
+	, Item.intM2MComputationId
+	, M2M.strM2MComputation
+	, strTonnageTaxUOM = TonnageUOM.strUnitMeasure
+	, Item.intTonnageTaxUOMId
+	, strFuelCategory 		= FuelCategory.strRinFuelCategoryCode
+	, strMedicationTag 		= Medication.strDescription
+	, strIngredientTag 		= Ingredient.strDescription
+	, strPhysicalItem 		= PhysicalItem.strItemNo
+	, strPatronageCategory 	= PatronageCategory.strCategoryCode
+	, strPatronageDirect 	= PatronageDirect.strCategoryCode
+	, strOrigin 			= Origin.strDescription
+	, strProductType		= ProductType.strDescription
+	, strRegion 			= Region.strDescription
+	, strSeason 			= Season.strDescription
+	, strClass 				= Class.strDescription
+	, strProductLine 		= ProductLine.strDescription
+	, strHazmatMessage		= HazMat.strDescription
+	, ysnUseWeighScales		= Item.ysnUseWeighScales
+	, ysnIsBasket			= Item.ysnIsBasket
+	, strDimensionUOM		= mfgDimensionUOM.strUnitMeasure
+	, strWeightUOM			= mfgWeightUOM.strUnitMeasure
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -75,3 +78,15 @@ LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = Ite
 LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = Item.intSeasonId
 LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.intClassVarietyId
 LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = Item.intProductLineId
+LEFT JOIN (
+	tblICUnitMeasure mfgDimensionUOM INNER JOIN tblICItemUOM mfgDimensionItemUOM
+		ON mfgDimensionUOM.intUnitMeasureId = mfgDimensionItemUOM.intUnitMeasureId		
+)
+	ON mfgDimensionItemUOM.intItemId = Item.intItemId
+	AND mfgDimensionUOM.intUnitMeasureId = Item.intDimensionUOMId
+LEFT JOIN (
+	tblICUnitMeasure mfgWeightUOM INNER JOIN tblICItemUOM mfgWeightItemUOM
+		ON mfgWeightUOM.intUnitMeasureId = mfgWeightItemUOM.intUnitMeasureId		
+)
+	ON mfgWeightItemUOM.intItemId = Item.intItemId	
+	AND mfgWeightUOM.intUnitMeasureId = Item.intWeightUOMId

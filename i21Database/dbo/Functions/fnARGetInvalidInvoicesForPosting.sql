@@ -1130,6 +1130,9 @@ IF(ISNULL(@Post,0)) = 1
 		INNER JOIN
 			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge')) ICI
 				ON ARID.[intItemId] = ICI.[intItemId]
+		INNER JOIN 
+			(SELECT [intInvoiceId], intOriginalInvoiceId FROM tblARInvoice WITH (NOLOCK) WHERE intOriginalInvoiceId IS NULL) ARI
+				ON I.[intInvoiceId] = ARI.[intInvoiceId]
 		INNER JOIN
 			(SELECT [intContractHeaderId], [intContractDetailId], [dblCashPrice], [strPricingType] FROM vyuARCustomerContract WITH (NOLOCK)) ARCC
 				ON ARID.[intContractHeaderId] = ARCC.[intContractHeaderId] 

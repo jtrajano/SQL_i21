@@ -327,19 +327,19 @@ IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 *	1. It is non-check transaction
 *	2. If it is a check transaction, the check report was not yet printed.
 */
-DECLARE @intPrintedTransaction AS INT
+--DECLARE @intPrintedTransaction AS INT
 
-SELECT @intPrintedTransaction = COUNT(F.intTransactionId) 
-FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
-			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@ACH)
-		AND F.dtmCheckPrinted IS NOT NULL
+--SELECT @intPrintedTransaction = COUNT(F.intTransactionId) 
+--FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+--			ON F.strTransactionId = TMP.strTransactionId
+--WHERE	F.intBankTransactionTypeId IN (@ACH)
+--		AND F.dtmCheckPrinted IS NOT NULL
 
-IF @intPrintedTransaction > 0
-BEGIN
-	RAISERROR('Unable to unpost printed/commited transaction.', 11, 1)
-	GOTO Exit_BankTransactionReversal_WithErrors
-END
+--IF @intPrintedTransaction > 0
+--BEGIN
+--	RAISERROR('Unable to unpost printed/commited transaction.', 11, 1)
+--	GOTO Exit_BankTransactionReversal_WithErrors
+--END
 
 /**
 * Delete the bank transactions
@@ -350,7 +350,7 @@ END
 DELETE tblCMBankTransaction
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK, @ACH)		
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK)		
 		AND (
 			-- Condition #1:
 			F.strReferenceNo IN (@CASH_PAYMENT)

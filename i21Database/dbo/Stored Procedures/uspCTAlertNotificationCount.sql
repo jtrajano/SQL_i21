@@ -4,65 +4,39 @@ AS
 
 BEGIN TRY
 
-	DECLARE @NotificationTypeEvent TABLE
+	DECLARE @NotificationCount TABLE
 	(
-		intEventId	INT,
-		strNotificationType NVARCHAR(50)	
+		intCount	INT,
+		strNotificationCount NVARCHAR(50)	
 	)
 
-	DECLARE @ErrMsg	NVARCHAR(MAX)
+	DECLARE @ErrMsg	NVARCHAR(MAX),
+			@intApprovedNotSentCount INT
 
-	INSERT INTO @NotificationTypeEvent
-	SELECT	intEventId,
-			CASE	WHEN	strEventName =  'Unconfirmed contract'				THEN	'Unconfirmed'
-					WHEN	strEventName =  'Contract without a sequence'		THEN	'Empty'	
-					WHEN	strEventName =	'Unsubmitted Contract Alert'		THEN	'Unsubmitted'
-					WHEN	strEventName =  'Unsigned Contract Alert'			THEN	'Unsigned'
-					WHEN	strEventName =  'Approved Contract Mail Not Sent'	THEN	'Approved Not Sent'
-			END
-	FROM tblCTEvent
+	INSERT INTO @NotificationCount
+	EXEC  [uspCTNotification] 'Empty',@intEntityId,1
 
-	SELECT *
+	INSERT INTO @NotificationCount
+	EXEC  [uspCTNotification] 'Unconfirmed',@intEntityId,1
+
+	INSERT INTO @NotificationCount
+	EXEC  [uspCTNotification] 'Unsigned',@intEntityId,1
+
+	INSERT INTO @NotificationCount
+	EXEC  [uspCTNotification] 'Unsubmitted',@intEntityId,1
+
+	INSERT INTO @NotificationCount
+	EXEC  [uspCTNotification] 'Approved Not Sent',@intEntityId,1
+
+	UPDATE @NotificationCount SET strNotificationCount = 'int'+REPLACE(strNotificationCount,' ','')+'Count',intCount = ISNULL(intCount,0)
+
+	SELECT  ISNULL(intUnsubmittedCount,0)		AS intUnsubmittedCount,
+			ISNULL(intEmptyCount,0)				AS intEmptyCount,
+			ISNULL(intUnconfirmedCount,0)		AS intUnconfirmedCount,
+			ISNULL(intApprovedNotSentCount,0)	AS intApprovedNotSentCount,
+			ISNULL(intUnsignedCount,0)			AS intUnsignedCount
 	FROM
-	(
-		SELECT COUNT(1) AS intCount, 'intApprovedNotSentCount' AS strNotificationCount  
-		FROM vyuCTNotification		NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strNotificationType
-		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
-		WHERE NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode) AND NF.strNotificationType = 'Approved Not Sent'
-
-		UNION
-
-		SELECT COUNT(1) AS intCount, 'intEmptyCount' AS strNotificationCount  
-		FROM vyuCTNotification NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strNotificationType
-		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
-		WHERE NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode) AND NF. strNotificationType = 'Empty'
-
-		UNION
-
-		SELECT COUNT(1) AS intCount, 'intUnconfirmedCount' AS strNotificationCount  
-		FROM vyuCTNotification NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strNotificationType
-		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
-		WHERE NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode) AND NF. strNotificationType = 'Unconfirmed'
-
-		UNION
-
-		SELECT COUNT(1) AS intCount, 'intUnsignedCount' AS strNotificationCount  
-		FROM vyuCTNotification NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strNotificationType
-		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
-		WHERE NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode) AND NF. strNotificationType = 'Unsigned'
-
-		UNION
-
-		SELECT COUNT(1) AS intCount, 'intUnsubmittedCount' AS strNotificationCount  
-		FROM vyuCTNotification NF
-		JOIN @NotificationTypeEvent	NE	ON	NE.strNotificationType	=	NF.strNotificationType
-		LEFT JOIN vyuCTEventRecipientFilter	RF	ON	RF.intEventId	=	NE.intEventId AND RF.intEntityId	=	@intEntityId
-		WHERE NF.strCommodityCode = ISNULL(RF.strCommodity,NF.strCommodityCode) AND NF. strNotificationType = 'Unsubmitted'
-	)t
+	@NotificationCount
 	PIVOT
 	(
 		MIN(intCount) FOR strNotificationCount IN 

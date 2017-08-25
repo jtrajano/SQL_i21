@@ -56,6 +56,17 @@ BEGIN
 				and St.strType = 'Primary'
 		) accountCategory
 		WHERE accountCategory.intAccountCategoryId != 1 --Vendor Prepayments
+
+		--Do not allow posting with 0 cost in one of the details
+		INSERT INTO @returntable
+		SELECT 
+			'The cost in one of the details is 0.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			27
+		FROM tblAPBill A 
+		WHERE EXISTS(SELECT * FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId AND B.dblCost = 0.000000)
 	END
 	
 	RETURN;
