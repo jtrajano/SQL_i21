@@ -379,6 +379,26 @@ IF @ysnIncludeBudget = 1
         EXEC sp_executesql @queryBudget
     END
 
+IF @ysnPrintFromCFLocal = 1
+	BEGIN
+		UPDATE @temp_balanceforward_table SET dblTotalAR = dblTotalAR - dblFuture
+
+		UPDATE BALANCEFORWARD
+		SET BALANCEFORWARD.dblTotalAR = BALANCEFORWARD.dblTotalAR + ISNULL(CF.dblTotalFuture, 0)
+		  , BALANCEFORWARD.dblFuture = CF.dblTotalFuture
+		FROM @temp_balanceforward_table BALANCEFORWARD
+		INNER JOIN (
+			SELECT intEntityCustomerId
+				 , dblTotalFuture = SUM(dblAmountDue)
+			FROM tblARInvoice WITH (NOLOCK)
+			WHERE strType = 'CF Tran'
+			AND dtmPostDate <= @dtmDateFromLocal
+			AND ysnPaid = 0
+			AND ysnPosted = 1
+			GROUP BY intEntityCustomerId
+		) CF ON BALANCEFORWARD.intEntityCustomerId = CF.intEntityCustomerId
+	END
+
 INSERT INTO @temp_statement_table(
 	  intEntityCustomerId
 	, strCustomerName
@@ -441,24 +461,6 @@ IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
 		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0
-	END
-
-IF @ysnPrintFromCFLocal = 1
-	BEGIN
-		UPDATE AGING
-		SET AGING.dblFuture = AGING.dblFuture - CF.dblTotalFuture
-		FROM @temp_aging_table AGING
-		INNER JOIN (
-			SELECT intEntityCustomerId
-				 , dblTotalFuture = SUM(dblAmountDue)
-			FROM tblARInvoice WITH (NOLOCK)
-			WHERE intEntityCustomerId = 13367 
-			AND strType = 'CF Tran'
-			AND dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-			AND ysnPaid = 0
-			AND ysnPosted = 1
-			GROUP BY intEntityCustomerId
-		) CF ON AGING.intEntityCustomerId = CF.intEntityCustomerId
 	END
 
 INSERT INTO @temp_cf_table (
