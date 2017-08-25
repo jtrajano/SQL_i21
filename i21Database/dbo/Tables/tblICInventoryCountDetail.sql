@@ -17,6 +17,8 @@
     [dblQtyPerPallet] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [dblPhysicalCount] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
     [intItemUOMId] INT NULL, 
+    [intWeightUOMId] INT NULL,
+    [dblWeightQty] NUMERIC(38, 20) NULL DEFAULT((0)),
     [ysnRecount] BIT NOT NULL DEFAULT ((0)), 
     [intEntityUserSecurityId] INT NOT NULL, 
     [intSort] INT NULL, 

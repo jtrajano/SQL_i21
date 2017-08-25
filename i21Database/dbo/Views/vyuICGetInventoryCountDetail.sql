@@ -25,7 +25,12 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	InvCountDetail.dblQtyPerPallet,
 	InvCountDetail.dblPhysicalCount,
 	InvCountDetail.intItemUOMId,
+	InvCountDetail.intWeightUOMId,
+	InvCountDetail.dblWeightQty,
 	UOM.strUnitMeasure,
+	strWeightUOM = WeightUOM.strUnitMeasure,
+	dblItemConversionFactor = ISNULL(ItemUOM.dblUnitQty, 0.00),
+	dblWeightConversionFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0.00),
 	dblConversionFactor = dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, 1),
 	dblPhysicalCountStockUnit = dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, InvCountDetail.dblPhysicalCount),
 	dblVariance = (CASE WHEN InvCount.ysnCountByLots = 1 THEN ISNULL(InvCountDetail.dblSystemCount, 0) - ISNULL(InvCountDetail.dblPhysicalCount, 0)
@@ -46,4 +51,6 @@ FROM tblICInventoryCountDetail InvCountDetail
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = InvCountDetail.intLotId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InvCountDetail.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = InvCountDetail.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 	LEFT JOIN tblSMUserSecurity UserSecurity ON UserSecurity.intEntityUserSecurityId = InvCountDetail.intEntityUserSecurityId
