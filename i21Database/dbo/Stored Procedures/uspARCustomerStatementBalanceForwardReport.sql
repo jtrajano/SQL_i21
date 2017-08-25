@@ -547,7 +547,12 @@ SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, strInvoiceNumber			= MAINREPORT.strInvoiceNumber
 	, strBOLNumber				= MAINREPORT.strBOLNumber
 	, strRecordNumber			= MAINREPORT.strRecordNumber
-	, strTransactionType		= MAINREPORT.strTransactionType
+	, strTransactionType		= CASE WHEN @ysnPrintFromCFLocal = 1 THEN
+									CASE WHEN MAINREPORT.strTransactionType = 'Debit Memo' THEN 'Invoice'
+										 WHEN MAINREPORT.strTransactionType = 'Customer Prepayment' THEN 'Payment'
+									END
+									ELSE MAINREPORT.strTransactionType
+								  END
 	, strPaymentInfo			= MAINREPORT.strPaymentInfo
 	, strSalespersonName		= MAINREPORT.strSalespersonName
 	, strAccountStatusCode		= MAINREPORT.strAccountStatusCode
