@@ -453,7 +453,7 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE dblBalance = 0 AND strTransactionType <> 'Balance Forward'
+        DELETE FROM @temp_statement_table WHERE ISNULL(dblBalance, 0) = 0 AND ISNULL(strTransactionType, '') <> 'Balance Forward'
         DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
     END
 
@@ -549,12 +549,7 @@ SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, strInvoiceNumber			= MAINREPORT.strInvoiceNumber
 	, strBOLNumber				= MAINREPORT.strBOLNumber
 	, strRecordNumber			= MAINREPORT.strRecordNumber
-	, strTransactionType		= CASE WHEN @ysnPrintFromCFLocal = 1 THEN
-									CASE WHEN MAINREPORT.strTransactionType = 'Debit Memo' THEN 'Invoice'
-										 WHEN MAINREPORT.strTransactionType = 'Customer Prepayment' THEN 'Payment'
-									END
-									ELSE MAINREPORT.strTransactionType
-								  END
+	, strTransactionType		= MAINREPORT.strTransactionType
 	, strPaymentInfo			= MAINREPORT.strPaymentInfo
 	, strSalespersonName		= MAINREPORT.strSalespersonName
 	, strAccountStatusCode		= MAINREPORT.strAccountStatusCode
@@ -593,7 +588,13 @@ FROM (
 		 , dblInvoiceTotal
 		 , intPaymentId
 		 , strRecordNumber
-		 , strTransactionType
+		 , strTransactionType					= CASE WHEN @ysnPrintFromCFLocal = 1 THEN
+													CASE WHEN STATEMENTREPORT.strTransactionType = 'Debit Memo' THEN 'Invoice'
+														 WHEN STATEMENTREPORT.strTransactionType = 'Customer Prepayment' THEN 'Payment'
+														 ELSE STATEMENTREPORT.strTransactionType
+													END
+													ELSE STATEMENTREPORT.strTransactionType
+												  END
 		 , strPaymentInfo
 		 , dtmDatePaid
 		 , dblPayment
