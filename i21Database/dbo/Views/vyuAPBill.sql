@@ -50,7 +50,14 @@ SELECT
 	EL.strLocationName AS strVendorLocation,
 	ISNULL(Payment.dblWithheld,0) AS dblWithheld,
 	ISNULL(Payment.dblDiscount,0) AS dblDiscount,
-	strPayeeName = (SELECT EL2.strCheckPayeeName FROM dbo.tblEMEntityLocation EL2 WHERE EL2.intEntityLocationId = A.intPayToAddressId)
+	strPayeeName = (SELECT EL2.strCheckPayeeName FROM dbo.tblEMEntityLocation EL2 WHERE EL2.intEntityLocationId = A.intPayToAddressId),
+	A.strComment,
+	ST.strTerm,
+	SV.strShipVia,
+	EN.strName AS strContactName,
+	CL.strLocationName AS strReceivingLocation,
+	strStoreLocation = (SELECT SCL.strLocationName FROM dbo.tblSMCompanyLocation SCL WHERE SCL.intCompanyLocationId = A.intStoreLocationId),
+	strOrderedBy = (SELECT UEN.strName FROM dbo.tblEMEntity UEN WHERE UEN.intEntityId = A.intOrderById)
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -62,6 +69,14 @@ FROM
 		ON EL.intEntityLocationId = A.intShipFromId
 	INNER JOIN dbo.tblSMCurrency CUR 
 		ON CUR.intCurrencyID = A.intCurrencyId
+	INNER JOIN dbo.tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = A.intShipToId
+	INNER JOIN dbo.tblSMTerm ST
+		ON ST.intTermID = A.intTermsId
+	LEFT JOIN dbo.tblSMShipVia SV
+		ON SV.intEntityId = A.intShipViaId
+	LEFT JOIN dbo.tblEMEntity EN
+		ON EN.intEntityId = A.intContactId	
 	OUTER APPLY
 	(
 		SELECT TOP 1

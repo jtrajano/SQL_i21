@@ -42,7 +42,18 @@ SELECT
 		THEN weightUOM.strUnitMeasure
 		ELSE uom.strUnitMeasure
 	END AS strUOM,
-	ISNULL(CD.intContractSeq,0) AS intSequenceId
+	ISNULL(CD.intContractSeq,0) AS intSequenceId,
+	L.strLoadNumber,
+	um.strUnitMeasure AS strCostUOM,
+	B.dblNetWeight,
+	B.dblDiscount,
+	H.strDescription AS strAccountDescription,
+	B.strComment,
+	B.dblVolume,
+	SL.strName as strStorageLocation,
+	B.dtmExpectedDate,
+	B.strBillOfLading,
+	P.strPurchaseOrderNumber
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -78,4 +89,12 @@ LEFT JOIN (dbo.tblICItemUOM weightItemUOM INNER JOIN dbo.tblICUnitMeasure weight
 	ON B.intWeightUOMId = weightItemUOM.intItemUOMId
 LEFT JOIN (dbo.tblICItemUOM itemUOM INNER JOIN dbo.tblICUnitMeasure uom ON itemUOM.intUnitMeasureId = uom.intUnitMeasureId)
 	ON B.intUnitOfMeasureId = itemUOM.intItemUOMId
+LEFT JOIN dbo.tblLGLoad L
+	ON L.intLoadId = B.intLoadId
+LEFT JOIN (dbo.tblICItemUOM costUOM INNER JOIN dbo.tblICUnitMeasure um ON costUOM.intUnitMeasureId = um.intUnitMeasureId)
+	ON B.intCostUOMId = costUOM.intItemUOMId
+LEFT JOIN dbo.tblICStorageLocation SL
+	ON SL.intStorageLocationId = B.intStorageLocationId
+LEFT JOIN (dbo.tblPOPurchaseDetail PD LEFT JOIN dbo.tblPOPurchase P ON PD.intPurchaseId = P.intPurchaseId)
+	ON PD.intPurchaseDetailId = B.intPurchaseDetailId
 WHERE weightItemUOM.intItemUOMId IS NOT NULL OR itemUOM.intItemUOMId IS NOT NULL
