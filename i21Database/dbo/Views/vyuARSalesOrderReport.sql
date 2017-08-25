@@ -55,7 +55,7 @@ SELECT SO.intSalesOrderId
 	 , strSalespersonName		= ESP.strName
 	 , strOrderedByName			= EOB.strName
 	 , strSplitName				= CASE WHEN ISNULL(ES.strDescription, '') <> '' THEN ES.strDescription ELSE ES.strSplitNumber END
-	 , strSOHeaderComment		= SO.strComments
+	 , strSOHeaderComment		= ISNULL(Comments.strMessage, SO.strComments)
 	 , strSOFooterComment		= SO.strFooterComments
 	 , dblSalesOrderSubtotal	= ISNULL(SO.dblSalesOrderSubtotal, 0)
 	 , dblShipping				= ISNULL(SO.dblShipping, 0)
@@ -114,3 +114,8 @@ LEFT JOIN (SELECT SUM(SD.dblTotal) AS dblProductTotal, PD.intProductTypeId, SD.i
 	LEFT JOIN (tblARProductTypeDetail PDD INNER JOIN tblARProductType PD ON PDD.intProductTypeId = PD.intProductTypeId) ON PDD.intCategoryId = ICC.intCategoryId
 GROUP BY PD.intProductTypeId, SD.intSalesOrderId) AS PRODUCTTYPETOTAL
 ON ISNULL(PD.intProductTypeId, 0) = ISNULL(PRODUCTTYPETOTAL.intProductTypeId, 0) AND SD.intSalesOrderId = PRODUCTTYPETOTAL.intSalesOrderId
+LEFT JOIN (SELECT 
+			strCode,
+			strMessage
+		  FROM	
+		  vyuARDocumentMaintenanceMessage) Comments ON SO.strComments = Comments.strCode
