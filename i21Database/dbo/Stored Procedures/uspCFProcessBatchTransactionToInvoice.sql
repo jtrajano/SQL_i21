@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFProcessBatchTransactionToInvoice]
+﻿CREATE PROCEDURE [dbo].[uspCFProcessBatchTransactionToInvoice]
 	  @TransactionId		NVARCHAR(MAX)
 	 ,@UserId				INT 
 	 ,@Post					BIT
@@ -429,12 +428,13 @@ SELECT * FROM #tmpForeignTransactionId
 					FROM
 						tblCFCard CFC
 					INNER JOIN
-						(	SELECT TOP 1 CFTran.intTransactionId, CFTran.intCardId, CFTran.dtmTransactionDate
+						(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
 							FROM
 								tblCFTransaction CFTran
 							INNER JOIN
 								#tmpCreatedInvoice ARL
 									ON CFTran.intTransactionId = ARL.intSourceId 
+								GROUP BY  CFTran.intCardId
 						) CFT
 							ON CFC.intCardId = CFT.intCardId					
 					WHERE 
@@ -447,12 +447,13 @@ SELECT * FROM #tmpForeignTransactionId
 					FROM
 						tblCFCard CFC
 					INNER JOIN
-						(	SELECT CFTran.intTransactionId, CFTran.intCardId, CFTran.dtmTransactionDate
+						(	SELECT CFTran.intCardId, MAX(CFTran.dtmTransactionDate) AS dtmTransactionDate
 							FROM
 								tblCFTransaction CFTran
 							INNER JOIN
 								#tmpCreatedInvoice ARL
 									ON CFTran.intTransactionId = ARL.intSourceId 
+								GROUP BY CFTran.intCardId
 						) CFT
 							ON CFC.intCardId = CFT.intCardId					
 				END
