@@ -1349,7 +1349,7 @@ SELECT
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[strBatchId]
-	,[strPostingError]
+	,[strPostingError] -- + '[fnARGetInvalidInvoicesForInvoiceSplits]'
 FROM 
 	[dbo].[fnARGetInvalidInvoicesForInvoiceSplits](@PostInvoiceDataFromIntegration, @Post) ICC
 
@@ -1475,7 +1475,7 @@ SELECT
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[strBatchId]
-	,[strPostingError]
+	,[strPostingError] -- + '[fnGRGetInvalidInvoicesForPosting]'
 FROM 
 	[dbo].[fnGRGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @Post) ICC
 
@@ -1511,7 +1511,7 @@ SELECT
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[strBatchId]
-	,[strPostingError]
+	,[strPostingError] -- + '[fnTMGetInvalidInvoicesForSync]'
 FROM 
 	[dbo].[fnTMGetInvalidInvoicesForSync](@PostInvoiceDataFromIntegration, @Post)
 
@@ -1640,7 +1640,7 @@ SELECT
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[strBatchId]
-	,[strPostingError]
+	,[strPostingError] -- + '[fnMFGetInvalidInvoicesForPosting]'
 FROM 
 	[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @Post)
 
@@ -1718,7 +1718,7 @@ SELECT
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[strBatchId]
-	,[strPostingError]
+	,[strPostingError] -- + '[fnICGetInvalidInvoicesForCosting]'
 FROM 
 	[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @Post)
 
@@ -1793,7 +1793,7 @@ SELECT
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[strBatchId]
-	,[strPostingError]
+	,[strPostingError] -- + '[fnICGetInvalidInvoicesForInTransitCosting]'
 FROM 
 	[dbo].[fnICGetInvalidInvoicesForInTransitCosting](@ItemsForInTransitCosting, @Post)
 
@@ -1854,7 +1854,7 @@ SELECT
 	,[intForexRateTypeId]
 	,[dblForexRate]
 FROM
-	[dbo].[fnARGetItemsForCosting](@Invoices, @Post)
+	[dbo].[fnARGetItemsForStoragePosting](@Invoices, @Post)
 
 INSERT INTO @returntable(
 	 [intInvoiceId]
@@ -1872,7 +1872,7 @@ SELECT
 	,[intInvoiceDetailId]
 	,[intItemId]
 	,[strBatchId]
-	,[strPostingError]
+	,[strPostingError] -- + '[fnICGetInvalidInvoicesForItemStoragePosting]'
 FROM 
 	[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @Post)
 
