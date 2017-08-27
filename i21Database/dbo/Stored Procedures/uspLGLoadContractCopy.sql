@@ -10,10 +10,40 @@ BEGIN TRY
 	DECLARE @strLoadSINumber NVARCHAR(MAX)
 	DECLARE @intNewLoadId INT
 	DECLARE @intOldLoadId INT
+	DECLARE @intNewContractLocationId INT
+	DECLARE @intNewContractSubLocationId INT
+	DECLARE @intNewContractStorageLocationId INT
+	DECLARE @intNewLoadingPortId INT
+	DECLARE @intNewDestinationPortId INT
+	DECLARE @intNewDestinationCityId INT
+	DECLARE @strNewLoadingPort NVARCHAR(100)
+	DECLARE @strNewDestinationPort NVARCHAR(100)
+	DECLARE @strNewDestinationCity NVARCHAR(100)
 
 	SELECT @intOldLoadId = intLoadId
 	FROM tblLGLoadDetail
 	WHERE intLoadDetailId = @intOldLoadDetailId
+
+	SELECT @intNewContractLocationId = intCompanyLocationId, 
+		   @intNewContractSubLocationId =  intSubLocationId, 
+		   @intNewLoadingPortId =  intLoadingPortId, 
+		   @intNewDestinationPortId = intDestinationPortId,
+		   @intNewContractStorageLocationId = intStorageLocationId,
+		   @intNewDestinationCityId = intDestinationCityId
+	FROM tblCTContractDetail 
+	WHERE intContractDetailId = @intNewContractDetailId
+
+	SELECT @strNewLoadingPort = strCity 
+	FROM tblSMCity 
+	WHERE intCityId = @intNewLoadingPortId
+
+	SELECT @strNewDestinationPort = strCity 
+	FROM tblSMCity 
+	WHERE intCityId = @intNewDestinationPortId
+
+	SELECT @strNewDestinationCity = strCity 
+	FROM tblSMCity 
+	WHERE intCityId = @intNewDestinationCityId
 
 	EXEC uspSMGetStartingNumber 106
 		,@strLoadSINumber OUTPUT
@@ -114,7 +144,7 @@ BEGIN TRY
 		)
 	SELECT 1
 		,@strLoadSINumber
-		,intCompanyLocationId
+		,@intNewContractLocationId
 		,intPurchaseSale
 		,dtmScheduledDate
 		,strCustomerReference
@@ -150,9 +180,9 @@ BEGIN TRY
 		,intWeightUnitMeasureId
 		,strBLNumber
 		,dtmBLDate
-		,strOriginPort
-		,strDestinationPort
-		,strDestinationCity
+		,@strNewLoadingPort
+		,@strNewDestinationPort
+		,@strNewDestinationCity
 		,intTerminalEntityId
 		,intShippingLineEntityId
 		,strServiceContractNumber
@@ -257,7 +287,7 @@ BEGIN TRY
 		,intItemId
 		,@intNewContractDetailId
 		,intSContractDetailId
-		,intPCompanyLocationId
+		,@intNewContractLocationId
 		,intSCompanyLocationId
 		,@dblNewLoadDetailQuantity
 		,intItemUOMId
@@ -282,7 +312,7 @@ BEGIN TRY
 		,strCustomerReference
 		,intAllocationDetailId
 		,intPickLotDetailId
-		,intPSubLocationId
+		,@intNewContractSubLocationId
 		,intSSubLocationId
 		,NULL
 		,NULL
@@ -313,8 +343,8 @@ BEGIN TRY
 		SELECT @intNewLoadId
 			,strDeliveryNoticeNumber
 			,dtmDeliveryNoticeDate
-			,intSubLocationId
-			,intStorageLocationId
+			,@intNewContractSubLocationId
+			,@intNewContractStorageLocationId
 			,intHaulerEntityId
 			,dtmPickupDate
 			,dtmDeliveryDate

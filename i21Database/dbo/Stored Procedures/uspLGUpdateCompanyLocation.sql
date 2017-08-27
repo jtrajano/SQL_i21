@@ -101,7 +101,7 @@ BEGIN TRY
 			WHERE CD.intContractDetailId = @intContractDetailId
 
 			UPDATE L
-			SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CASE 
+			SET intNumberOfContainers = ROUND(LD.dblNet / ISNULL(CASE 
 							WHEN ISNULL(CASE 
 										WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bags'
 											THEN CTCQ.dblQuantity
@@ -109,11 +109,11 @@ BEGIN TRY
 										END, 0) = 0
 								THEN LD.dblNet
 							ELSE CASE 
-									WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bulk'
+									WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bags'
 										THEN CTCQ.dblQuantity
 									ELSE CTCQ.dblBulkQuantity
 									END
-							END, LD.dblNet))
+							END, LD.dblNet),0)
 			FROM tblCTContractDetail CD
 			JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
 			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
