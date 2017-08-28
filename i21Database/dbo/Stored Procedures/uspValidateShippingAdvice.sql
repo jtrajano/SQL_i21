@@ -37,7 +37,12 @@ BEGIN TRY
 		,dblSampleQty NUMERIC(18, 6)
 		)
 
-	INSERT INTO @tblContractSampleDetail
+	IF OBJECT_ID('tempdb..#tempContractSampleQuantityDetail') IS NOT NULL
+		DROP TABLE #tempContractSampleQuantityDetail
+
+	IF OBJECT_ID('tempdb..#tempContractSampleDetail') IS NOT NULL
+		DROP TABLE #tempContractSampleDetail
+
 	SELECT C.intContractDetailId
 		,C.strContractNumber
 		,C.intContractSeq
@@ -46,30 +51,31 @@ BEGIN TRY
 		,dblContainerQty
 		,strSampleNumber
 		,strSampleStatus
+		,C.ysnSampleRequired
+	INTO #tempContractSampleDetail
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN vyuLGLoadOpenContracts C ON LD.intPContractDetailId = C.intContractDetailId
 	WHERE L.intLoadId = @intLoadId
-		AND ISNULL(C.ysnSampleRequired, 0) = 1
 		AND C.intShipmentType = 1
 
-	INSERT INTO @tblContractSampleQuantityDetail
 	SELECT C.intContractDetailId
 		,C.strContractNumber
 		,C.strContractNumber + '/' + CONVERT(NVARCHAR, C.intContractSeq) AS strContractSeq
 		,LD.dblQuantity AS dblLoadQty
+		,C.ysnSampleRequired
 		,(
 			SELECT ISNULL(SUM(SA.dblRepresentingQty), 0)
 			FROM tblQMSample SA
 			WHERE SA.intContractDetailId = C.intContractDetailId
 				AND SA.intSampleStatusId = 3
 			) dblSampleQty
+	INTO #tempContractSampleQuantityDetail
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN vyuLGLoadOpenContracts C ON LD.intPContractDetailId = C.intContractDetailId
 	LEFT JOIN tblQMSample S ON S.intContractDetailId = C.intContractDetailId
 	WHERE L.intLoadId = @intLoadId
-		AND ISNULL(C.ysnSampleRequired, 0) = 1
 		AND C.intShipmentType = 1
 		AND S.intProductTypeId = 8
 		AND S.intSampleStatusId <> 4
@@ -79,6 +85,26 @@ BEGIN TRY
 		,C.intContractSeq
 		,LD.dblQuantity
 		,intSampleStatusId
+		,C.ysnSampleRequired
+
+	INSERT INTO @tblContractSampleDetail
+	SELECT intContractDetailId
+		,strContractNumber
+		,intContractSeq
+		,strContractSeq
+		,dblLoadQty
+		,dblContainerQty
+		,strSampleNumber
+		,strSampleStatus
+	FROM #tempContractSampleDetail WHERE ISNULL(ysnSampleRequired, 0) = 1
+
+	INSERT INTO @tblContractSampleQuantityDetail
+	SELECT intContractDetailId
+		,strContractNumber
+		,strContractSeq
+		,dblLoadQty
+		,dblSampleQty
+	FROM #tempContractSampleQuantityDetail WHERE ISNULL(ysnSampleRequired, 0) = 1
 
 	SELECT @intMinRecordId = MIN(intRecordId)
 	FROM @tblContractSampleDetail
