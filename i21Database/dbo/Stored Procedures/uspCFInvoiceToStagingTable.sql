@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -171,6 +172,8 @@ BEGIN TRY
 	,ysnShowOnCFInvoice
 	,strDiscountSchedule
 	,ysnPostForeignSales
+	,ysnSummaryByDeptVehicleProd
+	,ysnDepartmentGrouping
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -296,6 +299,8 @@ BEGIN TRY
 	,cfInvRptDcnt.ysnShowOnCFInvoice
 	,cfInvRptDcnt.strDiscountSchedule
 	,cfInvRpt.ysnPostForeignSales
+	,ysnSummaryByDeptVehicleProd
+	,ysnDepartmentGrouping
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN tblCFInvoiceSummaryTempTable AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId
