@@ -5635,6 +5635,10 @@
     <Build Include="dbo\Views\vyuHDTicketCustomerContact.sql" />
     <Build Include="dbo\Views\vyuMFGetShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetReceiving.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementSubReport.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementTaxDetailsSubReport.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementInboundSubReport.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementOutboundSubReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
