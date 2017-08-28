@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuGLDetail]
+CREATE  VIEW [dbo].[vyuGLDetail]
 AS
         SELECT 
 		  A.intGLDetailId,
@@ -11,8 +11,14 @@ AS
             C.strAccountType,
             A.dblDebit,
             A.dblCredit,
-            CASE WHEN ISNULL(U.dblLbsPerUnit,0) > 0 THEN CAST((A.dblDebitUnit/ U.dblLbsPerUnit) AS numeric(18,6)) ELSE 0 END dblDebitUnit,
-			CASE WHEN ISNULL(U.dblLbsPerUnit,0) > 0 THEN CAST((A.dblCreditUnit/ U.dblLbsPerUnit) AS numeric(18,6)) ELSE 0 END dblCreditUnit,
+			CASE WHEN strModuleName = 'General Ledger' THEN
+				CASE WHEN ISNULL(U.dblLbsPerUnit,0) > 0 THEN CAST((A.dblDebitUnit/ U.dblLbsPerUnit) AS numeric(18,6)) ELSE 0 END 
+			ELSE
+				dblDebitUnit END dblDebitUnit,
+			CASE WHEN strModuleName = 'General Ledger' THEN
+				CASE WHEN ISNULL(U.dblLbsPerUnit,0) > 0 THEN CAST((A.dblCreditUnit/ U.dblLbsPerUnit) AS numeric(18,6)) ELSE 0 END
+			ELSE
+				dblCreditUnit END dblCreditUnit,
             A.strDescription,
             A.strCode,
             A.strReference,
