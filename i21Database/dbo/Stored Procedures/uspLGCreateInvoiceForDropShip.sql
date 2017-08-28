@@ -143,7 +143,7 @@ BEGIN
 		,[intInvoiceId]							= NULL
 		,[intEntityCustomerId]					= LD.intCustomerEntityId 
 		,[intCompanyLocationId]					= LD.intSCompanyLocationId 
-		,[intCurrencyId]						= C.intCurrencyId 
+		,[intCurrencyId]						= CD.intCurrencyId 
 		,[intTermId]							= CH.intTermId 
 		,[intPeriodsToAccrue]					= 1 
 		,[dtmDate]								= CAST(GETDATE() AS DATE) 
