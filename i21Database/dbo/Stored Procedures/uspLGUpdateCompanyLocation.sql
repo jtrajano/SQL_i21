@@ -129,14 +129,14 @@ BEGIN TRY
 		END
 	--END
 
-	IF (ISNULL(@intCountSALoads, 0) > 1)
-	BEGIN
-		IF(@dblTotalSAQty > @dblSeqQty)
-		BEGIN
-			SET @strErrMsg = 'Seq qty cannot be less than the total qty of the associated shipping advice(s).'
-			RAISERROR (@strErrMsg,16,1)
-		END
-	END
+	--IF (ISNULL(@intCountSALoads, 0) > 1)
+	--BEGIN
+	--	IF(@dblTotalSAQty > @dblSeqQty)
+	--	BEGIN
+	--		SET @strErrMsg = 'Seq qty cannot be less than the total qty of the associated shipping advice(s).'
+	--		RAISERROR (@strErrMsg,16,1)
+	--	END
+	--END
 
 END TRY
 
