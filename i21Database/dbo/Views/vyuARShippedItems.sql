@@ -966,11 +966,11 @@ FROM (
 	     , intShipmentItemUOMId				= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
 		 , intWeightUOMId					= ARCC.intPriceItemUOMId
 		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(ARCC.intItemWeightUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1)
-	     , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
-	     , dblQtyOrdered					= ISNULL(LD.dblQuantity,0)
-	     , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
-	     , dblShipmentQtyShippedTotal		= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
-	     , dblQtyRemaining					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
+		 , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
+		 , dblQtyOrdered					= ISNULL(LD.dblQuantity, 0)
+		 , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
+		 , dblShipmentQtyShippedTotal		= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
+		 , dblQtyRemaining					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
 	     , dblDiscount						= 0
 	     , dblPrice							= ARCC.dblCashPrice
 	     , dblShipmentUnitPrice				= ARCC.dblCashPrice
@@ -1032,6 +1032,7 @@ FROM (
 			 , dblGross
 			 , dblTare
 			 , dblNet
+			 , dblLotQuantity
 		FROM dbo.tblLGLoadDetailLot WITH (NOLOCK)
 	) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN (
