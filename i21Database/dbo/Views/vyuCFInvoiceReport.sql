@@ -189,6 +189,94 @@ ysnPrintTimeOnReports = (
 		ELSE cfCardAccount.ysnPrintTimeOnReports
 	END),
 
+ysnSummaryByDeptVehicleProd = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnSummaryByDeptVehicleProd
+
+		ELSE cfCardAccount.ysnSummaryByDeptVehicleProd
+	END),
+
+strPrimaryDepartment = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.strPrimaryDepartment
+
+		ELSE cfCardAccount.strPrimaryDepartment
+	END),
+
+ysnDepartmentGrouping = (	
+	CASE cfTrans.strTransactionType 
+		WHEN 'Foreign Sale' 
+		THEN cfSiteItem.ysnDepartmentGrouping
+
+		ELSE cfCardAccount.ysnDepartmentGrouping
+	END),
+
+strDepartment = (
+	CASE 
+		WHEN cfCardAccount.strPrimaryDepartment = 'Card' 
+		THEN 
+			CASE 
+				WHEN ISNULL(cfCardAccount.intDepartmentId,0) >= 1
+				THEN cfCardAccount.strDepartment
+				ELSE
+					CASE 
+						WHEN ISNULL(cfVehicle.intDepartmentId,0) >= 1
+						THEN cfVehicle.strDepartment
+						ELSE
+						'Unknown'
+					END
+			END
+		WHEN cfCardAccount.strPrimaryDepartment = 'Vehicle'
+		THEN 
+			CASE 
+				WHEN ISNULL(cfVehicle.intDepartmentId,0) >= 1
+				THEN cfVehicle.strDepartment
+				ELSE
+					CASE 
+						WHEN ISNULL(cfCardAccount.intDepartmentId,0) >= 1
+						THEN cfCardAccount.strDepartment
+						ELSE
+						'Unknown'
+					END
+			END
+		ELSE 'Unknown'
+	END
+),
+
+strDepartmentDescription = (
+	CASE 
+		WHEN cfCardAccount.strPrimaryDepartment = 'Card' 
+		THEN 
+			CASE 
+				WHEN ISNULL(cfCardAccount.intDepartmentId,0) >= 1
+				THEN cfCardAccount.strDepartmentDescription
+				ELSE
+					CASE 
+						WHEN ISNULL(cfVehicle.intDepartmentId,0) >= 1
+						THEN cfVehicle.strDepartmentDescription
+						ELSE
+						'Unknown'
+					END
+			END
+		WHEN cfCardAccount.strPrimaryDepartment = 'Vehicle'
+		THEN 
+			CASE 
+				WHEN ISNULL(cfVehicle.intDepartmentId,0) >= 1
+				THEN cfVehicle.strDepartmentDescription
+				ELSE
+					CASE 
+						WHEN ISNULL(cfCardAccount.intDepartmentId,0) >= 1
+						THEN cfCardAccount.strDepartmentDescription
+						ELSE
+						'Unknown'
+					END
+			END
+		ELSE 'Unknown'
+	END
+),
+
 emGroup.strGroupName, 
 
 cfTrans.intTransactionId, 
@@ -220,8 +308,8 @@ DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate,
                          ROUND(cfTransPrice.dblCalculatedAmount,2) AS dblCalculatedTotalAmount, cfTransPrice.dblOriginalAmount AS dblOriginalTotalAmount, 
                          cfTransGrossPrice.dblCalculatedAmount AS dblCalculatedGrossAmount, cfTransGrossPrice.dblOriginalAmount AS dblOriginalGrossAmount, 
                          cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount, cfTransNetPrice.dblOriginalAmount AS dblOriginalNetAmount, 
-                         cfTransNetPrice.dblCalculatedAmount - cfSiteItem.dblAverageCost AS dblMargin, cfTrans.ysnInvalid, cfTrans.ysnPosted, cfVehicle.strVehicleNumber, 
-                         cfVehicle.strVehicleDescription, cfSiteItem.strTaxState, cfDep.strDepartment, cfSiteItem.strSiteType, cfSiteItem.strTaxState AS strState, cfSiteItem.strSiteAddress, 
+                         cfTransNetPrice.dblCalculatedAmount - cfSiteItem.dblAverageCost AS dblMargin, cfTrans.ysnInvalid, cfTrans.ysnPosted, ISNULL(cfVehicle.strVehicleNumber,'Unknown') AS strVehicleNumber, 
+                         cfVehicle.strVehicleDescription, cfSiteItem.strTaxState,  cfSiteItem.strSiteType, cfSiteItem.strTaxState AS strState, cfSiteItem.strSiteAddress, 
                          cfSiteItem.ysnPostForeignSales,
 						 cfSiteItem.strSiteCity,
                              (SELECT   SUM(dblTaxCalculatedAmount) AS dblTotalTax
@@ -241,9 +329,44 @@ DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate,
                                                          (cfTT.intTransactionId = cfTrans.intTransactionId)
                                 GROUP BY cfTT.intTransactionId) / cfTrans.dblQuantity AS dblTaxExceptSST, cfTrans.strPrintTimeStamp, 
                          cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail
+
+
 FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
-                         dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId LEFT OUTER JOIN
+                         (
+
+SELECT 
+ icfVehicle.intVehicleId
+,icfVehicle.intAccountId
+,icfVehicle.strVehicleNumber
+,icfVehicle.strCustomerUnitNumber
+,icfVehicle.strVehicleDescription
+,icfVehicle.intDaysBetweenService
+,icfVehicle.intMilesBetweenService
+,icfVehicle.intLastReminderOdometer
+,icfVehicle.dtmLastReminderDate
+,icfVehicle.dtmLastServiceDate
+,icfVehicle.intLastServiceOdometer
+,icfVehicle.strNoticeMessageLine1
+,icfVehicle.strNoticeMessageLine2
+,icfVehicle.strVehicleForOwnUse
+,icfVehicle.intExpenseItemId
+,icfVehicle.strLicencePlateNumber
+,icfVehicle.intCreatedUserId
+,icfVehicle.dtmCreated
+,icfVehicle.intLastModifiedUserId
+,icfVehicle.intConcurrencyId
+,icfVehicle.dtmLastModified
+,icfVehicle.ysnCardForOwnUse
+,icfVehicle.ysnActive
+--,icfVehicle.intDepartmentId
+,icfVecleDep.intDepartmentId
+,icfVecleDep.strDepartment
+,icfVecleDep.strDepartmentDescription
+FROM tblCFVehicle AS icfVehicle LEFT JOIN
+tblCFDepartment as icfVecleDep
+on icfVehicle.intDepartmentId = icfVecleDep.intDepartmentId
+) AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId LEFT OUTER JOIN
                          dbo.vyuCFCardAccount AS cfCardAccount ON arInv.intEntityCustomerId = cfCardAccount.intCustomerId AND cfTrans.intCardId = cfCardAccount.intCardId LEFT OUTER JOIN
                              (SELECT   arCustGroupDetail.intCustomerGroupDetailId, arCustGroupDetail.intCustomerGroupId, arCustGroupDetail.intEntityId, arCustGroupDetail.ysnSpecialPricing, 
                                                          arCustGroupDetail.ysnContract, arCustGroupDetail.ysnBuyback, arCustGroupDetail.ysnQuote, arCustGroupDetail.ysnVolumeDiscount, 
@@ -281,13 +404,16 @@ FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
 														 cfAcct.ysnSummaryByCardProd,
 														 cfAcct.ysnSummaryByDeptCardProd, 
 														 cfAcct.ysnPrintTimeOnInvoices, 
-														 cfAcct.ysnPrintTimeOnReports
+														 cfAcct.ysnPrintTimeOnReports,
+														 cfAcct.ysnSummaryByDeptVehicleProd,
+														 cfAcct.strPrimaryDepartment,
+														 cfAcct.ysnDepartmentGrouping
                                 FROM         dbo.tblCFSite AS icfSite INNER JOIN
                                                          dbo.tblCFNetwork AS icfNetwork ON icfNetwork.intNetworkId = icfSite.intNetworkId 
 														 LEFT JOIN tblEMEntity iemEnt ON iemEnt.intEntityId = icfNetwork.intCustomerId 
-														 INNER JOIN tblARCustomer iarCus ON iarCus.intEntityCustomerId = iemEnt.intEntityId
-														 INNER JOIN tblCFAccount cfAcct ON iarCus.intEntityCustomerId = cfAcct.intCustomerId
-														 INNER JOIN tblCFInvoiceCycle cfInvCycle ON cfAcct.intInvoiceCycle = cfInvCycle.intInvoiceCycleId
+														 LEFT JOIN tblARCustomer iarCus ON iarCus.intEntityCustomerId = iemEnt.intEntityId
+														 LEFT JOIN tblCFAccount cfAcct ON iarCus.intEntityCustomerId = cfAcct.intCustomerId
+														 LEFT JOIN tblCFInvoiceCycle cfInvCycle ON cfAcct.intInvoiceCycle = cfInvCycle.intInvoiceCycleId
 														 LEFT JOIN tblEMEntityLocation arBillTo ON arBillTo.intEntityLocationId = iarCus.intBillToId
 														 INNER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId OR icfNetwork.intNetworkId = icfItem.intNetworkId INNER JOIN
@@ -305,9 +431,10 @@ FROM         dbo.vyuCFInvoice AS arInv RIGHT OUTER JOIN
                              (SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                 FROM         dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
                                 WHERE     (strTransactionPriceId = 'Net Price') AND cfTrans.intTransactionId = intTransactionId) AS cfTransNetPrice LEFT OUTER JOIN
-                         dbo.tblCFDepartment AS cfDep ON cfDep.intDepartmentId = cfCardAccount.intDepartmentId
+                         dbo.tblCFDepartment AS cfAccntDep ON cfAccntDep.intDepartmentId = cfCardAccount.intDepartmentId
+						 --LEFT OUTER JOIN
+						 --dbo.tblCFDepartment AS cfVehicleDep ON 
 WHERE     (cfTrans.ysnPosted = 1)
 --GO
+
 GO
-
-

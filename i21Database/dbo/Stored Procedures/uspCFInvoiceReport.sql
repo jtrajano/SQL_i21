@@ -527,7 +527,10 @@ BEGIN
 		,ysnPrintTimeOnReports		
 		,ysnInvalid					
 		,ysnPosted
-		,ysnPostForeignSales)
+		,ysnPostForeignSales
+		,ysnDepartmentGrouping
+		,ysnSummaryByDeptVehicleProd
+		)
 		SELECT
 		 intCustomerGroupId			
 		,intTransactionId			
@@ -609,7 +612,9 @@ BEGIN
 		,ysnPrintTimeOnReports		
 		,ysnInvalid					
 		,ysnPosted		
-		,ysnPostForeignSales			
+		,ysnPostForeignSales	
+		,ysnDepartmentGrouping
+		,ysnSummaryByDeptVehicleProd		
 	    FROM vyuCFInvoiceReport AS main 
 		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
 		on main.intAccountId = cfInvRptNo.intAccountId

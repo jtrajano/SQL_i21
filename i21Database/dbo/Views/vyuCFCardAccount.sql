@@ -1,6 +1,8 @@
-﻿CREATE VIEW [dbo].[vyuCFCardAccount]
+﻿
+CREATE VIEW [dbo].[vyuCFCardAccount]
 AS
-SELECT   A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountScheduleId, A.intInvoiceCycle, A.intSalesPersonId, A.dtmBonusCommissionDate, 
+SELECT   A.ysnDepartmentGrouping,A.strPrimaryDepartment,A.ysnSummaryByDeptVehicleProd,
+A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountScheduleId, A.intInvoiceCycle, A.intSalesPersonId, A.dtmBonusCommissionDate, 
                          A.dblBonusCommissionRate, A.dblRegularCommissionRate, A.ysnPrintTimeOnInvoices, A.ysnPrintTimeOnReports, A.intTermsCode, A.strBillingSite, A.strPrimarySortOptions, 
                          A.strSecondarySortOptions, A.ysnSummaryByCard, A.ysnSummaryByVehicle, A.ysnSummaryByMiscellaneous, A.ysnSummaryByProduct, A.ysnSummaryByDepartment, A.ysnSummaryByCardProd,A.ysnSummaryByDeptCardProd,
                          A.ysnVehicleRequire, A.intAccountStatusCodeId, A.strPrintRemittancePage, A.strInvoiceProgramName, A.intPriceRuleGroup, A.strPrintPricePerGallon, 
