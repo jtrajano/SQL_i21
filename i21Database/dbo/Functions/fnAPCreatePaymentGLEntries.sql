@@ -128,7 +128,11 @@ BEGIN
 		[intConcurrencyId]				=	1,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	A.dblAmountPaid,
+		[dblCreditForeign]				=	CAST(
+												dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+													- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+													paymentDetail.dblPayment, voucher.dblTotal)
+												AS DECIMAL(18,2)) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	A.dblExchangeRate,
