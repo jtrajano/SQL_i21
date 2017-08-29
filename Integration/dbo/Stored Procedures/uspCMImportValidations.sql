@@ -107,14 +107,14 @@ BEGIN
 
 		-- Check if balance against the running balance on GL(ERR)
 		SELECT TOP 1 @Unbalance_Found = 1 FROM(
-			SELECT 
+			SELECT
 			strExternalId,
-			CASE WHEN  SUM(dblDebit-dblCredit) <> apcbk_bal THEN 1 ELSE 0 END AS NotBalance
-			FROM 
-			tblGLDetail INNER JOIN tblGLCOACrossReference ON tblGLDetail.intAccountId = tblGLCOACrossReference.inti21Id
-			INNER JOIN apcbkmst ON tblGLCOACrossReference.strExternalId = apcbk_gl_cash
-			AND ysnIsUnposted = 0
-			GROUP BY strExternalId, apcbk_bal
+			CASE WHEN  sum(dblDebit - dblCredit) <> apcbk_bal THEN 1 ELSE 0 END AS NotBalance
+			FROM
+			tblGLDetail inner join tblGLCOACrossReference on tblGLDetail.intAccountId = tblGLCOACrossReference.inti21Id
+			inner join apcbkmst on tblGLCOACrossReference.strExternalId = apcbk_gl_cash
+			and ysnIsUnposted = 0
+			group by strExternalId, apcbk_bal, apcbk_no
 		) AS T
 		WHERE NotBalance = 1
 
