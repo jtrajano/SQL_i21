@@ -1136,14 +1136,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.showOtherCharges(win);
         }
     },
-    
-    updateWeightLossText: function (window, clear, weightLoss) {
-        if (clear) {
-            window.down("#txtWeightLossMsgValue").setValue("");
-            window.down("#txtWeightLossMsgPercent").setValue("");
+
+    updateWeightLossText: function(window, clear, weightLoss) {
+        if (!window) return;
+        weightLoss = weightLoss ? weightLoss : {
+            dblWeightLoss: 0.00,
+            dblWeightLossPercentage: 0.00
+        }; 
+
+        if(clear) {
+            window.down("#txtWeightLossMsgValue").setValue(0.00);
+            window.down("#txtWeightLossMsgPercent").setValue(0.00);
         } else {
-            window.down("#txtWeightLossMsgValue").setValue(Ext.util.Format.number(weightLoss.dblWeightLoss, '0,000.00'));
-            window.down("#txtWeightLossMsgPercent").setValue(Ext.util.Format.number(weightLoss.dblWeightLossPercentage, '0,000.00'));
+            window.down("#txtWeightLossMsgValue").setValue(weightLoss.dblWeightLoss);
+            window.down("#txtWeightLossMsgPercent").setValue(weightLoss.dblWeightLossPercentage);
 
             if (weightLoss.dblWeightLoss === 0) {
                 document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'black';
