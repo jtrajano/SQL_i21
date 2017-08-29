@@ -18,11 +18,15 @@ AS
 		(CASE 
 		WHEN INVRCPT.intSourceType = 4 
 		THEN (SELECT TOP 1 SC.intTicketId FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
+		WHEN INVRCPT.intSourceType IS NULL 
+		THEN (SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
 		ELSE (SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	strTicketNumber =
 		(CASE WHEN INVRCPT.intSourceType = 4 
 		THEN (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
+		WHEN INVRCPT.intSourceType IS NULL 
+		THEN (SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
 		ELSE (SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	INVRCPT.strReceiptNumber,
@@ -36,6 +40,8 @@ AS
 		 THEN 'Inboud Shipment' 
 		 WHEN INVRCPT.intSourceType = 1 
 		 THEN 'Scale'
+		 WHEN INVRCPT.intSourceType IS NULL
+		 THEN 'Settlement'
 	     ELSE 'None'
 		END),
 	strSplitNumber = 
@@ -72,16 +78,22 @@ AS
 	dblGrossWeight =
 		(CASE WHEN INVRCPT.intSourceType = 4 
 		THEN (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
+		WHEN  INVRCPT.intSourceType IS NULL
+		THEN  (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GRH.intTicketId = SC.intTicketId)    
 		ELSE (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	dblTareWeight = 
 		(CASE WHEN INVRCPT.intSourceType = 4 
 		THEN (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
+		WHEN  INVRCPT.intSourceType IS NULL
+		THEN  (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GRH.intTicketId = SC.intTicketId)    
 		ELSE (SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	dblNetWeight = 
 		(CASE WHEN INVRCPT.intSourceType = 4 
 		THEN (SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
+		WHEN  INVRCPT.intSourceType IS NULL
+		THEN  (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GRH.intTicketId = SC.intTicketId)  
 		ELSE (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	BillDtl.dblCost,
@@ -105,6 +117,7 @@ AS
 	INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 	INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId is null
 	INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+	LEFT JOIN tblGRStorageHistory GRH ON GRH.intCustomerStorageId = BillDtl.intCustomerStorageId AND GRH.strType = 'From Scale'
 	LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
@@ -152,6 +165,8 @@ AS
 		'Inboud Shipment' 
 		WHEN INVSHIP.intSourceType = 1 THEN
 		'Scale'
+		WHEN INVSHIP.intSourceType IS NULL
+		 THEN 'Settlement'
 		ELSE
 		'None'
 		END AS strSourceType,
