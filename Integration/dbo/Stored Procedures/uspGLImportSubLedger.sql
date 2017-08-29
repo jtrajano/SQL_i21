@@ -5,7 +5,8 @@ BEGIN
 EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportSubLedger'' and type = ''P'')
 			DROP PROCEDURE [dbo].[uspGLImportSubLedger];')
 
-EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
+EXEC(
+'CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     	( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
     	AS
     	BEGIN
@@ -312,14 +313,23 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			IF @isCOAPresent = 0 SET @isValid = 0
     			IF @isValid = 1
     			BEGIN
-
+					DECLARE @errorMsg VARCHAR(MAX)
     				DECLARE @RC int
     				DECLARE @Param nvarchar(max) =''SELECT intJournalId FROM tblGLJournal WHERE intJournalId = '' + CONVERT (VARCHAR(10), @intJournalId)
     				DECLARE @strBatchId nvarchar(100)
 					DECLARE @successfulCount int
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
 
-    				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
+					BEGIN TRY
+    					EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
+    				END TRY
+    				BEGIN CATCH
+    					EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version,@importLogId OUTPUT
+    					SELECT @errorMsg = ERROR_MESSAGE()
+    					UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
+    					COMMIT TRANSACTION
+    					CONTINUE
+    				END CATCH
 
     				IF @successfulCount = @journalCount
     				BEGIN
@@ -353,7 +363,6 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		BEGIN CATCH
     			ROLLBACK TRANSACTION
     				EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version,@importLogId OUTPUT
-    				DECLARE @errorMsg VARCHAR(MAX)
     				SELECT @errorMsg = ERROR_MESSAGE()
     				UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
     		END CATCH
