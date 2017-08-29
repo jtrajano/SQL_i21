@@ -21,59 +21,22 @@ FROM (
 		,dblAmount
 		,dblTax
 	FROM (
-		SELECT --Discount Detail 
-			 PYMT.intPaymentId
-			,Bill.strBillId AS strId
-			,BillDtl.intBillId
-			,BillDtl.intItemId
-			,Item.strShortName AS strDiscountCode
-			,Item.strItemNo AS strDiscountCodeDescription
-			,INVRCPTCHR.dblRate AS dblDiscountAmount
-			,dblShrinkPercent = ISNULL((
-										SELECT dblShrinkPercent
-										FROM tblQMTicketDiscount TD
-										JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
-										WHERE TD.intTicketId = CASE 
-												WHEN INVRCPT.intSourceType = 4
-													THEN (
-															SELECT TOP 1 SC.intTicketId
-															FROM tblGRCustomerStorage GR
-															JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId
-															WHERE intCustomerStorageId = INVRCPTITEM.intSourceId
-															)
-												ELSE (
-														SELECT TOP 1 SC.intTicketId
-														FROM tblSCTicket SC
-														WHERE intTicketId = INVRCPTITEM.intSourceId
-														)
-												END
-											AND DS.intItemId = BillDtl.intItemId
-										), 0)
-			
-			,dblGradeReading = ISNULL((
-										SELECT dblGradeReading
-										FROM tblQMTicketDiscount TD
-										JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
-										WHERE TD.intTicketId = CASE 
-												WHEN INVRCPT.intSourceType = 4
-													THEN (
-															SELECT TOP 1 SC.intTicketId
-															FROM tblGRCustomerStorage GR
-															JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId
-															WHERE intCustomerStorageId = INVRCPTITEM.intSourceId
-															)
-												ELSE (
-														SELECT TOP 1 SC.intTicketId
-														FROM tblSCTicket SC
-														WHERE intTicketId = INVRCPTITEM.intSourceId
-														)
-												END
-											AND DS.intItemId = BillDtl.intItemId
-										), 0)
-			
-			,BillDtl.dblTotal AS dblAmount
-			,BillDtl.dblTax AS dblTax
-			,PYMTDTL.dblTotal AS Net
+		SELECT
+			 intPaymentId = PYMT.intPaymentId
+			,strId = Bill.strBillId
+			,intBillId = BillDtl.intBillId
+			,intItemId = BillDtl.intItemId
+			,strDiscountCode = Item.strShortName 
+			,strDiscountCodeDescription = Item.strItemNo
+			,dblDiscountAmount = CASE 
+										WHEN INVRCPTCHR.strCostMethod = 'Per Unit' THEN INVRCPTCHR.dblRate
+										WHEN INVRCPTCHR.strCostMethod = 'Amount' THEN INVRCPTCHR.dblAmount
+								 END
+			,dblShrinkPercent = ISNULL(ScaleDiscount.dblShrinkPercent, 0)
+			,dblGradeReading =  ISNULL(ScaleDiscount.dblGradeReading, 0)			
+			,dblAmount = BillDtl.dblTotal 
+			,dblTax = BillDtl.dblTax
+			,Net = PYMTDTL.dblTotal
 		
 		FROM tblAPPayment PYMT
 		JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -83,7 +46,50 @@ FROM (
 		JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
 		JOIN tblICInventoryReceipt INVRCPT ON INVRCPTCHR.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 		JOIN tblICInventoryReceiptItem INVRCPTITEM ON INVRCPT.intInventoryReceiptId = INVRCPTITEM.intInventoryReceiptId		
-		WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL
+		LEFT JOIN (
+					SELECT 
+					QM.intTicketId
+				   ,DCode.intItemId
+				   ,QM.dblGradeReading
+				   ,QM.dblShrinkPercent
+					FROM tblQMTicketDiscount QM
+					JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+					WHERE QM.strSourceType = 'Scale'
+			     ) ScaleDiscount ON ScaleDiscount.intTicketId = INVRCPTITEM.intSourceId AND ScaleDiscount.intItemId = INVRCPTCHR.intChargeId AND INVRCPT.intSourceType = 1 
+				 WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL AND Item.strType = 'Other Charge'
+        UNION ALL
+		
+		SELECT 
+			 intPaymentId = PYMT.intPaymentId
+			,strId = Bill.strBillId
+			,intBillId = BillDtl.intBillId
+			,intItemId = BillDtl.intItemId
+			,strDiscountCode = Item.strShortName 
+			,strDiscountCodeDescription = Item.strItemNo
+			,dblDiscountAmount = BillDtl.dblCost
+			,dblShrinkPercent = ISNULL(StorageDiscount.dblShrinkPercent, 0)
+			,dblGradeReading =  ISNULL(StorageDiscount.dblGradeReading, 0)			
+			,dblAmount = BillDtl.dblTotal 
+			,dblTax = BillDtl.dblTax
+			,Net = PYMTDTL.dblTotal
+		FROM tblAPPayment PYMT
+		JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+		JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+		JOIN tblAPBillDetail BillDtl ON BillDtl.intBillId = Bill.intBillId
+		JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType = 'Other Charge'
+		JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
+		LEFT JOIN (
+					 SELECT 
+					 QM.intTicketFileId
+					,DCode.intItemId
+					,QM.dblGradeReading
+					,QM.dblShrinkPercent
+					FROM tblQMTicketDiscount QM
+					JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+					WHERE QM.strSourceType = 'Storage'
+			  ) StorageDiscount ON StorageDiscount.intTicketFileId = BillDtl.intCustomerStorageId AND StorageDiscount.intItemId = BillDtl.intItemId
+		  WHERE Item.strType = 'Other Charge'
+	  				 	
 		) tbl
 	) tbl
 GROUP BY intPaymentId
