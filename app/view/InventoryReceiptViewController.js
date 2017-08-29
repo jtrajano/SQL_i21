@@ -6070,16 +6070,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     iRely.Functions.showErrorDialog(jsonData.message.statusText);
                 }
                 else {
-
-                    if (!successCallback) {
-                        context.configuration.paging.store.load({
+                    // Reload the other charges after computing it from the server. 
+                    var tblICInventoryReceiptCharges = current._tblICInventoryReceiptCharges;                     
+                    if (tblICInventoryReceiptCharges){
+                        current._tblICInventoryReceiptCharges.load({
                             callback: function (records, options, success) {
-                                me.doOtherChargeTaxCalculate(win);
-                            }
-                        });
+                                if (successCallback) {
+                                    successCallback();
+                                }
+                                else {
+                                    me.doOtherChargeTaxCalculate(win);
+                                }
+                            }                            
+                        }); 
                     }
-
-                    if (successCallback) successCallback();
                 };
             }
             , function (failureResponse) {
