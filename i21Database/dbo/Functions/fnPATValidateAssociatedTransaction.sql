@@ -2,7 +2,7 @@
 (
 	@transactionIds NVARCHAR(MAX),
 	@type INT, -- 1 = Issued Stock, 2 = Retired Stock, 3 = Equity Payment, 4 = Voucher
-	@transaction NVARCHAR(MAX)
+	@transaction NVARCHAR(MAX) = NULL
 )
 RETURNS @returnTable TABLE
 (
@@ -66,6 +66,18 @@ BEGIN
 		INNER JOIN tblPATCustomerStock CS
 			ON APB.intBillId = CS.intBillId
 		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions) AND @transaction != 'Patronage'
+	END
+	ELSE IF (@type = 5)
+	BEGIN
+		INSERT INTO @returnTable
+		SELECT 'Could not unpost Refund. Refund Voucher <strong>'+ APB.strBillId +'</strong> is already paid.',
+				'Refund',
+				APB.strBillId,
+				APB.intBillId
+		FROM tblPATRefundCustomer RC
+		INNER JOIN tblAPBill APB
+			ON APB.intBillId = RC.intBillId
+		WHERE APB.ysnPaid = 1 AND RC.intRefundId IN (SELECT * FROM @tmpTransactions)
 	END
 
 	RETURN
