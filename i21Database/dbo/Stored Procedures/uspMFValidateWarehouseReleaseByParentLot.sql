@@ -55,6 +55,10 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
 
+	IF @strAttributeValue IS NULL
+		OR @strAttributeValue = ''
+		SET @strAttributeValue = 'False'
+
 	IF @strAttributeValue = 'True'
 	BEGIN
 		INSERT INTO @tblMFParentLot (strLotNumber)

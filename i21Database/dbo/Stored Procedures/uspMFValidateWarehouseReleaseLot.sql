@@ -136,6 +136,10 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
 
+	IF @strAttributeValue IS NULL
+		OR @strAttributeValue = ''
+		SET @strAttributeValue = 'False'
+
 	IF @strAttributeValue = 'False' 
 	BEGIN
 		SELECT ISNULL(W.intWorkOrderId,0) AS intWorkOrderId
