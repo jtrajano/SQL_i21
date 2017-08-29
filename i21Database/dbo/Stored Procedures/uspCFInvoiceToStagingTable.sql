@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -361,12 +360,17 @@ BEGIN TRY
 				@dtmBalanceForwardDate = [from]
 		FROM @temp_params WHERE [fieldname] = 'dtmBalanceForwardDate'
 
-		DECLARE @dtmTransactionDateFrom DATETIME
-		DECLARE @dtmTransactionDateTo DATETIME
+		DECLARE @dtmInvoiceDate DATETIME
 		SELECT TOP 1
-				@dtmTransactionDateFrom = [from]
-				,@dtmTransactionDateFrom = [to]
-		FROM @temp_params WHERE [fieldname] = 'dtmTransactionDate'
+				@dtmInvoiceDate = [from]
+		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
+
+		--DECLARE @dtmTransactionDateFrom DATETIME
+		--DECLARE @dtmTransactionDateTo DATETIME
+		--SELECT TOP 1
+		--		@dtmTransactionDateFrom = [from]
+		--		,@dtmTransactionDateFrom = [to]
+		--FROM @temp_params WHERE [fieldname] = 'dtmTransactionDate'
 
 		DECLARE @strCustomerNumber NVARCHAR(MAX)
 		SELECT TOP 1
@@ -377,7 +381,7 @@ BEGIN TRY
 		BEGIN
 			EXEC uspARCustomerStatementBalanceForwardReport 
 			@dtmDateFrom = @dtmBalanceForwardDate
-			,@dtmDateTo = @dtmTransactionDateTo
+			,@dtmDateTo = @dtmInvoiceDate
 			,@ysnPrintFromCF = 1
 
 		END
@@ -389,7 +393,7 @@ BEGIN TRY
 
 			EXEC uspARCustomerStatementBalanceForwardReport 
 			 @dtmDateFrom = @dtmBalanceForwardDate
-			,@dtmDateTo = @dtmTransactionDateTo
+			,@dtmDateTo = @dtmInvoiceDate
 			,@ysnPrintFromCF = 1
 			,@strCustomerName = @strCustomerName
 
@@ -448,7 +452,7 @@ BEGIN TRY
 		,0
 		,NULL --intPaymentId
 		,dtmInvoiceDate
-		,dtmInvoiceDate
+		,dbo.fnGetDueDateBasedOnTerm(dtmInvoiceDate,intTermID)
 		,NULL --dtmShipDate
 		,NULL --dtmDatePaid
 		,NULL --dtmAsOfDate
@@ -457,7 +461,7 @@ BEGIN TRY
 		,strTempInvoiceReportNumber
 		,NULL --strBOLNumber
 		,NULL --strRecordNumber
-		,'Debit Memo'
+		,'Invoice'
 		,NULL --strPaymentInfo
 		,NULL --strSalespersonName
 		,NULL --strAccountStatusCode
@@ -509,6 +513,7 @@ BEGIN TRY
 		,dblAccountTotalAmount
 		,dblAccountTotalDiscount
 		,ysnShowOnCFInvoice
+		,intTermID
 		
 
 		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1
@@ -559,74 +564,146 @@ BEGIN TRY
 		DECLARE @strWebsite NVARCHAR(MAX)
 		SET @strWebsite = (select TOP 1 ISNULL(strWebSite,'') from [tblSMCompanySetup])
 
-		UPDATE tblARCustomerStatementStagingTable
-		SET
-				 dblTotalAR						 = 		tbl1.dblTotalAR					
-				,dblCreditAvailable				 = 		tbl1.dblCreditAvailable			
-				,dblFuture						 = 		tbl1.dblFuture					
-				,dbl0Days						 = 		tbl1.dbl0Days					
-				,dbl10Days						 = 		tbl1.dbl10Days					
-				,dbl30Days						 = 		tbl1.dbl30Days					
-				,dbl60Days						 = 		tbl1.dbl60Days					
-				,dbl90Days						 = 		tbl1.dbl90Days					
-				,dbl91Days						 = 		tbl1.dbl91Days					
-				,dblCredits						 = 		tbl1.dblCredits					
-				,dblPrepayments					 = 		tbl1.dblPrepayments				
-				,strAccountStatusCode			 = 		tbl1.strAccountStatusCode		
-				,strFullAddress					 = 		tbl1.strFullAddress				
-				,strCompanyName					 = 		tbl1.strCompanyName				
-				,strCompanyAddress				 = 		tbl1.strCompanyAddress + CHAR(13) + @strWebsite
-				,dblCreditLimit					 = 		tbl1.dblCreditLimit				
-				,strCustomerName				 = 		tbl1.strCustomerName			
-				,strCustomerNumber				 = 		tbl1.strCustomerNumber			
-				,dtmAsOfDate					 = 		tbl1.dtmAsOfDate				
-		FROM (
-				select 
-				 top 1 
-				 dblTotalAR	
-				,intEntityCustomerId
-				,dblCreditAvailable	
-				,dblFuture	
-				,dbl0Days	
-				,dbl10Days	
-				,dbl30Days	
-				,dbl60Days	
-				,dbl90Days	
-				,dbl91Days	
-				,dblCredits	
-				,dblPrepayments
-				,strAccountStatusCode	
-				,strFullAddress	
-				,strCompanyName	
-				,strCompanyAddress	
-				,dblCreditLimit
-				,strCustomerName
-				,strCustomerNumber
-				,dtmAsOfDate
-				from tblARCustomerStatementStagingTable
-				where dblTotalAR IS NOT NULL
-				group by 
-				dblTotalAR	
-				,intEntityCustomerId
-				,dblCreditAvailable	
-				,dblFuture	
-				,dbl0Days	
-				,dbl10Days	
-				,dbl30Days	
-				,dbl60Days	
-				,dbl90Days	
-				,dbl91Days	
-				,dblCredits	
-				,dblPrepayments
-				,strAccountStatusCode	
-				,strFullAddress	
-				,strCompanyName	
-				,strCompanyAddress	
-				,dblCreditLimit
-				,strCustomerName
-				,strCustomerNumber
-				,dtmAsOfDate) as tbl1
-				WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = tbl1.intEntityCustomerId
+		
+		--UPDATE tblARCustomerStatementStagingTable
+		--SET
+		--		 dblTotalAR						 = 		tbl1.dblTotalAR					
+		--		,dblCreditAvailable				 = 		tbl1.dblCreditAvailable			
+		--		,dblFuture						 = 		tbl1.dblFuture					
+		--		,dbl0Days						 = 		tbl1.dbl0Days					
+		--		,dbl10Days						 = 		tbl1.dbl10Days					
+		--		,dbl30Days						 = 		tbl1.dbl30Days					
+		--		,dbl60Days						 = 		tbl1.dbl60Days					
+		--		,dbl90Days						 = 		tbl1.dbl90Days					
+		--		,dbl91Days						 = 		tbl1.dbl91Days					
+		--		,dblCredits						 = 		tbl1.dblCredits					
+		--		,dblPrepayments					 = 		tbl1.dblPrepayments				
+		--		,strAccountStatusCode			 = 		tbl1.strAccountStatusCode		
+		--		,strFullAddress					 = 		tbl1.strFullAddress				
+		--		,strCompanyName					 = 		tbl1.strCompanyName				
+		--		,strCompanyAddress				 = 		tbl1.strCompanyAddress + CHAR(13) + @strWebsite
+		--		,dblCreditLimit					 = 		tbl1.dblCreditLimit				
+		--		,strCustomerName				 = 		tbl1.strCustomerName			
+		--		,strCustomerNumber				 = 		tbl1.strCustomerNumber			
+		--		,dtmAsOfDate					 = 		tbl1.dtmAsOfDate				
+		--FROM (
+		--		select 
+		--		 top 1 
+		--		 dblTotalAR	
+		--		,intEntityCustomerId
+		--		,dblCreditAvailable	
+		--		,dblFuture	
+		--		,dbl0Days	
+		--		,dbl10Days	
+		--		,dbl30Days	
+		--		,dbl60Days	
+		--		,dbl90Days	
+		--		,dbl91Days	
+		--		,dblCredits	
+		--		,dblPrepayments
+		--		,strAccountStatusCode	
+		--		,strFullAddress	
+		--		,strCompanyName	
+		--		,strCompanyAddress	
+		--		,dblCreditLimit
+		--		,strCustomerName
+		--		,strCustomerNumber
+		--		,dtmAsOfDate
+		--		from tblARCustomerStatementStagingTable
+		--		where dblTotalAR IS NOT NULL
+		--		group by 
+		--		dblTotalAR	
+		--		,intEntityCustomerId
+		--		,dblCreditAvailable	
+		--		,dblFuture	
+		--		,dbl0Days	
+		--		,dbl10Days	
+		--		,dbl30Days	
+		--		,dbl60Days	
+		--		,dbl90Days	
+		--		,dbl91Days	
+		--		,dblCredits	
+		--		,dblPrepayments
+		--		,strAccountStatusCode	
+		--		,strFullAddress	
+		--		,strCompanyName	
+		--		,strCompanyAddress	
+		--		,dblCreditLimit
+		--		,strCustomerName
+		--		,strCustomerNumber
+		--		,dtmAsOfDate) as tbl1
+		--		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = tbl1.intEntityCustomerId
+
+
+		UPDATE STAGING
+		SET STAGING.dblTotalAR				= STAGING2.dblTotalAR     
+		  , STAGING.dblCreditAvailable		= STAGING2.dblCreditAvailable   
+		  , STAGING.dblFuture				= STAGING2.dblFuture     
+		  , STAGING.dbl0Days				= STAGING2.dbl0Days     
+		  , STAGING.dbl10Days				= STAGING2.dbl10Days     
+		  , STAGING.dbl30Days				= STAGING2.dbl30Days     
+		  , STAGING.dbl60Days				= STAGING2.dbl60Days     
+		  , STAGING.dbl90Days				= STAGING2.dbl90Days     
+		  , STAGING.dbl91Days				= STAGING2.dbl91Days     
+		  , STAGING.dblCredits				= STAGING2.dblCredits     
+		  , STAGING.dblPrepayments			= STAGING2.dblPrepayments    
+		  , STAGING.strAccountStatusCode    = STAGING2.strAccountStatusCode  
+		  , STAGING.strFullAddress			= STAGING2.strFullAddress    
+		  , STAGING.strCompanyName			= STAGING2.strCompanyName    
+		  , STAGING.strCompanyAddress		= STAGING2.strCompanyAddress + CHAR(13) + @strWebsite
+		  , STAGING.dblCreditLimit			= STAGING2.dblCreditLimit    
+		  , STAGING.strCustomerName			= STAGING2.strCustomerName   
+		  , STAGING.strCustomerNumber		= STAGING2.strCustomerNumber   
+		  , STAGING.dtmAsOfDate				= STAGING2.dtmAsOfDate
+		FROM tblARCustomerStatementStagingTable STAGING
+		CROSS APPLY (
+		 select top 1 dblTotalAR 
+		  ,intEntityCustomerId
+		  ,dblCreditAvailable 
+		  ,dblFuture 
+		  ,dbl0Days 
+		  ,dbl10Days 
+		  ,dbl30Days 
+		  ,dbl60Days 
+		  ,dbl90Days 
+		  ,dbl91Days 
+		  ,dblCredits 
+		  ,dblPrepayments
+		  ,strAccountStatusCode 
+		  ,strFullAddress 
+		  ,strCompanyName 
+		  ,strCompanyAddress 
+		  ,dblCreditLimit
+		  ,strCustomerName
+		  ,strCustomerNumber
+		  ,dtmAsOfDate
+		  from tblARCustomerStatementStagingTable
+		  where dblTotalAR IS NOT NULL
+		   AND intEntityCustomerId = STAGING.intEntityCustomerId
+		  group by 
+		  dblTotalAR 
+		  ,intEntityCustomerId
+		  ,dblCreditAvailable 
+		  ,dblFuture 
+		  ,dbl0Days 
+		  ,dbl10Days 
+		  ,dbl30Days 
+		  ,dbl60Days 
+		  ,dbl90Days 
+		  ,dbl91Days 
+		  ,dblCredits 
+		  ,dblPrepayments
+		  ,strAccountStatusCode 
+		  ,strFullAddress 
+		  ,strCompanyName 
+		  ,strCompanyAddress 
+		  ,dblCreditLimit
+		  ,strCustomerName
+		  ,strCustomerNumber
+		  ,dtmAsOfDate
+		) STAGING2
+		WHERE STAGING.dblTotalAR IS NULL
+
 
 	END
 
