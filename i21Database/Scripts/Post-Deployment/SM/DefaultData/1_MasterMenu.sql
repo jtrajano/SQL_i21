@@ -2222,7 +2222,7 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Pay Groups', strDescription = 'Pay Gro
 UPDATE tblSMMasterMenu SET strMenuName = 'Departments', strDescription = 'Departments' WHERE strMenuName = 'Employee Departments' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Earnings Register', strDescription = 'Earnings Register' WHERE strMenuName = 'Employee Earnings Register' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Quarterly State', strDescription = 'Quarterly State' WHERE strMenuName = 'Quarterly State Tax' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
-UPDATE tblSMMasterMenu SET strMenuName = 'Workers Comp Codes', strDescription = 'Workers Comp Codes' WHERE strMenuName = 'Workers Compensation Codes' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+UPDATE tblSMMasterMenu SET strMenuName = 'Workers Comp Codes', strDescription = 'Workers Comp Codes' WHERE strMenuName = 'Workers Compensation Codes' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Workers Comp', strDescription = 'Workers Comp' WHERE strMenuName = 'Workers Compensation' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 /* END OF RENAMING  */
 
@@ -2280,8 +2280,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Timecard 
 ELSE 
 	UPDATE tblSMMasterMenu SET  intSort = 2, strCommand = N'Payroll.view.TimeHistory?showSearch=true&searchCommand=TimeHistory' WHERE strMenuName = 'Timecard History' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTimeEntryParentMenuId
 
-
-	
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Deduction Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Deduction Types', N'Payroll', @PayrollMaintenanceParentMenuId, N'Deduction Types', N'Maintenance', N'Screen', N'Payroll.view.DeductionType?showSearch=true&searchCommand=DeductionType', N'small-menu-maintenance', 1, 1, 0, 1, 0, 0)
@@ -2347,8 +2345,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Workers C
 	VALUES (N'Workers Comp Codes', N'Payroll', @PayrollMaintenanceParentMenuId, N'Workers Comp Codes', N'Maintenance', N'Screen', N'Payroll.view.WorkersCompensationCodes', N'small-menu-maintenance', 1, 1, 0, 1, 9, 0)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Payroll.view.WorkersCompensationCodes' WHERE strMenuName = 'Workers Comp Codes' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
-
-
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Earnings History' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
