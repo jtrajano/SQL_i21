@@ -642,7 +642,7 @@ BEGIN
 	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
 	JOIN tblSCTicket SC ON SC.intTicketId = CS.intTicketId
-	JOIN (
+	LEFT JOIN (
 			SELECT A.intBillId,SUM(dblTotal) dblTotal
 			FROM tblAPBillDetail A
 			JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
@@ -1240,7 +1240,7 @@ BEGIN
 	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=StrgHstry.intCustomerStorageId
 	JOIN tblSCTicket SC ON SC.intTicketId = CS.intTicketId
-	JOIN (
+	LEFT JOIN (
 			SELECT A.intBillId,SUM(dblTotal) dblTotal
 			FROM tblAPBillDetail A
 			JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType = 'Other Charge'
