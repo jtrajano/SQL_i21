@@ -166,7 +166,7 @@ BEGIN
 												AS DECIMAL(18,2))
 											-
 											CAST(
-												(voucherDetail.dblTotal + voucherDetail.dblTax) * voucherDetail.dblRate
+												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
 												AS DECIMAL(18,2)),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -211,7 +211,7 @@ BEGIN
 												AS DECIMAL(18,2))
 											-
 											CAST(
-												(voucherDetail.dblTotal + voucherDetail.dblTax) * voucherDetail.dblRate
+												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
 												AS DECIMAL(18,2))) != 0
 	-- GROUP BY A.[strPaymentRecordNum],
 	-- A.dblExchangeRate,
