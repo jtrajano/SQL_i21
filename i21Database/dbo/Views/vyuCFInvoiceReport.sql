@@ -308,7 +308,7 @@ DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate,
                          ROUND(cfTransPrice.dblCalculatedAmount,2) AS dblCalculatedTotalAmount, cfTransPrice.dblOriginalAmount AS dblOriginalTotalAmount, 
                          cfTransGrossPrice.dblCalculatedAmount AS dblCalculatedGrossAmount, cfTransGrossPrice.dblOriginalAmount AS dblOriginalGrossAmount, 
                          cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount, cfTransNetPrice.dblOriginalAmount AS dblOriginalNetAmount, 
-                         cfTransNetPrice.dblCalculatedAmount - cfSiteItem.dblAverageCost AS dblMargin, cfTrans.ysnInvalid, cfTrans.ysnPosted, ISNULL(cfVehicle.strVehicleNumber,'Unknown') AS strVehicleNumber, 
+                         cfTransNetPrice.dblCalculatedAmount - cfSiteItem.dblAverageCost AS dblMargin, cfTrans.ysnInvalid, cfTrans.ysnPosted, cfVehicle.strVehicleNumber AS strVehicleNumber, 
                          cfVehicle.strVehicleDescription, cfSiteItem.strTaxState,  cfSiteItem.strSiteType, cfSiteItem.strTaxState AS strState, cfSiteItem.strSiteAddress, 
                          cfSiteItem.ysnPostForeignSales,
 						 cfSiteItem.strSiteCity,
@@ -436,5 +436,4 @@ on icfVehicle.intDepartmentId = icfVecleDep.intDepartmentId
 						 --dbo.tblCFDepartment AS cfVehicleDep ON 
 WHERE     (cfTrans.ysnPosted = 1)
 --GO
-
 GO
