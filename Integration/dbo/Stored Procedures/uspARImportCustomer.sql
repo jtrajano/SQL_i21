@@ -17,7 +17,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 		AS 
 	BEGIN
+		SET QUOTED_IDENTIFIER OFF
+		SET ANSI_NULLS ON
 		SET NOCOUNT ON
+		SET XACT_ABORT ON
+		SET ANSI_WARNINGS OFF
 		--================================================
 		--     UPDATE/INSERT IN ORIGIN	
 		--================================================
@@ -353,7 +357,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SELECT @originCustomer = agcus_key FROM #tmpagcusmst
 				BEGIN TRY
 					BEGIN TRANSACTION @TransName
-					--SAVE TRAN @TransName
+					SAVE TRAN @TransName
 					SELECT TOP 1
 						--Entity
 						@strName = CASE WHEN agcus_co_per_ind_cp = ''C'' THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))END,
@@ -651,7 +655,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				END
 								
 				CONTINUELOOP:
-				PRINT @originCustomer
+				--PRINT @originCustomer
 				DELETE FROM #tmpagcusmst WHERE agcus_key = @originCustomer
 		
 				SET @Counter += 1;
@@ -690,7 +694,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 		AS
 	BEGIN
-
+		SET QUOTED_IDENTIFIER OFF
+		SET ANSI_NULLS ON
+		SET NOCOUNT ON
+		SET XACT_ABORT ON
+		SET ANSI_WARNINGS OFF
 		--================================================
 		--     UPDATE/INSERT IN ORIGIN
 		--================================================
@@ -998,7 +1006,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					
 					SELECT @originCustomer = ptcus_cus_no FROM #tmpptcusmst
 					BEGIN TRANSACTION @TransName
-					--SAVE TRAN @TransName
+					SAVE TRAN @TransName
 					SELECT TOP 1
 						--Entity
 						@strName = CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN ptcus_last_name + ptcus_first_name WHEN ptcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))END,
@@ -1302,7 +1310,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				END
 				
 				CONTINUELOOP:
-				PRINT @originCustomer
+				--PRINT @originCustomer
 				DELETE FROM #tmpptcusmst WHERE ptcus_cus_no = @originCustomer
 
 				SET @Counter += 1;
