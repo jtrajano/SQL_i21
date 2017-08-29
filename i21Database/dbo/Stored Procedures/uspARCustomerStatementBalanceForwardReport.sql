@@ -397,6 +397,21 @@ IF @ysnPrintFromCFLocal = 1
 			AND ysnPosted = 1
 			GROUP BY intEntityCustomerId
 		) CF ON BALANCEFORWARD.intEntityCustomerId = CF.intEntityCustomerId
+
+		UPDATE AGINGREPORT
+		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
+		  , AGINGREPORT.dblFuture = AGINGREPORT.dblFuture - ISNULL(CF.dblTotalFuture, 0)
+		FROM @temp_aging_table AGINGREPORT
+		INNER JOIN (
+			SELECT intEntityCustomerId
+				 , dblTotalFuture = SUM(dblAmountDue)
+			FROM tblARInvoice WITH (NOLOCK)
+			WHERE strType = 'CF Tran'
+			AND dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+			AND ysnPaid = 0
+			AND ysnPosted = 1
+			GROUP BY intEntityCustomerId
+		) CF ON AGINGREPORT.intEntityCustomerId = CF.intEntityCustomerId
 	END
 
 INSERT INTO @temp_statement_table(
@@ -497,6 +512,12 @@ INNER JOIN (
 DELETE FROM @temp_statement_table
 WHERE intInvoiceId IN (SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) WHERE strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
 
+IF @ysnPrintFromCFLocal = 1
+	BEGIN
+		UPDATE @temp_statement_table SET strTransactionType = 'Payment' WHERE strTransactionType = 'Customer Prepayment' AND strType <> 'CF Tran'
+		UPDATE @temp_statement_table SET strTransactionType = 'Invoice' WHERE strTransactionType = 'Debit Memo' AND strType <> 'CF Tran'
+	END
+
 TRUNCATE TABLE tblARCustomerStatementStagingTable
 INSERT INTO tblARCustomerStatementStagingTable (
 	  intEntityCustomerId
@@ -588,13 +609,7 @@ FROM (
 		 , dblInvoiceTotal
 		 , intPaymentId
 		 , strRecordNumber
-		 , strTransactionType					= CASE WHEN @ysnPrintFromCFLocal = 1 THEN
-													CASE WHEN STATEMENTREPORT.strTransactionType = 'Debit Memo' THEN 'Invoice'
-														 WHEN STATEMENTREPORT.strTransactionType = 'Customer Prepayment' THEN 'Payment'
-														 ELSE STATEMENTREPORT.strTransactionType
-													END
-													ELSE STATEMENTREPORT.strTransactionType
-												  END
+		 , strTransactionType					= STATEMENTREPORT.strTransactionType
 		 , strPaymentInfo
 		 , dtmDatePaid
 		 , dblPayment
