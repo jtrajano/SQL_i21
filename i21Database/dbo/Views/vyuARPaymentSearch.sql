@@ -21,6 +21,7 @@ SELECT
 	,dtmBatchDate			= P.dtmBatchDate
 	,strBatchId				= P.strBatchId
 	,strUserEntered			= POSTEDBY.strName
+	,strEnteredBy			= EM.strName
 	,strTicketNumbers		= dbo.fnARGetScaleTicketNumbersFromPayment(P.intPaymentId)
 	,strCustomerReferences	= dbo.fnARGetCustomerReferencesFromPayment(P.intPaymentId)
 	,intCurrencyId			= P.intCurrencyId
