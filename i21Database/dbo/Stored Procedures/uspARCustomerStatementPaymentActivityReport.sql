@@ -613,7 +613,7 @@ BEGIN
 		 , strCustomerNumber			= STATEMENTREPORT.strCustomerNumber
 		 , strCustomerName				= STATEMENTREPORT.strCustomerName
 		 , dblCreditLimit				= STATEMENTREPORT.dblCreditLimit
-		 , intInvoiceId					= 1			 
+		 , intInvoiceId							 
 		 , strInvoiceNumber
 		 , strBOLNumber
 		 , dtmDate
