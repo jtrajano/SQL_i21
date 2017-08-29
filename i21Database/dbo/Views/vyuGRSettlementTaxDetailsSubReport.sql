@@ -1,25 +1,22 @@
 ﻿CREATE VIEW [dbo].[vyuGRSettlementTaxDetailsSubReport]
 AS
 SELECT 
- intInventoryReceiptId
-,(
-		SELECT strReceiptNumber
-		FROM tblICInventoryReceipt
-		WHERE intInventoryReceiptId = Tax.intInventoryReceiptId
- ) AS strReceiptNumber
- ,strTaxClass
- ,dblTax
-FROM vyuICGetInventoryReceiptItemTax Tax
+ strBillId = Bill.strBillId
+,strTaxClass = TaxClass.strTaxClass
+,dblTax =   CASE 
+					WHEN BillDtl.intInventoryReceiptChargeId IS NULL THEN Tax.dblTax
+					ELSE 
+							CASE 
+								WHEN Charge.ysnPrice = 1 THEN Tax.dblTax * - 1
+								ELSE Tax.dblTax
+							END
+			END
+   
+,intInventoryReceiptItemId = ISNULL(BillDtl.intInventoryReceiptItemId, 0) 
+,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0) 
+FROM tblAPBill Bill
+JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+JOIN vyuAPBillDetailTax Tax ON BillDtl.intBillDetailId = Tax.intBillDetailId
+JOIN tblSMTaxClass TaxClass ON Tax.intTaxClassId = TaxClass.intTaxClassId
+LEFT JOIN tblICInventoryReceiptCharge Charge ON BillDtl.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
 
-UNION
-
-SELECT 
-intInventoryReceiptId
-,(
-    SELECT strReceiptNumber
-    FROM tblICInventoryReceipt
-	WHERE intInventoryReceiptId = Charge.intInventoryReceiptId
-  ) AS strReceiptNumber
-  ,strTaxClass
-  ,dblTax
-FROM vyuICGetInventoryReceiptChargeTax Charge
