@@ -39,6 +39,10 @@ BEGIN
 			,[intOwnershipType]
 			,[intDetailId]
 			,[strTransactionId]
+			,[intWeightUOMId]
+			,[dblWeight]
+			,[dblGrossWeight]
+			,[dblWeightPerQty]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -53,6 +57,10 @@ BEGIN
 			,[intOwnershipType]			= 1
 			,[intDetailId]				= Detail.intInventoryCountDetailId
 			,[strTransactionId]			= Header.strCountNo
+			,[intWeightUOMId]           = Detail.intWeightUOMId
+			,[dblWeightQty]             = Detail.dblWeightQty
+			,[dblGrossWeight]           = Detail.dblWeightQty
+			,[dblWeightPerQty]          = Detail.dblWeightQty / Detail.dblPhysicalCount
 
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId
