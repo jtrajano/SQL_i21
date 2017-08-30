@@ -1,10 +1,6 @@
 ﻿GO
 
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPOriginCCDTransaction')
-	DROP VIEW vyuAPOriginCCDTransaction
-GO
-
-BEGIN
+IF NOT EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPOriginCCDTransaction')
 EXEC ('
 	CREATE VIEW [dbo].[vyuAPOriginCCDTransaction]
 	AS
@@ -54,4 +50,4 @@ EXEC ('
 		LEFT JOIN Bill ON Bill.strVendorOrderNumber = APOriginCCDTransaction.strVendorOrderNumber COLLATE Latin1_General_CI_AS
 		WHERE intBillId IS NULL
 		')
-END
+GO
