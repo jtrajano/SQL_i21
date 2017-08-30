@@ -12,6 +12,7 @@ BEGIN TRY
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
 	DECLARE @strPartnerNo nvarchar(100)
+	DECLARE @intStageShipmentETAId INT
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -38,7 +39,9 @@ BEGIN TRY
 			) x
 			Where x.QUALF='007'
 
-	Select TOP 1 strDeliveryNo AS strInfo1,ISNULL(CONVERT(VARCHAR(10),dtmETA,121),'') AS strInfo2 From tblIPShipmentETAStage
+	Select @intStageShipmentETAId=SCOPE_IDENTITY()
+
+	Select TOP 1 strDeliveryNo AS strInfo1,ISNULL(CONVERT(VARCHAR(10),dtmETA,121),'') AS strInfo2,CONVERT(VARCHAR(500),@intStageShipmentETAId) AS strSessionId From tblIPShipmentETAStage
 
 END TRY
 

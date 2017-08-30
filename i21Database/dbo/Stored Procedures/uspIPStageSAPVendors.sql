@@ -115,8 +115,6 @@ BEGIN TRY
 	Select strAccountNo,strAccountNo,'',''
 	From @tblVendor Where strAccountNo NOT IN (Select strAccountNo From @tblVendorContact)
 
-	Begin Tran
-
 	--Add to Staging tables
 	Insert into tblIPEntityStage(strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,strEntityType,strCurrency,strTerm,ysnDeleted,strSessionId)
 	Select strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,'Vendor',strCurrency,strTerm,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,@strSessionId
@@ -127,17 +125,11 @@ BEGIN TRY
 	From @tblVendorContact vc 
 	Join tblIPEntityStage s on s.strAccountNo=vc.strAccountNo
 
-	Commit Tran
-
 	Select TOP 1 strAccountNo AS strInfo1,strName AS strInfo2,@strSessionId AS strSessionId From @tblVendor
 
 END TRY
 
 BEGIN CATCH
-	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
-		ROLLBACK TRANSACTION
-
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	IF @idoc <> 0

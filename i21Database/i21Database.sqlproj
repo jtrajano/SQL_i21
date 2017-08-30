@@ -5644,6 +5644,7 @@
     <Build Include="dbo\Views\vyuLGContainerType.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetContainerTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspARForgiveServiceChargeInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
