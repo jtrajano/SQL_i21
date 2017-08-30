@@ -97,4 +97,4 @@ LEFT JOIN dbo.tblICStorageLocation SL
 	ON SL.intStorageLocationId = B.intStorageLocationId
 LEFT JOIN (dbo.tblPOPurchaseDetail PD LEFT JOIN dbo.tblPOPurchase P ON PD.intPurchaseId = P.intPurchaseId)
 	ON PD.intPurchaseDetailId = B.intPurchaseDetailId
-WHERE weightItemUOM.intItemUOMId IS NOT NULL OR itemUOM.intItemUOMId IS NOT NULL
+-- WHERE weightItemUOM.intItemUOMId IS NOT NULL OR itemUOM.intItemUOMId IS NOT NULL
