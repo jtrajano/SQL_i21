@@ -569,7 +569,13 @@ BEGIN
 		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	SUM(D.dblTax) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END),
+		[dblDebitForeign]				=	CAST(CASE WHEN charges.intInventoryReceiptChargeId > 0 
+													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN SUM(D.dblTax) * -1 
+															--WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
+																ELSE SUM(D.dblTax)
+													END) 
+											ELSE SUM(D.dblTax) END * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)),
+		-- [dblDebitForeign]				=	SUM(D.dblTax) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END),
 		--[dblDebitForeign]				=	(CASE WHEN B.dblOldCost IS NOT NULL 
 		--										 THEN  																				
 		--										    CASE WHEN B.dblOldCost = 0 THEN 0 
