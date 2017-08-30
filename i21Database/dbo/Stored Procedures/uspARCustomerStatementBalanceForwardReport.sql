@@ -1,12 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerStatementBalanceForwardReport]
 	  @dtmDateTo				AS DATETIME			= NULL
 	, @dtmDateFrom				AS DATETIME			= NULL
+	, @dtmBalanceForwardDate	AS DATETIME			= NULL
 	, @ysnPrintZeroBalance		AS BIT				= 0
 	, @ysnPrintCreditBalance	AS BIT				= 1
 	, @ysnIncludeBudget			AS BIT				= 0
 	, @ysnPrintOnlyPastDue		AS BIT				= 0
 	, @ysnPrintFromCF			AS BIT				= 0
-	, @strCustomerName			AS NVARCHAR(MAX)	= NULL
+	, @strCustomerNumber		AS NVARCHAR(MAX)	= NULL
 	, @strAccountStatusCode		AS NVARCHAR(MAX)	= NULL
 	, @strLocationName			AS NVARCHAR(MAX)	= NULL	 
 AS
@@ -19,18 +20,20 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @dtmDateToLocal				AS DATETIME			= NULL
 	  , @dtmDateFromLocal			AS DATETIME			= NULL
+	  , @dtmBalanceForwardDateLocal AS DATETIME			= NULL
 	  , @ysnPrintZeroBalanceLocal	AS BIT				= 0
 	  , @ysnPrintCreditBalanceLocal	AS BIT				= 1
 	  , @ysnIncludeBudgetLocal		AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal	AS BIT				= 0
 	  , @ysnPrintFromCFLocal		AS BIT				= 0
-	  , @strCustomerNameLocal		AS NVARCHAR(MAX)	= NULL
+	  , @strCustomerNumberLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL 
 	  , @strDateTo					AS NVARCHAR(50)
 	  , @strDateFrom				AS NVARCHAR(50)
 	  , @query						AS NVARCHAR(MAX)
 	  , @queryBudget				AS NVARCHAR(MAX)
+	  , @queryBalanceForward        AS NVARCHAR(MAX)
 	  , @filter						AS NVARCHAR(MAX)	= ''
 	  , @intEntityCustomerId		AS INT				= NULL
 
@@ -119,24 +122,32 @@ DECLARE @temp_cf_table TABLE(
 
 SET @dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
+SET @dtmBalanceForwardDateLocal = ISNULL(@dtmBalanceForwardDate, @dtmDateFromLocal)
 SET @ysnPrintZeroBalanceLocal	= ISNULL(@ysnPrintZeroBalance, 0)
 SET @ysnPrintCreditBalanceLocal	= ISNULL(@ysnPrintCreditBalance, 1)
 SET @ysnIncludeBudgetLocal		= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal	= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnPrintFromCFLocal		= ISNULL(@ysnPrintFromCF, 0)
-SET @strCustomerNameLocal		= NULLIF(@strCustomerName, '')
+SET @strCustomerNumberLocal		= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal		= NULLIF(@strLocationName, '')
+
+IF @ysnPrintFromCFLocal = 1
+	BEGIN
+		--SET @dtmBalanceForwardDateLocal = DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
+		SET @dtmDateFromLocal = DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
+	END
+
 SET @strDateTo					= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom				= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 
-IF @strCustomerNameLocal IS NOT NULL
+IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		SET @filter = 'strCustomerName = ''' + @strCustomerNameLocal + ''''
+		SET @filter = 'strCustomerNumber = ''' + @strCustomerNumberLocal + ''''
 
 		SELECT TOP 1 @intEntityCustomerId = intEntityCustomerId 
 		FROM vyuARCustomerSearch WITH (NOLOCK)
-		WHERE strName = @strCustomerNameLocal
+		WHERE strCustomerNumber = @strCustomerNumberLocal
 	END
 
 IF @strAccountStatusCodeLocal IS NOT NULL
@@ -149,7 +160,7 @@ INSERT INTO @temp_aging_table
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, 1
 
 INSERT INTO @temp_balanceforward_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateFromLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmBalanceForwardDateLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -247,9 +258,9 @@ FROM vyuARCustomerSearch C
 
 		UNION ALL
 
-		SELECT intInvoiceId			= PD.intInvoiceId
+		SELECT intInvoiceId			= NULL
 			 , intEntityCustomerId	= P.intEntityCustomerId
-			 , intPaymentId			= PD.intPaymentId
+			 , intPaymentId			= P.intPaymentId
 			 , intCompanyLocationId	= P.intLocationId
 			 , intTermId			= NULL
 			 , strInvoiceNumber		= NULL
@@ -258,33 +269,68 @@ FROM vyuARCustomerSearch C
 			 , strBOLNumber			= NULL
 			 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
 			 , strTransactionType	= ''Payment''
-			 , dblInvoiceTotal		= PD.dblInvoiceTotal
+			 , dblInvoiceTotal		= 0.00
 			 , dblBalance			= 0.00
-			 , dblPayment			= PD.dblPayment + PD.dblDiscount - PD.dblInterest
+			 , dblPayment			= P.dblAmountPaid
 			 , dtmDate				= P.dtmDatePaid
 			 , dtmDueDate			= NULL
 			 , dtmShipDate			= NULL
 			 , dtmDatePaid			= P.dtmDatePaid
-			 , strType				= I.strType
-		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-		INNER JOIN (SELECT intPaymentId
-						 , intEntityCustomerId
-						 , intLocationId
-						 , strRecordNumber
-						 , strPaymentInfo
-						 , dtmDatePaid
-					FROM dbo.tblARPayment WITH (NOLOCK)
-					WHERE ysnInvoicePrepayment = 0
-						AND ysnPosted = 1
-						AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
-		) P ON PD.intPaymentId = P.intPaymentId
+			 , strType				= NULL
+		FROM dbo.tblARPayment P WITH (NOLOCK)
 		INNER JOIN (
-			SELECT intInvoiceId
-					, strType
-			FROM dbo.tblARInvoice WITH (NOLOCK)
-			WHERE ysnPosted = 1
-				AND strType <> ''CF Tran''
-		) I	ON PD.intInvoiceId = I.intInvoiceId	
+			SELECT intPaymentId
+			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+			INNER JOIN (
+				SELECT intInvoiceId
+				FROM dbo.tblARInvoice WITH (NOLOCK)
+				WHERE ysnPosted = 1
+				  AND strType <> ''CF Tran''
+			) I ON I.intInvoiceId = PD.intInvoiceId
+		) PD ON P.intPaymentId = PD.intPaymentId
+		WHERE ysnInvoicePrepayment = 0
+			AND ysnPosted = 1
+			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+		GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid
+
+		--SELECT intInvoiceId			= PD.intInvoiceId
+		--	 , intEntityCustomerId	= P.intEntityCustomerId
+		--	 , intPaymentId			= PD.intPaymentId
+		--	 , intCompanyLocationId	= P.intLocationId
+		--	 , intTermId			= NULL
+		--	 , strInvoiceNumber		= NULL
+		--	 , strRecordNumber		= P.strRecordNumber
+		--	 , strInvoiceOriginId   = NULL
+		--	 , strBOLNumber			= NULL
+		--	 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
+		--	 , strTransactionType	= ''Payment''
+		--	 , dblInvoiceTotal		= PD.dblInvoiceTotal
+		--	 , dblBalance			= 0.00
+		--	 , dblPayment			= PD.dblPayment + PD.dblDiscount - PD.dblInterest
+		--	 , dtmDate				= P.dtmDatePaid
+		--	 , dtmDueDate			= NULL
+		--	 , dtmShipDate			= NULL
+		--	 , dtmDatePaid			= P.dtmDatePaid
+		--	 , strType				= I.strType
+		--FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+		--INNER JOIN (SELECT intPaymentId
+		--				 , intEntityCustomerId
+		--				 , intLocationId
+		--				 , strRecordNumber
+		--				 , strPaymentInfo
+		--				 , dtmDatePaid
+		--			FROM dbo.tblARPayment WITH (NOLOCK)
+		--			WHERE ysnInvoicePrepayment = 0
+		--				AND ysnPosted = 1
+		--				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+		--) P ON PD.intPaymentId = P.intPaymentId
+		--INNER JOIN (
+		--	SELECT intInvoiceId
+		--			, strType
+		--	FROM dbo.tblARInvoice WITH (NOLOCK)
+		--	WHERE ysnPosted = 1
+		--		AND strType <> ''CF Tran''
+		--) I	ON PD.intInvoiceId = I.intInvoiceId	
 	) TRANSACTIONS ON TRANSACTIONS.intEntityCustomerId = C.intEntityId
 	
 	LEFT JOIN (
@@ -434,7 +480,6 @@ INSERT INTO @temp_statement_table(
 	, strFullAddress
 	, strCompanyAddress
 	, strCompanyName
-	, strType
 )
 SELECT DISTINCT
 	  ISNULL(BALANCEFORWARD.intEntityCustomerId, STATEMENTFORWARD.intEntityCustomerId)
@@ -442,7 +487,7 @@ SELECT DISTINCT
 	, ISNULL(BALANCEFORWARD.strEntityNo, STATEMENTFORWARD.strCustomerNumber)
 	, 'Balance Forward'
 	, ISNULL(BALANCEFORWARD.dblCreditLimit, STATEMENTFORWARD.dblCreditLimit)
-	, @dtmDateFromLocal
+	, @dtmBalanceForwardDateLocal
 	, '01/01/1900'
 	, 1
 	, ISNULL(BALANCEFORWARD.dblTotalAR, 0)
@@ -450,7 +495,6 @@ SELECT DISTINCT
 	, STATEMENTFORWARD.strFullAddress
 	, STATEMENTFORWARD.strCompanyAddress
 	, STATEMENTFORWARD.strCompanyName
-	, STATEMENTFORWARD.strType
 FROM @temp_statement_table STATEMENTFORWARD
     LEFT JOIN @temp_balanceforward_table BALANCEFORWARD ON STATEMENTFORWARD.intEntityCustomerId = BALANCEFORWARD.intEntityCustomerId    
 
@@ -517,11 +561,15 @@ INNER JOIN (
 	) CFT ON ARI.intInvoiceId = CFT.intInvoiceId
 ) cfTable ON statementTable.intInvoiceId = cfTable.intInvoiceId
 
+DELETE FROM @temp_statement_table WHERE strTransactionType IS NULL
+
 DELETE FROM @temp_statement_table
 WHERE intInvoiceId IN (SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) WHERE strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
 
 IF @ysnPrintFromCFLocal = 1
 	BEGIN
+		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Customer Prepayment', 'Overpayment')
+		DELETE FROM @temp_statement_table WHERE strTransactionType = 'Payment' AND dblPayment = 0
 		UPDATE @temp_statement_table SET strTransactionType = 'Payment' WHERE strTransactionType = 'Customer Prepayment' AND strType <> 'CF Tran'
 		UPDATE @temp_statement_table SET strTransactionType = 'Invoice' WHERE strTransactionType = 'Debit Memo' AND strType <> 'CF Tran'
 	END
@@ -629,7 +677,7 @@ FROM (
 		 , strStatementFooterComment			= STATEMENTREPORT.strStatementFooterComment
 		 , strCompanyName
 		 , strCompanyAddress		 
-	FROM @temp_statement_table AS STATEMENTREPORT
+	FROM @temp_statement_table AS STATEMENTREPORT	
 	WHERE STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
 	UNION ALL
@@ -675,4 +723,4 @@ INNER JOIN (
 	FROM dbo.tblARCustomer WITH (NOLOCK)
 	WHERE strStatementFormat = 'Balance Forward'
 ) CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-ORDER BY ISNULL(MAINREPORT.intInvoiceId, 2), MAINREPORT.dtmDate, MAINREPORT.dtmDatePaid
+ORDER BY MAINREPORT.dtmDate

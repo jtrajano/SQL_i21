@@ -140,6 +140,11 @@ IF CHARINDEX('''', @strCustomerName) > 0
 
 IF @strStatementFormat = 'Balance Forward'
 	BEGIN
+		DECLARE @strCustomerNumber NVARCHAR(MAX)
+
+		IF ISNULL(@strCustomerName, '') <> ''
+			SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM vyuARCustomerSearch WHERE strName = @strCustomerName
+
 		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
 			  @dtmDateTo				= @dtmDateTo
 			, @dtmDateFrom				= @dtmDateFrom
@@ -148,7 +153,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @ysnIncludeBudget			= @ysnIncludeBudget
 			, @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
 			, @ysnPrintFromCF			= 0
-			, @strCustomerName			= @strCustomerName
+			, @strCustomerNumber		= @strCustomerNumber
 			, @strAccountStatusCode		= @strAccountStatusCode
 			, @strLocationName			= @strLocationName
 	END
