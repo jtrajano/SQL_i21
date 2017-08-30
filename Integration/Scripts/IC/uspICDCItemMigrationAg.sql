@@ -222,6 +222,12 @@ on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE
 join tblICUnitMeasure U on U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
 
 
+--set stock unit to No for Non Inventory Items
+update iu set ysnStockUnit = 0
+from tblICItemUOM iu 
+join tblICItem i on i.intItemId = iu.intItemId
+where i.strType not in ('Inventory', 'Raw Material', 'Finished Good')
+
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- ItemLocation data migration from ptlocmst/agitmmst origin tables to tblICItemLocation i21 table 
 -- Section 3
@@ -247,8 +253,8 @@ SELECT inv.intItemId
 	,1 intConcurrencyId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS)
-	 INNER JOIN vyuEMEntity AS vnd ON (itm.agitm_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = vnd.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS	AND vnd.strType = 'Vendor')
-	 LEFT JOIN tblICItemUOM AS uom ON (uom.intItemId) = (inv.intItemId) WHERE uom.ysnStockUnit = 1
+	 LEFT JOIN vyuEMEntity AS vnd ON (itm.agitm_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = vnd.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS	AND vnd.strType = 'Vendor')
+	 LEFT JOIN tblICItemUOM AS uom ON (uom.intItemId) = (inv.intItemId) and uom.ysnStockUnit = 1
 )
 
 --------------------------------------------------------------------------------------------------------------------------------------------
