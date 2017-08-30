@@ -99,10 +99,7 @@ Begin Transaction
 While @intWorkOrderId is not null
 Begin
 Select @strWorkOrderNo=strWorkOrderNo From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
-Select TOP 1 @intBatchId=intBatchId From tblMFWorkOrderProducedLot Where intWorkOrderId=@intWorkOrderId
-
-Set @strBatchId=''
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT 
+Select TOP 1 @intBatchId=intBatchId,@strBatchId=strBatchId From tblMFWorkOrderProducedLot Where intWorkOrderId=@intWorkOrderId
 
 Delete From @GLEntries
 
@@ -145,6 +142,9 @@ INSERT INTO @GLEntries (
 		,@strWorkOrderNo
 		,@strBatchId
 		,@intUserId	
+
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,0
 
 Update tblMFWorkOrderProducedLot Set ysnProductionReversed=1 Where intWorkOrderId=@intWorkOrderId
 
