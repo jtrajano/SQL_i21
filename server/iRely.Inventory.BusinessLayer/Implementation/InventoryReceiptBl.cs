@@ -142,7 +142,9 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<GetObjectResult> GetReceiptItems(GetParameter param)
         {
-            var query = _db.GetQuery<tblICInventoryReceiptItem>().Filter(param);
+            var query = _db.GetQuery<tblICInventoryReceiptItem>()
+                .Filter(param);
+
             var data = await query
                 .Select(s => new
                 {
@@ -204,7 +206,7 @@ namespace iRely.Inventory.BusinessLayer
                         : s.intOwnershipType == 4 ? "Consigned Sale"
                         : "Own",
                     intCommodityId = s.vyuICInventoryReceiptItemLookUp.intCommodityId,
-                    strWeightUOM = s.vyuICInventoryReceiptItemLookUp.strWeightUOM, 
+                    strWeightUOM = s.vyuICInventoryReceiptItemLookUp.strWeightUOM,
                     strContainer = s.vyuICInventoryReceiptItemLookUp.strContainer,
                     dblItemUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblItemUOMConvFactor,
                     dblWeightUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblWeightUOMConvFactor,
@@ -221,9 +223,11 @@ namespace iRely.Inventory.BusinessLayer
                     strSubCurrency = s.vyuICInventoryReceiptItemLookUp.strSubCurrency,
                     strPricingType = s.vyuICInventoryReceiptItemLookUp.strPricingType,
                     strTaxGroup = s.vyuICInventoryReceiptItemLookUp.strTaxGroup,
-                    strForexRateType = s.vyuICInventoryReceiptItemLookUp.strForexRateType
+                    strForexRateType = s.vyuICInventoryReceiptItemLookUp.strForexRateType,
+                    tblICInventoryReceiptItemTaxes = s.tblICInventoryReceiptItemTaxes
                 })
-                .AsNoTracking().ToListAsync();
+                .AsNoTracking()
+                .ToListAsync();
 
             return new GetObjectResult()
             {
@@ -284,7 +288,8 @@ namespace iRely.Inventory.BusinessLayer
                     , strCurrency = s.vyuICGetInventoryReceiptCharge.strCurrency
                     , strTaxGroup = s.vyuICGetInventoryReceiptCharge.strTaxGroup
                     , strForexRateType = s.vyuICGetInventoryReceiptCharge.strForexRateType
-            }).AsNoTracking().ToListAsync();
+                    , tblICInventoryReceiptChargeTaxes = s.tblICInventoryReceiptChargeTaxes
+                }).AsNoTracking().ToListAsync();
 
             return new GetObjectResult()
             {
