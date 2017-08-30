@@ -5,10 +5,10 @@ AS
 				,CH.dblQuantity
 				,CH.strContractNumber
 				,CH.intEntityId
-				,CH.ysnUnlimitedQuantity
+				,ISNULL(CH.ysnUnlimitedQuantity, 0) ysnUnlimitedQuantity
 				,CH.intCommodityId
 				,ISNULL(CD.ysnComplete,0) AS ysnComplete
-				,CD.dblCashPrice
+				,ISNULL(CD.dblCashPrice,0) dblCashPrice
 				,CO.strCommodityCode
 				,CO.strDescription AS	strCommodityDesc
 
