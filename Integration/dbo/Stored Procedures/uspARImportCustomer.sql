@@ -17,7 +17,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 		AS 
 	BEGIN
+		SET QUOTED_IDENTIFIER OFF
+		SET ANSI_NULLS ON
 		SET NOCOUNT ON
+		SET XACT_ABORT ON
+		SET ANSI_WARNINGS OFF
 		--================================================
 		--     UPDATE/INSERT IN ORIGIN	
 		--================================================
@@ -344,13 +348,16 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				FROM agcusmst
 					where agcus_key COLLATE Latin1_General_CI_AS not in ( select strCustomerNumber from tblARCustomer) 
 			ORDER BY agcusmst.agcus_key 
+			DECLARE @TransName NVARCHAR(100)
+			SET @TransName = ''CustomerImport''
 
 			WHILE (EXISTS(SELECT 1 FROM #tmpagcusmst))
 			BEGIN
 		
 				SELECT @originCustomer = agcus_key FROM #tmpagcusmst
 				BEGIN TRY
-					BEGIN TRANSACTION
+					BEGIN TRANSACTION @TransName
+					SAVE TRAN @TransName
 					SELECT TOP 1
 						--Entity
 						@strName = CASE WHEN agcus_co_per_ind_cp = ''C'' THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))END,
@@ -624,13 +631,13 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHERE intEntityCustomerId = @EntityId 
 
 					--INSERT AR CUSTOMER SPECIAL PRICE
-					EXEC uspARImportCustomerSpecialPrice @originCustomer
+					--EXEC uspARImportCustomerSpecialPrice @originCustomer
 					
-					COMMIT TRANSACTION
+					COMMIT TRANSACTION @TransName
 				END TRY
 				BEGIN CATCH
 				
-					ROLLBACK TRANSACTION
+					ROLLBACK TRANSACTION @TransName
 					
 					INSERT INTO tblARCustomerFailedImport( strCustomerNumber, strReason)					
 					VALUES(@originCustomer,ERROR_MESSAGE())					
@@ -648,7 +655,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				END
 								
 				CONTINUELOOP:
-				PRINT @originCustomer
+				--PRINT @originCustomer
 				DELETE FROM #tmpagcusmst WHERE agcus_key = @originCustomer
 		
 				SET @Counter += 1;
@@ -687,7 +694,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 		AS
 	BEGIN
-
+		SET QUOTED_IDENTIFIER OFF
+		SET ANSI_NULLS ON
+		SET NOCOUNT ON
+		SET XACT_ABORT ON
+		SET ANSI_WARNINGS OFF
 		--================================================
 		--     UPDATE/INSERT IN ORIGIN
 		--================================================
@@ -986,13 +997,16 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				FROM ptcusmst
 					where ptcus_cus_no COLLATE Latin1_General_CI_AS not in ( select strCustomerNumber from tblARCustomer) 
 			ORDER BY ptcusmst.ptcus_cus_no
+			DECLARE @TransName NVARCHAR(100)
+			SET @TransName = ''CustomerImport''
 
 			WHILE (EXISTS(SELECT 1 FROM #tmpptcusmst))
 			BEGIN
 				BEGIN TRY
 					
 					SELECT @originCustomer = ptcus_cus_no FROM #tmpptcusmst
-					BEGIN TRANSACTION
+					BEGIN TRANSACTION @TransName
+					SAVE TRAN @TransName
 					SELECT TOP 1
 						--Entity
 						@strName = CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN ptcus_last_name + ptcus_first_name WHEN ptcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))END,
@@ -1268,19 +1282,19 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHERE intEntityCustomerId = @EntityId
 
 					--INSERT TERMINAL TO CUSTOMER FREIGHT
-					EXEC uspEMImportPTTerminalToCustomer @originCustomer
+					--EXEC uspEMImportPTTerminalToCustomer @originCustomer
 
 					--INSERT AR CUSTOMER SPECIAL PRICE
-					EXEC uspARImportCustomerSpecialPrice @originCustomer
+					--EXEC uspARImportCustomerSpecialPrice @originCustomer
 					
 					--INSERT AR CUSTOMER SPECIAL PRICE
-					EXEC uspARImportPTTaxExemption @originCustomer
+					--EXEC uspARImportPTTaxExemption @originCustomer
 
-					COMMIT TRANSACTION
+					COMMIT TRANSACTION @TransName
 					
 				END TRY
 				BEGIN CATCH
-					ROLLBACK TRANSACTION
+					ROLLBACK TRANSACTION @TransName
 					INSERT INTO tblARCustomerFailedImport( strCustomerNumber, strReason)					
 					VALUES(@originCustomer,ERROR_MESSAGE())					
 					--PRINT ''''Failed to imports'''' + @originCustomer; --@@ERROR;		
@@ -1296,7 +1310,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				END
 				
 				CONTINUELOOP:
-				PRINT @originCustomer
+				--PRINT @originCustomer
 				DELETE FROM #tmpptcusmst WHERE ptcus_cus_no = @originCustomer
 
 				SET @Counter += 1;

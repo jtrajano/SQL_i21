@@ -183,10 +183,12 @@ BEGIN TRY
 
 			INSERT INTO tblTRLoadBlendIngredient(intLoadDistributionDetailId
 				, intRecipeItemId
+				, strReceiptLink
 				, dblQuantity
 				, intConcurrencyId)
 			SELECT @newLoadDistributionDetailId
 				, intRecipeItemId
+				, strReceiptLink
 				, dblQuantity
 				, 1
 			FROM tblTRLoadBlendIngredient
