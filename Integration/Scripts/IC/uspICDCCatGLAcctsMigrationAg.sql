@@ -39,7 +39,7 @@ INSERT INTO tblICCategoryAccount (
 	FROM agclsmst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.agcls_sls_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_sls_acct_no
 	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 UNION
@@ -52,7 +52,7 @@ UNION
 	FROM agclsmst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.agcls_pur_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_pur_acct_no
 	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 UNION
@@ -65,7 +65,7 @@ UNION
 	FROM agclsmst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.agcls_inv_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_inv_acct_no
 	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 )
@@ -90,7 +90,7 @@ INSERT INTO tblICCategoryAccount (
 	INNER JOIN tblICCategory AS cat ON cls.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN agctlmst AS cgl ON cgl.agctl_key = 06 
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cgl.agcgl_pend_ap 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cgl.agcgl_pend_ap
 	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 )
@@ -112,7 +112,7 @@ INSERT INTO tblICCategoryAccount (
 	FROM agclsmst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.agcls_sls_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_sls_acct_no
 	and cat.strInventoryType = 'Other Charge'
 )
@@ -131,7 +131,7 @@ INSERT INTO tblICCategoryAccount (
 	FROM agclsmst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.agcls_pur_acct_no 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_pur_acct_no
 	and cat.strInventoryType = 'Other Charge'
 )
