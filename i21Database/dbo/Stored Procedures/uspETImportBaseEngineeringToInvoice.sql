@@ -199,6 +199,16 @@ BEGIN
  				SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Item.'
  			END
 
+			IF (ISNULL(@intSiteId,0) = 0)
+ 			BEGIN
+				SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Site.'
+ 			END
+
+			IF LTRIM(@strErrorMessage) != ''
+			BEGIN		
+				GOTO LOGERROR
+			END
+
 			IF (@intRecordType = 5 AND ISNULL(@intSiteId,0) = 0)
 				BEGIN
 					SET @strErrorMessage = 'Invalid Site.'
