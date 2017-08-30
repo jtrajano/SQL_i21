@@ -21,7 +21,13 @@ AS
 				,LO.dtmETAPOD
 				,LO.dtmStuffingDate
 				,LO.dtmETSPOL
-				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
+				,CAST(
+						CASE	WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0) = 0 THEN 0
+								WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0)	= 
+										ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId AND ysnReceived = 1),0) THEN 1
+								ELSE 0
+						END
+				AS BIT) ysnDocsReceived
 				,STUFF(
 					(
 						SELECT	', ' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
@@ -86,7 +92,13 @@ AS
 				,LO.dtmETAPOD
 				,LO.dtmStuffingDate
 				,LO.dtmETSPOL
-				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
+				,CAST(
+						CASE	WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0) = 0 THEN 0
+								WHEN	ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId),0)	= 
+										ISNULL((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId AND ysnReceived = 1),0) THEN 1
+								ELSE 0
+						END
+				AS BIT) ysnDocsReceived
 				,NULL strContainerNumber
 				,LO.strBookingReference
 				,LO.intLoadId
