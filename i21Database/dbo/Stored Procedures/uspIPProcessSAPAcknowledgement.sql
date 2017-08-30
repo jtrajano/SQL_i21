@@ -161,11 +161,6 @@ Begin
 
 		If @strStatus NOT IN (52,53) --Error
 		Begin
-			--update the rowstate of next modified record to added if available
-			Update tblCTContractFeed Set strRowState='Added'
-			Where intContractFeedId = (Select TOP 1 intContractFeedId From tblCTContractFeed 
-			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='' Order By intContractFeedId)
-
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
@@ -242,10 +237,6 @@ Begin
 
 		If @strStatus NOT IN (52,53) --Error
 		Begin
-			--update the rowstate of next modified record to added if available
-			Update tblLGLoadStg Set strRowState='Added' 
-			Where intLoadStgId = (Select TOP 1 intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='' Order By intLoadStgId)
-
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage=@strMessage

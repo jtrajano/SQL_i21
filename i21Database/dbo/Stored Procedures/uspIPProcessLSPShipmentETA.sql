@@ -1,4 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessLSPShipmentETA]
+@strSessionId NVARCHAR(50)='',
+@strInfo1 NVARCHAR(MAX)='' OUT,
+@strInfo2 NVARCHAR(MAX)='' OUT
 AS
 BEGIN TRY
 
@@ -23,7 +26,10 @@ Declare @intMinRowNo int,
 		@strLoadNumber NVARCHAR(100),
 		@strFinalErrMsg NVARCHAR(MAX)=''
 
-Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
+If ISNULL(@strSessionId,'')=''
+	Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
+Else
+	Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage Where intStageShipmentETAId=@strSessionId
 
 While(@intMinRowNo is not null)
 Begin
@@ -35,6 +41,9 @@ Begin
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
 
 		Select @strLoadNumber=strLoadNumber From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
+
+		Set @strInfo1=ISNULL(@strDeliveryNo,'') + ' / ' + ISNULL(@strLoadNumber,'')
+		Set @strInfo2=ISNULL(CONVERT(VARCHAR(10),@dtmETA,121),'')
 
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)
@@ -118,10 +127,11 @@ Begin
 		Delete From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
 	END CATCH
 
-	Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage Where intStageShipmentETAId>@intMinRowNo
+	If ISNULL(@strSessionId,'')=''
+		Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage Where intStageShipmentETAId>@intMinRowNo
+	Else
+		Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage Where intStageShipmentETAId>@intMinRowNo AND intStageShipmentETAId=@strSessionId
 End
-
-Select @strDeliveryNo + ' / ' + ISNULL(@strLoadNumber,'') AS strInfo1,ISNULL(CONVERT(VARCHAR(10),@dtmETA,121),'') AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 

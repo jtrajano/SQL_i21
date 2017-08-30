@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPVendors]
-@strSessionId NVARCHAR(50)=''
+@strSessionId NVARCHAR(50)='',
+@strInfo1 NVARCHAR(MAX)='' OUT,
+@strInfo2 NVARCHAR(MAX)='' OUT
 AS
 BEGIN TRY
 
@@ -75,6 +77,9 @@ Delete From @tblEntityContactIdOutput
 
 Select @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency,@strAccountNo=strAccountNo,@ysnDeleted=ISNULL(ysnDeleted,0)
 From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId=@intMinVendor
+
+Set @strInfo1=ISNULL(@strAccountNo,'')
+Set @strInfo2=ISNULL(@strVendorName,'')
 
 Select @intEntityId=intEntityVendorId From tblAPVendor Where strVendorAccountNum=@strAccountNo
 Select @intTermId=intTermID From tblSMTerm Where strTermCode=@strTerm
@@ -334,8 +339,6 @@ END CATCH
 	Else
 		Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor AND strSessionId=@strSessionId
 End
-
-Select @strAccountNo AS strInfo1,@strVendorName AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 

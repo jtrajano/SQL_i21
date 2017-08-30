@@ -5403,6 +5403,7 @@
     <Build Include="dbo\Stored Procedures\uspCTNotification.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
     <Build Include="dbo\Stored Procedures\uspARForgiveServiceChargeInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
