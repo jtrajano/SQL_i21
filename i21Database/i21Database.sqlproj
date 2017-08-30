@@ -5412,8 +5412,7 @@
     <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
     <Build Include="dbo\Views\vyuMFGetShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetReceiving.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
-    <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspARForgiveServiceChargeInvoices.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
