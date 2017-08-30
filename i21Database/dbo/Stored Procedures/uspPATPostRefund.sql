@@ -90,6 +90,7 @@ SELECT R.intRefundId,
 		RC.ysnQualified, 
 		RC.dblRefundAmount,
 		RC.dblCashRefund,
+		RC.intBillId,
 		RC.dblEquityRefund
 	INTO #tmpRefundData 
 	FROM tblPATRefundCustomer RC 
@@ -113,14 +114,17 @@ END
 --  UNPOST AND DELETE VOUCHER
 ---------------------------------------------------------------------------------------------------------------------------------------
 
-IF(ISNULL(@ysnPosted,0) = 0)
+DECLARE @voucheredRefunds INT = 0;
+SELECT @voucheredRefunds = COUNT(*) FROM #tmpRefundData WHERE intBillId IS NOT NULL;
+
+IF(ISNULL(@ysnPosted,0) = 0 AND @voucheredRefunds > 0)
 BEGIN
 
 	BEGIN TRY
 	SET ANSI_WARNINGS ON;
 	DECLARE @voucherId AS NVARCHAR(MAX);
-	SELECT @voucherId = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intBillId)  FROM tblPATRefundCustomer 
-	WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData) AND intBillId IS NOT NULL 
+	SELECT @voucherId = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intBillId) FROM #tmpRefundData
+	WHERE intBillId IS NOT NULL 
 	FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
 	SET ANSI_WARNINGS OFF;
 
