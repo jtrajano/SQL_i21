@@ -5643,6 +5643,7 @@
     <None Include="Scripts\Post-Deployment\EM\DataMigration\1710_1720_CCSite_migration.sql" />
     <Build Include="dbo\Views\vyuLGContainerType.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetContainerTypes.sql" />
+    <Build Include="dbo\Stored Procedures\uspARForgiveServiceChargeInvoices.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
