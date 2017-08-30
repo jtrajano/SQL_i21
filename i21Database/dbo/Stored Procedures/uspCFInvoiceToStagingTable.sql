@@ -372,6 +372,12 @@ BEGIN TRY
 		--		,@dtmTransactionDateFrom = [to]
 		--FROM @temp_params WHERE [fieldname] = 'dtmTransactionDate'
 
+		DECLARE @strInvoiceCycle NVARCHAR(MAX)
+		SELECT TOP 1
+				@strInvoiceCycle = ISNULL([from],'')
+		FROM @temp_params WHERE [fieldname] = 'strInvoiceCycle'
+		
+
 		DECLARE @strCustomerNumber NVARCHAR(MAX)
 		SELECT TOP 1
 				@strCustomerNumber = ISNULL([from],'')
@@ -514,6 +520,21 @@ BEGIN TRY
 		,dblAccountTotalDiscount
 		,ysnShowOnCFInvoice
 		,intTermID
+
+		IF(ISNULL(@strInvoiceCycle,'') != '')
+		BEGIN
+
+			DELETE FROM tblARCustomerStatementStagingTable 
+			WHERE intEntityCustomerId NOT IN (
+				SELECT cfAC.intCustomerId 
+				FROM tblCFAccount as cfAC
+				INNER JOIN tblCFInvoiceCycle cfIC
+				ON cfAC.intInvoiceCycle = cfIC.intInvoiceCycleId
+				WHERE cfIC.strInvoiceCycle COLLATE Latin1_General_CI_AS IN (
+					SELECT Record FROM fnCFSplitString(@strInvoiceCycle,'|^|')
+				)
+			)
+		END
 		
 
 		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1
