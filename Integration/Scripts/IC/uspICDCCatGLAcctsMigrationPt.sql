@@ -59,7 +59,7 @@ USING
 	FROM ptclsmst AS cls 
 		INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_sls_acct_no 
-		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.ptcls_sls_acct_no
 		and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 
@@ -73,7 +73,7 @@ USING
 		FROM ptclsmst AS cls 
 			INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_pur_acct_no 
-			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = cls.ptcls_pur_acct_no
 			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 
@@ -86,7 +86,7 @@ USING
 		FROM ptclsmst AS cls 
 			INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_inv_acct_no 
-			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = cls.ptcls_inv_acct_no
 			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 ) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
@@ -111,7 +111,7 @@ USING
 		INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 		INNER JOIN ptmglmst AS cgl ON cgl.ptmgl_key = 01 
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cgl.ptmgl_ap 
-		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cgl.ptmgl_ap
 ) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
 ON [Target].intAccountCategoryId = [Source].intAccountCategoryId
@@ -126,7 +126,7 @@ VALUES ([Source].intCategoryId, [Source].intAccountCategoryId, [Source].intAccou
 --	SELECT cat.intCategoryId
 --	,seg.intAccountCategoryId
 --	,act.intAccountId
---	,1 FROM ptclsmst AS cls INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS INNER JOIN ptmglmst AS mgl ON mgl.ptmgl_key = 01 INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = mgl.ptmgl_pur_variance INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId INNER JOIN tblGLAccountSegmentMapping AS segm ON segm.intAccountId = coa.intCrossReferenceId INNER JOIN tblGLAccountSegment AS seg ON seg.intAccountSegmentId = segm.intAccountSegmentId WHERE coa.strExternalId = mgl.ptmgl_pur_variance
+--	,1 FROM ptclsmst AS cls INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS INNER JOIN ptmglmst AS mgl ON mgl.ptmgl_key = 01 INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = mgl.ptmgl_pur_variance INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id INNER JOIN tblGLAccountSegmentMapping AS segm ON segm.intAccountId = coa.inti21Id INNER JOIN tblGLAccountSegment AS seg ON seg.intAccountSegmentId = segm.intAccountSegmentId WHERE coa.strExternalId = mgl.ptmgl_pur_variance
 --	AND seg.strCode = SUBSTRING(strExternalId, 0, CHARINDEX('.', strExternalId))
 --)
 
@@ -143,7 +143,7 @@ USING
 	FROM ptclsmst AS cls 
 		INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_sls_acct_no 
-		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.ptcls_sls_acct_no
 		and cat.strInventoryType = 'Other Charge'
 ) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
@@ -165,7 +165,7 @@ USING
 	FROM ptclsmst AS cls 
 		INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_pur_acct_no 
-		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.ptcls_pur_acct_no
 		and cat.strInventoryType = 'Other Charge'
 ) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
