@@ -391,4 +391,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FRM\DefaultData\1_OfflineMenu.sql
 :r .\FRM\1_OfflineGuid.sql
 
+--CCR
+:r .\CCR\SiteDataFix.sql
+
 print 'END POST DEPLOYMENT'

@@ -181,6 +181,7 @@
     <Folder Include="Scripts\Post-Deployment\PAT\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\FRM" />
     <Folder Include="Scripts\Post-Deployment\FRM\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\CCR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -5613,6 +5614,7 @@
     <Build Include="dbo\Views\vyuGRSettlementOutboundSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettlementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
+    <Build Include="dbo\Views\vyuCCSiteHeaderSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5746,6 +5748,7 @@
     <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\30_UpdateBatchIdUsed.sql" />
     <Build Include="dbo\Functions\fnHDTicketCommentSentMessage.sql" />
+    <None Include="Scripts\Post-Deployment\CCR\SiteDataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
