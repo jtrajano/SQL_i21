@@ -1,4 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessLSPReceipt]
+@strSessionId NVARCHAR(50)='',
+@strInfo1 NVARCHAR(MAX)='' OUT,
+@strInfo2 NVARCHAR(MAX)='' OUT
 AS
 BEGIN TRY
 
@@ -26,7 +29,10 @@ Declare @intMinRowNo int,
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
-Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage
+If ISNULL(@strSessionId,'')=''
+	Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage
+Else
+	Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage Where intStageReceiptId=@strSessionId
 
 While(@intMinRowNo is not null)
 Begin
@@ -35,6 +41,8 @@ Begin
 
 		Select @strDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate,@strPartnerNo=strPartnerNo
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
+
+		Set @strInfo1=ISNULL(@strDeliveryNo,'')
 
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)
@@ -59,6 +67,8 @@ Begin
 		Begin Tran
 
 			EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT
+
+			Set @strInfo2=ISNULL(@strReceiptNo,'')
 
 			--Receipt
 			Insert into tblICInventoryReceipt(strReceiptType,intSourceType,intEntityVendorId,intLocationId,
@@ -156,6 +166,7 @@ Begin
 
 		SET @ErrMsg = ERROR_MESSAGE()
 		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+		Set @strInfo2=''
 
 		----Move to Error
 		Insert Into tblIPReceiptError(strDeliveryNo,strExternalRefNo,dtmReceiptDate,strPartnerNo,strImportStatus,strErrorMessage)
@@ -175,10 +186,11 @@ Begin
 		Delete From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 	END CATCH
 
-	Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage Where intStageReceiptId>@intMinRowNo
+	If ISNULL(@strSessionId,'')=''
+		Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage Where intStageReceiptId>@intMinRowNo
+	Else
+		Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage Where intStageReceiptId>@intMinRowNo AND intStageReceiptId=@strSessionId
 End
-
-Select @strDeliveryNo AS strInfo1,Case When ISNULL(@strFinalErrMsg,'')='' Then @strReceiptNo Else '' End AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 

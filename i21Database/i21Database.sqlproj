@@ -5612,6 +5612,7 @@
     <Build Include="dbo\Views\vyuGRSettlementInboundSubReport.sql" />
     <Build Include="dbo\Views\vyuGRSettlementOutboundSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettlementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

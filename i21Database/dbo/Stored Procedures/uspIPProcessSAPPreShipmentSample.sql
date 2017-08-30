@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPPreShipmentSample]
-@strSessionId NVARCHAR(50)=''
+@strSessionId NVARCHAR(50)='',
+@strInfo1 NVARCHAR(MAX)='' OUT,
+@strInfo2 NVARCHAR(MAX)='' OUT
 AS
 BEGIN TRY
 
@@ -51,6 +53,9 @@ Begin
 				@strLotNo=strLotNo
 		From tblIPPreShipmentSampleStage Where intStageSampleId=@intMinRowNo
 
+		Set @strInfo1=@strPONo
+		Set @strInfo2=ISNULL(@strItemNo,'') + ' / ' +  ISNULL(@strSampleNo,'')
+
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intContractDetailId=intContractDetailId 
 		From tblCTContractDetail Where strERPPONumber=@strPONo AND intItemId=@intItemId
@@ -74,6 +79,9 @@ Begin
 		Exec uspQMSamplePreShipment @strXml,@strSampleNoOut OUT,@intSampleId OUT
 
 		If Not Exists (Select 1 From tblQMSample Where intSampleId=@intSampleId) 
+			RaisError('Sample not created',16,1)
+
+		If ISNULL(@strSampleNo,'')<>'' AND Not Exists (Select 1 From tblQMSample Where strSampleNumber=@strSampleNo) 
 			RaisError('Sample not created',16,1)
 
 		--Move to Archive
@@ -107,8 +115,6 @@ Begin
 	Else
 		Select @intMinRowNo=Min(intStageSampleId) From tblIPPreShipmentSampleStage Where intStageSampleId>@intMinRowNo AND strSessionId=@strSessionId
 End
-
-Select TOP 1 @strPONo AS strInfo1, @strItemNo + ' / ' +  ISNULL(@strSampleNo,'') AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 
