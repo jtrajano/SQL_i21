@@ -165,13 +165,13 @@ BEGIN
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	@GainLossAccount,
 		[dblDebit]						=   --CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)) -
-											CAST(
+											(CAST(
 												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
 												AS DECIMAL(18,2))
 											-
 											CAST(
 												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
-												AS DECIMAL(18,2)),
+												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
