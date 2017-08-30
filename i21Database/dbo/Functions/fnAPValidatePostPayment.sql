@@ -416,7 +416,7 @@ BEGIN
 			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 			INNER JOIN tblAPBillDetail D ON D.intBillId = C.intBillId
 			WHERE B.intPaymentId = A.intPaymentId
-			AND D.dblRate <> A.dblExchangeRate
+			AND ISNULL(NULLIF(D.dblRate, 0), 1) <> ISNULL(NULLIF(A.dblExchangeRate,0), 1)
 		)
 		AND (B.intAccountsPayableRealizedId IS NULL OR B.intAccountsPayableRealizedId = 0)
 
