@@ -23,9 +23,9 @@ BEGIN TRY
 	END
 	IF(ISNULL(@ysnStorage,0) = 0)
 		BEGIN
-			IF EXISTS(SELECT TOP 1 intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0)
+			IF EXISTS(SELECT TOP 1 intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0 AND strDistributionOption != 'SPL')
 			BEGIN
-				UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
+				UPDATE tblSCTicket SET intContractId = @intContractDetailId WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0 AND strDistributionOption != 'SPL'
 				UPDATE tblSCTicket SET strContractNumber = CT.strContractNumber
 				, intContractSequence = CT.intContractSeq
 				, strContractLocation = CT.strLocationName

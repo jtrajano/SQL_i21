@@ -63,7 +63,7 @@ BEGIN TRY
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
 					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
-					IF OBJECT_ID (N'tempdb.dbo.##tmpVoucherDetail') IS NOT NULL
+					IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
                         DROP TABLE #tmpVoucherDetail
 					CREATE TABLE #tmpVoucherDetail (
 						[intBillId] [INT] PRIMARY KEY,
@@ -95,12 +95,18 @@ BEGIN TRY
 						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 						FETCH NEXT FROM voucherCursor INTO @intBillId;
 					END
+
+					CLOSE voucherCursor  
+					DEALLOCATE voucherCursor 
+
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
 					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId;
 				END
+				CLOSE intListCursor  
+				DEALLOCATE intListCursor 
 				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 			END
 		ELSE
@@ -180,7 +186,8 @@ BEGIN TRY
 							DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
 							FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
 						END
-
+						CLOSE intListCursor  
+						DEALLOCATE intListCursor 
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 					END
 			END
