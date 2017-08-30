@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPItems]
-@strSessionId NVARCHAR(50)=''
+@strSessionId NVARCHAR(50)='',
+@strInfo1 NVARCHAR(MAX)='' OUT,
+@strInfo2 NVARCHAR(MAX)='' OUT
 AS
 BEGIN TRY
 
@@ -51,6 +53,9 @@ Set @ysnDeleted=0
 
 Select @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
 @strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage Where intStageItemId=@intMinItem
+
+Set @strInfo1=ISNULL(@strItemNo,'')
+Set @strInfo2=ISNULL(@strItemType,'')
 
 Select @intCategoryId=intCategoryId From tblICCategory Where strCategoryCode=@strItemType
 
@@ -260,8 +265,6 @@ END CATCH
 	Else
 		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem AND strSessionId=@strSessionId
 End
-
-Select @strItemNo AS strInfo1,@strItemType AS strInfo2,@strFinalErrMsg AS strMessage
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 

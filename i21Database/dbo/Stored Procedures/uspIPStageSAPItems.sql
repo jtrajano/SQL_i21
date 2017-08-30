@@ -110,8 +110,6 @@ BEGIN TRY
 			,LVORM NVARCHAR(50)
 	)
 
-	Begin Tran
-
 	Update @tblItem set strItemNo=RIGHT(strItemNo,8)
 	Update @tblItemUOM set strItemNo=RIGHT(strItemNo,8)
 	Update @tblItemSubLocation set strItemNo=RIGHT(strItemNo,8)
@@ -143,17 +141,11 @@ BEGIN TRY
 	From @tblItemUOM iu Join tblIPItemStage i on iu.strItemNo=i.strItemNo
 	Where i.strItemType='ZMPN'
 
-	Commit Tran
-
 	Select TOP 1 strItemNo AS strInfo1,strItemType AS strInfo2,@strSessionId AS strSessionId From @tblItem
 
 END TRY
 
 BEGIN CATCH
-	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
-		ROLLBACK TRANSACTION
-
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	IF @idoc <> 0
