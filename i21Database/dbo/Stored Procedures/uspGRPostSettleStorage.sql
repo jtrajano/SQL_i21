@@ -796,12 +796,8 @@ BEGIN TRY
 				,dblQty = - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
 				,dblUOMQty = @dblUOMQty
 				,dblCost = CASE 
-								WHEN St.ysnDPOwnedType = 0 THEN 
-																CASE 
-																	WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
-																	ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
-																 END
-								ELSE 0
+								WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+								ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 						   END
 				,dblSalesPrice = 0.00
 				,intCurrencyId = @intCurrencyId
@@ -846,12 +842,8 @@ BEGIN TRY
 				,dblQty = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
 				,dblUOMQty = @dblUOMQty
 				,dblCost = CASE 
-								WHEN St.ysnDPOwnedType = 0 THEN 
-																 CASE 
-																	 WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
-																	 ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
-																  END
-								ELSE 0
+								WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+								ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 						   END
 				,dblSalesPrice = 0.00
 				,intCurrencyId = @intCurrencyId

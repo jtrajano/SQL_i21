@@ -233,10 +233,7 @@ BEGIN TRY
 				,dtmDate = GETDATE()
 				,dblQty = SH.dblUnits
 				,dblUOMQty = @dblUOMQty
-				,dblCost = CASE 
-								WHEN ST.ysnDPOwnedType = 0 THEN SH.dblPaidAmount
-								ELSE 0
-						   END
+				,dblCost = SH.dblPaidAmount
 				,dblSalesPrice = 0.00
 				,intCurrencyId = @intCurrencyId
 				,dblExchangeRate = 1
@@ -279,10 +276,7 @@ BEGIN TRY
 				,dtmDate = GETDATE()
 				,dblQty = - SH.dblUnits
 				,dblUOMQty = @dblUOMQty
-				,dblCost = CASE 
-								WHEN ST.ysnDPOwnedType = 0 THEN SH.dblPaidAmount
-								ELSE 0
-						   END
+				,dblCost = SH.dblPaidAmount
 				,dblSalesPrice = 0.00
 				,intCurrencyId = @intCurrencyId
 				,dblExchangeRate = 1
