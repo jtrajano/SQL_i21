@@ -883,8 +883,8 @@ SELECT
 	,[strItemDescription]				= ICI.[strDescription] 
 	,[intItemUOMId]						= ICISC.[intCostUOMId]
 	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
+	,[intOrderUOMId]					= NULL
 	,[strOrderUnitMeasure]				= ''
-	,[intShipmentItemUOMId]				= NULL		
 	,[intShipmentItemUOMId]				= ICISC.[intCostUOMId]
 	,[strShipmentUnitMeasure]			= ICUM.[strUnitMeasure]
 	,[dblQtyShipped]					= 1 	
@@ -978,16 +978,11 @@ INNER JOIN ITEM ICI ON ICISC.[intChargeId] = ICI.[intItemId]
 LEFT JOIN ITEMUOM ICIU ON ICISC.[intCostUOMId] = ICIU.[intItemUOMId] 
 LEFT JOIN ITEMUNITMEASURE ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
 INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT [intInventoryShipmentItemId],
-		[intInventoryShipmentChargeId]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE ISNULL([intInventoryShipmentChargeId],0) = 0) ARID ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
 LEFT OUTER JOIN COMPANYLOCATION SMCL ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN CURRENCY SMC ON ICISC.[intCurrencyId] = SMC.[intCurrencyID] 
 LEFT OUTER JOIN SCALETICKET ON ICISI.[intSourceId] = SCALETICKET.[intTicketId]
 LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ICISC.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
-WHERE ISNULL(ARID.[intInventoryShipmentChargeId],0) = 0
+WHERE  NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId])
 
 UNION ALL
 
@@ -1161,8 +1156,8 @@ SELECT DISTINCT
 	,[strItemDescription]				= ICI.[strDescription] 
 	,[intItemUOMId]						= MFG.[intItemUOMId]
 	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
+	,[intOrderUOMId]					= NULL
 	,[strOrderUnitMeasure]				= ''
-	,[intShipmentItemUOMId]				= NULL		
 	,[intShipmentItemUOMId]				= MFG.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= ICUM.[strUnitMeasure]
 	,[dblQtyShipped]					= MFG.[dblQuantity] 	
