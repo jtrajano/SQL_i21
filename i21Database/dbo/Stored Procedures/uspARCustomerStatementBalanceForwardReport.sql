@@ -107,6 +107,7 @@ DECLARE @temp_statement_table TABLE(
     ,[strCompanyName]				NVARCHAR(MAX)
     ,[strCompanyAddress]			NVARCHAR(MAX)
 	,[dblARBalance]					NUMERIC(18,6)
+	,[strType]						NVARCHAR(100)
 )
 
 DECLARE @temp_cf_table TABLE(
@@ -177,6 +178,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , strCompanyName		= COMPANY.strCompanyName
 	  , strCompanyAddress	= COMPANY.strCompanyAddress
 	  , dblARBalance		= C.dblARBalance
+	  , strType				= TRANSACTIONS.strType
 FROM vyuARCustomerSearch C
 	LEFT JOIN (
 		SELECT intInvoiceId			= I.intInvoiceId
@@ -197,6 +199,7 @@ FROM vyuARCustomerSearch C
 			 , dtmDueDate			= I.dtmDueDate
 			 , dtmShipDate			= I.dtmShipDate
 			 , dtmDatePaid			= PCREDITS.dtmDatePaid
+			 , strType				= I.strType
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		LEFT JOIN (
 			SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
@@ -262,6 +265,7 @@ FROM vyuARCustomerSearch C
 			 , dtmDueDate			= NULL
 			 , dtmShipDate			= NULL
 			 , dtmDatePaid			= P.dtmDatePaid
+			 , strType				= I.strType
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 		INNER JOIN (SELECT intPaymentId
 						 , intEntityCustomerId
@@ -276,6 +280,7 @@ FROM vyuARCustomerSearch C
 		) P ON PD.intPaymentId = P.intPaymentId
 		INNER JOIN (
 			SELECT intInvoiceId
+					, strType
 			FROM dbo.tblARInvoice WITH (NOLOCK)
 			WHERE ysnPosted = 1
 				AND strType <> ''CF Tran''
@@ -350,6 +355,7 @@ IF @ysnIncludeBudget = 1
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= CUST.dblARBalance
+				  , strType						= NULL
             FROM tblARCustomerBudget CB
                 INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId
                 INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
@@ -428,6 +434,7 @@ INSERT INTO @temp_statement_table(
 	, strFullAddress
 	, strCompanyAddress
 	, strCompanyName
+	, strType
 )
 SELECT DISTINCT
 	  ISNULL(BALANCEFORWARD.intEntityCustomerId, STATEMENTFORWARD.intEntityCustomerId)
@@ -443,6 +450,7 @@ SELECT DISTINCT
 	, STATEMENTFORWARD.strFullAddress
 	, STATEMENTFORWARD.strCompanyAddress
 	, STATEMENTFORWARD.strCompanyName
+	, STATEMENTFORWARD.strType
 FROM @temp_statement_table STATEMENTFORWARD
     LEFT JOIN @temp_balanceforward_table BALANCEFORWARD ON STATEMENTFORWARD.intEntityCustomerId = BALANCEFORWARD.intEntityCustomerId    
 
