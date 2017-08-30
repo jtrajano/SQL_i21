@@ -258,6 +258,10 @@ BEGIN
 	BEGIN
 		SET @hasCCReconciliation = 1
 	END
+	ELSE
+	BEGIN
+		SET @hasCCReconciliation = 0
+	END
 
 END
 
