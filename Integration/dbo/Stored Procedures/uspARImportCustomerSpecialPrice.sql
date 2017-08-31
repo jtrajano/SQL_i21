@@ -154,7 +154,7 @@ BEGIN
 				   ,[intConcurrencyId])
 		SELECT CUS.intEntityCustomerId
 			  ,(CASE WHEN PDV.ptpdv_vnd_no > ' ' THEN 
-					 (SELECT intEntityVendorId FROM tblAPVendor  
+					 (SELECT intEntityId FROM tblAPVendor  
 							 WHERE strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS 
 							 = PDV.ptpdv_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE PDV.ptpdv_vnd_no END) 
@@ -175,7 +175,7 @@ BEGIN
 			  ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN PDV.ptpdv_rack_vnd_no > ' ' THEN 
-					 (SELECT intEntityVendorId FROM tblAPVendor  
+					 (SELECT intEntityId FROM tblAPVendor  
 							 WHERE strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS 
 							 = PDV.ptpdv_rack_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE PDV.ptpdv_rack_vnd_no 
@@ -189,7 +189,7 @@ BEGIN
 			  ,(CASE WHEN PDV.ptpdv_vnd_no > ' ' THEN 
 							(SELECT VLOC.intEntityLocationId FROM tmpvndname OVND
 								INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
-								INNER JOIN tblEMEntityLocation VLOC ON VLOC.intEntityId = VND.intEntityVendorId 
+								INNER JOIN tblEMEntityLocation VLOC ON VLOC.intEntityId = VND.intEntityId 
 								AND VLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS			  
 							 WHERE OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE NULL 
@@ -197,7 +197,7 @@ BEGIN
 			  ,(CASE WHEN PDV.ptpdv_rack_vnd_no > ' ' THEN 
 							(SELECT VLOC.intEntityLocationId FROM tmpvndname OVND
 								INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
-								INNER JOIN tblEMEntityLocation VLOC ON VLOC.intEntityId = VND.intEntityVendorId 
+								INNER JOIN tblEMEntityLocation VLOC ON VLOC.intEntityId = VND.intEntityId 
 								AND VLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS			  
 							 WHERE OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_rack_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE NULL 
