@@ -203,9 +203,15 @@ FROM vyuARCustomerSearch C
 			 , strBOLNumber			= I.strBOLNumber
 			 , strPaymentInfo		= PCREDITS.strPaymentInfo
 			 , strTransactionType	= I.strTransactionType
-			 , dblInvoiceTotal		= CASE WHEN strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END
-			 , dblBalance			= CASE WHEN strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
-			 , dblPayment			= 0.00
+			 , dblInvoiceTotal		= CASE WHEN strTransactionType IN (''Credit Memo'', ''Overpayment'') THEN I.dblInvoiceTotal * -1
+										   WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00 
+										   ELSE I.dblInvoiceTotal 
+									  END
+			 , dblBalance			= CASE WHEN strTransactionType IN (''Credit Memo'', ''Overpayment'') THEN I.dblInvoiceTotal * -1
+										   WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00
+										   ELSE I.dblInvoiceTotal 
+									  END - ISNULL(TOTALPAYMENT.dblPayment, 0)
+			 , dblPayment			= CASE WHEN strTransactionType = ''Customer Prepayment'' THEN I.dblInvoiceTotal ELSE 0.00 END
 			 , dtmDate				= I.dtmDate
 			 , dtmDueDate			= I.dtmDueDate
 			 , dtmShipDate			= I.dtmShipDate
