@@ -181,7 +181,7 @@ IF(ISNULL(@Post,0)) = 1
 			AND (ARID.[intSalesOrderDetailId] IS NULL OR ARID.[intSalesOrderDetailId] = 0)
 			AND (ARID.[intShipmentPurchaseSalesContractId] IS NULL OR ARID.[intShipmentPurchaseSalesContractId] = 0)
 			AND (ARID.[intItemId] IS NOT NULL OR ARID.[intItemId] <> 0)
-			AND ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software')	
+			AND ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software', 'Comment', '')	
 
 		UNION
 		--Dsicount Account
@@ -1851,7 +1851,8 @@ SELECT
 	,[intForexRateTypeId]
 	,[dblForexRate]
 FROM
-	[dbo].[fnARGetItemsForStoragePosting](@Invoices, @Post)
+	[dbo].[fnARGetItemsForStoragePosting](@Invoices, @Post) 
+
 
 INSERT INTO @returntable(
 	 [intInvoiceId]
