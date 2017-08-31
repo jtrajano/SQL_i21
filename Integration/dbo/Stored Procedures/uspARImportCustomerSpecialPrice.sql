@@ -58,7 +58,7 @@ BEGIN
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
 
-		SELECT CUS.intEntityCustomerId
+		SELECT CUS.intEntityId
 			  ,(CASE WHEN SP.spprc_itm_no > ' ' THEN 
 					 (SELECT intItemId FROM tblICItem  
 							 WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS 
@@ -85,7 +85,7 @@ BEGIN
 		FROM spprcmst SP
 		INNER JOIN tmpagcusname OCUS ON OCUS.agcus_key COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityCustomerId 
+		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
 		WHERE SP.spprc_cus_no = @CustomerId
 	END
@@ -152,7 +152,7 @@ BEGIN
 				   ,[strInvoiceType]
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
-		SELECT CUS.intEntityCustomerId
+		SELECT CUS.intEntityId
 			  ,(CASE WHEN PDV.ptpdv_vnd_no > ' ' THEN 
 					 (SELECT intEntityVendorId FROM tblAPVendor  
 							 WHERE strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS 
@@ -213,7 +213,7 @@ BEGIN
 		FROM ptpdvmst PDV
 		INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityCustomerId 
+		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
 		WHERE PDV.ptpdv_cus_no = @CustomerId
 	END

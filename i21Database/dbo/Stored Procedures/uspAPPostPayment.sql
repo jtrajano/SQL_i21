@@ -217,7 +217,7 @@ BEGIN
 	INSERT INTO @GLEntries
 	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@payments, @userId, @batchId)
 	UNION ALL
-	SELECT * FROM dbo.[fnAPCreatePrepaymentGLEntries](@prepayIds, @userId, @batchId) ORDER BY intTransactionId
+	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@prepayIds, @userId, @batchId) ORDER BY intTransactionId
 END
 ELSE
 BEGIN

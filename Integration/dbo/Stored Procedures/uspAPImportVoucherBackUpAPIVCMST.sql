@@ -161,6 +161,8 @@ BEGIN
 			AND G.apchk_alt_trx_ind != 'O'
 	) PaymentInfo
 	WHERE A.apivc_trans_type IN ('I', 'C', 'A')
+
+	SET @hasCCReconciliation = 0;
 END
 ELSE
 BEGIN
@@ -251,9 +253,14 @@ BEGIN
 		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
 	) --MAKE SURE TO IMPORT CCD IF NOT YET IMPORTED
 
-	IF EXISTS(SELECT TOP 1 1 FROM tmp_apivcmstImport WHERE apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal'))
+	IF EXISTS(SELECT TOP 1 1 FROM tmp_apivcmstImport A WHERE A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND A.apivc_status_ind = 'U'
+	AND A.apivc_trans_type IN ('I', 'C', 'A'))
 	BEGIN
 		SET @hasCCReconciliation = 1
+	END
+	ELSE
+	BEGIN
+		SET @hasCCReconciliation = 0
 	END
 
 END

@@ -35,16 +35,17 @@ DECLARE @batchId NVARCHAR(40);
 --=====================================================================================================================================
 --  VALIDATE REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
+DECLARE @validateRefundCustomer TABLE(
+	[strErrorMsg] NVARCHAR(MAX),
+	[intRefundId] INT
+)
+
 IF(@ysnPosted = 1)
 BEGIN
-	DECLARE  @validateRefundCustomer TABLE(
-		[intRefundCustomerId] INT,
-		[intCustomerVolumeId] INT
-	)
 
 	INSERT INTO @validateRefundCustomer
-	SELECT	RC.intRefundCustomerId,
-			CV.intCustomerVolumeId
+	SELECT	'There are volumes that were already processed which made the record obsolete. Please delete this refund record.',
+			R.intRefundId
 	FROM tblPATRefundCustomer RC
 	INNER JOIN tblPATRefund R
 		ON R.intRefundId = RC.intRefundId
@@ -52,13 +53,22 @@ BEGIN
 		ON CV.intRefundCustomerId = RC.intRefundCustomerId
 	WHERE CV.ysnRefundProcessed = 0 AND RC.intRefundId <> @intRefundId
 
+END
+ELSE
+BEGIN
+	--- Validate if there are paid vouchers
+	INSERT INTO @validateRefundCustomer
+	SELECT	strError,
+			intTransactionId
+	FROM [dbo].[fnPATValidateAssociatedTransaction](@intRefundId, 5, default)
+END
 
-	IF EXISTS(SELECT 1 FROM @validateRefundCustomer)
-	BEGIN
-		SET @error = 'There are volumes that were already processed which made the record obsolete. Please delete this refund record.';
-		RAISERROR(@error, 16, 1);
-		GOTO Post_Rollback
-	END
+
+IF EXISTS(SELECT 1 FROM @validateRefundCustomer)
+BEGIN
+	SELECT TOP 1 @error = strErrorMsg FROM @validateRefundCustomer;
+	RAISERROR(@error, 16, 1);
+	GOTO Post_Rollback
 END
 
 --=====================================================================================================================================
@@ -80,6 +90,7 @@ SELECT R.intRefundId,
 		RC.ysnQualified, 
 		RC.dblRefundAmount,
 		RC.dblCashRefund,
+		RC.intBillId,
 		RC.dblEquityRefund
 	INTO #tmpRefundData 
 	FROM tblPATRefundCustomer RC 
@@ -91,12 +102,55 @@ SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	where ysnEligibleRefund = 1
 
 
 
+
 IF(@totalRecords = 0)  
 BEGIN
 	SET @success = 0
 	GOTO Post_Exit
 END
+----------------------------------------------------------------------------------------
 
+--=====================================================================================================================================
+--  UNPOST AND DELETE VOUCHER
+---------------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE @voucheredRefunds INT = 0;
+SELECT @voucheredRefunds = COUNT(*) FROM #tmpRefundData WHERE intBillId IS NOT NULL;
+
+IF(ISNULL(@ysnPosted,0) = 0 AND @voucheredRefunds > 0)
+BEGIN
+
+	BEGIN TRY
+	SET ANSI_WARNINGS ON;
+	DECLARE @voucherId AS NVARCHAR(MAX);
+	SELECT @voucherId = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intBillId) FROM #tmpRefundData
+	WHERE intBillId IS NOT NULL 
+	FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
+	SET ANSI_WARNINGS OFF;
+
+	EXEC [dbo].[uspAPPostBill]
+		@batchId = NULL,
+		@billBatchId = NULL,
+		@transactionType = NULL,
+		@post = 0,
+		@recap = 0,
+		@isBatch = 0,
+		@param = @voucherId,
+		@userId = @intUserId,
+		@beginTransaction = NULL,
+		@endTransaction = NULL,
+		@success = @success OUTPUT;
+
+	END TRY
+	BEGIN CATCH
+		SET @error = ERROR_MESSAGE();
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback;
+	END CATCH
+
+	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATRefundCustomer WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData));
+	UPDATE tblPATRefundCustomer SET intBillId = NULL WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData);
+END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 

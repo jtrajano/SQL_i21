@@ -12,6 +12,7 @@ BEGIN TRY
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
 	DECLARE @strPartnerNo nvarchar(100)
+	DECLARE @intStageReceiptId INT
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -39,6 +40,8 @@ BEGIN TRY
 			,LIFEX NVARCHAR(100) '../LIFEX' 
 			,NTANF DATETIME 
 			)
+
+	Select @intStageReceiptId=SCOPE_IDENTITY()
 
 	--Receipt Items
 	Insert Into tblIPReceiptItemStage(
@@ -99,7 +102,7 @@ BEGIN TRY
 			,VEMEH   NVARCHAR(100)
 			) x Join tblIPReceiptStage s on x.VBELN=s.strDeliveryNo
 
-	Select TOP 1 strDeliveryNo AS strInfo1, '' strInfo2 From tblIPReceiptStage
+	Select TOP 1 strDeliveryNo AS strInfo1, '' strInfo2,CONVERT(VARCHAR(500),@intStageReceiptId) AS strSessionId From tblIPReceiptStage
 
 END TRY
 

@@ -351,7 +351,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
 :r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
 :r .\EM\1730_Fix_SplitTypeEntry.sql
-
+:r .\EM\DataMigration\1710_1720_CCSite_migration.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
@@ -391,5 +391,8 @@ print 'BEGIN POST DEPLOYMENT'
 --FRM
 :r .\FRM\DefaultData\1_OfflineMenu.sql
 :r .\FRM\1_OfflineGuid.sql
+
+--CCR
+:r .\CCR\SiteDataFix.sql
 
 print 'END POST DEPLOYMENT'

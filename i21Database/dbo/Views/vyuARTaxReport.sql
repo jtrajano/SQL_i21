@@ -4,8 +4,7 @@ SELECT DISTINCT I.intEntityCustomerId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , C.strCustomerNumber
-	 , C.strName
-	 , C.strCounty
+	 , C.strName	 
 	 , strDisplayName			= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(C.strName, '')
 	 , strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -46,6 +45,7 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , CL.strTaxClass
 				 , TC.strCountry
 				 , TC.strState
+				 , TC.strCounty
 				 , TC.strCity
 				 , TC.intSalesTaxAccountId
 				 , SalesTaxAccount		= SA.strAccountId
@@ -112,6 +112,7 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				,CL.strTaxClass
 				,TC.strCountry
 				,TC.strState
+				,TC.strCounty
 				,TC.strCity
 				,TC.intSalesTaxAccountId
 				,SA.strAccountId

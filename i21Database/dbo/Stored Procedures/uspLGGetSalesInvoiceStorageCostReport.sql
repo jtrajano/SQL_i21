@@ -19,14 +19,14 @@ BEGIN
 		strPriceCurrency = PriceCur.strCurrency,
 		strPriceUOM = PriceUOM.strUnitMeasure
 	FROM tblARInvoice Inv
-	JOIN tblSMCurrency InvCur ON InvCur.intCurrencyID = Inv.intCurrencyId
-	JOIN tblLGLoad L ON L.intLoadId = Inv.intLoadId
-	JOIN tblLGLoadStorageCost SC ON SC.intLoadId = Inv.intLoadId
+	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
+	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
+	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+	JOIN tblLGLoadStorageCost SC ON SC.intLoadDetailLotId = LDL.intLoadDetailLotId
+	JOIN tblSMCurrency InvCur ON InvCur.intCurrencyID = Inv.intCurrencyId	
 	JOIN tblSMCurrency PriceCur ON PriceCur.intCurrencyID = SC.intCurrency
 	JOIN tblICItemUOM PriceItemUOM ON PriceItemUOM.intItemUOMId = SC.intPriceUOMId
 	JOIN tblICUnitMeasure PriceUOM ON PriceUOM.intUnitMeasureId = PriceItemUOM.intUnitMeasureId
-	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
 	LEFT JOIN tblICItem Item ON Item.intItemId = SC.intCostType

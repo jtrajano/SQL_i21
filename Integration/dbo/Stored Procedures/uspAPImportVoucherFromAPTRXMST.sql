@@ -111,7 +111,7 @@ SELECT
 										ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
 	[dblAmountDue]				=	CASE WHEN A.aptrx_trans_type = 'C' OR A.aptrx_trans_type = 'A' THEN A.aptrx_orig_amt 
 										ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
-	[intEntityId]				=	ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
+	[intEntityId]				=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 	[ysnPosted]					=	0,
 	[ysnPaid]					=	0,
 	[intTransactionType]		=	CASE WHEN A.aptrx_trans_type = 'I' AND A.aptrx_orig_amt > 0 THEN 1
@@ -133,6 +133,7 @@ SELECT
 	[dblDiscount]				=	ISNULL(A.aptrx_disc_amt,0),
 	[dblWithheld]				=	A.aptrx_wthhld_amt,
 	[intShipToId]				=	@userLocation,
+	[intStoreLocationId]		=	@userLocation,
 	[intShipFromId]				=	loc.intEntityLocationId,
 	[intPayToAddressId]			=	loc.intEntityLocationId,
 	[strShipFromAddress]		=	loc.strAddress,
@@ -182,6 +183,7 @@ INSERT
 	[dblDiscount],
 	[dblWithheld],
 	[intShipToId],
+	[intStoreLocationId],
 	[intShipFromId],
 	[intPayToAddressId],
 	[strShipFromAddress]	,	
@@ -221,6 +223,7 @@ VALUES
 	[dblDiscount],
 	[dblWithheld],
 	[intShipToId],
+	[intStoreLocationId],
 	[intShipFromId],
 	[intPayToAddressId],
 	[strShipFromAddress]	,	

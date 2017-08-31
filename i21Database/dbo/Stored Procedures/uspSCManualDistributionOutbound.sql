@@ -21,7 +21,6 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @strDistributionOption NVARCHAR(50) = NULL
 
-DECLARE @dblRemainingUnits AS DECIMAL (13,3)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketUOM INT
@@ -29,13 +28,12 @@ DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @intOrderId AS INT
 DECLARE @intLoadId AS INT
-DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
 DECLARE @intScaleStationId AS INT
 DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnIsStorage AS BIT
 DECLARE @intLoadContractId AS INT
-DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
+DECLARE @dblLoadScheduledUnits AS NUMERIC(38,20)
 DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
@@ -78,7 +76,7 @@ BEGIN TRY
 DECLARE @intId INT;
 DECLARE @ysnDPStorage AS BIT;
 DECLARE @intLoopContractId INT;
-DECLARE @dblLoopContractUnits NUMERIC(12,4);
+DECLARE @dblLoopContractUnits NUMERIC(38,20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId
@@ -396,7 +394,7 @@ BEGIN
 			SELECT @intDestinationWeightId = intDestinationWeightId, @intShipmentOrderId = intOrderId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ISNULL(intDestinationWeightId, 0) != 0
 
 			SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intShipmentOrderId; 
-			IF ISNULL(@InventoryShipmentId, 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1
+			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
 			BEGIN
 				--IF ISNULL(@intDestinationWeightId,0) = 0
 				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;

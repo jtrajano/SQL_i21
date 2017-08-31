@@ -128,7 +128,11 @@ BEGIN
 		[intConcurrencyId]				=	1,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	A.dblAmountPaid,
+		[dblCreditForeign]				=	CAST(
+												dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+													- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+													paymentDetail.dblPayment, voucher.dblTotal)
+												AS DECIMAL(18,2)) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	A.dblExchangeRate,
@@ -161,13 +165,13 @@ BEGIN
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	@GainLossAccount,
 		[dblDebit]						=   --CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)) -
-											CAST(
+											(CAST(
 												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
 												AS DECIMAL(18,2))
 											-
 											CAST(
-												(voucherDetail.dblTotal + voucherDetail.dblTax) * voucherDetail.dblRate
-												AS DECIMAL(18,2)),
+												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
+												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -211,7 +215,7 @@ BEGIN
 												AS DECIMAL(18,2))
 											-
 											CAST(
-												(voucherDetail.dblTotal + voucherDetail.dblTax) * voucherDetail.dblRate
+												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
 												AS DECIMAL(18,2))) != 0
 	-- GROUP BY A.[strPaymentRecordNum],
 	-- A.dblExchangeRate,

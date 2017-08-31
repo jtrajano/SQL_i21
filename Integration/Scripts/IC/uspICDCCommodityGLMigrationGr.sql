@@ -35,7 +35,7 @@ act.intAccountId, act.strDescription ACDescription
 	FROM gacommst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_sls 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_sls 
 	and c.intCategoryId = cat.intCategoryId) as ac)
 
@@ -53,7 +53,7 @@ act.intAccountId, act.strDescription ACDescription
 	FROM gacommst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
 	and c.intCategoryId = cat.intCategoryId) as ac)
 
@@ -71,7 +71,7 @@ act.intAccountId, act.strDescription ACDescription
 	FROM gacommst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_pur 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_pur 
 	and c.intCategoryId = cat.intCategoryId) as ac)
 
@@ -116,7 +116,7 @@ Cross Apply
 	FROM gacdcmst AS itm 
 	INNER JOIN tblICItem AS inv ON (rtrim(itm.gacdc_com_cd)+rtrim(itm.gacdc_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(strOldId, 0, CHARINDEX('-', strOldId)) = cast(itm.gacdc_sls_gl_acct_no as nvarchar)
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
@@ -137,7 +137,7 @@ Cross Apply
 	FROM gacdcmst AS itm 
 	INNER JOIN tblICItem AS inv ON (rtrim(itm.gacdc_com_cd)+rtrim(itm.gacdc_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(strOldId, 0, CHARINDEX('-', strOldId)) = cast(itm.gacdc_pur_gl_acct_no as nvarchar)
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac

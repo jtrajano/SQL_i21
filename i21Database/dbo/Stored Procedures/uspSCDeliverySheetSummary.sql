@@ -144,6 +144,7 @@ OPEN intListCursor;
 -- Initial fetch attempt
 FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @SplitAverage;
 
+--SPLIT
 WHILE @@FETCH_STATUS = 0
 BEGIN
 	IF ISNULL(@intEntityId,0) != 0
@@ -198,8 +199,7 @@ BEGIN
 		SET @Hold = 
 		ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
 		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
-		WHERE SCT.intStorageScheduleTypeId = -5 OR SCT.strDistributionOption = 'HLD' 
-		AND SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'), 0)
+		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'), 0)
 
 	END
 	
@@ -216,10 +216,11 @@ END
 CLOSE intListCursor;
 DEALLOCATE intListCursor;
 
+--NON-SPLIT
 IF ISNULL(@intEntityId,0) = 0
 	BEGIN
-		SELECT TOP 1 @intEntityId = SC.intEntityId, @strName = EM.strName, @SplitAverage = 100 FROM tblSCTicket SC 
-		INNER JOIN tblEMEntity EM ON EM.intEntityId = SC.intEntityId 
+		SELECT TOP 1 @intEntityId = SCD.intEntityId, @strName = EM.strName, @SplitAverage = 100 FROM tblSCDeliverySheet SCD 
+		INNER JOIN tblEMEntity EM ON EM.intEntityId = SCD.intEntityId 
 		WHERE intDeliverySheetId = @intDeliverySheetId
 			
 		--For priced contract
@@ -271,8 +272,7 @@ IF ISNULL(@intEntityId,0) = 0
 		SET @Hold = 
 		ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
 		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
-		WHERE SCT.intStorageScheduleTypeId = -5 OR SCT.strDistributionOption = 'HLD' 
-		AND SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'), 0)
+		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'), 0)
 
 		INSERT INTO #temp (Id, Contract, Cash, Storage, DP, Basis, WHGB, Hold) 
 		VALUES(@counter, @Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold)

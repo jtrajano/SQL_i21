@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPDuplicateBillBatch]
 	@billBatchId INT,
 	@userId INT,
+	@reset BIT = 0,
 	@billBatchCreatedId INT OUTPUT
 AS
 
@@ -70,7 +71,7 @@ SELECT intBillId, intEntityVendorId FROM tblAPBill WHERE intBillBatchId = @billB
 WHILE EXISTS(SELECT 1 FROM @tmpBillData)
 BEGIN
 	SELECT TOP 1 @billId = intBillId, @vendorId = intEntityVendorId FROM @tmpBillData
-	EXEC uspAPDuplicateBill @billId, @userId, @createdBillId OUT;
+	EXEC uspAPDuplicateBill @billId = @billId, @userId = @userId, @reset = @reset, @billCreatedId = @createdBillId OUT;
 	--GET DEFAULT SHIP FROM PER VENDOR
 	SET @shipFromId = (SELECT intEntityLocationId FROM [tblEMEntityLocation] WHERE intEntityId = @vendorId AND ysnDefaultLocation = 1)
 	UPDATE A

@@ -166,8 +166,8 @@ Begin
 			GOTO NEXT_SHIPMENT
 		End
 
-	--if ack is not received for the previous feed do not send the current feed
-	If (Select TOP 1 strFeedStatus From tblLGLoadStg Where intLoadId=@intLoadId AND strTransactionType='Shipment' 
+	--if ack is not received for the previous feed do not send the current feed (Always send DELETE)
+	If (Select TOP 1 strFeedStatus From tblLGLoadStg Where intLoadId=@intLoadId AND strTransactionType='Shipment' AND UPPER(@strHeaderRowState)<>'DELETE'
 		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)<>'Ack Rcvd'
 		GOTO NEXT_SHIPMENT
 

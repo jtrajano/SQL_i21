@@ -36,7 +36,7 @@ USING
 		FROM ptitmmst AS itm 
 			INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_sls_acct 
-			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_sls_acct
 			and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 			and I.intItemId = inv.intItemId
@@ -66,7 +66,7 @@ USING
 		FROM ptitmmst AS itm 
 		INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_pur_acct 
-		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_pur_acct
 		and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 		and I.intItemId = inv.intItemId
@@ -97,7 +97,7 @@ USING
 		FROM ptitmmst AS itm 
 		INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_sls_acct 
-		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_sls_acct
 		and inv.strType = 'Other Charge' 
 		and I.intItemId = inv.intItemId
@@ -127,7 +127,7 @@ USING
 	FROM ptitmmst AS itm 
 	INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_pur_acct 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = itm.ptitm_pur_acct
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
