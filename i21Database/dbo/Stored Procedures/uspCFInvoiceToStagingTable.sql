@@ -665,10 +665,20 @@ BEGIN TRY
 
 
 		UPDATE STAGING
-		SET STAGING.dblTotalAR				= STAGING2.dblTotalAR
+		SET STAGING.dblTotalAR				=  
+											(STAGING2.dblTotalAR + ( 
+												ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
+												WHERE innerTable.intCustomerId = STAGING2.intEntityCustomerId
+												GROUP BY intAccountId),0)
+											))
 		  , STAGING.dblCreditAvailable		= STAGING2.dblCreditAvailable   
 		  , STAGING.dblFuture				= STAGING2.dblFuture     
-		  , STAGING.dbl0Days				= STAGING2.dbl0Days 
+		  , STAGING.dbl0Days				= 
+											(STAGING2.dbl0Days + ( 
+												ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
+												WHERE innerTable.intCustomerId = STAGING2.intEntityCustomerId
+												GROUP BY intAccountId),0)
+											))    
 		  , STAGING.dbl10Days				= STAGING2.dbl10Days     
 		  , STAGING.dbl30Days				= STAGING2.dbl30Days     
 		  , STAGING.dbl60Days				= STAGING2.dbl60Days     
@@ -710,7 +720,29 @@ BEGIN TRY
 		  ,dtmAsOfDate
 		  from tblARCustomerStatementStagingTable
 		  where dblTotalAR IS NOT NULL
-		   AND intEntityCustomerId = STAGING.intEntityCustomerId		 
+		   AND intEntityCustomerId = STAGING.intEntityCustomerId
+		  group by 
+		  dblTotalAR 
+		  ,intEntityCustomerId
+		  ,dblCreditAvailable 
+		  ,dblFuture 
+		  ,dbl0Days 
+		  ,dbl10Days 
+		  ,dbl30Days 
+		  ,dbl60Days 
+		  ,dbl90Days 
+		  ,dbl91Days 
+		  ,dblCredits 
+		  ,dblPrepayments
+		  ,strAccountStatusCode 
+		  ,strFullAddress
+		  ,strStatementFooterComment 
+		  ,strCompanyName 
+		  ,strCompanyAddress 
+		  ,dblCreditLimit
+		  ,strCustomerName
+		  ,strCustomerNumber
+		  ,dtmAsOfDate
 		) STAGING2
 		WHERE STAGING.dblTotalAR IS NULL
 
