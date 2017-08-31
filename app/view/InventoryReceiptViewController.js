@@ -2618,7 +2618,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             totalNet = totalGross;
 
             record.set('dblGross', totalGross);
+            record.set('dblGrossBeforeEdit', totalGross);
             record.set('dblNet', totalNet);
+            record.set('dblNetBeforeEdit', totalNet);
         }
     },
 
