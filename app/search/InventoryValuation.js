@@ -120,6 +120,10 @@ Ext.define('Inventory.search.InventoryValuation', {
             case 'Invoice':
                 transactionType = 'Invoice';
                 break;
+            case 'Consume':
+            case 'Produce':
+                transactionType = 'BlendSheet';
+                break;
             default:
                 iRely.Functions.showInfoDialog('This transaction is not viewable on a screen.');
                 break;

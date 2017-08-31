@@ -431,6 +431,9 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'AccountsReceivable.view.Invoice';
                 columnName = 'strInvoiceNumber';
                 break;
+            case 'BlendSheet':
+                screenName = 'Manufacturing.view.BlendManagement';
+                columnName = 'strWorkOrderNo';
         }
 
         var filter = [];
