@@ -428,16 +428,20 @@ BEGIN
 
 	-- Initialize the Item-Owner Id.
 	SET @intItemOwnerId = NULL  
+
+	-- Get the Item-Owner id. 
 	SELECT	@intItemOwnerId = o.intItemOwnerId
-	FROM	tblICItemOwner o CROSS APPLY (
-				SELECT	TOP 1 
-						intItemOwnerId 
-				FROM	tblICItemOwner defaultOwner
-				WHERE	defaultOwner.ysnDefault = 1
-						AND defaultOwner.intOwnerId = ISNULL(@intOwnerId, defaultOwner.intOwnerId) 
-			) defaultOwner  
+	FROM	tblICItemOwner o
 	WHERE	o.intItemId = @intItemId
-			AND o.intItemOwnerId = defaultOwner.intItemOwnerId
+			AND o.intOwnerId = @intOwnerId 
+
+	-- If Item-Owner is null and @intOwnerId is null, then use the default item-owner id. 
+	SELECT	@intItemOwnerId = defaultOwner.intItemOwnerId
+	FROM	tblICItemOwner defaultOwner
+	WHERE	defaultOwner.intItemId = @intItemId
+			AND defaultOwner.ysnDefault = 1
+			AND @intItemOwnerId IS NULL 
+			AND @intOwnerId IS NULL 
 
 	-- Validate Owner Id 
 	IF (@intOwnerId IS NOT NULL) AND (@intItemOwnerId IS NULL)
