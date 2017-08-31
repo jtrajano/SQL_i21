@@ -48,7 +48,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 --FROM	dbo.tblSMStartingNumber
 --WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
 SELECT	@intStartingNumberId = intStartingNumberId FROM	dbo.tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
-EXEC uspSMGetStartingNumber @intStartingNumberId, strTransactionId
+EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUTPUT
 IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
 -- Increment the next transaction number
