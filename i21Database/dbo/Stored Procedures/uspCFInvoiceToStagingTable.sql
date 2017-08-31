@@ -383,18 +383,15 @@ BEGIN TRY
 				@strCustomerNumber = ISNULL([from],'')
 		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
 		
-		IF ISNULL(@strCustomerNumber,'') = ''
-		BEGIN
-			SET @strCustomerNumber = NULLIF(@strCustomerNumber, '')
+		SET @strCustomerNumber = NULLIF(@strCustomerNumber, '')
 
-			EXEC uspARCustomerStatementBalanceForwardReport 
-				  @dtmDateFrom = NULL			
-				, @dtmDateTo = @dtmInvoiceDate
-				, @ysnPrintZeroBalance = 1
-				, @dtmBalanceForwardDate = @dtmBalanceForwardDate
-				, @ysnPrintFromCF = 1
-				, @strCustomerNumber = @strCustomerNumber
-		END
+		EXEC uspARCustomerStatementBalanceForwardReport 
+				@dtmDateFrom = NULL			
+			, @dtmDateTo = @dtmInvoiceDate
+			, @ysnPrintZeroBalance = 1
+			, @dtmBalanceForwardDate = @dtmBalanceForwardDate
+			, @ysnPrintFromCF = 1
+			, @strCustomerNumber = @strCustomerNumber		
 
 		INSERT INTO tblARCustomerStatementStagingTable
 		(
