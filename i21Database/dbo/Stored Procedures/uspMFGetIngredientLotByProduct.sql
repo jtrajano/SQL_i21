@@ -34,6 +34,9 @@ BEGIN
 			,L.strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
+			,L.dblQty
+			,L.intItemUOMId AS intQtyUOMId
+			,U1.strUnitMeasure AS strQtyUOM
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND R.intItemId = @intItemId
@@ -65,6 +68,8 @@ BEGIN
 		JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 			AND BS.strPrimaryStatus = 'Active'
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -93,6 +98,9 @@ BEGIN
 			,NULL AS strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
+			,S.dblOnHand - S.dblUnitReserved AS dblQty
+			,IU.intItemUOMId AS intQtyUOMId
+			,U.strUnitMeasure AS strQtyUOM
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND R.intItemId = @intItemId
@@ -144,6 +152,9 @@ BEGIN
 			,L.strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
+			,L.dblQty
+			,L.intItemUOMId AS intQtyUOMId
+			,U1.strUnitMeasure AS strQtyUOM
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -174,6 +185,8 @@ BEGIN
 		JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 			AND BS.strPrimaryStatus = 'Active'
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -202,6 +215,9 @@ BEGIN
 			,NULL strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
+			,S.dblOnHand - S.dblUnitReserved AS dblQty
+			,S.intItemUOMId AS intQtyUOMId
+			,U.strUnitMeasure AS strQtyUOM
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
