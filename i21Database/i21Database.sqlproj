@@ -5648,6 +5648,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
     <Build Include="dbo\Views\vyuCCSiteHeaderSearch.sql" />
     <Build Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
