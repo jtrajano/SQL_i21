@@ -200,7 +200,7 @@ GO
 	END
 
 	/* ARRANGE USER ROLE MENUS SCREENS */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (Screens)')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (Screens) - 1730')
 	BEGIN
 		UPDATE RoleMenu SET intSort = ISNULL(MasterMenu.intSort, 0)
 		FROM tblSMUserRoleMenu RoleMenu
@@ -209,7 +209,7 @@ GO
 
 		PRINT N'ARRANGE USER ROLE MENUS (Screens)'
 		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
-		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Screens)', 'Arrange User Role Menus - Role Menu (Screens)', GETDATE())
+		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Screens) - 1730', 'Arrange User Role Menus - Role Menu (Screens) - 1730', GETDATE())
 	END
 
 	/* ARRANGE CONTACT ROLE MENUS SCREENS */
