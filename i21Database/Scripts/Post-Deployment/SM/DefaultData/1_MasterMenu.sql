@@ -5076,9 +5076,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User List (Portal)' AND strDescription = 'User List' AND strModuleName = 'System Manager' AND intParentMenuID = @AccountPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'User List (Portal)', N'System Manager', @AccountPortalParentMenuId, N'User List', N'Account', N'Screen', N'EntityManagement.view.EntityContactList?caller=', N'small-menu-account', 1, 0, 0, 1, 2, 1)
+	VALUES (N'User List (Portal)', N'System Manager', @AccountPortalParentMenuId, N'User List', N'Account', N'Screen', N'EntityManagement.controller.UserList', N'small-menu-account', 1, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'EntityManagement.view.EntityContactList?caller=' WHERE strMenuName = 'User List (Portal)' AND strDescription = 'User List' AND strModuleName = 'System Manager' AND intParentMenuID = @AccountPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'EntityManagement.controller.UserList' WHERE strMenuName = 'User List (Portal)' AND strDescription = 'User List' AND strModuleName = 'System Manager' AND intParentMenuID = @AccountPortalParentMenuId
 
 DECLARE @SMSalesUserListMenuId INT
 SELECT  @SMSalesUserListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'User List (Portal)' AND strDescription = 'User List' AND strModuleName = 'System Manager' AND intParentMenuID = @AccountPortalParentMenuId
