@@ -7,6 +7,7 @@
 
 AS
 
+
 IF OBJECT_ID('tempdb..#tempCustomer') IS NOT NULL
     DROP TABLE #tempCustomer
 IF OBJECT_ID('tempdb..##temp1') IS NOT NULL
@@ -36,7 +37,7 @@ SELECT @TempTableCreate+='['+t.strDistribution +'_strDistribution] NVARCHAR(100)
 FROM (
 SELECT DISTINCT strDistribution from #tempCustomer)t
 
-SET @TempTableCreate=LEFT(@TempTableCreate,LEN(@TempTableCreate)-1)
+SET @TempTableCreate=case when LEN(@TempTableCreate)>0 then LEFT(@TempTableCreate,LEN(@TempTableCreate)-1) else @TempTableCreate end
 SET @TempTableCreate = 'CREATE TABLE ##tblRKDailyPositionForCustomer1 ([dtmDate] datetime NULL,'+@TempTableCreate +')'
 IF OBJECT_ID('tempdb..##tblRKDailyPositionForCustomer1') IS NOT NULL
 DROP TABLE ##tblRKDailyPositionForCustomer1
@@ -78,22 +79,20 @@ BEGIN
 		BEGIN
 		IF OBJECT_ID('tempdb..##tempRunTime') IS NOT NULL
 	    DROP TABLE ##tempRunTime
-		SET @SQL1=' SELECT  @dtmDate1 dtmDate,* into ##tempRunTime FROM '+LEFT(@SQL1,LEN(@SQL1)-11)
+		SET @SQL1=' SELECT  @dtmDate1 dtmDate,* into ##tempRunTime FROM '+case when LEN(@SQL1)>0 then LEFT(@SQL1,LEN(@SQL1)-11) else @SQL1 end 
 		EXEC sp_executesql @SQL1,N'@dtmDate1 DATETIME',@dtmDate1
 	
 				SELECT @intColumn_Id=min(column_id) from tempdb.sys.columns where object_id = object_id('tempdb..##tempRunTime')
 				WHILE @intColumn_Id>0
 				BEGIN
 				 						
-					SELECT @strCumulativeNum=@strCumulativeNum+'['+name+'],' from tempdb.sys.columns where object_id = object_id('tempdb..##tempRunTime') AND  column_id=@intColumn_Id
-					--SELECT @strInsertList=@strInsertList+'['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer1' AND  ORDINAL_POSITION=@intColumn_Id
+					SELECT @strCumulativeNum=@strCumulativeNum+'['+name+'],' from tempdb.sys.columns where object_id = object_id('tempdb..##tempRunTime') AND  column_id=@intColumn_Id				
 				SELECT @intColumn_Id=min(column_id) from tempdb.sys.columns where object_id =object_id('tempdb..##tempRunTime') and column_id>@intColumn_Id
 				END
 	IF LEN(@strCumulativeNum) > 0
 	BEGIN
-				SELECT @strCumulativeNum= LEFT(@strCumulativeNum,LEN(@strCumulativeNum)-1)  
+				SELECT @strCumulativeNum= case when LEN(@strCumulativeNum)>0 then LEFT(@strCumulativeNum,LEN(@strCumulativeNum)-1) else @strCumulativeNum end   
 
-				--SELECT @strInsertList=LEFT(@strInsertList,LEN(@strInsertList)-1)  
 		DECLARE @Seq NVARCHAR(MAX)=''
 		SET @Seq = @Seq+'INSERT INTO ##tblRKDailyPositionForCustomer1 ('+@strCumulativeNum+')  SELECT '+@strCumulativeNum+' from ##tempRunTime'
  		EXEC sp_executesql @Seq
@@ -112,7 +111,7 @@ declare @SQLFinal nvarchar(max)=''
 
 select @strInsertList+='['+name+'],' from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
 select @intColCount=count(name) from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
-SELECT @strInsertList= LEFT(@strInsertList,LEN(@strInsertList)-1)  
+SELECT @strInsertList=  case when LEN(@strInsertList)>0 then LEFT(@strInsertList,LEN(@strInsertList)-1) else @strInsertList end  
 
 select @strPermtableList+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount
 SELECT @strPermtableList= LEFT(@strPermtableList,LEN(@strPermtableList)-1)  
@@ -122,5 +121,3 @@ SELECT  '+@strInsertList+'
 FROM ##tblRKDailyPositionForCustomer1 t order by dtmDate'
 
 EXEC sp_executesql @SQLFinal
-
-
