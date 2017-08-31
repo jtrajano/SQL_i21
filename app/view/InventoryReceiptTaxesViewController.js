@@ -42,7 +42,7 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colTaxGroup',
-                        width: 85,
+                        width: 90,
                         sortable: false,
                         dataIndex: 'strTaxGroup',
                         text: 'Tax Group',
@@ -51,7 +51,7 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colTaxClass',
-                        width: 85,
+                        width: 100,
                         sortable: false,
                         dataIndex: 'strTaxClass',
                         text: 'Tax Class',
@@ -60,16 +60,16 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colTaxCode',
-                        width: 85,
+                        width: 130,
                         sortable: false,
                         dataIndex: 'strTaxCode',
                         text: 'Tax Code',
-                        flex: 1.25
+                        flex: 1.5
                     },
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colCalculationMethod',
-                        width: 110,
+                        width: 120,
                         sortable: false,
                         dataIndex: 'strCalculationMethod',
                         text: 'Calculation Method'
@@ -77,7 +77,7 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                     {
                         xtype: 'numbercolumn',
                         itemId: 'colRate',
-                        width: 65,
+                        width: 50,
                         align: 'right',
                         format: '0,000.00####',
                         dataIndex: 'dblRate',
@@ -86,7 +86,7 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                     {
                         xtype: 'numbercolumn',
                         itemId: 'colTax',
-                        width: 65,
+                        width: 80,
                         align: 'right',
                         format: '0,000.00####',
                         dataIndex: 'dblTax',
@@ -110,6 +110,9 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
         btnUndo.setHidden(true);
         btnInsert.setHidden(true);
         btnDelete.setHidden(true);
+
+        win.width = 600;
+        win.minWidth = 600;
         win.show();
 
         var context = me.setupContext();
