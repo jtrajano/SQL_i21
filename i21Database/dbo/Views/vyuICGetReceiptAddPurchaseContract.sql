@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
+﻿CREATE  VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
 AS
 
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intLineNo) AS INT)
@@ -119,18 +119,18 @@ FROM (
 		, strSubLocationName		= strSubLocationName
 		, intStorageLocationId		= intStorageLocationId
 		, strStorageLocationName	= strStorageLocationName
-		, intOrderUOMId				= ItemUOM.intItemUOMId
-		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
-		, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
-		, intItemUOMId				= ItemUOM.intItemUOMId
-		, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
-		, strUnitType				= ItemUnitMeasure.strUnitType
+		, intOrderUOMId				= BundleItemUOM.intItemUOMId
+		, strOrderUOM				= BundleItemUnitMeasure.strUnitMeasure
+		, dblOrderUOMConvFactor		= BundleItemUOM.dblUnitQty
+		, intItemUOMId				= dbo.fnGetMatchingItemUOMId(BasketItem.intItemId, BundleItemUOM.intItemUOMId)
+		, strUnitMeasure			= BundleItemUnitMeasure.strUnitMeasure
+		, strUnitType				= BundleItemUnitMeasure.strUnitType
 		-- Gross/Net UOM -----------
 		, intWeightUOMId			= BasketUOM.intItemUOMId
 		, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure
 		-- Conversion factor -------
-		, dblItemUOMConvFactor		= ItemUOM.dblUnitQty
-		, dblWeightUOMConvFactor	= GrossNetUOM.dblUnitQty
+		, dblItemUOMConvFactor		= BundleItemUOM.dblUnitQty
+		, dblWeightUOMConvFactor	= BasketUOM.dblUnitQty
 		-- Cost UOM ----------------
 		, intCostUOMId				= ContractView.intSeqPriceUOMId
 		, strCostUOM				= ContractView.strSeqPriceUOM
@@ -146,8 +146,8 @@ FROM (
 		, ysnSubCurrency			= CAST(ContractView.ysnSubCurrency AS BIT)
 		, intCurrencyId				= dbo.fnICGetCurrency(ContractView.intContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
 		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(ContractView.intContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
-		, dblGross					= CAST(0 AS NUMERIC(38, 20))-- There is no gross from contracts.
-		, dblNet					= CAST(ContractView.dblAvailableNetWeight AS NUMERIC(38, 20))
+		, dblGross					= CAST(dbo.fnCalculateQtyBetweenUOM(BundleItemUOM.intItemUOMId, BasketUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20))-- There is no gross from contracts.
+		, dblNet					= CAST(dbo.fnCalculateQtyBetweenUOM(BundleItemUOM.intItemUOMId, BasketUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20))
 		, intForexRateTypeId		= ContractView.intRateTypeId
 		, strForexRateType			= ContractView.strCurrencyExchangeRateType
 		, dblForexRate				= ContractView.dblRate
@@ -157,11 +157,13 @@ FROM (
 		, strBundledItemDescription = ContractView.strItemDescription
 		, ysnIsBasket 				= ContractView.ysnIsBasket
 	FROM vyuCTContractDetailView ContractView
-		LEFT JOIN dbo.tblICItemUOM ItemUOM ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
-		LEFT JOIN tblICItemBundle BundleItem ON BundleItem.intItemId = ContractView.intItemId
+		--LEFT JOIN dbo.tblICItemUOM ItemUOM ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
+		INNER JOIN tblICItemBundle BundleItem ON BundleItem.intItemId = ContractView.intItemId
 		LEFT JOIN tblICItem BasketItem ON BasketItem.intItemId = BundleItem.intBundleItemId
-		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		--LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN dbo.tblICItemUOM GrossNetUOM ON ContractView.intNetWeightUOMId = GrossNetUOM.intItemUOMId
+		LEFT JOIN dbo.tblICItemUOM BundleItemUOM ON ContractView.intItemUOMId = BundleItemUOM.intItemUOMId
+		LEFT JOIN dbo.tblICUnitMeasure BundleItemUnitMeasure ON BundleItemUnitMeasure.intUnitMeasureId = BundleItemUOM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM BasketUOM ON BasketUOM.intItemId = BasketItem.intItemId
 			AND BasketUOM.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
 		LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
