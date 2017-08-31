@@ -9,7 +9,7 @@
 	[ysnDepositable] BIT NULL, 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTPaymentOption] PRIMARY KEY CLUSTERED ([intPaymentOptionId]), 
-    CONSTRAINT [AK_tblSTPaymentOption_intStoreId_strPaymentOptionId] UNIQUE NONCLUSTERED ([intStoreId],[strPaymentOption],[strPaymentOptionId]), 
+    --CONSTRAINT [AK_tblSTPaymentOption_intStoreId_strPaymentOptionId] UNIQUE NONCLUSTERED ([intStoreId],[strPaymentOption],[strPaymentOptionId]), 
 	CONSTRAINT [FK_tblSTPaymentOption_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]),
-    CONSTRAINT [FK_tblSTPaymentOption_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
+    CONSTRAINT [FK_tblSTPaymentOption_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
  );

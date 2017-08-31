@@ -48,6 +48,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql
+:r .\SM\1730_PortalMenus.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
 :r .\SM\1720_Statement_Footer_To_Report.sql
@@ -55,7 +56,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1730_EntityFavoriteMenu.sql
 :r .\SM\1730_UpdateTicketManagementMenus.sql
 :r .\SM\1730_UpdatePayrollMenus.sql
-:r .\SM\1730_PortalMenus.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
