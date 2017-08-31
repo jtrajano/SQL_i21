@@ -67,7 +67,44 @@ IF ISNULL(@InvoiceIds, '') <> ''
 					INNER JOIN @BudgetToForgive SCI ON CB.intCustomerBudgetId = SCI.intBudgetId
 				END
 
-			INSERT INTO tblGLDetail
+			INSERT INTO tblGLDetail (
+				   intCompanyId					
+				 , dtmDate						
+				 , strBatchId					
+				 , intAccountId					
+				 , dblDebit						
+				 , dblCredit					
+				 , dblDebitUnit					
+				 , dblCreditUnit				
+				 , strDescription				
+				 , strCode						
+				 , strReference					
+				 , intCurrencyId				
+				 , dblExchangeRate				
+				 , dtmDateEntered				
+				 , dtmTransactionDate			
+				 , strJournalLineDescription	
+				 , intJournalLineNo				
+				 , ysnIsUnposted				
+				 , intUserId					
+				 , intEntityId					
+				 , strTransactionId				
+				 , intTransactionId				
+				 , strTransactionType			
+				 , strTransactionForm			
+				 , strModuleName				
+				 , intConcurrencyId				
+				 , dblDebitForeign				
+				 , dblDebitReport				
+				 , dblCreditForeign				
+				 , dblCreditReport				
+				 , dblReportingRate				
+				 , dblForeignRate				
+				 , intReconciledId				
+				 , dtmReconciled				
+				 , ysnReconciled				
+				 , ysnRevalued					
+			)
 			SELECT intCompanyId					= GL.intCompanyId
 				 , dtmDate						= GETDATE()
 				 , strBatchId					= GL.strBatchId
