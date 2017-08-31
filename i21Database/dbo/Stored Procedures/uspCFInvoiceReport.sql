@@ -285,7 +285,7 @@ BEGIN
 		)
 
 		---------GET DISTINCT CARD ID---------
-		SET @tblCFTempTableQuery = 'SELECT DISTINCT intAccountId FROM vyuCFInvoiceReport ' + @whereClause
+		SET @tblCFTempTableQuery = 'SELECT DISTINCT ISNULL(intAccountId,0) FROM vyuCFInvoiceReport ' + @whereClause
 
 		INSERT INTO  @tblCFTableCardIds (intAccountId)
 		EXEC (@tblCFTempTableQuery)
