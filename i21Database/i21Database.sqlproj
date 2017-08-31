@@ -5647,6 +5647,7 @@
     <Build Include="dbo\Stored Procedures\uspARForgiveServiceChargeInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
     <Build Include="dbo\Views\vyuCCSiteHeaderSearch.sql" />
+    <Build Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
