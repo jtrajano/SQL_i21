@@ -5615,6 +5615,7 @@
     <Build Include="dbo\Stored Procedures\uspGRSettlementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
     <Build Include="dbo\Views\vyuCCSiteHeaderSearch.sql" />
+    <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

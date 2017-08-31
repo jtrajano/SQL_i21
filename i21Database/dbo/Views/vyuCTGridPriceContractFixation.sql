@@ -51,7 +51,7 @@ AS
 				CD.strContractType,
 				CD.strEntityName,
 				CD.strContractNumber,
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(BU.intCommodityUnitMeasureId, CD.intPriceCommodityUOMId ,CD.dblBasis) / 
+				dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
 				CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1
 						WHEN	CD.intBasisCurrencyId <> CD.intCurrencyId 
 						AND		CD.ysnBasisSubCurrency = 1			THEN 100 
