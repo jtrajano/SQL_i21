@@ -292,45 +292,6 @@ FROM vyuARCustomerSearch C
 			AND ysnPosted = 1
 			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 		GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid
-
-		--SELECT intInvoiceId			= PD.intInvoiceId
-		--	 , intEntityCustomerId	= P.intEntityCustomerId
-		--	 , intPaymentId			= PD.intPaymentId
-		--	 , intCompanyLocationId	= P.intLocationId
-		--	 , intTermId			= NULL
-		--	 , strInvoiceNumber		= NULL
-		--	 , strRecordNumber		= P.strRecordNumber
-		--	 , strInvoiceOriginId   = NULL
-		--	 , strBOLNumber			= NULL
-		--	 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
-		--	 , strTransactionType	= ''Payment''
-		--	 , dblInvoiceTotal		= PD.dblInvoiceTotal
-		--	 , dblBalance			= 0.00
-		--	 , dblPayment			= PD.dblPayment + PD.dblDiscount - PD.dblInterest
-		--	 , dtmDate				= P.dtmDatePaid
-		--	 , dtmDueDate			= NULL
-		--	 , dtmShipDate			= NULL
-		--	 , dtmDatePaid			= P.dtmDatePaid
-		--	 , strType				= I.strType
-		--FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-		--INNER JOIN (SELECT intPaymentId
-		--				 , intEntityCustomerId
-		--				 , intLocationId
-		--				 , strRecordNumber
-		--				 , strPaymentInfo
-		--				 , dtmDatePaid
-		--			FROM dbo.tblARPayment WITH (NOLOCK)
-		--			WHERE ysnInvoicePrepayment = 0
-		--				AND ysnPosted = 1
-		--				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
-		--) P ON PD.intPaymentId = P.intPaymentId
-		--INNER JOIN (
-		--	SELECT intInvoiceId
-		--			, strType
-		--	FROM dbo.tblARInvoice WITH (NOLOCK)
-		--	WHERE ysnPosted = 1
-		--		AND strType <> ''CF Tran''
-		--) I	ON PD.intInvoiceId = I.intInvoiceId	
 	) TRANSACTIONS ON TRANSACTIONS.intEntityCustomerId = C.intEntityId
 	
 	LEFT JOIN (
@@ -564,11 +525,11 @@ INNER JOIN (
 DELETE FROM @temp_statement_table WHERE strTransactionType IS NULL
 
 DELETE FROM @temp_statement_table
-WHERE intInvoiceId IN (SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) WHERE strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
+WHERE intInvoiceId IN (SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) WHERE strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo'))
 
 IF @ysnPrintFromCFLocal = 1
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Customer Prepayment', 'Overpayment')
+		DELETE FROM @temp_statement_table WHERE strTransactionType = 'Overpayment'
 		DELETE FROM @temp_statement_table WHERE strTransactionType = 'Payment' AND dblPayment = 0
 		UPDATE @temp_statement_table SET strTransactionType = 'Payment' WHERE strTransactionType = 'Customer Prepayment' AND strType <> 'CF Tran'
 		UPDATE @temp_statement_table SET strTransactionType = 'Invoice' WHERE strTransactionType = 'Debit Memo' AND strType <> 'CF Tran'
