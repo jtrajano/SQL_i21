@@ -4,5 +4,12 @@ SELECT
  E.*
 ,C.strCustomerNumber
 ,C.strName AS 'strCustomerName'
-FROM tblAREmailTemplate E
-	INNER JOIN vyuCFCustomerEntity C ON E.intEntityCustomerId = C.intEntityId
+FROM 
+	tblAREmailTemplate E WITH(NOLOCK)
+LEFT JOIN 
+	(SELECT 
+		intEntityId,
+		strCustomerNumber,
+		strName
+	 FROM 
+		vyuCFCustomerEntity WITH (NOLOCK)) C ON E.intEntityCustomerId = C.intEntityId
