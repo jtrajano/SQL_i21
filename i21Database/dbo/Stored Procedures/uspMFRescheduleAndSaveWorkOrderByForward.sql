@@ -58,6 +58,7 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@strWorkOrderNo NVARCHAR(50)
 		,@strCellName NVARCHAR(50)
+		,@strName NVARCHAR(50)
 		,@strPackName NVARCHAR(50)
 		,@intItemId INT
 		,@strItemNo NVARCHAR(50)
@@ -2024,13 +2025,27 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			IF @intManufacturingCellId IS NOT NULL
+			BEGIN
+				SELECT @strCellName = strCellName
+				FROM tblMFManufacturingCell
+				WHERE intManufacturingCellId = @intManufacturingCellId
+			END
+
+			IF @intCalendarId IS NOT NULL
+			BEGIN
+				SELECT @strName = strName
+				FROM tblMFScheduleCalendar
+				WHERE intCalendarId = @intCalendarId
+			END
+
 			SELECT 0 AS intScheduleId
 				,'' AS strScheduleNo
 				,@dtmCurrentDateTime AS dtmScheduleDate
 				,@intCalendarId AS intCalendarId
-				,'' AS strName
+				,@strName AS strName
 				,@intManufacturingCellId AS intManufacturingCellId
-				,'' AS strCellName
+				,@strCellName AS strCellName
 				,@ysnStandard AS ysnStandard
 				,@intLocationId AS intLocationId
 				,0 AS intConcurrencyId
