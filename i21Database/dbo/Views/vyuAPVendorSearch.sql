@@ -20,7 +20,7 @@ SELECT
 	isnull(d.strMobile,'') strMobile,
 	isnull(e.strTimezone,'') strTimezone,
 	isnull(b.strWebsite,'') strWebsite,
-	isnull(d.strPhone,'') strPhone,
+	isnull(pn.strPhone,'') strPhone,
 	isnull(d.strName,'') strContactName,
 	isnull(b.strEntityNo,'') strEntityNo,
 	isnull(e.strAddress,'') strAddress,
@@ -87,6 +87,8 @@ SELECT
 		on ad.intEntityLocationId = a.intBillToId
 	left join tblEMEntityLocation ae
 		on ae.intEntityLocationId = a.intShipFromId
+	left join tblEMEntityPhoneNumber pn
+		on pn.intEntityId = d.intEntityId
 
 	
 
