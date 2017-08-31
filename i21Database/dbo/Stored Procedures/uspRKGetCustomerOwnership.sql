@@ -3,23 +3,17 @@
 	   @dtmToTransactionDate datetime = null,
 	   @intCommodityId int =  null,
 	   @intItemId int= null
+
 AS
 
+IF OBJECT_ID('tempdb..#tempCustomer') IS NOT NULL
+    DROP TABLE #tempCustomer
+IF OBJECT_ID('tempdb..##temp1') IS NOT NULL
+    DROP TABLE ##temp1
+IF OBJECT_ID('tempdb..#final') IS NOT NULL
+    DROP TABLE #final
+
 SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet into #tempCustomer FROM (
-  SELECT dtmDate,strStorageTypeDescription,0.0 dblIn,0.0 dblOut,sum(dblInQty)-sum(dblOutQty) dblNet 
-   FROM(			
-		SELECT '1900-01-01' dtmDate,strStorageTypeDescription,CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
-													  CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty  
-		FROM tblSCTicket st
-		JOIN tblICItem i on i.intItemId=st.intItemId 
-		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
-		WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110)	< convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) and i.intCommodityId= @intCommodityId
-		AND i.intItemId= CASE WHEN ISNULL(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		AND gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer'
-)t     GROUP BY  strStorageTypeDescription,dtmDate
-
- UNION
-
    SELECT dtmDate,strStorageTypeDescription,sum(dblInQty) dblIn,sum(dblOutQty) dblOut,sum(dblInQty)-sum(dblOutQty) dblNet FROM(			
 		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
 																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty  				
@@ -33,7 +27,19 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer'
 		  )t     GROUP BY  dtmDate,strStorageTypeDescription
 ) t1
+declare @TempTableCreate nvarchar(max)=''
+SELECT @TempTableCreate+='['+t.strDistribution +'_strDistribution] NVARCHAR(100)  COLLATE Latin1_General_CI_AS  NULL,'+
+	   '['+t.strDistribution +'_In]  NUMERIC(18, 6) NULL,'+
+	   '['+t.strDistribution +'_Out]  NUMERIC(18, 6) NULL,'+
+	   '['+t.strDistribution +'_Net]  NUMERIC(18, 6) NULL,'  
+FROM (
+SELECT DISTINCT strDistribution from #tempCustomer)t
 
+SET @TempTableCreate=LEFT(@TempTableCreate,LEN(@TempTableCreate)-1)
+SET @TempTableCreate = 'CREATE TABLE ##tblRKDailyPositionForCustomer1 ([dtmDate] datetime NULL,'+@TempTableCreate +')'
+IF OBJECT_ID('tempdb..##tblRKDailyPositionForCustomer1') IS NOT NULL
+DROP TABLE ##tblRKDailyPositionForCustomer1
+EXEC sp_executesql @TempTableCreate
 DELETE FROM tblRKDailyPositionForCustomer
 
 DECLARE @FinalResult TABLE
@@ -51,16 +57,19 @@ SELECT DISTINCT @mRowNumber1=Min(intRowNum) FROM @FinalResult
 WHILE @mRowNumber1 > 0
 BEGIN
 	DECLARE @strCumulativeNum NVARCHAR(MAX)=''
-	DECLARE @strInsertList NVARCHAR(MAX)=''
 	DECLARE @intColumn_Id INT
+	DECLARE @Type nvarchar(max) =''
 	SELECT @dtmDate1=dtmDate FROM @FinalResult WHERE intRowNum=@mRowNumber1
-
+	
 		SET @SQL1 =''
 		DECLARE @intCount int =0
 		SELECT @intCount=min(intRowNum) FROM #tempCustomer WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
 		WHILE @intCount > 0
 		BEGIN
-		SET @SQL1 = @SQL1+'(SELECT strDistribution as '''+convert(nvarchar(100),@intCount)+'-strDistribution'+''', dblIn as '''+convert(nvarchar(100),@intCount)+'-In'+''',dblOut as '''+convert(nvarchar(100),@intCount)+'-Out'+''',dblNet as '''+convert(nvarchar(100),@intCount)+'-Net'+''' FROM #tempCustomer WHERE intRowNum= ' + convert(nvarchar,@intCount) +') t' + convert(nvarchar(100),@intCount) + ' CROSS JOIN'
+
+		select @Type=strDistribution from #tempCustomer where CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110)) and intRowNum=@intCount
+		SET @SQL1 = @SQL1+'(SELECT strDistribution as '''+convert(nvarchar(100),@Type)+'_strDistribution'+''', dblIn as '''+convert(nvarchar(100),@Type)+'_In'+''',dblOut as '''+convert(nvarchar(100),@Type)+'_Out'+''',dblNet as '''+convert(nvarchar(100),@Type)+'_Net'+''' FROM #tempCustomer WHERE intRowNum= ' + convert(nvarchar,@intCount) +') t' + convert(nvarchar(100),@intCount) + ' CROSS JOIN'
+		
 		SELECT @intCount = MIN(intRowNum) FROM #tempCustomer WHERE intRowNum > @intCount and CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
 		END
 
@@ -68,22 +77,24 @@ BEGIN
 		BEGIN
 		IF OBJECT_ID('tempdb..##tempRunTime') IS NOT NULL
 	    DROP TABLE ##tempRunTime
-		SET @SQL1=' SELECT  @dtmDate1 dtmDate,* into ##tempRunTime  FROM '+LEFT(@SQL1,LEN(@SQL1)-11)
+		SET @SQL1=' SELECT  @dtmDate1 dtmDate,* into ##tempRunTime FROM '+LEFT(@SQL1,LEN(@SQL1)-11)
 		EXEC sp_executesql @SQL1,N'@dtmDate1 DATETIME',@dtmDate1
-
+	
 				SELECT @intColumn_Id=min(column_id) from tempdb.sys.columns where object_id = object_id('tempdb..##tempRunTime')
 				WHILE @intColumn_Id>0
-				BEGIN							
+				BEGIN
+				 						
 					SELECT @strCumulativeNum=@strCumulativeNum+'['+name+'],' from tempdb.sys.columns where object_id = object_id('tempdb..##tempRunTime') AND  column_id=@intColumn_Id
-					SELECT @strInsertList=@strInsertList+'['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' AND  ORDINAL_POSITION=@intColumn_Id
+					--SELECT @strInsertList=@strInsertList+'['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer1' AND  ORDINAL_POSITION=@intColumn_Id
 				SELECT @intColumn_Id=min(column_id) from tempdb.sys.columns where object_id =object_id('tempdb..##tempRunTime') and column_id>@intColumn_Id
 				END
 	IF LEN(@strCumulativeNum) > 0
 	BEGIN
-				SELECT @strCumulativeNum= LEFT(@strCumulativeNum,LEN(@strCumulativeNum)-1)  	
-				SELECT @strInsertList=LEFT(@strInsertList,LEN(@strInsertList)-1)  
+				SELECT @strCumulativeNum= LEFT(@strCumulativeNum,LEN(@strCumulativeNum)-1)  
+
+				--SELECT @strInsertList=LEFT(@strInsertList,LEN(@strInsertList)-1)  
 		DECLARE @Seq NVARCHAR(MAX)=''
-		SET @Seq = @Seq+'INSERT INTO tblRKDailyPositionForCustomer ('+@strInsertList+')  SELECT '+@strCumulativeNum+' from ##tempRunTime'
+		SET @Seq = @Seq+'INSERT INTO ##tblRKDailyPositionForCustomer1 ('+@strCumulativeNum+')  SELECT '+@strCumulativeNum+' from ##tempRunTime'
  		EXEC sp_executesql @Seq
 
 	END
@@ -91,3 +102,22 @@ END
 
 SELECT @mRowNumber1 = MIN(intRowNum) FROM @FinalResult	WHERE intRowNum > @mRowNumber1
 END
+
+DECLARE @intColumn_Id1  int
+DECLARE @strInsertList NVARCHAR(MAX)=''
+declare @strPermtableList NVARCHAR(MAX)=''
+declare @intColCount int
+declare @SQLFinal nvarchar(max)=''
+
+select @strInsertList+='['+name+'],' from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
+select @intColCount=count(name) from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
+SELECT @strInsertList= LEFT(@strInsertList,LEN(@strInsertList)-1)  
+
+select @strPermtableList+='['+COLUMN_NAME+'],' from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME ='tblRKDailyPositionForCustomer' and ORDINAL_POSITION<=@intColCount
+SELECT @strPermtableList= LEFT(@strPermtableList,LEN(@strPermtableList)-1)  
+set @SQLFinal='
+INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableList+')
+SELECT  '+@strInsertList+'
+FROM ##tblRKDailyPositionForCustomer1 t order by dtmDate'
+
+EXEC sp_executesql @SQLFinal
