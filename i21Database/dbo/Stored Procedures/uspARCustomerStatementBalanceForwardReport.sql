@@ -184,8 +184,8 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , strSalespersonName  = C.strSalesPersonName
 	  , strAccountStatusCode = STATUSCODES.strAccountStatusCode
 	  , strLocationName		= CL.strLocationName
-	  , strFullAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-	  , strStatementFooterComment = dbo.fnARGetFooterComment(TRANSACTIONS.intCompanyLocationId, TRANSACTIONS.intEntityCustomerId, ''Statement Footer'')
+	  , strFullAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
+	  , strStatementFooterComment = dbo.fnARGetFooterComment(NULL, TRANSACTIONS.intEntityCustomerId, ''Statement Footer'')
 	  , strCompanyName		= COMPANY.strCompanyName
 	  , strCompanyAddress	= COMPANY.strCompanyAddress
 	  , dblARBalance		= C.dblARBalance
@@ -358,7 +358,7 @@ IF @ysnIncludeBudget = 1
 				  , strAccountStatusCode		= STATUSCODES.strAccountStatusCode
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
-				  , strStatementFooterComment	= NULL
+				  , strStatementFooterComment	= dbo.fnARGetFooterComment(NULL, CB.intEntityCustomerId, ''Statement Footer'')
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= CUST.dblARBalance
@@ -439,6 +439,7 @@ INSERT INTO @temp_statement_table(
 	, dblBalance
 	, dblPayment
 	, strFullAddress
+	, strStatementFooterComment
 	, strCompanyAddress
 	, strCompanyName
 )
@@ -454,6 +455,7 @@ SELECT DISTINCT
 	, ISNULL(BALANCEFORWARD.dblTotalAR, 0)
 	, 0
 	, STATEMENTFORWARD.strFullAddress
+	, STATEMENTFORWARD.strStatementFooterComment
 	, STATEMENTFORWARD.strCompanyAddress
 	, STATEMENTFORWARD.strCompanyName
 FROM @temp_statement_table STATEMENTFORWARD

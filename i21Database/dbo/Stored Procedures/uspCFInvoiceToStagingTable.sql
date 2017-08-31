@@ -657,7 +657,8 @@ BEGIN TRY
 		  , STAGING.dblCredits				= STAGING2.dblCredits     
 		  , STAGING.dblPrepayments			= STAGING2.dblPrepayments    
 		  , STAGING.strAccountStatusCode    = STAGING2.strAccountStatusCode  
-		  , STAGING.strFullAddress			= STAGING2.strFullAddress    
+		  , STAGING.strFullAddress			= STAGING2.strFullAddress
+		  , STAGING.strStatementFooterComment = STAGING2.strStatementFooterComment    
 		  , STAGING.strCompanyName			= STAGING2.strCompanyName    
 		  , STAGING.strCompanyAddress		= STAGING2.strCompanyAddress + CHAR(13) + @strWebsite
 		  , STAGING.dblCreditLimit			= STAGING2.dblCreditLimit    
@@ -680,6 +681,7 @@ BEGIN TRY
 		  ,dblPrepayments
 		  ,strAccountStatusCode 
 		  ,strFullAddress 
+		  ,strStatementFooterComment
 		  ,strCompanyName 
 		  ,strCompanyAddress 
 		  ,dblCreditLimit
@@ -703,7 +705,8 @@ BEGIN TRY
 		  ,dblCredits 
 		  ,dblPrepayments
 		  ,strAccountStatusCode 
-		  ,strFullAddress 
+		  ,strFullAddress
+		  ,strStatementFooterComment 
 		  ,strCompanyName 
 		  ,strCompanyAddress 
 		  ,dblCreditLimit
