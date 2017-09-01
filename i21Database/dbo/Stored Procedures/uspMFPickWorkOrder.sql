@@ -889,7 +889,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
@@ -1012,7 +1012,7 @@ BEGIN TRY
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -1140,7 +1140,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
@@ -1263,7 +1263,7 @@ BEGIN TRY
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -1390,7 +1390,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -1706,7 +1706,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId

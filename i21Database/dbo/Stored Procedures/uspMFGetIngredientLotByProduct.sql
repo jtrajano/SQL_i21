@@ -62,7 +62,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = SL.intRestrictionId
+		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId,R1.intRestrictionId)
 			AND R1.strInternalCode = 'STOCK'
 		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -179,7 +179,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = SL.intRestrictionId
+		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId,R1.intRestrictionId)
 			AND R1.strInternalCode = 'STOCK'
 		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
