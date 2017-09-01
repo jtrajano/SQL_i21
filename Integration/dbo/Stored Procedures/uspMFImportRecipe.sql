@@ -12,7 +12,7 @@ BEGIN
 	--================================================
 
 	DECLARE @cnt INT = 1
-	DECLARE @SQLCMD NVARCHAR(3000)
+	DECLARE @SQLCMD NVARCHAR(4000)
 	DECLARE @EntityId int
 	SET @EntityId = ISNULL((SELECT  intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @UserId),@UserId)
 
@@ -93,9 +93,11 @@ BEGIN
 					   ,(CASE WHEN ISDATE(FRM.ptfrm_last_chg_rev_dt) = 1 THEN CONVERT(DATE, CAST(FRM.ptfrm_last_chg_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)--[dtmLastModified]
 					   ,1--[intConcurrencyId]
 			FROM ptfrmmst  FRM
+			INNER JOIN ptitmmst OITM ON OITM.ptitm_itm_no = FRM.ptfrm_itm_no AND OITM.ptitm_loc_no = FRM.ptfrm_loc_no				
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRM.ptfrm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRM.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId
+			INNER JOIN tblICUnitMeasure UM ON Upper(UM.strSymbol) COLLATE SQL_Latin1_General_CP1_CS_AS = Upper(OITM.ptitm_unit) COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId
 			WHERE NOT EXISTS (select * from tblMFRecipe WHERE intItemId = ITM.intItemId AND intLocationId = LOC.intCompanyLocationId )			
 		 end
 		
@@ -166,10 +168,12 @@ BEGIN
 			           ,(CASE WHEN ISDATE(FRMI.ptfrm_last_chg_rev_dt) = 1 THEN CONVERT(DATE, CAST(FRMI.ptfrm_last_chg_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)
 			           ,1          
 			FROM ptfrmmst FRMI
+			INNER JOIN ptitmmst OITM ON OITM.ptitm_itm_no = FRMI.ptfrm_itm_no AND OITM.ptitm_loc_no = FRMI.ptfrm_loc_no					
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblMFRecipe RCP ON RCP.intItemId = ITM.intItemId AND RCP.intLocationId = LOC.intCompanyLocationId
-			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId 
+			INNER JOIN tblICUnitMeasure UM ON Upper(UM.strSymbol) COLLATE SQL_Latin1_General_CP1_CS_AS = Upper(OITM.ptitm_unit) COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId
 			WHERE NOT EXISTS (SELECT * FROM tblMFRecipeItem WHERE intRecipeId = RCP.intRecipeId )			
 
 			--Insert all ingredient items 
@@ -231,13 +235,15 @@ BEGIN
 					   ,(CASE WHEN ISDATE(FRMI.ptfrm_last_chg_rev_dt) = 1 THEN CONVERT(DATE, CAST(FRMI.ptfrm_last_chg_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)
 					   ,1          
 			FROM ptfrmmst FRMI
+			INNER JOIN ptitmmst OITM ON OITM.ptitm_itm_no = FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+'
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblICItem ITM1 ON ITM1.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblMFRecipe RCP ON RCP.intItemId = ITM.intItemId AND RCP.intLocationId = LOC.intCompanyLocationId
-			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM1.intItemId   
+			INNER JOIN tblICUnitMeasure UM ON Upper(UM.strSymbol) COLLATE SQL_Latin1_General_CP1_CS_AS = Upper(OITM.ptitm_unit) COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId  
 			WHERE FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL AND NOT EXISTS (SELECT * FROM tblMFRecipeItem WHERE intRecipeId = RCP.intRecipeId  AND intItemId = ITM1.intItemId )' 
-
+			
 			   EXEC (@SQLCMD)
 
 			   SET @cnt = @cnt + 1;
@@ -269,6 +275,3 @@ BEGIN
 	END
 		
 END	
-
-
-
