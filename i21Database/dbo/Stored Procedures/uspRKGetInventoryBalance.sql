@@ -87,7 +87,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer')a
 
 union
-SELECT dtmDate,strShipmentNumber tranShipmentNumber,dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+SELECT dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
 		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty from(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty,r.strShipmentNumber  
 FROM tblSCTicket st
