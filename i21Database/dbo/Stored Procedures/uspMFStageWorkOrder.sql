@@ -503,7 +503,8 @@ BEGIN TRY
 			PRINT 'Call Lot Adjust routine.'
 		END
 
-		IF @dblNewWeight % @dblWeightPerQty > 0
+		IF @dblWeightPerQty = 0
+			OR @dblNewWeight % @dblWeightPerQty > 0
 		BEGIN
 			SELECT @dblAdjustByQuantity = - @dblNewWeight
 				,@intAdjustItemUOMId = @intInputWeightUOMId
