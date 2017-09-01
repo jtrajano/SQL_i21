@@ -6,7 +6,7 @@ SELECT L.intLotId
 	,L.intLocationId
 FROM tblICLot L
 JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-JOIN tblICRestriction R1 ON R1.intRestrictionId = SL.intRestrictionId
+JOIN tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId,R1.intRestrictionId)
 	AND R1.strInternalCode = 'STOCK'
 WHERE L.intLotStatusId = 1 -- Active
 	AND L.dtmExpiryDate >= GetDate()

@@ -1300,9 +1300,11 @@ BEGIN TRY
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intInputItemId
-			AND RI.intWorkOrderId = TR.intWorkOrderId
-		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
+			AND RS.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
+			AND RI.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
 			AND R.intWorkOrderId = TR.intWorkOrderId
 			AND R.intRecipeId = RI.intRecipeId
 		WHERE strTransactionType IN (
@@ -1373,9 +1375,11 @@ BEGIN TRY
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intInputItemId
-			AND RI.intWorkOrderId = TR.intWorkOrderId
-		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
+			AND RS.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
+			AND RI.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
 			AND R.intWorkOrderId = TR.intWorkOrderId
 			AND R.intRecipeId = RI.intRecipeId
 		WHERE strTransactionType IN (

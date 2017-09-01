@@ -592,7 +592,7 @@ BEGIN TRY
 			SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -682,7 +682,7 @@ BEGIN TRY
 					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
 					FROM dbo.tblICLot L
 					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+					JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 						AND R.strInternalCode = 'STOCK'
 					JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 					JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
