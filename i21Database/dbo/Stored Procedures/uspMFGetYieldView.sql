@@ -51,6 +51,12 @@ BEGIN TRY
 		,@intPackagingCategoryId INT
 		,@intCategoryId INT
 		,@intOwnerId INT
+		,@intItemUOMId int
+		,@intInputItemUOMId int
+		,@intFromUnitMeasureId int
+		,@intToUnitMeasureId int
+		,@dblConversionToStock NUMERIC(18, 6)
+
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT
 		,dtmPlannedDate DATETIME
@@ -495,36 +501,42 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
 			,CASE 
 				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST(((Select Sum(dblOutputQuantity) from tblMFProductionSummary PS Where PS.intWorkOrderId=W.intWorkOrderId and PS.intItemTypeId in (2,4))
-									 - Isnull((
-											SELECT Sum(WP.dblPhysicalCount)
+					THEN CEILING(CAST(
+						(Isnull((
+											SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+											Else WP.dblQuantity End)
 											FROM tblMFWorkOrderProducedLot WP
-											WHERE WP.ysnFillPartialPallet = 1
+											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+											WHERE WP.ysnFillPartialPallet =0
 												AND WP.ysnProductionReversed = 0
 												AND WP.intWorkOrderId = W.intWorkOrderId
 											), 0)
-									) * RI.dblCalculatedQuantity / (
+									) 
+									* RI.dblCalculatedQuantity / (
 									CASE 
 										WHEN R.dblQuantity = 0
 											THEN 1
 										ELSE R.dblQuantity
 										END
 									) AS NUMERIC(18, 6)))
-				ELSE CAST((
-							(Select Sum(dblOutputQuantity) from tblMFProductionSummary PS Where PS.intWorkOrderId=W.intWorkOrderId and PS.intItemTypeId in (2,4)) - Isnull((
-									SELECT Sum(WP.dblPhysicalCount)
-									FROM tblMFWorkOrderProducedLot WP
-									WHERE WP.ysnFillPartialPallet = 1
-										AND WP.ysnProductionReversed = 0
-										AND WP.intWorkOrderId = W.intWorkOrderId
-									), 0)
-							) * RI.dblCalculatedQuantity / (
-							CASE 
-								WHEN R.dblQuantity = 0
-									THEN 1
-								ELSE R.dblQuantity
-								END
-							) AS NUMERIC(18, 6))
+				ELSE CAST(
+						(Isnull((
+											SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+											Else WP.dblQuantity End)
+											FROM tblMFWorkOrderProducedLot WP
+											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+											WHERE WP.ysnFillPartialPallet =0
+												AND WP.ysnProductionReversed = 0
+												AND WP.intWorkOrderId = W.intWorkOrderId
+											), 0)
+									) 
+									* RI.dblCalculatedQuantity / (
+									CASE 
+										WHEN R.dblQuantity = 0
+											THEN 1
+										ELSE R.dblQuantity
+										END
+									) AS NUMERIC(18, 6))
 				END AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
@@ -537,10 +549,12 @@ BEGIN TRY
 		INTO ##tblMFInputItemYield
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = TR.intItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intInputItemId
+		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
+			AND RS.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
 			AND RI.intWorkOrderId = W.intWorkOrderId
-		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
+		JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
 			AND R.intWorkOrderId = W.intWorkOrderId
 			AND R.intRecipeId = RI.intRecipeId
 		WHERE strTransactionType IN (
@@ -559,48 +573,42 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
 			,CASE 
 				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST((
-									Isnull((
-											SELECT Sum(WP.dblPhysicalCount)
+					THEN CEILING(CAST(
+						(Isnull((
+											SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+											Else WP.dblQuantity End)
 											FROM tblMFWorkOrderProducedLot WP
-											WHERE WP.ysnFillPartialPallet = 1
+											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+											WHERE WP.ysnFillPartialPallet =1
 												AND WP.ysnProductionReversed = 0
 												AND WP.intWorkOrderId = W.intWorkOrderId
 											), 0)
-									) * (
-									CASE 
-										WHEN RI.ysnPartialFillConsumption = 1
-											THEN RI.dblCalculatedQuantity
-										ELSE 0
-										END
-									) / (
+									) 
+									* RI.dblCalculatedQuantity / (
 									CASE 
 										WHEN R.dblQuantity = 0
 											THEN 1
 										ELSE R.dblQuantity
 										END
 									) AS NUMERIC(18, 6)))
-				ELSE CAST((
-							Isnull((
-									SELECT Sum(WP.dblPhysicalCount)
-									FROM tblMFWorkOrderProducedLot WP
-									WHERE WP.ysnFillPartialPallet = 1
-										AND WP.ysnProductionReversed = 0
-										AND WP.intWorkOrderId = W.intWorkOrderId
-									), 0)
-							) * (
-							CASE 
-								WHEN RI.ysnPartialFillConsumption = 1
-									THEN RI.dblCalculatedQuantity
-								ELSE 0
-								END
-							) / (
-							CASE 
-								WHEN R.dblQuantity = 0
-									THEN 1
-								ELSE R.dblQuantity
-								END
-							) AS NUMERIC(18, 6))
+				ELSE CAST(
+						(Isnull((
+											SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+											Else WP.dblQuantity End)
+											FROM tblMFWorkOrderProducedLot WP
+											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+											WHERE WP.ysnFillPartialPallet =1
+												AND WP.ysnProductionReversed = 0
+												AND WP.intWorkOrderId = W.intWorkOrderId
+											), 0)
+									) 
+									* RI.dblCalculatedQuantity / (
+									CASE 
+										WHEN R.dblQuantity = 0
+											THEN 1
+										ELSE R.dblQuantity
+										END
+									) AS NUMERIC(18, 6))
 				END AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
@@ -612,8 +620,10 @@ BEGIN TRY
 			,RI.intRecipeItemTypeId
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = TR.intItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intInputItemId
+		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
+			AND RS.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
 			AND RI.intWorkOrderId = W.intWorkOrderId
 		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
 			AND R.intWorkOrderId = W.intWorkOrderId
@@ -682,6 +692,8 @@ BEGIN TRY
 					,@dblQueuedQtyAdj = NULL
 					,@dblCycleCountAdj = NULL
 					,@dblEmptyOutAdj = NULL
+					,@intInputItemUOMId=NULL
+					,@intItemUOMId=NULL
 
 				SELECT @intItemId = intItemId
 				FROM ##tblMFFinalInputItemYield
@@ -690,7 +702,7 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					SELECT @dblInput = SUM(dblQuantity)
+					SELECT @dblInput = SUM(dblQuantity),@intInputItemUOMId =MIN(intItemUOMId)
 					FROM ##tblMFTransaction
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND strTransactionType = 'Input'
@@ -705,21 +717,28 @@ BEGIN TRY
 						AND strTransactionType = 'Input'
 				END
 
-				SELECT @dblOutput = SUM(dblQuantity)
+				SELECT @dblOutput = SUM(dblQuantity),@intItemUOMId=MIN(intItemUOMId)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intInputItemId = @intInputItemId
 					AND strTransactionType = 'Output'
 
-				SELECT @dblInputCC = SUM(dblQuantity)
-				FROM ##tblMFTransaction
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND intInputItemId = CASE 
-						WHEN @intInputItemId = @intItemId
-							THEN intInputItemId
-						ELSE @intInputItemId
-						END
-					AND strTransactionType = 'dblCountQuantity'
+				IF @intInputItemId = @intItemId
+				BEGIN
+					SELECT @dblInputCC = SUM(dblQuantity)
+					FROM ##tblMFTransaction
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND strTransactionType = 'dblCountQuantity'
+						AND intCategoryId <> @intCategoryId
+				END
+				ELSE
+				BEGIN
+					SELECT @dblInputCC = SUM(dblQuantity)
+					FROM ##tblMFTransaction
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intInputItemId = @intInputItemId
+						AND strTransactionType = 'dblCountQuantity'
+				END
 
 				IF @intInputItemId = @intItemId
 				BEGIN
@@ -816,15 +835,31 @@ BEGIN TRY
 					FROM ##tblMFFinalInputItemYield
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intCategoryId <> @intCategoryId
+						AND strTransactionType ='INPUT'
+
+					Select @intFromUnitMeasureId=intUnitMeasureId 
+					from tblICItemUOM Where intItemUOMId=@intInputItemUOMId
+
+					Select @intToUnitMeasureId=intUnitMeasureId 
+					from tblICItemUOM Where intItemUOMId=@intItemUOMId
+
+					Select @dblConversionToStock=NULL
+
+					If @intFromUnitMeasureId<>@intToUnitMeasureId
+					Select @dblConversionToStock=dblConversionToStock from tblICUnitMeasureConversion  Where intUnitMeasureId=@intFromUnitMeasureId and intStockUnitMeasureId =@intToUnitMeasureId
+
+					If @dblConversionToStock is null
+					Select @dblConversionToStock=1
 
 					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL(@dblTInput, 0) = 0
 								THEN 1
 							ELSE @dblTInput
 							END
+
 					UPDATE ##tblMFFinalInputItemYield
 					SET dblActualYield = @dblYieldP * 100
-						,dblTotalInput = @dblTInput
+						,dblTotalInput = @dblTInput*@dblConversionToStock
 						,dblTotalOutput = @dblTOutput
 						,dblStandardYield = 100
 					WHERE intWorkOrderId = @intWorkOrderId
@@ -834,6 +869,12 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblRequiredQty = 0
 
+					Select @dblRequiredQty = dblRequiredQty
+					from tblMFProductionSummary 
+					Where intWorkOrderId = @intWorkOrderId
+						AND intItemId = @intInputItemId
+					
+					if @dblRequiredQty=0 or @dblRequiredQty is null
 					SELECT @dblRequiredQty = dblRequiredQty
 					FROM ##tblMFFinalInputItemYield
 					WHERE intWorkOrderId = @intWorkOrderId
@@ -849,6 +890,7 @@ BEGIN TRY
 						,dblTotalInput = @dblTInput
 						,dblTotalOutput = @dblTOutput
 						,dblStandardYield = Case When @dblRequiredQty=0 or @dblRequiredQty is null then 0 else 100 End
+						,dblRequiredQty=@dblRequiredQty
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intInputItemId = @intInputItemId
 				END
@@ -1208,36 +1250,42 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
 			,CASE 
 				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST((
-									(Select Sum(dblOutputQuantity) from tblMFProductionSummary PS Where PS.intWorkOrderId=W.intWorkOrderId and PS.intItemTypeId in (2,4)) - isnull((
-											SELECT SUM(dblPhysicalCount)
+					THEN CEILING(CAST(
+						(Isnull((
+											SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+											Else WP.dblQuantity End)
 											FROM tblMFWorkOrderProducedLot WP
-											WHERE WP.ysnFillPartialPallet = 1
+											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+											WHERE WP.ysnFillPartialPallet =0
+												AND WP.ysnProductionReversed = 0
 												AND WP.intWorkOrderId = W.intWorkOrderId
 											), 0)
-									) * RI.dblCalculatedQuantity / (
+									) 
+									* RI.dblCalculatedQuantity / (
 									CASE 
 										WHEN R.dblQuantity = 0
 											THEN 1
 										ELSE R.dblQuantity
 										END
 									) AS NUMERIC(18, 6)))
-				ELSE (
-						CAST((
-								(Select Sum(dblOutputQuantity) from tblMFProductionSummary PS Where PS.intWorkOrderId=W.intWorkOrderId and PS.intItemTypeId in (2,4)) - isnull((
-										SELECT SUM(dblPhysicalCount)
-										FROM tblMFWorkOrderProducedLot WP
-										WHERE WP.ysnFillPartialPallet = 1
-											AND WP.intWorkOrderId = W.intWorkOrderId
-										), 0)
-								) * RI.dblCalculatedQuantity / (
-								CASE 
-									WHEN R.dblQuantity = 0
-										THEN 1
-									ELSE R.dblQuantity
-									END
-								) AS NUMERIC(18, 6))
-						)
+				ELSE CAST(
+						(Isnull((
+											SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+											Else WP.dblQuantity End)
+											FROM tblMFWorkOrderProducedLot WP
+											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+											WHERE WP.ysnFillPartialPallet =0
+												AND WP.ysnProductionReversed = 0
+												AND WP.intWorkOrderId = W.intWorkOrderId
+											), 0)
+									) 
+									* RI.dblCalculatedQuantity / (
+									CASE 
+										WHEN R.dblQuantity = 0
+											THEN 1
+										ELSE R.dblQuantity
+										END
+									) AS NUMERIC(18, 6))
 				END AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
@@ -1276,44 +1324,42 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
 			,CASE 
 				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST(isnull((
-										SELECT SUM(dblPhysicalCount)
-										FROM tblMFWorkOrderProducedLot WP
-										WHERE WP.ysnFillPartialPallet = 1
-											AND WP.intWorkOrderId = W.intWorkOrderId
-										), 0) * (
-									CASE 
-										WHEN RI.ysnPartialFillConsumption = 1
-											THEN RI.dblCalculatedQuantity
-										ELSE 0
-										END
-									) / (
+					THEN CEILING(CAST(
+						(Isnull((
+											SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+											Else WP.dblQuantity End)
+											FROM tblMFWorkOrderProducedLot WP
+											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+											WHERE WP.ysnFillPartialPallet =1
+												AND WP.ysnProductionReversed = 0
+												AND WP.intWorkOrderId = W.intWorkOrderId
+											), 0)
+									) 
+									* RI.dblCalculatedQuantity / (
 									CASE 
 										WHEN R.dblQuantity = 0
 											THEN 1
 										ELSE R.dblQuantity
 										END
 									) AS NUMERIC(18, 6)))
-				ELSE (
-						CAST(isnull((
-									SELECT SUM(dblPhysicalCount)
-									FROM tblMFWorkOrderProducedLot WP
-									WHERE WP.ysnFillPartialPallet = 1
-										AND WP.intWorkOrderId = W.intWorkOrderId
-									), 0) * (
-								CASE 
-									WHEN RI.ysnPartialFillConsumption = 1
-										THEN RI.dblCalculatedQuantity
-									ELSE 0
-									END
-								) / (
-								CASE 
-									WHEN R.dblQuantity = 0
-										THEN 1
-									ELSE R.dblQuantity
-									END
-								) AS NUMERIC(18, 6))
-						)
+				ELSE CAST(
+						(Isnull((
+											SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+											Else WP.dblQuantity End)
+											FROM tblMFWorkOrderProducedLot WP
+											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+											WHERE WP.ysnFillPartialPallet =1
+												AND WP.ysnProductionReversed = 0
+												AND WP.intWorkOrderId = W.intWorkOrderId
+											), 0)
+									) 
+									* RI.dblCalculatedQuantity / (
+									CASE 
+										WHEN R.dblQuantity = 0
+											THEN 1
+										ELSE R.dblQuantity
+										END
+									) AS NUMERIC(18, 6))
 				END AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
@@ -1400,6 +1446,8 @@ BEGIN TRY
 					,@dblCycleCountAdj = NULL
 					,@dblEmptyOutAdj = NULL
 					,@intPrimaryItemId = NULL
+					,@intInputItemUOMId=NULL
+					,@intItemUOMId=NULL
 
 				SELECT @intItemId = intItemId
 					,@dtmDate = dtmDate
@@ -1411,7 +1459,7 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					SELECT @dblInput = SUM(dblQuantity)
+					SELECT @dblInput = SUM(dblQuantity),@intInputItemUOMId =MIN(intItemUOMId)
 					FROM ##tblMFTransaction
 					WHERE intItemId = @intPrimaryItemId
 						AND dtmDate = @dtmDate
@@ -1439,7 +1487,7 @@ BEGIN TRY
 						AND strTransactionType = 'Input'
 				END
 
-				SELECT @dblOutput = SUM(dblQuantity)
+				SELECT @dblOutput = SUM(dblQuantity),@intItemUOMId=MIN(intItemUOMId)
 				FROM ##tblMFTransaction
 				WHERE intItemId = @intItemId
 					AND dtmDate = @dtmDate
@@ -1447,17 +1495,35 @@ BEGIN TRY
 					AND intInputItemId = @intInputItemId
 					AND strTransactionType = 'Output'
 
-				SELECT @dblInputCC = SUM(dblQuantity)
-				FROM ##tblMFTransaction
-				WHERE intItemId = @intPrimaryItemId
-					AND dtmDate = @dtmDate
-					AND intShiftId = IsNULL(@intShiftId, intShiftId)
-					AND intInputItemId = CASE 
-						WHEN @intInputItemId = @intItemId
-							THEN intInputItemId
-						ELSE @intInputItemId
-						END
-					AND strTransactionType = 'dblCountQuantity'
+				IF @intInputItemId = @intItemId
+				BEGIN
+					SELECT @dblInputCC = SUM(dblQuantity)
+					FROM ##tblMFTransaction
+					WHERE intItemId = @intPrimaryItemId
+						AND dtmDate = @dtmDate
+						AND intShiftId = IsNULL(@intShiftId, intShiftId)
+						AND intInputItemId = CASE 
+							WHEN @intInputItemId = @intItemId
+								THEN intInputItemId
+							ELSE @intInputItemId
+							END
+						AND strTransactionType = 'dblCountQuantity'
+						AND intCategoryId <> @intCategoryId
+				END
+				ELSE
+				BEGIN
+					SELECT @dblInputCC = SUM(dblQuantity)
+					FROM ##tblMFTransaction
+					WHERE intItemId = @intPrimaryItemId
+						AND dtmDate = @dtmDate
+						AND intShiftId = IsNULL(@intShiftId, intShiftId)
+						AND intInputItemId = CASE 
+							WHEN @intInputItemId = @intItemId
+								THEN intInputItemId
+							ELSE @intInputItemId
+							END
+						AND strTransactionType = 'dblCountQuantity'
+				END
 
 				IF @intInputItemId = @intItemId
 				BEGIN
@@ -1571,6 +1637,21 @@ BEGIN TRY
 						AND dtmDate = @dtmDate
 						AND intShiftId = IsNULL(@intShiftId, intShiftId)
 						AND intCategoryId <> @intCategoryId
+						AND strTransactionType ='INPUT'
+
+					Select @intFromUnitMeasureId=intUnitMeasureId 
+					from tblICItemUOM Where intItemUOMId=@intInputItemUOMId
+
+					Select @intToUnitMeasureId=intUnitMeasureId 
+					from tblICItemUOM Where intItemUOMId=@intItemUOMId
+
+					Select @dblConversionToStock=NULL
+
+					If @intFromUnitMeasureId<>@intToUnitMeasureId
+					Select @dblConversionToStock=dblConversionToStock from tblICUnitMeasureConversion  Where intUnitMeasureId=@intFromUnitMeasureId and intStockUnitMeasureId =@intToUnitMeasureId
+
+					If @dblConversionToStock is null
+					Select @dblConversionToStock=1
 
 					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL(@dblTInput, 0) = 0
@@ -1584,7 +1665,7 @@ BEGIN TRY
 								THEN ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
 							ELSE ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
 							END
-						,dblTotalInput = @dblTInput
+						,dblTotalInput = @dblTInput*@dblConversionToStock
 						,dblTotalOutput = @dblTOutput
 						,dblStandardYield = 100
 					WHERE intYieldId = @intYieldId
