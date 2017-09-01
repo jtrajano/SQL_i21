@@ -298,8 +298,47 @@ FROM vyuARCustomerSearch C
 			AND ysnPosted = 1
 			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 		GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid
+
+		UNION ALL
+
+		SELECT intInvoiceId			= NULL
+			, intEntityCustomerId	= P.intEntityCustomerId
+			, intPaymentId			= P.intPaymentId
+			, intCompanyLocationId	= P.intLocationId
+			, intTermId				= NULL
+			, strInvoiceNumber		= NULL
+			, strRecordNumber		= P.strRecordNumber
+			, strInvoiceOriginId	= NULL
+			, strBOLNumber			= NULL
+			, strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
+			, strTransactionType	= ''Discount Taken''
+			, dblInvoiceTotal		= 0.00
+			, dblBalance			= 0.00
+			, dblPayment			= ISNULL(PD.dblDiscountTaken, 0)
+			, dtmDate				= P.dtmDatePaid
+			, dtmDueDate			= NULL
+			, dtmShipDate			= NULL
+			, dtmDatePaid			= P.dtmDatePaid
+			, strType				= NULL
+		FROM dbo.tblARPayment P WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intPaymentId
+				 , dblDiscountTaken = SUM(PD.dblDiscount)
+			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+			INNER JOIN (
+				SELECT intInvoiceId
+				FROM dbo.tblARInvoice WITH (NOLOCK)
+				WHERE ysnPosted = 1
+					AND strType <> ''CF Tran''
+			) I ON I.intInvoiceId = PD.intInvoiceId
+			WHERE dblDiscount > 0
+			GROUP BY intPaymentId
+		) PD ON P.intPaymentId = PD.intPaymentId
+		WHERE ysnInvoicePrepayment = 0
+			AND ysnPosted = 1
+			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+		GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.dblDiscountTaken
 	) TRANSACTIONS ON TRANSACTIONS.intEntityCustomerId = C.intEntityId
-	
 	LEFT JOIN (
 		SELECT intTermID
 			 , strTerm
@@ -541,6 +580,7 @@ IF @ysnPrintFromCFLocal = 1
 		DELETE FROM @temp_statement_table WHERE strTransactionType = 'Payment' AND dblPayment = 0
 		UPDATE @temp_statement_table SET strTransactionType = 'Payment' WHERE strTransactionType = 'Customer Prepayment' AND strType <> 'CF Tran'
 		UPDATE @temp_statement_table SET strTransactionType = 'Invoice' WHERE strTransactionType = 'Debit Memo' AND strType <> 'CF Tran'
+		UPDATE @temp_statement_table SET strTransactionType = 'Service Charge' WHERE strType = 'Service Charge'
 	END
 
 TRUNCATE TABLE tblARCustomerStatementStagingTable
