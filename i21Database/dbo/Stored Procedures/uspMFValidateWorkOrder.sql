@@ -214,7 +214,7 @@ FROM @tblMFItem I
 Left JOIN @tblSubstituteItem SI on SI.intItemId=I.intItemId
 LEFT JOIN dbo.tblICLot L ON (L.intItemId = I.intItemId or L.intItemId = SI.intSubstituteItemId )
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 	AND R.strInternalCode = 'STOCK'
 JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
