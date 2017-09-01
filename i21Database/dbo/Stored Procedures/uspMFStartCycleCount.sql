@@ -1154,6 +1154,7 @@ BEGIN TRY
 				THEN ISNULL(PSL.dblOpeningQty, 0)
 			ELSE 0
 			END
+		,dblRequiredQty =PSL.dblRequiredQty 
 	FROM @tblMFQtyInProductionStagingLocation PSL
 	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = PSL.intItemId
 		AND RI.intWorkOrderId = @intWorkOrderId
@@ -1182,6 +1183,7 @@ BEGIN TRY
 		,dblCalculatedQuantity
 		,intCategoryId
 		,intItemTypeId
+		,dblRequiredQty
 		)
 	SELECT DISTINCT @intWorkOrderId
 		,PSL.intItemId
@@ -1213,6 +1215,7 @@ BEGIN TRY
 				ELSE 3
 				END
 			)
+		,PSL.dblRequiredQty 
 	FROM @tblMFQtyInProductionStagingLocation PSL
 	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = PSL.intItemId
 		AND RI.intWorkOrderId = @intWorkOrderId
