@@ -331,7 +331,27 @@ GO
         VALUES (N'', N'TM Order', N'TankManagement.view.Order', N'Tank Management', N'', 1,  0)
     END
 
+	--- Grain
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.DiscountTable')
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+        VALUES (N'', N'Discounts', N'Grain.view.DiscountTable', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Discounts', strModule = N'Grain' WHERE strNamespace = 'Grain.view.DiscountTable'
 	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.GrainStorageType')
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+        VALUES (N'', N'Storage Type', N'Grain.view.GrainStorageType', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Storage Type', strModule = N'Grain' WHERE strNamespace = 'Grain.view.GrainStorageType'
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts')
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+        VALUES (N'', N'Bill Storage', N'Grain.view.BillStorageAndDiscounts', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Grain' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
+
+	DELETE tblSMScreen WHERE strModule = 'Grain' AND strNamespace IN('Grain.view.StorageType', 'Grain.view.QualityDiscounts', 'Grain.view.StorageStatement')
+
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO
