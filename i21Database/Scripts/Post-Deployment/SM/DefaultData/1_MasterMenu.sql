@@ -1693,17 +1693,35 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Vouch
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Voucher?action=new', intSort = 1 WHERE strMenuName = 'New Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Voucher Batch Entry' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'New Voucher Batch Entry', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Voucher Batch Entry', N'Create', N'Screen', N'AccountsPayable.view.VoucherBatch?action=new', N'small-menu-create', 0, 0, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.VoucherBatch?action=new', intSort = 2 WHERE strMenuName = 'New Voucher Batch Entry' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Payable' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Payable', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Payable', N'Create', N'Screen', N'AccountsPayable.view.PayVouchersDetail?action=new', N'small-menu-create', 0, 0, 0, 1, 2, 1)
+	VALUES (N'New Payable', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Payable', N'Create', N'Screen', N'AccountsPayable.view.PayVouchersDetail?action=new', N'small-menu-create', 0, 0, 0, 1, 3, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PayVouchersDetail?action=new', intSort = 2 WHERE strMenuName = 'New Payable' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PayVouchersDetail?action=new', intSort = 3 WHERE strMenuName = 'New Payable' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Buyer' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'New Buyer', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Buyer', N'Create', N'Screen', N'EntityManagement.view.EntityDirect:EntityBuyer?action=new', N'small-menu-create', 0, 0, 0, 1, 4, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'EntityManagement.view.EntityDirect:EntityBuyer?action=new', intSort = 4 WHERE strMenuName = 'New Buyer' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Lien' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'New Lien', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Lien', N'Create', N'Screen', N'EntityManagement.view.EntityDirect:EntityLien?action=new', N'small-menu-create', 0, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'EntityManagement.view.EntityDirect:EntityLien?action=new', intSort = 5 WHERE strMenuName = 'New Lien' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Vendor' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Vendor', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Vendor', N'Create', N'Screen', N'AccountsPayable.view.EntityVendor?action=new', N'small-menu-create', 0, 0, 0, 1, 3, 1)
+	VALUES (N'New Vendor', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Vendor', N'Create', N'Screen', N'AccountsPayable.view.EntityVendor?action=new', N'small-menu-create', 0, 0, 0, 1, 6, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.EntityVendor?action=new', intSort = 3 WHERE strMenuName = 'New Vendor' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.EntityVendor?action=new', intSort = 6 WHERE strMenuName = 'New Vendor' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Paid Bills History' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
