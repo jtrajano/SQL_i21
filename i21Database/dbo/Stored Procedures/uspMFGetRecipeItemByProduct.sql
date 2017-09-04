@@ -46,29 +46,36 @@ BEGIN
 			,CONVERT(BIT, 0) AS ysnSubstituteItem
 			,I.strItemNo AS strMainRecipeItem
 			,ri.intRecipeItemId
+			,rt.strName as strRecipeItemType
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 		JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
-		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = ri.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityId] = ri.intLastModifiedUserId
+		LEFT JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
+		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
+		JOIN tblMFRecipeItemType rt on rt.intRecipeItemTypeId =ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
 			AND r.ysnActive = 1
-			AND ri.intRecipeItemTypeId = 1
 			AND (
-				(
-					ri.ysnYearValidationRequired = 1
-					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
-						AND ri.dtmValidTo
-					)
+				ri.intRecipeItemTypeId = 2
 				OR (
-					ri.ysnYearValidationRequired = 0
-					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-						AND DATEPART(dy, ri.dtmValidTo)
+					ri.intRecipeItemTypeId = 1
+					AND (
+						(
+							ri.ysnYearValidationRequired = 1
+							AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+								AND ri.dtmValidTo
+							)
+						OR (
+							ri.ysnYearValidationRequired = 0
+							AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+								AND DATEPART(dy, ri.dtmValidTo)
+							)
+						)
 					)
 				)
 		
@@ -99,6 +106,7 @@ BEGIN
 			,CONVERT(BIT, 1) AS ysnSubstituteItem
 			,I1.strItemNo AS strMainRecipeItem
 			,ri.intRecipeItemId
+			,rt.strName as strRecipeItemType
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipeSubstituteItem RSI ON RSI.intRecipeItemId = ri.intRecipeItemId
 			AND ri.intRecipeId = RSI.intRecipeId
@@ -107,27 +115,33 @@ BEGIN
 		JOIN dbo.tblICItem I1 ON I1.intItemId = ri.intItemId
 		JOIN tblICItemUOM iu ON RSI.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
-		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = RSI.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityId] = RSI.intLastModifiedUserId
+		LEFT JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
+		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = RSI.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = RSI.intLastModifiedUserId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
+		JOIN tblMFRecipeItemType rt on rt.intRecipeItemTypeId =ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
 			AND r.ysnActive = 1
-			AND ri.intRecipeItemTypeId = 1
 			AND (
-				(
-					ri.ysnYearValidationRequired = 1
-					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
-						AND ri.dtmValidTo
-					)
+				ri.intRecipeItemTypeId = 2
 				OR (
-					ri.ysnYearValidationRequired = 0
-					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-						AND DATEPART(dy, ri.dtmValidTo)
+					ri.intRecipeItemTypeId = 1
+					AND (
+						(
+							ri.ysnYearValidationRequired = 1
+							AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+								AND ri.dtmValidTo
+							)
+						OR (
+							ri.ysnYearValidationRequired = 0
+							AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+								AND DATEPART(dy, ri.dtmValidTo)
+							)
+						)
 					)
 				)
-		ORDER BY ri.intRecipeItemId
+		ORDER BY rt.strName,ri.intRecipeItemId
 	END
 	ELSE
 	BEGIN
@@ -182,31 +196,38 @@ BEGIN
 			,CONVERT(BIT, 0) AS ysnSubstituteItem
 			,I.strItemNo AS strMainRecipeItem
 			,ri.intRecipeItemId
+			,rt.strName as strRecipeItemType
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 		JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
-		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = ri.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityId] = ri.intLastModifiedUserId
+		LEFT JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
+		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = r.intWorkOrderId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
+		JOIN tblMFRecipeItemType rt on rt.intRecipeItemTypeId =ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
 			AND r.ysnActive = 1
-			AND ri.intRecipeItemTypeId = 1
 			AND (
-				(
-					ri.ysnYearValidationRequired = 1
-					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
-						AND ri.dtmValidTo
-					)
+				ri.intRecipeItemTypeId = 2
 				OR (
-					ri.ysnYearValidationRequired = 0
-					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-						AND DATEPART(dy, ri.dtmValidTo)
+					ri.intRecipeItemTypeId = 1
+					AND (
+						(
+							ri.ysnYearValidationRequired = 1
+							AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+								AND ri.dtmValidTo
+							)
+						OR (
+							ri.ysnYearValidationRequired = 0
+							AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+								AND DATEPART(dy, ri.dtmValidTo)
+							)
+						)
 					)
 				)
 			AND r.intWorkOrderId = @intWorkOrderId
@@ -250,6 +271,7 @@ BEGIN
 			,CONVERT(BIT, 1) AS ysnSubstituteItem
 			,I1.strItemNo AS strMainRecipeItem
 			,ri.intRecipeItemId
+			,rt.strName as strRecipeItemType
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = ri.intRecipeItemId
 			AND ri.intWorkOrderId = RSI.intWorkOrderId
@@ -259,28 +281,34 @@ BEGIN
 		JOIN dbo.tblICItem I1 ON I1.intItemId = ri.intItemId
 		JOIN tblICItemUOM iu ON RSI.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
-		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = RSI.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityId] = RSI.intLastModifiedUserId
+		LEFT JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
+		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = RSI.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = RSI.intLastModifiedUserId
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = r.intWorkOrderId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
+		JOIN tblMFRecipeItemType rt on rt.intRecipeItemTypeId =ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
 			AND r.ysnActive = 1
-			AND ri.intRecipeItemTypeId = 1
 			AND (
-				(
-					ri.ysnYearValidationRequired = 1
-					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
-						AND ri.dtmValidTo
-					)
+				ri.intRecipeItemTypeId = 2
 				OR (
-					ri.ysnYearValidationRequired = 0
-					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-						AND DATEPART(dy, ri.dtmValidTo)
+					ri.intRecipeItemTypeId = 1
+					AND (
+						(
+							ri.ysnYearValidationRequired = 1
+							AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+								AND ri.dtmValidTo
+							)
+						OR (
+							ri.ysnYearValidationRequired = 0
+							AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+								AND DATEPART(dy, ri.dtmValidTo)
+							)
+						)
 					)
 				)
 			AND r.intWorkOrderId = @intWorkOrderId
-		ORDER BY ri.intRecipeItemId
+		ORDER BY rt.strName,ri.intRecipeItemId
 	END
 END
