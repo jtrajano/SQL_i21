@@ -41,6 +41,14 @@ BEGIN
 	GOTO _Exit
 END;
 
+-- Foreign debit and credit amounts are not balanced.
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60013)
+BEGIN
+	RAISERROR('Foreign debit and credit amounts are not balanced.', 11, 1)
+	RETURN 60013
+	GOTO _Exit
+END;
+
 -- Unable to find an open fiscal year period to match the transaction date.
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60004)
 BEGIN 

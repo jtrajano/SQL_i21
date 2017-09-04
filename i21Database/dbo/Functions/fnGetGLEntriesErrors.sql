@@ -41,6 +41,21 @@ RETURN (
 				) SubQuery
 				
 		WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
+		UNION ALL
+		SELECT	SubQuery.strTransactionId
+				,strText = 'Foreign debit and credit amounts are not balanced.'
+				,intErrorCode = 60003
+				,strModuleName
+		FROM	(
+					SELECT	ToValidate.strTransactionId
+							,dblDebit = SUM(ISNULL(ToValidate.dblDebitForeign, 0))
+							,dblCredit = SUM(ISNULL(ToValidate.dblCreditForeign, 0))
+							,ToValidate.strModuleName
+					FROM	@GLEntriesToValidate ToValidate INNER JOIN dbo.tblGLAccount
+								ON ToValidate.intAccountId = tblGLAccount.intAccountId
+					GROUP BY ToValidate.strTransactionId,ToValidate.strModuleName
+				) SubQuery
+		WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
 
 		-- Unable to find an open fiscal year period to match the transaction date.
 		-- Allow audit adjustment transactions to be posted to a closed fiscal year period

@@ -1,14 +1,19 @@
-﻿GO
+﻿/*
+	Depends on :
+	 'vyuAPOriginCCDTransaction',
+	 'glijemst',
+	 'tblGLIjemst',
+	 'uspGLCreateImportLogDetail',
+	 'uspGLCreateImportLogHeader',
+	 'uspGLPostJournal'
+
+	 uspGLImportSubledger stub is existing database project. Alter command should be sufficient
+*/
+
+GO
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glijemst]') AND type IN (N'U'))
 BEGIN 
-
-EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportSubLedger'' and type = ''P'')
-			DROP PROCEDURE [dbo].[uspGLImportSubLedger];')
-
-EXEC('IF EXISTS (SELECT top 1 1 FROM INFORMATION_SCHEMA.VIEWS where TABLE_NAME = ''vyuAPOriginCCDTransaction'')
-			DROP VIEW vyuAPOriginCCDTransaction;')
-
-EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
+EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     	( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
     	AS
     	BEGIN

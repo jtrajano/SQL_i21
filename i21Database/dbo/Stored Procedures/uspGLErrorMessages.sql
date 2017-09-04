@@ -52,4 +52,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 60012) EXEC sp_dropmessa
 SET @strmessage = 'Fiscal period of reverse date for %s is %s'
 EXEC sp_addmessage 60012,11,@strmessage,'us_english','False'
 
-
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 60013) EXEC sp_dropmessage 60013, 'us_english'
+SET @strmessage = 'Foreign debit and credit amounts are not balanced.'
+EXEC sp_addmessage 60013,11,@strmessage,'us_english','False'
