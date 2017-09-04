@@ -39,7 +39,7 @@ BEGIN
 		,strNotes NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strUser NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,intTransactionId  int
+		,intTransactionId INT
 		,dtmTransactionDate DATETIME
 		)
 
@@ -85,11 +85,26 @@ BEGIN
 				END) AS dblTransactionQty
 		,um.strUnitMeasure AS strTransactionQtyUOM
 		,CASE 
-			WHEN ilt.intTransactionTypeId = 8
+			WHEN ilt.intTransactionTypeId IN (
+					4
+					,5
+					,8
+					,9
+					,23
+					)
 				THEN ilt.strTransactionId
-			WHEN iad.intNewLotId = @intLotId
-				THEN L1.strLotNumber
-			ELSE iad.strNewLotNumber
+			WHEN ilt.intTransactionTypeId IN (
+					17
+					,19
+					,20
+					)
+				THEN (
+						CASE 
+							WHEN iad.intNewLotId = @intLotId
+								THEN L1.strLotNumber
+							ELSE iad.strNewLotNumber
+							END
+						)
 			END AS strRelatedLotId
 		,CASE 
 			WHEN iad.intNewItemId IS NULL
@@ -116,16 +131,16 @@ BEGIN
 		,'' AS strOldVendorNo
 		,'' AS strNewVendorLotNo
 		,'' AS strOldVendorLotNo
-		,IA.strDescription  AS strNotes
+		,IA.strDescription AS strNotes
 		,us.strUserName AS strUser
 		,ilt.strBatchId
-		,ilt.intTransactionId 
+		,ilt.intTransactionId
 		,Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101)) AS dtmTransactionDate
 	FROM tblICLot l
 	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-	Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
+	LEFT JOIN tblICInventoryAdjustment IA ON IA.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	LEFT JOIN tblICItem i ON i.intItemId = ISNULL((
 				CASE 
 					WHEN ilt.intTransactionTypeId = 15
@@ -220,12 +235,27 @@ BEGIN
 					END) AS dblTransactionQty
 			,um.strUnitMeasure AS strTransactionQtyUOM
 			,CASE 
-				WHEN ilt.intTransactionTypeId = 8
-					THEN ilt.strTransactionId
-				WHEN iad.intNewLotId = @intLotId
-					THEN L1.strLotNumber
-				ELSE iad.strNewLotNumber
-				END AS strRelatedLotId
+			WHEN ilt.intTransactionTypeId IN (
+					4
+					,5
+					,8
+					,9
+					,23
+					)
+				THEN ilt.strTransactionId
+			WHEN ilt.intTransactionTypeId IN (
+					17
+					,19
+					,20
+					)
+				THEN (
+						CASE 
+							WHEN iad.intNewLotId = @intLotId
+								THEN L1.strLotNumber
+							ELSE iad.strNewLotNumber
+							END
+						)
+			END AS strRelatedLotId
 			,CASE 
 				WHEN iad.intNewItemId IS NULL
 					THEN NULL
@@ -254,17 +284,17 @@ BEGIN
 			,IA.strDescription AS strNotes
 			,us.strUserName AS strUser
 			,ilt.strBatchId
-			,ilt.intTransactionId 
+			,ilt.intTransactionId
 			,CASE 
 				WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
 					THEN Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
-				ELSE Convert(DATETIME, Convert(CHAR, dtmDate, 101)) 
+				ELSE Convert(DATETIME, Convert(CHAR, dtmDate, 101))
 				END AS dtmDateTime
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-		Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
+		LEFT JOIN tblICInventoryAdjustment IA ON IA.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 		LEFT JOIN tblICItem i ON i.intItemId = ISNULL((
 					CASE 
 						WHEN ilt.intTransactionTypeId = 15
@@ -342,8 +372,12 @@ BEGIN
 		,ia.strDescription AS strNotes
 		,us.strUserName AS strUser
 		,ia.strAdjustmentNo AS strBatchId
-		,IsNULL((Select top 1 IT.intTransactionId from tblICInventoryTransaction IT Where IT.strTransactionId=ia.strAdjustmentNo),99999999) as intTransactionId
-		,Convert(DATETIME, Convert(CHAR, ia.dtmPostedDate, 101)) as dtmTransactionDate
+		,IsNULL((
+				SELECT TOP 1 IT.intTransactionId
+				FROM tblICInventoryTransaction IT
+				WHERE IT.strTransactionId = ia.strAdjustmentNo
+				), 99999999) AS intTransactionId
+		,Convert(DATETIME, Convert(CHAR, ia.dtmPostedDate, 101)) AS dtmTransactionDate
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	--Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
@@ -373,12 +407,13 @@ BEGIN
 				AND iad.intNewLotStatusId IS NOT NULL
 				)
 			)
-	--ORDER BY 1
 
+	--ORDER BY 1
 	SELECT *
 	INTO #tempLotHistoryFinal
 	FROM #tempLotHistory LH
-	ORDER BY LH.dtmTransactionDate ASC,LH.intTransactionId ASC
+	ORDER BY LH.dtmTransactionDate ASC
+		,LH.intTransactionId ASC
 
 	DECLARE @strStorageLocation NVARCHAR(50)
 
@@ -439,5 +474,5 @@ BEGIN
 	END
 
 	SELECT *
-	FROM #tempLotHistoryFinal-- Order by dtmTransactionDate,intTransactionId 
+	FROM #tempLotHistoryFinal -- Order by dtmTransactionDate,intTransactionId 
 END
