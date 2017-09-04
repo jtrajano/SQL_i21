@@ -157,11 +157,11 @@ FROM (
 			,IC.strContractItemName
 			,PT.strDescription AS strProductType
 			,CH.intCommodityId
-			,strBookingReference = NULL
-			,strShippingLine = NULL
-			,strMVessel = NULL
-			,strMVoyageNumber = NULL
-			,dtmETAPOL = NULL
+		    ,L.strBookingReference
+		    ,SL.strName AS strShippingLine  
+		    ,L.strMVessel
+		    ,L.strMVoyageNumber
+		    ,L.dtmETAPOL
 			,'Contracts w/o document' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -172,6 +172,7 @@ FROM (
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblEMEntity SL ON SL.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
@@ -213,11 +214,11 @@ FROM (
 			,IC.strContractItemName
 			,PT.strDescription AS strProductType
 			,CH.intCommodityId
-			,strBookingReference = NULL
-			,strShippingLine = NULL
-			,strMVessel = NULL
-			,strMVoyageNumber = NULL
-			,dtmETAPOL = NULL
+		    ,L.strBookingReference
+		    ,SL.strName AS strShippingLine  
+		    ,L.strMVessel
+		    ,L.strMVoyageNumber
+		    ,L.dtmETAPOL
 			,'Contracts w/o weight claim' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -228,6 +229,7 @@ FROM (
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblEMEntity SL ON SL.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
@@ -272,11 +274,11 @@ FROM (
 			,IC.strContractItemName
 			,PT.strDescription AS strProductType
 			,CH.intCommodityId
-			,strBookingReference = NULL
-			,strShippingLine = NULL
-			,strMVessel = NULL
-			,strMVoyageNumber = NULL
-			,dtmETAPOL = NULL
+		    ,L.strBookingReference
+		    ,SL.strName AS strShippingLine  
+		    ,L.strMVessel
+		    ,L.strMVoyageNumber
+		    ,L.dtmETAPOL
 			,'Weight claims w/o debit note' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -289,6 +291,7 @@ FROM (
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblEMEntity SL ON SL.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
@@ -327,11 +330,11 @@ FROM (
 			,IC.strContractItemName
 			,PT.strDescription AS strProductType
 			,CH.intCommodityId
-			,strBookingReference = NULL
-			,strShippingLine = NULL
-			,strMVessel = NULL
-			,strMVoyageNumber = NULL
-			,dtmETAPOL = NULL
+		    ,L.strBookingReference
+		    ,SL.strName AS strShippingLine  
+		    ,L.strMVessel
+		    ,L.strMVoyageNumber
+		    ,L.dtmETAPOL
 			,'Contracts w/o 4C' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -342,6 +345,7 @@ FROM (
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblEMEntity SL ON SL.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
@@ -382,11 +386,11 @@ FROM (
 			,IC.strContractItemName
 			,PT.strDescription AS strProductType
 			,CH.intCommodityId
-			,strBookingReference = NULL
-			,strShippingLine = NULL
-			,strMVessel = NULL
-			,strMVoyageNumber = NULL
-			,dtmETAPOL = NULL
+		    ,L.strBookingReference
+		    ,SL.strName AS strShippingLine  
+		    ,L.strMVessel
+		    ,L.strMVoyageNumber
+		    ,L.dtmETAPOL
 			,'Contracts w/o TC' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -397,6 +401,7 @@ FROM (
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblEMEntity SL ON SL.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 		LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
