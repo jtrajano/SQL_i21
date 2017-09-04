@@ -1,4 +1,4 @@
-IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportAGTax')
+﻿IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportAGTax')
 	DROP PROCEDURE uspARImportAGTax
 GO
 
