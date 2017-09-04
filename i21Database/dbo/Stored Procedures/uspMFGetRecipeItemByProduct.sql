@@ -53,8 +53,8 @@ BEGIN
 		JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
 		LEFT JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId
+		JOIN dbo.tblSMUserSecurity U ON U.intEntityId = ri.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.intEntityId = ri.intLastModifiedUserId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
 		JOIN tblMFRecipeItemType rt on rt.intRecipeItemTypeId =ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
@@ -116,8 +116,8 @@ BEGIN
 		JOIN tblICItemUOM iu ON RSI.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
 		LEFT JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = RSI.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = RSI.intLastModifiedUserId
+		JOIN dbo.tblSMUserSecurity U ON U.intEntityId = RSI.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.intEntityId = RSI.intLastModifiedUserId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
 		JOIN tblMFRecipeItemType rt on rt.intRecipeItemTypeId =ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
@@ -204,8 +204,8 @@ BEGIN
 		JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
 		LEFT JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId
+		JOIN dbo.tblSMUserSecurity U ON U.intEntityId = ri.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.intEntityId = ri.intLastModifiedUserId
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = r.intWorkOrderId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
 		JOIN tblMFRecipeItemType rt on rt.intRecipeItemTypeId =ri.intRecipeItemTypeId
@@ -282,8 +282,8 @@ BEGIN
 		JOIN tblICItemUOM iu ON RSI.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
 		LEFT JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
-		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = RSI.intCreatedUserId
-		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = RSI.intLastModifiedUserId
+		JOIN dbo.tblSMUserSecurity U ON U.intEntityId = RSI.intCreatedUserId
+		JOIN dbo.tblSMUserSecurity U1 ON U1.intEntityId = RSI.intLastModifiedUserId
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = r.intWorkOrderId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
 		JOIN tblMFRecipeItemType rt on rt.intRecipeItemTypeId =ri.intRecipeItemTypeId
