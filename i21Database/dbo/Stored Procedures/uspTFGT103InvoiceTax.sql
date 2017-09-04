@@ -248,9 +248,8 @@ BEGIN TRY
 			INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
 			WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId
 				AND (tblTFTaxCategory.strTaxCategory = 'IN Gasoline Use Tax (GUT)')
-				AND tblARInvoiceDetailTax.dblTax = 0
 
-			UPDATE @TFTransaction SET dblTaxExempt = ISNULL(@TaxExempt, 0), strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+			UPDATE @TFTransaction SET dblTaxExempt = CASE WHEN @TaxExempt IS NULL THEN dblQtyShipped ELSE 0 END, strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
 			SET @Count = @Count - 1
 		END
 
