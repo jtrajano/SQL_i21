@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets850dc0a71fb0c753d5b00d8d1dcdb194b69f699127b877735542640dec466d53))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets731edcd1ef86c6990dec4781b3ae055aa62221d4f9205a641dfb465bbc9cce43))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets850dc0a71fb0c753d5b00d8d1dcdb194b69f699127b877735542640dec466d53 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets731edcd1ef86c6990dec4781b3ae055aa62221d4f9205a641dfb465bbc9cce43 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "850dc0a71fb0c753d5b00d8d1dcdb194b69f699127b877735542640dec466d53"; }
+            get { return "731edcd1ef86c6990dec4781b3ae055aa62221d4f9205a641dfb465bbc9cce43"; }
         }
 
         /// <summary>
@@ -14179,7 +14179,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetSubLocationBinDetails
-        [CodeFirstDatabaseSchema.vyuICGetSubLocationBinDetails](T1.vyuICGetSubLocationBinDetails_intItemLocationId, T1.vyuICGetSubLocationBinDetails_intItemId, T1.vyuICGetSubLocationBinDetails_intStorageLocationId, T1.vyuICGetSubLocationBinDetails_intCompanyLocationId, T1.vyuICGetSubLocationBinDetails_strCommodityCode, T1.vyuICGetSubLocationBinDetails_strItemDescription, T1.vyuICGetSubLocationBinDetails_strItemNo, T1.vyuICGetSubLocationBinDetails_strUOM, T1.vyuICGetSubLocationBinDetails_strLocation, T1.vyuICGetSubLocationBinDetails_strStorageLocation, T1.vyuICGetSubLocationBinDetails_strDiscountCode, T1.vyuICGetSubLocationBinDetails_strDiscountDescription, T1.vyuICGetSubLocationBinDetails_dtmReadingDate, T1.vyuICGetSubLocationBinDetails_dblAirSpaceReading, T1.vyuICGetSubLocationBinDetails_dblPhysicalReading, T1.vyuICGetSubLocationBinDetails_dblStockVariance, T1.vyuICGetSubLocationBinDetails_dblCapacity, T1.vyuICGetSubLocationBinDetails_dblStock, T1.vyuICGetSubLocationBinDetails_dblAvailable, T1.vyuICGetSubLocationBinDetails_dblEffectiveDepth, T1.vyuICGetSubLocationBinDetails_dblPackFactor, T1.vyuICGetSubLocationBinDetails_dblUnitPerFoot, T1.vyuICGetSubLocationBinDetails_strSubLocationName, T1.vyuICGetSubLocationBinDetails_intSubLocationId)
+        [CodeFirstDatabaseSchema.vyuICGetSubLocationBinDetails](T1.vyuICGetSubLocationBinDetails_intItemLocationId, T1.vyuICGetSubLocationBinDetails_intItemId, T1.vyuICGetSubLocationBinDetails_intStorageLocationId, T1.vyuICGetSubLocationBinDetails_intCompanyLocationId, T1.vyuICGetSubLocationBinDetails_strCommodityCode, T1.vyuICGetSubLocationBinDetails_strItemDescription, T1.vyuICGetSubLocationBinDetails_strItemNo, T1.vyuICGetSubLocationBinDetails_strLocation, T1.vyuICGetSubLocationBinDetails_strStorageLocation, T1.vyuICGetSubLocationBinDetails_dblCapacity, T1.vyuICGetSubLocationBinDetails_dblStock, T1.vyuICGetSubLocationBinDetails_dblAvailable, T1.vyuICGetSubLocationBinDetails_strSubLocationName, T1.vyuICGetSubLocationBinDetails_intSubLocationId)
     FROM (
         SELECT 
             T.intItemLocationId AS vyuICGetSubLocationBinDetails_intItemLocationId, 
@@ -14189,21 +14189,11 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCommodityCode AS vyuICGetSubLocationBinDetails_strCommodityCode, 
             T.strItemDescription AS vyuICGetSubLocationBinDetails_strItemDescription, 
             T.strItemNo AS vyuICGetSubLocationBinDetails_strItemNo, 
-            T.strUOM AS vyuICGetSubLocationBinDetails_strUOM, 
             T.strLocation AS vyuICGetSubLocationBinDetails_strLocation, 
             T.strStorageLocation AS vyuICGetSubLocationBinDetails_strStorageLocation, 
-            T.strDiscountCode AS vyuICGetSubLocationBinDetails_strDiscountCode, 
-            T.strDiscountDescription AS vyuICGetSubLocationBinDetails_strDiscountDescription, 
-            T.dtmReadingDate AS vyuICGetSubLocationBinDetails_dtmReadingDate, 
-            T.dblAirSpaceReading AS vyuICGetSubLocationBinDetails_dblAirSpaceReading, 
-            T.dblPhysicalReading AS vyuICGetSubLocationBinDetails_dblPhysicalReading, 
-            T.dblStockVariance AS vyuICGetSubLocationBinDetails_dblStockVariance, 
             T.dblCapacity AS vyuICGetSubLocationBinDetails_dblCapacity, 
             T.dblStock AS vyuICGetSubLocationBinDetails_dblStock, 
             T.dblAvailable AS vyuICGetSubLocationBinDetails_dblAvailable, 
-            T.dblEffectiveDepth AS vyuICGetSubLocationBinDetails_dblEffectiveDepth, 
-            T.dblPackFactor AS vyuICGetSubLocationBinDetails_dblPackFactor, 
-            T.dblUnitPerFoot AS vyuICGetSubLocationBinDetails_dblUnitPerFoot, 
             T.strSubLocationName AS vyuICGetSubLocationBinDetails_strSubLocationName, 
             T.intSubLocationId AS vyuICGetSubLocationBinDetails_intSubLocationId, 
             True AS _from0
@@ -14219,7 +14209,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetSubLocationBinDetails
-        [iRely.Inventory.Model.vyuICGetSubLocationBinDetails](T1.vyuICGetSubLocationBinDetails_intItemLocationId, T1.vyuICGetSubLocationBinDetails_intItemId, T1.vyuICGetSubLocationBinDetails_intStorageLocationId, T1.vyuICGetSubLocationBinDetails_intCompanyLocationId, T1.vyuICGetSubLocationBinDetails_strCommodityCode, T1.vyuICGetSubLocationBinDetails_strItemDescription, T1.vyuICGetSubLocationBinDetails_strItemNo, T1.vyuICGetSubLocationBinDetails_strUOM, T1.vyuICGetSubLocationBinDetails_strLocation, T1.vyuICGetSubLocationBinDetails_strStorageLocation, T1.vyuICGetSubLocationBinDetails_strDiscountCode, T1.vyuICGetSubLocationBinDetails_strDiscountDescription, T1.vyuICGetSubLocationBinDetails_dtmReadingDate, T1.vyuICGetSubLocationBinDetails_dblAirSpaceReading, T1.vyuICGetSubLocationBinDetails_dblPhysicalReading, T1.vyuICGetSubLocationBinDetails_dblStockVariance, T1.vyuICGetSubLocationBinDetails_dblCapacity, T1.vyuICGetSubLocationBinDetails_dblStock, T1.vyuICGetSubLocationBinDetails_dblAvailable, T1.vyuICGetSubLocationBinDetails_dblEffectiveDepth, T1.vyuICGetSubLocationBinDetails_dblPackFactor, T1.vyuICGetSubLocationBinDetails_dblUnitPerFoot, T1.vyuICGetSubLocationBinDetails_strSubLocationName, T1.vyuICGetSubLocationBinDetails_intSubLocationId)
+        [iRely.Inventory.Model.vyuICGetSubLocationBinDetails](T1.vyuICGetSubLocationBinDetails_intItemLocationId, T1.vyuICGetSubLocationBinDetails_intItemId, T1.vyuICGetSubLocationBinDetails_intStorageLocationId, T1.vyuICGetSubLocationBinDetails_intCompanyLocationId, T1.vyuICGetSubLocationBinDetails_strCommodityCode, T1.vyuICGetSubLocationBinDetails_strItemDescription, T1.vyuICGetSubLocationBinDetails_strItemNo, T1.vyuICGetSubLocationBinDetails_strLocation, T1.vyuICGetSubLocationBinDetails_strStorageLocation, T1.vyuICGetSubLocationBinDetails_dblCapacity, T1.vyuICGetSubLocationBinDetails_dblStock, T1.vyuICGetSubLocationBinDetails_dblAvailable, T1.vyuICGetSubLocationBinDetails_strSubLocationName, T1.vyuICGetSubLocationBinDetails_intSubLocationId)
     FROM (
         SELECT 
             T.intItemLocationId AS vyuICGetSubLocationBinDetails_intItemLocationId, 
@@ -14229,21 +14219,11 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCommodityCode AS vyuICGetSubLocationBinDetails_strCommodityCode, 
             T.strItemDescription AS vyuICGetSubLocationBinDetails_strItemDescription, 
             T.strItemNo AS vyuICGetSubLocationBinDetails_strItemNo, 
-            T.strUOM AS vyuICGetSubLocationBinDetails_strUOM, 
             T.strLocation AS vyuICGetSubLocationBinDetails_strLocation, 
             T.strStorageLocation AS vyuICGetSubLocationBinDetails_strStorageLocation, 
-            T.strDiscountCode AS vyuICGetSubLocationBinDetails_strDiscountCode, 
-            T.strDiscountDescription AS vyuICGetSubLocationBinDetails_strDiscountDescription, 
-            T.dtmReadingDate AS vyuICGetSubLocationBinDetails_dtmReadingDate, 
-            T.dblAirSpaceReading AS vyuICGetSubLocationBinDetails_dblAirSpaceReading, 
-            T.dblPhysicalReading AS vyuICGetSubLocationBinDetails_dblPhysicalReading, 
-            T.dblStockVariance AS vyuICGetSubLocationBinDetails_dblStockVariance, 
             T.dblCapacity AS vyuICGetSubLocationBinDetails_dblCapacity, 
             T.dblStock AS vyuICGetSubLocationBinDetails_dblStock, 
             T.dblAvailable AS vyuICGetSubLocationBinDetails_dblAvailable, 
-            T.dblEffectiveDepth AS vyuICGetSubLocationBinDetails_dblEffectiveDepth, 
-            T.dblPackFactor AS vyuICGetSubLocationBinDetails_dblPackFactor, 
-            T.dblUnitPerFoot AS vyuICGetSubLocationBinDetails_dblUnitPerFoot, 
             T.strSubLocationName AS vyuICGetSubLocationBinDetails_strSubLocationName, 
             T.intSubLocationId AS vyuICGetSubLocationBinDetails_intSubLocationId, 
             True AS _from0

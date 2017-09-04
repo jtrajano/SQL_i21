@@ -27,8 +27,8 @@ namespace iRely.Inventory.Model
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
-        }     
-        
+        }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Configurations.Add(new vyuICLotHistoryMap());
