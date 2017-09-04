@@ -46,6 +46,21 @@ BEGIN
 				,FT.strFreightTerm
 				,FT.strFobPoint
 				,CU.strCurrency
+				,CONT.strContainerType
+				,ShippingLine.strName AS strShippingLine			
+				,Terminal.strName AS strTerminal
+				,ForwardingAgent.strName AS strForwardingAgent
+				,Insurer.strName AS strInsurer
+				,Currency.strCurrency AS strInsuranceCurrency
+				,BLDraftToBeSent.strName AS strBLDraftToBeSent
+				,NP.strName AS strDocPresentationVal 
+				,ETAPODRC.strReasonCodeDescription AS strETAPODReasonCode
+				,ETAPOLRC.strReasonCodeDescription AS strETAPOLReasonCode
+				,ETSPOLRC.strReasonCodeDescription AS strETSPOLReasonCode
+				,DemurrageCurrency.strCurrency AS strDemurrageCurrency
+				,DespatchCurrency.strCurrency AS strDespatchCurrency
+				,LoadingUnit.strUnitMeasure AS strLoadingUnitMeasure
+				,DischargeUnit.strUnitMeasure AS strDischargeUnitMeasure
 				,DENSE_RANK() OVER (
 					ORDER BY L.intLoadId DESC
 					) intRankNo
@@ -53,6 +68,11 @@ BEGIN
 			LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 			LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 			LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+			LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+			LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
+			LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+			LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
+			LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
 			LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 			LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
@@ -63,6 +83,16 @@ BEGIN
 			LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 			LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
+			LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
+			LEFT JOIN tblLGContainerType CONT ON CONT.intContainerTypeId = L.intContainerTypeId
+			LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = L.intDocPresentationId AND NP.strEntity = L.strDocPresentationType
+			LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
+			LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
+			LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
+			LEFT JOIN tblSMCurrency DemurrageCurrency ON DemurrageCurrency.intCurrencyID = L.intDemurrageCurrencyId
+			LEFT JOIN tblSMCurrency DespatchCurrency ON DespatchCurrency.intCurrencyID = L.intDespatchCurrencyId
+			LEFT JOIN tblICUnitMeasure LoadingUnit ON LoadingUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
+			LEFT JOIN tblICUnitMeasure DischargeUnit ON DischargeUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
 			WHERE L.intLoadId IN (
 					SELECT *
 					FROM dbo.fnSplitString(@strLoadId, ',')
@@ -103,10 +133,30 @@ BEGIN
 			,FT.strFreightTerm
 			,FT.strFobPoint
 			,CU.strCurrency
+			,CONT.strContainerType
+			,ShippingLine.strName AS strShippingLine			
+			,Terminal.strName AS strTerminal
+			,ForwardingAgent.strName AS strForwardingAgent
+			,Insurer.strName AS strInsurer
+			,Currency.strCurrency AS strInsuranceCurrency
+			,BLDraftToBeSent.strName AS strBLDraftToBeSent
+			,NP.strName AS strDocPresentationVal  
+			,ETAPODRC.strReasonCodeDescription AS strETAPODReasonCode
+			,ETAPOLRC.strReasonCodeDescription AS strETAPOLReasonCode
+			,ETSPOLRC.strReasonCodeDescription AS strETSPOLReasonCode
+			,DemurrageCurrency.strCurrency AS strDemurrageCurrency
+			,DespatchCurrency.strCurrency AS strDespatchCurrency
+			,LoadingUnit.strUnitMeasure AS strLoadingUnitMeasure
+			,DischargeUnit.strUnitMeasure AS strDischargeUnitMeasure
 		FROM tblLGLoad L
 		LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 		LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 		LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+		LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+		LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
+		LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+		LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
+		LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
 		LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 		LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
@@ -117,6 +167,16 @@ BEGIN
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
+		LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
+		LEFT JOIN tblLGContainerType CONT ON CONT.intContainerTypeId = L.intContainerTypeId
+		LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = L.intDocPresentationId AND NP.strEntity = L.strDocPresentationType
+		LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
+		LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
+		LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
+		LEFT JOIN tblSMCurrency DemurrageCurrency ON DemurrageCurrency.intCurrencyID = L.intDemurrageCurrencyId
+		LEFT JOIN tblSMCurrency DespatchCurrency ON DespatchCurrency.intCurrencyID = L.intDespatchCurrencyId
+		LEFT JOIN tblICUnitMeasure LoadingUnit ON LoadingUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
+		LEFT JOIN tblICUnitMeasure DischargeUnit ON DischargeUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
 		WHERE L.strLoadNumber COLLATE Latin1_General_CI_AS IN (
 				SELECT *
 				FROM dbo.fnSplitString(@strLoadNumber, ',')
