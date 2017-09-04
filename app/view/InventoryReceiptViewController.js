@@ -5227,8 +5227,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string', hidden: true, required: true },
                     { dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string' },
-                    { dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order') },
-                    { dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order') },
+                    { dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string' },
+                    { dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string' },
 
                     { dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string', required: true },
                     { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', required: true },
