@@ -113,6 +113,12 @@ IF EXISTS
 BEGIN
 RAISERROR('The selected filled date already reconciled.',16,1)
 END
+
+IF ISNULL(@intFutureMarketId,0) = 0 
+BEGIN
+	RAISERROR('Market cannot be blank while creating hedge transaction.',16,1)
+END
+
 IF ISNULL(@intFutOptTransactionId,0) > 0
 BEGIN
       UPDATE tblRKFutOptTransaction
