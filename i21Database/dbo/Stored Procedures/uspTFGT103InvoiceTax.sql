@@ -407,6 +407,124 @@ BEGIN TRY
 			AND (tblTFReportingComponentCriteria.strCriteria <> '= 0' 
 			OR tblTFReportingComponentCriteria.strCriteria IS NULL)
 		)tblTransactions
+
+		-- INVENTORY TRANSFERS USING IC SCREEN --
+
+		INSERT INTO @TFTransaction(intId
+			, intInvoiceDetailId
+			, intTaxAuthorityId
+			, strFormCode
+			, intReportingComponentId
+			, strScheduleCode
+			, strType
+			, intProductCode
+			, strProductCode
+			, intItemId
+			, dblQtyShipped
+			, dblGross
+			, dblNet
+			, dblBillQty	
+			, dtmDate
+			, strDestinationCity
+			, strDestinationState
+			, strOriginCity
+			, strOriginState
+			, strCustomerName
+			, strCustomerFEIN
+			, strAccountStatusCode	
+			, strTaxCode	
+			, strHeaderCompanyName
+			, strHeaderAddress
+			, strHeaderCity
+			, strHeaderState
+			, strHeaderZip
+			, strHeaderPhone
+			, strHeaderStateTaxID
+			, strHeaderFederalTaxID
+			, dblTax
+			, dblTaxExempt
+			, strTransporterIdType
+			, strVendorIdType
+			, strCustomerIdType
+			, strVendorInvoiceNumber
+			, strCustomerLicenseNumber
+			, strCustomerAccountStatusCode
+			, strCustomerStreetAddress
+			, strCustomerZipCode
+			, strReportingComponentNote
+			, strDiversionNumber
+			, strDiversionOriginalDestinationState
+			, strTransactionType
+			, intTransactionNumberId)
+		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
+			, *
+		FROM (
+			SELECT DISTINCT tblICInventoryTransferDetail.intInventoryTransferDetailId
+				, tblTFReportingComponent.intTaxAuthorityId
+				, tblTFReportingComponent.strFormCode
+				, tblTFReportingComponent.intReportingComponentId
+				, tblTFReportingComponent.strScheduleCode
+				, tblTFReportingComponent.strType
+				, tblTFReportingComponentProductCode.intProductCodeId
+				, tblTFProductCode.strProductCode
+				, tblICInventoryTransferDetail.intItemId
+				, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
+				, tblICInventoryTransferDetail.dblQuantity AS dblGross
+				, tblICInventoryTransferDetail.dblQuantity AS dblNet
+				, tblICInventoryTransferDetail.dblQuantity
+				, tblICInventoryTransfer.dtmTransferDate AS dtmDate
+				, tblSMCompanyLocation.strCity AS strDestinationCity
+				, tblSMCompanyLocation.strStateProvince AS strDestinationState
+				, tblSMCompanyLocationFrom.strCity AS strOriginCity
+				, tblSMCompanyLocationFrom.strStateProvince AS strOriginState
+				, tblSMCompanyLocation.strLocationName AS strCustomerName
+				, tblSMCompanySetup.strEin AS strCustomerFEIN
+				, NULL AS strAccountStatusCode
+				, @ExemptGallSold AS strTaxCode
+				, tblSMCompanySetup.strCompanyName
+				, tblSMCompanySetup.strAddress
+				, tblSMCompanySetup.strCity
+				, tblSMCompanySetup.strState
+				, tblSMCompanySetup.strZip
+				, tblSMCompanySetup.strPhone
+				, tblSMCompanySetup.strStateTaxID
+				, tblSMCompanySetup.strFederalTaxID
+				, (ISNULL(tblICInventoryTransferDetail.dblQuantity, 0) * @ConfigGUTRate) AS dblTax
+				, 0.000000 AS dblTaxExempt
+				, strTransporterIdType = 'FEIN'
+				, strVendorIdType = 'FEIN'
+				, strCustomerIdType = 'FEIN'
+				, strVendorInvoiceNumber = NULL
+				, strCustomerLicenseNumber = NULL
+				, strCustomerAccountStatusCode = NULL
+				, strCustomerStreetAddress = NULL
+				, strCustomerZipCode = NULL
+				, strReportingComponentNote = tblTFReportingComponent.strNote
+				, strDiversionNumber = NULL
+				, strDiversionOriginalDestinationState = NULL
+				, strTransactionType = 'Transfer'
+				, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
+			FROM tblTFProductCode
+			INNER JOIN tblICInventoryTransferDetail 
+			INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
+			INNER JOIN tblICItemMotorFuelTax
+			INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
+			INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
+				ON tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId
+			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
+			INNER JOIN tblSMCompanyLocation ON tblICInventoryTransfer.intToLocationId = tblSMCompanyLocation.intCompanyLocationId
+			INNER JOIN tblSMCompanyLocation AS tblSMCompanyLocationFrom ON tblICInventoryTransfer.intFromLocationId = tblSMCompanyLocationFrom.intCompanyLocationId
+			LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
+		CROSS JOIN tblSMCompanySetup
+		WHERE  tblICInventoryTransfer.intSourceType IN (0,1,2)
+		AND tblTFReportingComponent.intReportingComponentId = @RCId
+				AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
+				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
+				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
+				AND (tblICInventoryTransfer.ysnPosted = 1)
+				AND (tblTFReportingComponentCriteria.strCriteria <> '= 0' 
+				OR tblTFReportingComponentCriteria.strCriteria IS NULL)
+		)tblTransactions
 				
 		IF (@ReportingComponentId <> '')
 		BEGIN
