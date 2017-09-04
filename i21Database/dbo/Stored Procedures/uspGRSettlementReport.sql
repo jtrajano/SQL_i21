@@ -18,6 +18,7 @@ DECLARE @intBankAccountId AS INT
 	,@strModule AS NVARCHAR(40)
 
 DECLARE @xmlDocumentId AS INT
+DECLARE @companyLogo varbinary(max)
 
 DECLARE @temp_xml_table TABLE 
 (
@@ -34,6 +35,18 @@ DECLARE @temp_xml_table TABLE
 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParam
 
+  SELECT
+  @companyLogo = blbFile
+  FROM tblSMUpload
+  WHERE intAttachmentId = 
+  (
+	  SELECT TOP 1
+	  intAttachmentId
+	  FROM tblSMAttachment
+	  WHERE strScreen = 'SystemManager.CompanyPreference'
+	  AND strComment = 'Header'
+	  ORDER BY intAttachmentId DESC
+  )
 
 INSERT INTO @temp_xml_table
 SELECT *
@@ -162,7 +175,8 @@ BEGIN
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = NULL
-	   ,lblCustomerPrepayment = NULL						 
+	   ,lblCustomerPrepayment = NULL
+	   ,blbHeaderLogo = @companyLogo						 
 
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -631,6 +645,7 @@ BEGIN
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = NULL
 	   ,lblCustomerPrepayment = NULL
+	   ,blbHeaderLogo = @companyLogo
 
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -788,6 +803,7 @@ BEGIN
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = NULL
 	   ,lblCustomerPrepayment = NULL
+	   ,blbHeaderLogo = @companyLogo
 	   						 
 	FROM tblCMBankTransaction BNKTRN
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1229,7 +1245,8 @@ BEGIN
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = NULL
-	   ,lblCustomerPrepayment = NULL					    
+	   ,lblCustomerPrepayment = NULL
+	   ,blbHeaderLogo = @companyLogo					    
 	
 	FROM tblCMBankTransaction BNKTRN	
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
