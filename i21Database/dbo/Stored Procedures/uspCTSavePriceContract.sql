@@ -42,13 +42,15 @@ BEGIN TRY
 
 	WHILE ISNULL(@intPriceFixationId,0) > 0
 	BEGIN
-		SELECT	@intPriceFixationDetailId = NULL
+		SELECT	@intPriceFixationDetailId = 0
 		
 		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
 		
 		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
 		BEGIN
 		
+			SELECT	@intFutOptTransactionId = 0,@ysnHedge = 0
+
 			SELECT	@intFutOptTransactionId	=	FD.intFutOptTransactionId,	
 					@intBrokerId			=	FD.intBrokerId,
 					@intBrokerageAccountId	=	FD.intBrokerageAccountId,
