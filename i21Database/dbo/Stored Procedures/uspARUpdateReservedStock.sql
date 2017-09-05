@@ -45,7 +45,7 @@ BEGIN
 		,[intTransactionTypeId]	= @TransactionTypeId
 		,[intOwnershipTypeId]	= @Ownership_Own
 	FROM 
-		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId]
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId]
 		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
@@ -61,6 +61,7 @@ BEGIN
 		AND ARI.[intInvoiceId] = @InvoiceId
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ARID.[intInventoryShipmentItemId] IS NULL
+		AND ARID.[intLoadDetailId] IS NULL
 		AND ARID.[intLotId] IS NULL
 
 	IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
