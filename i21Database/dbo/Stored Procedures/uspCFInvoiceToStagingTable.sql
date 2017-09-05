@@ -252,35 +252,35 @@ BEGIN TRY
 	,dtmDiscountDate
 	,dtmDueDate
 	,dtmInvoiceDate
-	,dblTotalMiles
-	,dblQuantity
-	,dblCalculatedTotalAmount
-	,dblOriginalTotalAmount
-	,dblCalculatedGrossAmount
-	,dblOriginalGrossAmount
-	,dblCalculatedNetAmount
-	,dblOriginalNetAmount
-	,dblMargin
-	,dblTotalTax
-	,dblTotalSST
-	,dblTaxExceptSST
-	,dblAccountTotalAmount --AS dblInvoiceTotal
-	,dblTotalQuantity
-	,dblTotalGrossAmount
-	,dblTotalNetAmount
-	,dblTotalAmount
-	,dblTotalTaxAmount
-	,dblEligableGallon
+	,ISNULL(dblTotalMiles				  ,0) AS dblTotalMiles
+	,ISNULL(dblQuantity					  ,0) AS dblQuantity
+	,ISNULL(dblCalculatedTotalAmount	  ,0) AS dblCalculatedTotalAmount
+	,ISNULL(dblOriginalTotalAmount		  ,0) AS dblOriginalTotalAmount
+	,ISNULL(dblCalculatedGrossAmount	  ,0) AS dblCalculatedGrossAmount
+	,ISNULL(dblOriginalGrossAmount		  ,0) AS dblOriginalGrossAmount
+	,ISNULL(dblCalculatedNetAmount		  ,0) AS dblCalculatedNetAmount
+	,ISNULL(dblOriginalNetAmount		  ,0) AS dblOriginalNetAmount
+	,ISNULL(dblMargin					  ,0) AS dblMargin
+	,ISNULL(dblTotalTax					  ,0) AS dblTotalTax
+	,ISNULL(dblTotalSST					  ,0) AS dblTotalSST
+	,ISNULL(dblTaxExceptSST				  ,0) AS dblTaxExceptSST
+	,ISNULL(dblAccountTotalAmount 		  ,0) AS dblAccountTotalAmount 
+	,ISNULL(dblTotalQuantity			  ,0) AS dblTotalQuantity
+	,ISNULL(dblTotalGrossAmount			  ,0) AS dblTotalGrossAmount
+	,ISNULL(dblTotalNetAmount			  ,0) AS dblTotalNetAmount
+	,ISNULL(dblTotalAmount				  ,0) AS dblTotalAmount
+	,ISNULL(dblTotalTaxAmount			  ,0) AS dblTotalTaxAmount
+	,ISNULL(dblEligableGallon			  ,0) AS dblEligableGallon
 	,TotalFET
 	,TotalSET
 	,TotalSST
 	,TotalLC
-	,dblDiscountRate
-	,dblDiscount
-	,dblAccountTotalAmount
-	,dblAccountTotalDiscount
-	,dblAccountTotalLessDiscount
-	,dblDiscountEP
+	,ISNULL(dblDiscountRate				  ,0) AS dblDiscountRate
+	,ISNULL(dblDiscount					  ,0) AS dblDiscount
+	,ISNULL(dblAccountTotalAmount		  ,0) AS dblAccountTotalAmount
+	,ISNULL(dblAccountTotalDiscount		  ,0) AS dblAccountTotalDiscount
+	,ISNULL(dblAccountTotalLessDiscount	  ,0) AS dblAccountTotalLessDiscount
+	,ISNULL(dblDiscountEP				  ,0) AS dblDiscountEP
 	,dblAPR
 	,ysnPrintMiscellaneous
 	,ysnSummaryByCard			
@@ -465,9 +465,17 @@ BEGIN TRY
 		,strCompanyName
 		,strCompanyAddress
 		,NULL --dblCreditLimit
-		,dblAccountTotalAmount --dblInvoiceTotal
+		,(dblAccountTotalAmount + ( 
+			ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
+			WHERE innerTable.intAccountId = cfInv.intAccountId
+			GROUP BY intAccountId),0)
+		)) --dblInvoiceTotal
 		,0 --dblPayment
-		,dblAccountTotalAmount --dblBalance
+		,(dblAccountTotalAmount + ( 
+			ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
+			WHERE innerTable.intAccountId = cfInv.intAccountId
+			GROUP BY intAccountId),0)
+		))  --dblBalance
 		,NULL --dblTotalAR
 		,NULL --dblCreditAvailable
 		,NULL --dblFuture
@@ -525,7 +533,7 @@ BEGIN TRY
 		END
 		
 
-		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1
+		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
 
 
 		UPDATE tblARCustomerStatementStagingTable
@@ -536,7 +544,7 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.strCFGroupDiscoount				   = 		cfInv.strGroupName			
 				,tblARCustomerStatementStagingTable.intCFDiscountDay				   = 		cfInv.intDiscountDay			
 				,tblARCustomerStatementStagingTable.strCFTermType					   = 		cfInv.strTermType				
-				,tblARCustomerStatementStagingTable.dtmCFInvoiceDate				   = 		cfInv.dtmInvoiceDate			
+				--,tblARCustomerStatementStagingTable.dtmCFInvoiceDate				   = 		cfInv.dtmInvoiceDate			
 				,tblARCustomerStatementStagingTable.intCFTermID						   = 		cfInv.intTermID					
 				,tblARCustomerStatementStagingTable.dblCFAccountTotalAmount			   = 		cfInv.dblAccountTotalAmount		
 				,tblARCustomerStatementStagingTable.dblCFAccountTotalDiscount		   = 		cfInv.dblAccountTotalDiscount	
@@ -573,11 +581,94 @@ BEGIN TRY
 		DECLARE @strWebsite NVARCHAR(MAX)
 		SET @strWebsite = (select TOP 1 ISNULL(strWebSite,'') from [tblSMCompanySetup])
 
+
+		
+		DELETE FROM tblARCustomerStatementStagingTable 
+		WHERE intEntityCustomerId IN (
+			SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE intEntityCustomerId not in (
+				SELECT intEntityCustomerId AS intCount FROM tblARCustomerStatementStagingTable
+				WHERE 
+				strTransactionType != 'Balance Forward' 
+				GROUP BY intEntityCustomerId,strCustomerName
+				HAVING ISNULL(COUNT(*),0) > 0)
+		AND ISNULL(dblTotalAR,0) = 0)
+
+		
+		--UPDATE tblARCustomerStatementStagingTable
+		--SET
+		--		 dblTotalAR						 = 		tbl1.dblTotalAR					
+		--		,dblCreditAvailable				 = 		tbl1.dblCreditAvailable			
+		--		,dblFuture						 = 		tbl1.dblFuture					
+		--		,dbl0Days						 = 		tbl1.dbl0Days					
+		--		,dbl10Days						 = 		tbl1.dbl10Days					
+		--		,dbl30Days						 = 		tbl1.dbl30Days					
+		--		,dbl60Days						 = 		tbl1.dbl60Days					
+		--		,dbl90Days						 = 		tbl1.dbl90Days					
+		--		,dbl91Days						 = 		tbl1.dbl91Days					
+		--		,dblCredits						 = 		tbl1.dblCredits					
+		--		,dblPrepayments					 = 		tbl1.dblPrepayments				
+		--		,strAccountStatusCode			 = 		tbl1.strAccountStatusCode		
+		--		,strFullAddress					 = 		tbl1.strFullAddress				
+		--		,strCompanyName					 = 		tbl1.strCompanyName				
+		--		,strCompanyAddress				 = 		tbl1.strCompanyAddress + CHAR(13) + @strWebsite
+		--		,dblCreditLimit					 = 		tbl1.dblCreditLimit				
+		--		,strCustomerName				 = 		tbl1.strCustomerName			
+		--		,strCustomerNumber				 = 		tbl1.strCustomerNumber			
+		--		,dtmAsOfDate					 = 		tbl1.dtmAsOfDate				
+		--FROM (
+		--		select 
+		--		 top 1 
+		--		 dblTotalAR	
+		--		,intEntityCustomerId
+		--		,dblCreditAvailable	
+		--		,dblFuture	
+		--		,dbl0Days	
+		--		,dbl10Days	
+		--		,dbl30Days	
+		--		,dbl60Days	
+		--		,dbl90Days	
+		--		,dbl91Days	
+		--		,dblCredits	
+		--		,dblPrepayments
+		--		,strAccountStatusCode	
+		--		,strFullAddress	
+		--		,strCompanyName	
+		--		,strCompanyAddress	
+		--		,dblCreditLimit
+		--		,strCustomerName
+		--		,strCustomerNumber
+		--		,dtmAsOfDate
+		--		from tblARCustomerStatementStagingTable
+		--		where dblTotalAR IS NOT NULL
+		--		group by 
+		--		dblTotalAR	
+		--		,intEntityCustomerId
+		--		,dblCreditAvailable	
+		--		,dblFuture	
+		--		,dbl0Days	
+		--		,dbl10Days	
+		--		,dbl30Days	
+		--		,dbl60Days	
+		--		,dbl90Days	
+		--		,dbl91Days	
+		--		,dblCredits	
+		--		,dblPrepayments
+		--		,strAccountStatusCode	
+		--		,strFullAddress	
+		--		,strCompanyName	
+		--		,strCompanyAddress	
+		--		,dblCreditLimit
+		--		,strCustomerName
+		--		,strCustomerNumber
+		--		,dtmAsOfDate) as tbl1
+		--		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = tbl1.intEntityCustomerId
+
+
 		UPDATE STAGING
-		SET STAGING.dblTotalAR				= STAGING2.dblTotalAR     
+		SET STAGING.dblTotalAR				= STAGING2.dblTotalAR
 		  , STAGING.dblCreditAvailable		= STAGING2.dblCreditAvailable   
 		  , STAGING.dblFuture				= STAGING2.dblFuture     
-		  , STAGING.dbl0Days				= STAGING2.dbl0Days     
+		  , STAGING.dbl0Days				= STAGING2.dbl0Days 
 		  , STAGING.dbl10Days				= STAGING2.dbl10Days     
 		  , STAGING.dbl30Days				= STAGING2.dbl30Days     
 		  , STAGING.dbl60Days				= STAGING2.dbl60Days     
