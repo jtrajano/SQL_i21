@@ -408,8 +408,9 @@ SELECT P.dtmDatePaid
      , dblAvailableCredit       = ISNULL(PD.dblPayment, 0)
 	 , dblPrepayments			= 0
 FROM dbo.tblARPayment P WITH (NOLOCK)
-    LEFT JOIN #PAYMENTDETAIL PD ON P.intPaymentId = PD.intPaymentId
-    LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))				    	
+    LEFT JOIN #PAYMENTDETAIL PD ON P.intPaymentId = PD.intPaymentId 
+	--INNER JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND I.strType <> 'CF Tran' AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
+    LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) AND I.strType <> 'CF Tran'
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
   AND (@intEntityCustomerIdLocal IS NULL OR P.intEntityCustomerId = @intEntityCustomerIdLocal)
@@ -624,7 +625,7 @@ SELECT I.intInvoiceId
 	 , I.strType
 FROM dbo.tblARPayment P WITH (NOLOCK)
     LEFT JOIN #PAYMENTDETAIL PD ON P.intPaymentId = PD.intPaymentId
-    LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))    	
+    LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) AND I.strType <> 'CF Tran'
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND (@intEntityCustomerIdLocal IS NULL OR P.intEntityCustomerId = @intEntityCustomerIdLocal)

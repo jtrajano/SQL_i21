@@ -573,77 +573,6 @@ BEGIN TRY
 		DECLARE @strWebsite NVARCHAR(MAX)
 		SET @strWebsite = (select TOP 1 ISNULL(strWebSite,'') from [tblSMCompanySetup])
 
-		
-		--UPDATE tblARCustomerStatementStagingTable
-		--SET
-		--		 dblTotalAR						 = 		tbl1.dblTotalAR					
-		--		,dblCreditAvailable				 = 		tbl1.dblCreditAvailable			
-		--		,dblFuture						 = 		tbl1.dblFuture					
-		--		,dbl0Days						 = 		tbl1.dbl0Days					
-		--		,dbl10Days						 = 		tbl1.dbl10Days					
-		--		,dbl30Days						 = 		tbl1.dbl30Days					
-		--		,dbl60Days						 = 		tbl1.dbl60Days					
-		--		,dbl90Days						 = 		tbl1.dbl90Days					
-		--		,dbl91Days						 = 		tbl1.dbl91Days					
-		--		,dblCredits						 = 		tbl1.dblCredits					
-		--		,dblPrepayments					 = 		tbl1.dblPrepayments				
-		--		,strAccountStatusCode			 = 		tbl1.strAccountStatusCode		
-		--		,strFullAddress					 = 		tbl1.strFullAddress				
-		--		,strCompanyName					 = 		tbl1.strCompanyName				
-		--		,strCompanyAddress				 = 		tbl1.strCompanyAddress + CHAR(13) + @strWebsite
-		--		,dblCreditLimit					 = 		tbl1.dblCreditLimit				
-		--		,strCustomerName				 = 		tbl1.strCustomerName			
-		--		,strCustomerNumber				 = 		tbl1.strCustomerNumber			
-		--		,dtmAsOfDate					 = 		tbl1.dtmAsOfDate				
-		--FROM (
-		--		select 
-		--		 top 1 
-		--		 dblTotalAR	
-		--		,intEntityCustomerId
-		--		,dblCreditAvailable	
-		--		,dblFuture	
-		--		,dbl0Days	
-		--		,dbl10Days	
-		--		,dbl30Days	
-		--		,dbl60Days	
-		--		,dbl90Days	
-		--		,dbl91Days	
-		--		,dblCredits	
-		--		,dblPrepayments
-		--		,strAccountStatusCode	
-		--		,strFullAddress	
-		--		,strCompanyName	
-		--		,strCompanyAddress	
-		--		,dblCreditLimit
-		--		,strCustomerName
-		--		,strCustomerNumber
-		--		,dtmAsOfDate
-		--		from tblARCustomerStatementStagingTable
-		--		where dblTotalAR IS NOT NULL
-		--		group by 
-		--		dblTotalAR	
-		--		,intEntityCustomerId
-		--		,dblCreditAvailable	
-		--		,dblFuture	
-		--		,dbl0Days	
-		--		,dbl10Days	
-		--		,dbl30Days	
-		--		,dbl60Days	
-		--		,dbl90Days	
-		--		,dbl91Days	
-		--		,dblCredits	
-		--		,dblPrepayments
-		--		,strAccountStatusCode	
-		--		,strFullAddress	
-		--		,strCompanyName	
-		--		,strCompanyAddress	
-		--		,dblCreditLimit
-		--		,strCustomerName
-		--		,strCustomerNumber
-		--		,dtmAsOfDate) as tbl1
-		--		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = tbl1.intEntityCustomerId
-
-
 		UPDATE STAGING
 		SET STAGING.dblTotalAR				= STAGING2.dblTotalAR     
 		  , STAGING.dblCreditAvailable		= STAGING2.dblCreditAvailable   
@@ -690,29 +619,7 @@ BEGIN TRY
 		  ,dtmAsOfDate
 		  from tblARCustomerStatementStagingTable
 		  where dblTotalAR IS NOT NULL
-		   AND intEntityCustomerId = STAGING.intEntityCustomerId
-		  group by 
-		  dblTotalAR 
-		  ,intEntityCustomerId
-		  ,dblCreditAvailable 
-		  ,dblFuture 
-		  ,dbl0Days 
-		  ,dbl10Days 
-		  ,dbl30Days 
-		  ,dbl60Days 
-		  ,dbl90Days 
-		  ,dbl91Days 
-		  ,dblCredits 
-		  ,dblPrepayments
-		  ,strAccountStatusCode 
-		  ,strFullAddress
-		  ,strStatementFooterComment 
-		  ,strCompanyName 
-		  ,strCompanyAddress 
-		  ,dblCreditLimit
-		  ,strCustomerName
-		  ,strCustomerNumber
-		  ,dtmAsOfDate
+		   AND intEntityCustomerId = STAGING.intEntityCustomerId		 
 		) STAGING2
 		WHERE STAGING.dblTotalAR IS NULL
 
