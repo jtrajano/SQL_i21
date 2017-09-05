@@ -14,6 +14,4 @@
 				,strSalespersonName
 			from
 				vyuCRMOpportunitySalesrepAndLob
-			where
-				intLineOfBusinessId <> 0
 			) as result
