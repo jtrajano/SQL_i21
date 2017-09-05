@@ -84,6 +84,7 @@ BEGIN
 			AND intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail 
 												WHERE intPayGroupId = @intPayGroupId
 												AND dtmDateFrom >= ISNULL(@dtmDateFrom, dtmDateFrom) AND dtmDateFrom <= ISNULL(@dtmDateTo, dtmDateTo))
+		ORDER BY intSort ASC
 
 		DELETE FROM #tmpPayGroups WHERE intPayGroupId = @intPayGroupId
 	END
