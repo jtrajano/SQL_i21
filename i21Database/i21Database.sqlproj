@@ -5750,6 +5750,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\30_UpdateBatchIdUsed.sql" />
     <Build Include="dbo\Functions\fnHDTicketCommentSentMessage.sql" />
     <None Include="Scripts\Post-Deployment\CCR\SiteDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
