@@ -2619,6 +2619,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             record.set('dblGross', totalGross);
             record.set('dblNet', totalNet);
+
+            if(record.get('ysnQtyUOMChanged')){    
+                record.set('dblGrossBeforeEdit', totalGross);
+                record.set('dblNetBeforeEdit', totalNet);
+                record.set('ysnQtyUOMChanged', false);
+            }
         }
     },
 
@@ -6751,6 +6757,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
         current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
         current.set('strUnitType', records[0].get('strUnitType'));
+
+        current.set('ysnQtyUOMChanged', true);
 
         if (current.get('dblWeightUOMConvFactor') === 0) {
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
