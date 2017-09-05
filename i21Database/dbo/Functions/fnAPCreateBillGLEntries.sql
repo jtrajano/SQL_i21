@@ -158,9 +158,20 @@ BEGIN
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId
 				UNION ALL --taxes
-				SELECT (CAST(R2.dblTax AS DECIMAL(18,2))) AS dblTotal , R.dblRate  AS dblRate, exRates.intCurrencyExchangeRateTypeId, exRates.strCurrencyExchangeRateType
+				SELECT CASE WHEN charges.intInventoryReceiptChargeId > 0 
+									THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
+												THEN R2.dblTax * -1 ELSE R2.dblTax END) 
+							ELSE R2.dblTax
+						END AS dblTotal ,
+				 R.dblRate  AS dblRate, 
+				 exRates.intCurrencyExchangeRateTypeId,
+				  exRates.strCurrencyExchangeRateType
                 FROM dbo.tblAPBillDetail R
 				INNER JOIN tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
+				LEFT JOIN tblICInventoryReceiptCharge charges
+					ON R.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+				LEFT JOIN tblICInventoryReceipt receipts
+					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
             ) Details
