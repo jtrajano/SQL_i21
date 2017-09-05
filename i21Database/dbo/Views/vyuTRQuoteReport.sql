@@ -17,11 +17,15 @@ SELECT TOP 100 PERCENT QD.intQuoteDetailId
 							WHEN (ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) < 0 THEN CAST((ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) AS NVARCHAR(50))
 							WHEN (ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) = 0 THEN CAST('0.00' AS NVARCHAR(50))
 							ELSE '+' + CAST((ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) AS NVARCHAR(50)) END
-	, dblQuotePrice = (CASE WHEN CustomerTransports.ysnShowTaxDetail = 0 AND CustomerTransports.ysnShowFeightDetail = 0 THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)
-							WHEN CustomerTransports.ysnShowTaxDetail = 1 AND CustomerTransports.ysnShowFeightDetail = 1 THEN ISNULL(QD.dblQuotePrice, 0) - ISNULL(QD.dblFreightRate, 0)
-							WHEN CustomerTransports.ysnShowTaxDetail = 1 AND CustomerTransports.ysnShowFeightDetail = 0 THEN ISNULL(QD.dblQuotePrice, 0)
-							WHEN CustomerTransports.ysnShowTaxDetail = 0 AND CustomerTransports.ysnShowFeightDetail = 1 THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0) - ISNULL(QD.dblFreightRate, 0) END)
-	, dblTotalPrice = ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)
+	--, dblQuotePrice = (CASE WHEN CustomerTransports.ysnShowTaxDetail = 0 AND CustomerTransports.ysnShowFeightDetail = 0 THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)
+	--						WHEN CustomerTransports.ysnShowTaxDetail = 1 AND CustomerTransports.ysnShowFeightDetail = 1 THEN ISNULL(QD.dblQuotePrice, 0) - ISNULL(QD.dblFreightRate, 0)
+	--						WHEN CustomerTransports.ysnShowTaxDetail = 1 AND CustomerTransports.ysnShowFeightDetail = 0 THEN ISNULL(QD.dblQuotePrice, 0)
+	--						WHEN CustomerTransports.ysnShowTaxDetail = 0 AND CustomerTransports.ysnShowFeightDetail = 1 THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0) - ISNULL(QD.dblFreightRate, 0) END)
+	, dblQuotePrice = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Roll-up' THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)
+							ELSE ISNULL(QD.dblQuotePrice, 0) - ISNULL(QD.dblFreightRate, 0) END)
+	--, dblTotalPrice = ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)
+	, dblTotalPrice = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Exclude' THEN ISNULL(QD.dblQuotePrice, 0) - ISNULL(QD.dblFreightRate, 0)
+							ELSE ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0) END)
 	, ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) 
 									FROM vyuARCustomerContacts CC 
 									WHERE CC.intCustomerEntityId = QH.intEntityCustomerId 
@@ -30,9 +34,12 @@ SELECT TOP 100 PERCENT QD.intQuoteDetailId
 							ELSE CONVERT(BIT, 0) END
 	, QH.intQuoteHeaderId
 	, QH.strQuoteComments
-	, CustomerTransports.ysnShowTaxDetail
+	, strNote = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Roll-up' THEN 'Note: Tax and Fees inclusive.' ELSE null END)
+	--, CustomerTransports.ysnShowTaxDetail
+	, ysnShowTaxDetail = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Itemize' THEN convert(bit,1) ELSE convert(bit,0) END)
 	, dblTax = ISNULL(QD.dblTax, 0)
-	, CustomerTransports.ysnShowFeightDetail
+	--, CustomerTransports.ysnShowFeightDetail
+	, ysnShowFeightDetail = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Itemize' THEN convert(bit,1) ELSE convert(bit,0) END)
 	, dblFreight = ISNULL(QD.dblFreightRate, 0)
 FROM tblTRQuoteHeader QH
 CROSS APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
