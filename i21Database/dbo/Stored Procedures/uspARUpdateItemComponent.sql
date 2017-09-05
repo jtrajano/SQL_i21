@@ -82,6 +82,7 @@ BEGIN
 		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0
 		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
+		AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 		AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0
 
 
@@ -124,6 +125,7 @@ BEGIN
 		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0	
 		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')	
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
+		AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 		AND ISNULL(ARID.[intSalesOrderDetailId], 0) = 0
 						
 	 
