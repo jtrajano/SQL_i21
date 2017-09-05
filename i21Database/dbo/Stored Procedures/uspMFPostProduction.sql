@@ -666,7 +666,7 @@ BEGIN
 
 	DELETE
 	FROM @GLEntries
-	WHERE strTransactionType = 'Consume'
+	WHERE strTransactionType NOT IN ('Produce') 
 
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,@ysnPost

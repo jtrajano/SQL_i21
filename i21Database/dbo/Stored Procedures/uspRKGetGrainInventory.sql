@@ -81,9 +81,76 @@ JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnul
 WHERE intCommodityId=@intCommodityId
 AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) 
-and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)  )t
+and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) 
+
+union
+SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
+		'' as strAdjDistributionOption,
+		'' as strCountDistributionOption,
+		'' tranShipmentNumber,
+		0.0 tranShipQty,
+		strReceiptNumber tranReceiptNumber,
+		dblInQty tranRecQty,
+		'' tranAdjNumber,
+		0.0 dblAdjustmentQty,
+		'' tranCountNumber,
+		0.0 dblCountQty,
+		'' tranInvoiceNumber,
+		0.0 dblInvoiceQty,
+		intInventoryReceiptId,
+		null intInventoryShipmentId,
+		null intInventoryAdjustmentId,
+		null intInventoryCountId,
+		null intInvoiceId 
+FROM(
+SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,r.strReceiptNumber,
+		strDistributionOption ,r.intInventoryReceiptId
+FROM tblSCTicket st
+		JOIN tblICItem i on i.intItemId=st.intItemId 
+		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId
+		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
+WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
+		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+		AND i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer')a
 
 
+Union
+SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributionOption,
+		'' as strAdjDistributionOption,
+		'' as strCountDistributionOption,
+		strShipmentNumber tranShipmentNumber,
+		dblOutQty tranShipQty,
+		'' tranReceiptNumber,
+		0.0 tranRecQty,
+		'' tranAdjNumber,
+		0.0 dblAdjustmentQty,
+		'' tranCountNumber,
+		0.0 dblCountQty,
+		'' tranInvoiceNumber,
+		0.0 dblInvoiceQty,
+		null intInventoryReceiptId,
+		intInventoryShipmentId intInventoryShipmentId,
+		null intInventoryAdjustmentId,
+		null intInventoryCountId,
+		null intInvoiceId 
+FROM(
+SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty,r.strShipmentNumber,
+		strDistributionOption ,r.intInventoryShipmentId
+FROM tblSCTicket st
+		JOIN tblICItem i on i.intItemId=st.intItemId 
+		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=st.intTicketId
+		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
+WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
+		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+		AND i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer')a
+
+ )t
 
 SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
     dtmDate [dtmDate],case when isnull(tranReceiptNumber,'') <> '' then tranReceiptNumber

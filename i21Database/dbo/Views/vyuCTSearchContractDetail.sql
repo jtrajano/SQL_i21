@@ -67,6 +67,9 @@ AS
 			CA.strDescription				AS	strProductType,
 			dbo.fnCTGetApprovedSampleQuantity(CD.intContractDetailId) AS dblApprovedQty,
 			SB.strSubLocationName,
+			BK.strBook,
+			SK.strSubBook,
+
 			--Required by other modules
 		
 			IM.strLotTracking,				
@@ -90,6 +93,9 @@ AS
 	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
 	JOIN	tblCTIndex						IX	ON	IX.intIndexId				=	CD.intIndexId				LEFT
+	JOIN	tblCTBook						BK	ON	BK.intBookId				=	CD.intBookId				LEFT
+	JOIN	tblCTSubBook					SK	ON	SK.intSubBookId				=	CD.intSubBookId				LEFT
+
 	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				LEFT	
 	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				LEFT
 	JOIN	tblICUnitMeasure				U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			LEFT

@@ -45,6 +45,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\26_ActivitySource.sql
 :r .\SM\DefaultData\27_Language.sql
 :r .\SM\DefaultData\28_MultiCompany.sql
+:r .\SM\DefaultData\29_TransportationMode.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql
@@ -213,6 +214,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\28_UpdateBaseAmounts.sql
 :r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
 :r .\AR\DefaultData\30_UpdateBatchIdUsed.sql
+:r .\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -240,6 +242,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateVoucherDetail1099.sql
 :r .\AP\UpdateAmountSign.sql
 :r .\AP\DefaultDataBalance.sql
+:r .\AP\UpdatePrepayVoucherStatus.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

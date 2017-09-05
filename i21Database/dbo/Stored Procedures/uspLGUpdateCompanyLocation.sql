@@ -5,6 +5,7 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg	NVARCHAR(MAX)
 	DECLARE @ysnUpdateCompanyLocation BIT = 0
+	DECLARE @ysnRestrictIncreaseSeqQty BIT = 0
 	DECLARE @intCountSILoads INT = 0 
 	DECLARE @intCountSALoads INT = 0 
 	DECLARE @strContractNumber NVARCHAR(100)
@@ -14,7 +15,8 @@ BEGIN TRY
 	DECLARE @dblSeqQty NUMERIC(18,6)
 	DECLARE @strErrMsg NVARCHAR(MAX)
 
-	SELECT @ysnUpdateCompanyLocation = ISNULL(ysnUpdateCompanyLocation, 0)
+	SELECT @ysnUpdateCompanyLocation = ISNULL(ysnUpdateCompanyLocation, 0),
+		   @ysnRestrictIncreaseSeqQty = ISNULL(ysnRestrictIncreaseSeqQty, 0)	
 	FROM tblLGCompanyPreference	
 
 	IF (@ysnUpdateCompanyLocation = 1)
@@ -82,61 +84,62 @@ BEGIN TRY
 
 	SELECT @dblSeqQty = dblQuantity FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
-	--IF(@dblTotalSIQty >= @dblSeqQty)
-	--BEGIN
-		IF (ISNULL(@intCountSILoads, 0) > 1)
-		BEGIN
-			SET @strErrMsg = 'More than one shipping instruction is available for contract ' + @strContractNumber + ' sequence ' + LTRIM(@intContractSeq) +'. Cannot reduce qty.'
-			RAISERROR (@strErrMsg,16,1)
-		END
-		ELSE 
-		BEGIN
-			UPDATE LD
-				SET dblQuantity = CD.dblQuantity,
-					dblNet = dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId,LD.intWeightItemUOMId,CD.dblQuantity),
-					dblGross = dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId,LD.intWeightItemUOMId,CD.dblQuantity)
-			FROM tblLGLoad L
-			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale IN (1,3) THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
-			WHERE CD.intContractDetailId = @intContractDetailId
+	IF (ISNULL(@intCountSILoads, 0) > 1)
+	BEGIN
+		SET @strErrMsg = 'More than one shipping instruction is available for contract ' + @strContractNumber + ' sequence ' + LTRIM(@intContractSeq) +'. Cannot reduce qty.'
+		RAISERROR (@strErrMsg,16,1)
+	END
+	ELSE 
+	BEGIN
+		UPDATE LD
+			SET dblQuantity = CD.dblQuantity,
+				dblNet = dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId,LD.intWeightItemUOMId,CD.dblQuantity),
+				dblGross = dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId,LD.intWeightItemUOMId,CD.dblQuantity),
+				intConcurrencyId = LD.intConcurrencyId + 1
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale IN (1,3) THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
+		WHERE CD.intContractDetailId = @intContractDetailId
+			AND L.intShipmentType = 2
 
-			UPDATE L
-			SET intNumberOfContainers = ROUND(LD.dblNet / ISNULL(CASE 
-							WHEN ISNULL(CASE 
-										WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bags'
-											THEN CTCQ.dblQuantity
-										ELSE CTCQ.dblBulkQuantity
-										END, 0) = 0
-								THEN LD.dblNet
-							ELSE CASE 
+		UPDATE L
+		SET intNumberOfContainers = ROUND(LD.dblNet / ISNULL(CASE 
+						WHEN ISNULL(CASE 
 									WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bags'
 										THEN CTCQ.dblQuantity
 									ELSE CTCQ.dblBulkQuantity
-									END
-							END, LD.dblNet),0)
-			FROM tblCTContractDetail CD
-			JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
-			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
-			LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
-			LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId
-				AND IC.intItemContractId = CD.intItemContractId
-			LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId, I.intOriginId)
-				AND I.intCommodityId = CA.intCommodityId
-			LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
-				AND CTCQ.intContainerTypeId = CT.intContainerTypeId
-			WHERE CD.intContractDetailId = @intContractDetailId
-		END
-	--END
+									END, 0) = 0
+							THEN LD.dblNet
+						ELSE CASE 
+								WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bags'
+									THEN CTCQ.dblQuantity
+								ELSE CTCQ.dblBulkQuantity
+								END
+						END, LD.dblNet),0),
+				intConcurrencyId = LD.intConcurrencyId + 1
+		FROM tblCTContractDetail CD
+		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+		LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
+		LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId
+			AND IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId, I.intOriginId)
+			AND I.intCommodityId = CA.intCommodityId
+		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
+			AND CTCQ.intContainerTypeId = CT.intContainerTypeId
+		WHERE CD.intContractDetailId = @intContractDetailId
+			AND L.intShipmentType = 2
+	END
 
-	--IF (ISNULL(@intCountSALoads, 0) > 1)
-	--BEGIN
-	--	IF(@dblTotalSAQty > @dblSeqQty)
-	--	BEGIN
-	--		SET @strErrMsg = 'Seq qty cannot be less than the total qty of the associated shipping advice(s).'
-	--		RAISERROR (@strErrMsg,16,1)
-	--	END
-	--END
+	IF(@ysnRestrictIncreaseSeqQty = 1)
+	BEGIN 
+		IF (ISNULL(@intCountSALoads, 0) > 0)
+		BEGIN
+			SET @strErrMsg = 'Shipping advice is available for contract ' + @strContractNumber + ' sequence ' + LTRIM(@intContractSeq) +'. Cannot change qty.'
+			RAISERROR (@strErrMsg,16,1)
+		END
+	END
 
 END TRY
 

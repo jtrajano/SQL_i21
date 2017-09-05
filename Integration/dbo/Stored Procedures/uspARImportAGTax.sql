@@ -1,3 +1,7 @@
+﻿IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportAGTax')
+	DROP PROCEDURE uspARImportAGTax
+GO
+
 CREATE PROCEDURE [dbo].[uspARImportAGTax]
 	AS
 BEGIN

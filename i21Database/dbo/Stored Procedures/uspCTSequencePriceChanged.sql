@@ -27,7 +27,9 @@ BEGIN TRY
 			@intContractHeaderId	=	intContractHeaderId
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId
-
+	
+	SELECT @dblCashPrice = dblSeqPrice FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId) 
+		
 	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
 
 	SELECT @ysnAllowChangePricing = ysnAllowChangePricing, @ysnEnablePriceContractApproval = ISNULL(ysnEnablePriceContractApproval,0) FROM tblCTCompanyPreference

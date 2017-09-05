@@ -5648,6 +5648,11 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
     <Build Include="dbo\Views\vyuCCSiteHeaderSearch.sql" />
     <Build Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
+    <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
+    <Build Include="dbo\Tables\tblSMTransportationMode.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\29_TransportationMode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5782,6 +5787,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\30_UpdateBatchIdUsed.sql" />
     <Build Include="dbo\Functions\fnHDTicketCommentSentMessage.sql" />
     <None Include="Scripts\Post-Deployment\CCR\SiteDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePrepayVoucherStatus.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

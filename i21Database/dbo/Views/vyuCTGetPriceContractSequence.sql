@@ -4,7 +4,7 @@ AS
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractSeq ASC) AS INT) intUniqueId,
 			*,
-			dbo.fnCTConvertQuantityToTargetCommodityUOM(intBasisCommodityUOMId,intFinalPriceUOMId,dblOriginalBasis)/ 
+			dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intBasisCommodityUOMId,dblOriginalBasis)/ 
 			CASE	WHEN	intBasisCurrencyId = intCurrencyId	THEN 1
 					WHEN	intBasisCurrencyId <> intCurrencyId 
 					AND		ysnBasisSubCurrency = 1				THEN 100 ELSE 0.01 

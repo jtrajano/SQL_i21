@@ -138,6 +138,10 @@ BEGIN TRY
 					,ysnCancelled = @ysnCancel
 					,strExternalShipmentNumber = NULL
 				WHERE intLoadId = @intLoadId
+				
+				UPDATE tblLGLoadContainer
+				SET ysnNewContainer = 1
+				WHERE intLoadId = @intLoadId
 
 				IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE intLoadId = @intLoadId)
 				BEGIN
