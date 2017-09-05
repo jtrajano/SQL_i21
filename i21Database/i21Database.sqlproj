@@ -5651,6 +5651,8 @@
     <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
     <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
+    <Build Include="dbo\Tables\tblSMTransportationMode.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\29_TransportationMode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

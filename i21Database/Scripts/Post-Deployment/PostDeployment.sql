@@ -45,6 +45,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\26_ActivitySource.sql
 :r .\SM\DefaultData\27_Language.sql
 :r .\SM\DefaultData\28_MultiCompany.sql
+:r .\SM\DefaultData\29_TransportationMode.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql
