@@ -5785,6 +5785,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\30_UpdateBatchIdUsed.sql" />
     <Build Include="dbo\Functions\fnHDTicketCommentSentMessage.sql" />
     <None Include="Scripts\Post-Deployment\CCR\SiteDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePrepayVoucherStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -6,6 +6,7 @@
     [intTransactionReversed]				INT             NULL ,
 	[intCommodityId]				INT             NULL ,
 	[intBankInfoId]				INT             NULL ,
+	[ysnPrepayHasPayment]				BIT             NOT NULL DEFAULT 0,
     [dtmDate]              DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]           DATETIME        NOT NULL DEFAULT GETDATE(),
     [intAccountId]         INT             NULL ,
