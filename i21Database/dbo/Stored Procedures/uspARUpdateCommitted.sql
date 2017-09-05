@@ -1034,6 +1034,7 @@ BEGIN
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
 		AND ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0
+		AND ISNULL(ARID.[intLoadDetailId], 0) = 0 
 
 	UNION ALL
 	--SO shipped > ordered		--Component
@@ -1086,6 +1087,7 @@ BEGIN
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
 		AND ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0
+		AND ISNULL(ARID.[intLoadDetailId], 0) = 0 
 				
 		
 	UPDATE

@@ -122,7 +122,7 @@ SELECT
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 FROM 
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblPrice], [intCompanyLocationSubLocationId], [intStorageLocationId], [intItemUOMId], [intLoadDetailId], [dblTotal], [ysnBlended],
-			[dblQtyShipped], [intInventoryShipmentItemId], [intShipmentPurchaseSalesContractId], [intStorageScheduleTypeId], [intItemWeightUOMId], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [dblShipmentNetWt], [intLotId]
+			[dblQtyShipped], [intInventoryShipmentItemId], [intStorageScheduleTypeId], [intItemWeightUOMId], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [dblShipmentNetWt], [intLotId]
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
@@ -148,7 +148,7 @@ LEFT OUTER JOIN
 WHERE				
 	((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], IST.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
-	AND (ARID.[intShipmentPurchaseSalesContractId] IS NULL OR ARID.[intShipmentPurchaseSalesContractId] = 0)
+	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
 	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
 	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1))
 	AND ARI.[strTransactionType] <> 'Debit Memo'							
@@ -192,7 +192,7 @@ FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intItemUOMId], [dblQtyShipped], [dblPrice], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblTotal] 
-		,[intInventoryShipmentItemId] ,[intShipmentPurchaseSalesContractId] ,[intStorageScheduleTypeId] ,[intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate]
+		,[intInventoryShipmentItemId] ,[intLoadDetailId] ,[intStorageScheduleTypeId] ,[intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate]
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		ON ARIC.[intItemId] = ARID.[intItemId]
 INNER JOIN
@@ -214,7 +214,7 @@ LEFT OUTER JOIN
 WHERE
 	((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], IST.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest') 
 	AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
-	AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
+	AND ISNULL(ARID.[intLoadDetailId],0) = 0
 	AND ISNULL(ARID.[intItemId],0) <> 0
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARI.[strTransactionType] <> 'Debit Memo'
