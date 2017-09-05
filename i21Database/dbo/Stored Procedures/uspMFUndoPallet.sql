@@ -31,6 +31,9 @@ BEGIN TRY
 		,@strLotTracking NVARCHAR(50)
 		,@intSpecialPalletLotId INT
 		,@strLocationName NVARCHAR(50)
+		,@intStorageLocationId int
+		,@strLotNumber nvarchar(50)
+
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
 		,intItemId INT
@@ -92,26 +95,11 @@ BEGIN TRY
 		,@intItemUOMId = intItemUOMId
 		,@dblPhysicalCount = dblPhysicalCount
 		,@intTransactionDetailId = intWorkOrderProducedLotId
+		,@intStorageLocationId=intStorageLocationId 
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
-		--AND intLotId = @intLotId
 		AND intBatchId = @intBatchId
 
-	--IF EXISTS (
-	--		SELECT *
-	--		FROM tblMFWorkOrderProducedLot
-	--		WHERE intWorkOrderId = @intWorkOrderId
-	--			AND intLotId = @intLotId
-	--			AND ysnReleased = 1
-	--		)
-	--BEGIN
-	--	RAISERROR (
-	--			51137
-	--			,11
-	--			,1
-	--			)
-	--	RETURN
-	--END
 	IF EXISTS (
 			SELECT *
 			FROM tblMFWorkOrderProducedLot
@@ -136,10 +124,10 @@ BEGIN TRY
 				AND intLotStatusId = 2
 			)
 		AND @ysnForceUndo = 0
-		AND @strLotTracking = 'Yes'
+		AND @strLotTracking <> 'No'
 	BEGIN
 		RAISERROR (
-				'Pallet Lot has been marked as a ghost and cannot be Undone.'
+				'Pallet/Lot has been marked as a ghost and cannot be Undone.'
 				,11
 				,1
 				)
@@ -154,10 +142,32 @@ BEGIN TRY
 				AND dblQty = 0
 			)
 		AND @ysnForceUndo = 0
-		AND @strLotTracking = 'Yes'
+		AND @strLotTracking <> 'No'
 	BEGIN
 		RAISERROR (
 				'Production reversal is not allowed for lots having zero qty.'
+				,11
+				,1
+				)
+
+		RETURN
+	END
+
+	SELECT @strLotNumber=strLotNumber
+	FROM dbo.tblICLot
+	WHERE intLotId = @intLotId
+
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblICLot
+			WHERE strLotNumber=@strLotNumber
+				AND intStorageLocationId =@intStorageLocationId 
+				AND dblQty = 0
+			)
+		AND @strLotTracking <> 'No'
+	BEGIN
+		RAISERROR (
+				'Pallet/Lot cannot be reversed. It is moved/adjusted/shipped.'
 				,11
 				,1
 				)
