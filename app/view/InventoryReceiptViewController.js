@@ -4735,7 +4735,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var plugin = grid.getPlugin('cepCharges');
         var current = plugin.getActiveRecord();
         var masterRecord = win.viewModel.data.current;
-        var cboVendor = win.down('#cboVendor');
+        //var cboVendor = win.down('#cboVendor');
         var cboCurrency = win.down('#cboCurrency');
 
         if (combo.itemId === 'cboOtherCharge') {
@@ -4747,7 +4747,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
 
             // Get the transaction currency
-            var chargeCurrencyId = cboCurrency.getValue();
+            var chargeCurrencyId = masterRecord.get('intCurrencyId');
 
             current.set('intChargeId', record.get('intItemId'));
             current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
@@ -4757,9 +4757,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // If other charge is accrue, default the vendor and currency from the transaction vendor and currency. 
             if (record.get('ysnAccrue') === true) {
                 current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
-                current.set('strVendorName', cboVendor.getRawValue());
-                current.set('intCurrencyId', chargeCurrencyId);
-                current.set('strCurrency', cboCurrency.getRawValue());
+                current.set('strVendorName', masterRecord.get('strVendorName'));
+                current.set('intCurrencyId', masterRecord.get('intCurrencyId'));
+                current.set('strCurrency', masterRecord.get('strCurrency'));
             }
             else {
                 current.set('intEntityVendorId', null);

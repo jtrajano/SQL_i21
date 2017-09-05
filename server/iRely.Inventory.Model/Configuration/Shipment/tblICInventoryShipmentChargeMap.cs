@@ -32,7 +32,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
-            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate").HasPrecision(18, 6);
 
             this.HasOptional(p => p.vyuICGetInventoryShipmentCharge)
                 .WithRequired(p => p.tblICInventoryShipmentCharge);

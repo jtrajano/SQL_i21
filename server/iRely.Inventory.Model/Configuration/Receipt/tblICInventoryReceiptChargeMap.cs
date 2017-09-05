@@ -36,10 +36,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
             this.Property(t => t.dblTax).HasColumnName("dblTax");
             this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
-           // this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
-           // this.Property(t => t.dblExchangeRate).HasColumnName("dblExchangeRate");
-           // this.Property(t => t.intCent).HasColumnName("intCent");
-            
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            // this.Property(t => t.dblExchangeRate).HasColumnName("dblExchangeRate");
+            // this.Property(t => t.intCent).HasColumnName("intCent");
+
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate").HasPrecision(18, 6);
+
             this.HasOptional(p => p.vyuICGetInventoryReceiptCharge)
                 .WithRequired(p => p.tblICInventoryReceiptCharge);
         }
