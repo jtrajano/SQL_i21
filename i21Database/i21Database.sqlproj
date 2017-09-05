@@ -5632,6 +5632,7 @@
     <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
     <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPNLPhysicalFuturesResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
