@@ -2,7 +2,7 @@
 (
 	@transactionIds NVARCHAR(MAX),
 	@type INT, -- 1 = Issued Stock, 2 = Retired Stock, 3 = Equity Payment, 4 = Voucher
-	@transaction NVARCHAR(MAX)
+	@transaction NVARCHAR(MAX) = NULL
 )
 RETURNS @returnTable TABLE
 (
@@ -65,6 +65,17 @@ BEGIN
 		FROM tblAPBill APB
 		INNER JOIN tblPATCustomerStock CS
 			ON APB.intBillId = CS.intBillId
+		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions) AND @transaction != 'Patronage'
+		UNION ALL
+		SELECT	'This voucher was created from Equity Payments - <strong>'+ EP.strPaymentNumber +'</strong>. Unpost it from there.',
+				'Voucher',
+				APB.strBillId,
+				APB.intBillId
+		FROM tblAPBill APB
+		INNER JOIN tblPATEquityPaySummary EPS
+			ON APB.intBillId = EPS.intBillId
+		INNER JOIN tblPATEquityPay EP
+			ON EP.intEquityPayId = EPS.intEquityPayId
 		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions) AND @transaction != 'Patronage'
 	END
 
