@@ -202,3 +202,15 @@ BEGIN
     VALUES(10,'Execute External Program')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 11)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(11,'Delete Log')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 12)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(12,'Reset Busy Flag')
+END
+GO

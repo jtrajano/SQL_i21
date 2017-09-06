@@ -68,6 +68,10 @@ Begin
 
 			EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT
 
+			--Re-check if the receipt no is already used. If yes, then regenerate the receipt no. 
+			IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptNumber = @strReceiptNo)
+				EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT
+
 			Set @strInfo2=ISNULL(@strReceiptNo,'')
 
 			--Receipt
