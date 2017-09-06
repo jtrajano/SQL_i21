@@ -232,7 +232,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'ysnWeights',
                     disabled: '{destinationWeightsDisabled}'
                 }
-            }
+            },
+            pgePostPreview: {
+                title: '{pgePreviewTitle}'
+            }    
         }
     },
 

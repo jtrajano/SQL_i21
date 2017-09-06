@@ -449,7 +449,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             btnViewItem: {
                 hidden: true
-            }
+            },
+            pgePostPreview: {
+                title: '{pgePreviewTitle}'
+            } 
         }
     },
 
