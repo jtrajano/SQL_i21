@@ -8,8 +8,8 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , dtmStartDate						= CTCD.dtmStartDate
 	 , dtmEndDate						= CTCD.dtmEndDate
 	 , strContractStatus				= CTCS.strContractStatus
-	 , intEntityCustomerId				= CTCH.intEntityId
-	 , intCurrencyId					= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.intInvoiceCurrencyId ELSE ISNULL(SMC.intMainCurrencyId, CTCD.intCurrencyId) END
+	 , intEntityCustomerId				= CTCH.intEntityId	 
+	 , intCurrencyId					= ISNULL(SMC.intMainCurrencyId, CTCD.intCurrencyId)
 	 , strCurrency						= SMC.strCurrency
 	 , intCompanyLocationId				= CTCD.intCompanyLocationId	
 	 , intItemId						= CTCD.intItemId
@@ -21,11 +21,8 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , strUnitMeasure					= ISNULL(ICUMP.strUnitMeasure, ICUMO.strUnitMeasure)
 	 , intPricingTypeId					= CTPT.intPricingTypeId
 	 , strPricingType					= CTPT.strPricingType
-	 , dblOrderPrice					= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.dblCashPrice * CTCD.dblRate ELSE CTCD.dblCashPrice END / (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
-	 , dblCashPrice						= CASE WHEN CTCD.ysnUseFXPrice = 1 
-											   THEN CTCD.dblCashPrice * CTCD.dblRate 
-											   ELSE CTCD.dblCashPrice 
-										  END
+	 , dblOrderPrice					= CTCD.dblCashPrice / (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
+	 , dblCashPrice						= CTCD.dblCashPrice 
 	 , intCurrencyExchangeRateTypeId	= CTCD.intRateTypeId
 	 , strCurrencyExchangeRateType		= SMCRT.strCurrencyExchangeRateType
 	 , intCurrencyExchangeRateId		= CTCD.intCurrencyExchangeRateId
@@ -58,12 +55,12 @@ FROM (
 		 , intContractSeq
 		 , dtmStartDate
 		 , dtmEndDate
-		 , intCurrencyId
+		 , intCurrencyId = CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN intInvoiceCurrencyId ELSE intCurrencyId END
 		 , intCompanyLocationId
 		 , intItemId
 		 , intItemUOMId
 		 , intPriceItemUOMId
-		 , dblCashPrice
+		 , dblCashPrice = CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN dblCashPrice * dblRate ELSE dblCashPrice END
 		 , dblBalance
 		 , dblScheduleQty
 		 , dblQuantity
