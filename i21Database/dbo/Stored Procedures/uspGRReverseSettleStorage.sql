@@ -44,7 +44,7 @@ BEGIN TRY
 				AND strType IN ('From Scale','From Transfer')
 
 			SELECT @intContractDetailId = intContractDetailId
-			FROM   vyuCTContractDetailView
+			FROM   tblCTContractDetail
 			WHERE  intContractHeaderId = @intContractHeaderId
 
 			EXEC uspCTUpdateSequenceQuantityUsingUOM 

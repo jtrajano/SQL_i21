@@ -286,7 +286,7 @@ BEGIN TRY
 				WHERE intSellContractKey = @SellContractKey
 
 				SELECT @intContractHeaderId = intContractHeaderId
-				FROM vyuCTContractDetailView
+				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 
 				IF @dblStorageUnits <= @dblContractUnits

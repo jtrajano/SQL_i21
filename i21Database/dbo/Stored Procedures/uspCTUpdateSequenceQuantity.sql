@@ -22,7 +22,8 @@ BEGIN TRY
 			@intToUnitMeasureId			INT,
 			@intItemId					INT,
 			@intContractHeaderId		INT,
-			@ysnLoad					BIT
+			@ysnLoad					BIT,
+			@dblTolerance				NUMERIC(18,6) = 0.0001
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -41,6 +42,11 @@ BEGIN TRY
 	FROM	vyuCTContractDetailView
 	WHERE	intContractDetailId = @intContractDetailId
 	
+	IF ABS(@dblQuantityToUpdate)- @dblAvailable < @dblTolerance AND ABS(@dblQuantityToUpdate)- @dblAvailable >0
+	BEGIN
+		 SET @dblQuantityToUpdate= - @dblAvailable
+	END
+
 	IF	@dblAvailable + @dblQuantityToUpdate < 0
 	BEGIN
 		SET @ErrMsg = 'Quantity cannot be reduced below '+LTRIM(@dblQuantity - @dblAvailable)+'.'

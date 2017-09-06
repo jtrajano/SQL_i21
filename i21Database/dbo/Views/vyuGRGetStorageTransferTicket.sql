@@ -24,7 +24,7 @@ SELECT TOP 100 PERCENT
 ,dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOpenBalance)  dblOpenBalance
 ,ST.ysnDPOwnedType
 ,SH.intContractHeaderId
-,CD.strContractNumber   
+,CH.strContractNumber   
 ,ISNULL(SH1.intTicketId,0) AS intTicketId
 ,ISNULL(dblDiscountsDue,0)-ISNULL(dblDiscountsPaid,0) AS dblDiscountUnPaid
 ,ISNULL(dblStorageDue,0)-ISNULL(dblStoragePaid,0) AS dblStorageUnPaid
@@ -39,6 +39,6 @@ JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.
 LEFT JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=CS.intCompanyLocationSubLocationId
 LEFT JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId=CS.intCustomerStorageId
 LEFT JOIN tblGRStorageHistory SH1 ON SH1.intCustomerStorageId=CS.intCustomerStorageId AND SH1.strType='From Scale'
-LEFT JOIN vyuCTContractDetailView CD ON CD.intContractHeaderId=SH.intContractHeaderId  
+LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId=SH.intContractHeaderId  
 WHERE CS.dblOpenBalance >0 AND ISNULL(CS.strStorageType,'') <> 'ITR'AND SH.strType IN('From Scale','From Transfer')  
 ORDER BY CS.dtmDeliveryDate
