@@ -173,12 +173,10 @@ BEGIN TRY
 		FULL OUTER JOIN tblSMShipVia
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityId = tblEMEntity_Transporter.intEntityId
 			ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityId
-		LEFT JOIN tblAPBillDetail ON tblAPBillDetail.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
-		LEFT JOIN tblAPBill ON tblAPBill.intBillId = tblAPBillDetail.intBillId
 		LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
 		LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 		LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
-		CROSS JOIN tblSMCompanySetup 
+		CROSS JOIN tblSMCompanySetup
 		WHERE tblTFReportingComponent.intReportingComponentId = @RCId
 			AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 			AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
