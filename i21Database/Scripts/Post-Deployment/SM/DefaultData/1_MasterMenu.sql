@@ -5057,19 +5057,19 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@SMSetPermissionsMenuId, 1)
 END
 
---IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payment Methods (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId)
---	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
---	VALUES (N'Payment Methods (Portal)', N'Accounts Receivable', @AccountPortalParentMenuId, N'Payment Methods (Portal)', N'Account', N'Screen', N'AccountsReceivable.view.MakePayments', N'small-menu-account', 1, 0, 0, 1, 4, 1)
---ELSE 
---	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'AccountsReceivable.view.MakePayments' WHERE strMenuName = 'Payment Methods (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payment Methods (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Payment Methods (Portal)', N'Accounts Receivable', @AccountPortalParentMenuId, N'Payment Methods (Portal)', N'Account', N'Screen', N'GlobalComponentEngine.view.PaymentMethods', N'small-menu-account', 1, 0, 0, 1, 4, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'GlobalComponentEngine.view.PaymentMethods' WHERE strMenuName = 'Payment Methods (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId
 
---DECLARE @ARPaymentMethodsMenuId INT
---SELECT  @ARPaymentMethodsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Payment Methods (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId
---IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Payment Methods (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId)
---BEGIN
---	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ARPaymentMethodsMenuId)
---	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@ARPaymentMethodsMenuId, 1)
---END
+DECLARE @ARPaymentMethodsMenuId INT
+SELECT  @ARPaymentMethodsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Payment Methods (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Payment Methods (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ARPaymentMethodsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@ARPaymentMethodsMenuId, 1)
+END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Change Password (Portal)' AND strModuleName = 'System Manager' AND intParentMenuID = @AccountPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
