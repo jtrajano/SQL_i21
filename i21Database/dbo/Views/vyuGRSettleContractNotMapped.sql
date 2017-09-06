@@ -18,25 +18,15 @@ SELECT
 ,V.strContractStatus   
 ,V.ysnUnlimitedQuantity   
 ,V.strPricingType   
-,V.intDetailConcurrencyId   
 ,V.intContractHeaderId   
 ,V.intCompanyLocationId   
 ,V.strLocationName   
 ,V.intItemId   
-,V.strItemNo   
-,V.intUnitMeasureId   
+,V.strItemNo     
 ,V.intPricingTypeId   
-,V.intDiscountId   
-,V.dblOriginalQty   
-,V.dblBalance    
 ,V.intContractTypeId   
-,V.intCommodityId   
-,V.ysnEarlyDayPassed   
-,V.ysnAllowedToShow   
 ,V.intContractStatusId
-,V.dblScheduleQty
-,V.intItemUOMId
 FROM tblGRSettleStorage S
 JOIN tblGRSettleContract T ON T.intSettleStorageId=S.intSettleStorageId
-JOIN vyuCTContractDetailView V ON V.intContractDetailId=T.intContractDetailId  
+JOIN vyuGRGetContracts V ON V.intContractDetailId=T.intContractDetailId  
 

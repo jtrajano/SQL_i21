@@ -240,15 +240,15 @@ BEGIN TRY
 	IF EXISTS(
 					SELECT 1 FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
 				AND dtmLastStorageAccrueDate IS NOT NULL
-				AND (dtmLastStorageAccrueDate >= @StorageChargeDate)
+				AND (dbo.fnRemoveTimeOnDate(dtmLastStorageAccrueDate) >= dbo.fnRemoveTimeOnDate(@StorageChargeDate))
 				AND (@strProcessType < > 'recalculate')
 			  ) --1.Calculation Date less than or equal to Last Accrue Date.
 			  
-		OR (@StorageChargeDate < @dtmDeliveryDate) --2.Calculation Date less than Delivery Date.
+		OR (dbo.fnRemoveTimeOnDate(@StorageChargeDate) < dbo.fnRemoveTimeOnDate(@dtmDeliveryDate)) --2.Calculation Date less than Delivery Date.
 		OR (
 				  (@intAllowanceDays > 0)
 			  AND (@dtmLastStorageAccrueDate IS NULL)
-			  AND ((DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1) <= @intAllowanceDays)
+			  AND ((DATEDIFF(DAY, dbo.fnRemoveTimeOnDate(@dtmDeliveryDate), dbo.fnRemoveTimeOnDate(@StorageChargeDate)) + 1) <= @intAllowanceDays)
 		    ) --3.Charge is not at all Accrued( Means at least once) and the No of Days between Dev.date to Calc. date less than or equal to Allowance Days.		
 	BEGIN
 		SET @dblStorageDuePerUnit = 0
@@ -256,10 +256,10 @@ BEGIN TRY
 		SET @StorageChargeCalculationRequired = 0
 	END
 	
-	IF @StorageChargeDate < @dtmDeliveryDate --1. When Storage Calculation Date less than Delivery date.
+	IF dbo.fnRemoveTimeOnDate(@StorageChargeDate) < dbo.fnRemoveTimeOnDate(@dtmDeliveryDate) --1. When Storage Calculation Date less than Delivery date.
 						OR (
 									 @dtmLastStorageAccrueDate IS NOT NULL
-								AND (@dtmLastStorageAccrueDate >= @StorageChargeDate)
+								AND (dbo.fnRemoveTimeOnDate(@dtmLastStorageAccrueDate) >= dbo.fnRemoveTimeOnDate(@StorageChargeDate))
 						   ) --2. When Last Storage Accrue date greather than or equal to Storage Calculation Date.
 						OR (@strAllowancePeriod='Date(s)' AND dbo.fnRemoveTimeOnDate(@dtmDeliveryDate) >= dbo.fnRemoveTimeOnDate(@dtmAllowancePeriodFrom) AND dbo.fnRemoveTimeOnDate(@StorageChargeDate) <=dbo.fnRemoveTimeOnDate(@dtmAllowancePeriodTo))   
 	BEGIN
@@ -278,9 +278,9 @@ BEGIN TRY
 		SET @StorageChargeDate = @dtmAllowancePeriodFrom - 1
 	END
 
-	SELECT @TotalDaysApplicableForStorageCharge = DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
+	SELECT @TotalDaysApplicableForStorageCharge = DATEDIFF(DAY, dbo.fnRemoveTimeOnDate(@dtmDeliveryDate), dbo.fnRemoveTimeOnDate(@StorageChargeDate)) + 1
 
-	SELECT @TotalMonthsApplicableForStorageCharge = DATEDIFF(MONTH, @dtmDeliveryDate, @StorageChargeDate) + 1
+	SELECT @TotalMonthsApplicableForStorageCharge = DATEDIFF(MONTH, dbo.fnRemoveTimeOnDate(@dtmDeliveryDate), dbo.fnRemoveTimeOnDate(@StorageChargeDate)) + 1
 
 	SET @TotalOriginalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge
 	
