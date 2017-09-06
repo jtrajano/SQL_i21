@@ -5653,6 +5653,7 @@
     <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
     <Build Include="dbo\Tables\tblSMTransportationMode.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\29_TransportationMode.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPNLPhysicalFuturesResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
