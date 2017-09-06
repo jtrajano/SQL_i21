@@ -139,16 +139,18 @@ BEGIN TRY
 			,[dblCreditForeign]	
 			,[dblCreditReport]	
 			,[dblReportingRate]	
-			,[dblForeignRate]
-	)
+			,[dblForeignRate])
 		EXEC @intReturnValue = dbo.uspICPostInTransitCosting 
 									 @ItemsToPost = @ItemsToPost
-									,@strBatchId = @strLoadNumber
+									,@strBatchId = @strBatchIdUsed
 									,@strAccountToCounterInventory = 'AP Clearing'--NULL
 									,@intEntityUserSecurityId = @intEntityUserSecurityId
 									,@strGLDescription = ''
 
-		SELECT * FROM @GLEntries
+		UPDATE tblLGLoad 
+		SET strBatchId = @strBatchIdUsed 
+		WHERE intLoadId = @intLoadId
+
 		IF @intReturnValue < 0 
 		BEGIN
 			RAISERROR(@strErrMsg,16,1)
