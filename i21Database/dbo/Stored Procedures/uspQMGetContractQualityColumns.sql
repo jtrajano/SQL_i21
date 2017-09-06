@@ -28,7 +28,7 @@ BEGIN TRY
      JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId  
      JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END

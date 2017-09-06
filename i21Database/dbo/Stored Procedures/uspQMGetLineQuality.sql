@@ -36,7 +36,7 @@ BEGIN TRY
 			AND S.intProductTypeId = 12
 			AND S.intProductValueId = W.intWorkOrderId'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
@@ -107,7 +107,7 @@ BEGIN TRY
 			AND S.intProductTypeId = 12
 			AND S.intProductValueId = W.intWorkOrderId'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END

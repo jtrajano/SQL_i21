@@ -37,7 +37,7 @@ BEGIN TRY
 		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
 			AND S.intProductTypeId = 11'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
@@ -115,7 +115,7 @@ BEGIN TRY
 		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
 			AND S.intProductTypeId = 11'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
