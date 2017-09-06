@@ -332,6 +332,19 @@ GO
 		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Grain' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
 
 	DELETE tblSMScreen WHERE strModule = 'Grain' AND strNamespace IN('Grain.view.StorageType', 'Grain.view.QualityDiscounts', 'Grain.view.StorageStatement')
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.ScaleLoadSelection')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (N'', N'Load Schedule Selection', N'Grain.view.ScaleLoadSelection', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Load Schedule Selection', strModule = N'Grain' WHERE strNamespace = 'Grain.view.ScaleLoadSelection'
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.ScaleContractSelection')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (N'', N'Contract Selection', N'Grain.view.ScaleContractSelection', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Contract Selection', strModule = N'Grain' WHERE strNamespace = 'Grain.view.ScaleContractSelection'
+
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO
