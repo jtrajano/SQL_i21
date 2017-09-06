@@ -32,7 +32,7 @@ BEGIN
 		,agtax_set_rt
 		,0
 	FROM agtaxmst otax
-	WHERE agtax_set_rt <> 0 and  agtax_itm_no <> ' ' 
+	WHERE agtax_set_rt <> 0 and  agtax_itm_no COLLATE Latin1_General_CI_AS <> ' ' COLLATE Latin1_General_CI_AS 
 
 	--INSERT FET TAX--
 	INSERT INTO [dbo].[tblSMTaxXRef]
@@ -54,7 +54,7 @@ BEGIN
 		,agtax_fet_rt
 		,0		
 	FROM agtaxmst otax
-	WHERE agtax_fet_rt <> 0 and  agtax_itm_no <> ' ' 
+	WHERE agtax_fet_rt <> 0 and  agtax_itm_no COLLATE Latin1_General_CI_AS <> ' ' COLLATE Latin1_General_CI_AS 
 
 	--INSERT SST TAX--
 	INSERT INTO [dbo].[tblSMTaxXRef]
@@ -107,10 +107,10 @@ BEGIN
 			   ,0
 				from tblSMTaxClassXref xrf
 	inner join tblICCategoryTax ctax on ctax.intTaxClassId = xrf.intTaxClassId
-	full outer join tblSMTaxXRef txrf on txrf.strOrgItemNo = '' 
-	where strTaxClassType = 'SST' and txrf.strOrgItemNo = '' 
+	full outer join tblSMTaxXRef txrf on txrf.strOrgItemNo COLLATE Latin1_General_CI_AS = '' COLLATE Latin1_General_CI_AS 
+	where strTaxClassType COLLATE Latin1_General_CI_AS = 'SST' COLLATE Latin1_General_CI_AS and txrf.strOrgItemNo = '' 
 
-	 delete from tblSMTaxXRef where intCategoryId is null and strOrgItemNo = ''
+	 delete from tblSMTaxXRef where intCategoryId is null and strOrgItemNo COLLATE Latin1_General_CI_AS = '' COLLATE Latin1_General_CI_AS
 
 	-------------------------------------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ BEGIN
 		,agtax_lc1_rt
 		,0				
 	FROM agtaxmst otax
-	WHERE agtax_lc1_rt <> 0 and  agtax_itm_no <> ' ' 
+	WHERE agtax_lc1_rt <> 0 and  agtax_itm_no COLLATE Latin1_General_CI_AS <> ' ' COLLATE Latin1_General_CI_AS 
 
 	--INSERT LC2 TAX--
 	INSERT INTO [dbo].[tblSMTaxXRef]
@@ -156,7 +156,7 @@ BEGIN
 		,agtax_lc2_rt
 		,0				
 	FROM agtaxmst otax
-	WHERE agtax_lc2_rt <> 0 and  agtax_itm_no <> ' ' 
+	WHERE agtax_lc2_rt <> 0 and  agtax_itm_no COLLATE Latin1_General_CI_AS <> ' ' COLLATE Latin1_General_CI_AS 
 
 	--INSERT LC3 TAX--
 	INSERT INTO [dbo].[tblSMTaxXRef]
@@ -178,7 +178,7 @@ BEGIN
 		,agtax_lc3_rt
 		,0				
 	FROM agtaxmst otax
-	WHERE agtax_lc3_rt <> 0 and  agtax_itm_no <> ' ' 
+	WHERE agtax_lc3_rt <> 0 and  agtax_itm_no COLLATE Latin1_General_CI_AS <> ' ' COLLATE Latin1_General_CI_AS 
 
 	--INSERT LC4 TAX--
 	INSERT INTO [dbo].[tblSMTaxXRef]
@@ -200,7 +200,7 @@ BEGIN
 		,agtax_lc4_rt
 		,0				
 	FROM agtaxmst otax
-	WHERE agtax_lc4_rt <> 0 and  agtax_itm_no <> ' ' 
+	WHERE agtax_lc4_rt <> 0 and  agtax_itm_no COLLATE Latin1_General_CI_AS <> ' ' COLLATE Latin1_General_CI_AS 
 
 	--INSERT LC5 TAX--
 	INSERT INTO [dbo].[tblSMTaxXRef]
@@ -222,7 +222,7 @@ BEGIN
 		,agtax_lc5_rt
 		,0				
 	FROM agtaxmst otax
-	WHERE agtax_lc5_rt <> 0 and  agtax_itm_no <> ' ' 
+	WHERE agtax_lc5_rt <> 0 and  agtax_itm_no COLLATE Latin1_General_CI_AS <> ' ' COLLATE Latin1_General_CI_AS
 
 	--INSERT LC6 TAX--
 	INSERT INTO [dbo].[tblSMTaxXRef]
@@ -244,7 +244,7 @@ BEGIN
 		,agtax_lc6_rt
 		,0				
 	FROM agtaxmst otax
-	WHERE agtax_lc6_rt <> 0 and  agtax_itm_no <> ' ' 
+	WHERE agtax_lc6_rt <> 0 and  agtax_itm_no COLLATE Latin1_General_CI_AS <> ' ' COLLATE Latin1_General_CI_AS 
 
 	--Insert i21 TAX GROUP--
 	UPDATE xrf
@@ -278,7 +278,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'SET' and xrf.[strOrgTaxType] = 'SET'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'SET' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'SET' COLLATE Latin1_General_CI_AS
 
 	Update xrf 
 	SET xrf.intTaxClassId = ctg.intTaxClassId, xrf.intTaxCodeId = tgcd.intTaxCodeId 
@@ -288,7 +288,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'FET' and xrf.[strOrgTaxType] = 'FET'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'FET' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'FET' COLLATE Latin1_General_CI_AS
 
 	Update xrf 
 	SET xrf.intTaxClassId = ctg.intTaxClassId, xrf.intTaxCodeId = tgcd.intTaxCodeId 
@@ -298,7 +298,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'SST' and xrf.[strOrgTaxType] = 'SST'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'SST' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'SST' COLLATE Latin1_General_CI_AS
 
 	Update xrf 
 	SET xrf.intTaxClassId = ctg.intTaxClassId, xrf.intTaxCodeId = tgcd.intTaxCodeId 
@@ -308,7 +308,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'LC1' and xrf.[strOrgTaxType] = 'LC1'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'LC1' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'LC1' COLLATE Latin1_General_CI_AS
 
 	Update xrf 
 	SET xrf.intTaxClassId = ctg.intTaxClassId, xrf.intTaxCodeId = tgcd.intTaxCodeId 
@@ -318,7 +318,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'LC2' and xrf.[strOrgTaxType] = 'LC2'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'LC2' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'LC2' COLLATE Latin1_General_CI_AS
 
 	Update xrf 
 	SET xrf.intTaxClassId = ctg.intTaxClassId, xrf.intTaxCodeId = tgcd.intTaxCodeId 
@@ -328,7 +328,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'LC3' and xrf.[strOrgTaxType] = 'LC3'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'LC3' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'LC3' COLLATE Latin1_General_CI_AS
 
 	Update xrf 
 	SET xrf.intTaxClassId = ctg.intTaxClassId, xrf.intTaxCodeId = tgcd.intTaxCodeId 
@@ -338,7 +338,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'LC4' and xrf.[strOrgTaxType] = 'LC4'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'LC4' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'LC4' COLLATE Latin1_General_CI_AS
 
 	Update xrf 
 	SET xrf.intTaxClassId = ctg.intTaxClassId, xrf.intTaxCodeId = tgcd.intTaxCodeId 
@@ -348,7 +348,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'LC5' and xrf.[strOrgTaxType] = 'LC5'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'LC5' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'LC5' COLLATE Latin1_General_CI_AS
 
 	Update xrf 
 	SET xrf.intTaxClassId = ctg.intTaxClassId, xrf.intTaxCodeId = tgcd.intTaxCodeId 
@@ -358,7 +358,7 @@ BEGIN
 	INNER JOIN [tblSMTaxClassXref] txf ON txf.intTaxClassId = ctg.intTaxClassId
 	INNER JOIN tblSMTaxGroupCode tgcd ON tgcd.[intTaxGroupId] = xrf.[intTaxGroupId]
 									   and tgcd.intTaxCodeId = tcd.intTaxCodeId
-	where txf.[strTaxClassType] = 'LC6' and xrf.[strOrgTaxType] = 'LC6'
+	where txf.[strTaxClassType] COLLATE Latin1_General_CI_AS = 'LC6' COLLATE Latin1_General_CI_AS and xrf.[strOrgTaxType] COLLATE Latin1_General_CI_AS = 'LC6' COLLATE Latin1_General_CI_AS
 	------------------------------------------------------------------------------------------------------------------------------
 
 END

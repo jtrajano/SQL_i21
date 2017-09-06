@@ -28,30 +28,30 @@ BEGIN
 	SELECT IVC.intInvoiceId, IVC.strInvoiceOriginId , ptstm_itm_no,IVC.intEntityCustomerId,ptstm_bill_to_cus, ITM.intItemId,ITM.intCategoryId,
 	CAT.intTaxClassId, --TAXG.intTaxGroupId, 
 	ptstm_tax_key, 
-	ptstm_set_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END) as ptstm_set_amt, 
-	ptstm_fet_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_fet_amt * -1 ELSE ptstm_fet_amt END) as ptstm_fet_amt,
-	ptstm_sst_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_sst_amt * -1 ELSE ptstm_sst_amt END) as ptstm_sst_amt,
-	ptstm_lc1_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc1_amt * -1 ELSE ptstm_lc1_amt END) as ptstm_lc1_amt,
-	ptstm_lc2_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc2_amt * -1 ELSE ptstm_lc2_amt END) as ptstm_lc2_amt, 
-	ptstm_lc3_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc3_amt * -1 ELSE ptstm_lc3_amt END) as ptstm_lc3_amt, 
-	ptstm_lc4_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc4_amt * -1 ELSE ptstm_lc4_amt END) as ptstm_lc4_amt, 
-	ptstm_lc5_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc5_amt * -1 ELSE ptstm_lc5_amt END) as ptstm_lc5_amt, 
-	ptstm_lc6_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc6_amt * -1 ELSE ptstm_lc6_amt END) as ptstm_lc6_amt, 
-	ptstm_lc7_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc7_amt * -1 ELSE ptstm_lc7_amt END) as ptstm_lc7_amt, 
-	ptstm_lc8_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc8_amt * -1 ELSE ptstm_lc8_amt END) as ptstm_lc8_amt, 
-	ptstm_lc9_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc9_amt * -1 ELSE ptstm_lc9_amt END) as ptstm_lc9_amt, 
-	ptstm_lc10_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc10_amt * -1 ELSE ptstm_lc10_amt END) as ptstm_lc10_amt, 
-	ptstm_lc11_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc11_amt * -1 ELSE ptstm_lc11_amt END) as ptstm_lc11_amt, 
-	ptstm_lc12_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc12_amt * -1 ELSE ptstm_lc12_amt END) as ptstm_lc12_amt into #itmnotax 
+	ptstm_set_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END) as ptstm_set_amt, 
+	ptstm_fet_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_fet_amt * -1 ELSE ptstm_fet_amt END) as ptstm_fet_amt,
+	ptstm_sst_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_sst_amt * -1 ELSE ptstm_sst_amt END) as ptstm_sst_amt,
+	ptstm_lc1_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc1_amt * -1 ELSE ptstm_lc1_amt END) as ptstm_lc1_amt,
+	ptstm_lc2_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc2_amt * -1 ELSE ptstm_lc2_amt END) as ptstm_lc2_amt, 
+	ptstm_lc3_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc3_amt * -1 ELSE ptstm_lc3_amt END) as ptstm_lc3_amt, 
+	ptstm_lc4_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc4_amt * -1 ELSE ptstm_lc4_amt END) as ptstm_lc4_amt, 
+	ptstm_lc5_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc5_amt * -1 ELSE ptstm_lc5_amt END) as ptstm_lc5_amt, 
+	ptstm_lc6_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc6_amt * -1 ELSE ptstm_lc6_amt END) as ptstm_lc6_amt, 
+	ptstm_lc7_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc7_amt * -1 ELSE ptstm_lc7_amt END) as ptstm_lc7_amt, 
+	ptstm_lc8_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc8_amt * -1 ELSE ptstm_lc8_amt END) as ptstm_lc8_amt, 
+	ptstm_lc9_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc9_amt * -1 ELSE ptstm_lc9_amt END) as ptstm_lc9_amt, 
+	ptstm_lc10_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc10_amt * -1 ELSE ptstm_lc10_amt END) as ptstm_lc10_amt, 
+	ptstm_lc11_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc11_amt * -1 ELSE ptstm_lc11_amt END) as ptstm_lc11_amt, 
+	ptstm_lc12_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc12_amt * -1 ELSE ptstm_lc12_amt END) as ptstm_lc12_amt into #itmnotax 
 	FROM tblARInvoice IVC 
 	INNER JOIN tblEMEntity ENT on ENT.intEntityId = IVC.intEntityCustomerId 
 	INNER JOIN ptstmmst STM ON STM.ptstm_ivc_no COLLATE Latin1_General_CI_AS = IVC.strInvoiceOriginId  COLLATE Latin1_General_CI_AS
-	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo  
+	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo  COLLATE Latin1_General_CI_AS
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.ptstm_itm_no  COLLATE Latin1_General_CI_AS
 	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId 
 	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL 
 				   AND IVC.strInvoiceOriginId  COLLATE Latin1_General_CI_AS	 <> ''	AND STM.ptstm_tax_key is not null
-				   and ptstm_itm_no not in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)
+				   and ptstm_itm_no COLLATE Latin1_General_CI_AS not in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)
 
 	------------------------------------------------------------------------------------------------------------------------------------------
 	---** INSERT SET TAX DETAILS **---
@@ -94,7 +94,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'SET' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'SET' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT FET TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -136,7 +136,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'FET' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'FET' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT SST TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -178,7 +178,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'SST' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'SST' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC1 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -220,7 +220,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC1' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC1' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC2 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -262,7 +262,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC2' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC2' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC3 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -304,7 +304,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC3' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC3' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC4 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -346,7 +346,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC4' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC4' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC5 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -388,7 +388,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC5' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC5' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 	---** INSERT LC6 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
 			([intInvoiceDetailId]
@@ -429,7 +429,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC6' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC6' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC7 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -471,7 +471,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC7' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC7' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 	---** INSERT LC8 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
 			([intInvoiceDetailId]
@@ -512,7 +512,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC8' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC8' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC9 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -554,7 +554,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC9' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC9' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC10 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -596,7 +596,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC10' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC10' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC11 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -638,7 +638,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC11' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC11' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC12 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -680,7 +680,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = SUBSTRING ( STM.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS		   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC12' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC12' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 	--*************************************************************************************************************
 	--************************************* TAX FOR ITEM THAT HAS NULL ON TAX KEY ********************************************************************
 	--*************************************************************************************************************
@@ -688,30 +688,30 @@ BEGIN
 	SELECT IVC.intInvoiceId, IVC.strInvoiceOriginId,ENT.strEntityNo, ptstm_itm_no, ITM.intItemId,ITM.intCategoryId,
 	CAT.intTaxClassId, --TAXG.intTaxGroupId, 
 	ptstm_tax_key, 
-	ptstm_set_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END) as ptstm_set_amt, 
-	ptstm_fet_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_fet_amt * -1 ELSE ptstm_fet_amt END) as ptstm_fet_amt,
-	ptstm_sst_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_sst_amt * -1 ELSE ptstm_sst_amt END) as ptstm_sst_amt,
-	ptstm_lc1_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc1_amt * -1 ELSE ptstm_lc1_amt END) as ptstm_lc1_amt,
-	ptstm_lc2_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc2_amt * -1 ELSE ptstm_lc2_amt END) as ptstm_lc2_amt, 
-	ptstm_lc3_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc3_amt * -1 ELSE ptstm_lc3_amt END) as ptstm_lc3_amt, 
-	ptstm_lc4_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc4_amt * -1 ELSE ptstm_lc4_amt END) as ptstm_lc4_amt, 
-	ptstm_lc5_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc5_amt * -1 ELSE ptstm_lc5_amt END) as ptstm_lc5_amt, 
-	ptstm_lc6_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc6_amt * -1 ELSE ptstm_lc6_amt END) as ptstm_lc6_amt, 
-	ptstm_lc7_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc7_amt * -1 ELSE ptstm_lc7_amt END) as ptstm_lc7_amt, 
-	ptstm_lc8_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc8_amt * -1 ELSE ptstm_lc8_amt END) as ptstm_lc8_amt, 
-	ptstm_lc9_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc9_amt * -1 ELSE ptstm_lc9_amt END) as ptstm_lc9_amt, 
-	ptstm_lc10_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc10_amt * -1 ELSE ptstm_lc10_amt END) as ptstm_lc10_amt, 
-	ptstm_lc11_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc11_amt * -1 ELSE ptstm_lc11_amt END) as ptstm_lc11_amt, 
-	ptstm_lc12_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc12_amt * -1 ELSE ptstm_lc12_amt END) as ptstm_lc12_amt into #itmnotax1
+	ptstm_set_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END) as ptstm_set_amt, 
+	ptstm_fet_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_fet_amt * -1 ELSE ptstm_fet_amt END) as ptstm_fet_amt,
+	ptstm_sst_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_sst_amt * -1 ELSE ptstm_sst_amt END) as ptstm_sst_amt,
+	ptstm_lc1_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc1_amt * -1 ELSE ptstm_lc1_amt END) as ptstm_lc1_amt,
+	ptstm_lc2_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc2_amt * -1 ELSE ptstm_lc2_amt END) as ptstm_lc2_amt, 
+	ptstm_lc3_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc3_amt * -1 ELSE ptstm_lc3_amt END) as ptstm_lc3_amt, 
+	ptstm_lc4_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc4_amt * -1 ELSE ptstm_lc4_amt END) as ptstm_lc4_amt, 
+	ptstm_lc5_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc5_amt * -1 ELSE ptstm_lc5_amt END) as ptstm_lc5_amt, 
+	ptstm_lc6_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc6_amt * -1 ELSE ptstm_lc6_amt END) as ptstm_lc6_amt, 
+	ptstm_lc7_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc7_amt * -1 ELSE ptstm_lc7_amt END) as ptstm_lc7_amt, 
+	ptstm_lc8_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc8_amt * -1 ELSE ptstm_lc8_amt END) as ptstm_lc8_amt, 
+	ptstm_lc9_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc9_amt * -1 ELSE ptstm_lc9_amt END) as ptstm_lc9_amt, 
+	ptstm_lc10_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc10_amt * -1 ELSE ptstm_lc10_amt END) as ptstm_lc10_amt, 
+	ptstm_lc11_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc11_amt * -1 ELSE ptstm_lc11_amt END) as ptstm_lc11_amt, 
+	ptstm_lc12_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc12_amt * -1 ELSE ptstm_lc12_amt END) as ptstm_lc12_amt into #itmnotax1
 	FROM tblARInvoice IVC 
 	INNER JOIN tblEMEntity ENT on ENT.intEntityId = IVC.intEntityCustomerId
 	INNER JOIN ptstmmst STM ON STM.ptstm_ivc_no COLLATE Latin1_General_CI_AS = IVC.strInvoiceOriginId  COLLATE Latin1_General_CI_AS
-	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo
+	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo COLLATE Latin1_General_CI_AS
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.ptstm_itm_no  COLLATE Latin1_General_CI_AS
 	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId
 	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL 
-				   AND IVC.strInvoiceOriginId <> ''	AND STM.ptstm_tax_key is null
-				   and ptstm_itm_no not in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)			  
+				   AND IVC.strInvoiceOriginId COLLATE Latin1_General_CI_AS <> '' COLLATE Latin1_General_CI_AS	AND STM.ptstm_tax_key is null
+				   and ptstm_itm_no COLLATE Latin1_General_CI_AS not in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)			  
 	-----------------------------------------------------------------------------------------------------------------------			   			   			  		   
 
 	---** INSERT SET TAX DETAILS **---
@@ -755,7 +755,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'SET' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'SET' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT FET TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -798,7 +798,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'FET' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'FET' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT SST TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -841,7 +841,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'SST' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'SST' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC1 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -884,7 +884,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC1' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC1' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC2 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -927,7 +927,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS	   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC2' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC2' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC3 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -970,7 +970,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS	   
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC3' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC3' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC4 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -1013,7 +1013,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC4' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC4' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC5 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -1056,7 +1056,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC5' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC5' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 	---** INSERT LC6 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
 			([intInvoiceDetailId]
@@ -1098,7 +1098,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC6' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC6' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC7 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -1141,7 +1141,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC7' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC7' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 	---** INSERT LC8 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
 			([intInvoiceDetailId]
@@ -1183,7 +1183,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC8' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC8' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC9 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -1226,7 +1226,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC9' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC9' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC10 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -1269,7 +1269,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC10' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC10' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC11 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -1312,7 +1312,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC11' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC11' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 
 	---** INSERT LC12 TAX DETAILS **---
 	INSERT INTO [tblARInvoiceDetailTax]
@@ -1355,7 +1355,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup TAXG on TAXG.strTaxGroup COLLATE Latin1_General_CI_AS = CUS.ptcus_state COLLATE Latin1_General_CI_AS
 	INNER JOIN tblSMTaxGroupCode TAXGC on TAXGC.intTaxGroupId = TAXG.intTaxGroupId and TAXGC.intTaxCodeId = TAXC.intTaxCodeId
 	INNER JOIN tblSMTaxCodeRate TAXR on TAXR.intTaxCodeId = TAXC.intTaxCodeId
-	where XREF.strTaxClassType = 'LC12' and IVCD.strDocumentNumber is NULL
+	where XREF.strTaxClassType COLLATE Latin1_General_CI_AS = 'LC12' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is NULL
 	--***********************************************************************************************************************************************
 
 	--************************************************************************************************************************************************
@@ -1367,28 +1367,28 @@ BEGIN
 	--drop table #tempDTL
 
 	SELECT intInvoiceId,strInvoiceOriginId,ptstm_itm_no, ITM.intItemId , ptstm_tax_key , 
-	ptstm_set_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END) as ptstm_set_amt, 
-	ptstm_fet_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_fet_amt * -1 ELSE ptstm_fet_amt END) as ptstm_fet_amt,
-	ptstm_sst_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_sst_amt * -1 ELSE ptstm_sst_amt END) as ptstm_sst_amt,
-	ptstm_lc1_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc1_amt * -1 ELSE ptstm_lc1_amt END) as ptstm_lc1_amt,
-	ptstm_lc2_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc2_amt * -1 ELSE ptstm_lc2_amt END) as ptstm_lc2_amt, 
-	ptstm_lc3_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc3_amt * -1 ELSE ptstm_lc3_amt END) as ptstm_lc3_amt, 
-	ptstm_lc4_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc4_amt * -1 ELSE ptstm_lc4_amt END) as ptstm_lc4_amt, 
-	ptstm_lc5_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc5_amt * -1 ELSE ptstm_lc5_amt END) as ptstm_lc5_amt, 
-	ptstm_lc6_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc6_amt * -1 ELSE ptstm_lc6_amt END) as ptstm_lc6_amt, 
-	ptstm_lc7_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc7_amt * -1 ELSE ptstm_lc7_amt END) as ptstm_lc7_amt, 
-	ptstm_lc8_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc8_amt * -1 ELSE ptstm_lc8_amt END) as ptstm_lc8_amt, 
-	ptstm_lc9_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc9_amt * -1 ELSE ptstm_lc9_amt END) as ptstm_lc9_amt, 
-	ptstm_lc10_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc10_amt * -1 ELSE ptstm_lc10_amt END) as ptstm_lc10_amt, 
-	ptstm_lc11_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc11_amt * -1 ELSE ptstm_lc11_amt END) as ptstm_lc11_amt, 
-	ptstm_lc12_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc12_amt * -1 ELSE ptstm_lc12_amt END) as ptstm_lc12_amt into #temp_ptstm
+	ptstm_set_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END) as ptstm_set_amt, 
+	ptstm_fet_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_fet_amt * -1 ELSE ptstm_fet_amt END) as ptstm_fet_amt,
+	ptstm_sst_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_sst_amt * -1 ELSE ptstm_sst_amt END) as ptstm_sst_amt,
+	ptstm_lc1_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc1_amt * -1 ELSE ptstm_lc1_amt END) as ptstm_lc1_amt,
+	ptstm_lc2_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc2_amt * -1 ELSE ptstm_lc2_amt END) as ptstm_lc2_amt, 
+	ptstm_lc3_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc3_amt * -1 ELSE ptstm_lc3_amt END) as ptstm_lc3_amt, 
+	ptstm_lc4_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc4_amt * -1 ELSE ptstm_lc4_amt END) as ptstm_lc4_amt, 
+	ptstm_lc5_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc5_amt * -1 ELSE ptstm_lc5_amt END) as ptstm_lc5_amt, 
+	ptstm_lc6_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc6_amt * -1 ELSE ptstm_lc6_amt END) as ptstm_lc6_amt, 
+	ptstm_lc7_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc7_amt * -1 ELSE ptstm_lc7_amt END) as ptstm_lc7_amt, 
+	ptstm_lc8_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc8_amt * -1 ELSE ptstm_lc8_amt END) as ptstm_lc8_amt, 
+	ptstm_lc9_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc9_amt * -1 ELSE ptstm_lc9_amt END) as ptstm_lc9_amt, 
+	ptstm_lc10_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc10_amt * -1 ELSE ptstm_lc10_amt END) as ptstm_lc10_amt, 
+	ptstm_lc11_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc11_amt * -1 ELSE ptstm_lc11_amt END) as ptstm_lc11_amt, 
+	ptstm_lc12_rt,(CASE WHEN IVC.strTransactionType COLLATE Latin1_General_CI_AS = 'Credit Memo' COLLATE Latin1_General_CI_AS THEN ptstm_lc12_amt * -1 ELSE ptstm_lc12_amt END) as ptstm_lc12_amt into #temp_ptstm
 	FROM tblARInvoice IVC 
 	INNER JOIN tblEMEntity ENT on ENT.intEntityId = IVC.intEntityCustomerId
 	INNER JOIN ptstmmst STM ON STM.ptstm_ivc_no COLLATE Latin1_General_CI_AS = IVC.strInvoiceOriginId  COLLATE Latin1_General_CI_AS
-	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo
+	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo COLLATE Latin1_General_CI_AS
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.ptstm_itm_no  COLLATE Latin1_General_CI_AS
-	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND IVC.strInvoiceOriginId <> ''	
-	and ptstm_itm_no in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)
+	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND IVC.strInvoiceOriginId COLLATE Latin1_General_CI_AS <> ''	 COLLATE Latin1_General_CI_AS
+	and ptstm_itm_no COLLATE Latin1_General_CI_AS in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)
 
 	--------------------------------------------------------------------------------------------------------------------------------------
 	---** INSERT SET TAX DETAILS **---
@@ -1413,7 +1413,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1430,11 +1430,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'SET' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'SET' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_set_rt, stm.ptstm_set_amt
 
@@ -1460,7 +1460,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1477,11 +1477,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'FET' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'FET' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_fet_rt, stm.ptstm_fet_amt	
 
@@ -1507,7 +1507,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1524,11 +1524,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'SST' and IVCD.strDocumentNumber is null
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'SST' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_sst_rt, stm.ptstm_sst_amt
 
@@ -1546,10 +1546,10 @@ BEGIN
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
 	where  stm.ptstm_sst_amt <> 0 and not exists
-	(select * from  tblSMTaxXRef XREF where XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 )  and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) and XREF.strOrgTaxType = 'SST') 
+	(select * from  tblSMTaxXRef XREF where XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS  and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS and XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'SST' COLLATE Latin1_General_CI_AS) 
 
 
 	if (select COUNT (*) from temp_sst) <> 0
@@ -1575,7 +1575,7 @@ BEGIN
 				XREF.intTaxClassId,	--[intTaxClassId]
 				0,--[strTaxableByOtherTaxes]
 				CASE 
-					WHEN ([strOrgCalcMethod] = 'U')
+					WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 						THEN 'Unit' 
 					ELSE 'Precentage'
 				END,--[strCalculationMethod]
@@ -1592,11 +1592,11 @@ BEGIN
 				END--[ysnTaxExempt]
 		from temp_sst stm
 		INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-		INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = ' ' and
-					 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-					 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-					 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-		where XREF.strOrgTaxType = 'SST' and IVCD.strDocumentNumber is null	and XREF.intTaxCodeId is not null
+		INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = ' ' COLLATE Latin1_General_CI_AS and
+					 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+					 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+					 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS
+		where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'SST' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	and XREF.intTaxCodeId is not null
 		group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 		XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_sst_rt, stm.ptstm_sst_amt
 	End
@@ -1622,7 +1622,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1639,11 +1639,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC1' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC1' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc1_rt, stm.ptstm_lc1_amt
 
@@ -1669,7 +1669,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1686,11 +1686,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC2' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC2' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc2_rt, stm.ptstm_lc2_amt
 
@@ -1717,7 +1717,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1734,11 +1734,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC3' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC3' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc3_rt, stm.ptstm_lc3_amt
 
@@ -1765,7 +1765,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END as [strOrgCalcMethod],
@@ -1782,11 +1782,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC4' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC4' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc4_rt, stm.ptstm_lc4_amt
 
@@ -1812,7 +1812,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1829,11 +1829,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC5' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC5' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc5_rt, stm.ptstm_lc5_amt
 
@@ -1860,7 +1860,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1877,11 +1877,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC6' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC6' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc6_rt, stm.ptstm_lc6_amt
 
@@ -1908,7 +1908,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1925,11 +1925,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC7' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC7' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc7_rt, stm.ptstm_lc7_amt
 
@@ -1956,7 +1956,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -1973,11 +1973,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC8' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC8' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc8_rt, stm.ptstm_lc8_amt
 
@@ -2004,7 +2004,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -2021,11 +2021,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC9' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC9' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc9_rt, stm.ptstm_lc9_amt
 
@@ -2052,7 +2052,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -2069,11 +2069,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC10' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC10' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc10_rt, stm.ptstm_lc10_amt
 
@@ -2100,7 +2100,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -2117,11 +2117,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC11' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC11' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc11_rt, stm.ptstm_lc11_amt
 
@@ -2148,7 +2148,7 @@ BEGIN
 			XREF.intTaxClassId,	--[intTaxClassId]
 			0,--[strTaxableByOtherTaxes]
 			CASE 
-				WHEN ([strOrgCalcMethod] = 'U')
+				WHEN ([strOrgCalcMethod] COLLATE Latin1_General_CI_AS = 'U' COLLATE Latin1_General_CI_AS)
 					THEN 'Unit' 
 				ELSE 'Precentage'
 			END,--[strCalculationMethod]
@@ -2165,11 +2165,11 @@ BEGIN
 			END--[ysnTaxExempt]
 	from #temp_ptstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
-	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) and
-				 XREF.strOrgState = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 )	
-	where XREF.strOrgTaxType = 'LC12' and IVCD.strDocumentNumber is null	
+	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.ptstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
+	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC12' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.ptstm_lc12_rt, stm.ptstm_lc12_amt
 
@@ -2180,7 +2180,7 @@ BEGIN
 	from tblARInvoiceDetail dtl
 	inner join tblARInvoice ivc on ivc.intInvoiceId = dtl.intInvoiceId
 	inner join tblARInvoiceDetailTax tax on tax.intInvoiceDetailId = dtl.intInvoiceDetailId
-	where ivc.strInvoiceOriginId <> '' group by dtl.intInvoiceDetailId, tax.intTaxGroupId
+	where ivc.strInvoiceOriginId COLLATE Latin1_General_CI_AS <> '' COLLATE Latin1_General_CI_AS group by dtl.intInvoiceDetailId, tax.intTaxGroupId
 
 	update dtl 
 	set dtl.intTaxGroupId = tmp.intTaxGroupId, dtl.dblTotalTax = tmp.dblTax
@@ -2195,7 +2195,7 @@ BEGIN
 	from tblARInvoice ivc
 	inner join tblARInvoiceDetail dtl on dtl.intInvoiceId = ivc.intInvoiceId
 	inner join tblARInvoiceDetailTax tax on tax.intInvoiceDetailId = dtl.intInvoiceDetailId
-	where ivc.strInvoiceOriginId <> '' group by ivc.intInvoiceId
+	where ivc.strInvoiceOriginId COLLATE Latin1_General_CI_AS <> '' COLLATE Latin1_General_CI_AS group by ivc.intInvoiceId
 
 	update ivc 
 	set ivc.dblTax = itax.ivctax
