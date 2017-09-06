@@ -313,7 +313,7 @@ BEGIN
 	FROM	[dbo].tblAPBill A 
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			CROSS APPLY dbo.fnAPCalculateVoucherDetailUnits(B.intBillDetailId) units
+			--CROSS APPLY dbo.fnAPCalculateVoucherDetailUnits(B.intBillDetailId) units
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblICInventoryReceiptItem E
@@ -325,7 +325,20 @@ BEGIN
 			LEFT JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			LEFT JOIN tblICItem F
-				ON B.intItemId = F.intItemId					
+				ON B.intItemId = F.intItemId
+			LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1					
+			OUTER APPLY( --	AP-4269 TIMEOUT ISSUE
+					SELECT
+							(CASE WHEN item.intItemId IS NULL THEN billDetails.dblQtyReceived ELSE
+														dbo.fnCalculateQtyBetweenUOM(CASE WHEN billDetails.intWeightUOMId > 0 
+																THEN billDetails.intWeightUOMId ELSE billDetails.intUnitOfMeasureId 
+														END, 
+														itemUOM.intItemUOMId, CASE WHEN billDetails.intWeightUOMId > 0 THEN billDetails.dblNetWeight ELSE billDetails.dblQtyReceived END)
+									END) as dblTotalUnits
+						FROM tblAPBillDetail billDetails
+						LEFT JOIN tblICItem item ON F.intItemId = item.intItemId
+						WHERE billDetails.intBillDetailId = B.intBillDetailId	
+			) units									
 			OUTER APPLY (
 				--Add the tax from IR
 				SELECT 
