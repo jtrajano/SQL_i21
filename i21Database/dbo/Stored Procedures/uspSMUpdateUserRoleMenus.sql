@@ -26,7 +26,7 @@ BEGIN TRY
 
 	-- Get whether User Role has administrative rights
 	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-	SELECT @isContact = CASE strRoleType WHEN 'Contact Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Contact' THEN 1 ELSE 0 END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
+	SELECT @isContact = CASE strRoleType WHEN 'Portal Default' THEN 1 ELSE (CASE strRoleType WHEN 'Contact Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Contact' THEN 1 ELSE 0 END) END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
 
 	-- Check whether or not to build the specified user role according to the Master Menus
 	IF (@BuildUserRole = 1)
@@ -46,7 +46,12 @@ BEGIN TRY
 												ELSE ISNULL((SELECT ysnVisible FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID), 0) END)
 											ELSE 0 END),
 			intSort = intSort FROM tblSMMasterMenu Menu --intSort = intMenuID FROM tblSMMasterMenu Menu
-			WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
+			WHERE intMenuID NOT IN 
+			(
+				SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID
+				UNION ALL
+				SELECT intMasterMenuId FROM tblSMContactMenu
+			)
 		END
 		ELSE
 		BEGIN

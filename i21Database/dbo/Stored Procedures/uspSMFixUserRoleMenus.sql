@@ -27,25 +27,32 @@ BEGIN TRY
 				DELETE FROM tblSMUserRoleMenu WHERE intMenuId NOT IN (SELECT intMasterMenuId FROM tblSMContactMenu) AND intUserRoleId = @UserRoleID
 
 				IF (@IsAdmin = 0)
-					BEGIN
-						DELETE FROM tblSMUserRoleMenu
-						WHERE intUserRoleId = @UserRoleID
-						AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
-											WHERE ((strMenuName = 'System Manager' 
-													AND strCommand = 'i21' 
-													AND intParentMenuID = 0)
-													OR intParentMenuID IN (1, 10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
+				BEGIN
+					DELETE FROM tblSMUserRoleMenu 
+					WHERE intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName IN ('User List (Portal)', 'Set Permissions (Portal)')) 
+					AND intUserRoleId = @UserRoleID
+					--DELETE FROM tblSMUserRoleMenu
+					--WHERE intUserRoleId = @UserRoleID
+					--AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
+					--					WHERE ((strMenuName = 'System Manager' 
+					--							AND strCommand = 'i21' 
+					--							AND intParentMenuID = 0)
+					--							OR intParentMenuID IN (1, 10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
+				END
+				--ELSE
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu
+				--	WHERE intUserRoleId = @UserRoleID
+				--	AND intMenuId IN (SELECT intMenuID
+				--							FROM tblSMMasterMenu
+				--							WHERE ((strMenuName NOT IN ('System Manager', 'Activities') AND strModuleName = 'System Manager' AND intParentMenuID = 1) 
+				--							OR intParentMenuID IN (10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
+				--END
 
-					END
-				ELSE
-					BEGIN
-						DELETE FROM tblSMUserRoleMenu
-						WHERE intUserRoleId = @UserRoleID
-						AND intMenuId IN (SELECT intMenuID
-												FROM tblSMMasterMenu
-												WHERE ((strMenuName NOT IN ('System Manager', 'Activities') AND strModuleName = 'System Manager' AND intParentMenuID = 1) 
-												OR intParentMenuID IN (10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
-					END
+				UPDATE rm SET ysnVisible = 1
+				FROM tblSMUserRoleMenu rm
+				INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID
+				WHERE mm.strMenuName IN ('My Account (Portal)', 'My Company (Portal)', 'Payment Methods (Portal)', 'Change Password (Portal)')
 			END
 		ELSE -- U S E R 
 			BEGIN
@@ -95,57 +102,57 @@ BEGIN TRY
 				--END
 
 				/* PURCHASING */
-				DECLARE @AccountsPayableParentMenuId INT
-				SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (A/P)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
+				--DECLARE @AccountsPayableParentMenuId INT
+				--SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing (A/P)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
 
-				DECLARE @AccountsPayableActivitiesParentMenuId INT
-				SELECT @AccountsPayableActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+				--DECLARE @AccountsPayableActivitiesParentMenuId INT
+				--SELECT @AccountsPayableActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
-				DECLARE @VendorMenuId INT
-				SELECT  @VendorMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @VendorMenuId AND intUserRoleId = @UserRoleID
-				END
+				--DECLARE @VendorMenuId INT
+				--SELECT  @VendorMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @VendorMenuId AND intUserRoleId = @UserRoleID
+				--END
 
-				DECLARE @VendorContactListMenuId INT
-				SELECT  @VendorContactListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Contact List' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Contact List' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @VendorContactListMenuId AND intUserRoleId = @UserRoleID
-				END
+				--DECLARE @VendorContactListMenuId INT
+				--SELECT  @VendorContactListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Contact List' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Contact List' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @VendorContactListMenuId AND intUserRoleId = @UserRoleID
+				--END
 
 				/* SALES */
-				DECLARE @AccountsReceivableParentMenuId INT
-				SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales (A/R)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
+				--DECLARE @AccountsReceivableParentMenuId INT
+				--SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales (A/R)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
 				
-				DECLARE @AccountsReceivableActivitiesParentMenuId INT
-				SELECT @AccountsReceivableActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+				--DECLARE @AccountsReceivableActivitiesParentMenuId INT
+				--SELECT @AccountsReceivableActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 
-				DECLARE @CustomerMenuId INT
-				SELECT  @CustomerMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @CustomerMenuId AND intUserRoleId = @UserRoleID
-				END
+				--DECLARE @CustomerMenuId INT
+				--SELECT  @CustomerMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @CustomerMenuId AND intUserRoleId = @UserRoleID
+				--END
 
-				DECLARE @MakePaymentsMenuId INT
-				SELECT  @MakePaymentsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @MakePaymentsMenuId AND intUserRoleId = @UserRoleID
-				END
+				--DECLARE @MakePaymentsMenuId INT
+				--SELECT  @MakePaymentsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Make Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @MakePaymentsMenuId AND intUserRoleId = @UserRoleID
+				--END
 
 				/* GRAIN */
-				DECLARE @GrainParentMenuId INT
-				SELECT @GrainParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Grain' AND strModuleName = 'Grain' AND intParentMenuID = 0
+				--DECLARE @GrainParentMenuId INT
+				--SELECT @GrainParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Grain' AND strModuleName = 'Grain' AND intParentMenuID = 0
 
-				DECLARE @StorageSettleMenuId INT
-				SELECT  @StorageSettleMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @StorageSettleMenuId AND intUserRoleId = @UserRoleID
-				END
+				--DECLARE @StorageSettleMenuId INT
+				--SELECT  @StorageSettleMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @StorageSettleMenuId AND intUserRoleId = @UserRoleID
+				--END
 			END
 		
 	-- Commit changes
