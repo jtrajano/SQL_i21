@@ -10,7 +10,7 @@ Ext.define('Inventory.search.StockDetail', {
             groupedOnLoad: true,
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
-                { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
+                { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
                 { dataIndex: 'strType', text: 'Item Type', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCommodityCode', text: 'Commodity', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCategoryCode', text: 'Category', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewCategory' },
@@ -48,6 +48,7 @@ Ext.define('Inventory.search.StockDetail', {
                     iconCls: 'small-calculator',
                     listeners: {
                         click: function (e) {
+                            var win = e.up('window');
                             var grid = e.up('panel');
                             if(grid.url === '../Inventory/api/Item/SearchStockDetail') {
                                 var selection = _.first(grid.getSelectionModel().selected.items);
@@ -70,7 +71,12 @@ Ext.define('Inventory.search.StockDetail', {
                                             }
                                         ]
                                     });
+
+                                    //iRely.Functions.openScreen('Inventory.view.InventoryValuation', { isMenuClick: true });
                                 }
+
+                                // Auto-Close                     
+                                if (win) win.close();                    
                             }
                         }
                     }
@@ -346,7 +352,7 @@ Ext.define('Inventory.search.StockDetail', {
                 { dataIndex: 'dblPackFactor', xtype: 'numbercolumn', summaryType: 'sum', text: 'Pack Factor', width: 100, flex: 1, hidden: true },
                 { dataIndex: 'dblUnitPerFoot', xtype: 'numbercolumn', summaryType: 'sum', text: 'Unit Per Foot', width: 100, flex: 1, hidden: true },
                 { dataIndex: 'strDiscountCode', text: 'Discount Schedule Id', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
-                { dataIndex: 'strDiscountDescription', text: 'Discount Schedule', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
+                { dataIndex: 'strDiscountDescription', text: 'Discount Schedule', width: 100, flex: 1 },
             ],
             buttons: [
                 {
@@ -554,5 +560,47 @@ Ext.define('Inventory.search.StockDetail', {
                 ]
             }
         }
-    ]
+    ],
+
+    onViewCategory: function (value, record) {
+        var locationName = record.get('strCategoryCode');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'Category');
+    },
+	
+    onViewLocation: function (value, record) {
+        var locationName = record.get('strLocationName');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
+    },	
+	
+    onViewItem: function (value, record) {
+        var itemNo = record.get('strItemNo');
+        i21.ModuleMgr.Inventory.showScreen(itemNo, 'ItemNo');
+    },	
+	
+    onViewBinLocation: function (value, record) {
+        var locationName = record.get('strLocation');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
+    },
+
+    onViewBinStorageLocation: function(value, record) {
+        var locationName = record.get('strStorageLocation');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'StorageLocation');
+    },	
+	
+    onViewBinUOM: function(value, record) {
+        var locationName = record.get('strUOM');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'UOM');
+    },
+
+    onViewDiscountCodes: function(value, record) {
+        iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', {
+            strSourceType: 'Storage Measurement Reading',
+            intTicketFileId: record.get('intStorageMeasurementReadingConversionId')
+        });
+    },
+
+    onViewUOM: function(value, record) {
+        var uom = record.get('strStockUOM');
+        i21.ModuleMgr.Inventory.showScreen(uom, 'UOM');
+    }  
 });
