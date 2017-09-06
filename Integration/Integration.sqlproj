@@ -154,10 +154,6 @@
     <None Include="Scripts\PAT\DropStoredProcedures.sql" />
     <None Include="Scripts\SM\InsertOriginTaxClassXRef.sql" />
     <None Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
-    <None Include="dbo\Stored Procedures\uspARImportAGTax.sql" />
-    <None Include="dbo\Stored Procedures\uspARImportAGTaxXref.sql" />
-    <None Include="dbo\Stored Procedures\uspARImportPTTax.sql" />
-    <None Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -428,5 +424,9 @@
     <Build Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
     <None Include="dbo\Stored Procedures\uspEMImportCustomerEFTInfo.sql" />
     <None Include="dbo\Stored Procedures\uspGLFlagOriginAccounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportAGTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportAGTaxXref.sql" />
   </ItemGroup>
 </Project>

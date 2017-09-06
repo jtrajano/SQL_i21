@@ -1,7 +1,4 @@
-﻿IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportPTTaxXref')
-	DROP PROCEDURE uspARImportPTTaxXref
-GO
-CREATE PROCEDURE [dbo].[uspARImportPTTaxXref]
+﻿CREATE PROCEDURE [dbo].[uspARImportPTTaxXref]
 	AS
 BEGIN
 --DELETE AND REIMPORT THE TAX RECORDS
