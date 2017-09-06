@@ -19,7 +19,7 @@ SELECT
 ,dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOpenBalance)-ISNULL(SST.TotalUnits,0) AS dblOpenBalance   
 ,ST.ysnDPOwnedType
 ,SH.intContractHeaderId
-,CD.strContractNumber   
+,CH.strContractNumber   
 ,ISNULL(SH1.intTicketId,0) AS intTicketId
 ,ISNULL(dblDiscountsDue,0)-ISNULL(dblDiscountsPaid,0) AS dblDiscountUnPaid
 ,ISNULL(dblStorageDue,0)-ISNULL(dblStoragePaid,0) AS dblStorageUnPaid
@@ -33,6 +33,6 @@ JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.
 LEFT JOIN (SELECT intCustomerStorageId,SUM(dblUnits) TotalUnits FROM tblGRSettleStorageTicket WHERE dblUnits >0 GROUP BY intCustomerStorageId) SST ON SST.intCustomerStorageId=CS.intCustomerStorageId AND dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOpenBalance)-SST.TotalUnits >0
 LEFT JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId=CS.intCustomerStorageId
 LEFT JOIN tblGRStorageHistory SH1 ON SH1.intCustomerStorageId=CS.intCustomerStorageId AND SH1.strType='From Scale'
-LEFT JOIN vyuCTContractDetailView CD ON CD.intContractHeaderId=SH.intContractHeaderId  
+LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId=SH.intContractHeaderId  
 WHERE ISNULL(CS.strStorageType,'') <> 'ITR'AND SH.strType IN('From Scale','From Transfer') 
 ORDER BY CS.dtmDeliveryDate

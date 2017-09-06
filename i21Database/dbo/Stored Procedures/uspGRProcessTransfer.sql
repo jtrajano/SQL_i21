@@ -264,7 +264,7 @@ BEGIN TRY
 		
 		IF ISNULL(@ItemContractHeaderId,0)>0
 		BEGIN
-		SELECT @ItemContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ItemContractHeaderId
+		SELECT @ItemContractDetailId=intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId=@ItemContractHeaderId
 		SET @ItemContractBalance = -@ItemBalance
 
 			EXEC uspCTUpdateSequenceQuantityUsingUOM 
@@ -1481,7 +1481,7 @@ BEGIN TRY
 			
 			IF ISNULL(@ActionContractHeaderId,0)>0
 			BEGIN
-			SELECT @ActionontractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ActionContractHeaderId
+			SELECT @ActionontractDetailId=intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId=@ActionContractHeaderId
 
 				EXEC uspCTUpdateSequenceQuantityUsingUOM 
 					  @intContractDetailId=@ActionontractDetailId
