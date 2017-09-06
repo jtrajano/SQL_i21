@@ -5,6 +5,7 @@
     [intParentMenuId]   INT NULL,
     [ysnVisible]        BIT CONSTRAINT [DF_tblSMUserRoleMenu_ysnVisible] DEFAULT ((1)) NOT NULL,
     [intSort]           INT NULL,
+	[ysnAvailable]      BIT NULL,
     [intConcurrencyId]  INT DEFAULT (1) NOT NULL,
     CONSTRAINT [PK_tblSMUserRoleMenu] PRIMARY KEY CLUSTERED ([intUserRoleMenuId] ASC),
     CONSTRAINT [FK_tblSMUserRoleMenu_tblSMMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [dbo].[tblSMMasterMenu] ([intMenuID]) ON DELETE CASCADE,

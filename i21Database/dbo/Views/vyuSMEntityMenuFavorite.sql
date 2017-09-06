@@ -4,7 +4,7 @@ SELECT DISTINCT
 Favorite.intEntityMenuFavoriteId,
 Favorite.intMenuId,
 UserSecurityCompanyLocationRolePermission.intEntityUserSecurityId AS intEntityId,
-UserSecurityCompanyLocationRolePermission.intCompanyLocationId,
+ISNULL(UserSecurityCompanyLocationRolePermission.intCompanyLocationId, 0) AS intCompanyLocationId,
 Favorite.intSort,
 ISNULL(MasterMenu.strMenuName, Favorite.strMenuName) AS strMenuName,
 MasterMenu.strModuleName,
@@ -14,7 +14,7 @@ MasterMenu.strCommand,
 MasterMenu.strIcon,
 ISNULL(MasterMenu.ysnLeaf, 0) AS ysnLeaf,
 ISNULL(MasterMenu.ysnIsLegacy, 0) AS ysnIsLegacy,
-Favorite.intParentEntityMenuFavoriteId,
+ISNULL(Favorite.intParentEntityMenuFavoriteId, 0) AS intParentEntityMenuFavoriteId,
 Favorite.intConcurrencyId
 FROM tblSMEntityMenuFavorite Favorite
 INNER JOIN

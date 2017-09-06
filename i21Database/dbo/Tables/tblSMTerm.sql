@@ -5,7 +5,7 @@
     [dblDiscountEP]				NUMERIC (18, 6) NULL,
     [intBalanceDue]				INT             NULL,
     [intDiscountDay]			INT             NULL,
-    [dtmDiscountDueNextMonth]	DATETIME        NULL,
+    [intDiscountDueNextMonth]	INT        NULL,
     [dblAPR]					NUMERIC (18, 6) NULL,
     [strTermCode]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
     [ysnAllowEFT]				BIT             DEFAULT ((1)) NOT NULL,
@@ -85,7 +85,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMTerm',
     @level2type = N'COLUMN',
-    @level2name = N'dtmDiscountDueNextMonth'
+    @level2name = N'intDiscountDueNextMonth'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'APR for Late Payment',

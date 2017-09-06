@@ -15,7 +15,7 @@ BEGIN
 	[strDescription], 
 	[blbMessage], 
 	[strModuleName], 
-	[ysnSystemDefined],
+	0,
 	@letterId
 	FROM dbo.tblSMLetter 
 	WHERE [intLetterId] = @letterId;

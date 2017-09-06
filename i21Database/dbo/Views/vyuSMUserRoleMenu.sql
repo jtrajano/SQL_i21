@@ -6,7 +6,7 @@ SELECT intUserRoleMenuId
 ,Menu.intParentMenuID as intParentMenuId
 ,RoleMenu.ysnVisible as ysnVisible
 ,RoleMenu.intSort
-,strMenuName
+,REPLACE(strMenuName, ' (Portal)', '') as strMenuName
 ,strModuleName
 ,strDescription
 ,Menu.strCategory
@@ -16,7 +16,9 @@ SELECT intUserRoleMenuId
 ,ysnExpanded
 ,ysnIsLegacy
 ,ysnLeaf
+,Menu.intRow as intRow
 ,RoleMenu.intConcurrencyId
 FROM tblSMUserRoleMenu RoleMenu
 LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
-WHERE  strMenuName NOT IN  (CASE  (SELECT TOP 1 ysnLegacyIntegration FROM tblSMCompanyPreference) WHEN 0 THEN ('Import GL from Subledger') ELSE ('')  END)
+WHERE ISNULL(ysnAvailable, 1) = 1 
+--WHERE  strMenuName NOT IN  (CASE  (SELECT TOP 1 ysnLegacyIntegration FROM tblSMCompanyPreference) WHEN 0 THEN ('Import GL from Subledger') ELSE ('')  END)

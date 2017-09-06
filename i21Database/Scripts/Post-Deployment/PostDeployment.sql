@@ -45,14 +45,18 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\26_ActivitySource.sql
 :r .\SM\DefaultData\27_Language.sql
 :r .\SM\DefaultData\28_MultiCompany.sql
+:r .\SM\DefaultData\29_TransportationMode.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql
+:r .\SM\1730_PortalMenus.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
 :r .\SM\1720_Statement_Footer_To_Report.sql
 :r .\SM\1730_UpdatePatronageMenus.sql
 :r .\SM\1730_EntityFavoriteMenu.sql
+:r .\SM\1730_UpdateTicketManagementMenus.sql
+:r .\SM\1730_UpdatePayrollMenus.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql

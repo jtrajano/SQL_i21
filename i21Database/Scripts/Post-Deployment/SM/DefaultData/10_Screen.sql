@@ -81,61 +81,54 @@ GO
 			WHERE strNamespace = 'EntityManagement.view.EntityContact'
 		END
 
+	-- Purchasing
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher') 
-		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId]) 
-			VALUES (N'Voucher', N'Voucher', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill',  1, 1,  0)
-		END
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId]) 
+		VALUES (N'Voucher', N'Voucher', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill',  1, 1,  0)
 	ELSE
-		BEGIN
-			UPDATE tblSMScreen
-			SET strTableName = 'tblAPBill',
-				ysnApproval = 1,
-				ysnActivity = 1
-			WHERE strNamespace = 'AccountsPayable.view.Voucher'
-		END
+		UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1 WHERE strNamespace = 'AccountsPayable.view.Voucher'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.PurchaseOrder') 
-		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId]) 
-			VALUES (N'Purchase Order', N'Purchase Order', N'AccountsPayable.view.PurchaseOrder', N'Accounts Payable', N'tblPOPurchase',  1, 1,  0)
-		END
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId]) 
+		VALUES (N'Purchase Order', N'Purchase Order', N'AccountsPayable.view.PurchaseOrder', N'Accounts Payable', N'tblPOPurchase',  1, 1,  0)
 	ELSE
-		BEGIN
-			UPDATE tblSMScreen
-			SET strTableName = 'tblPOPurchase',
-				ysnApproval = 1,
-				ysnActivity = 1
-			WHERE strNamespace = 'AccountsPayable.view.PurchaseOrder'
-		END
+		UPDATE tblSMScreen SET strTableName = 'tblPOPurchase', ysnApproval = 1, ysnActivity = 1 WHERE strNamespace = 'AccountsPayable.view.PurchaseOrder'
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.ImportAPInvoice') 
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [intConcurrencyId]) 
+		VALUES (N'', N'Import Vouchers from Origin', N'AccountsPayable.view.ImportAPInvoice', N'Accounts Payable',  0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = 'Import Vouchers from Origin' WHERE strNamespace = 'AccountsPayable.view.ImportAPInvoice'
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.RecapTransaction') 
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [intConcurrencyId]) 
+		VALUES (N'', N'Post Preview', N'AccountsPayable.view.RecapTransaction', N'Accounts Payable', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = 'Post Preview' WHERE strNamespace = 'AccountsPayable.view.RecapTransaction'
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.ReceivedItems') 
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [intConcurrencyId]) 
+		VALUES (N'', N'Add Payables', N'AccountsPayable.view.ReceivedItems', N'Accounts Payable', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = 'Add Payables' WHERE strNamespace = 'AccountsPayable.view.ReceivedItems'
+			
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.ReceivedItems') 
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [intConcurrencyId]) 
+		VALUES (N'', N'Tax Details', N'AccountsPayable.view.Taxes', N'Accounts Payable', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = 'Tax Details' WHERE strNamespace = 'AccountsPayable.view.Taxes'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.Quote') 
-		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId]) 
-			VALUES (N'Quote', N'Quote', N'AccountsReceivable.view.Quote', N'Accounts Receivable', N'tblSOSalesOrder',  1,  1,  0)
-		END
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId]) 
+		VALUES (N'Quote', N'Quote', N'AccountsReceivable.view.Quote', N'Accounts Receivable', N'tblSOSalesOrder',  1,  1,  0)
 	ELSE
-		BEGIN
-			UPDATE tblSMScreen
-			SET strTableName = 'tblSOSalesOrder',
-				ysnApproval = 1,
-				ysnActivity = 1
-			WHERE strNamespace = 'AccountsReceivable.view.Quote'
-		END
+		UPDATE tblSMScreen SET strTableName = 'tblSOSalesOrder', ysnApproval = 1, ysnActivity = 1 WHERE strNamespace = 'AccountsReceivable.view.Quote'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.SalesOrder') 
-		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId]) 
-			VALUES (N'Sales Order', N'Sales Order', N'AccountsReceivable.view.SalesOrder', N'Accounts Receivable', N'tblSOSalesOrder', 1,  1,  0)
-		END
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId]) 
+		VALUES (N'Sales Order', N'Sales Order', N'AccountsReceivable.view.SalesOrder', N'Accounts Receivable', N'tblSOSalesOrder', 1,  1,  0)
 	ELSE
-		BEGIN
-			UPDATE tblSMScreen
-			SET strTableName = 'tblSOSalesOrder',
-				ysnApproval = 1,
-				ysnActivity = 1
-			WHERE strNamespace = 'AccountsReceivable.view.SalesOrder'
-		END
+		UPDATE tblSMScreen SET strTableName = 'tblSOSalesOrder', ysnApproval = 1, ysnActivity = 1 WHERE strNamespace = 'AccountsReceivable.view.SalesOrder'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract') 
 		BEGIN
@@ -306,18 +299,6 @@ GO
 			WHERE strNamespace = 'Inventory.view.Item'
 		END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.PurchaseOrder')
-    BEGIN
-        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
-        VALUES (N'', N'Purchase Order', N'AccountsPayable.view.PurchaseOrder', N'Accounts Payable', N'tblPOPurchase', 1, 1, 1, 0)
-	END	
-
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Item')
-    BEGIN
-        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
-        VALUES (N'', N'Voucher', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill', 1, 1, 1, 0)
-	END	
-
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Item')
     BEGIN
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId])
@@ -331,7 +312,26 @@ GO
         VALUES (N'', N'TM Order', N'TankManagement.view.Order', N'Tank Management', N'', 1,  0)
     END
 
+	--- Grain
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.DiscountTable')
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+        VALUES (N'', N'Discounts', N'Grain.view.DiscountTable', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Discounts', strModule = N'Grain' WHERE strNamespace = 'Grain.view.DiscountTable'
 	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.GrainStorageType')
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+        VALUES (N'', N'Storage Type', N'Grain.view.GrainStorageType', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Storage Type', strModule = N'Grain' WHERE strNamespace = 'Grain.view.GrainStorageType'
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts')
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+        VALUES (N'', N'Bill Storage', N'Grain.view.BillStorageAndDiscounts', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Grain' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
+
+	DELETE tblSMScreen WHERE strModule = 'Grain' AND strNamespace IN('Grain.view.StorageType', 'Grain.view.QualityDiscounts', 'Grain.view.StorageStatement')
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO

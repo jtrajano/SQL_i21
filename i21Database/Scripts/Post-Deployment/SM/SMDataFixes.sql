@@ -47,6 +47,14 @@ GO
 			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @CommonInfoParentMenuId
 		)
 	END
+
+	IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'Position Report' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Position Report') > 1)
+	BEGIN
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intMenuID NOT IN
+		(
+			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management'
+		)
+	END
 GO
 
 	/* SET A DEFAULT VALUE FOR TAX CODE RATE */
@@ -192,7 +200,7 @@ GO
 	END
 
 	/* ARRANGE USER ROLE MENUS SCREENS */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (Screens)')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (Screens) - 1730')
 	BEGIN
 		UPDATE RoleMenu SET intSort = ISNULL(MasterMenu.intSort, 0)
 		FROM tblSMUserRoleMenu RoleMenu
@@ -201,7 +209,7 @@ GO
 
 		PRINT N'ARRANGE USER ROLE MENUS (Screens)'
 		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
-		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Screens)', 'Arrange User Role Menus - Role Menu (Screens)', GETDATE())
+		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Screens) - 1730', 'Arrange User Role Menus - Role Menu (Screens) - 1730', GETDATE())
 	END
 
 	/* ARRANGE CONTACT ROLE MENUS SCREENS */

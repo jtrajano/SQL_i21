@@ -5621,6 +5621,9 @@
     <Build Include="dbo\Views\vyuRKPositionByPeriodContDetView.sql" />
     <Build Include="dbo\Views\vyuRKMarketDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdateTicketManagementMenus.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdatePayrollMenus.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_PortalMenus.sql" />
     <Build Include="dbo\Views\vyuMFGetShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetReceiving.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSubReport.sql" />
@@ -5632,6 +5635,8 @@
     <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
     <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
+    <Build Include="dbo\Tables\tblSMTransportationMode.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\29_TransportationMode.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPNLPhysicalFuturesResult.sql" />
   </ItemGroup>
   <ItemGroup>
