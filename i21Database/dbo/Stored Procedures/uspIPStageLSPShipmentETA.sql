@@ -41,7 +41,7 @@ BEGIN TRY
 
 	Select @intStageShipmentETAId=SCOPE_IDENTITY()
 
-	Select TOP 1 strDeliveryNo AS strInfo1,ISNULL(CONVERT(VARCHAR(10),dtmETA,121),'') AS strInfo2,CONVERT(VARCHAR(500),@intStageShipmentETAId) AS strSessionId From tblIPShipmentETAStage
+	Select TOP 1 strDeliveryNo AS strInfo1,ISNULL(CONVERT(VARCHAR(10),dtmETA,121),'') AS strInfo2,CONVERT(VARCHAR(500),@intStageShipmentETAId) AS strSessionId From tblIPShipmentETAStage Where intStageShipmentETAId=@intStageShipmentETAId
 
 END TRY
 
