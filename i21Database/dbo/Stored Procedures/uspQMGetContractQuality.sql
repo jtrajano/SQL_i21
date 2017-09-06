@@ -34,7 +34,7 @@ BEGIN TRY
      JOIN tblICItem AS I ON I.intItemId = CD.intItemId  
      JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
@@ -120,7 +120,7 @@ BEGIN TRY
 		JOIN tblICItem AS I ON I.intItemId = CD.intItemId
 		JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END

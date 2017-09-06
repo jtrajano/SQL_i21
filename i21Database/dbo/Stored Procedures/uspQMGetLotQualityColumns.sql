@@ -30,7 +30,7 @@ BEGIN TRY
   JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
   JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
