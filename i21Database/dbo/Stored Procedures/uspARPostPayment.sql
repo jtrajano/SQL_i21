@@ -2496,6 +2496,12 @@ IF @recap = 0
 			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, Z.intEntityId, Z.intInterestAccountId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)		
 
+			-- Delete Invoice with Zero Payment
+			DELETE FROM tblARPaymentDetail
+			WHERE
+				dblPayment = 0
+				AND intInvoiceId IN (SELECT intInvoiceId FROM @ARReceivablePostData)	
+
 			-- Update the posted flag in the transaction table
 			UPDATE tblARPayment
 			SET		ysnPosted = 1
@@ -2678,13 +2684,7 @@ IF @recap = 0
 			-- Insert Zero Payments for updating
 			INSERT INTO @ARReceivablePostData
 			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, Z.intEntityId, Z.intInterestAccountId FROM @ZeroPayment Z
-			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)						
-			
-			-- Delete Invoice with Zero Payment
-			DELETE FROM tblARPaymentDetail
-			WHERE
-				dblPayment = 0
-				AND intInvoiceId IN (SELECT intInvoiceId FROM @ARReceivablePostData)				
+			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)											
 
 			--Insert Successfully posted transactions.
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
