@@ -115,6 +115,42 @@ BEGIN
 	END  
 END   
 
+DECLARE @iItemNo NVARCHAR(50)
+-- Validate blank storage location and sub location of lotted items
+DECLARE @LotNo NVARCHAR(50)
+SET @iItemNo = NULL
+
+SELECT TOP 1 @LotNo = cd.strLotNo, @iItemNo = i.strItemNo
+FROM tblICInventoryCountDetail cd
+	INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+WHERE cd.intInventoryCountId = @intTransactionId
+	AND i.strLotTracking <> 'No'
+	AND (cd.intSubLocationId IS NULL OR cd.intStorageLocationId IS NULL)
+
+IF(@iItemNo IS NOT NULL)
+BEGIN
+	-- Sub Location or Storage Location is missing for Item %s, Lot No. %s.
+	EXEC uspICRaiseError 80189, @iItemNo, @LotNo;
+	GOTO Post_Exit  
+END
+
+-- Validate blank lot number for autocreate
+
+SELECT TOP 1 @iItemNo = i.strItemNo
+FROM tblICInventoryCountDetail cd
+	INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+WHERE cd.intInventoryCountId = @intTransactionId
+	AND i.strLotTracking <> 'No'
+	AND cd.intLotId IS NULL AND NULLIF(cd.strLotNo, '') IS NULL
+
+IF(@iItemNo IS NOT NULL)
+BEGIN
+	BEGIN
+		EXEC uspICRaiseError 80130, @iItemNo;
+		GOTO Post_Exit  
+	END
+END
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
@@ -148,15 +184,15 @@ FROM tblICInventoryCount IC
 WHERE IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
 
 IF @ItemNo IS NOT NULL
-	BEGIN
-		-- Lot Number is invalid or missing for item {Item No.}
-		EXEC uspICRaiseError 80130, @ItemNo;
-		GOTO Post_Exit  
-	END
+BEGIN
+	-- Lot Number is invalid or missing for item {Item No.}
+	EXEC uspICRaiseError 80130, @ItemNo;
+	GOTO Post_Exit  
+END
+
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 IF @@ERROR <> 0 GOTO Post_Exit    
-
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  

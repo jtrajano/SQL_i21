@@ -202,6 +202,7 @@ BEGIN
 		WHEN @msgId = 80186 THEN 'The UOM %s is used for %s and not for %s. Please assign the correct UOM id.'
 		WHEN @msgId = 80187 THEN 'You are not allowed to change the Sub Location. Item %s still has stock at %s.'
 		WHEN @msgId = 80188 THEN 'You are not allowed to change the Sub Location. Item %s, plus %i more, still has stock at %s.'
+		WHEN @msgId = 80189 THEN 'Sub Location or Storage Location is missing for Item %s, Lot No. %s.'
 	END 
 
 	RETURN @msg
