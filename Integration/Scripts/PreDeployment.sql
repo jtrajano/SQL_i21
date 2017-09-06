@@ -229,7 +229,10 @@
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
-
+:r "..\dbo\Stored Procedures\uspARImportPTTaxXref.sql"
+:r "..\dbo\Stored Procedures\uspARImportPTTax.sql"
+:r "..\dbo\Stored Procedures\uspARImportAGTaxXref.sql"
+:r "..\dbo\Stored Procedures\uspARImportAGTax.sql"
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
 
