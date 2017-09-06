@@ -75,7 +75,6 @@ BEGIN
 		Header.intSalesOrderId = @SalesOrderId
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intItemId = TD.intItemId		
-		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyShipped))
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
 		AND ISNULL((@QuantityToPost),0) <> 0
 
