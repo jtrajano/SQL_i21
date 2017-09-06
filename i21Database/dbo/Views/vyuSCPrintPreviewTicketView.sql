@@ -148,7 +148,10 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	vyuEMSearchShipVia.strName AS strHaulerName,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision,
 	tblSCScaleSetup.ysnMultipleWeights,
-	ICCA.strDescription AS strGrade
+	ICCA.strDescription AS strGrade,
+	tblSCTicketPrintOption.intTicketFormatId,
+	tblSCTicketFormat.strTicketFooter,
+	tblSCTicketFormat.strTicketHeader
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -165,3 +168,5 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
   LEFT JOIN vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem on vyuICGetInventoryShipmentItem.intSourceId = SC.intTicketId
   LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SC.intCommodityAttributeId
+  LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
+  LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
