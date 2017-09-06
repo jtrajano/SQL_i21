@@ -22,6 +22,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			FROM dbo.tblARInvoice WITH (NOLOCK)
 			WHERE ysnPosted = 1
 			  AND ysnForgiven = 0
+			  AND ysnPaid = 0
 			  AND strType = 'Service Charge'
 		) SCI ON DV.intID = SCI.intInvoiceId
 
