@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuPATEquityDetails]
 	AS 
-SELECT	id = CAST(ROW_NUMBER() OVER (ORDER BY intCustomerId) AS INT),
+SELECT	id = CAST(ROW_NUMBER() OVER(ORDER BY FY.dtmDateFrom DESC, ENT.strName) AS int),
 		CE.intCustomerId,
 		ENT.strName,
 		CE.intFiscalYearId,
@@ -27,6 +27,7 @@ LEFT JOIN tblSMTaxCode TC
 GROUP BY CE.intCustomerId,
 		ENT.strName,
 		CE.intFiscalYearId,
+		FY.dtmDateFrom,
 		FY.strFiscalYear,
 		AR.strStockStatus,
 		TC.strTaxCode
