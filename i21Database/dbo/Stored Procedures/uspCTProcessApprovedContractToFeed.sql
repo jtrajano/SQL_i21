@@ -93,10 +93,10 @@ BEGIN TRY
 				SELECT TOP 1 @intLastFeedId =  intContractFeedId FROM tblCTContractFeed WHERE intContractDetailId = ISNULL(@intContractDetailId,0) ORDER BY intContractFeedId DESC
             END
             SELECT @strRowState= 'Modified'
-            IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND strRowState = 'Added' AND ISNULL(strMessage,'Success') <> 'Success')
-            BEGIN
-				SELECT @strRowState= 'Added'
-            END
+    --        IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND strRowState = 'Added' AND ISNULL(strMessage,'Success') <> 'Success')
+    --        BEGIN
+				--SELECT @strRowState= 'Added'
+    --        END
             --DELETE FROM tblCTApprovedContract WHERE intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId      < @intPrevApprovedContractId
             GOTO INSERTBLOCK
 
