@@ -102,7 +102,7 @@ BEGIN TRY
 			,VEMEH   NVARCHAR(100)
 			) x Join tblIPReceiptStage s on x.VBELN=s.strDeliveryNo
 
-	Select TOP 1 strDeliveryNo AS strInfo1, '' strInfo2,CONVERT(VARCHAR(500),@intStageReceiptId) AS strSessionId From tblIPReceiptStage
+	Select TOP 1 strDeliveryNo AS strInfo1, '' strInfo2,CONVERT(VARCHAR(500),@intStageReceiptId) AS strSessionId From tblIPReceiptStage Where intStageReceiptId=@intStageReceiptId
 
 END TRY
 
