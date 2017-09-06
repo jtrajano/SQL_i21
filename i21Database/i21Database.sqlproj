@@ -5638,6 +5638,7 @@
     <Build Include="dbo\Tables\tblSMTransportationMode.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\29_TransportationMode.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPNLPhysicalFuturesResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPNLSalesContractImpact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
