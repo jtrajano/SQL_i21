@@ -105,7 +105,7 @@ BEGIN
 												dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 													- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 													paymentDetail.dblPayment, voucher.dblTotal) * A.dblExchangeRate
-												AS DECIMAL(18,2)) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
+												AS DECIMAL(18,2)) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strNotes,
@@ -132,7 +132,7 @@ BEGIN
 												dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 													- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 													paymentDetail.dblPayment, voucher.dblTotal)
-												AS DECIMAL(18,2)) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
+												AS DECIMAL(18,2)) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	A.dblExchangeRate,
@@ -171,7 +171,7 @@ BEGIN
 											-
 											CAST(
 												dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
-												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
+												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -332,7 +332,7 @@ BEGIN
 												SUM(
 													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate)
 											AS DECIMAL(18,2))
-											* (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),
+											* (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -358,7 +358,7 @@ BEGIN
 												SUM(
 													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal))
 											AS DECIMAL(18,2))
-											* (CASE WHEN voucher.intTransactionType != 1 THEN -1 ELSE 1 END),      
+											* (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),      
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
@@ -382,6 +382,7 @@ BEGIN
 	B.intBillId,
 	D.strVendorId,
 	A.dtmDatePaid,
+	A.ysnPrepay,
 	A.intCurrencyId,
 	A.strNotes,
 	B.intPaymentDetailId,
