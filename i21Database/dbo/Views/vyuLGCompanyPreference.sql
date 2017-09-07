@@ -176,7 +176,7 @@ SELECT CP.intCompanyPreferenceId
 	,CAST(ISNULL(ysnUpdateCompanyLocation,0) AS BIT) ysnUpdateCompanyLocation
 	,CAST(ISNULL(ysnLoadContainerTypeByOrigin,0) AS BIT) ysnLoadContainerTypeByOrigin
 	,CAST(ISNULL(ysnRestrictIncreaseSeqQty,0) AS BIT) ysnRestrictIncreaseSeqQty
-
+	,ISNULL(CP.intNumberOfDecimalPlaces,4) intNumberOfDecimalPlaces
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
