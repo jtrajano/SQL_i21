@@ -26,4 +26,4 @@ RETURN
 		AND [intFunctionalCurrencyId] = [intToCurrencyId] 
 		AND dbo.fnDateLessThanEquals(dtmValidFromDate, @dtmDate) = 1
 	ORDER BY
-		[dtmValidFromDate] 
+		[dtmValidFromDate] DESC
