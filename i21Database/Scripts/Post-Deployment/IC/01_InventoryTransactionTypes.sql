@@ -182,6 +182,18 @@ USING	(
 		SELECT	id = 43
 				,name = 'Inventory Adjustment - Ownership Change'
 				,form = 'Inventory Adjustment'
+		UNION ALL
+		SELECT id = 44
+				,name = 'Load/Shipment-Inbound'
+				,form = 'Load/Shipment Schedule'
+		UNION ALL
+		SELECT id = 45
+				,name = 'Load/Shipment-Outbound'
+				,form = 'Load/Shipment Schedule'
+		UNION ALL
+		SELECT id = 46
+				,name = 'Load/Shipment-Drop Ship'
+				,form = 'Load/Shipment Schedule'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
