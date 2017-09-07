@@ -395,6 +395,10 @@ GO
                      UPDATE tblSMScreen SET strScreenName = N'Update Rebate/Discount', strModule = N'Store' WHERE strNamespace = 'Store.view.UpdateRebateDiscount'
               END
 
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Quality.view.QualityException')
+	BEGIN
+		UPDATE tblSMScreen SET strScreenName = N'Quality View' WHERE strNamespace = 'Quality.view.QualityException'
+	END
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO
