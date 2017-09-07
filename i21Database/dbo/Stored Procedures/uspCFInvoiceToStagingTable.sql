@@ -352,6 +352,12 @@ BEGIN TRY
 			@ysnIncludeRemittancePage = ISNULL([from],0)
 	FROM @temp_params WHERE [fieldname] = 'ysnIncludeRemittancePage'
 
+	DECLARE @ysnReprintInvoice BIT
+	SELECT TOP 1
+			@ysnReprintInvoice = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
+
+
 	IF(@ysnIncludeRemittancePage = 1)
 	BEGIN
 
@@ -382,6 +388,7 @@ BEGIN TRY
 		SELECT TOP 1
 				@strCustomerNumber = ISNULL([from],'')
 		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
+
 		
 		SET @strCustomerNumber = NULLIF(@strCustomerNumber, '')
 
@@ -393,6 +400,12 @@ BEGIN TRY
 			, @ysnPrintFromCF = 1
 			, @strCustomerNumber = @strCustomerNumber		
 
+
+		--SELECT '1',* FROM tblARCustomerStatementStagingTable
+
+		IF(@ysnReprintInvoice = 0)
+		BEGIN
+		
 		INSERT INTO tblARCustomerStatementStagingTable
 		(
 		 intEntityCustomerId
@@ -516,6 +529,8 @@ BEGIN TRY
 		,dblAccountTotalDiscount
 		,ysnShowOnCFInvoice
 		,intTermID
+
+		--SELECT '2',* FROM tblARCustomerStatementStagingTable
 
 		IF(ISNULL(@strInvoiceCycle,'') != '')
 		BEGIN
@@ -745,6 +760,35 @@ BEGIN TRY
 		  ,dtmAsOfDate
 		) STAGING2
 		WHERE STAGING.dblTotalAR IS NULL
+
+		END
+		ELSE
+		BEGIN
+			UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
+
+			UPDATE tblARCustomerStatementStagingTable
+			SET 
+					 tblARCustomerStatementStagingTable.intCFAccountId					   = 		cfInv.intAccountId				
+					,tblARCustomerStatementStagingTable.dblCFDiscount					   = 		cfInv.dblDiscount				
+					,tblARCustomerStatementStagingTable.dblCFEligableGallon				   = 		cfInv.dblEligableGallon			
+					,tblARCustomerStatementStagingTable.strCFGroupDiscoount				   = 		cfInv.strGroupName			
+					,tblARCustomerStatementStagingTable.intCFDiscountDay				   = 		cfInv.intDiscountDay			
+					,tblARCustomerStatementStagingTable.strCFTermType					   = 		cfInv.strTermType				
+					--,tblARCustomerStatementStagingTable.dtmCFInvoiceDate				   = 		cfInv.dtmInvoiceDate			
+					,tblARCustomerStatementStagingTable.intCFTermID						   = 		cfInv.intTermID					
+					,tblARCustomerStatementStagingTable.dblCFAccountTotalAmount			   = 		cfInv.dblAccountTotalAmount		
+					,tblARCustomerStatementStagingTable.dblCFAccountTotalDiscount		   = 		cfInv.dblAccountTotalDiscount	
+					,tblARCustomerStatementStagingTable.dblCFFeeTotalAmount				   = 		cfInv.dblFeeAmount			
+					,tblARCustomerStatementStagingTable.dblCFInvoiceTotal				   = 		cfInv.dblInvoiceTotal			
+					,tblARCustomerStatementStagingTable.dblCFTotalQuantity				   = 		cfInv.dblTotalQuantity			
+					,tblARCustomerStatementStagingTable.strCFTempInvoiceReportNumber	   = 		cfInv.strTempInvoiceReportNumber
+					,tblARCustomerStatementStagingTable.strCFEmailDistributionOption	   = 		cfInv.strEmailDistributionOption
+					,tblARCustomerStatementStagingTable.strCFEmail						   = 		cfInv.strEmail			
+					,tblARCustomerStatementStagingTable.ysnCFShowDiscountOnInvoice		   =		cfInv.ysnShowOnCFInvoice
+			FROM tblCFInvoiceStagingTable cfInv
+			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
+
+		END
 
 
 	END
