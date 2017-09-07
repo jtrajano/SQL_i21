@@ -5416,6 +5416,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
     <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
