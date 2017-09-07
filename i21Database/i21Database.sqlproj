@@ -5655,6 +5655,8 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\29_TransportationMode.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPNLPhysicalFuturesResult.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPNLSalesContractImpact.sql" />
+    <Build Include="dbo\Views\vyuSMContactScreen.sql" />
+    <Build Include="dbo\Views\vyuSMContactControl.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
