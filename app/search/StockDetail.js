@@ -423,6 +423,7 @@ Ext.define('Inventory.search.StockDetail', {
                 categoryAxis: {
                     title: 'Storage Unit',
                     labelRotation: 45,
+                    minHorizontalGap: 60,
                     //labelColorField: 'strColor',
                     boldLabels: false,
                     /*type: 'serial',*/

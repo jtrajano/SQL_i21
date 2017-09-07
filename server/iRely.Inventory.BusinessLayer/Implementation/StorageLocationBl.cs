@@ -164,7 +164,6 @@ namespace iRely.Inventory.BusinessLayer
             else
             {
                 query = _db.GetQuery<vyuICGetSubLocationBinDetails>()
-                    .Where(w => w.intSubLocationId == subLocationId)
                     .Filter(param, true);
             }
 
@@ -208,7 +207,6 @@ namespace iRely.Inventory.BusinessLayer
             else
             {
                 query = _db.GetQuery<vyuICGetStorageBinDetails>()
-                    .Where(w => w.intStorageLocationId == storageLocationId)
                     .Filter(param, true);
             }
 
