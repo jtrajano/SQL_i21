@@ -135,7 +135,7 @@ AS
 								 , @entityId
 								 , I.strInvoiceNumber
 								 , NULL
-								 , dblAmountDue = I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)
+								 , dblAmountDue = I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)
 								 , dblTotalAmount = dbo.fnRoundBanker(CASE WHEN SC.strCalculationType = 'Percent'
 						 								THEN
 						 									CASE WHEN SC.dblServiceChargeAPR > 0
@@ -143,12 +143,12 @@ AS
 						 											CASE WHEN SC.dblMinimumCharge > ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
 																																							THEN I.dtmDueDate 
 																																							ELSE I.dtmCalculated 
-																																						 END, ISNULL(PAYMENTDATE.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
+																																						 END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
 						 		  										THEN SC.dblMinimumCharge
 						 		  										ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
 																																	  THEN I.dtmDueDate 
 																																	  ELSE I.dtmCalculated 
-																																   END, ISNULL(PAYMENTDATE.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))
+																																   END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)))
 						 											END
 						 										ELSE 0
 						 									END
@@ -156,34 +156,36 @@ AS
 						 									SC.dblPercentage
 						 							END, dbo.fnARGetDefaultDecimal())
 							FROM tblARInvoice I
-								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
-								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
-								LEFT JOIN (SELECT PD.intInvoiceId
-												, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
-										   FROM tblARPaymentDetail PD 
-												INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId 
-												INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
-										   WHERE P.ysnPosted = 1 
-											 AND P.dtmDatePaid <= @asOfDate
-											 AND P.dtmDatePaid <= I.dtmDueDate
-										   GROUP BY PD.intInvoiceId
-								) AS PD ON PD.intInvoiceId = I.intInvoiceId
-								LEFT JOIN (SELECT PD.intInvoiceId					
-												, dtmDatePaid   = MAX(dtmDatePaid)
-										   FROM tblARPaymentDetail PD 
-												INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId 
-												INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
-										   WHERE P.ysnPosted = 1 
-											 AND P.dtmDatePaid <= @asOfDate
-										   GROUP BY PD.intInvoiceId
-								) AS PAYMENTDATE ON PAYMENTDATE.intInvoiceId = I.intInvoiceId 
+							INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
+							INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
+							LEFT JOIN (SELECT PD.intInvoiceId
+											, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
+											, dtmDatePaid   = MAX(dtmDatePaid)
+										FROM tblARPaymentDetail PD 
+											INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId 
+											INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+										WHERE P.ysnPosted = 1 
+											AND P.dtmDatePaid <= @asOfDate
+											AND (PD.dblPayment + PD.dblDiscount <> PD.dblInvoiceTotal OR (PD.dblPayment + PD.dblDiscount = PD.dblInvoiceTotal AND P.dtmDatePaid <= CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END))
+										GROUP BY PD.intInvoiceId
+							) AS PAYMENT ON PAYMENT.intInvoiceId = I.intInvoiceId	
+							LEFT JOIN (SELECT PD.intInvoiceId
+											, dtmDatePaid   = MAX(dtmDatePaid)
+										FROM tblARPaymentDetail PD 
+											INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId 
+											INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+										WHERE P.ysnPosted = 1 
+											AND P.dtmDatePaid <= @asOfDate	
+										GROUP BY PD.intInvoiceId
+							) AS PAYMENT2 ON PAYMENT2.intInvoiceId = I.intInvoiceId AND I.ysnPaid = 1
 							WHERE I.ysnPosted = 1 							  
 								AND I.strTransactionType IN ('Invoice', 'Debit Memo')
 								AND I.strType NOT IN ('CF Tran')
 								AND I.intEntityCustomerId = @entityId
 								AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < @asOfDate
-								AND (PAYMENTDATE.dtmDatePaid IS NOT NULL AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < PAYMENTDATE.dtmDatePaid OR PAYMENTDATE.dtmDatePaid IS NULL)
-								AND I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal) > @zeroDecimal					
+								AND (ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) IS NOT NULL AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) OR ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) IS NULL)
+								AND ((I.strType = 'Service Charge' AND ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND ysnForgiven = 0)))
+								AND I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal) > @zeroDecimal				
 						END
 					ELSE
 						BEGIN
