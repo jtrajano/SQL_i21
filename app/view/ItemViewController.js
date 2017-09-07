@@ -2319,21 +2319,30 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = win.viewModel.data.current;
 
         var stockUnitExist = true; 
-        if(current){
+        if(current){                        
             if (current.tblICItemUOMs()) {
-                Ext.Array.each(current.tblICItemUOMs().data.items, function (itemStock) {                    
-                    if (!itemStock.dummy) {
-                        stockUnitExist = false;
-                        if(itemStock.get('ysnStockUnit')){
-                            stockUnitExist = true;
-                            return false; 
-                        }                            
-                    }
-                });
-                if (stockUnitExist == false){
-                    iRely.Functions.showErrorDialog("Unit of Measure setup needs to have a Stock Unit.");
-                    return false;
-                }        
+                if (
+                    current.get('strType') != 'Other Charge'
+                    && current.get('strType') != 'Non-Inventory'
+                    && current.get('strType') != 'Service'
+                    && current.get('strType') != 'Software'
+                    && current.get('strType') != 'Comment'
+                )
+                {
+                    Ext.Array.each(current.tblICItemUOMs().data.items, function (itemStock) {                    
+                        if (!itemStock.dummy) {
+                            stockUnitExist = false;
+                            if(itemStock.get('ysnStockUnit')){
+                                stockUnitExist = true;
+                                return false; 
+                            }                            
+                        }
+                    });
+                    if (stockUnitExist == false){
+                        iRely.Functions.showErrorDialog("Unit of Measure setup needs to have a Stock Unit.");
+                        return false;
+                    }            
+                }                
             }        
         }
     },
