@@ -16,3 +16,11 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblGLAccountSegmentMapping_intAccountSegmentId]
     ON [dbo].[tblGLAccountSegmentMapping]([intAccountSegmentId] ASC);
 GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountSegmentMapping', @level2type=N'COLUMN',@level2name=N'intAccountSegmentMappingId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountSegmentMapping', @level2type=N'COLUMN',@level2name=N'intAccountId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Segment Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountSegmentMapping', @level2type=N'COLUMN',@level2name=N'intAccountSegmentId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountSegmentMapping', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
+GO

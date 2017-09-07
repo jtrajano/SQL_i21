@@ -29,3 +29,17 @@ GO
 ALTER TABLE [dbo].[tblGLCrossReferenceMapping] CHECK CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccountSystem]
 GO
 
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCrossReferenceMapping', @level2type=N'COLUMN',@level2name=N'intCrossReferenceMappingId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Old Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCrossReferenceMapping', @level2type=N'COLUMN',@level2name=N'strOldAccountId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCrossReferenceMapping', @level2type=N'COLUMN',@level2name=N'intAccountId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account System Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCrossReferenceMapping', @level2type=N'COLUMN',@level2name=N'intAccountSystemId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Outbound' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCrossReferenceMapping', @level2type=N'COLUMN',@level2name=N'ysnOutbound' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Inbound' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCrossReferenceMapping', @level2type=N'COLUMN',@level2name=N'ysnInbound' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCrossReferenceMapping', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
+GO

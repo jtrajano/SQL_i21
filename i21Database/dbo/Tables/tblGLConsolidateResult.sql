@@ -11,3 +11,13 @@ CREATE TABLE [dbo].[tblGLConsolidateResult](
 ) ON [PRIMARY]
 
 GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLConsolidateResult', @level2type=N'COLUMN',@level2name=N'intConsolidateResultId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Fiscal Open?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLConsolidateResult', @level2type=N'COLUMN',@level2name=N'ysnFiscalOpen' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unposted Transaction' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLConsolidateResult', @level2type=N'COLUMN',@level2name=N'ysnUnpostedTrans' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Result' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLConsolidateResult', @level2type=N'COLUMN',@level2name=N'strResult' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Company Name' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLConsolidateResult', @level2type=N'COLUMN',@level2name=N'strCompanyName' 
+GO

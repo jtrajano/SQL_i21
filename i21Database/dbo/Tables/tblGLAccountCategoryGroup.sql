@@ -17,3 +17,11 @@ GO
 
 ALTER TABLE [dbo].[tblGLAccountCategoryGroup] CHECK CONSTRAINT [FK_tblGLAccountCategoryGroup_tblGLAccountCategory]
 GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategoryGroup', @level2type=N'COLUMN',@level2name=N'intAccountCategoryGroupId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Category Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategoryGroup', @level2type=N'COLUMN',@level2name=N'intAccountCategoryId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Category Group Description' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategoryGroup', @level2type=N'COLUMN',@level2name=N'strAccountCategoryGroupDesc' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Category Group Code' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategoryGroup', @level2type=N'COLUMN',@level2name=N'strAccountCategoryGroupCode' 
+GO

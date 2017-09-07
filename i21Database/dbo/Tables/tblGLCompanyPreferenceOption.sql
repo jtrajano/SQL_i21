@@ -10,3 +10,20 @@
 	[intDefaultVisibleOldAccountSystemId] INT NULL
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'intCompanyPreferenceOptionId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Users to remind for unposted transactions' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'PostRemind_Users' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Before/ After fiscal period' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'PostRemind_BeforeAfter' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Number of Days Before/After Fiscal Period' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'PostRemind_Days' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Offset Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'OriginConversion_OffsetAccountId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Consolidating Parent' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'ysnConsolidatingParent' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Default Visible Old Account System Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'intDefaultVisibleOldAccountSystemId' 
+GO

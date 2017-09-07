@@ -234,7 +234,6 @@
     <Build Include="dbo\Tables\tblFRSegmentFilterGroup.sql" />
     <Build Include="dbo\Tables\tblFRSegmentFilterGroupDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccount.sql" />
-    <Build Include="dbo\Tables\tblGLMulticurrencySetting.sql" />
     <Build Include="dbo\Tables\tblGLAccountAllocationDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountDefault.sql" />
     <Build Include="dbo\Tables\tblGLAccountDefaultDetail.sql" />
@@ -4674,7 +4673,6 @@
     <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentCustomer.sql" />
     <Build Include="dbo\Views\vyuLGLoadStorageCostView.sql" />
-    <Build Include="dbo\Tables\tblGLMulticurrencySetting.sql" />
     <Build Include="dbo\Tables\tblGRSettleStorage.sql" />
     <Build Include="dbo\Tables\tblGRSettleStorageTicket.sql" />
     <Build Include="dbo\Tables\tblGRSettleContract.sql" />

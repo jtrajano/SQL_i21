@@ -59,4 +59,55 @@ GO
 ALTER TABLE [dbo].[tblGLRevalueDetails] CHECK CONSTRAINT [FK_tblGLRevalueDetails_tblGLRevalue]
 GO
 
-
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'intConsolidationDetailId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Consolidation Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'intConsolidationId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Transaction Type' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strTransactionType' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Transaction Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strTransactionId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Date Date' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dtmDate' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Date Due Date' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dtmDueDate' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Vendor Name' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strVendorName' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Commodity' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strCommodity' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Line Of Business' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strLineOfBusiness' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Location' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strLocation' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Ticket' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strTicket' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Contract Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strContractId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Item Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strItemId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Quantity' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblQuantity' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unit Price' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblUnitPrice' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Transaction Amount' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblTransactionAmount' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'intCurrencyId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Exchange Rate Type Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'intCurrencyExchangeRateTypeId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Historic Forex Rate' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblHistoricForexRate' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Historic Amount' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblHistoricAmount' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'New Forex Rate' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblNewForexRate' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'New Amount' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblNewAmount' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unrealized Gain' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblUnrealizedGain' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unrealized Loss' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'dblUnrealizedLoss' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Type' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalueDetails', @level2type=N'COLUMN',@level2name=N'strType' 
+GO

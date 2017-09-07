@@ -10,4 +10,9 @@
 
 GO
 
-
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountSystem', @level2type=N'COLUMN',@level2name=N'intAccountSystemId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account System Description' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountSystem', @level2type=N'COLUMN',@level2name=N'strAccountSystemDescription' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountSystem', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
+GO

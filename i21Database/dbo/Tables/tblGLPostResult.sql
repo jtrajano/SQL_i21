@@ -15,3 +15,22 @@ CREATE TABLE [dbo].[tblGLPostResult](
 	[intTransactionId] ASC
 )
 );
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Result' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'intResult' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Batch Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'strBatchId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Transaction Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'intTransactionId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Transaction Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'strTransactionId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Description' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'strDescription' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Date Date' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'dtmDate' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Transaction Type' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'strTransactionType' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'User Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'intUserId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Entity Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostResult', @level2type=N'COLUMN',@level2name=N'intEntityId' 
+GO

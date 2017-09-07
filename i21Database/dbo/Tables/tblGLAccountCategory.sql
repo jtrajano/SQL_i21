@@ -7,3 +7,14 @@
     [strAccountGroupFilter] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnRestricted] BIT NULL,
 )
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Category Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategory', @level2type=N'COLUMN',@level2name=N'intAccountCategoryId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Category (string)' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategory', @level2type=N'COLUMN',@level2name=N'strAccountCategory' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategory', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Group Filter' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategory', @level2type=N'COLUMN',@level2name=N'strAccountGroupFilter' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'If restricted' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategory', @level2type=N'COLUMN',@level2name=N'ysnRestricted' 
+GO
