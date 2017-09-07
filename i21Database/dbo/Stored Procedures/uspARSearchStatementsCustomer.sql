@@ -109,7 +109,7 @@ IF @ysnDetailedFormat = 0
 		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)
 		INNER JOIN (SELECT intEntityId
 					FROM dbo.tblARCustomer WITH (NOLOCK)
-					WHERE ISNULL(strStatementFormat, 'Open Item') = @strStatementFormat
+					WHERE ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormat
 		) C ON SSC.intEntityCustomerId = C.intEntityId
 		ORDER BY SSC.strCustomerName
 	END
