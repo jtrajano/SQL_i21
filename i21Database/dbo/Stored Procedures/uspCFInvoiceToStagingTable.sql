@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -764,6 +765,22 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+
+			IF(ISNULL(@strInvoiceCycle,'') != '')
+			BEGIN
+
+				DELETE FROM tblARCustomerStatementStagingTable 
+				WHERE intEntityCustomerId NOT IN (
+					SELECT cfAC.intCustomerId 
+					FROM tblCFAccount as cfAC
+					INNER JOIN tblCFInvoiceCycle cfIC
+					ON cfAC.intInvoiceCycle = cfIC.intInvoiceCycleId
+					WHERE cfIC.strInvoiceCycle COLLATE Latin1_General_CI_AS IN (
+						SELECT Record FROM fnCFSplitString(@strInvoiceCycle,'|^|')
+					)
+				)
+			END
+
 			UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
 
 			UPDATE tblARCustomerStatementStagingTable
@@ -787,6 +804,17 @@ BEGIN TRY
 					,tblARCustomerStatementStagingTable.ysnCFShowDiscountOnInvoice		   =		cfInv.ysnShowOnCFInvoice
 			FROM tblCFInvoiceStagingTable cfInv
 			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
+
+
+			DELETE FROM tblARCustomerStatementStagingTable 
+			WHERE intEntityCustomerId IN (
+				SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE intEntityCustomerId not in (
+					SELECT intEntityCustomerId AS intCount FROM tblARCustomerStatementStagingTable
+					WHERE 
+					strTransactionType != 'Balance Forward' 
+					GROUP BY intEntityCustomerId,strCustomerName
+					HAVING ISNULL(COUNT(*),0) > 0)
+			AND ISNULL(dblTotalAR,0) = 0)
 
 		END
 
