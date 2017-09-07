@@ -6639,7 +6639,7 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCustomerId',
+                                                                                    dataIndex: 'intEntityId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Customer Id',
                                                                                     hidden: true

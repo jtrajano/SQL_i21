@@ -15226,7 +15226,7 @@
                                                                         "columns": [
                                                                             "[",
                                                                             "\t{",
-                                                                            "\t\tdataIndex: 'intCustomerId',",
+                                                                            "\t\tdataIndex: 'intEntityId',",
                                                                             "\t\tdataType: 'numeric',",
                                                                             "\t\ttext: 'Customer Id',",
                                                                             "\t\thidden: true",
@@ -15243,7 +15243,7 @@
                                                                             "\t\ttext: 'Customer Name',",
                                                                             "\t\tflex: 1",
                                                                             "\t}",
-                                                                            "]"
+                                                                            "]\t"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strCustomerNumber",

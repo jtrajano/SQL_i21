@@ -1178,7 +1178,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colOwner: {
                     dataIndex: 'strCustomerNumber',
                     editor: {
-                        origValueField: 'intEntityCustomerId',
+                        origValueField: 'intEntityId',
                         origUpdateField: 'intOwnerId',
                         store: '{owner}'
                     }
