@@ -24,7 +24,7 @@ SELECT
 	B1.strName,
 	C.strAccountId,
 	Payment.strPaymentInfo,
-	dbo.fnAESDecryptASym(Payment.strBankAccountNo) AS strBankAccountNo,
+	dbo.fnAPMaskBankAccountNos(dbo.fnAESDecryptASym(Payment.strBankAccountNo)) AS strBankAccountNo,
 	Payment.ysnCleared,
 	Payment.dtmDateReconciled,
 	F.strUserName AS strUserId,
