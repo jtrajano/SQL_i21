@@ -351,23 +351,24 @@ Ext.define('Inventory.view.ItemLocationViewController', {
 
     onVendorDrilldown: function(combo) {
         var win = combo.up('window');
-        var current = win.viewModel.data.current;
+        var current = win ? win.viewModel.data.current : null;
+        var intVendorId = current ? current.get('intVendorId') : null; 
         
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
-        }
-        else {
-             iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+        if (intVendorId) {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
                 action: 'view',
                 filters: [
                     {
                         column: 'intEntityId',
-                        value: current.get('intVendorId')
+                        value: intVendorId
                     }
                 ],
                  
-                 viewConfig: { modal: true }
-            });
+                viewConfig: { modal: true }
+            });            
+        }
+        else {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
         }
     },
 
@@ -432,73 +433,61 @@ Ext.define('Inventory.view.ItemLocationViewController', {
     },
 
     onSubCategoryDrilldown: function(combo) {
-        var win = combo.up('window');
-        
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Store.view.SubCategory', { action: 'new', viewConfig: { modal: true }});
-        }
-        
-        else {
-            iRely.Functions.openScreen('Store.view.SubCategory', { 
-                filters: [
-                    {
-                        column: 'strSubcategoryId',
-                        value: combo.getRawValue()
-                    }
-                ],
-                viewConfig: { modal: true } 
-            });
-        }
+        iRely.Functions.openScreen('Store.view.SubCategory', { viewConfig: { modal: true }});
     },
 
     onProductCodeDrilldown: function(combo) {
         var win = combo.up('window');
-        var current = win.viewModel.data.current;
+        var current = win ? win.viewModel.data.current : null;
+        var intProductCodeId = current ? current.get('intProductCodeId') : null; 
+        var intLocationId = current ? current.get('intLocationId') : null; 
+        var strProductCode = current ? current.get('strProductCode') : null; 
         
-        if (iRely.Functions.isEmpty(combo.getValue())) {
+        if (!iRely.Functions.isEmpty(strProductCode) && intLocationId && intProductCodeId) {
             iRely.Functions.openScreen('Store.view.Store', { 
                 activeTab: 'Register Product',
-                action: 'new',
+                filters: [
+                    {
+                         column: 'intRegProdId',
+                         value: intProductCodeId,
+                         conjunction: 'and'
+                    },
+                    {
+                         column: 'intCompanyLocationId',
+                         value: intLocationId,
+                         conjunction: 'and'
+                    }  
+                ],                
             });
         }
         
         else {      
             iRely.Functions.openScreen('Store.view.Store', { 
                 activeTab: 'Register Product',
-                filters: [
-                    {
-                         column: 'intStoreNo',
-                         value: combo.getValue(),
-                         conjunction: 'and'
-                    },
-                    {
-                         column: 'intCompanyLocationId',
-                         value: current.get('intLocationId'),
-                         conjunction: 'and'
-                    }  
-                ],
-                
+                action: 'new',
             });
+
         }
     },
 
     onPromotionalDrilldown: function(combo) {
         var win = combo.up('window');
-        
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Store.view.PromotionSales', { action: 'new', viewConfig: { modal: true }});
-        }
-        
-        else {
+        var current = win ? win.viewModel.data.current : null;
+        var intPromoSalesListId = current ? current.get('intPromoSalesListId') : null;
+
+        if (intPromoSalesListId) {
             iRely.Functions.openScreen('Store.view.PromotionSales', { 
                 filters: [
                     {
                         column: 'intPromoSalesId',
-                        value: combo.getRawValue()
+                        value: intPromoSalesListId
                     }
                 ],
                 viewConfig: { modal: true } 
-            });
+            });            
+        }
+        else {
+            iRely.Functions.openScreen('Store.view.PromotionSales', { action: 'new', viewConfig: { modal: true }});
         }
     },
 
