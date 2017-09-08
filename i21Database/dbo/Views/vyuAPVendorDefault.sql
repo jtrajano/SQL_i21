@@ -28,7 +28,7 @@ SELECT
 	B.intGLAccountExpenseId,
 	K.strAccountId,
 	B.intBillToId,
-	C2.strCheckPayeeName AS strPayTo
+	CASE WHEN B.intBillToId > 0 THEN C2.strCheckPayeeName ELSE C.strCheckPayeeName END AS strPayTo
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B

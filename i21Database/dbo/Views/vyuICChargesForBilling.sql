@@ -83,6 +83,7 @@ SELECT
 	,[intScaleTicketId]							= ScaleTicket.intScaleTicketId
 	,[strScaleTicketNumber]						= ScaleTicket.strScaleTicketNumber
 	,[intLocationId]							= Receipt.intLocationId
+	,[intTaxGroupId]							= ReceiptCharge.intTaxGroupId
 	,[strReceiptType]							= Receipt.strReceiptType
 	,intForexRateTypeId							= ReceiptCharge.intForexRateTypeId
 	,dblForexRate								= ReceiptCharge.dblForexRate
@@ -227,6 +228,7 @@ SELECT
 	,[intScaleTicketId]							= ScaleTicket.intScaleTicketId
 	,[strScaleTicketNumber]						= ScaleTicket.strScaleTicketNumber
 	,[intLocationId]							= Receipt.intLocationId
+	,[intTaxGroupId]							= ReceiptCharge.intTaxGroupId
 	,[strReceiptType]							= Receipt.strReceiptType
 	,intForexRateTypeId							= ReceiptCharge.intForexRateTypeId
 	,dblForexRate								= ReceiptCharge.dblForexRate
