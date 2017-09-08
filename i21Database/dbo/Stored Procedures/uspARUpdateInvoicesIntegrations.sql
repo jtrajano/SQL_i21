@@ -52,6 +52,8 @@ EXEC dbo.[uspARUpdateProvisionalOnStandardInvoices] @IIDs
 
 EXEC dbo.[uspARUpdateLineItemsCommitted] @IIDs
 
+EXEC dbo.[uspARUpdateGrainOpenBalances]  @IIDs, @UserId
+
 DELETE FROM ARTD
 FROM
 	tblARTransactionDetail ARTD WITH (NOLOCK)

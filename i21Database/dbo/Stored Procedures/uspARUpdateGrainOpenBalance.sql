@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateGrainOpenBalance]
      @InvoiceId		INT
-	,@Negate		BIT	= 0
+	,@Delete		BIT	= 0
 	,@UserId		INT = NULL    
 AS
 BEGIN
@@ -14,7 +14,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000
 
-IF @Negate = 1
+IF @Delete = 1
 BEGIN
 	EXEC dbo.uspGRReverseTicketOpenBalance 
 			@strSourceType	= 'Invoice',
@@ -48,6 +48,19 @@ WHERE
 		OR
 		Detail.[dblQtyShipped] < dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyShipped)
 		)	
+
+UNION ALL
+
+SELECT TD.intTransactionDetailId 
+FROM 
+	tblARTransactionDetail TD
+INNER JOIN
+	tblARInvoice Header
+		ON TD.intTransactionId = Header.intInvoiceId							
+WHERE 
+	TD.intTransactionId = @InvoiceId
+	AND TD.strTransactionType = Header.strTransactionType
+	AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 
 DECLARE @InvoiceReversed BIT = 0
 IF EXISTS(SELECT TOP 1 NULL FROM @RecordsForReversal)
@@ -223,4 +236,3 @@ END
 END
 
 GO
-
