@@ -444,6 +444,12 @@ BEGIN TRY
 
 		SELECT @intItemUOMId = @intProduceUnitMeasureId
 
+		DECLARE @intSubLocationId1 INT
+
+		SELECT @intSubLocationId1 = intSubLocationId
+		FROM tblMFManufacturingCell
+		WHERE intManufacturingCellId = @intManufacturingCellId
+
 		--IF NOT EXISTS (
 		--		SELECT *
 		--		FROM dbo.tblICItemUOM
@@ -486,6 +492,7 @@ BEGIN TRY
 			,intProductionTypeId
 			,intBatchID
 			,intDepartmentId
+			,intConcurrencyId
 			)
 		SELECT @strWorkOrderNo
 			,@intManufacturingProcessId
@@ -495,7 +502,7 @@ BEGIN TRY
 			,10
 			,@intManufacturingCellId
 			,@intStorageLocationId
-			,@intSubLocationId
+			,@intSubLocationId1
 			,@intLocationId
 			,@dtmCurrentDate
 			,@intUserId
@@ -510,6 +517,7 @@ BEGIN TRY
 			,1
 			,@intBatchId
 			,@intDepartmentId
+			,1
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
 
