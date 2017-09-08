@@ -54,7 +54,8 @@ SELECT intEntityId				= ENTITY.intEntityId
      , strBillToCity			= BILLTOLOCATION.strCity
      , strBillToState			= BILLTOLOCATION.strState
      , strBillToZipCode			= BILLTOLOCATION.strZipCode
-     , strBillToCountry			= BILLTOLOCATION.strCountry     
+     , strBillToCountry			= BILLTOLOCATION.strCountry
+	 ,intServiceChargeId		= CUSTOMER.intServiceChargeId
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -83,6 +84,7 @@ INNER JOIN (
 		 , strSalesPersonName	= SALESPERSON.strSalesPersonName
 		 , strTerm				= TERM.strTerm
 		 , ysnHasBudgetSetup	= CAST(CASE WHEN (BUDGET.ysnHasBudgetSetup) = 1 THEN 1 ELSE 0 END AS BIT)
+		,intServiceChargeId		= C.intServiceChargeId
 	FROM dbo.tblARCustomer C WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT S.intEntityId
