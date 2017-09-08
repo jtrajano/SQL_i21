@@ -1,4 +1,4 @@
-﻿alter PROCEDURE [dbo].[uspGRSettlementReport]
+﻿CREATE PROCEDURE [dbo].[uspGRSettlementReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 SET ANSI_NULLS ON
