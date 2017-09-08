@@ -181,6 +181,7 @@
     <Folder Include="Scripts\Post-Deployment\PAT\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\FRM" />
     <Folder Include="Scripts\Post-Deployment\FRM\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\EM\DataMigration" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -5630,6 +5631,7 @@
     <Build Include="dbo\Views\vyuGRSettlementOutboundSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettlementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
+    <None Include="Scripts\Post-Deployment\EM\DataMigration\1710_1720_CCSite_migration.sql" />
     <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
     <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
