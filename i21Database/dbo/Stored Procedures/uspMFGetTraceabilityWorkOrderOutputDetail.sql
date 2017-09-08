@@ -21,7 +21,7 @@ SET NOCOUNT ON;
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intWorkOrderId=@intWorkOrderId) t
+		Where wi.intWorkOrderId=@intWorkOrderId AND ISNULL(wi.ysnProductionReversed,0)=0) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,
 		t.strLotAlias,t.intParentLotId,t.intAttributeTypeId,t.intImageTypeId
 
@@ -43,6 +43,6 @@ SET NOCOUNT ON;
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
-		Where wi.intWorkOrderId=@intWorkOrderId) t
+		Where wi.intWorkOrderId=@intWorkOrderId AND ISNULL(wi.ysnProductionReversed,0)=0) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,
 		t.strLotAlias,t.intParentLotId,t.intAttributeTypeId,t.intImageTypeId
