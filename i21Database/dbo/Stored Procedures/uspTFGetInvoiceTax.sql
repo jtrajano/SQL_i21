@@ -389,6 +389,7 @@ BEGIN TRY
 				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityId AND tblEMEntityLocation.ysnDefaultLocation = 1
 				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
 				CROSS JOIN tblSMCompanySetup
+				CROSS JOIN tblSMTaxCode
 				LEFT JOIN  (
 					SELECT tblARInvoiceDetailTax.intInvoiceDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblARInvoiceDetailTax.dblTax 
 					FROM tblARInvoiceDetailTax 
