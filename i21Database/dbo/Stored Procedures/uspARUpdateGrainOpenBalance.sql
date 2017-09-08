@@ -72,62 +72,90 @@ DECLARE @GrainItems TABLE(
 	,intCustomerStorageId		INT)
 
 IF @InvoiceReversed = 1
-BEGIN
-	DELETE FROM @GrainItems
-	INSERT INTO @GrainItems
-	SELECT
-		 I.intEntityCustomerId 
-		,I.intInvoiceId 
-		,ID.intInvoiceDetailId
-		,ID.intItemId
-		,dbo.fnCalculateStockUnitQty(ID.dblQtyShipped, ICIU.dblUnitQty)
-		,ID.intItemUOMId
-		,I.intCompanyLocationId
-		,ID.intStorageScheduleTypeId
-		,ID.intCustomerStorageId 
-	FROM 
-		(SELECT intInvoiceId, intEntityCustomerId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) I
-	INNER JOIN 
-		(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, intStorageScheduleTypeId, intCustomerStorageId FROM tblARInvoiceDetail WITH (NOLOCK)) ID ON I.intInvoiceId = ID.intInvoiceId
-	INNER JOIN
-		(SELECT intItemId, intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ICIU  ON ID.intItemId = ICIU.intItemId AND ID.intItemUOMId = ICIU.intItemUOMId				 		
-	WHERE 
-		I.intInvoiceId = @InvoiceId
-		AND ID.intStorageScheduleTypeId IS NOT NULL
-		AND ID.dblQtyShipped <> @ZeroDecimal
-END
+	BEGIN
+		DELETE FROM @GrainItems
+		INSERT INTO @GrainItems
+		SELECT
+			 I.intEntityCustomerId 
+			,I.intInvoiceId 
+			,ID.intInvoiceDetailId
+			,ID.intItemId
+			,dbo.fnCalculateStockUnitQty(ID.dblQtyShipped, ICIU.dblUnitQty)
+			,ID.intItemUOMId
+			,I.intCompanyLocationId
+			,ID.intStorageScheduleTypeId
+			,ID.intCustomerStorageId 
+		FROM 
+			(SELECT intInvoiceId, intEntityCustomerId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) I
+		INNER JOIN 
+			(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, intStorageScheduleTypeId, intCustomerStorageId FROM tblARInvoiceDetail WITH (NOLOCK)) ID ON I.intInvoiceId = ID.intInvoiceId
+		INNER JOIN
+			(SELECT intItemId, intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ICIU  ON ID.intItemId = ICIU.intItemId AND ID.intItemUOMId = ICIU.intItemUOMId				 		
+		WHERE 
+			I.intInvoiceId = @InvoiceId
+			AND ID.intStorageScheduleTypeId IS NOT NULL
+			AND ID.dblQtyShipped <> @ZeroDecimal
+	END
 ELSE
-BEGIN
-	DELETE FROM @GrainItems
-	INSERT INTO @GrainItems
-	SELECT
-		 I.intEntityCustomerId 
-		,I.intInvoiceId 
-		,ID.intInvoiceDetailId
-		,ID.intItemId
-		,dbo.fnCalculateStockUnitQty((ID.[dblQtyShipped] - dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, ID.intItemUOMId, TD.dblQtyShipped)), ICIU.dblUnitQty)
-		,ID.intItemUOMId
-		,I.intCompanyLocationId
-		,ID.intStorageScheduleTypeId
-		,ID.intCustomerStorageId 
-	FROM 
-		(SELECT intInvoiceId, intEntityCustomerId, intCompanyLocationId, strTransactionType FROM tblARInvoice WITH (NOLOCK)) I
-	INNER JOIN 
-		(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, intStorageScheduleTypeId, intCustomerStorageId FROM tblARInvoiceDetail WITH (NOLOCK)) ID ON I.intInvoiceId = ID.intInvoiceId
-	INNER JOIN
-	tblARTransactionDetail TD
-		ON ID.intInvoiceDetailId = TD.intTransactionDetailId 
-		AND ID.intInvoiceId = TD.intTransactionId 
-		AND TD.strTransactionType = I.strTransactionType
-	INNER JOIN
-		(SELECT intItemId, intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ICIU  ON ID.intItemId = ICIU.intItemId AND ID.intItemUOMId = ICIU.intItemUOMId				 		
-	WHERE 
-		I.intInvoiceId = @InvoiceId
-		AND ID.intStorageScheduleTypeId IS NOT NULL
-		AND ID.intItemId = TD.intItemId
-		AND ID.intStorageScheduleTypeId = TD.intStorageScheduleTypeId
-		AND ID.[dblQtyShipped] > dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, ID.intItemUOMId, TD.dblQtyShipped)
-END
+	BEGIN
+		DELETE FROM @GrainItems
+		INSERT INTO @GrainItems
+
+		--New Item
+		SELECT
+			 I.intEntityCustomerId 
+			,I.intInvoiceId 
+			,ID.intInvoiceDetailId
+			,ID.intItemId
+			,dbo.fnCalculateStockUnitQty(ID.[dblQtyShipped], ICIU.dblUnitQty)
+			,ID.intItemUOMId
+			,I.intCompanyLocationId
+			,ID.intStorageScheduleTypeId
+			,ID.intCustomerStorageId 
+		FROM 
+			(SELECT intInvoiceId, intEntityCustomerId, intCompanyLocationId, strTransactionType FROM tblARInvoice WITH (NOLOCK)) I
+		INNER JOIN 
+			(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, intStorageScheduleTypeId, intCustomerStorageId FROM tblARInvoiceDetail WITH (NOLOCK)) ID ON I.intInvoiceId = ID.intInvoiceId		
+		INNER JOIN
+			(SELECT intItemId, intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ICIU  ON ID.intItemId = ICIU.intItemId AND ID.intItemUOMId = ICIU.intItemUOMId				 		
+		WHERE 
+			I.intInvoiceId = @InvoiceId
+			AND ID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = I.strTransactionType)
+			AND ID.intItemId IS NOT NULL
+			AND ID.intStorageScheduleTypeId IS NOT NULL
+			AND ID.[dblQtyShipped] <> @ZeroDecimal
+
+		UNION ALL
+
+		--QTY/UOM Changed
+		SELECT
+			 I.intEntityCustomerId 
+			,I.intInvoiceId 
+			,ID.intInvoiceDetailId
+			,ID.intItemId
+			,dbo.fnCalculateStockUnitQty((ID.[dblQtyShipped] - dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, ID.intItemUOMId, TD.dblQtyShipped)), ICIU.dblUnitQty)
+			,ID.intItemUOMId
+			,I.intCompanyLocationId
+			,ID.intStorageScheduleTypeId
+			,ID.intCustomerStorageId 
+		FROM 
+			(SELECT intInvoiceId, intEntityCustomerId, intCompanyLocationId, strTransactionType FROM tblARInvoice WITH (NOLOCK)) I
+		INNER JOIN 
+			(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, intStorageScheduleTypeId, intCustomerStorageId FROM tblARInvoiceDetail WITH (NOLOCK)) ID ON I.intInvoiceId = ID.intInvoiceId
+		INNER JOIN
+		tblARTransactionDetail TD
+			ON ID.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND ID.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType = I.strTransactionType
+		INNER JOIN
+			(SELECT intItemId, intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ICIU  ON ID.intItemId = ICIU.intItemId AND ID.intItemUOMId = ICIU.intItemUOMId				 		
+		WHERE 
+			I.intInvoiceId = @InvoiceId
+			AND ID.intStorageScheduleTypeId IS NOT NULL
+			AND ID.intItemId = TD.intItemId
+			AND ID.intStorageScheduleTypeId = TD.intStorageScheduleTypeId
+			AND ID.[dblQtyShipped] > dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, ID.intItemUOMId, TD.dblQtyShipped)
+	END
 
 WHILE EXISTS(SELECT NULL FROM @GrainItems)
 BEGIN
