@@ -1732,6 +1732,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Clearing' AND strModuleNa
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Clearing Detail' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Expense Approval' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor History' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
 /* END OF DELETING */
 
 /* ACCOUNTS RECEIVABLE */
@@ -2154,6 +2155,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Quotes' AND strModuleName = 'Ac
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Customer Aging Detail Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Comment Maintenance' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'POS End Of Day' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Customer' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 /* END OF DELETING */
 
 /* PAYROLL */
