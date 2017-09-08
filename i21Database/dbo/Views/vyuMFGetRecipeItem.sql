@@ -5,7 +5,11 @@ cl.strLocationName,mp.strProcessName,cs.strName AS strCustomer,r.intVersionNo,rt
 i.strItemNo,i.strDescription,ri.dblQuantity,um.strUnitMeasure strUOM,ri.dblLowerTolerance,ri.dblUpperTolerance,cm.strName AS strConsumptionMethod,
 sl.strName AS strStorageLocation,ct.strName AS strCommentType,ri.dtmValidFrom,ri.dtmValidTo,
 mg.strName AS strMarginBy,ri.dblMargin,ri.ysnCostAppliedAtInvoice,r.intLocationId,r.intItemId AS intRecipeHeaderItemId,ri.intItemId AS intRecipeIngredientItemId,ri.intRecipeItemTypeId,
-r.intCustomerId,r.ysnActive
+r.intCustomerId,r.ysnActive,
+RecipeSubItem.intItemId AS intSubstituteItemId
+, SubstituteItem.strItemNo AS strSubstituteItemNo
+, SubstituteItem.strDescription AS strSubstituteItemDesc
+, ISNULL(RecipeSubItem.dblQuantity, 0) AS dblSubstituteItemQty
 from tblMFRecipe r
 Left Join tblICItem rhi on r.intItemId=rhi.intItemId
 Left Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId
@@ -20,3 +24,5 @@ Left Join tblICStorageLocation sl on ri.intStorageLocationId=sl.intStorageLocati
 Left Join tblMFCommentType ct on ri.intCommentTypeId=ct.intCommentTypeId
 Left Join tblMFMarginBy mg on ri.intMarginById=mg.intMarginById
 Left Join tblMFRecipeItemType rt on ri.intRecipeItemTypeId=rt.intRecipeItemTypeId
+LEFT JOIN tblMFRecipeSubstituteItem RecipeSubItem ON ri.intRecipeItemId = RecipeSubItem.intRecipeItemId
+LEFT JOIN tblICItem SubstituteItem ON RecipeSubItem.intSubstituteItemId = SubstituteItem.intItemId
