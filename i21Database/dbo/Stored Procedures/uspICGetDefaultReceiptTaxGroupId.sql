@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICGetDefaultReceiptTaxGroupId]
 	@intFreightTermId AS INT = NULL
 	,@intLocationId AS INT = NULL
+	,@intItemId AS INT = NULL 
 	,@intEntityVendorId AS INT = NULL
 	,@intEntityLocationId AS INT = NULL
 	,@intTaxGroupId INT OUTPUT
@@ -21,7 +22,7 @@ BEGIN
 				SELECT id = dbo.fnGetTaxGroupIdForVendor(
 					@intEntityVendorId		-- @VendorId
 					,@intLocationId			--,@CompanyLocationId
-					,NULL					--,@ItemId
+					,@intItemId				--,@ItemId
 					,@intEntityLocationId	--,@VendorLocationId
 					,@intFreightTermId		--,@FreightTermId
 				)			
