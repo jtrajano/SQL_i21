@@ -81,6 +81,7 @@ FROM
 		,[strReceiptLocation]		=	tblReceived.strReceiptLocation
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[intTaxGroupId]							=	tblReceived.intTaxGroupId
 		,[ysnReturn]								=	CAST(0 AS BIT)
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
@@ -131,6 +132,7 @@ FROM
 				,ISL.strName AS strStorageLocationName
 				,intLocationId = A1.intLocationId
 				,strReceiptLocation = (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A1.intLocationId)
+				,B1.intTaxGroupId
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -164,6 +166,7 @@ FROM
 				,dblOrderQty
 				,loc.intItemLocationId
 				,B1.dblTax
+				,B1.intTaxGroupId
 				,B1.intUnitMeasureId
 				,UOM.strUnitMeasure
 				,B1.intWeightUOMId
@@ -279,6 +282,7 @@ FROM
 	,[strReceiptLocation]		= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
+	,[intTaxGroupId]							=	B.intTaxGroupId
 	,[ysnReturn]								=	CAST(0 AS BIT)
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
@@ -391,6 +395,7 @@ FROM
 	,[strReceiptLocation]		= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
+	,[intTaxGroupId]							=	B.intTaxGroupId
 	,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -528,6 +533,7 @@ FROM
 		,[strReceiptLocation]						= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[intTaxGroupId]							=	NULL
 		,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 	FROM [vyuICChargesForBilling] A
 	--LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
@@ -645,6 +651,7 @@ FROM
 		,[strReceiptLocation]						=	NULL
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[intTaxGroupId]							=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -748,6 +755,7 @@ FROM
 		,[strReceiptLocation]						=	NULL
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[intTaxGroupId]							=	NULL
 		,[ysnReturn]								=	CAST(1 AS BIT)
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -841,6 +849,7 @@ FROM
 		,[strReceiptLocation]						=	NULL
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
+		,[intTaxGroupId]							=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
 	FROM vyuLGLoadPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
@@ -938,6 +947,7 @@ FROM
 		,[strReceiptLocation]						=	NULL
 		,[intInventoryShipmentItemId]				=	A.intInventoryShipmentItemId
 		,[intInventoryShipmentChargeId]				=	A.intInventoryShipmentChargeId
+		,[intTaxGroupId]							=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
 	FROM vyuICShipmentChargesForBilling A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
