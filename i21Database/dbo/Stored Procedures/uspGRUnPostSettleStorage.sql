@@ -95,12 +95,12 @@ BEGIN TRY
 			,dblUnits
 		)
 		SELECT 
-			 UH.intExternalId AS intSettleStorageTicketId
-			,5 AS intPricingTypeId
-			,'DP Contract' AS strDepletionType
-			,UH.intContractHeaderId AS intContractHeaderId
-			,UH.intContractDetailId AS intContractDetailId
-			,UH.dblTransactionQuantity AS dblUnits
+			 intSettleStorageTicketId = UH.intExternalId
+			,intPricingTypeId		  = 5 
+			,strDepletionType		  = 'DP Contract'
+			,intContractHeaderId	  = UH.intContractHeaderId 
+			,intContractDetailId	  = UH.intContractDetailId 
+			,dblUnits				  = UH.dblTransactionQuantity
 		FROM tblCTSequenceUsageHistory UH
 		JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
 		JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId
@@ -109,12 +109,12 @@ BEGIN TRY
 		UNION ALL
 		
 		SELECT 
-			 UH.intExternalId AS intSettleStorageTicketId
-			,1 AS intPricingTypeId
-			,'Purchase Contract' AS strDepletionType
-			,UH.intContractHeaderId AS intContractHeaderId
-			,UH.intContractDetailId AS intContractDetailId
-			,UH.dblTransactionQuantity
+			 intSettleStorageTicketId  = UH.intExternalId
+			,intPricingTypeId		   = 1 
+			,strDepletionType		   = 'Purchase Contract' 
+			,intContractHeaderId	   = UH.intContractHeaderId 
+			,intContractDetailId       = UH.intContractDetailId 
+			,dblUnits                  = UH.dblTransactionQuantity
 		FROM tblCTSequenceUsageHistory UH
 		JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
 		JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId AND SH.intSettleStorageId = UH.intExternalHeaderId
@@ -227,23 +227,23 @@ BEGIN TRY
 				,ysnIsStorage
 			)
 			SELECT 
-				 intItemId = @ItemId
-				,intItemLocationId = @ItemLocationId
-				,intItemUOMId = @intInventoryItemStockUOMId
-				,dtmDate = GETDATE()
-				,dblQty = SH.dblUnits
-				,dblUOMQty = @dblUOMQty
-				,dblCost = SH.dblPaidAmount
-				,dblSalesPrice = 0.00
-				,intCurrencyId = @intCurrencyId
-				,dblExchangeRate = 1
-				,intTransactionId = @intSettleStorageId
-				,intTransactionDetailId = @intSettleStorageId
-				,strTransactionId = @TicketNo
-				,intTransactionTypeId = 44
-				,intSubLocationId = CS.intCompanyLocationSubLocationId
-				,intStorageLocationId = CS.intStorageLocationId
-				,ysnIsStorage = 1
+				 intItemId					= @ItemId
+				,intItemLocationId			= @ItemLocationId
+				,intItemUOMId				= @intInventoryItemStockUOMId
+				,dtmDate					= GETDATE()
+				,dblQty						= SH.dblUnits
+				,dblUOMQty					= @dblUOMQty
+				,dblCost					= SH.dblPaidAmount
+				,dblSalesPrice				= 0.00
+				,intCurrencyId				= @intCurrencyId
+				,dblExchangeRate			= 1
+				,intTransactionId			= @intSettleStorageId
+				,intTransactionDetailId		= @intSettleStorageId
+				,strTransactionId			= @TicketNo
+				,intTransactionTypeId		= 44
+				,intSubLocationId			= CS.intCompanyLocationSubLocationId
+				,intStorageLocationId		= CS.intStorageLocationId
+				,ysnIsStorage				= 1
 			FROM tblGRStorageHistory SH
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
 			JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
@@ -270,22 +270,22 @@ BEGIN TRY
 				,ysnIsStorage
 			)
 			SELECT 
-				 intItemId = @ItemId
-				,intItemLocationId = @ItemLocationId
-				,intItemUOMId = @intInventoryItemStockUOMId
-				,dtmDate = GETDATE()
-				,dblQty = - SH.dblUnits
-				,dblUOMQty = @dblUOMQty
-				,dblCost = SH.dblPaidAmount
-				,dblSalesPrice = 0.00
-				,intCurrencyId = @intCurrencyId
-				,dblExchangeRate = 1
-				,intTransactionId = @intSettleStorageId
-				,intTransactionDetailId = @intSettleStorageId
-				,strTransactionId = @TicketNo
-				,intTransactionTypeId = 44
-				,intSubLocationId = CS.intCompanyLocationSubLocationId
-				,intStorageLocationId = CS.intStorageLocationId
+				 intItemId					= @ItemId
+				,intItemLocationId			= @ItemLocationId
+				,intItemUOMId				= @intInventoryItemStockUOMId
+				,dtmDate					= GETDATE()
+				,dblQty						= - SH.dblUnits
+				,dblUOMQty					= @dblUOMQty
+				,dblCost					= SH.dblPaidAmount
+				,dblSalesPrice				= 0.00
+				,intCurrencyId				= @intCurrencyId
+				,dblExchangeRate			= 1
+				,intTransactionId			= @intSettleStorageId
+				,intTransactionDetailId		= @intSettleStorageId
+				,strTransactionId			= @TicketNo
+				,intTransactionTypeId		= 44
+				,intSubLocationId			= CS.intCompanyLocationSubLocationId
+				,intStorageLocationId		= CS.intStorageLocationId
 				,ysnIsStorage = 0
 			FROM tblGRStorageHistory SH
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -337,20 +337,20 @@ BEGIN TRY
 				,[strVoucher]
 			)
 			SELECT 
-				 1 AS [intConcurrencyId]
-				,[intCustomerStorageId]
-				,[intContractHeaderId]
-				,[dblUnits]
-				,GETDATE() AS [dtmHistoryDate]
-				,'Reverse Settlement' AS [strType]
-				,@UserName AS [strUserName]
-				,intEntityId AS [intEntityId]
-				,strSettleTicket AS [strSettleTicket]
-				,4 AS [intTransactionTypeId]
-				,dblPaidAmount AS [dblPaidAmount]
-				,NULL AS [intBillId]
-				,NULL AS intSettleStorageId
-				,strVoucher AS strVoucher
+				 [intConcurrencyId]		= 1 
+				,[intCustomerStorageId] = [intCustomerStorageId]
+				,[intContractHeaderId]  = [intContractHeaderId]
+				,[dblUnits]				= [dblUnits]
+				,[dtmHistoryDate]		= GETDATE()
+				,[strType]				= 'Reverse Settlement'
+				,[strUserName]			= @UserName
+				,[intEntityId]			= [intEntityId]
+				,[strSettleTicket]		= [strSettleTicket]
+				,[intTransactionTypeId]	= 4
+				,[dblPaidAmount]		= [dblPaidAmount]
+				,[intBillId]			= NULL
+				,[intSettleStorageId]   = NULL
+				,[strVoucher]           = strVoucher
 			FROM tblGRStorageHistory
 			WHERE intSettleStorageId=@intSettleStorageId
 

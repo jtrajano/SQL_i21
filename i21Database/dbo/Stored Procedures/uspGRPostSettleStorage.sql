@@ -793,7 +793,14 @@ BEGIN TRY
 				,intItemLocationId			=  @ItemLocationId
 				,intItemUOMId				=  @intInventoryItemStockUOMId
 				,dtmDate					=  GETDATE()
-				,dblQty						= - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
+				,dblQty						= CASE 
+													WHEN 
+														dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])-ItemStock.dblUnitStorage >0 
+														AND dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])-ItemStock.dblUnitStorage < 0.00001
+														THEN - ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits]),5)
+													ELSE
+															-dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
+												END
 				,dblUOMQty					=  @dblUOMQty
 				,dblCost					=  CASE 
 													WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
@@ -812,7 +819,8 @@ BEGIN TRY
 			FROM @SettleVoucherCreate SV
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 			JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
-			JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId AND SV.intItemType = 1
+			JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId AND SV.intItemType = 1			
+			JOIN tblICItemStockUOM ItemStock ON ItemStock.intItemId=CS.intItemId AND ItemStock.intItemLocationId = @ItemLocationId
 
 			INSERT INTO @ItemsToPost 
 			(
@@ -1117,8 +1125,9 @@ BEGIN TRY
 			END
 
 			UPDATE CS
-			SET CS.dblOpenBalance = CS.dblOpenBalance - SH.dblUnit
+			SET CS.dblOpenBalance = CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit)
 			FROM tblGRCustomerStorage CS
+			JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
 			JOIN (
 					SELECT intCustomerStorageId
 						,SUM(dblUnits) dblUnit
@@ -1149,21 +1158,23 @@ BEGIN TRY
 			)
 			SELECT 
 				 [intConcurrencyId]     = 1 
-				,[intCustomerStorageId] = [intCustomerStorageId]
-				,[intContractHeaderId]  = [intContractHeaderId]
-				,[dblUnits]				= [dblUnits]
+				,[intCustomerStorageId] = SV.[intCustomerStorageId]
+				,[intContractHeaderId]  = SV.[intContractHeaderId]
+				,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 				,[dtmHistoryDate]		= GETDATE()
 				,[strType]				= 'Settlement'
 				,[strUserName]			= @UserName 
 				,[intEntityId]			= @EntityId
 				,[strSettleTicket]		= @TicketNo
 				,[intTransactionTypeId]	= 4 
-				,[dblPaidAmount]		= dblCashPrice
+				,[dblPaidAmount]		= SV.dblCashPrice
 				,[intBillId]			= @intCreatedBillId
 				,intSettleStorageId		= @intSettleStorageId
 				,strVoucher				= @strVoucher
-			FROM @SettleVoucherCreate
-			WHERE intItemType = 1
+			FROM @SettleVoucherCreate SV
+			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SV.intCustomerStorageId
+			JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+			WHERE SV.intItemType = 1
 		END
 
 		UPDATE tblGRSettleStorage
