@@ -270,7 +270,7 @@ BEGIN
 		GOTO DONE;
 	END
 
-	IF @lenOfSuccessPay > 0
+	IF @lenOfSuccessPay > 0 
 	BEGIN
 		--UPDATE tblAPPaymentDetail
 		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
@@ -278,6 +278,14 @@ BEGIN
 		EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
 	END
 
+	IF @lenOfSuccessPrePay > 0
+	BEGIN
+		--UPDATE tblAPPaymentDetail
+		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @prepayIds, @post = @post
+		--UPDATE BILL RECORDS
+		EXEC uspAPUpdateBillPayment @paymentIds = @prepayIds, @post = @post
+	END
+	
 	--Update posted status
 	UPDATE tblAPPayment
 		SET		ysnPosted = @post

@@ -19,7 +19,8 @@ BEGIN
 			tblAPBill.ysnPaid = 0,
 			tblAPBill.dblPayment = (C.dblPayment - B.dblPayment),
 			tblAPBill.dtmDatePaid = NULL,
-			tblAPBill.dblWithheld = 0
+			tblAPBill.dblWithheld = 0,
+			tblAPBill.ysnPrepayHasPayment = 0 --for prepayment
 	FROM tblAPPayment A
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
@@ -36,7 +37,8 @@ BEGIN
 			tblAPBill.dblWithheld = B.dblWithheld,
 			tblAPBill.dblDiscount = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount ELSE 0 END),
 			tblAPBill.dblInterest = (CASE WHEN B.dblAmountDue = 0 THEN B.dblInterest ELSE 0 END),
-			tblAPBill.dblPayment = (C.dblPayment + B.dblPayment)
+			tblAPBill.dblPayment = (C.dblPayment + B.dblPayment),
+			tblAPBill.ysnPrepayHasPayment = 1
 	FROM tblAPPayment A
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
