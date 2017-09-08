@@ -24,6 +24,8 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@defaultCurrency int,
 		@intSurchargeItemId as int,
 		@intFreightItemId as int,
+		@SurchargeUOMId as int,
+		@FreightUOMId as int,
 		@FreightCostAllocationMethod AS INT
 
 SELECT	TOP 1 @defaultCurrency = CP.intDefaultCurrencyId		
@@ -187,10 +189,19 @@ END
 		,intSourceType
 		,intTaxGroupId
 
-   SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
-   SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
-   -- Get Freight Cost Allocation Method from Company Preferences
-   SELECT TOP 1 @FreightCostAllocationMethod = intFreightCostAllocationMethod FROM tblTRCompanyPreference
+	SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
+	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+
+	SELECT TOP 1 @FreightUOMId = intCostUOMId FROM tblICItem WHERE intItemId = @intFreightItemId
+	IF (@FreightUOMId IS NULL)
+		SELECT TOP 1 @FreightUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+	
+	SELECT TOP 1 @SurchargeUOMId = intCostUOMId FROM tblICItem WHERE intItemId = @intSurchargeItemId
+	IF (@SurchargeUOMId IS NULL)
+		SELECT TOP 1 @SurchargeUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intSurchargeItemId AND ysnStockUnit = 1
+
+	-- Get Freight Cost Allocation Method from Company Preferences
+	SELECT TOP 1 @FreightCostAllocationMethod = intFreightCostAllocationMethod FROM tblTRCompanyPreference
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
@@ -230,15 +241,9 @@ END
 																					AND TempDist.strDestination = 'Location') THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END)
 														END)
-			,[strCostMethod]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Per Unit'
-														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
-																				FROM tblTRLoadDistributionHeader TempDist
-																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
-																					AND TempDist.strDestination = 'Location') THEN 'Per Unit'
-																ELSE 'Amount' END)
-														END)
+			,[strCostMethod]					= 'Per Unit'
 			,[dblRate]							= min(RE.dblFreightRate)
-			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+			,[intCostUOMId]						= @FreightUOMId
 			,[intOtherChargeEntityVendorId]		= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
 															min(RE.intEntityVendorId)
 														WHEN min(SM.strFreightBilledBy) = 'Internal' THEN 
@@ -258,7 +263,7 @@ END
 															1
 												END
     FROM	@ReceiptStagingTable RE 
-	        LEFT JOIN tblSMShipVia SM on SM.intEntityId = RE.intShipViaId
+	        LEFT JOIN tblSMShipVia SM on SM.intEntityShipViaId = RE.intShipViaId
 			LEFT JOIN (select TT.intLoadHeaderId, TT.strTransaction, RR.intLoadReceiptId from tblTRLoadHeader TT
 					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
 					                                                 where RR.strOrigin = 'Terminal'
@@ -286,7 +291,7 @@ END
 														END)
 			,[strCostMethod]					= 'Percentage'
 			,[dblRate]							= min(RE.dblSurcharge)
-			,[intCostUOMId]						= (SELECT TOP 1 UOM.intItemUOMId FROM tblICItemUOM UOM WHERE UOM.intItemId =  @intSurchargeItemId)
+			,[intCostUOMId]						= @SurchargeUOMId
 			,[intOtherChargeEntityVendorId]		= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
 															min(RE.intEntityVendorId)
 														WHEN min(SM.strFreightBilledBy) = 'Internal' THEN 
@@ -306,7 +311,7 @@ END
 															1
 												END
     FROM	@ReceiptStagingTable RE 
-	LEFT JOIN tblSMShipVia SM on SM.intEntityId = RE.intShipViaId
+	LEFT JOIN tblSMShipVia SM on SM.intEntityShipViaId = RE.intShipViaId
 	LEFT JOIN (select TT.intLoadHeaderId, RR.intLoadReceiptId, TT.strTransaction from tblTRLoadHeader TT
 					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
 					                                                 where RR.strOrigin = 'Terminal') LTE on LTE.intLoadReceiptId = RE.intSourceId
