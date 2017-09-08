@@ -211,7 +211,7 @@ BEGIN TRY
 		,[intItemUOMId]						= ARSID.[intShipmentItemUOMId]
 		,[dblQtyShipped]					= ARSID.dblShipmentQuantity
 		,[dblDiscount]						= ARSID.[dblDiscount]
-		,[dblPrice]							= ARSID.[dblPrice] 
+		,[dblPrice]							= ISNULL(ARID.[dblPrice], ARSID.[dblPrice]) 
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]
@@ -323,7 +323,7 @@ SELECT
 		,[intItemUOMId]						= ISI.[intItemUOMId] 
 		,[dblQtyShipped]					= ISI.[dblQuantity]  
 		,[dblDiscount]						= 0.00
-		,[dblPrice]							= ISI.[dblUnitPrice]
+		,[dblPrice]							= ISNULL(ARID.[dblPrice], ISI.[dblUnitPrice])
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]

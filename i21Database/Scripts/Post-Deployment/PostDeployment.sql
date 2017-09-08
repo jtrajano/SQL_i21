@@ -214,6 +214,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\28_UpdateBaseAmounts.sql
 :r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
 :r .\AR\DefaultData\30_UpdateBatchIdUsed.sql
+:r .\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -372,6 +373,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql
+:r .\TF\DefaultData\02_TerminalControl.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\IL_Illinois.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
@@ -393,5 +395,8 @@ print 'BEGIN POST DEPLOYMENT'
 --FRM
 :r .\FRM\DefaultData\1_OfflineMenu.sql
 :r .\FRM\1_OfflineGuid.sql
+
+--CCR
+:r .\CCR\SiteDataFix.sql
 
 print 'END POST DEPLOYMENT'

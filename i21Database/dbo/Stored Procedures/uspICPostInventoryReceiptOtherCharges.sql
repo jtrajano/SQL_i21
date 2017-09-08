@@ -196,13 +196,13 @@ BEGIN
 	INSERT INTO @ItemGLAccounts (
 		intItemId
 		,intItemLocationId 
-		--,intInventoryId
+		,intInventoryId
 		,intContraInventoryId
 		,intTransactionTypeId
 	)
 	SELECT	Query.intItemId
 			,Query.intItemLocationId
-			--,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_Inventory) 
+			,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_Inventory) 
 			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing) 
 			,intTransactionTypeId = @intTransactionTypeId
 	FROM	(
@@ -211,12 +211,16 @@ BEGIN
 						,ItemLocation.intItemLocationId
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+						INNER JOIN tblICInventoryReceiptItemAllocatedCharge AllocatedCharges
+							ON  AllocatedCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
+							AND AllocatedCharges.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 						LEFT JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intItemId = ReceiptItem.intItemId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 						AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
 						AND ISNULL(ReceiptItem.intOwnershipType, 0) = 1 -- Only "Own" items will have GL entries. 
+						AND AllocatedCharges.ysnInventoryCost = 1 -- And allocated charge is part of the item cost. 						
 			) Query
 
 	-- Get the GL Account ids to use for the other charges. 
@@ -239,15 +243,46 @@ BEGIN
 				SELECT	DISTINCT 
 						OtherCharges.intChargeId
 						,ItemLocation.intItemLocationId
-				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharges 
+				FROM	tblICInventoryReceipt Receipt INNER JOIN tblICInventoryReceiptCharge OtherCharges 
 							ON Receipt.intInventoryReceiptId = OtherCharges.intInventoryReceiptId
-						LEFT JOIN dbo.tblICItemLocation ItemLocation
+						LEFT JOIN tblICItemLocation ItemLocation
 							ON ItemLocation.intItemId = OtherCharges.intChargeId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
 				WHERE	OtherCharges.intInventoryReceiptId = @intInventoryReceiptId
 			) Query
 
-	-- Check for missing AP Clearing Account Id
+	-- -- Check for missing AP Clearing Account Id
+	-- BEGIN 
+	-- 	SET @strItemNo = NULL
+	-- 	SET @intChargeItemId = NULL
+
+	-- 	SELECT	TOP 1 
+	-- 			@intChargeItemId = Item.intItemId 
+	-- 			,@strItemNo = Item.strItemNo
+	-- 	FROM	tblICItem Item INNER JOIN @ItemGLAccounts ItemGLAccount
+	-- 				ON Item.intItemId = ItemGLAccount.intItemId
+	-- 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 
+
+	-- 	SELECT	TOP 1 
+	-- 			@strLocationName = c.strLocationName
+	-- 	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+	-- 				ON il.intLocationId = c.intCompanyLocationId
+	-- 			INNER JOIN @ItemGLAccounts ItemGLAccount
+	-- 				ON ItemGLAccount.intItemId = il.intItemId
+	-- 				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	-- 	WHERE	il.intItemId = @intChargeItemId
+	-- 			AND ItemGLAccount.intContraInventoryId IS NULL 				 			
+
+	-- 	IF @intChargeItemId IS NOT NULL 
+	-- 	BEGIN 
+	-- 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+	-- 		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_APClearing;
+	-- 		RETURN;
+	-- 	END 
+	-- END 
+	-- ;
+
+	-- Check for missing Inventory Account Id
 	BEGIN 
 		SET @strItemNo = NULL
 		SET @intChargeItemId = NULL
@@ -257,7 +292,7 @@ BEGIN
 				,@strItemNo = Item.strItemNo
 		FROM	tblICItem Item INNER JOIN @ItemGLAccounts ItemGLAccount
 					ON Item.intItemId = ItemGLAccount.intItemId
-		WHERE	ItemGLAccount.intContraInventoryId IS NULL 
+		WHERE	ItemGLAccount.intInventoryId IS NULL 
 
 		SELECT	TOP 1 
 				@strLocationName = c.strLocationName
@@ -266,17 +301,17 @@ BEGIN
 				INNER JOIN @ItemGLAccounts ItemGLAccount
 					ON ItemGLAccount.intItemId = il.intItemId
 					AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intChargeItemId
+		WHERE	il.intItemId = @intItemId
 				AND ItemGLAccount.intContraInventoryId IS NULL 				 			
 
 		IF @intChargeItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_APClearing;
+			EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_Inventory;
 			RETURN;
 		END 
 	END 
-	;
+	;	
 
 	-- Check for missing Other Charge Expense 
 	BEGIN 
@@ -410,7 +445,8 @@ BEGIN
 		,ysnInventoryCost
 		,dblForexRate
 		,strRateType
-		,strItemNo
+		,strCharge
+		,strItem
 	)
 	AS 
 	(
@@ -439,7 +475,8 @@ BEGIN
 				,AllocatedOtherCharges.ysnInventoryCost
 				,dblForexRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
-				,Charge.strItemNo
+				,strCharge = Charge.strItemNo
+				,strItem = Item.strItemNo
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -447,8 +484,10 @@ BEGIN
 					AND AllocatedOtherCharges.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
 					ON ReceiptCharges.intInventoryReceiptChargeId = AllocatedOtherCharges.intInventoryReceiptChargeId
-				INNER JOIN tblICItem Charge
+				LEFT JOIN tblICItem Charge
 					ON Charge.intItemId = ReceiptCharges.intChargeId
+				LEFT JOIN tblICItem Item 
+					ON Item.intItemId = ReceiptItem.intItemId 
 				LEFT JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = ReceiptItem.intItemId
 					AND ItemLocation.intLocationId = Receipt.intLocationId
@@ -471,64 +510,64 @@ BEGIN
 	-- Dr...... Item's Inventory Account
 	-- Cr..................... Freight Expense 
 	-------------------------------------------------------------------------------------------
-	--SELECT	
-	--		dtmDate						= ForGLEntries_CTE.dtmDate
-	--		,strBatchId					= @strBatchId
-	--		,intAccountId				= GLAccount.intAccountId
-	--		,dblDebit					= Debit.Value
-	--		,dblCredit					= Credit.Value
-	--		,dblDebitUnit				= 0
-	--		,dblCreditUnit				= 0
-	--		,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
-	--		,strCode					= @strCode
-	--		,strReference				= '' 
-	--		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-	--		,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
-	--		,dtmDateEntered				= GETDATE()
-	--		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-	--		,strJournalLineDescription  = '' 
-	--		,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-	--		,ysnIsUnposted				= 0
-	--		,intUserId					= NULL 
-	--		,intEntityId				= @intEntityUserSecurityId 
-	--		,strTransactionId			= ForGLEntries_CTE.strTransactionId
-	--		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-	--		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-	--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
-	--		,strModuleName				= @ModuleName
-	--		,intConcurrencyId			= 1
-	--		,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
-	--		,dblDebitReport				= NULL 
-	--		,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
-	--		,dblCreditReport			= NULL 
-	--		,dblReportingRate			= NULL 
-	--		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
-	--		,strRateType				= ForGLEntries_CTE.strRateType
-	--FROM	ForGLEntries_CTE  
-	--		INNER JOIN @ItemGLAccounts ItemGLAccounts
-	--			ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
-	--			AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
-	--		INNER JOIN dbo.tblGLAccount GLAccount
-	--			ON GLAccount.intAccountId = ItemGLAccounts.intContraInventoryId -- AP Clearing 
-	--		CROSS APPLY dbo.fnGetDebitFunctional(
-	--			ForGLEntries_CTE.dblCost
-	--			,ForGLEntries_CTE.intCurrencyId
-	--			,@intFunctionalCurrencyId
-	--			,ForGLEntries_CTE.dblForexRate
-	--		) Debit
-	--		CROSS APPLY dbo.fnGetCreditFunctional(
-	--			ForGLEntries_CTE.dblCost
-	--			,ForGLEntries_CTE.intCurrencyId
-	--			,@intFunctionalCurrencyId
-	--			,ForGLEntries_CTE.dblForexRate
-	--		) Credit
-	--		CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
-	--		CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
+	SELECT	
+			dtmDate						= ForGLEntries_CTE.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge + ' for ' + ForGLEntries_CTE.strItem
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+			,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+			,strJournalLineDescription  = '' 
+			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
+			,ysnIsUnposted				= 0
+			,intUserId					= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
+			,strTransactionId			= ForGLEntries_CTE.strTransactionId
+			,intTransactionId			= ForGLEntries_CTE.intTransactionId
+			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
+	FROM	ForGLEntries_CTE  
+			INNER JOIN @ItemGLAccounts ItemGLAccounts
+				ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
+				AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				ForGLEntries_CTE.dblCost
+				,ForGLEntries_CTE.intCurrencyId
+				,@intFunctionalCurrencyId
+				,ForGLEntries_CTE.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				ForGLEntries_CTE.dblCost
+				,ForGLEntries_CTE.intCurrencyId
+				,@intFunctionalCurrencyId
+				,ForGLEntries_CTE.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
 
-	--WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
-	--		AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
+	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
+			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
 
-	--UNION ALL 
+	UNION ALL 
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
@@ -537,7 +576,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -601,7 +640,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -660,7 +699,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -726,7 +765,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -782,7 +821,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -834,9 +873,64 @@ BEGIN
 	-- Accrue Other Charge to Vendor and Add Cost to Inventory 
 	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
 	-- 
-	-- (X) Dr...... Item's Inventory Acccount (Posted from uspICCreateReceiptGLentries)
+	-- (X) Dr...... Item's Inventory Acccount 
 	-- Cr.................... AP Clearing	
 	-------------------------------------------------------------------------------------------
+	UNION ALL 
+	SELECT	
+			dtmDate						= ForGLEntries_CTE.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge + ' for ' + ForGLEntries_CTE.strItem
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+			,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+			,strJournalLineDescription  = '' 
+			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
+			,ysnIsUnposted				= 0
+			,intUserId					= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
+			,strTransactionId			= ForGLEntries_CTE.strTransactionId
+			,intTransactionId			= ForGLEntries_CTE.intTransactionId
+			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
+	FROM	ForGLEntries_CTE INNER JOIN @ItemGLAccounts ItemGLAccounts
+				ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
+				AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId 
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				ForGLEntries_CTE.dblCost
+				,ForGLEntries_CTE.intCurrencyId
+				,@intFunctionalCurrencyId
+				,ForGLEntries_CTE.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				ForGLEntries_CTE.dblCost
+				,ForGLEntries_CTE.intCurrencyId
+				,@intFunctionalCurrencyId
+				,ForGLEntries_CTE.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
+	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1
+			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1	
 	UNION ALL 
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
@@ -846,7 +940,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -911,7 +1005,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -966,7 +1060,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId

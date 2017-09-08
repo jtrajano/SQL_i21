@@ -113,10 +113,10 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	dbo.tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
-			LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
-				ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
+			--LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
+			--	ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 			
-			AND ExemptedList.intTransactionTypeId IS NULL 
+			--AND ExemptedList.intTransactionTypeId IS NULL 
 
 	SELECT	TOP 1 
 			@strLocationName = c.strLocationName
@@ -246,7 +246,7 @@ WITH ForGLEntries_CTE (
 	,strItemNo
 	,strRateType
 	,dblLineTotal
-	,dblAddOnCostFromOtherCharge
+	--,dblAddOnCostFromOtherCharge
 )
 AS 
 (
@@ -272,62 +272,20 @@ AS
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,dblLineTotal = 
 					t.dblQty *
-					(
-						dbo.fnCalculateReceiptUnitCost(
-							ri.intItemId
-							,ri.intUnitMeasureId		
-							,ri.intCostUOMId
-							,ri.intWeightUOMId
-							,ri.dblUnitCost
-							,ri.dblNet
-							,t.intLotId
-							,t.intItemUOMId
-							,AggregrateItemLots.dblTotalNet
-							,ri.ysnSubCurrency
-							,r.intSubCurrencyCents
-						)
-					)							
-			,dblAddOnCostFromOtherCharge = 
-				t.dblQty *
-				CASE	
-					WHEN ISNULL(ri.ysnSubCurrency, 0) = 1 AND ISNULL(r.intSubCurrencyCents, 1) NOT IN (0, 1) THEN 
-						CASE 
-							WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
-								-- Convert the other charge to the currency used by the detail item. 						
-								CASE WHEN r.strReceiptType = 'Inventory Return' THEN 
-										/*Negate the other charge if it is an Inventory Return*/
-										-dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId) / ri.dblForexRate
-									ELSE 
-										dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId) / ri.dblForexRate
-								END 
-							ELSE 
-								-- No conversion. Detail item is already in functional currency. 						
-								CASE WHEN r.strReceiptType = 'Inventory Return' THEN 
-										-dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId) /*Negate the other charge if it is an Inventory Return*/
-									ELSE 
-										dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
-								END 
-						END		
-						/ r.intSubCurrencyCents 			
-					ELSE 
-						CASE 
-							WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
-								-- Convert the other charge to the currency used by the detail item. 						
-								CASE WHEN r.strReceiptType = 'Inventory Return' THEN 
-										/*Negate the other charge if it is an Inventory Return*/
-										-dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId) / ri.dblForexRate
-									ELSE 
-										dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId) / ri.dblForexRate
-								END 
-							ELSE 
-								-- No conversion. Detail item is already in functional currency. 						
-								CASE WHEN r.strReceiptType = 'Inventory Return' THEN 
-										-dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId) /*Negate the other charge if it is an Inventory Return*/
-									ELSE 
-										dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
-								END 
-						END
-				END
+					dbo.fnCalculateReceiptUnitCost(
+						ri.intItemId
+						,ri.intUnitMeasureId		
+						,ri.intCostUOMId
+						,ri.intWeightUOMId
+						,ri.dblUnitCost
+						,ri.dblNet
+						,t.intLotId
+						,t.intItemUOMId
+						,AggregrateItemLots.dblTotalNet
+						,ri.ysnSubCurrency
+						,r.intSubCurrencyCents
+					)						
+			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON 
@@ -404,43 +362,43 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-		--CROSS APPLY dbo.fnGetDebit(
-		--	ISNULL(dblLineTotal, 0)
-		--) DebitForeign
-		--CROSS APPLY dbo.fnGetCredit(
-		--	ISNULL(dblLineTotal, 0) 			
-		--) CreditForeign
-		--CROSS APPLY dbo.fnGetDebitFunctional(
-		--	ISNULL(dblLineTotal, 0)	
-		--	,ForGLEntries_CTE.intCurrencyId
-		--	,@intFunctionalCurrencyId
-		--	,ForGLEntries_CTE.dblForexRate
-		--) Debit
-		--CROSS APPLY dbo.fnGetCreditFunctional(
-		--	ISNULL(dblLineTotal, 0) 			
-		--	,ForGLEntries_CTE.intCurrencyId
-		--	,@intFunctionalCurrencyId
-		--	,ForGLEntries_CTE.dblForexRate
-		--) Credit
-
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)
-		) Debit
+		) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(
 			ISNULL(dblLineTotal, 0) 			
-		) Credit
-		CROSS APPLY dbo.fnGetDebitForeign(
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitFunctional(
 			ISNULL(dblLineTotal, 0)	
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) DebitForeign
-		CROSS APPLY dbo.fnGetCreditForeign(
+		) Debit
+		CROSS APPLY dbo.fnGetCreditFunctional(
 			ISNULL(dblLineTotal, 0) 			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) CreditForeign 
+		) Credit
+
+		-- CROSS APPLY dbo.fnGetDebit(
+		-- 	ISNULL(dblLineTotal, 0)
+		-- ) Debit
+		-- CROSS APPLY dbo.fnGetCredit(
+		-- 	ISNULL(dblLineTotal, 0) 			
+		-- ) Credit
+		-- CROSS APPLY dbo.fnGetDebitForeign(
+		-- 	ISNULL(dblLineTotal, 0)	
+		-- 	,ForGLEntries_CTE.intCurrencyId
+		-- 	,@intFunctionalCurrencyId
+		-- 	,ForGLEntries_CTE.dblForexRate
+		-- ) DebitForeign
+		-- CROSS APPLY dbo.fnGetCreditForeign(
+		-- 	ISNULL(dblLineTotal, 0) 			
+		-- 	,ForGLEntries_CTE.intCurrencyId
+		-- 	,@intFunctionalCurrencyId
+		-- 	,ForGLEntries_CTE.dblForexRate
+		-- ) CreditForeign 
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
@@ -491,43 +449,43 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
-		--CROSS APPLY dbo.fnGetDebit(
-		--	ISNULL(dblLineTotal, 0)			
-		--) DebitForeign
-		--CROSS APPLY dbo.fnGetCredit(
-		--	ISNULL(dblLineTotal, 0) 			
-		--) CreditForeign
-		--CROSS APPLY dbo.fnGetDebitFunctional(
-		--	ISNULL(dblLineTotal, 0)			
-		--	,ForGLEntries_CTE.intCurrencyId
-		--	,@intFunctionalCurrencyId
-		--	,ForGLEntries_CTE.dblForexRate
-		--) Debit
-		--CROSS APPLY dbo.fnGetCreditFunctional(
-		--	ISNULL(dblLineTotal, 0) 			
-		--	,ForGLEntries_CTE.intCurrencyId
-		--	,@intFunctionalCurrencyId
-		--	,ForGLEntries_CTE.dblForexRate
-		--) Credit
-
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)			
-		) Debit
+		) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(
 			ISNULL(dblLineTotal, 0) 			
-		) Credit
-		CROSS APPLY dbo.fnGetDebitForeign(
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitFunctional(
 			ISNULL(dblLineTotal, 0)			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) DebitForeign
-		CROSS APPLY dbo.fnGetCreditForeign(
+		) Debit
+		CROSS APPLY dbo.fnGetCreditFunctional(
 			ISNULL(dblLineTotal, 0) 			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) CreditForeign
+		) Credit
+
+		-- CROSS APPLY dbo.fnGetDebit(
+		-- 	ISNULL(dblLineTotal, 0)			
+		-- ) Debit
+		-- CROSS APPLY dbo.fnGetCredit(
+		-- 	ISNULL(dblLineTotal, 0) 			
+		-- ) Credit
+		-- CROSS APPLY dbo.fnGetDebitForeign(
+		-- 	ISNULL(dblLineTotal, 0)			
+		-- 	,ForGLEntries_CTE.intCurrencyId
+		-- 	,@intFunctionalCurrencyId
+		-- 	,ForGLEntries_CTE.dblForexRate
+		-- ) DebitForeign
+		-- CROSS APPLY dbo.fnGetCreditForeign(
+		-- 	ISNULL(dblLineTotal, 0) 			
+		-- 	,ForGLEntries_CTE.intCurrencyId
+		-- 	,@intFunctionalCurrencyId
+		-- 	,ForGLEntries_CTE.dblForexRate
+		-- ) CreditForeign
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
@@ -537,77 +495,77 @@ WHERE	ForGLEntries_CTE.dblQty <> 0
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
 
--------------------------------------------------------------------------------------------
--- This part is for the usual G/L entries for the Inventory Cost coming from Other Charges
--------------------------------------------------------------------------------------------
-UNION ALL 
-SELECT	
-		dtmDate						= ForGLEntries_CTE.dtmDate
-		,strBatchId					= @strBatchId
-		,intAccountId				= tblGLAccount.intAccountId
-		,dblDebit					= Debit.Value
-		,dblCredit					= Credit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ', ' + 'Added Inventory Cost for ' + strItemNo + ' from Other Charges.' 
-		,strCode					= 'IC' 
-		,strReference				= '' 
-		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
-		,dtmDateEntered				= GETDATE()
-		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
-		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= 0
-		,intUserId					= NULL 
-		,intEntityId				= @intEntityUserSecurityId 
-		,strTransactionId			= ForGLEntries_CTE.strTransactionId
-		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
-		,strModuleName				= @ModuleName
-		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
-		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
-		,dblCreditReport			= NULL 
-		,dblReportingRate			= NULL 
-		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
-		,strRateType				= ForGLEntries_CTE.strRateType 
-FROM	ForGLEntries_CTE  
-		INNER JOIN @GLAccounts GLAccounts
-			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
-			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-		CROSS APPLY dbo.fnGetDebit(
-			ISNULL(dblAddOnCostFromOtherCharge, 0)
-		) Debit
-		CROSS APPLY dbo.fnGetCredit(
-			ISNULL(dblAddOnCostFromOtherCharge, 0) 			
-		) Credit
-		CROSS APPLY dbo.fnGetDebitForeign(
-			ISNULL(dblAddOnCostFromOtherCharge, 0)	
-			,ForGLEntries_CTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,ForGLEntries_CTE.dblForexRate
-		) DebitForeign
-		CROSS APPLY dbo.fnGetCreditForeign(
-			ISNULL(dblAddOnCostFromOtherCharge, 0) 			
-			,ForGLEntries_CTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,ForGLEntries_CTE.dblForexRate
-		) CreditForeign
+-- -------------------------------------------------------------------------------------------
+-- -- This part is for the usual G/L entries for the Inventory Cost coming from Other Charges
+-- -------------------------------------------------------------------------------------------
+-- UNION ALL 
+-- SELECT	
+-- 		dtmDate						= ForGLEntries_CTE.dtmDate
+-- 		,strBatchId					= @strBatchId
+-- 		,intAccountId				= tblGLAccount.intAccountId
+-- 		,dblDebit					= Debit.Value
+-- 		,dblCredit					= Credit.Value
+-- 		,dblDebitUnit				= 0
+-- 		,dblCreditUnit				= 0
+-- 		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ', ' + 'Added Inventory Cost for ' + strItemNo + ' from Other Charges.' 
+-- 		,strCode					= 'IC' 
+-- 		,strReference				= '' 
+-- 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+-- 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+-- 		,dtmDateEntered				= GETDATE()
+-- 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+--         ,strJournalLineDescription  = '' 
+-- 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+-- 		,ysnIsUnposted				= 0
+-- 		,intUserId					= NULL 
+-- 		,intEntityId				= @intEntityUserSecurityId 
+-- 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+-- 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+-- 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+-- 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
+-- 		,strModuleName				= @ModuleName
+-- 		,intConcurrencyId			= 1
+-- 		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+-- 		,dblDebitReport				= NULL 
+-- 		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
+-- 		,dblCreditReport			= NULL 
+-- 		,dblReportingRate			= NULL 
+-- 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+-- 		,strRateType				= ForGLEntries_CTE.strRateType 
+-- FROM	ForGLEntries_CTE  
+-- 		INNER JOIN @GLAccounts GLAccounts
+-- 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+-- 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+-- 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+-- 		INNER JOIN dbo.tblGLAccount
+-- 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+-- 		CROSS APPLY dbo.fnGetDebit(
+-- 			ISNULL(dblAddOnCostFromOtherCharge, 0)
+-- 		) Debit
+-- 		CROSS APPLY dbo.fnGetCredit(
+-- 			ISNULL(dblAddOnCostFromOtherCharge, 0) 			
+-- 		) Credit
+-- 		CROSS APPLY dbo.fnGetDebitForeign(
+-- 			ISNULL(dblAddOnCostFromOtherCharge, 0)	
+-- 			,ForGLEntries_CTE.intCurrencyId
+-- 			,@intFunctionalCurrencyId
+-- 			,ForGLEntries_CTE.dblForexRate
+-- 		) DebitForeign
+-- 		CROSS APPLY dbo.fnGetCreditForeign(
+-- 			ISNULL(dblAddOnCostFromOtherCharge, 0) 			
+-- 			,ForGLEntries_CTE.intCurrencyId
+-- 			,@intFunctionalCurrencyId
+-- 			,ForGLEntries_CTE.dblForexRate
+-- 		) CreditForeign
 
-WHERE	ForGLEntries_CTE.dblQty <> 0 
-		AND ROUND(dblAddOnCostFromOtherCharge, 2) <> 0 
-		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
-				@InventoryTransactionTypeId_WriteOffSold
-				, @InventoryTransactionTypeId_RevalueSold
-				, @InventoryTransactionTypeId_AutoNegative
-				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
-			)
+-- WHERE	ForGLEntries_CTE.dblQty <> 0 
+-- 		AND ROUND(dblAddOnCostFromOtherCharge, 2) <> 0 
+-- 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
+-- 				@InventoryTransactionTypeId_WriteOffSold
+-- 				, @InventoryTransactionTypeId_RevalueSold
+-- 				, @InventoryTransactionTypeId_AutoNegative
+-- 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+-- 			)
 
 --UNION ALL 
 --SELECT	

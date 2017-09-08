@@ -201,7 +201,7 @@ END
 			LEFT JOIN tblTRLoadDistributionHeader DH ON TL.intLoadHeaderId = DH.intLoadHeaderId		
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
 			LEFT JOIN vyuTRGetLoadBlendIngredient Blend ON Blend.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
-			LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.intItemId = Blend.intIngredientItemId
+			LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine = Blend.strReceiptLink
             LEFT JOIN vyuICGetItemStock IC
 			    ON IC.intItemId = TR.intItemId AND IC.intLocationId = TR.intCompanyLocationId   	
 			LEFT JOIN tblTRSupplyPoint SP 
@@ -267,7 +267,7 @@ _PostOrUnPost:
 		WHERE	intInventoryTransferId = @TransferId
 
 		SELECT	TOP 1 @intEntityId = intEntityId 
-		FROM	dbo.tblSMUserSecurity 
+		FROM	tblSMUserSecurity 
 		WHERE	intEntityId = @intUserId
 		if @ysnRecap = 0
 		BEGIN

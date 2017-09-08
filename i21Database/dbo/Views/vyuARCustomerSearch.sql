@@ -55,6 +55,7 @@ SELECT intEntityId				= ENTITY.intEntityId
      , strBillToState			= BILLTOLOCATION.strState
      , strBillToZipCode			= BILLTOLOCATION.strZipCode
      , strBillToCountry			= BILLTOLOCATION.strCountry
+	 , strBillToPhone			= BILLTOLOCATION.strPhone
 	 ,intServiceChargeId		= CUSTOMER.intServiceChargeId
 FROM tblEMEntity ENTITY
 INNER JOIN (
@@ -179,5 +180,6 @@ LEFT JOIN (
 		 , strState
 		 , strZipCode
 		 , strCountry
+		 , strPhone
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 ) BILLTOLOCATION ON CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId

@@ -8,6 +8,8 @@
     [intStorageLocationId] INT NULL, 
 	[intCountGroupId] INT NULL,
     [intLotId] INT NULL, 
+	[strLotNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strLotAlias] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblSystemCount] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
     [dblLastCost] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
 	[strAutoCreatedLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

@@ -2287,6 +2287,15 @@ SELECT DISTINCT strLocation
 FROM @tblTempOne
 
 
+--For displaying changes made after update
+SELECT DISTINCT strLocation
+	  , strUpc
+	  , strItemDescription
+	  , strChangeDescription
+	  , strOldData
+	  , strNewData 
+FROM @tblTempOne
+
 
 --OLD
 --SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount	

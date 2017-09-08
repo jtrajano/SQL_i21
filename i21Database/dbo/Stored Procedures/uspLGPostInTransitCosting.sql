@@ -9,10 +9,23 @@ BEGIN TRY
 	DECLARE @intShipmentType INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ItemsToPost ItemInTransitCostingTableType
+	DECLARE @GLEntries AS RecapTableType 
+	DECLARE @intReturnValue INT
+	DECLARE @STARTING_NUMBER_BATCH INT = 3
+	DECLARE @strBatchId NVARCHAR(20) 
+	DECLARE @strBatchIdUsed NVARCHAR(20) 
+	DECLARE @intLocationId INT
 
-	SELECT @strLoadNumber = strLoadNumber
-	FROM tblLGLoad
+
+	SELECT @strBatchIdUsed = strBatchId,
+		   @strLoadNumber = strLoadNumber
+	FROM tblLGLoad 
 	WHERE intLoadId = @intLoadId
+
+	IF(@strBatchIdUsed IS NULL)
+		EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUT
+
+	SET @strBatchIdUsed = @strBatchId
 
 	INSERT INTO @ItemsToPost (
 		intItemId
@@ -59,14 +72,14 @@ BEGIN TRY
 		,L.intLoadId
 		,intLoadDetailId
 		,L.strLoadNumber
-		,11 intTransactionTypeId
-		,0
+		,22 intTransactionTypeId
+		,NULL
 		,L.intLoadId
 		,strLoadNumber
 		,0
-		,FP.intFobPointId
+		,2--FP.intFobPointId
 		,IL.intItemLocationId
-		,0
+		,NULL
 		,AD.dblQtyToPriceUOMConvFactor
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -75,8 +88,7 @@ BEGIN TRY
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	--JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
-	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 	WHERE L.intLoadId = @intLoadId
@@ -95,11 +107,59 @@ BEGIN TRY
 			,AD.dblQtyToPriceUOMConvFactor
 	
 
-	EXEC uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
-		,@strBatchId = @strLoadNumber
-		,@strAccountToCounterInventory = 0
-		,@intEntityUserSecurityId = @intEntityUserSecurityId
-		,@strGLDescription = ''
+	BEGIN 
+	INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate])
+		EXEC @intReturnValue = dbo.uspICPostInTransitCosting 
+									 @ItemsToPost = @ItemsToPost
+									,@strBatchId = @strBatchIdUsed
+									,@strAccountToCounterInventory = 'AP Clearing'--NULL
+									,@intEntityUserSecurityId = @intEntityUserSecurityId
+									,@strGLDescription = ''
+
+		UPDATE tblLGLoad 
+		SET strBatchId = @strBatchIdUsed 
+		WHERE intLoadId = @intLoadId
+
+		IF @intReturnValue < 0 
+		BEGIN
+			RAISERROR(@strErrMsg,16,1)
+		END
+		
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
+				
+	END 	
+
 END TRY
 
 BEGIN CATCH

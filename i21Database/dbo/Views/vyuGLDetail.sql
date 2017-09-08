@@ -1,4 +1,4 @@
-CREATE  VIEW [dbo].[vyuGLDetail]
+CREATE VIEW [dbo].[vyuGLDetail]
 AS
         SELECT 
 		  A.intGLDetailId,

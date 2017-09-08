@@ -30,6 +30,11 @@ BEGIN
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@VOID_MISC_CHECKS INT = 103
+		,@VOID_AP_PAYMENT AS INT = 116
+		,@VOID_PAYCHECK AS INT = 121
+		,@VOID_ACH AS INT = 122
+		,@VOID_DIRECT_DEPOSIT AS INT = 123
 		,@LastReconDate AS DATETIME
 
 		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
@@ -51,7 +56,7 @@ BEGIN
 					END
 			AND (
 				-- Filter for all the bank deposits and credits:
-				intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT)
+				intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT, @VOID_MISC_CHECKS, @VOID_AP_PAYMENT, @VOID_PAYCHECK, @VOID_ACH, @VOID_DIRECT_DEPOSIT)
 				OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 			)
 			--AND dbo.fnIsDepositEntry(strLink) = 0

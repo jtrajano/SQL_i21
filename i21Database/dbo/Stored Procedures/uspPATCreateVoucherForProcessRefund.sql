@@ -102,8 +102,14 @@ BEGIN
 			@intServiceFeeIncomeId = intServiceFeeIncomeId
 	FROM tblPATCompanyPreference
 
-	SELECT @dblServiceFee = dblServiceFee FROM #tempRefundCustomer GROUP BY dblServiceFee;
+	IF(ISNULL(@intAPClearingGLAccount,0) = 0)
+	BEGIN
+		SET @strErrorMessage = 'Unable to voucher. AP Clearing account is not set.';
+		RAISERROR(@strErrorMessage, 16, 1);
+		GOTO Post_Exit;
+	END
 
+	SELECT @dblServiceFee = dblServiceFee FROM #tempRefundCustomer GROUP BY dblServiceFee;
 
 	IF EXISTS(SELECT 1 FROM #tempRefundCustomer WHERE dblCashRefund = 0)
 	BEGIN

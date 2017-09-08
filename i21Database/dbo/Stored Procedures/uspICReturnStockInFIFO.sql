@@ -70,10 +70,16 @@ BEGIN
 							ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
 						INNER JOIN tblICInventoryTransactionType ty
 							ON ty.intTransactionTypeId = t.intTransactionTypeId
+						OUTER APPLY (
+							SELECT 	TOP 1 
+									strReturnPostMode = ISNULL(strReturnPostMode, 'Default')
+							FROM 	tblICCompanyPreference
+						) returnPostMode														
 				WHERE	cbOut.intInventoryFIFOId = cb.intInventoryFIFOId 
 						AND ty.strName = 'Inventory Adjustment - Quantity Change'
 						AND (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0 
 						AND ISNULL(t.ysnIsUnposted, 0) = 0 
+						AND returnPostMode.strReturnPostMode = 'Allow Return After Qty Change'
 			) cbOut
 	WHERE	r.intInventoryReceiptId = @intTransactionId
 			AND r.strReceiptNumber = @strTransactionId

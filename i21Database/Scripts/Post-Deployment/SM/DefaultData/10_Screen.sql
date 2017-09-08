@@ -334,6 +334,34 @@ GO
 	DELETE tblSMScreen WHERE strModule = 'Grain' AND strNamespace IN('Grain.view.StorageType', 'Grain.view.QualityDiscounts', 'Grain.view.StorageStatement')
 
 	   --- Store
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.GrainStorageType')
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+        VALUES (N'', N'Storage Type', N'Grain.view.GrainStorageType', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Storage Type', strModule = N'Grain' WHERE strNamespace = 'Grain.view.GrainStorageType'
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts')
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+        VALUES (N'', N'Bill Storage', N'Grain.view.BillStorageAndDiscounts', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Grain' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
+
+	DELETE tblSMScreen WHERE strModule = 'Grain' AND strNamespace IN('Grain.view.StorageType', 'Grain.view.QualityDiscounts', 'Grain.view.StorageStatement')
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.ScaleLoadSelection')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (N'', N'Load Schedule Selection', N'Grain.view.ScaleLoadSelection', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Load Schedule Selection', strModule = N'Grain' WHERE strNamespace = 'Grain.view.ScaleLoadSelection'
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.ScaleContractSelection')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (N'', N'Contract Selection', N'Grain.view.ScaleContractSelection', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Contract Selection', strModule = N'Grain' WHERE strNamespace = 'Grain.view.ScaleContractSelection'
+
+       --- Store
        --- Checkouts
        IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.CheckoutHeader')
               BEGIN
