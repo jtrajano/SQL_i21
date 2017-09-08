@@ -10,9 +10,11 @@
         e.strAddress,  
         e.strCity,  
         e.strState,  
-        e.strZipCode,		
-		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId),		
-		strEntityLineOfBusinessSalesperson = dbo.fnEMGetEntityLineOfBusinessSalesperson(a.intEntityId),
+        e.strZipCode,	
+		strLineOfBusiness = j.strLineOfBusiness,
+		strEntityLineOfBusinessSalesperson  = k.strName,
+		--strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId),		
+		--strEntityLineOfBusinessSalesperson = dbo.fnEMGetEntityLineOfBusinessSalesperson(a.intEntityId),
 		strContactName = g.strName,
 		strType = 
 			case when Vendor = 1 then 'Vendor, ' else '' end + 
@@ -35,8 +37,14 @@
             on f.intEntityContactId = g.intEntityId
 		left join tblEMEntityPhoneNumber h
 			on h.intEntityId = g.intEntityId
-
+		left join tblEMEntityLineOfBusiness i
+			on i.intEntityId = a.intEntityId
+		left join tblSMLineOfBusiness j
+			on j.intLineOfBusinessId = i.intLineOfBusinessId
+		left join tblEMEntity k
+			on k.intEntityId = i.intEntitySalespersonId
 	where Vendor = 1 or Customer = 1 or Competitor = 1 or [Partner] = 1 or Prospect = 1 or Buyer = 1
+
 
 
 

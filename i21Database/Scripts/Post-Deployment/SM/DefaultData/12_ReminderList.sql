@@ -287,16 +287,22 @@ GO
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} closed.',
                 [strQuery]          =        N'select intApprovalId from tblSMApprovalHistory
-												where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0',
+												where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0
+												and intEntityId not in (
+													select intEntityContactId from  tblEMEntityToContact where ysnPortalAccess = 1
+												)',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Closed',
                 [intSort]           =        13
     END
 	ELSE
 	BEGIN
 		UPDATE [tblSMReminderList]
-		SET	[strQuery] =        N'select intApprovalId from tblSMApprovalHistory
-								where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0'
-		WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction'
+		SET	[strQuery]				=        N'select intApprovalId from tblSMApprovalHistory
+												where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0
+												and intEntityId not in (
+													select intEntityContactId from  tblEMEntityToContact where ysnPortalAccess = 1
+												)'
+		WHERE [strReminder] = N'Closed' AND [strType] = N'Transaction'
 	END    
   
     IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Transaction')
@@ -327,15 +333,21 @@ GO
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} rejected.',
                 [strQuery]          =        N'select * from tblSMApprovalHistory
-												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0',
+												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0
+												and intEntityId not in (
+													select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1
+												)',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
                 [intSort]           =        15
     END
 	ELSE
 		BEGIN
 			UPDATE [tblSMReminderList]
-			SET	[strQuery] = N'select * from tblSMApprovalHistory
-							where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0'
+			SET	[strQuery]			=		N'select * from tblSMApprovalHistory
+												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0
+												and intEntityId not in (
+													select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1
+												)'
 			WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction' 
 		END
 
@@ -353,7 +365,7 @@ GO
 														dtmStartDate
 												FROM tblSMActivity A LEFT OUTER JOIN tblSMActivityAttendee B
 													ON A.intActivityId = B.intActivityId AND B.intEntityId = {0}
-												WHERE ysnRemind = 1 AND (intCreatedBy = {0} OR intAssignedTo = {0}) AND
+												WHERE ysnRemind = 1 AND (intCreatedBy = {0} OR intAssignedTo = {0}) AND (ysnDismiss = 0 OR ysnDismiss IS NULL) AND
 														CASE WHEN strReminder = ''0 minutes'' THEN dtmStartDate
 															 WHEN strReminder = ''5 minutes'' THEN DATEADD(MINUTE, -5, dtmStartDate)
 															 WHEN strReminder = ''10 minutes'' THEN DATEADD(MINUTE, -10, dtmStartDate)
@@ -382,6 +394,44 @@ GO
                 [strNamespace]      =        N'GlobalComponentEngine.view.ActivityReminder',
                 [intSort]           =        1
     END
+	ELSE
+		BEGIN
+			UPDATE [tblSMReminderList]
+			SET	[strQuery] = N'SELECT	A.intActivityId, 
+														B.intEntityId,
+														strSubject, 
+														strType,
+														dtmStartDate
+												FROM tblSMActivity A LEFT OUTER JOIN tblSMActivityAttendee B
+													ON A.intActivityId = B.intActivityId AND B.intEntityId = {0}
+												WHERE ysnRemind = 1 AND (intCreatedBy = {0} OR intAssignedTo = {0}) AND (ysnDismiss = 0 OR ysnDismiss IS NULL) AND
+														CASE WHEN strReminder = ''0 minutes'' THEN dtmStartDate
+															 WHEN strReminder = ''5 minutes'' THEN DATEADD(MINUTE, -5, dtmStartDate)
+															 WHEN strReminder = ''10 minutes'' THEN DATEADD(MINUTE, -10, dtmStartDate)
+															 WHEN strReminder = ''15 minutes'' THEN DATEADD(MINUTE, -15, dtmStartDate)
+															 WHEN strReminder = ''30 minutes'' THEN DATEADD(MINUTE, -30, dtmStartDate)
+															 WHEN strReminder = ''1 hour'' THEN DATEADD(HOUR, -1, dtmStartDate)
+															 WHEN strReminder = ''2 hours'' THEN DATEADD(HOUR, -2, dtmStartDate)
+															 WHEN strReminder = ''3 hours'' THEN DATEADD(HOUR, -3, dtmStartDate)
+															 WHEN strReminder = ''4 hours'' THEN DATEADD(HOUR, -4, dtmStartDate)
+															 WHEN strReminder = ''5 hours'' THEN DATEADD(HOUR, -5, dtmStartDate)
+															 WHEN strReminder = ''6 hours'' THEN DATEADD(HOUR, -6, dtmStartDate)
+															 WHEN strReminder = ''7 hours'' THEN DATEADD(HOUR, -7, dtmStartDate)
+															 WHEN strReminder = ''8 hours'' THEN DATEADD(HOUR, -8, dtmStartDate)
+															 WHEN strReminder = ''9 hours'' THEN DATEADD(HOUR, -9, dtmStartDate)
+															 WHEN strReminder = ''10 hours'' THEN DATEADD(HOUR, -10, dtmStartDate)
+															 WHEN strReminder = ''11 hours'' THEN DATEADD(HOUR, -11, dtmStartDate)
+															 WHEN strReminder = ''12 hours'' THEN DATEADD(HOUR, -12, dtmStartDate)
+															 WHEN strReminder = ''18 hours'' THEN DATEADD(HOUR, -18, dtmStartDate)
+															 WHEN strReminder = ''1 day'' THEN DATEADD(DAY, -1, dtmStartDate)
+															 WHEN strReminder = ''2 days'' THEN DATEADD(DAY, -2, dtmStartDate)
+															 WHEN strReminder = ''3 days'' THEN DATEADD(DAY, -3, dtmStartDate)
+															 WHEN strReminder = ''4 days'' THEN DATEADD(DAY, -4, dtmStartDate)
+															 WHEN strReminder = ''1 week'' THEN DATEADD(WEEK, -1, dtmStartDate)
+															 WHEN strReminder = ''2 weeks'' THEN DATEADD(WEEK, -2, dtmStartDate)
+														END <= GETUTCDATE()'
+			WHERE [strReminder] = N'Activity' AND [strType] = N'Reminder'
+		END
 
 	IF EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order')
 		BEGIN
