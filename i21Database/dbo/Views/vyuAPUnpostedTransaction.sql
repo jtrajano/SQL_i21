@@ -22,6 +22,7 @@ WHERE
 	ISNULL(ysnPosted, 0) = 0 AND 
 	APB.intTransactionType NOT IN (6,8,2,9,11,12) AND		   --Will not show (BillTemplate/ Over Payment / Prepayment / 1099Ajd / Claims  / Payment reversal)
 	APB.ysnForApproval != 1	AND								   --Will not show For Approval Bills
+	APB.ysnRecurring != 1 AND								   --Will not show Recurring Voucher Transaction 
     (APB.ysnApproved = 0)									   --Will not show Rejected approval bills
 
 UNION 
