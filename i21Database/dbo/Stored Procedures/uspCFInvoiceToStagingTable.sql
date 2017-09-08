@@ -551,6 +551,19 @@ BEGIN TRY
 
 		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
 
+		UPDATE tblARCustomerStatementStagingTable
+		SET 
+		strCFEmail							=	  (SELECT TOP (1) strEmail
+																						FROM    dbo.vyuARCustomerContacts
+																						WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+																						AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+																						AND (ISNULL(strEmail, N'') <> ''))
+		,strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
+																						FROM    dbo.vyuARCustomerContacts
+																						WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+																						AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+																						AND (ISNULL(strEmail, N'') <> ''))	
+
 
 		UPDATE tblARCustomerStatementStagingTable
 		SET 
@@ -608,77 +621,6 @@ BEGIN TRY
 				GROUP BY intEntityCustomerId,strCustomerName
 				HAVING ISNULL(COUNT(*),0) > 0)
 		AND ISNULL(dblTotalAR,0) = 0)
-
-		
-		--UPDATE tblARCustomerStatementStagingTable
-		--SET
-		--		 dblTotalAR						 = 		tbl1.dblTotalAR					
-		--		,dblCreditAvailable				 = 		tbl1.dblCreditAvailable			
-		--		,dblFuture						 = 		tbl1.dblFuture					
-		--		,dbl0Days						 = 		tbl1.dbl0Days					
-		--		,dbl10Days						 = 		tbl1.dbl10Days					
-		--		,dbl30Days						 = 		tbl1.dbl30Days					
-		--		,dbl60Days						 = 		tbl1.dbl60Days					
-		--		,dbl90Days						 = 		tbl1.dbl90Days					
-		--		,dbl91Days						 = 		tbl1.dbl91Days					
-		--		,dblCredits						 = 		tbl1.dblCredits					
-		--		,dblPrepayments					 = 		tbl1.dblPrepayments				
-		--		,strAccountStatusCode			 = 		tbl1.strAccountStatusCode		
-		--		,strFullAddress					 = 		tbl1.strFullAddress				
-		--		,strCompanyName					 = 		tbl1.strCompanyName				
-		--		,strCompanyAddress				 = 		tbl1.strCompanyAddress + CHAR(13) + @strWebsite
-		--		,dblCreditLimit					 = 		tbl1.dblCreditLimit				
-		--		,strCustomerName				 = 		tbl1.strCustomerName			
-		--		,strCustomerNumber				 = 		tbl1.strCustomerNumber			
-		--		,dtmAsOfDate					 = 		tbl1.dtmAsOfDate				
-		--FROM (
-		--		select 
-		--		 top 1 
-		--		 dblTotalAR	
-		--		,intEntityCustomerId
-		--		,dblCreditAvailable	
-		--		,dblFuture	
-		--		,dbl0Days	
-		--		,dbl10Days	
-		--		,dbl30Days	
-		--		,dbl60Days	
-		--		,dbl90Days	
-		--		,dbl91Days	
-		--		,dblCredits	
-		--		,dblPrepayments
-		--		,strAccountStatusCode	
-		--		,strFullAddress	
-		--		,strCompanyName	
-		--		,strCompanyAddress	
-		--		,dblCreditLimit
-		--		,strCustomerName
-		--		,strCustomerNumber
-		--		,dtmAsOfDate
-		--		from tblARCustomerStatementStagingTable
-		--		where dblTotalAR IS NOT NULL
-		--		group by 
-		--		dblTotalAR	
-		--		,intEntityCustomerId
-		--		,dblCreditAvailable	
-		--		,dblFuture	
-		--		,dbl0Days	
-		--		,dbl10Days	
-		--		,dbl30Days	
-		--		,dbl60Days	
-		--		,dbl90Days	
-		--		,dbl91Days	
-		--		,dblCredits	
-		--		,dblPrepayments
-		--		,strAccountStatusCode	
-		--		,strFullAddress	
-		--		,strCompanyName	
-		--		,strCompanyAddress	
-		--		,dblCreditLimit
-		--		,strCustomerName
-		--		,strCustomerNumber
-		--		,dtmAsOfDate) as tbl1
-		--		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = tbl1.intEntityCustomerId
-
 
 		UPDATE STAGING
 		SET STAGING.dblTotalAR				=  
@@ -782,6 +724,19 @@ BEGIN TRY
 			END
 
 			UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
+
+			UPDATE tblARCustomerStatementStagingTable
+			SET 
+			strCFEmail							=	  (SELECT TOP (1) strEmail
+																							FROM    dbo.vyuARCustomerContacts
+																							WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+																							AND (ISNULL(strEmail, N'') <> ''))
+			,strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
+																							FROM    dbo.vyuARCustomerContacts
+																							WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+																							AND (ISNULL(strEmail, N'') <> ''))	
 
 			UPDATE tblARCustomerStatementStagingTable
 			SET 
