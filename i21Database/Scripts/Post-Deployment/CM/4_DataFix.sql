@@ -259,5 +259,42 @@ BEGIN
 	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Fix for NULL intTransactionId on GL table','1')
 END	
 
+--This will fix all old transaction to be included as one batch in the Archive File tab of Process Payment. This is related to this jira key CM-1904
+IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Include Old Transations in Archive Tab')
+BEGIN
+
+    INSERT INTO tblCMBankFileGenerationLog 
+        (intBankAccountId
+        ,intTransactionId
+        ,strTransactionId
+        ,strProcessType
+        ,intBankFileFormatId
+        ,dtmGenerated
+        ,intBatchId
+        ,strFileName
+        ,ysnSent
+        ,dtmSent
+        ,intEntityId
+        ,intConcurrencyId)
+    SELECT
+        intBankAccountId
+        ,intTransactionId
+        ,strTransactionId
+        ,'Positive Pay'
+        ,0
+        ,GETDATE()
+        ,1
+        ,'Old Transactions'
+        ,0
+        ,null
+        ,1
+        ,1
+    FROM tblCMBankTransaction 
+    WHERE intBankTransactionTypeId IN (3,16,21) AND intBankFileAuditId IS NULL AND dtmCheckPrinted IS NOT NULL AND ysnCheckVoid = 0
+    AND intTransactionId NOT IN (SELECT intTransactionId FROM tblCMBankFileGenerationLog)    
+
+    --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Include Old Transations in Archive Tab','1')
+END    
 
 print('/*******************  END Cash Management Data Fixess *******************/')
