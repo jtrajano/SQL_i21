@@ -35,7 +35,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchReceiptCharges(GetParameter param);
         SaveResult UpdateReceiptVoucher();
         SaveResult CheckReceiptForValidReturn(int? receiptId);
-        SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName);
+        SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? itemId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName);
         Task<decimal> CalculateGrossQtyRatio(int intItemUOMId, int intGrossUOMId, decimal dblQty, decimal dblProposedQty, decimal dblProposedGrossQty);
     }
 }

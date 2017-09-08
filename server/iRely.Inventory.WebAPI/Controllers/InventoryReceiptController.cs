@@ -224,11 +224,11 @@ namespace iRely.Inventory.WebApi
 
         [HttpGet]
         [ActionName("GetDefaultReceiptTaxGroupId")]
-        public HttpResponseMessage GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId)
+        public HttpResponseMessage GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId, int? itemId)
         {
             int? taxGroup = null;
             string taxGroupName = null;
-            var result = _bl.GetDefaultReceiptTaxGroupId(freightTermId, locationId, entityVendorId, entityLocationId, out taxGroup, out taxGroupName);
+            var result = _bl.GetDefaultReceiptTaxGroupId(freightTermId, locationId, itemId, entityVendorId, entityLocationId, out taxGroup, out taxGroupName);
 
             var httpStatusCode = HttpStatusCode.OK;
             if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;

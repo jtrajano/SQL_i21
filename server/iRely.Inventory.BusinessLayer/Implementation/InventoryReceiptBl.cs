@@ -904,7 +904,7 @@ namespace iRely.Inventory.BusinessLayer
             return saveResult;
         }        
 
-        public SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName)
+        public SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? itemId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName)
         {
             SaveResult saveResult = new SaveResult();
             taxGroup = null;
@@ -928,6 +928,14 @@ namespace iRely.Inventory.BusinessLayer
                 else
                     locationIdParam.Value = locationId;
 
+                var itemIdParam = new SqlParameter("@intItemId", itemId);
+                itemIdParam.DbType = System.Data.DbType.Int32;
+                itemIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (itemId == null)
+                    itemIdParam.Value = DBNull.Value;
+                else
+                    itemIdParam.Value = itemId;
+                
                 var entityVendorIdParam = new SqlParameter("@intEntityVendorId", entityVendorId);
                 entityVendorIdParam.DbType = System.Data.DbType.Int32;
                 entityVendorIdParam.SqlDbType = System.Data.SqlDbType.Int;
@@ -954,9 +962,10 @@ namespace iRely.Inventory.BusinessLayer
                 strTaxGroupOutput.Size = 50;
 
                 _db.ContextManager.Database.ExecuteSqlCommand(
-                    "uspICGetDefaultReceiptTaxGroupId @intFreightTermId, @intLocationId, @intEntityVendorId, @intEntityLocationId, @intTaxGroupId OUTPUT, @strTaxGroup OUTPUT"
+                    "uspICGetDefaultReceiptTaxGroupId @intFreightTermId, @intLocationId, @intItemId, @intEntityVendorId, @intEntityLocationId, @intTaxGroupId OUTPUT, @strTaxGroup OUTPUT"
                     , freightTermIdParam
                     , locationIdParam
+                    , itemIdParam 
                     , entityVendorIdParam
                     , entityLocationIdParam
                     , intTaxGroupIdOutput

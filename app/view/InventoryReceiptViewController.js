@@ -1643,7 +1643,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 freightTermId: cfg.freightTermId,
                 locationId: cfg.locationId,
                 entityVendorId: cfg.entityVendorId,
-                entityLocationId: cfg.entityLocationId
+                entityLocationId: cfg.entityLocationId,
+                itemId: cfg.itemId 
             },
             method: 'get'
         }).subscribe(
@@ -1876,7 +1877,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 freightTermId: intFreightTermId,
                 locationId: intLocationId,
                 entityVendorId: vendorId,
-                entityLocationId: vendorLocation
+                entityLocationId: vendorLocation,
+                itemId: itemId 
             };
             me.getDefaultReceiptTaxGroupId(current, taxCfg);
         }
@@ -4844,6 +4846,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 locationId: masterRecord.get('intLocationId'),
                 entityVendorId: current.get('intEntityVendorId'),
                 entityLocationId: null,
+                itemId: current.get('intChargeId')
             };
             me.getDefaultReceiptTaxGroupId(current, taxCfg);
         }
@@ -4869,6 +4872,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     locationId: masterRecord.get('intLocationId'),
                     entityVendorId: current.get('intEntityVendorId'),
                     entityLocationId: null,
+                    itemId: current.get('intChargeId')
                 };
                 me.getDefaultReceiptTaxGroupId(current, taxCfg);
             }
