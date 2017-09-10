@@ -79,7 +79,7 @@ AS
 				intOrderId				=	CD.intContractHeaderId,
 				intLineNo				=	CD.intContractDetailId,
 				intWeightUOMId			=	CD.intNetWeightUOMId,
-				dblUnitPrice			=	ISNULL(AD.dblSeqPrice,0),
+				dblUnitPrice			=	ISNULL(AD.dblSeqPrice * AD.dblQtyToPriceUOMConvFactor,0),
 				intCurrencyId			=	CD.intCurrencyId,
 				intForexRateTypeId		=	CD.intRateTypeId,
 				dblForexRate			=	CD.dblRate
