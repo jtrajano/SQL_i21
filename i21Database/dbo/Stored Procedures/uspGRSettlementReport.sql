@@ -176,8 +176,7 @@ BEGIN
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = NULL
 	   ,lblCustomerPrepayment = NULL
-	   ,blbHeaderLogo = @companyLogo						 
-	   ,lblCustomerPrepayment = NULL						 
+	   ,blbHeaderLogo = @companyLogo						 	   						 
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
 		AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -1244,8 +1243,7 @@ BEGIN
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = NULL
 	   ,lblCustomerPrepayment = NULL
-	   ,blbHeaderLogo = @companyLogo					    
-	   ,lblCustomerPrepayment = NULL					    
+	   ,blbHeaderLogo = @companyLogo					    	   					    
 	FROM tblCMBankTransaction BNKTRN	
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 	JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
