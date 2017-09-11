@@ -77,10 +77,20 @@ BEGIN TRY
 	SELECT @intTransactionId = @intBatchId
 
 	SELECT @strTransactionId = strWorkOrderNo
-		,@intItemId = intItemId
 		,@intLocationId = intLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @dblQuantity = dblQuantity
+		,@intItemUOMId = intItemUOMId
+		,@dblPhysicalCount = dblPhysicalCount
+		,@intTransactionDetailId = intWorkOrderProducedLotId
+		,@intStorageLocationId=intStorageLocationId 
+		,@intItemId = intItemId
+	FROM tblMFWorkOrderProducedLot
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intBatchId = @intBatchId
+
 
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
@@ -91,14 +101,21 @@ BEGIN TRY
 	WHERE intLocationId = @intLocationId
 		AND intItemId = @intItemId
 
-	SELECT @dblQuantity = dblQuantity
-		,@intItemUOMId = intItemUOMId
-		,@dblPhysicalCount = dblPhysicalCount
-		,@intTransactionDetailId = intWorkOrderProducedLotId
-		,@intStorageLocationId=intStorageLocationId 
-	FROM tblMFWorkOrderProducedLot
-	WHERE intWorkOrderId = @intWorkOrderId
-		AND intBatchId = @intBatchId
+	--IF EXISTS (
+	--		SELECT *
+	--		FROM tblMFWorkOrderProducedLot
+	--		WHERE intWorkOrderId = @intWorkOrderId
+	--			AND intLotId = @intLotId
+	--			AND ysnReleased = 1
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			51137
+	--			,11
+	--			,1
+	--			)
+	--	RETURN
+	--END
 
 	IF EXISTS (
 			SELECT *
