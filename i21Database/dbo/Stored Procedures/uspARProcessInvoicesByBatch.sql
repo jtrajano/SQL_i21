@@ -1011,7 +1011,7 @@ BEGIN TRY
 			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
 	WHERE
 		ISNULL(EFP.[ysnForUpdate],0) = 1
-		AND ISNULL(IE.[ysnUnPostAndUpdate],0) = 1
+		AND (ISNULL(IE.[ysnUnPostAndUpdate],0) = 1 OR (IE.[ysnPost] IS NOT NULL AND IE.[ysnPost] = 0))
 		AND ISNULL(EFP.[intInvoiceId],0) <> 0
 		AND ISNULL(EFP.[ysnRecap], 0) = 0
 
@@ -1795,10 +1795,11 @@ BEGIN TRY
 		[intIntegrationLogId] = @IntegrationLogId
 		AND ISNULL([ysnSuccess], 0) = 1
 		AND ISNULL([ysnHeader], 0) = 1	
-		AND ISNULL([ysnInsert], 0) = 0	
+		AND ISNULL([ysnInsert], 0) = 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap], 0) = 0
+		AND NOT EXISTS(SELECT NULL FROM @InvoiceEntries IE  WHERE IE.[intInvoiceId] = tblARInvoiceIntegrationLogDetail.[intInvoiceId] AND (ISNULL(IE.[ysnUnPostAndUpdate],0) = 1 OR (IE.[ysnPost] IS NOT NULL AND IE.[ysnPost] = 0)))
 
 
 		
