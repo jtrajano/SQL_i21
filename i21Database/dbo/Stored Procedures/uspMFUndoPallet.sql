@@ -74,10 +74,19 @@ BEGIN TRY
 	SELECT @intTransactionId = @intBatchId
 
 	SELECT @strTransactionId = strWorkOrderNo
-		,@intItemId = intItemId
 		,@intLocationId = intLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @dblQuantity = dblQuantity
+		,@intItemUOMId = intItemUOMId
+		,@dblPhysicalCount = dblPhysicalCount
+		,@intTransactionDetailId = intWorkOrderProducedLotId
+		,@intItemId = intItemId
+	FROM tblMFWorkOrderProducedLot
+	WHERE intWorkOrderId = @intWorkOrderId
+		--AND intLotId = @intLotId
+		AND intBatchId = @intBatchId
 
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
@@ -87,15 +96,6 @@ BEGIN TRY
 	FROM tblICItemLocation
 	WHERE intLocationId = @intLocationId
 		AND intItemId = @intItemId
-
-	SELECT @dblQuantity = dblQuantity
-		,@intItemUOMId = intItemUOMId
-		,@dblPhysicalCount = dblPhysicalCount
-		,@intTransactionDetailId = intWorkOrderProducedLotId
-	FROM tblMFWorkOrderProducedLot
-	WHERE intWorkOrderId = @intWorkOrderId
-		--AND intLotId = @intLotId
-		AND intBatchId = @intBatchId
 
 	--IF EXISTS (
 	--		SELECT *
