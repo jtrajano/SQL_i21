@@ -430,3 +430,20 @@ GO
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO
+
+	--Manufacturing
+	DELETE from tblSMScreen where strModule='Manufacturing' and strNamespace in ('Manufacturing.view.DataSource','Manufacturing.view.ItemMachine','Manufacturing.view.BlendSheetItemGridRowExpander')
+
+GO
+
+	--Integration
+	Delete from tblSMScreen where strModule='Integration' and strNamespace in ('Integration.view.TextLayout','Integration.view.DatabaseTableToExcel','Integration.view.ValidateXML','Integration.view.GenerateXML')
+
+GO
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strModule='Integration' and strNamespace = 'Integration.view.CopyMoveDeleteFile')
+	BEGIN
+		UPDATE tblSMScreen SET strScreenName = N'File Operation' WHERE strModule='Integration' and strNamespace = 'Integration.view.CopyMoveDeleteFile'
+	END
+
+GO
