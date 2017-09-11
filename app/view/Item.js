@@ -558,7 +558,8 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'UPC Code',
                                                         flex: 2,
                                                         editor: {
-                                                            xtype: 'textfield'
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtLongUPCCode'
                                                         }
                                                     },
                                                     {
@@ -3741,27 +3742,6 @@ Ext.define('Inventory.view.Item', {
                                                                         fieldLabel: 'MTM',
                                                                         labelWidth: 105,
                                                                         readOnly: true
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intM2MComputationId',
-                                                                                dataType: 'int',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strM2MComputation',
-                                                                                dataType: 'string',
-                                                                                text: 'M2M Computation',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboM2M',
-                                                                        fieldLabel: 'M2M',
-                                                                        labelWidth: 150,
-                                                                        displayField: 'strM2MComputation',
-                                                                        valueField: 'intM2MComputationId'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',

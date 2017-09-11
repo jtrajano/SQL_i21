@@ -1166,6 +1166,9 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "txtLongUPCCode"
+                                                    },
                                                     "name": "MyTextField15",
                                                     "designerId": "ff3bd980-1a90-48bf-9f97-72c313539905"
                                                 }
@@ -8538,50 +8541,6 @@
                                                             },
                                                             "name": "MyCheckbox28",
                                                             "designerId": "895a31ff-120d-4f04-969f-649150bd877f"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "    {",
-                                                                    "        dataIndex: 'intM2MComputationId',",
-                                                                    "        dataType: 'int',",
-                                                                    "        hidden: true",
-                                                                    "    },",
-                                                                    "\t{",
-                                                                    "        dataIndex: 'strM2MComputation',",
-                                                                    "        dataType: 'string',",
-                                                                    "        text: 'M2M Computation',",
-                                                                    "        flex: 1",
-                                                                    "    }",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strM2MComputation",
-                                                                "fieldLabel": "M2M",
-                                                                "itemId": "cboM2M",
-                                                                "labelWidth": 150,
-                                                                "layout|flex": null,
-                                                                "valueField": "intM2MComputationId"
-                                                            },
-                                                            "name": "MyComboBox70",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "26256ff6-20df-4e25-9d69-090cbc68cc37",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Checkbox",

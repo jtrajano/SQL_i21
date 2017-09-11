@@ -638,10 +638,11 @@ Ext.define('Inventory.view.ItemViewController', {
             chkInventoryCost: '{current.ysnInventoryCost}',
             chkAccrue: '{current.ysnAccrue}',
             chkMTM: '{current.ysnMTM}',
-            cboM2M: {
-                value: '{current.intM2MComputationId}',
-                store: '{m2mComputations}'
-            },
+            // cboM2M: {
+            //     value: '{current.intM2MComputationId}',
+            //     store: '{m2mComputations}',
+            //     hidden: true
+            // },
             chkPrice: '{current.ysnPrice}',
             chkIsBasket: {
                 value: '{current.ysnIsBasket}',
