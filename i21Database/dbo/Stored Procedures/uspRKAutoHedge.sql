@@ -101,6 +101,18 @@ INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId,dtmTransactionDate,in
 	VALUES(1,@dtmTransactionDate,@intSelectedInstrumentTypeId,case when isnull(@intSelectedInstrumentTypeId,1)=1 then 'Exchange Traded' else 'OTC' end)
 SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY() 
 
+IF EXISTS
+(SELECT 1 FROM  tblRKReconciliationBrokerStatementHeader t
+					WHERE t.intFutureMarketId=@intFutureMarketId
+						AND t.intBrokerageAccountId=@intBrokerageAccountId
+						AND t.intCommodityId=@intCommodityId
+						AND t.intEntityId=@intEntityId AND ysnFreezed = 1
+						AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmFilledDate,110),110) =
+							CONVERT(DATETIME,CONVERT(VARCHAR(10),@dtmFilledDate,110),110) 	
+)
+BEGIN
+RAISERROR('The selected filled date already reconciled.',16,1)
+END
 IF ISNULL(@intFutOptTransactionId,0) > 0
 BEGIN
       UPDATE tblRKFutOptTransaction
@@ -170,7 +182,6 @@ BEGIN
               @intInstrumentTypeId ,
               @intCommodityId ,
               @intLocationId ,
-
               @intTraderId ,
               @strInternalTradeNo ,
               @strBrokerTradeNo ,
