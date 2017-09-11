@@ -110,6 +110,8 @@ EXEC(
 	--================================================
 	IF(@Update = 1 AND @AccountCode IS NULL) 
 	BEGIN
-		SELECT @Total = COUNT(ssasc_code) from tblARTempAccount
+		--SELECT @Total = COUNT(ssasc_code) from tblARTempAccount
+		select @Total = COUNT(ssasc_code) from ssascmst where ssasc_code  
+			COLLATE Latin1_General_CI_AS not in ( select strAccountStatusCode from tblARAccountStatus)
 	END'
 	)
