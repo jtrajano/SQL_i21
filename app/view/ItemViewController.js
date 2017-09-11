@@ -3826,14 +3826,16 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        var record = records[0];
         var win = combo.up('window');
         var grid = combo.up('grid');
         var grdOwner = win.down('#grdOwner');
         var plugin = grid.getPlugin('cepOwner');
         var current = plugin.getActiveRecord();
 
-        if (combo.itemId === 'cboOwner'){
-            current.set('strName', records[0].get('strName'));
+        if (combo.itemId === 'cboOwner' && record){
+            current.set('strName', record.get('strName'));
+            current.set('intOwnerId', record.get('intEntityId'));
         }
     },
     
