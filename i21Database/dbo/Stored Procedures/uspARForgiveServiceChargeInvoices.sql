@@ -107,7 +107,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				 , ysnRevalued					
 			)
 			SELECT intCompanyId					= GL.intCompanyId
-				 , dtmDate						= GETDATE()
+				 , dtmDate						= GL.dtmDate
 				 , strBatchId					= GL.strBatchId
 				 , intAccountId					= GL.intAccountId
 				 , dblDebit						= GL.dblCredit
@@ -120,7 +120,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				 , intCurrencyId				= GL.intCurrencyId
 				 , dblExchangeRate				= GL.dblExchangeRate
 				 , dtmDateEntered				= GETDATE()
-				 , dtmTransactionDate			= GETDATE()
+				 , dtmTransactionDate			= GL.dtmTransactionDate
 				 , strJournalLineDescription	= 'Forgiven Service Charge'
 				 , intJournalLineNo				= GL.intJournalLineNo
 				 , ysnIsUnposted				= 0
