@@ -5657,6 +5657,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPNLSalesContractImpact.sql" />
     <Build Include="dbo\Views\vyuSMContactScreen.sql" />
     <Build Include="dbo\Views\vyuSMContactControl.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKReconciledValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
