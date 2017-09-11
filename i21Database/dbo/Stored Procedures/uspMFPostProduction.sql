@@ -509,7 +509,7 @@ BEGIN
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
 	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
 	LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
-	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.strReceiptLine = BlendIngredient.strReceiptLink
 	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
 		AND ISNULL(DistItem.strReceiptLink, '') = ''
 
@@ -666,7 +666,7 @@ BEGIN
 
 	DELETE
 	FROM @GLEntries
-	WHERE strTransactionType = 'Consume'
+	WHERE strTransactionType NOT IN ('Produce') 
 
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,@ysnPost

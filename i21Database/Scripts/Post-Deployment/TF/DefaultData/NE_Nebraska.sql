@@ -51,51 +51,6 @@ where intTaxAuthorityId = @TaxAuthorityId
 	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
 
--- Terminal Control Numbers
-/* Generate script for Terminal Control Numbers. Specify Tax Authority Id to filter out specific Terminal Control Numbers only.
-select 'UNION ALL SELECT intTerminalControlNumberId = ' + CAST(intTerminalControlNumberId AS NVARCHAR(10)) 
-	+ CASE WHEN strTerminalControlNumber IS NULL THEN ', strTerminalControlNumber = NULL' ELSE ', strTerminalControlNumber = ''' + strTerminalControlNumber + ''''  END
-	+ CASE WHEN strName IS NULL THEN ', strName = NULL' ELSE ', strName = ''' + strName + ''''  END
-	+ CASE WHEN strAddress IS NULL THEN ', strAddress = NULL' ELSE ', strAddress = ''' + strAddress + ''''  END
-	+ CASE WHEN strCity IS NULL THEN ', strCity = NULL' ELSE ', strCity = ''' + strCity + '''' END 
-	+ CASE WHEN dtmApprovedDate IS NULL THEN ', dtmApprovedDate = NULL' ELSE ', dtmApprovedDate = ''' + CAST(dtmApprovedDate AS NVARCHAR(50)) + '''' END 
-	+ CASE WHEN strZip IS NULL THEN ', strZip = NULL' ELSE ', strZip = ''' + strZip + '''' END 
---	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(intMasterId, '') = '' THEN intTerminalControlNumberId ELSE intMasterId END) AS NVARCHAR(20)) -- Old Format
-	+ ', intMasterId = ' + CASE WHEN intMasterId IS NULL THEN CAST(@TaxAuthorityId AS NVARCHAR(20)) + CAST(intTerminalControlNumberId AS NVARCHAR(20)) ELSE CAST(intMasterId AS NVARCHAR(20)) END -- First 2 digit for TaxAuthorityCodeID
-from tblTFTerminalControlNumber
-where intTaxAuthorityId = @TaxAuthorityId
-*/
-	DECLARE @TerminalControlNumbers AS TFTerminalControlNumbers
-
-	INSERT INTO @TerminalControlNumbers(
-		intTerminalControlNumberId
-		, strTerminalControlNumber
-		, strName
-		, strAddress
-		, strCity
-		, dtmApprovedDate
-		, strZip
-		, intMasterId
-	)
-	-- Insert generated script here. Remove first instance of "UNION ALL "
-	SELECT intTerminalControlNumberId = 515, strTerminalControlNumber = 'T-39-NE-3604', strName = 'Signature Flight Support Corp.', strAddress = '3636 Wilbur Plaza', strCity = 'Omaha', dtmApprovedDate = NULL, strZip = '68110', intMasterId = 27515
-	UNION ALL SELECT intTerminalControlNumberId = 516, strTerminalControlNumber = 'T-39-NE-3612', strName = 'Magellan Pipeline Company, L.P.', strAddress = '13029 S 13th St', strCity = 'Bellevue', dtmApprovedDate = NULL, strZip = '68123', intMasterId = 27516
-	UNION ALL SELECT intTerminalControlNumberId = 517, strTerminalControlNumber = 'T-39-NE-3613', strName = 'Truman Arnold Co. - TAC Air', strAddress = '3737 Orville Plaza', strCity = 'Omaha', dtmApprovedDate = NULL, strZip = '68110', intMasterId = 27517
-	UNION ALL SELECT intTerminalControlNumberId = 518, strTerminalControlNumber = 'T-39-NE-3614', strName = 'Union Pacific Railroad Co.', strAddress = '6000 West Front St.', strCity = 'North Platte', dtmApprovedDate = NULL, strZip = '69101', intMasterId = 27518
-	UNION ALL SELECT intTerminalControlNumberId = 519, strTerminalControlNumber = 'T-39-NE-3615', strName = 'BNSF - Lincoln', strAddress = '201 North 7th Street', strCity = 'Lincoln', dtmApprovedDate = NULL, strZip = '68508', intMasterId = 27519
-	UNION ALL SELECT intTerminalControlNumberId = 520, strTerminalControlNumber = 'T-47-NE-3600', strName = 'NuStar Pipeline Operating Partnership, L.P. - Columbus', strAddress = 'R R 5, Box 27 BB', strCity = 'Columbus', dtmApprovedDate = NULL, strZip = '68601-', intMasterId = 27520
-	UNION ALL SELECT intTerminalControlNumberId = 521, strTerminalControlNumber = 'T-47-NE-3601', strName = 'NuStar Pipeline Operating Partnership, L.P. - Geneva', strAddress = 'U S Highway 81', strCity = 'Geneva', dtmApprovedDate = NULL, strZip = '68361-', intMasterId = 27521
-	UNION ALL SELECT intTerminalControlNumberId = 522, strTerminalControlNumber = 'T-47-NE-3602', strName = 'Magellan Pipeline Company, L.P.', strAddress = '12275 South US Hwy 281', strCity = 'Doniphan', dtmApprovedDate = NULL, strZip = '68832-', intMasterId = 27522
-	UNION ALL SELECT intTerminalControlNumberId = 523, strTerminalControlNumber = 'T-47-NE-3603', strName = 'Phillips 66 PL - Lincoln', strAddress = '1345 Saltillo Rd.', strCity = 'Roca', dtmApprovedDate = NULL, strZip = '68430', intMasterId = 27523
-	UNION ALL SELECT intTerminalControlNumberId = 524, strTerminalControlNumber = 'T-47-NE-3605', strName = 'Magellan Pipeline Company, L.P.', strAddress = '2000 Saltillo Road', strCity = 'Roca', dtmApprovedDate = NULL, strZip = '68430', intMasterId = 27524
-	UNION ALL SELECT intTerminalControlNumberId = 525, strTerminalControlNumber = 'T-47-NE-3606', strName = 'NuStar Pipeline Operating Partnership, L.P. - Norfolk', strAddress = 'Highway 81', strCity = 'Norfolk', dtmApprovedDate = NULL, strZip = '68701', intMasterId = 27525
-	UNION ALL SELECT intTerminalControlNumberId = 526, strTerminalControlNumber = 'T-47-NE-3607', strName = 'NuStar Pipeline Operating Partnership, L.P. - North Platte', strAddress = 'Rural Route Four', strCity = 'North Platte', dtmApprovedDate = NULL, strZip = '69101', intMasterId = 27526
-	UNION ALL SELECT intTerminalControlNumberId = 527, strTerminalControlNumber = 'T-47-NE-3608', strName = 'Magellan Pipeline Company, L.P.', strAddress = '2205 N 11th St', strCity = 'Omaha', dtmApprovedDate = NULL, strZip = '68110', intMasterId = 27527
-	UNION ALL SELECT intTerminalControlNumberId = 528, strTerminalControlNumber = 'T-47-NE-3610', strName = 'NuStar Pipeline Operating Partnership, L.P. - Osceola', strAddress = 'Rural Route 1', strCity = 'Osceola', dtmApprovedDate = NULL, strZip = '68651', intMasterId = 27528
-
-	EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = @TaxAuthorityCode, @TerminalControlNumbers = @TerminalControlNumbers
-
-
 -- Tax Category
 /* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
 select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(intTaxCategoryId AS NVARCHAR(10))

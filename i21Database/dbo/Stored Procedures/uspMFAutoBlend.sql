@@ -572,8 +572,12 @@ BEGIN TRY
 			SELECT	@strItemNo=strItemNo 
 			FROM	tblICItem 
 			WHERE	intItemId = @intRawItemId
+
+			SELECT	@strLocationName = strLocationName 
+			FROM	tblSMCompanyLocation 
+			WHERE	intCompanyLocationId=@intLocationId
 		
-			SET @ErrMsg = 'Inventory is not available for item ' + @strItemNo + '.'
+			SET @ErrMsg = 'Negative stock quantity is not allowed for item ' + @strItemNo + ' in location ' + @strLocationName + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 

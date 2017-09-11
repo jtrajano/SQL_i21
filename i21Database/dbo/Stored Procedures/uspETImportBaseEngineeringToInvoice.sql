@@ -177,7 +177,37 @@ BEGIN
 					SELECT @intLineItemTaxId =  dbo.fnGetTaxGroupIdForCustomer(@intCustomerEntityId,@intLocationId,@intItemId,null,null,null)
 				END
 
-			
+			---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+			IF (ISNULL(@dtmDate,0) = 0) 
+			 BEGIN
+				SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Invalid Date.'
+				END
+			IF (ISNULL(@dblPrice,0) = 0) 
+ 			BEGIN
+ 			    SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Price must have a value.'
+ 			END
+			IF (ISNULL(@dblQuantity,0) = 0) 
+ 			BEGIN
+ 				SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Quantity must have a value.'
+ 			END
+			IF (ISNULL(@intCustomerEntityId,0) = 0)
+			BEGIN
+				SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Customer.'
+			END
+			IF (ISNULL(@intItemId ,0) = 0)
+ 			BEGIN
+ 				SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Item.'
+ 			END
+
+			IF (ISNULL(@intSiteId,0) = 0)
+ 			BEGIN
+				SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Site.'
+ 			END
+
+			IF LTRIM(@strErrorMessage) != ''
+			BEGIN		
+				GOTO LOGERROR
+			END
 
 			IF (@intRecordType = 5 AND ISNULL(@intSiteId,0) = 0)
 				BEGIN

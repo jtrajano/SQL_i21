@@ -182,6 +182,7 @@
     <Folder Include="Scripts\Post-Deployment\FRM" />
     <Folder Include="Scripts\Post-Deployment\FRM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\EM\DataMigration" />
+    <Folder Include="Scripts\Post-Deployment\CCR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -779,6 +780,7 @@
     <Build Include="dbo\Tables\tblICItemKit.sql" />
     <Build Include="dbo\Tables\tblICItemKitDetail.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnPostErrors.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostingOnPostInTransitErrors.sql" />
     <Build Include="dbo\Tables\tblHDTicketEscalation.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasureConversion.sql" />
     <Build Include="dbo\Tables\tblICLineOfBusiness.sql" />
@@ -1861,6 +1863,7 @@
     <Build Include="dbo\Stored Procedures\uspTRShipped.sql" />
     <Build Include="dbo\Tables\tblEMEntityFarm.sql" />
     <Build Include="dbo\Views\vyuICGetCompactItem.sql" />
+    <Build Include="dbo\Views\vyuICGetItemUOMByType.sql" />
     <Build Include="dbo\Tables\tblICCompanyPreference.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTransferVoid.sql" />
@@ -4371,6 +4374,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetItemInTransitLocation.sql" />
     <Build Include="dbo\Views\vyuICItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInTransitCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPostInTransit.sql" />
     <Build Include="dbo\User Defined Types\ItemInTransitCostingTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostLotInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostActualCostInTransit.sql" />
@@ -5581,7 +5585,6 @@
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryBySummary.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportByProductType.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportByProductTypeDetail.sql" />
-    <Build Include="dbo\Tables\tblGLConsolidateResult.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_EntityFavoriteMenu.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchSyncInvoiceToDeliveryHistory.sql" />
     <Build Include="dbo\Functions\fnAPBankRounding.sql" />
@@ -5610,6 +5613,8 @@
     <Build Include="dbo\Functions\fnRKGetCurrencyExchangeRateType.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateSubLocationChange.sql" />
     <Build Include="dbo\Views\vyuPATChangeStockStatusDetail.sql" />
+    <Build Include="dbo\Views\vyuICInventoryCountItemStockLookup.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryInventoryCount.sql" />
     <Build Include="dbo\Views\vyuCTNotificationHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspCTNotification.sql" />
     <None Include="Scripts\Post-Deployment\FRM\1_OfflineGuid.sql" />
@@ -5623,6 +5628,18 @@
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateTicketManagementMenus.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdatePayrollMenus.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_PortalMenus.sql" />
+    <Build Include="dbo\Views\vyuPATCustomerVolumeLog.sql" />
+    <Build Include="dbo\Views\vyuPATCustomerVolumeLogDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdateTicketManagementMenus.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdatePayrollMenus.sql" />
+    <Build Include="dbo\Views\vyuRKPositionByPeriodContDetView.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateHandheldUserMenuMap.sql" />
+    <Build Include="dbo\Views\vyuRKMarketDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementReport.sql" />
+    <Build Include="dbo\Views\vyuHDTicketCommentLink.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_PortalMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
+    <Build Include="dbo\Views\vyuHDTicketCustomerContact.sql" />
     <Build Include="dbo\Views\vyuMFGetShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetReceiving.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSubReport.sql" />
@@ -5632,6 +5649,12 @@
     <Build Include="dbo\Stored Procedures\uspGRSettlementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
     <None Include="Scripts\Post-Deployment\EM\DataMigration\1710_1720_CCSite_migration.sql" />
+    <Build Include="dbo\Views\vyuLGContainerType.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetContainerTypes.sql" />
+    <Build Include="dbo\Stored Procedures\uspARForgiveServiceChargeInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipmentFeed.sql" />
+    <Build Include="dbo\Views\vyuCCSiteHeaderSearch.sql" />
+    <Build Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
     <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCustomerOwnership.sql" />
     <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
@@ -5775,6 +5798,12 @@
     <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\30_UpdateBatchIdUsed.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePrepayVoucherStatus.sql" />
+    <Build Include="dbo\Functions\fnHDTicketCommentSentMessage.sql" />
+    <None Include="Scripts\Post-Deployment\CCR\SiteDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePrepayVoucherStatus.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\30_ImportFileHeader.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateTaxGroupId.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -5839,5 +5868,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AfterUpgradeCleanup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\02_TerminalControl.sql" />
   </ItemGroup>
 </Project>

@@ -75,7 +75,7 @@ DECLARE @temp_return_table TABLE(
 	,[ysnHasEmailSetup]			BIT
 )
 
-IF @strLetterName <> 'Service Charge Invoices Letter' AND ISNULL(@ysnSystemDefined, 1) = 1
+IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter') AND ISNULL(@ysnSystemDefined, 1) = 1
 BEGIN
 	INSERT INTO @temp_aging_table
 	EXEC uspARCollectionOverdueDetailReport NULL, NULL
@@ -365,7 +365,7 @@ IF ISNULL(@strLetterName, '') <> ''
 		ELSE
 			DELETE FROM @temp_return_table WHERE ysnHasEmailSetup = 1
 
-		IF @strLetterName <> 'Service Charge Invoices Letter'
+		IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
 			BEGIN
 				DELETE FROM dbo.tblARCollectionOverdueDetail WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table)
 				DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table)

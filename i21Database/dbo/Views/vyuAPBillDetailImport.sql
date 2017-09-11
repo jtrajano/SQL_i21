@@ -1,9 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuAPBillDetailImport]
 AS
-
 SELECT 
 	Contract.strContractNumber,
-	Purchase.strPONumber strPurchaseOrderNumber,
+	Purchase.strPurchaseOrderNumber,
 	Item.strItemNo,
 	B.intPrepayTypeId,
 	Prepay.strText strPrepayType,
@@ -55,7 +54,12 @@ LEFT JOIN dbo.tblCTContractHeader Contract ON Contract.intContractHeaderId = B.i
 LEFT JOIN dbo.tblGLAccount H ON B.intAccountId = H.intAccountId 
 LEFT JOIN dbo.tblICItem Item 	ON B.intItemId = Item.intItemId
 LEFT JOIN dbo.tblSMCurrency CUR ON CUR.intCurrencyID = A.intCurrencyId
-LEFT JOIN dbo.tblPOPurchaseDetail Purchase ON Purchase.intPurchaseDetailId = B.intPurchaseDetailId
+OUTER APPLY(
+	SELECT TOP 1 A.strPurchaseOrderNumber from tblPOPurchase A
+	JOIN dbo.tblPOPurchaseDetail C
+ 	ON A.intPurchaseId = C.intPurchaseId
+ 	WHERE C.intPurchaseDetailId = B.intPurchaseDetailId
+)Purchase
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherForm1099]() where intId = B.int1099Form) Form1099
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherCategories1099]() WHERE intId = B.int1099Category) Category1099
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherPrepayType]() WHERE intId = B.intPrepayTypeId) Prepay

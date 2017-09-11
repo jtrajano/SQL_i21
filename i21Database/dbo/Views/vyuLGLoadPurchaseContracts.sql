@@ -104,7 +104,7 @@ FROM (
 			END
 		,L.ysnPosted
 		,L.intCurrencyId
-		,strLoadCurrency = LC.strCurrency
+		,strLoadCurrency = LCU.strCurrency
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -119,6 +119,7 @@ FROM (
 	LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CT.intCurrencyId
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CT.intConvPriceCurrencyId
-	LEFT JOIN tblSMCurrency LC ON LC.intCurrencyID = L.intCurrencyId
+--	LEFT JOIN tblSMCurrency LC ON LC.intCurrencyID = L.intCurrencyId
+	LEFT JOIN tblSMCurrency LCU ON LCU.intCurrencyID = L.intCurrencyId
 	WHERE L.ysnPosted = 1 AND L.intPurchaseSale IN (1, 3) AND L.intShipmentStatus IN (1,3)
 ) t1

@@ -25,6 +25,12 @@
 	,@ysnSummaryByDepartment		NVARCHAR(MAX)	 =	 'N'
 	,@ysnVehicleRequire				NVARCHAR(MAX)	 =	 'N'
 	,@ysnPrintMiscellaneous			NVARCHAR(MAX)	 =	 'N'
+	,@ysnSummaryByVehicle			NVARCHAR(MAX)	 =	 'N'
+	,@ysnSummaryByCardProduct		NVARCHAR(MAX)	 =	 'N'
+	,@ysnSummaryByDeptCardProduct	NVARCHAR(MAX)	 =	 'N'
+	,@ysnDepartmentGrouping	NVARCHAR(MAX)	 =	 'N'
+	,@ysnSummaryByDeptVehicleProduct	NVARCHAR(MAX)	 =	 'N'
+	
 	---------------------------------------------------------
 	,@dblBonusCommissionRate		NUMERIC(18,6)	 =	 NULL
 	,@dblRegularCommissionRate		NUMERIC(18,6)	 =	 NULL
@@ -38,6 +44,9 @@
 	,@strPrintRemittancePage		NVARCHAR(MAX)	 =	 'No'
 	,@strPrintPricePerGallon		NVARCHAR(MAX)	 =	 'Including Taxes'
 	,@strPrintSiteAddress			NVARCHAR(MAX)	 =	 'None'
+	,@strPrimaryDepartment			NVARCHAR(MAX)	 =	 'Card'
+	,@strExportFileMapping			NVARCHAR(MAX)	 =	 NULL
+	
 	---------------------------------------------------------
 
 AS
@@ -59,6 +68,7 @@ BEGIN
 	DECLARE @intRemotePriceProfileId				  INT = 0
 	DECLARE @intExtRemotePriceProfileId				  INT = 0
 	DECLARE @intLocalPriceProfileId					  INT = 0
+	DECLARE @intImportFileHeaderId					  INT = 0
 	---------------------------------------------------------
 
 
@@ -349,6 +359,25 @@ BEGIN
 	BEGIN
 		SET @intLocalPriceProfileId = NULL;
 	END
+
+
+	--File Mapping
+	IF(@strExportFileMapping != '')
+	BEGIN
+		SELECT @intImportFileHeaderId = intImportFileHeaderId 
+		FROM tblSMImportFileHeader 
+		WHERE strLayoutTitle = @strExportFileMapping
+		IF (@intImportFileHeaderId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strExportFileMapping +' on export file mapping list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intImportFileHeaderId = NULL;
+	END
 	---------------------------------------------------------
 	
 	IF(@ysnHasError = 1)
@@ -527,6 +556,95 @@ BEGIN
 		SET @ysnHasError = 1
 	END
 
+	--Summary by vehicle
+	IF (@ysnSummaryByVehicle = 'N')
+		BEGIN 
+			SET @ysnSummaryByVehicle = 0
+		END
+	ELSE IF (@ysnSummaryByVehicle = 'Y')
+		BEGIN
+			SET @ysnSummaryByVehicle = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Invalid summary by vehicle value '+ @ysnSummaryByVehicle +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
+
+	--ysnSummaryByCardProduct
+	IF (@ysnSummaryByCardProduct = 'N')
+		BEGIN 
+			SET @ysnSummaryByCardProduct = 0
+		END
+	ELSE IF (@ysnSummaryByCardProduct = 'Y')
+		BEGIN
+			SET @ysnSummaryByCardProduct = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Invalid card product value '+ @ysnSummaryByCardProduct +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
+
+	--ysnSummaryByDeptCardProduct
+	IF (@ysnSummaryByDeptCardProduct = 'N')
+		BEGIN 
+			SET @ysnSummaryByDeptCardProduct = 0
+		END
+	ELSE IF (@ysnSummaryByDeptCardProduct = 'Y')
+		BEGIN
+			SET @ysnSummaryByDeptCardProduct = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Invalid department card product  value '+ @ysnSummaryByDeptCardProduct +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
+
+	--ysnSummaryByDeptCardGrouping
+	IF (@ysnDepartmentGrouping = 'N')
+		BEGIN 
+			SET @ysnDepartmentGrouping = 0
+		END
+	ELSE IF (@ysnDepartmentGrouping = 'Y')
+		BEGIN
+			SET @ysnDepartmentGrouping = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Invalid department grouping value '+ @ysnDepartmentGrouping +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
+
+	--ysnSummaryByDeptVehicleProduct
+	IF (@ysnSummaryByDeptVehicleProduct = 'N')
+		BEGIN 
+			SET @ysnSummaryByDeptVehicleProduct = 0
+		END
+	ELSE IF (@ysnSummaryByDeptVehicleProduct = 'Y')
+		BEGIN
+			SET @ysnSummaryByDeptVehicleProduct = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Invalid summary by department vehicle product value '+ @ysnSummaryByDeptVehicleProduct +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
+
+	--Primary Department
+	IF(@strPrimaryDepartment NOT IN ('Card','Vehicle'))
+	BEGIN
+		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+		VALUES (@strCustomerId,'Invalid primary department value '+ @strPrimaryDepartment +'. Value should be Including Card and Vehicle only')
+		SET @ysnHasError = 1
+	END
+
+
 	--Bonus Commission Date
 	IF (@dtmBonusCommissionDate = '')
 		BEGIN 
@@ -584,7 +702,13 @@ BEGIN
 			,intExtRemotePriceProfileId
 			,intLocalPriceProfileId
 			,dtmCreated
-			,dtmLastModified)
+			,dtmLastModified
+			,ysnSummaryByVehicle		
+			,ysnSummaryByCardProd
+			,ysnSummaryByDeptCardProd	
+			,ysnDepartmentGrouping 
+			,ysnSummaryByDeptVehicleProd
+			)
 			VALUES(
 			 @intCustomerId
 			,@intDiscountDays
@@ -617,7 +741,13 @@ BEGIN
 			,@intExtRemotePriceProfileId
 			,@intLocalPriceProfileId
 			,GETDATE()
-			,GETDATE())
+			,GETDATE()
+			,@ysnSummaryByVehicle			
+			,@ysnSummaryByCardProduct		
+			,@ysnSummaryByDeptCardProduct	
+			,@ysnDepartmentGrouping	
+			,@ysnSummaryByDeptVehicleProduct
+			)
 
 			COMMIT TRANSACTION
 			RETURN 1

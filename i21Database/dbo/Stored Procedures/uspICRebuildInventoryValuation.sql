@@ -393,6 +393,10 @@ BEGIN
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
 		--PRINT 'Rebuilding stock as periodic.'
+		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
+			ON dbo.#tmpICInventoryTransaction(dtmDate ASC, strBatchId ASC);
+
+		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [intSortByQty] ASC, [id] ASC);') 
 
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
@@ -433,16 +437,14 @@ BEGIN
 				,dblForexRate 
 		FROM	#tmpUnOrderedICTransaction
 		ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC , intInventoryTransactionId ASC
-
-		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
-			ON dbo.#tmpICInventoryTransaction(dtmDate ASC, strBatchId ASC);
-
-		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [intSortByQty] ASC, [id] ASC);') 
-
 	END
 	ELSE 
 	BEGIN 
 		--PRINT 'Rebuilding stock as perpetual.'
+		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Perpetual]
+			ON dbo.#tmpICInventoryTransaction(strBatchId ASC);
+
+		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Perpetual] ON dbo.#tmpICInventoryTransaction([id] ASC, [id2] ASC);') 
 
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
@@ -483,11 +485,6 @@ BEGIN
 				,dblForexRate 
 		FROM	#tmpUnOrderedICTransaction
 		ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
-
-		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Perpetual]
-			ON dbo.#tmpICInventoryTransaction(strBatchId ASC);
-
-		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Perpetual] ON dbo.#tmpICInventoryTransaction([id] ASC, [id2] ASC);') 
 	END
 
 END

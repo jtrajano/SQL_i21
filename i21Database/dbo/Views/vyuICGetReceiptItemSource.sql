@@ -203,6 +203,18 @@ SELECT
 			ELSE 0.00
 			END
 		)
+	, intContainerWeightUOMId = 
+		(
+			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
+				THEN (
+					CASE WHEN Receipt.intSourceType = 2 -- Inbound Shipment
+						THEN LogisticsView.intWeightUOMId 
+					ELSE 0.00
+					END
+				)
+				ELSE NULL 
+			END
+		)	
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt 
 	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

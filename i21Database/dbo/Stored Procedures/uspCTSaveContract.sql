@@ -30,7 +30,8 @@ BEGIN TRY
 			@ysnFeedOnApproval			BIT,
 			@intTransactionId			INT,
 			@intApproverId				INT,
-			@intCompanyLocationId		INT
+			@intCompanyLocationId		INT,
+			@ysnSlice					BIT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber
@@ -96,7 +97,8 @@ BEGIN TRY
 		SELECT	@intPricingTypeId	=	NULL,
 				@dblCashPrice		=	NULL,
 				@dblBasis			=	NULL,
-				@dblOriginalBasis	=	NULL
+				@dblOriginalBasis	=	NULL,
+				@ysnSlice			=	NULL
 
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
 				@dblCashPrice		=	dblCashPrice,
@@ -107,8 +109,8 @@ BEGIN TRY
 				@dblNetWeight		=	dblNetWeight,
 				@intItemUOMId		=	intItemUOMId,
 				@intContractStatusId=	intContractStatusId,
-				@intCompanyLocationId = intCompanyLocationId
-
+				@intCompanyLocationId = intCompanyLocationId,
+				@ysnSlice			=  ysnSlice
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
@@ -130,7 +132,10 @@ BEGIN TRY
 		END
 
 		EXEC uspLGUpdateLoadItem @intContractDetailId
-		EXEC uspLGUpdateCompanyLocation @intContractDetailId
+		IF NOT EXISTS(SELECT 1 FROM tblCTContractDetail WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
+		BEGIN
+			EXEC uspLGUpdateCompanyLocation @intContractDetailId
+		END
 		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
 
 		EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById

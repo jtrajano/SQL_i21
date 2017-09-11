@@ -2,6 +2,7 @@
 (
 	[intLoadBlendIngredientId] INT NOT NULL IDENTITY, 
     [intLoadDistributionDetailId] INT NOT NULL, 
+	[strReceiptLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[intRecipeItemId] INT NOT NULL,
     [dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
