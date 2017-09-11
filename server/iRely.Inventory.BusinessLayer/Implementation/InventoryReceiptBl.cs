@@ -220,6 +220,8 @@ namespace iRely.Inventory.BusinessLayer
                     strDiscountSchedule = s.vyuICInventoryReceiptItemLookUp.strDiscountSchedule,
                     dblFranchise = s.vyuICInventoryReceiptItemLookUp.dblFranchise,
                     dblContainerWeightPerQty = s.vyuICInventoryReceiptItemLookUp.dblContainerWeightPerQty,
+                    intContainerWeightUOMId = s.vyuICInventoryReceiptItemLookUp.intContainerWeightUOMId,
+                    dblContainerWeightUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblContainerWeightUOMConvFactor,
                     strSubCurrency = s.vyuICInventoryReceiptItemLookUp.strSubCurrency,
                     strPricingType = s.vyuICInventoryReceiptItemLookUp.strPricingType,
                     strTaxGroup = s.vyuICInventoryReceiptItemLookUp.strTaxGroup,

@@ -5368,6 +5368,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strOwnershipType: 'Own',
                                 dblFranchise: order.get('dblFranchise'),
                                 dblContainerWeightPerQty: order.get('dblContainerWeightPerQty'),
+                                intContainerWeightUOMId: order.get('intWeightUOMId'),
+                                dblContainerWeightUOMConvFactor: order.get('dblWeightUOMConvFactor'),
                                 ysnSubCurrency: order.get('ysnSubCurrency'),
                                 strSubCurrency: order.get('strSubCurrency'),
                                 dblGross: order.get('dblGross'),
@@ -5900,6 +5902,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     getWeightLoss: function (ReceiptItems, sourceType) {
+        var me = this; 
         var dblWeightLoss = 0.00;
         var dblNetShippedWt = 0;
         var dblNetReceivedWt = 0;
@@ -5910,21 +5913,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (sourceType === 2) {
             Ext.Array.each(ReceiptItems.data.items, function (item) {
                 if (!item.dummy) {
-                    /*  dblFranchise = item.data.dblFranchise;
-                      dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
-                      dblNetReceivedWt = item.data.dblNet;
-
-                      if (dblFranchise > 0)
-                          dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
-                      if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
-                          dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
-                    var netQty = 0.00, orderQty = 0.00, wgtQty = 0.00;
-                    if (!iRely.Functions.isEmpty(item.get('dblNet'))) netQty = item.get('dblNet');
-                    if (!iRely.Functions.isEmpty(item.get('dblOrderQty'))) orderQty = item.get('dblOrderQty');
-                    if (!iRely.Functions.isEmpty(item.get('dblContainerWeightPerQty'))) wgtQty = item.get('dblContainerWeightPerQty');
-
-                    dblNetReceivedWt = netQty;
+                    // Get the Net Wgt. 
+                    var dblNetReceivedWt = item.get('dblNet');
+                    dblNetReceivedWt = dblNetReceivedWt ? dblNetReceivedWt : 0.00;
+                    
+                    // Calculate the Logistic Shipped Wgt. 
+                    var orderQty = item.get('dblOrderQty');
+                    var wgtQty = item.get('dblContainerWeightPerQty');                    
+                    
+                    orderQty = orderQty ? orderQty : 0.00;
+                    wgtQty = wgtQty ? wgtQty : 0.00;
                     dblNetShippedWt = orderQty * wgtQty;
+
+                    // Convert the Logistic Wgt UOM to the IR Wgt UOM.                     
+                    var dblShippedWeightUOMConvFactor = item.get('dblContainerWeightUOMConvFactor');
+                    var dblWeightUOMConvFactor = item.get('dblWeightUOMConvFactor');
+                    dblShippedWeightUOMConvFactor = dblShippedWeightUOMConvFactor ? dblShippedWeightUOMConvFactor : 0.00;
+                    dblWeightUOMConvFactor = dblWeightUOMConvFactor ? dblWeightUOMConvFactor : 0.00;
+                    
+                    if (dblShippedWeightUOMConvFactor != dblWeightUOMConvFactor){
+                        dblNetShippedWt = me.convertQtyBetweenUOM(
+                            dblShippedWeightUOMConvFactor, 
+                            dblWeightUOMConvFactor, 
+                            dblNetShippedWt
+                        );
+                    }
+                   
+                    // Calculate the Gain/Loss 
                     dblWeightLossPercentage = ic.utils.Math.round(((dblNetShippedWt - dblNetReceivedWt) / dblNetShippedWt) * 100, 2);
                     dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
                 }

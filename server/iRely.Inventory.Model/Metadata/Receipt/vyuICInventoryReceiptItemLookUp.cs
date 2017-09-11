@@ -46,6 +46,8 @@ namespace iRely.Inventory.Model
         public string strForexRateType { get; set; }
         public int? intItemUOMId { get; set; }
         public int? intItemUOMDecimalPlaces { get; set; }
+        public int? intContainerWeightUOMId { get; set; }
+        public decimal? dblContainerWeightUOMConvFactor { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
