@@ -8,7 +8,8 @@ BEGIN
 		DROP TABLE #tempLotHistoryFinal
 
 	CREATE TABLE #tempLotHistory (
-		dtmDateTime DATETIME
+		intRecordId int identity(1,1) primary key clustered
+		,dtmDateTime DATETIME
 		,strLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strItem NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
@@ -39,8 +40,41 @@ BEGIN
 		,strNotes NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strUser NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,intTransactionId INT
-		,dtmTransactionDate DATETIME
+		)
+
+		CREATE TABLE #tempLotHistoryFinal (
+		intRecordId int identity(1,1) primary key clustered
+		,dtmDateTime DATETIME
+		,strLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strItem NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+		,strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strSubLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strStorageLocation NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS
+		,strTransaction NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,dblWeight NUMERIC(38, 20)
+		,dblTransactionWeight NUMERIC(38, 20)
+		,strTransactionWeightUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,dblQuantity NUMERIC(38, 20)
+		,dblTransactionQty NUMERIC(38, 20)
+		,strTransactionQtyUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strRelatedLotId NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strPreviousItem NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strSourceSubLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strSourceStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,dtmNewExpiryDate DATETIME
+		,dtmOldExpiryDate DATETIME
+		,strNewVendorNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldVendorNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewVendorLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldVendorLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNotes NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strUser NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	DECLARE @dblPrimaryQty NUMERIC(38, 20)
@@ -134,8 +168,6 @@ BEGIN
 		,IA.strDescription AS strNotes
 		,us.strUserName AS strUser
 		,ilt.strBatchId
-		,ilt.intTransactionId
-		,Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101)) AS dtmTransactionDate
 	FROM tblICLot l
 	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -284,12 +316,6 @@ BEGIN
 			,IA.strDescription AS strNotes
 			,us.strUserName AS strUser
 			,ilt.strBatchId
-			,ilt.intTransactionId
-			,CASE 
-				WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
-					THEN Convert(DATETIME, Convert(CHAR, ilt.dtmCreated, 101))
-				ELSE Convert(DATETIME, Convert(CHAR, dtmDate, 101))
-				END AS dtmDateTime
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -372,12 +398,6 @@ BEGIN
 		,ia.strDescription AS strNotes
 		,us.strUserName AS strUser
 		,ia.strAdjustmentNo AS strBatchId
-		,IsNULL((
-				SELECT TOP 1 IT.intTransactionId
-				FROM tblICInventoryTransaction IT
-				WHERE IT.strTransactionId = ia.strAdjustmentNo
-				), 99999999) AS intTransactionId
-		,Convert(DATETIME, Convert(CHAR, ia.dtmPostedDate, 101)) AS dtmTransactionDate
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	--Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
@@ -408,12 +428,71 @@ BEGIN
 				)
 			)
 
-	--ORDER BY 1
-	SELECT *
-	INTO #tempLotHistoryFinal
+	Insert into #tempLotHistoryFinal(dtmDateTime 
+		,strLotNo 
+		,strItem 
+		,strDescription 
+		,strCategoryCode 
+		,strSubLocation 
+		,strStorageLocation 
+		,strTransaction 
+		,dblWeight 
+		,dblTransactionWeight 
+		,strTransactionWeightUOM 
+		,dblQuantity 
+		,dblTransactionQty 
+		,strTransactionQtyUOM 
+		,strRelatedLotId 
+		,strPreviousItem
+		,strSourceSubLocation 
+		,strSourceStorageLocation 
+		,strNewStatus 
+		,strOldStatus 
+		,strNewLotAlias 
+		,strOldLotAlias 
+		,dtmNewExpiryDate 
+		,dtmOldExpiryDate 
+		,strNewVendorNo 
+		,strOldVendorNo 
+		,strNewVendorLotNo 
+		,strOldVendorLotNo 
+		,strNotes 
+		,strUser 
+		,strBatchId)
+	SELECT dtmDateTime 
+		,strLotNo 
+		,strItem 
+		,strDescription 
+		,strCategoryCode 
+		,strSubLocation 
+		,strStorageLocation 
+		,strTransaction 
+		,dblWeight 
+		,dblTransactionWeight 
+		,strTransactionWeightUOM 
+		,dblQuantity 
+		,dblTransactionQty 
+		,strTransactionQtyUOM 
+		,strRelatedLotId 
+		,strPreviousItem
+		,strSourceSubLocation 
+		,strSourceStorageLocation 
+		,strNewStatus 
+		,strOldStatus 
+		,strNewLotAlias 
+		,strOldLotAlias 
+		,dtmNewExpiryDate 
+		,dtmOldExpiryDate 
+		,strNewVendorNo 
+		,strOldVendorNo 
+		,strNewVendorLotNo 
+		,strOldVendorLotNo 
+		,strNotes 
+		,strUser 
+		,strBatchId
 	FROM #tempLotHistory LH
-	ORDER BY LH.dtmTransactionDate ASC
-		,LH.intTransactionId ASC
+	ORDER BY LH.dtmDateTime ASC
+
 
 	DECLARE @strStorageLocation NVARCHAR(50)
 
@@ -474,5 +553,5 @@ BEGIN
 	END
 
 	SELECT *
-	FROM #tempLotHistoryFinal -- Order by dtmTransactionDate,intTransactionId 
+	FROM #tempLotHistoryFinal 
 END
