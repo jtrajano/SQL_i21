@@ -58,14 +58,14 @@ BEGIN TRY
 		,GETDATE()
 		,LD.dblQuantity
 		,IU.dblUnitQty
-		,AD.dblSeqPrice
-		,(CONVERT(NUMERIC(18, 6), Sum(AD.dblSeqPrice)) / (
+		,ISNULL(AD.dblSeqPrice,0)
+		,ISNULL((CONVERT(NUMERIC(18, 6), Sum(AD.dblSeqPrice)) / (
 				CONVERT(NUMERIC(18, 6), (
 						SELECT SUM(dblNet)
 						FROM tblLGLoadDetail D
 						WHERE L.intLoadId = D.intLoadId
 						))
-				) * CONVERT(NUMERIC(18, 6), SUM(LD.dblNet)))
+				) * CONVERT(NUMERIC(18, 6), SUM(LD.dblNet))),0)
 		,0.0
 		,AD.intSeqCurrencyId
 		,AD.dblNetWtToPriceUOMConvFactor

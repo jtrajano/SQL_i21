@@ -75,11 +75,11 @@ IF ISNULL(@intUserId, 0) = 0
 		RETURN;
 	END
 
-IF EXISTS(SELECT NULL FROM @tblACHPayments WHERE dtmDatePaid > GETDATE())
-	BEGIN
-		RAISERROR('Unable to process, ACH Payment record/s should be less than or equal to date today.', 16, 1)
-		RETURN;
-	END
+-- IF EXISTS(SELECT NULL FROM @tblACHPayments WHERE dtmDatePaid > GETDATE())
+-- 	BEGIN
+-- 		RAISERROR('Unable to process, ACH Payment record/s should be less than or equal to date today.', 16, 1)
+-- 		RETURN;
+-- 	END
 
 BEGIN TRANSACTION
 
