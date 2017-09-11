@@ -76,6 +76,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , intRecipeId				= INVOICEDETAIL.intRecipeId
 	 , intOneLinePrintId		= ISNULL(INVOICEDETAIL.intOneLinePrintId, 1)
 	 , strInvoiceComments		= INVOICEDETAIL.strInvoiceComments
+	 , strItemType				= INVOICEDETAIL.strItemType
 	 , dblTotalWeight			= ISNULL(INV.dblTotalWeight, 0)
 	 , strVFDDocumentNumber		= INVOICEDETAIL.strVFDDocumentNumber
 	 , ysnHasEmailSetup			= CASE WHEN (ISNULL(EMAILSETUP.intEmailSetupCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -129,7 +130,8 @@ LEFT JOIN (
 		 , TAX.strTaxCode
 		 , ITEM.strItemNo
 		 , ITEM.strInvoiceComments
-		 , ITEM.strDescription	AS strItemDescription
+		 , strItemType			= ITEM.strType
+		 , strItemDescription	= ITEM.strDescription
 		 , SO.strBOLNumber
 		 , RECIPE.intRecipeId
 		 , RECIPE.intOneLinePrintId
@@ -139,6 +141,7 @@ LEFT JOIN (
 			 , strItemNo
 			 , strDescription
 			 , strInvoiceComments
+			 , strType
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN (
