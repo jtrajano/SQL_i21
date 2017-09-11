@@ -1115,19 +1115,18 @@
                                             "designerId": "23774939-b130-4af8-a189-2df006975a5a",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Number",
+                                                    "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "editor",
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "allowDecimals": false,
-                                                        "allowExponential": false,
+                                                        "enableKeyEvents": true,
                                                         "itemId": "txtShortUPCCode",
-                                                        "quantityField": true
+                                                        "quantityField": null
                                                     },
-                                                    "name": "MyNumberField49",
+                                                    "name": "MyTextField21",
                                                     "configAlternates": {
                                                         "quantityField": "boolean"
                                                     },

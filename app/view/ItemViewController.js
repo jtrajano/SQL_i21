@@ -3782,6 +3782,13 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onUPCShortKeyDown: function(txtfield, e, eOpts){
+        if(e.keyCode >= 65 && e.keyCode <= 90){
+            e.preventDefault();
+            return;
+        }
+    },
+
     //</editor-fold>
     onLocationCellClick: function(view, cell, cellIndex, record, row, rowIndex, e) {
         var linkClicked = (e.target.tagName == 'A');
@@ -4112,7 +4119,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 change: this.onPricingStandardCostChange
             },
             "#txtShortUPCCode": {
-                specialKey: this.onUPCEnterTab
+                specialKey: this.onUPCEnterTab,
+                keydown: this.onUPCShortKeyDown
             },
             "#txtFullUPCCode": {
                 specialKey: this.onUPCEnterTab

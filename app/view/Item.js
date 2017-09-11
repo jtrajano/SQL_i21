@@ -539,16 +539,14 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
                                                         itemId: 'colDetailShortUPC',
                                                         width: 100,
-                                                        dataIndex: 'string',
                                                         text: 'Short UPC',
                                                         editor: {
-                                                            xtype: 'numberfield',
-                                                            quantityField: true,
+                                                            xtype: 'textfield',
                                                             itemId: 'txtShortUPCCode',
-                                                            allowDecimals: false,
-                                                            allowExponential: false
+                                                            enableKeyEvents: true
                                                         }
                                                     },
                                                     {
