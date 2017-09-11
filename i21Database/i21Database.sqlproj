@@ -5421,6 +5421,7 @@
     <Build Include="dbo\Tables\tblICLockedSubLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICLockInventoryLocation.sql" />
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKReconciledValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
