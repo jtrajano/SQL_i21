@@ -353,8 +353,6 @@
 }, {
     "pattern": "app/view/Statusbar1.js"
 }, {
-    "pattern": "app/view/BinToBinTransfer.js"
-}, {
     "pattern": "app/store/BufferedManufacturer.js"
 }, {
     "pattern": "app/view/BrandViewModel.js"
