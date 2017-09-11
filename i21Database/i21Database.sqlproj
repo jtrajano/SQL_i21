@@ -5418,6 +5418,9 @@
     <Build Include="dbo\Tables\tblRKDailyPositionForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalances.sql" />
+    <Build Include="dbo\Tables\tblICLockedSubLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLockInventoryLocation.sql" />
+    <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

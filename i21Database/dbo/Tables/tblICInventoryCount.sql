@@ -24,6 +24,7 @@
 	[dtmPosted] DATETIME NULL,
 	[intEntityId] INT NULL,
 	[intImportFlagInternal] INT NULL,
+	[intLockType] INT NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryCount] PRIMARY KEY ([intInventoryCountId]), 
