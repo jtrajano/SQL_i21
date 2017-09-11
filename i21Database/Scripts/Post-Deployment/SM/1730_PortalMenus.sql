@@ -1,6 +1,6 @@
 ﻿GO
-	/* REBUILD PORTAL MENUS */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Rebuild Portal Menus (System Manager) - 1730')
+	/* UPDATE PORTAL MENUS */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Update Portal Menus (System Manager) - 1730')
 	BEGIN
 
 		EXEC 
@@ -431,8 +431,8 @@
 
 		DELETE FROM tblSMContactMenu WHERE intContactMenuId < @accountContactMenuId
 
-		PRINT N'REBUILD PORTAL MENUS'
+		PRINT N'UPDATE PORTAL MENUS'
 		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
-		VALUES('System Manager', 'Rebuild Portal Menus (System Manager) - 1730', 'Rebuild Portal Menus (System Manager) - 1730', GETDATE())
+		VALUES('System Manager', 'Update Portal Menus (System Manager) - 1730', 'Update Portal Menus (System Manager) - 1730', GETDATE())
 	END
 GO
