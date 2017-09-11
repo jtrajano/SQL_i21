@@ -62,7 +62,7 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-					IF OBJECT_ID (N'tempdb.dbo.##tmpVoucherDetail') IS NOT NULL
+					IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
 						DROP TABLE #tmpVoucherDetail
 					CREATE TABLE #tmpVoucherDetail (
 						[intBillId] [INT] PRIMARY KEY,
@@ -128,7 +128,11 @@ BEGIN TRY
 				
 				IF @intEntityId > 0
 					BEGIN
-						
+						CREATE TABLE #tmpItemShipmentIds (
+							[intInventoryShipmentId] [INT] PRIMARY KEY,
+							[strShipmentNumber] [VARCHAR](100),
+							UNIQUE ([intInventoryShipmentId])
+						);
 						INSERT INTO #tmpItemShipmentIds(intInventoryShipmentId,strShipmentNumber) SELECT DISTINCT(intInventoryShipmentId),strShipmentNumber from vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 						DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
