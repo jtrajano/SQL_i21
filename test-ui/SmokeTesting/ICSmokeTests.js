@@ -329,184 +329,194 @@ StartTest (function (t) {
         //endregion
 
 
-//         /*====================================== Add Category ======================================*/
-//         //region
+        /*====================================== Add Category ======================================*/
+        //region
 
-//         .clickMenuScreen('Categories','Screen')
-//         .filterGridRecords('Search', 'FilterGrid', 'SC - Category - 01')
-//         .waitUntilLoaded('')
-//         .continueIf({
-//             expected: true,
-//             actual: function (win,next) {
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .displayText('Category already exists.')
-//                 return win.down('#grdSearch').store.getCount() == 0;
-//             },
+        .clickMenuScreen('Categories','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'SC - Category - 01')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Category already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     //Add Category
-//                     .displayText('===== Scenario 4: Add Category =====')
-//                     .clickMenuFolder('Inventory','Folder')
-//                     .addFunction(function(next){
-//                         commonIC.addCategory (t,next, 'SC - Category - 01', 'Test Smoke Category Description', 2)
-//                     })
-//                     .clickMenuFolder('Inventory','Folder')
-//                     .waitUntilLoaded('')
-//                     .done();
-//             },
-//             continueOnFail: true
-//         })
-//         //endregion
-
-
-//         /*====================================== Add Commodity ======================================*/
-//         //region
-
-//         .clickMenuScreen('Commodities','Screen')
-//         .filterGridRecords('Search', 'FilterGrid', 'SC - Commodity - 01')
-//         .waitUntilLoaded('')
-//         .continueIf({
-//             expected: true,
-//             actual: function (win,next) {
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .displayText('Commodity already exists.')
-//                 return win.down('#grdSearch').store.getCount() == 0;
-//             },
-
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .clickMenuFolder('Inventory','Folder')
-//                     //Add Commodity
-//                     .displayText('===== Scenario 6: Add Commodity =====')
-//                     .addFunction(function(next){
-//                         commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Test Smoke Commodity Description')
-//                     })
-//                     .clickMenuFolder('Inventory','Folder')
-//                     .waitUntilLoaded('')
-//                     .done();
-//             },
-//             continueOnFail: true
-//         })
-//         //endregion
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //Add Category
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
+                    .displayText('===== Scenario 4: Add Category =====')
+                    .addFunction(function(next){
+                        commonIC.addCategory (t,next, 'SC - Category - 01', 'Test Smoke Category Description', 2)
+                    })
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        //endregion
 
 
-//         /*====================================== Add Lotted Item ======================================*/
-//         //region
-//         .clickMenuScreen('Items','Screen')
-//         .filterGridRecords('Search', 'FilterGrid', 'Smoke - LTI - 01')
-//         .waitUntilLoaded('')
-//         .continueIf({
-//             expected: true,
-//             actual: function (win,next) {
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .displayText('Item already exists.')
-//                 return win.down('#grdSearch').store.getCount() == 0;
-//             },
+        /*====================================== Add Commodity ======================================*/
+        //region
 
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .clickMenuFolder('Inventory','Folder')
-//                     .displayText('===== Scenario 5: Add Lotted Item =====')
-//                     .addFunction(function(next){
-//                         commonIC.addInventoryItem
-//                         (t,next,
-//                             'Smoke - LTI - 01'
-//                             , 'Test Lotted Item For Other Smoke Testing'
-//                             , 'SC - Category - 01'
-//                             , 'SC - Commodity - 01'
-//                             , 3
-//                             , 'Test_Pounds'
-//                             , 'Test_Pounds'
-//                             , 10
-//                             , 10
-//                             , 40
-//                         )
-//                     })
-//                     .clickMenuFolder('Inventory','Folder')
-//                     .waitUntilLoaded('')
-//                     .done();
-//             },
-//             continueOnFail: true
-//         })
-//         //endregion
+        .clickMenuScreen('Commodities','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'SC - Commodity - 01')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Commodity already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //Add Commodity
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
+                    .displayText('===== Scenario 6: Add Commodity =====')
+                    .addFunction(function(next){
+                        commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Test Smoke Commodity Description')
+                    })
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        //endregion
 
 
-//         /*====================================== Add Non Lotted Item ======================================*/
-//         //region
-//         .clickMenuScreen('Items','Screen')
-//         .filterGridRecords('Search', 'FilterGrid', 'Smoke - NLTI - 01')
-//         .waitUntilLoaded('')
-//         .continueIf({
-//             expected: true,
-//             actual: function (win,next) {
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .displayText('Item already exists.')
-//                 return win.down('#grdSearch').store.getCount() == 0;
-//             },
+        /*====================================== Add Lotted Item ======================================*/
+        //region
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Items','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Smoke - LTI - 01')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Item already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .displayText('===== Scenario 5: Add Lotted Item =====')
+                    .addFunction(function(next){
+                        commonIC.addInventoryItem
+                        (t,next,
+                            'Smoke - LTI - 01'
+                            , 'Test Lotted Item For Other Smoke Testing'
+                            , 'SC - Category - 01'
+                            , 'SC - Commodity - 01'
+                            , 3
+                            , 'Test_Pounds'
+                            , 'Test_Pounds'
+                            , 10
+                            , 10
+                            , 40
+                        )
+                    })
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded()
+        //endregion
 
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .clickMenuFolder('Inventory','Folder')
-//                     .displayText('===== Scenario 6: Add Non Lotted Item =====')
-//                     .addFunction(function(next){
-//                         commonIC.addInventoryItem
-//                         (t,next,
-//                             'Smoke - NLTI - 01'
-//                             , 'Test Non Lotted Item Smoke Testing'
-//                             , 'SC - Category - 01'
-//                             , 'SC - Commodity - 01'
-//                             , 4
-//                             , 'Test_Pounds'
-//                             , 'Test_Pounds'
-//                             , 10
-//                             , 10
-//                             , 40
-//                         )
-//                     })
-//                     .clickMenuFolder('Inventory','Folder')
-//                     .waitUntilLoaded('')
-//                     .done();
-//             },
-//             continueOnFail: true
-//         })
-//         //endregion
+
+        /*====================================== Add Non Lotted Item ======================================*/
+        //region
+        .clickMenuScreen('Items','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Smoke - NLTI - 01')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Item already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                .clickButton('Close')
+                .waitUntilLoaded()
+                    .displayText('===== Scenario 6: Add Non Lotted Item =====')
+                    .addFunction(function(next){
+                        commonIC.addInventoryItem
+                        (t,next,
+                            'Smoke - NLTI - 01'
+                            , 'Test Non Lotted Item Smoke Testing'
+                            , 'SC - Category - 01'
+                            , 'SC - Commodity - 01'
+                            , 4
+                            , 'Test_Pounds'
+                            , 'Test_Pounds'
+                            , 10
+                            , 10
+                            , 40
+                        )
+                    })
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded()
+        //endregion
 
 
-//         /*====================================== Add Other Charge Item ======================================*/
-//         //region
-//         .clickMenuScreen('Items','Screen')
-//         .filterGridRecords('Search', 'FilterGrid', 'Smoke - Other Charge Item - 01')
-//         .waitUntilLoaded('')
-//         .continueIf({
-//             expected: true,
-//             actual: function (win,next) {
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .displayText('Item already exists.')
-//                 return win.down('#grdSearch').store.getCount() == 0;
-//             },
+        /*====================================== Add Other Charge Item ======================================*/
+        //region
+        .clickMenuScreen('Items','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Smoke - Other Charge Item - 01')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Item already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .clickMenuFolder('Inventory','Folder')
-//                     //Add Other Charge Item
-//                     .displayText('===== Scenario 7: Add Other Charge Item =====')
-//                     .addFunction(function(next){
-//                         commonIC.addOtherChargeItem
-//                         (t,next,
-//                             'Smoke - Other Charge Item - 01'
-//                             , 'Test Other Charge Item Smoke Testing'
-//                             , '0001 - Fort Wayne'
-//                         )
-//                     })
-//                     .displayText('===== Add Maintenance Screens Done =====')
-//                     .clickMenuFolder('Inventory','Folder')
-//                     .waitUntilLoaded('')
-//                     .done();
-//             },
-//             continueOnFail: true
-//         })
-//         //endregion
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                 
+                .clickButton('Close')
+                .waitUntilLoaded()
+                    //Add Other Charge Item
+                    .displayText('===== Scenario 7: Add Other Charge Item =====')
+                    .addFunction(function(next){
+                        commonIC.addOtherChargeItem
+                        (t,next,
+                            'Smoke - Other Charge Item - 01'
+                            , 'Test Other Charge Item Smoke Testing'
+                            , '0001 - Fort Wayne'
+                        )
+                    })
+                    .displayText('===== Add Maintenance Screens Done =====')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded()
+        //endregion
 
 
 
