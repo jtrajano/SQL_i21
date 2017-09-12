@@ -5666,6 +5666,7 @@
     <Build Include="dbo\Views\vyuSMContactControl.sql" />
     <Build Include="dbo\Functions\fnAPMaskBankAccountNos.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReconciledValidation.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
