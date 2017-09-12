@@ -512,11 +512,11 @@ module.exports = {
     }, {
         "pattern": "app/view/CountGroup.js"
     }, {
-        "pattern": "app/view/FactoryUnitType.js"
+        "pattern": "app/view/StorageUnitType.js"
     }, {
-        "pattern": "app/view/FactoryUnitTypeViewController.js"
+        "pattern": "app/view/StorageUnitTypeViewController.js"
     }, {
-        "pattern": "app/view/FactoryUnitTypeViewModel.js"
+        "pattern": "app/view/StorageUnitTypeViewModel.js"
     }, {
         "pattern": "app/view/FeedStockCodeViewModel.js"
     }, {
