@@ -16,7 +16,7 @@ SELECT	DISTINCT
 			,dblAmountDue = ISNULL(dblItemsPayable + dblTaxesPayable,0)
 			,dblVoucherAmount = CASE 
 								WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
-								ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE dblVoucherLineTotal END),0)
+								ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE dblVoucherLineTotal + dblVoucherTax END),0)
 								ELSE 0 END    
 			,dblWithheld = 0
 			,dblDiscount = 0 
