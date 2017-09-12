@@ -41,8 +41,9 @@ BEGIN
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LOT.intLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = IRI.intInventoryReceiptId
-	LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IRI.intOrderId
-	LEFT JOIN tblCTContractDetail PCD ON PCD.intContractHeaderId = PCH.intContractHeaderId
+	LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = IRI.intLineNo
+	LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
+
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
 	WHERE strLoadNumber = @strLoadNumber 
 END
