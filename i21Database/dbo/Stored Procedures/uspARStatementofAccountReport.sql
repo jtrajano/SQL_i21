@@ -18,6 +18,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
 		,@strCustomerName           AS NVARCHAR(MAX)
+		,@strCustomerNumber			AS NVARCHAR(MAX)
 		,@strStatementFormat        AS NVARCHAR(50)
 		,@strAccountStatusCode		AS NVARCHAR(5)
 		,@strLocationName			AS NVARCHAR(50)
@@ -138,13 +139,11 @@ SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 IF CHARINDEX('''', @strCustomerName) > 0 
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 
+IF ISNULL(@strCustomerName, '') <> ''
+	SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM vyuARCustomerSearch WHERE strName = @strCustomerName
+
 IF @strStatementFormat = 'Balance Forward'
 	BEGIN
-		DECLARE @strCustomerNumber NVARCHAR(MAX)
-
-		IF ISNULL(@strCustomerName, '') <> ''
-			SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM vyuARCustomerSearch WHERE strName = @strCustomerName
-
 		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
 			  @dtmDateTo				= @dtmDateTo
 			, @dtmDateFrom				= @dtmDateFrom
@@ -153,9 +152,39 @@ IF @strStatementFormat = 'Balance Forward'
 			, @ysnIncludeBudget			= @ysnIncludeBudget
 			, @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
 			, @ysnPrintFromCF			= 0
+			, @ysnSearchOnly			= 0
 			, @strCustomerNumber		= @strCustomerNumber
 			, @strAccountStatusCode		= @strAccountStatusCode
 			, @strLocationName			= @strLocationName
+	END
+ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
+	BEGIN
+		EXEC dbo.uspARCustomerStatementReport
+		      @dtmDateTo				= @dtmDateTo
+		    , @dtmDateFrom				= @dtmDateFrom
+		    , @ysnPrintZeroBalance		= @ysnPrintZeroBalance
+		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
+		    , @ysnIncludeBudget			= @ysnIncludeBudget
+		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
+			, @ysnSearchOnly			= 0
+		    , @strCustomerNumber		= @strCustomerNumber
+		    , @strAccountStatusCode		= @strAccountStatusCode
+		    , @strLocationName			= @strLocationName
+		    , @strStatementFormat		= @strStatementFormat
+	END
+ELSE IF @strStatementFormat = 'Payment Activity'
+	BEGIN
+		EXEC dbo.uspARCustomerStatementPaymentActivityReport
+			  @dtmDateTo				= @dtmDateTo
+		    , @dtmDateFrom				= @dtmDateFrom
+		    , @ysnPrintZeroBalance		= @ysnPrintZeroBalance
+		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
+		    , @ysnIncludeBudget			= @ysnIncludeBudget
+		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
+			, @ysnSearchOnly			= 0
+		    , @strCustomerNumber		= @strCustomerNumber
+		    , @strAccountStatusCode		= @strAccountStatusCode
+		    , @strLocationName			= @strLocationName
 	END
 
 INSERT INTO @temp_SOA_table

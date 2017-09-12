@@ -2,6 +2,7 @@
     [intEntityCustomerId]          INT             NULL,
     [intInvoiceId]                 INT             NULL,
     [intPaymentId]                 INT             NULL,
+	[intDaysDue]				   INT			   NULL,
     [dtmDate]                      DATETIME        NULL,
     [dtmDueDate]                   DATETIME        NULL,
     [dtmShipDate]                  DATETIME        NULL,
@@ -9,7 +10,9 @@
     [dtmAsOfDate]                  DATETIME        NULL,
     [strCustomerNumber]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCustomerName]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strDisplayName]			   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceNumber]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strReferenceNumber]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strBOLNumber]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strRecordNumber]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTransactionType]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -21,6 +24,12 @@
     [strStatementFooterComment]    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyName]               NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyAddress]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[dblTotalAmount]			   NUMERIC (18, 6) NULL,
+	[dblAmountPaid]				   NUMERIC (18, 6) NULL,
+	[dblAmountDue]				   NUMERIC (18, 6) NULL,
+	[dblPastDue]				   NUMERIC (18, 6) NULL,
+	[dblMonthlyBudget]			   NUMERIC (18, 6) NULL,
+	[dblRunningBalance]			   NUMERIC (18, 6) NULL,
     [dblCreditLimit]               NUMERIC (18, 6) NULL,
     [dblInvoiceTotal]              NUMERIC (18, 6) NULL,
     [dblPayment]                   NUMERIC (18, 6) NULL,
@@ -54,6 +63,7 @@
     [strCFTempInvoiceReportNumber] NVARCHAR (MAX)  NULL,
     [strCFEmailDistributionOption] NVARCHAR (MAX)  NULL,
     [strCFEmail]                   NVARCHAR (MAX)  NULL,
-	[ysnCFShowDiscountOnInvoice]   BIT             NULL
+	[ysnCFShowDiscountOnInvoice]   BIT             NULL,
+	[blbLogo]					   VARBINARY (MAX) NULL
 );
 

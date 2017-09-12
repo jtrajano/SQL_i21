@@ -7,6 +7,7 @@
 	, @ysnIncludeBudget			AS BIT				= 0
 	, @ysnPrintOnlyPastDue		AS BIT				= 0
 	, @ysnPrintFromCF			AS BIT				= 0
+	, @ysnSearchOnly			AS BIT				= 0
 	, @strCustomerNumber		AS NVARCHAR(MAX)	= NULL
 	, @strAccountStatusCode		AS NVARCHAR(MAX)	= NULL
 	, @strLocationName			AS NVARCHAR(MAX)	= NULL	 
@@ -134,7 +135,6 @@ SET @strLocationNameLocal		= NULLIF(@strLocationName, '')
 
 IF @ysnPrintFromCFLocal = 1
 	BEGIN
-		--SET @dtmBalanceForwardDateLocal = DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 		SET @dtmDateFromLocal = DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 	END
 
@@ -156,11 +156,14 @@ IF @strAccountStatusCodeLocal IS NOT NULL
 IF @strLocationNameLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
 
-INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, 1
+IF @ysnSearchOnly = 0
+	BEGIN
+		INSERT INTO @temp_aging_table
+		EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, 1
 
-INSERT INTO @temp_balanceforward_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmBalanceForwardDateLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
+		INSERT INTO @temp_balanceforward_table
+		EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmBalanceForwardDateLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
+	END
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -378,7 +381,7 @@ END
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
-IF @ysnIncludeBudget = 1
+IF @ysnIncludeBudgetLocal = 1
     BEGIN
         SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
             'SELECT intEntityCustomerId         = C.intEntityCustomerId 
@@ -736,7 +739,7 @@ FROM (
 				FROM @temp_cf_table
 	) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
 ) MAINREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT
+LEFT JOIN @temp_aging_table AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN (
 	SELECT intEntityCustomerId
