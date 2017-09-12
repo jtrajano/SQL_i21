@@ -166,7 +166,7 @@ BEGIN
 			FROM tblEMEntity EM1 
 			JOIN tblEMEntityToContact ETC ON ETC.intEntityId = EM1.intEntityId
 			JOIN tblEMEntity ETCN ON ETCN.intEntityId = ETC.intEntityContactId
-			WHERE EM.intEntityId = EM1.intEntityId
+			WHERE EM.intEntityId = EM1.intEntityId AND ETC.ysnDefaultContact = 1
 			)strContactName
 		  ,L.dtmScheduledDate
 		  ,LW.dtmPickupDate
@@ -181,7 +181,7 @@ BEGIN
 			FROM tblEMEntity E
 			JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
 			JOIN tblEMEntity E1 ON E1.intEntityId = EC.intEntityContactId
-			WHERE E.intEntityId = EM.intEntityId
+			WHERE E.intEntityId = EM.intEntityId AND EC.ysnDefaultContact = 1
 			) strCustomerContactNumber
 		  ,@strCompanyName AS strCompanyName
 		  ,@strCompanyAddress AS strCompanyAddress
