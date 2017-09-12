@@ -365,10 +365,6 @@
 }, {
     "pattern": "app/view/StatusbarPaging1.js"
 }, {
-    "pattern": "app/view/BuildAssemblyBlend.js"
-}, {
-    "pattern": "app/view/BuildAssemblyBlendViewController.js"
-}, {
     "pattern": "app/store/BufferedAssemblyItem.js"
 }, {
     "pattern": "app/model/ItemUOM.js"
@@ -376,8 +372,6 @@
     "pattern": "app/store/BufferedItemUnitMeasure.js"
 }, {
     "pattern": "app/store/BufferedItemStockUOMView.js"
-}, {
-    "pattern": "app/view/BuildAssemblyBlendViewModel.js"
 }, {
     "pattern": "app/view/CardCount.js"
 }, {
