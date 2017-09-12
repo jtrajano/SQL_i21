@@ -16,11 +16,14 @@ Ext.define('Inventory.view.ItemViewController', {
                 hidden: '{hideBuildAssembly}'
             },
             txtItemNo: '{current.strItemNo}',
-            txtDescription: '{current.strDescription}',
+            txtDescription: {
+                value: '{current.strDescription}',   
+                fieldLabel: '{setDescriptionMark}'
+            },
             txtModelNo: {
                 value: '{current.strModelNo}',
-                readOnly: '{HideDisableForComment}'
-             },
+                hidden: '{HideDisableForComment}'
+            },
             cboType: {
                 value: '{current.strType}',
                 store: '{itemTypes}',
@@ -28,24 +31,25 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             txtShortName: {
                 value: '{current.strShortName}',
-                readOnly: '{HideDisableForComment}'
+                hidden: '{HideDisableForComment}'
             },
             cboManufacturer: {
                 value: '{current.strManufacturer}',
                 origValueField: 'intManufacturerId',
                 store: '{manufacturer}',
-                readOnly: '{HideDisableForComment}'
+                hidden: '{HideDisableForComment}'
             },
             cboBrand: {
                 value: '{current.strBrand}',
                 origValueField: 'intBrandId',
                 store: '{brand}',
-                readOnly: '{HideDisableForComment}'
+                hidden: '{HideDisableForComment}'
             },
             cboStatus: {
                 value: '{current.strStatus}',
                 store: '{itemStatuses}',
-                readOnly: '{readOnlyForDiscountType}'
+                readOnly: '{readOnlyForDiscountType}',
+                hidden: '{HideDisableForComment}'
             },
             cboCategory: {
                 value: '{current.strCategory}',
@@ -56,10 +60,11 @@ Ext.define('Inventory.view.ItemViewController', {
                     value: '{current.strType}',
                     conjunction: 'and'
                 }],
-                 readOnly: '{HideDisableForComment}'
+                hidden: '{HideDisableForComment}'
             },
             cboCommodity: {
                 readOnly: '{readOnlyCommodity}',
+                hidden: '{HideDisableForComment}',
                 origValueField: 'intCommodityId',
                 value: '{current.strCommodityCode}',
                 store: '{commodity}'
@@ -67,14 +72,19 @@ Ext.define('Inventory.view.ItemViewController', {
             cboLotTracking: {
                 value: '{current.strLotTracking}',
                 store: '{lotTracking}',
-                readOnly: '{checkStockTracking}'
+                readOnly: '{checkStockTracking}',
+                hidden: '{HideDisableForComment}'
             },
             cboTracking: {
                 value: '{current.strInventoryTracking}',
                 store: '{invTracking}',
-                readOnly: '{checkLotTracking}'
+                readOnly: '{checkLotTracking}',
+                hidden: '{HideDisableForComment}'
             },
-            chkUseWeighScales: '{current.ysnUseWeighScales}',
+            chkUseWeighScales: {
+                value: '{current.ysnUseWeighScales}',
+                hidden: '{HideDisableForComment}'
+            },
 
             cfgStock: {
                 hidden: '{pgeStockHide}'

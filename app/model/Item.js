@@ -185,7 +185,7 @@ Ext.define('Inventory.model.Item', {
 
     validators: [
         {type: 'presence', field: 'strItemNo'},
-        {type: 'presence', field: 'strDescription'},
+        //{type: 'presence', field: 'strDescription'},
        // {type: 'presence', field: 'strStatus'},
        // {type: 'presence', field: 'intCategoryId'},
        // {type: 'presence', field: 'strInventoryTracking'},
@@ -232,7 +232,8 @@ Ext.define('Inventory.model.Item', {
             }
         }
 
-        if(this.get('strType') !== 'Bundle' && (this.get('intCategoryId') === null || this.get('intCategoryId') === ''))
+        if(this.get('strType') !== 'Bundle' && this.get('strType') !== 'Comment' 
+            && (this.get('intCategoryId') === null || this.get('intCategoryId') === ''))
         {
             errors.add({
                 field: 'intCategoryId',
@@ -245,14 +246,6 @@ Ext.define('Inventory.model.Item', {
                errors.add({
                     field: 'strStatus',
                     message: 'Status must be present' 
-               })
-            }
-        
-        if(this.get('strType') !== 'Comment' && (this.get('intCategoryId') === null || this.get('intCategoryId') === ''))
-            {
-               errors.add({
-                    field: 'intCategoryId',
-                    message: 'Category must be present' 
                })
             }
         
