@@ -388,8 +388,6 @@ module.exports = {
     }, {
         "pattern": "app/store/BufferedItemStockUOMView.js"
     }, {
-        "pattern": "app/view/CardCount.js"
-    }, {
         "pattern": "app/view/Category.js"
     }, {
         "pattern": "app/view/CategoryLocation.js"
