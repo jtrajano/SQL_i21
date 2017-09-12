@@ -50,6 +50,10 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
 	,cfSite.strSiteGroup
 	,cfTransaction.strPriceProfileId
 	,cfCard.strPriceGroup
+	,strPriceProfileSite = ISNULL(cfTransaction.strPriceProfileId,'') + '-' + ISNULL(cfSite.strSiteName, '')
+	,dtmTransactionDateOnly = cfTransaction.dtmTransactionDate
+	,dtmTransactionTimeOnly = cfTransaction.dtmTransactionDate
+	,dblTaxDiff = ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0.0) - ISNULL(tblCFTransactionTax_1.dblTaxOriginalAmount,0.0)
 FROM dbo.tblCFTransaction AS cfTransaction 
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
