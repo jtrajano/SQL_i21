@@ -87,249 +87,246 @@ StartTest (function (t) {
         //endregion
 
 
-//         /*====================================== Add Storage Location for Indianapolis======================================*/
-//         //region
-//         .clickMenuFolder('Inventory','Folder')
-//         .waitUntilLoaded('')
-//         .clickMenuScreen('Storage Locations','Screen')
-//         .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
-//         .waitUntilLoaded('')
-//         .continueIf({
-//             expected: true,
-//             actual: function (win,next) {
-//                 return win.down('#grdSearch').store.getCount() == 0;
-//             },
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .displayText('===== Scenario 1: Add New Storage Location. =====')
-//                     .clickMenuScreen('Storage Locations','Screen')
-//                     .clickButton('New')
-//                     .waitUntilLoaded('')
-//                     .enterData('Text Field','Name','Indy Storage')
-//                     .enterData('Text Field','Description','Indy Storage')
-//                     .selectComboBoxRowNumber('UnitType',6,0)
-//                     .selectComboBoxRowNumber('Location',2,0)
-//                     .selectComboBoxRowNumber('SubLocation',1,0)
-//                     .selectComboBoxRowNumber('ParentUnit',1,0)
-//                     .enterData('Text Field','Aisle','Test Aisle - 01')
-//                     .clickCheckBox('AllowConsume', true)
-//                     .clickCheckBox('AllowMultipleItems', true)
-//                     .clickCheckBox('AllowMultipleLots', true)
-//                     .clickCheckBox('CycleCounted', true)
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
-//                     .waitUntilLoaded('')
-//                     .done();
-//             },
-//             continueOnFail: true
-//         })
-//         //endregion
+        /*====================================== Add Storage Location for Indianapolis======================================*/
+        //region
+        .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded('')
+        .clickMenuScreen('Storage Units','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('===== Scenario 1: Add New Storage Location. =====')
+                    .clickButton('New')
+                    .waitUntilLoaded('')
+                    .enterData('Text Field','Name','Indy Storage')
+                    .enterData('Text Field','Description','Indy Storage')
+                    .selectComboBoxRowNumber('UnitType',6,0)
+                    .selectComboBoxRowNumber('Location',2,0)
+                    .selectComboBoxRowNumber('SubLocation',1,0)
+                    .selectComboBoxRowNumber('ParentUnit',1,0)
+                    .enterData('Text Field','Aisle','Test Aisle - 01')
+                    .clickCheckBox('AllowConsume', true)
+                    .clickCheckBox('AllowMultipleItems', true)
+                    .clickCheckBox('AllowMultipleLots', true)
+                    .clickCheckBox('CycleCounted', true)
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        //endregion
 
 
-//         /*====================================== Add Storage Location ======================================*/
-//         //region
-//         .waitUntilLoaded('')
-//         .clickMenuScreen('Storage Locations','Screen')
-//         .filterGridRecords('Search', 'FilterGrid', 'Smoke Storage')
-//         .waitUntilLoaded('')
+        /*====================================== Add Storage Location ======================================*/
+        //region
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded('')
+        .filterGridRecords('Search', 'FilterGrid', 'Smoke Storage')
+        .waitUntilLoaded('')
 
-//         .continueIf({
-//             expected: true,
-//             actual: function (win,next) {
-//                 return win.down('#grdSearch').store.getCount() == 0;
-//             },
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .displayText('Storage Location does not yet exists.')
-//                     .displayText('===== Scenario 1: Adding New Storage Location. =====')
-//                     .clickMenuScreen('Storage Locations','Screen')
-//                     .clickButton('New')
-//                     .waitUntilLoaded('')
-//                     .enterData('Text Field','Name','Smoke Storage')
-//                     .enterData('Text Field','Description','Test Smoke Storage')
-//                     .selectComboBoxRowNumber('UnitType',6,0)
-//                     .selectComboBoxRowNumber('Location',1,0)
-//                     .selectComboBoxRowNumber('SubLocation',6,0)
-//                     .selectComboBoxRowNumber('ParentUnit',1,0)
-//                     .enterData('Text Field','Aisle','Test Aisle - 01')
-//                     .clickCheckBox('AllowConsume', true)
-//                     .clickCheckBox('AllowMultipleItems', true)
-//                     .clickCheckBox('AllowMultipleLots', true)
-//                     .clickCheckBox('CycleCounted', true)
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
-//                     .waitUntilLoaded('')
-//                     .displayText('===== Storage Location Created =====')
-//                     .done();
-//             },
-//             continueOnFail: true
-//         })
-//         //endregion
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Storage Location does not yet exists.')
+                    .displayText('===== Scenario 1: Adding New Storage Location. =====')
+                    .clickButton('New')
+                    .waitUntilLoaded('')
+                    .enterData('Text Field','Name','Smoke Storage')
+                    .enterData('Text Field','Description','Test Smoke Storage')
+                    .selectComboBoxRowNumber('UnitType',6,0)
+                    .selectComboBoxRowNumber('Location',1,0)
+                    .selectComboBoxRowNumber('SubLocation',6,0)
+                    .selectComboBoxRowNumber('ParentUnit',1,0)
+                    .enterData('Text Field','Aisle','Test Aisle - 01')
+                    .clickCheckBox('AllowConsume', true)
+                    .clickCheckBox('AllowMultipleItems', true)
+                    .clickCheckBox('AllowMultipleLots', true)
+                    .clickCheckBox('CycleCounted', true)
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .displayText('===== Storage Location Created =====')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        //endregion
 
-//         /*====================================== Add Inventory UOM ======================================*/
-//         //region
-//         .clickMenuScreen('Inventory UOM','Screen')
-//         .filterGridRecords('Search', 'FilterGrid', 'Smoke')
-//         .waitUntilLoaded('')
+        /*====================================== Add Inventory UOM ======================================*/
+        //region
+        .clickMenuScreen('Inventory UOM','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Smoke')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Inventory UOM Location already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-//         .continueIf({
-//             expected: true,
-//             actual: function (win,next) {
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .displayText('Inventory UOM Location already exists.')
-//                 return win.down('#grdSearch').store.getCount() == 0;
-//             },
-
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     //region Scenario 2. Add Inventory UOM
-//                     .displayText('===== Scenario 2. Add Inventory UOM =====')
-//                     .clickMenuScreen('Inventory UOM','Screen')
-//                     .clickButton('New')
-//                     .waitUntilLoaded('')
-//                     .enterData('Text Field','UnitMeasure','Smoke_LB')
-//                     .enterData('Text Field','Symbol','Smoke_LB')
-//                     .selectComboBoxRowNumber('UnitType',6,0)
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .waitUntilLoaded('')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //region Scenario 2. Add Inventory UOM
+                    .displayText('===== Scenario 2. Add Inventory UOM =====')
+                    .clickButton('New')
+                    .waitUntilLoaded('')
+                    .enterData('Text Field','UnitMeasure','Smoke_LB')
+                    .enterData('Text Field','Symbol','Smoke_LB')
+                    .selectComboBoxRowNumber('UnitType',6,0)
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .waitUntilLoaded('')
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
 
 
-//                     //Add Inventory UOM with Conversion 5 lb bag
-//                     .clickButton('New')
-//                     .waitUntilLoaded('')
-//                     .enterData('Text Field','UnitMeasure','Smoke 5 LB bag')
-//                     .enterData('Text Field','Symbol','Smoke 5 LB bag')
-//                     .selectComboBoxRowNumber('UnitType',7,0)
-//                     .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
-//                     //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-//                     .enterGridData('Conversion', 1, 'dblConversionToStock', '5')
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
+                    //Add Inventory UOM with Conversion 5 lb bag
+                    .clickMenuScreen('Inventory UOM','Screen')
+                    .clickButton('New')
+                    .waitUntilLoaded('')
+                    .enterData('Text Field','UnitMeasure','Smoke 5 LB bag')
+                    .enterData('Text Field','Symbol','Smoke 5 LB bag')
+                    .selectComboBoxRowNumber('UnitType',7,0)
+                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                    //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
+                    .enterGridData('Conversion', 1, 'dblConversionToStock', '5')
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
 
 
-//                     //Add Inventory UOM with Conversion 10 lb bag
-//                     .clickButton('New')
-//                     .waitUntilLoaded('')
-//                     .enterData('Text Field','UnitMeasure','Smoke 10 LB bag')
-//                     .enterData('Text Field','Symbol','Smoke 10 LB bag')
-//                     .selectComboBoxRowNumber('UnitType',7,0)
-//                     .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
-//                     //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-//                     .enterGridData('Conversion', 1, 'dblConversionToStock', '10')
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
-//                     .waitUntilLoaded('')
-//                     .displayText('===== Inventory UOM Created =====')
-//                     .done();
-//             },
-//             continueOnFail: true
-//         })
-//         //endregion
+                    //Add Inventory UOM with Conversion 10 lb bag
+                    .clickMenuScreen('Inventory UOM','Screen')
+                    .clickButton('New')
+                    .waitUntilLoaded('')
+                    .enterData('Text Field','UnitMeasure','Smoke 10 LB bag')
+                    .enterData('Text Field','Symbol','Smoke 10 LB bag')
+                    .selectComboBoxRowNumber('UnitType',7,0)
+                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                    //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
+                    .enterGridData('Conversion', 1, 'dblConversionToStock', '10')
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .displayText('===== Inventory UOM Created =====')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        //endregion
 
 
 
-//         /*====================================== Add Fuel Types ======================================*/
-//         //region
+        /*====================================== Add Fuel Types ======================================*/
+        //region
 
-//         .displayText('===== Scenario 3: Add New Fuel Type, Fuel Category, Feed Stock, Fuel Code, Production Process, Feed Stock UOM =====')
-//         .clickMenuScreen('Fuel Types','Screen')
-//         .waitUntilLoaded('')
-//         .continueIf({
-//             expected: 'icfueltype',
-//             actual: function(win){
-//                 return win.alias[0].replace('widget.', '');
-//             },
-//             success: function(next){
-//                 new iRely.FunctionalTest().start(t, next)
-//                     .clickButton('Close')
-//                     .waitUntilLoaded('')
-//                     .clickButton('FuelCategory')
-//                     .waitUntilLoaded('')
-//                     .enterGridData('GridTemplate', 1, 'colRinFuelCategoryCode', 'ICSmokeFuelCategory')
-//                     .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFuelCategoryDesc')
-//                     .enterGridData('GridTemplate', 1, 'colEquivalenceValue', 'ICSmokeFuelCategory_EV')
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
+        .displayText('===== Scenario 3: Add New Fuel Type, Fuel Category, Feed Stock, Fuel Code, Production Process, Feed Stock UOM =====')
+        .clickMenuScreen('Fuel Types','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'ICSmokeFuelCategory')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+        
+                .clickButton('FuelCategory')
+                .waitUntilLoaded('')
+                .enterGridData('GridTemplate', 1, 'colRinFuelCategoryCode', 'ICSmokeFuelCategory')
+                .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFuelCategoryDesc')
+                .enterGridData('GridTemplate', 1, 'colEquivalenceValue', 'ICSmokeFuelCategory_EV')
+                .verifyStatusMessage('Edited')
+                .clickButton('Save')
+                .verifyStatusMessage('Saved')
+                .clickButton('Close')
 
-//                     //Feed Stock
-//                     .clickButton('FeedStock')
-//                     .waitUntilLoaded('')
-//                     .enterGridData('GridTemplate', 1, 'colRinFeedStockCode', 'ICSmokeFeedStock')
-//                     .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFeedStockDesc')
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
+                //Feed Stock
+                .clickButton('FeedStock')
+                .waitUntilLoaded('')
+                .enterGridData('GridTemplate', 1, 'colRinFeedStockCode', 'ICSmokeFeedStock')
+                .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFeedStockDesc')
+                .verifyStatusMessage('Edited')
+                .clickButton('Save')
+                .verifyStatusMessage('Saved')
+                .clickButton('Close')
 
-//                     //FuelCode
-//                     .clickButton('FuelCode')
-//                     .waitUntilLoaded('')
-//                     .enterGridData('GridTemplate', 1, 'colRinFuelCode', 'ICSmokeFuelCode')
-//                     .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFuelCodeDesc')
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
+                //FuelCode
+                .clickButton('FuelCode')
+                .waitUntilLoaded('')
+                .enterGridData('GridTemplate', 1, 'colRinFuelCode', 'ICSmokeFuelCode')
+                .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFuelCodeDesc')
+                .verifyStatusMessage('Edited')
+                .clickButton('Save')
+                .verifyStatusMessage('Saved')
+                .clickButton('Close')
 
-//                     //Production Process
-//                     .clickButton('ProductionProcess')
-//                     .waitUntilLoaded('')
-//                     .enterGridData('GridTemplate', 1, 'colRinProcessCode', 'ICSmokeProductionProcess')
-//                     .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeProductionProcessDesc')
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
+                //Production Process
+                .clickButton('ProductionProcess')
+                .waitUntilLoaded('')
+                .enterGridData('GridTemplate', 1, 'colRinProcessCode', 'ICSmokeProductionProcess')
+                .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeProductionProcessDesc')
+                .verifyStatusMessage('Edited')
+                .clickButton('Save')
+                .verifyStatusMessage('Saved')
+                .clickButton('Close')
 
-//                     //Feed Stock UOM
-//                     .clickButton('FeedStockUOM')
-//                     .waitUntilLoaded('')
-//                     .selectGridComboBoxRowValue('GridTemplate',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-//                     .enterGridData('GridTemplate', 1, 'colRinFeedStockUOMCode', 'Test UOM Code 1')
-//                     .verifyStatusMessage('Edited')
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
+                //Feed Stock UOM
+                .clickButton('FeedStockUOM')
+                .waitUntilLoaded('')
+                .selectGridComboBoxRowValue('GridTemplate',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
+                .enterGridData('GridTemplate', 1, 'colRinFeedStockUOMCode', 'Test UOM Code 1')
+                .verifyStatusMessage('Edited')
+                .clickButton('Save')
+                .verifyStatusMessage('Saved')
+                .clickButton('Close')
 
-//                     //Fuel Type
-//                     .clickButton('New')
-//                     .selectComboBoxRowNumber('FuelCategory',1,0)
-//                     .selectComboBoxRowNumber('FeedStock',1,0)
-//                     .enterData('Text Field','BatchNo','1')
-//                     .verifyData('Text Field','EquivalenceValue','ICSmokeFuelCategory_EV')
-//                     .selectComboBoxRowNumber('FuelCode',1,0)
-//                     .selectComboBoxRowNumber('ProductionProcess',1,0)
-//                     .selectComboBoxRowNumber('FeedStockUom',1,0)
-//                     .enterData('Text Field','FeedStockFactor','10')
-//                     .clickCheckBox('RenewableBiomass', true)
-//                     .enterData('Text Field','PercentOfDenaturant','25')
-//                     .clickCheckBox('DeductDenaturantFromRin', true)
-//                     .clickButton('Save')
-//                     .verifyStatusMessage('Saved')
-//                     .clickButton('Close')
-//                     .waitUntilLoaded('')
-//                     .displayText('===== Add Fuel Type Done =====')
+                //Fuel Type
+                .clickButton('New')
+                .selectComboBoxRowNumber('FuelCategory',1,0)
+                .selectComboBoxRowNumber('FeedStock',1,0)
+                .enterData('Text Field','BatchNo','1')
+                .verifyData('Text Field','EquivalenceValue','ICSmokeFuelCategory_EV')
+                .selectComboBoxRowNumber('FuelCode',1,0)
+                .selectComboBoxRowNumber('ProductionProcess',1,0)
+                .selectComboBoxRowNumber('FeedStockUom',1,0)
+                .enterData('Text Field','FeedStockFactor','10')
+                .clickCheckBox('RenewableBiomass', true)
+                .enterData('Text Field','PercentOfDenaturant','25')
+                .clickCheckBox('DeductDenaturantFromRin', true)
+                .clickButton('Save')
+                .verifyStatusMessage('Saved')
+                .clickButton('Close')
+                .waitUntilLoaded('')
+                .displayText('===== Add Fuel Type Done =====')
 
-//                     .done();
-//                          },
-//                         continueOnFail: true
-//                     })
-
-//         //endregion
+                .done();
+            },
+            continueOnFail: true
+         })
+        //endregion
 
 
 //         /*====================================== Add Category ======================================*/
