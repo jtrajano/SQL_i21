@@ -13,13 +13,13 @@
  * Do NOT hand edit this file.
  */
 
-Ext.define('Inventory.view.InventoryReceiptTaxes', {
+Ext.define('Inventory.view.TaxDetails', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.icinventoryreceipttaxes',
+    alias: 'widget.ictaxdetails',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',
-        'Inventory.view.InventoryReceiptTaxesViewController',
-        'Inventory.view.InventoryReceiptTaxesViewModel'
+        'Inventory.view.TaxDetailsViewController',
+        'Inventory.view.TaxDetailsViewModel'
     ]
 });

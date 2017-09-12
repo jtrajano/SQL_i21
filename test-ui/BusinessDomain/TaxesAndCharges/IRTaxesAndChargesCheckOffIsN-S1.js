@@ -44,10 +44,10 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
         .clickButton('TaxDetails')
-        .waitUntilLoaded('icinventoryreceipttaxes',3000)
+        .waitUntilLoaded('ictaxdetails',3000)
         .waitUntilLoaded('',3000)
         .verifyScreenWindow({
-            alias: 'icinventoryreceipttaxes',
+            alias: 'ictaxdetails',
             title: 'Tax Details',
             collapse: true,
             maximize: true,

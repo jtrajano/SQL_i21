@@ -636,11 +636,11 @@ module.exports = {
     }, {
         "pattern": "app/view/InventoryReceipt.js"
     }, {
-        "pattern": "app/view/InventoryReceiptTaxesViewController.js"
+        "pattern": "app/view/TaxDetailsViewController.js"
     }, {
-        "pattern": "app/view/InventoryReceiptTaxesViewModel.js"
+        "pattern": "app/view/TaxDetailsViewModel.js"
     }, {
-        "pattern": "app/view/InventoryReceiptTaxes.js"
+        "pattern": "app/view/TaxDetails.js"
     }, {
         "pattern": "app/view/InventoryReceiptViewController.js"
     }, {

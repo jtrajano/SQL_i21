@@ -2694,7 +2694,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onViewTaxDetailsClick: function (ReceiptItemId) {
         var win = this.getView();
-        var screenName = 'Inventory.view.InventoryReceiptTaxes';
+        var screenName = 'Inventory.view.TaxDetails';
         var grd = win.down('#grdInventoryReceipt');
         var vm = win.getViewModel();
 

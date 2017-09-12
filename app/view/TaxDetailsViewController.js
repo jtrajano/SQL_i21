@@ -13,9 +13,9 @@
  * Do NOT hand edit this file.
  */
 
-Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
+Ext.define('Inventory.view.TaxDetailsViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.icinventoryreceipttaxes',
+    alias: 'controller.ictaxdetails',
 
     setupContext: function () {
         "use strict";
