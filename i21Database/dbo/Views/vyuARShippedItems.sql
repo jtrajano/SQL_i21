@@ -595,6 +595,7 @@ FROM (
 			 , intOrderUOMId
 			 , intItemUOMId
 			 , strOrderUnitMeasure
+			 , intItemWeightUOMId
 			 , dblCashPrice
 			 , dblDetailQuantity
 			 , intFreightTermId
@@ -964,7 +965,7 @@ FROM (
 	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
 	     , intOrderUOMId					= ARCC.intOrderUOMId
 	     , intShipmentItemUOMId				= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
-		 , intWeightUOMId					= ARCC.intPriceItemUOMId
+		 , intWeightUOMId					= ARCC.intItemWeightUOMId
 		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(ARCC.intItemWeightUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1)
 		 , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
 		 , dblQtyOrdered					= ISNULL(LD.dblQuantity, 0)
@@ -1064,10 +1065,10 @@ FROM (
 		 , intPriceItemUOMId
 		 , intItemUOMId
 		 , strOrderUnitMeasure
+		 , intItemWeightUOMId	 
 		 , dblCashPrice
 		 , dblDetailQuantity
-		 , intFreightTermId	
-		 , intItemWeightUOMId	 
+		 , intFreightTermId			 
 		 , dblShipQuantity
 		 , dblOrderQuantity
 		 , dblSubCurrencyRate
@@ -1459,6 +1460,7 @@ LEFT OUTER JOIN (
 		 , intOrderUOMId
 		 , intItemUOMId
 		 , strOrderUnitMeasure
+		 , intItemWeightUOMId
 		 , dblCashPrice
 		 , dblDetailQuantity
 		 , intFreightTermId
