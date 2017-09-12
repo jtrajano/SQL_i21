@@ -793,8 +793,6 @@
 }, {
     "pattern": "app/view/ManufacturingCellViewModel.js"
 }, {
-    "pattern": "app/view/MaterialMovementMap.js"
-}, {
     "pattern": "app/view/OriginConversionOption.js"
 }, {
     "pattern": "app/view/OriginConversionOptionViewController.js"
