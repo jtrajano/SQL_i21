@@ -1,4 +1,4 @@
-Ext.define('Inventory.model.LotDetailHistory', {
+Ext.define('Inventory.model.LotHistory', {
     extend: 'iRely.BaseEntity',
 
     requires: [

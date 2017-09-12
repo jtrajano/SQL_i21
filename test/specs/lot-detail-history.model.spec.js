@@ -1,5 +1,5 @@
 UnitTestEngine.testModel({
-    name: 'Inventory.model.LotDetailHistory',
+    name: 'Inventory.model.LotHistory',
     base: 'iRely.BaseEntity',
     idProperty: 'intLotId',
     dependencies: ["Ext.data.Field"],

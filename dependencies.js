@@ -759,15 +759,15 @@
 }, {
     "pattern": "app/view/LotDetail.js"
 }, {
-    "pattern": "app/view/LotDetailHistory.js"
+    "pattern": "app/view/LotHistory.js"
 }, {
-    "pattern": "app/view/LotDetailHistoryViewController.js"
+    "pattern": "app/view/LotHistoryViewController.js"
 }, {
-    "pattern": "app/model/LotDetailHistory.js"
+    "pattern": "app/model/LotHistory.js"
 }, {
-    "pattern": "app/store/LotDetailHistory.js"
+    "pattern": "app/store/LotHistory.js"
 }, {
-    "pattern": "app/view/LotDetailHistoryViewModel.js"
+    "pattern": "app/view/LotHistoryViewModel.js"
 }, {
     "pattern": "app/view/LotDetailViewController.js"
 }, {

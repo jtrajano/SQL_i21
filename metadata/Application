@@ -9,7 +9,7 @@
         "name": "Inventory",
         "views": [
             "RebuildInventory",
-            "LotDetailHistory",
+            "LotHistory",
             "CopyItemLocation",
             "InventoryCountDetails"
         ]

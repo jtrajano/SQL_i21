@@ -1,6 +1,6 @@
-Ext.define('Inventory.view.LotDetailHistoryViewController', {
+Ext.define('Inventory.view.LotHistoryViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.iclotdetailhistory',
+    alias: 'controller.iclothistory',
 
     config: {
         binding: {
@@ -13,7 +13,7 @@ Ext.define('Inventory.view.LotDetailHistoryViewController', {
 
         var me = this;
         var win = options.window;
-        var store = Ext.create('Inventory.store.LotDetailHistory', { pageSize: 50 });
+        var store = Ext.create('Inventory.store.LotHistory', { pageSize: 50 });
 
         win.context = Ext.create('iRely.Engine', {
             window: win,
