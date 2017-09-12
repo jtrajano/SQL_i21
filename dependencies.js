@@ -533,12 +533,6 @@
 }, {
     "pattern": "app/view/FuelCode.js"
 }, {
-    "pattern": "app/view/FuelTaxClass.js"
-}, {
-    "pattern": "app/view/FuelTaxClassViewController.js"
-}, {
-    "pattern": "app/view/FuelTaxClassViewModel.js"
-}, {
     "pattern": "app/view/FuelType.js"
 }, {
     "pattern": "app/view/FuelTypeViewController.js"

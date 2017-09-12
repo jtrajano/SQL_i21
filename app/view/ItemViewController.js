@@ -286,10 +286,6 @@ Ext.define('Inventory.view.ItemViewController', {
             //---------//
             //Sales Tab//
             //---------//
-            cboFuelTaxClass: {
-                value: '{current.intFuelTaxClassId}',
-                store: '{taxClass}'
-            },
             cboSalesTaxGroup: {
                 value: '{current.intSalesTaxGroupId}',
                 store: '{salesTaxGroup}'
