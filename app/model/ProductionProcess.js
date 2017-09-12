@@ -1,7 +1,7 @@
 /**
  * Created by marahman on 19-09-2014.
  */
-Ext.define('Inventory.model.ProcessCode', {
+Ext.define('Inventory.model.ProductionProcess', {
     extend: 'iRely.BaseEntity',
 
     requires: [

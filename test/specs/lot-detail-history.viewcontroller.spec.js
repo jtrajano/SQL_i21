@@ -1,6 +1,6 @@
 UnitTestEngine.testViewController({
-    name: 'Inventory.view.LotDetailHistoryViewController',
-    alias: 'controller.iclotdetailhistory',
+    name: 'Inventory.view.LotHistoryViewController',
+    alias: 'controller.iclothistory',
     base: 'Ext.app.ViewController',
     dependencies: []
 });

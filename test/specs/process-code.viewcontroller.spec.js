@@ -1,6 +1,6 @@
 UnitTestEngine.testViewController({
-    name: 'Inventory.view.ProcessCodeViewController',
-    alias: 'controller.icprocesscode',
+    name: 'Inventory.view.ProductionProcessViewController',
+    alias: 'controller.icproductionprocess',
     base: 'Ext.app.ViewController',
     dependencies: []
 });

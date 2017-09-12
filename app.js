@@ -22,7 +22,7 @@ Ext.Loader.setConfig({
 Ext.application({
     views: [
         'RebuildInventory',
-        'LotDetailHistory',
+        'LotHistory',
         'CopyItemLocation',
         'InventoryCountDetails'
     ],

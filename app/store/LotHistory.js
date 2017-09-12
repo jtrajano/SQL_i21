@@ -1,13 +1,13 @@
-Ext.define('Inventory.store.LotDetailHistory', {
+Ext.define('Inventory.store.LotHistory', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.iclotdetailhistory',
+    alias: 'store.iclothistory',
 
     requires: [
-        'Inventory.model.LotDetailHistory'
+        'Inventory.model.LotHistory'
     ],
 
-    model: 'Inventory.model.LotDetailHistory',
-    storeId: 'LotDetailHistory',
+    model: 'Inventory.model.LotHistory',
+    storeId: 'LotHistory',
     pageSize: 50,
     batchActions: true,
     proxy: {

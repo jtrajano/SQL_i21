@@ -13,9 +13,9 @@
  * Do NOT hand edit this file.
  */
 
-Ext.define('Inventory.view.InventoryReceiptTaxesViewModel', {
+Ext.define('Inventory.view.TaxDetailsViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.icinventoryreceipttaxes',
+    alias: 'viewmodel.ictaxdetails',
 
     requires: [
         'i21.store.TaxGroupMasterBuffered'

@@ -122,7 +122,7 @@ Ext.define('Inventory.view.FuelTypeViewController', {
     },
 
     onProductionProcessDrilldown: function() {
-        iRely.Functions.openScreen('Inventory.view.ProcessCode', {viewConfig: { modal: true }});
+        iRely.Functions.openScreen('Inventory.view.ProductionProcess', {viewConfig: { modal: true }});
     },
 
     onFeedStockUomDrilldown: function() {

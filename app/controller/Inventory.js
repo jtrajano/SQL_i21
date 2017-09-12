@@ -77,10 +77,6 @@ Ext.define('Inventory.controller.Inventory', {
                 filterField = 'intInventoryAdjustmentId';
                 viewName = 'Inventory.view.InventoryAdjustment';
                 break;
-            case 'Build Assembly':
-                filterField = 'intBuildAssemblyId';
-                viewName = 'Inventory.view.BuildAssemblyBlend';
-                break;
             case 'Inventory Transfer':
                 filterField = 'intInventoryTransferId';
                 viewName = 'Inventory.view.InventoryTransfer';

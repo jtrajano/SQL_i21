@@ -121,14 +121,6 @@ Ext.define('Inventory.view.Item', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        hidden: true,
-                                        itemId: 'btnBuildAssembly',
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'Build Assembly'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
                                         itemId: 'btnClose',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Close'

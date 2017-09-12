@@ -57,7 +57,7 @@ StartTest (function (t) {
 
 
         .clickButton('ProductionProcess')
-        .waitUntilLoaded('icprocesscode')
+        .waitUntilLoaded('icproductionprocess')
         .selectGridRowNumber('GridTemplate',[1])
         .clickButton('Delete')
         //.verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
