@@ -811,12 +811,6 @@
 }, {
     "pattern": "app/view/ProcessCode.js"
 }, {
-    "pattern": "app/view/Reason.js"
-}, {
-    "pattern": "app/view/ReasonViewController.js"
-}, {
-    "pattern": "app/view/ReasonViewModel.js"
-}, {
     "pattern": "app/view/RebuildInventory.js"
 }, {
     "pattern": "app/view/RebuildInventoryViewController.js"
