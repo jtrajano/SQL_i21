@@ -9,7 +9,7 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , dtmEndDate						= CTCD.dtmEndDate
 	 , strContractStatus				= CTCS.strContractStatus
 	 , intEntityCustomerId				= CTCH.intEntityId	 
-	 , intCurrencyId					= ISNULL(SMC.intMainCurrencyId, CTCD.intCurrencyId)
+	 , intCurrencyId					= CASE WHEN CTCD.ysnUseFXPrice = 1 THEN CTCD.intInvoiceCurrencyId ELSE ISNULL(SMC.intMainCurrencyId, CTCD.intCurrencyId) END
 	 , strCurrency						= ISNULL(SMCH.strCurrency, SMC.strCurrency)
 	 , intCompanyLocationId				= CTCD.intCompanyLocationId	
 	 , intItemId						= CTCD.intItemId
