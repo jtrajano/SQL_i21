@@ -169,11 +169,11 @@ BEGIN
 		,us.strUserName AS strUser
 		,ilt.strBatchId
 	FROM tblICLot l
-	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
-	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
+	JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId 
+	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-	LEFT JOIN tblICInventoryAdjustment IA ON IA.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
-	LEFT JOIN tblICItem i ON i.intItemId = ISNULL((
+	Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
+	JOIN tblICItem i ON i.intItemId = ISNULL((
 				CASE 
 					WHEN ilt.intTransactionTypeId = 15
 						THEN iad.intItemId
@@ -182,10 +182,10 @@ BEGIN
 				), ilt.intItemId)
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-	LEFT JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
-	LEFT JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
-	LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
-	LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = ilt.intSubLocationId
+	JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
+	JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
+	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
+	JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = ilt.intSubLocationId
 	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = ilt.intStorageLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation clsl1 ON clsl1.intCompanyLocationSubLocationId = iad.intNewSubLocationId
 	LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intNewStorageLocationId
@@ -318,10 +318,10 @@ BEGIN
 			,ilt.strBatchId
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
-		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
+		JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-		LEFT JOIN tblICInventoryAdjustment IA ON IA.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
-		LEFT JOIN tblICItem i ON i.intItemId = ISNULL((
+		Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
+		JOIN tblICItem i ON i.intItemId = ISNULL((
 					CASE 
 						WHEN ilt.intTransactionTypeId = 15
 							THEN iad.intItemId
@@ -330,10 +330,10 @@ BEGIN
 					), ilt.intItemId)
 		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
 		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-		LEFT JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
-		LEFT JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
-		LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
-		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = ilt.intSubLocationId
+		JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
+		JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
+		JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
+		JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = ilt.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = ilt.intStorageLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl1 ON clsl1.intCompanyLocationSubLocationId = iad.intNewSubLocationId
 		LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intNewStorageLocationId
