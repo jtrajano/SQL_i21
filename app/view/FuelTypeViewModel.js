@@ -22,7 +22,7 @@ Ext.define('Inventory.view.FuelTypeViewModel', {
         'Inventory.store.BufferedFeedStockUom',
         'Inventory.store.BufferedFuelCategory',
         'Inventory.store.BufferedFuelCode',
-        'Inventory.store.BufferedProcessCode'
+        'Inventory.store.BufferedProductionProcess'
     ],
 
     stores: {
@@ -39,7 +39,7 @@ Ext.define('Inventory.view.FuelTypeViewModel', {
             type: 'icbufferedfuelcode'
         },
         productionProcess: {
-            type: 'icbufferedprocesscode'
+            type: 'icbufferedproductionprocess'
         }
     }
 

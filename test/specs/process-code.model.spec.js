@@ -1,5 +1,5 @@
 UnitTestEngine.testModel({
-    name: 'Inventory.model.ProcessCode',
+    name: 'Inventory.model.ProductionProcess',
     base: 'iRely.BaseEntity',
     idProperty: 'intRinProcessId',
     dependencies: ["Ext.data.Field"],

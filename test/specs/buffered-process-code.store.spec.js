@@ -1,11 +1,11 @@
 UnitTestEngine.testStore({
-    name: 'Inventory.store.BufferedProcessCode',
-    alias: "store.icbufferedprocesscode",
+    name: 'Inventory.store.BufferedProductionProcess',
+    alias: "store.icbufferedproductionprocess",
     base: 'Ext.data.BufferedStore',
-    dependencies: ["Inventory.model.ProcessCode"],
+    dependencies: ["Inventory.model.ProductionProcess"],
     config: {
-        "model": "Inventory.model.ProcessCode",
-        "storeId": "BufferedProcessCode",
+        "model": "Inventory.model.ProductionProcess",
+        "storeId": "BufferedProductionProcess",
         "pageSize": 50,
         "remoteFilter": true,
         "remoteSort": true,

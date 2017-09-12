@@ -1837,7 +1837,7 @@ Ext.define('Inventory.CommonICSmokeTest', {
 //                        //Inventory Production Process Screen
 //                        .displayText('=====  1.14 Open Production Process and Check Screen Fields ====')
 //                        .clickButton('ProductionProcess')
-//                        .waitUntilLoaded('icprocesscode')
+//                        .waitUntilLoaded('icproductionprocess')
 //                        .isControlVisible('btn',
 //                        [
 //                            'Save'

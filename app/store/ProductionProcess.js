@@ -1,20 +1,20 @@
 /**
  * Created by marahman on 19-09-2014.
  */
-Ext.define('Inventory.store.ProcessCode', {
+Ext.define('Inventory.store.ProductionProcess', {
     extend: 'Ext.data.Store',
-    alias: 'store.icprocesscode',
+    alias: 'store.icproductionprocess',
 
     requires: [
-        'Inventory.model.ProcessCode'
+        'Inventory.model.ProductionProcess'
     ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            model: 'Inventory.model.ProcessCode',
-            storeId: 'ProcessCode',
+            model: 'Inventory.model.ProductionProcess',
+            storeId: 'ProductionProcess',
             pageSize: 50,
             batchActions: true,
             proxy: {

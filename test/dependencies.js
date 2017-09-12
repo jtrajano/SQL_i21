@@ -290,9 +290,9 @@ module.exports = {
     }, {
         "pattern": "app/store/PersistentPagedStore.js"
     }, {
-        "pattern": "app/model/ProcessCode.js"
+        "pattern": "app/model/ProductionProcess.js"
     }, {
-        "pattern": "app/store/ProcessCode.js"
+        "pattern": "app/store/ProductionProcess.js"
     }, {
         "pattern": "app/model/RebuildInventory.js"
     }, {
@@ -558,7 +558,7 @@ module.exports = {
     }, {
         "pattern": "app/store/BufferedFuelCode.js"
     }, {
-        "pattern": "app/store/BufferedProcessCode.js"
+        "pattern": "app/store/BufferedProductionProcess.js"
     }, {
         "pattern": "app/view/FuelTypeViewModel.js"
     }, {
@@ -818,11 +818,11 @@ module.exports = {
     }, {
         "pattern": "app/view/PickLotViewModel.js"
     }, {
-        "pattern": "app/view/ProcessCodeViewModel.js"
+        "pattern": "app/view/ProductionProcessViewModel.js"
     }, {
-        "pattern": "app/view/ProcessCodeViewController.js"
+        "pattern": "app/view/ProductionProcessViewController.js"
     }, {
-        "pattern": "app/view/ProcessCode.js"
+        "pattern": "app/view/ProductionProcess.js"
     }, {
         "pattern": "app/view/RebuildInventory.js"
     }, {

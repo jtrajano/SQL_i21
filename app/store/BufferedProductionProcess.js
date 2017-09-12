@@ -1,20 +1,20 @@
 /**
  * Created by LZabala on 11/12/2014.
  */
-Ext.define('Inventory.store.BufferedProcessCode', {
+Ext.define('Inventory.store.BufferedProductionProcess', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.icbufferedprocesscode',
+    alias: 'store.icbufferedproductionprocess',
 
     requires: [
-        'Inventory.model.ProcessCode'
+        'Inventory.model.ProductionProcess'
     ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            model: 'Inventory.model.ProcessCode',
-            storeId: 'BufferedProcessCode',
+            model: 'Inventory.model.ProductionProcess',
+            storeId: 'BufferedProductionProcess',
             pageSize: 50,
             batchActions: true,
             remoteFilter: true,
