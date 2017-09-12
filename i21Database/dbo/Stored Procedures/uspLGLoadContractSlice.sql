@@ -451,6 +451,33 @@ BEGIN TRY
 			AND CTCQ.intContainerTypeId = CT.intContainerTypeId
 		WHERE CD.intContractHeaderId = @intContractHeaderId
 
+		UPDATE LD
+		SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CASE 
+						WHEN ISNULL(CASE 
+									WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bags'
+										THEN CTCQ.dblQuantity
+									ELSE CTCQ.dblBulkQuantity
+									END, 0) = 0
+							THEN LD.dblNet
+						ELSE CASE 
+								WHEN LOWER(ISNULL(L.strPackingDescription, '')) = 'bags'
+									THEN CTCQ.dblQuantity
+								ELSE CTCQ.dblBulkQuantity
+								END
+						END, LD.dblNet))
+		FROM tblCTContractDetail CD
+		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+		LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
+		LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId
+			AND IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId, I.intOriginId)
+			AND I.intCommodityId = CA.intCommodityId
+		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
+			AND CTCQ.intContainerTypeId = CT.intContainerTypeId
+		WHERE CD.intContractHeaderId = @intContractHeaderId
+
 		UPDATE CD
 		SET intNumberOfContainers = CEILING(CD.dblNetWeight / ISNULL(CASE 
 						WHEN ISNULL(CASE 
