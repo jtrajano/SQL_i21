@@ -2094,8 +2094,6 @@ Ext.define('Inventory.CommonICSmokeTest', {
             .clickButton('Close')
             .waitUntilLoaded('')
 
-<<<<<<< HEAD
-
             //Inventory Fuel Types Screen
             .displayText('=====  1.10 Open Fuel Types and Check Screen Fields ====')
 
@@ -2340,8 +2338,7 @@ Ext.define('Inventory.CommonICSmokeTest', {
             .waitUntilLoaded('')
 
 
-            //Inventory Storage Units Screen
-=======
+
 //
 //            //Inventory Fuel Types Screen
 //            .displayText('=====  1.10 Open Fuel Types and Check Screen Fields ====')
@@ -2546,12 +2543,7 @@ Ext.define('Inventory.CommonICSmokeTest', {
 //            //endregion
 
 
-
-
-
-
-            //Inventory Storage Locations Screen
->>>>>>> c018c3e2a51b12c6c7e93f44860528f3c3471824
+            //Inventory Storage Units Screen
             .displayText('=====  1.16 Open Storage Locations and Check Screen Fields ====')
             .clickMenuScreen('Storage Units','Screen')
             .waitUntilLoaded('')
