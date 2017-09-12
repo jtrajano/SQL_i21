@@ -1784,7 +1784,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter129",
+                                                                            "name": "filter1",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3082,7 +3082,35 @@
                                                                         "width": 85
                                                                     },
                                                                     "name": "MyNumberColumn22",
-                                                                    "designerId": "8a1d2789-3a19-48c0-a552-b6942d947972"
+                                                                    "designerId": "8a1d2789-3a19-48c0-a552-b6942d947972",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "currencyField": true,
+                                                                                "itemId": "txtForexRate",
+                                                                                "minValue": 0,
+                                                                                "readOnly": true
+                                                                            },
+                                                                            "name": "MyNumberField11",
+                                                                            "configAlternates": {
+                                                                                "currencyField": "boolean"
+                                                                            },
+                                                                            "designerId": "65e1ba83-7760-439c-aba6-22d99ffdd1dd",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "currencyField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -3674,7 +3702,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter130",
+                                                                            "name": "filter11",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -5548,7 +5576,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter131",
+                                                                    "name": "filter12",
                                                                     "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5922,7 +5950,35 @@
                                                                 "width": 85
                                                             },
                                                             "name": "MyNumberColumn3",
-                                                            "designerId": "b91d2d91-e6a3-4fcc-8aec-43f1b95f17c8"
+                                                            "designerId": "b91d2d91-e6a3-4fcc-8aec-43f1b95f17c8",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "currencyField": true,
+                                                                        "itemId": "txtChargeForexRate",
+                                                                        "minValue": 0,
+                                                                        "readOnly": true
+                                                                    },
+                                                                    "name": "MyNumberField14",
+                                                                    "configAlternates": {
+                                                                        "currencyField": "boolean"
+                                                                    },
+                                                                    "designerId": "8b50894e-d5ad-4051-baab-04a5821e4949",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "currencyField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Number",
@@ -6818,7 +6874,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter13",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7298,7 +7354,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter133",
+                                                    "name": "filter14",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7894,7 +7950,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
