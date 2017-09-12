@@ -725,12 +725,6 @@
 }, {
     "pattern": "app/view/ItemLocationViewModel.js"
 }, {
-    "pattern": "app/view/ItemSubstitution.js"
-}, {
-    "pattern": "app/view/ItemSubstitutionViewController.js"
-}, {
-    "pattern": "app/view/ItemSubstitutionViewModel.js"
-}, {
     "pattern": "app/view/ItemViewController.js"
 }, {
     "pattern": "app/store/BufferedInventoryTag.js"
