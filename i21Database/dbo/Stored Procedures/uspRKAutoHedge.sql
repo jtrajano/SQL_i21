@@ -105,6 +105,18 @@ BEGIN
 	RAISERROR('Market cannot be blank while creating hedge transaction.',16,1)
 END
 
+IF EXISTS
+(SELECT 1 FROM  tblRKReconciliationBrokerStatementHeader t
+					WHERE t.intFutureMarketId=@intFutureMarketId
+						AND t.intBrokerageAccountId=@intBrokerageAccountId
+						AND t.intCommodityId=@intCommodityId
+						AND t.intEntityId=@intEntityId AND ysnFreezed = 1
+						AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmFilledDate,110),110) =
+							CONVERT(DATETIME,CONVERT(VARCHAR(10),@dtmFilledDate,110),110) 	
+)
+BEGIN
+RAISERROR('The selected filled date already reconciled.',16,1)
+END
 IF ISNULL(@intFutOptTransactionId,0) > 0
 BEGIN
       UPDATE tblRKFutOptTransaction
@@ -174,7 +186,6 @@ BEGIN
               @intInstrumentTypeId ,
               @intCommodityId ,
               @intLocationId ,
-
               @intTraderId ,
               @strInternalTradeNo ,
               @strBrokerTradeNo ,
