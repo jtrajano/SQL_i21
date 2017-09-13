@@ -1,5 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerStatementReport]
-	@xmlParam NVARCHAR(MAX) = NULL
+	  @dtmDateTo				AS DATETIME			= NULL
+	, @dtmDateFrom				AS DATETIME			= NULL
+	, @ysnPrintZeroBalance		AS BIT				= 0
+	, @ysnPrintCreditBalance	AS BIT				= 1
+	, @ysnIncludeBudget			AS BIT				= 0
+	, @ysnPrintOnlyPastDue		AS BIT				= 0
+	, @ysnSearchOnly			AS BIT				= 0
+	, @strCustomerNumber		AS NVARCHAR(MAX)	= NULL
+	, @strAccountStatusCode		AS NVARCHAR(MAX)	= NULL
+	, @strLocationName			AS NVARCHAR(MAX)	= NULL
+	, @strStatementFormat		AS NVARCHAR(MAX)	= 'Open Item'
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -8,50 +18,22 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Sanitize the @xmlParam 
-IF LTRIM(RTRIM(@xmlParam)) = '' 
-	SET @xmlParam = NULL 
-
--- Declare the variables.
-DECLARE  @dtmDateTo					AS DATETIME
-		,@dtmDateFrom				AS DATETIME
-		,@strDateTo					AS NVARCHAR(50)
-		,@strDateFrom				AS NVARCHAR(50)
-		,@strLocationName			AS NVARCHAR(100)
-		,@strStatementFormat		AS NVARCHAR(50)
-		,@ysnPrintZeroBalance		AS BIT
-		,@ysnPrintCreditBalance		AS BIT
-		,@ysnIncludeBudget			AS BIT
-		,@ysnPrintOnlyPastDue		AS BIT
-		,@xmlDocumentId				AS INT
-		,@query						AS NVARCHAR(MAX)
-		,@queryBudget				AS NVARCHAR(MAX)
-		,@joinQuery                 AS NVARCHAR(MAX) = ''
-		,@filter					AS NVARCHAR(MAX) = ''
-		,@fieldname					AS NVARCHAR(50)
-		,@condition					AS NVARCHAR(20)
-		,@id						AS INT 
-		,@from						AS NVARCHAR(MAX)
-		,@to						AS NVARCHAR(MAX)
-		,@join						AS NVARCHAR(10)
-		,@begingroup				AS NVARCHAR(50)
-		,@endgroup					AS NVARCHAR(50)
-		,@datatype					AS NVARCHAR(50)
-		,@strCustomerName			AS NVARCHAR(MAX)
-		,@ysnReportDetail			AS BIT				= 0
-		
--- Create a table variable to hold the XML data. 		
-DECLARE @temp_xml_table TABLE (
-	 [id]			INT IDENTITY(1,1)
-	,[fieldname]	NVARCHAR(50)
-	,[condition]	NVARCHAR(20)
-	,[from]			NVARCHAR(MAX)
-	,[to]			NVARCHAR(MAX)
-	,[join]			NVARCHAR(10)
-	,[begingroup]	NVARCHAR(50)
-	,[endgroup]		NVARCHAR(50)
-	,[datatype]		NVARCHAR(50)
-)
+DECLARE @dtmDateToLocal				AS DATETIME			= NULL
+	  , @dtmDateFromLocal			AS DATETIME			= NULL
+	  , @ysnPrintZeroBalanceLocal	AS BIT				= 0
+	  , @ysnPrintCreditBalanceLocal	AS BIT				= 1
+	  , @ysnIncludeBudgetLocal		AS BIT				= 0
+	  , @ysnPrintOnlyPastDueLocal	AS BIT				= 0
+	  , @strCustomerNumberLocal		AS NVARCHAR(MAX)	= NULL
+	  , @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
+	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
+	  , @strStatementFormatLocal	AS NVARCHAR(MAX)	= 'Open Item'
+	  , @strDateTo					AS NVARCHAR(50)
+	  , @strDateFrom				AS NVARCHAR(50)
+	  , @query						AS NVARCHAR(MAX)
+	  , @queryBudget				AS NVARCHAR(MAX)
+	  , @filter						AS NVARCHAR(MAX)	= ''
+	  , @intEntityCustomerId		AS INT				= NULL
 
 DECLARE @temp_aging_table TABLE(	
 	 [strCustomerName]			NVARCHAR(100)
@@ -111,100 +93,39 @@ DECLARE @temp_cf_table TABLE(
 	,[dtmInvoiceDate]			DATETIME
 )
 
--- Prepare the XML 
-EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
+SET @dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
+SET	@dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
+SET @ysnPrintZeroBalanceLocal	= ISNULL(@ysnPrintZeroBalance, 0)
+SET @ysnPrintCreditBalanceLocal	= ISNULL(@ysnPrintCreditBalance, 1)
+SET @ysnIncludeBudgetLocal		= ISNULL(@ysnIncludeBudget, 0)
+SET @ysnPrintOnlyPastDueLocal	= ISNULL(@ysnPrintOnlyPastDue, 0)
+SET @strCustomerNumberLocal		= NULLIF(@strCustomerNumber, '')
+SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
+SET @strLocationNameLocal		= NULLIF(@strLocationName, '')
+SET @strStatementFormatLocal    = ISNULL(@strStatementFormat, 'Open Item')
+SET @strDateTo					= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
+SET @strDateFrom				= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 
--- Insert the XML to the xml table. 		
-INSERT INTO @temp_xml_table
-SELECT *
-FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
-WITH (
-	  [fieldname]  NVARCHAR(50)
-	, [condition]  NVARCHAR(20)
-	, [from]	   NVARCHAR(MAX)
-	, [to]		   NVARCHAR(MAX)
-	, [join]	   NVARCHAR(10)
-	, [begingroup] NVARCHAR(50)
-	, [endgroup]   NVARCHAR(50)
-	, [datatype]   NVARCHAR(50)
-)
-
--- Gather the variables values from the xml table.
-SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
- 	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
-       ,@condition	 = [condition]
-FROM	@temp_xml_table 
-WHERE	[fieldname] = 'dtmDate'
-
-SELECT @strLocationName = [from]
-FROM @temp_xml_table
-WHERE [fieldname] = 'strLocationName'
-
-SELECT @strStatementFormat = [from]
-FROM @temp_xml_table
-WHERE [fieldname] = 'strStatementFormat'
-
-SELECT @ysnPrintZeroBalance = [from]
-FROM @temp_xml_table
-WHERE [fieldname] = 'ysnPrintZeroBalance'
-
-SELECT @ysnPrintCreditBalance = [from]
-FROM @temp_xml_table
-WHERE [fieldname] = 'ysnPrintCreditBalance'
-
-SELECT @ysnIncludeBudget = [from]
-FROM @temp_xml_table
-WHERE [fieldname] = 'ysnIncludeBudget'
-
-SELECT @ysnPrintOnlyPastDue = [from]
-FROM @temp_xml_table
-WHERE [fieldname] = 'ysnPrintOnlyPastDue'
-
-SELECT @strCustomerName = [from]
-FROM @temp_xml_table
-WHERE [fieldname] IN ('strName', 'strCustomerName')
-
- -- SANITIZE THE DATE AND REMOVE THE TIME.
-IF @dtmDateTo IS NOT NULL
-	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
-ELSE 			  
-	SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
-
-IF @dtmDateFrom IS NOT NULL
-	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
-ELSE 			  
-	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-	
-SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
-SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
-
-INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, 1
-
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
-UPDATE @temp_xml_table SET fieldname = 'strName' WHERE fieldname = 'strCustomerName'
-
-SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
-
-WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
-BEGIN
-	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
-	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
-
-		IF (@fieldname = 'strName' OR @fieldname = 'strCustomerName' )
-			SET @filter = REPLACE (@filter, '|^|', ''',''')
-			SET @filter = REPLACE (@filter, ''',''''', '''')
-			SET @filter = REPLACE (@filter, '=', 'IN (')
-			SET @filter = @filter + ')'
-			SET @filter = REPLACE (@filter, '))', ')')
-
-	DELETE FROM @temp_xml_table WHERE id = @id
-
-	IF EXISTS(SELECT 1 FROM @temp_xml_table)
+IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		SET @filter = @filter + ' AND '
+		SET @filter = 'strCustomerNumber = ''' + @strCustomerNumberLocal + ''''
+
+		SELECT TOP 1 @intEntityCustomerId = intEntityId 
+		FROM vyuARCustomerSearch WITH (NOLOCK)
+		WHERE strCustomerNumber = @strCustomerNumberLocal
 	END
-END
+
+IF @strAccountStatusCodeLocal IS NOT NULL
+	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strAccountStatusCode LIKE (%''' + @strAccountStatusCodeLocal + '''%)'
+
+IF @strLocationNameLocal IS NOT NULL
+	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
+
+IF @ysnSearchOnly = 0
+	BEGIN
+		INSERT INTO @temp_aging_table
+		EXEC dbo.uspARCustomerAgingAsOfDateReport NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
+	END
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + '
 SELECT * 
@@ -229,7 +150,7 @@ FROM (
 		 , strName						= C.strName
 		 , strBOLNumber					= I.strBOLNumber
 		 , dblCreditLimit				= C.dblCreditLimit
-		 , strAccountStatusCode			= dbo.fnARGetCustomerAccountStatusCodes(C.intEntityId)
+		 , strAccountStatusCode			= STATUSCODES.strAccountStatusCode
 		 , strLocationName				= CL.strLocationName
 		 , strFullAddress				= [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 		 , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL)
@@ -314,6 +235,20 @@ FROM (
 				   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) 
 		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 	) COMPANY
+	OUTER APPLY (
+		SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
+		FROM (
+			SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
+			FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+			INNER JOIN (
+				SELECT intAccountStatusId
+						, strAccountStatusCode
+				FROM dbo.tblARAccountStatus WITH (NOLOCK)
+			) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+			WHERE CAS.intEntityCustomerId = C.intEntityId
+			FOR XML PATH ('''')
+		) SC (strAccountStatusCode)
+	) STATUSCODES
 ) MainQuery'
  
 IF ISNULL(@filter,'') != ''
@@ -324,7 +259,7 @@ END
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
-IF @ysnIncludeBudget = 1
+IF @ysnIncludeBudgetLocal = 1
 	BEGIN
 		SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
 			'SELECT strReferenceNumber			= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
@@ -344,7 +279,7 @@ IF @ysnIncludeBudget = 1
 				  , strName						= C.strName
 				  , strBOLNumber				= NULL
 				  , dblCreditLimit				= C.dblCreditLimit
-				  , strAccountStatusCode		= dbo.fnARGetCustomerAccountStatusCodes(CB.intEntityCustomerId)
+				  , strAccountStatusCode		= STATUSCODES.strAccountStatusCode
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
 				  , strStatementFooterComment	= NULL
@@ -354,25 +289,22 @@ IF @ysnIncludeBudget = 1
 				  , ysnStatementCreditLimit
 			FROM tblARCustomerBudget CB
 				INNER JOIN vyuARCustomerSearch C ON CB.intEntityCustomerId = C.intEntityId
+				OUTER APPLY (
+					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
+					FROM (
+						SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
+						FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+						INNER JOIN (
+							SELECT intAccountStatusId
+								 , strAccountStatusCode
+							FROM dbo.tblARAccountStatus WITH (NOLOCK)
+						) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+						WHERE CAS.intEntityCustomerId = CB.intEntityCustomerId
+						FOR XML PATH ('''')
+					) SC (strAccountStatusCode)
+				) STATUSCODES
 			WHERE CB.dtmBudgetDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 			  AND CB.dblAmountPaid < CB.dblBudgetAmount'
-
-		SET @filter = ''
-
-		DELETE FROM @temp_xml_table WHERE [fieldname] = 'strLocationName'
-
-		WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
-			BEGIN
-				SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
-				SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
-	
-				DELETE FROM @temp_xml_table WHERE id = @id
-
-				IF EXISTS(SELECT 1 FROM @temp_xml_table)
-				BEGIN
-					SET @filter = @filter + ' AND '
-				END
-			END
 		
 		IF ISNULL(@filter,'') != ''
 		BEGIN
@@ -383,23 +315,19 @@ IF @ysnIncludeBudget = 1
 		EXEC sp_executesql @queryBudget
 	END
 
-DELETE FROM @temp_statement_table
-WHERE strReferenceNumber IN (SELECT strInvoiceNumber = CASE WHEN ISNULL(ysnImportedFromOrigin, 0) = 0 THEN strInvoiceNumber ELSE strInvoiceOriginId END 
-							 FROM tblARInvoice WHERE strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo'))
-
-IF @ysnPrintOnlyPastDue = 1
+IF @ysnPrintOnlyPastDueLocal = 1
 	BEGIN		
-		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateTo) > 0
+		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0
 		UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
 	END
 
-IF @ysnPrintZeroBalance = 0
+IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE dblARBalance = 0
+		DELETE FROM @temp_statement_table WHERE ISNULL(dblARBalance, 0) = 0
 		DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
 	END
 
-IF @ysnPrintCreditBalance = 0
+IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
 		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0
@@ -436,6 +364,9 @@ INNER JOIN (
 	) CFT ON ARI.intInvoiceId = CFT.intInvoiceId
 ) cfTable ON statementTable.strReferenceNumber = cfTable.strInvoiceNumber
 
+DELETE FROM @temp_statement_table
+WHERE strReferenceNumber IN (SELECT strInvoiceNumber FROM dbo.tblARInvoice WITH (NOLOCK) WHERE strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo'))
+
 MERGE INTO tblARStatementOfAccount AS Target
 USING (SELECT strCustomerNumber, @dtmDateTo, SUM(ISNULL(dblAmountDue, 0))
 FROM @temp_statement_table GROUP BY strCustomerNumber
@@ -450,6 +381,42 @@ WHEN NOT MATCHED BY TARGET THEN
 INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
+TRUNCATE TABLE tblARCustomerStatementStagingTable
+INSERT INTO tblARCustomerStatementStagingTable (
+	  strReferenceNumber
+	, intEntityCustomerId
+	, strTransactionType
+	, dtmDueDate
+	, dtmDate
+	, intDaysDue
+	, dblTotalAmount
+	, dblAmountPaid
+	, dblAmountDue
+	, dblPastDue
+	, dblMonthlyBudget
+	, dblRunningBalance
+	, strCustomerNumber
+	, strDisplayName
+	, strCustomerName
+	, strBOLNumber
+	, dblCreditLimit
+	, strFullAddress
+	, strStatementFooterComment
+	, strCompanyName
+	, strCompanyAddress
+	, ysnStatementCreditLimit
+	, dblCreditAvailable
+	, dblFuture
+	, dbl0Days
+	, dbl10Days
+	, dbl30Days
+	, dbl60Days
+	, dbl90Days
+	, dbl91Days
+	, dblCredits
+	, dblPrepayments
+	, dtmAsOfDate
+	, blbLogo)
 SELECT MAINREPORT.* 
 	 , dblCreditAvailable	= MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
 	 , dblFuture			= ISNULL(AGINGREPORT.dblFuture, 0)
@@ -461,7 +428,7 @@ SELECT MAINREPORT.*
 	 , dbl91Days			= ISNULL(AGINGREPORT.dbl91Days, 0)
 	 , dblCredits			= ISNULL(AGINGREPORT.dblCredits, 0)
 	 , dblPrepayments		= ISNULL(AGINGREPORT.dblPrepayments, 0)
-	 , dtmAsOfDate			= @dtmDateTo
+	 , dtmAsOfDate			= @dtmDateToLocal
 	 , blbLogo				= dbo.fnSMGetCompanyLogo('Header')
 FROM (
 	SELECT STATEMENTREPORT.strReferenceNumber
@@ -537,10 +504,10 @@ FROM (
 			, STATEMENTREPORT.ysnStatementCreditLimit
 			, STATEMENTREPORT.intEntityCustomerId
 ) MAINREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT
+LEFT JOIN @temp_aging_table AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN (
 	SELECT intEntityId
 	FROM dbo.tblARCustomer WITH (NOLOCK) 
-	WHERE (ISNULL(strStatementFormat, '') = '' OR strStatementFormat = @strStatementFormat)
+	WHERE (ISNULL(strStatementFormat, '') = '' OR strStatementFormat = @strStatementFormatLocal)
 ) CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityId
