@@ -166,7 +166,7 @@ IF @dtmDate IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @innerQuery = @innerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 	END
     ELSE 
 	BEGIN 
@@ -193,6 +193,24 @@ BEGIN
 		   @join = [join], 
 		   @datatype = [datatype] 
 	FROM @temp_xml_table
+
+	--THIS FILTER WILL GET THE CONNECTED BILL ID FROM SOURCE MODULE
+	IF (@fieldname = 'strReceiptNumber' OR @fieldname = 'strTicketNumber' OR @fieldname = 'strShipmentNumber' OR @fieldname = 'strContractNumber' OR @fieldname = 'strLoadNumber')
+	BEGIN 
+		SET @strBillId = (SELECT TOP 1 strBillId FROM vyuAPOpenPayableDetailsFields WHERE (CASE WHEN @fieldname = 'strReceiptNumber' THEN  strReceiptNumber 
+																							    WHEN @fieldname = 'strTicketNumber' THEN  strTicketNumber 
+																								WHEN @fieldname = 'strShipmentNumber' THEN  strShipmentNumber 
+																								WHEN @fieldname = 'strLoadNumber' THEN  strLoadNumber 
+																							ELSE strContractNumber END) = @from)
+		SET @fieldname = 'strBillId'
+		SET @from = @strBillId
+	END
+    
+	--IF @strBillId IS NOT NULL
+	--BEGIN
+	--	SET @filter = dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)				  
+	--END  
+
 	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
 	
 	DELETE FROM @temp_xml_table WHERE id = @id
@@ -226,16 +244,16 @@ END
 		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strVendorIdName, @condition, @from, @to, @join, null, null, @datatype)				  
 	END
   
-   SELECT @strBillId = [fieldname], 
-		   @from = [from], 
-		   @to = [to], 
-		   @join = [join], 
-		   @datatype = [datatype] 
-	FROM @temp_xml_table WHERE [fieldname] = 'strBillId';
-	IF @strBillId IS NOT NULL
-	BEGIN
-		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strBillId, @condition, @from, @to, @join, null, null, @datatype)				  
-	END  
+ --  SELECT @strBillId = [fieldname], 
+	--	   @from = [from], 
+	--	   @to = [to], 
+	--	   @join = [join], 
+	--	   @datatype = [datatype] 
+	--FROM @temp_xml_table WHERE [fieldname] = 'strBillId';
+	--IF @strBillId IS NOT NULL
+	--BEGIN
+	--	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strBillId, @condition, @from, @to, @join, null, null, @datatype)				  
+	--END  
 
 	 SELECT @strAccountId = [fieldname], 
 		   @from = [from], 
@@ -270,22 +288,7 @@ END
 		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strTerm, @condition, @from, @to, @join, null, null, @datatype)				  
 	END  
 	
-	--THIS FILTER WILL GET THE CONNECTED BILL ID FROM SOURCE MODULE
-	IF (@fieldname = 'strReceiptNumber' OR @fieldname = 'strTicketNumber' OR @fieldname = 'strShipmentNumber' OR @fieldname = 'strContractNumber' OR @fieldname = 'strLoadNumber')
-	BEGIN 
-		SET @strBillId = (SELECT TOP 1 strBillId FROM vyuAPOpenPayableDetailsFields WHERE (CASE WHEN @fieldname = 'strReceiptNumber' THEN  strReceiptNumber 
-																							    WHEN @fieldname = 'strTicketNumber' THEN  strTicketNumber 
-																								WHEN @fieldname = 'strShipmentNumber' THEN  strShipmentNumber 
-																								WHEN @fieldname = 'strLoadNumber' THEN  strLoadNumber 
-																							ELSE strContractNumber END) = @from)
-		SET @fieldname = 'strBillId'
-		SET @from = @strBillId
-	END
-    
-	IF @strBillId IS NOT NULL
-	BEGIN
-		SET @filter = dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)				  
-	END  
+	
 
 SET @query = '
 	SELECT * FROM (
