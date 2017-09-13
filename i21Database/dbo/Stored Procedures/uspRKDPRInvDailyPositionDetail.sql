@@ -115,17 +115,15 @@ BEGIN
 
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,strTruckName,strDriverName,[Storage Due])
 				SELECT distinct 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((it1.dblUnitOnHand),0)) dblTotal
-				, ic.strLocationName,i.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
+				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((a.dblUnitOnHand),0)) dblTotal
+				, sl.strLocationName,i.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 				,null [Storage Due] 
-				FROM tblICItem i
-				INNER JOIN tblICInventoryReceiptItem ii on ii.intItemId = i.intItemId
-				INNER JOIN tblICInventoryReceipt ir on ir.intInventoryReceiptId=ii.intInventoryReceiptId
-				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
-				INNER JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
-				INNER JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-				INNER JOIN tblSMCompanyLocation ic on ic.intCompanyLocationId = il.intLocationId
+				FROM tblICItemStock a  
+				  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId  and isnull(a.dblUnitOnHand,0) > 0
+				  JOIN tblICItem i on a.intItemId=i.intItemId  
+				  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
+				  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
+				  JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 				WHERE i.intCommodityId =@intCommodityId AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
 
 				UNION
@@ -136,21 +134,7 @@ BEGIN
 				WHERE ysnCustomerStorage <> 1 AND
 				intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 								
-				--UNION
-
-				--(select distinct 1 AS intSeqId,'In-House',@strDescription,StorageType AS [strType],				
-				-- CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then dblTotal  else 0 end dblTotal 
-				-- ,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId,'' strTruckName,'' strDriverName,[Storage Due]
-				-- FROM (
-				--SELECT 
-				--dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal,strLocationName,strItemNo
-				--,Ticket,
-				--[Storage Type] StorageType,[Storage Due]
-				--FROM vyuGRGetStorageDetail ch
-				--WHERE ch.intCommodityId  = @intCommodityId	AND ysnDPOwnedType = 1
-				--	AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
-				--)t)
-			UNION
+				UNION
 				SELECT DISTINCT 1,'In-House',@strDescription,'On-Hold' strType,
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal,
 				cl.strLocationName,i1.strItemNo,@intCommodityId,@intCommodityUnitMeasureId,strTruckName,strDriverName,null [Storage Due]

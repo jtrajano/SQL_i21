@@ -1,7 +1,6 @@
 ﻿CREATE PROC [dbo].[uspRKDPRDailyPositionByCommodity]
-	@intVendorId INT = NULL
+	 @intVendorId INT = NULL
 AS
-
 DECLARE @tblFinalDetail TABLE (
 	intRowNum int,
 	strLocationName NVARCHAR(500) COLLATE Latin1_General_CI_AS,
@@ -56,7 +55,7 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    
    (isnull(invQty,0) - isnull(PurBasisDelivary,0)) + (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))+ isnull(dblCollatralSales,0)  + isnull(SlsBasisDeliveries,0)  AS CashExposure,  
    
-   (((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*isnull(dblContractSize,1)) + isnull(DeltaOption,0)   DeltaOption,          
+   (isnull(intOpenContract,0)) + isnull(DeltaOption,0)   DeltaOption,          
  
    isnull(ReceiptProductQty,0) ReceiptProductQty,
    isnull(OpenPurchasesQty,0) OpenPurchasesQty,
@@ -64,7 +63,8 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    isnull(OpenPurQty,0) OpenPurQty,
    
    CASE WHEN isnull(@intVendorId,0) = 0 THEN
-   isnull(invQty,0) + isnull(dblGrainBalance ,0) +
+   isnull(invQty,0) 
+   + isnull(dblGrainBalance ,0) +
    isnull(OnHold,0)
    else
     isnull(CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DPCustomer,0) else 0 end,0) + isnull(OnHold,0) end
@@ -115,22 +115,16 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 			AND CD.intUnitMeasureId=ium.intUnitMeasureId and intContractTypeId=2 and CD.intPricingTypeId in(1,2) 
 	WHERE  ch.intCommodityId=c.intCommodityId and cl.intCompanyLocationId  = CD.intCompanyLocationId)t) as OpenSalesQty			
      
-	,(SELECT top 1 rfm.dblContractSize as dblContractSize from tblRKFutOptTransaction otr  
-	JOIN tblRKFutureMarket rfm on rfm.intFutureMarketId=otr.intFutureMarketId  
-	WHERE otr.intCommodityId=c.intCommodityId and otr.intLocationId=cl.intCompanyLocationId) dblContractSize     
-              
-	,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
-		WHERE otr.strBuySell='Sell' AND otr.intCommodityId=c.intCommodityId  and intInstrumentTypeId=1
-		and otr.intLocationId=cl.intCompanyLocationId ) FutSBalTransQty     
-  
-	,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
-	WHERE otr.strBuySell='Buy' AND otr.intCommodityId=c.intCommodityId and intInstrumentTypeId=1 and otr.intLocationId=cl.intCompanyLocationId) as FutLBalTransQty,            
-           
- (SELECT SUM(psd.dblMatchQty) from tblRKMatchFuturesPSHeader psh            
- JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId            
- and intCommodityId=c.intCommodityId and psh.intCompanyLocationId=cl.intCompanyLocationId   ) FutMatchedQty  
 
-		,(select sum(isnull(Qty,0)) Qty from(
+              
+	,(select sum(intOpenContract) from(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId, intOpenContract*dblContractSize) as intOpenContract 
+	from vyuRKGetOpenContract otr  
+	JOIN tblRKFutOptTransaction t on otr.intFutOptTransactionId=t.intFutOptTransactionId
+	JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
+	JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
+	WHERE t.intCommodityId=c.intCommodityId and t.intLocationId=cl.intCompanyLocationId)t) intOpenContract   
+  
+	,(select sum(isnull(Qty,0)) Qty from(
 		SELECT 
 		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((a.dblUnitOnHand),0)) as Qty 
  		 FROM tblICItemStock a  
@@ -222,11 +216,13 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
 						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
 						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
-						) END * isnull((
+						) END * 
+						isnull((
 						SELECT TOP 1 dblDelta
 						FROM tblRKFuturesSettlementPrice sp
 						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId 
+						AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
 						AND ft.dblStrike = mm.dblStrike
 						ORDER BY dtmPriceDate DESC
 				),0))*m.dblContractSize  AS dblNoOfContract
@@ -304,11 +300,11 @@ insert into @tblFinalDetail
 			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenPurchasesQty)),0) OpenPurchasesQty,
 			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenSalesQty)),0) OpenSalesQty,
 			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblCompanyTitled)),0) dblCompanyTitled,
-			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblCaseExposure)),0)+ isnull(DeltaOption,0) dblCaseExposure,
+			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,isnull(dblCaseExposure+DeltaOption,0))),0) dblCaseExposure,			
 			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblBasisExposure)),0) OpenSalQty,
 			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblAvailForSale)),0) dblAvailForSale,
 			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblInHouse)),0) dblInHouse,
-			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblBasisExposure)),0) dblBasisExposure			
+			isnull(Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblBasisExposure)),0) dblBasisExposure						
 FROM #temp t
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 	JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
@@ -340,7 +336,7 @@ FROM #temp t
 
 END
 
-select intCommodityId,strCommodityCode,strUnitMeasure
+SELECT intCommodityId,strCommodityCode,strUnitMeasure
 	,sum(isnull(OpenPurchasesQty,0))  OpenPurchasesQty
 	,sum(isnull(OpenSalesQty,0))  	 OpenSalesQty
 	,sum(isnull(dblCompanyTitled,0)) dblCompanyTitled
@@ -350,4 +346,3 @@ select intCommodityId,strCommodityCode,strUnitMeasure
 	,sum(isnull(dblInHouse,0)) dblInHouse
 	,sum(isnull(dblBasisExposure,0)) dblBasisExposure from @tblFinalDetail
 GROUP BY intCommodityId,strCommodityCode,strUnitMeasure
-
