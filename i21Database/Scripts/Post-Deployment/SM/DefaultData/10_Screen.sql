@@ -332,6 +332,102 @@ GO
 		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Grain' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
 
 	DELETE tblSMScreen WHERE strModule = 'Grain' AND strNamespace IN('Grain.view.StorageType', 'Grain.view.QualityDiscounts', 'Grain.view.StorageStatement')
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.ScaleLoadSelection')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (N'', N'Load Schedule Selection', N'Grain.view.ScaleLoadSelection', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Load Schedule Selection', strModule = N'Grain' WHERE strNamespace = 'Grain.view.ScaleLoadSelection'
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.ScaleContractSelection')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (N'', N'Contract Selection', N'Grain.view.ScaleContractSelection', N'Grain', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Contract Selection', strModule = N'Grain' WHERE strNamespace = 'Grain.view.ScaleContractSelection'
+
+       --- Store
+       --- Checkouts
+       IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.CheckoutHeader')
+              BEGIN
+                     INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+                     VALUES (N'', N'Checkouts', N'Store.view.CheckoutHeader', N'Store', N'', 0)
+              END    
+       ELSE
+              BEGIN
+                     UPDATE tblSMScreen SET strScreenName = N'Checkouts', strModule = N'Store' WHERE strNamespace = 'Store.view.CheckoutHeader'
+              END
+       --- Promotion Item List
+       IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.PromotionItemList')
+              BEGIN
+                     INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+                     VALUES (N'', N'Promotion Item List', N'Store.view.PromotionItemList', N'Store', N'', 0)
+              END    
+       ELSE
+              BEGIN
+                     UPDATE tblSMScreen SET strScreenName = N'Promotion Item List', strModule = N'Store' WHERE strNamespace = 'Store.view.PromotionItemList'
+              END
+       --- Item Movement
+       IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.ItemMovementReport')
+              BEGIN
+                     INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+                     VALUES (N'', N'Item Movement', N'Store.view.ItemMovementReport', N'Store', N'', 0)
+              END    
+       ELSE
+              BEGIN
+                     UPDATE tblSMScreen SET strScreenName = N'Item Movement', strModule = N'Store' WHERE strNamespace = 'Store.view.ItemMovementReport'
+              END
+       --- Mark Up/Down
+       IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.MarkUpDown')
+              BEGIN
+                     INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+                     VALUES (N'', N'Mark Up/Down', N'Store.view.MarkUpDown', N'Store', N'', 0)
+              END    
+       ELSE
+              BEGIN
+                     UPDATE tblSMScreen SET strScreenName = N'Mark Up/Down', strModule = N'Store' WHERE strNamespace = 'Store.view.MarkUpDown'
+              END
+       --- Purge Promotions
+       IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.PurgePromotion')
+              BEGIN
+                     INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+                     VALUES (N'', N'Purge Promotions', N'Store.view.PurgePromotion', N'Store', N'', 0)
+              END    
+       ELSE
+              BEGIN
+                     UPDATE tblSMScreen SET strScreenName = N'Purge Promotions', strModule = N'Store' WHERE strNamespace = 'Store.view.PurgePromotion'
+              END
+       --- Update Rebate/Discount
+       IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.UpdateRebateDiscount')
+              BEGIN
+                     INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+                     VALUES (N'', N'Update Rebate/Discount', N'Store.view.UpdateRebateDiscount', N'Store', N'', 0)
+              END    
+       ELSE
+              BEGIN
+                     UPDATE tblSMScreen SET strScreenName = N'Update Rebate/Discount', strModule = N'Store' WHERE strNamespace = 'Store.view.UpdateRebateDiscount'
+              END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Quality.view.QualityException')
+	BEGIN
+		UPDATE tblSMScreen SET strScreenName = N'Quality View' WHERE strNamespace = 'Quality.view.QualityException'
+	END
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
+GO
+
+	--Manufacturing
+	DELETE from tblSMScreen where strModule='Manufacturing' and strNamespace in ('Manufacturing.view.DataSource','Manufacturing.view.ItemMachine','Manufacturing.view.BlendSheetItemGridRowExpander')
+
+GO
+
+	--Integration
+	Delete from tblSMScreen where strModule='Integration' and strNamespace in ('Integration.view.TextLayout','Integration.view.DatabaseTableToExcel','Integration.view.ValidateXML','Integration.view.GenerateXML')
+
+GO
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strModule='Integration' and strNamespace = 'Integration.view.CopyMoveDeleteFile')
+	BEGIN
+		UPDATE tblSMScreen SET strScreenName = N'File Operation' WHERE strModule='Integration' and strNamespace = 'Integration.view.CopyMoveDeleteFile'
+	END
+
 GO

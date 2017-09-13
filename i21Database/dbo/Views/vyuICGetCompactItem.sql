@@ -50,7 +50,6 @@ SELECT
 	, strClass 				= Class.strDescription
 	, strProductLine 		= ProductLine.strDescription
 	, strHazmatMessage		= HazMat.strDescription
-	, strItemMessage		= ItemMessage.strDescription
 	, ysnUseWeighScales		= Item.ysnUseWeighScales
 	, ysnIsBasket			= Item.ysnIsBasket
 	, strDimensionUOM		= mfgDimensionUOM.strUnitMeasure
@@ -70,7 +69,6 @@ LEFT JOIN tblICRinFuelCategory FuelCategory ON FuelCategory.intRinFuelCategoryId
 LEFT JOIN tblICTag Medication ON Medication.intTagId = Item.intMedicationTag
 LEFT JOIN tblICTag Ingredient ON Ingredient.intTagId = Item.intIngredientTag
 LEFT JOIN tblICTag HazMat ON HazMat.intTagId = Item.intHazmatMessage
-LEFT JOIN tblICTag ItemMessage ON ItemMessage.intTagId = Item.intItemMessage
 LEFT JOIN tblICItem PhysicalItem ON PhysicalItem.intItemId = Item.intPhysicalItem
 LEFT JOIN tblPATPatronageCategory PatronageCategory ON PatronageCategory.intPatronageCategoryId = Item.intPatronageCategoryId
 LEFT JOIN tblPATPatronageCategory PatronageDirect ON PatronageDirect.intPatronageCategoryId = Item.intPatronageCategoryDirectId

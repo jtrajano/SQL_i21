@@ -4,7 +4,7 @@
 	@strCompanyName nvarchar(100)
 )
 AS
-DECLARE @ysnOpen BIT, @ysnUnpostedTrans BIT,
+DECLARE @ysnOpen BIT, @ysnUnpostedTrans BIT, 
 	@intFiscalYearId INT,@intFiscalPeriodId INT,
 	@dtmStartDate DATETIME,	@dtmEndDate DATETIME
 
@@ -24,8 +24,8 @@ BEGIN
 END
 
 EXEC dbo.uspGLGetAllUnpostedTransactionsByFiscal @intFiscalYearId,1,@intFiscalPeriodId,'GL' ,@ysnUnpostedTrans OUT
-
-IF @ysnOpen = 1 or @ysnUnpostedTrans = 1
+	
+IF @ysnOpen = 1 or @ysnUnpostedTrans = 1 
 BEGIN
 	DECLARE @strResult NVARCHAR(1000)
 	IF @ysnOpen =1 and @ysnUnpostedTrans = 0 SET @strResult = 'Fiscal Period is still open in the subsidiary company.'
