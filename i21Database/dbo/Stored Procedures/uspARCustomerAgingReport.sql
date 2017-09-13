@@ -44,6 +44,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 DECLARE  @strAsOfDateTo					AS NVARCHAR(50)
 		,@strAsOfDateFrom				AS NVARCHAR(50)
 		,@strSalesperson				AS NVARCHAR(100)
+		,@strCustomerName				AS NVARCHAR(100)
 		,@xmlDocumentId					AS INT
 		,@query							AS NVARCHAR(MAX)
 		,@filter						AS NVARCHAR(MAX) = ''
@@ -92,6 +93,10 @@ WITH (
 )
 
 -- Gather the variables values from the xml table.
+SELECT  @strCustomerName = ISNULL([from], '')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strCustomerName'
+
 SELECT  @strSalesperson = ISNULL([from], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
@@ -115,6 +120,7 @@ WHERE	[fieldname] = 'ysnPrintOnlyOverCreditLimit'
 
 SET @strAsOfDateFrom = CASE WHEN @strAsOfDateFrom IS NULL THEN '''''' ELSE ''''+@strAsOfDateFrom+'''' END
 SET @strAsOfDateTo   = CASE WHEN @strAsOfDateTo IS NULL THEN '''''' ELSE ''''+@strAsOfDateTo+'''' END
+SET @strCustomerName = CASE WHEN @strCustomerName IS NULL THEN '''''' ELSE ''''+@strCustomerName+'''' END
 SET @strSalesperson  = CASE WHEN @strSalesperson IS NULL THEN '''''' ELSE ''''+@strSalesperson+'''' END
 SET @strSourceTransaction  = CASE WHEN @strSourceTransaction IS NULL THEN '''''' ELSE ''''+@strSourceTransaction+'''' END
 SET @strAgedBalances = CASE WHEN @strAgedBalances IS NULL THEN '''All''' ELSE ''''+@strAgedBalances+'''' END
@@ -160,17 +166,23 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'DECLARE @temp_aging_table TABLE(
 
 DECLARE @dtmDateTo				DATETIME
        ,@dtmDateFrom			DATETIME
+	   ,@strCustomerName		NVARCHAR(100)
 	   ,@strSalesperson			NVARCHAR(100)
 	   ,@strSourceTransaction	NVARCHAR(100)
 	   ,@strAgedBalances        NVARCHAR(100)
 	   ,@ysnPrintOnlyOverCreditLimit BIT
+	   ,@intEntityCustomerId	INT	= NULL
 
 SET @dtmDateTo   = CAST(CASE WHEN '+@strAsOfDateTo+' <> '''' THEN '+@strAsOfDateTo+' ELSE GETDATE() END AS DATETIME)
 SET @dtmDateFrom = CAST(CASE WHEN '+@strAsOfDateFrom+' <> '''' THEN '+@strAsOfDateFrom+' ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
+SET @strCustomerName = ISNULL('+@strCustomerName+', NULL)
 SET @strSalesperson = ISNULL('+@strSalesperson+', NULL)
 SET @strSourceTransaction = ISNULL('+@strSourceTransaction+', NULL)
 SET @strAgedBalances = ISNULL('+@strAgedBalances+', ''All'')
 SET @ysnPrintOnlyOverCreditLimit = CAST(ISNULL('+ CAST(@ysnPrintOnlyOverCreditLimit AS NVARCHAR(5)) +', 0) AS BIT)
+
+IF ISNULL(@strCustomerName, '''''''') <> ''''
+	SELECT TOP 1 @intEntityCustomerId = intEntityId FROM vyuARCustomerSearch WITH (NOLOCK) WHERE strName = @strCustomerName
 
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)
@@ -183,7 +195,7 @@ ELSE
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
  
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, NULL, @strSourceTransaction
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom, @dtmDateTo, @strSalesperson, @intEntityCustomerId, @strSourceTransaction
 
 DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
 
