@@ -33,6 +33,8 @@ DECLARE @dtmDateToLocal				AS DATETIME			= NULL
 	  , @strDateFrom				AS NVARCHAR(50)
 	  , @query						AS NVARCHAR(MAX)
 	  , @queryBudget				AS NVARCHAR(MAX)
+	  , @queryForCF					AS NVARCHAR(MAX)
+	  , @queryForNonCF				AS NVARCHAR(MAX)
 	  , @queryBalanceForward        AS NVARCHAR(MAX)
 	  , @filter						AS NVARCHAR(MAX)	= ''
 	  , @intEntityCustomerId		AS INT				= NULL
@@ -132,11 +134,7 @@ SET @ysnPrintFromCFLocal		= ISNULL(@ysnPrintFromCF, 0)
 SET @strCustomerNumberLocal		= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal		= NULLIF(@strLocationName, '')
-
-IF @ysnPrintFromCFLocal = 1
-	BEGIN
-		SET @dtmDateFromLocal = DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
-	END
+SET @dtmDateFromLocal			= DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 
 SET @strDateTo					= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom				= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
@@ -164,6 +162,126 @@ IF @ysnSearchOnly = 0
 		INSERT INTO @temp_balanceforward_table
 		EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmBalanceForwardDateLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
 	END
+
+SET @queryForCF = CAST('' AS NVARCHAR(MAX)) + '
+SELECT intInvoiceId			= NULL
+	 , intEntityCustomerId	= P.intEntityCustomerId
+	 , intPaymentId			= P.intPaymentId
+	 , intCompanyLocationId	= P.intLocationId
+	 , intTermId			= NULL
+	 , strInvoiceNumber		= NULL
+	 , strRecordNumber		= P.strRecordNumber
+	 , strInvoiceOriginId   = NULL
+	 , strBOLNumber			= NULL
+	 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
+	 , strTransactionType	= ''Payment''
+	 , dblInvoiceTotal		= 0.00
+	 , dblBalance			= 0.00
+	 , dblPayment			= P.dblAmountPaid
+	 , dtmDate				= P.dtmDatePaid
+	 , dtmDueDate			= NULL
+	 , dtmShipDate			= NULL
+	 , dtmDatePaid			= P.dtmDatePaid
+	 , strType				= NULL
+FROM dbo.tblARPayment P WITH (NOLOCK)
+INNER JOIN (
+	SELECT intPaymentId
+	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intInvoiceId
+		FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE ysnPosted = 1
+			AND strType <> ''CF Tran''
+	) I ON I.intInvoiceId = PD.intInvoiceId
+) PD ON P.intPaymentId = PD.intPaymentId
+WHERE ysnInvoicePrepayment = 0
+  AND ysnPosted = 1
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid
+
+UNION ALL
+
+SELECT intInvoiceId			= NULL
+	 , intEntityCustomerId	= P.intEntityCustomerId
+	 , intPaymentId			= P.intPaymentId
+	 , intCompanyLocationId	= P.intLocationId
+	 , intTermId			= NULL
+	 , strInvoiceNumber		= NULL
+	 , strRecordNumber		= P.strRecordNumber
+	 , strInvoiceOriginId	= NULL
+	 , strBOLNumber			= NULL
+	 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
+	 , strTransactionType	= ''Discount Taken''
+	 , dblInvoiceTotal		= 0.00
+	 , dblBalance			= 0.00
+	 , dblPayment			= ISNULL(PD.dblDiscountTaken, 0)
+	 , dtmDate				= P.dtmDatePaid
+	 , dtmDueDate			= NULL
+	 , dtmShipDate			= NULL
+	 , dtmDatePaid			= P.dtmDatePaid
+	 , strType				= NULL
+FROM dbo.tblARPayment P WITH (NOLOCK)
+INNER JOIN (
+	SELECT intPaymentId
+		 , dblDiscountTaken = SUM(PD.dblDiscount)
+	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intInvoiceId
+		FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE ysnPosted = 1
+			AND strType <> ''CF Tran''
+	) I ON I.intInvoiceId = PD.intInvoiceId
+	WHERE dblDiscount > 0
+	GROUP BY intPaymentId
+) PD ON P.intPaymentId = PD.intPaymentId
+WHERE ysnInvoicePrepayment = 0
+  AND ysnPosted = 1
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.dblDiscountTaken'
+
+SET @queryForNonCF = CAST('' AS NVARCHAR(MAX)) + '
+SELECT intInvoiceId			= NULL
+	 , intEntityCustomerId	= P.intEntityCustomerId
+	 , intPaymentId			= P.intPaymentId
+	 , intCompanyLocationId	= P.intLocationId
+	 , intTermId			= NULL
+	 , strInvoiceNumber		= NULL
+	 , strRecordNumber		= P.strRecordNumber + '' - '' + ISNULL(PD.strInvoiceNumber , '''')
+	 , strInvoiceOriginId   = NULL
+	 , strBOLNumber			= NULL
+	 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
+	 , strTransactionType	= ''Payment''
+	 , dblInvoiceTotal		= 0.00
+	 , dblBalance			= 0.00
+	 , dblPayment			= SUM(PD.dblPayment)
+	 , dtmDate				= P.dtmDatePaid
+	 , dtmDueDate			= NULL
+	 , dtmShipDate			= NULL
+	 , dtmDatePaid			= P.dtmDatePaid
+	 , strType				= NULL
+FROM dbo.tblARPayment P WITH (NOLOCK)
+INNER JOIN (
+	SELECT PD.intPaymentId
+	     , PD.intInvoiceId
+		 , I.strInvoiceNumber
+	     , dblPayment = SUM(PD.dblPayment) + SUM(PD.dblDiscount) - SUM(PD.dblInterest) 
+		 , I.dblInvoiceTotal
+	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intInvoiceId
+		     , strInvoiceNumber
+			 , dblInvoiceTotal	 = CASE WHEN dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +' THEN dblInvoiceTotal ELSE 0 END 
+		FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE ysnPosted = 1
+			AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
+			AND strType <> ''CF Tran''
+	) I ON I.intInvoiceId = PD.intInvoiceId
+	GROUP BY intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal	
+) PD ON P.intPaymentId = PD.intPaymentId AND PD.dblInvoiceTotal - PD.dblPayment <> 0
+WHERE ysnInvoicePrepayment = 0
+  AND ysnPosted = 1
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.intInvoiceId, strInvoiceNumber'
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 
 'SELECT *
@@ -268,83 +386,9 @@ FROM (
 															) P ON PD.intPaymentId = P.intPaymentId))))
 		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))
 
-		UNION ALL
+		UNION ALL ' + CASE WHEN @ysnPrintFromCF = 1 THEN @queryForCF ELSE @queryForNonCF END +
 
-		SELECT intInvoiceId			= NULL
-			 , intEntityCustomerId	= P.intEntityCustomerId
-			 , intPaymentId			= P.intPaymentId
-			 , intCompanyLocationId	= P.intLocationId
-			 , intTermId			= NULL
-			 , strInvoiceNumber		= NULL
-			 , strRecordNumber		= P.strRecordNumber
-			 , strInvoiceOriginId   = NULL
-			 , strBOLNumber			= NULL
-			 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
-			 , strTransactionType	= ''Payment''
-			 , dblInvoiceTotal		= 0.00
-			 , dblBalance			= 0.00
-			 , dblPayment			= P.dblAmountPaid
-			 , dtmDate				= P.dtmDatePaid
-			 , dtmDueDate			= NULL
-			 , dtmShipDate			= NULL
-			 , dtmDatePaid			= P.dtmDatePaid
-			 , strType				= NULL
-		FROM dbo.tblARPayment P WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intPaymentId
-			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-			INNER JOIN (
-				SELECT intInvoiceId
-				FROM dbo.tblARInvoice WITH (NOLOCK)
-				WHERE ysnPosted = 1
-				  AND strType <> ''CF Tran''
-			) I ON I.intInvoiceId = PD.intInvoiceId
-		) PD ON P.intPaymentId = PD.intPaymentId
-		WHERE ysnInvoicePrepayment = 0
-			AND ysnPosted = 1
-			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
-		GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid
-
-		UNION ALL
-
-		SELECT intInvoiceId			= NULL
-			, intEntityCustomerId	= P.intEntityCustomerId
-			, intPaymentId			= P.intPaymentId
-			, intCompanyLocationId	= P.intLocationId
-			, intTermId				= NULL
-			, strInvoiceNumber		= NULL
-			, strRecordNumber		= P.strRecordNumber
-			, strInvoiceOriginId	= NULL
-			, strBOLNumber			= NULL
-			, strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
-			, strTransactionType	= ''Discount Taken''
-			, dblInvoiceTotal		= 0.00
-			, dblBalance			= 0.00
-			, dblPayment			= ISNULL(PD.dblDiscountTaken, 0)
-			, dtmDate				= P.dtmDatePaid
-			, dtmDueDate			= NULL
-			, dtmShipDate			= NULL
-			, dtmDatePaid			= P.dtmDatePaid
-			, strType				= NULL
-		FROM dbo.tblARPayment P WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intPaymentId
-				 , dblDiscountTaken = SUM(PD.dblDiscount)
-			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-			INNER JOIN (
-				SELECT intInvoiceId
-				FROM dbo.tblARInvoice WITH (NOLOCK)
-				WHERE ysnPosted = 1
-					AND strType <> ''CF Tran''
-			) I ON I.intInvoiceId = PD.intInvoiceId
-			WHERE dblDiscount > 0
-			GROUP BY intPaymentId
-		) PD ON P.intPaymentId = PD.intPaymentId
-		WHERE ysnInvoicePrepayment = 0
-			AND ysnPosted = 1
-			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
-		GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.dblDiscountTaken
-	) TRANSACTIONS ON TRANSACTIONS.intEntityCustomerId = C.intEntityId
+	') TRANSACTIONS ON TRANSACTIONS.intEntityCustomerId = C.intEntityId
 	LEFT JOIN (
 		SELECT intTermID
 			 , strTerm
@@ -487,6 +531,10 @@ IF @ysnPrintFromCFLocal = 1
 			FROM dbo.tblCFInvoiceFeeStagingTable WITH (NOLOCK)
 			GROUP BY intCustomerId
 		) CF ON AGINGREPORT.intEntityCustomerId = CF.intCustomerId
+	END
+ELSE 
+	BEGIN
+		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType = 'Payment'
 	END
 
 INSERT INTO @temp_statement_table(
