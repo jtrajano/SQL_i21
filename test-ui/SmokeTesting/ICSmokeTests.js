@@ -657,10 +657,9 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
         .waitUntilLoaded('')
 
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM', 'Test_Pounds','strWeightUOM')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName','Raw Station','strSubLocationName')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName','RM Storage','strSubLocationName')
-
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM', 'Test_Pounds','strWeightUOM')
 
         .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
         .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
@@ -728,27 +727,27 @@ StartTest (function (t) {
         .displayText('===== Create Purchase Order Inventory Receipt for Lotted Item "Process Button" Done=====')
 
 
-////        /*====================================== Create PO to IR for Non Lotted Item Add Orders Screen ======================================*/
-////        //region
-////        .clickMenuFolder('Inventory','Folder')
-////        .waitUntilLoaded('')
-////        .displayText('===== Scenario 3: Create PO to IR for Non Lotted Item Add Orders Screen =====')
-////        .addFunction(function(next){
-////            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
-////        })
-////        .waitUntilLoaded('')
-////        //endregion
-////
-////
-////        /*====================================== Create PO to IR for Lotted Item  Add Orders Screen ======================================*/
-////        //region
-////        .displayText('===== Scenario 4: Create PO to IR for Lotted Item  Add Orders Screen =====')
-////        .addFunction(function(next){
-////            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
-////        })
-////        .waitUntilLoaded('')
-////        //endregion
+//        /*====================================== Create PO to IR for Non Lotted Item Add Orders Screen ======================================*/
+//        //region
+//        .clickMenuFolder('Inventory','Folder')
+//        .waitUntilLoaded('')
+//        .displayText('===== Scenario 3: Create PO to IR for Non Lotted Item Add Orders Screen =====')
+//        .addFunction(function(next){
+//            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
+//        })
+//        .waitUntilLoaded('')
+//        //endregion
 //
+//
+//        /*====================================== Create PO to IR for Lotted Item  Add Orders Screen ======================================*/
+//        //region
+//        .displayText('===== Scenario 4: Create PO to IR for Lotted Item  Add Orders Screen =====')
+//        .addFunction(function(next){
+//            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
+//        })
+//        .waitUntilLoaded('')
+//        //endregion
+
 
         /*====================================== Create Direct IR for Lotted Item with other charges and voucher ======================================*/
         //region
@@ -896,29 +895,29 @@ StartTest (function (t) {
 //         //endregion
 
 
-//         /*====================================== Create SO for Non Lotted Item ======================================*/
-//         .displayText('===== Scenario 10: Create SO IS for NON Lotted Item =====')
-//         .addFunction(function(next){
-//             commonIC.addSOtoISAddORdersNonLotted (t,next, 'Apple Spice Sales',  'USD', '0001 - Fort Wayne', 'Truck','Smoke - NLTI - 01','Test_Pounds', 100)
-//         })
-//         .waitUntilLoaded('')
-//         //endregion
+        /*====================================== Create SO for Non Lotted Item ======================================*/
+        .displayText('===== Scenario 10: Create SO IS for NON Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addSOtoISAddORdersNonLotted (t,next, 'Apple Spice Sales',  'USD', '0001 - Fort Wayne', 'Truck','Smoke - NLTI - 01','Test_Pounds', 100)
+        })
+        .waitUntilLoaded('')
+        //endregion
 
 
-//         /*====================================== Create Direct IS for Non Lotted Item ======================================*/
-//         .displayText('===== Scenario 11: Create Direct IS for Non Lotted Item =====')
-//         .addFunction(function(next){
-//             commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','Test_Pounds', 100)
-//         })
-//         //endregion
+        /*====================================== Create Direct IS for Non Lotted Item ======================================*/
+        .displayText('===== Scenario 11: Create Direct IS for Non Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','Test_Pounds', 100)
+        })
+        //endregion
 
 
-//         /*====================================== Create Direct IS for Lotted Item ======================================*/
-//         .displayText('===== Scenario 12: Create Direct IS for Lotted Item =====')
-//         .addFunction(function(next){
-//             commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 100, 'LOT-01')
-//         })
-// //        //endregion
+        /*====================================== Create Direct IS for Lotted Item ======================================*/
+        .displayText('===== Scenario 12: Create Direct IS for Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 100, 'LOT-01')
+        })
+       //endregion
 
 
 //         /*====================================== Create Inventory Transfer for Lotted Item Shipment Required Different Location ======================================*/

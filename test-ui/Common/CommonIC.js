@@ -1580,8 +1580,8 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowValue('Customer', customer, 'Customer',1)
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'Currency',1)
-            .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
             .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', quantity, uom)
@@ -1604,7 +1604,6 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
-            .clickMenuFolder('Inventory','Folder')
 
             .done();
     },
@@ -1771,11 +1770,13 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowValue('Customer', customer, 'Customer',1)
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
-            .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
+            .waitUntilLoaded('')
             .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', quantity, uom)
+            .waitUntilLoaded('')
 
             .selectGridComboBoxRowValue('LotTracking',1,'strLotId', lotno,'strLotId')
             .enterGridData('LotTracking', 1, 'colShipQty', '100')
@@ -1803,8 +1804,6 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
-            .clickMenuFolder('Inventory','Folder')
-            .waitUntilLoaded('')
 
             .done();
     },
@@ -1816,10 +1815,11 @@ Ext.define('Inventory.CommonIC', {
      *
      */
     addSOtoISAddORdersNonLotted: function (t,next, customer, currency,location,freight, itemno,uom, quantity) {
+        var linetotal =  quantity * 10;
         new iRely.FunctionalTest().start(t, next)
 
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales (A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1849,7 +1849,6 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
 
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
@@ -1866,22 +1865,27 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
-            .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
 //            .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName','Raw Station','strSubLocationName')
 //            .selectGridComboBoxRowValue('InventoryShipment',1,'strStorageLocationName','RM Storage','strStorageLocationName')
-            .clickTab('PostPreview')
+            .clickTab('Post Preview')
             .waitUntilLoaded('')
+            .clickTab('Details')
             .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colCredit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colDebit', linetotal)
             .clickButton('Post')
             .waitUntilLoaded('')
             .addResult('Successfully Posted',1500)
             .waitUntilLoaded('')
             .clickButton('Close')
-            .waitUntilLoaded('')
-            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .displayText('===== Add Orders Button SO to IS for Non Lotted Done=====')
             //endregion
