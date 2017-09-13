@@ -5221,7 +5221,7 @@ SELECT @CRMPortalParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CRMPortalParentMenuId)
 INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CRMPortalParentMenuId, 1)
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Activities (Portal)', N'CRM', @CRMPortalParentMenuId, N'Activities (Portal)', N'Portal Menu', N'Screen', N'CRM.view.Opportunity?searchCommand=searchConfigAllActivities', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
 ELSE 
@@ -5232,10 +5232,10 @@ SELECT  @CRMActivitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CRMActivitiesMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CRMActivitiesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CRMActivitiesMenuId, 1)
 END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Opportunities (Portal)', N'CRM', @CRMPortalParentMenuId, N'Opportunities (Portal)', N'Portal Menu', N'Screen', N'CRM.view.Opportunity?showSearch=true&searchCommand=Opportunity', N'small-menu-portal', 1, 0, 0, 1, 1, 1)
 ELSE 
@@ -5246,10 +5246,10 @@ SELECT  @CRMOpportunitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuNa
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CRMOpportunitiesMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CRMOpportunitiesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CRMOpportunitiesMenuId, 1)
 END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Campaigns (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Campaigns (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Campaigns (Portal)', N'CRM', @CRMPortalParentMenuId, N'Campaigns (Portal)', N'Portal Menu', N'Screen', N'CRM.view.Campaign?showSearch=true&searchCommand=Campaign', N'small-menu-portal', 1, 0, 0, 1, 2, 1)
 ELSE 
@@ -5260,10 +5260,10 @@ SELECT  @CRMCampaignsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName =
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Campaigns (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CRMCampaignsMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CRMCampaignsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CRMCampaignsMenuId, 1)
 END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pipe Statuses (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pipe Statuses (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Sales Pipe Statuses (Portal)', N'CRM', @CRMPortalParentMenuId, N'Sales Pipe Statuses (Portal)', N'Portal Menu', N'Screen', N'CRM.view.SalesPipeStatus?searchCommand=searchConfig', N'small-menu-portal', 1, 0, 0, 1, 3, 1)
 ELSE 
@@ -5274,10 +5274,10 @@ SELECT  @CRMSalesPipeStatusesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMe
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pipe Statuses (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CRMSalesPipeStatusesMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CRMSalesPipeStatusesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CRMSalesPipeStatusesMenuId, 1)
 END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sources (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sources (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Sources (Portal)', N'CRM', @CRMPortalParentMenuId, N'Sources (Portal)', N'Portal Menu', N'Screen', N'CRM.view.Source', N'small-menu-portal', 1, 0, 0, 1, 4, 1)
 ELSE 
@@ -5288,10 +5288,10 @@ SELECT  @CRMSourcesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = '
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sources (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CRMSourcesMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CRMSourcesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CRMSourcesMenuId, 1)
 END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Sales Entities (Portal)', N'CRM', @CRMPortalParentMenuId, N'Sales Entities (Portal)', N'Portal Menu', N'Screen', N'EntityManagement.view.EntityDirect?showSearch=true&searchCommand=EntityProspect', N'small-menu-portal', 1, 0, 0, 1, 5, 1)
 ELSE 
@@ -5302,10 +5302,10 @@ SELECT  @CRMSalesEntitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuNa
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CRMSalesEntitiesMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CRMSalesEntitiesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CRMSalesEntitiesMenuId, 1)
 END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Leads (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Leads (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Leads (Portal)', N'CRM', @CRMPortalParentMenuId, N'Leads (Portal)', N'Portal Menu', N'Screen', N'AccountsReceivable.view.EntityLead?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 6, 1)
 ELSE 
@@ -5316,7 +5316,7 @@ SELECT  @CRMLeadMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Lea
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Leads (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CRMLeadMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CRMLeadMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CRMLeadMenuId, 1)
 END
 
 /* Scale */
@@ -5332,7 +5332,7 @@ SELECT @ScalePortalParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuNa
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ScalePortalParentMenuId)
 INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@ScalePortalParentMenuId, 1)
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Tickets (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Tickets (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @ScalePortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Scale Tickets (Portal)', N'Ticket Management', @ScalePortalParentMenuId, N'Scale Tickets (Portal)', N'Portal Menu', N'Screen', N'Grain.view.ScaleStationSelection?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
 ELSE 
@@ -5343,10 +5343,10 @@ SELECT  @TKScaleTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Tickets (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @ScalePortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TKScaleTicketsMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TKScaleTicketsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TKScaleTicketsMenuId, 1)
 END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @ScalePortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Storage (Portal)', N'Ticket Management', @ScalePortalParentMenuId, N'Storage (Portal)', N'Portal Menu', N'Screen', N'Grain.view.Storage?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 1, 1)
 ELSE 
@@ -5357,7 +5357,7 @@ SELECT  @TKStorageMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'S
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @ScalePortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TKStorageMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TKStorageMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TKStorageMenuId, 1)
 END
 
 /* Logistics */
@@ -5384,7 +5384,7 @@ SELECT  @LGLoadShipmentSchedulesMenuId = intMenuID FROM tblSMMasterMenu WHERE st
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Load / Shipment Schedules (Portal)' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @LGLoadShipmentSchedulesMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@LGLoadShipmentSchedulesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@LGLoadShipmentSchedulesMenuId, 1)
 END
 
 /* Manufacturing */
@@ -5411,7 +5411,7 @@ SELECT  @MFTransactionsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transactions (Portal)' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @MFTransactionsMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@MFTransactionsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@MFTransactionsMenuId, 1)
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory (Portal)' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingPortalParentMenuId)
@@ -5425,7 +5425,7 @@ SELECT  @MFInventoryMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory (Portal)' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @MFInventoryMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@MFInventoryMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@MFInventoryMenuId, 1)
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality (Portal)' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingPortalParentMenuId)
@@ -5439,7 +5439,7 @@ SELECT  @MFQualityMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Q
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality (Portal)' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @MFQualityMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@MFQualityMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@MFQualityMenuId, 1)
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample Entry (Portal)' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingPortalParentMenuId)
@@ -5453,7 +5453,7 @@ SELECT  @MFSampleEntryMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample Entry (Portal)' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @MFSampleEntryMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@MFSampleEntryMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@MFSampleEntryMenuId, 1)
 END
 
 /* Card Fueling */
@@ -5480,7 +5480,7 @@ SELECT  @CFTransactionsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transactions (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CFTransactionsMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CFTransactionsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CFTransactionsMenuId, 1)
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Accounts (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId)
@@ -5494,7 +5494,7 @@ SELECT  @CFCardAccountsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Accounts (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CFCardAccountsMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CFCardAccountsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CFCardAccountsMenuId, 1)
 END
 
 /* Tank Management */
@@ -5521,7 +5521,7 @@ SELECT  @TMConsumptionSitesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenu
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Consumption Sites (Portal)' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TMConsumptionSitesMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TMConsumptionSitesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TMConsumptionSitesMenuId, 1)
 END
 
 /* Payroll */
@@ -5548,7 +5548,7 @@ SELECT  @PREmployeeMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = '
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PREmployeeMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@PREmployeeMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PREmployeeMenuId, 1)
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Paychecks (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
@@ -5562,7 +5562,7 @@ SELECT  @PRPaychecksMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Paychecks (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PRPaychecksMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@PRPaychecksMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PRPaychecksMenuId, 1)
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Request (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
@@ -5576,7 +5576,7 @@ SELECT  @PRTimeOffRequestMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuNa
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Request (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PRTimeOffRequestMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@PRTimeOffRequestMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PRTimeOffRequestMenuId, 1)
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Calendar (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
@@ -5590,7 +5590,7 @@ SELECT  @PRTimeOffCalendarMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuN
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Calendar (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PRTimeOffCalendarMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@PRTimeOffCalendarMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PRTimeOffCalendarMenuId, 1)
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'W-2s (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
@@ -5604,7 +5604,7 @@ SELECT  @PRW2SMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'W-2s 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'W-2s (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PRW2SMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@PRW2SMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PRW2SMenuId, 1)
 END
 
 GO
