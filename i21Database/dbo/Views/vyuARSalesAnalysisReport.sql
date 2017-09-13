@@ -135,7 +135,7 @@ LEFT OUTER JOIN (
 			, strTransactionId
 			, intItemId
 			, intItemUOMId
-			, dblCost				= AVG(dblCost)
+			, dblCost				= SUM((ABS(dblQty) * (dbo.fnCalculateUnitCost(ABS(dblCost), ABS(dblUOMQty))))) / (CASE WHEN SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1)))) END)
 	FROM
 		tblICInventoryTransaction 
 	WHERE ysnIsUnposted = 0
@@ -157,9 +157,20 @@ LEFT OUTER JOIN (
 	INNER JOIN tblICItem ICI
 		ON ICISI.intItemId = ICI.intItemId
 		AND ISNULL(ICI.strLotTracking, 'No') = 'No'
-	INNER JOIN tblICInventoryTransaction ICIT
-		ON ICIT.ysnIsUnposted							= 0
-		AND ISNULL(ICIT.intLotId, 0)					= 0
+	INNER JOIN (
+		SELECT intTransactionId
+			, strTransactionId
+			, intItemId
+			, intItemUOMId
+			, intLotId
+			, intTransactionDetailId
+			, dblCost				= SUM((ABS(dblQty) * (dbo.fnCalculateUnitCost(ABS(dblCost), ABS(dblUOMQty))))) / (CASE WHEN SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1))))END)
+		FROM
+			tblICInventoryTransaction 
+		WHERE ysnIsUnposted = 0
+		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId, intLotId, intTransactionDetailId
+		) ICIT
+		ON ISNULL(ICIT.intLotId, 0)						= 0
 		AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
 		AND ICIS.strShipmentNumber						= ICIT.strTransactionId
 		AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
@@ -319,7 +330,7 @@ FROM
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
 			 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-			 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
+			 , dblCost = SUM((ABS(ICIT.dblQty) * (dbo.fnCalculateUnitCost(ABS(ICIT.dblCost), ABS(ICIT.dblUOMQty))))) / (CASE WHEN SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) END)
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
@@ -411,7 +422,7 @@ FROM
 				 , strTransactionId
 				 , intItemId
 				 , intItemUOMId
-				 , dblCost				= AVG(dblCost)
+				 , dblCost				= SUM((ABS(dblQty) * (dbo.fnCalculateUnitCost(ABS(dblCost), ABS(dblUOMQty))))) / (CASE WHEN SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1))))END)
 			FROM
 				tblICInventoryTransaction 
 			WHERE ysnIsUnposted = 0
@@ -599,7 +610,7 @@ FROM
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
 			 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-			 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
+			 , dblCost = SUM((ABS(ICIT.dblQty) * (dbo.fnCalculateUnitCost(ABS(ICIT.dblCost), ABS(ICIT.dblUOMQty))))) / (CASE WHEN SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1))))END)
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
@@ -691,7 +702,7 @@ FROM
 				 , strTransactionId
 				 , intItemId
 				 , intItemUOMId
-				 , dblCost				= AVG(dblCost)
+				 , dblCost				= SUM((ABS(dblQty) * (dbo.fnCalculateUnitCost(ABS(dblCost), ABS(dblUOMQty))))) / (CASE WHEN SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1))))END)
 			FROM
 				tblICInventoryTransaction 
 			WHERE ysnIsUnposted = 0
@@ -731,7 +742,7 @@ FROM
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
 				 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-				 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
+				 , dblCost = SUM((ABS(ICIT.dblQty) * (dbo.fnCalculateUnitCost(ABS(ICIT.dblCost), ABS(ICIT.dblUOMQty))))) / (CASE WHEN SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1))))END)
 			FROM
 				tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS
@@ -829,7 +840,7 @@ FROM
 		SELECT ID.intSalesOrderDetailId
 			 , ID.intItemId
 			 , ID.intOrderUOMId
-			 , ICIT.dblCost
+			 , dblCost = SUM((ABS(ICIT.dblQty) * (dbo.fnCalculateUnitCost(ABS(ICIT.dblCost), ABS(ICIT.dblUOMQty))))) / (CASE WHEN SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1))))END)
 			 , ID.intMaintenanceAccountId
 		FROM 
 			tblARInvoiceDetail ID
@@ -845,7 +856,8 @@ FROM
 			AND I.strInvoiceNumber			= ICIT.strTransactionId
 			AND ID.intInvoiceDetailId		= ICIT.intTransactionDetailId
 			AND ID.intItemId				= ICIT.intItemId
-			AND ID.intItemUOMId				= ICIT.intItemUOMId) AS INV
+			AND ID.intItemUOMId				= ICIT.intItemUOMId
+		GROUP BY ID.intSalesOrderDetailId, ID.intItemId, ID.intOrderUOMId, ID.intMaintenanceAccountId) AS INV
 				ON SOD.intSalesOrderDetailId = INV.intSalesOrderDetailId
 				AND SOD.intItemId			 = INV.intItemId
 				AND SOD.intItemUOMId		 = INV.intOrderUOMId
@@ -854,7 +866,7 @@ FROM
 			 , ICISI.intLineNo
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
-			 , ICIT.dblCost	 
+			 , dblCost	 = SUM((ABS(ICIT.dblQty) * (dbo.fnCalculateUnitCost(ABS(ICIT.dblCost), ABS(ICIT.dblUOMQty))))) / (CASE WHEN SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1))))END)
 		FROM
 			tblICInventoryShipmentItem ICISI	
 		INNER JOIN tblICInventoryShipment ICIS
@@ -869,7 +881,8 @@ FROM
 			AND ICIS.strShipmentNumber						= ICIT.strTransactionId
 			AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
 			AND ICISI.intItemId								= ICIT.intItemId
-			AND ICISI.intItemUOMId							= ICIT.intItemUOMId) AS NONLOTTED
+			AND ICISI.intItemUOMId							= ICIT.intItemUOMId
+		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS NONLOTTED
 				ON SOD.intItemId					= NONLOTTED.intItemId
 				AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
@@ -879,7 +892,7 @@ FROM
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
 			 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-			 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
+			 , dblCost = SUM((ABS(ICIT.dblQty) * (dbo.fnCalculateUnitCost(ABS(ICIT.dblCost), ABS(ICIT.dblUOMQty))))) / SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1))))
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
@@ -971,7 +984,7 @@ FROM
 				 , strTransactionId
 				 , intItemId
 				 , intItemUOMId
-				 , dblCost				= AVG(dblCost)
+				 , dblCost				= SUM((ABS(dblQty) * (dbo.fnCalculateUnitCost(ABS(dblCost), ABS(dblUOMQty))))) / (CASE WHEN SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(dblQty) * ABS(ISNULL(dblUOMQty,1))))END)
 			FROM
 				tblICInventoryTransaction 
 			WHERE ysnIsUnposted = 0
@@ -985,7 +998,7 @@ FROM
 				 , ICISI.intLineNo
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
-				 , ICIT.dblCost		 
+				 , dblCost	= SUM((ABS(ICIT.dblQty) * (dbo.fnCalculateUnitCost(ABS(ICIT.dblCost), ABS(ICIT.dblUOMQty))))) / (CASE WHEN SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1))))= 0 THEN 1 ELSE SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) END)
 			FROM
 				tblICInventoryShipmentItem ICISI	
 			INNER JOIN tblICInventoryShipment ICIS
@@ -1000,7 +1013,8 @@ FROM
 				AND ICIS.strShipmentNumber						= ICIT.strTransactionId
 				AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
 				AND ICISI.intItemId								= ICIT.intItemId
-				AND ICISI.intItemUOMId							= ICIT.intItemUOMId) AS NONLOTTED
+				AND ICISI.intItemUOMId							= ICIT.intItemUOMId
+				GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS NONLOTTED
 					ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 					AND ARID.intItemId					= NONLOTTED.intItemId
 					AND ARID.intItemUOMId				= NONLOTTED.intItemUOMId
@@ -1011,7 +1025,7 @@ FROM
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
 				 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-				 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
+				 , dblCost = SUM((ABS(ICIT.dblQty) * (dbo.fnCalculateUnitCost(ABS(ICIT.dblCost), ABS(ICIT.dblUOMQty))))) / CASE WHEN SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) = 0 THEN 1 ELSE SUM((ABS(ICIT.dblQty) * ABS(ISNULL(ICIT.dblUOMQty,1)))) END
 			FROM
 				tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS
