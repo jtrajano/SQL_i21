@@ -98,6 +98,30 @@ FROM 	tblICItem i
 		LEFT JOIN tblAPBill bill
 			ON bill.intBillId = t.intTransactionId
 			AND bill.strBillId = t.strTransactionId
+		OUTER APPLY (
+			SELECT	TOP 1 
+					ld.intVendorEntityId
+					,ld.intCustomerEntityId
+			FROM	tblLGLoad l INNER JOIN tblLGLoadDetail ld
+						ON l.intLoadId = ld.intLoadId
+			where	l.strLoadNumber = t.strTransactionId
+					AND ld.intLoadDetailId = t.intTransactionDetailId
+					AND l.intLoadId = t.intTransactionId
+					AND ld.intItemId = t.intItemId		
+		) loadShipmentSchedule 
 		LEFT JOIN tblEMEntity e 
-			ON e.intEntityId = COALESCE(receipt.intEntityVendorId, shipment.intEntityCustomerId, invoice.intEntityCustomerId, bill.intEntityVendorId)  
-WHERE	i.strType NOT IN ('Other Charge', 'Non-Inventory', 'Service', 'Software', 'Comment')
+			ON e.intEntityId = COALESCE(
+				receipt.intEntityVendorId
+				, shipment.intEntityCustomerId
+				, invoice.intEntityCustomerId
+				, bill.intEntityVendorId
+				, loadShipmentSchedule.intVendorEntityId
+				, loadShipmentSchedule.intCustomerEntityId
+			)  
+WHERE	i.strType NOT IN (
+			'Other Charge'
+			, 'Non-Inventory'
+			, 'Service'
+			, 'Software'
+			, 'Comment'
+		)
