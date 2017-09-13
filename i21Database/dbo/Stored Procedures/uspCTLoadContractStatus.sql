@@ -256,13 +256,13 @@ BEGIN TRY
 					IR.strReceiptNumber, 
 					RL.strLotNumber, 
 					CASE	WHEN IR.strReceiptType = 'Inventory Return' 
-								THEN -1*RL.dblQuantity
-								ELSE	RL.dblQuantity
+								THEN -1*ISNULL(RL.dblQuantity,RI.dblNetReturned)
+								ELSE	ISNULL(RL.dblQuantity,RI.dblNetReturned)
 					END AS dblQuantity,
 					dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,
 						CASE	WHEN IR.strReceiptType = 'Inventory Return' 
-								THEN -1*(RL.dblGrossWeight - RL.dblTareWeight) 
-								ELSE	(RL.dblGrossWeight - RL.dblTareWeight) 
+								THEN -1*ISNULL((RL.dblGrossWeight - RL.dblTareWeight),RI.dblNet) 
+								ELSE	ISNULL((RL.dblGrossWeight - RL.dblTareWeight),RI.dblNet)
 						END
 					) AS dblNetWeight,
 					RI.intWeightUOMId intItemUOMId,
@@ -270,14 +270,14 @@ BEGIN TRY
 					SL.strSubLocationName,
 					IR.intInventoryReceiptId
 				
-			FROM	tblICInventoryReceiptItemLot	RL
-			JOIN	tblICInventoryReceiptItem		RI	ON	RI.intInventoryReceiptItemId		=	RL.intInventoryReceiptItemId
-														AND	RI.intLineNo						=	@intContractDetailId
+			FROM	tblICInventoryReceiptItem		RI	
 			JOIN	tblICInventoryReceipt			IR	ON	IR.intInventoryReceiptId			=	RI.intInventoryReceiptId 
+														AND	RI.intLineNo						=	@intContractDetailId
 														AND IR.strReceiptType					IN	('Purchase Contract','Inventory Return')
 			JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId
 			JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	RI.intWeightUOMId
-			JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId		CROSS	
+			JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId		
+	LEFT	JOIN	tblICInventoryReceiptItemLot	RL	ON	RI.intInventoryReceiptItemId		=	RL.intInventoryReceiptItemId	CROSS	
 			APPLY	tblLGCompanyPreference			LP 	
 
 			UNION ALL
