@@ -5659,6 +5659,7 @@
     <Build Include="dbo\Views\vyuSMContactControl.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReconciledValidation.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMI3724.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
