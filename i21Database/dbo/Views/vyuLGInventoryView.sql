@@ -71,7 +71,7 @@ SELECT
 	,Spot.intContractDetailId
 	,Spot.dblQty as dblStockQty
 	,Spot.strItemUOM as strStockUOM
-	,Spot.dblNetWeight
+	,Spot.dblNetWeightFull
 	,Spot.strWeightUOM
 	,Spot.intEntityVendorId
 	,Spot.strVendor
