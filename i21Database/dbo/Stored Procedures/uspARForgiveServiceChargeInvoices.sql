@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARForgiveServiceChargeInvoices]
-	@InvoiceIds	AS NVARCHAR(MAX)	= NULL
+	@InvoiceIds	AS NVARCHAR(MAX)	= NULL,
+	@intEntityId AS INT
 AS
   
 SET QUOTED_IDENTIFIER OFF  
@@ -35,6 +36,25 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			WHERE INV.ysnPosted = 1
 			  AND INV.ysnForgiven = 0
 			  AND INV.strType = 'Service Charge'
+
+			 --Audit Log
+
+				DECLARE @childData AS NVARCHAR(MAX)
+						SET @childData = '{"change": "tblARInvoice","children": [{"action": "Forgive","change": "Forgive - Record: ' + @InvoiceIds + '","iconCls": "small-tree-modified","children": [{"change":"ysnForgive","from":"0","to":"1","leaf":true,"iconCls":"small-gear"}]}]}';
+				
+
+				exec uspSMAuditLog 
+					@screenName				= 'AccountsReceivable.view.Invoice', 
+					@keyValue				= @InvoiceIds,
+					@entityId				= @intEntityId,
+					@actionType				= 'Updated',
+					@actionIcon				= 'small-tree-modified',
+					@changeDescription		=  '',
+					@fromValue				= '0',
+					@toValue				= '1',
+					@details				= @childData
+
+			--end of Audit log 
 
 			DECLARE @InvoicesToForgive TABLE (intInvoiceId INT)
 			DECLARE @BudgetToForgive TABLE (intBudgetId INT)
