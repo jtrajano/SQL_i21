@@ -702,7 +702,7 @@ BEGIN TRY
 				BEGIN
 					IF ((@dtmCurrentETAPOD IS NOT NULL) AND (ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,'')))
 					BEGIN
-						UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD  WHERE intContractDetailId = @intContractDetailId 
+						UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD, intConcurrencyId = intConcurrencyId + 1  WHERE intContractDetailId = @intContractDetailId 
 
 						EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
 													@intApprovedById =  @intApprovedById, 

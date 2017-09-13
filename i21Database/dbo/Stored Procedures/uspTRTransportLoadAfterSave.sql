@@ -277,7 +277,7 @@ BEGIN
 			, previousSnapshot.intTransactionDetailId
 			, previousSnapshot.strSourceType
 			, 2 --Update
-			, CASE WHEN (currentSnapshot.intContractDetailId = previousSnapshot.intContractDetailId) THEN (previousSnapshot.dblQuantity - currentSnapshot.dblQuantity)
+			, CASE WHEN (currentSnapshot.intContractDetailId = previousSnapshot.intContractDetailId) THEN (currentSnapshot.dblQuantity - previousSnapshot.dblQuantity)
 					ELSE (previousSnapshot.dblQuantity * -1) END -- Check if there was a change on Contract Detail Id used, insert record negating previous Contract Detail Id
 			, previousSnapshot.intContractDetailId
 		FROM @tmpCurrentSnapshot currentSnapshot

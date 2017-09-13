@@ -153,6 +153,7 @@
     <None Include="Scripts\AP\UpdateImportedBills1099.sql" />
     <None Include="Scripts\PAT\DropStoredProcedures.sql" />
     <None Include="Scripts\SM\InsertOriginTaxClassXRef.sql" />
+    <None Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -408,7 +409,6 @@
     <Build Include="dbo\Tables\tblARagordmst.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" />
     <None Include="Scripts\TM\CheckOriginTableAndTMPreference.sql" />
-    <None Include="Scripts\GL\1b_FlagCOACrossReferenceAccountsFromOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateTMCustomerView.sql" />
     <None Include="dbo\Views\vyuPROriginEmployee.sql" />
     <None Include="dbo\Views\vyuPROriginTaxTable.sql" />
@@ -423,6 +423,7 @@
     <None Include="dbo\Stored Procedures\uspGLSyncGLACTMST.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
     <None Include="dbo\Stored Procedures\uspEMImportCustomerEFTInfo.sql" />
+    <None Include="dbo\Stored Procedures\uspGLFlagOriginAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPTTax.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportAGTax.sql" />

@@ -12,30 +12,64 @@ BEGIN
 	FROM tblSMCompanyLocationSubLocation
 	WHERE intCompanyLocationSubLocationId = @intSubLocationId
 
-	SELECT Count(*) AS ProductCount
-	FROM dbo.tblMFRecipe R
-	JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
-	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN dbo.tblSMCompanyLocationSubLocationCategory C ON C.intCategoryId = I.intCategoryId
-		AND C.intCompanyLocationSubLocationId = @intSubLocationId
-		AND R.intLocationId = @intLocationId
-		AND R.ysnActive = 1
-		AND IU.ysnStockUnit = 1
-		AND I.strStatus = 'Active'
-		AND I.strItemNo LIKE @strItemNo + '%'
-		AND I.intItemId = (
-			CASE 
-				WHEN @intItemId > 0
-					THEN @intItemId
-				ELSE I.intItemId
-				END
+	IF EXISTS (
+			SELECT *
+			FROM tblSMCompanyLocationSubLocationCategory
+			WHERE intCompanyLocationSubLocationId = @intSubLocationId
 			)
-		AND R.intManufacturingProcessId = (
-			CASE 
-				WHEN @intManufacturingProcessId > 0
-					THEN @intManufacturingProcessId
-				ELSE R.intManufacturingProcessId
-				END
-			)
+	BEGIN
+		SELECT Count(*) AS ProductCount
+		FROM dbo.tblMFRecipe R
+		JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		JOIN dbo.tblSMCompanyLocationSubLocationCategory C ON C.intCategoryId = I.intCategoryId
+			AND C.intCompanyLocationSubLocationId = @intSubLocationId
+			AND R.intLocationId = @intLocationId
+			AND R.ysnActive = 1
+			AND IU.ysnStockUnit = 1
+			AND I.strStatus = 'Active'
+			AND I.strItemNo LIKE @strItemNo + '%'
+			AND I.intItemId = (
+				CASE 
+					WHEN @intItemId > 0
+						THEN @intItemId
+					ELSE I.intItemId
+					END
+				)
+			AND R.intManufacturingProcessId = (
+				CASE 
+					WHEN @intManufacturingProcessId > 0
+						THEN @intManufacturingProcessId
+					ELSE R.intManufacturingProcessId
+					END
+				)
+	END
+	ELSE
+	BEGIN
+		SELECT Count(*) AS ProductCount
+		FROM dbo.tblMFRecipe R
+		JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+			AND R.intLocationId = @intLocationId
+			AND R.ysnActive = 1
+			AND IU.ysnStockUnit = 1
+			AND I.strStatus = 'Active'
+			AND I.strItemNo LIKE @strItemNo + '%'
+			AND I.intItemId = (
+				CASE 
+					WHEN @intItemId > 0
+						THEN @intItemId
+					ELSE I.intItemId
+					END
+				)
+			AND R.intManufacturingProcessId = (
+				CASE 
+					WHEN @intManufacturingProcessId > 0
+						THEN @intManufacturingProcessId
+					ELSE R.intManufacturingProcessId
+					END
+				)
+	END
 END

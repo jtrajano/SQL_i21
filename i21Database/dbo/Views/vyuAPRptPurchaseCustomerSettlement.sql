@@ -93,7 +93,7 @@ AS
 		(CASE WHEN INVRCPT.intSourceType = 4 
 		THEN (SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		WHEN  INVRCPT.intSourceType IS NULL
-		THEN  (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GRH.intTicketId = SC.intTicketId)  
+		THEN (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GRH.intTicketId = SC.intTicketId)  
 		ELSE (SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END),
 	BillDtl.dblCost,

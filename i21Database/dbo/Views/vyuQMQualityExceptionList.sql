@@ -37,7 +37,7 @@ SELECT TR.intTestResultId
 		FROM dbo.fnQMGetShipperName(S.strMarks)
 		) AS strShipperName
 	,S.strComment
-	,ito1.intOwnerId AS intEntityId
+	,ISNULL(ito1.intOwnerId, ito2.intOwnerId) AS intEntityId
 	,S.intSampleTypeId
 	,TR.dtmLastModified
 	,S.dtmBusinessDate
@@ -59,8 +59,9 @@ LEFT JOIN dbo.tblICLot AS L ON L.intLotId = S.intProductValueId
 	AND S.intProductTypeId = 6
 LEFT JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = S.intProductValueId
 	AND S.intProductTypeId = 11
-LEFT JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
-LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = LI.intItemOwnerId
+LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = L.intItemOwnerId
+LEFT JOIN tblICItemOwner ito2 ON ito2.intItemId = S.intItemId
+	AND ito2.ysnDefault = 1
 LEFT JOIN tblMFShift SHI ON SHI.intShiftId = S.intShiftId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intProductValueId

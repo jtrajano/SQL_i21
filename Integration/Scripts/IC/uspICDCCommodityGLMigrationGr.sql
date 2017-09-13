@@ -35,7 +35,7 @@ act.intAccountId, act.strDescription ACDescription
 	FROM gacommst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_sls 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_sls 
 	and c.intCategoryId = cat.intCategoryId) as ac)
 
@@ -53,7 +53,7 @@ act.intAccountId, act.strDescription ACDescription
 	FROM gacommst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
 	and c.intCategoryId = cat.intCategoryId) as ac)
 
@@ -71,7 +71,7 @@ act.intAccountId, act.strDescription ACDescription
 	FROM gacommst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_pur 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_pur 
 	and c.intCategoryId = cat.intCategoryId) as ac)
 
@@ -84,6 +84,7 @@ act.intAccountId, act.strDescription ACDescription
 insert into tblICCategoryAccount 
 (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
 (Select intCategoryId, intAccountCategoryId, intAccountId, 1 from tblICCategory C 
+join tblICCommodity cm on C.strCategoryCode = cm.strCommodityCode
 cross join 
 (--select top 1 51 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%adjustment%'
 --union
@@ -96,25 +97,68 @@ select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDe
 where C.strInventoryType = 'Inventory' )
 
 
+---================================Grain Discounts=============================================
+--add gl accounts for discount items
+-- update accounts for type 'Other Charge' 
+--Sales account to Other Charge Income account
+INSERT INTO tblICItemAccount (
+	intItemId
+	,intAccountCategoryId
+	,intAccountId
+	,intConcurrencyId
+	) 
+select I.intItemId,ac.intAccountCategoryId, ac.intAccountId, 1 intConcurrencyId from tblICItem I
+Cross Apply
+	(SELECT top 1 inv.intItemId
+	--,seg.intAccountCategoryId
+	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Income') intAccountCategoryId
+	,act.intAccountId
+	FROM gacdcmst AS itm 
+	INNER JOIN tblICItem AS inv ON (rtrim(itm.gacdc_com_cd)+rtrim(itm.gacdc_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
+	INNER JOIN tblGLCOACrossReference AS coa ON substring(strOldId, 0, CHARINDEX('-', strOldId)) = cast(itm.gacdc_sls_gl_acct_no as nvarchar)
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
+	and inv.strType = 'Other Charge' 
+	and I.intItemId = inv.intItemId) as ac
+
+--Purchase account to Other Charge Expense account
+INSERT INTO tblICItemAccount (
+	intItemId
+	,intAccountCategoryId
+	,intAccountId
+	,intConcurrencyId
+	) 
+select I.intItemId,ac.intAccountCategoryId, ac.intAccountId, 1 intConcurrencyId from tblICItem I
+Cross Apply
+	(SELECT top 1 inv.intItemId
+	--,seg.intAccountCategoryId
+	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Expense') intAccountCategoryId
+	,act.intAccountId
+	FROM gacdcmst AS itm 
+	INNER JOIN tblICItem AS inv ON (rtrim(itm.gacdc_com_cd)+rtrim(itm.gacdc_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
+	INNER JOIN tblGLCOACrossReference AS coa ON substring(strOldId, 0, CHARINDEX('-', strOldId)) = cast(itm.gacdc_pur_gl_acct_no as nvarchar)
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
+	and inv.strType = 'Other Charge' 
+	and I.intItemId = inv.intItemId) as ac
+
 
 --==================================================================
 --update the account table with correct account category required for inventory to function
 
-UPDATE tgs SET intAccountCategoryId = tgc.intAccountCategoryId
---select tgs.strCode,  t.code, t.cat , tgc.strAccountCategory
-FROM dbo.tblGLAccountSegment tgs  
-JOIN 
-(--purchase
---select distinct(CAST(gacom_gl_pur AS VARCHAR)) code,'Cost of Goods' cat from gacommst  
---union
------Sales Account Category
---select distinct(CAST(gacom_gl_sls AS VARCHAR)) code,'Sales Account'cat from gacommst 
---union
----Inventory Category
-select distinct(CAST(gacom_gl_inv AS VARCHAR)) code, 'Inventory' cat from gacommst
-) as t 
-ON tgs.strCode = t.code  
-JOIN dbo.tblGLAccountCategory tgc ON t.cat  = tgc.strAccountCategory 
+UPDATE tgs SET intAccountCategoryId = act.intAccountCategoryId
+--select c.strDescription,ca.intCategoryId,ac.strAccountId,ac.strDescription, ca.intAccountCategoryId, tgs.intAccountCategoryId,act.intAccountCategoryId
+from tblICCategoryAccount ca 
+join tblGLAccount ac on ca.intAccountId = ac.intAccountId
+join tblICCategory c on ca.intCategoryId = c.intCategoryId
+join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategoryId
+join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
+join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
+join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
+where act.strAccountCategory in ('Inventory', 'Sales Account')
+and c.strInventoryType in ('Inventory', 'Raw Material', 'Finished Goods')
+and ast.strType = 'Primary'
+
 
 
 

@@ -6,7 +6,7 @@ SELECT intUserRoleMenuId
 ,Menu.intParentMenuID as intParentMenuId
 ,RoleMenu.ysnVisible as ysnVisible
 ,RoleMenu.intSort
-,strMenuName
+,REPLACE(strMenuName, ' (Portal)', '') as strMenuName
 ,strModuleName
 ,strDescription
 ,Menu.strCategory
@@ -16,6 +16,7 @@ SELECT intUserRoleMenuId
 ,ysnExpanded
 ,ysnIsLegacy
 ,ysnLeaf
+,Menu.intRow as intRow
 ,RoleMenu.intConcurrencyId
 FROM tblSMUserRoleMenu RoleMenu
 LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId

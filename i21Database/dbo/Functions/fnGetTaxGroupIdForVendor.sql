@@ -75,7 +75,8 @@ BEGIN
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intTaxEntityVendorId] = @VendorId
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
-		AND ST.[intItemId] = @ItemId
+		--AND ST.[intItemId] = @ItemId
+		AND COALESCE(ST.[intItemId], 0) = COALESCE(@ItemId, ST.[intItemId], 0) 
 		AND ST.[intCategoryId] = @ItemCategoryId
 			
 	UNION
@@ -99,7 +100,8 @@ BEGIN
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intTaxEntityVendorId] = @VendorId
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
-		AND ST.[intItemId] = @ItemId
+		--AND ST.[intItemId] = @ItemId
+		AND COALESCE(ST.[intItemId], 0) = COALESCE(@ItemId, ST.[intItemId], 0) 
 		
 	UNION	
 		
@@ -144,7 +146,8 @@ BEGIN
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
-		AND ST.[intItemId] = @ItemId
+		--AND ST.[intItemId] = @ItemId
+		AND COALESCE(ST.[intItemId], 0) = COALESCE(@ItemId, ST.[intItemId], 0) 
 		AND ST.[intCategoryId] = @ItemCategoryId	
 		
 	UNION	
@@ -168,7 +171,8 @@ BEGIN
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
-		AND ST.[intItemId] = @ItemId
+		--AND ST.[intItemId] = @ItemId
+		AND COALESCE(ST.[intItemId], 0) = COALESCE(@ItemId, ST.[intItemId], 0) 
 		
 	UNION			
 		
@@ -214,7 +218,8 @@ BEGIN
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intEntityVendorLocationId],0) = 0
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
-		AND ST.[intItemId] = @ItemId
+		--AND ST.[intItemId] = @ItemId
+		AND COALESCE(ST.[intItemId], 0) = COALESCE(@ItemId, ST.[intItemId], 0) 
 		AND ST.[intCategoryId] = @ItemCategoryId
 		
 	UNION
@@ -280,7 +285,8 @@ BEGIN
 	WHERE
 			V.[intEntityId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
-		AND ST.[intItemId] = @ItemId
+		--AND ST.[intItemId] = @ItemId
+		AND COALESCE(ST.[intItemId], 0) = COALESCE(@ItemId, ST.[intItemId], 0) 
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
 		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 

@@ -4,6 +4,7 @@
 SELECT LoadIngredient.intLoadBlendIngredientId
 	, LoadIngredient.intLoadDistributionDetailId
 	, LoadDetail.intLoadDistributionHeaderId
+	, LoadIngredient.strReceiptLink
 	, Recipe.intRecipeId
 	, Recipe.strItemNo
 	, Recipe.strDescription

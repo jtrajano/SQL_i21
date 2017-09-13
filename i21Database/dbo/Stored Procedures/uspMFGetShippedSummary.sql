@@ -59,7 +59,7 @@ FROM (
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-	LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
+	LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 	WHERE InvS.dtmShipDate BETWEEN @dtmFromDate
 			AND @dtmToDate
 				--AND IO1.intOwnerId = @intOwnerId

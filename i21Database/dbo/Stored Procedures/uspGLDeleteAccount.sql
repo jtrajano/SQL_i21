@@ -5,7 +5,7 @@ BEGIN TRY
 	BEGIN TRANSACTION
 		DECLARE @intLegacyReferenceId INT  = 0
 		DECLARE @strSQL NVARCHAR(500)
-		SELECT @intLegacyReferenceId = intLegacyReferenceId
+		SELECT @intLegacyReferenceId = intLegacyReferenceId  
 		FROM tblGLCOACrossReference  WHERE inti21Id = @intAccountId 
 		IF @intLegacyReferenceId > 0
 		BEGIN
@@ -18,7 +18,7 @@ BEGIN TRY
 			DELETE FROM tblGLCOACrossReference where intLegacyReferenceId = @intLegacyReferenceId
 			IF EXISTS (SELECT TOP 1 1 FROM sys.tables where tables.name = 'glactmst')
 			BEGIN
-
+				
 				SELECT @strSQL = 'DELETE FROM glactmst where A4GLIdentity = ' + CAST( @intLegacyReferenceId AS NVARCHAR(10))
 				EXEC(@strSQL)
 		    END

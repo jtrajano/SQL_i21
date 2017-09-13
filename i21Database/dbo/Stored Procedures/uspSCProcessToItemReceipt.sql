@@ -515,7 +515,7 @@ BEGIN TRY
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 				SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
-				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
+				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@intOwnershipType,0) = 1
 				BEGIN
 					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
 					SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId

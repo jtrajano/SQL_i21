@@ -190,6 +190,7 @@ BEGIN TRY
 				, dblQuantity
 				, 1
 			FROM tblTRLoadBlendIngredient
+			WHERE intLoadDistributionDetailId = @loadDistributionDetailId
 
 			DELETE FROM #tmpDistributionDetail WHERE intLoadDistributionDetailId = @loadDistributionDetailId
 			

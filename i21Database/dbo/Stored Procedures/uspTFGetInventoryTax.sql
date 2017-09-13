@@ -177,7 +177,7 @@ BEGIN TRY
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'
 				, strCustomerIdType = 'FEIN'
-				, strVendorInvoiceNumber = tblAPBill.strVendorOrderNumber
+				, strVendorInvoiceNumber = APBill.strVendorOrderNumber
 				, strCustomerLicenseNumber = NULL
 				, strCustomerAccountStatusCode = NULL
 				, strCustomerStreetAddress = NULL
@@ -204,11 +204,14 @@ BEGIN TRY
 			FULL OUTER JOIN tblSMShipVia ShipVia
 			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityId = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.intEntityId
 			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
-			LEFT JOIN tblAPBillDetail ON tblAPBillDetail.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-			LEFT JOIN tblAPBill ON tblAPBill.intBillId = tblAPBillDetail.intBillId
 			LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = Receipt.intInventoryReceiptId
 			LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 			LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
+			LEFT JOIN (
+				SELECT TOP 1 tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.intBillId, tblAPBill.strVendorOrderNumber
+				FROM tblAPBillDetail 
+				INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
+			) APBill ON APBill.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 			WHERE Receipt.ysnPosted = 1
 				AND RCPC.intReportingComponentId = @RCId
 				AND CAST(FLOOR(CAST(Receipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
@@ -319,7 +322,7 @@ BEGIN TRY
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'
 				, strCustomerIdType = 'FEIN'
-				, strVendorInvoiceNumber = tblAPBill.strVendorOrderNumber
+				, strVendorInvoiceNumber = APBill.strVendorOrderNumber
 				, strCustomerLicenseNumber = NULL
 				, strCustomerAccountStatusCode = NULL
 				, strCustomerStreetAddress = NULL
@@ -345,11 +348,14 @@ BEGIN TRY
 			FULL OUTER JOIN tblSMShipVia ShipVia
 			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityId = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.intEntityId
 			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
-			LEFT JOIN tblAPBillDetail ON tblAPBillDetail.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-			LEFT JOIN tblAPBill ON tblAPBill.intBillId = tblAPBillDetail.intBillId
 			LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = Receipt.intInventoryReceiptId
 			LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 			LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
+			LEFT JOIN (
+				SELECT TOP 1 tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.intBillId, tblAPBill.strVendorOrderNumber
+				FROM tblAPBillDetail 
+				INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
+			) APBill ON APBill.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 			WHERE Receipt.ysnPosted = 1
 				AND RCPC.intReportingComponentId = @RCId
 				AND CAST(FLOOR(CAST(Receipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)

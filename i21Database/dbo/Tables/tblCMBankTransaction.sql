@@ -47,6 +47,7 @@
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
     CONSTRAINT [FK_tblCMBankTransactiontblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] (intCurrencyID),
 	CONSTRAINT [FK_tblCMBankTransactiontblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] (intCompanyLocationId),
+	CONSTRAINT [FK_tblCMBankTransactiontblGLAccount] FOREIGN KEY ([intShortGLAccountId]) REFERENCES [dbo].[tblGLAccount] (intAccountId),
     UNIQUE NONCLUSTERED ([strTransactionId] ASC)
 );
 

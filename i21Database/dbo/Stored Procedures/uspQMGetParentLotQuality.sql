@@ -37,7 +37,7 @@ BEGIN TRY
 		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
 			AND S.intProductTypeId = 11'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
@@ -115,7 +115,7 @@ BEGIN TRY
 		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
 			AND S.intProductTypeId = 11'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
@@ -126,8 +126,7 @@ BEGIN TRY
 	END
 
 	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-		LEFT JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
-		LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = LI.intItemOwnerId'
+		LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = L.intItemOwnerId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN

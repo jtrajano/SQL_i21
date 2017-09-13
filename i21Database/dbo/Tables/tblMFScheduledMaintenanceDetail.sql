@@ -7,5 +7,5 @@
 	,dtmEndTime DATETIME NOT NULL
 	,intDuration INT NOT NULL
 	,CONSTRAINT PK_tblMFScheduledMaintenanceDetail_intScheduledMaintenanceDetailId PRIMARY KEY (intScheduledMaintenanceDetailId)
-	,CONSTRAINT FK_tblMFScheduledMaintenanceDetail_tblMFScheduledMaintenance_intScheduledMaintenanceId FOREIGN KEY (intScheduledMaintenanceId) REFERENCES tblMFScheduledMaintenance(intScheduledMaintenanceId)
+	,CONSTRAINT FK_tblMFScheduledMaintenanceDetail_tblMFScheduledMaintenance_intScheduledMaintenanceId FOREIGN KEY (intScheduledMaintenanceId) REFERENCES tblMFScheduledMaintenance(intScheduledMaintenanceId) ON DELETE CASCADE
 	)

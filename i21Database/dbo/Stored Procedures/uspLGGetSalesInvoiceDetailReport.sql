@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGGetSalesInvoiceDetailReport]
-		@xmlParam NVARCHAR(MAX) = NULL  
+		@xmlParam NVARCHAR(MAX) = NULL,
+		@ysnIncludeOtherChargeItems BIT = 1 
 AS
 BEGIN
 	DECLARE @intInvoiceId INT
@@ -36,11 +37,17 @@ BEGIN
 		CH.strContractNumber,
 		CD.intContractSeq,
 		Cont.strContainerNumber,
-		Cont.strMarks
+		Cont.strMarks,
+		Inv.dblInvoiceSubtotal,
+		Inv.dblTax,
+		Inv.dblInvoiceTotal,
+		strTaxDescription = TaxG.strDescription
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
+	JOIN tblICItem Item ON Item.intItemId = InvDet.intItemId
 	JOIN tblSMCurrency InvCur ON InvCur.intCurrencyID = Inv.intCurrencyId
+	LEFT JOIN tblSMTaxGroup TaxG ON TaxG.intTaxGroupId = InvDet.intTaxGroupId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId 
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
 	LEFT JOIN tblSMCurrency PriceCur ON PriceCur.intCurrencyID = CD.intCurrencyId
@@ -57,4 +64,5 @@ BEGIN
 	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
 	WHERE Inv.intInvoiceId = @intInvoiceId
+		AND Item.strType <> CASE WHEN @ysnIncludeOtherChargeItems <> 1 THEN 'Other Charge' ELSE '' END
 END

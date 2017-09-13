@@ -49,7 +49,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 									CASE WHEN INVOICEDETAIL.dblContractBalance = 0 THEN INVOICEDETAIL.dblBalance ELSE INVOICEDETAIL.dblContractBalance END
 								  ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END				
-	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN INVOICEDETAIL.strItemDescription ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + ' - ' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
+	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + ' - ' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
 	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
@@ -76,6 +76,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , intRecipeId				= INVOICEDETAIL.intRecipeId
 	 , intOneLinePrintId		= ISNULL(INVOICEDETAIL.intOneLinePrintId, 1)
 	 , strInvoiceComments		= INVOICEDETAIL.strInvoiceComments
+	 , strItemType				= INVOICEDETAIL.strItemType
 	 , dblTotalWeight			= ISNULL(INV.dblTotalWeight, 0)
 	 , strVFDDocumentNumber		= INVOICEDETAIL.strVFDDocumentNumber
 	 , ysnHasEmailSetup			= CASE WHEN (ISNULL(EMAILSETUP.intEmailSetupCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -120,6 +121,7 @@ LEFT JOIN (
 		 , ID.dblPrice
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
+		 , ID.strSCInvoiceNumber
 		 , UOM.strUnitMeasure
 		 , CONTRACTS.dblBalance
 		 , CONTRACTS.strContractNumber
@@ -128,7 +130,8 @@ LEFT JOIN (
 		 , TAX.strTaxCode
 		 , ITEM.strItemNo
 		 , ITEM.strInvoiceComments
-		 , ITEM.strDescription	AS strItemDescription
+		 , strItemType			= ITEM.strType
+		 , strItemDescription	= ITEM.strDescription
 		 , SO.strBOLNumber
 		 , RECIPE.intRecipeId
 		 , RECIPE.intOneLinePrintId
@@ -138,6 +141,7 @@ LEFT JOIN (
 			 , strItemNo
 			 , strDescription
 			 , strInvoiceComments
+			 , strType
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN (

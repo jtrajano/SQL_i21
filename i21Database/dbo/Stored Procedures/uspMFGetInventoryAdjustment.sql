@@ -38,7 +38,7 @@ JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 JOIN dbo.tblICItem I ON I.intItemId = IA.intItemId
 LEFT JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = IA.intUserId
 JOIN dbo.tblMFLotInventory LI ON LI.intLotId = IA.intSourceLotId
-LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
+LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = IO1.intOwnerId
 WHERE IT.intTransactionTypeId = 10
 	AND IA.dtmBusinessDate BETWEEN @dtmFromDate

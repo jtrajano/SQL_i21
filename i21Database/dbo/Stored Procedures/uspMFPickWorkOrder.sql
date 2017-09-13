@@ -889,7 +889,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
@@ -1012,7 +1012,7 @@ BEGIN TRY
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -1140,7 +1140,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
@@ -1263,7 +1263,7 @@ BEGIN TRY
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -1390,7 +1390,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -1706,7 +1706,7 @@ BEGIN TRY
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -1764,7 +1764,13 @@ BEGIN TRY
 		BEGIN
 			IF @ysnExcessConsumptionAllowed = 0
 			BEGIN
-				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty))
+				DECLARE @intUnitMeasureId INT
+					,@strUnitMeasure NVARCHAR(50)
+					,@intLotUnitMeasureId INT
+					,@strLotUnitMeasure NVARCHAR(50)
+					,@intLotItemUOMId int
+
+				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty)),@intLotItemUOMId=MIN(intItemUOMId)
 				FROM @tblLot
 
 				SELECT @strReqQty = CONVERT(DECIMAL(24, 4), @dblReqQty)
@@ -1772,9 +1778,6 @@ BEGIN TRY
 				SELECT @strItemNo = strItemNo
 				FROM dbo.tblICItem
 				WHERE intItemId = @intItemId
-
-				DECLARE @intUnitMeasureId INT
-					,@strUnitMeasure NVARCHAR(50)
 
 				SELECT @intUnitMeasureId = intUnitMeasureId
 				FROM dbo.tblICItemUOM
@@ -1784,13 +1787,21 @@ BEGIN TRY
 				FROM dbo.tblICUnitMeasure
 				WHERE intUnitMeasureId = @intUnitMeasureId
 
+				SELECT @intLotUnitMeasureId = intUnitMeasureId
+				FROM dbo.tblICItemUOM
+				WHERE intItemUOMId = @intLotItemUOMId
+
+				SELECT @strLotUnitMeasure = ' ' + strUnitMeasure
+				FROM dbo.tblICUnitMeasure
+				WHERE intUnitMeasureId = @intLotUnitMeasureId
+
 				RAISERROR (
 						'Item %s is having %s%s quantity which is less than the required quantity %s%s.'
 						,11
 						,1
 						,@strItemNo
 						,@strQty
-						,@strUnitMeasure
+						,@strLotUnitMeasure
 						,@strReqQty
 						,@strUnitMeasure
 						)

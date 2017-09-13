@@ -69,6 +69,8 @@ FROM (
 		, ysnBundleItem				= CAST(0 AS BIT)
 		, intBundledItemId			= CAST(NULL AS INT)
 		, strBundledItemNo			= CAST(NULL AS NVARCHAR(50))
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, ysnIsBasket = CAST(0 AS BIT)
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 

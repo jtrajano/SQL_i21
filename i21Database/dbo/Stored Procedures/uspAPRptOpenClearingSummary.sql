@@ -86,7 +86,7 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
-SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+SELECT @dateFrom = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SET @innerQuery = 
 		'SELECT 
 			intInventoryReceiptId
@@ -106,11 +106,11 @@ IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 ELSE
@@ -215,7 +215,7 @@ SET @query = '
 	) MainQuery
 '
 
-SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+--SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 
 IF ISNULL(@filter,'') != ''
 BEGIN

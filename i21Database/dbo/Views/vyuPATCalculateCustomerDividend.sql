@@ -18,4 +18,4 @@ INNER JOIN tblEMEntity ENT
 	ON ENT.intEntityId = CS.intCustomerPatronId
 INNER JOIN tblARCustomer ARC
 	ON ARC.intEntityId = ENT.intEntityId
-WHERE CS.strActivityStatus = 'Open'
+WHERE CS.strActivityStatus = 'Open' AND CS.ysnPosted = 1

@@ -1,8 +1,10 @@
-﻿GO
-
-IF NOT EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPOriginCCDTransaction')
+﻿/*
+	Dependencies: uspGLImportSubledger
+	vyuAPOriginCCDTransaction stub is already in Database project. Alter command should be sufficient
+*/
+GO
 EXEC ('
-	CREATE VIEW [dbo].[vyuAPOriginCCDTransaction]
+	ALTER VIEW [dbo].[vyuAPOriginCCDTransaction]
 	AS
 	
 	WITH APOriginCCDTransaction AS (

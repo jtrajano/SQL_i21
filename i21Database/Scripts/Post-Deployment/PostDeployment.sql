@@ -45,9 +45,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\26_ActivitySource.sql
 :r .\SM\DefaultData\27_Language.sql
 :r .\SM\DefaultData\28_MultiCompany.sql
+:r .\SM\DefaultData\29_TransportationMode.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql
+:r .\SM\1730_PortalMenus.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
 :r .\SM\1720_Statement_Footer_To_Report.sql
@@ -55,7 +57,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1730_EntityFavoriteMenu.sql
 :r .\SM\1730_UpdateTicketManagementMenus.sql
 :r .\SM\1730_UpdatePayrollMenus.sql
-:r .\SM\1730_PortalMenus.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -241,6 +242,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateVoucherDetail1099.sql
 :r .\AP\UpdateAmountSign.sql
 :r .\AP\DefaultDataBalance.sql
+:r .\AP\UpdatePrepayVoucherStatus.sql
+:r .\AP\UpdateTaxGroupId.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -283,6 +286,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql
+:R .\MF\7_ProcessAttributeDefaultValue.sql
 
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
@@ -351,7 +355,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
 :r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
 :r .\EM\1730_Fix_SplitTypeEntry.sql
-
+:r .\EM\DataMigration\1710_1720_CCSite_migration.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

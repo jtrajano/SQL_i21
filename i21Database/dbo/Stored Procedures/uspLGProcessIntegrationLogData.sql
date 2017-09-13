@@ -137,16 +137,16 @@ BEGIN TRY
 
 		SELECT @strRowState = 'Modified'
 
-		IF EXISTS (
-				SELECT 1
-				FROM tblLGLoadStg
-				WHERE intLoadStgId = @intLastFeedId
-					AND strRowState = 'Added'
-					AND ISNULL(strMessage, 'Success') <> 'Success'
-				)
-		BEGIN
-			SELECT @strRowState = 'Added'
-		END
+		--IF EXISTS (
+		--		SELECT 1
+		--		FROM tblLGLoadStg
+		--		WHERE intLoadStgId = @intLastFeedId
+		--			AND strRowState = 'Added'
+		--			AND ISNULL(strMessage, 'Success') <> 'Success'
+		--		)
+		--BEGIN
+		--	SELECT @strRowState = 'Added'
+		--END
 
 		DELETE
 		FROM @tblLoadRecord

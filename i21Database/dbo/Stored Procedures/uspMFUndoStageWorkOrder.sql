@@ -11,7 +11,7 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@intInventoryTransactionType AS INT = 8
-		,@intRecipeItemUOMId int
+		,@intRecipeItemUOMId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -64,7 +64,7 @@ BEGIN TRY
 		,@intProductionStagingId INT
 		,@strStagedLotNumber NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
-		,@dtmProductionDate datetime
+		,@dtmProductionDate DATETIME
 
 	SELECT @strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
@@ -76,7 +76,7 @@ BEGIN TRY
 		,@intNewItemUOMId = intItemUOMId
 		,@intNewStorageLocationId = intStorageLocationId
 		,@intMachineId = intMachineId
-		,@dtmProductionDate=dtmProductionDate
+		,@dtmProductionDate = dtmProductionDate
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
@@ -211,6 +211,34 @@ BEGIN TRY
 
 		SELECT @dblAdjustByQuantity = - @dblNewWeight
 
+		IF @dblWeightPerQty = 0
+			OR @dblNewWeight % @dblWeightPerQty > 0
+		BEGIN
+			SELECT @dblAdjustByQuantity = - @dblNewWeight
+				,@intNewItemUOMId = @intNewItemUOMId
+		END
+		ELSE
+		BEGIN
+			SELECT @dblAdjustByQuantity = - @dblNewWeight / @dblWeightPerQty
+				,@intNewItemUOMId = @intItemUOMId
+		END
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblICLot
+				WHERE strLotNumber = @strLotNumber
+					AND intStorageLocationId = @intStorageLocationId
+					AND (
+						intItemUOMId = @intNewItemUOMId
+						OR IsNULL(intWeightUOMId, intItemUOMId) = @intNewItemUOMId
+						)
+				)
+		BEGIN
+			SELECT @dblAdjustByQuantity = - dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intItemUOMId, @dblNewWeight)
+
+			SELECT @intNewItemUOMId = @intItemUOMId
+		END
+
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
@@ -225,7 +253,7 @@ BEGIN TRY
 			,@intNewStorageLocationId = @intNewStorageLocationId
 			,@strNewLotNumber = @strNewLotNumber
 			,@dblAdjustByQuantity = @dblAdjustByQuantity
-			,@dblNewSplitLotQuantity = 0
+			,@dblNewSplitLotQuantity = NULL
 			,@dblNewWeight = NULL
 			,@intNewItemUOMId = NULL
 			,@intNewWeightUOMId = NULL
@@ -273,7 +301,7 @@ BEGIN TRY
 	END
 
 	UPDATE tblMFProductionSummary
-	SET dblInputQuantity = dblInputQuantity -  IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intRecipeItemUOMId, @dblNewWeight), 0)
+	SET dblInputQuantity = dblInputQuantity - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intRecipeItemUOMId, @dblNewWeight), 0)
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intItemId = @intInputItemId
 

@@ -90,7 +90,7 @@ BEGIN
 			,@strPackingMaterial NVARCHAR(100)
 			,@strPackingMaterial1 NVARCHAR(100)
 			,@strCountryOfOrigin NVARCHAR(50)
-			,@strPalletId1 NVARCHAR(50)
+			,@strPalletId1 NVARCHAR(MAX)
 			,@intTaskId INT
 			,@intOriginId INT
 			,@intStatusId INT
@@ -103,8 +103,9 @@ BEGIN
 			,@intShiftId INT
 			,@strLotCode1 NVARCHAR(50)
 			,@strScreenSize NVARCHAR(50)
+			,@intProductionStageLocationId int
+			,@intStageLocationId int
 
-		--,@strCCPSize nvarchar(50)
 		SELECT @dtmPlannedDate = dtmPlannedDate
 			,@intPlannedShiftId = intPlannedShiftId
 			,@intLocationId = intLocationId
@@ -117,7 +118,6 @@ BEGIN
 		SELECT @strItemNo = strItemNo
 			,@strScreenSize = strWeightControlCode
 			,@strTargetWeight = Convert(NUMERIC(18, 0), dblBlendWeight)
-		--,@strCCPSize = strExternalGroup
 		FROM tblICItem
 		WHERE intItemId = @intItemId
 
@@ -157,18 +157,6 @@ BEGIN
 		IF @strLotCode1 <> ''
 			SELECT @strLotCode = Left(@strLotCode1, len(@strLotCode1) - 1)
 
-		--EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-		--		,@intItemId = @intItemId
-		--		,@intManufacturingId = NULL
-		--		,@intSubLocationId = @intSubLocationId
-		--		,@intLocationId = @intLocationId
-		--		,@intOrderTypeId = NULL
-		--		,@intBlendRequirementId = NULL
-		--		,@intPatternCode = 78
-		--		,@ysnProposed = 0
-		--		,@strPatternString = @strLotCode OUTPUT
-		--		,@intShiftId = @intPlannedShiftId
-		--		,@dtmDate = @dtmPlannedDate
 		SELECT @strPackagingCategory = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
@@ -292,16 +280,37 @@ BEGIN
 
 		SELECT @strPalletId1 = ''
 
-		SELECT @strPalletId1 = @strPalletId1 + DT.strParentLotNumber + ','
+		SELECT @intProductionStageLocationId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 75--Production Staging Location
+
+		SELECT @intStageLocationId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 76--Staging Location
+
+		SELECT @strPalletId1 = @strPalletId1 + DT.strParentLotNumber + ', '
 		FROM (
 			SELECT DISTINCT strParentLotNumber
-			FROM tblMFStageWorkOrder SW
-			JOIN dbo.tblMFTask T ON T.intOrderHeaderId = SW.intOrderHeaderId
-			JOIN dbo.tblICLot L ON L.intLotId = T.intLotId
-			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-			JOIN tblICItem I ON I.intItemId = T.intItemId
-			WHERE intWorkOrderId = @intProductValueId
+			FROM dbo.tblMFWorkOrderRecipe R
+			JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				AND RI.intWorkOrderId = R.intWorkOrderId
+				AND R.intWorkOrderId = @intProductValueId
+				AND RI.intRecipeItemTypeId = 1
+			LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
+				AND SI.intRecipeId = R.intRecipeId
+				AND SI.intWorkOrderId = @intProductValueId
+			JOIN tblICItem I ON (
+					I.intItemId = RI.intItemId
+					OR I.intItemId = SI.intSubstituteItemId
+					)
 				AND I.intCategoryId <> @intPMCategoryId
+			JOIN dbo.tblICLot L ON L.intItemId = I.intItemId
+				AND L.dblQty > 0 and L.intStorageLocationId in (@intProductionStageLocationId,@intStageLocationId)
+			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			) AS DT
 
 		SELECT TOP 1 @strLotNumber = strLotNumber
@@ -320,6 +329,8 @@ BEGIN
 		BEGIN
 			SELECT @strPalletId1 = Left(@strPalletId1, Len(@strPalletId1) - 1)
 		END
+
+		Select @strPalletId1=@strPalletId1+', N/A'
 
 		SELECT @strPackagingLotCode1 = ''
 			,@strPackagingLotCode2 = ''
@@ -354,7 +365,6 @@ BEGIN
 				OR I.strDescription LIKE 'Btl-%'
 				OR I.strDescription LIKE 'Jug-%'
 				)
-			--AND T.intTaskId > @intTaskId
 			AND PL.strParentLotNumber <> @strPackagingLotCode1
 		ORDER BY T.intTaskId
 
@@ -369,7 +379,6 @@ BEGIN
 		JOIN tblICItem I ON I.intItemId = T.intItemId
 		WHERE intWorkOrderId = @intProductValueId
 			AND I.strDescription LIKE 'Lbl-%'
-			--AND T.intTaskId > @intTaskId
 			AND PL.strParentLotNumber NOT IN (
 				@strPackagingLotCode1
 				,@strPackagingLotCode2
