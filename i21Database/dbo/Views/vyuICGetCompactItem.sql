@@ -36,6 +36,7 @@ SELECT Item.intItemId
 , M2M.strM2MComputation
 , strTonnageTaxUOM = TonnageUOM.strUnitMeasure
 , Item.intTonnageTaxUOMId
+, Item.ysnLotWeightsRequired
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

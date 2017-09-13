@@ -5568,6 +5568,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\31_UpdateBatchIdUsed.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCustomerRackQuoteHeader.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\26_ImportFileHeader.sql" />
+    <None Include="Scripts\Post-Deployment\IC\21_Update_LotWeightsRequired_tblICItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

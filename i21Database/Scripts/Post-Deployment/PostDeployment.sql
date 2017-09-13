@@ -265,6 +265,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\19_M2MComputations.sql
 :r .\IC\20_UpdateContractItemStatuses.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
+:r .\IC\21_Update_LotWeightsRequired_tblICItem.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql

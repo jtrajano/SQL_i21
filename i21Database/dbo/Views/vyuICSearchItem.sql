@@ -51,6 +51,7 @@ SELECT Item.intItemId
 , Item.intGradeId
 , strGrade = CommodityAttribGrade.strDescription
 , Item.strMarketValuation
+, Item.ysnLotWeightsRequired
 --End: Commodity fields 
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
