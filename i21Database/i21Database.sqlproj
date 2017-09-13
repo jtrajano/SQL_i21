@@ -5617,6 +5617,7 @@
     <Build Include="dbo\Views\vyuCCSiteHeaderSearch.sql" />
     <Build Include="dbo\Views\vyuCTFutureMarket.sql" />
     <Build Include="dbo\Tables\tblTMLostCustomerReason.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
