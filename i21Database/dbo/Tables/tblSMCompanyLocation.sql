@@ -213,7 +213,30 @@
 	CONSTRAINT [FK_tblSMCompanyLocation_tblEMEntity_ProductAlertOwner] FOREIGN KEY ([intProductAlertOwnerId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_SanitizationDockDoorUnit] FOREIGN KEY ([intSanitizationDockDoorUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_SanitizationStagingUnit] FOREIGN KEY ([intSanitizationStagingUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
-	CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_SanitizationStorageUnit] FOREIGN KEY ([intSanitizationStorageUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 
+	CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_SanitizationStorageUnit] FOREIGN KEY ([intSanitizationStorageUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount] FOREIGN KEY([intAPAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount1] FOREIGN KEY([intARAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount2] FOREIGN KEY([intCashAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount3] FOREIGN KEY([intDepositAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount4] FOREIGN KEY([intPurchaseAdvAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount5] FOREIGN KEY([intSalesAdvAcct]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount6] FOREIGN KEY([intServiceCharges]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount7] FOREIGN KEY([intSalesDiscounts]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount8] FOREIGN KEY([intCashOverShort]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount9] FOREIGN KEY([intWriteOff]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount10] FOREIGN KEY([intCreditCardFee]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount11] FOREIGN KEY([intSalesAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount12] FOREIGN KEY([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount13] FOREIGN KEY([intInterestAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount14] FOREIGN KEY([intWithholdAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount15] FOREIGN KEY([intUndepositedFundsId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount16] FOREIGN KEY([intPrepaidAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount17] FOREIGN KEY([intDeferredPayableId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount18] FOREIGN KEY([intPettyCash]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount19] FOREIGN KEY([intDeferredRevenueId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount20] FOREIGN KEY([intFreightIncome]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount21] FOREIGN KEY([intFreightAPAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount22] FOREIGN KEY([intFreightExpenses]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [AK_tblSMCompanyLocation_strLocationNumber] ON [tblSMCompanyLocation]([strLocationNumber]) WHERE [strLocationNumber] IS NOT NULL

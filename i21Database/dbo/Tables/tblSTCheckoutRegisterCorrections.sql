@@ -12,5 +12,6 @@
     CONSTRAINT [PK_tblSTCheckoutRegisterCorrections_intCorrectionId] PRIMARY KEY ([intCorrectionId]), 
     CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
-    CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblSTPaymentOption] FOREIGN KEY ([intPaymentOptionId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]) 
+    CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblSTPaymentOption] FOREIGN KEY ([intPaymentOptionId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]),
+	CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblGLAccount] FOREIGN KEY ([intAccount]) REFERENCES [tblGLAccount]([intAccountId]),
 )

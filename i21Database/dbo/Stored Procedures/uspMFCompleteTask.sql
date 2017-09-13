@@ -141,7 +141,7 @@ BEGIN TRY
 			,@intNewStorageLocationId = @intNewStorageLocationId
 			,@dblMoveQty = @dblMoveQty
 			,@intMoveItemUOMId = @intMoveItemUOMId
-			,@intUserId = @blnValidateLotReservation
+			,@intUserId = @intUserId
 			,@blnValidateLotReservation = 1
 			,@blnInventoryMove = @blnInventoryMove
 
@@ -430,7 +430,7 @@ BEGIN TRY
 				,@intNewStorageLocationId = @intNewStorageLocationId
 				,@dblMoveQty = @dblMoveQty
 				,@intMoveItemUOMId = @intMoveItemUOMId
-				,@intUserId = @blnValidateLotReservation
+				,@intUserId = @intUserId
 				,@blnValidateLotReservation = 1
 				,@blnInventoryMove = @blnInventoryMove
 

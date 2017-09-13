@@ -10,6 +10,8 @@ SELECT	L.strLoadNumber
 		,LC.strContainerNumber
 		,dblFranchise = CASE WHEN ISNULL(PWG.dblFranchise, 0) > 0 THEN PWG.dblFranchise / 100 ELSE 0 END 
 		,dblContainerWeightPerQty = CASE WHEN ISNULL(LC.dblQuantity, 0) = 0 THEN LC.dblNetWt ELSE LC.dblNetWt / LC.dblQuantity END -- (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END)
+		,intWeightUOMId = WeightItemUOM.intItemUOMId
+		,dblWeightUOMConvFactor = WeightItemUOM.dblUnitQty 
 FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 			ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL 

@@ -34,6 +34,9 @@ BEGIN
 			,L.strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
+			,L.dblQty
+			,L.intItemUOMId AS intQtyUOMId
+			,U1.strUnitMeasure AS strQtyUOM
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND R.intItemId = @intItemId
@@ -59,12 +62,14 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = SL.intRestrictionId
+		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId,R1.intRestrictionId)
 			AND R1.strInternalCode = 'STOCK'
 		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 			AND BS.strPrimaryStatus = 'Active'
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -93,6 +98,9 @@ BEGIN
 			,NULL AS strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
+			,S.dblOnHand - S.dblUnitReserved AS dblQty
+			,IU.intItemUOMId AS intQtyUOMId
+			,U.strUnitMeasure AS strQtyUOM
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND R.intItemId = @intItemId
@@ -144,6 +152,9 @@ BEGIN
 			,L.strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
+			,L.dblQty
+			,L.intItemUOMId AS intQtyUOMId
+			,U1.strUnitMeasure AS strQtyUOM
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -168,12 +179,14 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = SL.intRestrictionId
+		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId,R1.intRestrictionId)
 			AND R1.strInternalCode = 'STOCK'
 		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 			AND BS.strPrimaryStatus = 'Active'
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -202,6 +215,9 @@ BEGIN
 			,NULL strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
+			,S.dblOnHand - S.dblUnitReserved AS dblQty
+			,S.intItemUOMId AS intQtyUOMId
+			,U.strUnitMeasure AS strQtyUOM
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId

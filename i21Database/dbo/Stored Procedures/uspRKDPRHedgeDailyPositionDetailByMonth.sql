@@ -5,6 +5,7 @@
 		,@strPurchaseSales nvarchar(50) = NULL
 AS
 
+
 BEGIN
  
 if isnull(@strPurchaseSales,'') <> ''
@@ -259,11 +260,10 @@ UPDATE @List set intSeqNo = 8 where strType='Position'
 IF isnull(@intVendorId,0) = 0
 BEGIN
 SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
-FROM @List where dblTotal <> 0 order by intRowNumber,intSeqNo
-
+FROM @List where dblTotal <> 0 order by intSeqNo asc,case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 END
 ELSE
 BEGIN
 SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
-FROM @List where dblTotal <> 0  and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' order by intRowNumber,intSeqNo
+FROM @List where dblTotal <> 0  and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' order by intSeqNo asc, case when isnull(intContractHeaderId,0)=0 then intFutOptTransactionHeaderId else intContractHeaderId end desc
 END

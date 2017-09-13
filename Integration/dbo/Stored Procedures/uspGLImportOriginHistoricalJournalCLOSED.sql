@@ -131,14 +131,12 @@ SELECT
  CONVERT(int,1) AS intJournalId,
  glarc_trans_dt,
  tblGLAccount.intAccountId,
- CASE WHEN glarc_amt >= 0 THEN CASE WHEN glarc_dr_cr_ind = ''D'' THEN glarc_amt ELSE 0 END
- ELSE CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN (glarc_amt * -1) ELSE 0 END END AS Debit,
+ CASE WHEN glarc_dr_cr_ind = ''D'' THEN ABS(glarc_amt)  ELSE 0 END Debit,
  0 AS DebitRate, -- debit rate
- CASE WHEN glarc_amt >= 0 THEN CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN glarc_amt ELSE 0 END
- ELSE CASE WHEN glarc_dr_cr_ind = ''D'' THEN (glarc_amt * -1) ELSE 0 END END AS Credit,
+ CASE WHEN ISNULL(glarc_dr_cr_ind,''C'') = ''C'' THEN ABS(glarc_amt)  ELSE 0 END Credit,
  0 AS CreditRate, -- credit rate
- glarc_units AS DebitUnits,
- glarc_units AS CreditUnits,
+ CASE WHEN glarc_dr_cr_ind = ''D'' THEN ABS(glarc_units)  ELSE 0 END DebitUnits,
+ CASE WHEN ISNULL(glarc_dr_cr_ind,''C'') = ''C'' THEN ABS(glarc_units)  ELSE 0 END CreditUnits,
  glarc_ref AS strDescription,
  NULL AS intCurrencyId,
  0 AS dblUnitsInlbs,
@@ -155,114 +153,12 @@ SELECT
  glarc_src_id,
  glarc_src_seq,
  GETDATE() as gooddate,
- A4GLIdentity,
- NULL AS NegativeCreditUnits ,
- NULL AS NegativeDebitUnits
+ A4GLIdentity
  INTO #iRelyImptblGLJournalDetail
  FROM glarcmst
  INNER JOIN tblGLCOACrossReference ON
  SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16
  INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
-
---RESET DebitUnits/CreditUnits
-UPDATE #iRelyImptblGLJournalDetail SET DebitUnits = 0 ,CreditUnits = 0
-
-UPDATE
-A SET DebitUnits =
-case
-	WHEN B.glarc_units < 0	THEN B.glarc_units * -1
-	ELSE B.glarc_units END,
-	NegativeDebitUnits =
-			CASE WHEN B.glarc_units < 0	THEN 1 ELSE 0 END
-
-FROM
-#iRelyImptblGLJournalDetail A
-JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
-WHERE A.Debit > 0
-
-UPDATE
-A SET CreditUnits =
-	CASE
-		WHEN B.glarc_units < 0	THEN 0
-		ELSE B.glarc_units END,
-	NegativeCreditUnits =
-		CASE WHEN B.glarc_units < 0	THEN 1 ELSE 0 END
-FROM
-#iRelyImptblGLJournalDetail A
-JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
-WHERE A.Credit > 0
-
-	--GL-2040 For Journal entries - if there is a negative credit break into two entries on import
-IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUnits = 1)
-	BEGIN
-		insert INTO #iRelyImptblGLJournalDetail
-		(intJournalId,glarc_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glarc_period,glarc_jrnl_no,glarc_src_id,glarc_src_seq,gooddate,A4GLIdentity)
-		SELECT
-		intJournalId,
-		A.glarc_trans_dt,
-		intAccountId,
-		0 AS Debit,
-		0 AS Credit,
-		CreditUnits = CASE WHEN B.glarc_units < 0 THEN glarc_units * -1 ELSE glarc_units END,
-		0 AS DebitUnits,
-		0 AS DebitRate,
-		0 AS CreditRate,
-		0 AS dblUnitsInlbs,
-		0 as DebitUnitsInlbs,
-		'''' AS strCheckbookNo,
-		'''' AS strWorkArea,
-		''Negative Units for amount '' + CAST(ISNULL(glarc_amt,0) AS NVARCHAR(50)) AS strDescription,
-		strDocument,
-		strComments,
-		strReference,
-		''N'' AS strCorrecting,
-		strSourcePgm,																	-- aptrxu
-		A.glarc_period,
-		A.glarc_jrnl_no,
-		A.glarc_src_id,
-		A.glarc_src_seq,
-		gooddate,
-		A.A4GLIdentity
-		FROM  #iRelyImptblGLJournalDetail A
-		JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
-		WHERE NegativeDebitUnits = 1
-	END
-	IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeDebitUnits = 1)
-	BEGIN
-
-		INSERT INTO #iRelyImptblGLJournalDetail
-		(intJournalId,glarc_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glarc_period,glarc_jrnl_no,glarc_src_id,glarc_src_seq,gooddate,A4GLIdentity)
-		SELECT 
-		intJournalId,
-		A.glarc_trans_dt,
-		intAccountId,
-		0 AS Debit,
-		0 AS Credit,
-		0 AS CreditUnits,
-		DebitUnits = CASE WHEN B.glarc_units < 0 THEN glarc_units * -1 ELSE glarc_units END,
-		0 AS DebitRate,
-		0 AS CreditRate,
-		0 AS dblUnitsInlbs,
-		0 as DebitUnitsInlbs,
-		'''' AS strCheckbookNo,
-		'''' AS strWorkArea,
-		''Negative Units for amount '' + CAST(ISNULL(glarc_amt,0) AS NVARCHAR(50)) AS strDescription,
-		strDocument,
-		strComments,
-		strReference,
-		''N'' AS strCorrecting,
-		strSourcePgm,																	-- aptrxu
-		A.glarc_period,
-		A.glarc_jrnl_no,
-		A.glarc_src_id,
-		A.glarc_src_seq,
-		gooddate,
-		A.A4GLIdentity
-		FROM  #iRelyImptblGLJournalDetail A
-		JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
-		WHERE NegativeCreditUnits = 1
-	END
-
 
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 
@@ -288,35 +184,9 @@ UPDATE #iRelyImptblGLJournalDetail
  INNER JOIN tblGLJournal ON
  tblGLJournal.strJournalId = #iRelyImptblGLJournalDetail.glarc_jrnl_no
  AND tblGLJournal.strSourceId = glarc_src_seq
- --AND glarc_period = convert(varchar(4),SUBSTRING (convert(varchar(100),dtmDate,101),7,4)) + convert(varchar(4),SUBSTRING(convert(varchar(100),dtmDate,101),1,2))
+
 IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
---+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- -- ASSIGN TRANSACTION Id BASED ON NEW HEADER GROUPING
- --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
---SET ROWCOUNT 0
- --UPDATE #iRelyImptblGLJournalDetail
- --SET intLineNo = 0
---DECLARE @last1 INT
- --DECLARE @lastprior INT
- --DECLARE @line1 INT
---SET @line1 = 0
- --SET @last1 = 0
- --SET @lastprior = 0
---WHILE (SELECT COUNT(*) FROM #iRelyImptblGLJournalDetail where intLineNo = 0) > 0
- --BEGIN
- -- SELECT @last1= (SELECT MIN(intJournalId) FROM #iRelyImptblGLJournalDetail WHERE intLineNo = 0)
--- IF @last1 <> @lastprior
- -- BEGIN
- -- SET @line1 = 0
- -- END
--- SET ROWCOUNT 0
- -- SELECT @lastprior = @last1
- -- SELECT @line1 = (SELECT Max (intLineNo) FROM #iRelyImptblGLJournalDetail WHERE intJournalId = @last1)
--- SELECT @line1 = @line1 + 1
--- SET ROWCOUNT 1
- -- UPDATE #iRelyImptblGLJournalDetail set intLineNo = @line1
- -- WHERE intLineNo = 0 and intJournalId = @last1
---END
+
 --++++++++++++++++++++++++++++
  -- UPDATE GOODDATE
  --++++++++++++++++++++++++++++
@@ -375,9 +245,10 @@ ROLLBACK_INSERT:
 IMPORT_EXIT:
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail'
+
  EXEC sp_executesql @sql, @ParmDefinition,@intEntityId = @intEntityId, @resultOut = @result OUTPUT
 END
 ELSE
 	SELECT @result = 'SUCCESS '
-
+GO
 

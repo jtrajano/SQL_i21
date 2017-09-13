@@ -65,7 +65,7 @@ BEGIN
 		,[intSubLocationId]			=	SOTD.[intSubLocationId]
 		,[intStorageLocationId]		=	SOTD.[intStorageLocationId]
 	FROM 
-		(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesOrderDetailId], [dblPrice], [intInventoryShipmentItemId], [dblQtyOrdered], [dblQtyShipped], [intLotId], [intItemUOMId] FROM tblARInvoiceDetail WITH(NOLOCK)) ARID
+		(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesOrderDetailId], [dblPrice], [intInventoryShipmentItemId], [dblQtyOrdered], [dblQtyShipped], [intLotId], [intItemUOMId], [intLoadDetailId] FROM tblARInvoiceDetail WITH(NOLOCK)) ARID
 	INNER JOIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCurrencyId], [dtmDate], [intCompanyLocationId], [strTransactionType], [intTransactionId] FROM tblARInvoice  WITH(NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
@@ -86,6 +86,7 @@ BEGIN
 		[dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
+		AND ISNULL(ARID.[intLoadDetailId], 0) = 0 
 		AND ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0
 		AND ISNULL(ARI.[intTransactionId], 0) = 0 
 		AND ISNULL(II.[ysnFromPosting],0) = 1
@@ -114,7 +115,7 @@ BEGIN
 	FROM 
 		(SELECT [intComponentItemId], [intItemUOMId], [dblQuantity], [dblUnitQuantity], [intInvoiceDetailId] FROM tblARInvoiceDetailComponent WITH (NOLOCK)) ARIDC
 	INNER JOIN 
-		(SELECT [intInvoiceId], [intInvoiceDetailId], [intSalesOrderDetailId], [dblPrice], [intInventoryShipmentItemId], [dblQtyShipped], [intItemUOMId], [intLotId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+		(SELECT [intInvoiceId], [intInvoiceDetailId], [intSalesOrderDetailId], [dblPrice], [intInventoryShipmentItemId], [dblQtyShipped], [intItemUOMId], [intLotId], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
 	INNER JOIN
 		(SELECT [intInvoiceId], [dtmDate], [intCurrencyId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [intTransactionId] FROM tblARInvoice WITH (NOLOCK)) ARI
@@ -133,6 +134,7 @@ BEGIN
 		[dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
+		AND ISNULL(ARID.[intLoadDetailId], 0) = 0 
 		AND ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0
 		AND ISNULL(ARI.[intTransactionId], 0) = 0 
 		AND ISNULL(II.[ysnFromPosting],0) = 1

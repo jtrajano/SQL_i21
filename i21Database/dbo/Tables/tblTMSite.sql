@@ -76,6 +76,9 @@
     [intCompanyLocationPricingLevelId] INT NULL, 
     [intGlobalJulianCalendarId] INT NULL, 
 	[ysnRoutingAlert]			  BIT             DEFAULT 0 NOT NULL,
+	[ysnLostCustomer]			  BIT             DEFAULT 0 NOT NULL,
+	[intLostCustomerReasonId]     INT             NULL,
+	[dtmLostCustomerDate]        DATETIME        NULL,
     CONSTRAINT [PK_tblTMSite] PRIMARY KEY CLUSTERED ([intSiteID] ASC),
     CONSTRAINT [FK_tblTMSite_tblTMClock] FOREIGN KEY ([intClockID]) REFERENCES [dbo].[tblTMClock] ([intClockID]),
     CONSTRAINT [FK_tblTMSite_tblTMCustomer] FOREIGN KEY ([intCustomerID]) REFERENCES [dbo].[tblTMCustomer] ([intCustomerID]),
@@ -85,7 +88,8 @@
 	CONSTRAINT [FK_tblTMSite_tblTMRoute] FOREIGN KEY (intRouteId) REFERENCES [dbo].[tblTMRoute] (intRouteId),
 	CONSTRAINT [FK_tblTMSite_tblTMFillGroup] FOREIGN KEY (intFillGroupId) REFERENCES [dbo].[tblTMFillGroup] (intFillGroupId),
 	CONSTRAINT [FK_tblTMSite_tblTMTankTownship] FOREIGN KEY (intTankTownshipId) REFERENCES [dbo].[tblTMTankTownship] (intTankTownshipId),
-	CONSTRAINT [FK_tblTMSite_tblTMGlobalJulianCalendar] FOREIGN KEY ([intGlobalJulianCalendarId]) REFERENCES [dbo].[tblTMGlobalJulianCalendar] (intGlobalJulianCalendarId)
+	CONSTRAINT [FK_tblTMSite_tblTMGlobalJulianCalendar] FOREIGN KEY ([intGlobalJulianCalendarId]) REFERENCES [dbo].[tblTMGlobalJulianCalendar] (intGlobalJulianCalendarId),
+	CONSTRAINT [FK_tblTMSite_tblTMLostCustomerReason] FOREIGN KEY([intLostCustomerReasonId]) REFERENCES [dbo].[tblTMLostCustomerReason] ([intLostCustomerReasonId])
 );
 
 

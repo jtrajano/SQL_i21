@@ -28,7 +28,7 @@ BEGIN TRY
 	   JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 	   JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId'
 
-	IF @ysnShowSampleFromAllLocation = 0
+	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END

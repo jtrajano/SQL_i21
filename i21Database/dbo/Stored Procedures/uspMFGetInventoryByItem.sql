@@ -71,9 +71,8 @@ FROM (
 	JOIN tblMFLotSnapshotDetail SD ON SD.intLotId = L.intLotId
 	AND SD.intLotSnapshotId = @intLotSnapshotId
 	JOIN dbo.tblICItem I ON I.intItemId = SD.intItemId
-		AND SD.intStorageLocationId <> 6
-	JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
-	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+	LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
+	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = SD.intLotStatusId
 	LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = SD.intBondStatusId

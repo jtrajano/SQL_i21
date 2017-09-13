@@ -398,7 +398,7 @@ BEGIN
 		JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 		WHERE L.intItemId = @intItemId
 			AND L.intLocationId = @intLocationId

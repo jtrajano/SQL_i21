@@ -778,7 +778,7 @@ SELECT intRow,intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUni
 					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
 					dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName			
 FROM @FinalTable WHERE dblTotal <> 0
- ORDER BY strCommodityCode,intSeqId ASC
+ ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC
 END
 ELSE
 BEGIN
@@ -787,4 +787,5 @@ SELECT intRow,intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUni
 					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
 					dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName			
 FROM @FinalTable WHERE dblTotal <> 0 and strType <> 'Company Titled Stock' and strType not like '%'+@strPurchaseSales+'%'
+ ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC
 END

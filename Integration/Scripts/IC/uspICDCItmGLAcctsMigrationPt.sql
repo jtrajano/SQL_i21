@@ -36,7 +36,7 @@ USING
 		FROM ptitmmst AS itm 
 			INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_sls_acct 
-			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_sls_acct
 			and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 			and I.intItemId = inv.intItemId
@@ -66,7 +66,7 @@ USING
 		FROM ptitmmst AS itm 
 		INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_pur_acct 
-		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_pur_acct
 		and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
 		and I.intItemId = inv.intItemId
@@ -97,7 +97,7 @@ USING
 		FROM ptitmmst AS itm 
 		INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_sls_acct 
-		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_sls_acct
 		and inv.strType = 'Other Charge' 
 		and I.intItemId = inv.intItemId
@@ -127,7 +127,7 @@ USING
 	FROM ptitmmst AS itm 
 	INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_pur_acct 
-	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = itm.ptitm_pur_acct
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
@@ -137,4 +137,18 @@ ON [Target].intItemId = [Source].intItemId
 WHEN NOT MATCHED THEN
 INSERT (intItemId, intAccountCategoryId, intAccountId, intConcurrencyId)
 VALUES ([Source].intItemId, [Source].intAccountCategoryId, [Source].intAccountId, [Source].intConcurrencyId);
-
+-----------------------------------------------------------------------------------------------------
+--------update the account table with correct account category required for inventory to function
+UPDATE tgs SET intAccountCategoryId = act.intAccountCategoryId
+--select c.strDescription,ca.intItemId,ac.strAccountId,ac.strDescription, ca.intAccountCategoryId, tgs.intAccountCategoryId,act.intAccountCategoryId
+from tblICItemAccount ca 
+join tblGLAccount ac on ca.intAccountId = ac.intAccountId
+join tblICItem c on ca.intItemId = c.intItemId
+join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategoryId
+join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
+join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
+join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
+where act.strAccountCategory in ('Inventory', 'Sales Account', 'Inventory In-Transit','Work In Progress','Inventory Adjustment','AP Clearing')
+and c.strType in ('Inventory', 'Raw Material', 'Finished Good')
+and ast.strType = 'Primary'
+GO

@@ -7,7 +7,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemMotorFuelTax] PRIMARY KEY ([intItemMotorFuelTaxId]), 
-    CONSTRAINT [FK_tblICItemMotorFuelTax_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICItemMotorFuelTax_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemMotorFuelTax_tblTFTaxAuthority] FOREIGN KEY ([intTaxAuthorityId]) REFERENCES [tblTFTaxAuthority]([intTaxAuthorityId]), 
     CONSTRAINT [FK_tblICItemMotorFuelTax_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId]), 
     CONSTRAINT [AK_tblICItemMotorFuelTax] UNIQUE ([intItemId], [intTaxAuthorityId], [intProductCodeId])

@@ -4,6 +4,9 @@
 	,@strNewLotNumber NVARCHAR(50) = ''
 AS
 BEGIN TRY
+
+	Return
+
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@intLotId INT
 		,@dblSplitQty DECIMAL(24, 10)

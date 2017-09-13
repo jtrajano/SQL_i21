@@ -39,7 +39,8 @@ SET ANSI_WARNINGS OFF
 		SELECT	@intSourceId					=	NULL,
 				@intContainerId					=	NULL,
 				@dblQty							=	NULL,
-				@dblNetWeight					=	NULL
+				@dblNetWeight					=	NULL,
+				@dblContainerQty				=	NULL
 				
 		SELECT	@intSourceId					=	intSourceId,
 				@intContainerId					=	intContainerId,
@@ -63,17 +64,18 @@ SET ANSI_WARNINGS OFF
 				SET @ErrMsg = 'Container for this shipment does not exist'
 				RAISERROR(@ErrMsg,16,1)
 			END
-					
+
+			SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) 
+			FROM tblLGLoadDetailContainerLink 
+			WHERE intLoadContainerId = @intContainerId 
+				AND intLoadDetailId = @intSourceId
+
 			IF (@dblContainerQty + @dblQty) < 0
 			BEGIN		
 				SET @ErrMsg = 'Negative container quantity is not allowed'
 				RAISERROR(@ErrMsg,16,1)
 			END
-
-			SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) 
-			FROM tblLGLoadDetailContainerLink 
-			WHERE intLoadContainerId = @intContainerId
-			
+						
 			UPDATE tblLGLoadDetailContainerLink 
 			SET dblReceivedQty = (@dblContainerQty + @dblQty)  
 			WHERE intLoadDetailId = @intSourceId 

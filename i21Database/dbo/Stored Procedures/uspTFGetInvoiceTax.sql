@@ -329,7 +329,7 @@ BEGIN TRY
 					, tblARInvoiceDetail.dblQtyShipped AS dblNet
 					, tblARInvoiceDetail.dblQtyShipped AS dblGross
 					, tblARInvoiceDetail.dblQtyShipped AS dblBillQty
-					, tblARInvoiceDetailTax.dblTax
+					, ISNULL(TaxDetail.dblTax, 0.000000) dblTax
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
@@ -377,18 +377,25 @@ BEGIN TRY
 				INNER JOIN tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.intEntityId
 				INNER JOIN tblARInvoice ON tblSMShipVia.intEntityId = tblARInvoice.intShipViaId
 				INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
-				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId			
-				FULL OUTER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intItemId = tblARInvoiceDetail.intItemId
+				--INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId			
+				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intItemId = tblARInvoiceDetail.intItemId
 				INNER JOIN vyuTFGetReportingComponentProductCode RCProductCode ON tblICItemMotorFuelTax.intProductCodeId = RCProductCode.intProductCodeId
 				INNER JOIN tblTFReportingComponent ON RCProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
-				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
-				INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+				--INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
+				--INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 				INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 				INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 				INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
 				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityId AND tblEMEntityLocation.ysnDefaultLocation = 1
 				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
 				CROSS JOIN tblSMCompanySetup
+				CROSS JOIN tblSMTaxCode
+				LEFT JOIN  (
+					SELECT tblARInvoiceDetailTax.intInvoiceDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblARInvoiceDetailTax.dblTax 
+					FROM tblARInvoiceDetailTax 
+					INNER JOIN tblSMTaxCode as TaxCode ON TaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
+				) TaxDetail ON TaxDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId AND TaxDetail.intTaxCodeId = tblSMTaxCode.intTaxCodeId
+				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId =  tblSMTaxCode.intTaxCategoryId 
 				WHERE tblARInvoice.ysnPosted = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)

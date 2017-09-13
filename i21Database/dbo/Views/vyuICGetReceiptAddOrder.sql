@@ -64,6 +64,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, ysnBundleItem	= CAST(0 AS BIT)
 		, intBundledItemId = CAST(NULL AS INT)
 		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, ysnIsBasket = CAST(0 AS BIT)
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -142,6 +144,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, ysnBundleItem	= ContractView.ysnBundleItem
 		, intBundledItemId = CAST(NULL AS INT)
 		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))		
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, ysnIsBasket = CAST(0 AS BIT)
 	FROM	vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -162,7 +166,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 
 	WHERE	ysnAllowedToShow = 1
 			AND strContractType = 'Purchase'
-			AND ISNULL(ysnBundleItem, 0) = 0
+			AND ISNULL(ysnIsBasket, 0) = 0
 
     UNION ALL
 	
@@ -224,6 +228,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, ysnBundleItem				= ContractView.ysnBundleItem
 		, intBundledItemId			= CAST(ContractItem.intItemId AS INT)
 		, strBundledItemNo			= CAST(ContractItem.strItemNo AS NVARCHAR(50))
+		, strBundledItemDescription = CAST(ContractItem.strDescription AS NVARCHAR(500))
+		, ysnIsBasket 				= ContractView.ysnIsBasket
 	FROM tblICItemBundle BundleDetail
 		INNER JOIN tblICItem BundledItem ON BundledItem.intItemId = BundleDetail.intBundleItemId
 		INNER JOIN tblICItem ContractItem ON ContractItem.intItemId = BundleDetail.intItemId
@@ -234,7 +240,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 			AND BundleDetailUOM.intItemUOMId = BundleDetail.intItemUnitMeasureId
 	WHERE ContractView.strContractType = 'Purchase'
 		AND ContractView.ysnAllowedToShow = 1
-		AND ContractView.ysnBundleItem = 1
+		AND ContractView.ysnIsBasket = 1
 
 	UNION ALL
 
@@ -298,6 +304,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, ysnBundleItem	= 0
 		, intBundledItemId = CAST(NULL AS INT)
 		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, ysnIsBasket = CAST(0 AS BIT)
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView 
 	LEFT JOIN dbo.tblSMCurrency Currency ON Currency.strCurrency = ISNULL(LogisticsView.strMainCurrency, LogisticsView.strCurrency) 
 	LEFT JOIN dbo.tblICItemUOM ItemUOM ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
@@ -374,7 +382,9 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from transfer
 		, ysnBundleItem	= 0
 		, intBundledItemId = CAST(NULL AS INT)
-		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))		
+		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))	
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, ysnIsBasket = CAST(0 AS BIT)	
 	FROM	vyuICGetInventoryTransferDetail TransferView
 			LEFT JOIN dbo.tblICInventoryTransfer TransferViewHeader
 				ON TransferViewHeader.intInventoryTransferId = TransferView.intInventoryTransferId

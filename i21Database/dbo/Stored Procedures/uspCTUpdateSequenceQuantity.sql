@@ -91,15 +91,6 @@ BEGIN TRY
 		RAISERROR('UOM configured in the header not available in the sequence.',16,1)
 	END
 
-	SET @XML = '<tblCTContractDetails>'
-	SET @XML +=		'<tblCTContractDetail>'
-	SET @XML +=			'<intContractDetailId>'+LTRIM(@intContractDetailId)+'</intContractDetailId>'
-	SET @XML +=			'<dblQuantity>'+LTRIM(@dblQuantityToUpdate)+'</dblQuantity>'
-	SET @XML +=		'</tblCTContractDetail>'
-	SET @XML +=	'</tblCTContractDetails>'
-
-	EXEC uspCTValidateContractDetail @XML,'Modified'
-
 	UPDATE	tblCTContractHeader
 	SET		dblQuantity			=	dblQuantity + @dblQuantityToUpdate,
 			intConcurrencyId	=	intConcurrencyId + 1

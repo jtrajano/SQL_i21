@@ -81,7 +81,7 @@ WHILE @mRowNumber > 0
 					UPDATE tblRKFutOptTransactionImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Invalid Broker.' WHERE intFutOptTransactionId = @mRowNumber
 				END
 		END
-	
+
 		IF EXISTS(SELECT * FROM tblEMEntity WHERE strName=@strName)
 		BEGIN
 		--- Broker Trader Number Exists -- in existing record
@@ -265,10 +265,40 @@ WHILE @mRowNumber > 0
 					UPDATE tblRKFutOptTransactionImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Invalid Currency.' WHERE intFutOptTransactionId = @mRowNumber
 				END
 		END
+				
+
+-- Reconciled Validation 
+		IF EXISTS(SELECT 1 FROM  tblRKReconciliationBrokerStatementHeader t
+						JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
+						JOIN tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId
+						JOIN tblICCommodity c on c.intCommodityId=t.intCommodityId
+						JOIN tblEMEntity e on e.intEntityId= t.intEntityId
+					WHERE m.strFutMarketName=strFutMarketName AND b.strAccountNumber=@strAccountNumber
+						AND c.strCommodityCode=strCommodityCode AND e.strName=@strName AND ysnFreezed = 1
+						AND convert(datetime,dtmFilledDate,@ConvertYear) = convert(datetime,@dtmFilledDate,@ConvertYear))
+		BEGIN
+			IF NOT EXISTS(select * from tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber)
+				BEGIN
+					INSERT INTO tblRKFutOptTransactionImport_ErrLog(intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
+																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime)
+					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'The selected filled date already reconciled.',convert(datetime,dtmCreateDateTime,@ConvertYear)
+					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
+				END
+				ELSE
+				BEGIN					
+					SELECT @PreviousErrMsg=strErrorMsg from tblRKFutOptTransactionImport_ErrLog WHERE intFutOptTransactionId = @mRowNumber  
+					update tblRKFutOptTransactionImport_ErrLog set strErrorMsg=@PreviousErrMsg+'The selected filled date already reconciled.' WHERE intFutOptTransactionId = @mRowNumber
+				END
+		END
+
 
 -- BuySell
 		IF @strBuySell not in('Buy','Sell')
 		BEGIN
+
 			IF NOT EXISTS(select * from tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber)
 				BEGIN
 					INSERT INTO tblRKFutOptTransactionImport_ErrLog(intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
@@ -289,6 +319,7 @@ WHILE @mRowNumber > 0
 -- strFutureMonth
 		IF NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth=replace(@strFutureMonth,'-',' '))
 		BEGIN
+		
 			IF NOT EXISTS(SELECT * FROM tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber)
 				BEGIN
 					INSERT INTO tblRKFutOptTransactionImport_ErrLog(intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
@@ -598,4 +629,4 @@ BEGIN CATCH
  IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
  SET @ErrMsg = ERROR_MESSAGE()  
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
-End Catch	
+END CATCH	

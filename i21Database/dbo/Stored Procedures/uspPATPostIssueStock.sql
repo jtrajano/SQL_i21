@@ -438,10 +438,10 @@ BEGIN
 				,[ysnInventory]							= 0
 				,[strItemDescription]					= 'Patronage - Issued Stock' 
 				,[intItemUOMId]							= NULL
-				,[dblQtyOrdered]						= 1
-				,[dblQtyShipped]						= 1
+				,[dblQtyOrdered]						= 0
+				,[dblQtyShipped]						= CS.dblSharesNo
 				,[dblDiscount]							= 0
-				,[dblPrice]								= ROUND(CS.dblFaceValue,2)
+				,[dblPrice]								= ROUND(CS.dblParValue,2)
 				,[ysnRefreshPrice]						= 0
 				,[strMaintenanceType]					= ''
 				,[strFrequency]							= ''

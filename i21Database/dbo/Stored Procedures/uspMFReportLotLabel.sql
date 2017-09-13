@@ -65,7 +65,11 @@ BEGIN TRY
 			,l.intItemId
 			,l.dblQty
 			,um.strUnitMeasure AS strQtyUOM
-			,l.dblWeight
+			,CASE 
+				WHEN l.intWeightUOMId IS NULL
+					THEN l.dblQty * i.dblWeight
+				ELSE l.dblWeight
+				END AS dblWeight
 			,um1.strUnitMeasure AS strWeightUOM
 			,l.strLotNumber
 			,i.strItemNo
@@ -77,13 +81,20 @@ BEGIN TRY
 				FROM tblICLot L1
 				WHERE L1.strLotNumber = l.strLotNumber
 				) AS dtmDateCreated
+			,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
 		FROM tblICLot l
 		JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
 		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-		LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
+		JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 		LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
-		LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu1.intUnitMeasureId
+		LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = (
+				CASE 
+					WHEN l.intWeightUOMId IS NULL
+						THEN i.intWeightUOMId
+					ELSE iu1.intUnitMeasureId
+					END
+				)
 		WHERE l.intLotId IN (
 				SELECT *
 				FROM dbo.fnSplitString(@strLotId, '^')
@@ -96,7 +107,11 @@ BEGIN TRY
 			,l.intItemId
 			,l.dblQty
 			,um.strUnitMeasure AS strQtyUOM
-			,l.dblWeight
+			,CASE 
+				WHEN l.intWeightUOMId IS NULL
+					THEN l.dblQty * i.dblWeight
+				ELSE l.dblWeight
+				END AS dblWeight
 			,um1.strUnitMeasure AS strWeightUOM
 			,l.strLotNumber
 			,i.strItemNo
@@ -108,13 +123,20 @@ BEGIN TRY
 				FROM tblICLot L1
 				WHERE L1.strLotNumber = l.strLotNumber
 				) AS dtmDateCreated
+			,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
 		FROM tblICLot l
 		JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
 		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-		LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
+		JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 		LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
-		LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu1.intUnitMeasureId
+		LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = (
+				CASE 
+					WHEN l.intWeightUOMId IS NULL
+						THEN i.intWeightUOMId
+					ELSE iu1.intUnitMeasureId
+					END
+				)
 		WHERE l.strLotNumber IN (
 				SELECT Item COLLATE DATABASE_DEFAULT
 				FROM dbo.fnSplitString(@strLotNo, '^')

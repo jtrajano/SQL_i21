@@ -110,7 +110,7 @@ SELECT
 	,[strActualCostId]			= CASE WHEN (ISNULL(ARI.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARI.[intLoadDistributionHeaderId],0) <> 0) THEN ARI.[strActualCostId] ELSE NULL END
 FROM 
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intItemUOMId], [dblQtyShipped], [ysnBlended], [dblPrice], [intCompanyLocationSubLocationId], 
-		[intStorageLocationId], [dblTotal], [intInventoryShipmentItemId], [intShipmentPurchaseSalesContractId], [intStorageScheduleTypeId]
+		[intStorageLocationId], [dblTotal], [intInventoryShipmentItemId], [intLoadDetailId], [intStorageScheduleTypeId]
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [dtmShipDate], [intCurrencyId], [intDistributionHeaderId], [intLoadDistributionHeaderId], [strActualCostId], [intCompanyLocationId],
@@ -131,7 +131,7 @@ LEFT OUTER JOIN
 WHERE				
 	((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
-	AND (ARID.[intShipmentPurchaseSalesContractId] IS NULL OR ARID.[intShipmentPurchaseSalesContractId] = 0)
+	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
 	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
 	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1))
 	AND ARI.[strTransactionType] <> 'Debit Memo'

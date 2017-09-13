@@ -24,6 +24,10 @@ select distinct upper(rtrim(agitm_un_desc)) UnitMeasure
 from agitmmst
 where upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS not in (select upper(strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS from tblICUnitMeasure)
 
+--CREATE 'LB' unit of Measure if not available in Origin
+IF NOT EXISTS (select distinct upper(rtrim(agitm_un_desc)) UnitMeasure
+from agitmmst where upper(rtrim(agitm_un_desc)) = 'LB')
+INSERT INTO [dbo].[tblICUnitMeasure] ([strUnitMeasure]) VALUES ('LB')
 
 --import all packing description with pack per unit greater than 1. These are pack units and have a different stock unit.
 --concatenate unit desc with pack per unit to make a unique uom

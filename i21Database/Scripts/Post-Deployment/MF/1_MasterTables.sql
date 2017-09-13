@@ -2499,3 +2499,10 @@ UPDATE tblMFCompanyPreference
 SET ysnSplitLotOnPartialQty = 0
 WHERE ysnSplitLotOnPartialQty IS NULL
 GO
+
+GO
+UPDATE tblMFWorkOrder SET intParentWorkOrderId = NULL WHERE intParentWorkOrderId = 0
+UPDATE tblMFWorkOrder SET intCustomerId = NULL WHERE intCustomerId = 0
+UPDATE tblMFWorkOrder SET intSalesRepresentativeId = NULL WHERE intSalesRepresentativeId = 0
+UPDATE tblMFWorkOrder SET intActualShiftId = NULL WHERE intActualShiftId = 0
+GO

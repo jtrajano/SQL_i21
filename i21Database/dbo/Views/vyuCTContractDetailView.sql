@@ -39,9 +39,9 @@ AS
 			SR.strScheduleDescription,			IM.strShortName,				DP.strCity						AS	strDestinationPoint,
 			SK.intStockUOMId,					SK.strStockUnitMeasure,			DC.strCity						AS	strDestinationCity,
 			SK.intStockUnitMeasureId,			IC.strContractItemName,			PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
-			ST.strSplitNumber,					IM.ysnUseWeighScales,			U4.strUnitMeasure				AS	strStockItemUOM,
+			ST.strSplitNumber,													U4.strUnitMeasure				AS	strStockItemUOM,
 			CU.intMainCurrencyId,				CU.strCurrency,					CY.strCurrency					AS	strMainCurrency,
-																				U7.strUnitMeasure				AS	strNetWeightUOM,
+			ISNULL(IM.ysnUseWeighScales,0)		ysnUseWeighScales,				U7.strUnitMeasure				AS	strNetWeightUOM,
 																				ST.strDescription				AS	strSplitDescription,
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)															AS	ysnSubCurrency,
 			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
@@ -114,6 +114,7 @@ AS
 				END		AS BIT
 			)	AS		ysnEarlyDayPassed,
 			CAST(CASE WHEN IM.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) AS ysnBundleItem,
+			IM.ysnIsBasket,
 			dbo.fnCTGetContractPrice(CD.intContractDetailId) dblContractPrice,
 
 			AD.intSeqCurrencyId,				AD.ysnSeqSubCurrency,			AD.intSeqPriceUOMId,

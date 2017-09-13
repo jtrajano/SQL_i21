@@ -32,7 +32,7 @@ BEGIN
 	DECLARE @paymentRecordNum NVARCHAR(50);
 	DECLARE @payToAddress INT;
 	DECLARE @foreignCurrency BIT = 0;
-	DECLARE @rate DECIMAL(18,6) = 0;
+	DECLARE @rate DECIMAL(18,6) = 1;
 	DECLARE @rateType INT;
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId

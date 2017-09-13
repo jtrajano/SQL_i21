@@ -40,7 +40,7 @@ FROM dbo.tblAPBill A
 			INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
 			LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId 
 			WHERE B.intBillId = A.intBillId
-			ORDER BY dtmDatePaid DESC
+			ORDER BY dtmDateCreated DESC, dtmDatePaid DESC --GET THE LAST PAYMENT TRANSACTION 
 		 )  Payment     
 		LEFT JOIN dbo.tblAPVendor
 			ON tblAPVendor.[intEntityId] = A.[intEntityVendorId]

@@ -8,7 +8,7 @@ AS
 
 DECLARE @tblDateList TABLE
 (Id INT identity(1,1),
-       DateData datetime
+ DateData datetime
 )
 
 DECLARE @StartDateTime DATETIME
@@ -49,6 +49,8 @@ DECLARE @tblFirstResult TABLE
        tranShipQty NUMERIC(24,10),
        tranRecQty NUMERIC(24,10),
        dblAdjustmentQty NUMERIC(24,10),
+	   dblCountQty NUMERIC(24,10),
+	   dblInvoiceQty NUMERIC(24,10),
        BalanceForward NUMERIC(24,10)
 )
 
@@ -59,15 +61,19 @@ DECLARE @tblResultFinal TABLE
        dblUnpaidIn NUMERIC(24,10),
        dblUnpaidOut NUMERIC(24,10),
        dblUnpaidBalance NUMERIC(24,10),
-   BalanceForward NUMERIC(24,10),
+       BalanceForward NUMERIC(24,10),
        InventoryBalanceCarryForward NUMERIC(24,10)
 )
 
-INSERT INTO @tblResult (intRowNum ,dtmDate ,    [Distribution] ,     [Unpaid IN] , [Unpaid Out] ,       [Unpaid Balance],InventoryBalanceCarryForward,strReceiptNumber,intReceiptId )
-EXEC uspRKGetCompanyOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId
+-- Customer Ownership START
+EXEC uspRKGetCustomerOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId
+-- Custoemr ownershiip END
 
-INSERT INTO @tblFirstResult (dtmDate ,   tranShipQty , tranRecQty ,  dblAdjustmentQty , BalanceForward )
-EXEC uspRKGetInventoryBalance @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId
+INSERT INTO @tblResult (intRowNum ,dtmDate ,    [Distribution] ,     [Unpaid IN] , [Unpaid Out] ,       [Unpaid Balance],InventoryBalanceCarryForward,strReceiptNumber,intReceiptId )
+EXEC uspRKGetCompanyOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId
+
+INSERT INTO @tblFirstResult (dtmDate ,   tranShipQty , tranRecQty ,  dblAdjustmentQty ,dblCountQty,dblInvoiceQty, BalanceForward )
+EXEC uspRKGetInventoryBalance @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId
 
 
 INSERT INTO @tblResultFinal (dtmDate,dblUnpaidIn,dblUnpaidOut,BalanceForward,dblUnpaidBalance,InventoryBalanceCarryForward)
@@ -82,6 +88,8 @@ DECLARE @tblConsolidatedResult TABLE
        [Receive In] NUMERIC(24,10),
        [Ship Out] NUMERIC(24,10),
        [Adjustments] NUMERIC(24,10),
+	   [dblCount] NUMERIC(24,10),
+	   [dblInvoiceQty] NUMERIC(24,10),
        BalanceForward NUMERIC(24,10),
        InventoryBalanceCarryForward NUMERIC(24,10),
        [Unpaid In] NUMERIC(24,10),
@@ -90,35 +98,62 @@ DECLARE @tblConsolidatedResult TABLE
        [Balance] NUMERIC(24,10),
        [Unpaid Balance] NUMERIC(24,10)
 )
-INSERT INTO @tblConsolidatedResult(dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward,InventoryBalanceCarryForward ,
+INSERT INTO @tblConsolidatedResult(dtmDate ,[Receive In],[Ship Out],[Adjustments],dblCount,dblInvoiceQty,BalanceForward,InventoryBalanceCarryForward ,
               [Unpaid In],[Unpaid Out],[Balance], [Unpaid Balance])
 
-SELECT isnull(a.dtmDate,b.dtmDate) [Date],isnull(a.tranRecQty,0) [Receive In],       isnull(a.tranShipQty,0) [Ship Out], isnull(dblAdjustmentQty,0) [Adjustments],
+SELECT isnull(a.dtmDate,b.dtmDate) [Date],isnull(a.tranRecQty,0) [Receive In], isnull(a.tranShipQty,0) [Ship Out], isnull(dblAdjustmentQty,0) [Adjustments], isnull(dblCountQty,0) as dblCount,
+					isnull(dblInvoiceQty,0) dblInvoiceQty,
                      isnull(a.BalanceForward,0) BalanceForward,isnull(a.BalanceForward,0)+ isnull(b.InventoryBalanceCarryForward,0),
               isnull(b.dblUnpaidIn,0) [Unpaid In],isnull(b.dblUnpaidOut,0) [Unpaid Out],
                      isnull(b.dblUnpaidBalance,0) as [Balance1],null [Unpaid Balance] 
 FROM @tblFirstResult a
 FULL JOIN @tblResultFinal b on a.dtmDate=b.dtmDate ORDER BY b.dtmDate,a.dtmDate asc
 
-SELECT CONVERT(INT,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,* FROM(
-SELECT DISTINCT dtmDate,[Receive In] as [dblReceiveIn],[Ship Out] as [dblShipOut],Adjustments as dblAdjustments,isnull([InventoryBalance],0) as [dblInventoryBalance],
+
+SELECT CONVERT(INT,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,* into #final FROM(
+SELECT DISTINCT dtmDate,[Receive In] as [dblReceiveIn],isnull([Ship Out],0) + isnull(dblInvoiceQty,0) as [dblShipOut],Adjustments as dblAdjustments,dblCount,dblInvoiceQty,isnull([InventoryBalance],0) as [dblInventoryBalance],
 [Unpaid In] as dblUnpaidIn,[Unpaid Out] dblUnpaidOut,[Balance] dblBalance,    
           ISNULL([InventoryBalance],0) - isnull( [Balance] ,0) [dblPaidBalance], 
           ISNULL([Balance],0) + (isnull([InventoryBalance],0) - isnull( [Balance] ,0)) [dblTotalCompanyOwned],
            isnull(isnull([Unpaid In],0)-isnull([Unpaid Out],0),0) dblUnpaidBalance
 FROM (
-SELECT dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryBalanceCarryForward,
+SELECT dtmDate ,[Receive In],[Ship Out],[Adjustments],dblCount,dblInvoiceQty,BalanceForward, InventoryBalanceCarryForward,
               (SELECT SUM(BalanceForward) FROM @tblConsolidatedResult AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900')) AS 
-                       [InventoryBalance],
-              
-                       (case when isnull([Unpaid In],0)=0 and isnull([Unpaid Out],0)=0 then
+                       [InventoryBalance],              
+                       (CASE WHEN isnull([Unpaid In],0)=0 and isnull([Unpaid Out],0)=0 then
                            (SELECT top 1 Balance FROM @tblConsolidatedResult AS T2 WHERE Balance > 0 and isnull(T2.dtmDate,'01/01/1900') <= isnull(t.dtmDate,'01/01/1900') order by isnull                                        (T2.dtmDate,'01/01/1900') desc) 
               else [Balance] end) [Balance],
               [Unpaid In],[Unpaid Out]
               
 FROM(
-SELECT DateData dtmDate ,[Receive In],[Ship Out],[Adjustments],BalanceForward, InventoryBalanceCarryForward,
+SELECT DateData dtmDate ,[Receive In],[Ship Out],[Adjustments],dblCount,dblInvoiceQty,BalanceForward, InventoryBalanceCarryForward,
               [Unpaid In],[Unpaid Out],[Balance]
 FROM @tblConsolidatedResult T1
-full JOIN @tblDateList list on T1.dtmDate=list.DateData
+FULL JOIN @tblDateList list on T1.dtmDate=list.DateData
   )t )t1)t2 order by dtmDate
+
+
+  SELECT intRowNum,list.dtmDate,dblReceiveIn,dblShipOut,dblAdjustments,dblCount,dblInvoiceQty,dblInventoryBalance,  
+    (CASE WHEN strDistributionA is null then (SELECT DISTINCT TOP 1 strDistributionA FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionA,'') <>'') else strDistributionA end) strDistributionA, 	
+	[dblAIn],[dblAOut],(SELECT SUM(dblANet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblANet],
+	(CASE WHEN strDistributionB is null then (SELECT DISTINCT TOP 1 strDistributionB FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionB,'') <>'') else strDistributionB end) strDistributionB,
+	[dblBIn],[dblBOut],(SELECT SUM(dblBNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblBNet],
+	(CASE WHEN strDistributionC is null then (SELECT DISTINCT TOP 1 strDistributionC FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionC,'') <>'') else strDistributionC end) strDistributionC,
+	[dblCIn],[dblCOut],(SELECT SUM(dblCNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblCNet],
+	(CASE WHEN strDistributionD is null then (SELECT DISTINCT TOP 1 strDistributionD FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionD,'') <>'') else strDistributionD end) strDistributionD,
+	[dblDIn],[dblDOut],(SELECT SUM(dblDNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblDNet],
+	(CASE WHEN strDistributionE is null then (SELECT DISTINCT TOP 1 strDistributionE FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionE,'') <>'') else strDistributionE end) strDistributionE,
+	[dblEIn],[dblEOut],(SELECT SUM(dblENet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblENet],
+	(CASE WHEN strDistributionF is null then (SELECT DISTINCT TOP 1 strDistributionF FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionF,'') <>'') else strDistributionF end) strDistributionF,
+	[dblFIn],[dblFOut],(SELECT SUM(dblFNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblFNet],
+	(CASE WHEN strDistributionG is null then (SELECT DISTINCT TOP 1 strDistributionG FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionG,'') <>'') else strDistributionG end) strDistributionG,
+	[dblGIn],[dblGOut],(SELECT SUM(dblGNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblGNet],
+	(CASE WHEN strDistributionH is null then (SELECT DISTINCT TOP 1 strDistributionH FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionH,'') <>'') else strDistributionH end) strDistributionH,
+	[dblHIn],[dblHOut],(SELECT SUM(dblHNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblHNet],
+	(CASE WHEN strDistributionI is null then (SELECT DISTINCT TOP 1 strDistributionI FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionI,'') <>'') else strDistributionI end) strDistributionI,
+	[dblIIn],[dblIOut],(SELECT SUM(dblINet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblINet],
+	(CASE WHEN strDistributionJ is null then (SELECT DISTINCT TOP 1 strDistributionJ FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionJ,'') <>'') else strDistributionJ end) strDistributionJ,
+	[dblJIn],[dblJOut],(SELECT SUM(dblJNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblJNet]
+   ,dblUnpaidIn,dblUnpaidOut,dblBalance,dblPaidBalance,dblTotalCompanyOwned,dblUnpaidBalance
+  FROM #final list
+  FULL JOIN tblRKDailyPositionForCustomer t ON ISNULL(t.dtmDate,'1900-01-01')=isnull(list.dtmDate,'1900-01-01') order by list.dtmDate

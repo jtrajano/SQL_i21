@@ -68,6 +68,8 @@ FROM (
 		, ysnBundleItem = CAST(0 AS BIT)
 		, intBundledItemId = CAST(NULL AS INT)
 		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, ysnIsBasket = CAST(0 AS BIT)
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure

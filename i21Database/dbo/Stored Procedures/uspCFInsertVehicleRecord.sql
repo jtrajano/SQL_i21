@@ -14,6 +14,7 @@
 	,@ysnCardForOwnUse				NVARCHAR(MAX)	 =	 'N'
 	,@ysnActive						NVARCHAR(MAX)	 =	 'Y'
 	,@strNoticeMessageLine1			NVARCHAR(MAX)	 =	 ''
+	,@strDepartment					NVARCHAR(MAX)	 =	 ''
 	---------------------------------------------------------
 	,@dtmLastReminderDate			DATETIME		 =	 NULL
 	,@dtmLastServiceDate			DATETIME		 =	 NULL
@@ -35,6 +36,7 @@ BEGIN
 	DECLARE @intVehicleId							  INT = 0
 	DECLARE @intAccountId							  INT = 0
 	DECLARE @intExpenseItemId						  INT = 0
+	DECLARE @intDepartmentId						  INT = 0
 	---------------------------------------------------------
 
 
@@ -131,6 +133,26 @@ BEGIN
 		END
 
 	---------------------------------------------------------
+
+
+	--Department
+	IF (@strDepartment != '' AND @intAccountId > 0)
+	BEGIN 
+		SELECT @intDepartmentId = ISNULL(intDepartmentId ,0)
+		FROM tblCFDepartment 
+		WHERE strDepartment = @strDepartment AND intAccountId = @intAccountId
+
+		IF (@intDepartmentId = 0)
+		BEGIN
+			INSERT tblCFDepartment (intAccountId,strDepartment)
+			VALUES (@intAccountId,@strDepartment)
+			SET @intDepartmentId = SCOPE_IDENTITY()
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intDepartmentId = NULL
+	END
 	
 	IF(@ysnHasError = 1)
 	BEGIN
@@ -201,7 +223,8 @@ BEGIN
 				,dtmLastServiceDate
 				,intLastServiceOdometer
 				,strNoticeMessageLine1
-				,ysnActive)
+				,ysnActive
+				,intDepartmentId)
 			VALUES(
 				 @intAccountId
 				,@strVehicleNumber
@@ -217,7 +240,8 @@ BEGIN
 				,@dtmLastServiceDate
 				,@intLastServiceOdometer
 				,@strNoticeMessageLine1
-				,@ysnActive)
+				,@ysnActive
+				,@intDepartmentId)
 
 			COMMIT TRANSACTION
 			RETURN 1

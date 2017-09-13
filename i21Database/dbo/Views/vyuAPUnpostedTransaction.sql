@@ -20,8 +20,8 @@ FROM dbo.tblAPBill APB
 LEFT JOIN dbo.tblSMUserSecurity US ON APB.intEntityId = US.[intEntityId]
 WHERE 
 	ISNULL(ysnPosted, 0) = 0 AND 
-	APB.intTransactionType NOT IN (6,8) 
-	--AND				   --Will not show BillTemplate and Voucher Over Payment and Prepayment
+	APB.intTransactionType NOT IN (6,8,9,11,12) --Will not show (BillTemplate/ Over Payment / 1099Ajd / Claims  / Payment reversal)
+	AND APB.ysnRecurring != 1                                    --Will not show Recurring Voucher Transaction 
 	-- APB.ysnForApproval != 1	AND								   --Will not show For Approval Bills
     -- (APB.ysnApproved = 0)									   --Will not show Rejected approval bills
 

@@ -24,6 +24,8 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@defaultCurrency int,
 		@intSurchargeItemId as int,
 		@intFreightItemId as int,
+		@SurchargeUOMId as int,
+		@FreightUOMId as int,
 		@FreightCostAllocationMethod AS INT
 
 SELECT	TOP 1 @defaultCurrency = CP.intDefaultCurrencyId		
@@ -140,7 +142,7 @@ END
 			,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 			,dblSurcharge				= min(TR.dblPurSurcharge)
 			,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
-			,strActualCostId			= min(TLD.strTransaction) 											
+			,strActualCostId			= ISNULL(min(TLD.strTransaction), min(BID.strTransaction))
 			,intTaxGroupId				= min(TR.intTaxGroupId)
 			,strVendorRefNo				= min(TR.strBillOfLading)
 			,strSourceId				= min(TL.strTransaction)
@@ -161,9 +163,18 @@ END
 									ON TT.intLoadHeaderId = RR.intLoadHeaderId
 								JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
 								JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
-						WHERE	RR.strOrigin = 'Terminal' 
-								AND HH.strDestination = 'Customer' 	and RR.intItemId = HD.intItemId		
+						WHERE	((RR.strOrigin = 'Terminal' AND HH.strDestination = 'Customer') OR (RR.strOrigin = 'Terminal' AND HH.strDestination = 'Location' AND RR.intCompanyLocationId != HH.intCompanyLocationId))
+							AND RR.intItemId = HD.intItemId
 					  ) TLD	on TLD.intLoadHeaderId = TR.intLoadHeaderId	 and TLD.intLoadReceiptId = TR.intLoadReceiptId and TLD.intItemId = TR.intItemId
+			LEFT JOIN (
+						SELECT DISTINCT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId
+						FROM tblTRLoadHeader TT
+						LEFT JOIN tblTRLoadReceipt RR ON TT.intLoadHeaderId = RR.intLoadHeaderId
+						LEFT JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId
+						LEFT JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId
+						LEFT JOIN vyuTRGetLoadBlendIngredient BI ON BI.intLoadDistributionDetailId = HD.intLoadDistributionDetailId
+						WHERE	RR.strOrigin = 'Terminal' AND BI.intIngredientItemId = RR.intItemId
+						) BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
@@ -178,10 +189,19 @@ END
 		,intSourceType
 		,intTaxGroupId
 
-   SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
-   SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
-   -- Get Freight Cost Allocation Method from Company Preferences
-   SELECT TOP 1 @FreightCostAllocationMethod = intFreightCostAllocationMethod FROM tblTRCompanyPreference
+	SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
+	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+
+	SELECT TOP 1 @FreightUOMId = intCostUOMId FROM tblICItem WHERE intItemId = @intFreightItemId
+	IF (@FreightUOMId IS NULL)
+		SELECT TOP 1 @FreightUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+	
+	SELECT TOP 1 @SurchargeUOMId = intCostUOMId FROM tblICItem WHERE intItemId = @intSurchargeItemId
+	IF (@SurchargeUOMId IS NULL)
+		SELECT TOP 1 @SurchargeUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intSurchargeItemId AND ysnStockUnit = 1
+
+	-- Get Freight Cost Allocation Method from Company Preferences
+	SELECT TOP 1 @FreightCostAllocationMethod = intFreightCostAllocationMethod FROM tblTRCompanyPreference
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
@@ -223,7 +243,7 @@ END
 														END)
 			,[strCostMethod]					= 'Per Unit'
 			,[dblRate]							= min(RE.dblFreightRate)
-			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+			,[intCostUOMId]						= @FreightUOMId
 			,[intOtherChargeEntityVendorId]		= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
 															min(RE.intEntityVendorId)
 														WHEN min(SM.strFreightBilledBy) = 'Internal' THEN 
@@ -271,7 +291,7 @@ END
 														END)
 			,[strCostMethod]					= 'Percentage'
 			,[dblRate]							= min(RE.dblSurcharge)
-			,[intCostUOMId]						= (SELECT TOP 1 UOM.intItemUOMId FROM tblICItemUOM UOM WHERE UOM.intItemId =  @intSurchargeItemId)
+			,[intCostUOMId]						= @SurchargeUOMId
 			,[intOtherChargeEntityVendorId]		= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
 															min(RE.intEntityVendorId)
 														WHEN min(SM.strFreightBilledBy) = 'Internal' THEN 
@@ -342,7 +362,7 @@ _PostOrUnPost:
 		WHERE	intInventoryReceiptId = @ReceiptId
 
 		SELECT	TOP 1 @intEntityId = intEntityId 
-		FROM	dbo.tblSMUserSecurity 
+		FROM	tblSMUserSecurity 
 		WHERE	intEntityId = @intUserId
 		if @ysnRecap = 0
 		BEGIN

@@ -140,7 +140,7 @@ BEGIN TRY
 				SELECT TOP 1 1
 				FROM tblQMSample S
 				JOIN tblQMSampleStatus SS ON S.intSampleStatusId = SS.intSampleStatusId
-				WHERE S.intContractDetailId = 14641
+				WHERE S.intContractDetailId = @intContractDetailId
 					AND SS.strStatus = 'Approved'
 				)
 		BEGIN

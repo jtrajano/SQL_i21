@@ -3,7 +3,7 @@
 		@XML varchar(max)
 	
 	AS
-	BEGIN TRY
+BEGIN TRY
 	    
 		DECLARE @ErrMsg					   NVARCHAR(MAX),
 				@idoc					   INT,
@@ -908,9 +908,6 @@
 				, 'a.intItemLocationId'
 			)
 
-			INSERT INTO TestDatabase.dbo.tblPerson(strFirstName, strLastName)
-			VALUES(@SqlQuery1, 'Product Code')
-
 		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
 	 END 
@@ -1265,7 +1262,7 @@
 
 
 	 ---Update Logic-------
-PRINT 'Update Logic 01'		      
+--PRINT 'Update Logic 01'		      
 IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
    BEGIN
 
@@ -1286,7 +1283,7 @@ IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
 			   OR (@intNewBinLocation IS NOT NULL) OR (@dblNewMinQtyOnHand IS NOT NULL))
       BEGIN 
 	     
-		  SET @UpdateCount = 0
+		  --SET @UpdateCount = 0
 
           SET @SqlQuery1 = ' UPDATE tblICItemLocation SET '
 
@@ -1789,12 +1786,12 @@ IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
 
 		  EXEC (@SqlQuery1)
 
-		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
+		  --SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
 	 END	  
 END
 
 
-PRINT 'Update Logic 02'	
+--PRINT 'Update Logic 02'	
 IF((@strYsnPreview != 'Y')
 AND(@UpdateCount > 0))
 BEGIN
@@ -1881,17 +1878,17 @@ BEGIN
 		      END     
 
           EXEC (@SqlQuery1)
-		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+		  --SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
 	END
 END
 
-PRINT 'Update Logic 03'	
+--PRINT 'Update Logic 03'	
 IF((@strYsnPreview != 'Y')
 AND(@UpdateCount > 0))
 BEGIN
       IF ((@intNewGLPurchaseAccount IS NOT NULL) OR (@intNewGLSalesAccount IS NOT NULL))
 	  BEGIN
-	         PRINT '@intNewGLPurchaseAccount'
+	         --PRINT '@intNewGLPurchaseAccount'
 	         IF (@intNewGLPurchaseAccount IS NOT NULL)
 			 BEGIN
 			    SET @strAccountCategory = 'Cost of Goods'
@@ -1968,12 +1965,12 @@ BEGIN
 					SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
 
 					EXEC (@SqlQuery1)
-					SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+					--SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
 				END 
 			 END
 
 
-			 PRINT '@intNewGLSalesAccount'
+			 --PRINT '@intNewGLSalesAccount'
              IF (@intNewGLSalesAccount IS NOT NULL)
 			 BEGIN
 			    SET @strAccountCategory = 'Sales Account'
@@ -2049,7 +2046,7 @@ BEGIN
 
 					EXEC (@SqlQuery1)
 				
-					SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+					--SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
 				END 
 			 END
              
@@ -2136,7 +2133,10 @@ BEGIN
 END
   
 
-    IF (@strNewCountCode IS NOT NULL OR @intNewCategory IS NOT NULL OR @intNewGLPurchaseAccount IS NOT NULL OR @intNewGLSalesAccount IS NOT NULL)
+
+    --AUDIT LOG
+    --IF (@strNewCountCode IS NOT NULL OR @intNewCategory IS NOT NULL OR @intNewGLPurchaseAccount IS NOT NULL OR @intNewGLSalesAccount IS NOT NULL)
+	IF(@UpdateCount >= 1 AND @strYsnPreview != 'Y' AND (@strNewCountCode IS NOT NULL OR @intNewCategory IS NOT NULL OR @intNewGLPurchaseAccount IS NOT NULL OR @intNewGLSalesAccount IS NOT NULL))
 	BEGIN
 			--AUDIT LOG
 
@@ -2263,7 +2263,8 @@ END
 
 
 --NEW
-SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount
+--Remove for displaying changes made
+--SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount
 
 DELETE FROM tblSTMassUpdateReportMaster
 
@@ -2276,6 +2277,15 @@ SELECT strLocation
 	  , strNewData 
 FROM @tblTempOne
 
+
+--For displaying changes made after update
+SELECT DISTINCT strLocation
+	  , strUpc
+	  , strItemDescription
+	  , strChangeDescription
+	  , strOldData
+	  , strNewData 
+FROM @tblTempOne
 
 
 --OLD

@@ -223,6 +223,9 @@ SELECT CH.strContractNumber
 	,LDOC.strDocumentNo
 	,LD.dblQuantity
 	,LOAD.ysnInvoice
+	,LOAD.ysn4cRegistration
+	,LOAD.ysnProvisionalInvoice
+	,LOAD.ysnQuantityFinal
 FROM tblLGLoad LOAD
 JOIN tblLGLoadDetail LD ON LOAD.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = (
