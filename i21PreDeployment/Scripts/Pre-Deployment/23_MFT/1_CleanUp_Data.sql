@@ -15,6 +15,64 @@ BEGIN
     EXEC('DROP TABLE tblTFValidProductCode')
 END
 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxCriteria') 
+BEGIN
+	-- Old table
+	PRINT('Drop tblTFTaxCriteria')
+    EXEC('DROP TABLE tblTFTaxCriteria')
+END
+
+-- Old Table that rename to tblTFReportingComponentVendor
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidVendor') 
+BEGIN
+	-- Old table
+	PRINT('Drop tblTFValidVendor')
+	EXEC('DROP TABLE tblTFValidVendor')
+END
+
+-- Old Table that rename to tblTFReportingComponentField
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFScheduleFields') 
+BEGIN
+	-- Old table
+	PRINT('Drop tblTFScheduleFields')
+	EXEC('DROP TABLE tblTFScheduleFields')
+END
+
+-- Reporting Component Criteria
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentCriteria') 
+BEGIN
+	PRINT('Truncate tblTFReportingComponentCriteria')
+	EXEC('TRUNCATE TABLE tblTFReportingComponentCriteria')
+END
+
+-- Reporting Component Field
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentField') 
+BEGIN
+	PRINT('Truncate tblTFReportingComponentField')
+	EXEC('TRUNCATE TABLE tblTFReportingComponentField')
+END
+
+-- Reporting Component Destination State
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentDestinationState') 
+BEGIN
+	PRINT('Truncate tblTFReportingComponentDestinationState')
+	EXEC('TRUNCATE TABLE tblTFReportingComponentDestinationState')
+END
+
+-- Reporting Component Origin State
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentOriginState') 
+BEGIN
+	PRINT('Truncate tblTFReportingComponentOriginState')
+	EXEC('TRUNCATE TABLE tblTFReportingComponentOriginState')
+END
+
+-- Reporting Component Product Code
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentProductCode') 
+BEGIN
+	PRINT('Truncate tblTFReportingComponentProductCode')
+	EXEC('TRUNCATE TABLE tblTFReportingComponentProductCode')
+END
+
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactionSummary') 
 BEGIN
 	PRINT('Truncate tblTFTransactionSummary')
@@ -85,7 +143,6 @@ END
 
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
 BEGIN
-	
 	IF NOT EXISTS(SELECT * FROM  tblSMCleanupLog WHERE strModuleName = 'MFT' AND strDesription = 'Overall-Cleanup' AND ysnActive = 1) 
 	BEGIN
 		
@@ -111,29 +168,11 @@ BEGIN
 		BEGIN
 			EXEC('DELETE FROM tblTFReportingComponentConfiguration')
 		END
-	
+
 		-- Origin Destination State
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFOriginDestinationState') 
 		BEGIN
 			EXEC('DELETE FROM tblTFOriginDestinationState')
-		END
-		
-		-- Old Table that rename to tblTFReportingComponentProductCode
-		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidProductCode') 
-		BEGIN
-			EXEC('TRUNCATE TABLE tblTFValidProductCode')
-		END
-
-		-- Old Table that rename to tblTFReportingComponentVendor
-		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidVendor') 
-		BEGIN
-			EXEC('TRUNCATE TABLE tblTFValidVendor')
-		END
-
-		-- Old Table that rename to tblTFReportingComponentField
-		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFScheduleFields') 
-		BEGIN
-			EXEC('TRUNCATE TABLE tblTFScheduleFields')
 		END
 
 		-- Tax Category
