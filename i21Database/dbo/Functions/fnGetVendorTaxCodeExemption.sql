@@ -78,7 +78,7 @@ BEGIN
 							AND ICC.intCategoryId = @ItemCategoryId
 							AND ICCT.intTaxClassId = @TaxClassId
 					)					
-		AND ISNULL(@ItemId,0) <> 0
+		--AND ISNULL(@ItemId,0) <> 0
 	BEGIN
 		SET @TaxCodeExemption	= ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
 								+ ISNULL(' is not included in Item Category - ' + (SELECT TOP 1 [strCategoryCode] FROM tblICCategory WHERE [intCategoryId] = @ItemCategoryId) + ' tax class setup.', '') 	
