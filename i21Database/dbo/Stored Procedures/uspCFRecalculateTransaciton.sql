@@ -420,6 +420,11 @@ BEGIN
 	FROM tblCFSiteGroup
 	WHERE intSiteGroupId = @intSiteGroupId
 
+	IF(ISNULL(@dblAdjustmentRate,0) >= 1)
+	BEGIN
+	SET @ysnForceRounding = 1
+	END
+
 
 	--IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
 	--BEGIN
