@@ -65,3 +65,18 @@ BEGIN
 	NOT IN (SELECT DISTINCT intRank FROM tblPREmployeeRank)
 	')
 END
+
+/*
+* Time Off Requests
+* 1. Update Time Off Request Calendar entries with Time Off System Calendar Id
+* 2...
+*/
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRTimeOffRequest'))
+BEGIN
+	EXEC ('
+	UPDATE tblSMEvents 
+	SET intCalendarId = (SELECT TOP 1 intCalendarId FROM tblSMCalendars 
+						WHERE strCalendarName = ''Time Off'' AND strCalendarType = ''System'')
+	WHERE intEventId IN (SELECT intEventId FROM tblPRTimeOffRequest)
+	')
+END
