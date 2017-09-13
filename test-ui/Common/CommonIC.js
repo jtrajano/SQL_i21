@@ -604,7 +604,6 @@ Ext.define('Inventory.CommonIC', {
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .waitUntilLoaded('')
             .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', qtytoreceive, receiptuom)
-            .waitUntilLoaded('')
             .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
             .enterGridData('InventoryReceipt', 1, 'colUnitCost', cost)
             .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
@@ -629,9 +628,6 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .waitUntilLoaded('')
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
-            .clickMenuFolder('Inventory','Folder')
-            .waitUntilLoaded('')
-            .waitUntilLoaded('')
 
 
             .done();
@@ -661,7 +657,6 @@ Ext.define('Inventory.CommonIC', {
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .waitUntilLoaded('')
             .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', qtytoreceive, receiptuom)
-            .waitUntilLoaded('')
             .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
             .enterGridData('InventoryReceipt', 1, 'colUnitCost', cost)
             .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
@@ -671,8 +666,10 @@ Ext.define('Inventory.CommonIC', {
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName',storagelocation,'strSubLocationName')
 
             .enterGridData('LotTracking', 1, 'colLotId', lotno)
-            .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure',lotuom,'strUnitMeasure')
-            .enterGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
+            // .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure',lotuom,'strUnitMeasure')
+            .verifyGridData('LotTracking', 1, 'colLotUOM', receiptuom)
+            .verifyGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
+            // .enterGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
             .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
             .verifyGridData('LotTracking', 1, 'colLotWeightUOM',lotuom)
             .verifyGridData('LotTracking', 1, 'colLotStorageLocation', storagelocation)
@@ -696,9 +693,6 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .waitUntilLoaded('')
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
-            .clickMenuFolder('Inventory','Folder')
-            .waitUntilLoaded('')
-            .waitUntilLoaded('')
 
 
             .done();
@@ -1363,14 +1357,14 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
             .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
             .clickButton('AddDetail')
-            .waitUntilLoaded('ctcontractsequence')
             .waitUntilLoaded('')
-            .addFunction (function (next){
-            var date = new Date().toLocaleDateString();
-            new iRely.FunctionalTest().start(t, next)
-                .enterData('Date Field','EndDate', date, 0, 10)
-                .done();
-             })
+            .waitUntilLoaded('')
+            // .addFunction (function (next){
+            // var date = new Date().toLocaleDateString();
+            // new iRely.FunctionalTest().start(t, next)
+            //     .enterData('Date Field','EndDate', date, 0, 10)
+            //     .done();
+            //  })
             .selectComboBoxRowValue('Location', location , 'Location',1)
             .selectComboBoxRowValue('Item', itemno, 'Item',1)
             .selectComboBoxRowValue('NetWeightUOM', receiptuom, 'NetWeightUOM',1)
@@ -1436,8 +1430,6 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickButton('Close')
-            .waitUntilLoaded('')
-            .clickMenuFolder('Contract Management','Folder')
             .waitUntilLoaded('')
 
             .done();

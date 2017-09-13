@@ -1,4 +1,5 @@
 StartTest (function (t) {
+    var record=Math.floor((Math.random() * 1000000) + 1);
     var commonICST = Ext.create('Inventory.CommonICSmokeTest');
     var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
@@ -318,14 +319,15 @@ StartTest (function (t) {
                 .clickCheckBox('DeductDenaturantFromRin', true)
                 .clickButton('Save')
                 .verifyStatusMessage('Saved')
-                .clickButton('Close')
-                .waitUntilLoaded('')
+           
                 .displayText('===== Add Fuel Type Done =====')
 
                 .done();
             },
             continueOnFail: true
          })
+         .clickButton('Close')
+         .waitUntilLoaded('')
         //endregion
 
 
@@ -520,329 +522,360 @@ StartTest (function (t) {
 
 
 
-//         /*====================================== Create CT to IR for  Non Lotted Item Process Button ======================================*/
-//         //region
-//         .displayText('===== Scenario 1: Create CT to IR for  Non Lotted Item Process Button =====')
-//         .addFunction(function(next){
-//             commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
-//         })
-//         .waitUntilLoaded('')
-//         //endregion
+        // /*====================================== Create CT to IR for  Non Lotted Item Process Button ======================================*/
+        // //region
+        // .displayText('===== Scenario 1: Create CT to IR for  Non Lotted Item Process Button =====')
+        // .addFunction(function(next){
+        //     commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
+        // })
+        // .waitUntilLoaded('')
+        // //endregion
 
 
-//         /*====================================== Create CT to IR for  Lotted Item Process Button ======================================*/
-//         //region
-//         .displayText('===== Scenario 2:  CT to IR for Non Lotted Item Process Button =====')
-//         .addFunction(function(next){
-//             commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
-//         })
-//         .waitUntilLoaded('')
-//         //endregion
+        // /*====================================== Create CT to IR for  Lotted Item Process Button ======================================*/
+        // //region
+        // .displayText('===== Scenario 2:  CT to IR for Non Lotted Item Process Button =====')
+        // .addFunction(function(next){
+        //     commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
+        // })
+        // .waitUntilLoaded('')
+        // //endregion
 
 
 
-//         /*====================================== Create PO to IR for Non Lotted Process Button ======================================*/
-//         .displayText('=====  Scenario 3. Create PO to IR "Process Button" for Non Lotted Item  =====')
-//         .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
-//         .clickMenuScreen('Purchase Orders','Screen')
-//         .clickButton('New')
-//         .waitUntilLoaded('')
-//         .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
-//         .waitUntilLoaded('')
-//         .selectGridComboBoxRowValue('Items',1,'strItemNo','Smoke - NLTI - 01','strItemNo')
-//         .selectGridComboBoxRowValue('Items',1,'strUOM','Test_Pounds','strUOM')
-//         .enterGridData('Items', 1, 'colQtyOrdered', '100')
-//         .verifyGridData('Items', 1, 'colTotal', '1000')
-//         .clickButton('Save')
-//         .waitUntilLoaded('')
-//         .clickButton('Process')
-//         .addResult('Processing PO to IR',2000)
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .clickTab('Post Preview')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .clickTab('Details')
-//         .waitUntilLoaded('')
+        /*====================================== Create PO to IR for Non Lotted Process Button ======================================*/
+        .displayText('=====  Scenario 3. Create PO to IR "Process Button" for Non Lotted Item  =====')
+        .clickMenuFolder('Purchasing (A/P)','Folder')
+        .clickMenuScreen('Purchase Orders','Screen')
+        .clickButton('New')
+        .waitUntilLoaded('')
+        .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
+        .waitUntilLoaded('')
+        .selectGridComboBoxRowValue('Items',1,'strItemNo','Smoke - NLTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('Items',1,'strUOM','Test_Pounds','strUOM')
+        .enterGridData('Items', 1, 'colQtyOrdered', '100')
+        .verifyGridData('Items', 1, 'colTotal', '1000')
+        .clickButton('Save')
+        .waitUntilLoaded('')
+        .clickButton('Process')
+        .addResult('Processing PO to IR',2000)
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
 
-//         .verifyData('Combo Box','ReceiptType','Purchase Order')
-//         .verifyData('Combo Box','Vendor','ABC Trucking')
-//         .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'Smoke - NLTI - 01')
-//         .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'Test_Pounds', 'equal')
-//         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-//         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-//         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
-//         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-//         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
-//         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
+        .verifyData('Combo Box','ReceiptType','Purchase Order')
+        .verifyData('Combo Box','Vendor','ABC Trucking')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'Smoke - NLTI - 01')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'Test_Pounds', 'equal')
+        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
+        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
+        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
 
-//         .addFunction(function (next){
-//             var win =  Ext.WindowManager.getActive(),
-//                 total = win.down('#txtTotal').value;
-//             if (total == 1000) {
-//                 t.ok(true, 'Total is correct.');
-//             }
-//             else {
-//                 t.ok(false, 'Total is incorrect.');
-//             }
-//             next();
-//         })
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                total = win.down('#txtTotal').value;
+            if (total == 1000) {
+                t.ok(true, 'Total is correct.');
+            }
+            else {
+                t.ok(false, 'Total is incorrect.');
+            }
+            next();
+        })
 
-//         .clickTab('Post Preview')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .addResult('Open Post Preview Tab',2000)
-//         .clickTab('Details')
-//         .waitUntilLoaded('')
-//         .clickTab('Post Preview')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .addResult('Open Post Preview Tab',2000)
-//         .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
-//         .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
-//         .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
-//         .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
-//         .addResult('Successfully Posted',2000)
-//         .waitUntilLoaded('')
-//         .clickButton('Post')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .clickButton('Close')
-//         .waitUntilLoaded('')
-//         .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
-//         .displayText('===== Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" Done=====')
-
-
-//         /*====================================== Create PO to IR for Lotted Process Button ======================================*/
-//         .displayText('=====  Scenario 4. Create Create PO to IR "Process Button" for Lotted Item  =====')
-//         .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
-//         .clickMenuScreen('Purchase Orders','Screen')
-//         .clickButton('New')
-//         .waitUntilLoaded('')
-//         .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
-//         .waitUntilLoaded('')
-//         .selectGridComboBoxRowValue('Items',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-//         .selectGridComboBoxRowValue('Items',1,'strUOM','Test_Pounds','strUOM')
-//         .enterGridData('Items', 1, 'colQtyOrdered', '100')
-//         .verifyGridData('Items', 1, 'colTotal', '1000')
-//         .clickButton('Save')
-//         .waitUntilLoaded('')
-//         .clickButton('Process')
-//         .addResult('Processing PO to IR',1000)
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .clickTab('Incoming Inspection')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .clickTab('Details')
-//         .waitUntilLoaded('')
-
-//         .verifyData('Combo Box','ReceiptType','Purchase Order')
-//         .verifyData('Combo Box','Vendor','ABC Trucking')
-//         .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'Smoke - LTI - 01')
-//         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'Test_Pounds')
-//         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
-//         .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'Test_Pounds', 'equal')
-//         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-//         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-//         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
-//         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-//         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
-//         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
-//         .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'Test_Pounds', 'equal')
-//         .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM','Test_Pounds','strWeightUOM')
-//         .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
-//         .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
-//         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-//         .waitUntilLoaded('')
-
-//         .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM', 'Test_Pounds','strWeightUOM')
-//         .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName','Raw Station','strSubLocationName')
-//         .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName','RM Storage','strSubLocationName')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Open Post Preview Tab',2000)
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Open Post Preview Tab',2000)
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
+        .addResult('Successfully Posted',2000)
+        .waitUntilLoaded('')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        .displayText('===== Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" Done=====')
 
 
-//         .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-//         .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
-//         .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
-//         .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
-//         .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
-//         .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
-//         .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'Test_Pounds')
-//         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
-//         .addFunction(function (next){
-//             var win =  Ext.WindowManager.getActive(),
-//                 total = win.down('#txtGrossWgt').value;
-//             if (total == 100) {
-//                 t.ok(true, 'Gross is correct.');
-//             }
-//             else {
-//                 t.ok(false, 'Grossl is incorrect.');
-//             }
-//             next();
-//         })
-//         .addFunction(function (next){
-//             var win =  Ext.WindowManager.getActive(),
-//                 total = win.down('#txtNetWgt').value;
-//             if (total == 100) {
-//                 t.ok(true, 'Net is correct.');
-//             }
-//             else {
-//                 t.ok(false, 'Net is incorrect.');
-//             }
-//             next();
-//         })
-//         .addFunction(function (next){
-//             var win =  Ext.WindowManager.getActive(),
-//                 total = win.down('#txtTotal').value;
-//             if (total == 1000) {
-//                 t.ok(true, 'Total is correct.');
-//             }
-//             else {
-//                 t.ok(false, 'Total is incorrect.');
-//             }
-//             next();
-//         })
+        /*====================================== Create PO to IR for Lotted Process Button ======================================*/
+        .displayText('=====  Scenario 4. Create Create PO to IR "Process Button" for Lotted Item  =====')
+        .clickMenuFolder('Purchasing (A/P)','Folder')
+        .clickMenuScreen('Purchase Orders','Screen')
+        .clickButton('New')
+        .waitUntilLoaded('')
+        .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
+        .waitUntilLoaded('')
+        .selectGridComboBoxRowValue('Items',1,'strItemNo','Smoke - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('Items',1,'strUOM','Test_Pounds','strUOM')
+        .enterGridData('Items', 1, 'colQtyOrdered', '100')
+        .verifyGridData('Items', 1, 'colTotal', '1000')
+        .clickButton('Save')
+        .waitUntilLoaded('')
+        .clickButton('Process')
+        .addResult('Processing PO to IR',1000)
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .clickTab('Incoming Inspection')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
 
-//         .clickTab('Post Preview')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .addResult('Open Post Preview Tab',2000)
-//         .clickTab('Details')
-//         .waitUntilLoaded('')
-//         .clickTab('Post Preview')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .addResult('Open Post Preview Tab',2000)
-//         .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
-//         .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
-//         .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
-//         .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
-//         .addResult('Successfully Posted',2000)
-//         .waitUntilLoaded('')
-//         .clickButton('Post')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .clickButton('Close')
-//         .waitUntilLoaded('')
-//         .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
-//         .displayText('===== Create Purchase Order Inventory Receipt for Lotted Item "Process Button" Done=====')
+        .verifyData('Combo Box','ReceiptType','Purchase Order')
+        .verifyData('Combo Box','Vendor','ABC Trucking')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'Smoke - LTI - 01')
+        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'Test_Pounds')
+        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'Test_Pounds', 'equal')
+        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
+        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
+        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
+        .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+        .waitUntilLoaded('')
+
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM', 'Test_Pounds','strWeightUOM')
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName','Raw Station','strSubLocationName')
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName','RM Storage','strSubLocationName')
 
 
-// ////        /*====================================== Create PO to IR for Non Lotted Item Add Orders Screen ======================================*/
-// ////        //region
-// ////        .clickMenuFolder('Inventory','Folder')
-// ////        .waitUntilLoaded('')
-// ////        .displayText('===== Scenario 3: Create PO to IR for Non Lotted Item Add Orders Screen =====')
-// ////        .addFunction(function(next){
-// ////            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
-// ////        })
-// ////        .waitUntilLoaded('')
-// ////        //endregion
-// ////
-// ////
-// ////        /*====================================== Create PO to IR for Lotted Item  Add Orders Screen ======================================*/
-// ////        //region
-// ////        .displayText('===== Scenario 4: Create PO to IR for Lotted Item  Add Orders Screen =====')
-// ////        .addFunction(function(next){
-// ////            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
-// ////        })
-// ////        .waitUntilLoaded('')
-// ////        //endregion
-// //
+        .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
+        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
+        .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
+        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
+        .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
+        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
+        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'Test_Pounds')
+        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                total = win.down('#txtGrossWgt').value;
+            if (total == 100) {
+                t.ok(true, 'Gross is correct.');
+            }
+            else {
+                t.ok(false, 'Grossl is incorrect.');
+            }
+            next();
+        })
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                total = win.down('#txtNetWgt').value;
+            if (total == 100) {
+                t.ok(true, 'Net is correct.');
+            }
+            else {
+                t.ok(false, 'Net is incorrect.');
+            }
+            next();
+        })
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                total = win.down('#txtTotal').value;
+            if (total == 1000) {
+                t.ok(true, 'Total is correct.');
+            }
+            else {
+                t.ok(false, 'Total is incorrect.');
+            }
+            next();
+        })
 
-//         /*====================================== Create Direct IR for Lotted Item with other charges ======================================*/
-//         //region
-//         .displayText('===== Scenario 5: Direct IR for Lotted Item with other charges  =====')
-//         .clickMenuFolder('Inventory','Folder')
-//         .clickMenuScreen('Inventory Receipts','Screen')
-//         .clickButton('New')
-//         .waitUntilLoaded('')
-//         .selectComboBoxRowNumber('ReceiptType',4,0)
-//         .selectComboBoxRowNumber('Vendor',1,0)
-//         .selectComboBoxRowNumber('Location',1,0)
-//         .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-//         .waitUntilLoaded('')
-//         .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', 100, 'Test_Pounds')
-//         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-//         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
-//         .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'Test_Pounds')
-//         .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
-//         .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
-//         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-//         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
-//         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
-
-//         .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-//         .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
-//         .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
-//         .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
-//         .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
-//         .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
-//         .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'Test_Pounds')
-//         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
-
-//         //Calculate Charge Amount
-//         .clickTab('FreightInvoice')
-//         .selectGridComboBoxRowValue('Charges',1,'strItemNo','Smoke - Other Charge Item - 01','strItemNo')
-//         .selectGridComboBoxRowNumber('Charges',1,'colCostMethod',2)
-//         .selectGridComboBoxRowValue('Charges',1,'strCurrency','USD','strCurrency')
-//         .enterGridData('Charges', 1, 'colRate', '10')
-//         .clickGridCheckBox('Charges',0, 'strItemNo', 'Smoke - Other Charge Item - 01', 'ysnAccrue', true)
-
-//         .clickButton('CalculateCharges')
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .addResult('Successfully Calculated',2000)
-//         .waitUntilLoaded('')
-//         .waitUntilLoaded('')
-//         .addResult('Successfully Calculated',2000)
-
-//         .clickTab('Post Preview')
-//         .waitUntilLoaded('')
-//         .clickTab('Details')
-//         .waitUntilLoaded('')
-//         .clickTab('FreightInvoice')
-//         .waitUntilLoaded('')
-//         .verifyGridData('Charges', 1, 'colChargeAmount', '100')
-//         .clickButton('Save')
-//         .waitUntilLoaded('')
-
-//         .clickTab('Post Preview')
-//         .waitUntilLoaded('')
-//         .clickButton('Post')
-//         .waitUntilLoaded('')
-//         .addResult('Successfully Posted',2000)
-//         .waitUntilLoaded('')
-//         .clickTab('FreightInvoice')
-//         .waitUntilLoaded('')
-//         .verifyGridData('Charges', 1, 'colChargeAmount', '100')
-//         .clickButton('Close')
-//         .waitUntilLoaded('')
-//         .clickMenuFolder('Inventory','Folder')
-//         .displayText('=====  Scenario 1: Done: IR with Charges  =====')
-//         //endregion
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Open Post Preview Tab',2000)
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Open Post Preview Tab',2000)
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
+        .addResult('Successfully Posted',2000)
+        .waitUntilLoaded('')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        .displayText('===== Create Purchase Order Inventory Receipt for Lotted Item "Process Button" Done=====')
 
 
-//         /*====================================== Create Direct IR for Non Lotted Item ======================================*/
-//         //region
-//         .displayText('===== Scenario 6: Create Direct IR for Non Lotted Item =====')
-//         .addFunction(function(next){
-//             commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
-//         })
-//         .waitUntilLoaded('')
-//         //endregion
+////        /*====================================== Create PO to IR for Non Lotted Item Add Orders Screen ======================================*/
+////        //region
+////        .clickMenuFolder('Inventory','Folder')
+////        .waitUntilLoaded('')
+////        .displayText('===== Scenario 3: Create PO to IR for Non Lotted Item Add Orders Screen =====')
+////        .addFunction(function(next){
+////            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
+////        })
+////        .waitUntilLoaded('')
+////        //endregion
+////
+////
+////        /*====================================== Create PO to IR for Lotted Item  Add Orders Screen ======================================*/
+////        //region
+////        .displayText('===== Scenario 4: Create PO to IR for Lotted Item  Add Orders Screen =====')
+////        .addFunction(function(next){
+////            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
+////        })
+////        .waitUntilLoaded('')
+////        //endregion
+//
+
+        /*====================================== Create Direct IR for Lotted Item with other charges and voucher ======================================*/
+        //region
+        .displayText('===== Scenario 5: Direct IR for Lotted Item with other charges  =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Inventory Receipts','Screen')
+        .clickButton('New')
+        .waitUntilLoaded('')
+        .selectComboBoxRowNumber('ReceiptType',4,0)
+        .selectComboBoxRowNumber('Vendor',1,0)
+        .selectComboBoxRowNumber('Location',1,0)
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','Smoke - LTI - 01','strItemNo')
+        .waitUntilLoaded('')
+        .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', 100, 'Test_Pounds')
+        .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
+        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'Test_Pounds')
+        .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
+        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
+
+        .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
+        // .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
+        // .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
+        .verifyGridData('LotTracking', 1, 'colLotUOM', 'Test_Pounds')
+        .verifyGridData('LotTracking', 1, 'colLotQuantity', '100')
+        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
+        .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
+        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
+        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'Test_Pounds')
+        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
+
+        //Calculate Charge Amount
+        .clickTab('FreightInvoice')
+        .selectGridComboBoxRowValue('Charges',1,'strItemNo','Smoke - Other Charge Item - 01','strItemNo')
+        .selectGridComboBoxRowNumber('Charges',1,'colCostMethod',2)
+        .selectGridComboBoxRowValue('Charges',1,'strCurrency','USD','strCurrency')
+        .enterGridData('Charges', 1, 'colRate', '10')
+        .clickGridCheckBox('Charges',0, 'strItemNo', 'Smoke - Other Charge Item - 01', 'ysnAccrue', true)
+
+        .clickButton('CalculateCharges')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Successfully Calculated',2000)
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Successfully Calculated',2000)
+
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        // .clickTab('Details')
+        // .waitUntilLoaded('')
+        .clickTab('FreightInvoice')
+        .waitUntilLoaded('')
+        .verifyGridData('Charges', 1, 'colChargeAmount', '100')
+        .clickButton('Save')
+        .waitUntilLoaded('')
+
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',2000)
+        .waitUntilLoaded('')
+        .clickTab('FreightInvoice')
+        .waitUntilLoaded('')
+        .verifyGridData('Charges', 1, 'colChargeAmount', '100')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+
+        // //Process Voucher
+        // .clickButton('Voucher')
+        // .waitUntilLoaded('')
+        // .waitUntilLoaded('')
+        // .addResult('Successfully Posted',3000)
+        // .verifyMessageBox('iRely i21','Voucher successfully processed. Do you want to view it?','yesno','warning')
+        // .clickMessageBoxButton('yes')
+        // .waitUntilLoaded('')
+        // .waitUntilLoaded('')
+        // .addResult('Successfully Posted',3000)
+        // .waitUntilLoaded('')
+        // .addResult('Successfully Posted',3000)
+        // .enterData('Text Field','InvoiceNo', record)
+        // .verifyGridData('VoucherDetails', 1, 'colItemNo', 'Smoke - LTI - 01')
+        // .verifyGridData('VoucherDetails', 1, 'colUOM', 'Test_Pounds')
+        // .verifyGridData('VoucherDetails', 1, 'colQtyOrdered', '100')
+        // .verifyGridData('VoucherDetails', 1, 'colQtyReceived', '100')
+        // .verifyGridData('VoucherDetails', 1, 'colCost', '10')
+        // .verifyGridData('VoucherDetails', 1, 'colCostUOM', 'Test_Pounds')
+        // .verifyGridData('VoucherDetails', 1, 'colGrossUOM', 'Test_Pounds')
+        // .verifyGridData('VoucherDetails', 1, 'colTotal', '1000')
+        
+        // .verifyGridData('VoucherDetails', 2, 'colItemNo', 'Smoke - Other Charge Item - 01')
+        // .verifyGridData('VoucherDetails', 2, 'colQtyOrdered', '1')
+        // .verifyGridData('VoucherDetails', 2, 'colQtyReceived', '1')
+        // .verifyGridData('VoucherDetails', 2, 'colCost', '100')
+        // .clickButton('Post')
+        // .waitUntilLoaded('')
+        // .addResult('Successfully Posted',3000)
+        .clickButton('Close')
+        .addResult('Successfully Posted',3000)
+        .waitUntilLoaded('')
+        .displayText('=====  Scenario 5: Done: IR with Charges and Voucher  =====')
+        //endregion
 
 
-//         /*====================================== Create Direct IR for Lotted Item ======================================*/
-//         //region
-//         .displayText('===== Scenario 7: Create Direct IR for Lotted Item =====')
-//         .addFunction(function(next){
-//             commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
-//         })
-//         .waitUntilLoaded('')
-//         //endregion
+        /*====================================== Create Direct IR for Non Lotted Item ======================================*/
+        //region
+        .displayText('===== Scenario 6: Create Direct IR for Non Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
+        })
+        .waitUntilLoaded('')
+        //endregion
+
+
+        /*====================================== Create Direct IR for Lotted Item ======================================*/
+        //region
+        .displayText('===== Scenario 7: Create Direct IR for Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
+        })
+        .waitUntilLoaded('')
+        //endregion
 
 
 //         /*====================================== Create SC for Non Lotted Item ======================================*/
