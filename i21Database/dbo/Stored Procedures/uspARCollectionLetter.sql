@@ -20,7 +20,8 @@ BEGIN
 		  , @intEntityCustomerId	INT
 		  , @blb					VARBINARY(MAX)
 		  , @originalMsgInHTML		VARCHAR(MAX)	
-		  , @filterValue			VARCHAR(MAX)										
+		  , @filterValue			VARCHAR(MAX)	
+		  , @intSourceLetterId		INT										
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 	DECLARE @temp_params TABLE (
@@ -57,6 +58,17 @@ BEGIN
 	WHERE [fieldname] = 'intLetterId'
 		
 	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
+
+
+	SELECT @intSourceLetterId = intSourceLetterId FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+	IF (@intSourceLetterId IS NULL OR @intSourceLetterId = '')
+	BEGIN
+		SELECT @strLetterName = strName FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+	END
+	ELSE
+	BEGIN
+		SELECT @strLetterName = strName FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intSourceLetterId
+	END
 
 	SELECT @strLetterName		= strName
 		 , @strMessage			= CONVERT(VARCHAR(MAX), blbMessage)
