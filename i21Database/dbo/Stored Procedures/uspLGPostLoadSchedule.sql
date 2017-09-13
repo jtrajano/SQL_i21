@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @ysnValidateExternalShipmentNo BIT
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @strExternalShipmentNumber NVARCHAR(100)
+	DECLARE @strFOBPoint NVARCHAR(50)
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
@@ -20,6 +21,11 @@ BEGIN TRY
 	FROM tblLGCompanyPreference 
 
 	SELECT @ysnUnShip = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
+
+	SELECT @strFOBPoint = FT.strFobPoint 
+	FROM tblLGLoad L
+	JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId 
+	WHERE intLoadId = @intLoadId
 
 	IF @intPurchaseSale = 1
 	BEGIN
@@ -40,21 +46,24 @@ BEGIN TRY
 			,@ysnInventorize = @ysnPost
 			,@ysnUnShip = @ysnUnShip
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
+		
+		IF(ISNULL(@strFOBPoint,'') = 'Origin')
+		BEGIN		
+			EXEC uspLGPostInTransitCosting 
+				 @intLoadId = @intLoadId
+				,@ysnPost = @ysnPost
+				,@intPurchaseSale = 1
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+		END
 
-		EXEC uspLGPostInTransitCosting 
-			 @intLoadId = @intLoadId
-			,@ysnPost = @ysnPost
-			,@intPurchaseSale = 1
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-			IF(@ysnPost = 0)
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 2 WHERE intLoadId = @intLoadId
-			END
-			ELSE 
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
-			END
+		IF(@ysnPost = 0)
+		BEGIN
+			UPDATE tblLGLoad SET intShipmentStatus = 2 WHERE intLoadId = @intLoadId
+		END
+		ELSE 
+		BEGIN
+			UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+		END
 	END
 	ELSE IF @intPurchaseSale = 2
 	BEGIN
@@ -70,11 +79,14 @@ BEGIN TRY
 	END
 	ELSE IF @intPurchaseSale = 3
 	BEGIN
-		EXEC uspLGPostInTransitCosting 
-			@intLoadId = @intLoadId
-		   ,@ysnPost = @ysnPost
-		   ,@intPurchaseSale = 1
-		   ,@intEntityUserSecurityId = @intEntityUserSecurityId
+		IF(ISNULL(@strFOBPoint,'') = 'Origin')
+		BEGIN		
+			EXEC uspLGPostInTransitCosting 
+				 @intLoadId = @intLoadId
+				,@ysnPost = @ysnPost
+				,@intPurchaseSale = 1
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+		END
 
 		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
 	END
