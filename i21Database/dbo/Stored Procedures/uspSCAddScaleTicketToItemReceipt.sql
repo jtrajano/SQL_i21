@@ -112,7 +112,11 @@ SELECT
 		,strBillOfLadding			= NULL
 		,intCurrencyId				= CASE
 										WHEN ISNULL(CNT.intContractDetailId,0) = 0 THEN SC.intCurrencyId 
-										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
+										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN
+											CASE
+												WHEN ISNULL(CNT.intInvoiceCurrencyId,0) > 0 THEN CNT.intInvoiceCurrencyId
+												ELSE CNT.intCurrencyId
+											END
 									END
 		,intLocationId				= SC.intProcessingLocationId
 		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
