@@ -44,11 +44,11 @@ AS
             A.dblReportingRate,
             A.dblForeignRate,
 			A.intJournalLineNo,
-			J.strDocument,
+			A.strDocument,
 			A.ysnIsUnposted,
 			A.intTransactionId,
 			E.intEntityId,
-			J.strComments,
+			A.strComments,
 			U.strUOMCode
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId

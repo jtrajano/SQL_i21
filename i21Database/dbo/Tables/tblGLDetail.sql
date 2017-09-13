@@ -36,6 +36,8 @@
     [dtmReconciled] DATETIME NULL, 
     [ysnReconciled] BIT NULL, 
 	[ysnRevalued] BIT NULL,
+	[strDocument] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
+	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
