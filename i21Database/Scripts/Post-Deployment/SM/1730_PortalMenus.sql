@@ -81,6 +81,17 @@
 				WHERE masterMenu.strMenuName = ''Orders (Portal)'' AND intUserRoleId = @userRoleId
 			END
 
+			IF EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleMenu rm INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID WHERE intUserRoleId = @userRoleId AND strMenuName = ''Vouchers'')
+			BEGIN
+				UPDATE roleMenu SET ysnVisible =
+				(
+					SELECT COUNT(*) FROM tblSMUserRoleMenu rm INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID WHERE intUserRoleId = @userRoleId AND rm.ysnVisible = 1 AND strMenuName = ''Vouchers''
+				)
+				FROM tblSMUserRoleMenu roleMenu
+				INNER JOIN tblSMMasterMenu masterMenu ON roleMenu.intMenuId = masterMenu.intMenuID
+				WHERE masterMenu.strMenuName = ''Vouchers (Portal)'' AND intUserRoleId = @userRoleId
+			END
+
 			IF EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleMenu rm INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID WHERE intUserRoleId = @userRoleId AND strMenuName = ''Invoices'')
 			BEGIN
 				UPDATE roleMenu SET ysnVisible =

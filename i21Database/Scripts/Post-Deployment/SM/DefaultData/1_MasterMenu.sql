@@ -5097,17 +5097,31 @@ ELSE
 
 DECLARE @APOrdersMenuId INT
 SELECT  @APOrdersMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Orders (Portal)' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @TransactionsPortalParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Orders (Portal)' AND strModuleName = N'Transactions' AND intParentMenuID = @TransactionsPortalParentMenuId)
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Orders (Portal)' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @TransactionsPortalParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @APOrdersMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@APOrdersMenuId, 1)
 END
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vouchers (Portal)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @TransactionsPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Vouchers (Portal)', N'Accounts Payable', @TransactionsPortalParentMenuId, N'Vouchers (Portal)', N'Transaction', N'Screen', N'AccountsPayable.view.Voucher?showSearch=true', N'small-menu-transaction', 1, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'AccountsPayable.view.Voucher?showSearch=true' WHERE strMenuName = 'Vouchers (Portal)' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @TransactionsPortalParentMenuId
+
+DECLARE @APVouchersMenuId INT
+SELECT  @APVouchersMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vouchers (Portal)' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @TransactionsPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vouchers (Portal)' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @TransactionsPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @APVouchersMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@APVouchersMenuId, 1)
+END
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoices (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Invoices (Portal)', N'Accounts Receivable', @TransactionsPortalParentMenuId, N'Invoices (Portal)', N'Transaction', N'Screen', N'AccountsReceivable.view.Invoice?showSearch=true', N'small-menu-transaction', 1, 0, 0, 1, 1, 1)
+	VALUES (N'Invoices (Portal)', N'Accounts Receivable', @TransactionsPortalParentMenuId, N'Invoices (Portal)', N'Transaction', N'Screen', N'AccountsReceivable.view.Invoice?showSearch=true', N'small-menu-transaction', 1, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'AccountsReceivable.view.Invoice?showSearch=true' WHERE strMenuName = 'Invoices (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'AccountsReceivable.view.Invoice?showSearch=true' WHERE strMenuName = 'Invoices (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
 
 DECLARE @ARInvoicesMenuId INT
 SELECT  @ARInvoicesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Invoices (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
@@ -5119,9 +5133,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Make a Payment (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Make a Payment (Portal)', N'Accounts Receivable', @TransactionsPortalParentMenuId, N'Make a Payment (Portal)', N'Transaction', N'Screen', N'AccountsReceivable.view.MakePayments', N'small-menu-transaction', 1, 0, 0, 1, 2, 1)
+	VALUES (N'Make a Payment (Portal)', N'Accounts Receivable', @TransactionsPortalParentMenuId, N'Make a Payment (Portal)', N'Transaction', N'Screen', N'AccountsReceivable.view.MakePayments', N'small-menu-transaction', 1, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'AccountsReceivable.view.MakePayments' WHERE strMenuName = 'Make a Payment (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'AccountsReceivable.view.MakePayments' WHERE strMenuName = 'Make a Payment (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
 
 DECLARE @ARMakePaymentMenuId INT
 SELECT  @ARMakePaymentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Make a Payment (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
@@ -5133,9 +5147,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payment History (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Payment History (Portal)', N'Accounts Receivable', @TransactionsPortalParentMenuId, N'Payment History (Portal)', N'Transaction', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=PaymentHistory&direct=true', N'small-menu-transaction', 1, 0, 0, 1, 3, 1)
+	VALUES (N'Payment History (Portal)', N'Accounts Receivable', @TransactionsPortalParentMenuId, N'Payment History (Portal)', N'Transaction', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=PaymentHistory&direct=true', N'small-menu-transaction', 1, 0, 0, 1, 4, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Reporting.view.ReportManager?group=Sales&report=PaymentHistory&direct=true' WHERE strMenuName = 'Payment History (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Reporting.view.ReportManager?group=Sales&report=PaymentHistory&direct=true' WHERE strMenuName = 'Payment History (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
 
 DECLARE @ARPaymentHistoryMenuId INT
 SELECT  @ARPaymentHistoryMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Payment History (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @TransactionsPortalParentMenuId
@@ -5147,9 +5161,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contracts (Portal)' AND strModuleName = 'Contract Management' AND intParentMenuID = @TransactionsPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Contracts (Portal)', N'Contract Management', @TransactionsPortalParentMenuId, N'Contracts (Portal)', N'Transaction', N'Screen', N'ContractManagement.view.Contract?showSearch=true', N'small-menu-transaction', 1, 0, 0, 1, 4, 1)
+	VALUES (N'Contracts (Portal)', N'Contract Management', @TransactionsPortalParentMenuId, N'Contracts (Portal)', N'Transaction', N'Screen', N'ContractManagement.view.Contract?showSearch=true', N'small-menu-transaction', 1, 0, 0, 1, 5, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'ContractManagement.view.Contract?showSearch=true' WHERE strMenuName = 'Contracts (Portal)' AND strModuleName = 'Contract Management' AND intParentMenuID = @TransactionsPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'ContractManagement.view.Contract?showSearch=true' WHERE strMenuName = 'Contracts (Portal)' AND strModuleName = 'Contract Management' AND intParentMenuID = @TransactionsPortalParentMenuId
 
 DECLARE @CTContractsMenuId INT
 SELECT  @CTContractsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Contracts (Portal)' AND strModuleName = N'Contract Management' AND intParentMenuID = @TransactionsPortalParentMenuId
