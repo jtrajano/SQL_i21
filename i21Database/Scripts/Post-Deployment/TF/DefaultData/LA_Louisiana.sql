@@ -197,7 +197,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId and TaxCat.intTaxAuthorityId = @Tax
 	UNION ALL SELECT intTaxCriteriaId = 381, strTaxCategory = 'LA Excise Tax Gasoline', strState = 'LA', strFormCode = 'R-5399', strScheduleCode = 'D-21', strType = 'Aviation Fuels', strCriteria = '= 0', intMasterId = 18381
 	UNION ALL SELECT intTaxCriteriaId = 382, strTaxCategory = 'LA Inspection Fee', strState = 'LA', strFormCode = 'R-5399', strScheduleCode = 'D-21', strType = 'Aviation Fuels', strCriteria = '= 0', intMasterId = 18382
 	
-
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
 -- Reporting Component - Base

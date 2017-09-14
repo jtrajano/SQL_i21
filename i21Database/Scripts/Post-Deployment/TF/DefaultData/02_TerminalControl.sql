@@ -195,5 +195,62 @@ UNION ALL SELECT intTerminalControlNumberId = 528, strTerminalControlNumber = 'T
 
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NE', @TerminalControlNumbers = @TerminalNE
 
+-- LA Terminals
+DECLARE @TerminalLA AS TFTerminalControlNumbers
+
+INSERT INTO @TerminalLA(
+	intTerminalControlNumberId
+	, strTerminalControlNumber
+	, strName
+	, strAddress
+	, strCity
+	, dtmApprovedDate
+	, strZip
+	, intMasterId
+)
+SELECT intTerminalControlNumberId = 970, strTerminalControlNumber = 'T-72-LA-2351', strName = 'Chevron USA, Inc.- Arcadia', strAddress = 'Highway 80 East', strCity = 'Arcadia', dtmApprovedDate = NULL, strZip = '71001-', intMasterId = 18970
+UNION ALL SELECT intTerminalControlNumberId = 971, strTerminalControlNumber = 'T-72-LA-2353', strName = 'Sunoco Partners Marketing & Terminals LP', strAddress = 'Highway 80 East', strCity = 'Arcadia', dtmApprovedDate = NULL, strZip = '71001-', intMasterId = 18971
+UNION ALL SELECT intTerminalControlNumberId = 972, strTerminalControlNumber = 'T-72-LA-2356', strName = 'Aircraft Service International, Inc.', strAddress = 'Freight Road', strCity = 'Kenner', dtmApprovedDate = NULL, strZip = '70062', intMasterId = 18972
+UNION ALL SELECT intTerminalControlNumberId = 973, strTerminalControlNumber = 'T-72-LA-2358', strName = 'ExxonMobil Oil Corp.', strAddress = '3329 Scenic Highway', strCity = 'Baton Rouge', dtmApprovedDate = NULL, strZip = '70805-', intMasterId = 18973
+UNION ALL SELECT intTerminalControlNumberId = 974, strTerminalControlNumber = 'T-72-LA-2360', strName = 'Chalmette Refining, LLC', strAddress = '1700 Paris Rd Gate 50', strCity = 'Chalmette', dtmApprovedDate = NULL, strZip = '70043-', intMasterId = 18974
+UNION ALL SELECT intTerminalControlNumberId = 975, strTerminalControlNumber = 'T-72-LA-2361', strName = 'Motiva Enterprises LLC', strAddress = 'Louisiana Street', strCity = 'Covent', dtmApprovedDate = NULL, strZip = '70723-', intMasterId = 18975
+UNION ALL SELECT intTerminalControlNumberId = 976, strTerminalControlNumber = 'T-72-LA-2363', strName = 'Marathon Oil Garyville', strAddress = 'Highway 61', strCity = 'Garyville', dtmApprovedDate = NULL, strZip = '70051-', intMasterId = 18976
+UNION ALL SELECT intTerminalControlNumberId = 977, strTerminalControlNumber = 'T-72-LA-2365', strName = 'Motiva Enterprises LLC', strAddress = '143 Firehouse Dr.', strCity = 'Kenner', dtmApprovedDate = NULL, strZip = '70062-', intMasterId = 18977
+UNION ALL SELECT intTerminalControlNumberId = 978, strTerminalControlNumber = 'T-72-LA-2368', strName = 'CITGO - Lake Charles', strAddress = 'Cities Serv Hwy & LA Hwy 108', strCity = 'Lake Charles', dtmApprovedDate = NULL, strZip = '70601-', intMasterId = 18978
+UNION ALL SELECT intTerminalControlNumberId = 979, strTerminalControlNumber = 'T-72-LA-2371', strName = 'Valero Refining - Meraux', strAddress = '2501 East St Bernard Hwy', strCity = 'Meraux', dtmApprovedDate = NULL, strZip = '70075-', intMasterId = 18979
+UNION ALL SELECT intTerminalControlNumberId = 980, strTerminalControlNumber = 'T-72-LA-2375', strName = 'Buckeye Terminals, LLC - Opelousas', strAddress = 'Highway 182 South', strCity = 'Opelousas', dtmApprovedDate = NULL, strZip = '70571-', intMasterId = 18980
+UNION ALL SELECT intTerminalControlNumberId = 981, strTerminalControlNumber = 'T-72-LA-2376', strName = 'Placid Refining Co. LLC', strAddress = '1940 Louisiana Hwy One North', strCity = 'Port Allen', dtmApprovedDate = NULL, strZip = '70767-', intMasterId = 18981
+UNION ALL SELECT intTerminalControlNumberId = 982, strTerminalControlNumber = 'T-72-LA-2377', strName = 'IMTT - St Rose', strAddress = '11842 River Rd.', strCity = 'Saint Rose', dtmApprovedDate = NULL, strZip = '70087', intMasterId = 18982
+UNION ALL SELECT intTerminalControlNumberId = 983, strTerminalControlNumber = 'T-72-LA-2378', strName = 'Shreveport Refinery', strAddress = '3333 Midway  PO Box 3099', strCity = 'Shreveport', dtmApprovedDate = NULL, strZip = '71133-3099', intMasterId = 18983
+UNION ALL SELECT intTerminalControlNumberId = 984, strTerminalControlNumber = 'T-72-LA-2381', strName = 'Phillips 66 PL - Westlake', strAddress = '1980 Old Spanish Trail', strCity = 'Westlake', dtmApprovedDate = NULL, strZip = '70669-', intMasterId = 18984
+UNION ALL SELECT intTerminalControlNumberId = 985, strTerminalControlNumber = 'T-72-LA-2388', strName = 'Calumet Lubricants Co., LP', strAddress = 'U. S. Hwy 371 South', strCity = 'Cotton Valley', dtmApprovedDate = NULL, strZip = '71018-', intMasterId = 18985
+UNION ALL SELECT intTerminalControlNumberId = 986, strTerminalControlNumber = 'T-72-LA-2389', strName = 'Calumet Lubricants Co., LP', strAddress = '10234 Hwy 157', strCity = 'Princeton', dtmApprovedDate = NULL, strZip = '71067-9172', intMasterId = 18986
+UNION ALL SELECT intTerminalControlNumberId = 987, strTerminalControlNumber = 'T-72-LA-2391', strName = 'LBC Baton Rouge LLC', strAddress = '1725 Highway 75', strCity = 'Sunshine', dtmApprovedDate = NULL, strZip = '70780-', intMasterId = 18987
+UNION ALL SELECT intTerminalControlNumberId = 988, strTerminalControlNumber = 'T-72-LA-2392', strName = 'Archie Terminal Company', strAddress = '5010 Hwy 84', strCity = 'Jonesville', dtmApprovedDate = NULL, strZip = '71343', intMasterId = 18988
+UNION ALL SELECT intTerminalControlNumberId = 989, strTerminalControlNumber = 'T-72-LA-2393', strName = 'Monroe Terminal Company LLC', strAddress = '486 Highway 165 South', strCity = 'Monroe', dtmApprovedDate = NULL, strZip = '71202', intMasterId = 18989
+UNION ALL SELECT intTerminalControlNumberId = 990, strTerminalControlNumber = 'T-72-LA-2394', strName = 'ERPC Shreveport Area Truck Rack', strAddress = '4731 Viking Drive', strCity = 'Bossier City', dtmApprovedDate = NULL, strZip = '71111', intMasterId = 18990
+UNION ALL SELECT intTerminalControlNumberId = 991, strTerminalControlNumber = 'T-72-LA-2395', strName = 'John W Stone Oil Distributor', strAddress = '87 1st Street', strCity = 'Gretna', dtmApprovedDate = NULL, strZip = '70053', intMasterId = 18991
+UNION ALL SELECT intTerminalControlNumberId = 992, strTerminalControlNumber = 'T-72-LA-2397', strName = 'Five Star Fuels ', strAddress = '163 Gordy Rd', strCity = 'Baldwin', dtmApprovedDate = NULL, strZip = '70514', intMasterId = 18992
+UNION ALL SELECT intTerminalControlNumberId = 993, strTerminalControlNumber = 'T-72-LA-2399', strName = 'Stolthaven New Orleans LLC', strAddress = '2444 English Turn Road', strCity = 'Braithwaite', dtmApprovedDate = NULL, strZip = '70040', intMasterId = 18993
+UNION ALL SELECT intTerminalControlNumberId = 994, strTerminalControlNumber = 'T-72-LA-2400', strName = 'IMTT - Avondale', strAddress = '5450 River Road', strCity = 'Avondale', dtmApprovedDate = NULL, strZip = '70094', intMasterId = 18994
+UNION ALL SELECT intTerminalControlNumberId = 995, strTerminalControlNumber = 'T-72-LA-2401', strName = 'IMTT - Gretna', strAddress = '1145 4th ST ', strCity = 'Harvey', dtmApprovedDate = NULL, strZip = '70058', intMasterId = 18995
+UNION ALL SELECT intTerminalControlNumberId = 996, strTerminalControlNumber = 'T-72-LA-2402', strName = 'REG Geismar LLC', strAddress = '36187 Hwy 30', strCity = 'Geismer', dtmApprovedDate = NULL, strZip = '70734', intMasterId = 18996
+UNION ALL SELECT intTerminalControlNumberId = 997, strTerminalControlNumber = 'T-72-LA-2403', strName = 'Martin Operating Partnership, L.P.', strAddress = '2254 S Talens Landing Rd ', strCity = 'Gueydan', dtmApprovedDate = NULL, strZip = '70542', intMasterId = 18997
+UNION ALL SELECT intTerminalControlNumberId = 998, strTerminalControlNumber = 'T-72-LA-2404', strName = 'Martin Operating Partnership, L.P.', strAddress = '41937 Hwy 3147', strCity = 'Kaplan', dtmApprovedDate = NULL, strZip = '70548', intMasterId = 18998
+UNION ALL SELECT intTerminalControlNumberId = 999, strTerminalControlNumber = 'T-72-LA-2406', strName = 'Martin Operating Partnership, L.P.', strAddress = '821 Henry Puch Blvd', strCity = 'Lake Charles', dtmApprovedDate = NULL, strZip = '70606', intMasterId = 18999
+UNION ALL SELECT intTerminalControlNumberId = 1000, strTerminalControlNumber = 'T-72-LA-2407', strName = 'Martin Operating Partnership, L.P.', strAddress = '300 Adam Ted Gisclair Rd ', strCity = 'Golden Meadow', dtmApprovedDate = NULL, strZip = '70357', intMasterId = 181000
+UNION ALL SELECT intTerminalControlNumberId = 1001, strTerminalControlNumber = 'T-72-LA-2408', strName = 'Valero Refining - New Orleans', strAddress = '14902 River Road ', strCity = 'Norco', dtmApprovedDate = NULL, strZip = '70087', intMasterId = 181001
+UNION ALL SELECT intTerminalControlNumberId = 1002, strTerminalControlNumber = 'T-72-LA-2409', strName = 'Martin Operating Partnership, L.P.', strAddress = '485 Jump Basin Rd', strCity = 'Venice ', dtmApprovedDate = NULL, strZip = '70091', intMasterId = 181002
+UNION ALL SELECT intTerminalControlNumberId = 1003, strTerminalControlNumber = 'T-72-LA-2410', strName = 'Martin Operating Partnership, L.P.', strAddress = '9576 Grand Caillou Rd', strCity = 'Dulac', dtmApprovedDate = NULL, strZip = '70354', intMasterId = 181003
+UNION ALL SELECT intTerminalControlNumberId = 1004, strTerminalControlNumber = 'T-72-LA-2412', strName = 'Martin Operating Partnership, L.P.', strAddress = '141 Offshore Lane ', strCity = 'Amelia', dtmApprovedDate = NULL, strZip = '70340', intMasterId = 181004
+UNION ALL SELECT intTerminalControlNumberId = 1005, strTerminalControlNumber = 'T-72-LA-2413', strName = 'Martin Operating Partnership, L.P.', strAddress = '24823 LA Hwy 333', strCity = 'Abbeville', dtmApprovedDate = NULL, strZip = '70510', intMasterId = 181005
+UNION ALL SELECT intTerminalControlNumberId = 1006, strTerminalControlNumber = 'T-72-LA-2414', strName = 'Martin Operating Partnership, L.P.', strAddress = '332 Davis Rd ', strCity = 'Cameron', dtmApprovedDate = NULL, strZip = '70631', intMasterId = 181006
+UNION ALL SELECT intTerminalControlNumberId = 1007, strTerminalControlNumber = 'T-72-LA-2415', strName = 'Martin Operating Partnership, L.P.', strAddress = '100 Spirit Lane ', strCity = 'Berwick', dtmApprovedDate = NULL, strZip = '70342', intMasterId = 181007
+UNION ALL SELECT intTerminalControlNumberId = 1008, strTerminalControlNumber = 'T-72-LA-2416', strName = 'Martin Operating Partnership, L.P.', strAddress = '199 Wakefield Rd ', strCity = 'Cameron', dtmApprovedDate = NULL, strZip = '70631', intMasterId = 181008
+UNION ALL SELECT intTerminalControlNumberId = 1009, strTerminalControlNumber = 'T-72-LA-2417', strName = 'Diamond Green Diesel LLC', strAddress = '14891 Airline Drive ', strCity = 'Norco', dtmApprovedDate = NULL, strZip = '70079', intMasterId = 181009
+
+EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'LA', @TerminalControlNumbers = @TerminalLA
+
+
 
 
