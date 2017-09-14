@@ -31,7 +31,7 @@ IF @MaxPaymentID IS NULL
 	SET @MaxPaymentID = 0
 SET @OriginalMaxPaymentID = @MaxPaymentID
 	
-SELECT TOP 1 @DefaultPaymenMethodtId = [intPaymentMethodID] FROM tblSMPaymentMethod WHERE [strPaymentMethodCode] IS NOT NULL AND RTRIM(LTRIM([strPaymentMethodCode])) <> '' ORDER BY [strPaymentMethodCode]
+SELECT TOP 1 @DefaultPaymenMethodtId = [intPaymentMethodID] FROM tblSMPaymentMethod WHERE [strPaymentMethodCode] IS NOT NULL AND RTRIM(LTRIM([strPaymentMethodCode])) <> '''' ORDER BY [strPaymentMethodCode]
 IF @DefaultPaymenMethodtId IS NULL
 	SET @DefaultPaymenMethodtId = 0
 	
