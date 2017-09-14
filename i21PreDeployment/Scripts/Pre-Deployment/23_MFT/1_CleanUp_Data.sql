@@ -211,6 +211,13 @@ BEGIN
 			EXEC('UPDATE tblTFTerminalControlNumber SET intMasterId = NULL')
 		END
 
+		-- Filing Packet
+		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFFilingPacket') 
+		BEGIN
+			PRINT('Truncate tblTFFilingPacket')
+			EXEC('TRUNCATE TABLE tblTFFilingPacket')
+		END
+
 		-- Reporting Component
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent') 
 		BEGIN
@@ -220,13 +227,6 @@ BEGIN
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND COLUMN_NAME = 'intMasterId') 
 		BEGIN
 			EXEC('UPDATE tblTFReportingComponent SET intMasterId = NULL')
-		END
-
-		-- Filing Packet
-		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFFilingPacket') 
-		BEGIN
-			PRINT('Truncate tblTFFilingPacket')
-			EXEC('TRUNCATE TABLE tblTFFilingPacket')
 		END
 
 		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)	
