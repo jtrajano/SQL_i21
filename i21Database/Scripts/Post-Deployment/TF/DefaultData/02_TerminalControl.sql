@@ -251,6 +251,59 @@ UNION ALL SELECT intTerminalControlNumberId = 1009, strTerminalControlNumber = '
 
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'LA', @TerminalControlNumbers = @TerminalLA
 
+-- MI Terminals
+DECLARE @TerminalMI AS TFTerminalControlNumbers
+
+INSERT INTO @TerminalMI(
+	intTerminalControlNumberId
+	, strTerminalControlNumber
+	, strName
+	, strAddress
+	, strCity
+	, dtmApprovedDate
+	, strZip
+	, intMasterId
+)
+SELECT intTerminalControlNumberId = 455, strTerminalControlNumber = 'T-38-MI-3001', strName = 'U.S. Oil - Cheboygan', strAddress = '311 Coast Guard Drive', strCity = 'Cheyboygan', dtmApprovedDate = NULL, strZip = '49721', intMasterId = 22455
+UNION ALL SELECT intTerminalControlNumberId = 456, strTerminalControlNumber = 'T-38-MI-3002', strName = 'U.S. Oil - Rogers City', strAddress = '1035 Calcite Rd.', strCity = 'Rogers City', dtmApprovedDate = NULL, strZip = '49779', intMasterId = 22456
+UNION ALL SELECT intTerminalControlNumberId = 457, strTerminalControlNumber = 'T-38-MI-3003', strName = 'Waterfront Petroleum Terminal Co.', strAddress = '1071 Miller Rd.', strCity = 'Dearborn', dtmApprovedDate = NULL, strZip = '48120', intMasterId = 22457
+UNION ALL SELECT intTerminalControlNumberId = 458, strTerminalControlNumber = 'T-38-MI-3004', strName = 'Buckeye Terminals, LLC - Napoleon', strAddress = '6777 Brooklyn Road', strCity = 'Napoleon', dtmApprovedDate = NULL, strZip = '49261', intMasterId = 22458
+UNION ALL SELECT intTerminalControlNumberId = 459, strTerminalControlNumber = 'T-38-MI-3005', strName = 'Buckeye Terminals, LLC - River Rouge', strAddress = '205 Marion Street', strCity = 'River Rouge', dtmApprovedDate = NULL, strZip = '48218', intMasterId = 22459
+UNION ALL SELECT intTerminalControlNumberId = 460, strTerminalControlNumber = 'T-38-MI-3006', strName = 'Buckeye Terminals, LLC - Dearborn', strAddress = '8503 South Inkster Rd.', strCity = 'Taylor', dtmApprovedDate = NULL, strZip = '48180-2114', intMasterId = 22460
+UNION ALL SELECT intTerminalControlNumberId = 461, strTerminalControlNumber = 'T-38-MI-3007', strName = 'Buckeye Pipe Line Holdings, L.P - Taylor', strAddress = '24801 Ecorse Rd', strCity = 'Taylor', dtmApprovedDate = NULL, strZip = '48180', intMasterId = 22461
+UNION ALL SELECT intTerminalControlNumberId = 462, strTerminalControlNumber = 'T-38-MI-3008', strName = 'CITGO - Ferrysburg', strAddress = '524 Third Street', strCity = 'Ferrysburg', dtmApprovedDate = NULL, strZip = '49409', intMasterId = 22462
+UNION ALL SELECT intTerminalControlNumberId = 463, strTerminalControlNumber = 'T-38-MI-3009', strName = 'CITGO - Jackson', strAddress = '2001 Morrill Rd', strCity = 'Jackson', dtmApprovedDate = NULL, strZip = '49201', intMasterId = 22463
+UNION ALL SELECT intTerminalControlNumberId = 464, strTerminalControlNumber = 'T-38-MI-3010', strName = 'CITGO - Niles', strAddress = '2233 South Third', strCity = 'Niles', dtmApprovedDate = NULL, strZip = '49120', intMasterId = 22464
+UNION ALL SELECT intTerminalControlNumberId = 465, strTerminalControlNumber = 'T-38-MI-3011', strName = 'Marathon Niles', strAddress = '2140 South Third St.', strCity = 'Niles', dtmApprovedDate = NULL, strZip = '49120', intMasterId = 22465
+UNION ALL SELECT intTerminalControlNumberId = 466, strTerminalControlNumber = 'T-38-MI-3012', strName = 'Cousins Petroleum - Taylor', strAddress = '7965 Holland', strCity = 'Taylor', dtmApprovedDate = NULL, strZip = '48180', intMasterId = 22466
+UNION ALL SELECT intTerminalControlNumberId = 467, strTerminalControlNumber = 'T-38-MI-3013', strName = 'Buckeye Terminals, LLC - Ferrysburg', strAddress = '17806 North Shore Dr.', strCity = 'Ferrysburg', dtmApprovedDate = NULL, strZip = '49409', intMasterId = 22467
+UNION ALL SELECT intTerminalControlNumberId = 468, strTerminalControlNumber = 'T-38-MI-3014', strName = 'Buckeye Terminals, LLC - Taylor East', strAddress = '24501 Ecorse Rd', strCity = 'Taylor', dtmApprovedDate = NULL, strZip = '48180', intMasterId = 22468
+UNION ALL SELECT intTerminalControlNumberId = 469, strTerminalControlNumber = 'T-38-MI-3015', strName = 'Marathon Detroit', strAddress = '12700 Toronto St.', strCity = 'Detroit', dtmApprovedDate = NULL, strZip = '48217', intMasterId = 22469
+UNION ALL SELECT intTerminalControlNumberId = 470, strTerminalControlNumber = 'T-38-MI-3016', strName = 'Marathon Flint', strAddress = '6065 North Dort Highway', strCity = 'Mt. Morris', dtmApprovedDate = NULL, strZip = '48458', intMasterId = 22470
+UNION ALL SELECT intTerminalControlNumberId = 471, strTerminalControlNumber = 'T-38-MI-3017', strName = 'Marathon Jackson', strAddress = '2090 Morrill Rd', strCity = 'Jackson', dtmApprovedDate = NULL, strZip = '49201-8238', intMasterId = 22471
+UNION ALL SELECT intTerminalControlNumberId = 472, strTerminalControlNumber = 'T-38-MI-3018', strName = 'Delta Fuel Facility - DTW Metro', strAddress = 'West. Service Rd.', strCity = 'Romulus', dtmApprovedDate = NULL, strZip = '48174', intMasterId = 22472
+UNION ALL SELECT intTerminalControlNumberId = 473, strTerminalControlNumber = 'T-38-MI-3019', strName = 'Marathon Oil Niles', strAddress = '2216 South Third Street', strCity = 'Niles', dtmApprovedDate = NULL, strZip = '49120-4010', intMasterId = 22473
+UNION ALL SELECT intTerminalControlNumberId = 474, strTerminalControlNumber = 'T-38-MI-3020', strName = 'Marathon N. Muskegon', strAddress = '3005 Holton Rd', strCity = 'North Muskegon', dtmApprovedDate = NULL, strZip = '49445-2513', intMasterId = 22474
+UNION ALL SELECT intTerminalControlNumberId = 475, strTerminalControlNumber = 'T-38-MI-3022', strName = 'Buckeye Terminals, LLC - Flint', strAddress = 'G5340 North Dort Highway', strCity = 'Flint', dtmApprovedDate = NULL, strZip = '48505', intMasterId = 22475
+UNION ALL SELECT intTerminalControlNumberId = 476, strTerminalControlNumber = 'T-38-MI-3023', strName = 'Buckeye Terminals, LLC - Niles West', strAddress = '2150 South Third Street', strCity = 'Niles', dtmApprovedDate = NULL, strZip = '49120', intMasterId = 22476
+UNION ALL SELECT intTerminalControlNumberId = 477, strTerminalControlNumber = 'T-38-MI-3024', strName = 'Buckeye Terminals, LLC - Woodhaven', strAddress = '20755 West Road', strCity = 'Woodhaven', dtmApprovedDate = NULL, strZip = '48183-', intMasterId = 22477
+UNION ALL SELECT intTerminalControlNumberId = 478, strTerminalControlNumber = 'T-38-MI-3025', strName = 'Buckeye Terminals, LLC - Detroit', strAddress = '700 S. Deacon Street', strCity = 'Detroit', dtmApprovedDate = NULL, strZip = '48217', intMasterId = 22478
+UNION ALL SELECT intTerminalControlNumberId = 479, strTerminalControlNumber = 'T-38-MI-3028', strName = 'Buckeye Terminals, LLC - Niles', strAddress = '2303 South Third Street', strCity = 'Niles', dtmApprovedDate = NULL, strZip = '49120', intMasterId = 22479
+UNION ALL SELECT intTerminalControlNumberId = 480, strTerminalControlNumber = 'T-38-MI-3029', strName = 'Sunoco Partners Marketing & Terminals LP', strAddress = '4004 West Main Rd', strCity = 'Owosso', dtmApprovedDate = NULL, strZip = '48867', intMasterId = 22480
+UNION ALL SELECT intTerminalControlNumberId = 481, strTerminalControlNumber = 'T-38-MI-3030', strName = 'Sunoco Partners Marketing & Terminals LP', strAddress = '500 South Dix Avenue', strCity = 'Detroit', dtmApprovedDate = NULL, strZip = '48217', intMasterId = 22481
+UNION ALL SELECT intTerminalControlNumberId = 482, strTerminalControlNumber = 'T-38-MI-3032', strName = 'Marathon Bay City', strAddress = '1806 Marquette', strCity = 'Bay City', dtmApprovedDate = NULL, strZip = '48706', intMasterId = 22482
+UNION ALL SELECT intTerminalControlNumberId = 483, strTerminalControlNumber = 'T-38-MI-3033', strName = 'Marathon Lansing', strAddress = '6300 West Grand River', strCity = 'Lansing', dtmApprovedDate = NULL, strZip = '48906', intMasterId = 22483
+UNION ALL SELECT intTerminalControlNumberId = 484, strTerminalControlNumber = 'T-38-MI-3034', strName = 'Marathon Romulus', strAddress = '28001 Citrin Drive', strCity = 'Romulus', dtmApprovedDate = NULL, strZip = '48174', intMasterId = 22484
+UNION ALL SELECT intTerminalControlNumberId = 485, strTerminalControlNumber = 'T-38-MI-3037', strName = 'Sonoco Partners Marketing & Terminals LP', strAddress = '29120 Wick Road', strCity = 'Romulus', dtmApprovedDate = NULL, strZip = '48174', intMasterId = 22485
+UNION ALL SELECT intTerminalControlNumberId = 486, strTerminalControlNumber = 'T-38-MI-3039', strName = 'Delta Fuels of Michigan', strAddress = '40600 Grand River', strCity = 'Novi', dtmApprovedDate = NULL, strZip = '48374', intMasterId = 22486
+UNION ALL SELECT intTerminalControlNumberId = 487, strTerminalControlNumber = 'T-38-MI-3041', strName = 'Holland Terminal, Inc.', strAddress = '630 Ottawa Avenue', strCity = 'Holland', dtmApprovedDate = NULL, strZip = '49423', intMasterId = 22487
+UNION ALL SELECT intTerminalControlNumberId = 488, strTerminalControlNumber = 'T-38-MI-3043', strName = 'Buckeye Terminals, LLC - Marshall', strAddress = '12451 Old US 27 South', strCity = 'Marshall', dtmApprovedDate = NULL, strZip = '49068', intMasterId = 22488
+UNION ALL SELECT intTerminalControlNumberId = 489, strTerminalControlNumber = 'T-38-MI-3046', strName = 'Marysville Hydrocarbons', strAddress = '2510 Busha Highway', strCity = 'Marysville', dtmApprovedDate = NULL, strZip = '48040', intMasterId = 22489
+UNION ALL SELECT intTerminalControlNumberId = 490, strTerminalControlNumber = 'T-38-MI-3047', strName = 'Waterfront Petroleum Terminal Co.', strAddress = '5431 W Jefferson', strCity = 'Detroit', dtmApprovedDate = NULL, strZip = '48209', intMasterId = 22490
+UNION ALL SELECT intTerminalControlNumberId = 491, strTerminalControlNumber = 'T-38-MI-3048', strName = 'Plains LPG Services LP', strAddress = '1575 Fred Moore Hwy', strCity = 'St Clair', dtmApprovedDate = NULL, strZip = '48079', intMasterId = 22491
+
+EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'MI', @TerminalControlNumbers = @TerminalMI
+
 
 
 
