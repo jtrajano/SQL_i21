@@ -2144,8 +2144,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     taxAmount = i21.ModuleMgr.Inventory.roundDecimalValue(taxAmount, 2);
 
                     if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
-                        if (itemDetailTax.ysnTaxExempt)
+                        if (itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent === 0.00)
                             taxAmount = 0.00;
+
+                        if(itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent !== 0.00)
+                            taxAmount -= (taxAmount * (itemDetailTax.dblExemptionPercent/100.00));
+
                         itemDetailTax.dblTax = taxAmount;
                         itemDetailTax.dblAdjustedTax = taxAmount;
                     }
@@ -2172,7 +2176,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         intTaxAccountId: itemDetailTax.intTaxAccountId,
                         ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
                         ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
-                        ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                        ysnCheckoffTax: itemDetailTax.ysnCheckoffTax,
+                        ysnTaxOnly: itemDetailTax.ysnTaxOnly
                     });
                     detailRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
                 });
@@ -2386,31 +2391,45 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
+        quantity = Ext.isNumeric(quantity) ? quantity : 0.00;
+        price = Ext.isNumeric(price) ? price : 0.00;
 
         var taxableAmount = quantity * price;
+        var otherTaxes = 0.00; 
+        var dblRate = 0.00; 
 
         Ext.Array.each(itemTaxes, function (itemDetailTax) {
             if (itemDetailTax.strTaxableByOtherTaxes && itemDetailTax.strTaxableByOtherTaxes !== String.empty) {
-                if (itemDetailTax.strTaxableByOtherTaxes.split(",").indexOf(currentItemTax.intTaxClassId.toString()) > -1) {
-                    if(itemDetailTax.data.ysnTaxOnly)
+                if (itemDetailTax.strTaxableByOtherTaxes.split(",").indexOf(currentItemTax.intTaxCodeId.toString()) > -1) {
+                    dblRate = Ext.isNumeric(itemDetailTax.dblRate) ? itemDetailTax.dblRate : 0.00; 
+
+                    if(itemDetailTax.ysnTaxOnly)
                         taxableAmount = 0.000000;
                     else
-                        taxableAmount = ((quantity * price) - ((quantity * price) * (itemDetailTax.dblRate/100.0)));
+                        taxableAmount = ((quantity * price) - (quantity * price * dblRate / 100.0));
 
                     if (itemDetailTax.ysnTaxAdjusted) {
-                        taxableAmount = (quantity * price) + (itemDetailTax.dblAdjustedTax);
+                        otherTaxes += itemDetailTax.dblAdjustedTax;
                     } else {
                         if (itemDetailTax.strCalculationMethod === 'Percentage') {
-                            taxableAmount = (quantity * price) + ((quantity * price) * (itemDetailTax.dblRate / 100));
+                            otherTaxes += 
+                                ((itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent === 0.00) || itemDetailTax.ysnCheckoffTax)
+                                ? 0.00 
+                                : (quantity * price * dblRate / 100.0); 
                         } else {
-                            taxableAmount = (quantity * price) + (itemDetailTax.dblRate * quantity);
+                            otherTaxes += 
+                                ((itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent === 0.00) || itemDetailTax.ysnCheckoffTax) 
+                                ? 0.00 
+                                : (dblRate * quantity);
                         }
                     }
                 }
             }
         });
+        taxableAmount = Ext.isNumeric(taxableAmount) ? taxableAmount : 0.00;
+        otherTaxes = Ext.isNumeric(otherTaxes) ? otherTaxes : 0.00;
 
-        return taxableAmount;
+        return (taxableAmount + otherTaxes);
     },
 
     calculateOtherChargesTax: function (win) {
@@ -6038,7 +6057,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     dblAdjustedTax: itemDetailTax.dblAdjustedTax,
                                     intTaxAccountId: itemDetailTax.intTaxAccountId,
                                     ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
-                                    ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                                    ysnCheckoffTax: itemDetailTax.ysnCheckoffTax,
+                                    ysnTaxOnly: itemDetailTax.ysnTaxOnly
                                 });
                                 charge.tblICInventoryReceiptChargeTaxes().add(newItemTax);
                             });
