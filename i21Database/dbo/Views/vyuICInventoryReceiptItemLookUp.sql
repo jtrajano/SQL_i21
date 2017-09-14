@@ -193,7 +193,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, ContractView.strPricingType
 		, strTaxGroup = SMTaxGroup.strTaxGroup
 		, strForexRateType = forexType.strCurrencyExchangeRateType
-		, ReceiptItem.ysnLotWeightsRequired
+		, Item.ysnLotWeightsRequired
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
