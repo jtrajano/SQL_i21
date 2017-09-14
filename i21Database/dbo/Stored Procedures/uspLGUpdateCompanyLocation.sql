@@ -86,7 +86,7 @@ BEGIN TRY
 
 	IF (ISNULL(@intCountSILoads, 0) > 1)
 	BEGIN
-		SET @strErrMsg = 'More than one shipping instruction is available for contract ' + @strContractNumber + ' sequence ' + LTRIM(@intContractSeq) +'. Cannot reduce qty.'
+		SET @strErrMsg = 'More than one shipping instruction is available for contract ' + @strContractNumber + ' sequence ' + LTRIM(@intContractSeq) +'. Cannot change qty.'
 		RAISERROR (@strErrMsg,16,1)
 	END
 	ELSE 
