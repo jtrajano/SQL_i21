@@ -531,7 +531,7 @@ IF @ysnPrintFromCFLocal = 1
 	END
 ELSE 
 	BEGIN
-		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType = 'Payment'
+		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType IN ('Customer Prepayment', 'Payment')
 	END
 
 INSERT INTO @temp_statement_table(
