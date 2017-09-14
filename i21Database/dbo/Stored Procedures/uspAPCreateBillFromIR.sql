@@ -531,7 +531,7 @@ BEGIN
 			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
 			[intForexRateTypeId]		=	B.intForexRateTypeId,
 			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
-			[intTaxGroupId]				=	NULL,
+			[intTaxGroupId]				=	B.intTaxGroupId,
 			[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 			[dblTotal]					=	ISNULL((CASE WHEN B.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN (CASE WHEN B.intWeightUOMId > 0 
