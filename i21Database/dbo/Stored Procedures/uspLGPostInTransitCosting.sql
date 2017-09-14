@@ -145,6 +145,9 @@ BEGIN TRY
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@strGLDescription = ''
 
+			UPDATE @GLEntries
+			SET strCode = 'LG', strModuleName = 'Logistics'
+
 			UPDATE tblLGLoad
 			SET strBatchId = @strBatchIdUsed
 			WHERE intLoadId = @intLoadId
