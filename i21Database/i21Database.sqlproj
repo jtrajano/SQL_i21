@@ -5873,4 +5873,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MI_Michigan.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\NC_NorthCarolina.sql" />
+  </ItemGroup>
 </Project>
