@@ -16,7 +16,7 @@ BEGIN
 	--==========================================================
 	--     Insert into [tblTRLoadHeader],[tblTRLoadReceipt][tblTRLoadDistributionHeader] - TR Origin History
 	--========================================================== 
-	IF NOT EXISTS (SELECT intEntitySalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = @defaultDriver)
+	IF NOT EXISTS (SELECT intEntityId FROM tblARSalesperson WHERE intEntityId = @defaultDriver)
 	BEGIN
 			RAISERROR('Default Company Driver is not valid',16,1)
 			RETURN	
@@ -79,18 +79,18 @@ BEGIN
 			 CAST((LEFT(CONVERT(VARCHAR,MAX(trhst_rev_dt)),4) + '-' + SUBSTRING(CONVERT(VARCHAR,MAX(trhst_rev_dt)),5,2) +  '-' + RIGHT(CONVERT(VARCHAR,MAX(trhst_rev_dt)),2)) + ' ' +
 			   CAST((RTRIM(CONVERT(CHAR,LEFT(CAST((RIGHT('0000'+CAST(MAX(trhst_pur_rack_ent_time) AS VARCHAR(4)),4) ) AS CHAR(4)),2)+':'
 				+RIGHT(CAST((RIGHT('0000'+CAST(MAX(trhst_pur_rack_ent_time) AS VARCHAR(4)),4) ) AS CHAR(4)),2),108))+':00') AS CHAR(10)) AS DATETIME),-- dtmLoadDateTime
-			 (SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia 
+			 (SELECT TOP 1 intEntityId FROM tblSMShipVia 
 				WHERE strShipViaOriginKey COLLATE LATIN1_GENERAL_CI_AS = MAX(trhst_pur_carrier) COLLATE LATIN1_GENERAL_CI_AS),  -- intShipViaId
-			 (select top 1 intEntityShipViaId from tblSMShipVia 
+			 (select top 1 intEntityId from tblSMShipVia 
 				WHERE strShipViaOriginKey COLLATE LATIN1_GENERAL_CI_AS = MAX(trhst_pur_seller) COLLATE LATIN1_GENERAL_CI_AS),    -- intSellerId
-			 CASE WHEN (select COUNT(intEntityId) from tblEMEntity EM INNER JOIN trdrvmst DRV 
+			 CASE WHEN (select COUNT(SLS.intEntityId) from tblEMEntity EM INNER JOIN trdrvmst DRV 
 						on DRV.trdrv_driver COLLATE LATIN1_GENERAL_CI_AS = MAX(trhst_driver) COLLATE LATIN1_GENERAL_CI_AS
 						AND DRV.trdrv_name COLLATE LATIN1_GENERAL_CI_AS = EM.strName COLLATE LATIN1_GENERAL_CI_AS 
-						INNER JOIN tblARSalesperson SLS ON SLS.intEntitySalespersonId = EM.intEntityId ) = 0 THEN  @defaultDriver
-				  ELSE (select TOP 1 intEntityId from tblEMEntity EM INNER JOIN trdrvmst DRV 
+						INNER JOIN tblARSalesperson SLS ON SLS.intEntityId = EM.intEntityId ) = 0 THEN  @defaultDriver
+				  ELSE (select TOP 1 SLS.intEntityId from tblEMEntity EM INNER JOIN trdrvmst DRV 
 						on DRV.trdrv_driver COLLATE LATIN1_GENERAL_CI_AS = MAX(trhst_driver) COLLATE LATIN1_GENERAL_CI_AS
 						AND DRV.trdrv_name COLLATE LATIN1_GENERAL_CI_AS = EM.strName COLLATE LATIN1_GENERAL_CI_AS 
-						INNER JOIN tblARSalesperson SLS ON SLS.intEntitySalespersonId = EM.intEntityId) END,       -- intDriverId
+						INNER JOIN tblARSalesperson SLS ON SLS.intEntityId = EM.intEntityId) END,       -- intDriverId
 			 min(trhst_tractor_trailor),-- strTractor
 			 min(trhst_tractor_trailor),-- strTrailer
 			 1,-- ysnPosted
@@ -197,7 +197,7 @@ BEGIN
 							    			'Location'
 									END	   
               
-					   ,CUS.intEntityCustomerId                                  --[intDefaultLocationId] 
+					   ,CUS.intEntityId		                                     --[intDefaultLocationId] 
 					   ,CUS.intShipToId                                          --[intShipToLocationId]
 					   ,LOC.intCompanyLocationId                                 --[intCompanyLocationId]
 					   ,CUS.intSalespersonId                                     --[intSalespersonId]
@@ -231,7 +231,7 @@ BEGIN
 							  ,ITM.intItemId                     --[intItemId]
 							  ,(SELECT TOP 1 intContractDetailId FROM tblCTContractDetail CDT 
 								INNER JOIN tblCTContractHeader CNT ON CNT.intContractHeaderId = CDT.intContractHeaderId 
-								AND CNT.intEntityId = CUS.intEntityCustomerId
+								AND CNT.intEntityId = CUS.intEntityId
 								WHERE CNT.strContractNumber COLLATE SQL_Latin1_General_CP1_CS_AS = TR.trhst_cnt_no COLLATE SQL_Latin1_General_CP1_CS_AS 
 								AND CDT.intItemId = ITM.intItemId) --[intContractDetailId]
 							  ,trhst_sls_un                        --[dblUnits]
