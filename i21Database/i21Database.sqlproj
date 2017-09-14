@@ -3055,16 +3055,12 @@
     <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
     <Build Include="dbo\Views\vyuPATCancel.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningDistribution.sql" />
-    <Build Include="dbo\Functions\fnPATCreateRefundGLEntries.sql" />
-    <Build Include="dbo\Functions\fnPATReverseGLRefundEntries.sql" />
     <Build Include="dbo\Views\vyuCFSearchTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOProcessToInvoice.sql" />
     <Build Include="dbo\Views\vyuPRUnpostedTransactions.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLogo.sql" />
     <Build Include="dbo\Tables\tblSCListTicketTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdatePaycheckReferenceNo.sql" />
-    <Build Include="dbo\Functions\fnPATCreateDividendGLEntries.sql" />
-    <Build Include="dbo\Functions\fnPATReverseGLDividendEntries.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\Do Stock Repost.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICDetectBadOnHand.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
@@ -4446,10 +4442,6 @@
     <Build Include="dbo\Stored Procedures\uspMFUnpostProducedLot.sql" />
     <Build Include="dbo\Views\vyuQMTestResultNotMapped.sql" />
     <Build Include="dbo\Views\vyuQMSampleNotMapped.sql" />
-    <Build Include="dbo\Functions\fnPATReverseRetireStockGLEntries.sql" />
-    <Build Include="dbo\Functions\fnPATReverseIssueStockGLEntries.sql" />
-    <Build Include="dbo\Functions\fnPATCreateRetireStockGLEntries.sql" />
-    <Build Include="dbo\Functions\fnPATCreateIssueStockGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostIssueStock.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesBasis.sql" />
@@ -4568,8 +4560,6 @@
     <Build Include="dbo\Views\vyuCTGridPriceContractSpreadArbitrage.sql" />
     <Build Include="dbo\Functions\fnCTGetTopOneSequence.sql" />
     <Build Include="dbo\Views\vyuCTGridPriceContractCost.sql" />
-    <Build Include="dbo\Functions\fnPATCreateTransferInstrumentsGLEntries.sql" />
-    <Build Include="dbo\Functions\fnPATReverseTransferInstrumentsGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostTransferInstruments.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportStorageLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportItemLabel.sql" />
@@ -4577,8 +4567,6 @@
     <Build Include="dbo\Tables\tblRKReconciliationBrokerStatementImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFreezeFutOptTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReconciliationBrokerStatementImport.sql" />
-    <Build Include="dbo\Functions\fnPATCreateCancelEquityGLEntries.sql" />
-    <Build Include="dbo\Functions\fnPATReverseCancelEquityGLEntries.sql" />
     <Build Include="dbo\Views\vyuLGLoadDocumentTracking.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetEmailInfo.sql" />
     <Build Include="dbo\Views\vyuLGUnAllocatedContracts.sql" />
@@ -4730,8 +4718,6 @@
     <Build Include="dbo\Tables\tblPATEquityPaySummary.sql" />
     <Build Include="dbo\Tables\tblPATEquityPayDetail.sql" />
     <Build Include="dbo\Tables\tblPATEquityPay.sql" />
-    <Build Include="dbo\Functions\fnPATReverseEquityPayoutGLEntries.sql" />
-    <Build Include="dbo\Functions\fnPATCreateEquityPayoutGLEntries.sql" />
     <Build Include="dbo\Views\vyuMFLotList.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspRKConvertProductType.sql" />
