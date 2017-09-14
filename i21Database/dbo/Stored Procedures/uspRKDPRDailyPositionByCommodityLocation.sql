@@ -96,7 +96,7 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 		SELECT 
 		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((a.dblUnitOnHand),0)) AS Qty 
  		 FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId AND ISNULL(a.dblUnitOnHand,0) > 0
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId --AND ISNULL(a.dblUnitOnHand,0) > 0
 		  JOIN tblICItem i on a.intItemId=i.intItemId  
 		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 		  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
@@ -108,7 +108,7 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 		SELECT 
 		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((sr1.dblQty),0)) AS Qty 
  		 FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId and isnull(a.dblUnitOnHand,0) > 0
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId --and isnull(a.dblUnitOnHand,0) > 0
 		  JOIN tblICStockReservation sr1 ON a.intItemId = sr1.intItemId   
 		  JOIN tblICItem i on a.intItemId=i.intItemId  
 		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
