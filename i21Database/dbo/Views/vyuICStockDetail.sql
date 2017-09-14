@@ -72,6 +72,7 @@ SELECT
 				)
 	
 	,dblExtendedCost = ISNULL(ItemStockUOM.dblOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0)
+	,Item.ysnLotWeightsRequired
 FROM	
 	tblICItem Item 
 	LEFT JOIN (
