@@ -122,7 +122,7 @@ BEGIN
 				,null [Storage Due] 
 				FROM 
 				tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId AND ISNULL(a.dblUnitOnHand,0) > 0
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId --AND ISNULL(a.dblUnitOnHand,0) > 0
 		  JOIN tblICItem i on a.intItemId=i.intItemId  
 		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 		  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
@@ -382,7 +382,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,
 					isnull(a.dblUnitOnHand,0)) dblUnitOnHand
 					FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId AND ISNULL(a.dblUnitOnHand,0) > 0
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId --AND ISNULL(a.dblUnitOnHand,0) > 0
 		  JOIN tblICItem i on a.intItemId=i.intItemId  
 		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 		  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
