@@ -5661,6 +5661,9 @@
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI3724.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
+    <Build Include="dbo\Views\vyuGLglhstmstDifference.sql" />
+    <Build Include="dbo\Views\vyuGLPTDrillDownDifference.sql" />
+    <Build Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
