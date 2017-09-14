@@ -386,6 +386,10 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 495, strFormCode = 'R-5399', strScheduleCode = 'D-21', strType = 'Dyed Diesel', strState = 'LA', strStatus = 'Include', intMasterId = 18495
 	UNION ALL SELECT intValidDestinationStateId = 496, strFormCode = 'R-5399', strScheduleCode = 'D-21', strType = 'Aviation Fuels', strState = 'LA', strStatus = 'Include', intMasterId = 18496
 
+	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
+	EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
+	EXEC uspTFUpgradeValidDestinationStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidDestinationStates = @ValidDestinationStates
+
 -- Reporting Component - Configuration
 /* Generate script for Reporting Component - Configurations. Specify Tax Authority Id to filter out specific Reporting Component - Configurations only.
 select 'UNION ALL SELECT intReportTemplateId = ' + CAST(intReportingComponentConfigurationId AS NVARCHAR(10))
