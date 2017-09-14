@@ -5654,6 +5654,7 @@
     <Build Include="dbo\Stored Procedures\uspRKReconciledValidation.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
+    <None Include="Scripts\Post-Deployment\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

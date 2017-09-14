@@ -26,6 +26,17 @@
     [strCheckPayeeName]      NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[intDefaultCurrencyId] INT NULL,
 	[intVendorLinkId] INT NULL,
+	[strLocationDescription]	NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
+    [strLocationType]           NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL DEFAULT('Location'),
+    --Start Farm Fields     
+    [strFarmFieldNumber]        NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
+    [strFarmFieldDescription]	NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
+    [strFarmFSANumber]			NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
+    [strFarmSplitNumber]		NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,    
+    [strFarmSplitType]			NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+    [dblFarmAcres]				NUMERIC(18, 6)  DEFAULT ((0)) NULL,
+    --End Farm Fields
+
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblEMEntityLocation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_dbo.tblEMEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
     CONSTRAINT [FK_dbo.tblEMEntityLocation_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
@@ -38,6 +49,7 @@
 	CONSTRAINT [UK_tblEMEntityLocation_strLocationName_intEntityId] UNIQUE NONCLUSTERED ([strLocationName] ASC, [intEntityId] ASC)	,
 	CONSTRAINT [FK_tblEMEntityLocation_intCurrencyId] FOREIGN KEY ([intDefaultCurrencyId]) REFERENCES tblSMCurrency([intCurrencyID]),
     CONSTRAINT [FK_tblEMEntityLocation_tblEMEntity_intVendorLinkId] FOREIGN KEY ([intVendorLinkId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	CONSTRAINT [UK_tblEMEntityLocation_strLocationName_strFieldNumber] UNIQUE NONCLUSTERED ([strLocationName] ASC, [strFarmFieldNumber] ASC,[intEntityId] ASC)
 
 
 );

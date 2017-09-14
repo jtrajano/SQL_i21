@@ -357,6 +357,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
 :r .\EM\1730_Fix_SplitTypeEntry.sql
 :r .\EM\DataMigration\1710_1720_CCSite_migration.sql
+:r .\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql
+
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
