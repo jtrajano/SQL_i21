@@ -31,7 +31,7 @@ SELECT
 , dblPendingPayment			= (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0)
 , dblCreditLimit			= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = CAR.intEntityCustomerId)
 , dblNextPaymentAmount		= ISNULL(CB.dblBudgetAmount, 0.000000)
-, dblAmountPastDue			= (SELECT ISNULL(SUM(dblBudgetAmount),0.000000) FROM tblARCustomerBudget WHERE intEntityCustomerId = CAR.intEntityCustomerId AND dtmBudgetDate < GETDATE())
+, dblAmountPastDue			= (SELECT ISNULL(SUM(dblBudgetAmount - dblAmountPaid),0.000000) FROM tblARCustomerBudget WHERE intEntityCustomerId = CAR.intEntityCustomerId AND dtmBudgetDate < GETDATE())
 , intRemainingBudgetPeriods	= (SELECT ISNULL(COUNT(*), 0) FROM tblARCustomerBudget WHERE intEntityCustomerId = CAR.intEntityCustomerId AND dtmBudgetDate >= GETDATE())
 , strBudgetStatus			= CASE WHEN 1 = 1 THEN 'Past Due' ELSE 'Current' END
 , strTerm					= (SELECT TOP 1 strTerm FROM vyuARCustomer C INNER JOIN tblSMTerm T ON C.intTermsId = T.intTermID WHERE intEntityCustomerId = CAR.intEntityCustomerId)
