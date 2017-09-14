@@ -119,7 +119,7 @@ BEGIN
 				, sl.strLocationName,i.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 				,null [Storage Due] 
 				FROM tblICItemStock a  
-				  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId  and isnull(a.dblUnitOnHand,0) > 0
+				  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId -- and isnull(a.dblUnitOnHand,0) > 0
 				  JOIN tblICItem i on a.intItemId=i.intItemId  
 				  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 				  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1

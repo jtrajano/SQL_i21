@@ -240,7 +240,7 @@ BEGIN
 		SELECT (select sum(qty) Qty from (
 				SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((it1.dblUnitOnHand),0)) qty
 				FROM tblICItem i1
-				INNER JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId and isnull(it1.dblUnitOnHand,0) > 0
+				INNER JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId --and isnull(it1.dblUnitOnHand,0) > 0
 				INNER JOIN tblICItemLocation ic ON ic.intItemLocationId = it1.intItemLocationId
 				JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
@@ -384,7 +384,7 @@ BEGIN
 			SELECT isnull((select sum(Qty) Qty from (
 							SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((it1.dblUnitOnHand),0)) Qty
 				FROM tblICItem i1
-				INNER JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId and isnull(it1.dblUnitOnHand,0) > 0
+				INNER JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId --and isnull(it1.dblUnitOnHand,0) > 0
 				INNER JOIN tblICItemLocation ic ON ic.intItemLocationId = it1.intItemLocationId
 				JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
@@ -686,7 +686,7 @@ UNION
 						SELECT 
 						 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((a.dblUnitOnHand),0)) as Qty 
  						 FROM tblICItemStock a  
-						  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId   and isnull(a.dblUnitOnHand,0) > 0 
+						  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId   --and isnull(a.dblUnitOnHand,0) > 0 
 						  JOIN tblICItem i on a.intItemId=i.intItemId  
 						  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 						  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
