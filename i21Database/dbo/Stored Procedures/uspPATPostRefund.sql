@@ -22,8 +22,8 @@ BEGIN TRANSACTION -- START TRANSACTION
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.';
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.';
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage';
+DECLARE @MODULE_CODE NVARCHAR(5)  = 'PAT';
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Refund';
-DECLARE @TRAN_TYPE NVARCHAR(25) = 'Refund';
 DECLARE @totalRecords INT;
 DECLARE @GLEntries AS RecapTableType;
 DECLARE @error NVARCHAR(200);
@@ -116,16 +116,233 @@ DECLARE @intAdjustmentId INT
 
 IF ISNULL(@ysnPosted,0) = 1
 BEGIN
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @batchId)
+	INSERT INTO @GLEntries(
+			[dtmDate], 
+			[strBatchID], 
+			[intAccountId],
+			[dblDebit],
+			[dblCredit],
+			[dblDebitUnit],
+			[dblCreditUnit],
+			[strDescription],
+			[strCode],
+			[strReference],
+			[intCurrencyId],
+			[dtmDateEntered],
+			[dtmTransactionDate],
+			[strJournalLineDescription],
+			[intJournalLineNo],
+			[ysnIsUnposted],
+			[intUserId],
+			[intEntityId],
+			[strTransactionId],
+			[intTransactionId],
+			[strTransactionType],
+			[strTransactionForm],
+			[strModuleName],
+			[dblDebitForeign],
+			[dblDebitReport],
+			[dblCreditForeign],
+			[dblCreditReport],
+			[dblReportingRate],
+			[dblForeignRate],
+			[strRateType]
+	)
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
+		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[intAccountId]					=	D.intUndistributedEquityId,
+		[dblDebit]						=	0,
+		[dblCredit]						=	ROUND(B.dblEquityRefund, 2),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	'Undistributed Equity',
+		[strCode]						=	@MODULE_CODE,
+		[strReference]					=	A.strRefundNo,
+		[intCurrencyId]					=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmRefundDate,
+		[strJournalLineDescription]		=	'Undistributed Equity',
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strRefundNo, 
+		[intTransactionId]				=	A.intRefundId, 
+		[strTransactionType]			=	'Undistributed Equity',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL
+	FROM	[dbo].tblPATRefund A
+			INNER JOIN tblPATRefundCustomer B
+				ON A.intRefundId = B.intRefundId
+			INNER JOIN tblPATRefundRate D
+				ON B.intRefundTypeId = D.intRefundTypeId
+	WHERE	A.intRefundId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@validRefundIds)) AND B.ysnEligibleRefund = 1
+	UNION ALL
+	--AP Clearing
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
+		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[intAccountId]					=	E.intAPClearingGLAccount, 
+		[dblDebit]						=	0,
+		[dblCredit]						=	ROUND(B.dblCashRefund,2),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	'AP Clearing',
+		[strCode]						=	@MODULE_CODE,
+		[strReference]					=	A.strRefundNo,
+		[intCurrencyId]					=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmRefundDate,
+		[strJournalLineDescription]		=	'AP Clearing',
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strRefundNo, 
+		[intTransactionId]				=	A.intRefundId, 
+		[strTransactionType]			=	'AP Clearing',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL
+	FROM	[dbo].tblPATRefund A
+			INNER JOIN tblPATRefundCustomer B
+				ON A.intRefundId = B.intRefundId
+			INNER JOIN tblPATRefundRate D
+				ON B.intRefundTypeId = D.intRefundTypeId
+			CROSS JOIN tblPATCompanyPreference E
+	WHERE	A.intRefundId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@validRefundIds)) AND B.ysnEligibleRefund = 1
+	UNION ALL
+	--GENERAL RESERVE
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
+		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[intAccountId]					=	D.intGeneralReserveId,
+		[dblDebit]						=	ROUND(B.dblRefundAmount,2),
+		[dblCredit]						=	0,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	'General Reserve',
+		[strCode]						=	@MODULE_CODE,
+		[strReference]					=	A.strRefundNo,
+		[intCurrencyId]					=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmRefundDate,
+		[strJournalLineDescription]		=	'General Reserve',
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strRefundNo, 
+		[intTransactionId]				=	A.intRefundId, 
+		[strTransactionType]			=	'General Reserve',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL
+	FROM	[dbo].tblPATRefund A
+			INNER JOIN tblPATRefundCustomer B
+				ON A.intRefundId = B.intRefundId
+			INNER JOIN tblPATRefundRate D
+				ON B.intRefundTypeId = D.intRefundTypeId
+	WHERE	A.intRefundId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@validRefundIds)) AND B.ysnEligibleRefund = 1
 
 ----------------------------------------------------------------------------------
 
 END
 ELSE
 BEGIN
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnPATReverseGLRefundEntries(@validRefundIds, DEFAULT, @intUserId)
+	INSERT INTO @GLEntries(
+			[strTransactionId]
+			,[intTransactionId]
+			,[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[dblDebitForeign]           
+			,[dblDebitReport]            
+			,[dblCreditForeign]          
+			,[dblCreditReport]           
+			,[dblReportingRate]          
+			,[dblForeignRate]
+			,[strRateType]
+			,[strDocument]
+			,[strComments]
+	)
+	SELECT	
+		[strTransactionId]
+		,[intTransactionId]
+		,[dtmDate]
+		,strBatchId = @batchId COLLATE Latin1_General_CI_AS--[strBatchId]
+		,[intAccountId]
+		,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
+		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
+		,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
+		,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,dtmDateEntered = GETDATE()
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,ysnIsUnposted = 1
+		,intUserId = @intUserId
+		,[intEntityId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[dblDebitForeign]           
+		,[dblDebitReport]            
+		,[dblCreditForeign]          
+		,[dblCreditReport]           
+		,[dblReportingRate]          
+		,[dblForeignRate]
+		,NULL
+		,[strDocument]
+		,[strComments]
+	FROM	tblGLDetail 
+	WHERE	intTransactionId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@validRefundIds))
+	AND strModuleName = @MODULE_NAME AND strTransactionForm = @SCREEN_NAME AND strCode = @MODULE_CODE AND ysnIsUnposted = 0
+	ORDER BY intGLDetailId
 
 ----------------------------------------------------------------------------------
 
@@ -146,7 +363,7 @@ BEGIN
 	UPDATE tblGLDetail SET ysnIsUnposted = 1
 		WHERE intTransactionId = @intRefundId 
 			AND strModuleName = @MODULE_NAME 
-			AND strTransactionForm = @TRAN_TYPE
+			AND strTransactionForm = @SCREEN_NAME
 END
 
 
