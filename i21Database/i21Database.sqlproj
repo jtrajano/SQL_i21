@@ -5867,4 +5867,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\02_TerminalControl.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\LA_Louisiana.sql" />
+  </ItemGroup>
 </Project>
