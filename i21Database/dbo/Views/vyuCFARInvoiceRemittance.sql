@@ -1,6 +1,7 @@
 ﻿
 CREATE VIEW [dbo].[vyuCFARInvoiceRemittance]
 AS
+
 SELECT
  intEntityCustomerId					AS intCustomerId
 ,strCFTempInvoiceReportNumber			AS strTempInvoiceReportNumber
@@ -12,7 +13,8 @@ SELECT
 ,dblCFEligableGallon					AS dblEligableGallon					
 ,strCustomerName						AS strCustomerName
 ,strCFEmail								AS strEmail								
-,strCFEmailDistributionOption			AS strEmailDistributionOption			
+,strCFEmailDistributionOption			AS strEmailDistributionOption	
+,strCustomerNumber						AS strCustomerNumber		
 FROM            dbo.tblARCustomerStatementStagingTable 
 GROUP BY 
 intEntityCustomerId, 
@@ -25,4 +27,5 @@ dblCFFeeTotalAmount,
 dblCFEligableGallon, 
 strCustomerName,
 strCFEmail, 
-strCFEmailDistributionOption
+strCFEmailDistributionOption,
+strCustomerNumber
