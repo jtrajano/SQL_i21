@@ -232,6 +232,9 @@ BEGIN
 		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)	
 
 	END
+
 END
 
 PRINT('MFT Cleanup - END')
+
+GO

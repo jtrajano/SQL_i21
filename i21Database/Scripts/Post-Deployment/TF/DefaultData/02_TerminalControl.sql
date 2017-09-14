@@ -357,6 +357,6 @@ UNION ALL SELECT intTerminalControlNumberId = 748, strTerminalControlNumber = 'T
 
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NC', @TerminalControlNumbers = @TerminalNC
 
-
+GO
 
 

@@ -87,7 +87,6 @@ where intTaxAuthorityId = @TaxAuthorityId
 
 	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
-
 -- Tax Category
 /* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
 select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(intTaxCategoryId AS NVARCHAR(10))
