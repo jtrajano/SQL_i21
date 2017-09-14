@@ -444,6 +444,38 @@ BEGIN TRY
 		WHERE	intLoadDistributionDetailId = @intLoadDistributionDetailId 
 				AND ri.intRecipeId = @intRecipeId 
 				AND ri.intRecipeItemTypeId = 1
+				AND ISNULL(v.ysnSubstituteItem,0)=0
+		UNION ALL
+		SELECT --Substitute Items
+				@intRecipeId
+				,rs.intRecipeSubstituteItemId
+				,rs.intSubstituteItemId
+				,v.dblQuantity
+				,iu1.intItemUOMId
+				,0
+				,0
+				,ri.intConsumptionMethodId
+				,ri.intStorageLocationId
+				,ri.intItemId
+				,ri.dblCalculatedQuantity
+		FROM	tblTRLoadBlendIngredient v JOIN tblMFRecipeItem ri 
+					ON v.intRecipeItemId =ri.intRecipeItemId
+				JOIN tblMFRecipeSubstituteItem rs ON v.intRecipeItemId =rs.intRecipeItemId AND rs.intSubstituteItemId=v.intSubstituteItemId
+				JOIN dbo.tblICItemUOM iu ON iu.intItemUOMId = ri.intItemUOMId
+				JOIN dbo.tblICItemUOM iu1 ON iu1.intItemId = v.intSubstituteItemId
+				AND iu.intUnitMeasureId = iu1.intUnitMeasureId
+		WHERE	intLoadDistributionDetailId = @intLoadDistributionDetailId 
+				AND rs.intRecipeId = @intRecipeId 
+				AND ISNULL(v.ysnSubstituteItem,0)=1
+
+        IF (SELECT COUNT(1) FROM tblTRLoadBlendIngredient Where intLoadDistributionDetailId=@intLoadDistributionDetailId)=0
+            RaisError('No Ingredients found in Transport.',16,1)
+
+        IF Exists (SELECT 1 FROM tblTRLoadBlendIngredient Where intLoadDistributionDetailId=@intLoadDistributionDetailId AND ISNULL(dblQuantity,0)=0)
+            RaisError('Ingredients Quantity cannot be 0.',16,1)
+
+        IF (SELECT COUNT(1) FROM @tblInputItem)=0
+            RaisError('No Ingredients found in Transport.',16,1)
 	END
 
 	SELECT	@dblRecipeQty = dblQuantity 
@@ -663,19 +695,22 @@ BEGIN TRY
 				AND intRowNo>@intMinItem
 	END
 
-	--Check for Max produce qty using available inventory
-	SELECT	@dblMaxProduceQty = ISNULL(MIN(ISNULL(dblMaxProduceQty,0)),0) 
-	FROM	@tblInputItem 
-	WHERE	ISNULL(dblMaxProduceQty,0) > 0
-
-	IF @dblMaxProduceQty > 0
+	IF @strOrderType IN ('SALES ORDER','INVOICE')
 	BEGIN
-		IF @dblQtyToProduce <> @dblMaxProduceQty
-			BEGIN
-				SET @dblMaxQtyToProduce=@dblMaxProduceQty
-				SET @ErrMsg = 'Maximum of ' + CONVERT(VARCHAR,@dblMaxProduceQty) + ' can be produced using the available inventory.'
-				RAISERROR(@ErrMsg,16,1)
-			END
+		--Check for Max produce qty using available inventory
+		SELECT	@dblMaxProduceQty = ISNULL(MIN(ISNULL(dblMaxProduceQty,0)),0) 
+		FROM	@tblInputItem 
+		WHERE	ISNULL(dblMaxProduceQty,0) > 0
+
+		IF @dblMaxProduceQty > 0
+		BEGIN
+			IF @dblQtyToProduce <> @dblMaxProduceQty
+				BEGIN
+					SET @dblMaxQtyToProduce=@dblMaxProduceQty
+					SET @ErrMsg = 'Maximum of ' + CONVERT(VARCHAR,@dblMaxProduceQty) + ' can be produced using the available inventory.'
+					RAISERROR(@ErrMsg,16,1)
+				END
+		END
 	END
 
 	BEGIN TRAN
@@ -753,10 +788,12 @@ BEGIN TRY
 			SET @dblRawItemRecipeCalculatedQty = NULL
 			SELECT	@intRawItemId = intItemId
 					,@dblRawItemRecipeCalculatedQty = dblCalculatedQuantity 
+					,@dblRequiredQty=dblRequiredQty
 			FROM	@tblInputItem 
 			WHERE	intRowNo = @intMinItem
 
-			SET @dblRequiredQty = @dblRawItemRecipeCalculatedQty * (@dblWOQty / @dblRecipeQty)
+			IF @strOrderType IN ('SALES ORDER','INVOICE')
+				SET @dblRequiredQty = @dblRawItemRecipeCalculatedQty * (@dblWOQty / @dblRecipeQty)
 
 			DELETE FROM @tblPickedLot WHERE dblQty <= 0
 
