@@ -217,7 +217,7 @@ BEGIN
 			WHERE intNetworkId = @intNetworkId
 		END
 
-	IF(@strNetworkType = 'PacPride')
+	IF(@strNetworkType = 'PacPride' AND ISNULL(@ysnPosted,0) = 0)
 	BEGIN
 
 		DECLARE @intMatchSellingHost INT = 0
