@@ -1,17 +1,12 @@
 GO
 IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'glactmst') RETURN
-
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuGLtblGLIjemstDifference')
-	DROP VIEW vyuGLtblGLIjemstDifference
-GO
-
 IF  (SELECT TOP 1 ysnLegacyIntegration FROM tblSMCompanyPreference WHERE ysnLegacyIntegration = 1) = 1
 
 BEGIN
 
 EXEC (
     '
-    CREATE VIEW [dbo].[vyuGLtblGLIjemstDifference] AS
+    ALTER VIEW [dbo].[vyuGLtblGLIjemstDifference] AS
      SELECT *
      FROM( 
            SELECT B.strJournalId,
