@@ -135,6 +135,25 @@ BEGIN
 	GOTO Post_Exit  
 END
 
+
+-- Check if lotted items have gross/net UOM and have gross qty and net qty when the items have lot weights required enabled in item setup.
+SET @iItemNo = NULL
+SELECT TOP 1 @iItemNo = i.strItemNo
+FROM tblICInventoryCount c
+	INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
+	INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+WHERE (cd.intWeightUOMId IS NULL OR (cd.dblWeightQty = 0 AND cd.dblNetQty = 0))
+	AND i.ysnLotWeightsRequired = 1
+	AND i.strLotTracking <> 'No'
+	AND c.intInventoryCountId = @intTransactionId
+
+IF @iItemNo IS NOT NULL
+BEGIN
+	EXEC uspICRaiseError 80190, @iItemNo
+	GOTO Post_Exit
+END
+
+SET @iItemNo = NULL
 -- Validate blank lot number for autocreate
 
 SELECT TOP 1 @iItemNo = i.strItemNo
