@@ -357,6 +357,61 @@ UNION ALL SELECT intTerminalControlNumberId = 748, strTerminalControlNumber = 'T
 
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NC', @TerminalControlNumbers = @TerminalNC
 
+-- OR Terminals
+DECLARE @TerminalOR AS TFTerminalControlNumbers
+
+INSERT INTO @TerminalOR(
+	intTerminalControlNumberId
+	, strTerminalControlNumber
+	, strName
+	, strAddress
+	, strCity
+	, dtmApprovedDate
+	, strZip
+	, intMasterId
+)
+SELECT intTerminalControlNumberId = 712, strTerminalControlNumber = 'T-56-NC-2000', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '6801 Freedom Dr', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214', intMasterId = 33712
+UNION ALL SELECT intTerminalControlNumberId = 713, strTerminalControlNumber = 'T-56-NC-2001', strName = 'CITGO - Charlotte', strAddress = '7600 Mount Holly Road', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214-', intMasterId = 33713
+UNION ALL SELECT intTerminalControlNumberId = 714, strTerminalControlNumber = 'T-56-NC-2002', strName = 'Marathon Oil Charlotte', strAddress = '8035 Mt. Holly Rd.', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28130', intMasterId = 33714
+UNION ALL SELECT intTerminalControlNumberId = 715, strTerminalControlNumber = 'T-56-NC-2003', strName = 'Eco-Energy', strAddress = '7720 Mr. Holly Road', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214', intMasterId = 33715
+UNION ALL SELECT intTerminalControlNumberId = 716, strTerminalControlNumber = 'T-56-NC-2004', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '502 Tom Sadler Rd.', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214', intMasterId = 33716
+UNION ALL SELECT intTerminalControlNumberId = 717, strTerminalControlNumber = 'T-56-NC-2005', strName = 'Motiva Enterprises LLC', strAddress = '6851 Freedom Dr.', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214', intMasterId = 33717
+UNION ALL SELECT intTerminalControlNumberId = 718, strTerminalControlNumber = 'T-56-NC-2006', strName = 'Magellan Terminals Holdings LP', strAddress = '7145 Mount Holly Rd.', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214', intMasterId = 33718
+UNION ALL SELECT intTerminalControlNumberId = 719, strTerminalControlNumber = 'T-56-NC-2007', strName = 'Motiva Enterprises LLC', strAddress = '410 Tom Sadler Rd.', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214', intMasterId = 33719
+UNION ALL SELECT intTerminalControlNumberId = 720, strTerminalControlNumber = 'T-56-NC-2008', strName = 'Marathon Charlotte (East)', strAddress = '7401 Old Mount Holly Road', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214-', intMasterId = 33720
+UNION ALL SELECT intTerminalControlNumberId = 721, strTerminalControlNumber = 'T-56-NC-2009', strName = 'Motiva Enterprises LLC', strAddress = '992 Shaw Mill Road', strCity = 'Fayetteville', dtmApprovedDate = NULL, strZip = '28311-', intMasterId = 33721
+UNION ALL SELECT intTerminalControlNumberId = 722, strTerminalControlNumber = 'T-56-NC-2011', strName = 'Magellan Terminals Holdings LP', strAddress = '7109 West Market Street', strCity = 'Greensboro', dtmApprovedDate = NULL, strZip = '27409', intMasterId = 33722
+UNION ALL SELECT intTerminalControlNumberId = 723, strTerminalControlNumber = 'T-56-NC-2013', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '2101 West Oak St.', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576', intMasterId = 33723
+UNION ALL SELECT intTerminalControlNumberId = 724, strTerminalControlNumber = 'T-56-NC-2014', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '6907 West Market Street', strCity = 'Greensboro', dtmApprovedDate = NULL, strZip = '27409-', intMasterId = 33724
+UNION ALL SELECT intTerminalControlNumberId = 725, strTerminalControlNumber = 'T-56-NC-2015', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '6376 Burnt Poplar Rd', strCity = 'Greensboro', dtmApprovedDate = NULL, strZip = '27409-', intMasterId = 33725
+UNION ALL SELECT intTerminalControlNumberId = 726, strTerminalControlNumber = 'T-56-NC-2018', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '2200 West Oak St.', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33726
+UNION ALL SELECT intTerminalControlNumberId = 727, strTerminalControlNumber = 'T-56-NC-2019', strName = 'Center Point Terminal - Greensboro', strAddress = '6900 West Market St', strCity = 'Greensboro', dtmApprovedDate = NULL, strZip = '27409-', intMasterId = 33727
+UNION ALL SELECT intTerminalControlNumberId = 728, strTerminalControlNumber = 'T-56-NC-2020', strName = 'Magellan Terminals Holdings LP', strAddress = '115 Chimney Rock Road', strCity = 'Greensboro', dtmApprovedDate = NULL, strZip = '27409-9661', intMasterId = 33728
+UNION ALL SELECT intTerminalControlNumberId = 729, strTerminalControlNumber = 'T-56-NC-2021', strName = 'Motiva Enterprises LLC', strAddress = '101 S. Chimney Rock Rd.', strCity = 'Greensboro', dtmApprovedDate = NULL, strZip = '27409', intMasterId = 33729
+UNION ALL SELECT intTerminalControlNumberId = 730, strTerminalControlNumber = 'T-56-NC-2022', strName = 'TransMontaigne - Greensboro', strAddress = '6801 West Market Street', strCity = 'Greensboro', dtmApprovedDate = NULL, strZip = '27409-', intMasterId = 33730
+UNION ALL SELECT intTerminalControlNumberId = 731, strTerminalControlNumber = 'T-56-NC-2023', strName = 'TransMontaigne - Charlotte/Paw Creek', strAddress = '7615 Old Mount Holly Road', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214-', intMasterId = 33731
+UNION ALL SELECT intTerminalControlNumberId = 732, strTerminalControlNumber = 'T-56-NC-2024', strName = 'Magellan Terminals Holdings LP', strAddress = '7924 Mt. Holly Rd.', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214', intMasterId = 33732
+UNION ALL SELECT intTerminalControlNumberId = 733, strTerminalControlNumber = 'T-56-NC-2025', strName = 'Arc Terminals Holdings LLC', strAddress = '2999 W. Oak St.', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33733
+UNION ALL SELECT intTerminalControlNumberId = 734, strTerminalControlNumber = 'T-56-NC-2026', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '7325 Old Mount Holly Rd.', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28214', intMasterId = 33734
+UNION ALL SELECT intTerminalControlNumberId = 735, strTerminalControlNumber = 'T-56-NC-2027', strName = 'Motiva Enterprises LLC', strAddress = '2232 Ten-Ten.  Road', strCity = 'Apex', dtmApprovedDate = NULL, strZip = '27502-', intMasterId = 33735
+UNION ALL SELECT intTerminalControlNumberId = 736, strTerminalControlNumber = 'T-56-NC-2028', strName = 'TransMontaigne - Selma - N', strAddress = '2600 W. Oak St. (SSR 1929)', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33736
+UNION ALL SELECT intTerminalControlNumberId = 737, strTerminalControlNumber = 'T-56-NC-2029', strName = 'Marathon Selma', strAddress = '3707 Buffalo Road', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33737
+UNION ALL SELECT intTerminalControlNumberId = 738, strTerminalControlNumber = 'T-56-NC-2030', strName = 'CITGO - Selma', strAddress = '4095 Buffalo Rd', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33738
+UNION ALL SELECT intTerminalControlNumberId = 739, strTerminalControlNumber = 'T-56-NC-2031', strName = 'Marathon Selma', strAddress = '2555 West Oak Street', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33739
+UNION ALL SELECT intTerminalControlNumberId = 740, strTerminalControlNumber = 'T-56-NC-2032', strName = 'Aircraft Service International, Inc.', strAddress = '6502 Old Dowd Rd.', strCity = 'Charlotte', dtmApprovedDate = NULL, strZip = '28219', intMasterId = 33740
+UNION ALL SELECT intTerminalControlNumberId = 741, strTerminalControlNumber = 'T-56-NC-2033', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '4383 Buffalo Rd.', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33741
+UNION ALL SELECT intTerminalControlNumberId = 742, strTerminalControlNumber = 'T-56-NC-2034', strName = 'Kinder Morgan Southeast Terminals LLC', strAddress = '4086 Buffalo Road', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33742
+UNION ALL SELECT intTerminalControlNumberId = 743, strTerminalControlNumber = 'T-56-NC-2036', strName = 'Magellan Terminals Holdings LP', strAddress = '4414 Buffalo Road', strCity = 'Selma', dtmApprovedDate = NULL, strZip = '27576-', intMasterId = 33743
+UNION ALL SELECT intTerminalControlNumberId = 744, strTerminalControlNumber = 'T-56-NC-2037', strName = 'Buckeye Terminals, LLC - Wilmington', strAddress = '1312 S Front St.', strCity = 'Wilmington', dtmApprovedDate = NULL, strZip = '28401-', intMasterId = 33744
+UNION ALL SELECT intTerminalControlNumberId = 745, strTerminalControlNumber = 'T-56-NC-2038', strName = 'Piedmont Aviation Services, Inc.', strAddress = '6427 Bryan Blvd.', strCity = 'Greensboro', dtmApprovedDate = NULL, strZip = '27409', intMasterId = 33745
+UNION ALL SELECT intTerminalControlNumberId = 746, strTerminalControlNumber = 'T-56-NC-2043', strName = 'Apex Oil Company', strAddress = '3314 River Road', strCity = 'Wilmington', dtmApprovedDate = NULL, strZip = '28403-', intMasterId = 33746
+UNION ALL SELECT intTerminalControlNumberId = 747, strTerminalControlNumber = 'T-56-NC-2044', strName = 'Kinder Morgan Terminals Wilmington LLC', strAddress = '1710 Woodbine St.', strCity = 'Wilmington', dtmApprovedDate = NULL, strZip = '28402', intMasterId = 33747
+UNION ALL SELECT intTerminalControlNumberId = 748, strTerminalControlNumber = 'T-56-NC-2045', strName = 'Raleigh-Durham Airport Authority', strAddress = '2800 W. Terminal Blvd.', strCity = 'Morrisville', dtmApprovedDate = NULL, strZip = '27560', intMasterId = 33748
+
+EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'OR', @TerminalControlNumbers = @TerminalOR
+
+
+
 GO
 
 
