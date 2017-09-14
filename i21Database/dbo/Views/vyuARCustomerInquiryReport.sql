@@ -63,7 +63,7 @@ OUTER APPLY (
 	  AND intEntityCustomerId = CAR.intEntityCustomerId
 ) BUDGETMONTH
 OUTER APPLY (
-	SELECT dblAmountPastDue = SUM(dblBudgetAmount) 
+	SELECT dblAmountPastDue = SUM(dblBudgetAmount) - SUM(dblAmountPaid) 
 	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
 	WHERE intEntityCustomerId = CAR.intEntityCustomerId 
 	  AND dtmBudgetDate < GETDATE()
