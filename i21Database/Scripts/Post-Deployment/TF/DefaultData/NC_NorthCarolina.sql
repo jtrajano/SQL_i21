@@ -162,5 +162,6 @@ where intTaxAuthorityId = @TaxAuthorityId
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
-
 END
+
+GO
