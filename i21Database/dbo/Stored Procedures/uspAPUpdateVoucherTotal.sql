@@ -59,6 +59,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
 		,A.dblSubtotal = CAST((DetailTotal.dblTotal)  AS DECIMAL(18,2)) 
 		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
+		,A.dblTax = DetailTotal.dblTotalTax
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (

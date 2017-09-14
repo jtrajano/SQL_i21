@@ -1,11 +1,30 @@
-﻿CREATE TYPE [dbo].[VoucherDetailReceipt] AS TABLE
+﻿/**
+	NOTES:
+	[intInventoryReceiptType]
+	1 = Direct
+	2 = Purchase Contract
+	3 = Purchase Order
+	[dblQtyReceived]
+	Quantity UOM should always be as the receipt qty UOM
+**/
+CREATE TYPE [dbo].[VoucherDetailReceipt] AS TABLE
 (
+	[intInventoryReceiptType]		INT				NOT NULL,
 	[intInventoryReceiptItemId]		INT				NOT NULL,
     [dblQtyReceived]				DECIMAL(18, 6)	NULL, 
     [dblCost]						DECIMAL(18, 6)	NULL, 
     [intTaxGroupId]					INT NULL,
 	PRIMARY KEY CLUSTERED ([intInventoryReceiptItemId] ASC) 
 )
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+	@value = N'Inventory Receipt Type',
+	@level0type = N'SCHEMA',
+	@level0name = N'dbo',
+	@level1type = N'TYPE',
+	@level1name = N'VoucherDetailReceipt',
+	@level2type = N'COLUMN',
+	@level2name = N'intInventoryReceiptType'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
 	@value = N'Inventory Receipt Item Id.',
