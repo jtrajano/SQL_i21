@@ -410,7 +410,46 @@ UNION ALL SELECT intTerminalControlNumberId = 748, strTerminalControlNumber = 'T
 
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'OR', @TerminalControlNumbers = @TerminalOR
 
+-- WA Terminals
+DECLARE @TerminalWA AS TFTerminalControlNumbers
 
+INSERT INTO @TerminalWA(
+	intTerminalControlNumberId
+	, strTerminalControlNumber
+	, strName
+	, strAddress
+	, strCity
+	, dtmApprovedDate
+	, strZip
+	, intMasterId
+)
+SELECT intTerminalControlNumberId = 349, strTerminalControlNumber = 'T-33-WA-0001', strName = 'Petrogas', strAddress = '4100 Unick Road', strCity = 'Ferndale', dtmApprovedDate = NULL, strZip = '98248', intMasterId = 47349
+UNION ALL SELECT intTerminalControlNumberId = 350, strTerminalControlNumber = 'T-91-WA-4400', strName = 'Shell Oil Products US', strAddress = 'Marches Point Five Miles', strCity = 'Anacortes', dtmApprovedDate = NULL, strZip = '98221-', intMasterId = 47350
+UNION ALL SELECT intTerminalControlNumberId = 351, strTerminalControlNumber = 'T-91-WA-4401', strName = 'Phillips 66 PL - Moses Lake', strAddress = '3 miles north of Moses Lake', strCity = 'Moses Lake', dtmApprovedDate = NULL, strZip = '98837-', intMasterId = 47351
+UNION ALL SELECT intTerminalControlNumberId = 352, strTerminalControlNumber = 'T-91-WA-4402', strName = 'Tesoro Logistics Operations LLC', strAddress = '3000 Sacajawea Park Road', strCity = 'Pasco', dtmApprovedDate = NULL, strZip = '99301-', intMasterId = 47352
+UNION ALL SELECT intTerminalControlNumberId = 353, strTerminalControlNumber = 'T-91-WA-4404', strName = 'Phillips 66 PL - Renton', strAddress = '2423 Lind Avenue Southwest', strCity = 'Renton', dtmApprovedDate = NULL, strZip = '98055-', intMasterId = 47353
+UNION ALL SELECT intTerminalControlNumberId = 354, strTerminalControlNumber = 'T-91-WA-4406', strName = 'Kinder Morgan Liquids Terminals LLC', strAddress = '2720 13th Avenue SW', strCity = 'Seattle', dtmApprovedDate = NULL, strZip = '98134-', intMasterId = 47354
+UNION ALL SELECT intTerminalControlNumberId = 355, strTerminalControlNumber = 'T-91-WA-4408', strName = 'Shell Oil Products US', strAddress = '2555 13th Ave. S W', strCity = 'Seattle', dtmApprovedDate = NULL, strZip = '98134-', intMasterId = 47355
+UNION ALL SELECT intTerminalControlNumberId = 356, strTerminalControlNumber = 'T-91-WA-4410', strName = 'Phillips 66 PL - Spokane', strAddress = '6317 East Sharp Avenue', strCity = 'Spokane', dtmApprovedDate = NULL, strZip = '99206-', intMasterId = 47356
+UNION ALL SELECT intTerminalControlNumberId = 357, strTerminalControlNumber = 'T-91-WA-4411', strName = 'ExxonMobil Oil Corp.', strAddress = '6311 East Sharp Avenue', strCity = 'Spokane', dtmApprovedDate = NULL, strZip = '99211-', intMasterId = 47357
+UNION ALL SELECT intTerminalControlNumberId = 358, strTerminalControlNumber = 'T-91-WA-4412', strName = 'Holly Energy Partners - Operating LP', strAddress = '3225 East Lincoln Road', strCity = 'Spokane', dtmApprovedDate = NULL, strZip = '99217-', intMasterId = 47358
+UNION ALL SELECT intTerminalControlNumberId = 359, strTerminalControlNumber = 'T-91-WA-4413', strName = 'Phillips 66 PL - Tacoma', strAddress = '520 E D Street', strCity = 'Tacoma', dtmApprovedDate = NULL, strZip = '98421-', intMasterId = 47359
+UNION ALL SELECT intTerminalControlNumberId = 360, strTerminalControlNumber = 'T-91-WA-4414', strName = 'Targa Sound Terminal', strAddress = '2628 Marine View Drive', strCity = 'Tacoma', dtmApprovedDate = NULL, strZip = '98422', intMasterId = 47360
+UNION ALL SELECT intTerminalControlNumberId = 361, strTerminalControlNumber = 'T-91-WA-4415', strName = 'Shore Terminals LLC - Tacoma', strAddress = '250 East D Street', strCity = 'Tacoma', dtmApprovedDate = NULL, strZip = '98421', intMasterId = 47361
+UNION ALL SELECT intTerminalControlNumberId = 362, strTerminalControlNumber = 'T-91-WA-4417', strName = 'NuStar Terminals Operations Partnership L. P. - Vancouver', strAddress = '5420 Fruit Valley Road', strCity = 'Vancouver', dtmApprovedDate = NULL, strZip = '98660-', intMasterId = 47362
+UNION ALL SELECT intTerminalControlNumberId = 363, strTerminalControlNumber = 'T-91-WA-4418', strName = 'BP West Coast Products LLC', strAddress = '4519 Grandview', strCity = 'Blaine', dtmApprovedDate = NULL, strZip = '98231-', intMasterId = 47363
+UNION ALL SELECT intTerminalControlNumberId = 364, strTerminalControlNumber = 'T-91-WA-4419', strName = 'Tesoro Logistics Operations LLC', strAddress = '2211 West 26th Street', strCity = 'Vancouver', dtmApprovedDate = NULL, strZip = '98660-', intMasterId = 47364
+UNION ALL SELECT intTerminalControlNumberId = 365, strTerminalControlNumber = 'T-91-WA-4420', strName = 'Tidewater Terminal - Snake River', strAddress = 'Tank Farm Road', strCity = 'Pasco', dtmApprovedDate = NULL, strZip = '99301-', intMasterId = 47365
+UNION ALL SELECT intTerminalControlNumberId = 366, strTerminalControlNumber = 'T-91-WA-4421', strName = 'U.S. Oil & Refining Co.', strAddress = '3001 Marshall Ave', strCity = 'Tacoma', dtmApprovedDate = NULL, strZip = '98421-', intMasterId = 47366
+UNION ALL SELECT intTerminalControlNumberId = 367, strTerminalControlNumber = 'T-91-WA-4425', strName = 'BP West Coast Products LLC', strAddress = '1652 SW Lander St', strCity = 'Seattle', dtmApprovedDate = NULL, strZip = '95124-', intMasterId = 47367
+UNION ALL SELECT intTerminalControlNumberId = 368, strTerminalControlNumber = 'T-91-WA-4427', strName = 'Phillips 66 Co - Ferndale', strAddress = '3901 Unic Rd.', strCity = 'Ferndale', dtmApprovedDate = NULL, strZip = '98248-', intMasterId = 47368
+UNION ALL SELECT intTerminalControlNumberId = 369, strTerminalControlNumber = 'T-91-WA-4428', strName = 'Tesoro Logistics Operations LLC', strAddress = 'West March Point Road', strCity = 'Anacortes', dtmApprovedDate = NULL, strZip = '98221', intMasterId = 47369
+UNION ALL SELECT intTerminalControlNumberId = 370, strTerminalControlNumber = 'T-91-WA-4430', strName = 'NuStar Terminal Services, Inc - Vancouver', strAddress = 'Port of Vancouver Terminal #2', strCity = 'Vancouver', dtmApprovedDate = NULL, strZip = '98666', intMasterId = 47370
+UNION ALL SELECT intTerminalControlNumberId = 371, strTerminalControlNumber = 'T-91-WA-4431', strName = 'Swissport Fueling, Inc.', strAddress = '2350 South 190th St.', strCity = 'Seattle', dtmApprovedDate = NULL, strZip = '98188', intMasterId = 47371
+UNION ALL SELECT intTerminalControlNumberId = 372, strTerminalControlNumber = 'T-91-WA-4433', strName = 'Imperium Grays Harbor', strAddress = '3122 Port Industrial road ', strCity = 'Hoquian ', dtmApprovedDate = NULL, strZip = '98550', intMasterId = 47372
+UNION ALL SELECT intTerminalControlNumberId = 373, strTerminalControlNumber = 'T-91-WA-4434', strName = 'BNSF - Pasco', strAddress = '3490 N Railroad Avenue', strCity = 'Pasco', dtmApprovedDate = NULL, strZip = '99301', intMasterId = 47373
+
+EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'WA', @TerminalControlNumbers = @TerminalWA
 
 GO
 
