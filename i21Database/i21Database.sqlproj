@@ -5659,6 +5659,7 @@
     <Build Include="dbo\Views\vyuGLPTDrillDownDifference.sql" />
     <Build Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGenerateContractNumber.sql" />
+    <Build Include="dbo\Tables\tblRKM2MGrainBasis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
