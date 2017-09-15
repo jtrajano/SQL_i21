@@ -1,4 +1,4 @@
-﻿DECLARE @TaxAuthorityCode NVARCHAR(10) = 'LA'
+﻿DECLARE @TaxAuthorityCode NVARCHAR(10) = 'WA'
 	, @TaxAuthorityId INT
 
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
