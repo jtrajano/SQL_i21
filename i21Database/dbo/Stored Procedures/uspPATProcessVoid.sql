@@ -33,7 +33,7 @@ BEGIN TRANSACTION
 
 		INSERT INTO @GLEntries(
 				[dtmDate], 
-				[strBatchID], 
+				[strBatchId], 
 				[intAccountId],
 				[dblDebit],
 				[dblCredit],

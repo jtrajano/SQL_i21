@@ -61,7 +61,7 @@ SET @batchIdUsed = @batchId;
 	BEGIN
 		INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],

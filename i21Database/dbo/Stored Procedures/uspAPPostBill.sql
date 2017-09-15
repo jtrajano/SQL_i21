@@ -486,8 +486,72 @@ BEGIN
 	INSERT INTO @Ids
 	SELECT intBillId FROM #tmpPostBillData
 
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
+	INSERT INTO @GLEntries (
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId				
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate		
+	)
+	SELECT 
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId				
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate	
+	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 END
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT

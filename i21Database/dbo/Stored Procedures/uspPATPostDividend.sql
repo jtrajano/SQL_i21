@@ -41,7 +41,7 @@ IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],

@@ -95,7 +95,7 @@ BEGIN
 	------------------------CREATE GL ENTRIES---------------------
 		INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
@@ -285,7 +285,7 @@ BEGIN
 	------------------------CREATE GL ENTRIES---------------------
 		INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
