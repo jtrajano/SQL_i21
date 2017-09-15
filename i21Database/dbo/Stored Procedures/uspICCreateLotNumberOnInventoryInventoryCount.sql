@@ -43,6 +43,7 @@ BEGIN
 			,[dblWeight]
 			,[dblGrossWeight]
 			,[dblWeightPerQty]
+			,[dtmExpiryDate]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -61,6 +62,7 @@ BEGIN
 			,[dblWeightQty]             = Detail.dblWeightQty
 			,[dblGrossWeight]           = Detail.dblWeightQty
 			,[dblWeightPerQty]          = Detail.dblWeightQty / Detail.dblPhysicalCount
+			,[dtmExpiryDate]			= dbo.fnICCalculateExpiryDate(Detail.intItemId, Header.dtmCountDate, Header.dtmCountDate)
 
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId
