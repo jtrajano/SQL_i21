@@ -53,8 +53,71 @@ BEGIN
 	FROM	tblAPBill b 
 	WHERE	b.strBillId = @strBillId
 
-	INSERT INTO @billGLEntries
-	SELECT	* 
+	INSERT INTO @billGLEntries (
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId				
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate		
+	)
+	SELECT	
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId				
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate			 
 	FROM	dbo.[fnAPCreateBillGLEntries](
 				@intBillId
 				, @intEntityUserSecurityId
