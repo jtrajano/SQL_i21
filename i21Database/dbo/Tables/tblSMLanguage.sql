@@ -5,5 +5,6 @@
 	[intReportLabelId]			INT  NULL,
 	[ysnDefault]				BIT  NULL,
     [intConcurrencyId]			INT	 NOT NULL DEFAULT (1), 
-    CONSTRAINT [AK_tblSMLanguage_strLanguage_intReportLabelId] UNIQUE ([strLanguage], [intReportLabelId])
+    CONSTRAINT [AK_tblSMLanguage_strLanguage_intReportLabelId] UNIQUE ([strLanguage], [intReportLabelId]), 
+    CONSTRAINT [FK_tblSMLanguage_ToTable] FOREIGN KEY ([intReportLabelId]) REFERENCES [tblSMReportLabels]([intReportLabelsId]) 
 )
