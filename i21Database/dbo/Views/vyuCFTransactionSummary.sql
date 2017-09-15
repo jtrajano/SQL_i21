@@ -25,7 +25,7 @@ ELSE cfCard.strName
 END) AS strName
 
 ,cfTransaction.strTransactionType
-,cfTransaction.dtmTransactionDate
+,DATEADD(dd, DATEDIFF(dd, 0, cfTransaction.dtmTransactionDate ), 0) as dtmTransactionDate
 ,cfTransaction.dtmPostedDate
 ,cfTransaction.intTransactionId
 
