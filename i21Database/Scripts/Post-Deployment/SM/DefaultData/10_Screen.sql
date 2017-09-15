@@ -445,5 +445,14 @@ GO
 	BEGIN
 		UPDATE tblSMScreen SET strScreenName = N'File Operation' WHERE strModule='Integration' and strNamespace = 'Integration.view.CopyMoveDeleteFile'
 	END
-
 GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.Consolidate')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Consolidate GL Entries', N'GeneralLedger.view.Consolidate', N'GeneralLedger', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Consolidate GL Entries', strModule = N'General Ledger' WHERE strNamespace = 'GeneralLedger.view.Consolidate'
+GO
+	PRINT N'END INSERT DEFAULT SCREEN'
+GO
+
