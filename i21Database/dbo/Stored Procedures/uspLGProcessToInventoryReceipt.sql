@@ -124,7 +124,7 @@ BEGIN TRY
 			,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 			,dblExchangeRate = 1
 			,intLotId = NULL
-			,intSubLocationId = ISNULL(CD.intSubLocationId, LD.intPSubLocationId) --
+			,intSubLocationId = ISNULL(CD.intSubLocationId, LW.intSubLocationId) --
 			,intStorageLocationId = ISNULL(CD.intStorageLocationId, LW.intStorageLocationId) --
 			,ysnIsStorage = 0
 			,intSourceId = LD.intLoadDetailId --
