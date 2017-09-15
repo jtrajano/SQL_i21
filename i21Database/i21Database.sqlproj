@@ -5620,8 +5620,6 @@
     <Build Include="dbo\Stored Procedures\uspGRSettlementReport.sql" />
     <Build Include="dbo\Views\vyuHDTicketCommentLink.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_PortalMenus.sql" />
-    <Build Include="dbo\Views\vyuICGetItemSubLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetItemStorageLocation.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
     <Build Include="dbo\Views\vyuCFARInvoiceRemittance.sql" />
     <Build Include="dbo\Views\vyuCFAccountTerm.sql" />

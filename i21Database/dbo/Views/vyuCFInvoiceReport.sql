@@ -484,10 +484,10 @@ FROM   dbo.vyuCFInvoice AS arInv
                                  ON iemEnt.intEntityId = 
                                     icfNetwork.intCustomerId 
                           LEFT JOIN tblARCustomer iarCus 
-                                 ON iarCus.intEntityCustomerId = 
+                                 ON iarCus.intEntityId = 
                                     iemEnt.intEntityId 
                           LEFT JOIN tblCFAccount cfAcct 
-                                 ON iarCus.intEntityCustomerId = 
+                                 ON iarCus.intEntityId = 
                                     cfAcct.intCustomerId 
                           LEFT JOIN tblCFInvoiceCycle cfInvCycle 
                                  ON cfAcct.intInvoiceCycle = 

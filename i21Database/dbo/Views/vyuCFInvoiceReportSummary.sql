@@ -206,7 +206,7 @@ FROM   dbo.vyuCFInvoice AS arInv
                                  ON iemEnt.intEntityId = 
                                     icfNetwork.intCustomerId 
                           INNER JOIN tblARCustomer iarCus 
-                                  ON iarCus.intEntityCustomerId = 
+                                  ON iarCus.intEntityId = 
                                      iemEnt.intEntityId 
                           LEFT JOIN tblEMEntityLocation arBillTo 
                                  ON arBillTo.intEntityLocationId = 
