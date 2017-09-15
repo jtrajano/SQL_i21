@@ -31,7 +31,9 @@ BEGIN TRY
 			@intTransactionId			INT,
 			@intApproverId				INT,
 			@intCompanyLocationId		INT,
-			@ysnSlice					BIT
+			@ysnSlice					BIT,
+			@dblLotsFixed				NUMERIC(18,6),
+			@dblNoOfLots				NUMERIC(18,6)
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber
@@ -110,13 +112,29 @@ BEGIN TRY
 				@intItemUOMId		=	intItemUOMId,
 				@intContractStatusId=	intContractStatusId,
 				@intCompanyLocationId = intCompanyLocationId,
-				@ysnSlice			=  ysnSlice
+				@ysnSlice			=	ysnSlice,
+				@dblNoOfLots		=	dblNoOfLots
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
 		IF ISNULL(@intNetWeightUOMId,0) > 0 AND @dblNetWeight IS NULL
 		BEGIN
 			UPDATE tblCTContractDetail SET dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) WHERE intContractDetailId = @intContractDetailId
+		END
+
+		IF EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+		BEGIN
+			SELECT @dblLotsFixed =  dblLotsFixed	FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
+			BEGIN
+				UPDATE	tblCTContractDetail
+				SET		dblFutures			=	NULL,
+						dblCashPrice		=	NULL,
+						dblTotalCost		=	NULL,
+						intPricingTypeId	=	2
+				WHERE	intContractDetailId	=	@intContractDetailId
+			END
+
 		END
 
 		EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence'
