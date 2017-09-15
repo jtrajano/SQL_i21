@@ -230,6 +230,7 @@
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
+:r "..\dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql"
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
 
