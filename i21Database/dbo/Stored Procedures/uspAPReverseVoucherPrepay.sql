@@ -47,8 +47,76 @@ BEGIN
 	INSERT INTO @ids
 	SELECT @billId
 
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(@ids, 'Bill', DEFAULT, @userId, @batchId)
+	
+	INSERT 
+	INTO @GLEntries  
+		(dtmDate ,
+	    strBatchId ,
+	    intAccountId ,
+	    dblDebit ,
+	    dblCredit ,
+	    dblDebitUnit ,
+	    dblCreditUnit ,
+	    strDescription ,
+	    strCode ,
+	    strReference ,
+	    intCurrencyId ,
+	    dblExchangeRate ,
+	    dtmDateEntered ,
+	    dtmTransactionDate ,
+	    strJournalLineDescription ,
+	    intJournalLineNo ,
+	    ysnIsUnposted ,
+	    intUserId ,
+	    intEntityId ,
+	    strTransactionId ,
+	    intTransactionId ,
+	    strTransactionType ,
+	    strTransactionForm ,
+	    strModuleName ,
+	    intConcurrencyId ,
+	    dblDebitForeign ,
+	    dblDebitReport ,
+	    dblCreditForeign ,
+	    dblCreditReport ,
+	    dblReportingRate ,
+	    dblForeignRate ,
+	    strRateType)
+		
+	SELECT     
+		dtmDate ,
+	    strBatchId ,
+	    intAccountId ,
+	    dblDebit ,
+	    dblCredit ,
+	    dblDebitUnit ,
+	    dblCreditUnit ,
+	    strDescription ,
+	    strCode ,
+	    strReference ,
+	    intCurrencyId ,
+	    dblExchangeRate ,
+	    dtmDateEntered ,
+	    dtmTransactionDate ,
+	    strJournalLineDescription ,
+	    intJournalLineNo ,
+	    ysnIsUnposted ,
+	    intUserId ,
+	    intEntityId ,
+	    strTransactionId ,
+	    intTransactionId ,
+	    strTransactionType ,
+	    strTransactionForm ,
+	    strModuleName ,
+	    intConcurrencyId ,
+	    dblDebitForeign ,
+	    dblDebitReport ,
+	    dblCreditForeign ,
+	    dblCreditReport ,
+	    dblReportingRate ,
+	    dblForeignRate ,
+	    strRateType 
+	FROM dbo.fnAPReverseGLEntries(@ids, 'Bill', DEFAULT, @userId, @batchId)
 	UPDATE glEntries
 		SET glEntries.intTransactionId = @createdReversal,
 		glEntries.strTransactionId = @newBillId,
