@@ -399,10 +399,10 @@
     <None Include="Scripts\IC\uspICDCUomMigrationPt.sql" />
     <None Include="dbo\Stored Procedures\uspARImportCustomerSpecialPrice.sql" />
     <None Include="dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql" />
-    <None Include="dbo\Stored Procedures\uspTRImportOriginHistory.sql" />	
+    <None Include="dbo\Stored Procedures\uspTRImportOriginHistory.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportTruck.sql" />
     <None Include="dbo\Stored Procedures\uspMFImportRecipe.sql" />
-    <None Include="dbo\Stored Procedures\uspTRImportSupplyPoint.sql" />	
+    <None Include="dbo\Stored Procedures\uspTRImportSupplyPoint.sql" />
     <None Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPointRackPriceEquation.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPointProductSearch.sql" />
@@ -416,5 +416,8 @@
     <None Include="Scripts\GL\1b_FlagCOACrossReferenceAccountsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
     <None Include="dbo\Stored Procedures\uspEMImportCustomerEFTInfo.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportShipTo.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportStorageType.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportWeightGrades.sql" />
   </ItemGroup>
 </Project>
