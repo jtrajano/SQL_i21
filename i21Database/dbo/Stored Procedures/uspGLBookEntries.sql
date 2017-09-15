@@ -38,6 +38,8 @@ BEGIN
 			,[strDescription]
 			,[strCode]
 			,[strReference]
+			,[strDocument]
+			,[strComments]
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
@@ -72,6 +74,8 @@ BEGIN
 			,[strDescription]
 			,[strCode]
 			,[strReference]
+			,[strDocument]
+			,[strComments]
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,dtmDateEntered
