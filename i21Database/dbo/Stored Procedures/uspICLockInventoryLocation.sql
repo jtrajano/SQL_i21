@@ -1,18 +1,4 @@
-﻿/**
-Lock Type
-1 - Item Location
-2 - Lot
-3 - Storage Location
-4 - Sub Location
-
-Status
-1 - Open
-2 - Count Sheet Printed
-3 - Locked
-4 - Closed
-**/
-
-CREATE PROCEDURE [dbo].[uspICLockInventoryLocation] (@intLockType INT = 1, @intTransactionId INT = 1, @ysnLocked BIT = 1, @intSecurityUserId INT = NULL, @ysnPosting BIT = 0)
+﻿CREATE PROCEDURE [dbo].[uspICLockInventoryLocation] (@intLockType INT = 1, @intTransactionId INT = 1, @ysnLocked BIT = 1, @intSecurityUserId INT = NULL, @ysnPosting BIT = 0)
 AS
 BEGIN
 
@@ -31,56 +17,59 @@ BEGIN
 	SET @ysnLocked = 0
 END
 
-IF @intLockType = 2
+-- Lock Lots
+UPDATE l
+SET l.ysnLockedInventory = @ysnLocked
+FROM tblICLot l
+	INNER JOIN tblICInventoryCountDetail cd ON cd.intLotId = l.intLotId
+WHERE cd.intInventoryCountId = @intTransactionId
+
+-- Lock Non-Lotted Items by Company Location
+UPDATE il
+SET il.ysnLockedInventory = @ysnLocked
+FROM tblICItemLocation il
+	INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = cd.intInventoryCountId
+		AND cd.intItemLocationId = il.intItemLocationId
+WHERE cd.intInventoryCountId = @intTransactionId
+	AND cd.intSubLocationId IS NULL
+	AND cd.intStorageLocationId IS NULL
+	AND cd.intItemLocationId IS NOT NULL
+	AND cd.intLotId IS NULL
+
+-- Lock Non-lotted items by Sub Location
+IF @ysnLocked = 1
 BEGIN
-    UPDATE l
-	SET l.ysnLockedInventory = @ysnLocked
-    FROM tblICLot l
-		INNER JOIN tblICInventoryCountDetail cd ON cd.intLotId = l.intLotId
-    WHERE cd.intInventoryCountId = @intTransactionId
-END
-ELSE IF @intLockType = 4
-BEGIN
-	IF @ysnLocked = 1
-	BEGIN
-		INSERT INTO tblICLockedSubLocation(intTransactionId, strTransactionId, intSubLocationId, dtmDateCreated, intUserSecurityId)
-		SELECT intInventoryCountId, strCountNo, intSubLocationId, GETDATE(), @intSecurityUserId
-		FROM tblICInventoryCount
-		WHERE intInventoryCountId = @intTransactionId
-			AND intSubLocationId IS NOT NULL
-	END
-	ELSE
-	BEGIN
-		DELETE ll
-		FROM tblICLockedSubLocation ll
-		WHERE ll.intTransactionId = @intTransactionId
-	END
-END
-ELSE IF @intLockType = 3
-BEGIN
-	IF @ysnLocked = 1
-	BEGIN
-		INSERT INTO tblICLockedStorageLocation(intTransactionId, strTransactionId, intStorageLocationId, dtmDateCreated, intUserSecurityId)
-		SELECT intInventoryCountId, strCountNo, intStorageLocationId, GETDATE(), @intSecurityUserId
-		FROM tblICInventoryCount
-		WHERE intInventoryCountId = @intTransactionId
-			AND intStorageLocationId IS NOT NULL
-	END
-	ELSE
-	BEGIN
-		DELETE ll
-		FROM tblICLockedStorageLocation ll
-		WHERE ll.intTransactionId = @intTransactionId
-	END
+	INSERT INTO tblICLockedSubLocation(intTransactionId, strTransactionId, intSubLocationId, dtmDateCreated, intUserSecurityId)
+	SELECT c.intInventoryCountId, cd.strCountLine, cd.intSubLocationId, GETDATE(), @intSecurityUserId
+	FROM tblICInventoryCount c
+		INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
+	WHERE c.intInventoryCountId = @intTransactionId
+		AND (cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL)
+		AND cd.intLotId IS NULL
 END
 ELSE
 BEGIN
-	UPDATE il SET il.ysnLockedInventory = @ysnLocked
-	FROM tblICItemLocation il
-		INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
-		INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
-			AND il.intItemId = icd.intItemId
-    WHERE ic.intInventoryCountId = @intTransactionId
+	DELETE ll
+	FROM tblICLockedSubLocation ll
+	WHERE ll.intTransactionId = @intTransactionId
+END
+
+-- Lock Non-lotted items by Storage Location
+IF @ysnLocked = 1
+BEGIN
+	INSERT INTO tblICLockedStorageLocation(intTransactionId, strTransactionId, intStorageLocationId, dtmDateCreated, intUserSecurityId)
+	SELECT c.intInventoryCountId, cd.strCountLine, cd.intStorageLocationId, GETDATE(), @intSecurityUserId
+	FROM tblICInventoryCount c
+		INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
+	WHERE c.intInventoryCountId = @intTransactionId
+		AND cd.intStorageLocationId IS NOT NULL
+		AND cd.intLotId IS NULL
+END
+ELSE
+BEGIN
+	DELETE ll
+	FROM tblICLockedStorageLocation ll
+	WHERE ll.intTransactionId = @intTransactionId
 END
 
 END
