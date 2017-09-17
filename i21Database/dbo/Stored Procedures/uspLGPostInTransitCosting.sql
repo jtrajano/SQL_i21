@@ -21,6 +21,7 @@ BEGIN TRY
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 	DECLARE @ysnAllowBlankGLEntries AS BIT = 1
 	DECLARE @dummyGLEntries AS RecapTableType
+	DECLARE @intSalesContractId INT
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
@@ -94,7 +95,7 @@ BEGIN TRY
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
-		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CASE WHEN L.intPurchaseSale = 3 THEN 1 ELSE L.intFreightTermId END
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		WHERE L.intLoadId = @intLoadId
 		GROUP BY LD.intItemId
@@ -171,7 +172,7 @@ BEGIN TRY
 				,@ysnPost
 		END
 
-	IF @strFOBPoint = 'Destination'
+	IF @intPurchaseSale = 3
 	BEGIN
 		DECLARE @ItemsForPost AS ItemCostingTableType
 		DECLARE @StorageItemsForPost AS ItemCostingTableType
@@ -235,7 +236,7 @@ BEGIN TRY
 			,intTransactionDetailId = LoadDetail.intLoadDetailId
 			,strTransactionId = LOAD.strLoadNumber
 			,intTransactionTypeId = @INVENTORY_SHIPMENT_TYPE
-			,intLotId = Lot.intLotId
+			,intLotId = ISNULL(Lot.intLotId,0)
 			,intSubLocationId = Lot.intSubLocationId --, DetailLot.intSubLocationId)
 			,intStorageLocationId = Lot.intStorageLocationId --, DetailLot.intStorageLocationId) 
 		FROM tblLGLoad LOAD --Header 
@@ -247,94 +248,94 @@ BEGIN TRY
 		WHERE LOAD.intLoadId = @intLoadId
 
 		-- Call the post routine 
-		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
-		BEGIN
-			SET @ysnAllowBlankGLEntries = 0
+		--IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
+		--BEGIN
+		--	SET @ysnAllowBlankGLEntries = 0
 
-			-- Call the post routine 
-			INSERT INTO @dummyGLEntries (
-				[dtmDate]
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[strRateType]
-				)
-			EXEC @intReturnValue = dbo.uspICPostCosting @ItemsForPost
-				,@strBatchId
-				,NULL
-				,@intEntityUserSecurityId
+		--	-- Call the post routine 
+		--	INSERT INTO @dummyGLEntries (
+		--		[dtmDate]
+		--		,[strBatchId]
+		--		,[intAccountId]
+		--		,[dblDebit]
+		--		,[dblCredit]
+		--		,[dblDebitUnit]
+		--		,[dblCreditUnit]
+		--		,[strDescription]
+		--		,[strCode]
+		--		,[strReference]
+		--		,[intCurrencyId]
+		--		,[dblExchangeRate]
+		--		,[dtmDateEntered]
+		--		,[dtmTransactionDate]
+		--		,[strJournalLineDescription]
+		--		,[intJournalLineNo]
+		--		,[ysnIsUnposted]
+		--		,[intUserId]
+		--		,[intEntityId]
+		--		,[strTransactionId]
+		--		,[intTransactionId]
+		--		,[strTransactionType]
+		--		,[strTransactionForm]
+		--		,[strModuleName]
+		--		,[intConcurrencyId]
+		--		,[dblDebitForeign]
+		--		,[dblDebitReport]
+		--		,[dblCreditForeign]
+		--		,[dblCreditReport]
+		--		,[dblReportingRate]
+		--		,[dblForeignRate]
+		--		,[strRateType]
+		--		)
+		--	EXEC @intReturnValue = dbo.uspICPostCosting @ItemsForPost
+		--		,@strBatchId
+		--		,NULL
+		--		,@intEntityUserSecurityId
 
-			--IF @intReturnValue < 0
-			--	GOTO With_Rollback_Exit
+		--	--IF @intReturnValue < 0
+		--	--	GOTO With_Rollback_Exit
 
-			INSERT INTO @GLEntries (
-				[dtmDate]
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[strRateType]
-				)
-			EXEC @intReturnValue = dbo.uspICCreateGLEntries @strBatchId
-				,NULL
-				,@intEntityUserSecurityId
+		--	INSERT INTO @GLEntries (
+		--		[dtmDate]
+		--		,[strBatchId]
+		--		,[intAccountId]
+		--		,[dblDebit]
+		--		,[dblCredit]
+		--		,[dblDebitUnit]
+		--		,[dblCreditUnit]
+		--		,[strDescription]
+		--		,[strCode]
+		--		,[strReference]
+		--		,[intCurrencyId]
+		--		,[dblExchangeRate]
+		--		,[dtmDateEntered]
+		--		,[dtmTransactionDate]
+		--		,[strJournalLineDescription]
+		--		,[intJournalLineNo]
+		--		,[ysnIsUnposted]
+		--		,[intUserId]
+		--		,[intEntityId]
+		--		,[strTransactionId]
+		--		,[intTransactionId]
+		--		,[strTransactionType]
+		--		,[strTransactionForm]
+		--		,[strModuleName]
+		--		,[intConcurrencyId]
+		--		,[dblDebitForeign]
+		--		,[dblDebitReport]
+		--		,[dblCreditForeign]
+		--		,[dblCreditReport]
+		--		,[dblReportingRate]
+		--		,[dblForeignRate]
+		--		,[strRateType]
+		--		)
+		--	EXEC @intReturnValue = dbo.uspICCreateGLEntries @strBatchId
+		--		,NULL
+		--		,@intEntityUserSecurityId
 
-			--IF @intReturnValue < 0
-			--	GOTO With_Rollback_Exit
-		END
+		--	--IF @intReturnValue < 0
+		--	--	GOTO With_Rollback_Exit
+		--END
 
 			INSERT INTO @ItemsToPost (
 				intItemId
@@ -380,7 +381,7 @@ BEGIN TRY
 				,[intTransactionId]
 				,[strTransactionId]
 				,[intTransactionDetailId]
-				,[intFobPointId] = @intFOBPointId
+				,[intFobPointId] = 2
 				,[intInTransitSourceLocationId] = t.intItemLocationId
 				,[intForexRateTypeId] = t.intForexRateTypeId
 				,[dblForexRate] = t.dblForexRate
@@ -436,10 +437,6 @@ BEGIN TRY
 					,@strAccountToCounterInventory = NULL
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@strGLDescription = ''
-
-				SELECT '@GLEntries'
-					,*
-				FROM @GLEntries
 
 				--IF @intReturnValue < 0
 				--	GOTO With_Rollback_Exit
