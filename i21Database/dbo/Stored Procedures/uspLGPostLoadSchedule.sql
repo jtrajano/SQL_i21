@@ -79,14 +79,11 @@ BEGIN TRY
 	END
 	ELSE IF @intPurchaseSale = 3
 	BEGIN
-		IF(ISNULL(@strFOBPoint,'') = 'Origin')
-		BEGIN		
-			EXEC uspLGPostInTransitCosting 
-				 @intLoadId = @intLoadId
-				,@ysnPost = @ysnPost
-				,@intPurchaseSale = 1
-				,@intEntityUserSecurityId = @intEntityUserSecurityId
-		END
+		EXEC uspLGPostInTransitCosting 
+				@intLoadId = @intLoadId
+			,@ysnPost = @ysnPost
+			,@intPurchaseSale = @intPurchaseSale
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
 
 		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
 	END

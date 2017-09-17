@@ -587,10 +587,6 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@strGLDescription = ''
 
-			SELECT '@GLEntries'
-				,*
-			FROM @GLEntries
-
 			IF @intReturnValue < 0
 				GOTO With_Rollback_Exit
 		END
