@@ -19,11 +19,12 @@ intKey = CAST(ROW_NUMBER() OVER (ORDER BY UOM.intItemUOMId, IL.intLocationId) AS
 , Class.strSubcategoryId AS strClass
 FROM            
 tblICItemUOM UOM JOIN
-tblICItemLocation IL ON UOM.intItemId = IL.intItemId JOIN
-tblSTSubcategory AS Family ON Family.intSubcategoryId = IL.intFamilyId JOIN
+tblICItemLocation IL ON UOM.intItemId = IL.intItemId LEFT JOIN
+tblSTSubcategory AS Family ON Family.intSubcategoryId = IL.intFamilyId LEFT JOIN
 tblSTSubcategory AS Class ON Class.intSubcategoryId = IL.intClassId JOIN
 tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId JOIN
 tblICItemPricing IP ON IP.intItemLocationId = IL.intItemLocationId JOIN
 tblICItem I ON I.intItemId = UOM.intItemId JOIN
-tblICCategory adj6 ON I.intCategoryId = adj6.intCategoryId AND I.strType = 'Inventory' AND I.strStatus = 'Active'
+tblICCategory adj6 ON I.intCategoryId = adj6.intCategoryId
+WHERE I.strType = 'Inventory' AND I.strStatus = 'Active'
 
