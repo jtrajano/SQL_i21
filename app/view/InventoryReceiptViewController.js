@@ -3052,7 +3052,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         } 
         else {
-            btnVoucher.enable();
+            btnDebitMemo.enable();
         }          
     },
 
