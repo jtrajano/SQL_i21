@@ -105,7 +105,6 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 			dtmReverseDate,
 			strJournalId,
 			strTransactionType,
-			strTransactionType, 
 			CAST((dbo.[fnGeti21PeriodFromOriginPeriod](SUBSTRING(dtmDate,1,4), SUBSTRING(dtmDate,5,2))) as DATETIME) as dtmDate,
 			strReverseLink,
 			intCurrencyId,
