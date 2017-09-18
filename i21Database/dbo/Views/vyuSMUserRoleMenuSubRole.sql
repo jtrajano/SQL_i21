@@ -1,17 +1,20 @@
 ﻿CREATE VIEW [dbo].[vyuSMUserRoleMenuSubRole]
 AS 
-SELECT ISNULL(intUserRoleID, RoleMenu.intUserRoleId)  as intUserRoleId
+SELECT ISNULL(intUserRoleID, RoleMenu.intUserRoleId)  AS intUserRoleId
 ,RoleMenu.intMenuId
-,Menu.intParentMenuID as intParentMenuId
-,[dbo].[fnSMHideOriginMenus] (strMenuName, CAST(MAX(CAST(RoleMenu.ysnVisible as INT)) as BIT)) as ysnVisible
-,MIN(RoleMenu.intSort) as intSort
-,Menu.intRow as intRow
-,REPLACE(strMenuName, ' (Portal)', '') as strMenuName
+,Menu.intParentMenuID AS intParentMenuId
+,[dbo].[fnSMHideOriginMenus] (strMenuName, CAST(MAX(CAST(RoleMenu.ysnVisible AS INT)) AS BIT)) AS ysnVisible
+,MIN(RoleMenu.intSort) AS intSort
+,Menu.intRow AS intRow
+,REPLACE(strMenuName, ' (Portal)', '') AS strMenuName
 ,strModuleName
 ,Menu.strDescription
 ,Menu.strCategory
 ,strType
-,strCommand
+,CASE
+	WHEN strMenuName = 'Time Off Calendar (Portal)' THEN strCommand + '?id=' + CAST((SELECT intCalendarId FROM tblSMCalendars WHERE strCalendarName = 'Time Off' AND strCalendarType = 'System') AS NVARCHAR(MAX))
+	ELSE strCommand
+END AS strCommand 
 ,strIcon
 ,ysnExpanded
 ,ysnIsLegacy
