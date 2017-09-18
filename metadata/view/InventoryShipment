@@ -1036,7 +1036,7 @@
                                                                         "layout|margins": "0 0 0 5",
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "intCompanyLocationId",
+                                                                        "valueField": "strLocationName",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox27",
@@ -1153,7 +1153,7 @@
                                                                         "layout|margins": null,
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "intEntityLocationId",
+                                                                        "valueField": "strLocationName",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox70",
@@ -1239,7 +1239,7 @@
                                                                         "layout|margins": null,
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "strLocationName",
+                                                                        "valueField": "strShipToCompanyLocation",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox8",

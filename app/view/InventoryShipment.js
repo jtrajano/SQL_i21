@@ -532,7 +532,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 fieldLabel: 'Ship From',
                                                                                 labelWidth: 70,
                                                                                 displayField: 'strLocationName',
-                                                                                valueField: 'intCompanyLocationId'
+                                                                                valueField: 'strLocationName'
                                                                             },
                                                                             {
                                                                                 xtype: 'textareafield',
@@ -603,7 +603,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 fieldLabel: 'Ship To',
                                                                                 labelWidth: 60,
                                                                                 displayField: 'strLocationName',
-                                                                                valueField: 'intEntityLocationId'
+                                                                                valueField: 'strLocationName'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcombobox',
@@ -662,7 +662,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 fieldLabel: 'Ship To',
                                                                                 labelWidth: 60,
                                                                                 displayField: 'strLocationName',
-                                                                                valueField: 'strLocationName'
+                                                                                valueField: 'strShipToCompanyLocation'
                                                                             },
                                                                             {
                                                                                 xtype: 'textareafield',
