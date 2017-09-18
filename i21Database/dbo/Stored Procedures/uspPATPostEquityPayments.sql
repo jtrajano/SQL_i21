@@ -57,7 +57,7 @@ IF(@batchId IS NULL)
 	BEGIN
 		INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
@@ -89,7 +89,7 @@ IF(@batchId IS NULL)
 		)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmPaymentDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intUndistributedEquityId,
 			[dblDebit]						=	ROUND(C.dblEquityPay,2),
 			[dblCredit]						=	0,
@@ -130,7 +130,7 @@ IF(@batchId IS NULL)
 		--Allocated Reserve
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmPaymentDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intAllocatedReserveId,
 			[dblDebit]						=	ROUND(C.dblEquityPay,2),
 			[dblCredit]						=	0,
@@ -171,7 +171,7 @@ IF(@batchId IS NULL)
 		--AP Clearing
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmPaymentDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	ComPref.intAPClearingGLAccount,
 			[dblDebit]						=	0,
 			[dblCredit]						=	ROUND(C.dblEquityPay,2),

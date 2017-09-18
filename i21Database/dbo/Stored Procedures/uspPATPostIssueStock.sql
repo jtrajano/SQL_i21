@@ -95,7 +95,7 @@ BEGIN
 	------------------------CREATE GL ENTRIES---------------------
 		INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
@@ -128,7 +128,7 @@ BEGIN
 		--VOTING STOCK/NON-VOTING STOCK/OTHER ISSUED
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
 			[dblDebit]						=	ROUND(A.dblFaceValue, 2),
 			[dblCredit]						=	0,
@@ -164,7 +164,7 @@ BEGIN
 		--AP CLEARING
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	ComPref.intAPClearingGLAccount,
 			[dblDebit]						=	0,
 			[dblCredit]						=	ROUND(A.dblFaceValue,2),
@@ -285,7 +285,7 @@ BEGIN
 	------------------------CREATE GL ENTRIES---------------------
 		INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
@@ -317,7 +317,7 @@ BEGIN
 		)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
 			[dblDebit]						=	0,
 			[dblCredit]						=	ROUND(A.dblFaceValue,2),
@@ -353,7 +353,7 @@ BEGIN
 		--AR Account
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	ComPref.intARAccountId, 
 			[dblDebit]						=	ROUND(A.dblFaceValue,2),
 			[dblCredit]						=	0,

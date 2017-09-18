@@ -61,7 +61,7 @@ SET @batchIdUsed = @batchId;
 	BEGIN
 		INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
@@ -93,7 +93,7 @@ SET @batchIdUsed = @batchId;
 		)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmCancelDate), 0),
-			[strBatchID]					=	@batchIdUsed COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchIdUsed COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	CASE WHEN B.strEquityType = 'Undistributed' THEN C.intUndistributedEquityId ELSE C.intAllocatedReserveId END,
 			[dblDebit]						=	B.dblQuantityCancelled,
 			[dblCredit]						=	0,
@@ -132,7 +132,7 @@ SET @batchIdUsed = @batchId;
 		--GENERAL RESERVE 
 		SELECT
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmCancelDate), 0),
-			[strBatchID]					=	@batchIdUsed COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchIdUsed COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	C.intGeneralReserveId,
 			[dblDebit]						=	0,
 			[dblCredit]						=	B.dblQuantityCancelled,

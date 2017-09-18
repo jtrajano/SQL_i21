@@ -41,7 +41,7 @@ IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
@@ -73,7 +73,7 @@ BEGIN
 	)
 	SELECT	DISTINCT
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	D.intDividendsGLAccount,
 		[dblDebit]						=	ROUND(C.dblDividendAmount,2),
 		[dblCredit]						=	0,
@@ -114,7 +114,7 @@ BEGIN
 	--AP Clearing
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	@intAPClearingId, 
 		[dblDebit]						=	0,
 		[dblCredit]						=	ROUND(B.dblDividendAmount,2),

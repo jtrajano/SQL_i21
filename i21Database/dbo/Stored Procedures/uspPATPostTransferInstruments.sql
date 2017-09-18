@@ -70,7 +70,7 @@ SET @batchIdUsed = @batchId;
 	BEGIN
 		INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
@@ -103,7 +103,7 @@ SET @batchIdUsed = @batchId;
 		--Voting Stock Issued(Transfer Stock to Equity)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	ComPref.intVotingStockId,
 			[dblDebit]						=	B.dblQuantityTransferred,
 			[dblCredit]						=	0,
@@ -143,7 +143,7 @@ SET @batchIdUsed = @batchId;
 		--Undistributed Equity(Transfer Stock to Equity)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intUndistributedEquityId,
 			[dblDebit]						=	0,
 			[dblCredit]						=	B.dblQuantityTransferred,
@@ -184,7 +184,7 @@ SET @batchIdUsed = @batchId;
 		--Voting/Non-voting Stock Issued(Transfer Equity to Stock)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	CASE WHEN D.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
 			[dblDebit]						=	0,
 			[dblCredit]						=	B.dblQuantityTransferred,
@@ -226,7 +226,7 @@ SET @batchIdUsed = @batchId;
 		--Undistributed Equity(Transfer Equity to Stock)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intUndistributedEquityId,
 			[dblDebit]						=	B.dblQuantityTransferred,
 			[dblCredit]						=	0,
@@ -267,7 +267,7 @@ SET @batchIdUsed = @batchId;
 		--Undistributed Equity(Transfer Equity to Equity Reserve)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intUndistributedEquityId,
 			[dblDebit]						=	B.dblQuantityTransferred,
 			[dblCredit]						=	0,
@@ -308,7 +308,7 @@ SET @batchIdUsed = @batchId;
 		--Allocated Reserve(Transfer Equity to Equity Reserve)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intAllocatedReserveId,
 			[dblDebit]						=	0,
 			[dblCredit]						=	B.dblQuantityTransferred,
@@ -349,7 +349,7 @@ SET @batchIdUsed = @batchId;
 		--Undistributed Equity(Transfer Equity Reserve to Equity)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intUndistributedEquityId,
 			[dblDebit]						=	0,
 			[dblCredit]						=	B.dblQuantityTransferred,
@@ -390,7 +390,7 @@ SET @batchIdUsed = @batchId;
 		--Allocated Reserve(Transfer Equity Reserve to Equity)
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	D.intAllocatedReserveId,
 			[dblDebit]						=	B.dblQuantityTransferred,
 			[dblCredit]						=	0,

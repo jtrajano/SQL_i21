@@ -118,7 +118,7 @@ IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries(
 			[dtmDate], 
-			[strBatchID], 
+			[strBatchId], 
 			[intAccountId],
 			[dblDebit],
 			[dblCredit],
@@ -150,7 +150,7 @@ BEGIN
 	)
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	D.intUndistributedEquityId,
 		[dblDebit]						=	0,
 		[dblCredit]						=	ROUND(B.dblEquityRefund, 2),
@@ -189,7 +189,7 @@ BEGIN
 	--AP Clearing
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	E.intAPClearingGLAccount, 
 		[dblDebit]						=	0,
 		[dblCredit]						=	ROUND(B.dblCashRefund,2),
@@ -229,7 +229,7 @@ BEGIN
 	--GENERAL RESERVE
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
-		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	D.intGeneralReserveId,
 		[dblDebit]						=	ROUND(B.dblRefundAmount,2),
 		[dblCredit]						=	0,
