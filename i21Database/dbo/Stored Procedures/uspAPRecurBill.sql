@@ -14,7 +14,7 @@ BEGIN
 
 	DECLARE @billCreatedPrimaryKey INT;
 	SET @userId = (SELECT TOP 1 [intEntityId] FROM dbo.tblSMUserSecurity WHERE [intEntityId] = @userId)
-	EXEC uspAPDuplicateBill @billId, @userId, @billCreatedPrimaryKey OUTPUT
+	EXEC uspAPDuplicateBill @billId = @billId, @userId = @userId, @billCreatedId = @billCreatedPrimaryKey OUTPUT
 
 	UPDATE A
 		SET A.dtmDate = @billDate
