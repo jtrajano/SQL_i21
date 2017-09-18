@@ -5794,6 +5794,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\30_ImportFileHeader.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateTaxGroupId.sql" />
     <None Include="Scripts\Post-Deployment\TR\RemoveObsoleteScreen.sql" />
+    <None Include="Scripts\Post-Deployment\HD\RemoveHDObsoleteScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
