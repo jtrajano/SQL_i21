@@ -429,44 +429,64 @@ BEGIN TRY
 		)
 		SELECT 
 				@intRecipeId
-				,ri.intRecipeItemId
-				,ri.intItemId
-				,v.dblQuantity
-				,ri.intItemUOMId
+				,(
+					CASE 
+					WHEN BlendIngredient.ysnSubstituteItem = 1
+						THEN (
+								CASE 
+									WHEN BlendIngredient.intSubstituteItemId = Receipt.intItemId
+										THEN rs.intRecipeSubstituteItemId
+									ELSE BlendIngredient.intRecipeItemId
+									END
+								)
+					ELSE BlendIngredient.intRecipeItemId
+					END
+				)
+				,(
+					CASE 
+					WHEN BlendIngredient.ysnSubstituteItem = 1
+						THEN (
+								CASE 
+									WHEN BlendIngredient.intSubstituteItemId = Receipt.intItemId
+										THEN BlendIngredient.intSubstituteItemId
+									ELSE ri.intItemId
+									END
+								)
+					ELSE ri.intItemId
+					END
+				)
+				,BlendIngredient.dblQuantity
+				,(
+					CASE 
+					WHEN BlendIngredient.ysnSubstituteItem = 1
+						THEN (
+								CASE 
+									WHEN BlendIngredient.intSubstituteItemId = Receipt.intItemId
+										THEN iu1.intItemUOMId
+									ELSE ri.intItemUOMId
+									END
+								)
+					ELSE ri.intItemUOMId
+					END
+				)
 				,0
 				,0
-				,ri.intConsumptionMethodId
-				,ri.intStorageLocationId
+				,1
+				,null
 				,0
 				,ri.dblCalculatedQuantity
-		FROM	tblTRLoadBlendIngredient v JOIN tblMFRecipeItem ri 
-					ON v.intRecipeItemId =ri.intRecipeItemId
-		WHERE	intLoadDistributionDetailId = @intLoadDistributionDetailId 
-				AND ri.intRecipeId = @intRecipeId 
-				AND ri.intRecipeItemTypeId = 1
-				AND ISNULL(v.ysnSubstituteItem,0)=0
-		UNION ALL
-		SELECT --Substitute Items
-				@intRecipeId
-				,rs.intRecipeSubstituteItemId
-				,rs.intSubstituteItemId
-				,v.dblQuantity
-				,iu1.intItemUOMId
-				,0
-				,0
-				,ri.intConsumptionMethodId
-				,ri.intStorageLocationId
-				,ri.intItemId
-				,ri.dblCalculatedQuantity
-		FROM	tblTRLoadBlendIngredient v JOIN tblMFRecipeItem ri 
-					ON v.intRecipeItemId =ri.intRecipeItemId
-				JOIN tblMFRecipeSubstituteItem rs ON v.intRecipeItemId =rs.intRecipeItemId AND rs.intSubstituteItemId=v.intSubstituteItemId
-				JOIN dbo.tblICItemUOM iu ON iu.intItemUOMId = ri.intItemUOMId
-				JOIN dbo.tblICItemUOM iu1 ON iu1.intItemId = v.intSubstituteItemId
-				AND iu.intUnitMeasureId = iu1.intUnitMeasureId
-		WHERE	intLoadDistributionDetailId = @intLoadDistributionDetailId 
-				AND rs.intRecipeId = @intRecipeId 
-				AND ISNULL(v.ysnSubstituteItem,0)=1
+				FROM tblTRLoadDistributionDetail DistItem
+				LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+				LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+				LEFT JOIN tblTRLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
+				LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.strReceiptLine = BlendIngredient.strReceiptLink
+				LEFT JOIN tblMFRecipeItem ri ON ri.intRecipeItemId=BlendIngredient.intRecipeItemId
+				LEFT JOIN tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId=BlendIngredient.intRecipeItemId AND rs.intSubstituteItemId=BlendIngredient.intSubstituteItemId
+				LEFT JOIN dbo.tblICItemUOM iu ON iu.intItemUOMId = ri.intItemUOMId
+				LEFT JOIN dbo.tblICItemUOM iu1 ON iu1.intItemId = BlendIngredient.intSubstituteItemId AND iu.intUnitMeasureId = iu1.intUnitMeasureId
+				WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
+					AND ISNULL(DistItem.strReceiptLink, '') = ''
+					AND ri.intRecipeId=@intRecipeId
 
         IF (SELECT COUNT(1) FROM tblTRLoadBlendIngredient Where intLoadDistributionDetailId=@intLoadDistributionDetailId)=0
             RaisError('No Ingredients found in Transport.',16,1)
