@@ -57,6 +57,12 @@ SELECT intEntityId				= ENTITY.intEntityId
      , strBillToCountry			= BILLTOLOCATION.strCountry
 	 , strBillToPhone			= BILLTOLOCATION.strPhone
 	 ,intServiceChargeId		= CUSTOMER.intServiceChargeId
+
+	 
+
+	, intWarehouseId = CUSTOMERLOCATION.intWarehouseId
+	, intPaymentMethodId = CUSTOMER.intPaymentMethodId
+	, strPaymentMethod = CUSTOMER.strPaymentMethod
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -86,6 +92,8 @@ INNER JOIN (
 		 , strTerm				= TERM.strTerm
 		 , ysnHasBudgetSetup	= CAST(CASE WHEN (BUDGET.ysnHasBudgetSetup) = 1 THEN 1 ELSE 0 END AS BIT)
 		,intServiceChargeId		= C.intServiceChargeId
+		, intPaymentMethodId = C.intPaymentMethodId
+		, strPaymentMethod = PAYMENTMETHOD.strPaymentMethod
 	FROM dbo.tblARCustomer C WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT S.intEntityId
@@ -104,6 +112,11 @@ INNER JOIN (
 			 , strTerm
 		FROM dbo.tblSMTerm WITH (NOLOCK)
 	) TERM ON C.intTermsId = TERM.intTermID
+	LEFT JOIN (
+		SELECT intPaymentMethodId = intPaymentMethodID
+			 , strPaymentMethod
+		FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
+	) PAYMENTMETHOD ON C.intPaymentMethodId = PAYMENTMETHOD.intPaymentMethodId
 	OUTER APPLY (
 		SELECT TOP 1 1 AS ysnHasBudgetSetup
 		FROM dbo.tblARCustomerBudget WITH (NOLOCK)
@@ -139,6 +152,7 @@ LEFT JOIN (
 		 , strShipVia		= SHIPVIA.strName
 		 , strFreightTerm	= FREIGHTTERM.strFreightTerm
 		 , strCounty		= TAXCODE.strCounty
+		 , intWarehouseId = ISNULL(L.intWarehouseId, -99)
 	FROM dbo.tblEMEntityLocation L WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intTaxGroupId
