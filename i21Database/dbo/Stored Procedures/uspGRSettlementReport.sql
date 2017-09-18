@@ -174,8 +174,8 @@ BEGIN
 	   ,lblFactorTax = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax' ELSE NULL END
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
-	   ,dblCustomerPrepayment = NULL
-	   ,lblCustomerPrepayment = NULL
+	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END 
+	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END						 
 	   ,blbHeaderLogo = @companyLogo						 	   						 
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -227,20 +227,19 @@ BEGIN
 				)ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
 	 
 	 LEFT JOIN (
-			
-				SELECT
-				 PYMTDTL.intPaymentId
-				,PYMTDTL.intBillId
-				,SUM(PYMTDTL.dblPayment * -1) AS dblVendorPrepayment
-				FROM tblAPPayment PYMT
-				JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId			
-				AND PYMT.ysnPrepay = 1 AND PYMT.ysnPosted = 1
-				GROUP BY PYMTDTL.intPaymentId,PYMTDTL.intBillId
-				) VendorPrepayment ON VendorPrepayment.intPaymentId=PYMT.intPaymentId AND  VendorPrepayment.intBillId = Bill.intBillId
-     LEFT JOIN (
-					SELECT intPaymentId,SUM(dblPayment) dblPayment FROM tblAPPaymentDetail
-					WHERE intBillId IS NULL
-					GROUP BY intPaymentId
+				 SELECT
+				 intBillId
+				,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+				 FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
+				 GROUP BY intBillId
+				) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
+
+     LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intInvoiceId IS NOT NULL
+				  GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId
@@ -642,8 +641,8 @@ BEGIN
 	   ,lblFactorTax = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax' ELSE NULL END
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
-	   ,dblCustomerPrepayment = NULL
-	   ,lblCustomerPrepayment = NULL
+	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END 
+	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
 	   ,blbHeaderLogo = @companyLogo
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -687,19 +686,20 @@ BEGIN
 			  )ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
     
 	LEFT JOIN (
-				SELECT
-				PYMTDTL.intPaymentId
-			   ,PYMTDTL.intBillId
-			   ,SUM(PYMTDTL.dblPayment * -1) AS dblVendorPrepayment
-			   FROM tblAPPayment PYMT
-			   JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId			
-			   AND PYMT.ysnPrepay = 1 AND PYMT.ysnPosted = 1
-			   GROUP BY PYMTDTL.intPaymentId,PYMTDTL.intBillId
-			  ) VendorPrepayment ON VendorPrepayment.intPaymentId=PYMT.intPaymentId AND  VendorPrepayment.intBillId = Bill.intBillId
-	LEFT JOIN (
-					SELECT intPaymentId,SUM(dblPayment) dblPayment FROM tblAPPaymentDetail
-					WHERE intBillId IS NULL
-					GROUP BY intPaymentId
+				SELECT				
+				intBillId
+				,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+				FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
+				GROUP BY intBillId
+				) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
+
+	LEFT JOIN (	
+				   SELECT 
+				   intPaymentId
+				  ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intInvoiceId IS NOT NULL
+				  GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
@@ -799,8 +799,8 @@ BEGIN
 	   ,lblFactorTax = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax' ELSE NULL END
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
-	   ,dblCustomerPrepayment = NULL
-	   ,lblCustomerPrepayment = NULL
+	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END
+	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
 	   ,blbHeaderLogo = @companyLogo
 	FROM tblCMBankTransaction BNKTRN
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -845,22 +845,22 @@ BEGIN
 				 WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL 	 
 				GROUP BY  PYMT.intPaymentId
 				)ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
+	 
 	 LEFT JOIN (
-			
-				SELECT
-				 PYMTDTL.intPaymentId
-				,PYMTDTL.intBillId
-				,SUM(PYMTDTL.dblPayment * -1) AS dblVendorPrepayment
-				FROM tblAPPayment PYMT
-				JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId			
-				AND PYMT.ysnPrepay = 1 AND PYMT.ysnPosted = 1
-				GROUP BY PYMTDTL.intPaymentId,PYMTDTL.intBillId
-				) VendorPrepayment ON VendorPrepayment.intPaymentId=PYMT.intPaymentId AND  VendorPrepayment.intBillId = Bill.intBillId
+				 SELECT				
+				 intBillId
+				 ,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+				 FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
+				 GROUP BY intBillId
+				) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
 	
 	LEFT JOIN (
-					SELECT intPaymentId,SUM(dblPayment) dblPayment FROM tblAPPaymentDetail
-					WHERE intBillId IS NULL
-					GROUP BY intPaymentId
+				  SELECT 
+				  intPaymentId
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intInvoiceId IS NOT NULL
+				  GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId
@@ -1241,8 +1241,8 @@ BEGIN
 	   ,lblFactorTax = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax' ELSE NULL END
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
-	   ,dblCustomerPrepayment = NULL
-	   ,lblCustomerPrepayment = NULL
+	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END 
+	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
 	   ,blbHeaderLogo = @companyLogo					    	   					    
 	FROM tblCMBankTransaction BNKTRN	
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1285,20 +1285,19 @@ BEGIN
 			  )ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
     
 	LEFT JOIN (
-				SELECT
-				PYMTDTL.intPaymentId
-			   ,PYMTDTL.intBillId
-			   ,SUM(PYMTDTL.dblPayment * -1) AS dblVendorPrepayment
-			   FROM tblAPPayment PYMT
-			   JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId			
-			   AND PYMT.ysnPrepay = 1 AND PYMT.ysnPosted = 1
-			   GROUP BY PYMTDTL.intPaymentId,PYMTDTL.intBillId
-			  ) VendorPrepayment ON VendorPrepayment.intPaymentId=PYMT.intPaymentId AND  VendorPrepayment.intBillId = Bill.intBillId
+				 SELECT
+				 intBillId
+				,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+				FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
+				GROUP BY intBillId
+				) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
     
 	LEFT JOIN (
-					SELECT intPaymentId,SUM(dblPayment) dblPayment FROM tblAPPaymentDetail
-					WHERE intBillId IS NULL
-					GROUP BY intPaymentId
+				 SELECT 
+				 intPaymentId
+				 ,SUM(dblPayment) dblPayment 
+				 FROM tblAPPaymentDetail WHERE intInvoiceId IS NOT NULL
+				 GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
