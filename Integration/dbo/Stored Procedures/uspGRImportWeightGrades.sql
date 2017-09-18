@@ -25,8 +25,8 @@ BEGIN
 			 RETURN @Total
 	END
 
-	INSERT INTO tblCTWeightGrade(intConcurrencyId,strWeightGradeDesc,intOriginDest,ysnActive,ysnWeight,ysnGrade)
-	SELECT 1,y.strWeightGradeDesc,CASE WHEN t.strOriginDest = 'D' THEN 2 ELSE 1 END,1,1,1 
+	INSERT INTO tblCTWeightGrade(intConcurrencyId,strWeightGradeDesc,strWhereFinalized,ysnActive,ysnWeight,ysnGrade)
+	SELECT 1,y.strWeightGradeDesc,CASE WHEN t.strOriginDest = 'D' THEN 'Designation' ELSE 'Origin' END,1,1,1 
 	FROM(
 		SELECT  SUBSTRING(x.records,LEN(x.records),LEN(x.records)-1) id, x.strWeightGradeDesc
 		FROM gactlmst s
