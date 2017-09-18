@@ -487,6 +487,7 @@ BEGIN TRY
 				WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
 					AND ISNULL(DistItem.strReceiptLink, '') = ''
 					AND ri.intRecipeId=@intRecipeId
+					AND ri.intRecipeItemTypeId = 1
 
         IF (SELECT COUNT(1) FROM tblTRLoadBlendIngredient Where intLoadDistributionDetailId=@intLoadDistributionDetailId)=0
             RaisError('No Ingredients found in Transport.',16,1)
