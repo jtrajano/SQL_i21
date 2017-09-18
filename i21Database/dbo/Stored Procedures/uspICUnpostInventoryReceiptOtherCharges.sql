@@ -303,8 +303,7 @@ BEGIN
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
-		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-				
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId			
 	)
 
 	-------------------------------------------------------------------------------------------
@@ -322,7 +321,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge + ' for ' + ForGLEntries_CTE.strItem
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -340,9 +339,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -352,7 +351,7 @@ BEGIN
 				ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
 				AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
 			INNER JOIN dbo.tblGLAccount GLAccount
-				ON GLAccount.intAccountId = ItemGLAccounts.intContraInventoryId -- AP Clearing 
+				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
 			CROSS APPLY dbo.fnGetDebitFunctional(
 				ForGLEntries_CTE.dblCost
 				,ForGLEntries_CTE.intCurrencyId
@@ -398,9 +397,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END   
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END   
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -444,7 +443,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -462,9 +461,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -503,7 +502,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -521,9 +520,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -558,7 +557,7 @@ BEGIN
 	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
 	-- 
 	-- Dr...... AP Clearing	
-	-- Cr.................... Freight Expense  
+	-- Cr.................... Freight Expense 
 	-------------------------------------------------------------------------------------------
 	UNION ALL 
 	SELECT	
@@ -569,7 +568,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -587,9 +586,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -625,7 +624,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -643,9 +642,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -677,8 +676,8 @@ BEGIN
 	-- Accrue Other Charge to Vendor and Add Cost to Inventory 
 	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
 	-- 
-	-- (X) Dr...... Item's Inventory Acccount 
-	-- Cr.................... AP Clearing	
+	-- (X) Dr...... AP Clearing	
+	-- Cr.................... Item's Inventory Acccount 
 	-------------------------------------------------------------------------------------------
 	UNION ALL 
 	SELECT	
@@ -689,7 +688,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge + ' for ' + ForGLEntries_CTE.strItem
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -707,9 +706,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -762,9 +761,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -791,13 +790,14 @@ BEGIN
 
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1
 			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
-			
+
+
 	-------------------------------------------------------------------------------------------
 	-- Price Down 
 	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
 	-- 
-	-- Dr...... AP Clearing
-	-- Cr.................... Freight Expense 
+	-- Dr...... Freight Expense 
+	-- Cr.................... AP Clearing
 	-------------------------------------------------------------------------------------------
 	UNION ALL 
 	SELECT	
@@ -808,7 +808,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -826,9 +826,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -863,7 +863,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strCharge 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -881,9 +881,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
