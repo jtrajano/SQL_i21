@@ -17,6 +17,7 @@ intKey = CAST(ROW_NUMBER() OVER (ORDER BY UOM.intItemUOMId, IL.intLocationId) AS
 , IL.intClassId
 , Family.strSubcategoryId AS strFamily
 , Class.strSubcategoryId AS strClass
+, CL.intCompanyLocationId
 FROM            
 tblICItemUOM UOM JOIN
 tblICItemLocation IL ON UOM.intItemId = IL.intItemId LEFT JOIN
