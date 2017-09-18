@@ -202,6 +202,20 @@ GO
 	end
 	
 	--15
+	set @nameSpace = 'HelpDesk.view.Reminder';
+	if ((select count(*) from tblSMScreen where strModule = @moduleName and strNamespace = @nameSpace) > 0)
+	begin
+		begin transaction;
+		begin try
+			delete from tblSMScreen where strModule = @moduleName and strNamespace = @nameSpace;
+			commit transaction;
+		end try
+		begin catch
+			rollback transaction;
+		end catch
+	end
+	
+	--15
 	set @nameSpace = 'HelpDesk.view.ReminderList';
 	if ((select count(*) from tblSMScreen where strModule = @moduleName and strNamespace = @nameSpace) > 0)
 	begin
