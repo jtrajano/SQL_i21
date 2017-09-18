@@ -5662,6 +5662,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateMI3724.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
     <Build Include="dbo\Tables\tblRKM2MGrainBasis.sql" />
+    <Build Include="dbo\Views\vyuICETExportItemMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
