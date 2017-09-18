@@ -137,7 +137,7 @@ SELECT
 	A.intPaymentId
 FROM #tmpPayablePostData A
 INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
-WHERE B.ysnPrepay = 1
+WHERE B.ysnPrepay = 1 
 
 --GET ALL PAYMENTS
 INSERT INTO @payments
@@ -473,28 +473,17 @@ BEGIN
 		--UPDATE BILL RECORDS
 		EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
 	END
-
-	IF @lenOfSuccessPrePay > 0
-	BEGIN
-		--UPDATE tblAPPaymentDetail
-		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @prepayIds, @post = @post
-		--UPDATE BILL RECORDS
-		EXEC uspAPUpdateBillPayment @paymentIds = @prepayIds, @post = @post
-	END
 	
 	--Update posted status
 	UPDATE tblAPPayment
 		SET		ysnPosted = @post
 	WHERE	intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
 
-	--IF @lenOfSuccessPrePay > 0
-	--BEGIN
-	--	UPDATE A
-	--		SET A.ysnPosted = @post
-	--	FROM tblAPBill A
-	--	INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
-	--	WHERE B.intPaymentId IN (SELECT intId FROM @prepayIds)
-	--END
+	UPDATE A
+		SET A.ysnPrepayHasPayment = @post
+	FROM tblAPBill A
+	INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+	WHERE B.intPaymentId IN (SELECT intId FROM @prepayIds)
 
 	--CREATE BANK TRANSACTION
 	DECLARE @paymentForBankTransaction AS Id
