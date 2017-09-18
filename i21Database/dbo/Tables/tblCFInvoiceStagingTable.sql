@@ -134,8 +134,15 @@
     [ysnActive]                    BIT             NULL,
     [ysnEnergyTrac]                BIT             NULL,
     [strDiscountSchedule]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [ysnShowOnCFInvoice]           BIT             NULL
+    [ysnShowOnCFInvoice]           BIT             NULL,
+    [ysnPostForeignSales]          BIT             NULL,
+    [ysnSummaryByDeptVehicleProd]  BIT             NULL,
+    [ysnDepartmentGrouping]        BIT             NULL
 );
+
+
+
+
 
 
 
