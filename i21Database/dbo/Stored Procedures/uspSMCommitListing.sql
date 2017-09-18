@@ -59,7 +59,10 @@ BEGIN TRANSACTION
 			INNER JOIN tblSMControl D ON D.strControlId = A.strControlId	
 	WHERE ISNULL(A.strChange, '') = 'Deleted'
 
-
+	-- UPDATE MODULE
+	UPDATE tblSMScreen SET strModule = 'Ticket Management'
+	WHERE strModule = 'Grain'
+	
 	-- DELETE Stage
 	DELETE FROM tblSMScreenStage
 
