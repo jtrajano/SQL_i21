@@ -532,7 +532,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 fieldLabel: 'Ship From',
                                                                                 labelWidth: 70,
                                                                                 displayField: 'strLocationName',
-                                                                                valueField: 'intCompanyLocationId'
+                                                                                valueField: 'strLocationName'
                                                                             },
                                                                             {
                                                                                 xtype: 'textareafield',
@@ -603,7 +603,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 fieldLabel: 'Ship To',
                                                                                 labelWidth: 60,
                                                                                 displayField: 'strLocationName',
-                                                                                valueField: 'intEntityLocationId'
+                                                                                valueField: 'strLocationName'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcombobox',
@@ -662,7 +662,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 fieldLabel: 'Ship To',
                                                                                 labelWidth: 60,
                                                                                 displayField: 'strLocationName',
-                                                                                valueField: 'strLocationName'
+                                                                                valueField: 'strShipToCompanyLocation'
                                                                             },
                                                                             {
                                                                                 xtype: 'textareafield',
@@ -1409,7 +1409,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colForexRate',
                                                                         width: 85,
                                                                         dataIndex: 'dblForexRate',
-                                                                        text: 'Forex Rate'
+                                                                        text: 'Forex Rate',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            currencyField: true,
+                                                                            itemId: 'txtForexRate',
+                                                                            readOnly: true,
+                                                                            minValue: 0
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -2155,7 +2162,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         itemId: 'colChargeForexRate',
                                                         width: 85,
                                                         dataIndex: 'dblForexRate',
-                                                        text: 'Forex Rate'
+                                                        text: 'Forex Rate',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            currencyField: true,
+                                                            itemId: 'txtChargeForexRate',
+                                                            readOnly: true,
+                                                            minValue: 0
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',

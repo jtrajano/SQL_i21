@@ -1,11 +1,11 @@
 UnitTestEngine.testStore({
-    name: 'Inventory.store.ProcessCode',
-    alias: "store.icprocesscode",
+    name: 'Inventory.store.ProductionProcess',
+    alias: "store.icproductionprocess",
     base: 'Ext.data.Store',
-    dependencies: ["Inventory.model.ProcessCode"],
+    dependencies: ["Inventory.model.ProductionProcess"],
     config: {
-        "model": "Inventory.model.ProcessCode",
-        "storeId": "ProcessCode",
+        "model": "Inventory.model.ProductionProcess",
+        "storeId": "ProductionProcess",
         "pageSize": 50,
         "proxy": {
             "type": "rest",

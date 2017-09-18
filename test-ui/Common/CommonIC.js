@@ -29,8 +29,9 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded()
             .clickButton('New')
             .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('New Item Screen Opened',3000)
             .verifyScreenShown('icitem')
-            .verifyStatusMessage('Ready')
 
             .enterData('Text Field','ItemNo', item)
             .enterData('Text Field','Description', itemdesc)
@@ -106,9 +107,6 @@ Ext.define('Inventory.CommonIC', {
             .enterGridData('Pricing', 2, 'dblAmountPercent', priceAC)
             .clickButton('Save')
             .waitUntilLoaded()
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .displayText('===== Item Created =====')
             .done();
@@ -255,13 +253,13 @@ Ext.define('Inventory.CommonIC', {
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-
                         .done();
                 },
                 continueOnFail: true
             })
             .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+            .clickButton('Close')
             .waitUntilLoaded()
             .displayText('===== Add stock UOM first Done  =====')
             //endregion
@@ -296,17 +294,17 @@ Ext.define('Inventory.CommonIC', {
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-                        .waitUntilLoaded()
-
                         .done();
                 },
                 continueOnFail: true
             })
+            .clickButton('Close')
+            .waitUntilLoaded()
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
 
             //add another conversion
+            .clickMenuScreen('Inventory UOM','Screen')
             .filterGridRecords('Search', 'FilterGrid', 'Test_Bushels')
             .waitUntilLoaded()
             .continueIf({
@@ -331,16 +329,17 @@ Ext.define('Inventory.CommonIC', {
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-
                         .done();
                 },
                 continueOnFail: true
             })
+            .clickButton('Close')
+            .waitUntilLoaded()
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
 
             //add another conversion
+            .clickMenuScreen('Inventory UOM','Screen')
             .filterGridRecords('Search', 'FilterGrid', 'Test_KG')
             .waitUntilLoaded()
             .continueIf({
@@ -365,18 +364,17 @@ Ext.define('Inventory.CommonIC', {
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-
-
-
                         .done();
                 },
                 continueOnFail: true
             })
+            .clickButton('Close')
+            .waitUntilLoaded()
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
 
             //add another conversion
+            .clickMenuScreen('Inventory UOM','Screen')
             .filterGridRecords('Search', 'FilterGrid', 'Test_60 KG bags')
             .waitUntilLoaded()
             .continueIf({
@@ -402,16 +400,17 @@ Ext.define('Inventory.CommonIC', {
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-
                         .done();
                 },
                 continueOnFail: true
             })
+            .clickButton('Close')
+            .waitUntilLoaded()
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
 
             //add another conversion
+            .clickMenuScreen('Inventory UOM','Screen')
             .filterGridRecords('Search', 'FilterGrid', 'Test_25 KG bags')
             .waitUntilLoaded()
             .continueIf({
@@ -438,17 +437,20 @@ Ext.define('Inventory.CommonIC', {
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
+                        
 
                         .done();
                 },
                 continueOnFail: true
             })
+            .clickButton('Close')
+            .waitUntilLoaded()
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
 
 
             //add another conversion
+            .clickMenuScreen('Inventory UOM','Screen')
             .filterGridRecords('Search', 'FilterGrid', 'Test_50 KG bags')
             .waitUntilLoaded()
             .continueIf({
@@ -475,12 +477,13 @@ Ext.define('Inventory.CommonIC', {
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-
+                        
                         .done();
                 },
                 continueOnFail: true
             })
+            .clickButton('Close')
+            .waitUntilLoaded()
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
 
@@ -506,8 +509,6 @@ Ext.define('Inventory.CommonIC', {
         .clickButton('Save')
         .waitUntilLoaded()
         .verifyStatusMessage('Saved')
-        .clickButton('Close')
-        .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded('')
         .displayText('===== Add Commodity Done =====')
 
@@ -572,8 +573,6 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Save')
             .waitUntilLoaded()
             .verifyStatusMessage('Saved')
-            .clickButton('Close')
-            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .displayText('===== Add New Category - Inventory Type Done =====')
             .done();
@@ -605,7 +604,6 @@ Ext.define('Inventory.CommonIC', {
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .waitUntilLoaded('')
             .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', qtytoreceive, receiptuom)
-            .waitUntilLoaded('')
             .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
             .enterGridData('InventoryReceipt', 1, 'colUnitCost', cost)
             .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
@@ -630,9 +628,6 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .waitUntilLoaded('')
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
-            .clickMenuFolder('Inventory','Folder')
-            .waitUntilLoaded('')
-            .waitUntilLoaded('')
 
 
             .done();
@@ -662,7 +657,6 @@ Ext.define('Inventory.CommonIC', {
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .waitUntilLoaded('')
             .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', qtytoreceive, receiptuom)
-            .waitUntilLoaded('')
             .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
             .enterGridData('InventoryReceipt', 1, 'colUnitCost', cost)
             .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Test_Pounds')
@@ -672,8 +666,10 @@ Ext.define('Inventory.CommonIC', {
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName',storagelocation,'strSubLocationName')
 
             .enterGridData('LotTracking', 1, 'colLotId', lotno)
-            .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure',lotuom,'strUnitMeasure')
-            .enterGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
+            // .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure',lotuom,'strUnitMeasure')
+            .verifyGridData('LotTracking', 1, 'colLotUOM', receiptuom)
+            .verifyGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
+            // .enterGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
             .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
             .verifyGridData('LotTracking', 1, 'colLotWeightUOM',lotuom)
             .verifyGridData('LotTracking', 1, 'colLotStorageLocation', storagelocation)
@@ -697,9 +693,6 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .waitUntilLoaded('')
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
-            .clickMenuFolder('Inventory','Folder')
-            .waitUntilLoaded('')
-            .waitUntilLoaded('')
 
 
             .done();
@@ -1364,14 +1357,14 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
             .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
             .clickButton('AddDetail')
-            .waitUntilLoaded('ctcontractsequence')
             .waitUntilLoaded('')
-            .addFunction (function (next){
-            var date = new Date().toLocaleDateString();
-            new iRely.FunctionalTest().start(t, next)
-                .enterData('Date Field','EndDate', date, 0, 10)
-                .done();
-             })
+            .waitUntilLoaded('')
+            // .addFunction (function (next){
+            // var date = new Date().toLocaleDateString();
+            // new iRely.FunctionalTest().start(t, next)
+            //     .enterData('Date Field','EndDate', date, 0, 10)
+            //     .done();
+            //  })
             .selectComboBoxRowValue('Location', location , 'Location',1)
             .selectComboBoxRowValue('Item', itemno, 'Item',1)
             .selectComboBoxRowValue('NetWeightUOM', receiptuom, 'NetWeightUOM',1)
@@ -1437,8 +1430,6 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickButton('Close')
-            .waitUntilLoaded('')
-            .clickMenuFolder('Contract Management','Folder')
             .waitUntilLoaded('')
 
             .done();
@@ -1589,8 +1580,8 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowValue('Customer', customer, 'Customer',1)
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'Currency',1)
-            .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
             .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', quantity, uom)
@@ -1613,7 +1604,6 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
-            .clickMenuFolder('Inventory','Folder')
 
             .done();
     },
@@ -1780,11 +1770,13 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowValue('Customer', customer, 'Customer',1)
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
-            .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
+            .waitUntilLoaded('')
             .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', quantity, uom)
+            .waitUntilLoaded('')
 
             .selectGridComboBoxRowValue('LotTracking',1,'strLotId', lotno,'strLotId')
             .enterGridData('LotTracking', 1, 'colShipQty', '100')
@@ -1812,8 +1804,6 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
-            .clickMenuFolder('Inventory','Folder')
-            .waitUntilLoaded('')
 
             .done();
     },
@@ -1825,10 +1815,11 @@ Ext.define('Inventory.CommonIC', {
      *
      */
     addSOtoISAddORdersNonLotted: function (t,next, customer, currency,location,freight, itemno,uom, quantity) {
+        var linetotal =  quantity * 10;
         new iRely.FunctionalTest().start(t, next)
 
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales (A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1858,7 +1849,6 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
 
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
@@ -1875,22 +1865,27 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
-            .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
 //            .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName','Raw Station','strSubLocationName')
 //            .selectGridComboBoxRowValue('InventoryShipment',1,'strStorageLocationName','RM Storage','strStorageLocationName')
-            .clickTab('PostPreview')
+            .clickTab('Post Preview')
             .waitUntilLoaded('')
+            .clickTab('Details')
             .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colCredit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colDebit', linetotal)
             .clickButton('Post')
             .waitUntilLoaded('')
             .addResult('Successfully Posted',1500)
             .waitUntilLoaded('')
             .clickButton('Close')
-            .waitUntilLoaded('')
-            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .displayText('===== Add Orders Button SO to IS for Non Lotted Done=====')
             //endregion
@@ -2254,6 +2249,7 @@ Ext.define('Inventory.CommonIC', {
             .displayText('===== Setup Item UOM=====')
             .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
             .enterGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
+            .clickGridCheckBox('UnitOfMeasure', 1,'strUnitMeasure', 'Test_Pounds', 'ysnStockUnit', true)
             .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
             .enterGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '1')
             .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
@@ -2278,9 +2274,6 @@ Ext.define('Inventory.CommonIC', {
 
             .clickButton('Save')
             .waitUntilLoaded()
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .clickMenuFolder('Inventory','Folder')
             .displayText('===== Other Charge Item Created =====')
             .done();
 

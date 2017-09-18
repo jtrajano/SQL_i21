@@ -275,9 +275,9 @@
 }, {
     "pattern": "app/store/PersistentPagedStore.js"
 }, {
-    "pattern": "app/model/ProcessCode.js"
+    "pattern": "app/model/ProductionProcess.js"
 }, {
-    "pattern": "app/store/ProcessCode.js"
+    "pattern": "app/store/ProductionProcess.js"
 }, {
     "pattern": "app/model/RebuildInventory.js"
 }, {
@@ -365,10 +365,6 @@
 }, {
     "pattern": "app/view/StatusbarPaging1.js"
 }, {
-    "pattern": "app/view/BuildAssemblyBlend.js"
-}, {
-    "pattern": "app/view/BuildAssemblyBlendViewController.js"
-}, {
     "pattern": "app/store/BufferedAssemblyItem.js"
 }, {
     "pattern": "app/model/ItemUOM.js"
@@ -376,10 +372,6 @@
     "pattern": "app/store/BufferedItemUnitMeasure.js"
 }, {
     "pattern": "app/store/BufferedItemStockUOMView.js"
-}, {
-    "pattern": "app/view/BuildAssemblyBlendViewModel.js"
-}, {
-    "pattern": "app/view/CardCount.js"
 }, {
     "pattern": "app/view/Category.js"
 }, {
@@ -505,11 +497,11 @@
 }, {
     "pattern": "app/view/CountGroup.js"
 }, {
-    "pattern": "app/view/FactoryUnitType.js"
+    "pattern": "app/view/StorageUnitType.js"
 }, {
-    "pattern": "app/view/FactoryUnitTypeViewController.js"
+    "pattern": "app/view/StorageUnitTypeViewController.js"
 }, {
-    "pattern": "app/view/FactoryUnitTypeViewModel.js"
+    "pattern": "app/view/StorageUnitTypeViewModel.js"
 }, {
     "pattern": "app/view/FeedStockCodeViewModel.js"
 }, {
@@ -539,18 +531,6 @@
 }, {
     "pattern": "app/view/FuelCode.js"
 }, {
-    "pattern": "app/view/FuelTank.js"
-}, {
-    "pattern": "app/view/FuelTankViewController.js"
-}, {
-    "pattern": "app/view/FuelTankViewModel.js"
-}, {
-    "pattern": "app/view/FuelTaxClass.js"
-}, {
-    "pattern": "app/view/FuelTaxClassViewController.js"
-}, {
-    "pattern": "app/view/FuelTaxClassViewModel.js"
-}, {
     "pattern": "app/view/FuelType.js"
 }, {
     "pattern": "app/view/FuelTypeViewController.js"
@@ -563,7 +543,7 @@
 }, {
     "pattern": "app/store/BufferedFuelCode.js"
 }, {
-    "pattern": "app/store/BufferedProcessCode.js"
+    "pattern": "app/store/BufferedProductionProcess.js"
 }, {
     "pattern": "app/view/FuelTypeViewModel.js"
 }, {
@@ -641,11 +621,11 @@
 }, {
     "pattern": "app/view/InventoryReceipt.js"
 }, {
-    "pattern": "app/view/InventoryReceiptTaxesViewController.js"
+    "pattern": "app/view/TaxDetailsViewController.js"
 }, {
-    "pattern": "app/view/InventoryReceiptTaxesViewModel.js"
+    "pattern": "app/view/TaxDetailsViewModel.js"
 }, {
-    "pattern": "app/view/InventoryReceiptTaxes.js"
+    "pattern": "app/view/TaxDetails.js"
 }, {
     "pattern": "app/view/InventoryReceiptViewController.js"
 }, {
@@ -743,12 +723,6 @@
 }, {
     "pattern": "app/view/ItemLocationViewModel.js"
 }, {
-    "pattern": "app/view/ItemSubstitution.js"
-}, {
-    "pattern": "app/view/ItemSubstitutionViewController.js"
-}, {
-    "pattern": "app/view/ItemSubstitutionViewModel.js"
-}, {
     "pattern": "app/view/ItemViewController.js"
 }, {
     "pattern": "app/store/BufferedInventoryTag.js"
@@ -785,15 +759,15 @@
 }, {
     "pattern": "app/view/LotDetail.js"
 }, {
-    "pattern": "app/view/LotDetailHistory.js"
+    "pattern": "app/view/LotHistory.js"
 }, {
-    "pattern": "app/view/LotDetailHistoryViewController.js"
+    "pattern": "app/view/LotHistoryViewController.js"
 }, {
-    "pattern": "app/model/LotDetailHistory.js"
+    "pattern": "app/model/LotHistory.js"
 }, {
-    "pattern": "app/store/LotDetailHistory.js"
+    "pattern": "app/store/LotHistory.js"
 }, {
-    "pattern": "app/view/LotDetailHistoryViewModel.js"
+    "pattern": "app/view/LotHistoryViewModel.js"
 }, {
     "pattern": "app/view/LotDetailViewController.js"
 }, {
@@ -817,8 +791,6 @@
 }, {
     "pattern": "app/view/ManufacturingCellViewModel.js"
 }, {
-    "pattern": "app/view/MaterialMovementMap.js"
-}, {
     "pattern": "app/view/OriginConversionOption.js"
 }, {
     "pattern": "app/view/OriginConversionOptionViewController.js"
@@ -831,17 +803,11 @@
 }, {
     "pattern": "app/view/PickLotViewModel.js"
 }, {
-    "pattern": "app/view/ProcessCodeViewModel.js"
+    "pattern": "app/view/ProductionProcessViewModel.js"
 }, {
-    "pattern": "app/view/ProcessCodeViewController.js"
+    "pattern": "app/view/ProductionProcessViewController.js"
 }, {
-    "pattern": "app/view/ProcessCode.js"
-}, {
-    "pattern": "app/view/Reason.js"
-}, {
-    "pattern": "app/view/ReasonViewController.js"
-}, {
-    "pattern": "app/view/ReasonViewModel.js"
+    "pattern": "app/view/ProductionProcess.js"
 }, {
     "pattern": "app/view/RebuildInventory.js"
 }, {

@@ -56,6 +56,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 if(selection) {
                                     iRely.Functions.openScreen('Inventory.view.InventoryValuation', {
                                         showSearch: true,
+                                        isFloating: true,
                                         filters: [
                                             {
                                                 column: 'strItemNo',

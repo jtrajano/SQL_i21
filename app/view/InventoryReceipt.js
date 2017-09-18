@@ -1516,7 +1516,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colForexRate',
                                                                                 width: 85,
                                                                                 dataIndex: 'dblForexRate',
-                                                                                text: 'Forex Rate'
+                                                                                text: 'Forex Rate',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    currencyField: true,
+                                                                                    itemId: 'txtForexRate',
+                                                                                    readOnly: true,
+                                                                                    minValue: 0
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
@@ -2750,7 +2757,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'colChargeForexRate',
                                                                         width: 85,
                                                                         dataIndex: 'dblForexRate',
-                                                                        text: 'Forex Rate'
+                                                                        text: 'Forex Rate',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            currencyField: true,
+                                                                            itemId: 'txtChargeForexRate',
+                                                                            readOnly: true,
+                                                                            minValue: 0
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',

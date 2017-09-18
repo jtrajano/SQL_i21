@@ -72,7 +72,7 @@ Ext.define('Inventory.search.LotDetail', {
 
     onHistoryClick: function(e, grid) {
         if(grid.view.selection) {
-            iRely.Functions.openScreen('Inventory.view.LotDetailHistory', grid.view.selection.get('intLotId'));
+            iRely.Functions.openScreen('Inventory.view.LotHistory', grid.view.selection.get('intLotId'));
         } else {
             iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, "Please select a lot.");  
         }

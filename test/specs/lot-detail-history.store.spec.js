@@ -1,11 +1,11 @@
 UnitTestEngine.testStore({
-    name: 'Inventory.store.LotDetailHistory',
-    alias: "store.iclotdetailhistory",
+    name: 'Inventory.store.LotHistory',
+    alias: "store.iclothistory",
     base: 'Ext.data.BufferedStore',
-    dependencies: ["Inventory.model.LotDetailHistory"],
+    dependencies: ["Inventory.model.LotHistory"],
     config: {
-        "model": "Inventory.model.LotDetailHistory",
-        "storeId": "LotDetailHistory",
+        "model": "Inventory.model.LotHistory",
+        "storeId": "LotHistory",
         "pageSize": 50,
         "proxy": {
             "type": "rest",
