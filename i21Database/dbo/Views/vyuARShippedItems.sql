@@ -984,9 +984,9 @@ FROM (
 	     , intEntityShipViaId				= NULL
 	     , intTicketId						= NULL
 	     , intTaxGroupId					= NULL
-	     , dblGrossWt						= LDL.dblGross
-	     , dblTareWt						= LDL.dblTare
-	     , dblNetWt							= LDL.dblNet
+	     , dblGrossWt						= LD.dblGross
+	     , dblTareWt						= LD.dblTare
+	     , dblNetWt							= LD.dblNet
 	     , strPONumber						= ''
 	     , strBOLNumber						= ''
 	     , intSplitId						= NULL
@@ -1025,14 +1025,14 @@ FROM (
 			 , intSCompanyLocationId
 			 , intPContractDetailId
 			 , dblQuantity
+			 , dblGross
+			 , dblTare
+			 , dblNet
 		FROM dbo.tblLGLoadDetail WITH (NOLOCK)
 	) LD ON L.intLoadId  = LD.intLoadId
 	LEFT JOIN (
 		SELECT intLoadDetailId
 			 , intLotId
-			 , dblGross
-			 , dblTare
-			 , dblNet
 			 , dblLotQuantity
 		FROM dbo.tblLGLoadDetailLot WITH (NOLOCK)
 	) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
