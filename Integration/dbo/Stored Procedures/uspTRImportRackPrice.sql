@@ -41,7 +41,7 @@ BEGIN
 	 FROM ssvndmst  
 	 INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
-	 INNER JOIN tblAPVendor APVND ON APVND.intEntityVendorId = ENT.intEntityId
+	 INNER JOIN tblAPVendor APVND ON APVND.intEntityId = ENT.intEntityId
 	 WHERE APVND.ysnTransportTerminal = 1 AND ETYP.strType = 'Vendor'	 
 		
 	IF(@Checking = 0)
@@ -62,7 +62,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = TRP.trprc_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = TRP.trprc_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 		WHERE SUP.intSupplyPointId NOT IN (SELECT intSupplyPointId FROM tblTRRackPriceHeader WHERE intSupplyPointId = SUP.intSupplyPointId 
@@ -87,7 +87,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = TRP.trprc_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = TRP.trprc_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblTRRackPriceHeader RPH ON RPH.intSupplyPointId = SUP.intSupplyPointId AND RPH.dtmEffectiveDateTime =CAST((LEFT(CONVERT(VARCHAR,trprc_rev_dt),4) + '-' + SUBSTRING(CONVERT(VARCHAR,trprc_rev_dt),5,2) +  '-' + RIGHT(CONVERT(VARCHAR,trprc_rev_dt),2)) + ' ' 
@@ -105,7 +105,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = TRP.trprc_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = TRP.trprc_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 		WHERE SUP.intSupplyPointId NOT IN (SELECT intSupplyPointId FROM tblTRRackPriceHeader WHERE intSupplyPointId = SUP.intSupplyPointId 
