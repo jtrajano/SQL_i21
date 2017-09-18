@@ -5559,9 +5559,9 @@ INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@P
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Employee (Portal)', N'Payroll', @PayrollPortalParentMenuId, N'Employee (Portal)', N'Portal Menu', N'Screen', N'Payroll.view.EntityEmployee?action=new', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Employee (Portal)', N'Payroll', @PayrollPortalParentMenuId, N'Employee (Portal)', N'Portal Menu', N'Screen', N'Payroll.view.EntityEmployee', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Payroll.view.EntityEmployee?action=new' WHERE strMenuName = 'Employee (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Payroll.view.EntityEmployee' WHERE strMenuName = 'Employee (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId
 
 DECLARE @PREmployeeMenuId INT
 SELECT  @PREmployeeMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Employee (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId
@@ -5601,9 +5601,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Calendar (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Time Off Calendar (Portal)', N'Payroll', @PayrollPortalParentMenuId, N'Time Off Calendar (Portal)', N'Portal Menu', N'Screen', N'Payroll.view.TimeOffRequest?showSearch=true&searchCommand=TimeOffRequest&isFloating=true', N'small-menu-portal', 1, 0, 0, 1, 3, 1)
+	VALUES (N'Time Off Calendar (Portal)', N'Payroll', @PayrollPortalParentMenuId, N'Time Off Calendar (Portal)', N'Portal Menu', N'Screen', N'GlobalComponentEngine.view.Calendar', N'small-menu-portal', 1, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Payroll.view.TimeOffRequest?showSearch=true&searchCommand=TimeOffRequest&isFloating=true' WHERE strMenuName = 'Time Off Calendar (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'GlobalComponentEngine.view.Calendar' WHERE strMenuName = 'Time Off Calendar (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId
 
 DECLARE @PRTimeOffCalendarMenuId INT
 SELECT  @PRTimeOffCalendarMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Calendar (Portal)' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollPortalParentMenuId
