@@ -233,6 +233,14 @@
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
 
+--TRANSPORT
+:r "..\dbo\Stored Procedures\uspTRImportOriginHistory.sql"
+:r "..\dbo\Stored Procedures\uspTRImportRackPrice.sql"
+:r "..\dbo\Stored Procedures\uspTRImportSupplyPoint.sql"
+:r "..\dbo\Stored Procedures\uspTRImportSupplyPointProductSearch.sql"
+:r "..\dbo\Stored Procedures\uspTRImportSupplyPointRackPriceEquation.sql"
+:r "..\dbo\Stored Procedures\uspTRImportTruck.sql" 
+
 -- EnergyTrac
 :r "..\dbo\Stored Procedures\uspETRecreateDeliveryMetricsView.sql"
 
