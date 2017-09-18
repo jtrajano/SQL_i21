@@ -221,7 +221,7 @@ END
 --) Vouchers
 --WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 --		THEN
---			CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+--			CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND `(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 --				AND A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 --		ELSE 1 END)
 --AND A.apivc_trans_type IN ('I', 'C', 'A')
