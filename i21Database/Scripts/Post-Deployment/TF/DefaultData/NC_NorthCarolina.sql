@@ -240,6 +240,8 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 3079, strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333079
 	UNION ALL SELECT intFilingPacketId = 3080, strFormCode = 'NC EDI', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333080
 
+	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
+
 END
 
 GO
