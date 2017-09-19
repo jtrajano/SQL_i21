@@ -11,7 +11,7 @@ GO
 	begin
 		begin transaction;
 		begin try
-			update tblSMScreen set strScreenName = 'Create Multiple Ticket' where strModule = @moduleName and strNamespace = @nameSpace;
+			update tblSMScreen set strScreenName = 'Create Multiple Tickets' where strModule = @moduleName and strNamespace = @nameSpace;
 			commit transaction;
 		end try
 		begin catch
@@ -25,7 +25,7 @@ GO
 	begin
 		begin transaction;
 		begin try
-			update tblSMScreen set strScreenName = 'Link Issue' where strModule = @moduleName and strNamespace = @nameSpace;
+			update tblSMScreen set strScreenName = 'Link JIRA Issue' where strModule = @moduleName and strNamespace = @nameSpace;
 			commit transaction;
 		end try
 		begin catch
@@ -39,7 +39,7 @@ GO
 	begin
 		begin transaction;
 		begin try
-			update tblSMScreen set strScreenName = 'Create Issue' where strModule = @moduleName and strNamespace = @nameSpace;
+			update tblSMScreen set strScreenName = 'Create JIRA Issue' where strModule = @moduleName and strNamespace = @nameSpace;
 			commit transaction;
 		end try
 		begin catch
