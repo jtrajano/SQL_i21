@@ -269,6 +269,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\HDEntryDataFix.sql
 :R .\HD\CustomField.sql
 :R .\HD\RemoveHDObsoleteScreen.sql
+:R .\HD\RenameHDScreen.sql
 
 --CRM
 :R .\CRM\SplitCRMData.sql

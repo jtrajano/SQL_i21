@@ -5801,6 +5801,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateTaxGroupId.sql" />
     <None Include="Scripts\Post-Deployment\TR\RemoveObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\HD\RemoveHDObsoleteScreen.sql" />
+    <None Include="Scripts\Post-Deployment\HD\RenameHDScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
