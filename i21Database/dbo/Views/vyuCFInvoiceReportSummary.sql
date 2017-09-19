@@ -1,12 +1,11 @@
-﻿
-CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 SELECT intCustomerId = ( CASE cfTrans.strTransactionType 
                            WHEN 'Foreign Sale' THEN cfSiteItem.intCustomerId 
                            ELSE cfCardAccount.intCustomerId 
                          END ), 
        intAccountId = ( CASE cfTrans.strTransactionType 
-                          WHEN 'Foreign Sale' THEN cfSiteItem.intCustomerId 
+                          WHEN 'Foreign Sale' THEN cfSiteItem.intAccountId 
                           ELSE cfCardAccount.intAccountId 
                         END ), 
        strCustomerName = ( CASE cfTrans.strTransactionType 
@@ -197,7 +196,8 @@ FROM   dbo.vyuCFInvoice AS arInv
                           arBillTo.strCity, arBillTo.strState, 
                           arBillTo.strZipCode, 
                           arBillTo.strCountry, 
-                          NULL, 0) AS strBillTo 
+                          NULL, 0) AS strBillTo, 
+						  cfAcct.intAccountId
                    FROM   dbo.tblCFSite AS icfSite 
                           INNER JOIN dbo.tblCFNetwork AS icfNetwork 
                                   ON icfNetwork.intNetworkId = 
@@ -205,9 +205,12 @@ FROM   dbo.vyuCFInvoice AS arInv
                           LEFT JOIN tblEMEntity iemEnt 
                                  ON iemEnt.intEntityId = 
                                     icfNetwork.intCustomerId 
-                          INNER JOIN tblARCustomer iarCus 
-                                  ON iarCus.intEntityId = 
-                                     iemEnt.intEntityId 
+                          LEFT JOIN tblARCustomer iarCus 
+                                 ON iarCus.intEntityId = 
+                                    iemEnt.intEntityId 
+                          LEFT JOIN tblCFAccount cfAcct 
+                                 ON iarCus.intEntityId = 
+                                    cfAcct.intCustomerId 
                           LEFT JOIN tblEMEntityLocation arBillTo 
                                  ON arBillTo.intEntityLocationId = 
                                     iarCus.intBillToId 
@@ -331,9 +334,8 @@ FROM   dbo.vyuCFInvoice AS arInv
                                dblTaxRate 
                         FROM   dbo.vyuCFTransactionTax AS TotalTaxes 
                         GROUP  BY intTransactionId) AS TotalTaxes_1 
-                    ON cfTrans.intTransactionId = TotalTaxes_1.intTransactionId 
+                    ON cfTrans.intTransactionId = TotalTaxes_1.intTransactionId
 
- 
 GO
 
 

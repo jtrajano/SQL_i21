@@ -308,8 +308,24 @@ AND ( cfTT.intTransactionId = cfTrans.intTransactionId )
 GROUP  BY cfTT.intTransactionId) / cfTrans.dblQuantity         AS 
        dblTaxExceptSST, 
 cfTrans.strPrintTimeStamp, 
-cfCardAccount.strEmailDistributionOption, 
-cfCardAccount.strEmail 
+
+ strEmailDistributionOption = ( CASE cfTrans.strTransactionType 
+                                 WHEN 'Foreign Sale' 
+								 THEN 
+								 (select top 1 strEmailDistributionOption from vyuARCustomerContacts where [intEntityId] = cfSiteItem.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '')
+                                 ELSE 
+								 (select top 1 strEmailDistributionOption from vyuARCustomerContacts where [intEntityId] = cfCardAccount.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '')
+                               END ), 
+
+ strEmail = ( CASE cfTrans.strTransactionType 
+                                 WHEN 'Foreign Sale' 
+								 THEN 
+								 (select top 1 strEmail from vyuARCustomerContacts where [intEntityId] = cfSiteItem.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '')
+                                 ELSE 
+								 (select top 1 strEmail from vyuARCustomerContacts where [intEntityId] = cfCardAccount.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '')
+                               END )
+
+
 FROM   dbo.vyuCFInvoice AS arInv 
        RIGHT OUTER JOIN dbo.tblCFTransaction AS cfTrans 
                      ON arInv.intTransactionId = cfTrans.intTransactionId 
@@ -476,7 +492,7 @@ FROM   dbo.vyuCFInvoice AS arInv
                           cfAcct.ysnSummaryByDeptVehicleProd, 
                           cfAcct.strPrimaryDepartment, 
                           cfAcct.ysnDepartmentGrouping,
-						  cfAcct.intAccountId 
+						  cfAcct.intAccountId
                    FROM   dbo.tblCFSite AS icfSite 
                           INNER JOIN dbo.tblCFNetwork AS icfNetwork 
                                   ON icfNetwork.intNetworkId = 
@@ -549,7 +565,8 @@ FROM   dbo.vyuCFInvoice AS arInv
                                                               cfTransNetPrice 
        LEFT OUTER JOIN dbo.tblCFDepartment AS cfAccntDep 
                     ON cfAccntDep.intDepartmentId = 
-                       cfCardAccount.intDepartmentId 
+                       cfCardAccount.intDepartmentId
+
 
 GO
 

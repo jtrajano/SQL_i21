@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
+﻿CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
 	 @entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -153,7 +152,7 @@ BEGIN
 		FROM tblCFInvoiceStagingTable cfTrans
 		LEFT OUTER JOIN tblARInvoice I
 		ON cfTrans.intInvoiceId = I.intInvoiceId
-		WHERE cfTrans.intInvoiceId IS NOT NULL AND (cfTrans.strTransactionType != 'Foreign Sale' OR ISNULL(cfTrans.ysnPostForeignSales,0) != 0)
+		WHERE ISNULL(I.intInvoiceId,0) != 0
 		--------------------------------------
 
 		--select * From @EntriesForPayment

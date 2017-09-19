@@ -1,7 +1,4 @@
-﻿
-
-
-CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
 AS
 SELECT   
 
@@ -18,7 +15,7 @@ intAccountId = (
 
 	CASE cfTrans.strTransactionType 
 		WHEN 'Foreign Sale' 
-		THEN cfSiteItem.intCustomerId
+		THEN cfSiteItem.intAccountId
 
 		ELSE cfCardAccount.intAccountId
 	END),
@@ -84,9 +81,12 @@ FROM
                                                          icfSite.dtmCreated, icfSite.intLastModifiedUserId, icfSite.dtmLastModified, icfSite.intConcurrencyId, icfSite.intImportMapperId, icfItem.intItemId, 
                                                          icfItem.intARItemId, iicItemLoc.intItemLocationId, iicItemLoc.intIssueUOMId, iicItem.strDescription, iicItem.strShortName, iicItem.strItemNo, 
                                                          icfItem.strProductNumber, iicItemPricing.dblAverageCost, icfItem.strProductDescription, icfItem.ysnIncludeInQuantityDiscount, icfNetwork.ysnPostForeignSales, icfNetwork.intCustomerId, iemEnt.strName, iemEnt.strEntityNo
+														 ,cfAcct.intAccountId
                                 FROM         dbo.tblCFSite AS icfSite INNER JOIN
                                                          dbo.tblCFNetwork AS icfNetwork ON icfNetwork.intNetworkId = icfSite.intNetworkId LEFT JOIN 
-														 dbo.tblEMEntity iemEnt ON iemEnt.intEntityId = icfNetwork.intCustomerId INNER JOIN
+														 dbo.tblEMEntity iemEnt ON iemEnt.intEntityId = icfNetwork.intCustomerId LEFT JOIN 
+														 dbo.tblARCustomer iarCus ON iarCus.intEntityId = iemEnt.intEntityId LEFT JOIN 
+														 dbo.tblCFAccount cfAcct ON iarCus.intEntityId = cfAcct.intCustomerId   INNER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId OR icfNetwork.intNetworkId = icfItem.intNetworkId INNER JOIN
                                                          dbo.tblICItem AS iicItem ON icfItem.intARItemId = iicItem.intItemId LEFT OUTER JOIN
                                                          dbo.tblICItemLocation AS iicItemLoc ON iicItemLoc.intLocationId = icfSite.intARLocationId AND iicItemLoc.intItemId = icfItem.intARItemId INNER JOIN

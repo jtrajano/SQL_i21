@@ -180,7 +180,7 @@ BEGIN
 			,[dblQtyOrdered]						= NULL
 			,[dblQtyShipped]						= 1 -- DEFAULT TO 1
 			,[dblDiscount]							= NULL
-			,[dblPrice]								= dblAccountTotalAmount -- dblAccountTotalAmount
+			,[dblPrice]								= SUM(dblTotalAmount) -- dblAccountTotalAmount
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= ''
 			,[strFrequency]							= ''
@@ -213,15 +213,15 @@ BEGIN
 			,[strType]								= 'CF Invoice'
 			,[ysnUpdateAvailableDiscount]			= 1
 			,[strItemTermDiscountBy]				= 'Amount'
-			,[dblItemTermDiscount]					= dblAccountTotalDiscount
+			,[dblItemTermDiscount]					= SUM(dblDiscount)
 			,[strDocumentNumber]					= strTempInvoiceReportNumber
 		FROM tblCFInvoiceStagingTable
-		WHERE intInvoiceId IS NOT NULL AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
+		WHERE ISNULL(intInvoiceId,0) != 0
 		GROUP BY 
 		intCustomerId
 		,strTempInvoiceReportNumber
-		,dblAccountTotalAmount
-		,dblAccountTotalDiscount
+		--,dblAccountTotalAmount
+		--,dblAccountTotalDiscount
 		,intTermID
 		,dtmInvoiceDate
 		,intSalesPersonId
@@ -686,15 +686,15 @@ BEGIN
 			SELECT TOP 1 
 			 @strInvoiceReportNumber = strTempInvoiceReportNumber 
 			,@dblTotalQuantity = SUM(dblQuantity)
-			,@dblAccountTotalAmount = dblAccountTotalAmount
-			,@dblAccountTotalDiscount = dblAccountTotalDiscount
+			,@dblAccountTotalAmount = SUM(dblTotalAmount)
+			,@dblAccountTotalDiscount = SUM(dblDiscount)
 			FROM tblCFInvoiceStagingTable 
-			WHERE intCustomerId = @intEntityCustomerId AND intInvoiceId IS NOT NULL AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
+			WHERE intCustomerId = @intEntityCustomerId AND ISNULL(intInvoiceId,0) != 0
 			GROUP BY
 			 intCustomerId
 			,strTempInvoiceReportNumber
-			,dblAccountTotalAmount
-			,dblAccountTotalDiscount
+			--,dblAccountTotalAmount
+			--,dblAccountTotalDiscount
 			,intTermID
 			,dtmInvoiceDate
 			,intSalesPersonId

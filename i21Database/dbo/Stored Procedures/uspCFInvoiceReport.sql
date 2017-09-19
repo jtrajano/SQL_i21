@@ -1,7 +1,4 @@
-﻿
-
-
-CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
@@ -353,12 +350,17 @@ BEGIN
 																											intAccountId = (
 																											CASE cfTrans.strTransactionType 
 																												WHEN 'Foreign Sale' 
-																												THEN cfNet.intCustomerId
+																												THEN cfNet.intAccountId
 
 																												ELSE cfCardAcct.intAccountId 
 																											END)
 																											FROM tblCFTransaction as cfTrans
-																											INNER JOIN tblCFNetwork as cfNet
+																											INNER JOIN 
+																											(SELECT cfAcct.*,icfNet.intNetworkId FROM tblCFNetwork as icfNet
+																											LEFT JOIN tblCFAccount cfAcct 
+																											ON icfNet.intCustomerId = 
+																											cfAcct.intCustomerId )
+																											 as cfNet
 																											ON cfTrans.intNetworkId = cfNet.intNetworkId
 																											LEFT JOIN vyuCFCardAccount as cfCardAcct
 																											ON cfTrans.intCardId = cfCardAcct.intCardId
@@ -400,12 +402,17 @@ BEGIN
 																											intAccountId = (
 																											CASE cfTrans.strTransactionType 
 																												WHEN 'Foreign Sale' 
-																												THEN cfNet.intCustomerId
+																												THEN cfNet.intAccountId
 
 																												ELSE cfCardAcct.intAccountId 
 																											END)
 																											FROM tblCFTransaction as cfTrans
-																											INNER JOIN tblCFNetwork as cfNet
+																											INNER JOIN 
+																											(SELECT cfAcct.*,icfNet.intNetworkId FROM tblCFNetwork as icfNet
+																											LEFT JOIN tblCFAccount cfAcct 
+																											ON icfNet.intCustomerId = 
+																											cfAcct.intCustomerId )
+																											 as cfNet
 																											ON cfTrans.intNetworkId = cfNet.intNetworkId
 																											LEFT JOIN vyuCFCardAccount as cfCardAcct
 																											ON cfTrans.intCardId = cfCardAcct.intCardId
