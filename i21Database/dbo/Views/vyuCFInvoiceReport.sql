@@ -6,7 +6,7 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
                            ELSE cfCardAccount.intCustomerId 
                          END ), 
        intAccountId = ( CASE cfTrans.strTransactionType 
-                          WHEN 'Foreign Sale' THEN cfSiteItem.intCustomerId 
+                          WHEN 'Foreign Sale' THEN cfSiteItem.intAccountId 
                           ELSE cfCardAccount.intAccountId 
                         END ), 
        strCustomerName = ( CASE cfTrans.strTransactionType 
@@ -475,7 +475,8 @@ FROM   dbo.vyuCFInvoice AS arInv
                           cfAcct.ysnPrintTimeOnReports, 
                           cfAcct.ysnSummaryByDeptVehicleProd, 
                           cfAcct.strPrimaryDepartment, 
-                          cfAcct.ysnDepartmentGrouping 
+                          cfAcct.ysnDepartmentGrouping,
+						  cfAcct.intAccountId 
                    FROM   dbo.tblCFSite AS icfSite 
                           INNER JOIN dbo.tblCFNetwork AS icfNetwork 
                                   ON icfNetwork.intNetworkId = 
