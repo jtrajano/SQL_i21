@@ -4,8 +4,7 @@ StartTest (function (t) {
 
         //region
         .displayText('===== Pre-setup =====')
-               /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
-        //region
+        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
         .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
         .clickMenuFolder('System Manager','Folder')
         .clickMenuScreen('Users','Screen')
