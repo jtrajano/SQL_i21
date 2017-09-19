@@ -115,7 +115,7 @@ BEGIN TRY
 			,dtmDate = GETDATE()
 			,intShipViaId = CD.intShipViaId
 			,dblQty = ISNULL(LDCL.dblQuantity, LD.dblQuantity) --
-			,intGrossNetUOMId = ISNULL(CD.intNetWeightUOMId, LD.intWeightItemUOMId) --
+			,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId) --
 			,dblGross = ISNULL(LDCL.dblLinkGrossWt, LD.dblGross) --
 			,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) --
 			,dblCost = ISNULL(AD.dblSeqPrice, 0) --
@@ -214,7 +214,7 @@ BEGIN TRY
 			,dtmDate = GETDATE()
 			,intShipViaId = CD.intShipViaId
 			,dblQty = LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) --
-			,intGrossNetUOMId = ISNULL(CD.intNetWeightUOMId, LD.intWeightItemUOMId) --
+			,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId) --
 			,dblGross =  LD.dblGross - ISNULL(LD.dblDeliveredGross,0) --
 			,dblNet = LD.dblNet -ISNULL(LD.dblDeliveredNet,0) --
 			,dblCost = ISNULL(AD.dblSeqPrice, 0) --
