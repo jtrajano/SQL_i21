@@ -33,43 +33,39 @@ Ext.define('Inventory.view.TaxDetailsViewController', {
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colItemNo',
-                        width: 85,
                         sortable: false,
                         dataIndex: 'strItemNo',
                         text: 'Item No',
-                        flex: 1.25
+                        flex: 1.3
                     },
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colTaxGroup',
-                        width: 90,
                         sortable: false,
                         dataIndex: 'strTaxGroup',
                         text: 'Tax Group',
-                        flex: 1.25
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colTaxClass',
-                        width: 100,
-                        sortable: false,
-                        dataIndex: 'strTaxClass',
-                        text: 'Tax Class',
-                        flex: 1.25
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colTaxCode',
-                        width: 130,
-                        sortable: false,
-                        dataIndex: 'strTaxCode',
-                        text: 'Tax Code',
                         flex: 1.5
                     },
                     {
                         xtype: 'gridcolumn',
+                        itemId: 'colTaxClass',
+                        sortable: false,
+                        dataIndex: 'strTaxClass',
+                        text: 'Tax Class',
+                        flex: 1.5
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colTaxCode',
+                        sortable: false,
+                        dataIndex: 'strTaxCode',
+                        text: 'Tax Code',
+                        flex: 1.7
+                    },
+                    {
+                        xtype: 'gridcolumn',
                         itemId: 'colCalculationMethod',
-                        width: 120,
+                        flex: 1.5,
                         sortable: false,
                         dataIndex: 'strCalculationMethod',
                         text: 'Calculation Method'
@@ -77,7 +73,7 @@ Ext.define('Inventory.view.TaxDetailsViewController', {
                     {
                         xtype: 'numbercolumn',
                         itemId: 'colRate',
-                        width: 50,
+                        flex: 0.75,
                         align: 'right',
                         format: '0,000.00####',
                         dataIndex: 'dblRate',
@@ -86,7 +82,7 @@ Ext.define('Inventory.view.TaxDetailsViewController', {
                     {
                         xtype: 'numbercolumn',
                         itemId: 'colTax',
-                        width: 80,
+                        flex: 1.2,
                         align: 'right',
                         format: '0,000.00####',
                         dataIndex: 'dblTax',
@@ -111,8 +107,8 @@ Ext.define('Inventory.view.TaxDetailsViewController', {
         btnInsert.setHidden(true);
         btnDelete.setHidden(true);
 
-        win.width = 600;
-        win.minWidth = 600;
+        win.width = 760;
+        win.minWidth = 760;
         win.show();
 
         var context = me.setupContext();

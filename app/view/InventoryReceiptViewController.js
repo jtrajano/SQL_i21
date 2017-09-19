@@ -2406,7 +2406,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if(itemDetailTax.ysnTaxOnly)
                         taxableAmount = 0.000000;
                     else
-                        taxableAmount = ((quantity * price) - (quantity * price * dblRate / 100.0));
+                        taxableAmount = quantity * price; 
 
                     if (itemDetailTax.ysnTaxAdjusted) {
                         otherTaxes += itemDetailTax.dblAdjustedTax;
@@ -2420,7 +2420,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             otherTaxes += 
                                 ((itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent === 0.00) || itemDetailTax.ysnCheckoffTax) 
                                 ? 0.00 
-                                : (dblRate * quantity);
+                                : (quantity * dblRate);
                         }
                     }
                 }
