@@ -5409,6 +5409,10 @@
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReconciledValidation.sql" />
     <Build Include="fnICCalculateExpiryDate.sql" />
+    <Build Include="dbo\Tables\tblQMSampleImport.sql" />
+    <Build Include="dbo\Tables\tblQMSampleImportError.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleImportValidate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
