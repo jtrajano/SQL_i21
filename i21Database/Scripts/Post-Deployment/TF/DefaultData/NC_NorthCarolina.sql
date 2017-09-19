@@ -162,6 +162,84 @@ where intTaxAuthorityId = @TaxAuthorityId
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
+
+
+-- Filing Packet
+/* Generate script for Filing Packets. Specify Tax Authority Id to filter out specific Filing Packets only.
+select 'UNION ALL SELECT intFilingPacketId = ' + CAST(intFilingPacketId AS NVARCHAR(10))
+	+ CASE WHEN strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
+	+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
+	+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
+	+ CASE WHEN ysnStatus IS NULL THEN ', ysnStatus = NULL' ELSE ', ysnStatus = ' + CAST(ysnStatus AS NVARCHAR) END
+	+ CASE WHEN intFrequency IS NULL THEN ', intFrequency = NULL' ELSE ', intFrequency = ' + CAST(intFrequency AS NVARCHAR(10)) END
+--	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(FP.intMasterId, '') = '' THEN intFilingPacketId ELSE FP.intMasterId END) AS NVARCHAR(20)) -- Old Format
+	+ ', intMasterId = ' + CASE WHEN FP.intMasterId IS NULL THEN CAST(@TaxAuthorityId AS NVARCHAR(20)) + CAST(intFilingPacketId AS NVARCHAR(20)) ELSE CAST(FP.intMasterId AS NVARCHAR(20)) END -- First 2 digit for TaxAuthorityCodeID
+from tblTFFilingPacket FP
+left join tblTFReportingComponent RC on RC.intReportingComponentId = FP.intReportingComponentId
+where FP.intTaxAuthorityId = @TaxAuthorityId
+*/
+	DECLARE @FilingPackets AS TFFilingPackets
+
+	INSERT INTO @FilingPackets(
+		intFilingPacketId
+		, strFormCode
+		, strScheduleCode
+		, strType
+		, ysnStatus
+		, intFrequency
+		, intMasterId
+	)
+	SELECT intFilingPacketId = 3031, strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333031
+	UNION ALL SELECT intFilingPacketId = 3032, strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333032
+	UNION ALL SELECT intFilingPacketId = 3033, strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333033
+	UNION ALL SELECT intFilingPacketId = 3034, strFormCode = 'Gas-1301', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333034
+	UNION ALL SELECT intFilingPacketId = 3035, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 333035
+	UNION ALL SELECT intFilingPacketId = 3036, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Undyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333036
+	UNION ALL SELECT intFilingPacketId = 3037, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333037
+	UNION ALL SELECT intFilingPacketId = 3038, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Undyed Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 333038
+	UNION ALL SELECT intFilingPacketId = 3039, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Dyed Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 333039
+	UNION ALL SELECT intFilingPacketId = 3040, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Jet Fuel', ysnStatus = 1, intFrequency = 1, intMasterId = 333040
+	UNION ALL SELECT intFilingPacketId = 3041, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'AvGas', ysnStatus = 1, intFrequency = 1, intMasterId = 333041
+	UNION ALL SELECT intFilingPacketId = 3042, strFormCode = 'Gas-1252', strScheduleCode = '5A', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 333042
+	UNION ALL SELECT intFilingPacketId = 3043, strFormCode = 'Gas-1252', strScheduleCode = '5A', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 333043
+	UNION ALL SELECT intFilingPacketId = 3044, strFormCode = 'Gas-1252', strScheduleCode = '8', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 333044
+	UNION ALL SELECT intFilingPacketId = 3045, strFormCode = 'Gas-1252', strScheduleCode = '8', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 333045
+	UNION ALL SELECT intFilingPacketId = 3046, strFormCode = 'Gas-1252', strScheduleCode = '9A', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 333046
+	UNION ALL SELECT intFilingPacketId = 3047, strFormCode = 'Gas-1252', strScheduleCode = '9A', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 333047
+	UNION ALL SELECT intFilingPacketId = 3048, strFormCode = 'Gas-1252', strScheduleCode = '9C', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 333048
+	UNION ALL SELECT intFilingPacketId = 3049, strFormCode = 'Gas-1252', strScheduleCode = '9C', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 333049
+	UNION ALL SELECT intFilingPacketId = 3050, strFormCode = 'Gas-1252', strScheduleCode = '9E', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 333050
+	UNION ALL SELECT intFilingPacketId = 3051, strFormCode = 'Gas-1252', strScheduleCode = '9E', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 333051
+	UNION ALL SELECT intFilingPacketId = 3052, strFormCode = 'Gas-1252', strScheduleCode = '9F', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 333052
+	UNION ALL SELECT intFilingPacketId = 3053, strFormCode = 'Gas-1252', strScheduleCode = '9F', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 333053
+	UNION ALL SELECT intFilingPacketId = 3054, strFormCode = 'Gas-1252', strScheduleCode = '9G', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 333054
+	UNION ALL SELECT intFilingPacketId = 3055, strFormCode = 'Gas-1252', strScheduleCode = '9G', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 333055
+	UNION ALL SELECT intFilingPacketId = 3056, strFormCode = 'Gas-1259', strScheduleCode = '5R', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333056
+	UNION ALL SELECT intFilingPacketId = 3057, strFormCode = 'Gas-1259', strScheduleCode = '5R', strType = 'Dyed Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 333057
+	UNION ALL SELECT intFilingPacketId = 3058, strFormCode = 'Gas-1259', strScheduleCode = '5S', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333058
+	UNION ALL SELECT intFilingPacketId = 3059, strFormCode = 'Gas-1259', strScheduleCode = '5S', strType = 'Dyed Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 333059
+	UNION ALL SELECT intFilingPacketId = 3060, strFormCode = 'Gas-1259', strScheduleCode = '5U', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 333060
+	UNION ALL SELECT intFilingPacketId = 3061, strFormCode = 'Gas-1259', strScheduleCode = '5U', strType = 'Undyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333061
+	UNION ALL SELECT intFilingPacketId = 3062, strFormCode = 'Gas-1259', strScheduleCode = '5U', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333062
+	UNION ALL SELECT intFilingPacketId = 3063, strFormCode = 'Gas-1259', strScheduleCode = '5U', strType = 'Undyed Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 333063
+	UNION ALL SELECT intFilingPacketId = 3064, strFormCode = 'Gas-1259', strScheduleCode = '5V', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 333064
+	UNION ALL SELECT intFilingPacketId = 3065, strFormCode = 'Gas-1259', strScheduleCode = '5V', strType = 'Undyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333065
+	UNION ALL SELECT intFilingPacketId = 3066, strFormCode = 'Gas-1259', strScheduleCode = '5V', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333066
+	UNION ALL SELECT intFilingPacketId = 3067, strFormCode = 'Gas-1259', strScheduleCode = '5V', strType = 'Undyed Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 333067
+	UNION ALL SELECT intFilingPacketId = 3068, strFormCode = 'Gas-1259', strScheduleCode = '5W', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 333068
+	UNION ALL SELECT intFilingPacketId = 3069, strFormCode = 'Gas-1259', strScheduleCode = '5W', strType = 'Undyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333069
+	UNION ALL SELECT intFilingPacketId = 3070, strFormCode = 'Gas-1259', strScheduleCode = '5W', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 333070
+	UNION ALL SELECT intFilingPacketId = 3071, strFormCode = 'Gas-1259', strScheduleCode = '5W', strType = 'Undyed Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 333071
+	UNION ALL SELECT intFilingPacketId = 3072, strFormCode = 'Gas-1259', strScheduleCode = '5W', strType = 'Dyed Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 333072
+	UNION ALL SELECT intFilingPacketId = 3073, strFormCode = 'Gas-1259', strScheduleCode = '5W', strType = 'Jet Fule and Av Gas', ysnStatus = 1, intFrequency = 1, intMasterId = 333073
+	UNION ALL SELECT intFilingPacketId = 3074, strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333074
+	UNION ALL SELECT intFilingPacketId = 3075, strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333075
+	UNION ALL SELECT intFilingPacketId = 3076, strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333076
+	UNION ALL SELECT intFilingPacketId = 3077, strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333077
+	UNION ALL SELECT intFilingPacketId = 3078, strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333078
+	UNION ALL SELECT intFilingPacketId = 3079, strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333079
+	UNION ALL SELECT intFilingPacketId = 3080, strFormCode = 'NC EDI', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 333080
+
 END
 
 GO
