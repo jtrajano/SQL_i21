@@ -1820,6 +1820,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
             current.set('strCostUOM', records[0].get('strReceiveUOM'));
             current.set('intCostUOMId', records[0].get('intReceiveUOMId'));
+            current.set('intWeightUOMId', records[0].get('intGrossUOMId'));
+            current.set('strWeightUOM', records[0].get('strGrossUOM'));
+            current.set('dblWeightUOMConvFactor', records[0].get('dblGrossUOMConvFactor'));
             current.set('dblUnitCost', dblLastCost);
             current.set('dblUnitRetail', dblLastCost);
             current.set('dblItemUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
@@ -1841,36 +1844,38 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var strWeightUOM = '';
             var dblLotUOMConvFactor = 0;
 
-            if (records[0].get('strReceiveUOMType') === 'Weight') {
-                intUOM = records[0].get('intReceiveUOMId');
-                strUOM = records[0].get('strReceiveUOM');
-                strWeightUOM = records[0].get('strReceiveUOM');
-                dblLotUOMConvFactor = records[0].get('dblReceiveUOMConvFactor');
-                current.set('intWeightUOMId', intUOM);
-                current.set('strWeightUOM', strUOM);
-                current.set('dblWeightUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
-            }
-            else if (records[0].get('strStockUOMType') === 'Weight') {
-                intUOM = records[0].get('intStockUOMId');
-                strUOM = records[0].get('strStockUOM');
-                strWeightUOM = records[0].get('strStockUOM');
-                dblLotUOMConvFactor = 1;
-                current.set('intWeightUOMId', intUOM);
-                current.set('strWeightUOM', strUOM);
-                current.set('dblWeightUOMConvFactor', 1);
-            }
-            else {
-                intUOM = records[0].get('intReceiveUOMId');
-                strUOM = records[0].get('strReceiveUOM');
-                strWeightUOM = '';
-                dblLotUOMConvFactor = 0;
-                current.set('dblWeightUOMConvFactor', 0);
-            }
+            // if (records[0].get('strReceiveUOMType') === 'Weight') {
+            //     intUOM = records[0].get('intReceiveUOMId');
+            //     strUOM = records[0].get('strReceiveUOM');
+            //     strWeightUOM = records[0].get('strReceiveUOM');
+            //     dblLotUOMConvFactor = records[0].get('dblReceiveUOMConvFactor');
+            //     current.set('intWeightUOMId', intUOM);
+            //     current.set('strWeightUOM', strUOM);
+            //     current.set('dblWeightUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
+            // }
+            // else if (records[0].get('strStockUOMType') === 'Weight') {
+            //     intUOM = records[0].get('intStockUOMId');
+            //     strUOM = records[0].get('strStockUOM');
+            //     strWeightUOM = records[0].get('strStockUOM');
+            //     dblLotUOMConvFactor = 1;
+            //     current.set('intWeightUOMId', intUOM);
+            //     current.set('strWeightUOM', strUOM);
+            //     current.set('dblWeightUOMConvFactor', 1);
+            // }
+            // else {
+            //     intUOM = records[0].get('intReceiveUOMId');
+            //     strUOM = records[0].get('strReceiveUOM');
+            //     strWeightUOM = '';
+            //     dblLotUOMConvFactor = 0;
+            //     current.set('dblWeightUOMConvFactor', 0);
+            // }
 
-            if (!!records[0].get('strLotTracking') && records[0].get('strLotTracking') === 'No') {
-                current.set('intWeightUOMId', null);
-                current.set('strWeightUOM', null);
-            }
+
+
+            // if (!!records[0].get('strLotTracking') && records[0].get('strLotTracking') === 'No') {
+            //     current.set('intWeightUOMId', null);
+            //     current.set('strWeightUOM', null);
+            // }
 
             // Get the default tax group
             var taxCfg = {
@@ -1881,6 +1886,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 itemId: itemId 
             };
             me.getDefaultReceiptTaxGroupId(current, taxCfg);
+            me.calculateGrossNet(current, 1);
         }
         // else if (combo.itemId === 'cboItemUOM') {
         //     current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
