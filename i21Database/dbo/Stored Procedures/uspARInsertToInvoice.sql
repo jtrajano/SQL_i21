@@ -50,7 +50,8 @@ DECLARE @EntityCustomerId		INT,
 		@BillToLocationId		INT,
 		@SplitId				INT,
 		@EntityContactId		INT,
-		@StorageScheduleTypeId	INT
+		@StorageScheduleTypeId	INT,
+		@intEntityLineOfBusinessId	INT
 
 DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT, 
 							ysnIsInventory				BIT,
@@ -457,7 +458,8 @@ SELECT TOP 1
 		@BillToLocationId		=	intBillToLocationId,
 		@SplitId				=	intSplitId,
 		@SalesOrderComment		=   strComments,
-		@EntityContactId		=	intEntityContactId
+		@EntityContactId		=	intEntityContactId,
+		@intEntityLineOfBusinessId	= intEntityLineOfBusinessId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
@@ -553,7 +555,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@ItemMaintenanceDate	=	@dtmSOMaintenanceDate,
 							@ItemMaintenanceAmount	=	@dblNewSoftwareMaintAmt,
 							@ItemLicenseAmount		=	0,
-							@ItemPrice				=	@dblNewSoftwareMaintAmt
+							@ItemPrice				=	@dblNewSoftwareMaintAmt,
+							@intEntityLineOfBusinessId = @intEntityLineOfBusinessId
 							
 						DECLARE @softwareToPost NVARCHAR(MAX)
 						SET @softwareToPost = CONVERT(NVARCHAR(MAX), @intNewSoftwareInvoiceId)
@@ -607,6 +610,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[ysnRecurring]
 					,[ysnPosted]
 					,[intEntityContactId]
+					,[intEntityLineOfBusinessId]
 				)
 				SELECT
 					[intEntityCustomerId]
@@ -651,6 +655,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,1
 					,0
 					,[intEntityContactId]
+					,[intEntityLineOfBusinessId]
 				FROM
 				tblSOSalesOrder
 				WHERE intSalesOrderId = @SalesOrderId
@@ -782,6 +787,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@BillToLocationId				= @BillToLocationId
 					,@SplitId						= @SplitId
 					,@EntityContactId				= @EntityContactId
+					,@intEntityLineOfBusinessId		= @intEntityLineOfBusinessId
 
 			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0 
 				BEGIN
