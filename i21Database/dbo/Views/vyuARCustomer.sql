@@ -1,8 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomer]
 AS
 SELECT     
- Entity.intEntityId
-
+ Entity.intEntityId 
+ ,strPaymentMethod
+ ,intPaymentMethodId
 ,Entity.strName
 ,strCustomerNumber= case when Cus.strCustomerNumber = '' then Entity.strEntityNo else Cus.strCustomerNumber end 
 ,Cus.strType
@@ -46,3 +47,4 @@ LEFT JOIN tblEMEntityPhoneNumber as EnPhoneNo ON CusToCon.[intEntityContactId] =
 LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.[intEntityId] = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId
 LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
+LEFT JOIN tblSMPaymentMethod AS CustoPM ON Cus.intPaymentMethodId = CustoPM.intPaymentMethodID
