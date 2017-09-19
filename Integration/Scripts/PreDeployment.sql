@@ -230,6 +230,16 @@
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
+:r "..\dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql"
+:r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
+
+:r "..\dbo\Stored Procedures\deleteSP.sql" 
+
+--GRAIN
+:r "..\dbo\Stored Procedures\uspGRImportStorageType.sql"
+:r "..\dbo\Stored Procedures\uspGRImportWeightGrades.sql"
+:r "..\dbo\Stored Procedures\uspGRImportShipTo.sql"
+
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
 
