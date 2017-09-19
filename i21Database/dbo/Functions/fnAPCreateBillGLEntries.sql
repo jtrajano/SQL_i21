@@ -93,7 +93,7 @@ BEGIN
 																							THEN (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal * -1 
 																							ELSE (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	ISNULL(units.dblTotalUnits,0),
+		[dblCreditUnit]					=	Details.dblUnits,--ISNULL(units.dblTotalUnits,0),
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
@@ -153,8 +153,20 @@ BEGIN
 			-- ) Details
 			OUTER APPLY
             (
-                SELECT (R.dblTotal) AS dblTotal , R.dblRate  AS dblRate, exRates.intCurrencyExchangeRateTypeId, exRates.strCurrencyExchangeRateType
+                SELECT 
+					(R.dblTotal) AS dblTotal, 
+					R.dblRate  AS dblRate, 
+					exRates.intCurrencyExchangeRateTypeId, 
+					exRates.strCurrencyExchangeRateType,
+					dblUnits = CASE WHEN item.intItemId IS NULL THEN R.dblQtyReceived ELSE
+									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
+											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId 
+									END, 
+									itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
+				END
                 FROM dbo.tblAPBillDetail R
+				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
+				LEFT JOIN tblICItemUOM itemUOM ON item.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId
 				UNION ALL --taxes
@@ -165,7 +177,8 @@ BEGIN
 						END AS dblTotal ,
 				 R.dblRate  AS dblRate, 
 				 exRates.intCurrencyExchangeRateTypeId,
-				  exRates.strCurrencyExchangeRateType
+				  exRates.strCurrencyExchangeRateType,
+				  0
                 FROM dbo.tblAPBillDetail R
 				INNER JOIN tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
 				LEFT JOIN tblICInventoryReceiptCharge charges
