@@ -965,8 +965,8 @@ FROM (
 	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
 	     , intOrderUOMId					= ARCC.intOrderUOMId
 	     , intShipmentItemUOMId				= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
-		 , intWeightUOMId					= ARCC.intItemWeightUOMId
-		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(ARCC.intItemWeightUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1)
+		 , intWeightUOMId					= LD.intWeightItemUOMId --ARCC.intItemWeightUOMId
+		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1) --dbo.fnCalculateQtyBetweenUOM(ARCC.intItemWeightUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1)
 		 , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
 		 , dblQtyOrdered					= ISNULL(LD.dblQuantity, 0)
 		 , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
