@@ -4,22 +4,23 @@ StartTest (function (t) {
 
         //region
         .displayText('===== Pre-setup =====')
-        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
+               /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
+        //region
         .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
         .clickMenuFolder('System Manager','Folder')
         .clickMenuScreen('Users','Screen')
-        .waitUntilLoaded()
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
-        .waitUntilLoaded('ementity')
-        .waitUntilLoaded()
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
         .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
         .clickTab('User')
-        .waitUntilLoaded()
+        .waitUntilLoaded('')
         .clickTab('User Roles')
 
-        .waitUntilLoaded()
+        .waitUntilLoaded('')
         .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
-        .waitUntilLoaded()
+        .waitUntilLoaded('')
 
         .continueIf({
             expected: true,
@@ -33,32 +34,32 @@ StartTest (function (t) {
 
                     .displayText('Location is not yet existing.')
                     .clickButton('Close')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .clickMessageBoxButton('no')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
-                    .waitUntilLoaded('ementity')
+                    .waitUntilLoaded('')
                     .clickTab('User')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .clickTab('User Roles')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 'Dummy','strLocationName', '0002 - Indianapolis','strLocationName', 1)
                     .selectGridComboBoxBottomRowValue('UserRoleCompanyLocationRolePermission', 'strUserRole', 'ADMIN', 'strUserRole', 1)
                     .clickTab('Detail')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
                     .clickButton('Save')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .clickButton('Close')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
-                    .waitUntilLoaded('ementity')
+                    .waitUntilLoaded('')
                     .clickTab('User')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .clickTab('User Roles')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
@@ -73,23 +74,25 @@ StartTest (function (t) {
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
                     .clickButton('Close')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .clickMessageBoxButton('no')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .clickMenuFolder('System Manager','Folder')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
+        .waitUntilLoaded('')
+        //endregion
 
-
-        /*====================================== Add Storage Location for Indianapolis======================================*/
+      /*====================================== Add Storage Location for Indianapolis======================================*/
+        //region
         .clickMenuFolder('Inventory','Folder')
-        .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
+        .waitUntilLoaded('')
+        .clickMenuScreen('Storage Units','Screen')
         .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
-        .waitUntilLoaded()
+        .waitUntilLoaded('')
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -98,9 +101,8 @@ StartTest (function (t) {
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
                     .displayText('===== Scenario 1: Add New Storage Location. =====')
-                    .clickMenuScreen('Storage Locations','Screen')
                     .clickButton('New')
-                    .waitUntilLoaded('icstorageunit')
+                    .waitUntilLoaded('')
                     .enterData('Text Field','Name','Indy Storage')
                     .enterData('Text Field','Description','Indy Storage')
                     .selectComboBoxRowNumber('UnitType',6,0)
@@ -115,13 +117,15 @@ StartTest (function (t) {
                     .verifyStatusMessage('Edited')
                     .clickButton('Save')
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
-                    .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
-        .clickMenuFolder('Inventory','Folder')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        //endregion
+
+        
         /*====================================== Add Category ======================================*/
         //region
         .clickMenuFolder('Inventory','Folder')
@@ -139,18 +143,19 @@ StartTest (function (t) {
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
                     //Add Category
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
                     .displayText('===== Scenario 4: Add Category =====')
-                    .clickMenuFolder('Inventory','Folder')
                     .addFunction(function(next){
                         commonIC.addCategory (t,next, 'CRUD - Category', 'Test Category', 2)
                     })
-                    .clickMenuFolder('Inventory','Folder')
                     .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
-
+        .clickButton('Close')
+        .waitUntilLoaded('')
 
         /*====================================== Add Commodity ======================================*/
 
@@ -167,19 +172,20 @@ StartTest (function (t) {
 
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
-                    .clickMenuFolder('Inventory','Folder')
                     //Add Commodity
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
                     .displayText('===== Scenario 6: Add Commodity =====')
                     .addFunction(function(next){
                         commonIC.addCommodity (t,next, 'CRUD - Commodity', 'Test Commodity')
                     })
-                    .clickMenuFolder('Inventory','Folder')
                     .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
-
+        .clickButton('Close')
+        .waitUntilLoaded('')
 
         /*====================================== Add Lotted Item Yes Serial ======================================*/
         .clickMenuScreen('Items','Screen')
@@ -195,7 +201,8 @@ StartTest (function (t) {
 
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
-                    .clickMenuFolder('Inventory','Folder')
+                .clickButton('Close')
+                .waitUntilLoaded('')
                     .displayText('===== Scenario 1: Add Lotted Item Serial =====')
                     .addFunction(function(next){
                         commonIC.addInventoryItem
@@ -212,12 +219,13 @@ StartTest (function (t) {
                             , 40
                         )
                     })
-                    .clickMenuFolder('Inventory','Folder')
                     .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded('')
 
         /*====================================== Add Lotted Item Yes Serial ======================================*/
         .clickMenuScreen('Items','Screen')
@@ -233,8 +241,9 @@ StartTest (function (t) {
 
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
-                    .clickMenuFolder('Inventory','Folder')
                     .displayText('===== Scenario 2: Add Lotted Item =====')
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
                     .addFunction(function(next){
                         commonIC.addInventoryItem
                         (t,next,
@@ -250,13 +259,13 @@ StartTest (function (t) {
                             , 40
                         )
                     })
-                    .clickMenuFolder('Inventory','Folder')
                     .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
-
+        .clickButton('Close')
+        .waitUntilLoaded('')
 
         /*====================================== Add Non Lotted Item ======================================*/
         .clickMenuScreen('Items','Screen')
@@ -272,7 +281,8 @@ StartTest (function (t) {
 
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
-                    .clickMenuFolder('Inventory','Folder')
+                .clickButton('Close')
+                .waitUntilLoaded('')
                     .displayText('===== Scenario 3: Add Non Lotted Item =====')
                     .addFunction(function(next){
                         commonIC.addInventoryItem
@@ -289,13 +299,12 @@ StartTest (function (t) {
                             , 40
                         )
                     })
-                    .waitUntilLoaded('')
-                    .clickMenuFolder('Inventory','Folder')
                     .done();
             },
             continueOnFail: true
         })
-        .clickMenuFolder('Inventory','Folder')
+        .clickButton('Close')
+        .waitUntilLoaded('')
         .displayText('===== Pre-setup done =====')
 
 
@@ -351,6 +360,7 @@ StartTest (function (t) {
                     .selectComboBoxRowValue('ReceiveUom', 'Test_Pounds', 'ReceiveUom',0)
                     .selectComboBoxRowNumber('NegativeInventory',1,0)
                     .clickButton('Save')
+                    .waitUntilLoaded('')
                     .clickButton('Close')
 
                     .clickButton('AddLocation')
@@ -379,14 +389,15 @@ StartTest (function (t) {
                     .selectGridComboBoxRowNumber('Pricing', 2, 'strPricingMethod',3)
                     .enterGridData('Pricing', 2, 'dblAmountPercent', '40')
                     .clickButton('Save')
-                    .clickButton('Close')
+                    .waitUntilLoaded('')
                     .displayText('===== Add Non Lotted Item - Negative Inventory Yes Done=====')
                     //endregion
                     .done();
             },
             continueOnFail: true
         })
-
+        .waitUntilLoaded('')
+        .clickButton('Close')
 
         //region Scenario 5: Update an Item
         .displayText('===== Scenario 5: Update an Item =====')
@@ -402,20 +413,21 @@ StartTest (function (t) {
         .clickButton('Close')
 
         .displayText('===== Check Updated Fields Item =====')
-        .selectSearchRowNumber(1)
-        .clickButton('OpenSelected')
+        .clickMenuScreen('Items','Screen')
+        .doubleClickSearchRowValue('CRUD - LTI - 01', 'strOrderType', 1)
         .waitUntilLoaded('')
         .waitUntilLoaded('')
         .verifyData('Text Field','Description', 'Test Lotted Item Serial - Updated')
         .addResult('Successfully Updated',2000)
         .clickButton('Close')
+        .waitUntilLoaded('')
         .displayText('===== Update an Item Done=====')
         //endregion
 
         //region Scenario 6: Duplicate an Item
         .displayText('===== Scenario 6: Duplicate an Item =====')
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', '001 - CLTI-copy')
+        .filterGridRecords('Search', 'FilterGrid', 'CRUD - LTI - 01-copy')
         .waitUntilLoaded()
         .continueIf({
             expected: true,
@@ -466,24 +478,29 @@ StartTest (function (t) {
                     .verifyGridData('Pricing', 2, 'strLocationName', '0001 - Fort Wayne')
                     .verifyGridData('Pricing', 2, 'strPricingMethod', 'Markup Standard Cost')
                     .verifyGridData('Pricing', 2, 'dblAmountPercent', '40')
-                    .clickButton('Close')
-                    .waitTillLoaded('')
                     .displayText('===== Duplicate an Item Done=====')
                     //endregion
                     .done();
             },
             continueOnFail: true
         })
-
-
+        .clickButton('Close')
+        .waitTillLoaded('')
+        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+        .clickMessageBoxButton('yes')
+        .waitTillLoaded('')
 
         //region Scenario 7: Check Required Fields
         .displayText('===== Scenario 7: Check Required Fields =====')
+        .clickMenuScreen('Items','Screen')
+        .waitTillLoaded('')
         .clickButton('New')
         .waitUntilLoaded('icitem')
         .waitTillLoaded('')
         .clickButton('Save')
+        .waitTillLoaded('')
         .clickButton('Close')
+        .waitTillLoaded('')
         .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
         .clickMessageBoxButton('no')
         .displayText('===== Check Required Fields Done=====')

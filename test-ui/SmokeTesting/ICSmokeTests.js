@@ -84,7 +84,7 @@ StartTest (function (t) {
             },
             continueOnFail: true
         })
-
+        .waitUntilLoaded('')
         //endregion
 
 
