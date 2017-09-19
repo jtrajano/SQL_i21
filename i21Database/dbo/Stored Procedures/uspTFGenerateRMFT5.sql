@@ -69,22 +69,38 @@ BEGIN TRY
 		, dblLine12_Col3 NUMERIC(18,6)
 		, dblLine13_Col1 NUMERIC(18,6)
 		, dblLine13_Col2 NUMERIC(18,6)
-		, dblLine13_Col3 NUMERIC(18,6)
+		--, dblLine13_Col3 NUMERIC(18,6)
 		, dblLine14_Col1 NUMERIC(18,6)
 		, dblLine14_Col2 NUMERIC(18,6)
-		, dblLine14_Col3 NUMERIC(18,6)
+		--, dblLine14_Col3 NUMERIC(18,6)
 		, dblLine15_Col1 NUMERIC(18,6)
 		, dblLine15_Col2 NUMERIC(18,6)
-		, dblLine15_Col3 NUMERIC(18,6)
+		--, dblLine15_Col3 NUMERIC(18,6)
 		, dblLine16_Col1 NUMERIC(18,6)
 		, dblLine16_Col2 NUMERIC(18,6)
-		, dblLine16_Col3 NUMERIC(18,6)
+		--, dblLine16_Col3 NUMERIC(18,6)
 		, dblLine17_Col1 NUMERIC(18,6)
 		, dblLine17_Col2 NUMERIC(18,6)
-		, dblLine17_Col3 NUMERIC(18,6)
+		--, dblLine17_Col3 NUMERIC(18,6)
 		, dblLine18_Col1 NUMERIC(18,6)
 		, dblLine18_Col2 NUMERIC(18,6)
-		, dblLine18_Col3 NUMERIC(18,6)
+		--, dblLine18_Col3 NUMERIC(18,6)
+
+		, dblLine19_Col1 NUMERIC(18,6)
+		, dblLine19_Col2 NUMERIC(18,6)
+
+		, dblLine20_Col1 NUMERIC(18,6)
+		, dblLine20_Col2 NUMERIC(18,6)
+		
+		, dblLine21_Col1 NUMERIC(18,6)
+		, dblLine21_Col2 NUMERIC(18,6)
+
+		, dblLine22_Col1 NUMERIC(18,6)
+
+		, dblLine23_Col1 NUMERIC(18,6)
+
+		, dblLine24_Col1 NUMERIC(18,6)
+
 		, strDistLicense NVARCHAR(50)
 		, strSupplierLicense NVARCHAR(50)
 		, dtmFrom DATE
@@ -180,36 +196,36 @@ BEGIN TRY
 			,@dblLine12_Col1 NUMERIC(18,6)
 			,@dblLine12_Col2 NUMERIC(18,6)
 			,@dblLine12_Col3 NUMERIC(18,6)
+			
 			,@dblLine13_Col1 NUMERIC(18,6)
 			,@dblLine13_Col2 NUMERIC(18,6)
-			,@dblLine13_Col3 NUMERIC(18,6)
+			--,@dblLine13_Col3 NUMERIC(18,6)
+			
 			,@dblLine14_Col1 NUMERIC(18,6)
 			,@dblLine14_Col2 NUMERIC(18,6)
-			,@dblLine14_Col3 NUMERIC(18,6)
+			--,@dblLine14_Col3 NUMERIC(18,6)
+			
 			,@dblLine15_Col1 NUMERIC(18,6)
 			,@dblLine15_Col2 NUMERIC(18,6)
-			,@dblLine15_Col3 NUMERIC(18,6)
+			--,@dblLine15_Col3 NUMERIC(18,6)
+			
 			,@dblLine16_Col1 NUMERIC(18,6)
 			,@dblLine16_Col2 NUMERIC(18,6)
-			,@dblLine16_Col3 NUMERIC(18,6)
+			--,@dblLine16_Col3 NUMERIC(18,6)
+			
 			,@dblLine17_Col1 NUMERIC(18,6)
 			,@dblLine17_Col2 NUMERIC(18,6)
-			,@dblLine17_Col3 NUMERIC(18,6)
+			--,@dblLine17_Col3 NUMERIC(18,6)
+			
 			,@dblLine18_Col1 NUMERIC(18,6)
 			,@dblLine18_Col2 NUMERIC(18,6)
-			,@dblLine18_Col3 NUMERIC(18,6)
+			--,@dblLine18_Col3 NUMERIC(18,6)
 
-			,@dblLine19a_Col1 NUMERIC(18,6)
-			,@dblLine19a_Col2 NUMERIC(18,6)
+			,@dblLine19_Col1 NUMERIC(18,6)
+			,@dblLine19_Col2 NUMERIC(18,6)
 
-			,@dblLine19b_Col1 NUMERIC(18,6)
-			,@dblLine19b_Col2 NUMERIC(18,6)
-
-			,@dblLine20a_Col1 NUMERIC(18,6)
-			,@dblLine20a_Col2 NUMERIC(18,6)
-
-			,@dblLine20b_Col1 NUMERIC(18,6)
-			,@dblLine20b_Col2 NUMERIC(18,6)
+			,@dblLine20_Col1 NUMERIC(18,6)
+			,@dblLine20_Col2 NUMERIC(18,6)
 
 			,@dblLine21_Col1 NUMERIC(18,6)
 			,@dblLine21_Col2 NUMERIC(18,6)
@@ -315,30 +331,81 @@ BEGIN TRY
 		-- Line 13
 		SELECT @dblLine13_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line13Col1'
 		SELECT @dblLine13_Col2 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line13Col2'
-		SET @dblLine13_Col3 = null
+		--SET @dblLine13_Col3 = null
 
 		-- Line 14
 		SELECT @dblLine14_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line14Col1'
 		SELECT @dblLine14_Col2 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line14Col2'
-		SET @dblLine14_Col3 = null
+		--SET @dblLine14_Col3 = null
 
 		-- Line 15
 		SELECT @dblLine15_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line15Col1'
 		SELECT @dblLine15_Col2 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line15Col2'
-		SET @dblLine15_Col3 = null
+		--SET @dblLine15_Col3 = null
 
 		-- Line 16
 		SET @dblLine16_Col1 = ISNULL(@dblLine13_Col1, 0) + ISNULL(@dblLine14_Col1, 0) + ISNULL(@dblLine15_Col1, 0)
 		SET @dblLine16_Col2 =  ISNULL(@dblLine13_Col2, 0) + ISNULL(@dblLine14_Col2, 0) + ISNULL(@dblLine15_Col2, 0)
-		SET @dblLine16_Col3 = null
+		--SET @dblLine16_Col3 = null
 
+		-- Line 17
 		SELECT @dblLine17_Col1 = SUM(dblGross) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'E'
 		SELECT @dblLine17_Col2 = SUM(dblGross) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'SE'
-		SET @dblLine17_Col3 = null
+		--SET @dblLine17_Col3 = null
 
-		--SET @dblLine18_Col1 = 0.0
-		--SET @dblLine18_Col2 = 0.0
-		--SET @dblLine18_Col3 = 0.0
+		-- Line 18
+		SET @dblLine18_Col1 = ISNULL(@dblLine16_Col1, 0) - ISNULL(@dblLine17_Col1, 0)
+		SET @dblLine18_Col2 = ISNULL(@dblLine16_Col2, 0) - ISNULL(@dblLine17_Col2, 0)
+
+
+		IF  @dblLine18_Col1 <= 0
+		BEGIN
+			SET @dblLine19_Col1  = 0
+			SET @dblLine20_Col1  = 0
+			SET @dblLine21_Col1  = 0
+		END
+		ELSE
+		BEGIN
+			DECLARE @dblTaxRateGas  NUMERIC(18,6)
+			DECLARE @dblDiscGas  NUMERIC(18,6)
+
+			SELECT @dblTaxRateGas = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-TaxRateGas'
+			SELECT @dblDiscGas = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-ColDiscGas'
+
+			SET @dblLine19_Col1  =  ISNULL(@dblLine18_Col1, 0) * ISNULL(@dblTaxRateGas, 0)
+			SET @dblLine20_Col1  = (ISNULL(@dblLine13_Col1, 0) - ISNULL(@dblLine17_Col1, 0)) * ISNULL(@dblTaxRateGas, 0) * ISNULL(@dblDiscGas, 0)
+			SET @dblLine21_Col1  = ISNULL(@dblLine19_Col1, 0) - ISNULL(@dblLine20_Col1, 0)
+		END
+
+
+		IF  @dblLine18_Col2 <= 0
+		BEGIN
+			SET @dblLine19_Col2  = 0
+			SET @dblLine20_Col2  = 0
+			SET @dblLine21_Col2  = 0
+		END
+		ELSE
+		BEGIN
+			DECLARE @dblTaxRateSpecialFuel  NUMERIC(18,6)
+			DECLARE @dblDiscSpecialFuel  NUMERIC(18,6)
+
+			SELECT @dblTaxRateSpecialFuel = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-TaxRateSpecialFuel'
+			SELECT @dblDiscSpecialFuel = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-ColDiscSpecialFuel'
+
+			SET @dblLine19_Col2  = ISNULL(@dblLine18_Col2, 0) * ISNULL(@dblTaxRateSpecialFuel, 0)
+			SET @dblLine20_Col2  = (ISNULL(@dblLine13_Col2, 0) - ISNULL(@dblLine17_Col2, 0)) * ISNULL(@dblTaxRateGas, 0) * ISNULL(@dblDiscGas, 0)
+			SET @dblLine21_Col2  = ISNULL(@dblLine19_Col2, 0) - ISNULL(@dblLine20_Col2, 0)
+		END
+
+		-- Line 22
+		SET @dblLine22_Col1  = ISNULL(@dblLine21_Col1, 0) + ISNULL(@dblLine21_Col2, 0)
+
+		--Line 23
+		SELECT @dblLine23_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line23'
+
+		-- Line 24	
+		SET @dblLine24_Col1  = ISNULL(@dblLine22_Col1, 0) - ISNULL(@dblLine23_Col1, 0)
+
 
 		SELECT @strDistLicense = ISNULL(strConfiguration, '') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-DistLicense'
 		SELECT @strSupplierLicense = ISNULL(strConfiguration, '') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-SupplierLicense'
@@ -400,22 +467,31 @@ BEGIN TRY
 			,@dblLine12_Col3
 			,@dblLine13_Col1
 			,@dblLine13_Col2
-			,@dblLine13_Col3
+			--,@dblLine13_Col3
 			,@dblLine14_Col1
 			,@dblLine14_Col2
-			,@dblLine14_Col3
+			--,@dblLine14_Col3
 			,@dblLine15_Col1
 			,@dblLine15_Col2
-			,@dblLine15_Col3
+			--,@dblLine15_Col3
 			,@dblLine16_Col1
 			,@dblLine16_Col2
-			,@dblLine16_Col3
+			--,@dblLine16_Col3
 			,@dblLine17_Col1
 			,@dblLine17_Col2
-			,@dblLine17_Col3
+			--,@dblLine17_Col3
 			,@dblLine18_Col1
 			,@dblLine18_Col2
-			,@dblLine18_Col3
+			--,@dblLine18_Col3
+			,@dblLine19_Col1
+			,@dblLine19_Col2
+			,@dblLine20_Col1
+			,@dblLine20_Col2
+			,@dblLine21_Col1
+			,@dblLine21_Col2
+			,@dblLine22_Col1
+			,@dblLine23_Col1
+			,@dblLine24_Col1
 			,@strDistLicense
 			,@strSupplierLicense
 			,@dtmFrom
@@ -426,7 +502,6 @@ BEGIN TRY
 
 		Return;
 	END
-
 
 END TRY
 BEGIN CATCH
