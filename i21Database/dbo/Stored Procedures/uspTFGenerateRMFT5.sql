@@ -85,22 +85,21 @@ BEGIN TRY
 		, dblLine18_Col1 NUMERIC(18,6)
 		, dblLine18_Col2 NUMERIC(18,6)
 		--, dblLine18_Col3 NUMERIC(18,6)
-
 		, dblLine19_Col1 NUMERIC(18,6)
 		, dblLine19_Col2 NUMERIC(18,6)
-
 		, dblLine20_Col1 NUMERIC(18,6)
-		, dblLine20_Col2 NUMERIC(18,6)
-		
+		, dblLine20_Col2 NUMERIC(18,6)		
+		, dblLine20a NUMERIC(18,6)
+		, dblLine20b NUMERIC(18,6)		
 		, dblLine21_Col1 NUMERIC(18,6)
 		, dblLine21_Col2 NUMERIC(18,6)
-
 		, dblLine22_Col1 NUMERIC(18,6)
-
 		, dblLine23_Col1 NUMERIC(18,6)
-
 		, dblLine24_Col1 NUMERIC(18,6)
-
+		, dblTaxRateGas NUMERIC(18,6)
+		, dblDiscGas NUMERIC(18,6)
+		, dblTaxRateSpecialFuel  NUMERIC(18,6)
+		, dblDiscSpecialFuel  NUMERIC(18,6)
 		, strDistLicense NVARCHAR(50)
 		, strSupplierLicense NVARCHAR(50)
 		, dtmFrom DATE
@@ -195,47 +194,41 @@ BEGIN TRY
 			,@dblLine11_Col3 NUMERIC(18,6)
 			,@dblLine12_Col1 NUMERIC(18,6)
 			,@dblLine12_Col2 NUMERIC(18,6)
-			,@dblLine12_Col3 NUMERIC(18,6)
-			
+			,@dblLine12_Col3 NUMERIC(18,6)		
 			,@dblLine13_Col1 NUMERIC(18,6)
 			,@dblLine13_Col2 NUMERIC(18,6)
 			--,@dblLine13_Col3 NUMERIC(18,6)
-			
 			,@dblLine14_Col1 NUMERIC(18,6)
 			,@dblLine14_Col2 NUMERIC(18,6)
 			--,@dblLine14_Col3 NUMERIC(18,6)
-			
 			,@dblLine15_Col1 NUMERIC(18,6)
 			,@dblLine15_Col2 NUMERIC(18,6)
 			--,@dblLine15_Col3 NUMERIC(18,6)
-			
 			,@dblLine16_Col1 NUMERIC(18,6)
 			,@dblLine16_Col2 NUMERIC(18,6)
 			--,@dblLine16_Col3 NUMERIC(18,6)
-			
 			,@dblLine17_Col1 NUMERIC(18,6)
 			,@dblLine17_Col2 NUMERIC(18,6)
 			--,@dblLine17_Col3 NUMERIC(18,6)
-			
 			,@dblLine18_Col1 NUMERIC(18,6)
 			,@dblLine18_Col2 NUMERIC(18,6)
 			--,@dblLine18_Col3 NUMERIC(18,6)
-
 			,@dblLine19_Col1 NUMERIC(18,6)
 			,@dblLine19_Col2 NUMERIC(18,6)
-
 			,@dblLine20_Col1 NUMERIC(18,6)
 			,@dblLine20_Col2 NUMERIC(18,6)
-
+			,@dblLine20a NUMERIC(18,6)
+			,@dblLine20b NUMERIC(18,6)		
 			,@dblLine21_Col1 NUMERIC(18,6)
 			,@dblLine21_Col2 NUMERIC(18,6)
-
 			,@dblLine22_Col1 NUMERIC(18,6)
-
 			,@dblLine23_Col1 NUMERIC(18,6)
-
 			,@dblLine24_Col1 NUMERIC(18,6)
 
+			,@dblTaxRateGas  NUMERIC(18,6)
+			,@dblDiscGas  NUMERIC(18,6)
+			,@dblTaxRateSpecialFuel  NUMERIC(18,6)
+			,@dblDiscSpecialFuel  NUMERIC(18,6)
 			,@strDistLicense NVARCHAR(50)
 			,@strSupplierLicense NVARCHAR(50)
 			,@dtmFrom DATE
@@ -366,17 +359,14 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			DECLARE @dblTaxRateGas  NUMERIC(18,6)
-			DECLARE @dblDiscGas  NUMERIC(18,6)
-
 			SELECT @dblTaxRateGas = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-TaxRateGas'
 			SELECT @dblDiscGas = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-ColDiscGas'
 
 			SET @dblLine19_Col1  =  ISNULL(@dblLine18_Col1, 0) * ISNULL(@dblTaxRateGas, 0)
-			SET @dblLine20_Col1  = (ISNULL(@dblLine13_Col1, 0) - ISNULL(@dblLine17_Col1, 0)) * ISNULL(@dblTaxRateGas, 0) * ISNULL(@dblDiscGas, 0)
+			SET @dblLine20a = ISNULL(@dblLine13_Col1, 0) - ISNULL(@dblLine17_Col1, 0)
+			SET @dblLine20_Col1  = @dblLine20a * ISNULL(@dblTaxRateGas, 0) * ISNULL(@dblDiscGas, 0)
 			SET @dblLine21_Col1  = ISNULL(@dblLine19_Col1, 0) - ISNULL(@dblLine20_Col1, 0)
 		END
-
 
 		IF  @dblLine18_Col2 <= 0
 		BEGIN
@@ -386,14 +376,12 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			DECLARE @dblTaxRateSpecialFuel  NUMERIC(18,6)
-			DECLARE @dblDiscSpecialFuel  NUMERIC(18,6)
-
 			SELECT @dblTaxRateSpecialFuel = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-TaxRateSpecialFuel'
 			SELECT @dblDiscSpecialFuel = CASE WHEN ISNULL(strConfiguration, '') = '' THEN NULL ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-ColDiscSpecialFuel'
 
 			SET @dblLine19_Col2  = ISNULL(@dblLine18_Col2, 0) * ISNULL(@dblTaxRateSpecialFuel, 0)
-			SET @dblLine20_Col2  = (ISNULL(@dblLine13_Col2, 0) - ISNULL(@dblLine17_Col2, 0)) * ISNULL(@dblTaxRateGas, 0) * ISNULL(@dblDiscGas, 0)
+			SET @dblLine20b = ISNULL(@dblLine13_Col2, 0) - ISNULL(@dblLine17_Col2, 0)
+			SET @dblLine20_Col2  = @dblLine20b * ISNULL(@dblTaxRateGas, 0) * ISNULL(@dblDiscGas, 0)
 			SET @dblLine21_Col2  = ISNULL(@dblLine19_Col2, 0) - ISNULL(@dblLine20_Col2, 0)
 		END
 
@@ -487,11 +475,17 @@ BEGIN TRY
 			,@dblLine19_Col2
 			,@dblLine20_Col1
 			,@dblLine20_Col2
+			,@dblLine20a
+			,@dblLine20b		
 			,@dblLine21_Col1
 			,@dblLine21_Col2
 			,@dblLine22_Col1
 			,@dblLine23_Col1
 			,@dblLine24_Col1
+			,@dblTaxRateGas
+			,@dblDiscGas
+			,@dblTaxRateSpecialFuel
+			,@dblDiscSpecialFuel
 			,@strDistLicense
 			,@strSupplierLicense
 			,@dtmFrom
