@@ -238,7 +238,6 @@
 --GRAIN
 :r "..\dbo\Stored Procedures\uspGRImportStorageType.sql"
 :r "..\dbo\Stored Procedures\uspGRImportWeightGrades.sql"
-:r "..\dbo\Stored Procedures\uspGRImportShipTo.sql"
 
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
