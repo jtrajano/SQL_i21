@@ -88,7 +88,7 @@ BEGIN TRY
 	INTO #tmpMain
 	FROM vyuTFGetReportingComponent
 	WHERE intReportingComponentId IN (SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ','))
-		AND strScheduleName = 'Main Form'
+		AND intComponentTypeId = 2
 		AND strFormCode != 'RMFT-5'
 	ORDER BY strFormCode, strScheduleCode, strType, strTransactionType
 
