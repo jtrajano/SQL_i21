@@ -55,30 +55,39 @@ BEGIN
 			,intEntityEmployeeId
 			,intEmployeeEarningId
 			,intTypeEarningId
-			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = tblPREmployeeEarning.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
+			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = EE.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
 			,intWorkersCompensationId = CASE WHEN (strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount')) 
-											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE intEntityEmployeeId = tblPREmployeeEarning.intEntityEmployeeId) 
+											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE intEntityEmployeeId = EE.intEntityEmployeeId) 
 											ELSE NULL END
 			,strCalculationType
 			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblDefaultHours END					
 			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END
 			,dblRateAmount
-			,dblTotal = ROUND(CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
-							CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
-								CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
-							ELSE
-								dblRateAmount
+			,dblTotal = ROUND(
+							CASE WHEN (strCalculationType = 'Hourly Rate') THEN
+									CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
+								WHEN (strCalculationType IN ('Overtime', 'Rate Factor') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
+									CASE WHEN ((SELECT TOP 1 1 FROM tblPREmployeeEarning 
+												WHERE intTypeEarningId = EE.intEmployeeEarningLinkId
+												AND intEntityEmployeeId = EE.intEntityEmployeeId
+												AND strCalculationType = 'Hourly Rate') = 1
+											OR (SELECT TOP 1 1 FROM tblPREmployeeEarning 
+												WHERE intTypeEarningId = EE.intEmployeeEarningLinkId
+												AND intEntityEmployeeId = EE.intEntityEmployeeId
+												AND strCalculationType = 'Fixed Amount' AND dblDefaultHours > 0) = 1) THEN
+										CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
+									ELSE
+										dblRateAmount
+									END
+								ELSE
+									dblRateAmount
 							END
-						WHEN (strCalculationType = 'Hourly Rate') THEN
-							CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
-						ELSE
-							dblRateAmount
-						END, 2)
+						, 2)
 			,@dtmDateFrom
 			,@dtmDateTo
 			,intSort
 			,1
-		FROM tblPREmployeeEarning
+		FROM tblPREmployeeEarning EE
 		WHERE intPayGroupId = @intPayGroupId
 			AND (ysnDefault = 1 OR dblDefaultHours > 0)
 			AND intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail 
