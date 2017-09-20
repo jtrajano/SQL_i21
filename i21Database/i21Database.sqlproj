@@ -5665,6 +5665,7 @@
     <Build Include="dbo\Tables\tblQMSampleImportError.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImportValidate.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdateGeneralLedgerMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
