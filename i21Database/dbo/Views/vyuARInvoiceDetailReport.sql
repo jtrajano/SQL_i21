@@ -8,9 +8,11 @@ SELECT I.intInvoiceId
 								   ELSE 'Direct' 
 							  END
 	 , I.strInvoiceNumber
+	 , I.dtmDate
 	 , CT.strContractNumber
 	 , CT.intContractSeq
 	 , strCustomerName		= C.strName
+	 , strCustomerNumber	= C.strCustomerNumber	 
 	 , strItemDescription	= ITEM.strDescription
 	 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
 	 , dblItemWeight		= ISNULL(ID.dblItemWeight, 0)
@@ -20,7 +22,8 @@ SELECT I.intInvoiceId
 	 , dblTotalTax			= ISNULL(ID.dblTotalTax, 0)
 	 , dblDiscount			= ISNULL(ID.dblDiscount, 0)
 	 , dblTotal				= ISNULL(ID.dblTotal, 0)
-FROM dbo.tblARInvoice I WITH (NOLOCK)
+FROM 
+	dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (SELECT intInvoiceId
 			     , intInvoiceDetailId
 				 , intContractHeaderId
@@ -32,25 +35,34 @@ INNER JOIN (SELECT intInvoiceId
 				 , dblTotalTax
 				 , dblDiscount
 				 , dblTotal
-			FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
-) ID ON I.intInvoiceId = ID.intInvoiceId
-INNER JOIN (SELECT intEntityId
-				 , strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-) C ON I.intEntityCustomerId = C.intEntityId
+			FROM 
+				dbo.tblARInvoiceDetail WITH (NOLOCK)
+			) ID ON I.intInvoiceId = ID.intInvoiceId
+INNER JOIN (SELECT EME.intEntityId
+				 , EME.strName
+				 , ARC.strCustomerNumber
+			FROM dbo.tblEMEntity EME WITH (NOLOCK)  
+			LEFT JOIN (SELECT intEntityId
+							, strCustomerNumber
+						 FROM 
+							tblARCustomer WITH (NOLOCK)) ARC ON EME.intEntityId = ARC.intEntityId
+			) C ON I.intEntityCustomerId = C.intEntityId
 LEFT JOIN (SELECT intItemId
 				, strDescription
-		   FROM dbo.tblICItem WITH (NOLOCK)
-) ITEM ON ID.intItemId = ITEM.intItemId
+		   FROM 
+			dbo.tblICItem WITH (NOLOCK)
+			) ITEM ON ID.intItemId = ITEM.intItemId
 LEFT JOIN (SELECT CTH.intContractHeaderId
 				, CTH.strContractNumber
 				, CTD.intContractDetailId
 				, CTD.intContractSeq
-		   FROM dbo.tblCTContractHeader CTH WITH (NOLOCK)
+		   FROM 
+			dbo.tblCTContractHeader CTH WITH (NOLOCK)
 		   INNER JOIN (SELECT intContractHeaderId
 							, intContractDetailId
 							, intContractSeq
-					   FROM dbo.tblCTContractDetail WITH (NOLOCK)
-		   ) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
-) CT ON ID.intContractHeaderId = CT.intContractHeaderId
-    AND ID.intContractDetailId = CT.intContractDetailId
+					   FROM 
+						dbo.tblCTContractDetail WITH (NOLOCK)
+					 ) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
+			) CT ON ID.intContractHeaderId = CT.intContractHeaderId
+				AND ID.intContractDetailId = CT.intContractDetailId
