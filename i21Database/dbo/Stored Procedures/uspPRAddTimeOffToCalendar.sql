@@ -65,7 +65,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			UPDATE tblPRPayGroupDetail
 				SET tblPRPayGroupDetail.dblHoursToProcess = tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest,
 					dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
-								CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
+								CASE WHEN (EL.strCalculationType = 'Hourly Rate' OR (EL.strCalculationType = 'Fixed Amount' AND EL.dblDefaultHours > 0)) THEN
 									CASE WHEN (tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest) < 0 THEN 0 ELSE tblPRPayGroupDetail.dblDefaultHours + TOR.dblRequest END * tblPRPayGroupDetail.dblAmount
 								ELSE
 									tblPRPayGroupDetail.dblAmount
@@ -190,17 +190,26 @@ SELECT @intTimeOffRequestId = @intTransactionId
 					,EE.dblDefaultHours
 					,TOR.dblRequest
 					,EE.dblRateAmount
-					,dblTotal = CASE WHEN (EE.strCalculationType IN ('Rate Factor', 'Overtime') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
-									CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EE.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
-										TOR.dblRequest * EE.dblRateAmount
-									ELSE
-										EE.dblRateAmount
-									END
-								WHEN (strCalculationType = 'Hourly Rate') THEN
-									TOR.dblRequest * EE.dblRateAmount
-								ELSE
-									EE.dblRateAmount
-								END
+					,dblTotal = ROUND(
+										CASE WHEN (EE.strCalculationType = 'Hourly Rate') THEN
+												TOR.dblRequest * EE.dblRateAmount
+											WHEN (strCalculationType IN ('Overtime', 'Rate Factor') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
+												CASE WHEN ((SELECT TOP 1 1 FROM tblPREmployeeEarning 
+															WHERE intTypeEarningId = EE.intEmployeeEarningLinkId
+															AND intEntityEmployeeId = EE.intEntityEmployeeId
+															AND strCalculationType = 'Hourly Rate') = 1
+														OR (SELECT TOP 1 1 FROM tblPREmployeeEarning 
+															WHERE intTypeEarningId = EE.intEmployeeEarningLinkId
+															AND intEntityEmployeeId = EE.intEntityEmployeeId
+															AND strCalculationType = 'Fixed Amount' AND dblDefaultHours > 0) = 1) THEN
+													TOR.dblRequest * EE.dblRateAmount
+												ELSE
+													dblRateAmount
+												END
+											ELSE
+												dblRateAmount
+										END
+									, 2)
 					,TOR.dtmDateFrom
 					,TOR.dtmDateTo
 					,4
@@ -258,7 +267,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END
 						,EL.dblRateAmount
 						,dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
-										CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
+										CASE WHEN (EL.strCalculationType = 'Hourly Rate' OR (EL.strCalculationType = 'Fixed Amount' AND EL.dblDefaultHours > 0)) THEN
 											CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END * EL.dblRateAmount
 										ELSE
 											EL.dblRateAmount
@@ -285,7 +294,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 					UPDATE tblPRPayGroupDetail
 						SET tblPRPayGroupDetail.dblHoursToProcess = tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest,
 							dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
-										CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
+										CASE WHEN (EL.strCalculationType = 'Hourly Rate' OR (EL.strCalculationType = 'Fixed Amount' AND EL.dblDefaultHours > 0)) THEN
 											CASE WHEN (tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest) < 0 THEN 0 ELSE tblPRPayGroupDetail.dblDefaultHours - TOR.dblRequest END * tblPRPayGroupDetail.dblAmount
 										ELSE
 											tblPRPayGroupDetail.dblAmount
