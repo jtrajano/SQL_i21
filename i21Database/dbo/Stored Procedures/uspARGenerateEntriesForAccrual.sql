@@ -1446,4 +1446,38 @@ END
 END
 
 
-SELECT * FROM @GLEntries
+SELECT
+	 [dtmDate]
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]
+	,[dblDebitReport]
+	,[dblCreditForeign]
+	,[dblCreditReport]
+	,[dblReportingRate]
+	,[dblForeignRate]
+	,[strRateType]
+FROM
+	@GLEntries
