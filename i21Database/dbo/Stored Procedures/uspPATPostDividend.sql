@@ -71,9 +71,8 @@ BEGIN
 			[dblForeignRate],
 			[strRateType]
 	)
-	SELECT	DISTINCT
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
+	SELECT	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
+		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	D.intDividendsGLAccount,
 		[dblDebit]						=	ROUND(C.dblDividendAmount,2),
 		[dblCredit]						=	0,
@@ -114,7 +113,7 @@ BEGIN
 	--AP Clearing
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	@intAPClearingId, 
 		[dblDebit]						=	0,
 		[dblCredit]						=	ROUND(B.dblDividendAmount,2),
