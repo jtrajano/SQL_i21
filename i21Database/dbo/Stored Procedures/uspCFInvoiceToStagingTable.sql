@@ -622,20 +622,10 @@ BEGIN TRY
 		AND ISNULL(dblTotalAR,0) = 0)
 
 		UPDATE STAGING
-		SET STAGING.dblTotalAR				=  
-											(STAGING2.dblTotalAR + ( 
-												ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
-												WHERE innerTable.intCustomerId = STAGING2.intEntityCustomerId
-												GROUP BY intAccountId),0)
-											))
+		SET STAGING.dblTotalAR				= STAGING2.dblTotalAR
 		  , STAGING.dblCreditAvailable		= STAGING2.dblCreditAvailable   
 		  , STAGING.dblFuture				= STAGING2.dblFuture     
-		  , STAGING.dbl0Days				= 
-											(STAGING2.dbl0Days + ( 
-												ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
-												WHERE innerTable.intCustomerId = STAGING2.intEntityCustomerId
-												GROUP BY intAccountId),0)
-											))    
+		  , STAGING.dbl0Days				= STAGING2.dbl0Days
 		  , STAGING.dbl10Days				= STAGING2.dbl10Days     
 		  , STAGING.dbl30Days				= STAGING2.dbl30Days     
 		  , STAGING.dbl60Days				= STAGING2.dbl60Days     
