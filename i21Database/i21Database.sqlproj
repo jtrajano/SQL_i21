@@ -5807,6 +5807,7 @@
     <None Include="Scripts\Post-Deployment\TR\RemoveObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\HD\RemoveHDObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\HD\RenameHDScreen.sql" />
+    <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
