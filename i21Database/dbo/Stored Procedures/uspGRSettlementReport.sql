@@ -14,7 +14,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 
 
 DECLARE @intBankAccountId AS INT
-	,@strTransactionId AS NVARCHAR(40)
+	,@strTransactionId AS NVARCHAR(MAX)
 	,@strModule AS NVARCHAR(40)
 
 DECLARE @xmlDocumentId AS INT
@@ -23,8 +23,8 @@ DECLARE @temp_xml_table TABLE
 (
 	[fieldname] NVARCHAR(50)
 	,condition NVARCHAR(20)
-	,[from] NVARCHAR(50)
-	,[to] NVARCHAR(50)
+	,[from] NVARCHAR(MAX)
+	,[to] NVARCHAR(MAX)
 	,[join] NVARCHAR(10)
 	,[begingroup] NVARCHAR(50)
 	,[endgroup] NVARCHAR(50)
@@ -851,7 +851,7 @@ BEGIN
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId
-		AND BNKTRN.strTransactionId = @strTransactionId
+		AND BNKTRN.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		AND (
 			intInventoryReceiptChargeId IS NOT NULL
 			OR BillDtl.intInventoryReceiptItemId IS NOT NULL
@@ -1297,5 +1297,5 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)	
-	WHERE BNKTRN.intBankAccountId = @intBankAccountId AND BNKTRN.strTransactionId = @strTransactionId
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId AND BNKTRN.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 END
