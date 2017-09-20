@@ -5583,6 +5583,7 @@
     <Build Include="dbo\Views\vyuCFSearchAccountVehicle.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportPurgePromotionsPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendBatchEntry.sql" />
+    <Build Include="dbo\Tables\tblCFPostForeignTransResult.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadContainerData.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailContainerLinkData.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadData.sql" />
@@ -5624,6 +5625,9 @@
     <Build Include="dbo\Stored Procedures\uspGRSettlementReport.sql" />
     <Build Include="dbo\Views\vyuHDTicketCommentLink.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_PortalMenus.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
+    <Build Include="dbo\Views\vyuCFARInvoiceRemittance.sql" />
+    <Build Include="dbo\Views\vyuCFAccountTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReprocessToLoadStg.sql" />
     <Build Include="dbo\Views\vyuHDTicketCustomerContact.sql" />
     <Build Include="dbo\Views\vyuMFGetShipped.sql" />
@@ -5650,24 +5654,26 @@
     <Build Include="dbo\Stored Procedures\uspRKPNLSalesContractImpact.sql" />
     <Build Include="dbo\Views\vyuSMContactScreen.sql" />
     <Build Include="dbo\Views\vyuSMContactControl.sql" />
-    <Build Include="dbo\Functions\fnAPMaskBankAccountNos.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReconciledValidation.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMI3724.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
-    <None Include="Scripts\Post-Deployment\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql" />
     <Build Include="dbo\Views\vyuGLglhstmstDifference.sql" />
     <Build Include="dbo\Views\vyuGLPTDrillDownDifference.sql" />
     <Build Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceipt.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailReceiptCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGenerateContractNumber.sql" />
     <Build Include="dbo\Tables\tblRKM2MGrainBasis.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceiptCharge.sql" />
-    <Build Include="dbo\User Defined Types\VoucherDetailReceiptCharge.sql" />
+    <Build Include="dbo\Views\vyuICETExportItemMessages.sql" />
+    <Build Include="dbo\Views\vyuCFAccountCustomer.sql" />
     <Build Include="dbo\Tables\tblQMSampleImport.sql" />
     <Build Include="dbo\Tables\tblQMSampleImportError.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImportValidate.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateGeneralLedgerMenus.sql" />
+    <Build Include="dbo\Functions\fnAPMaskBankAccountNos.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5807,6 +5813,10 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\30_ImportFileHeader.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateTaxGroupId.sql" />
+    <None Include="Scripts\Post-Deployment\TR\RemoveObsoleteScreen.sql" />
+    <None Include="Scripts\Post-Deployment\HD\RemoveHDObsoleteScreen.sql" />
+    <None Include="Scripts\Post-Deployment\HD\RenameHDScreen.sql" />
+    <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -5874,5 +5884,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\02_TerminalControl.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\LA_Louisiana.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\MI_Michigan.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\NC_NorthCarolina.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\OR_Oregon.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\WA_Washington.sql" />
   </ItemGroup>
 </Project>

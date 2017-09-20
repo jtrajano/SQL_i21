@@ -19,5 +19,5 @@
     CONSTRAINT [PK_tblTFReportingComponent] PRIMARY KEY ([intReportingComponentId] ASC), 
     CONSTRAINT [FK_tblTFReportingComponent_tblTFComponentType] FOREIGN KEY ([intComponentTypeId]) REFERENCES [tblTFComponentType]([intComponentTypeId]), 
     CONSTRAINT [UK_tblTFReportingComponent_1] UNIQUE ([intTaxAuthorityId], [strFormCode], [strScheduleCode], [strType]), 
-    CONSTRAINT [FK_tblTFReportingComponent_ToTable] FOREIGN KEY (intTaxAuthorityId) REFERENCES [tblTFTaxAuthority]([intTaxAuthorityId])
+    CONSTRAINT [FK_tblTFReportingComponent_tblTFTaxAuthority] FOREIGN KEY (intTaxAuthorityId) REFERENCES [tblTFTaxAuthority]([intTaxAuthorityId])
 )

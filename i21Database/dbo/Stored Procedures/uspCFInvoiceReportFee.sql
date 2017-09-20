@@ -336,7 +336,9 @@ BEGIN
 			,intNetworkId
 			,intARLocationId
 			FROM tblCFInvoiceStagingTable AS cfInv
-			INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
+			INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intAccountId = cfCardAccount.intAccountId
+			--INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
+			WHERE ISNULL(intInvoiceId,0) != 0
 
 			-------------SET GROUP VOLUME TO OUTPUT---------------
 			DECLARE @dblTotalQuantity		NUMERIC(18,6)

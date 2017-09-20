@@ -337,15 +337,15 @@ GO
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.GrainStorageType')
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
-        VALUES (N'', N'Storage Type', N'Grain.view.GrainStorageType', N'Grain', N'', 0)
+		VALUES (N'', N'Storage Type', N'Grain.view.GrainStorageType', N'Ticket Management', N'', 0)
 	ELSE
-		UPDATE tblSMScreen SET strScreenName = N'Storage Type', strModule = N'Grain' WHERE strNamespace = 'Grain.view.GrainStorageType'
+		UPDATE tblSMScreen SET strScreenName = N'Storage Type', strModule = N'Ticket Management' WHERE strNamespace = 'Grain.view.GrainStorageType'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts')
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
-        VALUES (N'', N'Bill Storage', N'Grain.view.BillStorageAndDiscounts', N'Grain', N'', 0)
+        VALUES (N'', N'Bill Storage', N'Grain.view.BillStorageAndDiscounts', N'Ticket Management', N'', 0)
 	ELSE
-		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Grain' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
+		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Ticket Management' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
 
 	DELETE tblSMScreen WHERE strModule = 'Grain' AND strNamespace IN('Grain.view.StorageType', 'Grain.view.QualityDiscounts', 'Grain.view.StorageStatement')
 
@@ -427,10 +427,15 @@ GO
 	BEGIN
 		UPDATE tblSMScreen SET strScreenName = N'Quality View' WHERE strNamespace = 'Quality.view.QualityException'
 	END
-GO
-	PRINT N'END INSERT DEFAULT SCREEN'
-GO
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EnergyTrac.view.Report')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (N'', N'Delivery Metrics', N'EnergyTrac.view.Report', N'Energy Trac', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Delivery Metrics', strModule = N'Energy Trac' WHERE strNamespace = 'EnergyTrac.view.Report'
+
+GO
+	
 	--Manufacturing
 	DELETE from tblSMScreen where strModule='Manufacturing' and strNamespace in ('Manufacturing.view.DataSource','Manufacturing.view.ItemMachine','Manufacturing.view.BlendSheetItemGridRowExpander')
 
@@ -445,6 +450,7 @@ GO
 	BEGIN
 		UPDATE tblSMScreen SET strScreenName = N'File Operation' WHERE strModule='Integration' and strNamespace = 'Integration.view.CopyMoveDeleteFile'
 	END
+
 GO
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.Consolidate')
@@ -453,6 +459,6 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedg
 ELSE
     UPDATE tblSMScreen SET strScreenName = N'Consolidate GL Entries', strModule = N'General Ledger' WHERE strNamespace = 'GeneralLedger.view.Consolidate'
 GO
-	PRINT N'END INSERT DEFAULT SCREEN'
-GO
 
+PRINT N'END INSERT DEFAULT SCREEN'
+GO

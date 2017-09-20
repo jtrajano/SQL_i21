@@ -269,6 +269,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\DefaultData\2_Screen.sql
 :R .\HD\HDEntryDataFix.sql
 :R .\HD\CustomField.sql
+:R .\HD\RemoveHDObsoleteScreen.sql
+:R .\HD\RenameHDScreen.sql
 
 --CRM
 :R .\CRM\SplitCRMData.sql
@@ -382,6 +384,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\IL_Illinois.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
 :r .\TF\DefaultData\MS_Mississippi.sql
+:r .\TF\DefaultData\LA_Louisiana.sql
+:r .\TF\DefaultData\MI_Michigan.sql
+:r .\TF\DefaultData\NC_NorthCarolina.sql
+:r .\TF\DefaultData\OR_Oregon.sql
+:r .\TF\DefaultData\WA_Washington.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration
@@ -402,5 +409,8 @@ print 'BEGIN POST DEPLOYMENT'
 
 --CCR
 :r .\CCR\SiteDataFix.sql
+
+--TR
+:r .\TR\RemoveObsoleteScreen.sql
 
 print 'END POST DEPLOYMENT'

@@ -114,7 +114,11 @@ BEGIN
 		,intEntityCustomerId		= @intEntityId
 		,intCurrencyId				= CASE
 										WHEN ISNULL(CNT.intContractDetailId,0) = 0 THEN SC.intCurrencyId 
-										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
+										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN
+											CASE
+												WHEN ISNULL(CNT.intInvoiceCurrencyId,0) > 0 THEN CNT.intInvoiceCurrencyId
+												ELSE CNT.intCurrencyId
+											END
 									END
 		,intShipFromLocationId		= SC.intProcessingLocationId
 		,intShipToLocationId		= AR.intShipToId

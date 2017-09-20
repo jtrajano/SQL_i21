@@ -487,72 +487,70 @@ BEGIN
 	SELECT intBillId FROM #tmpPostBillData
 
 	INSERT INTO @GLEntries (
-		dtmDate ,
-	    strBatchId ,
-	    intAccountId ,
-	    dblDebit ,
-	    dblCredit ,
-	    dblDebitUnit ,
-	    dblCreditUnit ,
-	    strDescription ,
-	    strCode ,
-	    strReference ,
-	    intCurrencyId ,
-	    dblExchangeRate ,
-	    dtmDateEntered ,
-	    dtmTransactionDate ,
-	    strJournalLineDescription ,
-	    intJournalLineNo ,
-	    ysnIsUnposted ,
-	    intUserId ,
-	    intEntityId ,
-	    strTransactionId ,
-	    intTransactionId ,
-	    strTransactionType ,
-	    strTransactionForm ,
-	    strModuleName ,
-	    intConcurrencyId ,
-	    dblDebitForeign ,
-	    dblDebitReport ,
-	    dblCreditForeign ,
-	    dblCreditReport ,
-	    dblReportingRate ,
-	    dblForeignRate ,
-	    strRateType
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId				
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate		
 	)
-	SELECT     
-		dtmDate ,
-	    strBatchId ,
-	    intAccountId ,
-	    dblDebit ,
-	    dblCredit ,
-	    dblDebitUnit ,
-	    dblCreditUnit ,
-	    strDescription ,
-	    strCode ,
-	    strReference ,
-	    intCurrencyId ,
-	    dblExchangeRate ,
-	    dtmDateEntered ,
-	    dtmTransactionDate ,
-	    strJournalLineDescription ,
-	    intJournalLineNo ,
-	    ysnIsUnposted ,
-	    intUserId ,
-	    intEntityId ,
-	    strTransactionId ,
-	    intTransactionId ,
-	    strTransactionType ,
-	    strTransactionForm ,
-	    strModuleName ,
-	    intConcurrencyId ,
-	    dblDebitForeign ,
-	    dblDebitReport ,
-	    dblCreditForeign ,
-	    dblCreditReport ,
-	    dblReportingRate ,
-	    dblForeignRate ,
-	    strRateType 
+	SELECT 
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId				
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate	
 	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 END
 --=====================================================================================================================================

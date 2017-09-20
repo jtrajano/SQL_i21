@@ -1446,7 +1446,7 @@ END
 END
 
 
-SELECT
+SELECT 	 
 	 [dtmDate]
 	,[strBatchId]
 	,[intAccountId]

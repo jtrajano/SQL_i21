@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
+﻿CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
 	 @entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -123,7 +122,7 @@ BEGIN
 		SELECT 
 		 intCustomerId
 		,@companyLocationId
-		,I.intCurrencyId
+		,ISNULL(I.intCurrencyId,dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
 		,dtmInvoiceDate
 		,@accountId
 		,NULL
@@ -153,6 +152,7 @@ BEGIN
 		FROM tblCFInvoiceStagingTable cfTrans
 		LEFT OUTER JOIN tblARInvoice I
 		ON cfTrans.intInvoiceId = I.intInvoiceId
+		WHERE ISNULL(I.intInvoiceId,0) != 0
 		--------------------------------------
 
 		--select * From @EntriesForPayment
@@ -418,6 +418,8 @@ BEGIN
 
 
 		--select '[uspARProcessPayments]',* from @PaymentEntriesTEMP
+
+		SELECT * FROM @PaymentEntriesTEMP
 
 		SET @executedLine = 5
 		DECLARE @LogId INT

@@ -965,8 +965,8 @@ FROM (
 	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
 	     , intOrderUOMId					= ARCC.intOrderUOMId
 	     , intShipmentItemUOMId				= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
-		 , intWeightUOMId					= ARCC.intItemWeightUOMId
-		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(ARCC.intItemWeightUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1)
+		 , intWeightUOMId					= LD.intWeightItemUOMId --ARCC.intItemWeightUOMId
+		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1) --dbo.fnCalculateQtyBetweenUOM(ARCC.intItemWeightUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1)
 		 , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
 		 , dblQtyOrdered					= ISNULL(LD.dblQuantity, 0)
 		 , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
@@ -984,9 +984,9 @@ FROM (
 	     , intEntityShipViaId				= NULL
 	     , intTicketId						= NULL
 	     , intTaxGroupId					= NULL
-	     , dblGrossWt						= LDL.dblGross
-	     , dblTareWt						= LDL.dblTare
-	     , dblNetWt							= LDL.dblNet
+	     , dblGrossWt						= LD.dblGross
+	     , dblTareWt						= LD.dblTare
+	     , dblNetWt							= LD.dblNet
 	     , strPONumber						= ''
 	     , strBOLNumber						= ''
 	     , intSplitId						= NULL
@@ -1025,14 +1025,14 @@ FROM (
 			 , intSCompanyLocationId
 			 , intPContractDetailId
 			 , dblQuantity
+			 , dblGross
+			 , dblTare
+			 , dblNet
 		FROM dbo.tblLGLoadDetail WITH (NOLOCK)
 	) LD ON L.intLoadId  = LD.intLoadId
 	LEFT JOIN (
 		SELECT intLoadDetailId
 			 , intLotId
-			 , dblGross
-			 , dblTare
-			 , dblNet
 			 , dblLotQuantity
 		FROM dbo.tblLGLoadDetailLot WITH (NOLOCK)
 	) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId

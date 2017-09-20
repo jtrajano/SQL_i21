@@ -23,7 +23,9 @@
 			case when [Partner] = 1 then 'Partner, ' else '' end +
 			case when Prospect = 1 then 'Prospect, ' else '' end+
 			case when Buyer = 1 then 'Buyer, ' else '' end,
-		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC)
+		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC),
+		intEntitySalespersonId = m.intEntityId,
+		strEntitySalespersonName = m.strName
 
     FROM         
             tblEMEntity a
@@ -43,6 +45,10 @@
 			on j.intLineOfBusinessId = i.intLineOfBusinessId
 		left join tblEMEntity k
 			on k.intEntityId = i.intEntitySalespersonId
+		left join tblARCustomer l
+			on l.intEntityId = a.intEntityId
+		left join tblEMEntity m
+			on m.intEntityId = l.intSalespersonId
 	where Vendor = 1 or Customer = 1 or Competitor = 1 or [Partner] = 1 or Prospect = 1 or Buyer = 1
 
 

@@ -1,11 +1,13 @@
 ﻿-- Declare the Tax Authority Code that will be used all throughout Indiana Default Data
-PRINT ('Deploying Indiana Tax Forms')
+
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'IN'
 	, @TaxAuthorityId INT
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN
+
+	PRINT ('Deploying Indiana Tax Forms')
 
 -- Product Codes
 /* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
@@ -86,7 +88,6 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intProductCodeId = 2438, strProductCode = 'E10', strDescription = 'Ethanol (11%) Blended', strProductCodeGroup = 'Alcohol', strNote = 'This Product Code is now obsolete', intMasterId = 142438
 
 	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
-
 
 -- Tax Category
 /* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
@@ -1658,7 +1659,7 @@ WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportTemplateId = 149, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-015', strReportSection = 'Section 3:    Calculation of Oil Inspection Fees Due', intReportItemSequence = '4', intTemplateItemNumber = '15', strDescription = '4. Total oil inspection fees due (Line 2 plus or minus Line 3)', strScheduleList = '13,14', strConfiguration = NULL, ysnConfiguration = '0', ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = NULL, intMasterId = 14149
 	
 	UNION ALL SELECT intReportTemplateId = 184, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-040', strReportSection = 'Section 4:    Calculation of Surcharge Tax Due', intReportItemSequence = '1', intTemplateItemNumber = '16', strDescription = '1. Total Billed Gallons (From Section 2 Line 5)', strScheduleList = '3,4', strConfiguration = NULL, ysnConfiguration = '0', ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = NULL, intMasterId = 14184
-	UNION ALL SELECT intReportTemplateId = 151, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-041', strReportSection = 'Section 4:    Calculation of Surcharge Tax Due', intReportItemSequence = '2', intTemplateItemNumber = '17', strDescription = '2. Surcharge Tax Due (Multiply Line 1 by the applicable rate from the table)', strScheduleList = '0', strConfiguration = NULL, ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '140', intMasterId = 14185
+	UNION ALL SELECT intReportTemplateId = 151, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-041', strReportSection = 'Section 4:    Calculation of Surcharge Tax Due', intReportItemSequence = '2', intTemplateItemNumber = '17', strDescription = '2. Surcharge Tax Due (Multiply Line 1 by $<value>)', strScheduleList = '0', strConfiguration = NULL, ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '140', intMasterId = 14185
 	UNION ALL SELECT intReportTemplateId = 152, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-042', strReportSection = 'Section 4:    Calculation of Surcharge Tax Due', intReportItemSequence = '3', intTemplateItemNumber = '18', strDescription = '3. Adjustment (Schedule E-1 must be attached and is subject to department approval)', strScheduleList = '0', strConfiguration = NULL, ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '150', intMasterId = 14186
 	UNION ALL SELECT intReportTemplateId = 153, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-043', strReportSection = 'Section 4:    Calculation of Surcharge Tax Due', intReportItemSequence = '4', intTemplateItemNumber = '19', strDescription = '4. Total Surcharge Tax Due (Line 2 plus or minus Line 3)', strScheduleList = '16,17,18', strConfiguration = NULL, ysnConfiguration = '0', ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = NULL, intMasterId = 14187
 	

@@ -237,7 +237,6 @@ BEGIN
     [dblReportingRate],
     [dblForeignRate],
 	[strRateType])	
-	--SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)
 	SELECT 
 	[dtmDate],
 	[strBatchId],

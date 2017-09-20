@@ -37,8 +37,6 @@
     [dtmReconciled] DATETIME NULL, 
     [ysnReconciled] BIT NULL, 
 	[ysnRevalued] BIT NULL,
-	[ysnExported] BIT NULL,
-	[dtmExportedDate] DATETIME NULL,
 	intSourceEntityId INT NULL,
 	intSourceLocationId INT NULL,
 	intSourceUOM INT NULL,
@@ -184,7 +182,7 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Reconciled?
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Revalued?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnRevalued' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Exported?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnExported' 
+--EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Exported?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnExported' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Entity used in the source transaction qucikly' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceEntityId' 
 GO

@@ -128,7 +128,7 @@ BEGIN
 		--VOTING STOCK/NON-VOTING STOCK/OTHER ISSUED
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
 			[dblDebit]						=	ROUND(A.dblFaceValue, 2),
 			[dblCredit]						=	0,
@@ -164,7 +164,7 @@ BEGIN
 		--AP CLEARING
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 			[intAccountId]					=	ComPref.intAPClearingGLAccount,
 			[dblDebit]						=	0,
 			[dblCredit]						=	ROUND(A.dblFaceValue,2),
@@ -317,7 +317,7 @@ END
 --		)
 --		SELECT	
 --			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
---			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
+--			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 --			[intAccountId]					=	CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
 --			[dblDebit]						=	0,
 --			[dblCredit]						=	ROUND(A.dblFaceValue,2),
@@ -353,7 +353,7 @@ END
 --		--AR Account
 --		SELECT	
 --			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
---			[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
+--			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 --			[intAccountId]					=	ComPref.intARAccountId, 
 --			[dblDebit]						=	ROUND(A.dblFaceValue,2),
 --			[dblCredit]						=	0,
@@ -385,6 +385,10 @@ END
 --		FROM	[dbo].[tblPATCustomerStock] A
 --		CROSS APPLY tblARCompanyPreference ComPref
 --		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
+
+--	END
+--	ELSE
+--	BEGIN
 
 --	END
 --	ELSE
@@ -466,6 +470,7 @@ END
 --			AND strModuleName = @MODULE_NAME AND strTransactionForm = @ISSUE_STOCK
 --	END
 --END
+
 BEGIN TRY
 IF(ISNULL(@ysnRecap, 0) = 0)
 BEGIN
