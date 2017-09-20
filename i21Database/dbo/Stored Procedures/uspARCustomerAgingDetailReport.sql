@@ -178,6 +178,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'DECLARE @temp_aging_table TABLE(
 	,[strSalespersonName]		NVARCHAR(100)
 	,[intCompanyLocationId]		INT
 	,[strSourceTransaction]		NVARCHAR(100)
+	,[strType]					NVARCHAR(100)
 )
 
 DECLARE @dtmDateTo				DATETIME

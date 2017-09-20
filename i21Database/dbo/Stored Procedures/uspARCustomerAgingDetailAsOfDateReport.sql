@@ -284,6 +284,7 @@ SELECT strCustomerName		= E.strName
 	 , strSalespersonName	= 'strSalespersonName'
 	 , intCompanyLocationId	= AGING.intCompanyLocationId
 	 , strSourceTransaction	= @strSourceTransactionLocal
+	 , strType				= AGING.strType
 FROM
 (SELECT A.strInvoiceNumber
      , A.strRecordNumber
@@ -305,7 +306,8 @@ FROM
 	 , dblPrepayments		= B.dblPrepayments * -1	 
 	 , dtmDate				= ISNULL(B.dtmDatePaid, A.dtmDate)
 	 , dtmDueDate	 
-	 , intCompanyLocationId	 
+	 , intCompanyLocationId
+	 , A.strType
 FROM
 (SELECT dtmDate				= I.dtmPostDate
 	 , I.strInvoiceNumber
@@ -332,6 +334,7 @@ FROM
 				END
 	, dblAvailableCredit = 0
 	, dblPrepayments     = 0
+	, strType
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 WHERE I.ysnPosted = 1
@@ -369,6 +372,7 @@ SELECT dtmDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 90 THEN 'Over 90' END
 	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 	 , dblPrepayments		= 0
+	 , strType
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN #INVOICETOTALPAYMENT PD ON I.intInvoiceId = PD.intInvoiceId
@@ -410,6 +414,7 @@ SELECT dtmDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 90 THEN 'Over 90' END
 	 , dblAvailableCredit	= 0
 	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+	 , strType
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
@@ -453,6 +458,7 @@ SELECT P.dtmDatePaid
 				END
      , dblAvailableCredit       = ISNULL(PD.dblPayment, 0)
 	 , dblPrepayments			= 0
+	 , strType
 FROM dbo.tblARPayment P WITH (NOLOCK)
     LEFT JOIN #PAYMENTDETAIL PD ON P.intPaymentId = PD.intPaymentId
     LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
@@ -502,6 +508,7 @@ SELECT DISTINCT
 				END
 	 , dblAvailableCredit	= 0 
 	 , dblPrepayments		= 0
+	 , strType
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 	 LEFT JOIN (#ARPAYMENTDETAILS PD INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId
 	 LEFT JOIN (#APPAYMENTDETAILS APPD INNER JOIN #APPOSTEDPAYMENT APP ON APPD.intPaymentId = APP.intPaymentId) ON I.intInvoiceId = APPD.intInvoiceId
