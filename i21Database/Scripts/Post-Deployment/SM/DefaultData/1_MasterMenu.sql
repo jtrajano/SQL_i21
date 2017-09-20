@@ -3622,6 +3622,8 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Item Contamination' AND strModu
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing'
 /* End of Delete */
 
+UPDATE tblSMMasterMenu SET strMenuName = 'Item Receive Life and Custom Label', strDescription = 'Item Receive Life and Custom Label' where strMenuName = 'Item Receive Life'
+
 /* TANK MANAGEMENT */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Management' AND strModuleName = 'Tank Management' AND intParentMenuID = 0)
 UPDATE tblSMMasterMenu SET intSort = 18 WHERE strMenuName = 'Tank Management' AND strModuleName = 'Tank Management' AND intParentMenuID = 0
