@@ -497,7 +497,7 @@ IF @ysnPrintFromCFLocal = 1
 				 , dblTotalFuture = SUM(dblAmountDue)
 			FROM tblARInvoice WITH (NOLOCK)
 			WHERE strType = 'CF Tran'
-			AND dtmPostDate <= @dtmDateFromLocal
+			AND dtmPostDate < @dtmDateFromLocal
 			AND ysnPaid = 0
 			AND ysnPosted = 1
 			GROUP BY intEntityCustomerId
