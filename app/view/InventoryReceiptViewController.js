@@ -169,7 +169,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         value: 'true'
                     }
                 ],
-                readOnly: '{isReceiptReadonly}'
+                readOnly: '{isFreightTermsReadonly}'
             },
             txtFobPoint: {
                 value: '{current.strFobPoint}',
