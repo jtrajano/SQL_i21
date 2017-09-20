@@ -233,6 +233,8 @@
 :r "..\dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
 
+:r "..\dbo\Stored Procedures\deleteSP.sql"
+
 --GRAIN
 :r "..\dbo\Stored Procedures\uspGRImportStorageType.sql"
 :r "..\dbo\Stored Procedures\uspGRImportWeightGrades.sql"
