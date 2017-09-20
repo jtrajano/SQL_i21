@@ -12,6 +12,7 @@ GO
 
 	PRINT N'Start updating nmwly added columnt(strDocument, strComments) column in tblGLDetail table'
 GO
+	--Applied on 17.1
 	UPDATE G SET strComments = B.strComments 
 	FROM tblGLDetail G 
 	JOIN tblGLJournalDetail B 
@@ -31,6 +32,13 @@ GO
 	WHERE B.intJournalId = G.intTransactionId 
 	AND C.strJournalId = G.strTransactionId 
 	AND ISNULL(G.strDocument,'') = ''
+
+	UPDATE A
+	SET A.strComments = B.strReference
+	FROM tblGLDetail A
+	JOIN tblAPBill B ON A.intTransactionId = B.intBillId
+	AND A.strTransactionId = B.strBillId
+	AND ISNULL(A.strComments,'') = ''
 GO
 	PRINT N'Finished updating nmwly added columnt(strDocument, strComments) column in tblGLDetail table'
 GO
