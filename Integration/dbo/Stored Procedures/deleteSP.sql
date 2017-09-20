@@ -1,7 +1,4 @@
-﻿IF EXISTS(select top 1 1 from sys.procedures where name = 'uspMFImportRecipe')
-	DROP PROCEDURE uspMFImportRecipe
-GO
-IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportStorageType')
+﻿IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportStorageType')
 	DROP PROCEDURE uspGRImportStorageType
 GO
 
