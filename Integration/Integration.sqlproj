@@ -419,5 +419,6 @@
     <None Include="dbo\Stored Procedures\uspGRImportShipTo.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportStorageType.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportWeightGrades.sql" />
+    <None Include="dbo\Stored Procedures\deleteSP.sql" />
   </ItemGroup>
 </Project>
