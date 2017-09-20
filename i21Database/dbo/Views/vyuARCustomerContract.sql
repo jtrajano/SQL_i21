@@ -27,7 +27,7 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , strCurrencyExchangeRateType		= SMCRT.strCurrencyExchangeRateType
 	 , intCurrencyExchangeRateId		= CTCD.intCurrencyExchangeRateId
 	 , dblCurrencyExchangeRate			= CTCD.dblRate
-	 , intSubCurrencyId					= CTCD.intConvPriceCurrencyId
+	 , intSubCurrencyId					= ISNULL(CTCD.intBasisCurrencyId, CTCD.intConvPriceCurrencyId)
 	 , dblSubCurrencyRate				= CONVERT(NUMERIC(18,6),ISNULL(SMC.intCent, 1.000000))
 	 , strSubCurrency					= SMC.strCurrency
 	 , intPriceItemUOMId				= CTCD.intPriceItemUOMId
@@ -74,6 +74,7 @@ FROM (
 		 , intNetWeightUOMId
 		 , intInvoiceCurrencyId
 		 , ysnUseFXPrice
+		 , intBasisCurrencyId
 		 , intConvPriceCurrencyId
 	FROM dbo.tblCTContractDetail WITH (NOLOCK)
 ) CTCD 
@@ -165,7 +166,7 @@ LEFT OUTER JOIN (
 		 , intMainCurrencyId
 		 , strCurrency
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
-) SMC ON CTCD.intConvPriceCurrencyId = SMC.intCurrencyID
+) SMC ON ISNULL(CTCD.intBasisCurrencyId, CTCD.intConvPriceCurrencyId) = SMC.intCurrencyID
 LEFT OUTER JOIN (
 	SELECT intCurrencyID		 
 		 , intMainCurrencyId
