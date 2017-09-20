@@ -71,8 +71,7 @@ BEGIN
 			[dblForeignRate],
 			[strRateType]
 	)
-	SELECT	DISTINCT
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
+	SELECT	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
 		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	D.intDividendsGLAccount,
 		[dblDebit]						=	ROUND(C.dblDividendAmount,2),
