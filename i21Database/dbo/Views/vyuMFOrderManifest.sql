@@ -5,6 +5,7 @@ SELECT OH.intOrderHeaderId
 	,M.intConcurrencyId
 	,L.intLotId
 	,L.strLotNumber
+	,PL.strParentLotNumber
 	,L.strLotAlias
 	,L.dblQty
 	,I.strItemNo
@@ -16,6 +17,7 @@ SELECT OH.intOrderHeaderId
 FROM tblMFOrderHeader OH 
 JOIN tblMFOrderManifest M ON OH.intOrderHeaderId = M.intOrderHeaderId
 JOIN tblICLot L ON L.intLotId = M.intLotId
+JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 JOIN tblICItem I ON I.intItemId = L.intItemId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId

@@ -7,6 +7,7 @@ SELECT OH.intOrderHeaderId
 	  ,TT.strTaskType
 	  ,TS.strTaskState
 	  ,L.strLotNumber
+	  ,PL.strParentLotNumber
 	  ,L.strLotAlias
 	  ,I.strItemNo
 	  ,I.strDescription AS strItemDescription
@@ -30,6 +31,7 @@ JOIN tblMFTaskType TT ON TT.intTaskTypeId = T.intTaskTypeId
 JOIN tblMFTaskState TS ON TS.intTaskStateId = T.intTaskStateId
 JOIN tblMFTaskPriority TP ON TP.intTaskPriorityId = T.intTaskPriorityId
 JOIN tblICLot L ON L.intLotId = T.intLotId
+JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 JOIN tblICItem I ON I.intItemId = T.intItemId
 JOIN tblICStorageLocation FSL ON FSL.intStorageLocationId = T.intFromStorageLocationId
 JOIN tblICStorageLocation TSL ON TSL.intStorageLocationId = T.intToStorageLocationId
