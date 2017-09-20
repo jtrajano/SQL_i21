@@ -38,7 +38,7 @@ INSERT INTO #tblPRICES(intItemId,name,pricingMethod,reference,perUnit, intLocati
 										, Item.intLocationId
 										, dblPrice = ISNULL(Item.dblSalePrice , 0) 
 								FROM vyuICGetItemPricing Item
-								WHERE intUnitMeasureId = (SELECT TOP 1 intIssueUOMId FROM tblICItemLocation WHERE intItemId = Item.intItemId AND intLocationId = Item.intLocationId)
+								WHERE intItemUnitMeasureId = (SELECT TOP 1 intIssueUOMId FROM tblICItemLocation WHERE intItemId = Item.intItemId AND intLocationId = Item.intLocationId)
 								AND Item.dblSalePrice > 0) price 
 								ON price.intItemId = item.intItemId
 				WHERE (item.ysnAvailableTM = 1	OR item.strType = 'Service') and price.intLocationId = @intDefaultLocationId
