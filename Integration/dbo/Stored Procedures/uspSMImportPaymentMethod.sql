@@ -192,7 +192,7 @@ BEGIN
 			,1
 			,P.[strPaymentMethodCode]
 			,P.[strPaymentMethodCode]
-			,ISNULL(GL.[inti21Id],0)
+			,GL.[inti21Id]
 			,P.[strPrintOption] 
 			,0
 		FROM
