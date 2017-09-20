@@ -4,6 +4,7 @@
 	,@intVendorId int = null
 	,@strPurchaseSales nvarchar(50) = NULL
 as
+
 BEGIN
 	 DECLARE @Commodity AS TABLE 
 	 (
@@ -119,7 +120,7 @@ BEGIN
 				, sl.strLocationName,i.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 				,null [Storage Due] 
 				FROM tblICItemStock a  
-				  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId -- and isnull(a.dblUnitOnHand,0) > 0
+				  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId  --and isnull(a.dblUnitOnHand,0) > 0
 				  JOIN tblICItem i on a.intItemId=i.intItemId  
 				  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 				  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
@@ -354,36 +355,26 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 
 SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 		,'Company Titled Stock' AS [strType]
-		,ISNULL(invQty, 0) - -Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +
+		,ISNULL(invQty, 0) +
 		  (isnull(CollateralPurchases, 0) - isnull(CollateralSale, 0)) +
 		 CASE WHEN (SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then isnull(OffSite,0) else 0 end +  
-		CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end +  
-		isnull(SlsBasisDeliveries ,0)
+		CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end  
+		 +isnull(SlsBasisDeliveries ,0)
 		 AS dblTotal,@intCommodityId,@intCommodityUnitMeasureId
 	FROM (
-		SELECT isnull((select sum(dblUnitOnHand) from (
-					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(it1.dblUnitOnHand,0)) dblUnitOnHand
-					FROM tblICItem i
-					INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
-					INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-					JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
+		SELECT 
+		isnull((select sum(dblUnitOnHand) from (
+					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(a.dblUnitOnHand,0)) dblUnitOnHand
+					FROM tblICItemStock a  
+					  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId -- and isnull(a.dblUnitOnHand,0) > 0
+					  JOIN tblICItem i on a.intItemId=i.intItemId  
+					  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
+					  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
 					JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 					WHERE i.intCommodityId = @intCommodityId
 					AND il.intLocationId  = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end							
 					)t), 0) AS invQty
-			,isnull((select sum(dblQty) from (
-					SELECT 
-					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(sr1.dblQty,0)) dblQty
-					FROM tblICItem i
-					INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
-					INNER JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId
-					JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
-					JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-					INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-					WHERE i.intCommodityId = @intCommodityId
-					AND il.intLocationId  = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end							
-					)t), 0) AS ReserveQty
-
+			
 			,(select sum(dblRemainingQuantity) from (SELECT 
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((dblRemainingQuantity),0)) dblRemainingQuantity
 			   FROM tblRKCollateral c
@@ -419,7 +410,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 					 WHERE cd.intCommodityId = @intCommodityId)t) as SlsBasisDeliveries
 
 				,(select sum(dblTotal) dblTotal from (
-					SELECT distinct
+					SELECT 
 					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal
 					FROM vyuGRGetStorageDetail ch
 					WHERE ch.intCommodityId  = @intCommodityId
