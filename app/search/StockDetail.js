@@ -139,6 +139,13 @@ Ext.define('Inventory.search.StockDetail', {
                         stackType: "100%"
                     }
                 ],
+                chartScrollbar: {
+                    enabled: true,
+                    graph: "stockGraph",
+                    graphType: "line",
+                    oppositeAxis: false,
+                    scrollbarHeight: 100
+                },                
                 graphs: [
                     {
                         id: 'stockGraph',
@@ -155,7 +162,8 @@ Ext.define('Inventory.search.StockDetail', {
                         //labelText: '[[value]]',
                         lineAlpha: 0.5,
                         lineColor: "#FFFFFF",
-                        lineThickness: 1
+                        lineThickness: 1,
+                        fixedColumnWidth: 50
                     },
                     {
                         id: 'spaceGraph',
@@ -170,7 +178,8 @@ Ext.define('Inventory.search.StockDetail', {
                         fillColors: "#cdcdcd",
                         lineAlpha: 0.5,
                         lineColor: "#cdcdcd",
-                        lineThickness: 1
+                        lineThickness: 1,
+                        fixedColumnWidth: 50
                     }
                 ],
                 legend: {
@@ -183,7 +192,7 @@ Ext.define('Inventory.search.StockDetail', {
                 depth3D: 30,
                 categoryAxis: {
                     title: 'Storage Location',
-                    labelRotation: 45,
+                    labelRotation: 20,
                     //labelColorField: 'strColor',
                     boldLabels: false,
                     /*type: 'serial',*/
@@ -379,6 +388,13 @@ Ext.define('Inventory.search.StockDetail', {
                         stackType: "100%"
                     }
                 ],
+                chartScrollbar: {
+                    enabled: true,
+                    graph: "stockGraph",
+                    graphType: "line",
+                    oppositeAxis: false,
+                    scrollbarHeight: 100
+                },
                 graphs: [
                     {
                         id: 'stockGraph',
@@ -395,7 +411,8 @@ Ext.define('Inventory.search.StockDetail', {
                         //labelText: '[[value]]',
                         lineAlpha: 0.5,
                         lineColor: "#FFFFFF",
-                        lineThickness: 1
+                        lineThickness: 1,
+                        fixedColumnWidth: 50
                     },
                     {
                         id: 'spaceGraph',
@@ -410,7 +427,8 @@ Ext.define('Inventory.search.StockDetail', {
                         fillColors: "#cdcdcd",
                         lineAlpha: 0.5,
                         lineColor: "#cdcdcd",
-                        lineThickness: 1
+                        lineThickness: 1,
+                        fixedColumnWidth: 50
                     }
                 ],
                 legend: {
@@ -423,7 +441,7 @@ Ext.define('Inventory.search.StockDetail', {
                 depth3D: 30,
                 categoryAxis: {
                     title: 'Storage Unit',
-                    labelRotation: 45,
+                    labelRotation: 20,
                     minHorizontalGap: 60,
                     //labelColorField: 'strColor',
                     boldLabels: false,
