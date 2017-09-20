@@ -44,10 +44,14 @@ AS
 		,[strSalespersonName]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,[intCompanyLocationId]		INT
 		,[strSourceTransaction]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,[strType]					NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	)
 	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
 	      , @dblMinimumSC		NUMERIC(18, 6) = 0
 		  , @dblMinFinanceSC    NUMERIC(18, 6) = 0
+		  , @ysnChargeonCharge	BIT = 1
+
+	SELECT TOP 1 @ysnChargeonCharge = ISNULL(ysnChargeonCharge, 1) FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 	--VALIDATION
 	IF ISNULL(@arAccountId, 0) = 0
@@ -102,6 +106,9 @@ AS
 		BEGIN
 			INSERT INTO @temp_aging_table
 			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDate, NULL
+
+			IF ISNULL(@ysnChargeonCharge, 1) = 0
+				DELETE FROM @temp_aging_table WHERE strType = 'Service Charge'
 
 			IF (DATEPART(dd, @asOfDate) = 31)
 				DELETE FROM @temp_aging_table WHERE dtmDueDate = @asOfDate
@@ -202,6 +209,7 @@ AS
 							    AND (ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) IS NOT NULL AND DATEADD(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN SC.intGracePeriod ELSE 0 END, I.dtmDueDate) < ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) OR ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) IS NULL)
                                 AND ((I.strType = 'Service Charge' AND ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND ysnForgiven = 0)))
                                 AND I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal) > @zeroDecimal
+								AND ((@ysnChargeonCharge = 0 AND I.strType NOT IN ('Service Charge')) OR (@ysnChargeonCharge = 1))
 						END
 					ELSE
 						BEGIN
