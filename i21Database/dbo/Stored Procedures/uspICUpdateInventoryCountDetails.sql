@@ -36,6 +36,7 @@ BEGIN
 		, dblLastCost
 		, strCountLine
 		, intItemUOMId
+		, intWeightUOMId
 		, ysnRecount
 		, intEntityUserSecurityId
 		, intConcurrencyId
@@ -53,6 +54,7 @@ BEGIN
 		, dblLastCost
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intKey ASC) AS NVARCHAR(50))
 		, intItemUOMId
+		, intWeightUOMId
 		, ysnRecount = 0
 		, intEntityUserSecurityId = @intEntityUserSecurityId
 		, intConcurrencyId = 1
