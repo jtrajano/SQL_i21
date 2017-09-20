@@ -180,6 +180,8 @@ BEGIN TRY
 				,intLotId = @intNewLotId
 				,intFromStorageLocationId = @intNewStorageLocationId
 			WHERE intTaskId = @intTaskId
+
+			Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
 		END
 
 		INSERT INTO tblMFPickForWOStaging (
@@ -469,6 +471,8 @@ BEGIN TRY
 					,intLotId = @intNewLotId
 					,intFromStorageLocationId = @intNewStorageLocationId
 				WHERE intTaskId = @intTaskId
+
+				Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
 			END
 
 			INSERT INTO tblMFPickForWOStaging (
