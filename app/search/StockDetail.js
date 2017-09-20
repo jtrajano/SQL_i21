@@ -10,7 +10,7 @@ Ext.define('Inventory.search.StockDetail', {
             groupedOnLoad: true,
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
-                { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
+                { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
                 { dataIndex: 'strType', text: 'Item Type', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCommodityCode', text: 'Commodity', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCategoryCode', text: 'Category', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewCategory' },
@@ -48,6 +48,7 @@ Ext.define('Inventory.search.StockDetail', {
                     iconCls: 'small-calculator',
                     listeners: {
                         click: function (e) {
+                            var win = e.up('window');
                             var grid = e.up('panel');
                             if(grid.url === '../Inventory/api/Item/SearchStockDetail') {
                                 var selection = _.first(grid.getSelectionModel().selected.items);
@@ -55,6 +56,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 if(selection) {
                                     iRely.Functions.openScreen('Inventory.view.InventoryValuation', {
                                         showSearch: true,
+                                        isFloating: true,
                                         filters: [
                                             {
                                                 column: 'strItemNo',
@@ -70,7 +72,12 @@ Ext.define('Inventory.search.StockDetail', {
                                             }
                                         ]
                                     });
+
+                                    //iRely.Functions.openScreen('Inventory.view.InventoryValuation', { isMenuClick: true });
                                 }
+
+                                // Auto-Close                     
+                                if (win) win.close();                    
                             }
                         }
                     }
@@ -94,20 +101,19 @@ Ext.define('Inventory.search.StockDetail', {
                 { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
                 { dataIndex: 'strLocation', text: 'Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinLocation' },
                 { dataIndex: 'strSubLocationName', text: 'Storage Location', width: 100, flex: 1 },
-                { dataIndex: 'strStorageLocation', text: 'Storage Unit', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
+               // { dataIndex: 'strStorageLocation', text: 'Storage Unit', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
                 { dataIndex: 'dblStock', text: 'Stock', xtype: 'numbercolumn', summaryType: 'sum', width: 100, flex: 1 },
-                { dataIndex: 'dblAirSpaceReading', xtype: 'numbercolumn', text: 'Air Space Reading', width: 100, flex: 1, summaryType: 'sum' },
-                { dataIndex: 'dblPhysicalReading', xtype: 'numbercolumn', text: 'Physical Reading', width: 100, flex: 1, summaryType: 'sum' },
-                { dataIndex: 'dblStockVariance', xtype: 'numbercolumn', text: 'Stock Variance', width: 100, flex: 1, summaryType: 'sum' },
-                { dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinUOM' },
-                { dataIndex: 'dtmReadingDate', xtype: 'datecolumn', dataType: 'date', text: 'Reading Date', width: 100, flex: 1, hidden: false },
+                //{ dataIndex: 'dblAirSpaceReading', xtype: 'numbercolumn', text: 'Air Space Reading', width: 100, flex: 1, summaryType: 'sum' },
+                //{ dataIndex: 'dblPhysicalReading', xtype: 'numbercolumn', text: 'Physical Reading', width: 100, flex: 1, summaryType: 'sum' },
+                //{ dataIndex: 'dblStockVariance', xtype: 'numbercolumn', text: 'Stock Variance', width: 100, flex: 1, summaryType: 'sum' },
+                //{ dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinUOM' },
+                //{ dataIndex: 'dtmReadingDate', xtype: 'datecolumn', dataType: 'date', text: 'Reading Date', width: 100, flex: 1, hidden: false },
                 { dataIndex: 'dblCapacity', xtype: 'numbercolumn', text: 'Capacity', width: 100, flex: 1, summaryType: 'sum' },
                 { dataIndex: 'dblAvailable', xtype: 'numbercolumn', summaryType: 'sum', text: 'Space Available', width: 100, flex: 1 },
                 { dataIndex: 'dblEffectiveDepth', xtype: 'numbercolumn', summaryType: 'sum', text: 'Effective Depth', width: 100, flex: 1, hidden: true },
                 { dataIndex: 'dblPackFactor', xtype: 'numbercolumn', summaryType: 'sum', text: 'Pack Factor', width: 100, flex: 1, hidden: true },
-                { dataIndex: 'dblUnitPerFoot', xtype: 'numbercolumn', summaryType: 'sum', text: 'Unit Per Foot', width: 100, flex: 1, hidden: true },
-                { dataIndex: 'strDiscountCode', text: 'Discount Schedule Id', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
-                { dataIndex: 'strDiscountDescription', text: 'Discount Schedule', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
+                { dataIndex: 'dblUnitPerFoot', xtype: 'numbercolumn', summaryType: 'sum', text: 'Unit Per Foot', width: 100, flex: 1, hidden: true }
+                //{ dataIndex: 'strDiscountCode', text: 'Discount Schedule Id', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
             ],
             buttons: [
                 {
@@ -133,6 +139,13 @@ Ext.define('Inventory.search.StockDetail', {
                         stackType: "100%"
                     }
                 ],
+                chartScrollbar: {
+                    enabled: true,
+                    graph: "stockGraph",
+                    graphType: "line",
+                    oppositeAxis: false,
+                    scrollbarHeight: 100
+                },                
                 graphs: [
                     {
                         id: 'stockGraph',
@@ -149,7 +162,8 @@ Ext.define('Inventory.search.StockDetail', {
                         //labelText: '[[value]]',
                         lineAlpha: 0.5,
                         lineColor: "#FFFFFF",
-                        lineThickness: 1
+                        lineThickness: 1,
+                        fixedColumnWidth: 50
                     },
                     {
                         id: 'spaceGraph',
@@ -164,7 +178,8 @@ Ext.define('Inventory.search.StockDetail', {
                         fillColors: "#cdcdcd",
                         lineAlpha: 0.5,
                         lineColor: "#cdcdcd",
-                        lineThickness: 1
+                        lineThickness: 1,
+                        fixedColumnWidth: 50
                     }
                 ],
                 legend: {
@@ -177,7 +192,7 @@ Ext.define('Inventory.search.StockDetail', {
                 depth3D: 30,
                 categoryAxis: {
                     title: 'Storage Location',
-                    labelRotation: 45,
+                    labelRotation: 20,
                     //labelColorField: 'strColor',
                     boldLabels: false,
                     /*type: 'serial',*/
@@ -347,7 +362,7 @@ Ext.define('Inventory.search.StockDetail', {
                 { dataIndex: 'dblPackFactor', xtype: 'numbercolumn', summaryType: 'sum', text: 'Pack Factor', width: 100, flex: 1, hidden: true },
                 { dataIndex: 'dblUnitPerFoot', xtype: 'numbercolumn', summaryType: 'sum', text: 'Unit Per Foot', width: 100, flex: 1, hidden: true },
                 { dataIndex: 'strDiscountCode', text: 'Discount Schedule Id', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
-                { dataIndex: 'strDiscountDescription', text: 'Discount Schedule', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
+                { dataIndex: 'strDiscountDescription', text: 'Discount Schedule', width: 100, flex: 1 },
             ],
             buttons: [
                 {
@@ -373,6 +388,13 @@ Ext.define('Inventory.search.StockDetail', {
                         stackType: "100%"
                     }
                 ],
+                chartScrollbar: {
+                    enabled: true,
+                    graph: "stockGraph",
+                    graphType: "line",
+                    oppositeAxis: false,
+                    scrollbarHeight: 100
+                },
                 graphs: [
                     {
                         id: 'stockGraph',
@@ -389,7 +411,8 @@ Ext.define('Inventory.search.StockDetail', {
                         //labelText: '[[value]]',
                         lineAlpha: 0.5,
                         lineColor: "#FFFFFF",
-                        lineThickness: 1
+                        lineThickness: 1,
+                        fixedColumnWidth: 50
                     },
                     {
                         id: 'spaceGraph',
@@ -404,7 +427,8 @@ Ext.define('Inventory.search.StockDetail', {
                         fillColors: "#cdcdcd",
                         lineAlpha: 0.5,
                         lineColor: "#cdcdcd",
-                        lineThickness: 1
+                        lineThickness: 1,
+                        fixedColumnWidth: 50
                     }
                 ],
                 legend: {
@@ -417,7 +441,7 @@ Ext.define('Inventory.search.StockDetail', {
                 depth3D: 30,
                 categoryAxis: {
                     title: 'Storage Unit',
-                    labelRotation: 45,
+                    labelRotation: 20,
                     minHorizontalGap: 60,
                     //labelColorField: 'strColor',
                     boldLabels: false,
@@ -556,5 +580,47 @@ Ext.define('Inventory.search.StockDetail', {
                 ]
             }
         }
-    ]
+    ],
+
+    onViewCategory: function (value, record) {
+        var locationName = record.get('strCategoryCode');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'Category');
+    },
+	
+    onViewLocation: function (value, record) {
+        var locationName = record.get('strLocationName');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
+    },	
+	
+    onViewItem: function (value, record) {
+        var itemNo = record.get('strItemNo');
+        i21.ModuleMgr.Inventory.showScreen(itemNo, 'ItemNo');
+    },	
+	
+    onViewBinLocation: function (value, record) {
+        var locationName = record.get('strLocation');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
+    },
+
+    onViewBinStorageLocation: function(value, record) {
+        var locationName = record.get('strStorageLocation');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'StorageLocation');
+    },	
+	
+    onViewBinUOM: function(value, record) {
+        var locationName = record.get('strUOM');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'UOM');
+    },
+
+    onViewDiscountCodes: function(value, record) {
+        iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', {
+            strSourceType: 'Storage Measurement Reading',
+            intTicketFileId: record.get('intStorageMeasurementReadingConversionId')
+        });
+    },
+
+    onViewUOM: function(value, record) {
+        var uom = record.get('strStockUOM');
+        i21.ModuleMgr.Inventory.showScreen(uom, 'UOM');
+    }  
 });

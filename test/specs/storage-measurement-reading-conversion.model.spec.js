@@ -63,6 +63,34 @@ UnitTestEngine.testModel({
         "name": "strUnitMeasure",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "dblUnitPerFoot",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblResidualUnit",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblValue",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblGainLoss",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblOnHand",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblNewOnHand",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblVariance",
+        "type": "float",
+        "allowNull": false
     }],
     validators: [
         [{

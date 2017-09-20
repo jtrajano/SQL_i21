@@ -36,6 +36,10 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "strShipFromLocation",
+        "type": "string",
+        "allowNull": false
+    }, {
         "name": "intEntityCustomerId",
         "type": "int",
         "allowNull": true
@@ -48,9 +52,17 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "strFreightTerm",
+        "type": "string",
+        "allowNull": false
+    }, {
         "name": "intCurrencyId",
         "type": "int",
         "allowNull": true
+    }, {
+        "name": "strCurrency",
+        "type": "string",
+        "allowNull": false
     }, {
         "name": "strBOLNumber",
         "type": "string",
@@ -96,8 +108,8 @@ UnitTestEngine.testModel({
         "type": "date",
         "allowNull": false
     }, {
-        "name": "dtmFreeTime",
-        "type": "date",
+        "name": "strFreeTime",
+        "type": "string",
         "allowNull": false
     }, {
         "name": "strReceivedBy",
@@ -135,6 +147,10 @@ UnitTestEngine.testModel({
         "name": "intShipToCompanyLocationId",
         "type": "int",
         "allowNull": true
+    }, {
+        "name": "strShipToLocation",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{
@@ -144,13 +160,16 @@ UnitTestEngine.testModel({
             "field": "intOrderType",
             "type": "presence"
         }, {
-            "field": "intShipFromLocationId",
+            "field": "strShipFromLocation",
             "type": "presence"
         }, {
-            "field": "intFreightTermId",
+            "field": "strShipToLocation",
             "type": "presence"
         }, {
-            "field": "intCurrencyId",
+            "field": "strFreightTerm",
+            "type": "presence"
+        }, {
+            "field": "strCurrency",
             "type": "presence"
         }]
     ]

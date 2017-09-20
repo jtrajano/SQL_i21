@@ -576,8 +576,8 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                             itemId: 'cboProductCode',
                                                                                             fieldLabel: 'Product Code',
                                                                                             labelWidth: 105,
-                                                                                            displayField: 'strRegProdCode',
-                                                                                            valueField: 'strItemTypeCode'
+                                                                                            displayField: 'strProductCode',
+                                                                                            valueField: 'strProductCode'
                                                                                         },
                                                                                         {
                                                                                             xtype: 'textfield',

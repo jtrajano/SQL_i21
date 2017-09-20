@@ -72,6 +72,30 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intDestinationWeightId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intDestinationGradeId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intDestinationQtyUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strDestinationQtyUOM",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "dblDestinationGrossQty",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblDestinationNetQty",
+        "type": "float",
+        "allowNull": false
+    }, {
         "name": "strItemNo",
         "type": "string",
         "allowNull": false

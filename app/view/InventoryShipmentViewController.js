@@ -97,16 +97,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             cboShipFromAddress: {
                 value: '{current.strShipFromLocation}',
-                origValueField: 'intCompanyLocationId',
-                origUpdateField: 'intShipFromLocationId',
+                origValueField: 'strLocationName',
+                origUpdateField: 'strShipFromLocation',
                 store: '{shipFromLocation}',
                 readOnly: '{current.ysnPosted}'
             },
             txtShipFromAddress: '{strShipFromAddress}',
             cboShipToAddress: {
                 value: '{current.strShipToLocation}',
-                origValueField: 'intEntityLocationId',
-                origUpdateField: 'intShipToLocationId',
+                origValueField: 'strLocatioName',
+                origUpdateField: 'strShipToLocation',
                 store: '{shipToLocation}',
                 readOnly: '{current.ysnPosted}',
                 defaultFilters: [{
@@ -117,9 +117,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 fieldLabel: '{setShipToFieldLabel}'
             },
             cboShipToCompanyAddress: {
-                value: '{current.strShipToLocation}',
-                origValueField: 'intCompanyLocationId',
-                origUpdateField: 'intShipToCompanyLocationId',
+                value: '{current.strShipToCompanyLocation}',
+                origValueField: 'strLocatioName',
+                origUpdateField: 'strShipToCompanyLocation',
                 store: '{shipToCompanyLocation}',
                 readOnly: '{current.ysnPosted}',
                 defaultFilters: [{
@@ -950,6 +950,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (records.length <= 0)
             return;
 
+        var record = records[0];
+        if (!record)
+            return; 
+
         var win = combo.up('window');
         var current = win.viewModel.data.current;
         
@@ -965,27 +969,31 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     });
                 }
                 if (shipmentItemCount == 0){
-                    current.set('intShipFromLocationId', records[0].get('intCompanyLocationId'));
-                    current.set('strShipFromStreet', records[0].get('strAddress'));
-                    current.set('strShipFromCity', records[0].get('strCity'));
-                    current.set('strShipFromState', records[0].get('strStateProvince'));
-                    current.set('strShipFromZipPostalCode', records[0].get('strZipPostalCode'));
-                    current.set('strShipFromCountry', records[0].get('strCountry'));
+                    current.set('intShipFromLocationId', record.get('intCompanyLocationId'));
+                    current.set('strShipFromStreet', record.get('strAddress'));
+                    current.set('strShipFromCity', record.get('strCity'));
+                    current.set('strShipFromState', record.get('strStateProvince'));
+                    current.set('strShipFromZipPostalCode', record.get('strZipPostalCode'));
+                    current.set('strShipFromCountry', record.get('strCountry'));
                 }                
             }
             else if (combo.itemId === 'cboShipToAddress'){
-                current.set('strShipToStreet', records[0].get('strAddress'));
-                current.set('strShipToCity', records[0].get('strCity'));
-                current.set('strShipToState', records[0].get('strState'));
-                current.set('strShipToZipPostalCode', records[0].get('strZipCode'));
-                current.set('strShipToCountry', records[0].get('strCountry'));
+                current.set('strShipToStreet', record.get('strAddress'));
+                current.set('strShipToCity', record.get('strCity'));
+                current.set('strShipToState', record.get('strState'));
+                current.set('strShipToZipPostalCode', record.get('strZipCode'));
+                current.set('strShipToCountry', record.get('strCountry'));
+                current.set('intShipToLocationId', record.get('intEntityLocationId'));
             }
             else if (combo.itemId === 'cboShipToCompanyAddress'){
-                current.set('strShipToStreet', records[0].get('strAddress'));
-                current.set('strShipToCity', records[0].get('strCity'));
-                current.set('strShipToState', records[0].get('strStateProvince'));
-                current.set('strShipToZipPostalCode', records[0].get('strZipPostalCode'));
-                current.set('strShipToCountry', records[0].get('strCountry'));
+                current.set('strShipToStreet', record.get('strAddress'));
+                current.set('strShipToCity', record.get('strCity'));
+                current.set('strShipToState', record.get('strStateProvince'));
+                current.set('strShipToZipPostalCode', record.get('strZipPostalCode'));
+                current.set('strShipToCountry', record.get('strCountry'));
+                current.set('strShipToLocation', record.get('strLocationName'));
+                current.set('intShipToLocationId', record.get('intEntityLocationId'));               
+                current.set('intShipToCompanyLocationId', record.get('intEntityLocationId'));
             }
         }
     },

@@ -67,7 +67,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intShipToLocationId).HasColumnName("intShipToLocationId");
             this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
             this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
-            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate").HasPrecision(18, 6);
         }
     }
 }

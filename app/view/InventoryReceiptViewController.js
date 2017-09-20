@@ -169,7 +169,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         value: 'true'
                     }
                 ],
-                readOnly: '{isReceiptReadonly}'
+                readOnly: '{isFreightTermsReadonly}'
             },
             txtFobPoint: {
                 value: '{current.strFobPoint}',
@@ -1056,24 +1056,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onGridAfterLayout: function (grid) {
-        "use strict";
+        // "use strict";
 
-        //TODO: Remove this when we upgrade to Ext 6 - workaround for the flying combo
-        var editor = grid.editingPlugin && grid.editingPlugin.activeEditor;
-        if (editor && editor.field instanceof Ext.form.field.Text) {
-            var plugin = editor.editingPlugin,
-                record = plugin.activeRecord,
-                column = plugin.activeColumn,
-                view = grid.view,
-                row = view.getRow(record);
+        // //TODO: Remove this when we upgrade to Ext 6 - workaround for the flying combo
+        // var editor = grid.editingPlugin && grid.editingPlugin.activeEditor;
+        // if (editor && editor.field instanceof Ext.form.field.Text) {
+        //     var plugin = editor.editingPlugin,
+        //         record = plugin.activeRecord,
+        //         column = plugin.activeColumn,
+        //         view = grid.view,
+        //         row = view.getRow(record);
 
-            if (row && record && column && editor.getXY().toString() !== '0,0') {
-                var cell = plugin.getCell(record, column);
-                if (cell && (editor.getXY() !== cell.getXY())) {
-                    editor.realign();
-                }
-            }
-        }
+        //     if (row && record && column && editor.getXY().toString() !== '0,0') {
+        //         var cell = plugin.getCell(record, column);
+        //         if (cell && (editor.getXY() !== cell.getXY())) {
+        //             editor.realign();
+        //         }
+        //     }
+        // }
     },
 
     show: function (config) {
@@ -1136,14 +1136,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.showOtherCharges(win);
         }
     },
-    
-    updateWeightLossText: function (window, clear, weightLoss) {
-        if (clear) {
-            window.down("#txtWeightLossMsgValue").setValue("");
-            window.down("#txtWeightLossMsgPercent").setValue("");
+
+    updateWeightLossText: function(window, clear, weightLoss) {
+        if (!window) return;
+        weightLoss = weightLoss ? weightLoss : {
+            dblWeightLoss: 0.00,
+            dblWeightLossPercentage: 0.00
+        }; 
+
+        if(clear) {
+            window.down("#txtWeightLossMsgValue").setValue(0.00);
+            window.down("#txtWeightLossMsgPercent").setValue(0.00);
         } else {
-            window.down("#txtWeightLossMsgValue").setValue(Ext.util.Format.number(weightLoss.dblWeightLoss, '0,000.00'));
-            window.down("#txtWeightLossMsgPercent").setValue(Ext.util.Format.number(weightLoss.dblWeightLossPercentage, '0,000.00'));
+            window.down("#txtWeightLossMsgValue").setValue(weightLoss.dblWeightLoss);
+            window.down("#txtWeightLossMsgPercent").setValue(weightLoss.dblWeightLossPercentage);
 
             if (weightLoss.dblWeightLoss === 0) {
                 document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'black';
@@ -1637,7 +1643,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 freightTermId: cfg.freightTermId,
                 locationId: cfg.locationId,
                 entityVendorId: cfg.entityVendorId,
-                entityLocationId: cfg.entityLocationId
+                entityLocationId: cfg.entityLocationId,
+                itemId: cfg.itemId 
             },
             method: 'get'
         }).subscribe(
@@ -1870,7 +1877,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 freightTermId: intFreightTermId,
                 locationId: intLocationId,
                 entityVendorId: vendorId,
-                entityLocationId: vendorLocation
+                entityLocationId: vendorLocation,
+                itemId: itemId 
             };
             me.getDefaultReceiptTaxGroupId(current, taxCfg);
         }
@@ -2136,8 +2144,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     taxAmount = i21.ModuleMgr.Inventory.roundDecimalValue(taxAmount, 2);
 
                     if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
-                        if (itemDetailTax.ysnTaxExempt)
+                        if (itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent === 0.00)
                             taxAmount = 0.00;
+
+                        if(itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent !== 0.00)
+                            taxAmount -= (taxAmount * (itemDetailTax.dblExemptionPercent/100.00));
+
                         itemDetailTax.dblTax = taxAmount;
                         itemDetailTax.dblAdjustedTax = taxAmount;
                     }
@@ -2164,7 +2176,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         intTaxAccountId: itemDetailTax.intTaxAccountId,
                         ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
                         ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
-                        ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                        ysnCheckoffTax: itemDetailTax.ysnCheckoffTax,
+                        ysnTaxOnly: itemDetailTax.ysnTaxOnly
                     });
                     detailRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
                 });
@@ -2378,31 +2391,45 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
+        quantity = Ext.isNumeric(quantity) ? quantity : 0.00;
+        price = Ext.isNumeric(price) ? price : 0.00;
 
         var taxableAmount = quantity * price;
+        var otherTaxes = 0.00; 
+        var dblRate = 0.00; 
 
         Ext.Array.each(itemTaxes, function (itemDetailTax) {
             if (itemDetailTax.strTaxableByOtherTaxes && itemDetailTax.strTaxableByOtherTaxes !== String.empty) {
-                if (itemDetailTax.strTaxableByOtherTaxes.split(",").indexOf(currentItemTax.intTaxClassId.toString()) > -1) {
-                    if(itemDetailTax.data.ysnTaxOnly)
+                if (itemDetailTax.strTaxableByOtherTaxes.split(",").indexOf(currentItemTax.intTaxCodeId.toString()) > -1) {
+                    dblRate = Ext.isNumeric(itemDetailTax.dblRate) ? itemDetailTax.dblRate : 0.00; 
+
+                    if(itemDetailTax.ysnTaxOnly)
                         taxableAmount = 0.000000;
                     else
-                        taxableAmount = ((quantity * price) - ((quantity * price) * (itemDetailTax.dblRate/100.0)));
+                        taxableAmount = quantity * price; 
 
                     if (itemDetailTax.ysnTaxAdjusted) {
-                        taxableAmount = (quantity * price) + (itemDetailTax.dblAdjustedTax);
+                        otherTaxes += itemDetailTax.dblAdjustedTax;
                     } else {
                         if (itemDetailTax.strCalculationMethod === 'Percentage') {
-                            taxableAmount = (quantity * price) + ((quantity * price) * (itemDetailTax.dblRate / 100));
+                            otherTaxes += 
+                                ((itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent === 0.00) || itemDetailTax.ysnCheckoffTax)
+                                ? 0.00 
+                                : (quantity * price * dblRate / 100.0); 
                         } else {
-                            taxableAmount = (quantity * price) + (itemDetailTax.dblRate * quantity);
+                            otherTaxes += 
+                                ((itemDetailTax.ysnTaxExempt && itemDetailTax.dblExemptionPercent === 0.00) || itemDetailTax.ysnCheckoffTax) 
+                                ? 0.00 
+                                : (quantity * dblRate);
                         }
                     }
                 }
             }
         });
+        taxableAmount = Ext.isNumeric(taxableAmount) ? taxableAmount : 0.00;
+        otherTaxes = Ext.isNumeric(otherTaxes) ? otherTaxes : 0.00;
 
-        return taxableAmount;
+        return (taxableAmount + otherTaxes);
     },
 
     calculateOtherChargesTax: function (win) {
@@ -2506,7 +2533,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
         }
 
-        return Math.round(result, 12);
+        //return Math.round(result, 12);
+        return ic.utils.Math.round(result, 12); 
     },
 
     calculateGrossNet: function (record, calculateItemGrossNet) {
@@ -2612,6 +2640,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             record.set('dblGross', totalGross);
             record.set('dblNet', totalNet);
+
+            if(record.get('ysnQtyUOMChanged')){    
+                record.set('dblGrossBeforeEdit', totalGross);
+                record.set('dblNetBeforeEdit', totalNet);
+                record.set('ysnQtyUOMChanged', false);
+            }
         }
     },
 
@@ -2679,7 +2713,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onViewTaxDetailsClick: function (ReceiptItemId) {
         var win = this.getView();
-        var screenName = 'Inventory.view.InventoryReceiptTaxes';
+        var screenName = 'Inventory.view.TaxDetails';
         var grd = win.down('#grdInventoryReceipt');
         var vm = win.getViewModel();
 
@@ -3018,7 +3052,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         } 
         else {
-            btnVoucher.enable();
+            btnDebitMemo.enable();
         }          
     },
 
@@ -4728,7 +4762,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var plugin = grid.getPlugin('cepCharges');
         var current = plugin.getActiveRecord();
         var masterRecord = win.viewModel.data.current;
-        var cboVendor = win.down('#cboVendor');
+        //var cboVendor = win.down('#cboVendor');
         var cboCurrency = win.down('#cboCurrency');
 
         if (combo.itemId === 'cboOtherCharge') {
@@ -4740,7 +4774,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
 
             // Get the transaction currency
-            var chargeCurrencyId = cboCurrency.getValue();
+            var chargeCurrencyId = masterRecord.get('intCurrencyId');
 
             current.set('intChargeId', record.get('intItemId'));
             current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
@@ -4750,9 +4784,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // If other charge is accrue, default the vendor and currency from the transaction vendor and currency. 
             if (record.get('ysnAccrue') === true) {
                 current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
-                current.set('strVendorName', cboVendor.getRawValue());
-                current.set('intCurrencyId', chargeCurrencyId);
-                current.set('strCurrency', cboCurrency.getRawValue());
+                current.set('strVendorName', masterRecord.get('strVendorName'));
+                current.set('intCurrencyId', masterRecord.get('intCurrencyId'));
+                current.set('strCurrency', masterRecord.get('strCurrency'));
             }
             else {
                 current.set('intEntityVendorId', null);
@@ -4831,6 +4865,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 locationId: masterRecord.get('intLocationId'),
                 entityVendorId: current.get('intEntityVendorId'),
                 entityLocationId: null,
+                itemId: current.get('intChargeId')
             };
             me.getDefaultReceiptTaxGroupId(current, taxCfg);
         }
@@ -4856,6 +4891,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     locationId: masterRecord.get('intLocationId'),
                     entityVendorId: current.get('intEntityVendorId'),
                     entityLocationId: null,
+                    itemId: current.get('intChargeId')
                 };
                 me.getDefaultReceiptTaxGroupId(current, taxCfg);
             }
@@ -5218,8 +5254,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string', hidden: true, required: true },
                     { dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string' },
-                    { dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order') },
-                    { dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order') },
+                    { dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string' },
+                    { dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string' },
 
                     { dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string', required: true },
                     { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', required: true },
@@ -5351,6 +5387,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strOwnershipType: 'Own',
                                 dblFranchise: order.get('dblFranchise'),
                                 dblContainerWeightPerQty: order.get('dblContainerWeightPerQty'),
+                                intContainerWeightUOMId: order.get('intWeightUOMId'),
+                                dblContainerWeightUOMConvFactor: order.get('dblWeightUOMConvFactor'),
                                 ysnSubCurrency: order.get('ysnSubCurrency'),
                                 strSubCurrency: order.get('strSubCurrency'),
                                 dblGross: order.get('dblGross'),
@@ -5883,6 +5921,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     getWeightLoss: function (ReceiptItems, sourceType) {
+        var me = this; 
         var dblWeightLoss = 0.00;
         var dblNetShippedWt = 0;
         var dblNetReceivedWt = 0;
@@ -5893,21 +5932,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (sourceType === 2) {
             Ext.Array.each(ReceiptItems.data.items, function (item) {
                 if (!item.dummy) {
-                    /*  dblFranchise = item.data.dblFranchise;
-                      dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
-                      dblNetReceivedWt = item.data.dblNet;
-
-                      if (dblFranchise > 0)
-                          dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
-                      if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
-                          dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
-                    var netQty = 0.00, orderQty = 0.00, wgtQty = 0.00;
-                    if (!iRely.Functions.isEmpty(item.get('dblNet'))) netQty = item.get('dblNet');
-                    if (!iRely.Functions.isEmpty(item.get('dblOrderQty'))) orderQty = item.get('dblOrderQty');
-                    if (!iRely.Functions.isEmpty(item.get('dblContainerWeightPerQty'))) wgtQty = item.get('dblContainerWeightPerQty');
-
-                    dblNetReceivedWt = netQty;
+                    // Get the Net Wgt. 
+                    var dblNetReceivedWt = item.get('dblNet');
+                    dblNetReceivedWt = dblNetReceivedWt ? dblNetReceivedWt : 0.00;
+                    
+                    // Calculate the Logistic Shipped Wgt. 
+                    var orderQty = item.get('dblOrderQty');
+                    var wgtQty = item.get('dblContainerWeightPerQty');                    
+                    
+                    orderQty = orderQty ? orderQty : 0.00;
+                    wgtQty = wgtQty ? wgtQty : 0.00;
                     dblNetShippedWt = orderQty * wgtQty;
+
+                    // Convert the Logistic Wgt UOM to the IR Wgt UOM.                     
+                    var dblShippedWeightUOMConvFactor = item.get('dblContainerWeightUOMConvFactor');
+                    var dblWeightUOMConvFactor = item.get('dblWeightUOMConvFactor');
+                    dblShippedWeightUOMConvFactor = dblShippedWeightUOMConvFactor ? dblShippedWeightUOMConvFactor : 0.00;
+                    dblWeightUOMConvFactor = dblWeightUOMConvFactor ? dblWeightUOMConvFactor : 0.00;
+                    
+                    if (dblShippedWeightUOMConvFactor != dblWeightUOMConvFactor){
+                        dblNetShippedWt = me.convertQtyBetweenUOM(
+                            dblShippedWeightUOMConvFactor, 
+                            dblWeightUOMConvFactor, 
+                            dblNetShippedWt
+                        );
+                    }
+                   
+                    // Calculate the Gain/Loss 
                     dblWeightLossPercentage = ic.utils.Math.round(((dblNetShippedWt - dblNetReceivedWt) / dblNetShippedWt) * 100, 2);
                     dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
                 }
@@ -6006,7 +6057,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     dblAdjustedTax: itemDetailTax.dblAdjustedTax,
                                     intTaxAccountId: itemDetailTax.intTaxAccountId,
                                     ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
-                                    ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                                    ysnCheckoffTax: itemDetailTax.ysnCheckoffTax,
+                                    ysnTaxOnly: itemDetailTax.ysnTaxOnly
                                 });
                                 charge.tblICInventoryReceiptChargeTaxes().add(newItemTax);
                             });
@@ -6069,16 +6121,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     iRely.Functions.showErrorDialog(jsonData.message.statusText);
                 }
                 else {
-
-                    if (!successCallback) {
-                        context.configuration.paging.store.load({
+                    // Reload the other charges after computing it from the server. 
+                    var tblICInventoryReceiptCharges = current._tblICInventoryReceiptCharges;                     
+                    if (tblICInventoryReceiptCharges){
+                        current._tblICInventoryReceiptCharges.load({
                             callback: function (records, options, success) {
-                                me.doOtherChargeTaxCalculate(win);
-                            }
-                        });
+                                if (successCallback) {
+                                    successCallback();
+                                }
+                                else {
+                                    me.doOtherChargeTaxCalculate(win);
+                                }
+                            }                            
+                        }); 
                     }
-
-                    if (successCallback) successCallback();
                 };
             }
             , function (failureResponse) {
@@ -6740,6 +6796,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
         current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
         current.set('strUnitType', records[0].get('strUnitType'));
+
+        current.set('ysnQtyUOMChanged', true);
 
         if (current.get('dblWeightUOMConvFactor') === 0) {
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));

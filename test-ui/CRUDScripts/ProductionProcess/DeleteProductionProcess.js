@@ -9,7 +9,7 @@ StartTest (function (t) {
         .waitUntilLoaded()
 
         .clickButton('ProductionProcess')
-        .waitUntilLoaded('icprocesscode')
+        .waitUntilLoaded('')
         .selectGridRowNumber('GridTemplate',[1])
         .clickButton('Delete')
         //.verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
@@ -26,7 +26,7 @@ StartTest (function (t) {
         .displayText('=====  Scenario 2: Delete Used Production Process =====')
 
         .clickButton('ProductionProcess')
-        .waitUntilLoaded('icprocesscode')
+        .waitUntilLoaded('')
         .selectGridRowNumber('GridTemplate',[2])
         .clickButton('Delete')
         //.verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
@@ -45,7 +45,7 @@ StartTest (function (t) {
         //region Scenario 3: Delete Multiple Production Process
         .displayText('=====  Scenario 3: Delete Multiple Production Process =====')
         .clickButton('ProductionProcess')
-        .waitUntilLoaded('icprocesscode')
+        .waitUntilLoaded('')
         .selectGridRowNumber('GridTemplate',[1,3])
         .clickButton('Delete')
         //.verifyMessageBox('iRely i21','You are about to delete 3 rows.<br/>Are you sure you want to continue?','yesno', 'question')

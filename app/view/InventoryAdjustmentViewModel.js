@@ -1000,7 +1000,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 default:
                      return 'Yes - Manual|^|Yes - Serial Number|^|Yes - Manual/Serial Number|^|No';
             }
-        }                       
+        },
+        pgePreviewTitle: function(get) {
+            var posted = get('current.ysnPosted');
+            if (posted){
+                return 'Unpost Preview';
+            }
+            else 
+                return 'Post Preview';
+        }                                 
     }
 
 });

@@ -77,10 +77,6 @@ Ext.define('Inventory.controller.Inventory', {
                 filterField = 'intInventoryAdjustmentId';
                 viewName = 'Inventory.view.InventoryAdjustment';
                 break;
-            case 'Build Assembly':
-                filterField = 'intBuildAssemblyId';
-                viewName = 'Inventory.view.BuildAssemblyBlend';
-                break;
             case 'Inventory Transfer':
                 filterField = 'intInventoryTransferId';
                 viewName = 'Inventory.view.InventoryTransfer';
@@ -304,6 +300,8 @@ Ext.define('Inventory.controller.Inventory', {
     showScreenFromHeaderDrilldown: function(screen, grid, fieldName) {
         var selections = [];
         var idList = '';
+        var nameSpace = screen.substr(screen.lastIndexOf('.') + 1);
+        var params;
 
         if (grid) {
             if (grid.getSelectionModel()) {
@@ -317,11 +315,25 @@ Ext.define('Inventory.controller.Inventory', {
             }
         }
 
-        if (idList.length > 0) {
-            iRely.Functions.openScreen(screen, idList);
+        switch(nameSpace){
+            case 'ManufacturingCell':
+                var filters =  [{
+                    column: 'intManufacturingCellId',
+                    value: idList
+                }];
+                params = idList.length > 0 ? { filters: filters, action: 'view', searchTab: 'ManufacturingCell' } 
+                        : { viewConfig: { modal: true }, action: 'new', searchTab: 'ManufacturingCell' };
+                break;
+            default:
+                params = idList.length > 0 ? idList : { action: 'new', viewConfig: { modal: true }};
+            break;
+        }
+            
+        if (idList.length > 0) {            
+            iRely.Functions.openScreen(screen, params);
         }
         else {
-            iRely.Functions.openScreen(screen, { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen(screen, params);
         }
     },
 
@@ -431,6 +443,9 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'AccountsReceivable.view.Invoice';
                 columnName = 'strInvoiceNumber';
                 break;
+            case 'BlendSheet':
+                screenName = 'Manufacturing.view.BlendManagement';
+                columnName = 'strWorkOrderNo';
         }
 
         var filter = [];

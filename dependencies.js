@@ -1,13 +1,43 @@
 [{
     "pattern": "app/Application.js"
 }, {
-    "pattern": "app/controller/Inventory.js"
-}, {
     "pattern": "app/controller/Main.js"
 }, {
     "pattern": "app/model/ItemUPC.js"
 }, {
     "pattern": "app/model/StockReservation.js"
+}, {
+    "pattern": "app/search/Category.js"
+}, {
+    "pattern": "app/search/Commodity.js"
+}, {
+    "pattern": "app/search/FuelType.js"
+}, {
+    "pattern": "app/search/InventoryAdjustment.js"
+}, {
+    "pattern": "app/search/InventoryCount.js"
+}, {
+    "pattern": "app/search/InventoryReceipt.js"
+}, {
+    "pattern": "app/search/InventoryShipment.js"
+}, {
+    "pattern": "app/search/InventoryTransfer.js"
+}, {
+    "pattern": "app/search/InventoryUOM.js"
+}, {
+    "pattern": "app/search/InventoryValuation.js"
+}, {
+    "pattern": "app/search/InventoryValuationSummary.js"
+}, {
+    "pattern": "app/search/Item.js"
+}, {
+    "pattern": "app/search/LotDetail.js"
+}, {
+    "pattern": "app/search/StockDetail.js"
+}, {
+    "pattern": "app/search/StorageMeasurementReading.js"
+}, {
+    "pattern": "app/search/StorageUnit.js"
 }, {
     "pattern": "app/model/AdjustmentDetail.js"
 }, {
@@ -49,6 +79,10 @@
 }, {
     "pattern": "app/store/BufferedFuelType.js"
 }, {
+    "pattern": "app/model/InventoryCountDetail.js"
+}, {
+    "pattern": "app/store/BufferedInventoryCountDetail.js"
+}, {
     "pattern": "app/model/InventoryValuation.js"
 }, {
     "pattern": "app/store/BufferedInventoryValuation.js"
@@ -65,9 +99,21 @@
 }, {
     "pattern": "app/store/BufferedItemFactoryManufacturingCell.js"
 }, {
+    "pattern": "app/model/BufferedItemMotorFuelTax.js"
+}, {
+    "pattern": "app/store/BufferedItemMotorFuelTax.js"
+}, {
     "pattern": "app/model/ItemStockSummary.js"
 }, {
     "pattern": "app/store/BufferedItemStockSummary.js"
+}, {
+    "pattern": "app/store/BufferedItemStockSummaryByLot.js"
+}, {
+    "pattern": "app/store/BufferedItemSubLocations.js"
+}, {
+    "pattern": "app/model/LineOfBusiness.js"
+}, {
+    "pattern": "app/store/BufferedLineOfBusiness.js"
 }, {
     "pattern": "app/model/ManufacturingCellPackType.js"
 }, {
@@ -169,15 +215,17 @@
 }, {
     "pattern": "app/store/FuelType.js"
 }, {
-    "pattern": "app/model/InventoryCountDetail.js"
-}, {
     "pattern": "app/model/InventoryCount.js"
 }, {
     "pattern": "app/store/InventoryCount.js"
 }, {
+    "pattern": "app/store/InventoryCountDetail.js"
+}, {
     "pattern": "app/model/InventoryTag.js"
 }, {
     "pattern": "app/store/InventoryTag.js"
+}, {
+    "pattern": "app/model/ItemSubLocation.js"
 }, {
     "pattern": "app/model/ItemLocation.js"
 }, {
@@ -195,8 +243,6 @@
 }, {
     "pattern": "app/store/ItemStockView.js"
 }, {
-    "pattern": "app/model/LineOfBusiness.js"
-}, {
     "pattern": "app/store/LineOfBusiness.js"
 }, {
     "pattern": "app/model/Lot.js"
@@ -206,6 +252,10 @@
     "pattern": "app/model/LotStatus.js"
 }, {
     "pattern": "app/store/LotStatus.js"
+}, {
+    "pattern": "app/model/M2MComputation.js"
+}, {
+    "pattern": "app/store/M2MComputation.js"
 }, {
     "pattern": "app/model/Manufacturer.js"
 }, {
@@ -223,9 +273,15 @@
 }, {
     "pattern": "app/store/PaidOut.js"
 }, {
-    "pattern": "app/model/ProcessCode.js"
+    "pattern": "app/store/PersistentPagedStore.js"
 }, {
-    "pattern": "app/store/ProcessCode.js"
+    "pattern": "app/model/ProductionProcess.js"
+}, {
+    "pattern": "app/store/ProductionProcess.js"
+}, {
+    "pattern": "app/model/RebuildInventory.js"
+}, {
+    "pattern": "app/store/RebuildInventory.js"
 }, {
     "pattern": "app/model/ReceiptItemLot.js"
 }, {
@@ -246,10 +302,6 @@
     "pattern": "app/store/ReceiptItemChargeTax.js"
 }, {
     "pattern": "app/store/ReceiptItemTax.js"
-}, {
-    "pattern": "app/model/RebuildInventory.js"
-}, {
-    "pattern": "app/store/RebuildInventory.js"
 }, {
     "pattern": "app/model/ShipmentItemLot.js"
 }, {
@@ -301,8 +353,6 @@
 }, {
     "pattern": "app/view/Statusbar1.js"
 }, {
-    "pattern": "app/view/BinToBinTransfer.js"
-}, {
     "pattern": "app/store/BufferedManufacturer.js"
 }, {
     "pattern": "app/view/BrandViewModel.js"
@@ -315,10 +365,6 @@
 }, {
     "pattern": "app/view/StatusbarPaging1.js"
 }, {
-    "pattern": "app/view/BuildAssemblyBlend.js"
-}, {
-    "pattern": "app/view/BuildAssemblyBlendViewController.js"
-}, {
     "pattern": "app/store/BufferedAssemblyItem.js"
 }, {
     "pattern": "app/model/ItemUOM.js"
@@ -326,10 +372,6 @@
     "pattern": "app/store/BufferedItemUnitMeasure.js"
 }, {
     "pattern": "app/store/BufferedItemStockUOMView.js"
-}, {
-    "pattern": "app/view/BuildAssemblyBlendViewModel.js"
-}, {
-    "pattern": "app/view/CardCount.js"
 }, {
     "pattern": "app/view/Category.js"
 }, {
@@ -344,8 +386,6 @@
     "pattern": "app/store/BufferedUnitMeasure.js"
 }, {
     "pattern": "app/store/BufferedCompactItem.js"
-}, {
-    "pattern": "app/store/BufferedLineOfBusiness.js"
 }, {
     "pattern": "app/store/BufferedCategoryLocation.js"
 }, {
@@ -375,6 +415,14 @@
 }, {
     "pattern": "app/view/CompanyPreferenceOption.js"
 }, {
+    "pattern": "app/Utils.js"
+}, {
+    "pattern": "app/ux/GridUOMField.js"
+}, {
+    "pattern": "app/ux/GridUOMColumn.js"
+}, {
+    "pattern": "app/controller/Inventory.js"
+}, {
     "pattern": "app/view/CompanyPreferenceOptionViewController.js"
 }, {
     "pattern": "app/view/CompanyPreferenceOptionViewModel.js"
@@ -383,7 +431,65 @@
 }, {
     "pattern": "app/view/ContractDocumentViewController.js"
 }, {
+    "pattern": "app/store/BufferedCertification.js"
+}, {
     "pattern": "app/view/ContractDocumentViewModel.js"
+}, {
+    "pattern": "app/view/CopyItemLocation.js"
+}, {
+    "pattern": "app/view/CopyItemLocationViewController.js"
+}, {
+    "pattern": "app/model/ItemVendorXref.js"
+}, {
+    "pattern": "app/model/ItemCustomerXref.js"
+}, {
+    "pattern": "app/model/ItemContractDocument.js"
+}, {
+    "pattern": "app/model/ItemContract.js"
+}, {
+    "pattern": "app/model/ItemCertification.js"
+}, {
+    "pattern": "app/model/ItemPOSSLA.js"
+}, {
+    "pattern": "app/model/ItemPOSCategory.js"
+}, {
+    "pattern": "app/model/ItemManufacturingUOM.js"
+}, {
+    "pattern": "app/model/ItemAccount.js"
+}, {
+    "pattern": "app/model/ItemCommodityCost.js"
+}, {
+    "pattern": "app/model/ItemStock.js"
+}, {
+    "pattern": "app/model/ItemPricingLevel.js"
+}, {
+    "pattern": "app/model/ItemSpecialPricing.js"
+}, {
+    "pattern": "app/model/ItemAssembly.js"
+}, {
+    "pattern": "app/model/ItemBundle.js"
+}, {
+    "pattern": "app/model/ItemKitDetail.js"
+}, {
+    "pattern": "app/model/ItemKit.js"
+}, {
+    "pattern": "app/model/ItemNote.js"
+}, {
+    "pattern": "app/model/ItemOwner.js"
+}, {
+    "pattern": "app/model/ItemFactoryManufacturingCell.js"
+}, {
+    "pattern": "app/model/ItemFactory.js"
+}, {
+    "pattern": "app/model/ItemMotorFuelTax.js"
+}, {
+    "pattern": "app/model/Item.js"
+}, {
+    "pattern": "app/store/BufferedItem.js"
+}, {
+    "pattern": "app/store/Item.js"
+}, {
+    "pattern": "app/view/CopyItemLocationViewModel.js"
 }, {
     "pattern": "app/view/CountGroupViewModel.js"
 }, {
@@ -391,11 +497,11 @@
 }, {
     "pattern": "app/view/CountGroup.js"
 }, {
-    "pattern": "app/view/FactoryUnitType.js"
+    "pattern": "app/view/StorageUnitType.js"
 }, {
-    "pattern": "app/view/FactoryUnitTypeViewController.js"
+    "pattern": "app/view/StorageUnitTypeViewController.js"
 }, {
-    "pattern": "app/view/FactoryUnitTypeViewModel.js"
+    "pattern": "app/view/StorageUnitTypeViewModel.js"
 }, {
     "pattern": "app/view/FeedStockCodeViewModel.js"
 }, {
@@ -425,18 +531,6 @@
 }, {
     "pattern": "app/view/FuelCode.js"
 }, {
-    "pattern": "app/view/FuelTank.js"
-}, {
-    "pattern": "app/view/FuelTankViewController.js"
-}, {
-    "pattern": "app/view/FuelTankViewModel.js"
-}, {
-    "pattern": "app/view/FuelTaxClass.js"
-}, {
-    "pattern": "app/view/FuelTaxClassViewController.js"
-}, {
-    "pattern": "app/view/FuelTaxClassViewModel.js"
-}, {
     "pattern": "app/view/FuelType.js"
 }, {
     "pattern": "app/view/FuelTypeViewController.js"
@@ -449,7 +543,7 @@
 }, {
     "pattern": "app/store/BufferedFuelCode.js"
 }, {
-    "pattern": "app/store/BufferedProcessCode.js"
+    "pattern": "app/store/BufferedProductionProcess.js"
 }, {
     "pattern": "app/view/FuelTypeViewModel.js"
 }, {
@@ -487,19 +581,17 @@
 }, {
     "pattern": "app/store/BufferedItemStockUOMForAdjustmentView.js"
 }, {
+    "pattern": "app/model/AdjustItemOwner.js"
+}, {
+    "pattern": "app/store/BufferedItemOwner.js"
+}, {
     "pattern": "app/view/InventoryAdjustmentViewModel.js"
 }, {
     "pattern": "app/view/InventoryBaseViewController.js"
 }, {
     "pattern": "app/view/InventoryCount.js"
 }, {
-    "pattern": "app/view/InventoryCountGroup.js"
-}, {
-    "pattern": "app/view/InventoryCountGroupViewController.js"
-}, {
-    "pattern": "app/view/InventoryCountGroupViewModel.js"
-}, {
-    "pattern": "app/view/InventoryCountViewController.js"
+    "pattern": "app/view/InventoryCountDetailsViewController.js"
 }, {
     "pattern": "app/store/BufferedCategory.js"
 }, {
@@ -509,15 +601,31 @@
 }, {
     "pattern": "app/store/ItemStockSummaryByLot.js"
 }, {
+    "pattern": "app/model/InventoryCountStockItem.js"
+}, {
+    "pattern": "app/store/BufferedInventoryCountStockItem.js"
+}, {
+    "pattern": "app/view/InventoryCountDetailsViewModel.js"
+}, {
+    "pattern": "app/view/InventoryCountDetails.js"
+}, {
+    "pattern": "app/view/InventoryCountGroup.js"
+}, {
+    "pattern": "app/view/InventoryCountGroupViewController.js"
+}, {
+    "pattern": "app/view/InventoryCountGroupViewModel.js"
+}, {
+    "pattern": "app/view/InventoryCountViewController.js"
+}, {
     "pattern": "app/view/InventoryCountViewModel.js"
 }, {
     "pattern": "app/view/InventoryReceipt.js"
 }, {
-    "pattern": "app/view/InventoryReceiptTaxesViewController.js"
+    "pattern": "app/view/TaxDetailsViewController.js"
 }, {
-    "pattern": "app/view/InventoryReceiptTaxesViewModel.js"
+    "pattern": "app/view/TaxDetailsViewModel.js"
 }, {
-    "pattern": "app/view/InventoryReceiptTaxes.js"
+    "pattern": "app/view/TaxDetails.js"
 }, {
     "pattern": "app/view/InventoryReceiptViewController.js"
 }, {
@@ -550,6 +658,8 @@
     "pattern": "app/store/BufferedParentLot.js"
 }, {
     "pattern": "app/store/BufferedOtherCharges.js"
+}, {
+    "pattern": "app/model/CommodityGradeView.js"
 }, {
     "pattern": "app/store/BufferedGradeAttribute.js"
 }, {
@@ -613,12 +723,6 @@
 }, {
     "pattern": "app/view/ItemLocationViewModel.js"
 }, {
-    "pattern": "app/view/ItemSubstitution.js"
-}, {
-    "pattern": "app/view/ItemSubstitutionViewController.js"
-}, {
-    "pattern": "app/view/ItemSubstitutionViewModel.js"
-}, {
     "pattern": "app/view/ItemViewController.js"
 }, {
     "pattern": "app/store/BufferedInventoryTag.js"
@@ -630,8 +734,6 @@
     "pattern": "app/store/BufferedFuelTaxClass.js"
 }, {
     "pattern": "app/store/BufferedDocument.js"
-}, {
-    "pattern": "app/store/BufferedCertification.js"
 }, {
     "pattern": "app/store/BufferedClassAttribute.js"
 }, {
@@ -645,6 +747,8 @@
 }, {
     "pattern": "app/store/BufferedSeasonAttribute.js"
 }, {
+    "pattern": "app/store/BufferedM2MComputation.js"
+}, {
     "pattern": "app/view/ItemViewModel.js"
 }, {
     "pattern": "app/view/LineOfBusinessViewModel.js"
@@ -654,6 +758,16 @@
     "pattern": "app/view/LineOfBusiness.js"
 }, {
     "pattern": "app/view/LotDetail.js"
+}, {
+    "pattern": "app/view/LotHistory.js"
+}, {
+    "pattern": "app/view/LotHistoryViewController.js"
+}, {
+    "pattern": "app/model/LotHistory.js"
+}, {
+    "pattern": "app/store/LotHistory.js"
+}, {
+    "pattern": "app/view/LotHistoryViewModel.js"
 }, {
     "pattern": "app/view/LotDetailViewController.js"
 }, {
@@ -677,8 +791,6 @@
 }, {
     "pattern": "app/view/ManufacturingCellViewModel.js"
 }, {
-    "pattern": "app/view/MaterialMovementMap.js"
-}, {
     "pattern": "app/view/OriginConversionOption.js"
 }, {
     "pattern": "app/view/OriginConversionOptionViewController.js"
@@ -691,67 +803,15 @@
 }, {
     "pattern": "app/view/PickLotViewModel.js"
 }, {
-    "pattern": "app/view/ProcessCodeViewModel.js"
+    "pattern": "app/view/ProductionProcessViewModel.js"
 }, {
-    "pattern": "app/view/ProcessCodeViewController.js"
+    "pattern": "app/view/ProductionProcessViewController.js"
 }, {
-    "pattern": "app/view/ProcessCode.js"
-}, {
-    "pattern": "app/view/Reason.js"
-}, {
-    "pattern": "app/view/ReasonViewController.js"
-}, {
-    "pattern": "app/view/ReasonViewModel.js"
+    "pattern": "app/view/ProductionProcess.js"
 }, {
     "pattern": "app/view/RebuildInventory.js"
 }, {
-    "pattern": "app/model/ItemVendorXref.js"
-}, {
-    "pattern": "app/model/ItemCustomerXref.js"
-}, {
-    "pattern": "app/model/ItemContractDocument.js"
-}, {
-    "pattern": "app/model/ItemContract.js"
-}, {
-    "pattern": "app/model/ItemCertification.js"
-}, {
-    "pattern": "app/model/ItemPOSSLA.js"
-}, {
-    "pattern": "app/model/ItemPOSCategory.js"
-}, {
-    "pattern": "app/model/ItemManufacturingUOM.js"
-}, {
-    "pattern": "app/model/ItemAccount.js"
-}, {
-    "pattern": "app/model/ItemCommodityCost.js"
-}, {
-    "pattern": "app/model/ItemStock.js"
-}, {
-    "pattern": "app/model/ItemPricingLevel.js"
-}, {
-    "pattern": "app/model/ItemSpecialPricing.js"
-}, {
-    "pattern": "app/model/ItemAssembly.js"
-}, {
-    "pattern": "app/model/ItemBundle.js"
-}, {
-    "pattern": "app/model/ItemKitDetail.js"
-}, {
-    "pattern": "app/model/ItemKit.js"
-}, {
-    "pattern": "app/model/ItemNote.js"
-}, {
-    "pattern": "app/model/ItemOwner.js"
-}, {
-    "pattern": "app/model/ItemFactoryManufacturingCell.js"
-}, {
-    "pattern": "app/model/ItemFactory.js"
-}, {
-    "pattern": "app/model/ItemMotorFuelTax.js"
-}, {
-    "pattern": "app/model/Item.js"
-}, {
-    "pattern": "app/store/Item.js"
+    "pattern": "app/view/RebuildInventoryViewController.js"
 }, {
     "pattern": "app/model/FiscalPeriod.js"
 }, {
@@ -774,6 +834,10 @@
     "pattern": "app/view/StockDetailViewModel.js"
 }, {
     "pattern": "app/view/StorageMeasurementReading.js"
+}, {
+    "pattern": "app/model/StorageUnitStock.js"
+}, {
+    "pattern": "app/store/BufferedStorageUnitStock.js"
 }, {
     "pattern": "app/view/StorageMeasurementReadingViewModel.js"
 }, {

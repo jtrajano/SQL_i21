@@ -790,7 +790,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             ic.count.loadDetails(me, win, win.context, true);
     },
 
-    attachOnEditListener(win, grdPhysicalCount) {
+    attachOnEditListener: function(win, grdPhysicalCount) {
         var me = this;
         var plugin = grdPhysicalCount.getPlugin('cepPhysicalCount');
         plugin.on({

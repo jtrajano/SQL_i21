@@ -16,6 +16,10 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intContractDetailId",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "intChargeId",
         "type": "int",
         "allowNull": true

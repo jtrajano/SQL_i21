@@ -16,8 +16,15 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
 
     saveAndPokeGrid: function(win, grid) {
         var me = this;
+
         return Ext.bind(function(success, failure) {
-            //me.pokeGrid(grid);
+
+            // Do not continue with Save if beforeSave returned false. 
+            if (me.beforeSave && me.beforeSave(win) === false){
+                return; 
+            }
+
+            // Save, poke the grid, and call the after Save function. 
             win.context.data.saveRecord({
                 callbackFn: function(batch, options) {
                     me.pokeGrid(grid);
@@ -28,6 +35,36 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
             });
         }, me);
     },
+
+    saveRecord: function(win, afterSaveFn) {
+        var me = this;
+        var context = win ? win.context : null; 
+
+        if (!context) return; 
+
+        // If there is no data change, return immediately. 
+        if (!context.data.hasChanges()) return; 
+
+        // Do not continue with Save if beforeSave returned false. 
+        if (me.beforeSave && me.beforeSave(win) === false){
+            return; 
+        }
+
+        // Validate the record first. 
+        context.data.validator.validateRecord({ window: win }, function(valid) {
+            // If records are valid, continue with the save. 
+            if (valid){
+                // Save and call the after Save callback. 
+                context.data.saveRecord({
+                    callbackFn: function (batch, options) {
+                        if (afterSaveFn && Ext.isFunction(afterSaveFn)){
+                            afterSaveFn(batch, options); 
+                        }
+                    }
+                });                    
+            }
+        });
+    },    
 
     getCurrent: function() {
         return this.getView().getViewModel().data.current;

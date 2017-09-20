@@ -5,8 +5,8 @@ Ext.define('Inventory.model.ItemUOM', {
     extend: 'iRely.BaseEntity',
 
     requires: [
-        'Ext.data.Field',
-        'AccountsPayable.common.validators.NotZero'
+        'Ext.data.Field'
+        //'AccountsPayable.common.validators.NotZero'
     ],
 
     idProperty: 'intItemUOMId',
@@ -45,34 +45,39 @@ Ext.define('Inventory.model.ItemUOM', {
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblUnitQty', type: 'float' },
         { name: 'dblSellQty', type: 'float' },
-        { name: 'dblWeight', type: 'float' },
-        { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'strDescription', type: 'string' },
         { name: 'strUpcCode', type: 'string', allowNull: true },
-        { name: 'strLongUPCCode', type: 'string', allowNull: true
-//            persist: true,
-//            convert: function(value, record){
-//                var shortUPC = record.get('strUpcCode');
-//                return i21.ModuleMgr.Inventory.getFullUPCString(shortUPC);
-//            },
-//            depends: ['strUpcCode']
-        },
+        { name: 'strLongUPCCode', type: 'string', allowNull: true },
         { name: 'ysnStockUnit', type: 'boolean' },
         { name: 'ysnAllowPurchase', type: 'boolean' },
         { name: 'ysnAllowSale', type: 'boolean' },
         { name: 'dblLength', type: 'float' },
         { name: 'dblWidth', type: 'float' },
         { name: 'dblHeight', type: 'float' },
-        { name: 'intDimensionUOMId', type: 'int', allowNull: true },
+        //{ name: 'intDimensionUOMId', type: 'int', allowNull: true },
         { name: 'dblVolume', type: 'float' },
-        { name: 'intVolumeUOMId', type: 'int', allowNull: true },
+        //{ name: 'intVolumeUOMId', type: 'int', allowNull: true },
         { name: 'dblMaxQty', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },
         { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'strUnitMeasure'},
-        {type: 'notzero', field: 'dblUnitQty'}
-    ]
+        {type: 'presence', field: 'strUnitMeasure'}
+        //{type: 'notzero', field: 'dblUnitQty'}
+    ], 
+
+    validate: function(options){
+        var errors = this.callParent(arguments);
+        var dblUnitQty = this.get('dblUnitQty');
+        dblUnitQty = Ext.isNumeric(dblUnitQty) ? dblUnitQty : 0;
+        if(dblUnitQty == 0)
+        {
+            errors.add({
+                field: 'dblUnitQty',
+                message: 'Zero is not allowed.' 
+            });
+        }
+        return errors;        
+    }
 });

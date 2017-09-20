@@ -10,12 +10,12 @@ StartTest (function (t) {
 
         .selectSearchRowNumber([1])
         .clickButton('OpenSelected')
-        .waitUntilLoaded('icfueltype')
+        .waitUntilLoaded('')
         .clickButton('Delete')
         .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
         .clickMessageBoxButton('yes')
         .waitUntilLoaded()
-        .waitUntilLoaded('icfueltype')
+        .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded()
 
@@ -57,7 +57,7 @@ StartTest (function (t) {
 
 
         .clickButton('ProductionProcess')
-        .waitUntilLoaded('icprocesscode')
+        .waitUntilLoaded('icproductionprocess')
         .selectGridRowNumber('GridTemplate',[1])
         .clickButton('Delete')
         //.verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')

@@ -1036,7 +1036,7 @@
                                                                         "layout|margins": "0 0 0 5",
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "intCompanyLocationId",
+                                                                        "valueField": "strLocationName",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox27",
@@ -1153,7 +1153,7 @@
                                                                         "layout|margins": null,
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "intEntityLocationId",
+                                                                        "valueField": "strLocationName",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox70",
@@ -1239,7 +1239,7 @@
                                                                         "layout|margins": null,
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "strLocationName",
+                                                                        "valueField": "strShipToCompanyLocation",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox8",
@@ -2009,7 +2009,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter15",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2802,6 +2802,34 @@
                                                                     "name": "dataType",
                                                                     "type": "string"
                                                                 }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "currencyField": true,
+                                                                        "itemId": "txtForexRate",
+                                                                        "minValue": 0,
+                                                                        "readOnly": true
+                                                                    },
+                                                                    "name": "MyNumberField17",
+                                                                    "configAlternates": {
+                                                                        "currencyField": "boolean"
+                                                                    },
+                                                                    "designerId": "e2c5bafd-9308-47f6-ab0a-106a48f69815",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "currencyField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
                                                             ]
                                                         },
                                                         {
@@ -3443,7 +3471,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter18",
+                                                                    "name": "filter16",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4053,7 +4081,7 @@
                                                         "layout|flex": null,
                                                         "width": 198
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter17",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4427,6 +4455,34 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "currencyField": true,
+                                                        "itemId": "txtChargeForexRate",
+                                                        "minValue": 0,
+                                                        "readOnly": true
+                                                    },
+                                                    "name": "MyNumberField18",
+                                                    "configAlternates": {
+                                                        "currencyField": "boolean"
+                                                    },
+                                                    "designerId": "b4e10384-89d6-43ec-a8e8-bc6da032bb6d",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "currencyField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -5005,7 +5061,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging12",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

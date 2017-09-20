@@ -1058,13 +1058,13 @@
                                                                                                     "]"
                                                                                                 ],
                                                                                                 "designer|createAlias": "gridcombobox",
-                                                                                                "displayField": "strRegProdCode",
+                                                                                                "displayField": "strProductCode",
                                                                                                 "enableDrillDown": true,
                                                                                                 "fieldLabel": "Product Code",
                                                                                                 "itemId": "cboProductCode",
                                                                                                 "labelWidth": 105,
                                                                                                 "layout|flex": null,
-                                                                                                "valueField": "strItemTypeCode"
+                                                                                                "valueField": "strProductCode"
                                                                                             },
                                                                                             "name": "MyComboBox14",
                                                                                             "configAlternates": {

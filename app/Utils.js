@@ -5,12 +5,10 @@ Ext.define('Inventory.Utils', {
     statics: {
         Math: {
             round: function(number, precision) {
-                var zeroes = "";
-                for(var i = 0; i < precision; i++) {
-                    zeroes += "0";
-                }
-                var pattern = "0.[" + zeroes + "]";
-                return parseFloat(numeral(number).format(pattern));
+                if (!Ext.isNumeric(number)) return; 
+                precision = Ext.isNumeric(precision) ? precision : 0; 
+
+                return Number(Math.round(number+'e'+precision)+'e-'+precision);
             }
         },
         

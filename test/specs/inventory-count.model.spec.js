@@ -44,6 +44,10 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
+        "name": "strShiftNo",
+        "type": "string",
+        "allowNull": false
+    }, {
         "name": "ysnIncludeZeroOnHand",
         "type": "boolean",
         "allowNull": false
@@ -58,6 +62,10 @@ UnitTestEngine.testModel({
     }, {
         "name": "ysnCountByLots",
         "type": "boolean",
+        "allowNull": false
+    }, {
+        "name": "strCountBy",
+        "type": "string",
         "allowNull": false
     }, {
         "name": "ysnCountByPallets",

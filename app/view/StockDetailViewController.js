@@ -45,48 +45,6 @@ Ext.define('Inventory.view.StockDetailViewController', {
         return context;
     },
 
-    onViewCategory: function (value, record) {
-        var locationName = record.get('strCategoryCode');
-        i21.ModuleMgr.Inventory.showScreen(locationName, 'Category');
-    },
-
-    onViewLocation: function (value, record) {
-        var locationName = record.get('strLocationName');
-        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
-    },
-
-    onViewItem: function (value, record) {
-        var itemNo = record.get('strItemNo');
-        i21.ModuleMgr.Inventory.showScreen(itemNo, 'ItemNo');
-    },
-
-    onViewBinLocation: function (value, record) {
-        var locationName = record.get('strLocation');
-        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
-    },
-
-    onViewBinStorageLocation: function(value, record) {
-        var locationName = record.get('strStorageLocation');
-        i21.ModuleMgr.Inventory.showScreen(locationName, 'StorageLocation');
-    },
-
-    onViewBinUOM: function(value, record) {
-        var locationName = record.get('strUOM');
-        i21.ModuleMgr.Inventory.showScreen(locationName, 'UOM');
-    },
-
-    onViewDiscountCodes: function(value, record) {
-        iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', {
-            strSourceType: 'Storage Measurement Reading',
-            intTicketFileId: record.get('intStorageMeasurementReadingConversionId')
-        });
-    },
-
-    onViewUOM: function(value, record) {
-        var uom = record.get('strStockUOM');
-        i21.ModuleMgr.Inventory.showScreen(uom, 'UOM');
-    },
-
     onViewMeasurementReading: function(button, e, opts) {
         "use strict";
         var today = new i21.ModuleMgr.Inventory.getTodayDate();

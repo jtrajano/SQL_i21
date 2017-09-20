@@ -142,7 +142,9 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<GetObjectResult> GetReceiptItems(GetParameter param)
         {
-            var query = _db.GetQuery<tblICInventoryReceiptItem>().Filter(param);
+            var query = _db.GetQuery<tblICInventoryReceiptItem>()
+                .Filter(param);
+
             var data = await query
                 .Select(s => new
                 {
@@ -204,7 +206,7 @@ namespace iRely.Inventory.BusinessLayer
                         : s.intOwnershipType == 4 ? "Consigned Sale"
                         : "Own",
                     intCommodityId = s.vyuICInventoryReceiptItemLookUp.intCommodityId,
-                    strWeightUOM = s.vyuICInventoryReceiptItemLookUp.strWeightUOM, 
+                    strWeightUOM = s.vyuICInventoryReceiptItemLookUp.strWeightUOM,
                     strContainer = s.vyuICInventoryReceiptItemLookUp.strContainer,
                     dblItemUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblItemUOMConvFactor,
                     dblWeightUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblWeightUOMConvFactor,
@@ -218,12 +220,16 @@ namespace iRely.Inventory.BusinessLayer
                     strDiscountSchedule = s.vyuICInventoryReceiptItemLookUp.strDiscountSchedule,
                     dblFranchise = s.vyuICInventoryReceiptItemLookUp.dblFranchise,
                     dblContainerWeightPerQty = s.vyuICInventoryReceiptItemLookUp.dblContainerWeightPerQty,
+                    intContainerWeightUOMId = s.vyuICInventoryReceiptItemLookUp.intContainerWeightUOMId,
+                    dblContainerWeightUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblContainerWeightUOMConvFactor,
                     strSubCurrency = s.vyuICInventoryReceiptItemLookUp.strSubCurrency,
                     strPricingType = s.vyuICInventoryReceiptItemLookUp.strPricingType,
                     strTaxGroup = s.vyuICInventoryReceiptItemLookUp.strTaxGroup,
-                    strForexRateType = s.vyuICInventoryReceiptItemLookUp.strForexRateType
+                    strForexRateType = s.vyuICInventoryReceiptItemLookUp.strForexRateType,
+                    tblICInventoryReceiptItemTaxes = s.tblICInventoryReceiptItemTaxes
                 })
-                .AsNoTracking().ToListAsync();
+                .AsNoTracking()
+                .ToListAsync();
 
             return new GetObjectResult()
             {
@@ -284,7 +290,8 @@ namespace iRely.Inventory.BusinessLayer
                     , strCurrency = s.vyuICGetInventoryReceiptCharge.strCurrency
                     , strTaxGroup = s.vyuICGetInventoryReceiptCharge.strTaxGroup
                     , strForexRateType = s.vyuICGetInventoryReceiptCharge.strForexRateType
-            }).AsNoTracking().ToListAsync();
+                    , tblICInventoryReceiptChargeTaxes = s.tblICInventoryReceiptChargeTaxes
+                }).AsNoTracking().ToListAsync();
 
             return new GetObjectResult()
             {
@@ -899,7 +906,7 @@ namespace iRely.Inventory.BusinessLayer
             return saveResult;
         }        
 
-        public SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName)
+        public SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? itemId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName)
         {
             SaveResult saveResult = new SaveResult();
             taxGroup = null;
@@ -923,6 +930,14 @@ namespace iRely.Inventory.BusinessLayer
                 else
                     locationIdParam.Value = locationId;
 
+                var itemIdParam = new SqlParameter("@intItemId", itemId);
+                itemIdParam.DbType = System.Data.DbType.Int32;
+                itemIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (itemId == null)
+                    itemIdParam.Value = DBNull.Value;
+                else
+                    itemIdParam.Value = itemId;
+                
                 var entityVendorIdParam = new SqlParameter("@intEntityVendorId", entityVendorId);
                 entityVendorIdParam.DbType = System.Data.DbType.Int32;
                 entityVendorIdParam.SqlDbType = System.Data.SqlDbType.Int;
@@ -949,9 +964,10 @@ namespace iRely.Inventory.BusinessLayer
                 strTaxGroupOutput.Size = 50;
 
                 _db.ContextManager.Database.ExecuteSqlCommand(
-                    "uspICGetDefaultReceiptTaxGroupId @intFreightTermId, @intLocationId, @intEntityVendorId, @intEntityLocationId, @intTaxGroupId OUTPUT, @strTaxGroup OUTPUT"
+                    "uspICGetDefaultReceiptTaxGroupId @intFreightTermId, @intLocationId, @intItemId, @intEntityVendorId, @intEntityLocationId, @intTaxGroupId OUTPUT, @strTaxGroup OUTPUT"
                     , freightTermIdParam
                     , locationIdParam
+                    , itemIdParam 
                     , entityVendorIdParam
                     , entityLocationIdParam
                     , intTaxGroupIdOutput

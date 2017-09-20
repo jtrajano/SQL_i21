@@ -44,6 +44,10 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intGrossUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "intReceiveUOMId",
         "type": "int",
         "allowNull": true
@@ -257,6 +261,10 @@ UnitTestEngine.testModel({
         "allowNull": false
     }, {
         "name": "strUnitMeasure",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strProductCode",
         "type": "string",
         "allowNull": false
     }],

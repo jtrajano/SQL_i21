@@ -6,7 +6,7 @@ UnitTestEngine.testStore({
     config: {
         "model": "Inventory.model.ItemStockSummary",
         "storeId": "ItemStockSummaryByLot",
-        "pageSize": 50,
+        "pageSize": 1000000,
         "remoteFilter": true,
         "remoteSort": true,
         "proxy": {

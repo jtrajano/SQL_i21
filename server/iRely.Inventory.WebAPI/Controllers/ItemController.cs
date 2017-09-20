@@ -115,9 +115,9 @@ namespace iRely.Inventory.WebApi
 
         [HttpGet]
         [ActionName("GetItemUOMsByType")]
-        public async Task<HttpResponseMessage> GetItemUOMsByType(int? intItemId = 0, string strUnitType = "")
+        public async Task<HttpResponseMessage> GetItemUOMsByType(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemUOMsByType(intItemId, strUnitType));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemUOMsByType(param));
         }
 
         [HttpGet]

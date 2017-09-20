@@ -264,10 +264,6 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
-        "name": "intItemMessage",
-        "type": "int",
-        "allowNull": true
-    }, {
         "name": "strVolumeRebateGroup",
         "type": "string",
         "allowNull": false
@@ -593,6 +589,10 @@ UnitTestEngine.testModel({
         "allowNull": true
     }, {
         "name": "ysnUseWeighScales",
+        "type": "boolean",
+        "allowNull": false
+    }, {
+        "name": "ysnIsBasket",
         "type": "boolean",
         "allowNull": false
     }],

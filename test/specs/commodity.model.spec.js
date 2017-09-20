@@ -95,6 +95,30 @@ UnitTestEngine.testModel({
         "name": "dblMaxOver",
         "type": "float",
         "allowNull": false
+    }, {
+        "name": "intSalesWeightsGradesId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intPurchaseWeightsGradesId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intTransferWeightsGradesId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strSalesWeightsGrades",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strPurchaseWeightsGrades",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strTransferWeightsGrades",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

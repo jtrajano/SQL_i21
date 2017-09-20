@@ -138,19 +138,19 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDetailWeight: {
                     dataIndex: 'dblWeight'
                 },
-                colDetailWeightUOM: {
-                    dataIndex: 'strWeightUOM',
-                    editor: {
-                        origValueField: 'intUnitMeasureId',
-                        origUpdateField: 'intWeightUOMId',
-                        store: '{weightUOM}',
-                        defaultFilters: [{
-                            column: 'strUnitType',
-                            value: 'Weight',
-                            conjunction: 'and'
-                        }]
-                    }
-                },
+                // colDetailWeightUOM: {
+                //     dataIndex: 'strWeightUOM',
+                //     editor: {
+                //         origValueField: 'intUnitMeasureId',
+                //         origUpdateField: 'intWeightUOMId',
+                //         store: '{weightUOM}',
+                //         defaultFilters: [{
+                //             column: 'strUnitType',
+                //             value: 'Weight',
+                //             conjunction: 'and'
+                //         }]
+                //     }
+                // },
                 colDetailShortUPC: 'strUpcCode',
                 colDetailUpcCode: {
                     dataIndex: 'strLongUPCCode'
@@ -286,10 +286,6 @@ Ext.define('Inventory.view.ItemViewController', {
             //---------//
             //Sales Tab//
             //---------//
-            cboFuelTaxClass: {
-                value: '{current.intFuelTaxClassId}',
-                store: '{taxClass}'
-            },
             cboSalesTaxGroup: {
                 value: '{current.intSalesTaxGroupId}',
                 store: '{salesTaxGroup}'
@@ -495,19 +491,38 @@ Ext.define('Inventory.view.ItemViewController', {
             txtWidth: '{current.dblWidth}',
             txtDepth: '{current.dblDepth}',
             cboDimensionUOM: {
-                value: '{current.intDimensionUOMId}',
-                store: '{mfgDimensionUom}'
-            },
-            cboWeightUOM: {
-                value: '{current.intWeightUOMId}',
-                store: '{weightUOMs}',
+                //value: '{current.intDimensionUOMId}',
+                value: '{current.strDimensionUOM}',
+                store: '{mfgDimensionUom}',
                 defaultFilters: [
                     {
-                        name: 'intUnitMeasureId',
-                        condition: 'eq',
-                        value: 0
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strUnitType',
+                        value: 'Packed',
+                        conjunction: 'and'
+                    }                    
+                ],                
+            },
+            cboWeightUOM: {
+                //value: '{current.intWeightUOMId}',
+                value: '{current.strWeightUOM}',
+                store: '{mfgWeightUom}',
+                defaultFilters: [
+                    {
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strUnitType',
+                        value: 'Weight',
+                        conjunction: 'and'
                     }
-                ]
+                ],
             },
             txtWeight: '{current.dblWeight}',
             txtMaterialPack: '{current.intMaterialPackTypeId}',
@@ -2136,10 +2151,19 @@ Ext.define('Inventory.view.ItemViewController', {
         }
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemLocationScreen('edit', win, record);
-                return;
-            } });
+            // win.context.data.saveRecord({ successFn: function(batch, eOpts){
+            //     me.openItemLocationScreen('edit', win, record);
+            //     return;
+            // } });
+
+            me.saveRecord(
+                win, 
+                function(batch, eOpts){
+                    me.openItemLocationScreen('edit', win, record);
+                    return;
+                }            
+            );
+
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
@@ -2159,10 +2183,19 @@ Ext.define('Inventory.view.ItemViewController', {
         me.getDefaultUOM(win);
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemLocationScreen('new', win);
-                return;
-            } });
+            // win.context.data.saveRecord({ successFn: function(batch, eOpts){
+            //     me.openItemLocationScreen('new', win);
+            //     return;
+            // } });
+
+            me.saveRecord(
+                win, 
+                function(batch, eOpts){
+                    me.openItemLocationScreen('new', win);
+                    return;
+                }            
+            );
+
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
@@ -2253,7 +2286,8 @@ Ext.define('Inventory.view.ItemViewController', {
                         }
                     });
                     search.close();
-                    win.context.data.saveRecord();
+                    //win.context.data.saveRecord();
+                    me.saveRecord(win);
                 },
                 openallclick: function() {
                     search.close();
@@ -2262,15 +2296,51 @@ Ext.define('Inventory.view.ItemViewController', {
             search.show();
         };
 
-        // if (!win.context.data.hasChanges()) {
-        //     showAddScreen();
-        // }
+        // win.context.data.saveRecord({
+        //     callbackFn: function(batch, options) {
+        //         showAddScreen();
+        //     }
+        // });
 
-        win.context.data.saveRecord({
-            callbackFn: function(batch, options) {
+        me.saveRecord(
+            win, 
+            function(batch, eOpts){
                 showAddScreen();
-            }
-        });
+            }            
+        );        
+    },
+
+    beforeSave: function(win){
+        if (!win) return; 
+        var current = win.viewModel.data.current;
+
+        var stockUnitExist = true; 
+        if(current){                        
+            if (current.tblICItemUOMs()) {
+                if (
+                    current.get('strType') != 'Other Charge'
+                    && current.get('strType') != 'Non-Inventory'
+                    && current.get('strType') != 'Service'
+                    && current.get('strType') != 'Software'
+                    && current.get('strType') != 'Comment'
+                )
+                {
+                    Ext.Array.each(current.tblICItemUOMs().data.items, function (itemStock) {                    
+                        if (!itemStock.dummy) {
+                            stockUnitExist = false;
+                            if(itemStock.get('ysnStockUnit')){
+                                stockUnitExist = true;
+                                return false; 
+                            }                            
+                        }
+                    });
+                    if (stockUnitExist == false){
+                        iRely.Functions.showErrorDialog("Unit of Measure setup needs to have a Stock Unit.");
+                        return false;
+                    }            
+                }                
+            }        
+        }
     },
 
     afterSave: function(me, win, batch, options) {
@@ -2290,9 +2360,15 @@ Ext.define('Inventory.view.ItemViewController', {
         }
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemLocationScreen('edit', win, selection[0]);
-            } });
+            // win.context.data.saveRecord({ successFn: function(batch, eOpts){
+            //     me.openItemLocationScreen('edit', win, selection[0]);
+            // } });
+            me.saveRecord(
+                win, 
+                function(batch, eOpts){
+                    me.openItemLocationScreen('edit', win, selection[0]);
+                }            
+            );               
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
@@ -2422,6 +2498,7 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        var me = this; 
         var win = combo.up('window');
         var grid = combo.up('grid');
         var selection = grid.getSelectionModel().getSelection();
@@ -2502,95 +2579,14 @@ Ext.define('Inventory.view.ItemViewController', {
                         }
                     });
 
-                    win.context.data.saveRecord();
+                    //win.context.data.saveRecord();
+                    me.saveRecord(win);                      
 				},
 				function (failureResponse) {
                     var jsonData = Ext.decode(failureResponse.responseText);
                     iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
 				}
         );
-        // var filter = [
-        //     {
-        //         c: 'intItemLocationId',
-        //         v: records[0].data.intItemLocationId,
-        //         cj: 'and',
-        //         g: 'g0'
-        //     }
-        // ];
-        // Ext.Ajax.request({
-        //     timeout: 120000,
-        //     url: '../Inventory/api/ItemLocation/Search?page=1&start=0&limit=50&sort=[]&filter=' +
-        //         JSON.stringify(filter),
-        //     method: 'GET',
-        //     success: function(response) {
-        //         var json = JSON.parse(response.responseText);
-        //         var copyLocation = json.data[0];
-        //         Ext.Array.each(selection, function (location) {
-        //             if (location.get('intItemLocationId') !== copyLocation.intItemLocationId) {
-        //                 location.set('intVendorId', copyLocation.intVendorId);
-        //                 location.set('strDescription', copyLocation.strDescription);
-        //                 location.set('intCostingMethod', copyLocation.intCostingMethod);
-        //                 location.set('strCostingMethod', copyLocation.strCostingMethod);
-        //                 location.set('intAllowNegativeInventory', copyLocation.intAllowNegativeInventory);
-        //                 //location.set('intSubLocationId', copyLocation.intSubLocationId);
-        //                 //location.set('intStorageLocationId', copyLocation.intStorageLocationId);
-        //                 location.set('intIssueUOMId', copyLocation.intIssueUOMId);
-        //                 location.set('intReceiveUOMId', copyLocation.intReceiveUOMId);
-        //                 location.set('intFamilyId', copyLocation.intFamilyId);
-        //                 location.set('intClassId', copyLocation.intClassId);
-        //                 location.set('intProductCodeId', copyLocation.intProductCodeId);
-        //                 location.set('intFuelTankId', copyLocation.intFuelTankId);
-        //                 location.set('strPassportFuelId1', copyLocation.strPassportFuelId2);
-        //                 location.set('strPassportFuelId2', copyLocation.strPassportFuelId2);
-        //                 location.set('strPassportFuelId3', copyLocation.strPassportFuelId3);
-        //                 location.set('ysnTaxFlag1', copyLocation.ysnTaxFlag1);
-        //                 location.set('ysnTaxFlag2', copyLocation.ysnTaxFlag2);
-        //                 location.set('ysnTaxFlag3', copyLocation.ysnTaxFlag3);
-        //                 location.set('ysnPromotionalItem', copyLocation.ysnPromotionalItem);
-        //                 location.set('intMixMatchId', copyLocation.intMixMatchId);
-        //                 location.set('ysnDepositRequired', copyLocation.ysnDepositRequired);
-        //                 location.set('intDepositPLUId', copyLocation.intDepositPLUId);
-        //                 location.set('intBottleDepositNo', copyLocation.intBottleDepositNo);
-        //                 location.set('ysnQuantityRequired', copyLocation.ysnQuantityRequired);
-        //                 location.set('ysnScaleItem', copyLocation.ysnScaleItem);
-        //                 location.set('ysnFoodStampable', copyLocation.ysnFoodStampable);
-        //                 location.set('ysnReturnable', copyLocation.ysnReturnable);
-        //                 location.set('ysnPrePriced', copyLocation.ysnPrePriced);
-        //                 location.set('ysnOpenPricePLU', copyLocation.ysnOpenPricePLU);
-        //                 location.set('ysnLinkedItem', copyLocation.ysnLinkedItem);
-        //                 location.set('strVendorCategory', copyLocation.strVendorCategory);
-        //                 location.set('ysnCountBySINo', copyLocation.ysnCountBySINo);
-        //                 location.set('strSerialNoBegin', copyLocation.strSerialNoBegin);
-        //                 location.set('strSerialNoEnd', copyLocation.strSerialNoEnd);
-        //                 location.set('ysnIdRequiredLiquor', copyLocation.ysnIdRequiredLiquor);
-        //                 location.set('ysnIdRequiredCigarette', copyLocation.ysnIdRequiredCigarette);
-        //                 location.set('intMinimumAge', copyLocation.intMinimumAge);
-        //                 location.set('ysnApplyBlueLaw1', copyLocation.ysnApplyBlueLaw1);
-        //                 location.set('ysnApplyBlueLaw2', copyLocation.ysnApplyBlueLaw2);
-        //                 location.set('ysnCarWash', copyLocation.ysnCarWash);
-        //                 location.set('intItemTypeCode', copyLocation.intItemTypeCode);
-        //                 location.set('intItemTypeSubCode', copyLocation.intItemTypeSubCode);
-        //                 location.set('ysnAutoCalculateFreight', copyLocation.ysnAutoCalculateFreight);
-        //                 location.set('intFreightMethodId', copyLocation.intFreightMethodId);
-        //                 location.set('dblFreightRate', copyLocation.dblFreightRate);
-        //                 location.set('intShipViaId', copyLocation.intShipViaId);
-        //                 location.set('intNegativeInventory', copyLocation.intNegativeInventory);
-        //                 location.set('dblReorderPoint', copyLocation.dblReorderPoint);
-        //                 location.set('dblMinOrder', copyLocation.dblMinOrder);
-        //                 location.set('dblSuggestedQty', copyLocation.dblSuggestedQty);
-        //                 location.set('dblLeadTime', copyLocation.dblLeadTime);
-        //                 location.set('strCounted', copyLocation.strCounted);
-        //                 location.set('intCountGroupId', copyLocation.intCountGroupId);
-        //                 location.set('ysnCountedDaily', copyLocation.ysnCountedDaily);
-        //                 location.set('strVendorId', copyLocation.strVendorId);
-        //                 location.set('strCategory', copyLocation.strCategory);
-        //                 location.set('strUnitMeasure', copyLocation.strUnitMeasure);
-        //             }
-        //         });
-
-        //         win.context.data.saveRecord();
-        //     }
-        // });
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
@@ -3523,30 +3519,6 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onBuildAssemblyClick: function(button) {
-        var win = button.up('window');
-        var current = win.viewModel.data.current;
-
-        if (current) {
-            var screenName = 'Inventory.view.BuildAssemblyBlend';
-
-            Ext.require([
-                screenName,
-                    screenName + 'ViewModel',
-                    screenName + 'ViewController'
-            ], function () {
-                var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-                var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
-                var controller = view.getController();
-                controller.show({
-                    itemId: current.get('intItemId'),
-                    action: 'new',
-                    itemSetup: current.tblICItemAssemblies().data.items
-                });
-            });
-        }
-    },
-
     onLoadUOMClick: function(button) {
         // No longer implemented
     },
@@ -3799,10 +3771,17 @@ Ext.define('Inventory.view.ItemViewController', {
             }
 
             if (vm.data.current.phantom === true) {
-                win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                    me.openItemLocationScreen('edit', win, record);
-                    return;
-                } });
+                // win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                //     me.openItemLocationScreen('edit', win, record);
+                //     return;
+                // } });
+
+                me.saveRecord(
+                    win, 
+                    function(batch, eOpts){
+                        me.openItemLocationScreen('edit', win, record);
+                    }
+                );                
             }
             else {
                 win.context.data.validator.validateRecord({ window: win }, function(valid) {
@@ -3819,14 +3798,16 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        var record = records[0];
         var win = combo.up('window');
         var grid = combo.up('grid');
         var grdOwner = win.down('#grdOwner');
         var plugin = grid.getPlugin('cepOwner');
         var current = plugin.getActiveRecord();
 
-        if (combo.itemId === 'cboOwner'){
-            current.set('strName', records[0].get('strName'));
+        if (combo.itemId === 'cboOwner' && record){
+            current.set('strName', record.get('strName'));
+            current.set('intOwnerId', record.get('intEntityId'));
         }
     },
     
@@ -3946,6 +3927,26 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         }
     },
+
+    onManufacturingUOMSelect: function(combo, records, eOpts) {
+        if (!combo && !records && records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win ? win.viewModel.data.current : null;
+
+        if (!current)
+            return; 
+        
+        if (combo.itemId === 'cboDimensionUOM'){
+            current.set('intDimensionUOMId', records[0].get('intUnitMeasureId'));
+            current.set('strDimensionUOM', records[0].get('strUnitMeasure'));
+        }
+        else if (combo.itemId === 'cboWeightUOM') {
+            current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
+            current.set('strWeightUOM', records[0].get('strUnitMeasure'));
+        }
+    },    
 
     init: function(application) {
         this.control({
@@ -4091,9 +4092,6 @@ Ext.define('Inventory.view.ItemViewController', {
             "#btnDuplicate": {
                 click: this.onDuplicateClick
             },
-            "#btnBuildAssembly": {
-                click: this.onBuildAssemblyClick
-            },
             "#btnLoadUOM": {
                 click: this.onLoadUOMClick
             },
@@ -4170,6 +4168,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#chkIsBasket": {
                 change: this.onIsBasketChange    
+            },
+            "#cboDimensionUOM": {
+                select: this.onManufacturingUOMSelect
+            },
+            "#cboWeightUOM": {
+                select: this.onManufacturingUOMSelect
             }
         });
 

@@ -3,7 +3,7 @@
 */
 Ext.define('Inventory.store.PersistentPagedStore', {
     extend: 'Ext.data.Store',
-
+    storeId: 'PersistentPagedStore',
     pruneModifiedRecords: false,
 
     listeners: {

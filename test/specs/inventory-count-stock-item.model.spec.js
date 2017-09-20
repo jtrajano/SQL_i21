@@ -1,0 +1,62 @@
+UnitTestEngine.testModel({
+    name: 'Inventory.model.InventoryCountStockItem',
+    base: 'iRely.BaseEntity',
+    idProperty: 'intKey',
+    dependencies: ["Ext.data.Field"],
+    fields: [{
+        "name": "intKey",
+        "type": "int",
+        "allowNull": false
+    }, {
+        "name": "intItemId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strItemNo",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "dblOnHand",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "intItemStockUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intSubLocationId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intStorageLocationId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intLocationId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strSubLocationName",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strStorageLocationName",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "intUnitMeasureId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strUnitMeasure",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "intItemUOMId",
+        "type": "int",
+        "allowNull": true
+    }],
+    validators: [
+        []
+    ]
+});

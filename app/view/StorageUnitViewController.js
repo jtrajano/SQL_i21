@@ -287,10 +287,10 @@ Ext.define('Inventory.view.StorageUnitViewController', {
 
     onUnitTypeDrilldown: function(combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.FactoryUnitType', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('Inventory.view.StorageUnitType', { action: 'new', viewConfig: { modal: true }});
         }
         else {
-            iRely.Functions.openScreen('Inventory.view.FactoryUnitType', combo.getValue());
+            iRely.Functions.openScreen('Inventory.view.StorageUnitType', combo.getValue());
         }
     },
 

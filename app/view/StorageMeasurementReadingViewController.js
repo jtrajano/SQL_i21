@@ -234,7 +234,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         current.set('intItemId', records[0].get('intItemId'));
         current.set('strItemNo', records[0].get('strItemNo'));
         current.set('intCommodityId', records[0].get('intCommodityId'));
-        current.set('strCommodity', records[0].get('strCommodity'));
+        current.set('strCommodity', records[0].get('strCommodityCode'));
         current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
         current.set('dblEffectiveDepth', records[0].get('dblEffectiveDepth'));
 

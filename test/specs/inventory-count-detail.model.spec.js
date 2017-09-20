@@ -28,6 +28,10 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intCountGroupId",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "intLotId",
         "type": "int",
         "allowNull": true
@@ -100,7 +104,7 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
-        "name": "strLotNumber",
+        "name": "strLotNo",
         "type": "string",
         "allowNull": false
     }, {
@@ -113,6 +117,14 @@ UnitTestEngine.testModel({
         "allowNull": false
     }, {
         "name": "dblConversionFactor",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblQtyReceived",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblQtySold",
         "type": "float",
         "allowNull": false
     }, {
@@ -134,6 +146,9 @@ UnitTestEngine.testModel({
             "type": "presence"
         }, {
             "field": "strUnitMeasure",
+            "type": "presence"
+        }, {
+            "field": "strItemNo",
             "type": "presence"
         }]
     ]

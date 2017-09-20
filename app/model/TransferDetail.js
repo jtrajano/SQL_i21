@@ -53,7 +53,8 @@ Ext.define('Inventory.model.TransferDetail', {
         { name: 'dblTaxAmount', type: 'float'},
 
         { name: 'dblOriginalAvailableQty', type: 'float' },
-        { name: 'dblOriginalStorageQty', type: 'float' }
+        { name: 'dblOriginalStorageQty', type: 'float' },
+        { name: 'strToStorageLocationName', type: 'string'}
     ],
 
     validators: [
@@ -67,6 +68,13 @@ Ext.define('Inventory.model.TransferDetail', {
             errors.add({
                 field: 'dblQuantity',
                 message: 'Transfer Qty must be greater than zero(0).'
+            })
+        }
+
+        if (this.get('intLotId') && !this.get('intToStorageLocationId')) {
+            errors.add({
+                field: 'strToStorageLocationName',
+                message: 'Storage Unit is required for lotted items.'
             })
         }
 
