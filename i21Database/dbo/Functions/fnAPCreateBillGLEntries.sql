@@ -37,6 +37,8 @@ RETURNS @returntable TABLE
     [dblReportingRate]          NUMERIC (18, 6) NULL,
     [dblForeignRate]            NUMERIC (18, 6) NULL,
 	[strRateType]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
+	[strComments]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
 )
 AS
@@ -127,6 +129,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[strRateType]                   =    Details.strCurrencyExchangeRateType,
+		[strDocument]					=	NULL,
+		[strComments]					=	A.strReference,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
 			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
@@ -229,6 +233,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
+		[strDocument]					=	NULL,
+		[strComments]					=	A.strReference,
 		[intConcurrencyId]				=	1
 	FROM tblAPBill A
 	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
@@ -322,6 +328,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	NULL,
+		[strComments]					=	A.strReference,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			LEFT JOIN [dbo].tblAPBillDetail B
@@ -432,6 +440,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	NULL,
+		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
@@ -532,6 +542,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	NULL,
+		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
@@ -624,6 +636,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	NULL,
+		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
@@ -735,6 +749,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	NULL,
+		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B

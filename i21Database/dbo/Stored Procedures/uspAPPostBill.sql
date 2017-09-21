@@ -344,7 +344,9 @@ BEGIN
 	    dblCreditReport ,
 	    dblReportingRate ,
 	    dblForeignRate ,
-	    strRateType 
+	    strRateType ,
+		strDocument,
+		strComments
 	)
 	SELECT     
 		dtmDate ,
@@ -377,7 +379,9 @@ BEGIN
 	    dblCreditReport ,
 	    dblReportingRate ,
 	    dblForeignRate ,
-	    strRateType 	 
+	    strRateType ,
+		strDocument,
+		strComments	 
 	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
 	ORDER BY intTransactionId
 
