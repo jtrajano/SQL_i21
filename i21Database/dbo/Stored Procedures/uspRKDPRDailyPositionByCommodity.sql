@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKDPRDailyPositionByCommodity]
+﻿CREATE PROC [dbo].[uspRKDPRDailyPositionByCommodity] 
 	 @intVendorId INT = NULL
 AS
 DECLARE @tblFinalDetail TABLE (
@@ -46,12 +46,12 @@ isnull(CashExposure,0) as dblCaseExposure, isnull(DeltaOption,0) DeltaOption,
 isnull(InHouse,0) as dblInHouse,intLocationId  into #temp         
 FROM(              
 SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId, intLocationId, 
-   isnull(invQty,0)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
+   isnull(invQty,0)+
    Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then isnull(OffSite,0) else 0 end +  
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end +   
    (isnull(dblCollatralPurchase,0)-isnull(dblCollatralSales,0))   + isnull(SlsBasisDeliveries,0)  AS CompanyTitled,
 
-   isnull(invQty,0)-  isnull(ReserveQty,0)  + isnull(SlsBasisDeliveries,0) AS CompanyTitledNonDP,       
+   isnull(invQty,0)  + isnull(SlsBasisDeliveries,0) AS CompanyTitledNonDP,       
    
    (isnull(invQty,0) - isnull(PurBasisDelivary,0)) + (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))+ isnull(dblCollatralSales,0)  + isnull(SlsBasisDeliveries,0)  AS CashExposure,  
    
@@ -114,9 +114,7 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId    and CD.intContractStatusId <> 3
 			AND CD.intUnitMeasureId=ium.intUnitMeasureId and intContractTypeId=2 and CD.intPricingTypeId in(1,2) 
 	WHERE  ch.intCommodityId=c.intCommodityId and cl.intCompanyLocationId  = CD.intCompanyLocationId)t) as OpenSalesQty			
-     
-
-              
+                   
 	,(select sum(intOpenContract) from(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId, intOpenContract*dblContractSize) as intOpenContract 
 	from vyuRKGetOpenContract otr  
 	JOIN tblRKFutOptTransaction t on otr.intFutOptTransactionId=t.intFutOptTransactionId
@@ -128,26 +126,13 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 		SELECT 
 		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((a.dblUnitOnHand),0)) as Qty 
  		 FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId  and isnull(a.dblUnitOnHand,0) > 0
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId  --and isnull(a.dblUnitOnHand,0) > 0
 		  JOIN tblICItem i on a.intItemId=i.intItemId  
 		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 		  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
 		  JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 		 WHERE sl.intCompanyLocationId=cl.intCompanyLocationId and i.intCommodityId= c.intCommodityId	
-		 )t) as invQty  
-		 
-		,(select sum(isnull(Qty,0)) Qty from(
-		SELECT 
-		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((sr1.dblQty),0)) as Qty 
- 		 FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId and isnull(a.dblUnitOnHand,0) > 0
-		  JOIN tblICStockReservation sr1 ON a.intItemId = sr1.intItemId   
-		  JOIN tblICItem i on a.intItemId=i.intItemId  
-		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
-		   JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
-		  JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-		 WHERE sl.intCompanyLocationId=cl.intCompanyLocationId and i.intCommodityId= c.intCommodityId		 
-		 )t) as ReserveQty 	  	
+		 )t) as invQty 
 
 	,isnull((SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
 		FROM ( 
@@ -195,7 +180,7 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 	 WHERE CH.intCommodityId = c.intCommodityId AND ysnDPOwnedType=1 and CH.intCompanyLocationId=cl.intCompanyLocationId
 	  and  intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then intEntityId else @intVendorId end 	
 	 )t) as DP 
-
+	 
 	,(SELECT Sum(dblTotal) from (
     SELECT
      dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(Balance,0)) dblTotal

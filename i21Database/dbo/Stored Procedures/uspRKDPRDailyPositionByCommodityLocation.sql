@@ -18,12 +18,12 @@ isnull(CashExposure,0) as dblCaseExposure, isnull(DeltaOption,0) DeltaOption,
 isnull(InHouse,0) as dblInHouse,intLocationId  into #temp         
 FROM(              
 SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId, intLocationId, 
-   isnull(invQty,0)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
+   isnull(invQty,0) +  
    Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then isnull(OffSite,0) else 0 end +  
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end +   
    (isnull(dblCollatralPurchase,0)-isnull(dblCollatralSales,0))   + isnull(SlsBasisDeliveries,0)  AS CompanyTitled,
 
-   isnull(invQty,0)-  isnull(ReserveQty,0)  + isnull(SlsBasisDeliveries,0) AS CompanyTitledNonDP,       
+   isnull(invQty,0)+ isnull(SlsBasisDeliveries,0) AS CompanyTitledNonDP,       
    
    (isnull(invQty,0) - isnull(PurBasisDelivary,0)) + (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))+ isnull(dblCollatralSales,0)  + isnull(SlsBasisDeliveries,0)  AS CashExposure,     
    
@@ -96,7 +96,7 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 		SELECT 
 		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((a.dblUnitOnHand),0)) AS Qty 
  		 FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId AND ISNULL(a.dblUnitOnHand,0) > 0
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId --AND ISNULL(a.dblUnitOnHand,0) > 0
 		  JOIN tblICItem i on a.intItemId=i.intItemId  
 		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 		  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
@@ -104,19 +104,6 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 		 WHERE sl.intCompanyLocationId=cl.intCompanyLocationId and i.intCommodityId= c.intCommodityId	
 		 )t) as invQty  
 		 
-		,(SELECT SUM(ISNULL(Qty,0)) Qty FROM(
-		SELECT 
-		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((sr1.dblQty),0)) AS Qty 
- 		 FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId and isnull(a.dblUnitOnHand,0) > 0
-		  JOIN tblICStockReservation sr1 ON a.intItemId = sr1.intItemId   
-		  JOIN tblICItem i on a.intItemId=i.intItemId  
-		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
-		   JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
-		  JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-		 WHERE sl.intCompanyLocationId=cl.intCompanyLocationId and i.intCommodityId= c.intCommodityId		 
-		 )t) as ReserveQty 	  	
-
 	,isnull((SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
 		FROM ( 
 		SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((SUM(dblAdjustmentAmount)),0)) dblAdjustmentAmount,
@@ -299,4 +286,3 @@ FROM #temp t
 	ORDER BY strCommodityCode
 
 END
-
