@@ -43,7 +43,6 @@ GROUP BY
 	, A.intAccountId
 	, EC.strClass
 	, dblRate
-
 UNION ALL   
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
@@ -76,13 +75,14 @@ LEFT JOIN dbo.tblCMBankTransaction E
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
-	--AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
---PREPAYMENT
+	AND C.intTransactionType != 2
+	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
 UNION ALL
+--APPLIED DM
 SELECT
 	A.dtmDate
-	,B.intTransactionId
-	,C.strBillId
+	,A.intBillId
+	,A.strBillId
 	,B.dblAmountApplied
 	,0 AS dblTotal
 	,0 AS dblAmountDue
@@ -98,10 +98,10 @@ SELECT
 	,EC.strClass
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
-INNER JOIN dbo.tblAPBill C ON B.intTransactionId = B.intBillId
+INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-WHERE A.ysnPosted = 1
+WHERE A.ysnPosted = 1 --AND C.intTransactionType != 2
 UNION ALL
 SELECT --OVERPAYMENT
 	A.dtmDate

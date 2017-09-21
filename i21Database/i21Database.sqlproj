@@ -5669,6 +5669,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalances.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalance.sql" />
     <Build Include="dbo\Views\vyuEMEntityGroupApproverUsage.sql" />
+    <Build Include="dbo\Views\vyuAPPrepaidPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

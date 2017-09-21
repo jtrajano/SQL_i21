@@ -2,7 +2,8 @@
 WITH SCHEMABINDING
 AS
 SELECT 
-A.intBillId
+intId
+,A.intBillId
 ,A.strBillId
 ,A.dblTotal
 ,A.intShipToId AS intLocationId
@@ -29,8 +30,9 @@ A.intBillId
 FROM dbo.tblAPBill A
 	INNER JOIN 
 	(
-		SELECT 
-			B.[intEntityVendorId]
+		SELECT
+			CAST(ROW_NUMBER() OVER(ORDER BY B.intPaymentId DESC) AS INT) AS intId 
+			,B.[intEntityVendorId]
 			,B.intPaymentId
 			,B.ysnPosted
 			,C.intBillId
