@@ -4641,57 +4641,41 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     // },
 
     onItemSelectionChange: function (selModel, selected, eOpts) {
-        if (selModel) {
-            if (selModel.view == null || selModel.view == 'undefined') {
-                if (selModel.views == 'undefined' || selModel.views == null || selModel.views.length == 0)
-                    return;
-                var w = selModel.views[0].up('window');
-                var plt = w.down("#pnlLotTracking");
-                this.updateWeightLossText(w, true, 0);
-                plt.setVisible(false);
-                return;
-            }
+        var me = this; 
+
+        if (selModel && selModel.view) {
             var win = selModel.view.grid.up('window');
-            var vm = win.viewModel;
-            var pnlLotTracking = win.down("#pnlLotTracking");
+            var vm = win ? win.viewModel : null;
+            var pnlLotTracking = win ? win.down('#pnlLotTracking') : null;
+            
+            // Reset the weight gain/loss back to zero. 
+            if (win) {
+                me.updateWeightLossText(win, true, 0);
+            }
 
-            if (selected.length > 0) {
-                var current = selected[0];
-
-                if (current.dummy) {
-                    vm.data.currentReceiptItem = null;
-                    pnlLotTracking.setVisible(false);
-                }
-                else if (!!current.get('strLotTracking') && current.get('strLotTracking') == 'No') {
-                    pnlLotTracking.setVisible(false);
-                    vm.data.currentReceiptItem = null;
-                }
-                else {
-                    vm.data.currentReceiptItem = current;
-                    pnlLotTracking.setVisible(true);
-                }
-
-                // if(!current.phantom && !current.dirty) {
-                //     win.down("#grdLotTracking").setLoading("Loading lots...");
-                //     var receiptItemLot = current.tblICInventoryReceiptItemLots();
-                //     var proxy = receiptItemLot && (receiptItemLot instanceof Ext.data.Store) ? receiptItemLot.getProxy() : null; 
-
-                //     if (proxy) {
-                //         proxy.extraParams = {
-                //             intInventoryReceiptItemId: current.get('intInventoryReceiptItemId')
-                //         };
-                //         // Manually get the lot records. 
-                //         receiptItemLot.load(
-                //             function(records, operation, success) {
-                //                 win.down("#grdLotTracking").setLoading(false);
-                //             }
-                //         );
-                //     }
-                // }
+            // Exit if view model object is invalid. 
+            if (!vm || !vm.data)
+                return; 
+            
+            // Get the current receipt item for use in the lot grid. 
+            var current = selected && selected[0] ? selected[0] : null;
+            if (current) {                
+                vm.data.currentReceiptItem = 
+                    current.dummy || (!!current.get('strLotTracking') && current.get('strLotTracking') === 'No') 
+                    ? null 
+                    : current;
             }
             else {
                 vm.data.currentReceiptItem = null;
-                pnlLotTracking.setVisible(false);
+            }
+
+            // If currentReceiptItem is valid, show the lot panel. Otherwise, hide it. 
+            var hide = vm.data.currentReceiptItem ? false : true; 
+            if (pnlLotTracking){
+                var task = new Ext.util.DelayedTask(function () {
+                    pnlLotTracking.setHidden(hide);    
+                });
+                task.delay(1);    
             }
         }
     },
@@ -7191,7 +7175,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             /*"#btnPostPreview": {
                 click: this.onRecapClick
-            },
+            },  
             "#btnUnpostPreview": {
                 click: this.onRecapClick
             },*/
