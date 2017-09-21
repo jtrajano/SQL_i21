@@ -49,6 +49,17 @@ CROSS APPLY
 	AND C.intTransactionType = 11 --Claims
 ) AppliedPayments
 WHERE A.intTransactionType IN (2,3,8)
+
+-- IF @post = 0
+-- BEGIN
+-- 	--we need to reset this records to correctly compute on client side
+-- 	UPDATE A
+-- 		SET A.ysnApplied = 0
+-- 		,A.dblBalance = A.dblAmountApplied + A.dblBalance
+-- 		,A.dblAmountApplied = 0
+-- 	FROM tblAPAppliedPrepaidAndDebit A
+-- 	WHERE A.intBillId IN (SELECT intBillId FROM #tmpBillsId)
+-- END
 --removed to add performance improvement, we could only apply to posted transactions, unless it pulls the unposted transaction as well
 --AND 1 = CASE WHEN A.intTransactionType= 3 AND A.ysnPosted != 1 --DEBIT MEMO should be posted
 --			 THEN 0 ELSE 1 END

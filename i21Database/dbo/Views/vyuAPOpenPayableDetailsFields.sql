@@ -46,6 +46,25 @@ FROM (
 			FROM dbo.vyuAPPayables
 			) tmpAPPayables
 		GROUP BY intBillId
+		UNION ALL
+		SELECT 
+			intBillId
+			,SUM(tmpAPPrepaidPayables.dblTotal) AS dblTotal
+			,0 --SUM(tmpAPPrepaidPayables.dblAmountPaid) AS dblAmountPaid
+			,SUM(tmpAPPrepaidPayables.dblDiscount)AS dblDiscount
+			,SUM(tmpAPPrepaidPayables.dblInterest) AS dblInterest
+			,CAST((SUM(tmpAPPrepaidPayables.dblTotal) + SUM(tmpAPPrepaidPayables.dblInterest) - SUM(tmpAPPrepaidPayables.dblAmountPaid) - SUM(tmpAPPrepaidPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+		FROM (SELECT --DISTINCT 
+				intBillId
+				,dblTotal
+				,dblAmountDue
+				,dblAmountPaid
+				,dblDiscount
+				,dblInterest
+				,dtmDate
+				,intPrepaidRowType
+			FROM dbo.vyuAPPrepaidPayables) tmpAPPrepaidPayables 
+		GROUP BY intBillId, intPrepaidRowType
 		) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A ON A.intBillId = tmpAgingSummaryTotal.intBillId
 	LEFT JOIN (
