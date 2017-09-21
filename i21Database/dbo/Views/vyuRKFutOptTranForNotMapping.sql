@@ -9,7 +9,7 @@ CASE WHEN ft.intInstrumentTypeId = 1 then 'Futures'
 CASE WHEN strBuySell = 'Sell' then -intNoOfContract else intNoOfContract end intGetNoOfContract,
 case when strBuySell = 'Sell' then -(fot.dblContractSize * (select sum(intOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId) 				
 				) else (fot.dblContractSize * (select sum(intOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId)) end dblHedgeQty,
-strUnitMeasure,strCommodityCode,strLocationName,strCurrency,substring(fm.strFutureMonth,0,4) + '(' +fm.strSymbol+')'+convert(nvarchar,fm.intYear) strFutureMonthYear,
+strUnitMeasure,strCommodityCode,strLocationName,bc.strCurrency,substring(fm.strFutureMonth,0,4) + '(' +fm.strSymbol+')'+convert(nvarchar,fm.intYear) strFutureMonthYear,
 fm.strFutureMonth strFutureMonthYearWOSymbol,
  substring(om.strOptionMonth,0,4) + '(' +fom.strOptSymbol+')'+convert(nvarchar,om.intYear)  strOptionMonthYear,
   		strOptionMonth strOptionMonthYearWOSymbol
@@ -34,7 +34,7 @@ LEFT OUTER JOIN [dbo].[tblICUnitMeasure] AS um ON [fot].[intUnitMeasureId] = um.
 LEFT OUTER JOIN [dbo].[tblICCommodity] AS sc ON ft.[intCommodityId] = sc.[intCommodityId]
 LEFT OUTER JOIN [dbo].[tblSMCompanyLocation] AS cl ON ft.[intLocationId] = cl.[intCompanyLocationId]
 LEFT OUTER JOIN [dbo].[tblCMBank] AS b ON ft.[intBankId] = b.[intBankId]
-LEFT OUTER JOIN [dbo].[tblCMBankAccount] AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
+LEFT OUTER JOIN [dbo].[vyuCMBankAccount] AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
 LEFT OUTER JOIN [dbo].[tblSMCurrency] AS bc ON ft.[intCurrencyId] = bc.[intCurrencyID]
 LEFT OUTER JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN [dbo].[tblRKAssignFuturesToContractSummary] AS cs ON cs.[intFutOptAssignedId] = ft.[intFutOptTransactionId]
