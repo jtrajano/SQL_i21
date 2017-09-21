@@ -5,7 +5,8 @@ SELECT DISTINCT I.intEntityCustomerId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , C.strCustomerNumber
-	 , C.strName	 
+	 , C.strName	 	 
+	 , strDisplayName			= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(C.strName, '')	 
 	 , strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
 	 , intCurrencyId			= I.intCurrencyId
@@ -23,11 +24,12 @@ SELECT DISTINCT I.intEntityCustomerId
 					   )
 					   * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 
-	, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+	, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)	
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , TC.strTaxAgency
-				 , TC.strTaxCode
+				 , TC.strTaxCode				 
+				 , strTaxCodeDescription = TC.strDescription
 				 , TC.intTaxClassId
 				 , CL.strTaxClass
 				 , TC.strCountry
@@ -50,6 +52,8 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , IDT.dblAdjustedTax	 				 				 
 				 , IDT.dblTax
 				 , ID.intInvoiceDetailId
+				 , dblTotalAdjustedTax  = SUM(IDT.dblAdjustedTax)
+				 , dblTotalTax			= SUM(IDT.dblTax)
 			FROM dbo.tblSMTaxCode TC WITH (NOLOCK)
 			LEFT OUTER JOIN (SELECT intTaxClassId
 									, strTaxClass 
@@ -94,6 +98,7 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				,TC.intTaxCodeId
 				,TC.strTaxAgency
 				,TC.strTaxCode
+				,TC.strDescription
 				,TC.intTaxClassId
 				,CL.strTaxClass
 				,TC.strCountry
@@ -147,7 +152,8 @@ SELECT DISTINCT I.intEntityCustomerId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , C.strCustomerNumber
-	 , C.strName	 
+	 , C.strName		 	 
+	 , strDisplayName			= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(C.strName, '') 
 	 , strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
 	 , intCurrencyId			= I.intCurrencyId
@@ -172,6 +178,7 @@ INNER JOIN (
 			SELECT DISTINCT  TC.intTaxCodeId
 				 , TC.strTaxAgency
 				 , TC.strTaxCode
+				 , strTaxCodeDescription = TC.strDescription
 				 , TC.intTaxClassId
 				 , CL.strTaxClass
 				 , TC.strCountry
@@ -194,6 +201,8 @@ INNER JOIN (
 				 , IDT.dblAdjustedTax	 				 				 
 				 , IDT.dblTax
 				 , ID.intInvoiceDetailId
+				 , dblTotalAdjustedTax  = SUM(IDT.dblAdjustedTax)
+				 , dblTotalTax			= SUM(IDT.dblTax)
 			FROM 
 				tblARInvoiceDetail ID
 
