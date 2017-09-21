@@ -103,6 +103,7 @@
 :r .\11_IC\Remove_Accounts_With_Deleted_Category.sql
 :r .\11_IC\Update_Item_Commodity_Origin_Keys.sql
 :r .\11_IC\CleanInvalidWeightVolumeGrossUOM.sql
+:r .\11_IC\CleanUPCCodes.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql

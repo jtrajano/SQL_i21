@@ -38,7 +38,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemUOM_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItemUOM_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItemUOM_VolumeUOM] FOREIGN KEY ([intVolumeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-		CONSTRAINT [AK_tblICItemUOM] UNIQUE ([intItemId], [intUnitMeasureId]),
+		CONSTRAINT [AK_tblICItemUOM] UNIQUE ([intItemId], [intUnitMeasureId])
 	)
 	GO
 
@@ -63,6 +63,15 @@ Type the overview for the table here.
 		INCLUDE(intUnitMeasureId, intItemUOMId, dblUnitQty); 
 	GO
 
+		CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strUpcCode]
+		ON tblICItemUOM([strUpcCode])
+		WHERE [strUpcCode] IS NOT NULL;
+	GO
+
+		CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strLongUPCCode]
+		ON tblICItemUOM([strLongUPCCode])
+		WHERE [strLongUPCCode] IS NOT NULL;
+	GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
