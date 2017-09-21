@@ -952,7 +952,7 @@ FROM (
 	     , strShipmentNumber				= NULL
 	     , intLoadId						= L.intLoadId
 	     , intLoadDetailId					= LD.intLoadDetailId
-	     , intLotId							= LDL.intLotId
+	     , intLotId							= NULL
 	     , strLoadNumber					= L.strLoadNumber
 	     , intRecipeItemId					= NULL
 	     , intContractHeaderId				= ARCC.intContractHeaderId
@@ -966,12 +966,12 @@ FROM (
 	     , intOrderUOMId					= ARCC.intOrderUOMId
 	     , intShipmentItemUOMId				= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
 		 , intWeightUOMId					= LD.intWeightItemUOMId --ARCC.intItemWeightUOMId
-		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1) --dbo.fnCalculateQtyBetweenUOM(ARCC.intItemWeightUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1)
-		 , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
+		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1.000000)
+		 , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
 		 , dblQtyOrdered					= ISNULL(LD.dblQuantity, 0)
-		 , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
-		 , dblShipmentQtyShippedTotal		= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
-		 , dblQtyRemaining					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
+		 , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
+		 , dblShipmentQtyShippedTotal		= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
+		 , dblQtyRemaining					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
 	     , dblDiscount						= 0
 	     , dblPrice							= ARCC.dblCashPrice
 	     , dblShipmentUnitPrice				= ARCC.dblCashPrice
@@ -979,14 +979,14 @@ FROM (
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0
 	     , dblTotal							= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId)), ISNULL(LD.dblQuantity, 0)) * ARCC.dblCashPrice
-	     , intStorageLocationId				= LO.intStorageLocationId
+	     , intStorageLocationId				= NULL
 	     , intTermId						= NULL
 	     , intEntityShipViaId				= NULL
 	     , intTicketId						= NULL
 	     , intTaxGroupId					= NULL
-	     , dblGrossWt						= LD.dblGross
-	     , dblTareWt						= LD.dblTare
-	     , dblNetWt							= LD.dblNet
+	     , dblGrossWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblGross)
+	     , dblTareWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblTare)
+	     , dblNetWt							= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblNet)
 	     , strPONumber						= ''
 	     , strBOLNumber						= ''
 	     , intSplitId						= NULL
@@ -1024,31 +1024,35 @@ FROM (
 			 , intWeightItemUOMId
 			 , intSCompanyLocationId
 			 , intPContractDetailId
-			 , dblQuantity
-			 , dblGross
-			 , dblTare
-			 , dblNet
-		FROM dbo.tblLGLoadDetail WITH (NOLOCK)
+			 , dblQuantity			 
+		FROM 
+			dbo.tblLGLoadDetail WITH (NOLOCK)		
+
 	) LD ON L.intLoadId  = LD.intLoadId
 	LEFT JOIN (
 		SELECT intLoadDetailId
-			 , intLotId
-			 , dblLotQuantity
-		FROM dbo.tblLGLoadDetailLot WITH (NOLOCK)
+			 , intWeightUOMId
+			 , dblGross	= SUM(dblGross)
+			 , dblTare	= SUM(dblTare)
+			 , dblNet	= SUM(dblNet)
+		FROM dbo.tblLGLoadDetailLot WITH (NOLOCK) 
+		GROUP BY
+			 intLoadDetailId
+			,intWeightUOMId
 	) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN (
-		SELECT intLotId
-			 , intStorageLocationId
-		FROM dbo.tblICLot WITH (NOLOCK)
-	) LO ON LO.intLotId = LDL.intLotId
-	LEFT OUTER JOIN (
-		SELECT intInventoryShipmentItemId
-			 , intRecipeItemId
-			 , strShipmentNumber
-			 , intLoadDetailId
-		 FROM tblARInvoiceDetail WITH (NOLOCK)
-		 WHERE ISNULL(intLoadDetailId, 0) = 0
-	) ARID ON LDL.intLoadDetailId = ARID.intLoadDetailId
+	--LEFT JOIN (
+	--	SELECT intLotId
+	--		 , intStorageLocationId
+	--	FROM dbo.tblICLot WITH (NOLOCK)
+	--) LO ON LO.intLotId = LDL.intLotId
+	--LEFT OUTER JOIN (
+	--	SELECT intInventoryShipmentItemId
+	--		 , intRecipeItemId
+	--		 , strShipmentNumber
+	--		 , intLoadDetailId
+	--	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	--	 WHERE ISNULL(intLoadDetailId, 0) = 0
+	--) ARID ON LDL.intLoadDetailId = ARID.intLoadDetailId
 	LEFT OUTER JOIN (
 	SELECT intContractHeaderId
 		 , intContractDetailId
