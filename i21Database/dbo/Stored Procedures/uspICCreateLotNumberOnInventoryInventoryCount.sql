@@ -44,6 +44,8 @@ BEGIN
 			,[dblGrossWeight]
 			,[dblWeightPerQty]
 			,[dtmExpiryDate]
+			,[strParentLotNumber]
+			,[strParentLotAlias]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -63,6 +65,8 @@ BEGIN
 			,[dblGrossWeight]           = Detail.dblWeightQty
 			,[dblWeightPerQty]          = Detail.dblWeightQty / Detail.dblPhysicalCount
 			,[dtmExpiryDate]			= dbo.fnICCalculateExpiryDate(Detail.intItemId, Header.dtmCountDate, Header.dtmCountDate)
+			,[strParentLotNumber]		= Detail.strParentLotNo
+			,[strParentLotAlias]		= Detail.strParentLotAlias
 
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId
@@ -91,6 +95,8 @@ BEGIN
 	UPDATE	dbo.tblICInventoryCountDetail
 	SET		intLotId = LotNumbers.intLotId
 			,strLotNo = LotNumbers.strLotNumber
+			,intParentLotId = LotNumbers.intParentLotId
+			,strParentLotNo = LotNumbers.strParentLotNumber
 	FROM	dbo.tblICInventoryCountDetail Detail INNER JOIN #GeneratedLotItems LotNumbers
 				ON Detail.intInventoryCountDetailId = LotNumbers.intDetailId
 END 
