@@ -5663,6 +5663,8 @@
     <Build Include="dbo\Tables\tblARCustomerStatementStagingTable.sql" />
     <Build Include="dbo\Tables\tblRKM2MGrainBasis.sql" />
     <Build Include="dbo\Views\vyuICETExportItemMessages.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalances.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
