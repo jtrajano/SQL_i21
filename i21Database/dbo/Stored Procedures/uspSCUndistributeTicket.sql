@@ -49,7 +49,7 @@ BEGIN TRY
 					UNIQUE ([intInventoryReceiptId])
 				);
 				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
-
+				
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
 				SELECT intInventoryReceiptId,  strReceiptNumber
@@ -62,14 +62,13 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
+					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
 					IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
-						DROP TABLE #tmpVoucherDetail
+                        DROP TABLE #tmpVoucherDetail
 					CREATE TABLE #tmpVoucherDetail (
 						[intBillId] [INT] PRIMARY KEY,
 						UNIQUE ([intBillId])
 					);
-					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
-
 					INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(intBillId) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 					
 					DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
@@ -96,12 +95,18 @@ BEGIN TRY
 						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 						FETCH NEXT FROM voucherCursor INTO @intBillId;
 					END
+
+					CLOSE voucherCursor  
+					DEALLOCATE voucherCursor 
+
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
 					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId;
 				END
+				CLOSE intListCursor  
+				DEALLOCATE intListCursor 
 				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 			END
 		ELSE
@@ -181,23 +186,23 @@ BEGIN TRY
 							DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
 							FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
 						END
-
+						CLOSE intListCursor  
+						DEALLOCATE intListCursor 
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 					END
 			END
 		
 		--Audit Log
 		
-		SET @jsonData = 'Updated - Record:' + CAST(@intTicketId AS NVARCHAR(MAX)) + '","keyValue":"' + CAST(@intTicketId AS NVARCHAR(MAX)) + ''          
 		EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
-			,@screenName		= 'Grain.view.ScaleViewController'	-- Screen Namespace
+			,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
 			,@entityId			= @intUserId						-- Entity Id.
 			,@actionType		= 'Updated'							-- Action Type
 			,@changeDescription	= 'Ticket Status'					-- Description
 			,@fromValue			= 'Completed'						-- Previous Value
 			,@toValue			= 'Reopened'						-- New Value
-			,@details			= @jsonData;
+			,@details			= '';
 
 		IF ISNULL(@intLoadDetailId,0) > 0
 		BEGIN
