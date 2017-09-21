@@ -1495,6 +1495,16 @@ Ext.define('Inventory.view.ItemViewModel', {
             else {
                     return false;
             }
+        },
+        setDescriptionMark: function(get){
+            var win = this.getView(),
+                txtDescription = win.down('#txtDescription');
+
+            if(get('current.strType') !== 'Comment'){
+                win.markedIt(txtDescription);
+            } else{
+                win.removeMark(txtDescription);
+            }
         }
     }
 

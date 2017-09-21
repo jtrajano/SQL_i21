@@ -640,6 +640,16 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         }
     },       
 
+    onNegativeInventorySelect: function(combo, records){
+        // var me = this,
+        //     win = me.getView(),
+        //     vm = me.getViewModel(),
+        //     current = vm.data.current;
+        if(records.get('strDescription') == 'Yes'){
+            iRely.Functions.showInfoDialog('Change the setting to Yes only if the business absolutely requires it. Otherwise this can lead to serious stock errors.');
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboLocation": {
@@ -688,6 +698,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             },
             "#cboCostingMethod": {
                 select: this.onCostingMethodSelect
+            },
+            "#cboNegativeInventory": {
+                select: this.onNegativeInventorySelect
             }
         });
     }
