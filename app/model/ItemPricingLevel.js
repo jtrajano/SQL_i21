@@ -78,6 +78,14 @@ Ext.define('Inventory.model.ItemPricingLevel', {
                 })
             }
         }
+
+        if(this.get('dblUnitPrice') <= 0){
+            errors.add({
+                field:'dblUnitPrice',
+                message: 'Retail Price cannot be zero for Pricing Level'
+            });
+        }
+        
         return errors;
     }
 });
