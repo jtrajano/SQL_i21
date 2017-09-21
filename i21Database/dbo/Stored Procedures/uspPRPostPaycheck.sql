@@ -929,6 +929,12 @@ END
 ELSE IF @ysnPost = 0
 BEGIN
 	-- Reverse the G/L entries
+	UPDATE tblGLDetail 
+	SET ysnIsUnposted = 1
+	WHERE strBatchId = @batchIdUsed
+		AND strTransactionId = @strTransactionId
+		AND strCode = @GL_DETAIL_CODE
+
 	INSERT INTO #tmpGLDetail (
 		[strTransactionId]
 		,[intTransactionId]
