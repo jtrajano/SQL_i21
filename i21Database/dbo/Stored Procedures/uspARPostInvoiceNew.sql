@@ -709,157 +709,157 @@ BEGIN CATCH
 	GOTO Post_Exit
 END CATCH
 
-BEGIN TRY
-	IF @Recap = 0
-		BEGIN
-			DECLARE @GrainItems TABLE(
-									 intEntityCustomerId		INT
-									,intInvoiceId				INT	
-									,intInvoiceDetailId			INT
-									,intItemId					INT
-									,dblQuantity				NUMERIC(18,6)
-									,intItemUOMId				INT
-									,intLocationId				INT
-									,intStorageScheduleTypeId	INT
-									,intCustomerStorageId		INT)
+--BEGIN TRY
+--	IF @Recap = 0
+--		BEGIN
+--			DECLARE @GrainItems TABLE(
+--									 intEntityCustomerId		INT
+--									,intInvoiceId				INT	
+--									,intInvoiceDetailId			INT
+--									,intItemId					INT
+--									,dblQuantity				NUMERIC(18,6)
+--									,intItemUOMId				INT
+--									,intLocationId				INT
+--									,intStorageScheduleTypeId	INT
+--									,intCustomerStorageId		INT)
 
-			INSERT INTO @GrainItems
-			SELECT
-				 I.intEntityCustomerId 
-				,I.intInvoiceId 
-				,ID.intInvoiceDetailId
-				,ID.intItemId
-				,dbo.fnCalculateStockUnitQty(ID.dblQtyShipped, ICIU.dblUnitQty)
-				,ID.intItemUOMId
-				,I.intCompanyLocationId
-				,ID.intStorageScheduleTypeId
-				,ID.intCustomerStorageId 
-			FROM 
-				(SELECT intInvoiceId, intEntityCustomerId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) I
-			INNER JOIN 
-				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, intStorageScheduleTypeId, intCustomerStorageId FROM tblARInvoiceDetail WITH (NOLOCK)) ID ON I.intInvoiceId = ID.intInvoiceId
-			INNER JOIN
-				(SELECT intItemId, intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ICIU  ON ID.intItemId = ICIU.intItemId AND ID.intItemUOMId = ICIU.intItemUOMId				 		
-			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-				AND ID.intStorageScheduleTypeId IS NOT NULL
-				AND ID.dblQtyShipped <> @ZeroDecimal
+--			INSERT INTO @GrainItems
+--			SELECT
+--				 I.intEntityCustomerId 
+--				,I.intInvoiceId 
+--				,ID.intInvoiceDetailId
+--				,ID.intItemId
+--				,dbo.fnCalculateStockUnitQty(ID.dblQtyShipped, ICIU.dblUnitQty)
+--				,ID.intItemUOMId
+--				,I.intCompanyLocationId
+--				,ID.intStorageScheduleTypeId
+--				,ID.intCustomerStorageId 
+--			FROM 
+--				(SELECT intInvoiceId, intEntityCustomerId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) I
+--			INNER JOIN 
+--				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, intStorageScheduleTypeId, intCustomerStorageId FROM tblARInvoiceDetail WITH (NOLOCK)) ID ON I.intInvoiceId = ID.intInvoiceId
+--			INNER JOIN
+--				(SELECT intItemId, intItemUOMId, dblUnitQty FROM tblICItemUOM WITH (NOLOCK)) ICIU  ON ID.intItemId = ICIU.intItemId AND ID.intItemUOMId = ICIU.intItemUOMId				 		
+--			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+--				AND ID.intStorageScheduleTypeId IS NOT NULL
+--				AND ID.dblQtyShipped <> @ZeroDecimal
 
-			WHILE EXISTS (SELECT NULL FROM @GrainItems)
-				BEGIN
-					DECLARE
-						 @EntityCustomerId		INT
-						,@InvoiceId				INT 
-						,@InvoiceDetailId		INT
-						,@ItemId				INT
-						,@Quantity				NUMERIC(18,6)
-						,@ItemUOMId				INT
-						,@LocationId			INT
-						,@StorageScheduleTypeId	INT
-						,@CustomerStorageId		INT
+--			WHILE EXISTS (SELECT NULL FROM @GrainItems)
+--				BEGIN
+--					DECLARE
+--						 @EntityCustomerId		INT
+--						,@InvoiceId				INT 
+--						,@InvoiceDetailId		INT
+--						,@ItemId				INT
+--						,@Quantity				NUMERIC(18,6)
+--						,@ItemUOMId				INT
+--						,@LocationId			INT
+--						,@StorageScheduleTypeId	INT
+--						,@CustomerStorageId		INT
 			
-					SELECT TOP 1 
-						  @InvoiceDetailId			= GI.intInvoiceDetailId
-						, @InvoiceId				= GI.intInvoiceId
-						, @EntityCustomerId			= GI.intEntityCustomerId 
-						, @ItemId					= GI.intItemId
-						, @Quantity					= GI.dblQuantity				
-						, @ItemUOMId				= GI.intItemUOMId
-						, @LocationId				= GI.intLocationId
-						, @StorageScheduleTypeId	= GI.intStorageScheduleTypeId
-						, @CustomerStorageId		= GI.intCustomerStorageId 
-					FROM @GrainItems GI
+--					SELECT TOP 1 
+--						  @InvoiceDetailId			= GI.intInvoiceDetailId
+--						, @InvoiceId				= GI.intInvoiceId
+--						, @EntityCustomerId			= GI.intEntityCustomerId 
+--						, @ItemId					= GI.intItemId
+--						, @Quantity					= GI.dblQuantity				
+--						, @ItemUOMId				= GI.intItemUOMId
+--						, @LocationId				= GI.intLocationId
+--						, @StorageScheduleTypeId	= GI.intStorageScheduleTypeId
+--						, @CustomerStorageId		= GI.intCustomerStorageId 
+--					FROM @GrainItems GI
 
 				  
-					BEGIN TRY
-					IF @Post = 1
-						BEGIN
-							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
-								 @strOptionType		= 'Update'
-								,@strSourceType		= 'Invoice'
-								,@intEntityId		= @EntityCustomerId
-								,@intItemId			= @ItemId
-								,@intStorageTypeId	= @StorageScheduleTypeId
-								,@dblUnitsConsumed	= @Quantity
-								,@IntSourceKey		= @InvoiceId
-								,@intUserId			= @UserEntityID							
-							END
-					ELSE
-						BEGIN
-							EXEC dbo.uspGRReverseTicketOpenBalance 
-									@strSourceType	= 'Invoice',
-									@IntSourceKey	= @InvoiceId,
-									@intUserId		= @UserEntityID
+--					BEGIN TRY
+--					IF @Post = 1
+--						BEGIN
+--							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
+--								 @strOptionType		= 'Update'
+--								,@strSourceType		= 'Invoice'
+--								,@intEntityId		= @EntityCustomerId
+--								,@intItemId			= @ItemId
+--								,@intStorageTypeId	= @StorageScheduleTypeId
+--								,@dblUnitsConsumed	= @Quantity
+--								,@IntSourceKey		= @InvoiceId
+--								,@intUserId			= @UserEntityID							
+--							END
+--					ELSE
+--						BEGIN
+--							EXEC dbo.uspGRReverseTicketOpenBalance 
+--									@strSourceType	= 'Invoice',
+--									@IntSourceKey	= @InvoiceId,
+--									@intUserId		= @UserEntityID
 
-							UPDATE tblARInvoiceDetail SET intCustomerStorageId = NULL WHERE intInvoiceDetailId = @InvoiceDetailId							
-						END						
-					END TRY
-					BEGIN CATCH
-						SELECT @ErrorMerssage = ERROR_MESSAGE()
-						IF @RaiseError = 0
-							BEGIN
-								IF (XACT_STATE()) = -1
-									ROLLBACK TRANSACTION							
-								BEGIN TRANSACTION						
-								--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
-								UPDATE ILD
-								SET
-									 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
-									,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
-									,ILD.[strPostingMessage]	= @ErrorMerssage
-									,ILD.[strBatchId]			= @BatchId
-									,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
-								FROM
-									tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
-								INNER JOIN
-									@PostInvoiceData PID
-										ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-								WHERE
-									ILD.[intIntegrationLogId] = @IntegrationLogId
-									AND ILD.[ysnPost] IS NOT NULL 
+--							UPDATE tblARInvoiceDetail SET intCustomerStorageId = NULL WHERE intInvoiceDetailId = @InvoiceDetailId							
+--						END						
+--					END TRY
+--					BEGIN CATCH
+--						SELECT @ErrorMerssage = ERROR_MESSAGE()
+--						IF @RaiseError = 0
+--							BEGIN
+--								IF (XACT_STATE()) = -1
+--									ROLLBACK TRANSACTION							
+--								BEGIN TRANSACTION						
+--								--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
+--								UPDATE ILD
+--								SET
+--									 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+--									,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+--									,ILD.[strPostingMessage]	= @ErrorMerssage
+--									,ILD.[strBatchId]			= @BatchId
+--									,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
+--								FROM
+--									tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
+--								INNER JOIN
+--									@PostInvoiceData PID
+--										ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+--								WHERE
+--									ILD.[intIntegrationLogId] = @IntegrationLogId
+--									AND ILD.[ysnPost] IS NOT NULL 
 
-								COMMIT TRANSACTION
-							END						
-						IF @RaiseError = 1
-							RAISERROR(@ErrorMerssage, 11, 1)
+--								COMMIT TRANSACTION
+--							END						
+--						IF @RaiseError = 1
+--							RAISERROR(@ErrorMerssage, 11, 1)
 		
-						GOTO Post_Exit
-					END CATCH					
+--						GOTO Post_Exit
+--					END CATCH					
 
-					DELETE FROM @GrainItems WHERE intInvoiceDetailId = @InvoiceDetailId
-				END	
-		END	
-END TRY
-BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()
-	IF @RaiseError = 0
-		BEGIN
-			IF (XACT_STATE()) = -1
-				ROLLBACK TRANSACTION							
-			BEGIN TRANSACTION						
-			--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
-			UPDATE ILD
-			SET
-				 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
-				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
-				,ILD.[strPostingMessage]	= @ErrorMerssage
-				,ILD.[strBatchId]			= @BatchId
-				,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
-			FROM
-				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
-			INNER JOIN
-				@PostInvoiceData PID
-					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-			WHERE
-				ILD.[intIntegrationLogId] = @IntegrationLogId
-				AND ILD.[ysnPost] IS NOT NULL  
+--					DELETE FROM @GrainItems WHERE intInvoiceDetailId = @InvoiceDetailId
+--				END	
+--		END	
+--END TRY
+--BEGIN CATCH
+--	SELECT @ErrorMerssage = ERROR_MESSAGE()
+--	IF @RaiseError = 0
+--		BEGIN
+--			IF (XACT_STATE()) = -1
+--				ROLLBACK TRANSACTION							
+--			BEGIN TRANSACTION						
+--			--EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param
+--			UPDATE ILD
+--			SET
+--				 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+--				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+--				,ILD.[strPostingMessage]	= @ErrorMerssage
+--				,ILD.[strBatchId]			= @BatchId
+--				,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
+--			FROM
+--				tblARInvoiceIntegrationLogDetail ILD WITH (NOLOCK)
+--			INNER JOIN
+--				@PostInvoiceData PID
+--					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+--			WHERE
+--				ILD.[intIntegrationLogId] = @IntegrationLogId
+--				AND ILD.[ysnPost] IS NOT NULL  
 
-			COMMIT TRANSACTION
-		END						
-	IF @RaiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)
+--			COMMIT TRANSACTION
+--		END						
+--	IF @RaiseError = 1
+--		RAISERROR(@ErrorMerssage, 11, 1)
 		
-	GOTO Post_Exit
-END CATCH
+--	GOTO Post_Exit
+--END CATCH
 
 --------------------------------------------------------------------------------------------  
 -- Validations  

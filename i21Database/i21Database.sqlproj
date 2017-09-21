@@ -5677,6 +5677,8 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleImportValidate.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateGeneralLedgerMenus.sql" />
     <Build Include="dbo\Views\vyuEMEntityGroupApproverUsage.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalances.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

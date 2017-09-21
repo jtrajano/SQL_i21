@@ -33,7 +33,8 @@ INSERT INTO [tblARTransactionDetail](
 	,[intSiteId]
 	,[intCompanyLocationSubLocationId]
 	,[intStorageLocationId]
-	,[intOwnershipTypeId])
+	,[intOwnershipTypeId]
+	,[intStorageScheduleTypeId])
 SELECT
 	 [intTransactionDetailId]				= ARID.[intInvoiceDetailId]
 	,[intTransactionId]						= ARID.[intInvoiceId] 
@@ -57,7 +58,7 @@ SELECT
 	,[intCompanyLocationSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
 	,[intStorageLocationId]					= ARID.[intStorageLocationId]
 	,[intOwnershipTypeId]					= NULL
-
+	,[intStorageScheduleTypeId]				= ARID.[intStorageScheduleTypeId]
 FROM
 	[tblARInvoiceDetail] ARID
 INNER JOIN
