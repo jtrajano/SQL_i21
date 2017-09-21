@@ -73,7 +73,7 @@ BEGIN
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId
 			AND ItemLocation.intLocationId = Header.intLocationId
 	WHERE Header.intInventoryCountId = @intTransactionId
-		AND Detail.intLotId IS NULL
+		--AND Detail.intLotId IS NULL
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
