@@ -90,7 +90,7 @@ BEGIN TRY
 	FROM vyuTFGetReportingComponent
 	WHERE intReportingComponentId IN (SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ','))
 		AND intComponentTypeId = 2
-		AND strFormCode NOT IN ('RMFT-5','RMFT-5-US')
+		AND strFormCode NOT IN ('RMFT-5')
 	ORDER BY strFormCode, strScheduleCode, strType, strTransactionType
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpMain)
