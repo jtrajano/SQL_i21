@@ -900,6 +900,25 @@ BEGIN TRY
 					AND IL.[ysnSuccess] = 1
 					AND ISNULL(ITG.[ysnResetDetails], 0) = 1
 			)
+		OR
+		EXISTS(
+			SELECT 
+				ARI.intInvoiceId, ARI.strType, ARI.strTransactionType, CFT.intTransactionId, ARID.strDocumentNumber, ARIDT.intInvoiceDetailTaxId 			
+			FROM
+				tblARInvoiceDetail ARID 
+			INNER JOIN @InvoiceEntries ARI 
+				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
+			INNER JOIN @IntegrationLog IL 
+				ON ARI.[intInvoiceId] = IL.[intInvoiceId] 			
+			LEFT JOIN 
+				(SELECT intInvoiceDetailId, intInvoiceDetailTaxId FROM tblARInvoiceDetailTax) ARIDT ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId
+			INNER JOIN 
+				(SELECT intTransactionId, strTransactionId FROM tblCFTransaction ) CFT ON ARID.strDocumentNumber = CFT.strTransactionId
+			LEFT JOIN 
+				(SELECT intTransactionId FROM tblCFTransactionTax) CFTT ON CFT.intTransactionId = CFTT.intTransactionId
+			WHERE 
+				ARI.strType = 'CF Tran'
+			)
 
 	DELETE FROM tblARInvoiceDetail 
 	WHERE 
@@ -913,7 +932,7 @@ BEGIN TRY
 			WHERE
 				tblARInvoiceDetail.[intInvoiceId] = IL.[intInvoiceId]
 				AND IL.[ysnSuccess] = 1 
-				AND ISNULL(ITG.[ysnResetDetails], 0) = 1)
+				AND ISNULL(ITG.[ysnResetDetails], 0) = 1				)
 
 	DECLARE @LineItems InvoiceStagingTable
 	DELETE FROM @LineItems
