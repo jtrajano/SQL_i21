@@ -22,8 +22,8 @@ BEGIN
 			RETURN	
 	END	
 
-	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tempvnd')
-		DROP table tempvnd
+	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '#tempvnd')
+		DROP table #tempvnd
 
 		 SELECT 		ssvnd_vnd_no,
 					CASE WHEN ssvnd_pay_to IS NULL OR ssvnd_pay_to = ssvnd_vnd_no THEN ssvnd_vnd_no ELSE ssvnd_pay_to END as ssvnd_pay_to,
@@ -34,7 +34,7 @@ BEGIN
 									+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
 								END,'')) + '_' + CAST(A4GLIdentity AS NVARCHAR) END as ssvnd_name,
 					ssvnd_tax_st
-		 INTO tempvnd			
+		 INTO #tempvnd			
 		 FROM ssvndmst 
 
 		DECLARE @intLoadDistributionHeaderId int,
@@ -128,7 +128,7 @@ BEGIN
 								else  
 							    		'Location'
 								END	   
-					 ,VND.intEntityVendorId               --[intTerminalId]
+					 ,VND.intEntityId               --[intTerminalId]
 					 ,SP.intSupplyPointId           --[intSupplyPointId]
 					 ,loc.intCompanyLocationId
 					 ,ISNULL(trhst_pur_lading_no,trhst_ord_no)
@@ -149,10 +149,10 @@ BEGIN
 					INNER JOIN tblTRLoadHeader HDR ON HDR.strTransaction COLLATE SQL_Latin1_General_CP1_CS_AS = TR.trhst_ord_no COLLATE SQL_Latin1_General_CP1_CS_AS		  
 					LEFT JOIN tblICItem AS ITM ON TR.trhst_pur_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS
 					LEFT JOIN tblSMCompanyLocation AS loc ON TR.trhst_pur_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
-					LEFT JOIN tempvnd AS TMP ON trhst_pur_vnd_no = TMP.ssvnd_vnd_no
+					LEFT JOIN #tempvnd AS TMP ON trhst_pur_vnd_no = TMP.ssvnd_vnd_no
 					LEFT JOIN tblAPVendor AS VND ON TMP.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS = VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS 
-					LEFT JOIN tblEMEntity AS ENT ON ENT.intEntityId = VND.intEntityVendorId
-					LEFT JOIN tblEMEntityLocation AS VNDLOC ON VNDLOC.intEntityId = VND.intEntityVendorId AND TMP.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS = VNDLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS
+					LEFT JOIN tblEMEntity AS ENT ON ENT.intEntityId = VND.intEntityId
+					LEFT JOIN tblEMEntityLocation AS VNDLOC ON VNDLOC.intEntityId = VND.intEntityId AND TMP.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS = VNDLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS
 					left join vyuTRSupplyPointView as SP on SP.intEntityLocationId = VNDLOC.intEntityLocationId
 				WHERE isNull(trhst_cus_no,'') = '' AND intLoadHeaderId NOT IN (SELECT intLoadHeaderId FROM tblTRLoadReceipt RCPT
 				WHERE HDR.intLoadHeaderId = RCPT.intLoadHeaderId)
