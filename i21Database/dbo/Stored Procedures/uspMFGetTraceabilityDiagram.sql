@@ -15,7 +15,10 @@ Declare @strType nvarchar(2)
 Declare @intContractId int
 Declare @intShipmentId int
 Declare @intContainerId int
- 
+Declare @intNoOfShipRecord int
+Declare @intNoOfShipRecordCounter int
+Declare @intNoOfShipRecordParentCounter int
+		 
 Declare @tblTemp AS table
 (
 	intRecordId int,
@@ -456,14 +459,32 @@ Begin
 						dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
 		Exec uspMFGetTraceabilityLotShipDetail @intLotId,@ysnParentLot
 
-		Update @tblNodeData Set intRecordId=1,intParentId=0
+		--Generate RecordId for all the Shipments (include multiple shipments)
+		UPDATE t
+			SET t.intRecordId = t.intRowNo,t.intParentId=0
+			FROM (
+				  SELECT intRecordId,intParentId,ROW_NUMBER() OVER (ORDER BY intLotId) AS intRowNo
+				  FROM @tblNodeData
+				  ) t
 
-		--Lot Detail
-		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
-		Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId,@ysnParentLot
+		Select @intNoOfShipRecord=count(1) From @tblNodeData
+		Set @intNoOfShipRecordCounter=@intNoOfShipRecord
+		Set @intNoOfShipRecordParentCounter=1
+		
+		If Isnull(@intNoOfShipRecordCounter,0)=0 Set @intNoOfShipRecordCounter=1
 
-		Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
+		--Lot Detail -- Add one or many depending on no of ship records
+		While (@intNoOfShipRecordCounter>0)
+		Begin
+			Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+			dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
+			Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId,@ysnParentLot
+
+			Update @tblNodeData Set intRecordId=(Select case when count(1)=1 then 2 else count(1) end from @tblNodeData),intParentId=@intNoOfShipRecordParentCounter,strType='L' Where intParentId is null
+
+			Set @intNoOfShipRecordCounter=@intNoOfShipRecordCounter-1
+			Set @intNoOfShipRecordParentCounter=@intNoOfShipRecordParentCounter+1
+		End
 	End
 
 	--Shipment
@@ -490,9 +511,10 @@ Begin
 	--Counter Data for the while loop
 	SELECT @intMaxRecordCount = Max(intRecordId),@intParentId = Max(intRecordId) FROM @tblNodeData
 
+	--Point the Record Id to the first visible Lot Node depending on no of shipments (multiple shipments) , case statement refers to that
 	Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
-	Select TOP 1 intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+	Select TOP 1 intRecordId-(Case When @intNoOfShipRecord>0 Then (@intNoOfShipRecord-1) Else 0 End),intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Order By intRecordId Desc
 
 	Set @intRowCount=1
