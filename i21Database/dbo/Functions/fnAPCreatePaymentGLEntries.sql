@@ -330,7 +330,7 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=   CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate)
+													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1))
 											AS DECIMAL(18,2))
 											* (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
