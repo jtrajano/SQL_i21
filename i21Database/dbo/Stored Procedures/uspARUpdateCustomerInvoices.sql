@@ -1005,6 +1005,7 @@ BEGIN TRY
 		,[dblItemWeight]
 		,[intItemWeightUOMId]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[strPricing]
 		,[strVFDDocumentNumber]
 		,[ysnRefreshPrice]
@@ -1142,6 +1143,7 @@ BEGIN TRY
 		,[dblItemWeight]						= ITG.[dblItemWeight]
 		,[intItemWeightUOMId]					= ITG.[intItemWeightUOMId]
 		,[dblPrice]								= ITG.[dblPrice]
+		,[dblUnitPrice]							= ITG.[dblUnitPrice]
 		,[strPricing]							= ITG.[strPricing]
 		,[strVFDDocumentNumber]					= ITG.[strVFDDocumentNumber]
 		,[ysnRefreshPrice]						= ITG.[ysnRefreshPrice]
@@ -1269,6 +1271,12 @@ BEGIN TRY
 																		ARID.[dblPrice]
 																  END
 		,ARID.[dblBasePrice]						= ARID.[dblBasePrice]
+		,ARID.[dblUnitPrice]						= CASE WHEN ISNULL(ITG.[ysnUpdateAvailableDiscount], 0) = 0 THEN 
+																		(CASE WHEN (ISNULL(ITG.[ysnRefreshPrice], 0) = 1) THEN ITG.[dblUnitPrice] / ISNULL(ITG.[dblSubCurrencyRate], 1) ELSE ITG.[dblUnitPrice] END)
+																	ELSE
+																		ARID.[dblUnitPrice]
+																  END
+		,ARID.[dblBaseUnitPrice]					= ARID.[dblBaseUnitPrice]
 		,ARID.[strPricing]							= CASE WHEN ISNULL(ITG.[ysnUpdateAvailableDiscount], 0) = 0 THEN ITG.[strPricing] ELSE ARID.[strPricing] END
 		,ARID.[dblTotalTax]							= ARID.[dblTotalTax]
 		,ARID.[dblBaseTotalTax]						= [dblBaseTotalTax]

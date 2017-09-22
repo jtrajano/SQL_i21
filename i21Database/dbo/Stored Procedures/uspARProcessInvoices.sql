@@ -195,6 +195,7 @@ DECLARE  @Id									INT
 		,@ItemTermDiscount						NUMERIC(18, 6)
 		,@ItemTermDiscountBy					NVARCHAR(50)
 		,@ItemPrice								NUMERIC(18, 6)
+		,@ItemUnitPrice							NUMERIC(18, 6)
 		,@ItemPricing							NVARCHAR(250)
 		,@ItemVFDDocumentNumber					NVARCHAR(100)
 		,@RefreshPrice							BIT
@@ -354,6 +355,7 @@ BEGIN
 		,@ItemTermDiscount				= (CASE WHEN @GroupingOption = 0 THEN [dblItemTermDiscount] ELSE NULL END)
 		,@ItemTermDiscountBy			= (CASE WHEN @GroupingOption = 0 THEN [strItemTermDiscountBy] ELSE NULL END)
 		,@ItemPrice						= (CASE WHEN @GroupingOption = 0 THEN [dblPrice] ELSE NULL END)
+		,@ItemUnitPrice					= (CASE WHEN @GroupingOption = 0 THEN [dblUnitPrice] ELSE NULL END)
 		,@ItemPricing					= (CASE WHEN @GroupingOption = 0 THEN [strPricing] ELSE NULL END)
 		,@ItemVFDDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strVFDDocumentNumber] ELSE NULL END)
 		,@RefreshPrice					= (CASE WHEN @GroupingOption = 0 THEN [ysnRefreshPrice] ELSE 0 END)
@@ -572,6 +574,7 @@ BEGIN
 			,@ItemTermDiscount				= @ItemTermDiscount
 			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@ItemPrice						= @ItemPrice
+			,@ItemUnitPrice					= @ItemUnitPrice
 			,@RefreshPrice					= @RefreshPrice
 			,@ItemMaintenanceType			= @ItemMaintenanceType
 			,@ItemFrequency					= @ItemFrequency
@@ -715,6 +718,7 @@ BEGIN
 					,@ItemTermDiscount				= [dblItemTermDiscount]
 					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 					,@ItemPrice						= [dblPrice]
+					,@ItemUnitPrice					= [dblUnitPrice]
 					,@ItemPricing					= CASE WHEN ISNULL([strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + strSourceTransaction COLLATE Latin1_General_CI_AS ELSE [strPricing] COLLATE Latin1_General_CI_AS END
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
@@ -804,6 +808,7 @@ BEGIN
 						,@ItemTermDiscount				= @ItemTermDiscount
 						,@ItemTermDiscountBy			= @ItemTermDiscountBy
 						,@ItemPrice						= @ItemPrice
+						,@ItemUnitPrice					= @ItemUnitPrice
 						,@ItemPricing					= @ItemPricing
 						,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 						,@RefreshPrice					= @RefreshPrice
@@ -1341,6 +1346,7 @@ BEGIN TRY
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
+						,@ItemUnitPrice					= [dblUnitPrice]
 						,@ItemPricing					= [strPricing] 
 						,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 						,@RefreshPrice					= [ysnRefreshPrice]
@@ -1426,6 +1432,7 @@ BEGIN TRY
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
+							,@ItemUnitPrice					= @ItemUnitPrice
 							,@ItemPricing					= @ItemPricing
 							,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 							,@RefreshPrice					= @RefreshPrice
@@ -1612,6 +1619,7 @@ BEGIN TRY
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
+					,@ItemUnitPrice					= [dblUnitPrice]
 					,@ItemPricing					= [strPricing] 
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
@@ -1704,6 +1712,8 @@ BEGIN TRY
 							,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT							
 							,@InvoiceType				= @InvoiceType
 							,@TermId					= @TermId
+
+						SET @ItemUnitPrice = @ItemPrice
 						END TRY
 						BEGIN CATCH
 							SET @ErrorMessage = ERROR_MESSAGE();
@@ -1733,6 +1743,11 @@ BEGIN TRY
 																		(CASE WHEN (ISNULL(@RefreshPrice,0) = 1) THEN @ItemPrice / ISNULL(@ItemSubCurrencyRate, 1) ELSE @ItemPrice END)
 																	ELSE
 																		[dblPrice]
+																  END
+						,[dblUnitPrice]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN 
+																		(CASE WHEN (ISNULL(@RefreshPrice,0) = 1) THEN @ItemUnitPrice / ISNULL(@ItemSubCurrencyRate, 1) ELSE @ItemUnitPrice END)
+																	ELSE
+																		[dblUnitPrice]
 																  END
 						,[strPricing]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPricing ELSE [strPricing] END							
 						,[strVFDDocumentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVFDDocumentNumber ELSE [strVFDDocumentNumber] END

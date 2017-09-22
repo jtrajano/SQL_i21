@@ -12,6 +12,7 @@
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
+	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL	
@@ -113,6 +114,7 @@ BEGIN TRY
 		,[dblQtyShipped]
 		,[dblDiscount]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[dblTotalTax]
 		,[dblTotal]
 		,[intCurrencyExchangeRateTypeId]
@@ -180,6 +182,7 @@ BEGIN TRY
 		,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 		,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
+		,[dblUnitPrice]						= ISNULL(@ItemUnitPrice, @ZeroDecimal)			
 		,[dblTotalTax]						= @ZeroDecimal
 		,[dblTotal]							= @ZeroDecimal
 		,[intCurrencyExchangeRateTypeId]	= @ItemCurrencyExchangeRateTypeId

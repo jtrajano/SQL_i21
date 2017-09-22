@@ -216,6 +216,8 @@ USING
 		,[strItemTermDiscountBy]				= IE.[strItemTermDiscountBy]
 		,[dblPrice]								= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END)
 		,[dblBasePrice]							= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+		,[dblUnitPrice]							= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblUnitPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblUnitPrice], @ZeroDecimal) END)
+		,[dblBaseUnitPrice]						= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblUnitPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblUnitPrice], @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
 		,[strPricing]							= CASE WHEN ISNULL(IE.[strPricing],'') = '' AND RTRIM(LTRIM(ISNULL(IE.[strSourceTransaction],''))) <> '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + IE.[strSourceTransaction] COLLATE Latin1_General_CI_AS ELSE IE.[strPricing] COLLATE Latin1_General_CI_AS END
 		,[dblTotalTax]							= @ZeroDecimal
 		,[dblBaseTotalTax]						= @ZeroDecimal
@@ -330,6 +332,8 @@ INSERT(
 	,[strItemTermDiscountBy]
 	,[dblPrice]
 	,[dblBasePrice]
+	,[dblUnitPrice]
+	,[dblBaseUnitPrice]
 	,[strPricing]
 	,[dblTotalTax]
 	,[dblBaseTotalTax]
@@ -428,6 +432,8 @@ VALUES(
 	,[strItemTermDiscountBy]
 	,[dblPrice]
 	,[dblBasePrice]
+	,[dblUnitPrice]
+	,[dblBaseUnitPrice]
 	,[strPricing]
 	,[dblTotalTax]
 	,[dblBaseTotalTax]
