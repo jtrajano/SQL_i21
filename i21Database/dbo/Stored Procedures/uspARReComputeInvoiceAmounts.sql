@@ -53,7 +53,7 @@ SET
 	,[dblPrice]					= ISNULL([dblPrice], @ZeroDecimal)
 	,[dblBasePrice]				= CASE WHEN [dblBasePrice] <> [dblPrice] AND [dblBasePrice] = @ZeroDecimal THEN (ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END)) ELSE ISNULL([dblBasePrice], @ZeroDecimal) END
 	,[dblUnitPrice] 			= ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal)
-	,[dblBaseUnitPrice]			= CASE WHEN ISNULL(ISNULL([dblBaseUnitPrice], [dblBaseUnitPrice]), @ZeroDecimal) <> ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) AND ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) = @ZeroDecimal THEN (ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END)) ELSE ISNULL([dblBaseUnitPrice], @ZeroDecimal) END
+	,[dblBaseUnitPrice]			= CASE WHEN ISNULL(ISNULL([dblBaseUnitPrice], [dblBasePrice]), @ZeroDecimal) <> ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) AND ISNULL(ISNULL([dblBaseUnitPrice], [dblUnitPrice]), @ZeroDecimal) = @ZeroDecimal THEN (ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END)) ELSE ISNULL([dblBaseUnitPrice], @ZeroDecimal) END
 	,[dblTotalTax]				= ISNULL([dblTotalTax], @ZeroDecimal)
 	,[dblBaseTotalTax]			= ISNULL([dblBaseTotalTax], @ZeroDecimal)
 	,[dblTotal]					= ISNULL([dblTotal], @ZeroDecimal)
@@ -135,8 +135,8 @@ IF (@AvailableDiscountOnly = 1)
 UPDATE
 	tblARInvoiceDetail
 SET
-	  [dblTotalTax]		= T.[dblAdjustedTax]
-	 ,[dblBaseTotalTax]	= T.[dblBaseAdjustedTax]
+	  [dblTotalTax]		= ISNULL(T.[dblAdjustedTax], @ZeroDecimal)
+	 ,[dblBaseTotalTax]	= ISNULL(T.[dblBaseAdjustedTax], @ZeroDecimal)
 FROM
 	(
 		SELECT
@@ -192,10 +192,10 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	 [dblTax]					= T.[dblTotalTax]
-	,[dblBaseTax]				= T.[dblBaseTotalTax]
-	,[dblInvoiceSubtotal]		= T.[dblTotal]
-	,[dblBaseInvoiceSubtotal]	= T.[dblBaseTotal]
+	 [dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal)
+	,[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
+	,[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
+	,[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
 FROM
 	(
 		SELECT 
@@ -232,17 +232,20 @@ END
 IF ISNULL(@OriginalInvoiceId, 0) <> 0
 	BEGIN
 		DECLARE @dblProvisionalAmt	NUMERIC(18,6)
+				,@dblBaseProvisionalAmt	NUMERIC(18,6)
 
-		SELECT TOP 1 @dblProvisionalAmt = dblInvoiceTotal 
+		SELECT TOP 1 
+			 @dblProvisionalAmt = dblAmountDue 
+			,@dblBaseProvisionalAmt = dblBaseAmountDue 
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE intInvoiceId = @OriginalInvoiceId
 		  AND ysnProcessed = 1
 		  AND strType = 'Provisional'
 
 		UPDATE tblARInvoice
-		SET dblAmountDue		= dblAmountDue - @dblProvisionalAmt
-		  , dblBaseAmountDue	= dblAmountDue - @dblProvisionalAmt
-		  , dblPayment			= @dblProvisionalAmt
-		  , dblBasePayment		= @dblProvisionalAmt
+		SET dblAmountDue		= dblAmountDue - ISNULL(@dblProvisionalAmt, @ZeroDecimal)
+		  , dblBaseAmountDue	= dblAmountDue - ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
+		  , dblPayment			= ISNULL(@dblProvisionalAmt, @ZeroDecimal)
+		  , dblBasePayment		= ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
 		WHERE intInvoiceId = @InvoiceIdLocal
 	END
