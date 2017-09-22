@@ -43,7 +43,7 @@ SET
 	,ARID.[dblPrice]				= ISNULL(ARID.[dblPrice], @ZeroDecimal)
 	,ARID.[dblBasePrice]			= CASE WHEN ARID.[dblBasePrice] <> ARID.[dblPrice] AND ARID.[dblBasePrice] = @ZeroDecimal THEN (ISNULL(ARID.[dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END)) ELSE ISNULL(ARID.[dblBasePrice], @ZeroDecimal) END
 	,ARID.[dblUnitPrice] 			= ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal)
-	,ARID.[dblBaseUnitPrice]		= CASE WHEN ISNULL(ISNULL(ARID.[dblBaseUnitPrice], ARID.[dblBaseUnitPrice]), @ZeroDecimal) <> ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) AND ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) = @ZeroDecimal THEN (ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END)) ELSE ISNULL(ARID.[dblBaseUnitPrice], @ZeroDecimal) END
+	,[dblBaseUnitPrice]				= CASE WHEN ISNULL(ISNULL(ARID.[dblBaseUnitPrice], ARID.[dblBasePrice]), @ZeroDecimal) <> ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) AND ISNULL(ISNULL(ARID.[dblBaseUnitPrice], ARID.[dblUnitPrice]), @ZeroDecimal) = @ZeroDecimal THEN (ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END)) ELSE ISNULL(ARID.[dblBaseUnitPrice], @ZeroDecimal) END
 	,ARID.[dblTotalTax]				= ISNULL(ARID.[dblTotalTax], @ZeroDecimal)
 	,ARID.[dblBaseTotalTax]			= ISNULL(ARID.[dblBaseTotalTax], @ZeroDecimal)
 	,ARID.[dblTotal]				= ISNULL(ARID.[dblTotal], @ZeroDecimal)
