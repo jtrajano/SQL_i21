@@ -30,6 +30,8 @@ BEGIN TRY
 		, @SPInventory NVARCHAR(50)
 		, @SPInvoice NVARCHAR(50)
 		, @SPRunReport NVARCHAR(50)
+		, @SPEDIReport NVARCHAR(50)
+		, @strTaxAuthorityCode NVARCHAR(10)
 
 	DECLARE @ParamDefinition NVARCHAR(MAX)
 		, @SPRunString NVARCHAR(MAX)
@@ -57,6 +59,8 @@ BEGIN TRY
 			, @TransactionType = strTransactionType
 			, @SPInventory = strSPInventory
 			, @SPInvoice = strSPInvoice
+			, @SPEDIReport = strSPRunReport
+			, @strTaxAuthorityCode = strTaxAuthorityCode
 			, @SPRunReport = CASE WHEN (strTransactionType = 'Inventory') THEN strSPInventory
 								WHEN (strTransactionType = 'Invoice') THEN strSPInvoice
 								ELSE NULL END
@@ -77,6 +81,14 @@ BEGIN TRY
 		SET @SPRunString = @SPRunReport + ' @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom = @DateFrom, @DateTo = @DateTo, @IsEdi = @IsEdi, @Refresh = @Refresh'
 		
 		EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @ReportingComponentId = @RCId, @DateFrom = @DateFrom, @DateTo = @DateTo, @IsEdi = @IsEdi, @Refresh = 0;  
+
+		-- FOR EDI
+		IF(@strTaxAuthorityCode = 'IN' AND @IsEdi = 1)
+		BEGIN
+			SET @ParamDefinition =  N'@Guid NVARCHAR(250), @FormCodeParam NVARCHAR(MAX), @ScheduleCodeParam NVARCHAR(MAX), @Refresh NVARCHAR(5)'
+			SET @SPRunString = @SPEDIReport + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
+			EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @FormCodeParam = @FormCode, @ScheduleCodeParam = @ScheduleCode, @Refresh = 1;  
+		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 
