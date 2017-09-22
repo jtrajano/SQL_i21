@@ -1378,6 +1378,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         action(record);
     },
 
+    validateRequiredGrossWeight(receiptItems, result) {
+        var ri = _.filter(receiptItems, function(x) { return x.phantom === false; });
+        ri = _.map(ri, function(x) { return x.data; });
+        ri = _.filter(ri, function(x) { return x.strLotTracking !== 'No' && x.ysnLotWeightsRequired === true && ((x.intWeightUOMId === null) || (x.dblGross === 0 && x.dblNet === 0)); })
+
+        if(ri.length > 0) {
+            var msgBox = iRely.Functions;
+            msgBox.showCustomDialog(
+                msgBox.dialogType.ERROR,
+                msgBox.dialogButtonType.OK,
+                "Gross/Net UOM, Weight and Net Qty are required to be filled out for Item " + ri[0].strItemNo,
+                result
+            );
+        }
+
+        return ri.length === 0;
+    },
+
     validateRecord: function (config, action) {
         this.validateRecord(config, function (result) {
             if (result) {
@@ -1389,6 +1407,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     //Validate Unit Cost in not zero
                     if (current.get('strReceiptType') !== 'Purchase Contract') {
                         var receiptItems = current.tblICInventoryReceiptItems().data.items;
+                        if(!controller.validateRequiredGrossWeight(receiptItems, function() { })) {
+                            return false;
+                        }
                         var exists = Ext.Array.findBy(receiptItems, function (item) {
                             if (item.get('dblUnitCost') === 0 && item.dummy !== true) {
                                 return true;

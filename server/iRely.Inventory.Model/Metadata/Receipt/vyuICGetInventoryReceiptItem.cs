@@ -74,6 +74,7 @@ namespace iRely.Inventory.Model
         public string strShipFrom { get; set; }
         public int? intCurrencyId { get; set; }
         public string strCurrency { get; set; }
+        public bool? ysnLotWeightsRequired { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

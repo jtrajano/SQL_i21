@@ -85,6 +85,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.ysnUseWeighScales}',
                 hidden: '{HideDisableForComment}'
             },
+            chkLotWeightsRequired: {
+                value: '{current.ysnLotWeightsRequired}',
+                hidden: '{!isLotTracked}'
+            },
+            chkUseWeighScales: '{current.ysnUseWeighScales}',
 
             cfgStock: {
                 hidden: '{pgeStockHide}'

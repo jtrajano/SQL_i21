@@ -42,6 +42,8 @@ namespace iRely.Inventory.Model
         public int? intEntityId { get; set; }
         public int? intImportFlagInternal { get; set; }
         public string strShiftNo { get; set; }
+        public int? intLockType { get; set; }
+
         public int? intSort { get; set; }
 
         private string _location;
@@ -180,6 +182,10 @@ namespace iRely.Inventory.Model
         public int? intLotId { get; set; }
         public string strLotNo { get; set; }
         public string strLotAlias { get; set; }
+        public int? intParentLotId { get; set; }
+        public string strParentLotNo { get; set; }
+        public string strParentLotAlias { get; set; }
+
         public decimal? dblSystemCount { get; set; }
         public decimal? dblLastCost { get; set; }
         public string strCountLine { get; set; }
@@ -193,6 +199,29 @@ namespace iRely.Inventory.Model
         public string strAutoCreatedLotNumber { get; set; }
         public decimal? dblQtyReceived { get; set; }
         public decimal? dblQtySold { get; set; }
+        public int? intStockUOMId { get; set; }
+        public decimal? dblWeightQty { get; set; }
+        public decimal? dblNetQty { get; set; }
+        public int? intWeightUOMId { get; set; }
+        private string _stockUOM;
+        [NotMapped]
+        public string strStockUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_stockUOM))
+                    if (vyuICGetInventoryCountDetail != null)
+                        return vyuICGetInventoryCountDetail.strStockUOM;
+                    else
+                        return null;
+                else
+                    return _stockUOM;
+            }
+            set
+            {
+                _stockUOM = value;
+            }
+        }
 
         private string _itemNo;
         [NotMapped]
@@ -399,9 +428,9 @@ namespace iRely.Inventory.Model
                 _countStockUnit = value;
             }
         }
-        private decimal _variance;
+        private decimal? _variance;
         [NotMapped]
-        public decimal dblVariance
+        public decimal? dblVariance
         {
             get
             {
@@ -493,6 +522,9 @@ namespace iRely.Inventory.Model
         public int? intLotId { get; set; }
         public string strLotNo { get; set; }
         public string strLotAlias { get; set; }
+        public int? intParentLotId { get; set; }
+        public string strParentLotNo { get; set; }
+        public string strParentLotAlias { get; set; }
         public decimal? dblSystemCount { get; set; }
         public decimal? dblLastCost { get; set; }
         public string strCountLine { get; set; }
@@ -510,7 +542,15 @@ namespace iRely.Inventory.Model
         public int? intEntityUserSecurityId { get; set; }
         public string strUserName { get; set; }
         public int? intSort { get; set; }
-        
+        public string strWeightUOM { get; set; }
+        public decimal? dblWeightQty { get; set; }
+        public decimal? dblNetQty { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public decimal? dblItemUOMConversionFactor { get; set; }
+        public decimal? dblWeightUOMConversionFactor { get; set; }
+        public int? intStockUOMId { get; set; }
+        public string strStockUOM { get; set; }
+
         public tblICInventoryCountDetail tblICInventoryCountDetail { get; set; }
     }
 

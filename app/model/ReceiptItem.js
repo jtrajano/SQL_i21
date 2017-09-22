@@ -87,7 +87,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'intForexRateTypeId', type: 'int', allowNull: true },
         { name: 'strForexRateType', type: 'string'},
         { name: 'dblForexRate', type: 'float', allowNull: true },
-
+        { name: 'ysnLotWeightsRequired', type: 'boolean', defaultValue: false },
+        
         { name: 'dblOpenReceiveBeforeEdit', type: 'float', allowNull: true},
         { name: 'dblGrossBeforeEdit', type: 'float', allowNull: true},
         { name: 'dblNetBeforeEdit', type: 'float', allowNull: true}

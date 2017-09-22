@@ -182,6 +182,14 @@ Ext.define('Inventory.search.StockDetail', {
                         fixedColumnWidth: 50
                     }
                 ],
+                chartScrollbar: {
+                    enabled: true,
+                    graph: "spaceGraph",
+                    graphType: "column",
+                    gridCount: 3,
+                    oppositeAxis: true,
+                    scrollbarHeight: 100
+                },
                 legend: {
                     enabled: true,
                     useGraphSettings: true,
