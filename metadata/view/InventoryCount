@@ -747,7 +747,7 @@
                                                                 "itemId": "cboSubLocation",
                                                                 "layout|flex": null,
                                                                 "name": null,
-                                                                "valueField": "intCompanyLocationSubLocationId"
+                                                                "valueField": "strSubLocationName"
                                                             },
                                                             "configAlternates": {
                                                                 "columns": "array",
@@ -804,7 +804,7 @@
                                                                 "itemId": "cboStorageLocation",
                                                                 "layout|flex": null,
                                                                 "name": null,
-                                                                "valueField": "intStorageLocationId"
+                                                                "valueField": "strName"
                                                             },
                                                             "configAlternates": {
                                                                 "columns": "array",
@@ -1005,7 +1005,7 @@
                                                                 "itemId": "cboCategory",
                                                                 "layout|flex": null,
                                                                 "name": null,
-                                                                "valueField": "intCategoryId"
+                                                                "valueField": "strCategoryCode"
                                                             },
                                                             "configAlternates": {
                                                                 "columns": "array",
@@ -1062,7 +1062,7 @@
                                                                 "itemId": "cboCommodity",
                                                                 "layout|flex": null,
                                                                 "name": null,
-                                                                "valueField": "intCommodityId"
+                                                                "valueField": "strCommodityCode"
                                                             },
                                                             "configAlternates": {
                                                                 "columns": "array",
@@ -1468,7 +1468,7 @@
                                                                 "itemId": "cboCountGroup",
                                                                 "layout|flex": null,
                                                                 "name": null,
-                                                                "valueField": "intCountGroupId"
+                                                                "valueField": "strCountGroup"
                                                             },
                                                             "configAlternates": {
                                                                 "columns": "array",

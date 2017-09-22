@@ -22,6 +22,8 @@ Ext.define('Inventory.model.InventoryCount', {
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intStorageLocationId', type: 'int', allowNull: true },
         { name: 'strDescription', type: 'string' },
+        { name: 'strSubLocation', type: 'string' },
+        { name: 'strStorageLocation', type: 'string' },
         { name: 'strShiftNo', type: 'string' },
         { name: 'ysnIncludeZeroOnHand', type: 'boolean' },
         { name: 'ysnIncludeOnHand', type: 'boolean' },
