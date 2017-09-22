@@ -5691,6 +5691,8 @@
     <Build Include="dbo\Stored Procedures\uspRKMatchingLotAvailableQtyValidation.sql" />
     <Build Include="dbo\Functions\fnCommaSeparatedValueToTable.sql" />
     <Build Include="dbo\Tables\tblMFPackingItemCategory.sql" />
+    <Build Include="dbo\Views\vyuMFGetPostedDate.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryShipmentCustomField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
