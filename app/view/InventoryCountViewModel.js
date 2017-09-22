@@ -75,8 +75,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             type: 'icbufferedstoragelocation'
         },
         itemUOM: {
-            //type: 'icbuffereditemunitmeasure'
-             type: 'icbuffereditemstockuomforadjustmentview'
+            type: 'icbuffereditemunitmeasure'
         },
         status: {
             autoLoad: true,

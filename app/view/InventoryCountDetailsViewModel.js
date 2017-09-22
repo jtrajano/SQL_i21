@@ -72,7 +72,6 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
         },
         itemUOMs: {
             type: "icbuffereditemunitmeasure"
-            //type: "icbuffereditemstockuomforadjustmentview"
         }
     },
 
