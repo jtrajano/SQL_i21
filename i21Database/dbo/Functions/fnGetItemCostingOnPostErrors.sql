@@ -276,11 +276,43 @@ RETURN (
 							)
 				,intErrorCode = 80066
 		WHERE	EXISTS (
+					-- Validate Locked Company Locations
 					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
 								ON Item.intItemId = @intItemId
 								AND Location.intItemLocationId = @intItemLocationId
 					WHERE	ysnLockedInventory = 1
+
+					UNION
+					-- Validate Locked Sub Lcoations
+					SELECT TOP 1 1
+					FROM tblICItem i
+						INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
+						INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
+						INNER JOIN tblSMCompanyLocationSubLocation csl ON csl.intCompanyLocationId = cl.intCompanyLocationId
+						INNER JOIN tblICLockedSubLocation ll ON ll.intSubLocationId = csl.intCompanyLocationSubLocationId
+					WHERE i.intItemId = @intItemId
+						AND ll.intSubLocationId = @intSubLocationId
+
+					UNION
+					-- Validate Locked Storage Locations
+					SELECT TOP 1 1
+					FROM tblICItemLocation il
+						INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
+						INNER JOIN tblICItem i ON i.intItemId = il.intItemId
+						INNER JOIN tblSMCompanyLocationSubLocation csl ON csl.intCompanyLocationId = cl.intCompanyLocationId
+						INNER JOIN tblICStorageLocation sl ON sl.intSubLocationId = csl.intCompanyLocationSubLocationId
+						INNER JOIN tblICLockedStorageLocation ll ON ll.intStorageLocationId = sl.intStorageLocationId
+					WHERE i.intItemId = @intItemId
+						AND csl.intCompanyLocationSubLocationId = @intSubLocationId
+						AND sl.intStorageLocationId = @intStorageLocationId
+
+					UNION
+					-- Validate Locked Lots
+					SELECT TOP 1 1
+					FROM tblICLot l
+					WHERE l.intLotId = @intLotId
+						AND l.ysnLockedInventory = 1
 				)
 
 

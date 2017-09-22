@@ -51,6 +51,7 @@ Type the overview for the table here.
 		[dblNetReturned] NUMERIC(38, 20) NULL DEFAULT ((0)),		
 		[intForexRateTypeId] INT NULL, 
 		[dblForexRate] NUMERIC(18, 6) NULL,
+		[ysnLotWeightsRequired] BIT NULL DEFAULT((0)),
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

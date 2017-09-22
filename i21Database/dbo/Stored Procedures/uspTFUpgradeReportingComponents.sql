@@ -45,11 +45,12 @@ BEGIN TRY
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
-			strFormName				= SOURCE.strFormName
+			 strFormCode			= SOURCE.strFormCode
+			, strFormName			= SOURCE.strFormName
 			, strScheduleName		= SOURCE.strScheduleName
 			, strNote				= SOURCE.strNote
 			, strTransactionType	= SOURCE.strTransactionType
-			, intSort			= SOURCE.intSort
+			, intSort				= SOURCE.intSort
 			, strSPInventory		= SOURCE.strSPInventory
 			, strSPInvoice			= SOURCE.strSPInvoice
 			, strSPRunReport		= SOURCE.strSPRunReport

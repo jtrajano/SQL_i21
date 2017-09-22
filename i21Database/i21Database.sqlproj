@@ -5678,6 +5678,12 @@
     <Build Include="dbo\Views\vyuAPPrepaidPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateGrainOpenBalances.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLockInventoryLocation.sql" />
+    <Build Include="dbo\Functions\fnICCalculateExpiryDate.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuICGetItemSubLocation.sql" />
+    <Build Include="dbo\Tables\tblICLockedSubLocation.sql" />
+    <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
