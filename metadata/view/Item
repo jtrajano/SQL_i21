@@ -1523,7 +1523,8 @@
                                                         "quantityField": "boolean",
                                                         "allowDecimals": "boolean",
                                                         "allowExponential": "boolean",
-                                                        "itemId": "string"
+                                                        "itemId": "string",
+                                                        "enableKeyEvents": "boolean"
                                                     },
                                                     "name": "MyNumberField49",
                                                     "designerId": "41a2e42c-a230-49ab-959a-24609a791f87",
@@ -1572,6 +1573,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "itemId": "txtLongUPCCode"
+                                                    },
+                                                    "configAlternates": {
+                                                        "itemId": "string"
                                                     },
                                                     "name": "MyTextField15",
                                                     "designerId": "ff3bd980-1a90-48bf-9f97-72c313539905"
