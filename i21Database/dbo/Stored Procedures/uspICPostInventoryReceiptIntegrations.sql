@@ -198,6 +198,7 @@ BEGIN
 	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT
 	BEGIN 
 		EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+		EXEC uspICLinkInboundShipmentReceiptWithVoucher DEFAULT, @intTransactionId
 	END
 
 	-- Update the received quantities back to a Scale Ticket
