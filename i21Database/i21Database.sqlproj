@@ -5678,6 +5678,7 @@
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
     <Build Include="dbo\Views\vyuMFGetBlendTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMatchingLotAvailableQtyValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
