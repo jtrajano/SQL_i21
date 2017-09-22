@@ -261,6 +261,8 @@ ELSE
 			 , SOD.intLicenseAccountId
 			 , SOD.intMaintenanceAccountId
 			 , SO.intCompanyLocationId
+			 , SOD.intItemId
+			 , SOD.strMaintenanceType			 
 		INTO #ORDERDETAILS
 		FROM dbo.tblSOSalesOrderDetail SOD WITH(NOLOCK)
 		INNER JOIN @IdsLocal PID ON SOD.intSalesOrderId = PID.intId
@@ -374,7 +376,7 @@ ELSE
 			
 		UPDATE LIA
 		SET LIA.[intSalesAccountId] = ISNULL(SOD.[intSalesAccountId], IST.[intSalesAccountId])
-		FROM @LineItemAccounts LIA
+		FROM @LineItemAccounts LIA		
 		INNER JOIN #ORDERDETAILS SOD ON LIA.[intDetailId] = SOD.[intSalesOrderDetailId] 	
 		OUTER APPLY (
 			SELECT TOP 1 intSalesAccountId
@@ -382,7 +384,7 @@ ELSE
 			WHERE IST.intItemId = SOD.intItemId
 			  AND IST.intLocationId = SOD.intCompanyLocationId
 		) IST
-		LEFT OUTER JOIN #COMPANYLOCATIONS SMCL ON SO.intCompanyLocationId = SMCL.intCompanyLocationId
+		LEFT OUTER JOIN #COMPANYLOCATIONS SMCL ON SOD.intCompanyLocationId = SMCL.intCompanyLocationId
 		WHERE ISNULL(LIA.[intSalesAccountId], 0) = 0			
 			
 		UPDATE SOD
