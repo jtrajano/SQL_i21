@@ -29,7 +29,8 @@
         "itemId": "string",
         "margin": "auto",
         "prependButtons": "boolean",
-        "width": "auto"
+        "width": "auto",
+        "scrollable": "boolean"
     },
     "designerId": "6e9d32bd-1b77-41b2-9662-434eced19679",
     "viewControllerInstanceId": "2190b325-7007-4076-a27d-8dae415962fc",
@@ -60,7 +61,8 @@
                 "itemId": "string",
                 "layout|flex": "number",
                 "tabIndex": "number",
-                "text": "string"
+                "text": "string",
+                "scrollable": "boolean"
             },
             "name": "MyButton",
             "designerId": "247c5654-a93e-4631-b93c-c1ba367e7a0e"
@@ -90,7 +92,8 @@
                 "itemId": "string",
                 "layout|flex": "number",
                 "tabIndex": "number",
-                "text": "string"
+                "text": "string",
+                "scrollable": "boolean"
             },
             "name": "MyButton1",
             "designerId": "dbffd8e8-4e5b-4224-b7a2-b4fa71258338"
@@ -120,7 +123,8 @@
                 "itemId": "string",
                 "layout|flex": "number",
                 "tabIndex": "number",
-                "text": "string"
+                "text": "string",
+                "scrollable": "boolean"
             },
             "name": "MyButton2",
             "designerId": "bf39f47d-84c2-4c68-a3b3-4b6bf906fc50"
@@ -146,7 +150,8 @@
                 "layout|flex": "number",
                 "layout|margins": "string",
                 "margin": "auto",
-                "text": "string"
+                "text": "string",
+                "scrollable": "boolean"
             },
             "name": "MyLabel",
             "designerId": "dba197c7-2211-4e2f-a5a2-a21986c61faf"
@@ -166,7 +171,8 @@
             "configAlternates": {
                 "designer|displayName": "string",
                 "layout|flex": "number",
-                "margin": "auto"
+                "margin": "auto",
+                "scrollable": "boolean"
             },
             "name": "MyFill",
             "designerId": "d2e7a712-d34e-4295-83b5-d356dbe27446"

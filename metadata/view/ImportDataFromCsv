@@ -31,7 +31,8 @@
         "minWidth": "number",
         "modal": "boolean",
         "title": "string",
-        "width": "auto"
+        "width": "auto",
+        "scrollable": "boolean"
     },
     "name": "MyWindow",
     "designerId": "fa67247d-7427-454a-9772-9371f6e5d623",
@@ -69,7 +70,8 @@
                 "margin": "auto",
                 "title": "string",
                 "trackResetOnLoad": "boolean",
-                "ui": "string"
+                "ui": "string",
+                "scrollable": "boolean"
             },
             "name": "MyForm",
             "designerId": "07af14be-8672-4991-b9e5-925b14999351",
@@ -91,7 +93,8 @@
                         "designer|uiInterfaceName": "string",
                         "dock": "string",
                         "layout|flex": "number",
-                        "ui": "string"
+                        "ui": "string",
+                        "scrollable": "boolean"
                     },
                     "name": "MyToolbar",
                     "designerId": "ab15bef9-f25c-4814-9843-fa2416460678",
@@ -115,7 +118,8 @@
                                 "itemId": "string",
                                 "layout|flex": "number",
                                 "text": "string",
-                                "ui": "string"
+                                "ui": "string",
+                                "scrollable": "boolean"
                             },
                             "name": "MyButton",
                             "designerId": "b63126c9-5077-4728-b76d-2761d46d741f"
@@ -139,7 +143,8 @@
                                 "itemId": "string",
                                 "layout|flex": "number",
                                 "text": "string",
-                                "ui": "string"
+                                "ui": "string",
+                                "scrollable": "boolean"
                             },
                             "name": "MyButton1",
                             "designerId": "c32dbd62-1495-41b3-a2bb-9524350b5603"
@@ -165,7 +170,8 @@
                         "activeTab": "auto",
                         "bodyCls": "typedarray",
                         "layout|flex": "number",
-                        "plain": "boolean"
+                        "plain": "boolean",
+                        "scrollable": "boolean"
                     },
                     "name": "MyTabPanel",
                     "designerId": "bc23d3f2-4b59-42d8-8f12-69a884c66564",
@@ -187,7 +193,8 @@
                                 "container|align": "string",
                                 "itemId": "string",
                                 "layout": "string",
-                                "title": "string"
+                                "title": "string",
+                                "scrollable": "boolean"
                             },
                             "name": "MyPanel",
                             "designerId": "0b058104-d300-4a39-a02f-0200ea93e1f8",
@@ -199,6 +206,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "configAlternates": {
+                                        "scrollable": "boolean"
+                                    },
                                     "name": "TabConfig",
                                     "designerId": "a368a257-2db9-4b19-b72d-4bd353cdb1c2"
                                 },
@@ -221,7 +231,8 @@
                                         "height": "auto",
                                         "layout": "string",
                                         "layout|flex": "number",
-                                        "padding": "auto"
+                                        "padding": "auto",
+                                        "scrollable": "boolean"
                                     },
                                     "name": "MyContainer",
                                     "designerId": "d8fc58cd-a03a-4eb5-929f-25dbed1e1164",
@@ -239,7 +250,8 @@
                                             },
                                             "configAlternates": {
                                                 "padding": "auto",
-                                                "text": "string"
+                                                "text": "string",
+                                                "scrollable": "boolean"
                                             },
                                             "name": "MyLabel",
                                             "designerId": "73dfe4da-8093-4218-a345-0c4a2ae64f92"
@@ -263,7 +275,8 @@
                                                 "itemId": "string",
                                                 "layout|flex": "number",
                                                 "padding": "auto",
-                                                "width": "auto"
+                                                "width": "auto",
+                                                "scrollable": "boolean"
                                             },
                                             "name": "MyFileUpload",
                                             "designerId": "104d8e04-975e-4794-8465-53b416c421fc"
@@ -293,7 +306,8 @@
                                         "layout|flex": "number",
                                         "margin": "auto",
                                         "padding": "auto",
-                                        "title": "string"
+                                        "title": "string",
+                                        "scrollable": "boolean"
                                     },
                                     "name": "MyFieldSet",
                                     "designerId": "c18b0eeb-6cfe-43ad-98f0-eec9e4c4f47a",
@@ -317,7 +331,8 @@
                                                 "border": "boolean",
                                                 "height": "auto",
                                                 "layout|flex": "number",
-                                                "title": "string"
+                                                "title": "string",
+                                                "scrollable": "boolean"
                                             },
                                             "name": "MyForm2",
                                             "designerId": "7cbdda28-f342-411c-b1f3-68e0464e1400",
@@ -339,7 +354,8 @@
                                                         "boxLabel": "string",
                                                         "fieldLabel": "string",
                                                         "itemId": "string",
-                                                        "layout|anchor": "string"
+                                                        "layout|anchor": "string",
+                                                        "scrollable": "boolean"
                                                     },
                                                     "name": "MyCheckbox1",
                                                     "designerId": "4bb0898c-20a4-4c7e-9ee0-0be9862d99be"

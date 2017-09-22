@@ -1,5 +1,5 @@
 var source = './app';
-var destination = '../../../artifacts/17.3/Inventory/debug/app';
+var destination = '../../../artifacts/17.4/Inventory/debug/app';
 var test_ui_dest = '../../../../QC1730/Inventory/test-ui';
 var changed = require('gulp-changed');
 

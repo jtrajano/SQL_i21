@@ -31,7 +31,7 @@
     "xdsBuild": 282,
     "schemaVersion": 1,
     "upgradeVersion": 310000000001,
-    "framework": "ext50",
+    "framework": "ext65",
     "viewOrderMap": {
         "view": [
             "9d74ad70-3b4c-4a9b-ba01-2f6486ba7f29",

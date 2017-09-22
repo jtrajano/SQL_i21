@@ -19,7 +19,8 @@
         "height": "auto",
         "hidden": "boolean",
         "hideMode": "string",
-        "width": "auto"
+        "width": "auto",
+        "scrollable": "boolean"
     },
     "designerId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4",
     "viewControllerInstanceId": "cf83061c-88e3-47e2-95ea-40fd51bd0738",
@@ -54,7 +55,8 @@
                 "margin": "auto",
                 "tabIndex": "number",
                 "trigger2Cls": "string",
-                "width": "auto"
+                "width": "auto",
+                "scrollable": "boolean"
             },
             "name": "MyTextField134",
             "designerId": "de56539e-f102-4107-902a-c60a28cf0078",
@@ -111,7 +113,8 @@
             "configAlternates": {
                 "itemId": "string",
                 "padding": "auto",
-                "text": "string"
+                "text": "string",
+                "scrollable": "boolean"
             },
             "name": "MyLabel1",
             "designerId": "2cf331a3-e16c-4551-8f6b-308b6781aa76"
