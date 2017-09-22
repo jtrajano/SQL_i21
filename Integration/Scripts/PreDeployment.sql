@@ -251,6 +251,9 @@
 :r "..\dbo\Stored Procedures\uspTRImportSupplyPointRackPriceEquation.sql"
 :r "..\dbo\Stored Procedures\uspTRImportTruck.sql" 
 
+--LOGISTICS
+:r "..\dbo\Stored Procedures\uspLGImportEquipmentType.sql"
+
 -- EnergyTrac
 :r "..\dbo\Stored Procedures\uspETRecreateDeliveryMetricsView.sql"
 
