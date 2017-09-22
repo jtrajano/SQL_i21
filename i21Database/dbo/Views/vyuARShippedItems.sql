@@ -35,8 +35,8 @@ SELECT id							= NEWID()
 	 , strItemDescription			= ISNULL(SHIPPEDITEMS.strItemDescription, ITEM.strDescription)
 	 , intItemUOMId					= SHIPPEDITEMS.intItemUOMId
 	 , strUnitMeasure				= ITEMUOM.strUnitMeasure
-	 , intOrderUOMId				= SHIPPEDITEMS.intItemUOMId
-	 , strOrderUnitMeasure			= ITEMUOM.strUnitMeasure
+	 , intOrderUOMId				= SHIPPEDITEMS.intOrderUOMId
+	 , strOrderUnitMeasure			= ITEMORDERUOM.strUnitMeasure
 	 , intShipmentItemUOMId			= SHIPPEDITEMS.intItemUOMId	 
 	 , strShipmentUnitMeasure		= ITEMUOM.strUnitMeasure
 	 , dblQtyShipped				= SHIPPEDITEMS.dblQtyShipped	
@@ -962,19 +962,19 @@ FROM (
 	     , intFreightTermId					= ARCC.intFreightTermId
 	     , intItemId						= LD.intItemId
 	     , strItemDescription				= NULL
-	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
+	     , intItemUOMId						= ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId)
 	     , intOrderUOMId					= ARCC.intOrderUOMId
-	     , intShipmentItemUOMId				= ISNULL(ARCC.intItemUOMId,LD.intItemUOMId)
+	     , intShipmentItemUOMId				= ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId)
 		 , intWeightUOMId					= LD.intWeightItemUOMId --ARCC.intItemWeightUOMId
 		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1.000000)
 		 , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
 		 , dblQtyOrdered					= ISNULL(LD.dblQuantity, 0)
-		 , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
-		 , dblShipmentQtyShippedTotal		= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
-		 , dblQtyRemaining					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
+		 , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
+		 , dblShipmentQtyShippedTotal		= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
+		 , dblQtyRemaining					= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
 	     , dblDiscount						= 0
-	     , dblPrice							= ARCC.dblCashPrice
-	     , dblShipmentUnitPrice				= ARCC.dblCashPrice
+	     , dblPrice							= ARCC.dblOrderPrice
+	     , dblShipmentUnitPrice				= ((ARCC.dblOrderPrice * ISNULL(ARCC.dblSubCurrencyRate, 1.000000)) * dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0
@@ -1071,6 +1071,7 @@ FROM (
 		 , strOrderUnitMeasure
 		 , intItemWeightUOMId	 
 		 , dblCashPrice
+		 , dblOrderPrice
 		 , dblDetailQuantity
 		 , intFreightTermId			 
 		 , dblShipQuantity
@@ -1497,6 +1498,18 @@ LEFT OUTER JOIN (
 		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
 	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
 ) ITEMUOM ON SHIPPEDITEMS.intItemUOMId = ITEMUOM.intItemUOMId
+LEFT OUTER JOIN (
+	SELECT intItemUOMId
+		 , intItemId
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+) ITEMORDERUOM ON SHIPPEDITEMS.intOrderUOMId = ITEMORDERUOM.intItemUOMId
 LEFT OUTER JOIN (
 	SELECT intItemUOMId
 		 , intItemId
