@@ -2,7 +2,8 @@
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
-	,@intEntityUserSecurityId AS INT = NULL 
+	,@intEntityUserSecurityId AS INT = NULL
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -22,7 +23,6 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
 
 -- Get the Inventory Count batch number
-DECLARE @strBatchId AS NVARCHAR(40) 
 DECLARE @strItemNo AS NVARCHAR(50)
 
 -- Get the default currency ID
@@ -49,6 +49,7 @@ BEGIN
 			,@ysnTransactionPostedFlag AS BIT
 			,@strCountDescription AS NVARCHAR(255)
 			,@InventoryCount_TransactionType INT = 23
+			,@intLocationId AS INT
 			,@intLockType INT
   
 	SELECT TOP 1   
@@ -58,6 +59,7 @@ BEGIN
 			,@dtmDate = dtmCountDate
 			,@intCreatedEntityId = intEntityId
 			,@strCountDescription = strDescription
+			,@intLocationId = intLocationId
 	FROM	dbo.tblICInventoryCount
 	WHERE	strCountNo = @strTransactionId  
 END  
@@ -201,7 +203,7 @@ SELECT TOP 1 @ItemNo = Item.strItemNo
 FROM tblICInventoryCount IC 
 	LEFT JOIN tblICInventoryCountDetail ICDetail ON ICDetail.intInventoryCountId = IC.intInventoryCountId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ICDetail.intItemId
-WHERE IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
+WHERE ISNULL(NULLIF(IC.strCountBy, ''), 'Item') = 'Item' AND IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
 
 IF @ItemNo IS NOT NULL
 BEGIN
@@ -211,7 +213,7 @@ BEGIN
 END
 
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId
 IF @@ERROR <> 0 GOTO Post_Exit    
 
 --------------------------------------------------------------------------------------------  
@@ -276,8 +278,9 @@ BEGIN
 		LEFT JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
 		LEFT JOIN dbo.tblICItemUOM StockUOM ON Detail.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
 	WHERE Header.intInventoryCountId = @intTransactionId
-			--AND Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) <> 0
+				--AND Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) <> 0
 			AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END <> 0)
+			AND ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
@@ -403,15 +406,23 @@ END
 -- 3. Book the G/L entries
 -- 4. Commit the save point.
 --------------------------------------------------------------------------------------------  
-IF	@ysnRecap = 1	
+IF @ysnRecap = 1
 BEGIN 
-
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspGLPostRecapOld 
+
+	-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
+	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN 
+		EXEC dbo.uspGLPostRecap 
 			@GLEntries
-			,@intTransactionId
-			,@strTransactionId
-			,'IC'
+			,@intEntityUserSecurityId
+	END 
+	ELSE 
+	BEGIN 
+		-- Post preview is not available. Financials are only booked for company-owned stocks.
+		EXEC uspICRaiseError 80185; 
+	END 
+
 	COMMIT TRAN @TransactionName
 END 
 
