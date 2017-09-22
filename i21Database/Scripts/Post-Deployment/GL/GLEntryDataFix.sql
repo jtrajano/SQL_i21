@@ -45,4 +45,11 @@ GO
 	AND A.strTransactionId = B.strBillId
 	AND ISNULL(A.strComments,'') = ''
 
+	UPDATE A
+	SET A.strDocument = B.strVendorOrderNumber
+	FROM tblGLDetail A
+	JOIN tblAPBill B ON A.intTransactionId = B.intBillId 
+	AND A.strTransactionId = B.strBillId
+	AND ISNULL(A.strDocument,'') = ''
+
 GO
