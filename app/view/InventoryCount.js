@@ -277,7 +277,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             itemId: 'cboSubLocation',
                                                             fieldLabel: 'Storage Location',
                                                             displayField: 'strSubLocationName',
-                                                            valueField: 'intCompanyLocationSubLocationId'
+                                                            valueField: 'strSubLocationName'
                                                         },
                                                         {
                                                             xtype: 'gridcombobox',
@@ -303,7 +303,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             itemId: 'cboStorageLocation',
                                                             fieldLabel: 'Storage Unit',
                                                             displayField: 'strName',
-                                                            valueField: 'intStorageLocationId'
+                                                            valueField: 'strName'
                                                         },
                                                         {
                                                             xtype: 'datefield',
@@ -375,7 +375,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             itemId: 'cboCategory',
                                                             fieldLabel: 'Category',
                                                             displayField: 'strCategoryCode',
-                                                            valueField: 'intCategoryId'
+                                                            valueField: 'strCategoryCode'
                                                         },
                                                         {
                                                             xtype: 'gridcombobox',
@@ -401,7 +401,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             itemId: 'cboCommodity',
                                                             fieldLabel: 'Commodity',
                                                             displayField: 'strCommodityCode',
-                                                            valueField: 'intCommodityId'
+                                                            valueField: 'strCommodityCode'
                                                         },
                                                         {
                                                             xtype: 'textfield',
@@ -540,7 +540,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             itemId: 'cboCountGroup',
                                                             fieldLabel: 'Count Group',
                                                             displayField: 'strCountGroup',
-                                                            valueField: 'intCountGroupId'
+                                                            valueField: 'strCountGroup'
                                                         },
                                                         {
                                                             xtype: 'textfield',
