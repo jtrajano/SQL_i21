@@ -212,7 +212,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                             }
                         ]
                     },
-                    hidden: '{hasCountGroup}'
+                    hidden: true
                 },
                 colStockUOM: 'strUnitMeasure',
                 colDescription: {
