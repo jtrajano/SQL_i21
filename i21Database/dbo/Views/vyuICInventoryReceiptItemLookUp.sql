@@ -195,6 +195,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strForexRateType = forexType.strCurrencyExchangeRateType
 		, intContainerWeightUOMId = LogisticsView.intWeightUOMId
 		, dblContainerWeightUOMConvFactor = LogisticsView.dblWeightUOMConvFactor
+		, Item.ysnLotWeightsRequired
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

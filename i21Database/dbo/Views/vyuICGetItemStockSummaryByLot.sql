@@ -25,6 +25,7 @@ SELECT
 	, ItemStock.intStorageLocationId
 	, strStorageLocationName = StorageLocation.strName
 	, ItemStock.intItemUOMId
+	, Lot.intWeightUOMId
 	, UOM.strUnitMeasure
 	, ItemStock.intLotId
 	, Lot.strLotNumber

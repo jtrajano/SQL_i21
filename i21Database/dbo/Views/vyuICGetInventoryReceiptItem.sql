@@ -72,6 +72,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Receipt.strShipFrom
 	, Receipt.intCurrencyId
 	, Receipt.strCurrency 
+	, Item.ysnLotWeightsRequired
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
