@@ -88,12 +88,10 @@ If @ysnEnableParentLot=1
 	where sr.intItemId=@intItemId AND ISNULL(sr.ysnPosted,0)=0
 	group by sr.intParentLotId
 
---intPhysicalItemUOMId is 
-Select l.intLotId,l.strLotNumber,l.intItemId,i.strItemNo,i.strDescription,ISNULL(l.strLotAlias,'') AS strLotAlias,l.dblWeight AS dblPhysicalQty,
---ISNULL(c.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(l.dblWeight,0) - ISNULL(c.dblReservedQty,0)),0) AS dblAvailableQty,
-l.intWeightUOMId AS intItemUOMId ,u.strUnitMeasure AS strUOM, 
---ROUND((ISNULL((ISNULL(l.dblWeight,0) - ISNULL(c.dblReservedQty,0)),0)/ case when ISNULL(iu1.dblUnitQty,0)=0 then 1 else iu1.dblUnitQty end ),0) AS dblAvailableUnit,
-l.dblLastCost AS dblUnitCost,iu1.dblUnitQty AS dblWeightPerUnit,u.strUnitMeasure AS strWeightPerUnitUOM,
+Select l.intLotId,l.strLotNumber,l.intItemId,i.strItemNo,i.strDescription,ISNULL(l.strLotAlias,'') AS strLotAlias,
+CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,ri.intItemUOMId,l.dblQty) End AS dblPhysicalQty,
+isnull(l.intWeightUOMId,iu2.intItemUOMId) AS intItemUOMId ,isnull(u.strUnitMeasure,um2.strUnitMeasure) AS strUOM, 
+l.dblLastCost AS dblUnitCost,Case When ISNULL(l.dblWeight,0)>0 Then l.dblWeightPerQty Else iu1.dblUnitQty/iu2.dblUnitQty End AS dblWeightPerUnit,u.strUnitMeasure AS strWeightPerUnitUOM,
 l.intItemUOMId  AS intPhysicalItemUOMId,l.dtmDateCreated AS dtmReceiveDate,l.dtmExpiryDate,ISNULL(' ','') AS strVendorId,ISNULL(l.strVendorLotNo,'') AS strVendorLotNo,
 l.strGarden AS strGarden,l.intLocationId,
 cl.strLocationName AS strLocationName,
@@ -106,24 +104,25 @@ CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
 CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
 l.intParentLotId,
 sl.intStorageLocationId,
-u1.strUnitMeasure AS strPhysicalItemUOM
+u1.strUnitMeasure AS strPhysicalItemUOM,
+i.intCategoryId
 into #tempLot
 from tblICLot l
---Left Join @tblReservedQty c on l.intLotId=c.intLotId
 Join tblICItem i on l.intItemId=i.intItemId
-Join tblICItemUOM iu on l.intWeightUOMId=iu.intItemUOMId
-Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
+Left Join tblICItemUOM iu on l.intWeightUOMId=iu.intItemUOMId
+Left Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
 Join tblSMCompanyLocation cl on cl.intCompanyLocationId=l.intLocationId
 Left Join tblSMCompanyLocationSubLocation sbl on sbl.intCompanyLocationSubLocationId=l.intSubLocationId
 Left Join tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
 Left Join tblICStorageUnitType ut on sl.intStorageUnitTypeId=ut.intStorageUnitTypeId AND ut.strInternalCode <> 'PROD_STAGING'
 Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
 Join tblICUnitMeasure u1 on iu1.intUnitMeasureId=u1.intUnitMeasureId
---Left Join vyuAPVendor v on l.intVendorId=v.intVendorId
 Left Join tblMFRecipeItem ri on ri.intItemId=i.intItemId and ri.intRecipeItemId=@intRecipeItemId
+Left Join tblICItemUOM iu2 on ri.intItemUOMId=iu2.intItemUOMId
+Left Join tblICUnitMeasure um2 on iu2.intUnitMeasureId=um2.intUnitMeasureId 
 Left Join vyuQMGetLotQuality q on l.intLotId=q.intLotId
 Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
-Where l.intItemId=@intItemId and l.dblWeight>0 and ls.intLotStatusId in (Select intLotStatusId From @tblLotStatus)
+Where l.intItemId=@intItemId and l.dblQty>0 and ls.intLotStatusId in (Select intLotStatusId From @tblLotStatus)
 And l.intLocationId = Case When @ysnShowOtherFactoryLots=1 Then l.intLocationId Else @intLocationId End 
 Order by l.dtmExpiryDate, l.dtmDateCreated
 
@@ -140,7 +139,7 @@ Begin
 		tl.intPhysicalItemUOMId, tl.dtmReceiveDate, tl.dtmExpiryDate, tl.strVendorId, tl.strVendorLotNo, 
 		tl.strGarden, tl.intLocationId, tl.strLocationName, tl.strSubLocationName, tl.strStorageLocationName,tl.intStorageLocationId, 
 		tl.strRemarks, tl.dblRiskScore, tl.dblConfigRatio, tl.dblDensity, tl.dblScore, tl.intParentLotId,
-		CAST(0 AS bit) AS ysnParentLot,tl.strPhysicalItemUOM 
+		CAST(0 AS bit) AS ysnParentLot,tl.strPhysicalItemUOM,tl.intCategoryId 
 		from #tempLot tl Left Join @tblReservedQty r on tl.intLotId=r.intLotId
 End
 Else
@@ -153,7 +152,7 @@ Begin
 		tl.intPhysicalItemUOMId, MAX(tl.dtmReceiveDate) AS dtmReceiveDate, MAX(tl.dtmExpiryDate) AS dtmExpiryDate, MAX(tl.strVendorId) AS strVendorId, MAX(tl.strVendorLotNo) AS strVendorLotNo, 
 		MAX(tl.strGarden) AS strGarden, tl.intLocationId, tl.strLocationName, MAX(tl.strSubLocationName) AS strSubLocationName, tl.strStorageLocationName AS strStorageLocationName,tl.intStorageLocationId, 
 		MAX(tl.strRemarks) AS strRemarks, MAX(tl.dblRiskScore) AS dblRiskScore, MAX(tl.dblConfigRatio) AS dblConfigRatio, MAX(tl.dblDensity) AS dblDensity, 
-		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot
+		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId
 		into #tempParentLotByStorageLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,
@@ -173,7 +172,7 @@ Begin
 		tl.intPhysicalItemUOMId, MAX(tl.dtmReceiveDate) AS dtmReceiveDate, MAX(tl.dtmExpiryDate) AS dtmExpiryDate, MAX(tl.strVendorId) AS strVendorId, MAX(tl.strVendorLotNo) AS strVendorLotNo, 
 		MAX(tl.strGarden) AS strGarden, tl.intLocationId, tl.strLocationName, '' AS strSubLocationName, '' AS strStorageLocationName,0 AS intStorageLocationId,
 		MAX(tl.strRemarks) AS strRemarks, MAX(tl.dblRiskScore) AS dblRiskScore, MAX(tl.dblConfigRatio) AS dblConfigRatio, MAX(tl.dblDensity) AS dblDensity, 
-		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot 
+		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId 
 		into #tempParentLotByLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,tl.strLotAlias,

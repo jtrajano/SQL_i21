@@ -383,10 +383,11 @@ Begin
 	--Get the child Lots for the Parent Lot
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
-	Select l.intLotId,l.strLotNumber,l.intItemId,l.dblWeight,@intItemUOMId,@intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
+	Select l.intLotId,l.strLotNumber,l.intItemId,CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) End
+	,@intItemUOMId,@intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
 	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
-	Where pld.intPickListId=@intPickListId AND pld.intParentLotId=@intParentLotId AND l.intStorageLocationId=@intKitStagingLocationId AND l.dblWeight>0
+	Where pld.intPickListId=@intPickListId AND pld.intParentLotId=@intParentLotId AND l.intStorageLocationId=@intKitStagingLocationId AND l.dblQty>0
 
 	Select @intMinChildLot=Min(intRowNo) from @tblChildLot
 

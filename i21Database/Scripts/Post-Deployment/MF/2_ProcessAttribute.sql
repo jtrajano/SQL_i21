@@ -982,14 +982,23 @@ BEGIN
 		,strAttributeName
 		,intAttributeDataTypeId
 		,intAttributeTypeId
+		,ysnMultiSelect
 		,strSQL
 		)
 	SELECT 46
 		,'Packaging Category'
 		,5
 		,1
-		,'SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
+		,1
+		,'SELECT convert(varchar,intCategoryId) AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
 END
+ELSE
+Begin
+	Update tblMFAttribute
+	Set strSQL='SELECT convert(varchar,intCategoryId) AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
+		,ysnMultiSelect=1
+	Where intAttributeId = 46
+end
 GO
 
 IF NOT EXISTS (

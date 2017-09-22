@@ -51,18 +51,11 @@ BEGIN TRY
 	Declare @strInActiveItems nvarchar(max)
 	DECLARE @dtmDate DATETIME=Convert(DATE, GetDate())
 	DECLARE @intDayOfYear INT=DATEPART(dy, @dtmDate)
+	Declare @strPackagingCategoryId NVARCHAR(Max)
 
 	SELECT @dtmCurrentDateTime = GetDate()
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
-
-	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
-
-	SELECT @intBusinessShiftId = intShiftId
-	FROM dbo.tblMFShift
-	WHERE intLocationId = @intLocationId
-		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
-			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
 	BEGIN TRAN
 
@@ -218,13 +211,16 @@ Declare @tblLotSummary AS table
 	intRowNo int IDENTITY,
 	intLotId INT,
 	intItemId int,
-	dblQty NUMERIC(38,20)	
+	dblQty NUMERIC(38,20),
+	intRecipeItemId int	
 )
 Declare @dblInputAvlQty NUMERIC(38,20)
 Declare @dblInputReqQty NUMERIC(38,20)
 Declare @intInputLotId int
 Declare @intInputItemId int
 Declare @strInputLotNumber nvarchar(50)
+
+Select @intLocationId=intLocationId From @tblBlendSheet
 
 INSERT INTO @tblLotSummary(intLotId,intItemId,dblQty)
 Select intLotId,intItemId,SUM(dblQty) From @tblLot GROUP BY intLotId,intItemId
@@ -234,8 +230,9 @@ Select @intMinLot=Min(intRowNo) From @tblLotSummary
 While(@intMinLot is not null)
 Begin
 	Select @intInputLotId=intLotId,@dblInputReqQty=dblQty,@intInputItemId=intItemId From @tblLotSummary Where intRowNo=@intMinLot
-	Select @dblInputAvlQty=dblWeight - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=@intInputLotId AND ISNULL(ysnPosted,0)=0) 
-	From tblICLot Where intLotId=@intInputLotId
+	Select @dblInputAvlQty=CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,tl.intItemUOMId,l.dblQty) End 
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=@intInputLotId AND ISNULL(ysnPosted,0)=0) 
+	From tblICLot l join @tblLot tl on l.intLotId=tl.intLotId Where l.intLotId=@intInputLotId
 
 	if @dblInputReqQty > @dblInputAvlQty
 	Begin
@@ -251,10 +248,32 @@ Begin
 End
 --End Available Qty Check
 
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
+
+	SELECT @intBusinessShiftId = intShiftId
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+	SELECT @intRecipeId = intRecipeId
+		,@intManufacturingProcessId = a.intManufacturingProcessId
+	FROM tblMFRecipe a
+	JOIN @tblBlendSheet b ON a.intItemId = b.intItemId
+		AND a.intLocationId = b.intLocationId
+		AND ysnActive = 1
+
+	SELECT @strPackagingCategoryId = ISNULL(pa.strAttributeValue, '')
+	FROM tblMFManufacturingProcessAttribute pa
+	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND at.strAttributeName = 'Packaging Category'
+
 	UPDATE @tblBlendSheet
 	SET dblQtyToProduce = (
 			SELECT sum(dblQty)
-			FROM @tblLot
+			FROM @tblLot l join tblICItem i on l.intItemId=i.intItemId Where i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId))
 			)
 
 	UPDATE @tblLot
@@ -331,9 +350,11 @@ End
 
 	IF @ysnEnableParentLot = 0
 		UPDATE a
-		SET a.dblWeightPerUnit = b.dblWeightPerQty
+		SET a.dblWeightPerUnit = CASE WHEN b.dblWeightPerQty > 0 THEN b.dblWeightPerQty ELSE iu1.dblUnitQty/iu.dblUnitQty END
 		FROM @tblLot a
 		JOIN tblICLot b ON a.intLotId = b.intLotId
+		LEFT JOIN tblICItemUOM iu on a.intItemUOMId=iu.intItemUOMId
+		LEFT JOIN tblICItemUOM iu1 on a.intItemIssuedUOMId=iu1.intItemUOMId
 	ELSE
 		UPDATE a
 		SET a.dblWeightPerUnit = (
@@ -343,13 +364,6 @@ End
 				)
 		FROM @tblLot a
 		JOIN tblICParentLot b ON a.intLotId = b.intParentLotId
-
-	SELECT @intRecipeId = intRecipeId
-		,@intManufacturingProcessId = a.intManufacturingProcessId
-	FROM tblMFRecipe a
-	JOIN @tblBlendSheet b ON a.intItemId = b.intItemId
-		AND a.intLocationId = b.intLocationId
-		AND ysnActive = 1
 
 	SELECT @ysnCalculateNoSheetUsingBinSize = CASE 
 			WHEN UPPER(pa.strAttributeValue) = 'TRUE'
@@ -591,7 +605,7 @@ End
 						,CASE 
 							WHEN intItemUOMId = intItemIssuedUOMId
 								THEN @dblReqQty
-							ELSE @dblReqQty / dblWeightPerUnit
+							ELSE @dblReqQty / CASE WHEN dblWeightPerUnit > 0 THEN dblWeightPerUnit ELSE 1.0 END
 							END
 						,intItemIssuedUOMId
 						,dblWeightPerUnit
@@ -628,7 +642,7 @@ End
 						,CASE 
 							WHEN intItemUOMId = intItemIssuedUOMId
 								THEN @dblQty
-							ELSE @dblQty / dblWeightPerUnit
+							ELSE @dblQty / CASE WHEN dblWeightPerUnit > 0 THEN dblWeightPerUnit ELSE 1.0 END
 							END
 						,intItemIssuedUOMId
 						,dblWeightPerUnit
@@ -908,7 +922,8 @@ End
 				UPDATE tblMFWorkOrder
 				SET dblQuantity = (
 						SELECT sum(dblQuantity)
-						FROM tblMFWorkOrderConsumedLot
+						FROM tblMFWorkOrderConsumedLot wi 
+						join tblICItem i on wi.intItemId=i.intItemId AND i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId))
 						WHERE intWorkOrderId = @intWorkOrderId
 						)
 				WHERE intWorkOrderId = @intWorkOrderId
@@ -916,7 +931,8 @@ End
 				UPDATE tblMFWorkOrder
 				SET dblQuantity = (
 						SELECT sum(dblQuantity)
-						FROM tblMFWorkOrderInputLot
+						FROM tblMFWorkOrderInputLot wi 
+						join tblICItem i on wi.intItemId=i.intItemId AND i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId))
 						WHERE intWorkOrderId = @intWorkOrderId
 						)
 				WHERE intWorkOrderId = @intWorkOrderId
@@ -924,7 +940,8 @@ End
 			UPDATE tblMFWorkOrder
 			SET dblQuantity = (
 					SELECT sum(dblQuantity)
-					FROM tblMFWorkOrderInputParentLot
+					FROM tblMFWorkOrderInputParentLot wi 
+						join tblICItem i on wi.intItemId=i.intItemId AND i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId))
 					WHERE intWorkOrderId = @intWorkOrderId
 					)
 			WHERE intWorkOrderId = @intWorkOrderId

@@ -119,7 +119,7 @@ Declare @tblRemainingPickedItems AS table
 Insert Into @tblPickListDetail(intPickListId,intPickListDetailId,intLotId,strLotNumber,intParentLotId,intItemId,intStorageLocationId,
 dblPickQuantity,intPickUOMId,dblPhysicalQty,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId,dblQuantity)
 Select pld.intPickListId,pld.intPickListDetailId,pld.intLotId,l.strLotNumber,pld.intParentLotId,pld.intItemId,pld.intStorageLocationId,
-pld.dblPickQuantity,pld.intPickUOMId,dblWeight,
+pld.dblPickQuantity,pld.intPickUOMId,CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) End,
 CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId,pld.dblQuantity
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
 Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId AND l.intStorageLocationId <> @intKitStagingLocationId --Exclude Lots that are already in Kit Staging Location

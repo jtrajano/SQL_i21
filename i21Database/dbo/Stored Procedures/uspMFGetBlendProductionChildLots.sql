@@ -106,6 +106,7 @@ SELECT wcl.intWorkOrderConsumedLotId
 	,CSL.strSubLocationName
 	,CL.strLocationName
 	,i.strLotTracking
+	,i.intCategoryId
 FROM tblMFWorkOrderConsumedLot wcl
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICItem i ON wcl.intItemId = i.intItemId
@@ -136,7 +137,8 @@ SELECT wcl.intWorkOrderConsumedLotId
 	,sl.strName AS strStorageLocationName
 	,i.dblRiskScore
 	,ISNULL(wcl.ysnStaged, 0) AS ysnStaged
-	,(ISNULL(l.dblWeight, 0) - ISNULL(rq.dblReservedQty, 0)) AS dblAvailableQty
+	,(ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,wcl.intItemUOMId,l.dblQty) End, 0) 
+	- ISNULL(rq.dblReservedQty, 0)) AS dblAvailableQty
 	,CASE WHEN wcl.intItemUOMId=wcl.intItemIssuedUOMId THEN 1 ELSE ISNULL(l.dblWeightPerQty, 1) END AS dblWeightPerUnit
 	,wcl.intRecipeItemId
 	,l.intParentLotId
@@ -199,6 +201,7 @@ SELECT wcl.intWorkOrderConsumedLotId
 		,CSL.strSubLocationName
 		,CL.strLocationName
 		,i.strLotTracking
+		,i.intCategoryId
 FROM tblMFWorkOrderConsumedLot wcl
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICLot l ON wcl.intLotId = l.intLotId
@@ -275,7 +278,8 @@ Begin
 		AND ISNULL(sd.intSubLocationId,0)=ISNULL(tpl.intSubLocationId,0) 
 		AND ISNULL(sd.intStorageLocationId,0)=ISNULL(tpl.intStorageLocationId,0)
 		AND sd.ysnStockUnit = 1)
-	Else (ISNULL(l.dblWeight, 0) - ISNULL((Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=tpl.intLotId AND ysnPosted=0), 0)) 
+	Else (ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,tpl.intItemUOMId,l.dblQty) End, 0) 
+	- ISNULL((Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=tpl.intLotId AND ysnPosted=0), 0)) 
 	End AS dblAvailableQty,
 	CASE WHEN tpl.intItemUOMId=tpl.intItemIssuedUOMId THEN 1 ELSE ISNULL(tpl.dblWeightPerUnit, 1) END AS dblWeightPerUnit,
 	tpl.intRecipeItemId,
@@ -286,6 +290,7 @@ Begin
 	tpl.strSubLocationName,
 	tpl.strLocationName,
 	i.strLotTracking
+	,i.intCategoryId
 	From @tblPickedLots tpl 
 	Left Join tblICLot l on tpl.intLotId=l.intLotId
 	Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId

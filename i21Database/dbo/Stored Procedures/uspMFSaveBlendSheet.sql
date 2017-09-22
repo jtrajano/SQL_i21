@@ -17,6 +17,8 @@ BEGIN TRY
 	DECLARE @dblBulkReqQuantity NUMERIC(38,20)
 	Declare @intCategoryId int
 	Declare @intCellId int
+	Declare @strPackagingCategoryId NVARCHAR(Max)
+	DECLARE @dblWOQuantity NUMERIC(38,20)
 
 	SET @intWorkOrderId = 0;
 
@@ -59,6 +61,11 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,ysnParentLot BIT
 		)
+
+	Declare @tblPackagingCategoryId Table 
+	(
+		intCategoryId int
+	)
 
 	INSERT INTO @tblBlendSheet (
 		intWorkOrderId
@@ -167,8 +174,6 @@ BEGIN TRY
 	SET intStorageLocationId = NULL
 	WHERE intStorageLocationId = 0
 
-	Update @tblBlendSheet Set dblQtyToProduce=(Select SUM(ISNULL(dblQty,0)) From @tblLot)
-
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblMFCompanyPreference
 
@@ -226,6 +231,13 @@ BEGIN TRY
 		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
+	SELECT @strPackagingCategoryId = ISNULL(pa.strAttributeValue, '')
+	FROM tblMFManufacturingProcessAttribute pa
+	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND at.strAttributeName = 'Packaging Category'
+
 	BEGIN TRAN
 
 	IF @intWorkOrderId = 0
@@ -242,6 +254,11 @@ BEGIN TRY
             ,@intPatternCode = 93
             ,@ysnProposed = 0
             ,@strPatternString = @strNextWONo OUTPUT
+
+		--Exclude Packing category while summing weight
+		Update @tblBlendSheet Set dblQtyToProduce=(Select SUM(ISNULL(dblQty,0)) 
+		From @tblLot l 
+		join tblICItem i on l.intItemId=i.intItemId Where i.intCategoryId not in (Select * from dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId)))
 
 		INSERT INTO tblMFWorkOrder (
 			strWorkOrderNo
@@ -297,8 +314,7 @@ BEGIN TRY
 	END
 	ELSE
 		UPDATE a
-		SET a.dblQuantity = b.dblQtyToProduce
-			,a.intManufacturingCellId = b.intCellId
+		SET  a.intManufacturingCellId = b.intCellId
 			,a.intMachineId = b.intMachineId
 			,a.dblBinSize = b.dblBinSize
 			,a.dtmExpectedDate = b.dtmDueDate
@@ -312,7 +328,6 @@ BEGIN TRY
 		FROM tblMFWorkOrder a
 		JOIN @tblBlendSheet b ON a.intWorkOrderId = b.intWorkOrderId
 
-	--Delete From tblMFWorkOrderInputLot where intWorkOrderId=@intWorkOrderId
 	SELECT @dtmProductionDate = dtmExpectedDate
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -460,11 +475,6 @@ BEGIN TRY
 		WHERE intRowNo > @intMinRowNo
 	END
 
-	--Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-	--dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId)
-	--Select @intWorkOrderId,intLotId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,null,
-	--GetDate(),intUserId,GetDate(),intUserId
-	--From @tblLot
 	--Update Bulk Item(By Location or FIFO) Standard Required Qty Calculated Using Planned Qty
 	SELECT @dblBulkReqQuantity = ISNULL(SUM((ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity))), 0)
 	FROM tblMFRecipeItem ri
@@ -478,8 +488,19 @@ BEGIN TRY
 			,3
 			)
 
+	IF @ysnEnableParentLot = 0
+	Select @dblWOQuantity = SUM(ISNULL(dblQuantity,0)) 
+		From tblMFWorkOrderInputLot wi 
+		join tblICItem i on wi.intItemId=i.intItemId 
+		Where wi.intWorkOrderId=@intWorkOrderId AND i.intCategoryId not in (Select * from dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId))
+	Else
+	Select @dblWOQuantity = SUM(ISNULL(dblQuantity,0)) 
+		From tblMFWorkOrderInputParentLot wi 
+		join tblICItem i on wi.intItemId=i.intItemId 
+		Where wi.intWorkOrderId=@intWorkOrderId AND i.intCategoryId not in (Select * from dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId))
+					
 	UPDATE tblMFWorkOrder
-	SET dblQuantity = dblQuantity + @dblBulkReqQuantity
+	SET dblQuantity = ISNULL(@dblWOQuantity,0) + ISNULL(@dblBulkReqQuantity,0)
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE tblMFBlendRequirement

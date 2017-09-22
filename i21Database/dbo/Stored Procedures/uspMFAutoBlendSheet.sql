@@ -86,7 +86,7 @@ Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnAc
 --Delete shortage of item records
 Delete From @tblPickedLots Where ISNULL(intLotId,0)=0
 
-Select * From @tblPickedLots
+Select p.*,i.intCategoryId From @tblPickedLots p join tblICItem i on p.intItemId=i.intItemId
 
 END
 

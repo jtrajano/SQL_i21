@@ -16,6 +16,7 @@ Declare @ysnRecipeItemValidityByDueDate bit=0
 Declare @intManufacturingProcessId int
 Declare @intDayOfYear INT
 Declare @dtmDate DATETIME
+Declare @strPackagingCategoryId NVARCHAR(Max)
 
 Select @intRecipeId = intRecipeId,@intManufacturingProcessId=intManufacturingProcessId 
 from tblMFRecipe where intItemId=@intItemId and intLocationId=@intLocationId and ysnActive=1
@@ -24,6 +25,13 @@ Select @ysnRecipeItemValidityByDueDate=CASE When UPPER(pa.strAttributeValue) = '
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 and at.strAttributeName='Recipe Item Validity By Due Date'
+
+SELECT @strPackagingCategoryId = ISNULL(pa.strAttributeValue, '')
+FROM tblMFManufacturingProcessAttribute pa
+JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId
+	AND intLocationId = @intLocationId
+	AND at.strAttributeName = 'Packaging Category'
 
 If @ysnRecipeItemValidityByDueDate=0
 	Set @dtmDate=Convert(date,GetDate())
@@ -85,6 +93,11 @@ where r.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
 
 Update a Set a.ysnHasSubstitute=1 from @tblRequiredQty a Join @tblRequiredQty b on a.intItemId=b.intParentItemId
 
+--For Pack Items take the ceil of Req Qty
+Update t Set t.dblRequiredQty=CEILING(t.dblRequiredQty)
+From @tblRequiredQty t join tblICItem i on t.intItemId=i.intItemId
+join (Select value from dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId)) p on i.intCategoryId=p.value
+
 Declare @tblPhysicalQty table
 (
 	intItemId int,
@@ -93,7 +106,7 @@ Declare @tblPhysicalQty table
 )
 
 Insert into @tblPhysicalQty
-Select ri.intItemId,Sum(l.dblWeight) AS dblPhysicalQty,
+Select ri.intItemId,Sum(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,ri.intItemUOMId,l.dblQty) End) AS dblPhysicalQty,
 CASE When  ISNULL(MAX(l.dblWeightPerQty),1)=0 then 1 Else  ISNULL(MAX(l.dblWeightPerQty),1) End AS dblWeightPerUnit
 From tblICLot l 
 Join tblMFRecipeItem ri on ri.intItemId=l.intItemId 
@@ -103,7 +116,7 @@ group by ri.intItemId
 
 --Substitute
 Insert into @tblPhysicalQty
-Select rs.intSubstituteItemId,Sum(l.dblWeight) AS dblPhysicalQty,
+Select rs.intSubstituteItemId,Sum(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,rs.intItemUOMId,l.dblQty) End) AS dblPhysicalQty,
 CASE When  ISNULL(MAX(l.dblWeightPerQty),1)=0 then 1 Else  ISNULL(MAX(l.dblWeightPerQty),1) End AS dblWeightPerUnit 
 From tblICLot l 
 Join tblMFRecipeSubstituteItem rs on rs.intSubstituteItemId=l.intItemId 

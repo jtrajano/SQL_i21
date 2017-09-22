@@ -266,9 +266,9 @@ If @ysnEnableParentLot=0
 If @ysnEnableParentLot=0
 	Insert Into @tblAvailableQty(intLotId,intItemId,strLotNo,strLotAlias,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM)
 	Select l.intLotId,l.intItemId,icl.strLotNumber,icl.strLotAlias,i.strItemNo,
-	ISNULL((ISNULL(icl.dblWeight,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
+	ISNULL((ISNULL(CASE WHEN isnull(icl.dblWeight,0)>0 Then icl.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(icl.intItemUOMId,ri.intItemUOMId,icl.dblQty) End,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
 	l.dblQty,
-	(l.dblQty - ISNULL((ISNULL(icl.dblWeight,0) - ISNULL(r.dblReservedQty,0)),0)) AS dblOverCommitQty,
+	(l.dblQty - ISNULL((ISNULL(CASE WHEN isnull(icl.dblWeight,0)>0 Then icl.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(icl.intItemUOMId,ri.intItemUOMId,icl.dblQty) End,0) - ISNULL(r.dblReservedQty,0)),0)) AS dblOverCommitQty,
 	l.dblWeightPerUnit,
 	um.strUnitMeasure
 	from @tblLot l
@@ -277,6 +277,7 @@ If @ysnEnableParentLot=0
 	Join tblICItem i on l.intItemId=i.intItemId
 	Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Left Join tblMFRecipeItem ri on l.intRecipeItemId=ri.intRecipeItemId
 Else
 	Begin
 		Insert into @tblAvailableLot(intLotId,intItemId,strLotNumber,strLotAlias,strItemNo,dblPhysicalQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM,
