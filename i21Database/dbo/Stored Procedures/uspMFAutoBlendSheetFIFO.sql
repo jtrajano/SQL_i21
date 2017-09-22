@@ -821,7 +821,7 @@ BEGIN TRY
 			SELECT L.intLotId
 				,L.strLotNumber
 				,L.intItemId
-				,L.dblWeight
+				,CASE WHEN isnull(L.dblWeight,0)>0 Then L.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId,@intItemUOMId,L.dblQty) End
 				,L.intLocationId
 				,L.intSubLocationId
 				,L.intStorageLocationId
@@ -831,7 +831,7 @@ BEGIN TRY
 				,L.dblWeightPerQty
 				,US.strUserName
 				,L.intParentLotId
-				,L.intWeightUOMId
+				,ISNULL(L.intWeightUOMId,L.intItemUOMId)
 				,L.intItemUOMId
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
@@ -843,7 +843,7 @@ BEGIN TRY
 					Select strStatusName From @tblLotStatus
 					)
 				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-				AND L.dblWeight >= .01
+				AND L.dblQty >= .01
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
 					,@intBlendStagingLocationId
@@ -1265,7 +1265,7 @@ BEGIN TRY
 												))
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
 									END AS dblQuantity
-								,L.intWeightUOMId AS intItemUOMId
+								,ISNULL(L.intWeightUOMId,@intItemUOMId) AS intItemUOMId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
 										THEN Convert(numeric(38,20),(
@@ -1280,14 +1280,14 @@ BEGIN TRY
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
 										THEN L.intItemUOMId
-									ELSE L.intWeightUOMId
+									ELSE ISNULL(L.intWeightUOMId,@intItemUOMId)
 									END AS intItemIssuedUOMId
 								,@intRecipeItemId AS intRecipeItemId
 								,@intStorageLocationId AS intStorageLocationId
 								,L.dblWeightPerQty
 							FROM tblICLot L
 							WHERE L.intLotId = @intParentLotId
-								AND L.dblWeight >= .01
+								AND L.dblQty >= .01
 						ELSE
 							INSERT INTO #tblBlendSheetLot (
 								intParentLotId
@@ -1384,7 +1384,7 @@ BEGIN TRY
 												))
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
 									END AS dblQuantity
-								,L.intWeightUOMId AS intItemUOMId
+								,ISNULL(L.intWeightUOMId,@intItemUOMId) AS intItemUOMId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
 										THEN Convert(numeric(38,20),(
@@ -1399,14 +1399,14 @@ BEGIN TRY
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
 										THEN L.intItemUOMId
-									ELSE L.intWeightUOMId
+									ELSE ISNULL(L.intWeightUOMId,@intItemUOMId)
 									END AS intItemIssuedUOMId
 								,@intRecipeItemId AS intRecipeItemId
 								,@intStorageLocationId AS intStorageLocationId
 								,L.dblWeightPerQty
 							FROM tblICLot L
 							WHERE L.intLotId = @intParentLotId
-								AND L.dblWeight >= .01
+								AND L.dblQty >= .01
 						ELSE
 							INSERT INTO #tblBlendSheetLot (
 								intParentLotId
@@ -1656,7 +1656,7 @@ BEGIN TRY
 			,'Added' AS strRowState
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICLot L ON BS.intParentLotId = L.intLotId
-			AND L.dblWeight > 0
+			AND L.dblQty > 0
 		INNER JOIN tblICItem I ON I.intItemId = L.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId

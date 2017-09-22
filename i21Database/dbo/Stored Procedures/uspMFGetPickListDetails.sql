@@ -353,9 +353,10 @@ Begin
 	Select pld.intPickListDetailId,pld.intPickListId,pld.intLotId,l.strLotNumber,l.strLotAlias,l.intParentLotId,pl.strParentLotNumber,
 	l.intItemId,i.strItemNo,i.strDescription,sl.intStorageLocationId,sl.strName AS strStorageLocationName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure AS strUOM,pld.dblIssuedQuantity,pld.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM, 
-	ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
+	ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) End,0) 
+	- ISNULL(rq.dblReservedQty,0) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
-	pld.intStageLotId,(ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0))/ (Case When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End) AS dblAvailableUnit,
+	pld.intStageLotId,(ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) End,0) - ISNULL(rq.dblReservedQty,0))/ (Case When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End) AS dblAvailableUnit,
 	um2.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId IN (@intKitStagingLocationId,@intBlendStagingLocationId) Then 'Staged' Else 'Picking' End AS strStatus
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId 
 	Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId 
@@ -505,7 +506,8 @@ Begin
 		Group by sr.intLotId
 
 		Insert Into @tblChildLot(intLotId,dblQuantity)
-		Select l.intLotId,(ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty 
+		Select l.intLotId,(ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,tpl.intItemUOMId,l.dblQty) End,0) 
+		- ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty 
 		from tblICLot l 
 		Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
 		Left Join @tblReservedQty rq on l.intLotId=rq.intLotId
@@ -687,7 +689,8 @@ Begin
 		Group by sr.intLotId
 
 		Insert Into @tblChildLot(intLotId,dblQuantity)
-		Select l.intLotId,(ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty 
+		Select l.intLotId,(ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,tpl.intItemUOMId,l.dblQty) End,0) 
+		- ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty 
 		from tblICLot l 
 		Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
 		Left Join @tblReservedQty rq on l.intLotId=rq.intLotId
@@ -723,9 +726,9 @@ Begin
 	Select pld.intPickListDetailId,pld.intPickListId,pld.intStageLotId AS intLotId,l.strLotNumber,l.strLotAlias,l.intParentLotId,pl.strParentLotNumber,
 	l.intItemId,i.strItemNo,i.strDescription,l.intStorageLocationId,sl.strName AS strStorageLocationName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure AS strUOM,pld.dblIssuedQuantity,pld.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM, 
-	((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
+	((ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) End,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
-	pld.intStageLotId,((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity)/ (Case When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End) AS dblAvailableUnit,
+	pld.intStageLotId,((ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) End,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity)/ (Case When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End) AS dblAvailableUnit,
 	um2.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId=@intKitStagingLocationId Then 'Staged' Else '' End AS strStatus
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId 
 	Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId 

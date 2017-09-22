@@ -270,7 +270,7 @@ Begin
 			Insert Into @tblPickedLots
 			Select 0,l.intLotId,l.strLotNumber,i.strItemNo,i.strDescription,SUM(wi.dblQuantity),wi.intItemUOMId,um.strUnitMeasure,
 			SUM(wi.dblIssuedQuantity),wi.intItemIssuedUOMId,um1.strUnitMeasure,i.intItemId,
-			0,0.0,0.0,0.0,AVG(l.dblWeightPerQty),0.0,l.intStorageLocationId,sl.strName,'',@intLocationId,'',0,l.strLotAlias,0,'Added'
+			0,0.0,0.0,0.0,AVG(CASE When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End),0.0,l.intStorageLocationId,sl.strName,'',@intLocationId,'',0,l.strLotAlias,0,'Added'
 			From tblMFWorkOrderInputLot wi join tblICLot l on wi.intLotId=l.intLotId 
 			Join tblICItem i on l.intItemId=i.intItemId
 			Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
@@ -350,7 +350,8 @@ Begin
 	Group by sr.intLotId
 
 	Insert Into @tblChildLot(intLotId,dblQuantity)
-	Select l.intLotId,(ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty 
+	Select l.intLotId,(ISNULL(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,tpl.intItemUOMId,l.dblQty) End,0) 
+	- ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty 
 	from tblICLot l 
 	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
 	Left Join @tblReservedQty rq on l.intLotId=rq.intLotId

@@ -30,7 +30,8 @@ Begin
 		i.dblRiskScore,
 		ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
 		CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
-		CAST(ISNULL(q.Score,0) AS decimal) AS dblScore
+		CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
+		i.intCategoryId
 		From tblMFWorkOrderInputLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -60,7 +61,8 @@ Begin
 		i.dblRiskScore,
 		ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
 		CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
-		CAST(ISNULL(q.Score,0) AS decimal) AS dblScore
+		CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
+		i.intCategoryId
 		From tblMFWorkOrderConsumedLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -92,7 +94,8 @@ Begin
 	i.dblRiskScore,
 	ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
 	CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
-	CAST(ISNULL(q.Score,0) AS decimal) AS dblScore
+	CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
+	i.intCategoryId
 	into #tblWorkOrderInputParent
 	From tblMFWorkOrderInputParentLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
 	Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId

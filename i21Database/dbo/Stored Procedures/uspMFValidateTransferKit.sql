@@ -113,7 +113,7 @@ Declare @tblParentLot table
 	Begin
 		Select @intParentLotId=intParentLotId,@dblReqQty=dblReqQty From @tblParentLot Where intRowNo=@intMinParentLot
 
-		Select @dblAvailableQty=ISNULL(SUM(l.dblWeight),0)
+		Select @dblAvailableQty=ISNULL(SUM(CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) End),0)
 		From tblICLot l Join tblMFPickListDetail pld on l.intLotId=pld.intStageLotId 
 		Where pld.intPickListId=@intPickListId And l.intParentLotId=@intParentLotId And l.dblQty > 0 
 		AND l.intStorageLocationId=@intKitStagingLocationId
