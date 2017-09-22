@@ -14,6 +14,8 @@
 	strSampleStatus NVARCHAR(30) COLLATE Latin1_General_CI_AS,
 	strPropertyName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strPropertyValue NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	strComment NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	strResult NVARCHAR(20) COLLATE Latin1_General_CI_AS,
 
 	intCreatedUserId INT,
 	dtmCreated DATETIME NULL CONSTRAINT DF_tblQMSampleImport_dtmCreated DEFAULT GETDATE()

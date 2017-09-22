@@ -24,6 +24,8 @@ BEGIN TRY
 		,strSampleStatus
 		,strPropertyName
 		,strPropertyValue
+		,strComment
+		,strResult
 		,strErrorMsg
 		,intCreatedUserId
 		,dtmCreated
