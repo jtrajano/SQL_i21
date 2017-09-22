@@ -5414,6 +5414,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImportValidate.sql" />
     <Build Include="dbo\Tables\tblMFPackingItemCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMatchingLotAvailableQtyValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
