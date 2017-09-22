@@ -978,7 +978,8 @@ FROM (
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0
-	     , dblTotal							= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId)), ISNULL(LD.dblQuantity, 0)) * ARCC.dblCashPrice
+	     , dblTotal							= ((ARCC.dblOrderPrice * ISNULL(ARCC.dblSubCurrencyRate, 1.000000)) * dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
+											* dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblNet)
 	     , intStorageLocationId				= NULL
 	     , intTermId						= NULL
 	     , intEntityShipViaId				= NULL
