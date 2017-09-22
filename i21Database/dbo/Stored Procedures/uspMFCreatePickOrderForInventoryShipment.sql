@@ -21,7 +21,7 @@ BEGIN TRY
 	SELECT @strInventoryShipmentNo = strShipmentNumber,
 		   @intShipFromLocationId = intShipFromLocationId,
 		   @dtmCurrentDate = GETDATE(),
-		   @strReferenceNo='Ref. # '+strReferenceNumber
+		   @strReferenceNo=Case When strReferenceNumber<>'' Then 'Ref. # '+strReferenceNumber Else ''End
 	FROM tblICInventoryShipment
 	WHERE intInventoryShipmentId = @intInventoryShipmentId
 

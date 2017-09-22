@@ -19,7 +19,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	SELECT @dtmStartDate = dtmStartDate
+	SELECT @dtmStartDate = dtmEndDate+1
 	FROM dbo.tblGLFiscalYearPeriod
 	WHERE strPeriod = @strPeriod
 
