@@ -8,18 +8,28 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@dblCashPrice			NUMERIC(18,6),
-			@ysnPosted				BIT,
-			@strReceiptNumber		NVARCHAR(50),
-			@intLastModifiedById	INT,
-			@intInventoryReceiptId	INT,
-			@intPricingTypeId		INT,
-			@intContractHeaderId	INT,
-			@ysnOnceApproved		BIT,
-			@ysnApprovalExist		BIT,
-			@ysnAllowChangePricing	BIT,
-			@ysnEnablePriceContractApproval BIT
+	DECLARE @ErrMsg							NVARCHAR(MAX),
+			@dblCashPrice					NUMERIC(18,6),
+			@ysnPosted						BIT,
+			@strReceiptNumber				NVARCHAR(50),
+			@intLastModifiedById			INT,
+			@intInventoryReceiptId			INT,
+			@intPricingTypeId				INT,
+			@intContractHeaderId			INT,
+			@ysnOnceApproved				BIT,
+			@ysnApprovalExist				BIT,
+			@ysnAllowChangePricing			BIT,
+			@ysnEnablePriceContractApproval BIT,
+			@intEntityId					INT,
+			@intContractTypeId				INT,
+			@intInvoiceId					INT,
+			@intInventoryShipmentId			INT,
+			@intNewInvoiceId				INT,
+			@intBillId						INT,
+			@intNewBillId					INT,
+			@ysnSuccess						BIT,
+			@voucherDetailReceipt			VoucherDetailReceipt,
+			@voucherDetailReceiptCharge		VoucherDetailReceiptCharge
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -30,6 +40,10 @@ BEGIN TRY
 	
 	SELECT @dblCashPrice = dblSeqPrice FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId) 
 		
+	SELECT	@intEntityId		=	intEntityId,
+			@intContractTypeId	=	intContractTypeId
+	FROM	tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+
 	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
 
 	SELECT @ysnAllowChangePricing = ysnAllowChangePricing, @ysnEnablePriceContractApproval = ISNULL(ysnEnablePriceContractApproval,0) FROM tblCTCompanyPreference
@@ -56,39 +70,86 @@ BEGIN TRY
 	IF 	@intPricingTypeId NOT IN (1,6) OR @ysnAllowChangePricing = 1
 		RETURN
 
-	IF OBJECT_ID('tempdb..#tblReceipt') IS NOT NULL  								
+	IF @intContractTypeId = 1 
+	BEGIN
+		IF OBJECT_ID('tempdb..#tblReceipt') IS NOT NULL  								
 		DROP TABLE #tblReceipt								
 
-	SELECT	DISTINCT ISNULL(IR.ysnPosted,0) ysnPosted, strReceiptNumber, RI.intInventoryReceiptId
-	INTO	#tblReceipt
-	FROM	tblICInventoryReceipt		IR
-	JOIN	tblICInventoryReceiptItem	RI ON RI.intInventoryReceiptId = IR.intInventoryReceiptId
-	WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract' AND RI.dblUnitCost <> ISNULL(@dblCashPrice,0) 
+		SELECT	DISTINCT ISNULL(IR.ysnPosted,0) ysnPosted, strReceiptNumber, RI.intInventoryReceiptItemId, RI.intInventoryReceiptId,BD.intBillId
+		INTO	#tblReceipt
+		FROM	tblICInventoryReceipt		IR
+		JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptId		=	IR.intInventoryReceiptId
+   LEFT	JOIN	tblAPBillDetail				BD	ON	BD.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
+		WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract' --AND RI.dblUnitCost <> ISNULL(@dblCashPrice,0) 
 
-	IF EXISTS(SELECT * FROM #tblReceipt)
-	BEGIN
-		SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE ysnPosted= 1
+		SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt
 
-		WHILE ISNULL(@intInventoryReceiptId,0) <> 0
-		BEGIN			
-			SELECT @ysnPosted = ysnPosted, @strReceiptNumber = strReceiptNumber FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
+		WHILE ISNULL(@intInventoryReceiptId,0) > 0
+		BEGIN
+			SELECT	@intBillId = intBillId FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
+			IF ISNULL(@intBillId,0) = 0
+			BEGIN
+				INSERT	INTO @voucherDetailReceipt (intInventoryReceiptType,intInventoryReceiptItemId,dblCost)
+				SELECT	intInventoryReceiptType		=	2,
+						intInventoryReceiptItemId	=	intInventoryReceiptItemId,
+						dblCost						=	@dblCashPrice
+				FROM	#tblReceipt
+				WHERE	intInventoryReceiptId		=	@intInventoryReceiptId
 
-			EXEC uspICPostInventoryReceipt 0,0,@strReceiptNumber,@intUserId
+				INSERT INTO @voucherDetailReceiptCharge(intInventoryReceiptChargeId)
+				SELECT intInventoryReceiptChargeId FROM tblICInventoryReceiptCharge WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-			SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE ysnPosted= 1 AND intInventoryReceiptId > @intInventoryReceiptId
+				EXEC [dbo].[uspAPCreateBillData] 
+					 @userId						=	@intUserId
+					,@vendorId						=	@intEntityId
+					,@voucherDetailReceipt			=	@voucherDetailReceipt
+					,@voucherDetailReceiptCharge	=	@voucherDetailReceiptCharge
+					,@billId						=	@intNewBillId OUTPUT
+
+				EXEC [dbo].[uspAPPostBill] 
+					 @post = 1
+					,@recap = 0
+					,@isBatch = 0
+					,@param = @intNewBillId
+					,@userId = @intUserId
+					,@success = @ysnSuccess OUTPUT
+			END
+			SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE intInventoryReceiptId > @intInventoryReceiptId
 		END
-	
-		EXEC uspICUpdateInventoryReceiptUnitCost @intContractDetailId,@dblCashPrice 
+		
 
-		SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE ysnPosted= 1
+	END
+	IF @intContractTypeId = 2
+	BEGIN
 
-		WHILE ISNULL(@intInventoryReceiptId,0) <> 0
-		BEGIN			
-			SELECT @ysnPosted = ysnPosted, @strReceiptNumber = strReceiptNumber FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
+		IF OBJECT_ID('tempdb..#tblShipment') IS NOT NULL  								
+			DROP TABLE #tblShipment
 
-			EXEC uspICPostInventoryReceipt 1,0,@strReceiptNumber,@intUserId
+		SELECT	DISTINCT SH.intInventoryShipmentId,ISNULL(ID.intInvoiceId ,0) intInvoiceId
+		INTO	#tblShipment
+		FROM	tblICInventoryShipment		SH 
+		JOIN	tblICInventoryShipmentItem	SI	ON	SI.intInventoryShipmentId		=	SH.intInventoryShipmentId 
+   LEFT	JOIN	tblARInvoiceDetail			ID	ON	ID.intInventoryShipmentItemId	=	SI.intInventoryShipmentItemId
+		WHERE	SI.intLineNo	= @intContractDetailId 
+		AND		SH.intOrderType = 1
+		AND		SH.ysnPosted	= 1
 
-			SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE ysnPosted= 1 AND intInventoryReceiptId > @intInventoryReceiptId 
+		SELECT	@intInventoryShipmentId = MIN(intInventoryShipmentId) FROM #tblShipment
+
+		WHILE ISNULL(@intInventoryShipmentId,0) > 0
+		BEGIN
+
+			SELECT	@intInvoiceId = intInvoiceId FROM #tblShipment WHERE intInventoryShipmentId = @intInventoryShipmentId
+
+			IF	ISNULL(@intInvoiceId,0)	=	0
+			BEGIN
+				EXEC	uspARCreateInvoiceFromShipment 
+						 @ShipmentId		= @intInventoryShipmentId
+						,@UserId			= @intUserId
+						,@NewInvoiceId		= @intNewInvoiceId	OUTPUT
+			END
+
+			SELECT	@intInventoryShipmentId = MIN(intInventoryShipmentId) FROM #tblShipment WHERE intInventoryShipmentId > @intInventoryShipmentId
 		END
 	END
 	
