@@ -5690,6 +5690,7 @@
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMatchingLotAvailableQtyValidation.sql" />
     <Build Include="dbo\Functions\fnCommaSeparatedValueToTable.sql" />
+    <Build Include="dbo\Tables\tblMFPackingItemCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
