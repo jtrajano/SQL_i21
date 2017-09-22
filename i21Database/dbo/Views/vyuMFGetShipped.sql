@@ -28,14 +28,15 @@ SELECT InvS.intInventoryShipmentId
 			THEN InvSL.dblQuantityShipped
 		ELSE InvSL.dblQuantityShipped * I.dblWeight
 		END AS Weight
-	,(
-		SELECT MIN(dtmCreated)
-		FROM tblICInventoryTransaction IT
-		WHERE IT.intLotId = L.intLotId
-			AND IT.intTransactionTypeId = 5
-			AND IT.ysnIsUnposted = 0
-			AND IT.strTransactionId = InvS.strShipmentNumber
-		) AS dtmPostedDate
+	--,(
+	--	SELECT MIN(dtmCreated)
+	--	FROM tblICInventoryTransaction IT
+	--	WHERE IT.intLotId = L.intLotId
+	--		AND IT.intTransactionTypeId = 5
+	--		AND IT.ysnIsUnposted = 0
+	--		AND IT.intTransactionId = InvS.intInventoryShipmentId
+	--	) AS dtmPostedDate
+	,PD.dtmPostedDate
 	,C.strCategoryCode
 	,C.strDescription AS strCategoryDescription
 	,CAST(CASE 
@@ -78,105 +79,15 @@ SELECT InvS.intInventoryShipmentId
 	,InvS.strFreeTime
 	,InvS.strReceivedBy
 	,SV.strName AS strShipVia
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'total pallets loaded'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strTotalPalletsLoaded
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'airbags'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strAirbags
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'case labels'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strCaseLabels
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'number of pallet labels'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strNumberofPalletLabels
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'number of pallet placards'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strNumberofPalletPlacards
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'pallet cap'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strPalletCap
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'wood pallet'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strWoodPallet
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'heat treated pallet'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strHeatTreatedPallet
-	,(
-		SELECT TOP 1 FV.strValue
-		FROM tblSMTabRow TR
-		JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-		JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-			AND LOWER(TD.strControlName) = 'heat treated pallet'
-		JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-		JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-			AND S.strNamespace = 'Inventory.view.InventoryShipment'
-		WHERE T.intRecordId = InvS.intInventoryShipmentId
-		) AS strBlockAndBrace
+	,CF.strTotalPalletsLoaded
+	,CF.strAirbags
+	,CF.strCaseLabels
+	,CF.strNumberofPalletLabels
+	,CF.strNumberofPalletPlacards
+	,CF.strPalletCap
+	,CF.strWoodPallet
+	,CF.strHeatTreatedPallet
+	,CF.strBlockAndBrace
 FROM dbo.tblICInventoryShipment InvS
 JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
 JOIN dbo.tblICInventoryShipmentItemLot InvSL ON InvSL.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
@@ -191,4 +102,5 @@ JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = InvS.intShipToLocati
 JOIN dbo.tblSMCompanyLocation EL1 ON EL1.intCompanyLocationId = InvS.intShipFromLocationId
 JOIN tblSMFreightTerms FT ON FT.intFreightTermId = InvS.intFreightTermId
 LEFT JOIN tblSMShipVia SV ON SV.intEntityId = InvS.intShipViaId
-
+Left JOIN vyuMFGetPostedDate PD on PD.intLotId= L.intLotId and PD.intTransactionId = InvS.intInventoryShipmentId
+Left JOIN vyuMFGetInventoryShipmentCustomField CF on CF.intRecordId=InvS.intInventoryShipmentId
