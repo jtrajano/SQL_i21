@@ -26,6 +26,7 @@
 	[intEntityId] INT NULL,
 	[strShiftNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intImportFlagInternal] INT NULL,
+    [intLockType] INT NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryCount] PRIMARY KEY ([intInventoryCountId]), 

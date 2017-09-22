@@ -30,10 +30,13 @@ BEGIN
 		, intSubLocationId
 		, intStorageLocationId
 		, intLotId
+		, strLotNo
+		, strLotAlias
 		, dblSystemCount
 		, dblLastCost
 		, strCountLine
 		, intItemUOMId
+		, intWeightUOMId
 		, ysnRecount
 		, intEntityUserSecurityId
 		, intConcurrencyId
@@ -45,10 +48,13 @@ BEGIN
 		, intSubLocationId
 		, intStorageLocationId
 		, intLotId
+		, strLotNumber
+		, strLotAlias
 		, dblSystemCount = dblOnHand
 		, dblLastCost
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intKey ASC) AS NVARCHAR(50))
 		, intItemUOMId
+		, intWeightUOMId
 		, ysnRecount = 0
 		, intEntityUserSecurityId = @intEntityUserSecurityId
 		, intConcurrencyId = 1

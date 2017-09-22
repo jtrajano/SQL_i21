@@ -288,7 +288,28 @@ BEGIN
 			EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId;
 			RETURN -1; 
 		END 
-	END 
+	END
+	
+	/*
+		Check if receipt items and lots have gross/net UOM and have gross qty and net qty when the items have Lot Weights Required enabled in Item setup.
+	*/
+	SET @intItemId = NULL
+
+	SELECT @strItemNo = i.strItemNo
+		,@intItemId = i.intItemId
+	FROM tblICInventoryReceipt r
+			INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+			INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
+		WHERE i.ysnLotWeightsRequired = 1
+			AND i.strLotTracking <> 'No'
+			AND (ri.intWeightUOMId IS NULL OR (ri.dblGross = 0 AND ri.dblNet = 0))
+			AND r.intInventoryReceiptId = @intTransactionId
+
+	IF @intItemId IS NOT NULL
+	BEGIN
+		EXEC uspICRaiseError 80190, @strItemNo
+		GOTO Post_Exit 	
+	END
 END
 
 -- Check if sub location and storage locations are valid. 
