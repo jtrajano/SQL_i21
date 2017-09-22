@@ -16,6 +16,7 @@
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 	,@RefreshPrice					BIT				= 0
@@ -195,6 +196,8 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			--,@AllowQtyToExceedContract	= 0
 			,@InvoiceType				= @InvoiceType
 			,@TermId					= @TermId
+
+		SET @ItemUnitPrice = @ItemPrice
 		END TRY
 		BEGIN CATCH
 			SET @ErrorMessage = ERROR_MESSAGE();
@@ -235,6 +238,7 @@ BEGIN TRY
 				,[dblItemTermDiscount]
 				,[strItemTermDiscountBy]
 				,[dblPrice]
+				,[dblUnitPrice]
 				,[strPricing]
 				,[dblTotalTax]
 				,[dblTotal]
@@ -318,6 +322,7 @@ BEGIN TRY
 				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
 				,[strItemTermDiscountBy]			= @ItemTermDiscountBy
 				,[dblPrice]							= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
+				,[dblUnitPrice]						= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemUnitPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemUnitPrice, @ZeroDecimal) END)
 				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal

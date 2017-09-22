@@ -18,6 +18,7 @@
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 	,@RefreshPrice					BIT				= 0
@@ -135,6 +136,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemTermDiscount				= @ItemTermDiscount
 			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@ItemPrice						= @ItemPrice
+			,@ItemUnitPrice					= @ItemUnitPrice
 			,@ItemPricing					= @ItemPricing
 			,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 			,@RefreshPrice					= @RefreshPrice
@@ -239,6 +241,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strItemTermDiscountBy]
 				,[dblLicenseAmount]
 				,[dblPrice]
+				,[dblUnitPrice]
 				,[strPricing]
 				,[strVFDDocumentNumber]
 				,[intSiteId]
@@ -290,6 +293,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemTermDiscountBy
 				,@ItemLicenseAmount
 				,@ItemPrice
+				,@ItemUnitPrice
 				,@ItemPricing
 				,@ItemVFDDocumentNumber
 				,@ItemSiteId
@@ -370,6 +374,7 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
+			,@ItemUnitPrice					= @ItemUnitPrice
 			,@ItemTermDiscount				= @ItemTermDiscount
 			,@ItemTermDiscountBy			= @ItemTermDiscountBy
 			,@RecomputeTax					= @RecomputeTax
