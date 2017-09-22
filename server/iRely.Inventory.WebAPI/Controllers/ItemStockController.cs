@@ -30,9 +30,9 @@ namespace iRely.Inventory.WebApi
 
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetLocationStockOnHand(int intLocationId, int intItemId)
+        public async Task<HttpResponseMessage> GetLocationStockOnHand(int? intLocationId, int? intItemId, int? intSubLocationId, int? intStorageLocationId, int? intLotId, int? intItemUOMId)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetLocationStockOnHand(intLocationId, intItemId));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetLocationStockOnHand(intLocationId, intItemId, intSubLocationId, intStorageLocationId, intLotId, intItemUOMId));
         }
 
         [HttpGet]
@@ -51,6 +51,18 @@ namespace iRely.Inventory.WebApi
         public async Task<HttpResponseMessage> GetInventoryCountItemStockLookup(GetParameter param)
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetInventoryCountItemStockLookup(param));
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetItemStorageLocations(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStorageLocations(param));
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetItemSubLocations(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemSubLocations(param));
         }
     }
 }

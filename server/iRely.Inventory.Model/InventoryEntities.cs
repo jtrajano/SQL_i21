@@ -1,4 +1,5 @@
 ﻿using iRely.Common;
+using iRely.Inventory.Model;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -31,6 +32,7 @@ namespace iRely.Inventory.Model
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Configurations.Add(new vyuICGetItemStorageLocationMap());
             modelBuilder.Configurations.Add(new vyuICLotHistoryMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageUnitStockMap());
             modelBuilder.Configurations.Add(new vyuICInventoryCountItemStockLookupMap());

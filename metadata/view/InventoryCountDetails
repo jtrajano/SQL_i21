@@ -8,7 +8,7 @@
     "userConfig": {
         "designer|userAlias": "icinventorycountdetails",
         "designer|userClassName": "InventoryCountDetails",
-        "height": 611,
+        "height": 806,
         "layout": "fit",
         "minHeight": 580,
         "modal": true,
@@ -19,13 +19,24 @@
         "title": "Inventory Count Details",
         "width": 543
     },
+    "configAlternates": {
+        "designer|userAlias": "string",
+        "designer|userClassName": "string",
+        "height": "auto",
+        "layout": "string",
+        "minHeight": "number",
+        "modal": "boolean",
+        "requires": "typedarray",
+        "title": "string",
+        "width": "auto"
+    },
     "name": "MyWindow",
     "designerId": "fee564cf-f104-42ee-9b49-f11f6be0bf67",
     "viewControllerInstanceId": "6d604513-f9b8-4656-bb6c-22bb462a7ca6",
     "viewModelInstanceId": "1331d40b-bdb4-4d2a-9a92-bbf25a7933ed",
     "cn": [
         {
-            "type": "Ext.panel.Panel",
+            "type": "Ext.form.Panel",
             "reference": {
                 "name": "items",
                 "type": "array"
@@ -40,7 +51,17 @@
                 "title": null,
                 "ui": "i21-form"
             },
-            "name": "MyPanel2",
+            "configAlternates": {
+                "bodyPadding": "auto",
+                "container|align": "string",
+                "designer|uiInterfaceName": "string",
+                "itemId": "string",
+                "layout": "string",
+                "title": "string",
+                "ui": "string",
+                "bodyCls": "typedarray"
+            },
+            "name": "MyForm1",
             "designerId": "5d39f2a7-89f5-46b0-aca2-ff1b0faa1f0a",
             "cn": [
                 {
@@ -55,6 +76,12 @@
                         "dock": "top",
                         "layout|flex": 1,
                         "ui": "i21-toolbar"
+                    },
+                    "configAlternates": {
+                        "designer|uiInterfaceName": "string",
+                        "dock": "string",
+                        "layout|flex": "number",
+                        "ui": "string"
                     },
                     "name": "MyToolbar",
                     "designerId": "01722f25-97fa-49dd-a856-96a0522b0afc",
@@ -72,6 +99,13 @@
                                 "layout|flex": null,
                                 "text": "Save",
                                 "ui": "i21-button-toolbar-small"
+                            },
+                            "configAlternates": {
+                                "designer|uiInterfaceName": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "text": "string",
+                                "ui": "string"
                             },
                             "name": "MyButton3",
                             "designerId": "49ebf1f5-a17b-4188-86b3-7c3ce4e7ff73",
@@ -94,6 +128,12 @@
                                             "console.log(e);"
                                         ]
                                     },
+                                    "configAlternates": {
+                                        "designer|params": "typedarray",
+                                        "designer|viewControllerFn": "string",
+                                        "fn": "string",
+                                        "implHandler": "code"
+                                    },
                                     "name": "handler",
                                     "designerId": "b0278158-e3ca-478b-b54d-89bb2b1e8c5d"
                                 }
@@ -113,6 +153,13 @@
                                 "text": "Cancel",
                                 "ui": "i21-button-toolbar-small"
                             },
+                            "configAlternates": {
+                                "designer|uiInterfaceName": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "text": "string",
+                                "ui": "string"
+                            },
                             "name": "MyButton4",
                             "designerId": "69f1f5ac-aeab-45e8-b0ea-2d5bf7843245"
                         }
@@ -127,8 +174,17 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabPanel",
                         "layout|flex": 1
+                    },
+                    "configAlternates": {
+                        "activeTab": "auto",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "bodyCls": "typedarray"
                     },
                     "name": "MyTabPanel",
                     "designerId": "92498875-da71-4871-bfee-0a4c992f3298",
@@ -144,6 +200,11 @@
                                 "itemId": "tabDetails",
                                 "layout": "fit",
                                 "title": "Details"
+                            },
+                            "configAlternates": {
+                                "itemId": "string",
+                                "layout": "string",
+                                "title": "string"
                             },
                             "name": "MyPanel1",
                             "designerId": "95ca59b9-a3bb-474b-bfdf-3cb29e727352",
@@ -169,6 +230,10 @@
                                         "layout": "form",
                                         "padding": 10
                                     },
+                                    "configAlternates": {
+                                        "layout": "string",
+                                        "padding": "auto"
+                                    },
                                     "name": "MyContainer3",
                                     "designerId": "5b257ac4-ac2f-4142-99a4-11948208b1f9",
                                     "cn": [
@@ -180,9 +245,14 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "fieldLabel": "Count Line No",
+                                                "fieldLabel": "Count Line #",
                                                 "itemId": "txtCountLineNo",
                                                 "readOnly": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
                                             },
                                             "name": "MyTextField5",
                                             "designerId": "6de6f6c6-6bff-4048-9763-0b56009e128e"
@@ -198,72 +268,95 @@
                                                 "columns": [
                                                     "[",
                                                     "    {",
-                                                    "        dataIndex: 'intItemId',",
-                                                    "        dataType: 'numeric',",
-                                                    "        hidden: true",
+                                                    "    dataIndex: 'intItemId',",
+                                                    "    dataType: 'numeric',",
+                                                    "    hidden: true",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'intLocationId',",
-                                                    "        dataType: 'numeric',",
-                                                    "        hidden: true",
+                                                    "    dataIndex: 'intLocationId',",
+                                                    "    dataType: 'numeric',",
+                                                    "    hidden: true",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'strItemNo',",
-                                                    "        dataType: 'string',",
-                                                    "        text: 'Item Number',",
-                                                    "        flex: 1",
+                                                    "    dataIndex: 'intItemLocationId',",
+                                                    "    dataType: 'numeric',",
+                                                    "    hidden: true",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'strType',",
-                                                    "        dataType: 'string',",
-                                                    "        text: 'Item Type',",
-                                                    "        flex: 1",
+                                                    "    dataIndex: 'strItemNo',",
+                                                    "    dataType: 'string',",
+                                                    "    text: 'Item Number',",
+                                                    "    flex: 1",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'strDescription',",
-                                                    "        dataType: 'string',",
-                                                    "        text: 'Description',",
-                                                    "        flex: 1",
+                                                    "    dataIndex: 'strType',",
+                                                    "    dataType: 'string',",
+                                                    "    text: 'Item Type',",
+                                                    "    flex: 1",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'strLotTracking',",
-                                                    "        dataType: 'string',",
-                                                    "        hidden: true",
+                                                    "    dataIndex: 'strDescription',",
+                                                    "    dataType: 'string',",
+                                                    "    text: 'Description',",
+                                                    "    flex: 1",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'intCategoryId',",
-                                                    "        dataType: 'numeric',",
-                                                    "        hidden: true",
+                                                    "    dataIndex: 'strLotTracking',",
+                                                    "    dataType: 'string',",
+                                                    "    hidden: true",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'strCategoryCode',",
-                                                    "        dataType: 'string',",
-                                                    "        text: 'Category',",
-                                                    "        flex: 1",
+                                                    "    dataIndex: 'intCategoryId',",
+                                                    "    dataType: 'numeric',",
+                                                    "    hidden: true",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'intStockUOMId',",
-                                                    "        dataType: 'numeric',",
-                                                    "        hidden: true",
+                                                    "    dataIndex: 'strCategoryCode',",
+                                                    "    dataType: 'string',",
+                                                    "    text: 'Category',",
+                                                    "    flex: 1",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'strStockUOM',",
-                                                    "        dataType: 'string',",
-                                                    "        hidden: true",
+                                                    "    dataIndex: 'intStockUOMId',",
+                                                    "    dataType: 'numeric',",
+                                                    "    hidden: true",
+                                                    "    },",
+                                                    "    {",
+                                                    "    dataIndex: 'strStockUOM',",
+                                                    "    dataType: 'string',",
+                                                    "    hidden: true",
+                                                    "    },",
+                                                    "    {",
+                                                    "    dataIndex: 'dblStockUnitQty',",
+                                                    "    dataType: 'float',",
+                                                    "    hidden: true",
+                                                    "    },",
+                                                    "    {",
+                                                    "    dataIndex: 'ysnLotWeightsRequired',",
+                                                    "    dataType: 'boolean',",
+                                                    "    hidden: true",
                                                     "    }",
                                                     "]"
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strItemNo",
-                                                "fieldLabel": "Item",
+                                                "fieldLabel": "Item No",
                                                 "itemId": "cboItem",
+                                                "modelValidation": true,
                                                 "reference": "cboItem",
                                                 "valueField": "strItemNo"
                                             },
-                                            "name": "MyComboBox3",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "designer|createAlias": "string",
+                                                "displayField": "datafield",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "reference": "string",
+                                                "valueField": "datafield",
+                                                "modelValidation": "boolean"
                                             },
+                                            "name": "MyComboBox3",
                                             "designerId": "a8c9fda6-4bf7-44b7-ab0a-23cad6b50198",
                                             "customConfigs": [
                                                 {
@@ -304,10 +397,16 @@
                                                 "reference": "cboCountGroup",
                                                 "valueField": "strCountGroup"
                                             },
-                                            "name": "MyComboBox12",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "designer|createAlias": "string",
+                                                "displayField": "datafield",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "reference": "string",
+                                                "valueField": "datafield"
                                             },
+                                            "name": "MyComboBox12",
                                             "designerId": "eeac705e-315a-441c-9a65-24fb2f76fbaf",
                                             "customConfigs": [
                                                 {
@@ -329,6 +428,11 @@
                                                 "itemId": "txtDescription",
                                                 "readOnly": true
                                             },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
+                                            },
                                             "name": "MyTextField",
                                             "designerId": "5133b47b-c0ca-4e1f-9536-de643724737e"
                                         },
@@ -343,6 +447,11 @@
                                                 "fieldLabel": "Category",
                                                 "itemId": "txtCategory",
                                                 "readOnly": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
                                             },
                                             "name": "MyTextField1",
                                             "designerId": "f7705343-2b4e-4edf-a6eb-a02bc2d85de0"
@@ -364,6 +473,12 @@
                                                     "\t\thidden: true",
                                                     "\t},",
                                                     "    {",
+                                                    "        dataIndex: 'intItemId',",
+                                                    "        dataType: 'numeric',",
+                                                    "        text: 'Item Id',",
+                                                    "        hidden: true",
+                                                    "    },",
+                                                    "    {",
                                                     "\t\tdataIndex: 'intItemLocationId',",
                                                     "\t\tdataType: 'numeric',",
                                                     "\t\ttext: 'Item Location Id',",
@@ -381,49 +496,33 @@
                                                     "\t\ttext: 'Storage Location',",
                                                     "\t\tflex: 1",
                                                     "\t},    ",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'intStorageLocationId',",
-                                                    "\t\tdataType: 'numeric',",
-                                                    "\t\ttext: 'Storage Unit Id',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strStorageLocationName',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Storage Unit',",
-                                                    "\t\tflex: 1",
-                                                    "\t},    ",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'dblOnHand',",
-                                                    "\t\tdataType: 'float',",
-                                                    "\t\ttext: 'Available Qty',",
-                                                    "\t\tflex: 1",
-                                                    "\t},",
                                                     "    {",
-                                                    "\t\tdataIndex: 'intItemUOMId',",
-                                                    "\t\tdataType: 'numeric',",
-                                                    "\t\ttext: 'Item UOM Id',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strUnitMeasure',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'UOM',",
-                                                    "\t\tflex: 1",
-                                                    "\t}",
+                                                    "        dataIndex: 'strClassification',",
+                                                    "        dataType: 'string',",
+                                                    "        text: 'Classification',",
+                                                    "        hidden: true",
+                                                    "    }",
                                                     "]"
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strSubLocationName",
                                                 "fieldLabel": "Storage Location",
                                                 "itemId": "cboStorageLocation",
+                                                "modelValidation": true,
                                                 "reference": "cboStorageLocation",
                                                 "valueField": "strSubLocationName"
                                             },
-                                            "name": "MyComboBox4",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "designer|createAlias": "string",
+                                                "displayField": "datafield",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "reference": "string",
+                                                "valueField": "datafield",
+                                                "modelValidation": "boolean"
                                             },
+                                            "name": "MyComboBox4",
                                             "designerId": "344aa5c1-f4f3-4d76-a8e8-5602eb34d67d",
                                             "customConfigs": [
                                                 {
@@ -450,12 +549,6 @@
                                                     "        hidden: true",
                                                     "    },",
                                                     "    {",
-                                                    "        dataIndex: 'intItemLocationId',",
-                                                    "        dataType: 'numeric',",
-                                                    "        text: 'Item Location Id',",
-                                                    "        hidden: true",
-                                                    "    },",
-                                                    "    {",
                                                     "        dataIndex: 'intSubLocationId',",
                                                     "        dataType: 'numeric',",
                                                     "        text: 'Storage Location Id',",
@@ -472,29 +565,6 @@
                                                     "        dataType: 'string',",
                                                     "        text: 'Storage Unit',",
                                                     "        flex: 1",
-                                                    "    },",
-                                                    "    {",
-                                                    "        dataIndex: 'strSubLocationName',",
-                                                    "        dataType: 'string',",
-                                                    "        hidden: true",
-                                                    "    },",
-                                                    "    {",
-                                                    "        dataIndex: 'dblOnHand',",
-                                                    "        dataType: 'float',",
-                                                    "        text: 'Available Qty',",
-                                                    "        flex: 1",
-                                                    "    },",
-                                                    "    {",
-                                                    "        dataIndex: 'intItemUOMId',",
-                                                    "        dataType: 'numeric',",
-                                                    "        text: 'Item UOM Id',",
-                                                    "        hidden: true",
-                                                    "    },",
-                                                    "    {",
-                                                    "        dataIndex: 'strUnitMeasure',",
-                                                    "        dataType: 'string',",
-                                                    "        text: 'UOM',",
-                                                    "        flex: 1",
                                                     "    }",
                                                     "]"
                                                 ],
@@ -502,13 +572,21 @@
                                                 "displayField": "strStorageLocationName",
                                                 "fieldLabel": "Storage Unit",
                                                 "itemId": "cboStorageUnit",
+                                                "modelValidation": true,
                                                 "reference": "cboStorageUnit",
                                                 "valueField": "strStorageLocationName"
                                             },
-                                            "name": "MyComboBox6",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "designer|createAlias": "string",
+                                                "displayField": "datafield",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "reference": "string",
+                                                "valueField": "datafield",
+                                                "modelValidation": "boolean"
                                             },
+                                            "name": "MyComboBox6",
                                             "designerId": "290606b0-5b8f-4eed-b25b-8a284a9a492a",
                                             "customConfigs": [
                                                 {
@@ -587,19 +665,31 @@
                                                     "\t\tdataType: 'string',",
                                                     "\t\ttext: 'UOM',",
                                                     "\t\tflex: 1",
-                                                    "\t}",
+                                                    "\t},",
+                                                    "    {",
+                                                    "        dataIndex: 'dblItemUOMConv',",
+                                                    "        dataType: 'float',",
+                                                    "        hidden: true",
+                                                    "    }",
                                                     "]"
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strLotNumber",
-                                                "fieldLabel": "Lot No",
+                                                "fieldLabel": "Lot Id",
                                                 "itemId": "cboLotNo",
+                                                "modelValidation": true,
                                                 "valueField": "strLotNumber"
                                             },
-                                            "name": "MyComboBox7",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "designer|createAlias": "string",
+                                                "displayField": "datafield",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "valueField": "datafield",
+                                                "modelValidation": "boolean"
                                             },
+                                            "name": "MyComboBox7",
                                             "designerId": "912f7e94-a09b-4d7e-b4f6-27fd5cf84685",
                                             "customConfigs": [
                                                 {
@@ -619,10 +709,90 @@
                                             "userConfig": {
                                                 "fieldLabel": "Lot Alias",
                                                 "itemId": "txtLotAlias",
-                                                "readOnly": true
+                                                "readOnly": false
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
                                             },
                                             "name": "MyTextField11",
                                             "designerId": "a0dc1d46-ddb4-4333-9c7e-617aff39b2a6"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "        dataIndex: 'strParentLotNumber',",
+                                                    "        dataType: 'string',",
+                                                    "        text: 'Parent Lot Id',",
+                                                    "        flex: 1",
+                                                    "    },",
+                                                    "    {",
+                                                    "        dataIndex: 'intItemId',",
+                                                    "        dataType: 'numeric',",
+                                                    "        text: 'Item Id',",
+                                                    "        hidden: true",
+                                                    "    },",
+                                                    "    {",
+                                                    "        dataIndex: 'intParentLotId',",
+                                                    "        dataType: 'numeric',",
+                                                    "        hidden: true",
+                                                    "    }",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strParentLotNumber",
+                                                "fieldLabel": "Parent Lot Id",
+                                                "itemId": "cboParentLotNo",
+                                                "modelValidation": true,
+                                                "valueField": "strParentLotNumber"
+                                            },
+                                            "configAlternates": {
+                                                "columns": "array",
+                                                "designer|createAlias": "string",
+                                                "displayField": "datafield",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "valueField": "datafield",
+                                                "modelValidation": "boolean"
+                                            },
+                                            "name": "MyComboBox93",
+                                            "designerId": "7e9a9ce1-baea-43f9-a684-23a86ef132af",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Text",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "fieldLabel": "UOM",
+                                                "itemId": "txtStockUOM",
+                                                "readOnly": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
+                                            },
+                                            "name": "MyTextField14",
+                                            "designerId": "48967425-3044-407a-80d5-e50075980fbd"
                                         },
                                         {
                                             "type": "Ext.form.field.Number",
@@ -632,9 +802,14 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "fieldLabel": "System Count",
+                                                "fieldLabel": "On Hand",
                                                 "itemId": "txtSystemCount",
                                                 "readOnly": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
                                             },
                                             "name": "MyNumberField7",
                                             "designerId": "4b8a9f1f-fdd6-43e3-bf4e-c3421f175f6b"
@@ -647,9 +822,14 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "fieldLabel": "Cost",
+                                                "fieldLabel": "Last Cost",
                                                 "itemId": "txtCost",
                                                 "readOnly": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
                                             },
                                             "name": "MyNumberField6",
                                             "designerId": "19f5b9e8-43c2-49ba-acfa-b98369a7ade7"
@@ -665,6 +845,10 @@
                                                 "fieldLabel": "Qty Received",
                                                 "itemId": "txtQtyReceived"
                                             },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string"
+                                            },
                                             "name": "MyNumberField14",
                                             "designerId": "5382ac00-dd1a-4ba8-b2f3-b3105e4e6a1c"
                                         },
@@ -679,6 +863,10 @@
                                                 "fieldLabel": "Qty Sold",
                                                 "itemId": "txtQtySold"
                                             },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string"
+                                            },
                                             "name": "MyNumberField15",
                                             "designerId": "58c71862-0a11-4e8f-a285-1dca743c4a49"
                                         },
@@ -690,8 +878,118 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "fieldLabel": "# of Pallets",
+                                                "itemId": "txtNoOfPallets"
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string"
+                                            },
+                                            "name": "MyNumberField36",
+                                            "designerId": "e493e659-4867-420a-a36f-3df9511a1965"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "fieldLabel": "Qty per Pallet",
+                                                "itemId": "txtQtyPerPallet"
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string"
+                                            },
+                                            "name": "MyNumberField68",
+                                            "designerId": "d9c29159-f0f8-4af8-b8b5-8639b6ad72a9"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intItemUOMId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strUnitMeasure',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Unit Measure',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strUnitType',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Unit Type',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "    {",
+                                                    "\t\tdataIndex: 'dblUnitQty',",
+                                                    "\t\tdataType: 'float',",
+                                                    "        text: 'Unit Qty',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\txtype: 'checkcolumn',",
+                                                    "\t\tdataIndex: 'ysnStockUnit',",
+                                                    "\t\tdataType: 'boolean',",
+                                                    "\t\ttext: 'Stock Unit',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strUnitMeasure",
+                                                "fieldLabel": "Count UOM",
+                                                "itemId": "cboUOM",
+                                                "modelValidation": true,
+                                                "valueField": "strUnitMeasure"
+                                            },
+                                            "configAlternates": {
+                                                "columns": "array",
+                                                "designer|createAlias": "string",
+                                                "displayField": "datafield",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "valueField": "datafield",
+                                                "modelValidation": "boolean"
+                                            },
+                                            "name": "MyComboBox9",
+                                            "designerId": "9b652af7-2103-4e3d-8d15-631caea6f927",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "fieldLabel": "Physical Count",
-                                                "itemId": "txtPhysicalCount"
+                                                "itemId": "txtPhysicalCount",
+                                                "modelValidation": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "modelValidation": "boolean"
                                             },
                                             "name": "MyNumberField3",
                                             "designerId": "8ceacd0c-3231-48b1-a955-dc2c1933b8db"
@@ -723,57 +1021,39 @@
                                                     "\t\ttext: 'Unit Type',",
                                                     "\t\tflex: 1",
                                                     "\t},",
+                                                    "    {",
+                                                    "\t\tdataIndex: 'dblUnitQty',",
+                                                    "\t\tdataType: 'float',",
+                                                    "        text: 'Unit Qty',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
                                                     "\t{",
                                                     "\t\txtype: 'checkcolumn',",
                                                     "\t\tdataIndex: 'ysnStockUnit',",
                                                     "\t\tdataType: 'boolean',",
                                                     "\t\ttext: 'Stock Unit',",
                                                     "\t\tflex: 1",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'dblUnitQty',",
-                                                    "\t\tdataType: 'float',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'dblOnHand',",
-                                                    "\t\tdataType: 'float',",
-                                                    "\t\ttext: 'On Hand',",
-                                                    "\t\tflex: 1",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'intSubLocationId',",
-                                                    "\t\tdataType: 'numeric',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strSubLocationName',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'intStorageLocationId',",
-                                                    "\t\tdataType: 'numeric',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strStorageLocationName',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\thidden: true",
                                                     "\t}",
                                                     "]"
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strUnitMeasure",
-                                                "fieldLabel": "UOM",
-                                                "itemId": "cboUOM",
+                                                "fieldLabel": "Gross/Net UOM",
+                                                "itemId": "cboWeightUOM",
+                                                "modelValidation": true,
                                                 "valueField": "strUnitMeasure"
                                             },
-                                            "name": "MyComboBox9",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "designer|createAlias": "string",
+                                                "displayField": "datafield",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "valueField": "datafield",
+                                                "modelValidation": "boolean"
                                             },
-                                            "designerId": "9b652af7-2103-4e3d-8d15-631caea6f927",
+                                            "name": "MyComboBox91",
+                                            "designerId": "e36f2eba-a347-4f23-9be6-59f921984494",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -790,9 +1070,54 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "fieldLabel": "Gross Weight",
+                                                "itemId": "txtWeightQty",
+                                                "modelValidation": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "modelValidation": "boolean"
+                                            },
+                                            "name": "MyNumberField69",
+                                            "designerId": "dbbe0d6c-6dec-4f32-880b-9c593741782f"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "fieldLabel": "Net Weight",
+                                                "itemId": "txtNetWeightQty",
+                                                "modelValidation": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "modelValidation": "boolean"
+                                            },
+                                            "name": "MyNumberField70",
+                                            "designerId": "f6fb6a3e-5a3e-4c6c-90b1-4e35dc2b6c81"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "fieldLabel": "Physical Count in Stock Unit",
                                                 "itemId": "txtPhysicalCountInStockUnit",
                                                 "readOnly": true
+                                            },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
                                             },
                                             "name": "MyNumberField4",
                                             "designerId": "5d635b80-78fe-4dac-8749-6bbaf0d4c0ec"
@@ -809,6 +1134,11 @@
                                                 "itemId": "txtVariance",
                                                 "readOnly": true
                                             },
+                                            "configAlternates": {
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "readOnly": "boolean"
+                                            },
                                             "name": "MyNumberField5",
                                             "designerId": "e2c69390-026b-404e-86bc-6d9a3a5f2c1f"
                                         },
@@ -824,6 +1154,11 @@
                                                 "fieldLabel": "Recount",
                                                 "itemId": "chkRecount"
                                             },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string"
+                                            },
                                             "name": "MyCheckbox2",
                                             "designerId": "e37d0ffa-a51e-47dc-b81f-a3184269d6c8"
                                         },
@@ -838,6 +1173,11 @@
                                                 "itemId": "lblEnteredBy",
                                                 "text": "Entered by",
                                                 "width": 200
+                                            },
+                                            "configAlternates": {
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "width": "auto"
                                             },
                                             "name": "MyLabel2",
                                             "designerId": "ce728f84-6000-450d-8993-71346ed1755f"
@@ -858,6 +1198,10 @@
                     "userConfig": {
                         "dock": "bottom",
                         "layout|flex": 1
+                    },
+                    "configAlternates": {
+                        "dock": "string",
+                        "layout|flex": "number"
                     },
                     "name": "statusbarpaging13",
                     "designerId": "d4a45d8f-6d6e-4187-b5da-2cab756b3b74",

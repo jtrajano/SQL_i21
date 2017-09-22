@@ -23,6 +23,24 @@
         "title": "Fuel Types",
         "width": 481
     },
+    "configAlternates": {
+        "collapsible": "boolean",
+        "defaultFocus": "string",
+        "designer|userAlias": "string",
+        "designer|userClassName": "string",
+        "height": "auto",
+        "hidden": "boolean",
+        "icon": "string",
+        "layout": "string",
+        "maxHeight": "number",
+        "maximizable": "boolean",
+        "minHeight": "number",
+        "minWidth": "number",
+        "minimizable": "boolean",
+        "reference": "string",
+        "title": "string",
+        "width": "auto"
+    },
     "designerId": "db932a16-d560-435e-99db-9c598d10bbc3",
     "viewControllerInstanceId": "0427e452-7553-4ce5-bda7-4a08d04a7125",
     "viewModelInstanceId": "f67117e8-4622-4643-9942-aa4283dbd0b8",
@@ -52,6 +70,24 @@
                 "url": null,
                 "width": null
             },
+            "configAlternates": {
+                "autoShow": "boolean",
+                "bodyBorder": "boolean",
+                "bodyPadding": "auto",
+                "container|align": "string",
+                "dock": "string",
+                "frame": "boolean",
+                "header": "boolean",
+                "height": "auto",
+                "itemId": "string",
+                "layout": "string",
+                "margin": "auto",
+                "title": "string",
+                "trackResetOnLoad": "boolean",
+                "ui": "string",
+                "url": "string",
+                "width": "auto"
+            },
             "name": "MyForm7",
             "designerId": "3580b407-2aef-46f1-a34b-3cbbaa7c51c1",
             "cn": [
@@ -68,6 +104,13 @@
                         "dock": "top",
                         "ui": "i21-toolbar",
                         "width": 588
+                    },
+                    "configAlternates": {
+                        "container|padding": "auto",
+                        "designer|displayName": "string",
+                        "dock": "string",
+                        "ui": "string",
+                        "width": "auto"
                     },
                     "name": "MyToolbar35",
                     "designerId": "4c43bcfc-6c5e-414f-a925-b6afb70a8797",
@@ -90,6 +133,17 @@
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "layout|margins": "string",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
+                            },
                             "name": "MyButton93",
                             "designerId": "a4df0e79-1d2b-418b-a439-540ece465d94"
                         },
@@ -109,6 +163,16 @@
                                 "text": "Save",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
+                            },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
                             },
                             "name": "MyButton94",
                             "designerId": "5002d7b9-988e-404d-ac3e-86d83cd8e870"
@@ -130,6 +194,16 @@
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
+                            },
                             "name": "MyButton95",
                             "designerId": "f8b8761d-cc5c-405c-817f-7e91413a3fb6"
                         },
@@ -149,6 +223,16 @@
                                 "text": "Delete",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
+                            },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
                             },
                             "name": "MyButton96",
                             "designerId": "3e081feb-2ab4-48ab-8cf5-cb4fd9d555d7"
@@ -170,6 +254,16 @@
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
+                            },
                             "name": "MyButton97",
                             "designerId": "4068f749-609c-45c5-817d-ed68ffc707e2"
                         },
@@ -189,6 +283,16 @@
                                 "text": "Close",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
+                            },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
                             },
                             "name": "MyButton98",
                             "designerId": "658b5c25-ea39-4462-8b10-b6572e1379c6"
@@ -211,6 +315,13 @@
                         "layout|flex": 1,
                         "plain": true
                     },
+                    "configAlternates": {
+                        "activeTab": "auto",
+                        "bodyCls": "typedarray",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "plain": "boolean"
+                    },
                     "name": "MyTabPanel8",
                     "designerId": "0f5b4473-1441-4cc7-88dc-1e02992bfd40",
                     "cn": [
@@ -226,6 +337,12 @@
                                 "container|align": "stretch",
                                 "layout": "vbox",
                                 "title": "Details"
+                            },
+                            "configAlternates": {
+                                "bodyPadding": "auto",
+                                "container|align": "string",
+                                "layout": "string",
+                                "title": "string"
                             },
                             "name": "MyPanel1",
                             "designerId": "ea454266-dd01-4e5d-a0b6-f005f040d98d",
@@ -256,6 +373,16 @@
                                         "layout|margins": null,
                                         "margin": null,
                                         "width": null
+                                    },
+                                    "configAlternates": {
+                                        "container|align": "string",
+                                        "designer|displayName": "string",
+                                        "height": "auto",
+                                        "layout": "string",
+                                        "layout|flex": "number",
+                                        "layout|margins": "string",
+                                        "margin": "auto",
+                                        "width": "auto"
                                     },
                                     "name": "MyContainer55",
                                     "designerId": "07b54fe4-15a3-4d72-a1ad-7116677b9577",
@@ -314,11 +441,27 @@
                                                 "valueField": "strRinFuelCategoryCode",
                                                 "width": null
                                             },
-                                            "name": "MyComboBox63",
                                             "configAlternates": {
                                                 "columns": "array",
-                                                "enableDrillDown": "boolean"
+                                                "enableDrillDown": "boolean",
+                                                "designer|createAlias": "string",
+                                                "designer|displayName": "string",
+                                                "displayField": "datafield",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "valueField": "datafield",
+                                                "width": "auto"
                                             },
+                                            "name": "MyComboBox63",
                                             "designerId": "a5e5c5b5-8952-48dd-b15e-a4148ba0371a",
                                             "customConfigs": [
                                                 {
@@ -381,11 +524,27 @@
                                                 "valueField": "strRinFeedStockCode",
                                                 "width": null
                                             },
-                                            "name": "MyComboBox64",
                                             "configAlternates": {
                                                 "columns": "array",
-                                                "enableDrillDown": "boolean"
+                                                "enableDrillDown": "boolean",
+                                                "designer|createAlias": "string",
+                                                "designer|displayName": "string",
+                                                "displayField": "datafield",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "valueField": "datafield",
+                                                "width": "auto"
                                             },
+                                            "name": "MyComboBox64",
                                             "designerId": "158e82c0-7bdf-4061-b5e5-c9be997929e4",
                                             "customConfigs": [
                                                 {
@@ -429,10 +588,29 @@
                                                 "value": null,
                                                 "width": null
                                             },
-                                            "name": "MyNumberField14",
                                             "configAlternates": {
-                                                "quantityField": "boolean"
+                                                "quantityField": "boolean",
+                                                "allowDecimals": "boolean",
+                                                "designer|displayName": "string",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldCls": "string",
+                                                "fieldLabel": "string",
+                                                "fieldStyle": "string",
+                                                "hideTrigger": "boolean",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number",
+                                                "value": "object",
+                                                "width": "auto"
                                             },
+                                            "name": "MyNumberField14",
                                             "designerId": "612b526d-7188-47bd-a31f-9cb9212ff0dc",
                                             "customConfigs": [
                                                 {
@@ -468,10 +646,26 @@
                                                 "tabIndex": null,
                                                 "width": null
                                             },
-                                            "name": "MyNumberField15",
                                             "configAlternates": {
-                                                "quantityField": "boolean"
+                                                "quantityField": "boolean",
+                                                "allowDecimals": "boolean",
+                                                "designer|displayName": "string",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "fieldStyle": "string",
+                                                "hideTrigger": "boolean",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "width": "auto"
                                             },
+                                            "name": "MyNumberField15",
                                             "designerId": "1b19e950-2f0f-4e8f-93a0-d9150376cc3a",
                                             "customConfigs": [
                                                 {
@@ -502,6 +696,21 @@
                                                 "name": null,
                                                 "tabIndex": null,
                                                 "width": 170
+                                            },
+                                            "configAlternates": {
+                                                "designer|displayName": "string",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "width": "auto"
                                             },
                                             "name": "MyTextField",
                                             "designerId": "cb947ddc-b53d-408a-828e-21ff31f0b23d"
@@ -554,11 +763,27 @@
                                                 "valueField": "strRinFuelCode",
                                                 "width": 170
                                             },
-                                            "name": "MyComboBox66",
                                             "configAlternates": {
                                                 "columns": "array",
-                                                "enableDrillDown": "boolean"
+                                                "enableDrillDown": "boolean",
+                                                "designer|createAlias": "string",
+                                                "designer|displayName": "string",
+                                                "displayField": "datafield",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "valueField": "datafield",
+                                                "width": "auto"
                                             },
+                                            "name": "MyComboBox66",
                                             "designerId": "74f69a76-67b8-437d-aec2-c1f740ea3eda",
                                             "customConfigs": [
                                                 {
@@ -621,11 +846,27 @@
                                                 "valueField": "strRinProcessCode",
                                                 "width": 170
                                             },
-                                            "name": "MyComboBox67",
                                             "configAlternates": {
                                                 "columns": "array",
-                                                "enableDrillDown": "boolean"
+                                                "enableDrillDown": "boolean",
+                                                "designer|createAlias": "string",
+                                                "designer|displayName": "string",
+                                                "displayField": "datafield",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "valueField": "datafield",
+                                                "width": "auto"
                                             },
+                                            "name": "MyComboBox67",
                                             "designerId": "a67ee039-a375-44bc-9291-5cfcb0742753",
                                             "customConfigs": [
                                                 {
@@ -694,11 +935,27 @@
                                                 "valueField": "strRinFeedStockUOMCode",
                                                 "width": 170
                                             },
-                                            "name": "MyComboBox68",
                                             "configAlternates": {
                                                 "columns": "array",
-                                                "enableDrillDown": "boolean"
+                                                "enableDrillDown": "boolean",
+                                                "designer|createAlias": "string",
+                                                "designer|displayName": "string",
+                                                "displayField": "datafield",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "valueField": "datafield",
+                                                "width": "auto"
                                             },
+                                            "name": "MyComboBox68",
                                             "designerId": "03dc79f4-15f4-4ce2-9001-988db48be2a6",
                                             "customConfigs": [
                                                 {
@@ -738,10 +995,25 @@
                                                 "tabIndex": null,
                                                 "width": null
                                             },
-                                            "name": "MyNumberField16",
                                             "configAlternates": {
-                                                "quantityField": "boolean"
+                                                "quantityField": "boolean",
+                                                "designer|displayName": "string",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "fieldStyle": "string",
+                                                "hideTrigger": "boolean",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "width": "auto"
                                             },
+                                            "name": "MyNumberField16",
                                             "designerId": "6794b5f5-5d4f-40e7-8b9d-d3a86191072b",
                                             "customConfigs": [
                                                 {
@@ -764,6 +1036,13 @@
                                                 "itemId": "chkRenewableBiomass",
                                                 "labelWidth": 165,
                                                 "layout|flex": null
+                                            },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number"
                                             },
                                             "name": "MyCheckbox63",
                                             "designerId": "5519542f-ed1d-4d6d-8ba8-98517576a584"
@@ -793,10 +1072,25 @@
                                                 "tabIndex": null,
                                                 "width": null
                                             },
-                                            "name": "MyNumberField17",
                                             "configAlternates": {
-                                                "quantityField": "boolean"
+                                                "quantityField": "boolean",
+                                                "designer|displayName": "string",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "fieldStyle": "string",
+                                                "hideTrigger": "boolean",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "width": "auto"
                                             },
+                                            "name": "MyNumberField17",
                                             "designerId": "f5644e27-75c6-46b3-85bf-659a24bbcb4b",
                                             "customConfigs": [
                                                 {
@@ -819,6 +1113,13 @@
                                                 "itemId": "chkDeductDenaturantFromRin",
                                                 "labelWidth": 165,
                                                 "layout|flex": null
+                                            },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number"
                                             },
                                             "name": "MyCheckbox64",
                                             "designerId": "70fc0d5d-47e2-4d04-aec9-c7a5648ab50c"
@@ -844,6 +1145,15 @@
                         "itemId": "pagingtoolbar",
                         "layout|flex": 1,
                         "store": null
+                    },
+                    "configAlternates": {
+                        "afterPageText": "string",
+                        "designer|createAlias": "string",
+                        "designer|displayName": "string",
+                        "dock": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "store": "store"
                     },
                     "name": "statusbarpaging19",
                     "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",

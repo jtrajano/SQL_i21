@@ -85,6 +85,7 @@ Ext.define('Inventory.model.ItemStockView', {
         { name: 'intSalesTaxGroupId', type: 'int', allowNull: true },
         { name: 'strSalesTax', type: 'string' },
         { name: 'intPurchaseTaxGroupId', type: 'int', allowNull: true },
-        { name: 'strPurchaseTax', type: 'string' }
+        { name: 'strPurchaseTax', type: 'string' },
+        { name: 'ysnLotWeightsRequired', type: 'boolean', defaultValue: false }        
     ]
 });

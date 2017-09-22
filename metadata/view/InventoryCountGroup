@@ -23,6 +23,24 @@
         "title": "Inventory Count Group",
         "width": 473
     },
+    "configAlternates": {
+        "collapsible": "boolean",
+        "defaultFocus": "string",
+        "designer|userAlias": "string",
+        "designer|userClassName": "string",
+        "height": "auto",
+        "hidden": "boolean",
+        "icon": "string",
+        "layout": "string",
+        "maxHeight": "number",
+        "maximizable": "boolean",
+        "minHeight": "number",
+        "minWidth": "number",
+        "minimizable": "boolean",
+        "reference": "string",
+        "title": "string",
+        "width": "auto"
+    },
     "name": "ContractDocument1",
     "designerId": "91b8f386-0350-4266-9ceb-f8c80198ac34",
     "viewControllerInstanceId": "a01d68fb-c827-41a9-a2ab-321695df1566",
@@ -53,6 +71,24 @@
                 "url": null,
                 "width": null
             },
+            "configAlternates": {
+                "autoShow": "boolean",
+                "bodyBorder": "boolean",
+                "bodyPadding": "auto",
+                "container|align": "string",
+                "dock": "string",
+                "frame": "boolean",
+                "header": "boolean",
+                "height": "auto",
+                "itemId": "string",
+                "layout": "string",
+                "margin": "auto",
+                "title": "string",
+                "trackResetOnLoad": "boolean",
+                "ui": "string",
+                "url": "string",
+                "width": "auto"
+            },
             "name": "MyForm7",
             "designerId": "71fa9ab5-3496-42f4-96fa-5d117049cc9a",
             "cn": [
@@ -69,6 +105,13 @@
                         "dock": "top",
                         "ui": "i21-toolbar",
                         "width": 588
+                    },
+                    "configAlternates": {
+                        "container|padding": "auto",
+                        "designer|displayName": "string",
+                        "dock": "string",
+                        "ui": "string",
+                        "width": "auto"
                     },
                     "name": "MyToolbar35",
                     "designerId": "365da001-e275-4488-a4be-1b5e660a47c8",
@@ -91,6 +134,17 @@
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "layout|margins": "string",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
+                            },
                             "name": "MyButton93",
                             "designerId": "9f878486-10cc-4301-b047-cd24f2eae7ba"
                         },
@@ -110,6 +164,16 @@
                                 "text": "Save",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
+                            },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
                             },
                             "name": "MyButton94",
                             "designerId": "d35da742-47b4-4067-a5f2-ba82d21521b5"
@@ -131,6 +195,16 @@
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
+                            },
                             "name": "MyButton95",
                             "designerId": "d301b4e9-8456-4690-9d7c-83e32ead8b8e"
                         },
@@ -150,6 +224,16 @@
                                 "text": "Delete",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
+                            },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
                             },
                             "name": "MyButton96",
                             "designerId": "2a9820c3-4724-4cd4-981d-74034705a2e9"
@@ -171,6 +255,16 @@
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
+                            },
                             "name": "MyButton97",
                             "designerId": "53634263-823f-4161-ae5c-4459db8c4ae1"
                         },
@@ -190,6 +284,16 @@
                                 "text": "Close",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
+                            },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto"
                             },
                             "name": "MyButton98",
                             "designerId": "51f3f9a1-f34c-4c56-9632-55ac021bdfba"
@@ -212,6 +316,13 @@
                         "layout|flex": 1,
                         "plain": true
                     },
+                    "configAlternates": {
+                        "activeTab": "auto",
+                        "bodyCls": "typedarray",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "plain": "boolean"
+                    },
                     "name": "MyTabPanel9",
                     "designerId": "02da4fc9-f90e-46a4-8736-3ecd0e000ed6",
                     "cn": [
@@ -227,6 +338,12 @@
                                 "container|align": "stretch",
                                 "layout": "vbox",
                                 "title": "Details"
+                            },
+                            "configAlternates": {
+                                "bodyPadding": "auto",
+                                "container|align": "string",
+                                "layout": "string",
+                                "title": "string"
                             },
                             "name": "MyPanel1",
                             "designerId": "df2bd1b4-28f9-42fd-9c0a-619a2df9324e",
@@ -258,6 +375,16 @@
                                         "margin": null,
                                         "width": null
                                     },
+                                    "configAlternates": {
+                                        "container|align": "string",
+                                        "designer|displayName": "string",
+                                        "height": "auto",
+                                        "layout": "string",
+                                        "layout|flex": "number",
+                                        "layout|margins": "string",
+                                        "margin": "auto",
+                                        "width": "auto"
+                                    },
                                     "name": "MyContainer55",
                                     "designerId": "b34a26ae-b535-49de-87c7-c251391a5598",
                                     "cn": [
@@ -285,6 +412,24 @@
                                                 "tabIndex": null,
                                                 "value": null,
                                                 "width": null
+                                            },
+                                            "configAlternates": {
+                                                "designer|displayName": "string",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldCls": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number",
+                                                "value": "object",
+                                                "width": "auto"
                                             },
                                             "name": "MyTextField65",
                                             "designerId": "068d8e57-3f5e-4e6c-aa10-64156c8ba71d"
@@ -315,10 +460,26 @@
                                                 "tabIndex": null,
                                                 "width": null
                                             },
-                                            "name": "MyNumberField4",
                                             "configAlternates": {
-                                                "quantityField": "boolean"
+                                                "quantityField": "boolean",
+                                                "allowDecimals": "boolean",
+                                                "designer|createAlias": "string",
+                                                "designer|displayName": "string",
+                                                "enforceMaxLength": "boolean",
+                                                "fieldLabel": "string",
+                                                "hideTrigger": "boolean",
+                                                "itemId": "string",
+                                                "labelPad": "number",
+                                                "labelSeparator": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number",
+                                                "margin": "auto",
+                                                "maxLength": "number",
+                                                "name": "string",
+                                                "tabIndex": "number",
+                                                "width": "auto"
                                             },
+                                            "name": "MyNumberField4",
                                             "designerId": "93ed1e36-5c50-42cf-8d0c-ba95f8cae522",
                                             "customConfigs": [
                                                 {
@@ -342,6 +503,13 @@
                                                 "labelWidth": 125,
                                                 "layout|flex": null
                                             },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number"
+                                            },
                                             "name": "MyCheckbox64",
                                             "designerId": "39b24628-0392-4fb9-9a86-1e8628950428"
                                         },
@@ -358,6 +526,13 @@
                                                 "itemId": "chkScannedCountEntry",
                                                 "labelWidth": 125,
                                                 "layout|flex": null
+                                            },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number"
                                             },
                                             "name": "MyCheckbox4",
                                             "designerId": "d595a5b2-9dad-4f6f-bb7b-815b657689aa"
@@ -376,6 +551,13 @@
                                                 "labelWidth": 125,
                                                 "layout|flex": null
                                             },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number"
+                                            },
                                             "name": "MyCheckbox5",
                                             "designerId": "9885f42c-5da3-4b37-9f62-107ef9305db2"
                                         },
@@ -392,6 +574,13 @@
                                                 "itemId": "chkCountByPallets",
                                                 "labelWidth": 125,
                                                 "layout|flex": null
+                                            },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number"
                                             },
                                             "name": "MyCheckbox41",
                                             "designerId": "5260eca4-246c-4853-ba2d-6e9ff81134d8"
@@ -410,6 +599,13 @@
                                                 "labelWidth": 125,
                                                 "layout|flex": null
                                             },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number"
+                                            },
                                             "name": "MyCheckbox6",
                                             "designerId": "888ac402-caea-4a78-816a-c18c03e3b079"
                                         },
@@ -426,6 +622,13 @@
                                                 "itemId": "chkExternal",
                                                 "labelWidth": 125,
                                                 "layout|flex": null
+                                            },
+                                            "configAlternates": {
+                                                "boxLabel": "string",
+                                                "fieldLabel": "string",
+                                                "itemId": "string",
+                                                "labelWidth": "number",
+                                                "layout|flex": "number"
                                             },
                                             "name": "MyCheckbox42",
                                             "designerId": "5e5feca7-e439-44f8-aec8-e75f875bceb2"
@@ -451,6 +654,15 @@
                         "itemId": "pagingtoolbar",
                         "layout|flex": 1,
                         "store": null
+                    },
+                    "configAlternates": {
+                        "afterPageText": "string",
+                        "designer|createAlias": "string",
+                        "designer|displayName": "string",
+                        "dock": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "store": "store"
                     },
                     "name": "statusbarpaging112",
                     "designerId": "5f645857-eb50-4702-8a6e-970a15d31272",

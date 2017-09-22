@@ -17,6 +17,18 @@
         "title": "Lot History",
         "width": 800
     },
+    "configAlternates": {
+        "designer|userAlias": "string",
+        "designer|userClassName": "string",
+        "height": "auto",
+        "layout": "string",
+        "maximizable": "boolean",
+        "minHeight": "number",
+        "minWidth": "number",
+        "minimizable": "boolean",
+        "title": "string",
+        "width": "auto"
+    },
     "name": "MyWindow",
     "designerId": "9d74ad70-3b4c-4a9b-ba01-2f6486ba7f29",
     "viewControllerInstanceId": "e40c3d59-dc3c-4404-a139-fc030495cc7c",
@@ -35,6 +47,13 @@
                 "dock": "top",
                 "ui": "i21-toolbar",
                 "width": 588
+            },
+            "configAlternates": {
+                "container|padding": "auto",
+                "designer|displayName": "string",
+                "dock": "string",
+                "ui": "string",
+                "width": "auto"
             },
             "name": "MyToolbar16",
             "designerId": "0857e664-2dc0-41ae-8847-47708ecf9987",
@@ -57,6 +76,17 @@
                         "ui": "i21-button-toolbar-small",
                         "width": null
                     },
+                    "configAlternates": {
+                        "designer|displayName": "string",
+                        "hidden": "boolean",
+                        "icon": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "tabIndex": "number",
+                        "text": "string",
+                        "ui": "string",
+                        "width": "auto"
+                    },
                     "name": "MyButton69",
                     "designerId": "b7af39b0-1a2c-4dee-9c95-8d5d9f297f75"
                 },
@@ -77,6 +107,17 @@
                         "text": "Save",
                         "ui": "i21-button-toolbar-small",
                         "width": null
+                    },
+                    "configAlternates": {
+                        "designer|displayName": "string",
+                        "hidden": "boolean",
+                        "icon": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "tabIndex": "number",
+                        "text": "string",
+                        "ui": "string",
+                        "width": "auto"
                     },
                     "name": "MyButton70",
                     "designerId": "1b145c26-0ef1-4c3f-bd2e-8e24c34ee681"
@@ -99,6 +140,17 @@
                         "ui": "i21-button-toolbar-small",
                         "width": null
                     },
+                    "configAlternates": {
+                        "designer|displayName": "string",
+                        "hidden": "boolean",
+                        "icon": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "tabIndex": "number",
+                        "text": "string",
+                        "ui": "string",
+                        "width": "auto"
+                    },
                     "name": "MyButton71",
                     "designerId": "f874916f-1f80-4574-b9db-9df48353c80d"
                 },
@@ -119,6 +171,17 @@
                         "text": "Delete",
                         "ui": "i21-button-toolbar-small",
                         "width": null
+                    },
+                    "configAlternates": {
+                        "designer|displayName": "string",
+                        "hidden": "boolean",
+                        "icon": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "tabIndex": "number",
+                        "text": "string",
+                        "ui": "string",
+                        "width": "auto"
                     },
                     "name": "MyButton72",
                     "designerId": "30fc5fa0-39af-4d42-9a73-c525086905de"
@@ -141,6 +204,17 @@
                         "ui": "i21-button-toolbar-small",
                         "width": null
                     },
+                    "configAlternates": {
+                        "designer|displayName": "string",
+                        "hidden": "boolean",
+                        "icon": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "tabIndex": "number",
+                        "text": "string",
+                        "ui": "string",
+                        "width": "auto"
+                    },
                     "name": "MyButton73",
                     "designerId": "c540ee6e-3e50-4551-ac73-a02851fc7918"
                 },
@@ -160,6 +234,16 @@
                         "text": "Close",
                         "ui": "i21-button-toolbar-small",
                         "width": null
+                    },
+                    "configAlternates": {
+                        "designer|displayName": "string",
+                        "icon": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "tabIndex": "number",
+                        "text": "string",
+                        "ui": "string",
+                        "width": "auto"
                     },
                     "name": "MyButton74",
                     "designerId": "3e1709be-4980-45c5-b9d5-06ca9786d449"
@@ -182,6 +266,15 @@
                 "title": null,
                 "ui": "i21-form"
             },
+            "configAlternates": {
+                "bodyPadding": "auto",
+                "container|align": "string",
+                "designer|uiInterfaceName": "string",
+                "itemId": "string",
+                "layout": "string",
+                "title": "string",
+                "ui": "string"
+            },
             "name": "MyForm1",
             "designerId": "29735a21-7b68-49f8-9291-62692147daad",
             "cn": [
@@ -199,6 +292,13 @@
                         "layout|flex": 1,
                         "title": null
                     },
+                    "configAlternates": {
+                        "designer|createAlias": "string",
+                        "forceFit": "boolean",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "title": "string"
+                    },
                     "name": "MyGridPanel1",
                     "designerId": "3f1bc2fe-3a38-4763-984e-5987abc89e8c",
                     "cn": [
@@ -215,6 +315,12 @@
                                 "hidden": true,
                                 "itemId": "tlbToolbar"
                             },
+                            "configAlternates": {
+                                "componentCls": "string",
+                                "dock": "string",
+                                "hidden": "boolean",
+                                "itemId": "string"
+                            },
                             "name": "MyToolbar",
                             "designerId": "6bb54f5e-380e-4c9a-8c2e-8c0bf5c38b71",
                             "cn": [
@@ -228,6 +334,10 @@
                                     "userConfig": {
                                         "layout|flex": null,
                                         "width": 100
+                                    },
+                                    "configAlternates": {
+                                        "layout|flex": "number",
+                                        "width": "auto"
                                     },
                                     "name": "filter138",
                                     "designerId": "b19c0442-51eb-4b01-9c27-b939a88b7caa",
@@ -249,11 +359,16 @@
                                 "text": "Transaction Id",
                                 "width": 119
                             },
-                            "name": "MyColumn12",
                             "configAlternates": {
                                 "enableDrillDown": "boolean",
-                                "key": "boolean"
+                                "key": "boolean",
+                                "dataIndex": "datafield",
+                                "hidden": "boolean",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
+                            "name": "MyColumn12",
                             "designerId": "1da6650b-63d6-4772-9110-7549f75ceec5"
                         },
                         {
@@ -270,6 +385,14 @@
                                 "itemId": "colTransactionReferenceId",
                                 "text": "Transaction Id",
                                 "width": 142
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "drillDownClick": "string",
+                                "drillDownText": "string",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyColumn5",
                             "designerId": "50aa609d-a412-44a7-b618-dbf5cd612f9c",
@@ -299,6 +422,12 @@
                                 "text": "Transaction Type",
                                 "width": 156
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn11",
                             "designerId": "1fbe1896-a37f-4d51-a089-c3d424943a41"
                         },
@@ -316,6 +445,13 @@
                                 "text": "Lot Id",
                                 "width": 100
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "hidden": "boolean",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn2",
                             "designerId": "43a644d8-aeb3-4cb7-95cb-f5abbeefe08b"
                         },
@@ -331,6 +467,12 @@
                                 "itemId": "colDate",
                                 "text": "Date",
                                 "width": 100
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyDateColumn",
                             "designerId": "5c3bc9d6-3b37-41e5-874f-26bd7759b526"
@@ -348,6 +490,12 @@
                                 "text": "Lot Number",
                                 "width": 100
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn3",
                             "designerId": "fc1ec8dc-4fd5-42d4-ac2c-245cd95b4ab4"
                         },
@@ -364,6 +512,12 @@
                                 "text": "Vendor/Customer",
                                 "width": 159
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn9",
                             "designerId": "e6919839-31bb-4b50-bf6e-8338728d05a5"
                         },
@@ -379,6 +533,12 @@
                                 "itemId": "colLotUOM",
                                 "text": "Lot UOM",
                                 "width": 100
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyColumn6",
                             "designerId": "1ac035c6-baa5-40a8-b056-b4d46b6c93d9"
@@ -397,6 +557,14 @@
                                 "itemId": "colQty",
                                 "text": "Qty",
                                 "width": 100
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "dataType": "string",
+                                "format": "string",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyNumberColumn1",
                             "designerId": "fd2635a5-fc96-4e6b-9828-5338da6a69c1",
@@ -428,6 +596,14 @@
                                 "text": "Cost",
                                 "width": 100
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "dataType": "string",
+                                "format": "string",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyNumberColumn2",
                             "designerId": "7228e5a0-5032-4013-bbcd-89f1026191ac",
                             "customConfigs": [
@@ -457,6 +633,14 @@
                                 "itemId": "colAmount",
                                 "text": "Amount",
                                 "width": 100
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "dataType": "string",
+                                "format": "string",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyNumberColumn3",
                             "designerId": "2af235cc-8dd0-4fe2-b090-5dba289ef4eb",
@@ -488,6 +672,14 @@
                                 "text": "Weight",
                                 "width": 100
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "dataType": "string",
+                                "format": "string",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyNumberColumn4",
                             "designerId": "a4215244-150a-47c3-b07a-89c99f912ff1",
                             "customConfigs": [
@@ -516,6 +708,12 @@
                                 "text": "Location",
                                 "width": 100
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn18",
                             "designerId": "1a282bfb-ddbd-4b51-95bc-739feba92476"
                         },
@@ -531,6 +729,12 @@
                                 "itemId": "colStorageLocationName",
                                 "text": "Storage Unit",
                                 "width": 100
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyColumn19",
                             "designerId": "b5f71a96-5edc-497e-892f-bccb6152ab7e"
@@ -548,6 +752,12 @@
                                 "text": "Parent Lot Number",
                                 "width": 117
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn4",
                             "designerId": "e471abe9-ed2c-446d-9c02-aac42dfe33d1"
                         },
@@ -563,6 +773,12 @@
                                 "itemId": "colWeightPerQty",
                                 "text": "Weight Per Qty",
                                 "width": 100
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyColumn7",
                             "designerId": "c2a50384-cae3-49d1-8a6d-cf304b26b16d"
@@ -581,6 +797,13 @@
                                 "text": "Entity Id",
                                 "width": 100
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "hidden": "boolean",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn10",
                             "designerId": "f8ac7dbc-82a6-47ff-a3cf-8e8c8c54a8d9"
                         },
@@ -596,6 +819,12 @@
                                 "itemId": "colExpiryDate",
                                 "text": "Expiry Date",
                                 "width": 100
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyDateColumn1",
                             "designerId": "fac70117-ea11-40c4-8169-e2755df248bd"
@@ -614,6 +843,13 @@
                                 "text": "Location Id",
                                 "width": 100
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "hidden": "boolean",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn17",
                             "designerId": "47528182-8287-4e9b-9351-7d5f6beb8171"
                         },
@@ -630,6 +866,13 @@
                                 "itemId": "colStorageLocationId",
                                 "text": "Storage Location Id",
                                 "width": 100
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "hidden": "boolean",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyColumn20",
                             "designerId": "d7a268b1-bea2-461e-a0e9-046bb0b93496"
@@ -657,6 +900,9 @@
             "codeClass": null,
             "userConfig": {
                 "dock": "bottom"
+            },
+            "configAlternates": {
+                "dock": "string"
             },
             "name": "statusbar12",
             "designerId": "3be277c0-a441-47e2-be82-26f12e44faaa",

@@ -28,7 +28,7 @@ Ext.define('Inventory.model.InventoryCountDetail', {
                 }
             }
         },
-        { name: 'intItemId', type: 'int', allowNull: true },
+        { name: 'intItemId', type: 'int', allowNull: false },
         { name: 'intItemLocationId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intStorageLocationId', type: 'int', allowNull: true },
@@ -41,6 +41,8 @@ Ext.define('Inventory.model.InventoryCountDetail', {
         { name: 'dblQtyPerPallet', type: 'float' },
         { name: 'dblPhysicalCount', type: 'float' },
         { name: 'intItemUOMId', type: 'int', allowNull: true },
+        { name: 'strStockUOM', type: 'string' },
+        { name: 'intStockUOMId', type: 'int', allowNull: true },
         { name: 'ysnRecount', type: 'boolean' },
         { name: 'intEntityUserSecurityId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true },
@@ -54,8 +56,17 @@ Ext.define('Inventory.model.InventoryCountDetail', {
         { name: 'strStorageLocationName', type: 'string' },
         { name: 'strLotNo', type: 'string' },
         { name: 'strLotAlias', type: 'string' },
+        { name: 'strParentLotAlias', type: 'string' },
+        { name: 'strParentLotNo', type: 'string' },
+        { name: 'intParentLotId', type: 'int', allowNull: true },
+        { name: 'strWeightUOM', type: 'string' },
+        { name: 'intWeightUOMId', type: 'int', allowNull: true },
+        { name: 'dblWeightQty', type: 'float' },
+        { name: 'dblNetQty', type: 'float' },
         { name: 'strUnitMeasure', type: 'string' },
         { name: 'dblConversionFactor', type: 'float' },
+        { name: 'dblItemUOMConversionFactor', type: 'float' },
+        { name: 'dblWeightUOMConversionFactor', type: 'float' },
         { name: 'dblQtyReceived', type: 'float' },
         { name: 'dblQtySold', type: 'float' },
         { name: 'dblPhysicalCountStockUnit', type: 'float',
@@ -82,12 +93,64 @@ Ext.define('Inventory.model.InventoryCountDetail', {
                 return dblVariance;
             },
             depends: ['dblPhysicalCount', 'dblSystemCount', 'dblQtyReceived', 'dblQtySold']},
-        { name: 'strUserName', type: 'string' }
+        { name: 'strUserName', type: 'string' },
+        { name: 'ysnLotted', type: 'boolean' }
     ],
 
     validators: [
+        { type: 'presence', field: 'intItemId' },
         { type: 'presence', field: 'intItemUOMId' },
         { type: 'presence', field: 'strUnitMeasure' },
         { type: 'presence', field: 'strItemNo' }
-    ]
+    ],
+
+    validate: function(options) {
+        var errors = this.callParent(arguments);
+
+        if (this.get('intLotId')) {
+            if (this.get('intSubLocationId') === null || this.get('intSubLocationId') === 0) {
+                errors.add({
+                    field: 'strSubLocationName',
+                    message: "Please select a storage location."
+                });   
+            } else if (this.get('intStorageLocationId') === null || this.get('intStorageLocationId') === 0) {
+                errors.add({
+                    field: 'strStorageLocationName',
+                    message: "Please select a storage unit."
+                });
+            }
+        }
+
+        if(this.get('ysnLotted')) {
+            if(this.get('intSubLocationId') === null || this.get('intSubLocationId') === 0) {
+                errors.add({
+                    field: 'strSubLocationName',
+                    message: "Please select a storage location."
+                });   
+            }
+
+            if(this.get('intStorageLocationId') === null || this.get('intStorageLocationId') === 0) {
+                errors.add({
+                    field: 'strStorageLocationName',
+                    message: "Please select a storage unit."
+                });   
+            }
+
+            if (!this.get('strLotNo')) {
+                errors.add({
+                    field: 'strLotNo',
+                    message: "Please type a lot number or select an existing lot from the Lot Id list."
+                });  
+            }
+        }
+
+        if(this.get('ysnLotWeightsRequired') && ((this.get('intWeightUOMId') === null) || (this.get('dblWeightQty') === 0 && this.get('dblNetQty') === 0))) {
+            errors.add({
+                field: this.get('intWeightUOMId') === null ? 'strWeightUOM' : this.get('dblWeightQty') === 0 ? 'dblWeightQty': 'strWeightUOM',
+                message: "Gross/Net UOM and weights are required for item " + this.get('strItemNo')
+            });
+        }
+
+        return errors;
+    }
 });
