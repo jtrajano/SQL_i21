@@ -239,6 +239,7 @@ BEGIN
 		,[dblItemTermDiscount]
 		,[strItemTermDiscountBy]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[strPricing]
 		,[strVFDDocumentNumber]
 		,[ysnRefreshPrice]
@@ -369,6 +370,7 @@ BEGIN
 		,[dblItemTermDiscount]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblItemTermDiscount] ELSE NULL END)
 		,[strItemTermDiscountBy]			= (CASE WHEN @GroupingOption = 0 THEN IE.[strItemTermDiscountBy] ELSE NULL END)
 		,[dblPrice]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblPrice] ELSE NULL END)
+		,[dblUnitPrice]						= (CASE WHEN @GroupingOption = 0 THEN IE.[dblUnitPrice] ELSE NULL END)
 		,[strPricing]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strPricing] ELSE NULL END)
 		,[strVFDDocumentNumber]				= (CASE WHEN @GroupingOption = 0 THEN IE.[strVFDDocumentNumber] ELSE NULL END)
 		,[ysnRefreshPrice]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnRefreshPrice] ELSE 0 END)
@@ -552,6 +554,7 @@ BEGIN
 			,[dblItemWeight]
 			,[intItemWeightUOMId]
 			,[dblPrice]
+			,[dblUnitPrice]
 			,[strPricing]
 			,[strVFDDocumentNumber]
 			,[ysnRefreshPrice]
@@ -688,6 +691,7 @@ BEGIN
 			,[dblItemWeight]						= ITG.[dblItemWeight]
 			,[intItemWeightUOMId]					= ITG.[intItemWeightUOMId]
 			,[dblPrice]								= ITG.[dblPrice]
+			,[dblUnitPrice]							= ITG.[dblUnitPrice]
 			,[strPricing]							= ITG.[strPricing]
 			,[strVFDDocumentNumber]					= ITG.[strVFDDocumentNumber]
 			,[ysnRefreshPrice]						= ITG.[ysnRefreshPrice]
@@ -1119,6 +1123,7 @@ BEGIN
 		,[dblItemTermDiscount]
 		,[strItemTermDiscountBy]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[strPricing]
 		,[strVFDDocumentNumber]
 		,[ysnRefreshPrice]
@@ -1250,6 +1255,7 @@ BEGIN
 		,[dblItemTermDiscount]				= IE.[dblItemTermDiscount]
 		,[strItemTermDiscountBy]			= IE.[strItemTermDiscountBy]
 		,[dblPrice]							= IE.[dblPrice]
+		,[dblUnitPrice]						= IE.[dblUnitPrice]
 		,[strPricing]						= IE.[strPricing]
 		,[strVFDDocumentNumber]				= IE.[strVFDDocumentNumber]
 		,[ysnRefreshPrice]					= IE.[ysnRefreshPrice]

@@ -17,6 +17,8 @@
 	[strItemTermDiscountBy]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
     [dblPrice]								NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblPrice] DEFAULT ((0)) NULL,
 	[dblBasePrice]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBasePrice] DEFAULT ((0)) NULL,
+	[dblUnitPrice]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblUnitPrice] DEFAULT ((0)) NULL,
+	[dblBaseUnitPrice]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBaseUnitPrice] DEFAULT ((0)) NULL,
 	[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblTotalTax]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblTotalTax] DEFAULT ((0)) NULL,
 	[dblBaseTotalTax]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBaseTotalTax] DEFAULT ((0)) NULL,

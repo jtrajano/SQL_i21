@@ -118,6 +118,7 @@ BEGIN TRY
 		,[dblQtyShipped]
 		,[dblDiscount]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[ysnRefreshPrice]
 		,[strMaintenanceType]
 		,[strFrequency]
@@ -212,6 +213,7 @@ BEGIN TRY
 		,[dblQtyShipped]					= ARSID.dblShipmentQuantity
 		,[dblDiscount]						= ARSID.[dblDiscount]
 		,[dblPrice]							= ISNULL(ARID.[dblPrice], ARSID.[dblPrice]) 
+		,[dblUnitPrice]						= ISNULL(ARID.[dblUnitPrice], ARSID.[dblPrice]) 
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]
@@ -324,6 +326,7 @@ SELECT
 		,[dblQtyShipped]					= ISI.[dblQuantity]  
 		,[dblDiscount]						= 0.00
 		,[dblPrice]							= ISNULL(ARID.[dblPrice], ISI.[dblUnitPrice])
+		,[dblUnitPrice]						= ISNULL(ARID.[dblUnitPrice], ISI.[dblUnitPrice])
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]
