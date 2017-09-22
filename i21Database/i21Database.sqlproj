@@ -5687,6 +5687,7 @@
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
