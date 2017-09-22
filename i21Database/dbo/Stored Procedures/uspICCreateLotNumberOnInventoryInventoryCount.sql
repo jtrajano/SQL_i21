@@ -65,7 +65,7 @@ BEGIN
 			,[dblGrossWeight]           = Detail.dblWeightQty
 			,[dblWeightPerQty]          = Detail.dblWeightQty / Detail.dblPhysicalCount
 			,[dtmExpiryDate]			= dbo.fnICCalculateExpiryDate(Detail.intItemId, Header.dtmCountDate, Header.dtmCountDate)
-			,[strParentLotNumber]		= Detail.strParentLotNumber
+			,[strParentLotNumber]		= Detail.strParentLotNo
 			,[strParentLotAlias]		= Detail.strParentLotAlias
 
 	FROM tblICInventoryCount Header
