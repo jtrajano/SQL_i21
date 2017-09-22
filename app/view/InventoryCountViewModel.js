@@ -13,17 +13,37 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         'Inventory.store.BufferedItemStockView',
         'Inventory.store.BufferedItemStockUOMView',
         'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedParentLot',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'Inventory.store.BufferedItemStockUOMForAdjustmentView',
-        'GeneralLedger.controls.RecapTab'
+        'GeneralLedger.controls.RecapTab',
+        'Inventory.store.BufferedItemSubLocationsLookup',
+        'Inventory.store.BufferedItemStorageLocationsLookup'
     ],
 
     data: {
-        pageSize: 200
+        pageSize: 200,
+        forceSelection: false
     },
 
     stores: {
+        parentLots: {
+            type: 'icbufferedparentlot'
+        },
+        lockTypes: {
+            fields: [
+                { name: 'intId' },
+                { name: 'strType' }
+            ],
+            data: [
+                { intId: 1, strType: 'Company Location' },
+                { intId: 4, strType: 'Sub Location'},
+                { intId: 3, strType: 'Storage Location' },
+                { intId: 2, strType: 'Lot' }
+            ],
+            autoLoad: true
+        },
         countBy: {
             fields: [{ name: 'strName' }],
             autoLoad: true,
@@ -97,10 +117,10 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             type: 'icbuffereditemstockview'
         },
         fromSubLocation: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemsublocationslookup'
         },
         fromStorageLocation: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemstoragelocationslookup'
         },
         lot: {
             type: 'icbufferedlot'
@@ -142,11 +162,12 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
         
         checkPrintCountSheet: function (get) {
-            if (get('current.intStatus') == 4 || get('hasCountGroup')) {
+            if (get('current.intStatus') == 4 || get('hasCountGroup') || get('current.intStatus') == 3) {
                 return true;
             }
             else return false;
         },
+        
         checkPrintVariance: function (get) {
             if (get('current.intStatus') !== 3) {
                 return true;
@@ -161,17 +182,19 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
         hidePostButton: function(get) {
             var posted = get('current.ysnPosted');
-            if (get('current.intStatus') === 3 || get('current.intStatus') === 4 || get('current.strCountBy') === 'Pack') {
-                return true;
-            }
-            else return posted;
+            // if (get('current.intStatus') === 3 || get('current.intStatus') === 4 || get('current.strCountBy') === 'Pack') {
+            //     return true;
+            // }
+            // else return posted;
+            return posted;
         },
         hideUnpostButton: function (get) {
             var posted = get('current.ysnPosted');
-            if (get('current.intStatus') === 4 && get('current.strCountBy') !== 'Pack') {
-                return false;
-            }
-            else return true;
+            // if (get('current.intStatus') === 4 && get('current.strCountBy') !== 'Pack') {
+            //     return true;
+            // }
+            // else return !posted;
+            return !posted;
         },
         checkRecount: function (get) {
             if (get('current.intStatus') !== 4) {
@@ -200,6 +223,24 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                 return false;
             }
         },
+        readOnly: function(get) { return true; },
+        
+        disablePhysicalCount: function(get) {
+            return get('grdPhysicalCount.selection.dblPallets') > 0 && get('grdPhysicalCount.selection.dblQtyPerPallet') > 0;
+        },
+
+        disableCountUOM: function(get) {
+            return !iRely.Functions.isEmpty(get('grdPhysicalCount.selection.intLotId')) || !get('grdPhysicalCount.selection.intLotId') === 0;
+        },
+
+        isAutoLot: function(get) {
+            if(iRely.Functions.isEmpty(get('grdPhysicalCount.selection.intLotId')) && !iRely.Functions.isEmpty(get('grdPhysicalCount.selection.strLotNo'))) {
+                return true;
+            }
+            else {
+                return false;
+            }    
+        },
         disableBtnDelete: function (get) {
             if(get('current.ysnPosted') || get('current.intStatus') === 3 )
                 return true;
@@ -226,6 +267,9 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                 }
                 this.set('current.strCountBy', value);
             }
+        },
+        isPack: function(get) {
+            return get('current.strCountBy') === 'Pack';
         },
         getFetchText: function(get) {
             //return (get('hasCountGroup')) ? "Refresh" : "Fetch";

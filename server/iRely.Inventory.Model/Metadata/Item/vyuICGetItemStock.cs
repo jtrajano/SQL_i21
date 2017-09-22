@@ -124,6 +124,8 @@ namespace iRely.Inventory.Model
         public decimal? dblGrossEndMonthCost { get; set; }
         public bool? ysnGrossUOMAllowPurchase { get; set; }
         public bool? ysnGrossUOMAllowSale { get; set; }
+        public bool? ysnLotWeightsRequired { get; set; }
+
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }

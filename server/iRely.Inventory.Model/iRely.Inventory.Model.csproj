@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\Item\tblICItemSubLocationMap.cs" />
+    <Compile Include="Configuration\Item\vyuICGetItemStorageLocationMap.cs" />
     <Compile Include="Configuration\Receipt\tblICInventoryReceiptChargeMap.cs" />
     <Compile Include="Configuration\Receipt\tblICInventoryReceiptChargeTaxMap.cs" />
     <Compile Include="Configuration\Receipt\tblICInventoryReceiptInspectionMap.cs" />
@@ -370,6 +371,7 @@
     <Compile Include="Metadata\vyuICGetCustomerCurrency.cs" />
     <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblSMCompanyLocationPricingLevel.cs" />
+    <Compile Include="Metadata\Item\vyuICGetItemStorageLocation.cs" />
     <Compile Include="Metadata\vyuICGetItemUOM.cs" />
     <Compile Include="Metadata\vyuICInventoryCountItemStockLookup.cs" />
     <Compile Include="Metadata\vyuICInventoryCountItemStockLookupMap.cs" />

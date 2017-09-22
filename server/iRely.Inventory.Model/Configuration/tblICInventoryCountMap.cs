@@ -38,6 +38,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intImportFlagInternal).HasColumnName("intImportFlagInternal");
             this.Property(t => t.strShiftNo).HasColumnName("strShiftNo");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+            this.Property(t => t.intLockType).HasColumnName("intLockType");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasMany(p => p.tblICInventoryCountDetails)
@@ -66,6 +67,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.strLotNo).HasColumnName("strLotNo");
             this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
+            this.Property(t => t.intParentLotId).HasColumnName("intParentLotId");
+            this.Property(t => t.strParentLotNo).HasColumnName("strParentLotNo");
+            this.Property(t => t.strParentLotAlias).HasColumnName("strParentLotAlias");
             this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(38, 20);
             this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
             this.Property(t => t.strCountLine).HasColumnName("strCountLine");
@@ -73,12 +77,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(38, 20);
             this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(38, 20);
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.dblWeightQty).HasColumnName("dblWeightQty").HasPrecision(38, 20);
+            this.Property(t => t.dblNetQty).HasColumnName("dblNetQty").HasPrecision(38, 20);
+            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.dblQtyReceived).HasColumnName("dblQtyReceived").HasPrecision(38, 20);
             this.Property(t => t.dblQtySold).HasColumnName("dblQtySold").HasPrecision(38, 20);
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strAutoCreatedLotNumber).HasColumnName("strAutoCreatedLotNumber");
+            this.Property(t => t.intStockUOMId).HasColumnName("intStockUOMId");
 
             this.HasOptional(p => p.vyuICGetInventoryCountDetail)
                 .WithRequired(p => p.tblICInventoryCountDetail);
@@ -155,6 +163,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.strLotNo).HasColumnName("strLotNo");
             this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
+            this.Property(t => t.intParentLotId).HasColumnName("intParentLotId");
+            this.Property(t => t.strParentLotNo).HasColumnName("strParentLotNo");
+            this.Property(t => t.strParentLotAlias).HasColumnName("strParentLotAlias");
             this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(38, 20);
             this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
             this.Property(t => t.strCountLine).HasColumnName("strCountLine");
@@ -163,6 +174,14 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(38, 20);
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
+            this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
+            this.Property(t => t.dblWeightQty).HasColumnName("dblWeightQty").HasPrecision(38, 20);
+            this.Property(t => t.dblNetQty).HasColumnName("dblNetQty").HasPrecision(38, 20);
+            this.Property(t => t.dblItemUOMConversionFactor).HasColumnName("dblItemUOMConversionFactor");
+            this.Property(t => t.dblWeightUOMConversionFactor).HasColumnName("dblWeightUOMConversionFactor");
+            this.Property(t => t.intStockUOMId).HasColumnName("intStockUOMId");
+            this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(38, 20);
             this.Property(t => t.dblPhysicalCountStockUnit).HasColumnName("dblPhysicalCountStockUnit").HasPrecision(38, 20);
             this.Property(t => t.dblVariance).HasColumnName("dblVariance").HasPrecision(38, 20);

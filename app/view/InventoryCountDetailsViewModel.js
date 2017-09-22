@@ -11,23 +11,50 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
         'Inventory.store.ItemStockSummaryByLot',
         'Inventory.store.BufferedItemStockView',
         'Inventory.store.BufferedItemStockUOMView',
+        'Inventory.store.BufferedParentLot',
         'Inventory.store.BufferedLot',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'Inventory.store.BufferedItemStockUOMForAdjustmentView',
-        'Inventory.store.BufferedInventoryCountStockItem'
+        'Inventory.store.BufferedInventoryCountStockItem',
+        'Inventory.store.BufferedItemSubLocationsLookup',
+        'Inventory.store.BufferedItemStorageLocationsLookup'
     ],
 
     data: {
         inventoryCount: null,
-        forceSelection: false
+        forceSelection: false,
+        isLotted: false,
+        selectedLot: null
     },
     formulas: {
         lotAliasReadOnly: function(get) {
             return get('current.intLotId');
+        },
+        disablePhysicalCount: function(get) {
+            return get('current.dblPallets') > 0 && get('current.dblQtyPerPallet') > 0;
+        },
+        disableCountUOM: function(get) {
+            return get('current.intLotId') || get('current.intLotId') === 0;
+        },
+        disableGrossUOM: function(get) {
+            return get('current.ysnLotWeightsRequired') === false && get('current.strLotTracking') !== 'No';
+        },
+        setWeightUOMFieldLabel: function(get) {
+            var win = this.getView();
+            var cboWeightUOM = win.down('#cboWeightUOM');
+        
+            if(get('current.ysnLotWeightsRequired') && ((get('current.intWeightUOMId') === null) || (get('current.dblWeightQty') === 0 && get('current.dblNetQty') === 0))) {
+                cboWeightUOM.setFieldLabel('Gross/Net UOM');
+            } else {
+                cboWeightUOM.setFieldLabel('Gross/Net UOM ' + '<span style="color:red">*</span>');
+            }
         }
     },
     stores: {
+        parentLots: {
+            type: 'icbufferedparentlot'
+        },
         countGroup: {
             type: 'icbufferedcountgroup'
         },
@@ -35,16 +62,17 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
             type: 'icbuffereditemstockview'
         },
         storageLocations: {
-            type: 'icbufferedinventorycountstockitem'
+            type: 'icbuffereditemsublocationslookup'
         },
         storageUnits: {
-            type: 'icbufferedinventorycountstockitem'
+            type: 'icbuffereditemstoragelocationslookup'
         },
         lots: {
             type: 'icbufferedlot'
         },
         itemUOMs: {
-            type: "icbufferedinventorycountstockitem"
+            type: "icbuffereditemunitmeasure"
+            //type: "icbuffereditemstockuomforadjustmentview"
         }
     },
 

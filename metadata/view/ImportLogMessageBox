@@ -16,6 +16,17 @@
         "title": "Log Messages",
         "width": 672
     },
+    "configAlternates": {
+        "designer|userAlias": "string",
+        "designer|userClassName": "string",
+        "height": "auto",
+        "layout": "string",
+        "minHeight": "number",
+        "minWidth": "number",
+        "modal": "boolean",
+        "title": "string",
+        "width": "auto"
+    },
     "name": "MyWindow",
     "designerId": "3786c8be-10b7-4e31-b83f-df24e9151288",
     "viewControllerInstanceId": "e6b19d87-81f7-4ae6-9cd4-7e02d1a252fe",
@@ -32,6 +43,10 @@
                 "layout": "fit",
                 "title": null
             },
+            "configAlternates": {
+                "layout": "string",
+                "title": "string"
+            },
             "name": "MyPanel7",
             "designerId": "bf4873f4-01d4-4326-a129-1ddf05871914",
             "cn": [
@@ -47,6 +62,11 @@
                         "itemId": "gridLogs",
                         "title": null
                     },
+                    "configAlternates": {
+                        "height": "auto",
+                        "itemId": "string",
+                        "title": "string"
+                    },
                     "name": "MyGridPanel4",
                     "designerId": "bbb7cd91-8f2d-47c8-b038-74dff1d35dea",
                     "cn": [
@@ -61,6 +81,11 @@
                                 "dataIndex": "Type",
                                 "itemId": "colType",
                                 "text": "Type"
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string"
                             },
                             "name": "MyColumn55",
                             "designerId": "5703f1a2-6e0a-4572-82e4-2442c4392529"
@@ -79,6 +104,13 @@
                                 "text": "Message",
                                 "width": 250
                             },
+                            "configAlternates": {
+                                "cellWrap": "boolean",
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
+                            },
                             "name": "MyColumn49",
                             "designerId": "780200f1-37fe-4878-9dcd-73c100e01d44"
                         },
@@ -93,6 +125,11 @@
                                 "dataIndex": "Row",
                                 "itemId": "colRow",
                                 "text": "Row"
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string"
                             },
                             "name": "MyColumn53",
                             "designerId": "f91848bc-ca69-4e49-ba2d-15e997951837"
@@ -109,6 +146,11 @@
                                 "itemId": "colColumn",
                                 "text": "Field"
                             },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string"
+                            },
                             "name": "MyColumn52",
                             "designerId": "da667cb5-63ab-4a0f-921f-22916e2abde6"
                         },
@@ -124,6 +166,12 @@
                                 "itemId": "colStatus",
                                 "text": "Status",
                                 "width": 200
+                            },
+                            "configAlternates": {
+                                "dataIndex": "datafield",
+                                "itemId": "string",
+                                "text": "string",
+                                "width": "auto"
                             },
                             "name": "MyColumn58",
                             "designerId": "6edfa75a-8c67-4a70-bdfb-bbbe199fb315"
@@ -161,6 +209,10 @@
                                             "{columnName}: {name}"
                                         ]
                                     },
+                                    "configAlternates": {
+                                        "designer|displayName": "string",
+                                        "implHandler": "code"
+                                    },
                                     "name": "groupHeaderTpl",
                                     "designerId": "bb2ed922-1a1b-4e69-ae83-317ce1d4f940"
                                 }
@@ -182,6 +234,11 @@
                 "dock": "top",
                 "ui": "i21-toolbar"
             },
+            "configAlternates": {
+                "designer|uiInterfaceName": "string",
+                "dock": "string",
+                "ui": "string"
+            },
             "name": "MyToolbar",
             "designerId": "742e8a89-308d-42ce-81f1-556315d98123",
             "cn": [
@@ -198,6 +255,13 @@
                         "layout|flex": null,
                         "text": "Close",
                         "ui": "i21-button-toolbar-small"
+                    },
+                    "configAlternates": {
+                        "designer|uiInterfaceName": "string",
+                        "itemId": "string",
+                        "layout|flex": "number",
+                        "text": "string",
+                        "ui": "string"
                     },
                     "name": "MyButton26",
                     "designerId": "5ed030ed-59e7-402f-810b-6ce989dc9a8f"

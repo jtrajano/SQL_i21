@@ -16,6 +16,12 @@ Ext.define('Inventory.store.BufferedInventoryCountDetail', {
     remoteSort: true,
     proxy: {
         type: 'rest',
+        actionMethods: {
+            create: 'POST',
+            read: 'GET',
+            update: 'PATCH',
+            destroy: 'DELETE'
+        },
         api: {
             create: '../Inventory/api/InventoryCountDetail/Post',
             read: '../Inventory/api/InventoryCount/GetInventoryCountDetails',

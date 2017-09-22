@@ -82,6 +82,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strShipFrom).HasColumnName("strShipFrom");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+            this.Property(t => t.ysnLotWeightsRequired).HasColumnName("ysnLotWeightsRequired");
         }
     }
 }

@@ -77,27 +77,12 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, new { data = data, strCountLine = strCountLine, intCountLine = intCountLine });
         }
 
-        [HttpGet]
-        [ActionName("GetLastCountGroup")]
-        public async Task<HttpResponseMessage> GetLastCountGroup(int intCountGroupId)
-        {
-            var bl = _bl as InventoryCountDetailBl;
-            var repo = bl.GetRepository() as InventoryRepository;
-
-            var last = await repo.GetQuery<tblICInventoryCountDetail>()
-                .Where(p => p.intCountGroupId == intCountGroupId)
-                .OrderByDescending(o => o.intInventoryCountDetailId).FirstOrDefaultAsync();
-
-            return Request.CreateResponse(HttpStatusCode.OK, new { data = last });
-        }
-
-        [HttpPut]
+        [HttpPatch]
         [ActionName("UpdateDetail")]
         public async Task<HttpResponseMessage> UpdateDetail(tblICInventoryCountDetail detail)
         {
             var bl = _bl as InventoryCountDetailBl;
             var repo = bl.GetRepository() as InventoryRepository;
-            
             if (ModelState.IsValid && detail != null)
             {
                 if(detail.intInventoryCountDetailId == 0)
@@ -105,9 +90,29 @@ namespace iRely.Inventory.WebApi
                 var d = repo.ContextManager.Entry<tblICInventoryCountDetail>(repo.GetQuery<tblICInventoryCountDetail>().First(t => t.intInventoryCountDetailId == detail.intInventoryCountDetailId));
                 if (d != null)
                 {
+                    if(detail.dblWeightQty != null)
+                    {
+                        d.Property(e => e.dblWeightQty).CurrentValue = detail.dblWeightQty;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+                    if(detail.dblNetQty != null)
+                    {
+                        d.Property(e => e.dblNetQty).CurrentValue = detail.dblNetQty;
+                        d.State = EntityState.Modified;
+                    }
+                    if (detail.intWeightUOMId != null)
+                    {
+                        d.Property(e => e.intWeightUOMId).CurrentValue = detail.intWeightUOMId;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
                     if (detail.dblPhysicalCount != null)
                     {
                         d.Property(e => e.dblPhysicalCount).CurrentValue = detail.dblPhysicalCount;
+                        d.State = System.Data.Entity.EntityState.Modified;
+                    }
+                    if (detail.intStockUOMId != null)
+                    {
+                        d.Property(e => e.intStockUOMId).CurrentValue = detail.intStockUOMId;
                         d.State = System.Data.Entity.EntityState.Modified;
                     }
                     if (detail.intItemUOMId != null)
@@ -115,23 +120,43 @@ namespace iRely.Inventory.WebApi
                         d.Property(e => e.intItemUOMId).CurrentValue = detail.intItemUOMId;
                         d.State = System.Data.Entity.EntityState.Modified;
                     }
-                    if (detail.intItemUOMId == -1)
-                    {
-                        d.Property(e => e.intItemUOMId).CurrentValue = null;
-                        d.State = System.Data.Entity.EntityState.Modified;
-                    }
-
                     if (detail.intItemId != null)
                     {
                         d.Property(e => e.intItemId).CurrentValue = detail.intItemId;
                         d.State = System.Data.Entity.EntityState.Modified;
                     }
-                    if (detail.intItemId == -1)
+
+                    if (detail.strLotNo != null)
                     {
-                        d.Property(e => e.intItemId).CurrentValue = null;
+                        d.Property(e => e.intLotId).CurrentValue = detail.intLotId;
+                        d.Property(e => e.strLotNo).CurrentValue = detail.strLotNo;
+                        d.State = EntityState.Modified;
+                    }
+                    if (detail.strLotAlias != null)
+                    {
+                        d.Property(e => e.strLotAlias).CurrentValue = detail.strLotAlias;
+                        d.State = EntityState.Modified;
+                    }
+                    if (detail.intStorageLocationId != null)
+                    {
+                        d.Property(e => e.intStorageLocationId).CurrentValue = detail.intStorageLocationId;
                         d.State = System.Data.Entity.EntityState.Modified;
                     }
-
+                    if (detail.dblSystemCount != null)
+                    {
+                        d.Property(e => e.dblSystemCount).CurrentValue = detail.dblSystemCount;
+                        d.State = EntityState.Modified;
+                    }
+                    if (detail.dblLastCost != null)
+                    {
+                        d.Property(e => e.dblLastCost).CurrentValue = detail.dblLastCost;
+                        d.State = EntityState.Modified;
+                    }
+                    if (detail.dblVariance != null)
+                    {
+                        d.Property(e => e.dblVariance).CurrentValue = detail.dblVariance;
+                        d.State = EntityState.Modified;
+                    }
                     if (detail.intCountGroupId != null)
                     {
                         d.Property(e => e.intCountGroupId).CurrentValue = detail.intCountGroupId;
@@ -152,23 +177,6 @@ namespace iRely.Inventory.WebApi
                     if (detail.dblQtySold != null)
                     {
                         d.Property(e => e.dblQtySold).CurrentValue = detail.dblQtySold;
-                        d.State = System.Data.Entity.EntityState.Modified;
-                    }
-
-                    if (detail.intLotId != null)
-                    {
-                        d.Property(e => e.intLotId).CurrentValue = detail.intLotId;
-                        d.State = System.Data.Entity.EntityState.Modified;
-                    }
-                    if (detail.intLotId == -1)
-                    {
-                        d.Property(e => e.intLotId).CurrentValue = null;
-                        d.State = System.Data.Entity.EntityState.Modified;
-                    }
-
-                    if (detail.intStorageLocationId != null)
-                    {
-                        d.Property(e => e.intStorageLocationId).CurrentValue = detail.intStorageLocationId;
                         d.State = System.Data.Entity.EntityState.Modified;
                     }
                     if (detail.intSubLocationId != null)

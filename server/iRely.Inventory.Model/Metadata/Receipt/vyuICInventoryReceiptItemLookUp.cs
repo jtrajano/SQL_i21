@@ -48,6 +48,7 @@ namespace iRely.Inventory.Model
         public int? intItemUOMDecimalPlaces { get; set; }
         public int? intContainerWeightUOMId { get; set; }
         public decimal? dblContainerWeightUOMConvFactor { get; set; }
+        public bool? ysnLotWeightsRequired { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

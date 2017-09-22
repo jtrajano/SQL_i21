@@ -50,17 +50,24 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetLocationStockOnHand(int intLocationId, int intItemId)
+        public async Task<SearchResult> GetLocationStockOnHand(int? intLocationId, int? intItemId, int? intSubLocationId, int? intStorageLocationId, int? intLotId, int? intItemUOMId)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOM>()
-                .Where(w => w.intLocationId == intLocationId && w.intItemId == intItemId && w.ysnStockUnit == true)
+                .Where(w => w.intLocationId == intLocationId && w.intItemId == intItemId 
+                    && (intSubLocationId == null ? 1 == 1 : w.intSubLocationId == intSubLocationId)
+                    && (intStorageLocationId == null ? 1 == 1 : w.intStorageLocationId == intStorageLocationId)
+                    && (intLotId == null ? 1 == 1 : w.intLotId == intLotId)
+                    && (intItemUOMId == null ? 1 == 1 : w.intItemUOMId == intItemUOMId)
+                //&& w.ysnStockUnit == true)
+                )
                 .GroupBy(o => o.intLocationId)
                 .Select(g => new { dblOnHand = g.Sum(i => i.dblOnHand) });
             var data = await query.ToListAsync();
 
             return new SearchResult() 
             {
-                data = query.AsQueryable()
+                data = query.AsQueryable(),
+                total = await query.CountAsync()
             };
         }
 
@@ -69,6 +76,34 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICInventoryCountItemStockLookup>()
                     .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemStockUOMId", "DESC").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> GetItemSubLocations(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemSubLocations>()
+                    .Filter(param, true);
+
+            var data = await query.ExecuteProjection(param, "intSubLocationId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> GetItemStorageLocations(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStorageLocation>()
+                    .Filter(param, true);
+
+            var data = await query.ExecuteProjection(param, "intStorageLocationId").ToListAsync();
 
             return new SearchResult()
             {

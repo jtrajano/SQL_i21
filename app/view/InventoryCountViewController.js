@@ -12,6 +12,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             bind: {
                 title: 'Inventory Count - {current.strCountNo}'
             },
+            btnEditRow: {
+                hidden: true
+            },
             cboPageSize: {
                 hidden: true,
                 value: '{pageSize}',
@@ -27,6 +30,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 hidden: '{hidePostButton}'
             },
             btnDetachSelectedRows: {
+                hidden: '{hidePostButton}'
+            },
+            btnDetachAll: {
                 hidden: '{hidePostButton}'
             },
             btnUndo: {
@@ -56,12 +62,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             btnRecount: {
                 hidden: '{checkRecount}',
-                hidden: '{hasCountGroup}'
+                hidden: '{hasCountGroup}',
             },
-            btnFetch: {
-                disabled: '{checkPrintCountSheet}'
-            },
-
             cboLocation: {
                 value: '{current.strLocation}',
                 origValueField: 'intCompanyLocationId',
@@ -145,12 +147,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             cboCountBy: {
                 store: '{countBy}',
-                value: '{countByGroup}'
+                value: '{countByGroup}',
+                disabled: '{current.ysnPosted}'
             },
 
             chkCountByLots: {
                 value: '{current.ysnCountByLots}',
-                hidden: '{hasCountGroup}'
+                hidden: '{hasCountGroup}',
+                disabled: '{current.ysnPosted}'
             },
             chkCountByPallets: {
                 value: '{current.ysnCountByPallets}',
@@ -187,7 +191,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             btnFetchDetails: {
                 text: '{getFetchText}',
-                iconCls: '{getFetchIconCls}'
+                iconCls: '{getFetchIconCls}',
+                disabled: '{checkPrintCountSheet}',
+                hidden: '{current.ysnPosted}'      
             },
             grdPhysicalCount: {
                 readOnly: '{current.ysnPosted}',
@@ -195,6 +201,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     dataIndex: 'strItemNo',
                     editor: {
                         store: '{itemStock}',
+                        readOnly: true,
                         origValueField: 'intItemId',
                         origUpdateField: 'intItemId',
                         defaultFilters: [
@@ -207,6 +214,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     },
                     hidden: '{hasCountGroup}'
                 },
+                colStockUOM: 'strUnitMeasure',
                 colDescription: {
                     dataIndex: 'strItemDescription',
                     drillDownText: 'View Item',
@@ -228,11 +236,30 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     drillDownText: 'View Category',
                     drillDownClick: 'onViewCategory'
                 },
+                colTextItemNo: 'strItemNo',
+                colTextSubLocation: {
+                    dataIndex: 'strSubLocationName',
+                    hidden: '{hasCountGroup}'
+                },
+                colTextStorageLocation: {
+                    dataIndex: 'strStorageLocationName',
+                    hidden: '{hasCountGroup}'
+                },
+                colTextLotId: {
+                    dataIndex: 'strLotNo',
+                    hidden: '{!current.ysnCountByLots}',
+                    hidden: '{hasCountGroup}'
+                },
+                colParentLotId: {
+                    dataIndex: 'strParentLotNo',
+                    hidden: '{!current.ysnCountByLots}'
+                },
                 colSubLocation: {
-                    hidden: '{hasCountGroup}',
+                    hidden: true,
                     dataIndex: 'strSubLocationName',
                     editor: {
-                        readOnly: '{disableCountGridFields}',
+                        // readOnly: '{disableCountGridFields}',
+                        readOnly: true,
                         store: '{fromSubLocation}',
                         origValueField: 'intSubLocationId',
                         origUpdateField: 'intSubLocationId',
@@ -248,10 +275,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                                 conjunction: 'and'
                             },
                             {
-                                column: 'dblOnHand',
-                                value: '0',
-                                conjunction: 'and',
-                                condition: 'gt'
+                                column: 'strClassification',
+                                value: 'Inventory',
+                                conjunction: 'and'
                             },
                            /* {
                                 column: 'ysnStockUnit',
@@ -263,10 +289,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     }
                 },
                 colStorageLocation: {
-                    hidden: '{hasCountGroup}',
+                    hidden: true,
                     dataIndex: 'strStorageLocationName',
                     editor: {
-                        readOnly: '{disableCountGridFields}',
+                        // readOnly: '{disableCountGridFields}',
+                        readOnly: true,
                         store: '{fromStorageLocation}',
                         origValueField: 'intStorageLocationId',
                         origUpdateField: 'intStorageLocationId',
@@ -296,12 +323,15 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     }
                 },
                 colLotNo: {
-                    hidden: '{hasCountGroup}',
+                    hidden: true,
                     dataIndex: 'strLotNo',
-					hidden: '{!current.ysnCountByLots}',
+                    // hidden: '{!current.ysnCountByLots}',
+                    hidden: true,
                     editor: {
-                        readOnly: '{disableCountGridFields}',
+                        // readOnly: '{disableCountGridFields}',
+                        readOnly: true,
                         store: '{lot}',
+                        forceSelection: '{forceSelection}',
                         origValueField: 'intLotId',
                         origUpdateField: 'intLotId',
                         defaultFilters: [
@@ -333,9 +363,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     hidden: '{!current.ysnCountByLots}',
                     hidden: '{hasCountGroup}'
                 },
-                colSystemCount: {
-                    dataIndex: 'dblSystemCount'
-                },
+                colSystemCount: 'dblSystemCount',
                 colQtyReceived: {
                     dataIndex: 'dblQtyReceived',
                     hidden: '{!hasCountGroup}'
@@ -354,6 +382,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colNoPallets: {
                     dataIndex: 'dblPallets',
                     hidden: '{!current.ysnCountByPallets}',
+                    hidden: '{!current.ysnCountByLots}',
                     hidden: '{hasCountGroup}',
                     editor: {
                         readOnly: '{disableCountGridFields}',
@@ -370,7 +399,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colPhysicalCount: {
                     dataIndex: 'dblPhysicalCount',
                     editor: {
-                        readOnly: '{disableCountGridFields}'
+                        readOnly: '{disableCountGridFields}',
+                        readOnly: '{disablePhysicalCount}'
                     }
                 },
                 colUOM: {
@@ -378,6 +408,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     hidden: '{hasCountGroup}',
                     editor: {
                         readOnly: '{disableCountGridFields}',
+                        readOnly: '{disableCountUOM}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intItemUOMId',
                         store: '{itemUOM}',
@@ -401,6 +432,44 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         ]
                     }
                 },
+                colWeightQty: {
+                    dataIndex: 'dblWeightQty',
+                    hidden: '{!current.ysnCountByLots}',
+                    editor: {
+                        readOnly: '{disableCountGridFields}'
+                    }
+                },
+                colNetWeightQty: {
+                    dataIndex: 'dblNetQty',
+                    hidden: '{!current.ysnCountByLots}'
+                },
+                colWeightUOM: {
+                    dataIndex: 'strWeightUOM',
+                    hidden: '{!current.ysnCountByLots}',
+                    editor: {
+                        readOnly: '{disableCountGridFields}',
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intWeightUOMId',
+                        store: '{itemUOM}',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdPhysicalCount.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strUnitType',
+                                value: 'Weight',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }    
+                },
                 colPhysicalCountStockUnit: {
                     dataIndex: 'dblPhysicalCountStockUnit',
                     hidden: '{hasCountGroup}'
@@ -414,8 +483,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colEnteredBy: 'strUserName'
             },
             pgePostPreview: {
-                title: '{pgePreviewTitle}',
-                hidden: '{hasCountGroup}'
+                title: '{pgePreviewTitle}'
             }
         }
     },
@@ -465,6 +533,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             btnExportGridData.setText("Export");
 
         me.attachOnEditListener(win, grdPhysicalCount);
+
+        var cepCount = grdPhysicalCount.getPlugin('cepPhysicalCount');
+        if (cepCount) {
+            cepCount.on({
+                edit: me.onPhysicalCountChange,
+                scope: me
+            });
+        }
 
         return win.context;
     },
@@ -553,31 +629,35 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         action(newRecord);
     },
 
-    getTotalLocationStockOnHand: function (intLocationId, intItemId, callback) {
+    getTotalLocationStockOnHand: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, intLotId, intItemUOMId, callback) {
         ic.utils.ajax({
             timeout: 120000,
             url: '../Inventory/api/ItemStock/GetLocationStockOnHand',
             params: {
                 intLocationId: intLocationId,
-                intItemId: intItemId
+                intItemId: intItemId,
+                intSubLocationId: intSubLocationId,
+                intStorageLocationId: intStorageLocationId,
+                intLotId: intLotId,
+                intItemUOMId: intItemUOMId
             }
         })
-        .subscribe(
-            function(response) {
+            .subscribe(
+            function (response) {
                 var jsonData = Ext.decode(response.responseText);
                 if (jsonData.success) {
-                    if(jsonData.data.length > 0)
+                    if (jsonData.data.length > 0)
                         callback(jsonData.data[0].dblOnHand);
                     else
                         callback(0);
                 } else
                     callback(0);
             },
-            function(error) {
+            function (error) {
                 var jsonData = Ext.decode(error.responseText);
                 callback(jsonData.ExceptionMessage, true);
             }
-        );
+            );
     },
 
     createLineItemRecord: function (config, action) {
@@ -588,13 +668,20 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         record.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
         record.set('strUserName', iRely.config.Security.UserName);
         if(!iRely.Functions.isEmpty(record.get('strItemNo'))) {
-            config.createRecord.$owner.prototype.getTotalLocationStockOnHand(config.dummy.intInventoryCount.data.intLocationId, config.dummy.data.intItemId, function (val, err) {
-                if (err) {
-                    iRely.Functions.showErrorDialog(val);
-                } else {
-                    record.set('dblSystemCount', val);
-                } 
-            });
+            config.createRecord.$owner.prototype.getTotalLocationStockOnHand(
+                config.dummy.intInventoryCount.data.intLocationId,
+                config.dummy.data.intItemId,
+                config.dummy.data.intSubLocationId,
+                config.dummy.data.intStorageLocationId,
+                config.dummy.data.intLotId,
+                config.dummy.data.intItemUOMId,
+                function (val, err) {
+                    if (err) {
+                        iRely.Functions.showErrorDialog(val);
+                    } else {
+                        record.set('dblSystemCount', val);
+                    }
+                });
         }
         action(record);
     },
@@ -698,7 +785,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
             var pagingtoolbar = win.down("#pgtCount");
             var defaultFilter = ic.count.getFilter(current, true);
-            var filter = defaultFilter;
+            var filter = []; //defaultFilter;
             if(filters)
                 filter = filters;
 
@@ -773,7 +860,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 conjunction: 'and'
             };
             filters.push(parentFilter);
-            filters = filters.concat(ic.count.getFilter(win.viewModel.data.current));
+            //filters = filters.concat(ic.count.getFilter(win.viewModel.data.current));
             ic.count.loadDetails(me, win, win.context, true, filters);    
         }
     },
@@ -786,8 +873,48 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var grdPhysicalCount = win.down("#grdPhysicalCount");
         var pagingtoolbar = win.down("#pgtCount");
         
-        if(!current.phantom)
-            ic.count.loadDetails(me, win, win.context, true);
+        if (!current.phantom) {
+            var filter = {
+                column: 'intInventoryCountId',
+                value: win.getViewModel().get('current.intInventoryCountId'),
+                condition: 'eq',
+                conjunction: 'and'
+            };
+            ic.count.loadDetails(me, win, win.context, true, [filter]);
+        } else {
+            grdPhysicalCount.store.data.clear();
+        }
+    },
+
+    calculateGrossNet: function (lotQty, itemUOMConversionFactor, weightUOMConversionFactor, tareWeight) {
+        var grossQty = 0.00;
+        var me = this;
+        if (itemUOMConversionFactor === weightUOMConversionFactor) {
+            grossQty = lotQty;
+        }
+        else if (weightUOMConversionFactor !== 0) {
+            grossQty = me.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+        }
+
+        return {
+            gross: grossQty,
+            tare: tareWeight,
+            net: grossQty - tareWeight
+        };
+    },
+
+    convertQtyBetweenUOM: function (sourceUOMConversionFactor, targetUOMConversionFactor, qty) {
+        var result = 0;
+
+        if (sourceUOMConversionFactor === targetUOMConversionFactor) {
+            result = qty;
+        }
+        else if (targetUOMConversionFactor !== 0) {
+            result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
+        }
+
+        //return Math.round(result, 12);
+        return ic.utils.Math.round(result, 12);
     },
 
     attachOnEditListener: function(win, grdPhysicalCount) {
@@ -828,6 +955,62 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         iRely.Functions.showCustomDialog('question', 'yesno', 'Are you sure you want to delete the selected record(s)?', msgAction);
     },
 
+    onDetachAll: function (e) {
+        var msgAction = function (button) {
+            if (button === 'yes') {
+                var me = this;
+                var win = e.up('window');
+                var vm = win.getViewModel();
+                var current = vm.get('current');
+                var id = current.get('intInventoryCountId');
+                win.down("#grdPhysicalCount").setLoading("Deleting records...");
+                ic.utils.ajax({
+                    url: '../Inventory/api/InventoryCount/DeleteAllDetails',
+                    method: 'DELETE',
+                    params: {
+                        intInventoryCountId: id
+                    }
+                }).subscribe(function (response) {
+                    win.down("#grdPhysicalCount").setLoading(false);
+                    var filter = [{
+                        column: 'intInventoryCountId',
+                        value: id,
+                        condition: 'eq'
+                    }];
+                    ic.count.loadDetails(me, win, win.context, true, filter);
+                });
+            }
+        };
+        iRely.Functions.showCustomDialog('question', 'yesno', 'Are you sure you want to delete all record(s)?', msgAction);
+    },
+
+    onOpenRow: function (e) {
+        var me = this;
+        var win = e.up('window');
+        var vm = win.getViewModel();
+        var grid = win.down('grid');
+        var store = grid.store;
+
+        iRely.Functions.openScreen('Inventory.view.InventoryCountDetails', {
+            id: grid.selection.get('intInventoryCountDetailId'),
+            viewConfig: {
+                listeners: {
+                    close: function (count) {
+                        var filter = {
+                            column: 'intInventoryCountId',
+                            value: count.viewModel.data.inventoryCount.data.intInventoryCountId,
+                            condition: 'eq',
+                            conjunction: 'and'
+                        };
+                        ic.count.loadDetails(me, win, win.context, true, [filter]);
+                    }
+                }
+            },
+            action: 'edit',
+            current: vm.get('current')
+        });
+    },
+
     onAttachNewRow: function(e) {
         var me = this;
         var win = e.up('window');
@@ -848,18 +1031,19 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                                         condition: 'eq',
                                         conjunction: 'and'
                                     };
-                                    store.proxy.extraParams = { filter: iRely.Functions.encodeFilters([filter]) }
-                                    
-                                    store.load({
-                                        filters: filter,
-                                        params: {
-                                            start: 0,
-                                            limit: win.viewModel.data.pageSize
-                                        },
-                                        callback: function(records, opts, success) {
-                                            win.setLoading(false);
-                                        }
-                                    });
+                                    ic.count.loadDetails(me, win, win.context, true, [filter]);
+                                    // store.proxy.extraParams = { filter: iRely.Functions.encodeFilters([filter]) }
+
+                                    // store.load({
+                                    //     filters: filter,
+                                    //     params: {
+                                    //         start: 0,
+                                    //         limit: win.viewModel.data.pageSize
+                                    //     },
+                                    //     callback: function(records, opts, success) {
+                                    //         win.setLoading(false);
+                                    //     }
+                                    // });
                                 }
                             }
                         },
@@ -953,11 +1137,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 })
                 .subscribe(function(data) {
                     win.setLoading('Loading Items...');
-                    ic.count.loadDetails(me, win, win.context, true);
+                    var defaultFilter = ic.count.getFilter(current, true);
+                    defaultFilter.push({
+                        column: 'intInventoryCountId',
+                        value: current.get('intInventoryCountId')
+                    });
+                    ic.count.loadDetails(me, win, win.context, true, defaultFilter);
                 }, function(failed) {
                     win.setLoading(false);    
                     var json = JSON.parse(failed.responseText);
-                    iRely.Functions.showCustomDialog('question', 'yesno', json.message, function() {
+                    iRely.Functions.showCustomDialog('error', 'ok', json.message, function() {
 
                     });
                 });
@@ -1111,20 +1300,15 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     },
 
     onPostClick: function(button, e, oOpts) {
-        if (btnPost){
-            btnPost.disable();
-        }
-        else {
-            return;
-        }
-
         var me = this;
-        var win = btnPost.up('window');
+        var win = button.up('window');
         var context = win.context;
         var currentRecord = win.viewModel.data.current;
         var tabInventoryCount = win.down('#tabInventoryCount');
         var activeTab = tabInventoryCount.getActiveTab();       
-
+        var paging = win.down('ipagingstatusbar');
+        var grd = win.down('#grdPhysicalCount');
+        
         var doPost = function (){
             var current = currentRecord; 
             ic.utils.ajax({
@@ -1138,7 +1322,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             })
             .subscribe(
                 function(successResponse) {
-                    //me.onAfterShip(true);
+                    grd.getSelectionModel().deselectAll();
+                    paging.doRefresh();
 
                     // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
                     if (activeTab.itemId == 'pgePostPreview'){
@@ -1148,15 +1333,15 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         };
                         me.doPostPreview(win, cfg);
                     }                     
-                    btnPost.enable();
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
                     var message = responseText ? responseText.message : {}; 
                     var statusText = message ? message.statusText : 'Oh no! Something went wrong while posting the inventory count.';
+                    iRely.Functions.showErrorDialog(statusText);   
 
-                    //me.onAfterShip(false, statusText);
-                    btnPost.enable();
+                    grd.getSelectionModel().deselectAll();
+                    paging.doRefresh();
                 }
             )
         };    
@@ -1171,10 +1356,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                             doPost();             
                         }
                     });
-                }
-                // If records are invalid, re-enable the post button. 
-                else {
-                    btnPost.enable();
                 }
             });            
         }
@@ -1428,10 +1609,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var plugin = grid ? grid.getPlugin('cepPhysicalCount') : null;
         var current = plugin ? plugin.getActiveRecord() : null;
         var me = this;
+        var vm = win.getViewModel();
+
         if (current) {
             switch (combo.itemId) {
                 case 'cboItem':
                     current.set('strItemDescription', records[0].get('strDescription'));
+                    current.set('strCategory', records[0].get('strCategoryCode'));
                     current.set('intCategoryId', records[0].get('intCategoryId'));
                     current.set('strCategory', records[0].get('strCategoryCode'));
                     current.set('strStorageLocationName', null);
@@ -1439,16 +1623,36 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('strSubLocationName', null);
                     current.set('intSubLocationId', null);
                     current.set('dblSystemCount', null);
+                    current.set('intLotId', null);
+                    current.set('strLotNo', null);
+                    current.set('strLotAlias', null);
+                    current.set('intWeightUOMId', null);
+                    current.set('strWeightUOM', null);
+                    current.set('dblWeightQty', null);
+                    current.set('dblWeightUOMConversionFactor', null);
+                    current.set('dblItemUOMConversionFactor', records[0].get('dblStockUnitQty'));
+                    current.set('strStockUOM', records[0].get('strStockUOM'));
+                    current.set('intStockUOMId', records[0].get('intStockUOMId'));
                     current.set('intItemUOMId', records[0].get('intStockUOMId'));
                     current.set('strUnitMeasure', records[0].get('strStockUOM'));
-                    /*me.getTotalLocationStockOnHand(current.intInventoryCount.data.intLocationId, current.data.intItemId, function (val, err) {
-                        if (err) {
-                            iRely.Functions.showErrorDialog(val);
-                        } else {
-                            current.set('dblSystemCount', val);
+                    //current.set('selectedLot', null); // @TODO
+                    // current.set('intItemUOMId', records[0].get('intStockUOMId'));
+                    // current.set('strUnitMeasure', records[0].get('strStockUOM'));
+
+                    //current.set('isLotted', rec.get('strLotTracking') !== 'No'); // @TODO
+
+                    me.getTotalLocationStockOnHand(
+                        vm.get('current.intLocationId'),
+                        current.get('intItemId'),
+                        current.get('intSubLocationId'),
+                        current.get('intStorageLocationId'),
+                        current.get('intLotId'),
+                        current.get('intItemUOMId'),
+                        function (quantity) {
+                            current.set('dblSystemCount', quantity);
                         }
-                    });*/
-                    me.getStockQuantity(current, win);
+                    );
+
                     if (current.get('strCountLine') === '' || current.get('strCountLine') === null) {
                         var win = combo.up('window');
                         var currentItems = win.viewModel.data.current;
@@ -1480,34 +1684,108 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     }
                     break;
                 case 'cboGrdSubLocation':
-                    current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
-                    current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
-                    current.set('dblSystemCount', records[0].get('dblOnHand'));
-                    current.set('intItemUOMId', records[0].get('intItemUOMId'));
-                    current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+                    current.set('strStorageLocationName', null);
+                    current.set('intStorageLocationId', null);
+                    current.set('intItemLocationId', records[0].get('intItemLocationId'));
+                    current.set('intLotId', null);
+                    current.set('strLotNo', null);
+                    current.set('strLotAlias', null);
+                    current.set('dblSystemCount', null);
+                    current.set('intItemUOMId', null);
+                    current.set('strUnitMeasure', null);
+                    //current.set('selectedLot', null); //@TODO
+                    me.getTotalLocationStockOnHand(
+                        vm.get('current.intLocationId'),
+                        current.get('intItemId'),
+                        current.get('intSubLocationId'),
+                        current.get('intStorageLocationId'),
+                        current.get('intLotId'),
+                        current.get('intItemUOMId'),
+                        function (quantity) {
+                            current.set('dblSystemCount', quantity);
+                        }
+                    );
                     break;
                 case 'cboGrdStorageLocation':
-                    current.set('strSubLocationName', records[0].get('strSubLocationName'));
-                    current.set('intSubLocationId', records[0].get('intSubLocationId'));
-                    current.set('dblSystemCount', records[0].get('dblOnHand'));
-                    current.set('intItemUOMId', records[0].get('intItemUOMId'));
-                    current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+                    vm.set('intLotId', null);
+                    vm.set('strLotNo', null);
+                    vm.set('strLotAlias', null);
+                    current.set('dblSystemCount', null);
+                    current.set('intItemUOMId', null);
+                    current.set('strUnitMeasure', null);
+
+                    me.getTotalLocationStockOnHand(
+                        vm.get('current.intLocationId'),
+                        current.get('intItemId'),
+                        current.get('intSubLocationId'),
+                        current.get('intStorageLocationId'),
+                        current.get('intLotId'),
+                        current.get('intItemUOMId'),
+                        function (quantity) {
+                            current.set('dblSystemCount', quantity);
+                        }
+                    );
                     break;
                 case 'cboLotNo':
+                    current.set('dblSystemCount', null);
+                    current.set('strUnitMeasure', records[0].get('strItemUOM'));
+                    current.set('intItemUOMId', records[0].get('intItemUOMId'));
                     current.set('strLotAlias', records[0].get('strLotAlias'));
                     current.set('dblSystemCount', records[0].get('dblQty'));
+                    current.set('dblItemUOMConversionFactor', records[0].get('dblItemUOMConv'));
+                    current.set('intWeightUOMId', null);
+                    current.set('dblWeightQty', null);
+                    current.set('dblNetQty', null);
+                    current.set('strWeightUOM', null);
+                    //current.set('dblWeightUOMConversionFactor', null);
+                    me.getTotalLocationStockOnHand(
+                        vm.get('current.intLocationId'),
+                        current.get('intItemId'),
+                        current.get('intSubLocationId'),
+                        current.get('intStorageLocationId'),
+                        current.get('intLotId'),
+                        current.get('intItemUOMId'),
+                        function (quantity) {
+                            current.set('dblSystemCount', quantity);
+                        }
+                    );
+                    me.mapGrossNet(current);
+                    break;
+                case 'cboWeightUOM':
+                    current.set('dblWeightUOMConversionFactor', records[0].get('dblUnitQty'));
+                    me.mapGrossNet(current);
                     break;
                 case 'cboUOM':
-                    current.set('dblSystemCount', records[0].get('dblOnHand'));
-                    // current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
-                    // current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
-                    // current.set('strSubLocationName', records[0].get('strSubLocationName'));
-                    // current.set('intSubLocationId', records[0].get('intSubLocationId'));
+                    current.set('dblItemUOMConversionFactor', records[0].get('dblUnitQty'));
+                    if (current.get('intLotId')) {
+                        current.set('dblSystemCount', records[0].get('dblOnHand'));
+                        me.getTotalLocationStockOnHand(
+                            vm.get('current.intLocationId'),
+                            current.get('intItemId'),
+                            current.get('intSubLocationId'),
+                            current.get('intStorageLocationId'),
+                            current.get('intLotId'),
+                            current.get('intItemUOMId'),
+                            function (quantity) {
+                                current.set('dblSystemCount', quantity);
+                            }
+                        );
+                    } else {
+                        current.set('dblSystemCount', 0.00);
+                    }
+
+                    me.mapGrossNet(current);
                     break;
             }
         }
     },
 
+    mapGrossNet: function (current) {
+        var gn = this.calculateGrossNet(current.get('dblPhysicalCount'), current.get('dblItemUOMConversionFactor'), current.get('dblWeightUOMConversionFactor'), 0.00);
+        current.set('dblWeightQty', gn.gross);
+        current.set('dblNetQty', gn.gross);
+    },
+    
     onItemClick: function () {
         iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true }});
     },
@@ -1650,9 +1928,113 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         }
     },
 
+    onItemBeforeQuery: function (obj) {
+        if (obj.combo) {
+            if (obj.combo.itemId === 'cboItem') {
+                var vm = obj.combo.up('window').getViewModel();
+                var current = vm.get('current');
+                var locationId = current.get('intLocationId');
+
+                obj.combo.defaultFilters = [
+                    {
+                        column: 'intLocationId',
+                        value: locationId,
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strLotTracking',
+                        value: 'No',
+                        conjunction: 'and',
+                        condition: 'eq'
+                    }
+                ];
+
+                if (current.get('ysnCountByLots')) {
+                    obj.combo.defaultFilters = [
+                        {
+                            column: 'intLocationId',
+                            value: locationId,
+                            conjunction: 'and'
+                        },
+                        {
+                            column: 'strLotTracking',
+                            value: 'No',
+                            conjunction: 'and',
+                            condition: 'noteq'
+                        }
+                    ];
+                }
+            }
+        }
+    },
+
+    onUOMBeforeQuery: function (obj) {
+        if (obj.combo) {
+            if (obj.combo.itemId === 'cboUOM') {
+                var vm = obj.combo.up('window').getViewModel();
+                var current = vm.get('current');
+                var locationId = current.get('intLocationId');
+                var grdPhysicalCount = obj.combo.up('window').down('#grdPhysicalCount');
+
+                obj.combo.defaultFilters = [
+                    {
+                        column: 'intItemId',
+                        value: grdPhysicalCount.selection.get('intItemId'),
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'intLocationId',
+                        value: locationId,
+                        conjunction: 'and'
+                    }
+                ];
+
+                if (grdPhysicalCount.selection.get('intLotId')) {
+                    if (grdPhysicalCount.selection.get('intLotId')) {
+                        obj.combo.defaultFilters = [
+                            {
+                                column: 'intItemId',
+                                value: grdPhysicalCount.selection.get('intItemId'),
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: locationId,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intItemUOMId',
+                                value: grdPhysicalCount.selection.get('intItemUOMId'),
+                                conjunction: 'and',
+                                condition: 'eq'
+                            }
+                        ];
+                    }
+                }
+            }
+        }
+    },
+
+    onPhysicalCountChange: function (config, column) {
+        var me = this;
+        var current = column.record;
+        if (column.field === 'dblPhysicalCount')
+            me.mapGrossNet(current);
+        else if (column.field === "dblQtyPerPallet" || column.field === "dblPallets") {
+            var calcPallet = current.get('dblPallets') !== 0 && current.get('dblQtyPerPallet') !== 0;
+            if (calcPallet) {
+                current.set('dblPhysicalCount', current.get('dblPallets') * current.get('dblQtyPerPallet'));
+            }
+        }
+    },
+    
     init: function (application) {
         this.control({
             "#cboUOM": {
+                //  beforequery: this.onUOMBeforeQuery,
+                select: this.onInventoryCountDetailSelect
+            },
+            "#cboWeightUOM": {
                 select: this.onInventoryCountDetailSelect
             },
             "#cboCountGroup": {
@@ -1686,6 +2068,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 click: this.onRecapClick
             },
             "#cboItem": {
+                beforequery: this.onItemBeforeQuery,
                 select: this.onInventoryCountDetailSelect
             },
             "#cboGrdSubLocation": {
@@ -1718,8 +2101,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             "#btnDetachSelectedRows": {
                 click: this.onDetachSelectedRows
             },
+            "#btnDetachAll": {
+                click: this.onDetachAll
+            },
             "#btnAttachNewRow": {
                 click: this.onAttachNewRow
+            },
+            "#btnEditRow": {
+                click: this.onOpenRow
             },
             "#cboCountBy": {
                 select: this.onCountBySelect

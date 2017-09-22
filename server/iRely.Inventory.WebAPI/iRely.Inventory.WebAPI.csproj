@@ -258,8 +258,8 @@
       <HintPath>..\packages\iRely.Common.17.31.6467.17348-rc\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="iRely.Reports.Helper, Version=17.3.6466.37220, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\iRely.Reports.Helper.17.3.6466.37220\lib\net45\iRely.Reports.Helper.dll</HintPath>
+    <Reference Include="iRely.Reports.Helper, Version=17.3.6471.10105, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\iRely.Reports.Helper.17.3.6471.10105\lib\net45\iRely.Reports.Helper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
@@ -554,6 +554,7 @@
     <None Include="Properties\PublishProfiles\1620.pubxml" />
     <None Include="Properties\PublishProfiles\1630.pubxml" />
     <None Include="Properties\PublishProfiles\1640.pubxml" />
+    <None Include="Properties\PublishProfiles\17.3.pubxml" />
     <None Include="Properties\PublishProfiles\1710.pubxml" />
     <None Include="Properties\PublishProfiles\1730.pubxml" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />

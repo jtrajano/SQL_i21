@@ -18,6 +18,19 @@
         "prependButtons": true,
         "width": null
     },
+    "configAlternates": {
+        "border": "auto",
+        "container|padding": "auto",
+        "designer|userAlias": "string",
+        "designer|userClassName": "string",
+        "floating": "boolean",
+        "frame": "boolean",
+        "inputItemWidth": "number",
+        "itemId": "string",
+        "margin": "auto",
+        "prependButtons": "boolean",
+        "width": "auto"
+    },
     "designerId": "6e9d32bd-1b77-41b2-9662-434eced19679",
     "viewControllerInstanceId": "2190b325-7007-4076-a27d-8dae415962fc",
     "viewModelInstanceId": "0d70f8b0-c287-4c7f-869d-8a03ba31cc14",
@@ -39,10 +52,17 @@
                 "text": null,
                 "tooltip": "Click to get help on this screen"
             },
-            "name": "MyButton",
             "configAlternates": {
-                "tooltip": "string"
+                "tooltip": "string",
+                "designer|displayName": "string",
+                "icon": "string",
+                "iconCls": "string",
+                "itemId": "string",
+                "layout|flex": "number",
+                "tabIndex": "number",
+                "text": "string"
             },
+            "name": "MyButton",
             "designerId": "247c5654-a93e-4631-b93c-c1ba367e7a0e"
         },
         {
@@ -62,10 +82,17 @@
                 "text": null,
                 "tooltip": "Click for support on this screen"
             },
-            "name": "MyButton1",
             "configAlternates": {
-                "tooltip": "string"
+                "tooltip": "string",
+                "designer|displayName": "string",
+                "icon": "string",
+                "iconCls": "string",
+                "itemId": "string",
+                "layout|flex": "number",
+                "tabIndex": "number",
+                "text": "string"
             },
+            "name": "MyButton1",
             "designerId": "dbffd8e8-4e5b-4224-b7a2-b4fa71258338"
         },
         {
@@ -85,10 +112,17 @@
                 "text": null,
                 "tooltip": "Click to display table/field name tooltips"
             },
-            "name": "MyButton2",
             "configAlternates": {
-                "tooltip": "string"
+                "tooltip": "string",
+                "designer|displayName": "string",
+                "icon": "string",
+                "iconCls": "string",
+                "itemId": "string",
+                "layout|flex": "number",
+                "tabIndex": "number",
+                "text": "string"
             },
+            "name": "MyButton2",
             "designerId": "bf39f47d-84c2-4c68-a3b3-4b6bf906fc50"
         },
         {
@@ -106,6 +140,14 @@
                 "margin": "0 5",
                 "text": "Ready"
             },
+            "configAlternates": {
+                "designer|displayName": "string",
+                "itemId": "string",
+                "layout|flex": "number",
+                "layout|margins": "string",
+                "margin": "auto",
+                "text": "string"
+            },
             "name": "MyLabel",
             "designerId": "dba197c7-2211-4e2f-a5a2-a21986c61faf"
         },
@@ -120,6 +162,11 @@
                 "designer|displayName": "Fill",
                 "layout|flex": null,
                 "margin": null
+            },
+            "configAlternates": {
+                "designer|displayName": "string",
+                "layout|flex": "number",
+                "margin": "auto"
             },
             "name": "MyFill",
             "designerId": "d2e7a712-d34e-4295-83b5-d356dbe27446"

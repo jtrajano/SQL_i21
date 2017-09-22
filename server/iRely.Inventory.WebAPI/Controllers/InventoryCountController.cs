@@ -49,6 +49,7 @@ namespace iRely.Inventory.WebApi
         [ActionName("UpdateDetails")]
         public async Task<HttpResponseMessage> UpdateDetails([FromBody] InvCountDetailsParams param)
         {
+            var updateResult = new SaveResult();
             try
             {
                 var db = ((InventoryCountBl)_bl).GetRepository().ContextManager.Database;
@@ -68,26 +69,16 @@ namespace iRely.Inventory.WebApi
                     new SqlParameter("@intStorageLocationId", param.intStorageLocationId),
                     new SqlParameter("@ysnIncludeZeroOnHand", param.ysnIncludeZeroOnHand),
                     new SqlParameter("@ysnCountByLots", param.ysnCountByLots));
-                var result = new
-                {
-                    success = true,
-                    message = "success",
-                    exception = "",
-                    innerException = ""
-                };
-                return Request.CreateResponse(HttpStatusCode.Accepted, result);
+                updateResult.HasError = false;
             }
             catch (Exception ex)
             {
-                var result = new
-                {
-                    success = false,
-                    message = "failed",
-                    exception = ex.Message,
-                    innerException = ex.InnerException.Message
-                };
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
+                updateResult.BaseException = ex;
+                updateResult.HasError = true;
+                updateResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
+
+            return Request.CreateResponse(updateResult.HasError ? HttpStatusCode.InternalServerError : HttpStatusCode.Accepted, updateResult);
         }
 
         [HttpPut]
@@ -152,12 +143,32 @@ namespace iRely.Inventory.WebApi
                 result = new SearchResult()
                 {
                     success = false,
-                    summaryData = ex.Message
+                    summaryData = ex.InnerException != null ? ex.InnerException.Message : ex.Message
                 };
             }
 
             return Request.CreateResponse(result.success ? HttpStatusCode.Accepted : HttpStatusCode.InternalServerError, result);
         }
+
+        [HttpDelete]
+        [ActionName("DeleteAllDetails")]
+        public async Task<IHttpActionResult> GetInventoryCountDetails([FromBody] LockInventoryCount intInventoryCountId)
+        {
+            try
+            {
+                var bl = ((InventoryCountBl)_bl);
+                var query = bl.GetRepository().GetQuery<tblICInventoryCountDetail>().Where(e => e.intInventoryCountId == intInventoryCountId.intInventoryCountId);
+                var details = await query.ToListAsync();
+                bl.GetRepository().GetQuery<tblICInventoryCountDetail>().RemoveRange(details);
+                await bl.SaveAsync(false);
+                return StatusCode(HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
 
 
         public struct LockInventoryCount
@@ -189,23 +200,48 @@ namespace iRely.Inventory.WebApi
         [ActionName("PostTransaction")]
         public HttpResponseMessage PostTransaction(BusinessLayer.Common.Posting_RequestModel count)
         {
-            var result = _bl.PostInventoryCount(count, count.isRecap);
-
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            try
             {
-                data = new
+                var result = _bl.PostInventoryCount(count, count.isRecap);
+
+                if(result.HasError)
                 {
-                    strBatchId = result.strBatchId,
-                    strTransactionId = count.strTransactionId
-                },
-                success = true,
-                message = new
-                {
-                    statusText = result.Exception.Message,
-                    status = result.Exception.Error,
-                    button = result.Exception.Button.ToString()
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, new
+                    {
+                        success = false,
+                        message = new
+                        {
+                            statusText = result.Exception.Message,
+                            status = result.Exception.Error,
+                            button = result.Exception.Button.ToString()
+                        }
+                    });
                 }
-            });
+
+                return Request.CreateResponse(HttpStatusCode.Accepted, new
+                {
+                    data = new
+                    {
+                        strBatchId = result.strBatchId,
+                        strTransactionId = count.strTransactionId
+                    },
+                    success = true,
+                    message = new
+                    {
+                        statusText = result.Exception.Message,
+                        status = result.Exception.Error,
+                        button = result.Exception.Button.ToString()
+                    }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
 
         [HttpGet]

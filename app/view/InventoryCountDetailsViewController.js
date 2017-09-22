@@ -19,7 +19,16 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 ],
                 hidden: '{isCountByGroup}'
             },
-            
+            txtDescription: '{current.strItemDescription}',
+            txtStockUOM: '{current.strStockUOM}',
+            txtNoOfPallets: {
+                value: '{current.dblPallets}',
+                hidden: '{!isLotted}'
+            },
+            txtQtyPerPallet: {
+                value: '{current.dblQtyPerPallet}',
+                hidden: '{!isLotted}'
+            },
             cboCountGroup: {
                 store: '{countGroup}',
                 value: '{current.strCountGroup}',
@@ -89,6 +98,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{lots}',
                 value: '{current.strLotNo}',
                 origValueField: 'intLotId',
+                hidden: '{!isLotted}',
                 hidden: '{isCountByGroup}',
                 forceSelection: '{forceSelection}',
                 defaultFilters: [
@@ -114,9 +124,22 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                     }
                 ]
             },
+            cboParentLotNo: {
+                value: '{current.strParentLotNo}',
+                store: '{parentLots}',
+                defaultFilters: [
+                    {
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'and'
+                    }
+                ],
+                hidden: '{!isLotted}',
+                forceSelection: '{forceSelection}'
+            },
             cboUOM: {
                 store: '{itemUOMs}',
-                value: '{current.strUOM}',
+                value: '{current.strUnitMeasure}',
                 origValueField: 'intItemUOMId',
                 hidden: '{isCountByGroup}',
                 defaultFilters: [
@@ -128,6 +151,43 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                     {
                         column: 'intLocationId',
                         value: '{inventoryCount.intLocationId}',
+                        conjunction: 'and'
+                    }
+                ],
+                readOnly: '{disableCountUOM}'
+            },
+            txtWeightQty: {
+                value: '{current.dblWeightQty}',
+                hidden: '{!isLotted}',
+                readOnly: '{disableGrossUOM}'
+            },
+            txtNetWeightQty: {
+                value: '{current.dblNetQty}',
+                hidden: '{!isLotted}',
+                readOnly: '{disableGrossUOM}'
+            },
+            cboWeightUOM: {
+                store: '{itemUOMs}',
+                value: '{current.strWeightUOM}',
+                hidden: '{!isLotted}',
+                fieldLabel: '{setWeightUOMFieldLabel}',
+                readOnly: '{disableGrossUOM}',
+                origValueField: 'intItemUOMId',
+                origUpdateField: 'intWeightUOMId',
+                defaultFilters: [
+                    {
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'intLocationId',
+                        value: '{inventoryCount.intLocationId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strUnitType',
+                        value: 'Weight',
                         conjunction: 'and'
                     }
                 ]
@@ -149,15 +209,19 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             txtCountLineNo: {
                 value: '{current.strCountLine}',
             },
-            txtPhysicalCount: '{current.dblPhysicalCount}',
+            txtPhysicalCount: {
+                value: '{current.dblPhysicalCount}',
+                readOnly: '{disablePhysicalCount}'
+            },
             txtPhysicalCountInStockUnit: {
                 value: '{current.dblPhysicalCountStockUnit}',
                 hidden: '{isCountByGroup}'
             },
             txtLotAlias: {
                 value: '{current.strLotAlias}',
+				readOnly: '{lotAliasReadOnly}',
+                hidden: '{!isLotted}',
                 hidden: '{isCountByGroup}',
-				readOnly: '{lotAliasReadOnly}'
             },
             chkRecount: {
                 value: '{current.ysnRecount}',
@@ -167,39 +231,53 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         }
     },
 
-    show: function(config) {
+    show: function (config) {
         var me = this,
             win = me.getView(),
-            vm  = me.getViewModel(),
+            vm = me.getViewModel();
+
+        if (config) {
+            win.show();
+            win.context = me.setupContext({ window: win });
+
+            if(config.action === "edit") {
+                if (config.param.id) {
+                    config.filters = [{ column: 'intInventoryCountDetailId', value: config.param.id }];
+
+                    win.context.data.load({
+                        filters: config.filters,
+                        callback: function (records, opts, success) { 
+                            vm.setData({
+                                inventoryCount: config.param.current
+                            });
+                        }
+                    });
+                }
+            } else {
+                vm.setData({
+                    inventoryCount: config.param.current
+                });
+    
+                win.context.data.addRecord();
+            }
+        }
+    },
+
+    setupContext: function(options) {
+        var me = this,
+            win = me.getView(),
+            vm = me.getViewModel(),
             store = Ext.create('Inventory.store.InventoryCountDetail');
 
-        if(config) {
-            win.show();
-            
-            /* Set context */
-            var context = Ext.create('iRely.Engine', {
-                window: win,
-                store: store,
-                binding: me.config.binding,
-                createRecord: me.onCreateRecord
-            });
-            win.context = context;
-            
-            if (config.id) {
-                config.filters = [{ column: 'intInventoryCountId', value: config.id }];
+        /* Set context */
+        var context = Ext.create('iRely.Engine', {
+            window: win,
+            store: store,
+            binding: me.config.binding,
+            createRecord: me.onCreateRecord
+        });
 
-                context.data.load({
-                    filters: config.filters,
-                    callback: function(records, opts, success) { }
-                });
-            }
-
-            vm.setData({
-                inventoryCount: config.param.current
-            });
-
-            context.data.addRecord();
-        }
+        return context;
     },
 
     onCreateRecord: function(config, action) {
@@ -211,6 +289,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         rec.set('ysnRecount', false);
         rec.set('dblLastCost', 0);
         rec.set('dblSystemCount', 0);
+        rec.set('strCountBy', vm.get('inventoryCount.strCountBy'));
         
         rec.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
         rec.set('strUserName', 'Entered by ' + iRely.config.Security.UserName);
@@ -238,7 +317,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         var me = this,
             win = me.getView(),
             vm = me.getViewModel(),
-            valid = true,
+            //valid = true,
             message = "";
 
         if(!vm.get('inventoryCount.strCountBy') === 'Pack') {
@@ -256,42 +335,83 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             }    
         }
 
-        if(valid) {
-            win.context.data.saveRecord({
-                successFn: function() {
-                    win.close(vm.get('inventoryCount').intInventoryCountId);
-                }
-            });
-        } else {
-            iRely.Functions.showCustomDialog('error', 'ok', message, function() { });    
-        }
+        win.context.data.validator.validateRecord({ window: win }, function (valid) {
+            if (valid) {
+                win.context.data.saveRecord({
+                    successFn: function () {
+                        win.close(vm.get('inventoryCount').intInventoryCountId);
+                    }
+                });
+            }
+        });
     },
 
-    getTotalLocationStockOnHand: function (intLocationId, intItemId, callback) {
+    getTotalLocationStockOnHand: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, intLotId, intItemUOMId, callback) {
         ic.utils.ajax({
             timeout: 120000,
             url: '../Inventory/api/ItemStock/GetLocationStockOnHand',
             params: {
                 intLocationId: intLocationId,
-                intItemId: intItemId
+                intItemId: intItemId,
+                intSubLocationId: intSubLocationId,
+                intStorageLocationId: intStorageLocationId,
+                intLotId: intLotId,
+                intItemUOMId: intItemUOMId
             }
         })
-        .subscribe(
-            function(response) {
+            .subscribe(
+            function (response) {
                 var jsonData = Ext.decode(response.responseText);
                 if (jsonData.success) {
-                    if(jsonData.data.length > 0)
+                    if (jsonData.data.length > 0)
                         callback(jsonData.data[0].dblOnHand);
                     else
                         callback(0);
                 } else
                     callback(0);
             },
-            function(error) {
+            function (error) {
                 var jsonData = Ext.decode(error.responseText);
                 callback(jsonData.ExceptionMessage, true);
             }
-        );
+            );
+    },
+
+    mapGrossNet: function (current) {
+        var gn = this.calculateGrossNet(current.get('dblPhysicalCount'), current.get('dblItemUOMConversionFactor'), current.get('dblWeightUOMConversionFactor'), 0.00);
+        current.set('dblWeightQty', gn.gross);
+        current.set('dblNetQty', gn.gross);
+    },
+
+    calculateGrossNet: function (lotQty, itemUOMConversionFactor, weightUOMConversionFactor, tareWeight) {
+        var grossQty = 0.00;
+        var me = this;
+        if (itemUOMConversionFactor === weightUOMConversionFactor) {
+            grossQty = lotQty;
+        }
+        else if (weightUOMConversionFactor !== 0) {
+            grossQty = me.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+        }
+
+        return {
+            gross: grossQty,
+            tare: tareWeight,
+            net: grossQty - tareWeight
+        };
+    },
+
+    convertQtyBetweenUOM: function (sourceUOMConversionFactor, targetUOMConversionFactor, qty) {
+        var result = 0;
+
+        if (sourceUOMConversionFactor === targetUOMConversionFactor) {
+            result = qty;
+        }
+        else if (targetUOMConversionFactor !== 0) {
+            result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
+        }
+
+        //return Math.round(result, 12);
+        return ic.utils.Math.round(result, 12);
     },
 
     getStockQuantity: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, callback) {
@@ -342,16 +462,31 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         vm.set('current.intLotId', null);
         vm.set('current.strLotNo', null);
         vm.set('current.strLotAlias', null);
+        vm.set('selectedLot', null);
+        vm.set('current.intWeightUOMId', null);
+        vm.set('current.intItemId', rec.get('intItemId'));
+        vm.set('current.ysnLotWeightsRequired', rec.get('ysnLotWeightsRequired'));
+        vm.set('current.dblWeightQty', null);
+        vm.set('current.dblNetQty', null);
+        vm.set('current.strWeightUOM', null);
+        vm.set('current.dblWeightUOMConversionFactor', null);
+        vm.set('current.dblItemUOMConversionFactor', rec.get('dblStockUnitQty'));
+        vm.set('current.strStockUOM', rec.get('strStockUOM'));
+        vm.set('current.intStockUOMId', rec.get('intStockUOMId'));
         vm.set('current.intItemUOMId', rec.get('intStockUOMId'));
         vm.set('current.strUnitMeasure', rec.get('strStockUOM'));
+        vm.set('current.intItemLocationId', rec.get('intItemLocationId'));
+        vm.set('current.ysnLotted', rec.get('strLotTracking') !== 'No');
+        vm.set('isLotted', rec.get('strLotTracking') !== 'No');
 
-        // me.getStockQuantity(vm.get('inventoryCount.intLocationId'), vm.get('current.intItemId'), 
-        //     vm.get('current.intSubLocationId'), vm.get('current.intStorageLocationId'), function(quantity) {
-        //         vm.set('current.dblSystemCount', quantity);
-        //     }
-        // );
-        me.getTotalLocationStockOnHand(vm.get('inventoryCount.intLocationId'), vm.get('current.intItemId'), 
-            vm.get('current.intSubLocationId'), vm.get('current.intStorageLocationId'), function(quantity) {
+        me.getTotalLocationStockOnHand(
+            vm.get('inventoryCount.intLocationId'),
+            vm.get('current.intItemId'),
+            vm.get('current.intSubLocationId'),
+            vm.get('current.intStorageLocationId'),
+            vm.get('current.intLotId'),
+            vm.get('current.intItemUOMId'),
+            function (quantity) {
                 vm.set('current.dblSystemCount', quantity);
             }
         );
@@ -367,6 +502,29 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
 
         vm.set('current.strLotAlias', rec.get('strLotAlias'));
         vm.set('current.dblSystemCount', rec.get('dblQty'));
+        vm.set('current.strUnitMeasure', rec.get('strItemUOM'));
+        vm.set('current.intItemUOMId', rec.get('intItemUOMId'));
+        vm.set('current.intWeightUOMId', null);
+        vm.set('current.dblWeightQty', null);
+        vm.set('current.intLotId', rec.get('intLotId'));
+        vm.set('current.dblNetQty', null);
+        vm.set('current.strWeightUOM', null);
+        vm.set('current.dblItemUOMConversionFactor', rec.get('dblItemUOMConv'));
+        //vm.set('current.dblWeightUOMConversionFactor', null);
+        
+        vm.set('selectedLot', records);
+        me.getTotalLocationStockOnHand(
+            vm.get('inventoryCount.intLocationId'),
+            vm.get('current.intItemId'),
+            vm.get('current.intSubLocationId'),
+            vm.get('current.intStorageLocationId'),
+            vm.get('current.intLotId'),
+            vm.get('current.intItemUOMId'),
+            function (quantity) {
+                vm.set('current.dblSystemCount', quantity);
+            }
+        );
+        me.mapGrossNet(vm.get('current'));
     },
 
     onSubLocationSelect: function(combo, records, opts) {
@@ -377,11 +535,25 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         var vm = me.getViewModel();
         var rec = _.first(records);
 
-        vm.set('current.strStorageLocationName', rec.get('strStorageLocationName'));
-        vm.set('current.intStorageLocationId', rec.get('intStorageLocationId'));
-        vm.set('current.dblSystemCount', rec.get('dblOnHand'));
-        vm.set('current.intItemUOMId', rec.get('intItemUOMId'));
-        vm.set('current.strUnitMeasure', rec.get('strUnitMeasure'));
+        vm.set('current.strStorageLocationName', null);
+        vm.set('current.intStorageLocationId', null);
+        vm.set('current.intLotId', null);
+        vm.set('current.strLotNo', null);
+        vm.set('current.strLotAlias', null);
+        vm.set('current.intItemLocationId', rec.get('intItemLocationId'));
+        vm.set('selectedLot', null);
+
+        me.getTotalLocationStockOnHand(
+            vm.get('inventoryCount.intLocationId'),
+            vm.get('current.intItemId'),
+            vm.get('current.intSubLocationId'),
+            vm.get('current.intStorageLocationId'),
+            vm.get('current.intLotId'),
+            vm.get('current.intItemUOMId'),
+            function (quantity) {
+                vm.set('current.dblSystemCount', quantity);
+            }
+        );
     },
 
     onStorageUnitSelect: function(combo, records, opts) {
@@ -392,11 +564,23 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         var vm = me.getViewModel();
         var rec = _.first(records);
 
-        vm.set('current.strSubLocationName', rec.get('strSubLocationName'));
-        vm.set('current.intSubLocationId', rec.get('intSubLocationId'));
-        vm.set('current.dblSystemCount', rec.get('dblOnHand'));
-        vm.set('current.intItemUOMId', rec.get('intItemUOMId'));
-        vm.set('current.strUnitMeasure', rec.get('strUnitMeasure'));    
+        if (vm.get('current.intLotId')) {
+            vm.set('current.strLotNo', null);
+            vm.set('current.strLotAlias', null);
+            vm.set('selectedLot', null);
+        }
+
+        me.getTotalLocationStockOnHand(
+            vm.get('inventoryCount.intLocationId'),
+            vm.get('current.intItemId'),
+            vm.get('current.intSubLocationId'),
+            vm.get('current.intStorageLocationId'),
+            vm.get('current.intLotId'),
+            vm.get('current.intItemUOMId'),
+            function (quantity) {
+                vm.set('current.dblSystemCount', quantity);
+            }
+        );   
     },
 
     onUOMSelect: function(combo, records, opts) {
@@ -407,7 +591,25 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         var vm = me.getViewModel();
         var rec = _.first(records);
 
-        vm.set('current.dblSystemCount', rec.get('dblOnHand'));    
+        vm.set('current.intItemUOMId', rec.get('intItemUOMId'));
+        if (vm.get('current.intLotId')) {
+            vm.set('current.dblSystemCount', rec.get('dblOnHand'));
+            me.getTotalLocationStockOnHand(
+                vm.get('inventoryCount.intLocationId'),
+                vm.get('current.intItemId'),
+                vm.get('current.intSubLocationId'),
+                vm.get('current.intStorageLocationId'),
+                vm.get('current.intLotId'),
+                vm.get('current.intItemUOMId'),
+                function (quantity) {
+                    vm.set('current.dblSystemCount', quantity);
+                }
+            );
+        } else {
+            vm.set('current.dblSystemCount', 0.00);
+        }
+        vm.get('current').set('dblItemUOMConversionFactor', rec.get('dblUnitQty'));
+        me.mapGrossNet(vm.get('current'));
     },
 
     onCountGroupSelect: function(combo, records, opts) {
@@ -433,13 +635,143 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         });
     },
 
+    onGrossUOMSelect: function(combo, records, opts) {
+        if(records.length <= 0)
+            return;
+        
+        var me = this;
+        var vm = me.getViewModel();
+        var rec = _.first(records);
+        var current = vm.get('current');
+        current.set('intWeightUOMId', rec.get('intItemUOMId'));
+        current.set('dblWeightUOMConversionFactor', rec.get('dblUnitQty'));
+        me.mapGrossNet(current);
+    },
+
+    onItemBeforeQuery: function (obj) {
+        if (obj.combo) {
+            if (obj.combo.itemId === 'cboItem') {
+                var vm = obj.combo.up('window').getViewModel();
+                var current = vm.get('current');
+                var locationId = vm.get('inventoryCount.intLocationId');
+
+                obj.combo.defaultFilters = [
+                    {
+                        column: 'intLocationId',
+                        value: locationId,
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strLotTracking',
+                        value: 'No',
+                        conjunction: 'and',
+                        condition: 'eq'
+                    }
+                ];
+
+                if (vm.get('inventoryCount.ysnCountByLots')) {
+                    obj.combo.defaultFilters = [
+                        {
+                            column: 'intLocationId',
+                            value: locationId,
+                            conjunction: 'and'
+                        },
+                        {
+                            column: 'strLotTracking',
+                            value: 'No',
+                            conjunction: 'and',
+                            condition: 'noteq'
+                        }
+                    ];
+                }
+            }
+        }
+    },
+
+    onUOMBeforeQuery: function (obj) {
+        if (obj.combo) {
+            if (obj.combo.itemId === 'cboUOM') {
+                var vm = obj.combo.up('window').getViewModel();
+                var current = vm.get('current');
+                var locationId = vm.get('inventoryCount.intLocationId');
+
+                obj.combo.defaultFilters = [
+                    {
+                        column: 'intItemId',
+                        value: current.get('intItemId'),
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'intLocationId',
+                        value: locationId,
+                        conjunction: 'and'
+                    }
+                ];
+
+                if (current.get('intLotId')) {
+                    var selectedLot = vm.get('selectedLot');
+                    if (selectedLot && selectedLot.length > 0) {
+                        obj.combo.defaultFilters = [
+                            {
+                                column: 'intItemId',
+                                value: current.get('intItemId'),
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: locationId,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intItemUOMId',
+                                value: selectedLot[0].get('intItemUOMId'),
+                                conjunction: 'and',
+                                condition: 'eq'
+                            }
+                        ];
+                    }
+                }
+            }
+        }
+    },
+
+    onPhysicalCountChange: function(field, newValue, oldValue) {
+        var me = this;
+        var current = me.getViewModel().get('current');
+        me.mapGrossNet(current);
+    },
+
+    onPalletChange: function(field, newValue, oldValue) {
+        var me = this;
+        var current = me.getViewModel().get('current');
+        
+        var calcPallet = current.get('dblPallets') !== 0 && current.get('dblQtyPerPallet') !== 0;
+        if(calcPallet) {
+            current.set('dblPhysicalCount', current.get('dblPallets') * current.get('dblQtyPerPallet'));
+        }
+    },
+
+
     init: function(application) {
         this.control({
             "#btnAdd": {
                 click: this.onAddClick
             },
+            "#txtPhysicalCount": {
+                change: this.onPhysicalCountChange
+            },
+            "#txtNoOfPallets": {
+                change: this.onPalletChange
+            },
+            "#txtQtyPerPallet": {
+                change: this.onPalletChange
+            },
             "#cboItem": {
+                beforequery: this.onItemBeforeQuery,
                 select: this.onItemSelect
+            },
+            "#cboWeightUOM": {
+                select: this.onGrossUOMSelect
             },
             "#cboLotNo": {
                 select: this.onLotSelect
@@ -451,6 +783,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 select: this.onStorageUnitSelect
             },
             "#cboUOM": {
+                //beforequery: this.onUOMBeforeQuery,
                 select: this.onUOMSelect
             },
             "#cboCountGroup": {
