@@ -64,6 +64,68 @@ BEGIN TRY
 		SELECT TOP 1 @ReportingComponentId = [from] FROM @Params WHERE [fieldname] = 'ReportingComponentId'
 		SELECT TOP 1 @Refresh = [from] FROM @Params WHERE [fieldname] = 'Refresh'
 
+		DECLARE @DateFrom DATETIME
+			, @DateTo DATETIME
+			, @TaxAuthorityId INT
+
+		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IL'
+		SELECT intProductCodeId
+			, strProductCode
+		INTO #tmpFGCodes
+		FROM tblTFProductCode
+		WHERE intTaxAuthorityId = @TaxAuthorityId
+			AND (strProductCode LIKE 'B%'
+			OR strProductCode LIKE 'D%'
+			OR strProductCode IN ('999'))
+
+		SELECT intProductCodeId
+			, strProductCode
+		INTO #tmpRawMaterialCode
+		FROM tblTFProductCode
+		WHERE intTaxAuthorityId = @TaxAuthorityId
+			AND strProductCode IN ('160', '228', '285', '145', '073', '999')
+
+		SELECT TOP 1 @DateFrom = [from], @DateTo = [to]  FROM @Params WHERE [fieldname] = 'Date'
+		
+		SELECT Blend.intBlendTransactionId
+			, Blend.strBlendTransactionNo
+			, dtmBlendingDate = Blend.dtmBlendDate
+			, Blend.intPrimaryItemId
+			, Blend.strPrimaryItemNo
+			, strPrimaryProductColAProductCode = CASE WHEN PrimaryCode.strProductCode != '160' THEN NULL ELSE PrimaryCode.strProductCode END
+			, intPrimaryProductColAGallons = CASE WHEN PrimaryCode.strProductCode != '160' THEN NULL ELSE ROUND(Blend.dblPrimaryQty, 0) END 
+			, strPrimaryProductColBProductCode = CASE WHEN PrimaryCode.strProductCode != '228' THEN NULL ELSE PrimaryCode.strProductCode END
+			, intPrimaryProductColBGallons = CASE WHEN PrimaryCode.strProductCode != '228' THEN NULL ELSE ROUND(Blend.dblPrimaryQty, 0) END 
+			, strPrimaryProductColCProductCode = CASE WHEN PrimaryCode.strProductCode != '999' THEN NULL ELSE PrimaryCode.strProductCode END
+			, intPrimaryProductColCGallons = CASE WHEN PrimaryCode.strProductCode != '999' THEN NULL ELSE ROUND(Blend.dblPrimaryQty, 0) END 
+			, Blend.intBlendAgendItemId
+			, Blend.strBlendAgentItemNo
+			, strBlendingAgentColAProductCode = CASE WHEN AgentCode.strProductCode != '285' THEN NULL ELSE AgentCode.strProductCode END
+			, intBlendingAgentColAGallons = CASE WHEN AgentCode.strProductCode != '285' THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, strBlendingAgentColBProductCode = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN NULL ELSE AgentCode.strProductCode END
+			, intBlendingAgentColBGallons = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, strBlendingAgentColCProductCode = CASE WHEN AgentCode.strProductCode != '999' THEN NULL ELSE AgentCode.strProductCode END
+			, intBlendingAgentColCGallons = CASE WHEN AgentCode.strProductCode != '999' THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, Blend.intFinishedGoodItemId
+			, Blend.strFinishedGoodItemNo
+			, strEndProductProductCode = FGCode.strProductCode
+			, intEndProductGallons = ROUND(Blend.dblFinishedGoodQty, 0)
+		FROM vyuMFGetBlendTransactions Blend
+		INNER JOIN tblICItemMotorFuelTax PrimaryItem ON PrimaryItem.intItemId = Blend.intPrimaryItemId
+		INNER JOIN tblTFProductCode PrimaryCode ON PrimaryCode.intProductCodeId = PrimaryItem.intProductCodeId
+		INNER JOIN tblICItemMotorFuelTax AgentItem ON AgentItem.intItemId = Blend.intBlendAgendItemId
+		INNER JOIN tblTFProductCode AgentCode ON AgentCode.intProductCodeId = AgentItem.intProductCodeId
+		INNER JOIN tblICItemMotorFuelTax FGItem ON FGItem.intItemId = Blend.intFinishedGoodItemId
+		INNER JOIN tblTFProductCode FGCode ON FGCode.intProductCodeId = FGItem.intProductCodeId
+		WHERE CAST(FLOOR(CAST(Blend.dtmBlendDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
+			AND CAST(FLOOR(CAST(Blend.dtmBlendDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
+			AND FGItem.intProductCodeId IN (SELECT intProductCodeId FROM #tmpFGCodes)
+			AND (PrimaryItem.intProductCodeId IN (SELECT intProductCodeId FROM #tmpRawMaterialCode)
+			OR AgentItem.intProductCodeId IN (SELECT intProductCodeId FROM #tmpRawMaterialCode))
+
+		DROP TABLE #tmpFGCodes
+		DROP TABLE #tmpRawMaterialCode
+
 	END
 
 END TRY
