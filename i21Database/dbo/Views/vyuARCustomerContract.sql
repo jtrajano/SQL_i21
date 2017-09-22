@@ -20,8 +20,7 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , intItemUOMId						= CTCD.intItemUOMId --ISNULL(CTCD.intPriceItemUOMId, CTCD.intItemUOMId)
 	 , strUnitMeasure					= ICUMO.strUnitMeasure --ICUMP.strUnitMeasure
 	 , intPricingTypeId					= CTPT.intPricingTypeId
-	 , strPricingType					= CTPT.strPricingType
-	 , dblOrderPrice					= CTCD.dblCashPrice --/ (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
+	 , strPricingType					= CTPT.strPricingType	 
 	 , dblCashPrice						= (CTCD.dblCashPrice * dbo.fnCalculateQtyBetweenUOM(CTCD.intItemUOMId, ISNULL(CTCD.intPriceItemUOMId, CTCD.intItemUOMId), 1))  --CTCD.dblCashPrice 
 	 , intCurrencyExchangeRateTypeId	= CTCD.intRateTypeId
 	 , strCurrencyExchangeRateType		= SMCRT.strCurrencyExchangeRateType
@@ -30,7 +29,9 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , intSubCurrencyId					= ISNULL(CTCD.intBasisCurrencyId, CTCD.intConvPriceCurrencyId)
 	 , dblSubCurrencyRate				= CONVERT(NUMERIC(18,6),ISNULL(SMC.intCent, 1.000000))
 	 , strSubCurrency					= SMC.strCurrency
-	 , intPriceItemUOMId				= CTCD.intPriceItemUOMId
+	 , dblOrderPrice					= CTCD.dblCashPrice --/ (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
+	 , intPriceItemUOMId				= ISNULL(CTCD.intPriceItemUOMId, CTCD.intItemUOMId)
+	 , strPriceUnitMeasure				= ISNULL(ICUMP.strUnitMeasure, ICUMO.strUnitMeasure)
 	 , dblBalance						= CTCD.dblBalance
 	 , dblScheduleQty					= CTCD.dblScheduleQty
 	 , dblAvailableQty					= ISNULL(CTCD.dblBalance,0) - ISNULL(CTCD.dblScheduleQty,0) --dbo.fnCalculateQtyBetweenUOM(CTCD.intItemUOMId, ISNULL(CTCD.intPriceItemUOMId, CTCD.intItemUOMId), (ISNULL(CTCD.dblBalance,0) - ISNULL(CTCD.dblScheduleQty,0)))
@@ -123,19 +124,19 @@ LEFT OUTER JOIN (
 		 , strContractType
 	FROM dbo.tblCTContractType WITH (NOLOCK)
 ) CTCT ON CTCH.intContractTypeId = CTCT.intContractTypeId
---LEFT OUTER JOIN (
---	SELECT intItemUOMId
---		 , intUnitMeasureId
---		 , intItemId
---		 , dblUnitQty
---	FROM  dbo.tblICItemUOM WITH (NOLOCK)
---) ICIUP ON CTCD.intPriceItemUOMId = ICIUP.intItemUOMId 
---	   AND CTCD.intItemId = ICIUP.intItemId
---LEFT OUTER JOIN (
---	SELECT intUnitMeasureId
---		 , strUnitMeasure
---	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
---) ICUMP ON ICIUP.intUnitMeasureId = ICUMP.intUnitMeasureId
+LEFT OUTER JOIN (
+	SELECT intItemUOMId
+		 , intUnitMeasureId
+		 , intItemId
+		 , dblUnitQty
+	FROM  dbo.tblICItemUOM WITH (NOLOCK)
+) ICIUP ON ISNULL(CTCD.intPriceItemUOMId, CTCD.intItemUOMId) = ICIUP.intItemUOMId 
+	   AND CTCD.intItemId = ICIUP.intItemId
+LEFT OUTER JOIN (
+	SELECT intUnitMeasureId
+		 , strUnitMeasure
+	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+) ICUMP ON ICIUP.intUnitMeasureId = ICUMP.intUnitMeasureId
 LEFT OUTER JOIN (
 	SELECT intItemUOMId
 		 , intItemId

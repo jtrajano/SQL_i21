@@ -220,6 +220,7 @@ DECLARE
 		,[dblItemWeight]
 		,[intItemWeightUOMId]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[strPricing]
 		,[ysnRefreshPrice]
 		,[strMaintenanceType]
@@ -311,11 +312,12 @@ DECLARE
 		,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
 		,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
 		,[intItemUOMId]							= ARSI.[intItemUOMId] 
-		,[dblQtyShipped]						= ARSI.[dblQtyShipped] 
+		,[dblQtyShipped]						= ARSI.[dblShipmentQuantity] 
 		,[dblDiscount]							= ARSI.[dblDiscount] 
 		,[dblItemWeight]						= ARSI.[dblWeight]  
 		,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
-		,[dblPrice]								= ARSI.[dblShipmentUnitPrice] 
+		,[dblPrice]								= ARSI.[dblPrice] 
+		,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice]
 		,[strPricing]							= 'Inventory Shipment Item Price'
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= NULL
