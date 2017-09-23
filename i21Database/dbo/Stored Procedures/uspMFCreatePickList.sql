@@ -32,6 +32,7 @@ Declare @intMinItemCount int,
 		@strXml nvarchar(max),
 		@intRecipeId int,
 		@intBlendItemId int
+Declare @dblDefaultResidueQty NUMERIC(38,20)
 
 Declare @tblWorkOrder AS table
 (
@@ -206,7 +207,7 @@ INSERT INTO @tblWorkOrder values (@id)
 Select @intManufacturingProcessId=intManufacturingProcessId From tblMFWorkOrder 
 Where intWorkOrderId in (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
-Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
+Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0),@dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) From tblMFCompanyPreference
 
 Select @intKitStagingLocationId=pa.strAttributeValue 
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
@@ -370,7 +371,7 @@ Begin
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1 
 				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-				AND L.dblWeight >= .01
+				AND L.dblWeight > @dblDefaultResidueQty
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
 					,@intBlendStagingLocationId
@@ -400,7 +401,7 @@ Begin
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1 
 				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-				AND L.dblWeight >= .01
+				AND L.dblWeight > @dblDefaultResidueQty
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
 					,@intBlendStagingLocationId

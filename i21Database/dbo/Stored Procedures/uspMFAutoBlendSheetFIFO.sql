@@ -66,6 +66,7 @@ BEGIN TRY
 	Declare @id int
 	Declare @ysnWOStagePick bit=0
 	Declare @ysnIncludeKitStagingLocation bit=0
+	Declare @dblDefaultResidueQty NUMERIC(38,20)
 
 	DECLARE @intSequenceNo INT
 		,@intSequenceCount INT = 1
@@ -75,7 +76,7 @@ BEGIN TRY
 		,@strOrderByFinal NVARCHAR(100) = ''
 
 	If @ysnFromPickList=0
-		SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+		SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0), @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001)
 		FROM tblMFCompanyPreference
 
 	SELECT @strBlendItemNo = i.strItemNo
@@ -765,7 +766,7 @@ BEGIN TRY
 					Select sd.intItemStockUOMId,'',sd.intItemId,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,@intItemUOMId,sd.dblAvailableQty),
 					sd.intLocationId,sd.intSubLocationId,sd.intStorageLocationId,NULL,NULL,0,sd.dblUnitQty,'',0,@intItemUOMId AS intItemUOMId,@intItemUOMId AS intItemUOMId 
 					From vyuMFGetItemStockDetail sd 
-					Where sd.intItemId=@intRawItemId AND sd.dblAvailableQty > .01 AND sd.intLocationId=@intLocationId 
+					Where sd.intItemId=@intRawItemId AND sd.dblAvailableQty > @dblDefaultResidueQty AND sd.intLocationId=@intLocationId 
 					AND ISNULL(sd.intStorageLocationId,0) NOT IN (@intKitStagingLocationId,@intBlendStagingLocationId)
 					AND ISNULL(sd.ysnStockUnit,0)=1 ORDER BY sd.intItemStockUOMId
 
@@ -843,7 +844,7 @@ BEGIN TRY
 					Select strStatusName From @tblLotStatus
 					)
 				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-				AND L.dblQty >= .01
+				AND L.dblQty > @dblDefaultResidueQty
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
 					,@intBlendStagingLocationId
@@ -1125,7 +1126,7 @@ BEGIN TRY
 			Begin
 				SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
 									   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId 
-									   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty >= .01 ORDER BY ' + @strOrderByFinal
+									   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > ' + CONVERT(VARCHAR(50), @dblDefaultResidueQty) + ' ORDER BY ' + @strOrderByFinal
 
 				EXEC (@strSQL)
 			End
@@ -1133,12 +1134,12 @@ BEGIN TRY
 			Begin
 				INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
 				SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId
-				FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty >= .01 AND PL.intStorageLocationId IN (Select intStagingLocationId From @tblWOStagingLocation)
+				FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > @dblDefaultResidueQty AND PL.intStorageLocationId IN (Select intStagingLocationId From @tblWOStagingLocation)
 				Order By PL.dtmCreateDate
 
 				INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
 				SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId
-				FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty >= .01 AND PL.intStorageLocationId NOT IN (Select intStagingLocationId From @tblWOStagingLocation)
+				FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > @dblDefaultResidueQty AND PL.intStorageLocationId NOT IN (Select intStagingLocationId From @tblWOStagingLocation)
 				Order By PL.dtmCreateDate
 			End
 
@@ -1154,7 +1155,7 @@ BEGIN TRY
 					Select strStatusName From @tblLotStatus
 					)
 				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-				AND L.dblWeight >= .01
+				AND L.dblWeight > @dblDefaultResidueQty
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
 					,@intBlendStagingLocationId
@@ -1174,7 +1175,7 @@ BEGIN TRY
 				If @dblBulkItemAvailableQty > 0
 					INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId)
 					Select TOP 1 intLotId,intItemId,@dblBulkItemAvailableQty,intStorageLocationId,1,intWeightUOMId,intWeightUOMId 
-					From tblICLot Where intItemId=@intRawItemId AND dblWeight >= .01 AND ISNULL(intStorageLocationId,0) > 0 AND intLocationId=@intLocationId
+					From tblICLot Where intItemId=@intRawItemId AND dblWeight > @dblDefaultResidueQty AND ISNULL(intStorageLocationId,0) > 0 AND intLocationId=@intLocationId
 			End
 
 			--Full Bag Pick
@@ -1287,7 +1288,7 @@ BEGIN TRY
 								,L.dblWeightPerQty
 							FROM tblICLot L
 							WHERE L.intLotId = @intParentLotId
-								AND L.dblQty >= .01
+								AND L.dblQty > @dblDefaultResidueQty
 						ELSE
 							INSERT INTO #tblBlendSheetLot (
 								intParentLotId
@@ -1406,7 +1407,7 @@ BEGIN TRY
 								,L.dblWeightPerQty
 							FROM tblICLot L
 							WHERE L.intLotId = @intParentLotId
-								AND L.dblQty >= .01
+								AND L.dblQty > @dblDefaultResidueQty
 						ELSE
 							INSERT INTO #tblBlendSheetLot (
 								intParentLotId

@@ -6,6 +6,9 @@
 AS
 
 Declare @strUOM nvarchar(50)
+Declare @dblDefaultResidueQty NUMERIC(38,20)
+
+Select TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) From tblMFCompanyPreference
 
 Select @strUOM=um.strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
 Where iu.intItemUOMId=@intItemUOMId
@@ -40,8 +43,8 @@ Select * From
 			'Active'
 			)
 		AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-		AND L.dblQty  >= .01
-	) t Where t.dblAvailableQty >= .01
+		AND L.dblQty  > @dblDefaultResidueQty
+	) t Where t.dblAvailableQty > @dblDefaultResidueQty
 	ORDER BY t.dtmDateCreated
 Else
 	Select 0,sd.intItemId,i.strItemNo,i.strDescription,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,@intItemUOMId,sd.dblAvailableQty) AS dblAvailableQty,
@@ -51,4 +54,4 @@ Else
 	JOIN tblICItem i ON sd.intItemId=i.intItemId
 	JOIN tblICStorageLocation sl ON sd.intStorageLocationId=sl.intStorageLocationId
 	JOIN tblSMCompanyLocationSubLocation csl ON sd.intSubLocationId=csl.intCompanyLocationSubLocationId	 
-	Where sd.intItemId=@intItemId AND sd.dblAvailableQty > .01 AND sd.intLocationId=@intLocationId AND ISNULL(sd.ysnStockUnit,0)=1 ORDER BY sd.intItemStockUOMId
+	Where sd.intItemId=@intItemId AND sd.dblAvailableQty > @dblDefaultResidueQty AND sd.intLocationId=@intLocationId AND ISNULL(sd.ysnStockUnit,0)=1 ORDER BY sd.intItemStockUOMId

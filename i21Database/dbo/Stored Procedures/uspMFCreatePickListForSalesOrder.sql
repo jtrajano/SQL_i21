@@ -13,6 +13,7 @@ Declare @intMinLot INT
 Declare @intLotId INT
 Declare @dblAvailableQty NUMERIC(38,20)
 Declare @intPickListId INT
+Declare @dblDefaultResidueQty NUMERIC(38,20)
 
 DECLARE @tblInputItem TABLE (
 	intRowNo INT IDENTITY(1, 1)
@@ -51,6 +52,8 @@ DECLARE @tblPickedLot TABLE(
 	,intStorageLocationId INT
 	,dblItemRequiredQty NUMERIC(38,20)
 )
+
+Select TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) From tblMFCompanyPreference
 
 Insert Into @tblInputItem(intItemId,dblQty,intItemUOMId,strLotTracking)
 Select sd.intItemId,SUM(sd.dblQtyOrdered),sd.intItemUOMId,i.strLotTracking 
@@ -100,7 +103,7 @@ Begin
 		Select 0,sd.intItemId,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,@intItemUOMId,sd.dblAvailableQty),@intItemUOMId,
 		sd.intLocationId,sd.intSubLocationId,sd.intStorageLocationId
 		From vyuMFGetItemStockDetail sd 
-		Where sd.intItemId=@intItemId AND sd.dblAvailableQty > .01 AND sd.intLocationId=@intLocationId AND ISNULL(sd.ysnStockUnit,0)=1 ORDER BY sd.intItemStockUOMId
+		Where sd.intItemId=@intItemId AND sd.dblAvailableQty > @dblDefaultResidueQty AND sd.intLocationId=@intLocationId AND ISNULL(sd.ysnStockUnit,0)=1 ORDER BY sd.intItemStockUOMId
 	Else
 		INSERT INTO @tblLot (
 		 intLotId
@@ -128,10 +131,10 @@ Begin
 			'Active'
 			)
 		AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-		AND L.dblQty  >= .01
+		AND L.dblQty  > @dblDefaultResidueQty
 		ORDER BY L.dtmDateCreated
 
-	Delete From @tblLot Where dblQty < .01
+	Delete From @tblLot Where dblQty < @dblDefaultResidueQty
 
 	Select @intMinLot=MIN(intRowNo) From @tblLot
 	While @intMinLot is not null

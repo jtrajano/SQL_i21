@@ -36,6 +36,9 @@ BEGIN TRY
 		,@strItemNumber NVARCHAR(50)
 		,@strUnitMeasure NVARCHAR(50)
 		,@dblLotAvailableQty NUMERIC(38, 20)
+		,@dblDefaultResidueQty NUMERIC(38,20)
+
+		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -224,7 +227,7 @@ BEGIN TRY
 				SELECT dblWeight
 				FROM dbo.tblICLot
 				WHERE intLotId = @intLotId
-				) < 0.00001
+				) < @dblDefaultResidueQty
 			AND (
 				SELECT dblWeight
 				FROM dbo.tblICLot
@@ -237,7 +240,7 @@ BEGIN TRY
 				SELECT dblQty
 				FROM dbo.tblICLot
 				WHERE intLotId = @intLotId
-				) < 0.00001
+				) < @dblDefaultResidueQty
 			AND (
 				SELECT dblQty
 				FROM dbo.tblICLot
