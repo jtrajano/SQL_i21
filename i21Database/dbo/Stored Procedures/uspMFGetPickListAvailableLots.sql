@@ -21,6 +21,7 @@ Declare @dblRecipeQty NUMERIC(38,20)
 Declare @dblQtyToProduce NUMERIC(38,20)
 Declare @strLotTracking nvarchar(50)
 Declare @ysnIncludeKitStagingLocation bit=0
+Declare @dblDefaultResidueQty NUMERIC(38,20)
 
 Declare @tblReservedQty table
 (
@@ -54,6 +55,8 @@ BEGIN
 END
 SET @id=@strWorkOrderIds
 INSERT INTO @tblWorkOrder(intWorkOrderId) values (@id)
+
+Select TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) From tblMFCompanyPreference
 
 Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFManufacturingProcess where intAttributeTypeId=2
 
@@ -114,7 +117,7 @@ Begin
 	JOIN tblSMCompanyLocationSubLocation csl ON sd.intSubLocationId=csl.intCompanyLocationSubLocationId	 
 	Join tblICItemUOM iu on ti.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Where sd.intItemId=@intItemId AND sd.dblAvailableQty > .01 AND sd.intLocationId=@intLocationId AND ISNULL(sd.ysnStockUnit,0)=1 
+	Where sd.intItemId=@intItemId AND sd.dblAvailableQty > @dblDefaultResidueQty AND sd.intLocationId=@intLocationId AND ISNULL(sd.ysnStockUnit,0)=1 
 	AND sd.intStorageLocationId NOT IN (@intKitStagingLocationId,@intBlendStagingLocationId) 
 	ORDER BY sd.intItemStockUOMId
 End

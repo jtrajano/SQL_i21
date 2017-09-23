@@ -21,6 +21,8 @@ DECLARE @dblReservedQty NUMERIC(38, 20)
 DECLARE @ysnWOStagePick BIT = 0
 DECLARE @intConsumptionMethodId INT
 DECLARE @strPackagingCategory NVARCHAR(50)
+Declare @dblDefaultResidueQty NUMERIC(38,20)
+
 DECLARE @tblInputItem TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,intRecipeId INT
@@ -91,6 +93,8 @@ DECLARE @tblPickedLot TABLE (
 	,dblReservedQty NUMERIC(38, 20)
 	)
 DECLARE @tblWOStagingLocation AS TABLE (intStagingLocationId INT)
+
+Select TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) From tblMFCompanyPreference
 
 SELECT @intLocationId = intLocationId
 	,@intOutputItemId = intItemId
@@ -359,7 +363,7 @@ BEGIN
 			,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId, @intItemUOMId, sd.dblReservedQty)
 		FROM vyuMFGetItemStockDetail sd
 		WHERE sd.intItemId = @intItemId
-			AND sd.dblAvailableQty > .01
+			AND sd.dblAvailableQty >  @dblDefaultResidueQty
 			AND sd.intLocationId = @intLocationId
 			AND ISNULL(sd.ysnStockUnit, 0) = 1
 		ORDER BY sd.intItemStockUOMId
@@ -407,12 +411,12 @@ BEGIN
 				L.dtmExpiryDate IS NULL
 				OR L.dtmExpiryDate >= GETDATE()
 				)
-			AND L.dblQty >= .01
+			AND L.dblQty > @dblDefaultResidueQty
 		ORDER BY L.dtmDateCreated
 
 	DELETE
 	FROM @tblLot
-	WHERE dblQty < .01
+	WHERE dblQty <  @dblDefaultResidueQty
 
 	--if WO has associated Pick Order, pick lots from Order Staging Location
 	IF @ysnWOStagePick = 1
@@ -523,7 +527,7 @@ BEGIN
 			AND intLocationId = @intLocationId
 			AND ISNULL(ysnPosted, 0) = 0
 
-		IF @dblAvailableQty >= .01
+		IF @dblAvailableQty > @dblDefaultResidueQty
 		BEGIN
 			DELETE
 			FROM @tblLotCopy

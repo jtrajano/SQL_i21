@@ -34,6 +34,9 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@intCategoryId INT
 	,@intManufacturingCellId INT
 	,@intSubLocationId INT
+
+	SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+
 DECLARE @tblMFLot TABLE (
 	intRecordId INT Identity(1, 1)
 	,intLotId INT
@@ -833,7 +836,7 @@ BEGIN
 					SELECT dblWeight
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId
-					) < 0.00001
+					) < @dblDefaultResidueQty
 				AND (
 					SELECT dblWeight
 					FROM dbo.tblICLot
@@ -845,7 +848,7 @@ BEGIN
 					SELECT dblQty
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId
-					) < 0.00001
+					) < @dblDefaultResidueQty
 				AND (
 					SELECT dblQty
 					FROM dbo.tblICLot

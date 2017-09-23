@@ -26,6 +26,9 @@ Declare @intMinItemCount int,
 		@ysnIsSubstitute bit,
 		@intParentItemId int,
 		@intMinRemainingItem int
+Declare @dblDefaultResidueQty NUMERIC(38,20)
+
+Select TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) From tblMFCompanyPreference
 
 Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId,@intWorkOrderId=intWorkOrderId
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -382,7 +385,7 @@ Begin
 			AND L.intLocationId = @intLocationId
 			AND L.intLotStatusId = 1 
 			AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-			AND L.dblWeight >= .01
+			AND L.dblWeight > @dblDefaultResidueQty
 			AND L.intStorageLocationId NOT IN (
 				@intKitStagingLocationId
 				,@intBlendStagingLocationId
@@ -398,7 +401,7 @@ Begin
 			AND L.intLocationId = @intLocationId
 			AND L.intLotStatusId = 1 
 			AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-			AND L.dblWeight >= .01
+			AND L.dblWeight > @dblDefaultResidueQty
 			AND L.intStorageLocationId NOT IN (
 				@intKitStagingLocationId
 				,@intBlendStagingLocationId
@@ -551,7 +554,7 @@ Begin
 			AND L.intLocationId = @intLocationId
 			AND L.intLotStatusId = 1 
 			AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-			AND L.dblWeight >= .01
+			AND L.dblWeight > @dblDefaultResidueQty
 			AND L.intStorageLocationId NOT IN (
 				@intKitStagingLocationId
 				,@intBlendStagingLocationId
@@ -566,7 +569,7 @@ Begin
 			AND L.intLocationId = @intLocationId
 			AND L.intLotStatusId = 1 
 			AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-			AND L.dblWeight >= .01
+			AND L.dblWeight > @dblDefaultResidueQty
 			AND L.intStorageLocationId NOT IN (
 				@intKitStagingLocationId
 				,@intBlendStagingLocationId
@@ -754,7 +757,7 @@ Begin
 			AND L.intLocationId = @intLocationId
 			AND L.intLotStatusId = 1 
 			AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-			AND L.dblWeight >= .01
+			AND L.dblWeight > @dblDefaultResidueQty
 			AND L.intStorageLocationId NOT IN (
 				@intKitStagingLocationId
 				,@intBlendStagingLocationId
@@ -770,7 +773,7 @@ Begin
 			AND L.intLocationId = @intLocationId
 			AND L.intLotStatusId = 1 
 			AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-			AND L.dblWeight >= .01
+			AND L.dblWeight > @dblDefaultResidueQty
 			AND L.intStorageLocationId NOT IN (
 				@intKitStagingLocationId
 				,@intBlendStagingLocationId
