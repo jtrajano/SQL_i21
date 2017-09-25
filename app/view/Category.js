@@ -626,107 +626,6 @@ Ext.define('Inventory.view.Category', {
                                     {
                                         xtype: 'panel',
                                         layout: 'fit',
-                                        title: 'Point of Sale',
-                                        tabConfig: {
-                                            xtype: 'tab',
-                                            itemId: 'cfgLocations'
-                                        },
-                                        items: [
-                                            {
-                                                xtype: 'advancefiltergrid',
-                                                itemId: 'grdLocation',
-                                                margin: -1,
-                                                columnLines: true,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        componentCls: 'i21-toolbar-grid',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                itemId: 'btnAddLocation',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-insert',
-                                                                text: 'Insert'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                itemId: 'btnEditLocation',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-open',
-                                                                text: 'View'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                itemId: 'btnDeleteLocation',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-remove',
-                                                                text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 1,
-                                                        itemId: 'colLocationId',
-                                                        dataIndex: 'string',
-                                                        text: 'Location'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 1,
-                                                        itemId: 'colLocationCashRegisterDept',
-                                                        dataIndex: 'string',
-                                                        text: 'Cash Register Dept.'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 1,
-                                                        itemId: 'colLocationTargetGrossProfit',
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Target Gross Profit %'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 1,
-                                                        itemId: 'colLocationTargetInventoryCost',
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Target Inventory at Cost'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 1,
-                                                        itemId: 'colLocationCostInventoryBOM',
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Cost of Inventory at BOM'
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvStore'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                })
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        layout: 'fit',
                                         title: 'GL Accounts',
                                         tabConfig: {
                                             xtype: 'tab',
@@ -857,6 +756,107 @@ Ext.define('Inventory.view.Category', {
                                                         clicksToEdit: 1
                                                     }
                                                 ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'fit',
+                                        title: 'Point of Sale',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgLocations'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                itemId: 'grdLocation',
+                                                margin: -1,
+                                                columnLines: true,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        componentCls: 'i21-toolbar-grid',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                itemId: 'btnAddLocation',
+                                                                tabIndex: -1,
+                                                                iconCls: 'small-insert',
+                                                                text: 'Insert'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                itemId: 'btnEditLocation',
+                                                                tabIndex: -1,
+                                                                iconCls: 'small-open',
+                                                                text: 'View'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                itemId: 'btnDeleteLocation',
+                                                                tabIndex: -1,
+                                                                iconCls: 'small-remove',
+                                                                text: 'Remove'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colLocationId',
+                                                        dataIndex: 'string',
+                                                        text: 'Location'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colLocationCashRegisterDept',
+                                                        dataIndex: 'string',
+                                                        text: 'Cash Register Dept.'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colLocationTargetGrossProfit',
+                                                        align: 'right',
+                                                        dataIndex: 'string',
+                                                        text: 'Target Gross Profit %'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colLocationTargetInventoryCost',
+                                                        align: 'right',
+                                                        dataIndex: 'string',
+                                                        text: 'Target Inventory at Cost'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colLocationCostInventoryBOM',
+                                                        align: 'right',
+                                                        dataIndex: 'string',
+                                                        text: 'Cost of Inventory at BOM'
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvStore'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                })
                                             }
                                         ]
                                     },
