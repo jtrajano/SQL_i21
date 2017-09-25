@@ -154,16 +154,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FuelCode',
                     items: [
                         {
-                            url: 'CRUDScripts/FuelCode/AddFuelCode.js?v='+version,
-                            title: 'AddFuelCode',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FuelCode/DeleteFuelCode.js?v='+version,
-                            title: 'DeleteFuelCode',
+                            url: 'CRUDScripts/FuelCode/AddAndDeleteFuelCode.js?v='+version,
+                            title: 'AddAndDeleteFuelCode',
                             preload: [
                                 functionalTest,
                                 commonIC
