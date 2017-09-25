@@ -7,7 +7,7 @@ Ext.define('Inventory.search.InventoryShipment', {
             title: 'Search Inventory Shipment',
             type: 'Inventory.InventoryShipment',
             api: {
-                read: '../Inventory/api/InventoryShipment/Search'
+                read: '../inventory/api/inventoryshipment/search'
             },
             columns: [
                 { dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },

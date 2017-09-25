@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemStock', {
                             //extraParams: { include: 'tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemStock/Get'
+                                read: '../inventory/api/itemstock/get'
                             },
                             reader: {
                                 type: 'json',

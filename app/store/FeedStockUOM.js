@@ -20,10 +20,10 @@ Ext.define('Inventory.store.FeedStockUom', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/FeedStockUOM/Get',
-                    update: '../Inventory/api/FeedStockUOM/Put',
-                    create: '../Inventory/api/FeedStockUOM/Post',
-                    destroy: '../Inventory/api/FeedStockUOM/Delete'
+                    read: '../inventory/api/feedstockuom/get',
+                    update: '../inventory/api/feedstockuom/put',
+                    create: '../inventory/api/feedstockuom/post',
+                    destroy: '../inventory/api/feedstockuom/delete'
                 },
                 reader: {
                     type: 'json',

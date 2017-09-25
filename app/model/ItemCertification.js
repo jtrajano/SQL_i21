@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemCertification', {
                             extraParams: { include: 'tblICCertification' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemCertification/Get'
+                                read: '../inventory/api/itemcertification/get'
                             },
                             reader: {
                                 type: 'json',

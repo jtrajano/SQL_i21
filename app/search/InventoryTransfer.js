@@ -7,7 +7,7 @@ Ext.define('Inventory.search.InventoryTransfer', {
             title: 'Search Inventory Transfer',
             type: 'Inventory.InventoryTransfer',
             api: {
-                read: '../Inventory/api/InventoryTransfer/Search'
+                read: '../inventory/api/inventorytransfer/search'
             },
             columns: [
 

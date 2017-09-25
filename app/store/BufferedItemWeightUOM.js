@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedItemWeightUOM', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/ItemUOM/SearchWeightUOMs'
+                    read: '../inventory/api/itemuom/searchweightuoms'
                 },
                 reader: {
                     type: 'json',

@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedCertification', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Certification/Search'
+                    read: '../inventory/api/certification/search'
                 },
                 reader: {
                     type: 'json',

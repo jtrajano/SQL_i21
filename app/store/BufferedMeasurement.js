@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedMeasurement', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Measurement/Search'
+                    read: '../inventory/api/measurement/search'
                 },
                 reader: {
                     type: 'json',

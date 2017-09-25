@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedItemPricingView', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/ItemPricing/SearchItemPricingViews'
+                    read: '../inventory/api/itempricing/searchitempricingviews'
                 },
                 reader: {
                     type: 'json',

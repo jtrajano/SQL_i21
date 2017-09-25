@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedItemUPC', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/SearchItemUPCs'
+                    read: '../inventory/api/item/searchitemupcs'
                 },
                 reader: {
                     type: 'json',

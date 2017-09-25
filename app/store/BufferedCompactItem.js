@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedCompactItem', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/SearchCompactItems'
+                    read: '../inventory/api/item/searchcompactitems'
                 },
                 reader: {
                     type: 'json',

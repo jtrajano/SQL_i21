@@ -15,7 +15,7 @@ Ext.define('Inventory.store.BufferedReceiptItemView', {
     proxy: {
         type: 'rest',
         api: {
-            read: '../Inventory/api/InventoryReceipt/SearchReceiptItemView'
+            read: '../inventory/api/inventoryreceipt/searchreceiptitemview'
         },
         extraParams: {
             intInventoryReceiptId: 156

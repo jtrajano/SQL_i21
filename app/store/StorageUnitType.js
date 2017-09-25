@@ -19,10 +19,10 @@ Ext.define('Inventory.store.StorageUnitType', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/StorageUnitType/Get',
-                    update: '../Inventory/api/StorageUnitType/Put',
-                    create: '../Inventory/api/StorageUnitType/Post',
-                    destroy: '../Inventory/api/StorageUnitType/Delete'
+                    read: '../inventory/api/storageunittype/get',
+                    update: '../inventory/api/storageunittype/put',
+                    create: '../inventory/api/storageunittype/post',
+                    destroy: '../inventory/api/storageunittype/delete'
                 },
                 reader: {
                     type: 'json',

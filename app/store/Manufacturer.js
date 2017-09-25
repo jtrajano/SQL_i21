@@ -21,10 +21,10 @@ Ext.define('Inventory.store.Manufacturer', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Manufacturer/Get',
-                    update: '../Inventory/api/Manufacturer/Put',
-                    create: '../Inventory/api/Manufacturer/Post',
-                    destroy: '../Inventory/api/Manufacturer/Delete'
+                    read: '../inventory/api/manufacturer/get',
+                    update: '../inventory/api/manufacturer/put',
+                    create: '../inventory/api/manufacturer/post',
+                    destroy: '../inventory/api/manufacturer/delete'
                 },
                 reader: {
                     type: 'json',

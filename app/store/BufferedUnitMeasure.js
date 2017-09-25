@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedUnitMeasure', {
                 extraParams: { include: 'tblICUnitMeasureConversions.StockUnitMeasure, vyuICGetUOMConversions' },
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/UnitMeasure/Search'
+                    read: '../inventory/api/unitmeasure/search'
                 },
                 reader: {
                     type: 'json',

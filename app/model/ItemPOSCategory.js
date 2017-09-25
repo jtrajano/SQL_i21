@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemPOSCategory', {
                             extraParams: { include: 'tblICCategory' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemPOSCategory/Get'
+                                read: '../inventory/api/itemposcategory/get'
                             },
                             reader: {
                                 type: 'json',

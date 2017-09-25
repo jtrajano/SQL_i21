@@ -54,7 +54,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
             return;
         }
         ic.utils.ajax({
-            url: '../Inventory/api/Item/CopyItemLocation',
+            url: '../inventory/api/item/copyitemlocation',
             params: {
                 intSourceItemId: sourceItem.get('intItemId'),
                 strDestinationItemIds: destinationItemIds.join()

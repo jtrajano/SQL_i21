@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedProductTypeAttribute', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/CommodityAttribute/SearchProductTypeAttributes'
+                    read: '../inventory/api/commodityattribute/searchproducttypeattributes'
                 },
                 reader: {
                     type: 'json',

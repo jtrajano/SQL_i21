@@ -24,7 +24,7 @@ Ext.define('Inventory.store.Store', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Store/GetStores'
+                    read: '../inventory/api/store/getstores'
                 },
                 reader: {
                     type: 'json',

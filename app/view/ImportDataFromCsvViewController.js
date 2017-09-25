@@ -40,7 +40,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                 if (form.isValid()) {
                     var file = fileInput.files[0];
                     me.ajaxRequest({
-                        url: '../Inventory/api/ImportData/Import',
+                        url: '../inventory/api/importdata/import',
                         file: file,
                         importType: params.type,
                         allowOverwrite: chbOverwrite.checked,

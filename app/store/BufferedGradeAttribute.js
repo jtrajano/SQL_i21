@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedGradeAttribute', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/CommodityAttribute/SearchGradeAttributes'
+                    read: '../inventory/api/commodityattribute/searchgradeattributes'
                 },
                 reader: {
                     type: 'json',

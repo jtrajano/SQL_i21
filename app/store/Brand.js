@@ -20,10 +20,10 @@ Ext.define('Inventory.store.Brand', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Brand/Get',
-                    update: '../Inventory/api/Brand/Put',
-                    create: '../Inventory/api/Brand/Post',
-                    destroy: '../Inventory/api/Brand/Delete'
+                    read: '../inventory/api/brand/get',
+                    update: '../inventory/api/brand/put',
+                    create: '../inventory/api/brand/post',
+                    destroy: '../inventory/api/brand/delete'
                 },
                 reader: {
                     type: 'json',

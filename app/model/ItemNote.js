@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemNote', {
                             extraParams: { include: 'tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemNote/Get'
+                                read: '../inventory/api/itemnote/get'
                             },
                             reader: {
                                 type: 'json',

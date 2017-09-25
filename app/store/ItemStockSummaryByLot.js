@@ -22,7 +22,7 @@ Ext.define('Inventory.store.ItemStockSummaryByLot', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/InventoryCount/GetItemStockSummaryByLot'
+                    read: '../inventory/api/inventorycount/getitemstocksummarybylot'
                 },
                 reader: {
                     type: 'json',

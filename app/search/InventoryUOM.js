@@ -6,7 +6,7 @@ Ext.define('Inventory.search.InventoryUOM', {
             title:  'Search Inventory UOMs',
             type: 'Inventory.InventoryUOM',
             api: {
-                read: '../Inventory/api/UnitMeasure/Search'
+                read: '../inventory/api/unitmeasure/search'
             },
             columns: [
                 {dataIndex: 'intUnitMeasureId',text: "UOM Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

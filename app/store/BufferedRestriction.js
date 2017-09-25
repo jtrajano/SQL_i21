@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedRestriction', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Restriction/Search'
+                    read: '../inventory/api/restriction/search'
                 },
                 reader: {
                     type: 'json',

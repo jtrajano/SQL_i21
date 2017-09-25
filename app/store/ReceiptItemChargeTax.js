@@ -20,10 +20,10 @@ Ext.define('Inventory.store.ReceiptChargeTax', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/InventoryReceiptChargeTax/GetReceiptChargeTaxView',
-                    update: '../Inventory/api/InventoryReceiptChargeTax/Put',
-                    create: '../Inventory/api/InventoryReceiptChargeTax/Post',
-                    destroy: '../Inventory/api/InventoryReceiptChargeTax/Delete'
+                    read: '../inventory/api/inventoryreceiptchargetax/getreceiptchargetaxview',
+                    update: '../inventory/api/inventoryreceiptchargetax/put',
+                    create: '../inventory/api/inventoryreceiptchargetax/post',
+                    destroy: '../inventory/api/inventoryreceiptchargetax/delete'
                 },
                 reader: {
                     type: 'json',

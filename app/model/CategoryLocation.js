@@ -23,7 +23,7 @@ Ext.define('Inventory.model.CategoryLocation', {
                         proxy: {
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/CategoryLocation/Get'
+                                read: '../inventory/api/categorylocation/get'
                             },
                             reader: {
                                 type: 'json',

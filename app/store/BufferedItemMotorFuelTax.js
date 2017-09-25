@@ -19,7 +19,7 @@ Ext.define('Inventory.store.BufferedItemMotorFuelTax', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetItemMotorFuelTax'
+                    read: '../inventory/api/item/getitemmotorfueltax'
                 },
                 reader: {
                     type: 'json',

@@ -1621,7 +1621,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         win.context.data.saveRecord({
             successFn: function () {
                 ic.utils.ajax({
-                    url: '../Inventory/api/InventoryReceipt/GetTaxGroupId',
+                    url: '../inventory/api/inventoryreceipt/gettaxgroupid',
                     params: {
                         id: current.get('intInventoryReceiptId')
                     },
@@ -1659,7 +1659,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         cfg = cfg ? cfg : {};
 
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryReceipt/GetDefaultReceiptTaxGroupId',
+            url: '../inventory/api/inventoryreceipt/getdefaultreceipttaxgroupid',
             params: {
                 freightTermId: cfg.freightTermId,
                 locationId: cfg.locationId,
@@ -1693,7 +1693,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         failureFn = failureFn && (failureFn instanceof Function) ? failureFn : function () { /*empty function*/ };
 
         ic.utils.ajax({
-            url: '../entitymanagement/api/vendorpricing/SearchVendorLocationItemCurrency',
+            url: '../entitymanagement/api/vendorpricing/searchvendorlocationitemcurrency',
             params: {
                 VendorId: cfg.vendorId,
                 ItemId: cfg.itemId,
@@ -2916,7 +2916,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var processReceiptToVoucher = function (receiptId, callback) {
             ic.utils.ajax({
-                url: '../Inventory/api/InventoryReceipt/ProcessBill',
+                url: '../inventory/api/inventoryreceipt/processbill',
                 params: {
                     id: receiptId
                 },
@@ -3012,7 +3012,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var processReceiptToDebitMemo = function (receiptId) {
             ic.utils.ajax({
-                url: '../Inventory/api/InventoryReceipt/ProcessBill',
+                url: '../inventory/api/inventoryreceipt/processbill',
                 params: {
                     id: receiptId
                 },
@@ -5282,7 +5282,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             searchSettings: {
                 scope: me,
                 type: 'Inventory',
-                url: '../Inventory/api/InventoryReceipt/GetAddOrders?VendorId=' + VendorId + '&ReceiptType=' + ReceiptType + '&SourceType=' + SourceType + '&CurrencyId=' + CurrencyId,
+                url: '../inventory/api/inventoryreceipt/getaddorders?vendorid=' + VendorId + '&ReceiptType=' + ReceiptType + '&SourceType=' + SourceType + '&CurrencyId=' + CurrencyId,
                 columns: [
                     { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
                     { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
@@ -6158,7 +6158,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (!(context && current)) return;
 
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryReceipt/CalculateCharges',
+            url: '../inventory/api/inventoryreceipt/calculatecharges',
             params: {
                 id: current.get('intInventoryReceiptId')
             },
@@ -6330,7 +6330,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var doRecap = function (currentRecord) {
             ic.utils.ajax({
-                url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
+                url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../inventory/api/inventoryreceipt/return' : '../inventory/api/inventoryreceipt/receive',
                 params: {
                     strTransactionId: currentRecord.get('strReceiptNumber'),
                     isPost: isAfterPostCall ? ysnPosted : currentRecord.get('ysnPosted') ? false : true,
@@ -6392,7 +6392,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var doPost = function () {
                     if (current) {
                         ic.utils.ajax({
-                            url: '../Inventory/api/InventoryReceipt/UpdateReceiptInspection',
+                            url: '../inventory/api/inventoryreceipt/updatereceiptinspection',
                             params: {
                                 id: current.get('intInventoryReceiptId')
                             },
@@ -6489,7 +6489,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     var showChargeTaxScreen = function () {
                         var search = i21.ModuleMgr.Search;
                         search.scope = me;
-                        search.url = '../Inventory/api/InventoryReceipt/GetChargeTaxDetails?ChargeId=' + ChargeId + '&ReceiptId=' + ReceiptId;
+                        search.url = '../inventory/api/inventoryreceipt/getchargetaxdetails?ChargeId=' + ChargeId + '&ReceiptId=' + ReceiptId;
                         search.columns = [
                             { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
                             { dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },

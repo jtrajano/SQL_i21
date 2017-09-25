@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemCommodityCost', {
                             extraParams: { include: 'tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemCommodityCost/Get'
+                                read: '../inventory/api/itemcommoditycost/get'
                             },
                             reader: {
                                 type: 'json',

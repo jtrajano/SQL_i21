@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemOwner', {
                             extraParams: { include: 'tblARCustomer' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemOwner/Get'
+                                read: '../inventory/api/itemowner/get'
                             },
                             reader: {
                                 type: 'json',

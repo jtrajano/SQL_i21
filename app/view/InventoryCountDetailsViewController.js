@@ -293,7 +293,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         rec.set('strUserName', 'Entered by ' + iRely.config.Security.UserName);
         rec.set('dblConversionFactor', 1);
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryCountDetail/GetLastCountDetailId',
+            url: '../inventory/api/inventorycountdetail/getlastcountdetailid',
             params: {
                 intInventoryCountId: intInventoryCountId
             }
@@ -347,7 +347,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
     getTotalLocationStockOnHand: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, intLotId, intItemUOMId, callback) {
         ic.utils.ajax({
             timeout: 120000,
-            url: '../Inventory/api/ItemStock/GetLocationStockOnHand',
+            url: '../inventory/api/itemstock/getlocationstockonhand',
             params: {
                 intLocationId: intLocationId,
                 intItemId: intItemId,
@@ -415,7 +415,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
     getStockQuantity: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, callback) {
         ic.utils.ajax({
             timeout: 120000,   
-            url: '../Inventory/api/Item/GetItemStockUOMSummary',
+            url: '../inventory/api/item/getitemstockuomsummary',
             params: {
                 ItemId: intItemId,
                 LocationId: intLocationId,
@@ -619,7 +619,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         var rec = _.first(records);
         var intCountGroupId = rec.get('intCountGroupId');
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryCountDetail/GetLastCountGroup',
+            url: '../inventory/api/inventorycountdetail/getlastcountgroup',
             params: {
                 intCountGroupId: intCountGroupId
             }

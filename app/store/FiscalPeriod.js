@@ -13,7 +13,7 @@ Ext.define('Inventory.store.FiscalPeriod', {
     proxy: {
         type: 'rest',
         api: {
-            read: '../Inventory/api/InventoryValuation/GetFiscalMonths'
+            read: '../inventory/api/inventoryvaluation/getfiscalmonths'
         },
         reader: {
             type: 'json',

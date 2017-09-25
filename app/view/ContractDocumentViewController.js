@@ -22,7 +22,7 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
             title:  'Search Contract Document',
             type: 'Inventory.Document',
             api: {
-                read: '../Inventory/api/Document/Search'
+                read: '../inventory/api/document/search'
             },
             columns: [
                 {dataIndex: 'intDocumentId',text: "Document Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedQAProperty', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/QAProperty/Search'
+                    read: '../inventory/api/qaproperty/search'
                 },
                 reader: {
                     type: 'json',

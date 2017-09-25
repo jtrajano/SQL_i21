@@ -20,10 +20,10 @@ Ext.define('Inventory.store.Certification', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Certification/Get',
-                    update: '../Inventory/api/Certification/Put',
-                    create: '../Inventory/api/Certification/Post',
-                    destroy: '../Inventory/api/Certification/Delete'
+                    read: '../inventory/api/certification/get',
+                    update: '../inventory/api/certification/put',
+                    create: '../inventory/api/certification/post',
+                    destroy: '../inventory/api/certification/delete'
                 },
                 reader: {
                     type: 'json',

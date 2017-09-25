@@ -391,7 +391,7 @@ Ext.define('Inventory.view.CommodityViewController', {
 
         iRely.Msg.showWait('Converting units...');
         ic.utils.ajax({
-            url: '../Inventory/api/Item/GetUnitConversion',
+            url: '../inventory/api/item/getunitconversion',
             method: 'Post',
             params: {
                 intFromUnitMeasureId: unitMeasureId,

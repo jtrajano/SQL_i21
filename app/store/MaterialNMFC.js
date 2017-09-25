@@ -20,10 +20,10 @@ Ext.define('Inventory.store.MaterialNMFC', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/MaterialNMFC/GetMaterialNMFCs',
-                    update: '../Inventory/api/MaterialNMFC/PutMaterialNMFCs',
-                    create: '../Inventory/api/MaterialNMFC/PostMaterialNMFCs',
-                    destroy: '../Inventory/api/MaterialNMFC/DeleteMaterialNMFCs'
+                    read: '../inventory/api/materialnmfc/getmaterialnmfcs',
+                    update: '../inventory/api/materialnmfc/putmaterialnmfcs',
+                    create: '../inventory/api/materialnmfc/postmaterialnmfcs',
+                    destroy: '../inventory/api/materialnmfc/deletematerialnmfcs'
                 },
                 reader: {
                     type: 'json',

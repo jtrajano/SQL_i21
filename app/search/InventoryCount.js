@@ -7,7 +7,7 @@ Ext.define('Inventory.search.InventoryCount', {
             title: 'Search Inventory Count',
             type: 'Inventory.InventoryCount',
             api: {
-                read: '../Inventory/api/InventoryCount/Search'
+                read: '../inventory/api/inventorycount/search'
             },
             columns: [
                 { dataIndex: 'intInventoryCountId', text: "Count Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },

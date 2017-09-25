@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemMotorFuelTax', {
                             extraParams: { include: 'vyuICGetItemMotorFuelTax' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemMotorFuelTax/Get'
+                                read: '../inventory/api/itemmotorfueltax/get'
                             },
                             reader: {
                                 type: 'json',

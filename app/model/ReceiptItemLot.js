@@ -28,10 +28,10 @@ Ext.define('Inventory.model.ReceiptItemLot', {
                         autoLoad: false,
                         proxy: {
                             api: {
-                                create: '../Inventory/api/InventoryReceiptItemLot/Post',
-                                read: '../Inventory/api/InventoryReceiptItemLot/SearchLots',
-                                update: '../Inventory/api/InventoryReceiptItemLot/Put',
-                                destroy: '../Inventory/api/InventoryReceiptItemLot/Delete'
+                                create: '../inventory/api/inventoryreceiptitemlot/post',
+                                read: '../inventory/api/inventoryreceiptitemlot/searchlots',
+                                update: '../inventory/api/inventoryreceiptitemlot/put',
+                                destroy: '../inventory/api/inventoryreceiptitemlot/delete'
                             },
                             type: 'rest',
                             reader: {

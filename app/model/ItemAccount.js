@@ -24,7 +24,7 @@ Ext.define('Inventory.model.ItemAccount', {
                             extraParams: { include: 'tblGLAccount, tblGLAccountCategory' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemAccount/Get'
+                                read: '../inventory/api/itemaccount/get'
                             },
                             reader: {
                                 type: 'json',

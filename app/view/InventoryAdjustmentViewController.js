@@ -1113,7 +1113,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         ic.utils.ajax({
             timeout: 120000,   
-            url: '../Inventory/api/Item/GetItemStockUOMSummary',
+            url: '../inventory/api/item/getitemstockuomsummary',
             params: {
                 ItemId: itemId,
                 LocationId: locationId,
@@ -1379,7 +1379,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         var doPost = function (){
             ic.utils.ajax({
-                url: '../Inventory/api/InventoryAdjustment/PostTransaction',
+                url: '../inventory/api/inventoryadjustment/posttransaction',
                 params:{
                     strTransactionId: current.get('strAdjustmentNo'),
                     isPost: current.get('ysnPosted') ? false : true,
@@ -1452,7 +1452,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         var doRecap = function (){
             ic.utils.ajax({
-                url: '../Inventory/api/InventoryAdjustment/PostTransaction',
+                url: '../inventory/api/inventoryadjustment/posttransaction',
                 params:{
                     strTransactionId: current.get('strAdjustmentNo'),
                     isPost: isAfterPostCall ? ysnPosted : current.get('ysnPosted') ? false : true,

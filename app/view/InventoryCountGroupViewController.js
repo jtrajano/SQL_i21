@@ -7,7 +7,7 @@ Ext.define('Inventory.view.InventoryCountGroupViewController', {
             title: 'Search Inventory Count Group',
             type: 'Inventory.InventoryCountGroup',
             api: {
-                read: '../Inventory/api/CountGroup/Search'
+                read: '../inventory/api/countgroup/search'
             },
             columns: [
                 {dataIndex: 'intCountGroupId', text: "Count Group Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},

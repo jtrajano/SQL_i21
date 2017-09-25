@@ -20,10 +20,10 @@ Ext.define('Inventory.store.ManufacturingCell', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/ManufacturingCell/GetManufacturingCells',
-                    update: '../Inventory/api/ManufacturingCell/PutManufacturingCells',
-                    create: '../Inventory/api/ManufacturingCell/PostManufacturingCells',
-                    destroy: '../Inventory/api/ManufacturingCell/DeleteManufacturingCells'
+                    read: '../inventory/api/manufacturingcell/getmanufacturingcells',
+                    update: '../inventory/api/manufacturingcell/putmanufacturingcells',
+                    create: '../inventory/api/manufacturingcell/postmanufacturingcells',
+                    destroy: '../inventory/api/manufacturingcell/deletemanufacturingcells'
                 },
                 reader: {
                     type: 'json',

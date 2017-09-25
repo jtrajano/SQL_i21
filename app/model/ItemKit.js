@@ -24,7 +24,7 @@ Ext.define('Inventory.model.ItemKit', {
                             extraParams: { include: 'tblICItemKitDetails.tblICItem, tblICItemKitDetails.tblICItemUOM' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemKit/Get'
+                                read: '../inventory/api/itemkit/get'
                             },
                             reader: {
                                 type: 'json',

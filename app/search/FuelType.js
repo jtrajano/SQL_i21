@@ -6,7 +6,7 @@ Ext.define('Inventory.search.FuelType', {
             title:  'Search Fuel Type',
             type: 'Inventory.FuelType',
             api: {
-                read: '../Inventory/api/FuelType/Search'
+                read: '../inventory/api/fueltype/search'
             },
             columns: [
                 {dataIndex: 'intFuelTypeId',text: "Fuel Type", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

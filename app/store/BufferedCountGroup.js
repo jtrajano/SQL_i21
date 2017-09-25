@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedCountGroup', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/CountGroup/Search'
+                    read: '../inventory/api/countgroup/search'
                 },
                 reader: {
                     type: 'json',

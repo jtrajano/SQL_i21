@@ -7,7 +7,7 @@ Ext.define('Inventory.search.InventoryAdjustment', {
             title: 'Search Inventory Adjustment',
             type: 'Inventory.InventoryAdjustment',
             api: {
-                read: '../Inventory/api/InventoryAdjustment/Search'
+                read: '../inventory/api/inventoryadjustment/search'
             },
             columns: [
                 { dataIndex: 'intInventoryAdjustmentId', text: 'Inventory Adjustment Id', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },

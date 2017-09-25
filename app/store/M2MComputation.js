@@ -13,10 +13,10 @@ Ext.define('Inventory.store.M2MComputation', {
     proxy: {
         type: 'rest',
         api: {
-            read: '../Inventory/api/M2MComputation/Get',
-            update: '../Inventory/api/M2MComputation/Put',
-            create: '../Inventory/api/M2MComputation/Post',
-            destroy: '../Inventory/api/M2MComputation/Delete'
+            read: '../inventory/api/m2mcomputation/get',
+            update: '../inventory/api/m2mcomputation/put',
+            create: '../inventory/api/m2mcomputation/post',
+            destroy: '../inventory/api/m2mcomputation/delete'
         },
         reader: {
             type: 'json',

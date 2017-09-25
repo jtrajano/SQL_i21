@@ -22,10 +22,10 @@ Ext.define('Inventory.store.Receipt', {
                 timeout: 600000,
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/InventoryReceipt/Get',
-                    update: '../Inventory/api/InventoryReceipt/Put',
-                    create: '../Inventory/api/InventoryReceipt/Post',
-                    destroy: '../Inventory/api/InventoryReceipt/Delete'
+                    read: '../inventory/api/inventoryreceipt/get',
+                    update: '../inventory/api/inventoryreceipt/put',
+                    create: '../inventory/api/inventoryreceipt/post',
+                    destroy: '../inventory/api/inventoryreceipt/delete'
                 },
                 reader: {
                     type: 'json',

@@ -6,7 +6,7 @@ Ext.define('Inventory.search.StockDetail', {
         {
             mainTitle: 'Stock Details',
             title: 'Search Locations YTD',
-            url: '../Inventory/api/Item/SearchStockDetail',
+            url: '../inventory/api/item/searchstockdetail',
             groupedOnLoad: true,
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
@@ -50,7 +50,7 @@ Ext.define('Inventory.search.StockDetail', {
                         click: function (e) {
                             var win = e.up('window');
                             var grid = e.up('panel');
-                            if(grid.url === '../Inventory/api/Item/SearchStockDetail') {
+                            if(grid.url === '../inventory/api/item/searchstockdetail') {
                                 var selection = _.first(grid.getSelectionModel().selected.items);
 
                                 if(selection) {
@@ -90,7 +90,7 @@ Ext.define('Inventory.search.StockDetail', {
             enableDblClick: false,
             title: 'Search Storage Locations YTD',
             api: {
-                read: '../Inventory/api/StorageLocation/SearchSubLocationBinDetails'
+                read: '../inventory/api/storagelocation/searchsublocationbindetails'
             },
             columns: [
                 { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
@@ -125,7 +125,7 @@ Ext.define('Inventory.search.StockDetail', {
                 }
             ],
             chart: {
-                url: '../Inventory/api/StorageLocation/SearchSubLocationBins',
+                url: '../inventory/api/storagelocation/searchsublocationbins',
                 type: 'serial',
                 /*startDuration: 1,
                 startEffect: 'elastic',*/
@@ -226,7 +226,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 proxy: {
                                     type: 'rest',
                                     api: {
-                                        read: '../Inventory/api/StorageLocation/SearchSubLocationBinDetails'
+                                        read: '../inventory/api/storagelocation/searchsublocationbindetails'
                                     },
                                     reader: {
                                         type: 'json',
@@ -250,7 +250,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 proxy: {
                                     type: 'rest',
                                     api: {
-                                        read: '../Inventory/api/StorageLocation/SearchStorageBins'
+                                        read: '../inventory/api/storagelocation/searchstoragebins'
                                     },
                                     reader: {
                                         type: 'json',
@@ -344,7 +344,7 @@ Ext.define('Inventory.search.StockDetail', {
             enableDblClick: false,
             title: 'Storage Units YTD',
             api: {
-                read: '../Inventory/api/StorageLocation/SearchStorageBinDetails'
+                read: '../inventory/api/storagelocation/searchstoragebindetails'
             },
             columns: [
                 { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
@@ -382,7 +382,7 @@ Ext.define('Inventory.search.StockDetail', {
                 }
             ],
             chart: {
-                url: '../Inventory/api/StorageLocation/SearchStorageBins',
+                url: '../inventory/api/storagelocation/searchstoragebins',
                 type: 'serial',
                 /*startDuration: 1,
                 startEffect: 'elastic',*/
@@ -476,7 +476,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 proxy: {
                                     type: 'rest',
                                     api: {
-                                        read: '../Inventory/api/StorageLocation/SearchStorageBinDetails'
+                                        read: '../inventory/api/storagelocation/searchstoragebindetails'
                                     },
                                     reader: {
                                         type: 'json',
@@ -500,7 +500,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 proxy: {
                                     type: 'rest',
                                     api: {
-                                        read: '../Inventory/api/StorageLocation/SearchStorageBins'
+                                        read: '../inventory/api/storagelocation/searchstoragebins'
                                     },
                                     reader: {
                                         type: 'json',
