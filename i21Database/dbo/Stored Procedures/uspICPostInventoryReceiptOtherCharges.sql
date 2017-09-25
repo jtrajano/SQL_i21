@@ -164,6 +164,42 @@ BEGIN
 	END 
 END 
 
+-- Validate
+BEGIN 
+	-- Check if Other charge is a price down. If yes, then Receipt currency and Other Charge currency must be the same. 
+	SELECT @strItemNo = NULL
+			,@intChargeItemId = NULL 
+			,@strTransactionId = NULL 
+			,@strCurrencyId = NULL 
+			,@strFunctionalCurrencyId = NULL 
+
+	SELECT TOP 1 
+			@strTransactionId = Receipt.strReceiptNumber
+			,@strItemNo = Item.strItemNo
+			,@intChargeItemId = Item.intItemId
+			,@strCurrencyId = cc.strCurrency
+			,@strFunctionalCurrencyId = rc.strCurrency
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = OtherCharge.intChargeId
+			LEFT JOIN tblSMCurrency cc
+				ON cc.intCurrencyID =  OtherCharge.intCurrencyId
+			LEFT JOIN tblSMCurrency rc
+				ON rc.intCurrencyID =  Receipt.intCurrencyId
+	WHERE	ISNULL(OtherCharge.ysnPrice, 0) = 1 
+			AND OtherCharge.intCurrencyId IS NOT NULL 
+			AND OtherCharge.intCurrencyId <> Receipt.intCurrencyId
+
+	IF @intChargeItemId IS NOT NULL 
+	BEGIN 
+		-- '{Other Charge} is using {Other Charge currency}. Price down is only allowed for {Receipt Currency} currency. Please change the currency or uncheck the Price Down.'
+		EXEC uspICRaiseError 80191, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
+		RETURN -1
+	END 
+END 
+
+
 -- Calculate the other charges. 
 BEGIN
 	EXEC dbo.uspICCalculateOtherCharges

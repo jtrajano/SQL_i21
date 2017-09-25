@@ -204,6 +204,7 @@ BEGIN
 		WHEN @msgId = 80188 THEN 'You are not allowed to change the Sub Location. Item %s, plus %i more, still has stock at %s.'
 		WHEN @msgId = 80189 THEN 'Sub Location or Storage Location is missing for Item %s, Lot No. %s.'
 		WHEN @msgId = 80190 THEN 'Gross/Net UOM and weights are required for item %s.'
+		WHEN @msgId = 80191 THEN '%s is using %s. Price down is only allowed for %s currency. Please change the currency or uncheck the Price Down.'
 	END 
 
 	RETURN @msg
