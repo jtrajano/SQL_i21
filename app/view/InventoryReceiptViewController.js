@@ -4886,6 +4886,44 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strCurrency', record.get('strCurrency'));
             current.set('intCent', record.get('intCent'));
             current.set('ysnSubCurrency', record.get('ysnSubCurrency'));
+            current.set('intForexRateTypeId', null);
+            current.set('strForexRateType', null);
+            current.set('dblForexRate', null);
+
+            var chargeCurrencyId = current.get('intCurrencyId');            
+            var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+            var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');         
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');  
+
+            // function variable to process the default forex rate. 
+            var processForexRateOnSuccess = function (successResponse, isItemLastCost) {
+                if (successResponse && successResponse.length > 0) {
+                    var dblForexRate = successResponse[0].dblRate;
+                    var strRateType = successResponse[0].strRateType;
+
+                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+
+                    current.set('intForexRateTypeId', intRateType);
+                    current.set('strForexRateType', strRateType);
+                    current.set('dblForexRate', dblForexRate);
+                }
+            }
+
+            // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+            if (chargeCurrencyId != functionalCurrencyId && intRateType) {
+                iRely.Functions.getForexRate(
+                    chargeCurrencyId,
+                    intRateType,
+                    masterRecord.get('dtmReceiptDate'),
+                    function (successResponse) {
+                        processForexRateOnSuccess(successResponse);
+                    },
+                    function (failureResponse) {
+                        var jsonData = Ext.decode(failureResponse.responseText);
+                        iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                    }
+                );
+            }
         }
 
         if (combo.itemId === 'cboChargeTaxGroup') {
@@ -5029,6 +5067,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             );
         }
     },
+
 
     onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnAccrue') {
