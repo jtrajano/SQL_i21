@@ -143,7 +143,7 @@ Ext.define('Inventory.search.StockDetail', {
                     enabled: true,
                     graph: "stockGraph",
                     graphType: "line",
-                    oppositeAxis: true,
+                    oppositeAxis: false,
                     scrollbarHeight: 100
                 },                
                 graphs: [
@@ -187,7 +187,7 @@ Ext.define('Inventory.search.StockDetail', {
                     graph: "spaceGraph",
                     graphType: "column",
                     gridCount: 3,
-                    oppositeAxis: true,
+                    oppositeAxis: false,
                     scrollbarHeight: 100
                 },
                 legend: {
@@ -400,7 +400,7 @@ Ext.define('Inventory.search.StockDetail', {
                     enabled: true,
                     graph: "stockGraph",
                     graphType: "line",
-                    oppositeAxis: true,
+                    oppositeAxis: false,
                     scrollbarHeight: 100
                 },
                 graphs: [
