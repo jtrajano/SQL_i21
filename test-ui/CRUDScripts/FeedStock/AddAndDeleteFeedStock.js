@@ -7,21 +7,6 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Fuel Types','Screen')
         .waitUntilLoaded()
-        .continueIf({
-            expected: 'icfueltype',
-            actual: function(win){
-                return win.alias[0].replace('widget.', '');
-            },
-            success: function(next){
-                new iRely.FunctionalTest().start(t, next)
-                    .waitUntilLoaded()
-                    .clickButton('Close')
-                    .waitUntilLoaded()
-                    .done();
-            },
-            continueOnFail: true
-        })
-
         .clickButton('FeedStock')
         .waitUntilLoaded('')
         .filterGridRecords('GridTemplate', 'FilterGrid', 'Test Feed Stock 1')
