@@ -228,7 +228,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{readOnlyReceiptItemGrid}',
                 colOrderNumber: {
                     hidden: '{checkHideOrderNo}',
-                    dataIndex: 'strOrderNumber'
+                    dataIndex: 'strOrderNumber',
+                    text: '{colOrderNumberColumnText}'
                 },
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
