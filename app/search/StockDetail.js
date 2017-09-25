@@ -187,7 +187,7 @@ Ext.define('Inventory.search.StockDetail', {
                     graph: "spaceGraph",
                     graphType: "column",
                     gridCount: 3,
-                    oppositeAxis: true,
+                    oppositeAxis: false,
                     scrollbarHeight: 100
                 },
                 legend: {
