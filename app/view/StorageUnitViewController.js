@@ -137,26 +137,27 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                         store: '{categoryAllowed}'
                     }
                 }
-            },
-
-            grdSKU: {
-                colItem: 'strItemNo',
-                colSku: 'strSku',
-                colQty: 'dblQuantity',
-                colContainer: 'strContainer',
-                colLotSerial: 'intLotCodeId',
-                colExpiration: 'dtmExpiration',
-                colStatus: 'strLotStatus',
-                colOwner: 'intOwnerId'
-            },
-
-            grdContainer: {
-                colContainer: 'strContainer',
-                colExternalSystem: 'intExternalSystemId',
-                colContainerType: 'strContainerType',
-                colLastUpdateBy: 'strLastUpdatedBy',
-                colLastUpdateOn: 'dtmLastUpdatedOn'
             }
+            // ,
+
+            // grdSKU: {
+            //     colItem: 'strItemNo',
+            //     colSku: 'strSku',
+            //     colQty: 'dblQuantity',
+            //     colContainer: 'strContainer',
+            //     colLotSerial: 'intLotCodeId',
+            //     colExpiration: 'dtmExpiration',
+            //     colStatus: 'strLotStatus',
+            //     colOwner: 'intOwnerId'
+            // },
+
+            // grdContainer: {
+            //     colContainer: 'strContainer',
+            //     colExternalSystem: 'intExternalSystemId',
+            //     colContainerType: 'strContainerType',
+            //     colLastUpdateBy: 'strLastUpdatedBy',
+            //     colLastUpdateOn: 'dtmLastUpdatedOn'
+            // }
 
         }
     },
@@ -195,23 +196,23 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                         grid: win.down('#grdMeasurement'),
                         deleteButton : win.down('#btnDeleteMeasurement')
                     })
-                },
-                {
-                    key: 'tblICStorageLocationSkus',
-                    component: Ext.create('iRely.grid.Manager', {
-                        grid: win.down('#grdSKU'),
-                        deleteButton : win.down('#btnDeleteSKU'),
-                        position: 'none'
-                    })
-                },
-                {
-                    key: 'tblICStorageLocationContainers',
-                    component: Ext.create('iRely.grid.Manager', {
-                        grid: win.down('#grdContainer'),
-                        deleteButton : win.down('#btnDeleteContainer'),
-                        position: 'none'
-                    })
                 }
+                // {
+                //     key: 'tblICStorageLocationSkus',
+                //     component: Ext.create('iRely.grid.Manager', {
+                //         grid: win.down('#grdSKU'),
+                //         deleteButton : win.down('#btnDeleteSKU'),
+                //         position: 'none'
+                //     })
+                // },
+                // {
+                //     key: 'tblICStorageLocationContainers',
+                //     component: Ext.create('iRely.grid.Manager', {
+                //         grid: win.down('#grdContainer'),
+                //         deleteButton : win.down('#btnDeleteContainer'),
+                //         position: 'none'
+                //     })
+                // }
             ]
         });
 
