@@ -25,13 +25,14 @@ StartTest (function (t) {
                     .enterData('Text Field','Symbol','Test_Pounds')
                     .selectComboBoxRowNumber('UnitType',6,0)
                     .clickButton('Save')
-                    .waitUntilLoaded()
+                    .waitUntilLoaded('')
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded()
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
         .displayText('===== Add stock UOM first Done  =====')
@@ -67,17 +68,19 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
-                    .waitUntilLoaded()
-
+                    .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded()
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
 
         //add another conversion
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test_Bushels')
         .waitUntilLoaded()
         .continueIf({
@@ -102,16 +105,20 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                    
 
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded()
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
 
         //add another conversion
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test_KG')
         .waitUntilLoaded()
         .continueIf({
@@ -136,16 +143,20 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                  
 
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded()
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
 
         //add another conversion
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test_60 KG bags')
         .waitUntilLoaded()
         .continueIf({
@@ -170,16 +181,20 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                
 
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded()
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
 
         //add another conversion
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test_25 KG bags')
         .waitUntilLoaded()
         .continueIf({
@@ -204,12 +219,14 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                
 
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded()
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
         .displayText('===== Add Conversion UOM Done  =====')
@@ -219,6 +236,7 @@ StartTest (function (t) {
         //Scenario 1: Add new Commodity with No UOM and Attribute
         .displayText('===== Scenario 1: Add new Commodity with No UOM and Attribute =====')
         .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'AAA - Commodity 1')
         .waitUntilLoaded()
         .continueIf({
@@ -236,17 +254,20 @@ StartTest (function (t) {
                     .enterData('Text Field','Description','Commodity with No UOM and Attribute')
                     .clickCheckBox('ExchangeTraded',true)
                     .clickButton('Save')
-                    .clickButton('Close')
+                    .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded('')
 
 
 
         //region Scenario 2: Add new Commodity with UOM but NO Attribute setup
         .displayText('===== Scenario 2: Add new Commodity with UOM but NO Attribute setup =====')
         .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'AAA - Commodity 2')
         .waitUntilLoaded()
         .continueIf({
@@ -287,17 +308,20 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                    .waitUntilLoaded('')
+                   
                     .done();
             },
             continueOnFail: true
         })
-
+        .clickButton('Close')
+        .waitUntilLoaded('')
 
 
         //region Scenario 3: Add new Commodity with UOM and Attribute setup
         .displayText('===== Scenario 3: Add new Commodity with UOM and Attribute setup =====')
         .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded('')
         .filterGridRecords('Search', 'FilterGrid', 'AAA - Commodity 3')
         .waitUntilLoaded()
         .continueIf({
@@ -341,15 +365,18 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded('')
 
         .waitUntilLoaded()
         //region Scenario 4: Update Commodity
         .displayText('===== Scenario 4: Update Commodity =====')
+        .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('AAA - Commodity 1', 'strOrderType', 1)
         .waitUntilLoaded('')
         .enterData('Text Field','Description','Updated Commodity')
@@ -375,24 +402,25 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .verifyStatusMessage('Saved')
         .clickButton('Close')
-
-        .doubleClickSearchRowValue('AAA - Commodity 1', 'strOrderType', 1)
         .waitUntilLoaded('')
-        .verifyData('Text Field','Description','Updated Commodity')
-        .clickButton('Close')
         //endregion
 
 
         //region Scenario 5: Check Required Fields
         .displayText('===== Scenario 5: Check Required Fields =====')
+        .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded('')
         .clickButton('New')
         .waitUntilLoaded('')
         .clickButton('Save')
         .clickButton('Close')
+        .waitUntilLoaded('')
         //endregion
 
         //region Scenario 6: Save Duplicate Commodity Code
         .displayText('===== Scenario 6: Save Duplicate Commodity Code =====')
+        .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded('')
         .clickButton('New')
         .waitUntilLoaded('')
         .enterData('Text Field','CommodityCode','AAA - Commodity 1')
@@ -407,7 +435,7 @@ StartTest (function (t) {
         .enterData('Text Field','CommodityCode','AAA - Commodity 4')
         .clickButton('Save')
         .clickButton('Close')
-
+        .waitUntilLoaded('')
         //endregion
 
 
