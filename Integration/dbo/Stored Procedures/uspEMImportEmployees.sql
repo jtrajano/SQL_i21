@@ -13,7 +13,8 @@ EXEC('
 CREATE PROCEDURE [dbo].[uspEMImportEmployees]
 	@EmployeId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
-	@Total INT = 0 OUTPUT
+	@Total INT = 0 OUTPUT,
+	@TermDate DATE = null
 
 AS
 
@@ -22,6 +23,11 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 --SET ANSI_WARNINGS OFF
+
+if @TermDate is null
+begin
+	set @TermDate = ''1/1/'' + CAST(DATEPART(YEAR, getdate()) AS NVARCHAR(4))
+end
 
 SET @Total = 0
 IF(@Update = 1 AND @EmployeId IS NOT NULL)
@@ -235,8 +241,8 @@ BEGIN
 	SELECT premp_emp INTO #tmpprempmst 
 	FROM prempmst
 		where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
-		 and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, DATEADD(YEAR,-1, getdate()), 102),''.'', '''') )
-	
+		and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
+		
 	WHILE (EXISTS(SELECT 1 FROM #tmpprempmst))
 	BEGIN
 		
@@ -251,10 +257,10 @@ BEGIN
 
             SELECT TOP 1
                 --Entities
-                @strName			= premp_first_name + '' '' +premp_initial + '' '' + premp_last_name,                
+                @strName			= LTRIM(RTRIM(premp_first_name)) + '' '' +LTRIM(RTRIM(premp_initial)) + '' '' + LTRIM(RTRIM(premp_last_name)),                
 				@strNickName		= premp_nickname,
 				@strTitle			= premp_job_title,
-				@strFirstName		= premp_first_name,
+				@strFirstName		= LTRIM(RTRIM(premp_first_name)),
 				@strMiddleName		= premp_initial,
 				@strLastName		= premp_last_name,
 				@strSuffix			= premp_extension,
@@ -626,7 +632,8 @@ IF(@Update = 1 AND @EmployeId IS NULL)
 BEGIN
 	SELECT @Total = COUNT(premp_emp)  			
 	FROM prempmst
-	where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
+	where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee) 	
+	and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
 END
 
 
