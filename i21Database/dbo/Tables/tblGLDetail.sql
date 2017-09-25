@@ -42,7 +42,7 @@
 	intSourceUOM INT NULL,
 	dblSourceUnitDebit NUMERIC(18,9) NULL,
 	dblSourceUnitCredit NUMERIC(18,9) NULL,
-	intCommodity INT NULL,
+	intCommodityId INT NULL,
 	intSourceDocumentId INT NULL,
 	[strDocument] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
