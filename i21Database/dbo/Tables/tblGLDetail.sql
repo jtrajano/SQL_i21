@@ -182,17 +182,13 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Revalued?' 
 GO
 --EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Exported?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnExported' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Entity used in the source transaction qucikly' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceEntityId' 
-GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Location of the transaction for ease of reporting' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceLocationId' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unit of measure from the source transaction and will allow us to long term eliminate the conversions in GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceUOM' 
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unit of measure from the source transaction and will allow us to long term eliminate the conversions in GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceUOMId' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Debits in the source transaction uom' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'dblSourceUnitDebit' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Credits in the source transaction UOM' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'dblSourceUnitCredit' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Future use - to easily identify commodity in the GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intCommodity' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'This is the enities document number for example it is the vendor invoice number on a voucher - a customer po number on an invoice.' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceDocumentId' 
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Future use - to easily identify commodity in the GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intCommodityId' 
 GO
