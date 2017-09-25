@@ -23,11 +23,11 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             txtStockUOM: '{current.strStockUOM}',
             txtNoOfPallets: {
                 value: '{current.dblPallets}',
-                hidden: '{!isLotted}'
+                hidden: '{isCountByGroupOrNotLotted}'
             },
             txtQtyPerPallet: {
                 value: '{current.dblQtyPerPallet}',
-                hidden: '{!isLotted}'
+                hidden: '{isCountByGroupOrNotLotted}'
             },
             cboCountGroup: {
                 store: '{countGroup}',
@@ -75,7 +75,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{storageUnits}',
                 value: '{current.strStorageLocationName}',
                 origValueField: 'intStorageLocationId',
-                hidden: '{isCountByGroup}',
+                hidden: '{isCountByGroupOrNotLotted}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -98,8 +98,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{lots}',
                 value: '{current.strLotNo}',
                 origValueField: 'intLotId',
-                hidden: '{!isLotted}',
-                hidden: '{isCountByGroup}',
+                hidden: '{isCountByGroupOrNotLotted}',
                 forceSelection: '{forceSelection}',
                 defaultFilters: [
                     {
@@ -134,7 +133,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                         conjunction: 'and'
                     }
                 ],
-                hidden: '{!isLotted}',
+                hidden: '{isCountByGroupOrNotLotted}',
                 forceSelection: '{forceSelection}'
             },
             cboUOM: {
@@ -158,18 +157,18 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             },
             txtWeightQty: {
                 value: '{current.dblWeightQty}',
-                hidden: '{!isLotted}',
+                hidden: '{isCountByGroupOrNotLotted}',
                 readOnly: '{disableGrossUOM}'
             },
             txtNetWeightQty: {
                 value: '{current.dblNetQty}',
-                hidden: '{!isLotted}',
+                hidden: '{isCountByGroupOrNotLotted}',
                 readOnly: '{disableGrossUOM}'
             },
             cboWeightUOM: {
                 store: '{itemUOMs}',
                 value: '{current.strWeightUOM}',
-                hidden: '{!isLotted}',
+                hidden: '{isCountByGroupOrNotLotted}',
                 fieldLabel: '{setWeightUOMFieldLabel}',
                 readOnly: '{disableGrossUOM}',
                 origValueField: 'intItemUOMId',
@@ -220,8 +219,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             txtLotAlias: {
                 value: '{current.strLotAlias}',
 				readOnly: '{lotAliasReadOnly}',
-                hidden: '{!isLotted}',
-                hidden: '{isCountByGroup}',
+                hidden: '{isCountByGroupOrNotLotted}'
             },
             chkRecount: {
                 value: '{current.ysnRecount}',
