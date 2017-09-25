@@ -79,21 +79,21 @@ BEGIN TRY
 		, dblLine17_Col2 NUMERIC
 		, dblLine18_Col1 NUMERIC
 		, dblLine18_Col2 NUMERIC
-		, dblLine19_Col1 NUMERIC(18,6)
-		, dblLine19_Col2 NUMERIC(18,6)
-		, dblLine20_Col1 NUMERIC(18,6)
-		, dblLine20_Col2 NUMERIC(18,6)		
-		, dblLine20a NUMERIC(18,6)
-		, dblLine20b NUMERIC(18,6)		
-		, dblLine21_Col1 NUMERIC(18,6)
-		, dblLine21_Col2 NUMERIC(18,6)
-		, dblLine22_Col1 NUMERIC(18,6)
-		, dblLine23_Col1 NUMERIC(18,6)
-		, dblLine24_Col1 NUMERIC(18,6)
-		, dblTaxRateGas NUMERIC(18,6)
-		, dblDiscGas NUMERIC(18,6)
-		, dblTaxRateSpecialFuel  NUMERIC(18,6)
-		, dblDiscSpecialFuel  NUMERIC(18,6)
+		, dblLine19_Col1 NUMERIC(18,2)
+		, dblLine19_Col2 NUMERIC(18,2)
+		, dblLine20_Col1 NUMERIC(18,2)
+		, dblLine20_Col2 NUMERIC(18,2)		
+		, dblLine20a NUMERIC(18,2)
+		, dblLine20b NUMERIC(18,2)		
+		, dblLine21_Col1 NUMERIC(18,2)
+		, dblLine21_Col2 NUMERIC(18,2)
+		, dblLine22_Col1 NUMERIC(18,2)
+		, dblLine23_Col1 NUMERIC(18,2)
+		, dblLine24_Col1 NUMERIC(18,2)
+		, dblTaxRateGas NUMERIC(18,2)
+		, dblDiscGas NUMERIC(18,2)
+		, dblTaxRateSpecialFuel  NUMERIC(18,2)
+		, dblDiscSpecialFuel  NUMERIC(18,2)
 		, strDistLicense NVARCHAR(50)
 		, strSupplierLicense NVARCHAR(50)
 		, dtmFrom DATE
@@ -162,21 +162,21 @@ BEGIN TRY
 		, @dblLine17_Col2 NUMERIC = 0
 		, @dblLine18_Col1 NUMERIC = 0
 		, @dblLine18_Col2 NUMERIC = 0
-		, @dblLine19_Col1 NUMERIC(18,6) = 0
-		, @dblLine19_Col2 NUMERIC(18,6) = 0
-		, @dblLine20_Col1 NUMERIC(18,6) = 0
-		, @dblLine20_Col2 NUMERIC(18,6) = 0
-		, @dblLine20a NUMERIC(18,6) = 0
-		, @dblLine20b NUMERIC(18,6) = 0
-		, @dblLine21_Col1 NUMERIC(18,6) = 0
-		, @dblLine21_Col2 NUMERIC(18,6) = 0
-		, @dblLine22_Col1 NUMERIC(18,6) = 0
-		, @dblLine23_Col1 NUMERIC(18,6) = 0
-		, @dblLine24_Col1 NUMERIC(18,6) = 0
-		, @dblTaxRateGas  NUMERIC(18,6) = 0
-		, @dblDiscGas  NUMERIC(18,6) = 0
-		, @dblTaxRateSpecialFuel  NUMERIC(18,6) = 0
-		, @dblDiscSpecialFuel  NUMERIC(18,6) = 0
+		, @dblLine19_Col1 NUMERIC(18,2) = 0
+		, @dblLine19_Col2 NUMERIC(18,2) = 0
+		, @dblLine20_Col1 NUMERIC(18,2) = 0
+		, @dblLine20_Col2 NUMERIC(18,2) = 0
+		, @dblLine20a NUMERIC(18,2) = 0
+		, @dblLine20b NUMERIC(18,2) = 0
+		, @dblLine21_Col1 NUMERIC(18,2) = 0
+		, @dblLine21_Col2 NUMERIC(18,2) = 0
+		, @dblLine22_Col1 NUMERIC(18,2) = 0
+		, @dblLine23_Col1 NUMERIC(18,2) = 0
+		, @dblLine24_Col1 NUMERIC(18,2) = 0
+		, @dblTaxRateGas  NUMERIC(18,2) = 0
+		, @dblDiscGas  NUMERIC(18,2) = 0
+		, @dblTaxRateSpecialFuel  NUMERIC(18,2) = 0
+		, @dblDiscSpecialFuel  NUMERIC(18,2) = 0
 		, @strDistLicense NVARCHAR(50)
 		, @strSupplierLicense NVARCHAR(50)
 		, @dtmFrom DATE
@@ -212,10 +212,10 @@ BEGIN TRY
 
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
 
-		SELECT @dblTaxRateGas = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-TaxRateGas'
-		SELECT @dblDiscGas = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-ColDiscGas'
-		SELECT @dblTaxRateSpecialFuel = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-TaxRateSpecialFuel'
-		SELECT @dblDiscSpecialFuel = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-ColDiscSpecialFuel'
+		SELECT @dblTaxRateGas = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-TaxRateGas'
+		SELECT @dblDiscGas = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-ColDiscGas'
+		SELECT @dblTaxRateSpecialFuel = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-TaxRateSpecialFuel'
+		SELECT @dblDiscSpecialFuel = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-ColDiscSpecialFuel'
 
 		SELECT @strDistLicense = ISNULL(strConfiguration, '') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-DistLicense'
 		SELECT @strSupplierLicense = ISNULL(strConfiguration, '') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-SupplierLicense'
@@ -357,7 +357,7 @@ BEGIN TRY
 		SET @dblLine22_Col1  = ISNULL(@dblLine21_Col1, 0) + ISNULL(@dblLine21_Col2, 0)
 
 		--Line 23
-		SELECT @dblLine23_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line23'
+		SELECT @dblLine23_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-Line23'
 
 		-- Line 24	
 		SET @dblLine24_Col1  = ISNULL(@dblLine22_Col1, 0) - ISNULL(@dblLine23_Col1, 0)
