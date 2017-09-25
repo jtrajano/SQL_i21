@@ -37,6 +37,6 @@
 	[intSourceUOMId]			INT NULL,
 	[dblSourceUnitDebit]		NUMERIC (18, 6)  NULL,
 	[dblSourceUnitCredit]		NUMERIC (18, 6)  NULL,
-	[intCommodityId]			INT NULL,
+	[intCommodityId]			INT NULL
 )
 
