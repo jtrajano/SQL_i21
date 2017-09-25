@@ -357,6 +357,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             
             return screenTitle;
         },
+        
+        colOrderNumberColumnText: function(get) {
+            if (get('current.strReceiptType') === 'Purchase Contract'){
+                return 'Contract No.'
+            }
+            else
+                return 'Order Number'
+        },
+
         hidePostButton: function(get) {
             var posted = get('current.ysnPosted');
             var hide = true;
