@@ -188,49 +188,51 @@ Ext.define('Inventory.search.InventoryReceipt', {
                 { dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true }
             ]
-        },
-        {
-            title: 'Vouchers',
-            api: {
-                read: '../Inventory/api/InventoryReceipt/SearchReceiptVouchers'
-            },
-            columns: [
-                { dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, dataType: 'numeric', key: true, hidden: true },
-                { dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },
-                { dataIndex: 'strAllVouchers', text: 'Voucher Nos.', width: 100, dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
-                { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'date', xtype: 'datecolumn' },
-                { dataIndex: 'strVendor', text: 'Vendor', width: 300, dataType: 'string' },
-                { dataIndex: 'strLocationName', text: 'Destination', width: 200, dataType: 'string' },
-                { dataIndex: 'strReceiptNumber', text: 'Receipt No', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'string' },
-                { dataIndex: 'strBillOfLading', text: 'BOL', width: 100, dataType: 'string' },
-                { dataIndex: 'strReceiptType', text: 'Order Type', width: 120, dataType: 'string' },
-                { dataIndex: 'strOrderNumber', text: 'Order No', width: 100, dataType: 'string' },
-                { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
-                { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string' },                
-                { dataIndex: 'dblUnitCost', text: 'Unit Cost', width: 120, dataType: 'float', xtype: 'numbercolumn' },
-                { dataIndex: 'strCostUOM', text: 'Cost UOM', width: 80, dataType: 'string' },
-                { dataIndex: 'dblReceiptQty', text: 'Receipt Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
-                { dataIndex: 'dblVoucherQty', text: 'Voucher Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
-                { dataIndex: 'strItemUOM', text: 'UOM', width: 80, dataType: 'string' },
-                { dataIndex: 'dblReceiptLineTotal', text: 'Receipt Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
-                { dataIndex: 'dblVoucherLineTotal', text: 'Voucher Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
-                { dataIndex: 'dblReceiptTax', text: 'Receipt Tax', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
-                { dataIndex: 'dblVoucherTax', text: 'Voucher Tax', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
-                { dataIndex: 'dblOpenQty', text: 'Uncleared Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
-                { dataIndex: 'dblItemsPayable', text: 'Uncleared Items Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
-                { dataIndex: 'dblTaxesPayable', text: 'Uncleared Taxes Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
-                { dataIndex: 'dtmLastVoucherDate', text: 'Last Voucher Date', width: 120, dataType: 'date', xtype: 'datecolumn' },
-                { dataIndex: 'strFilterString', text: 'Voucher Nos.', flex: 1, dataType: 'string', required: true, hidden: true }
-            ],
-            buttons: [
-                {
-                    text: 'Refresh Vouchers',
-                    itemId: 'btnRefreshVoucher',
-                    clickHandler: 'onRefreshVoucherClick',
-                    width: 400
-                }                
-            ]
         }
+        // IC-4257: Removed it. Voucher tab is now moved to AP. 
+        // ,
+        // {
+        //     title: 'Vouchers',
+        //     api: {
+        //         read: '../Inventory/api/InventoryReceipt/SearchReceiptVouchers'
+        //     },
+        //     columns: [
+        //         { dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, dataType: 'numeric', key: true, hidden: true },
+        //         { dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },
+        //         { dataIndex: 'strAllVouchers', text: 'Voucher Nos.', width: 100, dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
+        //         { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'date', xtype: 'datecolumn' },
+        //         { dataIndex: 'strVendor', text: 'Vendor', width: 300, dataType: 'string' },
+        //         { dataIndex: 'strLocationName', text: 'Destination', width: 200, dataType: 'string' },
+        //         { dataIndex: 'strReceiptNumber', text: 'Receipt No', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'string' },
+        //         { dataIndex: 'strBillOfLading', text: 'BOL', width: 100, dataType: 'string' },
+        //         { dataIndex: 'strReceiptType', text: 'Order Type', width: 120, dataType: 'string' },
+        //         { dataIndex: 'strOrderNumber', text: 'Order No', width: 100, dataType: 'string' },
+        //         { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
+        //         { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string' },                
+        //         { dataIndex: 'dblUnitCost', text: 'Unit Cost', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+        //         { dataIndex: 'strCostUOM', text: 'Cost UOM', width: 80, dataType: 'string' },
+        //         { dataIndex: 'dblReceiptQty', text: 'Receipt Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+        //         { dataIndex: 'dblVoucherQty', text: 'Voucher Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+        //         { dataIndex: 'strItemUOM', text: 'UOM', width: 80, dataType: 'string' },
+        //         { dataIndex: 'dblReceiptLineTotal', text: 'Receipt Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
+        //         { dataIndex: 'dblVoucherLineTotal', text: 'Voucher Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
+        //         { dataIndex: 'dblReceiptTax', text: 'Receipt Tax', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
+        //         { dataIndex: 'dblVoucherTax', text: 'Voucher Tax', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
+        //         { dataIndex: 'dblOpenQty', text: 'Uncleared Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+        //         { dataIndex: 'dblItemsPayable', text: 'Uncleared Items Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
+        //         { dataIndex: 'dblTaxesPayable', text: 'Uncleared Taxes Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
+        //         { dataIndex: 'dtmLastVoucherDate', text: 'Last Voucher Date', width: 120, dataType: 'date', xtype: 'datecolumn' },
+        //         { dataIndex: 'strFilterString', text: 'Voucher Nos.', flex: 1, dataType: 'string', required: true, hidden: true }
+        //     ],
+        //     buttons: [
+        //         {
+        //             text: 'Refresh Vouchers',
+        //             itemId: 'btnRefreshVoucher',
+        //             clickHandler: 'onRefreshVoucherClick',
+        //             width: 400
+        //         }                
+        //     ]
+        // }
     ],
 
     processReceiptToVoucher: function (receiptId, callback) {
