@@ -47,6 +47,7 @@ BEGIN TRY
 		SET 
 			 strFormCode			= SOURCE.strFormCode
 			, strFormName			= SOURCE.strFormName
+			, strScheduleCode		= SOURCE.strScheduleCode
 			, strScheduleName		= SOURCE.strScheduleName
 			, strNote				= SOURCE.strNote
 			, strTransactionType	= SOURCE.strTransactionType
