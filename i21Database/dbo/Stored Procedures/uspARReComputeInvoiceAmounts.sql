@@ -247,5 +247,5 @@ IF ISNULL(@OriginalInvoiceId, 0) <> 0
 		  , dblBaseAmountDue	= dblAmountDue - ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
 		  , dblPayment			= ISNULL(@dblProvisionalAmt, @ZeroDecimal)
 		  , dblBasePayment		= ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
-		WHERE intInvoiceId = @InvoiceIdLocal
+		WHERE intInvoiceId = @OriginalInvoiceId
 	END
