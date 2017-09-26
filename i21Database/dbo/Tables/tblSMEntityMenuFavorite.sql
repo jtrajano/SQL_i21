@@ -7,6 +7,7 @@
 	[intCompanyLocationId] INT NULL, 
 	[intParentEntityMenuFavoriteId] INT NULL,
     [intSort] INT NULL DEFAULT (1), 
+	[ysnCustomView] BIT NOT NULL DEFAULT (0), 
 	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [FK_tblSMEntityMenuFavorite_tblSMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [tblSMMasterMenu]([intMenuID]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMEntityMenuFavorite_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) ON DELETE CASCADE,
