@@ -24,6 +24,10 @@ BEGIN
 		,@intLotCodeNoOfDigits INT
 		,@strLotTracking NVARCHAR(50)
 		,@intDamagedStatusId INT
+		,@strLotCode NVARCHAR(50)
+		,@dtmManufacturedDate DATETIME
+		,@strLifeTimeType NVARCHAR(50)
+		,@intLifeTime INT
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
@@ -89,6 +93,31 @@ BEGIN
 		RETURN - 1;
 	END
 
+	IF @ysnPickByLotCode = 1
+	BEGIN
+		SELECT @strLotCode = Substring(@strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+
+		SELECT @dtmManufacturedDate = DATEADD(day, CAST(RIGHT(@strLotCode, 3) AS INT) - 1, CONVERT(DATETIME, LEFT(@strLotCode, 2) + '0101', 112))
+
+		SELECT @strLifeTimeType = strLifeTimeType
+			,@intLifeTime = intLifeTime
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
+
+		IF @strLifeTimeType = 'Years'
+			SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmManufacturedDate)
+		ELSE IF @strLifeTimeType = 'Months'
+			SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmManufacturedDate)
+		ELSE IF @strLifeTimeType = 'Days'
+			SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmManufacturedDate)
+		ELSE IF @strLifeTimeType = 'Hours'
+			SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, @dtmManufacturedDate)
+		ELSE IF @strLifeTimeType = 'Minutes'
+			SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmManufacturedDate)
+		ELSE
+			SET @dtmExpiryDate = DateAdd(yy, 1, @dtmManufacturedDate)
+	END
+
 	IF ISNULL(@intParentLotId, 0) = 0
 	BEGIN
 		IF @ysnPickByLotCode = 1
@@ -124,12 +153,32 @@ BEGIN
 
 		UPDATE tblICLot
 		SET intParentLotId = @intParentLotId
+			,dtmManufacturedDate = CASE 
+				WHEN @ysnPickByLotCode = 1
+					THEN @dtmManufacturedDate
+				ELSE dtmManufacturedDate
+				END
+			,dtmExpiryDate = CASE 
+				WHEN @ysnPickByLotCode = 1
+					THEN @dtmExpiryDate
+				ELSE dtmExpiryDate
+				END
 		WHERE intLotId = @intLotId
 	END
 	ELSE
 	BEGIN
 		UPDATE tblICLot
 		SET intParentLotId = @intParentLotId
+			,dtmManufacturedDate = CASE 
+				WHEN @ysnPickByLotCode = 1
+					THEN @dtmManufacturedDate
+				ELSE dtmManufacturedDate
+				END
+			,dtmExpiryDate = CASE 
+				WHEN @ysnPickByLotCode = 1
+					THEN @dtmExpiryDate
+				ELSE dtmExpiryDate
+				END
 		WHERE intLotId = @intLotId
 	END
 
