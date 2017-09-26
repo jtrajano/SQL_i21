@@ -5417,6 +5417,7 @@
     <Build Include="dbo\Stored Procedures\uspRKMatchingLotAvailableQtyValidation.sql" />
     <Build Include="dbo\Views\vyuMFGetPostedDate.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryShipmentCustomField.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReleaseReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
