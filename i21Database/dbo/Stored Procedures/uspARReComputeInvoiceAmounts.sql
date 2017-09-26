@@ -229,23 +229,23 @@ WHERE
 
 END
 
-IF ISNULL(@OriginalInvoiceId, 0) <> 0
-	BEGIN
-		DECLARE @dblProvisionalAmt	NUMERIC(18,6)
-				,@dblBaseProvisionalAmt	NUMERIC(18,6)
+--IF ISNULL(@OriginalInvoiceId, 0) <> 0
+--	BEGIN
+--		DECLARE @dblProvisionalAmt	NUMERIC(18,6)
+--				,@dblBaseProvisionalAmt	NUMERIC(18,6)
 
-		SELECT TOP 1 
-			 @dblProvisionalAmt = dblAmountDue 
-			,@dblBaseProvisionalAmt = dblBaseAmountDue 
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-		WHERE intInvoiceId = @OriginalInvoiceId
-		  AND ysnProcessed = 1
-		  AND strType = 'Provisional'
+--		SELECT TOP 1 
+--			 @dblProvisionalAmt = dblAmountDue 
+--			,@dblBaseProvisionalAmt = dblBaseAmountDue 
+--		FROM dbo.tblARInvoice WITH (NOLOCK)
+--		WHERE intInvoiceId = @OriginalInvoiceId
+--		  AND ysnProcessed = 1
+--		  AND strType = 'Provisional'
 
-		UPDATE tblARInvoice
-		SET dblAmountDue		= dblAmountDue - ISNULL(@dblProvisionalAmt, @ZeroDecimal)
-		  , dblBaseAmountDue	= dblAmountDue - ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
-		  , dblPayment			= ISNULL(@dblProvisionalAmt, @ZeroDecimal)
-		  , dblBasePayment		= ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
-		WHERE intInvoiceId = @OriginalInvoiceId
-	END
+--		UPDATE tblARInvoice
+--		SET dblAmountDue		= dblAmountDue - ISNULL(@dblProvisionalAmt, @ZeroDecimal)
+--		  , dblBaseAmountDue	= dblAmountDue - ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
+--		  , dblPayment			= ISNULL(@dblProvisionalAmt, @ZeroDecimal)
+--		  , dblBasePayment		= ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
+--		WHERE intInvoiceId = @OriginalInvoiceId
+--	END
