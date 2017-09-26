@@ -1348,6 +1348,16 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                         }
                                     },
                                     {
+                                        xtype: 'glposthistory',
+                                        itemId: 'pgePostHistory',
+                                        layout: 'fit',
+                                        title: 'Post History',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabPostHistory'
+                                        }
+                                    },
+                                    {
                                         xtype: 'panel',
                                         itemId: 'pgeAudit',
                                         layout: 'fit',

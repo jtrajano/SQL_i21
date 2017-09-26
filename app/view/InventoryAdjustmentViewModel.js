@@ -18,7 +18,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         'Inventory.store.BufferedItemStockUOMForAdjustmentView',
         'Inventory.store.BufferedItemOwner',
         'Inventory.store.BufferedItemStockUOMView',
-        'GeneralLedger.controls.RecapTab'        
+        'GeneralLedger.controls.RecapTab',
+        'GeneralLedger.controls.PostHistory'
     ],
 
     stores: {
@@ -148,6 +149,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         intCurrencyId: function(get) {
             //Since adjustment does not have a currency, return the functional currency. 
             return i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        },
+
+        strTransactionId: function(get){
+            return get('current.strAdjustmentNo');
         },
         
         formulaShowLotNumberEditor: function(get){
