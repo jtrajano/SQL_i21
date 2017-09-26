@@ -13,6 +13,7 @@ using iRely.Inventory.BusinessLayer;
 namespace iRely.Inventory.WebApi
 {
     public class ItemController : BaseApiController<tblICItem>
+
     {
         private IItemBl _bl;
 
@@ -235,6 +236,13 @@ namespace iRely.Inventory.WebApi
         public async Task<HttpResponseMessage> SearchStockDetail(GetParameter param)
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchStockDetail(param));
+        }
+
+        [HttpGet]
+        [ActionName("SearchItemUOMDetail")]
+        public async Task<HttpResponseMessage> SearchItemUOMDetail(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemUOMDetail(param));
         }
 
         public struct GetUnitConversionParam

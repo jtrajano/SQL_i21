@@ -24,7 +24,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-            : base(GetConnectionString(true))
+           : base(GetConnectionString(true))
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
@@ -274,6 +274,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetCustomerCurrencyMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentMap());
             modelBuilder.Configurations.Add(new vyuICStockDetailMap());
+            modelBuilder.Configurations.Add(new vyuICItemUOMDetailMap());
 
             modelBuilder.Configurations.Add(new vyuICSearchItemMap());
             modelBuilder.Configurations.Add(new vyuICGetItemUOMByTypeMap());

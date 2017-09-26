@@ -1051,6 +1051,25 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public async Task<SearchResult> SearchItemUOMDetail(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICItemUOMDetail>()
+                .Where(
+                    p => (p.strType == "Inventory" ||
+                    p.strType == "Finished Good" ||
+                    p.strType == "Raw Material") && p.intLocationId != null
+                )
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
         /// <summary>
         /// Get the Conversion of one UOM to another based on the Inventory UOM > Conversion values. 
         /// </summary>
