@@ -130,11 +130,11 @@ SELECT @intTimeOffRequestId = @intTransactionId
 				+ '<tr><td><strong>Reason</strong></td><td>' + REPLACE(TOR.strReason, '''', '''''') + '</td></tr>'
 				+ '<tr><td><strong>Address while on Time Off</strong></td><td>' + REPLACE(TOR.strAddress, '''', '''''') + '</td></tr>'
 				+ '</tbody></table>'
-			,'{"drillDown":{"enabled":true,"url":"#/PR/TimeOffRequest?routeId=' + CAST(intTimeOffRequestId AS NVARCHAR(20))+'%7C%5E%7C&activeTab=Details","text":"View Time Off Request "},"title":"Time Off - ' + REPLACE(ENT.strName, '', '''') + '"}'
+			,'{"allDay":"true","drillDown":{"enabled":true,"url":"#/PR/TimeOffRequest?routeId=' + CAST(intTimeOffRequestId AS NVARCHAR(20))+'%7C%5E%7C&activeTab=Details","text":"View Time Off Request "},"title":"Time Off - ' + REPLACE(ENT.strName, '', '''') + '"}'
 			,'Payroll.view.TimeOffRequest'
 			,CAST(TOR.intTimeOffRequestId AS NVARCHAR(100))
-			,DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), CAST(FLOOR(CAST(TOR.dtmDateFrom AS FLOAT)) AS DATETIME))
-			,DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), DATEADD(MS,-3, DATEADD(day, 1, DATEADD(DD, DATEDIFF(DD, 0, TOR.dtmDateTo), 0))))
+			,TOR.dtmDateFrom
+			,TOR.dtmDateTo
 			,GETDATE()
 			,GETDATE()
 			,1
