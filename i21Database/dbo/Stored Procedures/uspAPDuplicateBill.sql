@@ -18,6 +18,7 @@ DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
 DECLARE @generatedBillRecordId NVARCHAR(50);
+DECLARE @origBillId NVARCHAR(50);
 DECLARE @tranRecordId INT;
 DECLARE @tranType INT = @type;
 DECLARE @isVendorContact INT = 0;
@@ -35,6 +36,7 @@ BEGIN
 END
 
 SET @tranRecordId = CASE @tranType WHEN 1 THEN 9 WHEN 2 THEN 20 WHEN 3 THEN 18 WHEN 8 THEN 66 WHEN 9 THEN 77 WHEN 12 THEN 122 END
+SET @origBillId = (SELECT TOP 1 strBillId FROM #tmpDuplicateBill);
 
 IF (EXISTS(SELECT 1 FROM [tblEMEntityToContact] A INNER JOIN [tblEMEntityType] B ON A.intEntityId = B.intEntityId WHERE intEntityContactId = @userId AND strType = 'Vendor'))
 BEGIN
@@ -57,7 +59,7 @@ BEGIN
 		,dblWithheld = 0
 		,strVendorOrderNumber = NULL
 		--,strBillId = @generatedBillRecordId
-		,strReference = A.strReference + ' Duplicate of ' + A.strBillId
+		,strReference = A.strReference + ' Duplicate of ' + @origBillId
 		--,intEntityId = @userId
 		,ysnApproved = 0
 		,ysnForApprovalSubmitted = 0
