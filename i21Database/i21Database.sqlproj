@@ -5696,6 +5696,7 @@
     <Build Include="dbo\Views\vyuICItemUOMDetail.sql" />
     <Build Include="dbo\Views\vyuPATEquityPaySummary.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutMarkUpDowns.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReleaseReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
