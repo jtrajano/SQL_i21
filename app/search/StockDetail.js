@@ -117,7 +117,7 @@ Ext.define('Inventory.search.StockDetail', {
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblReorderPoint', text: 'Reorder Point', flex: 1, dataType: 'float', renderer: function (value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblNearingReorderBy', text: 'Nearing Reorder By', flex: 1, dataType: 'float', renderer: function (value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblMinOrder', text: 'Minimum Order', flex: 1, dataType: 'float', renderer: function (value) { return Ext.util.Format.number(value, '#,##0.00'); } },
-                { xtype: 'checkboxcolumn', dataIndex: 'ysnStockUnit', text: 'Stock Unit', flex: 1, dataType: 'boolean' }
+                { xtype: 'checkcolumn', dataIndex: 'ysnStockUnit', text: 'Stock Unit', flex: 1, dataType: 'boolean' }
             ],
             showNew: false,
             showOpenSelected: false,
