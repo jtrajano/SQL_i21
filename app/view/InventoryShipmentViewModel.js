@@ -27,7 +27,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'Grain.store.BufferedStorageTakeOut',
         'ContractManagement.store.WeightGradeBuffered',
         'i21.store.CurrencyExchangeRateTypeBuffered',
-        'GeneralLedger.controls.RecapTab'
+        'GeneralLedger.controls.RecapTab',
+        'GeneralLedger.controls.PostHistory'        
         //'AccountsReceivable.common.ARFunctions'
     ],
 
@@ -237,6 +238,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             return get('current.intCurrencyId');
         },
         
+        strTransactionId: function(get) {
+            return get('current.strShipmentNumber');
+        },
+
         hasCustomerStorage: function(get) {
             return get('grdInventoryShipment.selection.strStorageTypeDescription');
         },
