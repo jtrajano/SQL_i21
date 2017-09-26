@@ -148,7 +148,7 @@ END
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
 			OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
-			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)))
+			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId)) -- TR-1011 AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)
 			AND TR.intItemId = DD.intItemId /* If distribution item is different from the received item, then this is an auto-blend scenario where received items are blended together to be distributed as a new item (ex. E10 is 10% ethanol and 90% gasoline). */
 	GROUP BY TR.intLoadReceiptId, TR.intCompanyLocationId, DH.intCompanyLocationId
 
@@ -211,7 +211,7 @@ END
 		AND ISNULL(DD.strReceiptLink, '') = ''
 	    AND IC.strType != 'Non-Inventory'
 		AND TR.intCompanyLocationId != DH.intCompanyLocationId 
-		AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)
+		--AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0) -- TR1011
 	GROUP BY TR.intLoadReceiptId, TR.intCompanyLocationId, DH.intCompanyLocationId
 
 
