@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspMFReleaseReservation @intOrderHeaderId INT
+	,@ysnDeleteAll BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -34,35 +35,38 @@ BEGIN
 		,@intTransactionId
 		,@intInventoryTransactionType
 
-	INSERT INTO @ItemsToReserve (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		,dblQty
-		,intTransactionId
-		,strTransactionId
-		,intTransactionTypeId
-		)
-	SELECT intItemId = T.intItemId
-		,intItemLocationId = IL.intItemLocationId
-		,intItemUOMId = T.intItemUOMId
-		,intLotId = T.intLotId
-		,intSubLocationId = SL.intSubLocationId
-		,intStorageLocationId = T.intFromStorageLocationId
-		,dblQty = T.dblPickQty
-		,intTransactionId = @intTransactionId
-		,strTransactionId = @strTransactionId
-		,intTransactionTypeId = @intInventoryTransactionType
-	FROM tblMFTask T
-	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
-	JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
-		AND IL.intLocationId = SL.intLocationId
-	WHERE T.intOrderHeaderId = @intOrderHeaderId
+	IF @ysnDeleteAll = 0
+	BEGIN
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = T.intFromStorageLocationId
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intTransactionId
+			,strTransactionId = @strTransactionId
+			,intTransactionTypeId = @intInventoryTransactionType
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId = @intOrderHeaderId
 
-	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-		,@intTransactionId
-		,@intInventoryTransactionType
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
+	END
 END
