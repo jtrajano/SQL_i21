@@ -33,7 +33,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Logistics.store.BufferedShipmentReceiptContracts',
         'Inventory.store.BufferedReceiptItemView',
         'i21.store.CurrencyExchangeRateTypeBuffered',
-        'GeneralLedger.controls.RecapTab'
+        'GeneralLedger.controls.RecapTab',
+        'GeneralLedger.controls.PostHistory'
     ],
 
     data: {
@@ -341,6 +342,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     formulas: {
         intCurrencyId: function(get) {
             return get('current.intCurrencyId');
+        },
+
+        strTransactionId: function(get){
+            return get('current.strReceiptNumber');
         },
 
         receiptTitle: function(get) {

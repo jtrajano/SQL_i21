@@ -10248,6 +10248,50 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "designer|createAlias": "glposthistory",
+                                "itemId": "pgePostHistory",
+                                "layout": "fit",
+                                "title": "Post History"
+                            },
+                            "configAlternates": {
+                                "bodyPadding": "auto",
+                                "itemId": "string",
+                                "layout": "string",
+                                "title": "string",
+                                "scrollable": "boolean",
+                                "designer|createAlias": "string"
+                            },
+                            "name": "MyPanel3",
+                            "designerId": "2df40cc0-54ea-40af-8253-86e8fb74daa1",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabPostHistory"
+                                    },
+                                    "configAlternates": {
+                                        "scrollable": "boolean",
+                                        "itemId": "string"
+                                    },
+                                    "name": "TabConfig16",
+                                    "designerId": "f06edaed-1662-4c7a-895f-460b0778d25e"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": null,
                                 "itemId": "pgeAuditLog",
                                 "layout": "fit",
                                 "title": "Audit Log"

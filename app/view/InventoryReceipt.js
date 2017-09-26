@@ -3466,6 +3466,16 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         }
                                     },
                                     {
+                                        xtype: 'glposthistory',
+                                        itemId: 'pgePostHistory',
+                                        layout: 'fit',
+                                        title: 'Post History',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabPostHistory'
+                                        }
+                                    },
+                                    {
                                         xtype: 'panel',
                                         itemId: 'pgeAuditLog',
                                         layout: 'fit',
