@@ -3655,6 +3655,48 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "glposthistory",
+                                "itemId": "pgePostHistory",
+                                "title": "Post History"
+                            },
+                            "configAlternates": {
+                                "designer|createAlias": "string",
+                                "itemId": "string",
+                                "title": "string",
+                                "scrollable": "boolean"
+                            },
+                            "name": "MyPanel",
+                            "designerId": "ad103059-4771-4971-acba-c6ef5d499688",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabPostHistory",
+                                        "tabIndex": 1
+                                    },
+                                    "configAlternates": {
+                                        "itemId": "string",
+                                        "tabIndex": "number",
+                                        "scrollable": "boolean"
+                                    },
+                                    "name": "TabConfig1",
+                                    "designerId": "640f3a94-0919-4817-972f-a9aaae1b7ca8"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
                                 "layout": "fit",
                                 "title": "Activities"
                             },

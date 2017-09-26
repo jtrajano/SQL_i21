@@ -18,6 +18,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         'i21.store.CompanyLocationSubLocationBuffered',
         'Inventory.store.BufferedItemStockUOMForAdjustmentView',
         'GeneralLedger.controls.RecapTab',
+        'GeneralLedger.controls.PostHistory',
         'Inventory.store.BufferedItemSubLocationsLookup',
         'Inventory.store.BufferedItemStorageLocationsLookup'
     ],
@@ -159,6 +160,10 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         intCurrencyId: function(get) {
             return get('current.intCurrencyId');
         },
+
+        strTransactionId: function(get) {
+            return get('current.strCountNo');
+        },                
         
         checkPrintCountSheet: function (get) {
             if (get('current.intStatus') == 4 || get('hasCountGroup') || get('current.intStatus') == 3) {

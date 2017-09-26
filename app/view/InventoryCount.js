@@ -1290,6 +1290,16 @@ Ext.define('Inventory.view.InventoryCount', {
                             }
                         },
                         {
+                            xtype: 'glposthistory',
+                            itemId: 'pgePostHistory',
+                            title: 'Post History',
+                            tabConfig: {
+                                xtype: 'tab',
+                                itemId: 'tabPostHistory',
+                                tabIndex: 1
+                            }
+                        },
+                        {
                             xtype: 'panel',
                             layout: 'fit',
                             title: 'Activities',
