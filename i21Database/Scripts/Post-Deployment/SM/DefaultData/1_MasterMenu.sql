@@ -1056,10 +1056,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Build Ac
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'GeneralLedger.view.BuildAccounts' WHERE strMenuName = N'Build Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId
 
-UPDATE  tblSMMasterMenu SET strMenuName = 'Fiscal Year', strDescription = 'Fiscal Year' where strModuleName = 'General Ledger' and strMenuName = 'Fiscal Years'
-UPDATE  tblSMMasterMenu SET strMenuName = 'Import from CSV', strDescription = 'Import from CSV' where strModuleName = 'General Ledger' and strMenuName = 'Import GL from CSV'
-UPDATE  tblSMMasterMenu SET strMenuName = 'Import Logs', strDescription = 'Import Logs' where strModuleName = 'General Ledger' and strMenuName = 'GL Import Logs'
-UPDATE  tblSMMasterMenu SET strMenuName = 'Consolidate GL Entries', strDescription ='Consolidate GL Entries' where strModuleName = 'General Ledger' and strMenuName = 'Consolidate'
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Account Structure' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Account Groups' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
