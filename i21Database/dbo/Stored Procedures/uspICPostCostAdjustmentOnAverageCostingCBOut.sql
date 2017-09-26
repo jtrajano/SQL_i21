@@ -40,9 +40,9 @@ BEGIN
 		,[intTransactionDetailId] INT NULL						-- Link id to the transaction detail. 
 		,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
 		,[intTransactionTypeId] INT NOT NULL					-- The transaction type. Source table for the types are found in tblICInventoryTransactionType
-		,[intLotId] INT NULL									-- Place holder field for average cost
-		,[intSubLocationId] INT NULL							-- Place holder field for average cost
-		,[intStorageLocationId] INT NULL						-- Place holder field for average cost
+		,[intLotId] INT NULL									
+		,[intSubLocationId] INT NULL							
+		,[intStorageLocationId] INT NULL						
 		,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 		,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- If there is a value, this means the item is used in Actual Costing. 
 		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. The integer id of INVRCT-10001 is 1934). 
