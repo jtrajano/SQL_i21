@@ -42,3 +42,21 @@ IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRPaycheckDed
 BEGIN
 	EXEC ('UPDATE tblPRPaycheckDeduction SET intExpenseAccountId = NULL WHERE strPaidBy = ''Employee'' AND intExpenseAccountId IS NOT NULL')
 END
+
+/*
+* Time Off Requests
+* 1. Remove time part of Date From and To, change Common Calendar Entry to All Day event
+* 2...
+*/
+
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRTimeOffRequest'))
+	AND EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblSMEvents'))
+BEGIN
+EXEC('UPDATE tblSMEvents 
+		SET dtmStart = tblPRTimeOffRequest.dtmDateFrom,
+			dtmEnd = tblPRTimeOffRequest.dtmDateTo,
+			strJsonData = REPLACE(strJsonData, ''{"drillDown":'', ''{"allDay":"true","drillDown":'')
+		FROM tblSMEvents 
+			INNER JOIN tblPRTimeOffRequest
+			ON tblSMEvents.intEventId = tblPRTimeOffRequest.intEventId')
+END
