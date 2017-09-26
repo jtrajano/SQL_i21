@@ -227,7 +227,7 @@ INSERT INTO @adjustedEntries (
 	,[intCostUOMId] 
 	,[dblVoucherCost] 
 	,[intCurrencyId] 
-	,[dblExchangeRate] 
+	--,[dblExchangeRate] 
 	,[intTransactionId] 
 	,[intTransactionDetailId] 
 	,[strTransactionId] 
@@ -258,7 +258,7 @@ SELECT
 														dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost)
 												END 
 		,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
-		,[dblExchangeRate] 					=	1 -- Exchange rate is always 1. 
+		--,[dblExchangeRate] 					=	1 -- Exchange rate is always 1. 
 		,[intTransactionId]					=	A.intBillId
 		,[intTransactionDetailId] 			=	B.intBillDetailId
 		,[strTransactionId] 				=	A.strBillId

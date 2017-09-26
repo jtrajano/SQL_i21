@@ -21,7 +21,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
 	,@intCurrencyId AS INT 
-	,@dblExchangeRate AS NUMERIC(38,20)	
+	--,@dblExchangeRate AS NUMERIC(38,20)	
 	,@intEntityUserSecurityId AS INT
 	,@intRelatedInventoryTransactionId AS INT = NULL 
 	,@intAdjustLotId AS INT = NULL 
@@ -50,7 +50,7 @@ BEGIN
 		,[dblNewCost] NUMERIC(38,20) NULL DEFAULT 0				-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
 		,[dblNewValue] NUMERIC(38,20) NULL 						-- 
 		,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
-		,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
+		--,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 		,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
 		,[intTransactionDetailId] INT NULL						-- Link id to the transaction detail. 
 		,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
@@ -146,7 +146,7 @@ DECLARE @InvTranId AS INT
 		,@InvTranSubLocationId AS INT
 		,@InvTranStorageLocationId AS INT 
 		,@InvTranCurrencyId AS INT
-		,@InvTranExchangeRate AS NUMERIC(38,20)
+		--,@InvTranExchangeRate AS NUMERIC(38,20)
 		,@InvTranStringTransactionId AS NVARCHAR(40)
 		,@InvTranIntTransactionId AS INT
 		,@InvTranTypeName AS NVARCHAR(200)
@@ -589,7 +589,7 @@ BEGIN
 					,@InvTranCost					= NULL
 					,@InvTranValue					= NULL
 					,@InvTranCurrencyId				= NULL
-					,@InvTranExchangeRate			= NULL
+					--,@InvTranExchangeRate			= NULL
 					,@InvTranIntTransactionId		= NULL
 					,@InvTranStringTransactionId	= NULL
 					,@InvTranTypeId					= NULL 
@@ -605,7 +605,7 @@ BEGIN
 					,@InvTranCost					= InvTran.dblCost
 					,@InvTranValue					= InvTran.dblValue 
 					,@InvTranCurrencyId				= InvTran.intCurrencyId
-					,@InvTranExchangeRate			= InvTran.dblExchangeRate
+					--,@InvTranExchangeRate			= InvTran.dblExchangeRate
 					,@InvTranIntTransactionId		= InvTran.intTransactionId
 					,@InvTranStringTransactionId	= InvTran.strTransactionId
 					,@InvTranTypeId					= InvTran.intTransactionTypeId
@@ -829,7 +829,7 @@ BEGIN
 								--,[dblNewCost] 
 								,[dblNewValue]
 								,[intCurrencyId] 
-								,[dblExchangeRate] 
+								--,[dblExchangeRate] 
 								,[intTransactionId] 
 								,[intTransactionDetailId] 
 								,[strTransactionId] 
@@ -856,7 +856,7 @@ BEGIN
 								--,[dblNewCost]					= dbo.fnDivide(dbo.fnMultiply(InvTran.dblQty, InvTran.dblCost) + (-@InvTranValue), InvTran.dblQty) 
 								,[dblNewValue]					= -@InvTranValue
 								,[intCurrencyId]				= InvTran.intCurrencyId
-								,[dblExchangeRate]				= InvTran.dblExchangeRate
+								--,[dblExchangeRate]				= InvTran.dblExchangeRate
 								,[intTransactionId]				= @intTransactionId
 								,[intTransactionDetailId]		= @intTransactionDetailId
 								,[strTransactionId]				= @strTransactionId

@@ -150,7 +150,7 @@ BEGIN
 		,[intCostUOMId] 
 		,[dblVoucherCost] 
 		,[intCurrencyId] 
-		,[dblExchangeRate] 
+		--,[dblExchangeRate] 
 		,[intTransactionId]
 		,[intTransactionDetailId]
 		,[strTransactionId]
@@ -174,7 +174,7 @@ BEGIN
 			,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
 			,[dblVoucherCost] 					=	B.dblCost 
 			,[intCurrencyId] 					=	A.intCurrencyId
-			,[dblExchangeRate] 					=	0
+			--,[dblExchangeRate] 					=	0
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId
