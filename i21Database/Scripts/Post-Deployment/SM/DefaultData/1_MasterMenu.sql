@@ -4063,11 +4063,11 @@ SELECT @CRMParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'CR
 UPDATE tblSMMasterMenu SET strCategory = N'Maintenance', strIcon = N'small-menu-maintenance' WHERE strMenuName IN ('Sales Pipe Statuses', 'Sources', 'Types', 'Statuses', 'Milestones', 'Prospect Requirements', 'Sales Entities', 'Leads', 'Customer Licenses') AND strModuleName = 'CRM'
 
 /* CATEGORY FOLDERS */
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId AND strCommand = '')
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
 	VALUES (N'Activities', N'CRM', @CRMParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strDescription = 'Activities', strCategory = NULL, strType = 'Folder', strIcon = 'small-folder', strCommand = N'', ysnLeaf = 0, intSort = 0, intRow = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET strDescription = 'Activities', strCategory = NULL, strType = 'Folder', strIcon = 'small-folder', strCommand = N'', ysnLeaf = 0, intSort = 0, intRow = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId AND strCommand = ''
 
 DECLARE @CRMActivitiesParentMenuId INT
 SELECT @CRMActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
