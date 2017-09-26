@@ -763,7 +763,7 @@ IF(ISNULL(@Post,0)) = 1
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Sales Account of item - ' + ICI.[strItemNo] + ' is not valid.' ELSE 'The Sales Account of item - ' + ICI.[strItemNo] + ' was not specified.' END
+			,[strPostingError]		= ICI.[strItemNo] + ' at ' + SMCL.strLocationName + ' is missing a GL account setup for Sales account category.'
 		FROM 
 			@Invoices I
 		INNER JOIN
@@ -779,6 +779,9 @@ IF(ISNULL(@Post,0)) = 1
 		LEFT OUTER JOIN
 			(SELECT [intAccountId] FROM tblGLAccount WITH (NOLOCK)) GLA
 				ON Acct.[intSalesAccountId] = GLA.[intAccountId]	
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], strLocationName FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON I.[intCompanyLocationId] = SMCL.[intCompanyLocationId] 
 		WHERE
 			ARID.[dblTotal] <> @ZeroDecimal 
 			AND (ARID.[intItemId] IS NOT NULL OR ARID.[intItemId] <> 0)
