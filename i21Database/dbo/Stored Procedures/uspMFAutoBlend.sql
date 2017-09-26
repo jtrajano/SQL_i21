@@ -875,7 +875,7 @@ BEGIN TRY
 					SELECT 
 							@intWorkOrderId
 							,@intLotId
-							,@intRawItemId
+							,intItemId
 							,@dblAvailableQty
 							,intItemUOMId
 							,intLocationId
