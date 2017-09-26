@@ -5694,6 +5694,7 @@
     <Build Include="dbo\Views\vyuMFGetPostedDate.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryShipmentCustomField.sql" />
     <Build Include="dbo\Views\vyuICItemUOMDetail.sql" />
+    <Build Include="dbo\Views\vyuPATEquityPaySummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
