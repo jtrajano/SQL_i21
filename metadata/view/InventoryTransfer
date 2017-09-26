@@ -3037,6 +3037,48 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "glposthistory",
+                                "itemId": "pgePostHistory",
+                                "layout": "fit",
+                                "title": "Post History"
+                            },
+                            "configAlternates": {
+                                "designer|createAlias": "string",
+                                "itemId": "string",
+                                "layout": "string",
+                                "title": "string",
+                                "scrollable": "boolean"
+                            },
+                            "name": "MyPanel2",
+                            "designerId": "9de52da6-b80d-4078-8e17-3b8eaee578f3",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabPostHistory"
+                                    },
+                                    "configAlternates": {
+                                        "itemId": "string",
+                                        "scrollable": "boolean"
+                                    },
+                                    "name": "TabConfig3",
+                                    "designerId": "d4a62b17-b038-439e-b4c0-75869cf787d1"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
                                 "itemId": "pgeAuditLog",
                                 "layout": "fit",
                                 "title": "Audit Log"

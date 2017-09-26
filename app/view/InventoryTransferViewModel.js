@@ -17,7 +17,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedItemStockUOMViewTotals',
-        'GeneralLedger.controls.RecapTab'        
+        'GeneralLedger.controls.RecapTab',
+        'GeneralLedger.controls.PostHistory'      
     ],
 
     stores: {
@@ -143,6 +144,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             //Since transfer does not have a currency, return the functional currency. 
             return i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         },
+
+        strTransactionId: function(get) {
+            return get('current.strTransferNo');
+        },        
         
         destinationWeightsDisabled: function(get) {
             if(!(get('current.ysnShipmentRequired') && get('current.strTransferType') === 'Location to Location') || get('current.ysnPosted') || get('current.intSourceType') === 1) {
