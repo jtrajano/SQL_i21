@@ -9,10 +9,10 @@ Favorite.intSort,
 ISNULL(MasterMenu.strMenuName, Favorite.strMenuName) AS strMenuName,
 MasterMenu.strModuleName,
 MasterMenu.strDescription,
-ISNULL(MasterMenu.strType, 'Folder') AS strType,
-MasterMenu.strCommand,
+CASE WHEN Favorite.ysnCustomView = 1 THEN 'Custom View' ELSE ISNULL(MasterMenu.strType, 'Folder') END AS strType,
+CASE WHEN Favorite.ysnCustomView = 1 THEN ('GlobalComponentEngine.view.SystemDashboard?id=' + CAST(Favorite.intMenuId AS NVARCHAR)) ELSE MasterMenu.strCommand END AS strCommand,
 MasterMenu.strIcon,
-ISNULL(MasterMenu.ysnLeaf, 0) AS ysnLeaf,
+CASE WHEN Favorite.ysnCustomView = 1 THEN CAST(1 AS BIT) ELSE ISNULL(MasterMenu.ysnLeaf, 0) END AS ysnLeaf,
 ISNULL(MasterMenu.ysnIsLegacy, 0) AS ysnIsLegacy,
 ISNULL(Favorite.intParentEntityMenuFavoriteId, 0) AS intParentEntityMenuFavoriteId,
 Favorite.intConcurrencyId
@@ -26,6 +26,5 @@ INNER JOIN
 	SELECT intEntityContactId AS intEntityUserSecurityId, intEntityRoleId AS intUserRoleId, NULL AS intCompanyLocationId FROM tblEMEntityToContact WHERE intEntityRoleId IS NOT NULL
 ) UserSecurityCompanyLocationRolePermission ON Favorite.intEntityId = UserSecurityCompanyLocationRolePermission.intEntityUserSecurityId --AND ISNULL(UserSecurityCompanyLocationRolePermission.intCompanyLocationId, 0) = ISNULL(Favorite.intCompanyLocationId, 0)
 LEFT JOIN tblSMUserRoleMenu RoleMenu ON UserSecurityCompanyLocationRolePermission.intUserRoleId = RoleMenu.intUserRoleId and Favorite.intMenuId = RoleMenu.intMenuId
-LEFT JOIN tblSMMasterMenu MasterMenu ON Favorite.intMenuId = MasterMenu.intMenuID
+LEFT JOIN tblSMMasterMenu MasterMenu ON Favorite.intMenuId = MasterMenu.intMenuID and Favorite.ysnCustomView = 0
 WHERE (CASE ISNULL(MasterMenu.strType, 'Folder') WHEN 'Folder' THEN 1 ELSE ISNULL(RoleMenu.ysnVisible, 0) END) = 1
-
