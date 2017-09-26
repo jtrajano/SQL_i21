@@ -5693,6 +5693,7 @@
     <Build Include="dbo\Tables\tblMFPackingItemCategory.sql" />
     <Build Include="dbo\Views\vyuMFGetPostedDate.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryShipmentCustomField.sql" />
+    <Build Include="dbo\Views\vyuICItemUOMDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
