@@ -1349,7 +1349,7 @@ BEGIN
 
 						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 						FROM @LotEntries ItemLot
-						WHERE ItemLot.intSourceType IS NULL OR ItemLot.intSourceType 5 4 OR ItemLot.intSourceType < 0
+						WHERE ItemLot.intSourceType IS NULL OR ItemLot.intSourceType > 5 OR ItemLot.intSourceType < 0
 
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
