@@ -12,11 +12,7 @@ AS
 			CDP.intItemId AS intPItemId,
 			CAST (CHP.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber, 
 			AD.dblPAllocatedQty,
-			AD.dblPAllocatedQty - CASE 
-								  WHEN CDP.dblScheduleQty > (IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0))
-										THEN CDP.dblScheduleQty
-								  ELSE IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)
-								  END AS dblPUnAllocatedQty,
+			AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) - IsNull(PL.dblLotPickedQty, 0) AS dblPUnAllocatedQty,
 			AD.intPUnitMeasureId,
 			UP.strUnitMeasure as strPUnitMeasure,
 			ENP.strName AS strVendor,
@@ -39,11 +35,7 @@ AS
 			CDS.intItemId AS intSItemId,
 			CAST (CHS.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
 			AD.dblSAllocatedQty,
-			AD.dblSAllocatedQty - CASE 
-								  WHEN CDS.dblScheduleQty > (IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0))
-										THEN CDS.dblScheduleQty
-								  ELSE IsNull(LD.dblSShippedQuantity,0) - ISNULL(PLS.dblSalePickedQty, 0) 
-								  END AS dblSUnAllocatedQty,
+			AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)  AS dblSUnAllocatedQty,
 			AD.intSUnitMeasureId,
 			US.strUnitMeasure as strSUnitMeasure,
 			ENS.strName AS strCustomer,
@@ -96,14 +88,6 @@ AS
 	LEFT JOIN	tblCTPosition			PS	ON	PS.intPositionId			= CHS.intPositionId
 	LEFT JOIN	tblSMCountry			CP	ON	CP.intCountryID				= ITP.intOriginId
 	LEFT JOIN	tblSMCountry			CS	ON	CS.intCountryID				= ITS.intOriginId
-	WHERE	
-		((AD.dblPAllocatedQty - CASE 
-								  WHEN CDP.dblScheduleQty > (IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0))
-										THEN CDP.dblScheduleQty
-								  ELSE IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)
-								  END) > 0) AND
-		((AD.dblSAllocatedQty - CASE 
-								  WHEN CDS.dblScheduleQty > (IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0))
-										THEN CDS.dblScheduleQty
-								  ELSE IsNull(LD.dblSShippedQuantity,0) - ISNULL(PLS.dblSalePickedQty, 0) 
-								  END) > 0)
+	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
+	  AND ((AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)) > 0)
+	  AND AD.intAllocationDetailId NOT IN (SELECT ISNULL(intAllocationDetailId, 0) FROM tblLGLoadDetail)
