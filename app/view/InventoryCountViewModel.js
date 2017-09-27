@@ -267,6 +267,9 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                 this.set('current.strCountBy', value);
             }
         },
+        isCountByGroupOrNotLotted: function(get) {
+            return get('current.strCountBy') === 'Pack' || !get('current.ysnCountByLots');
+        },
         isPack: function(get) {
             return get('current.strCountBy') === 'Pack';
         },
