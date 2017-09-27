@@ -22,6 +22,7 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_SCALE AS INT = 1
 		,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 2
 		,@SOURCE_TYPE_TRANSPORT AS INT = 3
+		,@SOURCE_TYPE_DELIVERY_SHEET AS INT = 5
 		-- Item Ownership types
 		,@OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_Storage AS INT = 2
@@ -211,6 +212,12 @@ BEGIN
 	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_TRANSPORT
 	BEGIN 
 		EXEC dbo.uspTRReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+	END
+
+	-- Update the received quantities back to a Delivery Sheet
+	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_DELIVERY_SHEET
+	BEGIN 
+		EXEC dbo.uspSCDeliverySheetReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 	END
 END 
 
