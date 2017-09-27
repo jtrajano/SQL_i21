@@ -645,7 +645,7 @@ BEGIN TRY
 			,[dblQty] = PL.dblQuantity
 			,[dblUOMQty] = 1
 			,[intCostUOMId] = PL.intItemUOMId
-			,[dblNewCost] = @dblNewUnitCost
+			,[dblNewCost] = Case When IsNULL(RI.dblPercentage,0)=0 Then @dblNewUnitCost Else @dblNewUnitCost*RI.dblPercentage/100 End
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
 				FROM tblSMCompanyPreference
@@ -668,6 +668,7 @@ BEGIN TRY
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
 		JOIN tblICLot L ON L.intLotId = PL.intLotId
 		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+		Left JOIN tblMFWorkOrderRecipeItem RI on RI.intWorkOrderId =W.intWorkOrderId and RI.intItemId=PL.intItemId and RI.intRecipeItemTypeId =2
 		WHERE PL.intWorkOrderId = @intWorkOrderId
 			AND PL.ysnProductionReversed = 0
 			AND PL.intItemId IN (
