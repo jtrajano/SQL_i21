@@ -408,6 +408,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --CCR
 :r .\CCR\SiteDataFix.sql
+:r .\CCR\RemoveCCRObsoleteScreen.sql
 
 --TR
 :r .\TR\RemoveObsoleteScreen.sql
