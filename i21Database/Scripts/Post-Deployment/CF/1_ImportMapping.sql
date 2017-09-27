@@ -217,6 +217,11 @@ BEGIN
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
 	VALUES (@pacpridePK, SCOPE_IDENTITY(), 62, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 3)
 
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
+	VALUES (@pacpridePK, N'Miscellanous', 0, 18, NULL, 0, 1, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 64, NULL, NULL, N'tblCFTransaction', N'strMiscellaneous', NULL, NULL, NULL, 1, 1)
+
 END
 	-----------Pac Pride-------------
 
