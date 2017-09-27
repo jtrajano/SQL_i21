@@ -36,7 +36,7 @@ from (
        SELECT dblInQty  dblUnpaidIn,
        dblOutQty dblUnpaidOut
        FROM (
-       SELECT       CONVERT(VARCHAR(10),b.dtmDate,110) dtmDate, dblUnitCost dblUnitCost1,
+      SELECT       CONVERT(VARCHAR(10),b.dtmDate,110) dtmDate, dblUnitCost dblUnitCost1,
                            ir.intInventoryReceiptItemId ,i.strItemNo,
                            isnull(bd.dblQtyReceived,0) dblInQty,
                            (bd.dblTotal - isnull((select case when sum(pd.dblPayment)- max(dblTotal) = 0 then bd.dblTotal else sum(pd.dblPayment) end 
@@ -61,7 +61,9 @@ FROM
  tblICInventoryReceiptItem ir 
  JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
 JOIN tblICItem i on i.intItemId=ir.intItemId 
- JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId AND strDistributionOption IN ('DP')
+ JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 
+ JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
+
 WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) < convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) )
   and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge' and i.intCommodityId=@intCommodityId
 
@@ -103,7 +105,9 @@ FROM
  tblICInventoryReceiptItem ir 
  JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
 JOIN tblICItem i on i.intItemId=ir.intItemId 
- JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId AND strDistributionOption IN ('DP')
+ JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 
+ JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
+
 WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110))  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110)) and i.intCommodityId= @intCommodityId
 and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 ORDER BY dtmDate
@@ -111,4 +115,4 @@ ORDER BY dtmDate
 SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
    dtmDate dtmDate,strDistributionOption [strDistribution],dblUnpaidIn [dblUnpaidIN],dblUnpaidOut [dblUnpaidOut],dblUnpaidBalance [dblUnpaidBalance],
    InventoryBalanceCarryForward dblInventoryBalanceCarryForward,strReceiptNumber,intReceiptId
-FROM @tblResult T1 order by dtmDate,strReceiptNumber Asc 
+FROM @tblResult T1 order by dtmDate,strReceiptNumber Asc
