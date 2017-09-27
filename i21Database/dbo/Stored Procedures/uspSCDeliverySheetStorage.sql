@@ -248,7 +248,7 @@ BEGIN TRY
 	           ,[intStorageScheduleId]
 	           ,[intStorageTypeId]
 	           ,[intCompanyLocationId]
-	           ,[intTicketId]
+	           ,[intDeliverySheetId]
 	           ,[intDiscountScheduleId]
 	           ,[dblTotalPriceShrink]
 	           ,[dblTotalWeightShrink]
@@ -280,7 +280,7 @@ BEGIN TRY
 			,[intStorageScheduleId]	= @intDefaultStorageSchedule -- TODO Storage Schedule
 			,[intStorageTypeId]		= @intGRStorageId
 			,[intCompanyLocationId]= SCD.intCompanyLocationId
-			,[intTicketId]= SCD.intDeliverySheetId
+			,[intDeliverySheetId]= SCD.intDeliverySheetId
 			,[intDiscountScheduleId]= GRDS.intDiscountScheduleId
 			,[dblTotalPriceShrink]= 0
 			,[dblTotalWeightShrink]= 0 
@@ -324,7 +324,7 @@ BEGIN TRY
 	INSERT INTO [dbo].[tblGRStorageHistory]
 		   ([intConcurrencyId]
 		   ,[intCustomerStorageId]
-		   ,[intTicketId]
+		   ,[intDeliverySheetId]
 		   ,[intInventoryReceiptId]
 		   ,[intInvoiceId]
 		   ,[intContractHeaderId]
@@ -375,7 +375,7 @@ BEGIN TRY
            ,[strSourceType]
 		   ,[intSort]
 		   ,[strDiscountChargeType])
-		SELECT	 
+		SELECT DISTINCT
 			[intConcurrencyId]= 1       
            ,[dblGradeReading]= SD.[dblGradeReading]
            ,[strCalcMethod]= SD.[strCalcMethod]
@@ -392,8 +392,9 @@ BEGIN TRY
            ,[strSourceType]= 'Storage'
 		   ,[intSort]=SD.[intSort]
 		   ,[strDiscountChargeType]=SD.[strDiscountChargeType]
-		FROM	dbo.[tblQMTicketDiscount] SD
-		WHERE	SD.intTicketId = @intDeliverySheetId AND SD.strSourceType = 'Scale'
+		FROM dbo.[tblQMTicketDiscount] SD
+		INNER JOIN tblSCTicket SC ON SC.intTicketId = SD.intTicketId
+		WHERE SC.intDeliverySheetId = @intDeliverySheetId AND SD.strSourceType = 'Scale'
 		
 		UPDATE CS
 		SET  CS.dblDiscountsDue=QM.dblDiscountsDue
