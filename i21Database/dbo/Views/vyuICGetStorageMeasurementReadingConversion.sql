@@ -11,7 +11,7 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, Item.strItemNo
 	, Detail.intStorageLocationId
 	, strStorageLocationName = StorageLocation.strName
-	, StorageLocation.dblEffectiveDepth
+	, Detail.dblEffectiveDepth
 	, StorageLocation.intSubLocationId
 	, SubLocation.strSubLocationName
 	, Detail.dblAirSpaceReading
@@ -20,6 +20,14 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, strDiscountSchedule = DiscountSchedule.strDiscountId
 	, UOM.strUnitMeasure
 	, UOM.intUnitMeasureId
+	, StorageLocation.dblPackFactor
+	, StorageLocation.dblUnitPerFoot
+	, StorageLocation.dblResidualUnit
+	, Detail.dblOnHand
+	, Detail.dblNewOnHand
+	, Detail.dblValue
+	, Detail.dblVariance
+	, Detail.dblGainLoss
 FROM tblICStorageMeasurementReadingConversion Detail
 LEFT JOIN tblICStorageMeasurementReading Header ON Header.intStorageMeasurementReadingId = Detail.intStorageMeasurementReadingId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommodityId
