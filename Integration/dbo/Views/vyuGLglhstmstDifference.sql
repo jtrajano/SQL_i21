@@ -2,17 +2,13 @@ GO
 IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'glhstmst') RETURN
 IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'glactmst') RETURN
 
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuGLglhstmstDifference')
-	DROP VIEW vyuGLglhstmstDifference
-GO
-
 IF  (SELECT TOP 1 ysnLegacyIntegration FROM tblSMCompanyPreference WHERE ysnLegacyIntegration = 1) = 1
 
 BEGIN
 
 EXEC (
     '
-      CREATE VIEW [dbo].[vyuGLglhstmstDifference] AS
+      ALTER VIEW [dbo].[vyuGLglhstmstDifference] AS
 
      select A.strJournalId, A.strAccountId, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strSourceId, A.strSourceType, A.strSourceKey, B.glhst_acct1_8, B.glhst_acct9_16, B.glhst_amt, B.glhst_units, B.glhst_dr_cr_ind, B.Debit, B.Credit, B.DebitUnit, B.CreditUnit, B.glhst_date, B.glhst_period, B.glhst_src_id, B.glhst_src_seq, B.A4GLIdentity from ( SELECT	   B.strJournalId,
                   A.intLineNo,
