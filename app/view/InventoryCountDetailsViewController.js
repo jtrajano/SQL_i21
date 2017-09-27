@@ -52,7 +52,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 value: '{current.strSubLocationName}',
                 origValueField: 'intSubLocationId',
                 origUpdateField: 'intSubLocationId',
-                hidden: '{isCountByGroup}',
+                hidden: '{isCountByGroupOrNotLotted}',
                 defaultFilters: [
                     {
                         column: 'intItemId',
