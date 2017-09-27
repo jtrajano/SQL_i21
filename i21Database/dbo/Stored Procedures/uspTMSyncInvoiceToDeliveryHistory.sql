@@ -40,6 +40,8 @@ BEGIN
 	DECLARE @intSeasonResetId INT
 	DECLARE @dblLastAccumulatedDDOnSeasonReset NUMERIC(18,6)
 	DECLARE @ysnMaxExceed BIT
+	DECLARE @dtmCurrentSeasonStart DATETIME
+	DECLARE @intAccumulatedDDAfterLastDeliveryBeforeReset INT
 	
 
 
@@ -871,6 +873,8 @@ BEGIN
 					--END
 
 					
+					
+
 					UPDATE tblTMSite
 					SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
 						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
@@ -894,9 +898,36 @@ BEGIN
 						,dtmLastReadingUpdate = @dtmInvoiceDate
 					WHERE intSiteID = @intSiteId
 
+
+					----------------------- checking for season reset-------------------------
+					SET @intAccumulatedDDAfterLastDeliveryBeforeReset = 0
+					SET @dtmCurrentSeasonStart = NULL
+					
+					--Check Current season 
+					SELECT TOP 1 @dtmCurrentSeasonStart = dtmDate 
+					FROM tblTMDegreeDayReading
+					WHERE ysnSeasonStart = 1 
+						AND intClockID = @intClockId
+						AND dtmDate > @dtmInvoiceDate
+					ORDER BY dtmDate DESC
+
+					IF(@dtmCurrentSeasonStart IS NOT NULL)
+					BEGIN
+						SELECT @intAccumulatedDDAfterLastDeliveryBeforeReset = SUM(intDegreeDays)
+						FROM tblTMDegreeDayReading
+						WHERE intClockID = @intClockId
+							AND dtmDate < @dtmCurrentSeasonStart
+							AND dtmDate > @dtmInvoiceDate
+
+						SET @intAccumulatedDDAfterLastDeliveryBeforeReset = @dblAccumulatedDegreeDay + @intAccumulatedDDAfterLastDeliveryBeforeReset
+					END
+
+					
+					------------------------------------------------------------------------------
+
 					--Update Next Delivery Degree Day and degree day Between
 					UPDATE tblTMSite
-						SET	intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
+						SET	intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay - @intAccumulatedDDAfterLastDeliveryBeforeReset + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
 						,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
 					WHERE intSiteID = @intSiteId
 
