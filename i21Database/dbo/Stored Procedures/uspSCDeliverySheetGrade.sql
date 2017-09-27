@@ -21,7 +21,12 @@ DECLARE @strItemNo AS NVARCHAR(MAX)
 CREATE TABLE #DeliverySheetGrade (Item VARCHAR(50),Amount NUMERIC(38,6),intDeliverySheetId INT)
 
 INSERT INTO #DeliverySheetGrade (Item)
-SELECT strItemNo FROM tblICItem where strType = 'Other Charge' AND strCostType = 'Discount'
+SELECT DISTINCT strItemNo FROM tblSCDeliverySheet SCD
+LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
+LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SCT.intTicketId
+LEFT JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
+WHERE SCT.intDeliverySheetId = @intDeliverySheetId
 
 UPDATE #DeliverySheetGrade SET intDeliverySheetId = @intDeliverySheetId
 
