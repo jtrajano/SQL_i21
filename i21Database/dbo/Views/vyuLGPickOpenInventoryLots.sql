@@ -46,7 +46,7 @@ SELECT Lot.intLotId
        , dblWeightUOMConv = ItemWeightUOM.dblUnitQty
        , Lot.dblWeightPerQty
        , OG.intCountryID intOriginId
-       , strBOLNo = Receipt.strBillOfLading
+       , Lot.strBOLNo
        , Lot.strVessel
        , Lot.strReceiptNumber
        , LC.strMarks as strMarkings
@@ -85,8 +85,8 @@ SELECT Lot.intLotId
 	   , LD.intWeightItemUOMId
 	   , PO.strPosition
 FROM tblICLot Lot
-JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
-LEFT JOIN tblICInventoryReceiptItem      ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
+JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
+LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
@@ -107,6 +107,6 @@ LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = Lot.intWeig
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= Item.intOriginId	AND CA.strType = 'Origin'
 LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
-LEFT JOIN tblCTPosition PO ON PO.intPositionId = CTHeader.intPositionId
+LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
 WHERE Lot.dblQty > 0 
 ) InvLots
