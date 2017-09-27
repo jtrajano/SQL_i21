@@ -242,7 +242,8 @@ IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 									  FROM @temp_aging_table 
 									  GROUP BY intEntityCustomerId 
 									  HAVING AVG(ISNULL(dblCreditLimit, 0)) > SUM(ISNULL(dblTotalAR, 0))
-										 OR (AVG(ISNULL(dblCreditLimit, 0)) = 0 AND SUM(ISNULL(dblTotalAR, 0)) = 0))
+										 OR (AVG(ISNULL(dblCreditLimit, 0)) = 0 AND SUM(ISNULL(dblTotalAR, 0)) = 0)
+										 OR AVG(ISNULL(dblCreditLimit, 0)) = 0)
 	END
 
 DECLARE @temp_open_invoices TABLE (intInvoiceId INT)
