@@ -90,6 +90,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 {
                     intSourceType: 4,
                     strSourceType: 'Settle Storage'
+                },
+                {
+                    intSourceType: 5,
+                    strSourceType: 'Delivery Sheet'
                 }
             ],
             fields: {
