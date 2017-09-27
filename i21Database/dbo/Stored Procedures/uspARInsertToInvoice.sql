@@ -33,7 +33,6 @@ DECLARE @EntityCustomerId		INT,
 		@TermId					INT,
 		@EntityId				INT,
 		@Date					DATETIME,
-		@DueDate				DATETIME,				
 		@EntitySalespersonId	INT,
 		@FreightTermId			INT,
 		@ShipViaId				INT,
@@ -445,7 +444,6 @@ SELECT TOP 1
 		@TermId					=	intTermId,
 		@EntityId				=	@UserId,
 		@Date					=	@DateOnly,
-		@DueDate				=	dtmDueDate,
 		@EntitySalespersonId	=	intEntitySalespersonId,
 		@FreightTermId			=	intFreightTermId,
 		@ShipViaId				=	intShipViaId,  	   
@@ -526,7 +524,6 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@TermId					=	@TermId,
 							@EntityId				=	@UserId,
 							@InvoiceDate			=	@dtmSOMaintenanceDate,
-							@DueDate				=	@DueDate,
 							@ShipDate				=	@dtmSOMaintenanceDate,
 							@NewInvoiceId			=	@intNewSoftwareInvoiceId OUT,
 							@ErrorMessage			=   @ErrorMessage OUT,
@@ -761,7 +758,6 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@TermId						= @TermId
 					,@EntityId						= @EntityId
 					,@InvoiceDate					= @Date
-					,@DueDate						= @DueDate
 					,@ShipDate						= @Date
 					,@PostDate						= NULL
 					,@TransactionType				= 'Invoice'
