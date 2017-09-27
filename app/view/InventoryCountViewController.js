@@ -239,20 +239,19 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colTextItemNo: 'strItemNo',
                 colTextSubLocation: {
                     dataIndex: 'strSubLocationName',
-                    hidden: '{hasCountGroup}'
+                    hidden: '{isCountByGroupOrNotLotted}'
                 },
                 colTextStorageLocation: {
                     dataIndex: 'strStorageLocationName',
-                    hidden: '{hasCountGroup}'
+                    hidden: '{isCountByGroupOrNotLotted}'
                 },
                 colTextLotId: {
                     dataIndex: 'strLotNo',
-                    hidden: '{!current.ysnCountByLots}',
-                    hidden: '{hasCountGroup}'
+                    hidden: '{isCountByGroupOrNotLotted}'
                 },
                 colParentLotId: {
                     dataIndex: 'strParentLotNo',
-                    hidden: '{!current.ysnCountByLots}'
+                    hidden: '{isCountByGroupOrNotLotted}'
                 },
                 colSubLocation: {
                     hidden: true,
@@ -360,8 +359,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 },
                 colLotAlias: {
                     dataIndex: 'strLotAlias',
-                    hidden: '{!current.ysnCountByLots}',
-                    hidden: '{hasCountGroup}'
+                    hidden: '{isCountByGroupOrNotLotted}'
                 },
                 colSystemCount: 'dblSystemCount',
                 colQtyReceived: {
@@ -381,17 +379,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 },
                 colNoPallets: {
                     dataIndex: 'dblPallets',
-                    hidden: '{!current.ysnCountByPallets}',
-                    hidden: '{!current.ysnCountByLots}',
-                    hidden: '{hasCountGroup}',
+                    hidden: '{isCountByGroupOrNotLotted}',
                     editor: {
                         readOnly: '{disableCountGridFields}',
                     }
                 },
                 colQtyPerPallet: {
                     dataIndex: 'dblQtyPerPallet',
-                    hidden: '{!current.ysnCountByPallets}',
-                    hidden: '{hasCountGroup}',
+                    hidden: '{isCountByGroupOrNotLotted}',
                     editor: {
                         readOnly: '{disableCountGridFields}',
                     }
