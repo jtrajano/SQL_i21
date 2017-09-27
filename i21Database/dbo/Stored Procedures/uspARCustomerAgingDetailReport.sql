@@ -244,15 +244,6 @@ IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 									  HAVING AVG(ISNULL(dblCreditLimit, 0)) > SUM(ISNULL(dblTotalAR, 0))
 										 OR (AVG(ISNULL(dblCreditLimit, 0)) = 0 AND SUM(ISNULL(dblTotalAR, 0)) = 0))
 	END
-ELSE
-	BEGIN
-		DELETE FROM @temp_aging_table 
-		WHERE intEntityCustomerId IN (SELECT intEntityCustomerId 
-									  FROM @temp_aging_table 
-									  GROUP BY intEntityCustomerId 
-									  HAVING AVG(ISNULL(dblCreditLimit, 0)) < SUM(ISNULL(dblTotalAR, 0))
-										 OR (AVG(ISNULL(dblCreditLimit, 0)) = 0 AND SUM(ISNULL(dblTotalAR, 0)) = 0))
-	END
 
 DECLARE @temp_open_invoices TABLE (intInvoiceId INT)
 INSERT INTO @temp_open_invoices
