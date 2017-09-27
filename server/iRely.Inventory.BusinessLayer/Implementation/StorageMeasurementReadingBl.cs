@@ -19,8 +19,13 @@ namespace iRely.Inventory.BusinessLayer
         {
             _db = db;
         }
+
+        public IRepository GetRepository()
+        {
+            return this._db;
+        }
         #endregion
-        
+
         public override async Task<BusinessResult<tblICStorageMeasurementReading>> SaveAsync(bool continueOnConflict)
         {
             var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);

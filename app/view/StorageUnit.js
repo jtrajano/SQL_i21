@@ -557,6 +557,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 {
                                                     xtype: 'numberfield',
                                                     quantityField: true,
+                                                    hidden: true,
                                                     itemId: 'txtPackFactor',
                                                     fieldLabel: 'Pack Factor',
                                                     labelWidth: 105,

@@ -367,10 +367,17 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        format: '0,000.##',
+                                                        itemId: 'colUnitsPerFoot',
+                                                        width: 100,
+                                                        text: 'Units per Foot'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
                                                         itemId: 'colAirSpaceReading',
                                                         width: 120,
                                                         align: 'right',
-                                                        text: 'Air Space Reading',
+                                                        text: 'Reading in Foot',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             quantityField: true

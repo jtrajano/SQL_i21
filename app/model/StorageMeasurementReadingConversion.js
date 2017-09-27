@@ -80,7 +80,12 @@ Ext.define('Inventory.model.StorageMeasurementReadingConversion', {
                 var dblUnitPerFoot = iRely.Functions.isEmpty(record.get('dblUnitPerFoot')) ? 0 : record.get('dblUnitPerFoot');
                 var dblResidualUnit = iRely.Functions.isEmpty(record.get('dblResidualUnit')) ? 0 : record.get('dblResidualUnit');
 
-                return ((dblEffectiveDepth - dblAirSpaceReading) * dblUnitPerFoot) + dblResidualUnit;
+                if(dblEffectiveDepth === 0)
+                    return (dblAirSpaceReading * dblUnitPerFoot);
+                else if (dblEffectiveDepth > 0)
+                    return ((dblEffectiveDepth - dblAirSpaceReading) * dblUnitPerFoot);
+                
+                 //return ((dblEffectiveDepth - dblAirSpaceReading) * dblUnitPerFoot) + dblResidualUnit;
             },
             depends: [ 'dblEffectiveDepth', 'dblAirSpaceReading' ]
         },
@@ -110,7 +115,7 @@ Ext.define('Inventory.model.StorageMeasurementReadingConversion', {
         if (this.get('dblAirSpaceReading') <= 0) {
             errors.add({
                 field: 'dblAirSpaceReading',
-                message: 'Air Space Reading must be greater than zero(0).'
+                message: 'Reading in Foot must be greater than zero(0).'
             })
         }
 

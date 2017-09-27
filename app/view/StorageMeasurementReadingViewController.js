@@ -32,6 +32,12 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                                 column: 'intLocationId',
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'intStorageUnitId',
+                                value: "",
+                                condition: 'notnull',
+                                conjunction: 'and'
                             }
                         ]
                     }
@@ -41,6 +47,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                 colAirSpaceReading: 'dblAirSpaceReading',
                 colCashPrice: 'dblCashPrice',
                 colUnitMeasure: 'strUnitMeasure',
+                colUnitsPerFoot: 'dblUnitPerFoot',
                 colDiscountSchedule: {
                      dataIndex: 'strDiscountDescription',
                      editor: {
@@ -237,7 +244,6 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         current.set('strCommodity', records[0].get('strCommodityCode'));
         current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
         current.set('dblEffectiveDepth', records[0].get('dblEffectiveDepth'));
-
         current.set('dblUnitPerFoot', records[0].get('dblUnitPerFoot'));
         current.set('dblResidualUnit', records[0].get('dblResidualUnit'));
         current.set('dblOnHand', records[0].get('dblOnHand'));

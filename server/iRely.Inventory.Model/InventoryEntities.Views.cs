@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets3f30a823d04b82f91f67424b59da1c382c2ae85d3bbea78d05fe4cadea7428dd))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4202145fd3e233ee1d6a89fa20b019711e417c68e090f9e98dbed401362b20d4))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets3f30a823d04b82f91f67424b59da1c382c2ae85d3bbea78d05fe4cadea7428dd : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets4202145fd3e233ee1d6a89fa20b019711e417c68e090f9e98dbed401362b20d4 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "3f30a823d04b82f91f67424b59da1c382c2ae85d3bbea78d05fe4cadea7428dd"; }
+            get { return "4202145fd3e233ee1d6a89fa20b019711e417c68e090f9e98dbed401362b20d4"; }
         }
 
         /// <summary>
@@ -4790,7 +4790,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageMeasurementReadingConversion
-        [CodeFirstDatabaseSchema.tblICStorageMeasurementReadingConversion](T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.tblICStorageMeasurementReadingConversion_intCommodityId, T1.tblICStorageMeasurementReadingConversion_intItemId, T1.tblICStorageMeasurementReadingConversion_intStorageLocationId, T1.tblICStorageMeasurementReadingConversion_dblAirSpaceReading, T1.tblICStorageMeasurementReadingConversion_dblCashPrice, T1.tblICStorageMeasurementReadingConversion_intDiscountSchedule, T1.tblICStorageMeasurementReadingConversion_dblOnHand, T1.tblICStorageMeasurementReadingConversion_dblValue, T1.tblICStorageMeasurementReadingConversion_dblNewOnHand, T1.tblICStorageMeasurementReadingConversion_dblVariance, T1.tblICStorageMeasurementReadingConversion_dblGainLoss, T1.tblICStorageMeasurementReadingConversion_dblResidualUnit, T1.tblICStorageMeasurementReadingConversion_dblUnitPerFoot, T1.tblICStorageMeasurementReadingConversion_intSort, T1.tblICStorageMeasurementReadingConversion_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICStorageMeasurementReadingConversion](T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.tblICStorageMeasurementReadingConversion_intCommodityId, T1.tblICStorageMeasurementReadingConversion_intItemId, T1.tblICStorageMeasurementReadingConversion_intStorageLocationId, T1.tblICStorageMeasurementReadingConversion_dblAirSpaceReading, T1.tblICStorageMeasurementReadingConversion_dblCashPrice, T1.tblICStorageMeasurementReadingConversion_intDiscountSchedule, T1.tblICStorageMeasurementReadingConversion_dblOnHand, T1.tblICStorageMeasurementReadingConversion_dblValue, T1.tblICStorageMeasurementReadingConversion_dblNewOnHand, T1.tblICStorageMeasurementReadingConversion_dblVariance, T1.tblICStorageMeasurementReadingConversion_dblGainLoss, T1.tblICStorageMeasurementReadingConversion_dblResidualUnit, T1.tblICStorageMeasurementReadingConversion_dblUnitPerFoot, T1.tblICStorageMeasurementReadingConversion_dblEffectiveDepth, T1.tblICStorageMeasurementReadingConversion_intSort, T1.tblICStorageMeasurementReadingConversion_intConcurrencyId)
     FROM (
         SELECT 
             T.intStorageMeasurementReadingConversionId AS tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, 
@@ -4808,6 +4808,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblGainLoss AS tblICStorageMeasurementReadingConversion_dblGainLoss, 
             T.dblResidualUnit AS tblICStorageMeasurementReadingConversion_dblResidualUnit, 
             T.dblUnitPerFoot AS tblICStorageMeasurementReadingConversion_dblUnitPerFoot, 
+            T.dblEffectiveDepth AS tblICStorageMeasurementReadingConversion_dblEffectiveDepth, 
             T.intSort AS tblICStorageMeasurementReadingConversion_intSort, 
             T.intConcurrencyId AS tblICStorageMeasurementReadingConversion_intConcurrencyId, 
             True AS _from0
@@ -4823,7 +4824,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageMeasurementReadingConversion
-        [CodeFirstDatabaseSchema.vyuICGetStorageMeasurementReadingConversion](T1.vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.vyuICGetStorageMeasurementReadingConversion_strReadingNo, T1.vyuICGetStorageMeasurementReadingConversion_dtmDate, T1.vyuICGetStorageMeasurementReadingConversion_intCommodityId, T1.vyuICGetStorageMeasurementReadingConversion_strCommodity, T1.vyuICGetStorageMeasurementReadingConversion_intItemId, T1.vyuICGetStorageMeasurementReadingConversion_strItemNo, T1.vyuICGetStorageMeasurementReadingConversion_intStorageLocationId, T1.vyuICGetStorageMeasurementReadingConversion_strStorageLocationName, T1.vyuICGetStorageMeasurementReadingConversion_dblEffectiveDepth, T1.vyuICGetStorageMeasurementReadingConversion_intSubLocationId, T1.vyuICGetStorageMeasurementReadingConversion_strSubLocationName, T1.vyuICGetStorageMeasurementReadingConversion_dblAirSpaceReading, T1.vyuICGetStorageMeasurementReadingConversion_dblCashPrice, T1.vyuICGetStorageMeasurementReadingConversion_intDiscountSchedule, T1.vyuICGetStorageMeasurementReadingConversion_strDiscountSchedule, T1.vyuICGetStorageMeasurementReadingConversion_strUnitMeasure, T1.vyuICGetStorageMeasurementReadingConversion_intUnitMeasureId)
+        [CodeFirstDatabaseSchema.vyuICGetStorageMeasurementReadingConversion](T1.vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.vyuICGetStorageMeasurementReadingConversion_strReadingNo, T1.vyuICGetStorageMeasurementReadingConversion_dtmDate, T1.vyuICGetStorageMeasurementReadingConversion_intCommodityId, T1.vyuICGetStorageMeasurementReadingConversion_strCommodity, T1.vyuICGetStorageMeasurementReadingConversion_intItemId, T1.vyuICGetStorageMeasurementReadingConversion_strItemNo, T1.vyuICGetStorageMeasurementReadingConversion_intStorageLocationId, T1.vyuICGetStorageMeasurementReadingConversion_strStorageLocationName, T1.vyuICGetStorageMeasurementReadingConversion_dblEffectiveDepth, T1.vyuICGetStorageMeasurementReadingConversion_intSubLocationId, T1.vyuICGetStorageMeasurementReadingConversion_strSubLocationName, T1.vyuICGetStorageMeasurementReadingConversion_dblAirSpaceReading, T1.vyuICGetStorageMeasurementReadingConversion_dblCashPrice, T1.vyuICGetStorageMeasurementReadingConversion_intDiscountSchedule, T1.vyuICGetStorageMeasurementReadingConversion_strDiscountSchedule, T1.vyuICGetStorageMeasurementReadingConversion_strUnitMeasure, T1.vyuICGetStorageMeasurementReadingConversion_intUnitMeasureId, T1.vyuICGetStorageMeasurementReadingConversion_dblUnitPerFoot, T1.vyuICGetStorageMeasurementReadingConversion_dblResidualUnit, T1.vyuICGetStorageMeasurementReadingConversion_dblOnHand, T1.vyuICGetStorageMeasurementReadingConversion_dblNewOnHand, T1.vyuICGetStorageMeasurementReadingConversion_dblValue, T1.vyuICGetStorageMeasurementReadingConversion_dblVariance, T1.vyuICGetStorageMeasurementReadingConversion_dblGainLoss)
     FROM (
         SELECT 
             T.intStorageMeasurementReadingConversionId AS vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, 
@@ -4845,6 +4846,13 @@ namespace Edm_EntityMappingGeneratedViews
             T.strDiscountSchedule AS vyuICGetStorageMeasurementReadingConversion_strDiscountSchedule, 
             T.strUnitMeasure AS vyuICGetStorageMeasurementReadingConversion_strUnitMeasure, 
             T.intUnitMeasureId AS vyuICGetStorageMeasurementReadingConversion_intUnitMeasureId, 
+            T.dblUnitPerFoot AS vyuICGetStorageMeasurementReadingConversion_dblUnitPerFoot, 
+            T.dblResidualUnit AS vyuICGetStorageMeasurementReadingConversion_dblResidualUnit, 
+            T.dblOnHand AS vyuICGetStorageMeasurementReadingConversion_dblOnHand, 
+            T.dblNewOnHand AS vyuICGetStorageMeasurementReadingConversion_dblNewOnHand, 
+            T.dblValue AS vyuICGetStorageMeasurementReadingConversion_dblValue, 
+            T.dblVariance AS vyuICGetStorageMeasurementReadingConversion_dblVariance, 
+            T.dblGainLoss AS vyuICGetStorageMeasurementReadingConversion_dblGainLoss, 
             True AS _from0
         FROM InventoryEntities.vyuICGetStorageMeasurementReadingConversions AS T
     ) AS T1");
@@ -8436,7 +8444,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageMeasurementReadingConversions
-        [iRely.Inventory.Model.tblICStorageMeasurementReadingConversion](T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.tblICStorageMeasurementReadingConversion_intCommodityId, T1.tblICStorageMeasurementReadingConversion_intItemId, T1.tblICStorageMeasurementReadingConversion_intStorageLocationId, T1.tblICStorageMeasurementReadingConversion_dblAirSpaceReading, T1.tblICStorageMeasurementReadingConversion_dblCashPrice, T1.tblICStorageMeasurementReadingConversion_intDiscountSchedule, T1.tblICStorageMeasurementReadingConversion_dblOnHand, T1.tblICStorageMeasurementReadingConversion_dblValue, T1.tblICStorageMeasurementReadingConversion_dblNewOnHand, T1.tblICStorageMeasurementReadingConversion_dblVariance, T1.tblICStorageMeasurementReadingConversion_dblGainLoss, T1.tblICStorageMeasurementReadingConversion_dblResidualUnit, T1.tblICStorageMeasurementReadingConversion_dblUnitPerFoot, T1.tblICStorageMeasurementReadingConversion_intSort, T1.tblICStorageMeasurementReadingConversion_intConcurrencyId)
+        [iRely.Inventory.Model.tblICStorageMeasurementReadingConversion](T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.tblICStorageMeasurementReadingConversion_intCommodityId, T1.tblICStorageMeasurementReadingConversion_intItemId, T1.tblICStorageMeasurementReadingConversion_intStorageLocationId, T1.tblICStorageMeasurementReadingConversion_dblAirSpaceReading, T1.tblICStorageMeasurementReadingConversion_dblCashPrice, T1.tblICStorageMeasurementReadingConversion_intDiscountSchedule, T1.tblICStorageMeasurementReadingConversion_dblOnHand, T1.tblICStorageMeasurementReadingConversion_dblValue, T1.tblICStorageMeasurementReadingConversion_dblNewOnHand, T1.tblICStorageMeasurementReadingConversion_dblVariance, T1.tblICStorageMeasurementReadingConversion_dblGainLoss, T1.tblICStorageMeasurementReadingConversion_dblResidualUnit, T1.tblICStorageMeasurementReadingConversion_dblUnitPerFoot, T1.tblICStorageMeasurementReadingConversion_dblEffectiveDepth, T1.tblICStorageMeasurementReadingConversion_intSort, T1.tblICStorageMeasurementReadingConversion_intConcurrencyId)
     FROM (
         SELECT 
             T.intStorageMeasurementReadingConversionId AS tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, 
@@ -8454,6 +8462,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblGainLoss AS tblICStorageMeasurementReadingConversion_dblGainLoss, 
             T.dblResidualUnit AS tblICStorageMeasurementReadingConversion_dblResidualUnit, 
             T.dblUnitPerFoot AS tblICStorageMeasurementReadingConversion_dblUnitPerFoot, 
+            T.dblEffectiveDepth AS tblICStorageMeasurementReadingConversion_dblEffectiveDepth, 
             T.intSort AS tblICStorageMeasurementReadingConversion_intSort, 
             T.intConcurrencyId AS tblICStorageMeasurementReadingConversion_intConcurrencyId, 
             True AS _from0
@@ -8469,7 +8478,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageMeasurementReadingConversions
-        [iRely.Inventory.Model.vyuICGetStorageMeasurementReadingConversion](T1.vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.vyuICGetStorageMeasurementReadingConversion_strReadingNo, T1.vyuICGetStorageMeasurementReadingConversion_dtmDate, T1.vyuICGetStorageMeasurementReadingConversion_intCommodityId, T1.vyuICGetStorageMeasurementReadingConversion_strCommodity, T1.vyuICGetStorageMeasurementReadingConversion_intItemId, T1.vyuICGetStorageMeasurementReadingConversion_strItemNo, T1.vyuICGetStorageMeasurementReadingConversion_intStorageLocationId, T1.vyuICGetStorageMeasurementReadingConversion_strStorageLocationName, T1.vyuICGetStorageMeasurementReadingConversion_dblEffectiveDepth, T1.vyuICGetStorageMeasurementReadingConversion_intSubLocationId, T1.vyuICGetStorageMeasurementReadingConversion_strSubLocationName, T1.vyuICGetStorageMeasurementReadingConversion_dblAirSpaceReading, T1.vyuICGetStorageMeasurementReadingConversion_dblCashPrice, T1.vyuICGetStorageMeasurementReadingConversion_intDiscountSchedule, T1.vyuICGetStorageMeasurementReadingConversion_strDiscountSchedule, T1.vyuICGetStorageMeasurementReadingConversion_strUnitMeasure, T1.vyuICGetStorageMeasurementReadingConversion_intUnitMeasureId)
+        [iRely.Inventory.Model.vyuICGetStorageMeasurementReadingConversion](T1.vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.vyuICGetStorageMeasurementReadingConversion_strReadingNo, T1.vyuICGetStorageMeasurementReadingConversion_dtmDate, T1.vyuICGetStorageMeasurementReadingConversion_intCommodityId, T1.vyuICGetStorageMeasurementReadingConversion_strCommodity, T1.vyuICGetStorageMeasurementReadingConversion_intItemId, T1.vyuICGetStorageMeasurementReadingConversion_strItemNo, T1.vyuICGetStorageMeasurementReadingConversion_intStorageLocationId, T1.vyuICGetStorageMeasurementReadingConversion_strStorageLocationName, T1.vyuICGetStorageMeasurementReadingConversion_dblEffectiveDepth, T1.vyuICGetStorageMeasurementReadingConversion_intSubLocationId, T1.vyuICGetStorageMeasurementReadingConversion_strSubLocationName, T1.vyuICGetStorageMeasurementReadingConversion_dblAirSpaceReading, T1.vyuICGetStorageMeasurementReadingConversion_dblCashPrice, T1.vyuICGetStorageMeasurementReadingConversion_intDiscountSchedule, T1.vyuICGetStorageMeasurementReadingConversion_strDiscountSchedule, T1.vyuICGetStorageMeasurementReadingConversion_strUnitMeasure, T1.vyuICGetStorageMeasurementReadingConversion_intUnitMeasureId, T1.vyuICGetStorageMeasurementReadingConversion_dblUnitPerFoot, T1.vyuICGetStorageMeasurementReadingConversion_dblResidualUnit, T1.vyuICGetStorageMeasurementReadingConversion_dblOnHand, T1.vyuICGetStorageMeasurementReadingConversion_dblNewOnHand, T1.vyuICGetStorageMeasurementReadingConversion_dblValue, T1.vyuICGetStorageMeasurementReadingConversion_dblVariance, T1.vyuICGetStorageMeasurementReadingConversion_dblGainLoss)
     FROM (
         SELECT 
             T.intStorageMeasurementReadingConversionId AS vyuICGetStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, 
@@ -8491,6 +8500,13 @@ namespace Edm_EntityMappingGeneratedViews
             T.strDiscountSchedule AS vyuICGetStorageMeasurementReadingConversion_strDiscountSchedule, 
             T.strUnitMeasure AS vyuICGetStorageMeasurementReadingConversion_strUnitMeasure, 
             T.intUnitMeasureId AS vyuICGetStorageMeasurementReadingConversion_intUnitMeasureId, 
+            T.dblUnitPerFoot AS vyuICGetStorageMeasurementReadingConversion_dblUnitPerFoot, 
+            T.dblResidualUnit AS vyuICGetStorageMeasurementReadingConversion_dblResidualUnit, 
+            T.dblOnHand AS vyuICGetStorageMeasurementReadingConversion_dblOnHand, 
+            T.dblNewOnHand AS vyuICGetStorageMeasurementReadingConversion_dblNewOnHand, 
+            T.dblValue AS vyuICGetStorageMeasurementReadingConversion_dblValue, 
+            T.dblVariance AS vyuICGetStorageMeasurementReadingConversion_dblVariance, 
+            T.dblGainLoss AS vyuICGetStorageMeasurementReadingConversion_dblGainLoss, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetStorageMeasurementReadingConversion AS T
     ) AS T1");

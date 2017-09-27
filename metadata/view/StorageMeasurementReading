@@ -894,6 +894,38 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "designer|createAlias": "numbercolumn",
+                                                "format": "0,000.##",
+                                                "itemId": "colUnitsPerFoot",
+                                                "text": "Units per Foot",
+                                                "width": 100
+                                            },
+                                            "configAlternates": {
+                                                "designer|createAlias": "string",
+                                                "format": "string",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "width": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn6",
+                                            "designerId": "6aed8206-3cf4-426a-bbf6-ade375b211d3",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "format",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -903,7 +935,7 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "itemId": "colAirSpaceReading",
-                                                "text": "Air Space Reading",
+                                                "text": "Reading in Foot",
                                                 "width": 120
                                             },
                                             "configAlternates": {

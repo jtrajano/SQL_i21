@@ -73,6 +73,7 @@ namespace iRely.Inventory.Model
         public decimal? dblGainLoss { get; set; }
         public decimal? dblResidualUnit { get; set; }
         public decimal? dblUnitPerFoot { get; set; }
+        public decimal? dblEffectiveDepth { get; set; }
         public int? intSort { get; set; }
 
         private string _unitMeasure;
@@ -188,22 +189,7 @@ namespace iRely.Inventory.Model
                 _subLocation = value;
             }
         }
-        private decimal _effectiveDepth;
-        [NotMapped]
-        public decimal dblEffectiveDepth
-        {
-            get
-            {
-                if (vyuICGetStorageMeasurementReadingConversion != null)
-                    return vyuICGetStorageMeasurementReadingConversion.dblEffectiveDepth ?? 0;
-                else
-                    return _effectiveDepth;
-            }
-            set
-            {
-                _effectiveDepth = value;
-            }
-        }
+
         private string _discountSchedule;
         [NotMapped]
         public string strDiscountSchedule
@@ -249,7 +235,13 @@ namespace iRely.Inventory.Model
         public string strDiscountSchedule { get; set; }
         public string strUnitMeasure { get; set; }
         public int? intUnitMeasureId { get; set; }
-
+        public decimal? dblUnitPerFoot { get; set; }
+        public decimal? dblResidualUnit { get; set; }
+        public decimal? dblOnHand { get; set; }
+        public decimal? dblNewOnHand { get; set; }
+        public decimal? dblValue { get; set; }
+        public decimal? dblVariance { get; set; }
+        public decimal? dblGainLoss { get; set; }
         public tblICStorageMeasurementReadingConversion tblICStorageMeasurementReadingConversion { get; set; }
     }
     

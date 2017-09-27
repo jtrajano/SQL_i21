@@ -1522,6 +1522,7 @@
                                                     "userConfig": {
                                                         "designer|createAlias": "numberfield",
                                                         "fieldLabel": "Pack Factor",
+                                                        "hidden": true,
                                                         "hideTrigger": true,
                                                         "itemId": "txtPackFactor",
                                                         "labelWidth": 105,
@@ -1536,7 +1537,8 @@
                                                         "itemId": "string",
                                                         "labelWidth": "number",
                                                         "layout|flex": "number",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "hidden": "boolean"
                                                     },
                                                     "name": "MyNumberField17",
                                                     "designerId": "51136bd2-8976-42fb-82c4-eac169772bba",
