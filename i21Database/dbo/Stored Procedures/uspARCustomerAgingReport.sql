@@ -222,6 +222,7 @@ IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 	BEGIN
 		DELETE FROM @temp_aging_table WHERE ISNULL(dblCreditLimit, 0) > ISNULL(dblTotalAR, 0)
 									    OR (ISNULL(dblCreditLimit, 0) = 0 AND ISNULL(dblTotalAR, 0) = 0)
+										OR ISNULL(dblCreditLimit, 0) = 0
 	END
 
 SELECT strCompanyName		= COMPANY.strCompanyName
