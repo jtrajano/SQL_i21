@@ -101,6 +101,19 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer')a
 
+UNION
+SELECT CONVERT(VARCHAR(10),dtmTicketDateTime,110) AS dtmDate,
+'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblGrossUnits tranRecQty,
+'' tranAdjNumber,0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty
+FROM 
+ tblICInventoryReceiptItem ir 
+ JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
+JOIN tblICItem i on i.intItemId=ir.intItemId 
+ JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 
+ JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
+WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110))  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110)) and i.intCommodityId= @intCommodityId
+and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+
 )t
 
 SELECT *
