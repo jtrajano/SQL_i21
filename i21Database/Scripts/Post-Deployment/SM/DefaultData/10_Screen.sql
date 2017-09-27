@@ -444,5 +444,52 @@ ELSE
     UPDATE tblSMScreen SET strScreenName = N'Consolidate GL Entries', strModule = N'General Ledger' WHERE strNamespace = 'GeneralLedger.view.Consolidate'
 GO
 
+
+-- Patronage - Start Screen Rename --
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.CustomerStock')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Stock', N'Patronage.view.CustomerStock', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Stock', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.CustomerStock'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.EquityDetail')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Equity', N'Patronage.view.EquityDetail', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Equity', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.EquityDetail'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.PrintLetter')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Mailer', N'Patronage.view.PrintLetter', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Mailer', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.PrintLetter'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.RefundCalculationWorksheet')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Refunds', N'Patronage.view.RefundCalculationWorksheet', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Refunds', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.RefundCalculationWorksheet'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.VolumeDetail')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Volume', N'Patronage.view.VolumeDetail', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Volume', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.VolumeDetail'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.ProcessDividend')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Dividends', N'Patronage.view.ProcessDividend', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Dividends', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.ProcessDividend'
+GO
+
+-- Patronage - End Screen Rename --
+
+
 PRINT N'END INSERT DEFAULT SCREEN'
 GO
