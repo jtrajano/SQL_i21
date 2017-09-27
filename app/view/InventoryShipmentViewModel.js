@@ -78,6 +78,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 {
                     intSourceType: 3,
                     strSourceType: 'Pick Lot'
+                },
+                {
+                    intSourceType: 4,
+                    strSourceType: 'Delivery Sheet'
                 }
             ],
             fields: [
