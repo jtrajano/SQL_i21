@@ -1460,6 +1460,15 @@ Ext.define('Inventory.view.ItemViewModel', {
             return get('current.strType') !== 'Bundle';
         },
 
+        readOnlyForOtherCharge: function(get){
+            
+            if(get('current.strType') === 'Other Charge'){
+                return true;
+            } else {
+                return false;
+            }
+        },
+
         readOnlyForDiscountType: function(get) {
             var itemId = get('current.intItemId');
             var me = this;           

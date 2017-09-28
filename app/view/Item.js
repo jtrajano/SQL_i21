@@ -221,34 +221,6 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intManufacturerId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Manufacturer ID',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strManufacturer',
-                                                                        dataType: 'string',
-                                                                        text: 'Manufacturer',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strContact',
-                                                                        dataType: 'string',
-                                                                        text: 'Contact',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                enableDrillDown: 'true',
-                                                                itemId: 'cboManufacturer',
-                                                                fieldLabel: 'Manufacturer',
-                                                                displayField: 'strManufacturer',
-                                                                valueField: 'intManufacturerId'
-                                                            },
-                                                            {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboStatus',
                                                                 fieldLabel: 'Status',
@@ -292,73 +264,6 @@ Ext.define('Inventory.view.Item', {
                                                                 valueField: 'intCommodityId'
                                                             },
                                                             {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboLotTracking',
-                                                                fieldLabel: 'Lot Tracking',
-                                                                displayField: 'strLotTracking',
-                                                                valueField: 'strLotTracking'
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkLotWeightsRequired',
-                                                                hideEmptyLabel: false,
-                                                                boxLabel: 'Lot Weights Required',
-                                                                checked: true
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkUseWeighScales',
-                                                                hideEmptyLabel: false,
-                                                                boxLabel: 'Use Weigh Scales'
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intBrandId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Brand ID',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strBrandCode',
-                                                                        dataType: 'string',
-                                                                        text: 'Brand Code',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strBrandName',
-                                                                        dataType: 'string',
-                                                                        text: 'Brand Name',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                enableDrillDown: 'true',
-                                                                itemId: 'cboBrand',
-                                                                fieldLabel: 'Brand',
-                                                                labelWidth: 116,
-                                                                displayField: 'strBrandCode',
-                                                                valueField: 'intBrandId'
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtModelNo',
-                                                                fieldLabel: 'Model No',
-                                                                labelWidth: 116,
-                                                                enforceMaxLength: true,
-                                                                maxLength: 50
-                                                            },
-                                                            {
                                                                 xtype: 'gridcombobox',
                                                                 columns: [
                                                                     {
@@ -396,10 +301,33 @@ Ext.define('Inventory.view.Item', {
                                                                 enableDrillDown: 'true',
                                                                 itemId: 'cboCategory',
                                                                 fieldLabel: 'Category',
-                                                                labelWidth: 116,
                                                                 displayField: 'strCategoryCode',
                                                                 valueField: 'intCategoryId'
                                                             },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboLotTracking',
+                                                                fieldLabel: 'Lot Tracking',
+                                                                displayField: 'strLotTracking',
+                                                                valueField: 'strLotTracking'
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkLotWeightsRequired',
+                                                                hideEmptyLabel: false,
+                                                                boxLabel: 'Lot Weights Required',
+                                                                checked: true
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 1,
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
                                                                 xtype: 'combobox',
                                                                 columns: [
@@ -424,15 +352,82 @@ Ext.define('Inventory.view.Item', {
                                                                 ],
                                                                 itemId: 'cboTracking',
                                                                 fieldLabel: 'Inv. Valuation',
-                                                                labelWidth: 116,
                                                                 displayField: 'strDescription',
                                                                 valueField: 'strDescription'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intBrandId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Brand ID',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strBrandCode',
+                                                                        dataType: 'string',
+                                                                        text: 'Brand Code',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strBrandName',
+                                                                        dataType: 'string',
+                                                                        text: 'Brand Name',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                enableDrillDown: 'true',
+                                                                itemId: 'cboBrand',
+                                                                fieldLabel: 'Brand',
+                                                                displayField: 'strBrandCode',
+                                                                valueField: 'intBrandId'
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtModelNo',
+                                                                fieldLabel: 'Model No',
+                                                                enforceMaxLength: true,
+                                                                maxLength: 50
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intManufacturerId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Manufacturer ID',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strManufacturer',
+                                                                        dataType: 'string',
+                                                                        text: 'Manufacturer',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strContact',
+                                                                        dataType: 'string',
+                                                                        text: 'Contact',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                enableDrillDown: 'true',
+                                                                itemId: 'cboManufacturer',
+                                                                fieldLabel: 'Manufacturer',
+                                                                displayField: 'strManufacturer',
+                                                                valueField: 'intManufacturerId'
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkUseWeighScales',
+                                                                hideEmptyLabel: false,
+                                                                boxLabel: 'Use Weigh Scales'
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
                                                                 itemId: 'chkIsBasket',
                                                                 hideEmptyLabel: false,
-                                                                labelWidth: 116,
                                                                 boxLabel: 'Is Basket'
                                                             }
                                                         ]

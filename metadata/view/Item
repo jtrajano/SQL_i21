@@ -657,72 +657,6 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intManufacturerId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Manufacturer ID',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strManufacturer',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Manufacturer',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strContact',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Contact',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strManufacturer",
-                                                        "enableDrillDown": "true",
-                                                        "fieldLabel": "Manufacturer",
-                                                        "itemId": "cboManufacturer",
-                                                        "layout|flex": null,
-                                                        "tabIndex": null,
-                                                        "valueField": "intManufacturerId"
-                                                    },
-                                                    "configAlternates": {
-                                                        "columns": "array",
-                                                        "designer|createAlias": "string",
-                                                        "displayField": "datafield",
-                                                        "enableDrillDown": "string",
-                                                        "fieldLabel": "string",
-                                                        "itemId": "string",
-                                                        "layout|flex": "number",
-                                                        "tabIndex": "number",
-                                                        "valueField": "datafield",
-                                                        "scrollable": "boolean"
-                                                    },
-                                                    "name": "MyComboBox3",
-                                                    "designerId": "34f0af06-4236-4a61-b532-dbe6d49190d5",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "enableDrillDown",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
                                                         "displayField": "strStatus",
                                                         "fieldLabel": "Status",
                                                         "itemId": "cboStatus",
@@ -824,6 +758,90 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCategoryId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Category ID',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strCategoryCode',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Category Code',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "    {",
+                                                            "\t\tdataIndex: 'strInventoryType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "    {",
+                                                            "        dataIndex: 'tblICCategoryAccounts',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'tblICCategoryUOMs',",
+                                                            "        hidden: true",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strCategoryCode",
+                                                        "enableDrillDown": "true",
+                                                        "fieldLabel": "Category",
+                                                        "itemId": "cboCategory",
+                                                        "labelAlign": null,
+                                                        "layout|flex": null,
+                                                        "margin": null,
+                                                        "tabIndex": null,
+                                                        "valueField": "intCategoryId"
+                                                    },
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "designer|createAlias": "string",
+                                                        "displayField": "datafield",
+                                                        "enableDrillDown": "string",
+                                                        "fieldLabel": "string",
+                                                        "itemId": "string",
+                                                        "labelAlign": "string",
+                                                        "labelWidth": "number",
+                                                        "layout|flex": "number",
+                                                        "margin": "auto",
+                                                        "tabIndex": "number",
+                                                        "valueField": "datafield",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyComboBox2",
+                                                    "designerId": "0be85a42-0f81-4938-9bee-c8098f645684",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
                                                         "displayField": "strLotTracking",
                                                         "fieldLabel": "Lot Tracking",
                                                         "itemId": "cboLotTracking",
@@ -870,32 +888,6 @@
                                                     },
                                                     "name": "MyCheckbox42",
                                                     "designerId": "c9a66a70-1c4e-4f89-bdd2-ef7ae627c91c"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": "Use Weigh Scales",
-                                                        "designer|createAlias": "checkboxfield",
-                                                        "hideEmptyLabel": false,
-                                                        "itemId": "chkUseWeighScales",
-                                                        "layout|flex": null
-                                                    },
-                                                    "configAlternates": {
-                                                        "boxLabel": "string",
-                                                        "designer|createAlias": "string",
-                                                        "fieldLabel": "string",
-                                                        "itemId": "string",
-                                                        "layout|flex": "number",
-                                                        "hideEmptyLabel": "boolean",
-                                                        "scrollable": "boolean"
-                                                    },
-                                                    "name": "MyCheckbox43",
-                                                    "designerId": "612c3330-9f14-4c94-8e45-bc45ff6b7e9c"
                                                 }
                                             ]
                                         },
@@ -936,6 +928,68 @@
                                                     "userConfig": {
                                                         "columns": [
                                                             "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intCategoryId',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Category ID',",
+                                                            "        hidden: true",
+                                                            "        },",
+                                                            "        {",
+                                                            "        dataIndex: 'strCategoryCode',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Category Code',",
+                                                            "        flex: 1",
+                                                            "        },",
+                                                            "        {",
+                                                            "        dataIndex: 'strDescription',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Description',",
+                                                            "        flex: 1",
+                                                            "        }",
+                                                            "]"
+                                                        ],
+                                                        "displayField": "strDescription",
+                                                        "fieldLabel": "Inv. Valuation",
+                                                        "itemId": "cboTracking",
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "margin": null,
+                                                        "tabIndex": null,
+                                                        "valueField": "strDescription"
+                                                    },
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "displayField": "datafield",
+                                                        "fieldLabel": "string",
+                                                        "itemId": "string",
+                                                        "labelWidth": "number",
+                                                        "layout|flex": "number",
+                                                        "layout|margins": "string",
+                                                        "margin": "auto",
+                                                        "tabIndex": "number",
+                                                        "valueField": "datafield",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyComboBox7",
+                                                    "designerId": "8fbc06ee-4a99-4463-a83f-f3bdb93d70eb",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
                                                             "\t{",
                                                             "\t\tdataIndex: 'intBrandId',",
                                                             "\t\tdataType: 'numeric',",
@@ -961,7 +1015,6 @@
                                                         "enableDrillDown": "true",
                                                         "fieldLabel": "Brand",
                                                         "itemId": "cboBrand",
-                                                        "labelWidth": 116,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "margin": null,
@@ -1009,7 +1062,6 @@
                                                         "enforceMaxLength": true,
                                                         "fieldLabel": "Model No",
                                                         "itemId": "txtModelNo",
-                                                        "labelWidth": 116,
                                                         "layout|flex": null,
                                                         "margin": null,
                                                         "maxLength": 50,
@@ -1040,49 +1092,33 @@
                                                         "columns": [
                                                             "[",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'intCategoryId',",
+                                                            "\t\tdataIndex: 'intManufacturerId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Category ID',",
+                                                            "\t\ttext: 'Manufacturer ID',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'strCategoryCode',",
+                                                            "\t\tdataIndex: 'strManufacturer',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Category Code',",
+                                                            "\t\ttext: 'Manufacturer',",
                                                             "\t\tflex: 1",
                                                             "\t},",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataIndex: 'strContact',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
+                                                            "\t\ttext: 'Contact',",
                                                             "\t\tflex: 1",
-                                                            "\t},",
-                                                            "    {",
-                                                            "\t\tdataIndex: 'strInventoryType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "    {",
-                                                            "        dataIndex: 'tblICCategoryAccounts',",
-                                                            "        hidden: true",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'tblICCategoryUOMs',",
-                                                            "        hidden: true",
-                                                            "    }",
+                                                            "\t}",
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strCategoryCode",
+                                                        "displayField": "strManufacturer",
                                                         "enableDrillDown": "true",
-                                                        "fieldLabel": "Category",
-                                                        "itemId": "cboCategory",
-                                                        "labelAlign": null,
-                                                        "labelWidth": 116,
+                                                        "fieldLabel": "Manufacturer",
+                                                        "itemId": "cboManufacturer",
                                                         "layout|flex": null,
-                                                        "margin": null,
                                                         "tabIndex": null,
-                                                        "valueField": "intCategoryId"
+                                                        "valueField": "intManufacturerId"
                                                     },
                                                     "configAlternates": {
                                                         "columns": "array",
@@ -1091,16 +1127,13 @@
                                                         "enableDrillDown": "string",
                                                         "fieldLabel": "string",
                                                         "itemId": "string",
-                                                        "labelAlign": "string",
-                                                        "labelWidth": "number",
                                                         "layout|flex": "number",
-                                                        "margin": "auto",
                                                         "tabIndex": "number",
                                                         "valueField": "datafield",
                                                         "scrollable": "boolean"
                                                     },
-                                                    "name": "MyComboBox2",
-                                                    "designerId": "0be85a42-0f81-4938-9bee-c8098f645684",
+                                                    "name": "MyComboBox3",
+                                                    "designerId": "34f0af06-4236-4a61-b532-dbe6d49190d5",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1115,67 +1148,30 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.ComboBox",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "    {",
-                                                            "        dataIndex: 'intCategoryId',",
-                                                            "        dataType: 'numeric',",
-                                                            "        text: 'Category ID',",
-                                                            "        hidden: true",
-                                                            "        },",
-                                                            "        {",
-                                                            "        dataIndex: 'strCategoryCode',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Category Code',",
-                                                            "        flex: 1",
-                                                            "        },",
-                                                            "        {",
-                                                            "        dataIndex: 'strDescription',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Description',",
-                                                            "        flex: 1",
-                                                            "        }",
-                                                            "]"
-                                                        ],
-                                                        "displayField": "strDescription",
-                                                        "fieldLabel": "Inv. Valuation",
-                                                        "itemId": "cboTracking",
-                                                        "labelWidth": 116,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "margin": null,
-                                                        "tabIndex": null,
-                                                        "valueField": "strDescription"
+                                                        "boxLabel": "Use Weigh Scales",
+                                                        "designer|createAlias": "checkboxfield",
+                                                        "hideEmptyLabel": false,
+                                                        "itemId": "chkUseWeighScales",
+                                                        "layout|flex": null
                                                     },
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "displayField": "datafield",
+                                                        "boxLabel": "string",
+                                                        "designer|createAlias": "string",
                                                         "fieldLabel": "string",
                                                         "itemId": "string",
-                                                        "labelWidth": "number",
                                                         "layout|flex": "number",
-                                                        "layout|margins": "string",
-                                                        "margin": "auto",
-                                                        "tabIndex": "number",
-                                                        "valueField": "datafield",
+                                                        "hideEmptyLabel": "boolean",
                                                         "scrollable": "boolean"
                                                     },
-                                                    "name": "MyComboBox7",
-                                                    "designerId": "8fbc06ee-4a99-4463-a83f-f3bdb93d70eb",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox43",
+                                                    "designerId": "612c3330-9f14-4c94-8e45-bc45ff6b7e9c"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Checkbox",
@@ -1188,7 +1184,6 @@
                                                         "boxLabel": "Is Basket",
                                                         "hideEmptyLabel": false,
                                                         "itemId": "chkIsBasket",
-                                                        "labelWidth": 116,
                                                         "layout|flex": null
                                                     },
                                                     "configAlternates": {

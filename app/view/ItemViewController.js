@@ -22,7 +22,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             txtModelNo: {
                 value: '{current.strModelNo}',
-                hidden: '{HideDisableForComment}'
+                hidden: '{HideDisableForComment}',
+                readOnly: '{readOnlyForOtherCharge}'
             },
             cboType: {
                 value: '{current.strType}',
@@ -37,12 +38,14 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strManufacturer}',
                 origValueField: 'intManufacturerId',
                 store: '{manufacturer}',
+                readOnly: '{readOnlyForOtherCharge}',
                 hidden: '{HideDisableForComment}'
             },
             cboBrand: {
                 value: '{current.strBrand}',
                 origValueField: 'intBrandId',
                 store: '{brand}',
+                readOnly: '{readOnlyForOtherCharge}',
                 hidden: '{HideDisableForComment}'
             },
             cboStatus: {
@@ -83,13 +86,18 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             chkUseWeighScales: {
                 value: '{current.ysnUseWeighScales}',
+                readOnly: '{readOnlyForOtherCharge}',
                 hidden: '{HideDisableForComment}'
             },
             chkLotWeightsRequired: {
                 value: '{current.ysnLotWeightsRequired}',
+                readOnly: '{readOnlyForOtherCharge}',
                 hidden: '{!isLotTracked}'
             },
-            chkUseWeighScales: '{current.ysnUseWeighScales}',
+            chkUseWeighScales: { 
+                value: '{current.ysnUseWeighScales}',
+                readOnly: '{readOnlyForOtherCharge}'
+            },
 
             cfgStock: {
                 hidden: '{pgeStockHide}'
@@ -166,11 +174,18 @@ Ext.define('Inventory.view.ItemViewController', {
                 //         }]
                 //     }
                 // },
-                colDetailShortUPC: 'strUpcCode',
-                colDetailUpcCode: {
-                    dataIndex: 'strLongUPCCode'
+                colDetailShortUPC: {
+                    dataIndex: 'strUpcCode',
+                    hidden: '{readOnlyForOtherCharge}'
                 },
-                colStockUnit: 'ysnStockUnit',
+                colDetailUpcCode: {
+                    dataIndex: 'strLongUPCCode',
+                    hidden: '{readOnlyForOtherCharge}'
+                },
+                colStockUnit: {
+                    dataIndex: 'ysnStockUnit',
+                    hidden: '{readOnlyForOtherCharge}'
+                },
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: {
                     disabled: '{readOnlyOnBundleItems}',
@@ -208,7 +223,10 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colDetailMaxQty: 'dblMaxQty',
+                colDetailMaxQty: {
+                    dataIndex: 'dblMaxQty',
+                    hidden: '{readOnlyForOtherCharge}'
+                }
             },
 
             btnLoadUOM: {
