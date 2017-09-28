@@ -448,6 +448,46 @@ BEGIN
 		ROLLBACK TRAN @TransactionName
 	END CATCH
 
+	-- Actual Costing
+	IF (ISNULL(@strActualCostId, '') <> '')
+	BEGIN TRY
+		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveActual
+			@dtmDate 
+			,@intItemId 
+			,@intItemLocationId 
+			,@intSubLocationId 
+			,@intStorageLocationId 
+			,@intItemUOMId 
+			,@dblQty 
+			,@intCostUOMId 
+			,@dblNewCost 
+			,@dblNewValue 
+			,@intTransactionId 
+			,@intTransactionDetailId 
+			,@strTransactionId 
+			,@intSourceTransactionId 
+			,@intSourceTransactionDetailId 
+			,@strSourceTransactionId
+			,@strBatchId 
+			,@intTransactionTypeId 
+			,@intEntityUserSecurityId 
+			,@intRelatedInventoryTransactionId 
+			,@TransactionFormName 
+			,@intFobPointId 
+			,@intInTransitSourceLocationId 
+			,@strActualCostId 
+	END TRY
+	BEGIN CATCH
+		-- Get the error details. 
+		SELECT 
+			@ErrorMessage = ERROR_MESSAGE()
+			,@ReturnValue = ERROR_NUMBER()
+			,@ErrorSeverity = ERROR_SEVERITY()
+			,@ErrorState = XACT_STATE()
+
+		-- Rollback to the last save point. 
+		ROLLBACK TRAN @TransactionName
+	END CATCH
 
 	---- FIFO
 	--IF (@CostingMethod = @FIFO) AND (@strActualCostId IS NULL)

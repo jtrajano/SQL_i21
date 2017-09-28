@@ -5704,6 +5704,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveActual.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
