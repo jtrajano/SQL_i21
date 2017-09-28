@@ -271,10 +271,12 @@ BEGIN
 			RETURN 1
 		END TRY
 		BEGIN CATCH
+		
+			ROLLBACK TRANSACTION
+
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strItemCode,'SQL Error - ' + ERROR_MESSAGE())
 			SET @ysnHasError = 1
-			ROLLBACK TRANSACTION
 			RETURN 0
 		END CATCH
 		

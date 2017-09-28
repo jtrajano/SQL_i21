@@ -226,9 +226,11 @@ BEGIN
 	--Cash Customer
 	IF (@strARCashCustomer != '')
 		BEGIN 
-			SELECT @intARCashCustomer = intEntityId  
-			FROM tblEMEntity
-			WHERE strName = @strARCashCustomer
+			SELECT @intARCashCustomer = e.intEntityId  
+			FROM tblEMEntity e
+			INNER JOIN tblARCustomer c
+			ON e.intEntityId = c.intEntityId
+			WHERE e.strName = @strARCashCustomer
 			IF (@intARCashCustomer = 0)
 			BEGIN
 				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
@@ -493,10 +495,12 @@ BEGIN
 			RETURN 1
 		END TRY
 		BEGIN CATCH
+		
+			ROLLBACK TRANSACTION
+
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strSiteNumber,'SQL Error - ' + ERROR_MESSAGE())
 			SET @ysnHasError = 1
-			ROLLBACK TRANSACTION
 			RETURN 0
 		END CATCH
 		
