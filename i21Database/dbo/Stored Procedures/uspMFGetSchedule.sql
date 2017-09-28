@@ -10,12 +10,13 @@ DECLARE @dtmCurrentDate DATETIME
 	,@tblMFWorkOrderSchedule ScheduleTable
 	,@ysnAutoPriorityOrderByDemandRatio BIT
 	,@ysnDisplayNewOrderByExpectedDate BIT
-	,@intLocationId int
-	,@ysnCheckCrossContamination bit
+	,@intLocationId INT
+	,@ysnCheckCrossContamination BIT
 	,@intBlendAttributeId INT
 	,@strBlendAttributeValue NVARCHAR(50)
 	,@strCellName NVARCHAR(50)
 	,@strName NVARCHAR(50)
+	,@intMachineId INT
 
 SELECT @intBlendAttributeId = intAttributeId
 FROM tblMFAttribute
@@ -34,21 +35,19 @@ DECLARE @tblMFWorkOrderCC TABLE (
 	,intExecutionOrder INT
 	,intCCFailed INT
 	)
-
 DECLARE @tblMFDisplayNewOrderByExpectedDate ScheduleTable
-
-Declare @tblMFWorkOrderScheduleCC ScheduleTable
+DECLARE @tblMFWorkOrderScheduleCC ScheduleTable
 
 SELECT @dtmCurrentDate = GETDATE()
 
 SELECT @ysnAutoPriorityOrderByDemandRatio = ysnAutoPriorityOrderByDemandRatio
 	,@ysnDisplayNewOrderByExpectedDate = ysnDisplayNewOrderByExpectedDate
-	,@ysnCheckCrossContamination=ysnCheckCrossContamination
+	,@ysnCheckCrossContamination = ysnCheckCrossContamination
 FROM dbo.tblMFCompanyPreference
 
-SELECT @intLocationId =intLocationId 
-FROM dbo.tblMFManufacturingCell 
-WHERE intManufacturingCellId =@intManufacturingCellId 
+SELECT @intLocationId = intLocationId
+FROM dbo.tblMFManufacturingCell
+WHERE intManufacturingCellId = @intManufacturingCellId
 
 IF @dtmFromDate IS NULL
 BEGIN
@@ -81,8 +80,8 @@ BEGIN
 	JOIN dbo.tblMFScheduleCalendar SC ON SC.intCalendarId = S.intCalendarId
 	WHERE intScheduleId = @intScheduleId
 
-	SELECT @intManufacturingCellId = S.intManufacturingCellId,
-			@intLocationId =intLocationId 
+	SELECT @intManufacturingCellId = S.intManufacturingCellId
+		,@intLocationId = intLocationId
 	FROM dbo.tblMFSchedule S
 	WHERE S.intScheduleId = @intScheduleId
 END
@@ -176,7 +175,6 @@ END
 --	JOIN dbo.tblMFRecipeGroup RG on RG.intRecipeGroupId=R.intRecipeGropupId 
 --	WHERE W.intStatusId = 3-- We need to get only Open status orders
 --		AND W.intManufacturingCellId = @intManufacturingCellId
-
 --	INSERT INTO @tblMFWorkOrderCC
 --	 (
 --		intWorkOrderId
@@ -184,7 +182,6 @@ END
 --		,intCCFailed
 --		)
 --	EXEC dbo.uspMFCheckCC @tblMFWorkOrderScheduleCC
-
 --	--SET s.Targetdate = s.ExpectedDate
 --	--	,s.byWhichDate = 1
 --	--	,s.EO = st.EO
@@ -194,7 +191,6 @@ END
 --	--FROM stgischWOScheduleMain s
 --	--JOIN @tblMFWorkOrder st ON st.intRecordId = s.intRecordId
 --END
-
 IF @ysnDisplayNewOrderByExpectedDate = 1
 BEGIN
 	INSERT INTO @tblMFDisplayNewOrderByExpectedDate (
@@ -210,16 +206,16 @@ BEGIN
 	SELECT W.intWorkOrderId
 		,W.intItemId
 		,W.dtmExpectedDate
-		,Isnull(dtmPlannedStartDate,W.dtmExpectedDate)
+		,Isnull(dtmPlannedStartDate, W.dtmExpectedDate)
 		,I.intPackTypeId
 		,(
 			SELECT TOP 1 strItemNo
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
-			JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
+			JOIN dbo.tblICCategory C ON C.intCategoryId = WI.intCategoryId
 			WHERE RI.intRecipeId = R.intRecipeId
 				AND C.strCategoryCode = @strBlendAttributeValue
-				AND RI.intRecipeItemTypeId=1
+				AND RI.intRecipeItemTypeId = 1
 			) AS strWIPItemNo
 		,Row_number() OVER (
 			ORDER BY WS.intSequenceNo DESC
@@ -231,14 +227,15 @@ BEGIN
 	LEFT JOIN dbo.tblMFSchedule S ON S.intScheduleId = @intScheduleId
 	LEFT JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 		AND S.intScheduleId = SL.intScheduleId
-		JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = IsNULL(SL.intStatusId, W.intStatusId)
+	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = IsNULL(SL.intStatusId, W.intStatusId)
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 		AND R.intLocationId = W.intLocationId
 		AND R.ysnActive = 1
 	WHERE W.intStatusId <> 13
 		AND W.intManufacturingCellId = @intManufacturingCellId
 	ORDER BY WS.intSequenceNo DESC
-		,SL.intExecutionOrder, W.dtmExpectedDate 
+		,SL.intExecutionOrder
+		,W.dtmExpectedDate
 
 	DECLARE @intRecordId INT
 		,@intItemId INT
@@ -277,28 +274,28 @@ BEGIN
 			,intExecutionOrder DESC
 
 		IF @intExecutionOrder IS NULL
-			SELECT Top 1 @intExecutionOrder = intExecutionOrder
+			SELECT TOP 1 @intExecutionOrder = intExecutionOrder
 			FROM @tblMFDisplayNewOrderByExpectedDate
 			WHERE intItemId = @intItemId
 				AND intPackTypeId = @intPackTypeId
-				AND Convert(datetime,Convert(char,dtmPlannedStartDate)) = @dtmExpectedDate
-				AND intRecordId <> @intRecordId
-		ORDER BY dtmPlannedStartDate DESC
-				,intExecutionOrder DESC
-
-		IF @intExecutionOrder IS NULL
-			SELECT Top 1 @intExecutionOrder = intExecutionOrder
-			FROM @tblMFDisplayNewOrderByExpectedDate
-			WHERE intItemId = @intItemId
-				AND Convert(datetime,Convert(char,dtmPlannedStartDate)) = @dtmExpectedDate
+				AND Convert(DATETIME, Convert(CHAR, dtmPlannedStartDate)) = @dtmExpectedDate
 				AND intRecordId <> @intRecordId
 			ORDER BY dtmPlannedStartDate DESC
 				,intExecutionOrder DESC
 
 		IF @intExecutionOrder IS NULL
-			SELECT Top 1 @intExecutionOrder = intExecutionOrder
+			SELECT TOP 1 @intExecutionOrder = intExecutionOrder
 			FROM @tblMFDisplayNewOrderByExpectedDate
-			WHERE Convert(datetime,Convert(char,dtmPlannedStartDate)) <= @dtmExpectedDate
+			WHERE intItemId = @intItemId
+				AND Convert(DATETIME, Convert(CHAR, dtmPlannedStartDate)) = @dtmExpectedDate
+				AND intRecordId <> @intRecordId
+			ORDER BY dtmPlannedStartDate DESC
+				,intExecutionOrder DESC
+
+		IF @intExecutionOrder IS NULL
+			SELECT TOP 1 @intExecutionOrder = intExecutionOrder
+			FROM @tblMFDisplayNewOrderByExpectedDate
+			WHERE Convert(DATETIME, Convert(CHAR, dtmPlannedStartDate)) <= @dtmExpectedDate
 				AND intRecordId <> @intRecordId
 			ORDER BY dtmPlannedStartDate DESC
 				,intExecutionOrder DESC
@@ -321,15 +318,23 @@ BEGIN
 	END
 END
 
+SELECT @intMachineId = P1.intMachineId
+FROM tblMFMachinePackType P1
+WHERE P1.intPackTypeId IN (
+		SELECT P2.intPackTypeId
+		FROM tblMFManufacturingCellPackType P2
+		WHERE P2.intManufacturingCellId = @intManufacturingCellId
+		)
+
 SELECT C.intManufacturingCellId
 	,C.strCellName
 	,W.intWorkOrderId
 	,Isnull(S.intScheduleId, 0) intScheduleId
 	,W.strWorkOrderNo
 	,W.dblQuantity
-	,ISNULL(W.dtmEarliestDate,W.dtmExpectedDate) AS dtmEarliestDate 
+	,ISNULL(W.dtmEarliestDate, W.dtmExpectedDate) AS dtmEarliestDate
 	,W.dtmExpectedDate
-	,ISNULL(W.dtmLatestDate,W.dtmExpectedDate) AS dtmLatestDate
+	,ISNULL(W.dtmLatestDate, W.dtmExpectedDate) AS dtmLatestDate
 	,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
 	,W.dblProducedQuantity
 	,W.strComment AS strWorkOrderComments
@@ -339,10 +344,10 @@ SELECT C.intManufacturingCellId
 		SELECT TOP 1 strItemNo
 		FROM dbo.tblMFRecipeItem RI
 		JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
-		JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = WI.intCategoryId
 		WHERE RI.intRecipeId = R.intRecipeId
 			AND C.strCategoryCode = @strBlendAttributeValue
-			AND RI.intRecipeItemTypeId=1
+			AND RI.intRecipeItemTypeId = 1
 		) AS strWIPItemNo
 	,I.intItemId
 	,I.strItemNo
@@ -370,7 +375,7 @@ SELECT C.intManufacturingCellId
 							WHEN @ysnAutoPriorityOrderByDemandRatio = 1
 								AND W.intStatusId = 3
 								THEN WD.intDemandRatio
-							ELSE ISNULL(SL.intExecutionOrder,9999)
+							ELSE ISNULL(SL.intExecutionOrder, 9999)
 							END
 						,CASE 
 							WHEN @ysnAutoPriorityOrderByDemandRatio = 1
@@ -399,7 +404,11 @@ SELECT C.intManufacturingCellId
 	,SL.strNote
 	,SL.strAdditionalComments
 	--,SL.intNoOfSelectedMachine
-    ,Convert(int,Case When W.intStatusId = 1 Then SL.intNoOfSelectedMachine Else IsNULL(SL.intNoOfSelectedMachine,1) End) AS intNoOfSelectedMachine
+	,Convert(INT, CASE 
+			WHEN W.intStatusId = 1
+				THEN SL.intNoOfSelectedMachine
+			ELSE IsNULL(SL.intNoOfSelectedMachine, 1)
+			END) AS intNoOfSelectedMachine
 	,SL.dtmEarliestStartDate
 	,SL.intPlannedShiftId
 	,SL.ysnFrozen
@@ -415,7 +424,16 @@ SELECT C.intManufacturingCellId
 	,W.ysnIngredientAvailable
 	,CONVERT(BIT, 0) AS ysnEOModified
 	,WD.intDemandRatio
-	,IsNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
+	,IsNULL(SL.intNoOfFlushes, 0) AS intNoOfFlushes
+	,M.dblBatchSize
+	,U1.strUnitMeasure AS strBatchUOM
+	,W.dblQuantity / (
+		CASE 
+			WHEN IsNULL(M.dblBatchSize, 0) = 0
+				THEN 1
+			ELSE M.dblBatchSize
+			END
+		) dblNoofBatches
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
 	AND W.intStatusId <> 13
@@ -436,6 +454,8 @@ JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 LEFT JOIN @tblWorkOrderDemandRatio WD ON W.intWorkOrderId = WD.intWorkOrderId
 LEFT JOIN @tblMFDisplayNewOrderByExpectedDate DN ON W.intWorkOrderId = DN.intWorkOrderId
 LEFT JOIN @tblMFWorkOrderCC CC ON W.intWorkOrderId = CC.intWorkOrderId
+LEFT JOIN tblMFMachine M ON M.intMachineId = @intMachineId
+LEFT JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = M.intBatchSizeUOMId
 ORDER BY CASE 
 		WHEN @ysnDisplayNewOrderByExpectedDate = 1
 			THEN DN.intExecutionOrder
@@ -445,8 +465,8 @@ ORDER BY CASE
 	,CASE 
 		WHEN @ysnCheckCrossContamination = 1
 			AND W.intStatusId = 3
-			THEN CC.intExecutionOrder 
-		ELSE ISNULL(SL.intExecutionOrder,9999)
+			THEN CC.intExecutionOrder
+		ELSE ISNULL(SL.intExecutionOrder, 9999)
 		END
 	,CASE 
 		WHEN @ysnAutoPriorityOrderByDemandRatio = 1
@@ -529,5 +549,5 @@ FROM dbo.tblMFScheduleRule R
 JOIN dbo.tblMFScheduleRuleType RT ON RT.intScheduleRuleTypeId = R.intScheduleRuleTypeId
 LEFT JOIN dbo.tblMFScheduleConstraint SC ON SC.intScheduleRuleId = R.intScheduleRuleId
 	AND SC.intScheduleId = @intScheduleId
-WHERE R.intLocationId = @intLocationId AND R.ysnActive = 1
-	
+WHERE R.intLocationId = @intLocationId
+	AND R.ysnActive = 1
