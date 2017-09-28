@@ -193,16 +193,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FuelType',
                     items: [
                         {
-                            url: 'CRUDScripts/FuelType/AddFuelType.js?v='+version,
-                            title: 'AddFuelType',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FuelType/DeleteFuelType.js?v='+version,
-                            title: 'DeleteFuelType',
+                            url: 'CRUDScripts/FuelType/AddAndDeleteFuelType.js?v='+version,
+                            title: 'AddAndDeleteFuelType',
                             preload: [
                                 functionalTest,
                                 commonIC
