@@ -6,6 +6,7 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
         .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'DELETE LB')
         .waitUntilLoaded()
         .continueIf({
@@ -28,7 +29,10 @@ StartTest (function (t) {
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
                     .clickButton('Close')
+                    .waitUntilLoaded()
 
+                    .clickMenuScreen('Inventory UOM','Screen')
+                    .waitUntilLoaded()
                     .doubleClickSearchRowValue('DELETE LB', 'strUnitMeasure', 1)
                     .waitUntilLoaded('')
                     .clickButton('Delete')
@@ -53,8 +57,10 @@ StartTest (function (t) {
         /*====================================== Scenario 2: Delete Used Inventory UOM ======================================*/
         //region
         .displayText('===== Scenario 2: Delete Used Inventory UOM  =====')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .doubleClickSearchRowValue('KG', 'strUnitMeasure', 1)
-        .waitUntilLoaded('icinventoryuom')
+        .waitUntilLoaded('')
         .clickButton('Delete')
         .waitUntilLoaded()
         .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
@@ -74,6 +80,8 @@ StartTest (function (t) {
         /*====================================== Scenario 3: Delete a single Inventory UOM conversion record. ======================================*/
         //region
         .displayText('===== Scenario 3: Delete a single Inventory UOM conversion record. =====')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded('')
         .filterGridRecords('Search', 'FilterGrid', 'Delete 10LB Bag')
         .waitUntilLoaded()
         .continueIf({
@@ -101,16 +109,19 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
-                    .waitUntilLoaded()
+                
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
         //endregion
 
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('Delete 10LB Bag', 'strUnitMeasure', 1)
         .waitUntilLoaded('')
         .selectGridRowNumber('Conversion',[1])
@@ -120,19 +131,24 @@ StartTest (function (t) {
         .clickButton('Save')
         .waitUntilLoaded()
         .clickButton('Close')
+
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded('')
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
         .waitUntilLoaded('')
-        .verifyData('Text Field','Symbol','Test_10 LB bag - Updated')
         .verifyGridData('Conversion', 1, 'colConversionStockUOM', 'KG')
         .verifyGridData('Conversion', 1, 'colConversionToStockUOM', '4.53592')
         .verifyGridData('Conversion', 2, 'colConversionStockUOM', '50 lb bag')
         .clickButton('Close')
         .displayText('===== Scenario 3: Delete a single Inventory UOM conversion record Done =====')
 
+        
         .displayText('===== Scenario 4: Delete multiple Inventory UOM conversion record. =====')
-        .doubleClickSearchRowValue('Test_10 LB bag - Updated', 'strUnitMeasure', 1)
-        .waitUntilLoaded('icinventoryuom')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded('')
+        .doubleClickSearchRowValue('Delete 10LB Bag', 'strUnitMeasure', 1)
+        .waitUntilLoaded('')
         .selectGridRowNumber('Conversion',[1,2])
         .clickButton('DeleteConversion')
         .waitUntilLoaded()
@@ -140,9 +156,12 @@ StartTest (function (t) {
         .clickButton('Save')
         .waitUntilLoaded()
         .clickButton('Close')
+
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded('')
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
-        .waitUntilLoaded('icinventoryuom')
+        .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded()
         .clearTextFilter('FilterGrid')
