@@ -5690,6 +5690,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertItemRecord.sql" />
     <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
     <Build Include="dbo\Views\vyuAPOriginPayables.sql" />
+    <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
