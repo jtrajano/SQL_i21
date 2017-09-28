@@ -34,9 +34,6 @@ DECLARE @ErrorMessage AS NVARCHAR(4000)
 IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
 	DROP TABLE #tmpRevalueProducedItems  
 
---IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevaluedInventoryTransaction')) 
---	DROP TABLE #tmpRevaluedInventoryTransaction
-
 -- Create the temp table if it does not exists. 
 BEGIN 
 	CREATE TABLE #tmpRevalueProducedItems (
@@ -50,7 +47,6 @@ BEGIN
 		,[dblNewCost] NUMERIC(38,20) NULL DEFAULT 0				-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
 		,[dblNewValue] NUMERIC(38,20) NULL						-- 
 		,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
-		--,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 		,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
 		,[intTransactionDetailId] INT NULL						-- Link id to the transaction detail. 
 		,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
@@ -71,8 +67,6 @@ END
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1
-		--,@INVENTORY_WRITE_OFF_SOLD AS INT = 2
-		--,@INVENTORY_REVALUE_SOLD AS INT = 3
 		,@INVENTORY_COST_VARIANCE AS INT = 1
 		,@INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35
 
@@ -86,7 +80,7 @@ DECLARE @intId AS INT
 		,@dtmDate AS DATETIME
 		,@dblQty AS NUMERIC(38,20)
 		,@intCostUOMId AS INT 
-		,@dblVoucherCost AS NUMERIC(38,20)
+		,@dblNewCost AS NUMERIC(38,20)
 		,@dblNewValue AS NUMERIC(38,20)
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT
@@ -96,7 +90,6 @@ DECLARE @intId AS INT
 		,@strSourceTransactionId AS NVARCHAR(40) 
 		,@intTransactionTypeId AS INT 
 		,@intCurrencyId AS INT 
-		--,@dblExchangeRate AS NUMERIC(38,20)
 		,@strActualCostId NVARCHAR(50)
 		,@intRelatedInventoryTransactionId INT 
 		,@intLotId AS INT 
@@ -136,7 +129,6 @@ BEGIN
 			,[dblVoucherCost] 
 			,[dblNewValue]
 			,[intCurrencyId] 
-			--,[dblExchangeRate] 
 			,[intTransactionId]
 			,[intTransactionDetailId] 
 			,[strTransactionId] 
@@ -164,7 +156,6 @@ BEGIN
 			,[dblVoucherCost] 
 			,[dblNewValue]
 			,[intCurrencyId] 
-			--,[dblExchangeRate] 
 			,[intTransactionId]
 			,[intTransactionDetailId] 
 			,[strTransactionId] 
@@ -216,7 +207,6 @@ SELECT  intId
 		,strSourceTransactionId
 		,intTransactionTypeId
 		,intCurrencyId
-		--,dblExchangeRate
 		,strActualCostId
 		,intRelatedInventoryTransactionId
 		,intLotId
@@ -237,7 +227,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@dtmDate
 	,@dblQty
 	,@intCostUOMId
-	,@dblVoucherCost
+	,@dblNewCost
 	,@dblNewValue
 	,@intTransactionId
 	,@intTransactionDetailId
@@ -247,7 +237,6 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@strSourceTransactionId
 	,@intTransactionTypeId
 	,@intCurrencyId
-	--,@dblExchangeRate
 	,@strActualCostId
 	,@intRelatedInventoryTransactionId
 	,@intLotId
@@ -301,32 +290,30 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST) AND (@strActualCostId IS NULL)
 	BEGIN TRY
-		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnAverageCosting
+		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveAvg
 			@dtmDate
-			,@intItemId
-			,@intItemLocationId
+			,@intItemId 
+			,@intItemLocationId 
 			,@intSubLocationId
-			,@intStorageLocationId
+			,@intStorageLocationId 
 			,@intItemUOMId
 			,@dblQty
-			,@intCostUOMId			
-			,@dblVoucherCost 
-			,@dblNewValue
-			,@intTransactionId
-			,@intTransactionDetailId
-			,@strTransactionId
-			,@intSourceTransactionId
-			,@intSourceTransactionDetailId
-			,@strSourceTransactionId
-			,@strBatchId
-			,@intTransactionTypeId
-			,@intCurrencyId
-			--,@dblExchangeRate
-			,@intEntityUserSecurityId
-			,@intRelatedInventoryTransactionId
-			,@TransactionFormName
-			,@intFobPointId
-			,@intInTransitSourceLocationId
+			,@intCostUOMId 
+			,@dblNewCost
+			,@dblNewValue 
+			,@intTransactionId 
+			,@intTransactionDetailId 
+			,@strTransactionId 
+			,@intSourceTransactionId 
+			,@intSourceTransactionDetailId 
+			,@strSourceTransactionId 
+			,@strBatchId 
+			,@intTransactionTypeId 
+			,@intEntityUserSecurityId 
+			,@intRelatedInventoryTransactionId 
+			,@TransactionFormName 
+			,@intFobPointId 
+			,@intInTransitSourceLocationId 
 
 	END TRY
 	BEGIN CATCH
@@ -341,175 +328,175 @@ BEGIN
 		ROLLBACK TRAN @TransactionName
 	END CATCH
 
-	-- FIFO
-	IF (@CostingMethod = @FIFO) AND (@strActualCostId IS NULL)
-	BEGIN TRY
-		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnFIFOCosting
-			@dtmDate
-			,@intItemId
-			,@intItemLocationId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@intItemUOMId
-			,@dblQty			
-			,@intCostUOMId
-			,@dblVoucherCost 
-			,@dblNewValue
-			,@intTransactionId
-			,@intTransactionDetailId
-			,@strTransactionId
-			,@intSourceTransactionId
-			,@intSourceTransactionDetailId
-			,@strSourceTransactionId
-			,@strBatchId
-			,@intTransactionTypeId
-			,@intCurrencyId
-			--,@dblExchangeRate			
-			,@intEntityUserSecurityId
-			,@intRelatedInventoryTransactionId
-			,@TransactionFormName
-			,@intFobPointId
-			,@intInTransitSourceLocationId
-	END TRY
-	BEGIN CATCH
-		-- Get the error details. 
-		SELECT 
-			@ErrorMessage = ERROR_MESSAGE()
-			,@ReturnValue = ERROR_NUMBER()
-			,@ErrorSeverity = ERROR_SEVERITY()
-			,@ErrorState = XACT_STATE()
+	---- FIFO
+	--IF (@CostingMethod = @FIFO) AND (@strActualCostId IS NULL)
+	--BEGIN TRY
+	--	EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnFIFOCosting
+	--		@dtmDate
+	--		,@intItemId
+	--		,@intItemLocationId
+	--		,@intSubLocationId
+	--		,@intStorageLocationId
+	--		,@intItemUOMId
+	--		,@dblQty			
+	--		,@intCostUOMId
+	--		,@dblNewCost 
+	--		,@dblNewValue
+	--		,@intTransactionId
+	--		,@intTransactionDetailId
+	--		,@strTransactionId
+	--		,@intSourceTransactionId
+	--		,@intSourceTransactionDetailId
+	--		,@strSourceTransactionId
+	--		,@strBatchId
+	--		,@intTransactionTypeId
+	--		,@intCurrencyId
+	--		--,@dblExchangeRate			
+	--		,@intEntityUserSecurityId
+	--		,@intRelatedInventoryTransactionId
+	--		,@TransactionFormName
+	--		,@intFobPointId
+	--		,@intInTransitSourceLocationId
+	--END TRY
+	--BEGIN CATCH
+	--	-- Get the error details. 
+	--	SELECT 
+	--		@ErrorMessage = ERROR_MESSAGE()
+	--		,@ReturnValue = ERROR_NUMBER()
+	--		,@ErrorSeverity = ERROR_SEVERITY()
+	--		,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
-	END CATCH
+	--	-- Rollback to the last save point. 
+	--	ROLLBACK TRAN @TransactionName
+	--END CATCH
 
-	-- LIFO
-	IF (@CostingMethod = @LIFO) AND (@strActualCostId IS NULL)
-	BEGIN TRY
-		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnLIFOCosting
-			@dtmDate
-			,@intItemId
-			,@intItemLocationId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@intItemUOMId
-			,@dblQty		
-			,@intCostUOMId	
-			,@dblVoucherCost 
-			,@dblNewValue
-			,@intTransactionId
-			,@intTransactionDetailId
-			,@strTransactionId
-			,@intSourceTransactionId
-			,@intSourceTransactionDetailId
-			,@strSourceTransactionId
-			,@strBatchId
-			,@intTransactionTypeId
-			,@intCurrencyId
-			--,@dblExchangeRate			
-			,@intEntityUserSecurityId
-			,@intRelatedInventoryTransactionId
-			,@TransactionFormName
-			,@intFobPointId
-			,@intInTransitSourceLocationId
-	END TRY
-	BEGIN CATCH
-		-- Get the error details. 
-		SELECT 
-			@ErrorMessage = ERROR_MESSAGE()
-			,@ReturnValue = ERROR_NUMBER()
-			,@ErrorSeverity = ERROR_SEVERITY()
-			,@ErrorState = XACT_STATE()
+	---- LIFO
+	--IF (@CostingMethod = @LIFO) AND (@strActualCostId IS NULL)
+	--BEGIN TRY
+	--	EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnLIFOCosting
+	--		@dtmDate
+	--		,@intItemId
+	--		,@intItemLocationId
+	--		,@intSubLocationId
+	--		,@intStorageLocationId
+	--		,@intItemUOMId
+	--		,@dblQty		
+	--		,@intCostUOMId	
+	--		,@dblNewCost 
+	--		,@dblNewValue
+	--		,@intTransactionId
+	--		,@intTransactionDetailId
+	--		,@strTransactionId
+	--		,@intSourceTransactionId
+	--		,@intSourceTransactionDetailId
+	--		,@strSourceTransactionId
+	--		,@strBatchId
+	--		,@intTransactionTypeId
+	--		,@intCurrencyId
+	--		--,@dblExchangeRate			
+	--		,@intEntityUserSecurityId
+	--		,@intRelatedInventoryTransactionId
+	--		,@TransactionFormName
+	--		,@intFobPointId
+	--		,@intInTransitSourceLocationId
+	--END TRY
+	--BEGIN CATCH
+	--	-- Get the error details. 
+	--	SELECT 
+	--		@ErrorMessage = ERROR_MESSAGE()
+	--		,@ReturnValue = ERROR_NUMBER()
+	--		,@ErrorSeverity = ERROR_SEVERITY()
+	--		,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
-	END CATCH
+	--	-- Rollback to the last save point. 
+	--	ROLLBACK TRAN @TransactionName
+	--END CATCH
 
-	-- Lot Costing
-	IF (@CostingMethod = @LOTCOST) AND (@strActualCostId IS NULL)
-	BEGIN TRY
-		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnLotCosting
-			@dtmDate
-			,@intItemId
-			,@intItemLocationId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@intItemUOMId
-			,@dblQty
-			,@intCostUOMId			
-			,@dblVoucherCost 
-			,@dblNewValue
-			,@intTransactionId
-			,@intTransactionDetailId
-			,@strTransactionId
-			,@intSourceTransactionId
-			,@intSourceTransactionDetailId
-			,@strSourceTransactionId
-			,@strBatchId
-			,@intTransactionTypeId
-			,@intCurrencyId
-			--,@dblExchangeRate			
-			,@intEntityUserSecurityId
-			,@intRelatedInventoryTransactionId
-			,@intLotId
-			,@TransactionFormName
-			,@intFobPointId
-			,@intInTransitSourceLocationId
-	END TRY
-	BEGIN CATCH
-		-- Get the error details. 
-		SELECT 
-			@ErrorMessage = ERROR_MESSAGE()
-			,@ReturnValue = ERROR_NUMBER()
-			,@ErrorSeverity = ERROR_SEVERITY()
-			,@ErrorState = XACT_STATE()
+	---- Lot Costing
+	--IF (@CostingMethod = @LOTCOST) AND (@strActualCostId IS NULL)
+	--BEGIN TRY
+	--	EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnLotCosting
+	--		@dtmDate
+	--		,@intItemId
+	--		,@intItemLocationId
+	--		,@intSubLocationId
+	--		,@intStorageLocationId
+	--		,@intItemUOMId
+	--		,@dblQty
+	--		,@intCostUOMId			
+	--		,@dblNewCost 
+	--		,@dblNewValue
+	--		,@intTransactionId
+	--		,@intTransactionDetailId
+	--		,@strTransactionId
+	--		,@intSourceTransactionId
+	--		,@intSourceTransactionDetailId
+	--		,@strSourceTransactionId
+	--		,@strBatchId
+	--		,@intTransactionTypeId
+	--		,@intCurrencyId
+	--		--,@dblExchangeRate			
+	--		,@intEntityUserSecurityId
+	--		,@intRelatedInventoryTransactionId
+	--		,@intLotId
+	--		,@TransactionFormName
+	--		,@intFobPointId
+	--		,@intInTransitSourceLocationId
+	--END TRY
+	--BEGIN CATCH
+	--	-- Get the error details. 
+	--	SELECT 
+	--		@ErrorMessage = ERROR_MESSAGE()
+	--		,@ReturnValue = ERROR_NUMBER()
+	--		,@ErrorSeverity = ERROR_SEVERITY()
+	--		,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
-	END CATCH
+	--	-- Rollback to the last save point. 
+	--	ROLLBACK TRAN @TransactionName
+	--END CATCH
 
-	-- Actual Costing
-	IF (ISNULL(@strActualCostId, '') <> '')
-	BEGIN TRY
-		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnActualCosting
-			@dtmDate
-			,@intItemId
-			,@intItemLocationId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@intItemUOMId
-			,@dblQty
-			,@intCostUOMId			
-			,@dblVoucherCost 
-			,@dblNewValue
-			,@intTransactionId
-			,@intTransactionDetailId
-			,@strTransactionId
-			,@intSourceTransactionId
-			,@intSourceTransactionDetailId
-			,@strSourceTransactionId
-			,@strBatchId
-			,@intTransactionTypeId
-			,@intCurrencyId
-			--,@dblExchangeRate			
-			,@intEntityUserSecurityId
-			,@strActualCostId
-			,@intRelatedInventoryTransactionId
-			,@TransactionFormName
-			,@intFobPointId
-			,@intInTransitSourceLocationId
-	END TRY
-	BEGIN CATCH
-		-- Get the error details. 
-		SELECT 
-			@ErrorMessage = ERROR_MESSAGE()
-			,@ReturnValue = ERROR_NUMBER()
-			,@ErrorSeverity = ERROR_SEVERITY()
-			,@ErrorState = XACT_STATE()
+	---- Actual Costing
+	--IF (ISNULL(@strActualCostId, '') <> '')
+	--BEGIN TRY
+	--	EXEC @ReturnValue = dbo.uspICPostCostAdjustmentOnActualCosting
+	--		@dtmDate
+	--		,@intItemId
+	--		,@intItemLocationId
+	--		,@intSubLocationId
+	--		,@intStorageLocationId
+	--		,@intItemUOMId
+	--		,@dblQty
+	--		,@intCostUOMId			
+	--		,@dblNewCost 
+	--		,@dblNewValue
+	--		,@intTransactionId
+	--		,@intTransactionDetailId
+	--		,@strTransactionId
+	--		,@intSourceTransactionId
+	--		,@intSourceTransactionDetailId
+	--		,@strSourceTransactionId
+	--		,@strBatchId
+	--		,@intTransactionTypeId
+	--		,@intCurrencyId
+	--		--,@dblExchangeRate			
+	--		,@intEntityUserSecurityId
+	--		,@strActualCostId
+	--		,@intRelatedInventoryTransactionId
+	--		,@TransactionFormName
+	--		,@intFobPointId
+	--		,@intInTransitSourceLocationId
+	--END TRY
+	--BEGIN CATCH
+	--	-- Get the error details. 
+	--	SELECT 
+	--		@ErrorMessage = ERROR_MESSAGE()
+	--		,@ReturnValue = ERROR_NUMBER()
+	--		,@ErrorSeverity = ERROR_SEVERITY()
+	--		,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
-	END CATCH
+	--	-- Rollback to the last save point. 
+	--	ROLLBACK TRAN @TransactionName
+	--END CATCH
 
 	-- If there is an error, do a rollback for that particular cost adjustment, 
 	-- log the error, 
@@ -541,7 +528,7 @@ BEGIN
 		,@dtmDate
 		,@dblQty
 		,@intCostUOMId
-		,@dblVoucherCost
+		,@dblNewCost
 		,@dblNewValue
 		,@intTransactionId
 		,@intTransactionDetailId
@@ -551,7 +538,6 @@ BEGIN
 		,@strSourceTransactionId
 		,@intTransactionTypeId
 		,@intCurrencyId
-		--,@dblExchangeRate
 		,@strActualCostId
 		,@intRelatedInventoryTransactionId
 		,@intLotId
@@ -578,148 +564,147 @@ BEGIN
 	COMMIT TRANSACTION 
 END 
 
------------------------------------------------------------------------------------------------------------------------------
--- Create the Auto Variance
------------------------------------------------------------------------------------------------------------------------------
-BEGIN 
+-------------------------------------------------------------------------------------------------------------------------------
+---- Create the Auto Variance
+-------------------------------------------------------------------------------------------------------------------------------
+--BEGIN 
 
-	-----------------------------------------------------------------------------------------------------------------------------
-	-- Begin of the loop
-	-----------------------------------------------------------------------------------------------------------------------------
-	DECLARE loopItemsToAdjustForAutoNegative CURSOR LOCAL FAST_FORWARD
-	FOR 
-	SELECT  intId
-			,intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intSubLocationId
-			,intStorageLocationId
-			,dtmDate
-			,intCostUOMId
-			,dblVoucherCost
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
-			,strActualCostId
-			,intRelatedInventoryTransactionId
-			,intFobPointId
-			,intInTransitSourceLocationId
-	FROM	@Internal_ItemsToAdjust
+--	-----------------------------------------------------------------------------------------------------------------------------
+--	-- Begin of the loop
+--	-----------------------------------------------------------------------------------------------------------------------------
+--	DECLARE loopItemsToAdjustForAutoNegative CURSOR LOCAL FAST_FORWARD
+--	FOR 
+--	SELECT  intId
+--			,intItemId
+--			,intItemLocationId
+--			,intItemUOMId
+--			,intSubLocationId
+--			,intStorageLocationId
+--			,dtmDate
+--			,intCostUOMId
+--			,dblVoucherCost
+--			,intTransactionId
+--			,intTransactionDetailId
+--			,strTransactionId
+--			,intTransactionTypeId
+--			,strActualCostId
+--			,intRelatedInventoryTransactionId
+--			,intFobPointId
+--			,intInTransitSourceLocationId
+--	FROM	@Internal_ItemsToAdjust
 
-	OPEN loopItemsToAdjustForAutoNegative;
+--	OPEN loopItemsToAdjustForAutoNegative;
 
-	-- Initial fetch attempt
-	FETCH NEXT FROM loopItemsToAdjustForAutoNegative INTO 
-		@intId
-		,@intItemId
-		,@intItemLocationId
-		,@intItemUOMId
-		,@intSubLocationId
-		,@intStorageLocationId
-		,@dtmDate
-		,@intCostUOMId
-		,@dblVoucherCost
-		,@intTransactionId
-		,@intTransactionDetailId
-		,@strTransactionId
-		,@intTransactionTypeId
-		,@strActualCostId
-		,@intRelatedInventoryTransactionId
-		,@intFobPointId 
-		,@intInTransitSourceLocationId
-	;
+--	-- Initial fetch attempt
+--	FETCH NEXT FROM loopItemsToAdjustForAutoNegative INTO 
+--		@intId
+--		,@intItemId
+--		,@intItemLocationId
+--		,@intItemUOMId
+--		,@intSubLocationId
+--		,@intStorageLocationId
+--		,@dtmDate
+--		,@intCostUOMId
+--		,@dblNewCost
+--		,@intTransactionId
+--		,@intTransactionDetailId
+--		,@strTransactionId
+--		,@intTransactionTypeId
+--		,@strActualCostId
+--		,@intRelatedInventoryTransactionId
+--		,@intFobPointId 
+--		,@intInTransitSourceLocationId
+--	;
 
-	DECLARE @AutoNegativeAmount AS NUMERIC(38, 20)
-	WHILE @@FETCH_STATUS = 0
-	BEGIN 
-		-- Initialize the costing method 
-		SET @CostingMethod = NULL;
-		SET @AutoNegativeAmount = 0
+--	DECLARE @AutoNegativeAmount AS NUMERIC(38, 20)
+--	WHILE @@FETCH_STATUS = 0
+--	BEGIN 
+--		-- Initialize the costing method 
+--		SET @CostingMethod = NULL;
+--		SET @AutoNegativeAmount = 0
 
-		-- Get the costing method of an item 
-		SELECT	@CostingMethod = CostingMethod 
-		FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
+--		-- Get the costing method of an item 
+--		SELECT	@CostingMethod = CostingMethod 
+--		FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
 
-		--------------------------------------------------------------------------------
-		-- Perform the Auto-Negative on Items using the Average Costing
-		--------------------------------------------------------------------------------
-		-- Average Cost
-		IF (@CostingMethod = @AVERAGECOST) AND ISNULL(@strActualCostId, '') = ''
-		BEGIN 
-			SELECT	@AutoNegativeAmount = 
-						dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
-						- dbo.fnGetItemTotalValueFromTransactions(
-							Stock.intItemId, 
-							Stock.intItemLocationId
-						)
-			FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemPricing ItemPricing
-						ON	Stock.intItemId = ItemPricing.intItemId
-							AND Stock.intItemLocationId = ItemPricing.intItemLocationId
-			WHERE	Stock.intItemId = @intItemId
-					AND Stock.intItemLocationId = @intItemLocationId
+--		--------------------------------------------------------------------------------
+--		-- Perform the Auto-Negative on Items using the Average Costing
+--		--------------------------------------------------------------------------------
+--		-- Average Cost
+--		IF (@CostingMethod = @AVERAGECOST) AND ISNULL(@strActualCostId, '') = ''
+--		BEGIN 
+--			SELECT	@AutoNegativeAmount = 
+--						dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
+--						- dbo.fnGetItemTotalValueFromTransactions(
+--							Stock.intItemId, 
+--							Stock.intItemLocationId
+--						)
+--			FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemPricing ItemPricing
+--						ON	Stock.intItemId = ItemPricing.intItemId
+--							AND Stock.intItemLocationId = ItemPricing.intItemLocationId
+--			WHERE	Stock.intItemId = @intItemId
+--					AND Stock.intItemLocationId = @intItemLocationId
 
-			IF ROUND(ISNULL(@AutoNegativeAmount, 0),6) <> 0.00
-			BEGIN 
-				EXEC [dbo].[uspICPostInventoryTransaction]
-						@intItemId								= @intItemId
-						,@intItemLocationId						= @intItemLocationId
-						,@intItemUOMId							= @intItemUOMId
-						,@intSubLocationId						= @intSubLocationId
-						,@intStorageLocationId					= @intStorageLocationId
-						,@dtmDate								= @dtmDate
-						,@dblQty								= 0
-						,@dblUOMQty								= 0
-						,@dblCost								= 0
-						,@dblValue								= @AutoNegativeAmount
-						,@dblSalesPrice							= 0
-						,@intCurrencyId							= NULL
-						--,@dblExchangeRate						= 1
-						,@intTransactionId						= @intTransactionId
-						,@intTransactionDetailId				= @intTransactionDetailId
-						,@strTransactionId						= @strTransactionId
-						,@strBatchId							= @strBatchId
-						,@intTransactionTypeId					= @INVENTORY_AUTO_NEGATIVE
-						,@intLotId								= NULL
-						,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId
-						,@intRelatedTransactionId				= NULL 
-						,@strRelatedTransactionId				= NULL						
-						,@strTransactionForm					= @TransactionFormName
-						,@intEntityUserSecurityId				= @intEntityUserSecurityId
-						,@intCostingMethod						= @AVERAGECOST
-						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT 
-						,@intFobPointId							= @intFobPointId
-						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-			END 
-		END
+--			IF ROUND(ISNULL(@AutoNegativeAmount, 0),6) <> 0.00
+--			BEGIN 
+--				EXEC [dbo].[uspICPostInventoryTransaction]
+--						@intItemId								= @intItemId
+--						,@intItemLocationId						= @intItemLocationId
+--						,@intItemUOMId							= @intItemUOMId
+--						,@intSubLocationId						= @intSubLocationId
+--						,@intStorageLocationId					= @intStorageLocationId
+--						,@dtmDate								= @dtmDate
+--						,@dblQty								= 0
+--						,@dblUOMQty								= 0
+--						,@dblCost								= 0
+--						,@dblValue								= @AutoNegativeAmount
+--						,@dblSalesPrice							= 0
+--						,@intCurrencyId							= NULL
+--						,@intTransactionId						= @intTransactionId
+--						,@intTransactionDetailId				= @intTransactionDetailId
+--						,@strTransactionId						= @strTransactionId
+--						,@strBatchId							= @strBatchId
+--						,@intTransactionTypeId					= @INVENTORY_AUTO_NEGATIVE
+--						,@intLotId								= NULL
+--						,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId
+--						,@intRelatedTransactionId				= NULL 
+--						,@strRelatedTransactionId				= NULL						
+--						,@strTransactionForm					= @TransactionFormName
+--						,@intEntityUserSecurityId				= @intEntityUserSecurityId
+--						,@intCostingMethod						= @AVERAGECOST
+--						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT 
+--						,@intFobPointId							= @intFobPointId
+--						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+--			END 
+--		END
 
-		FETCH NEXT FROM loopItemsToAdjustForAutoNegative INTO 
-			@intId
-			,@intItemId
-			,@intItemLocationId
-			,@intItemUOMId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@dtmDate
-			,@intCostUOMId
-			,@dblVoucherCost
-			,@intTransactionId
-			,@intTransactionDetailId
-			,@strTransactionId
-			,@intTransactionTypeId
-			,@strActualCostId
-			,@intRelatedInventoryTransactionId
-			,@intFobPointId
-			,@intInTransitSourceLocationId
-		;
-	END 
+--		FETCH NEXT FROM loopItemsToAdjustForAutoNegative INTO 
+--			@intId
+--			,@intItemId
+--			,@intItemLocationId
+--			,@intItemUOMId
+--			,@intSubLocationId
+--			,@intStorageLocationId
+--			,@dtmDate
+--			,@intCostUOMId
+--			,@dblNewCost
+--			,@intTransactionId
+--			,@intTransactionDetailId
+--			,@strTransactionId
+--			,@intTransactionTypeId
+--			,@strActualCostId
+--			,@intRelatedInventoryTransactionId
+--			,@intFobPointId
+--			,@intInTransitSourceLocationId
+--		;
+--	END 
 
-	-----------------------------------------------------------------------------------------------------------------------------
-	-- End of the loop
-	-----------------------------------------------------------------------------------------------------------------------------
-	CLOSE loopItemsToAdjustForAutoNegative;
-	DEALLOCATE loopItemsToAdjustForAutoNegative;
-END 
+--	-----------------------------------------------------------------------------------------------------------------------------
+--	-- End of the loop
+--	-----------------------------------------------------------------------------------------------------------------------------
+--	CLOSE loopItemsToAdjustForAutoNegative;
+--	DEALLOCATE loopItemsToAdjustForAutoNegative;
+--END 
 
 -------------------------------------------------------------------------------------------
 -- Repeat the cost adjustment process if there are 'Produced/Transferred' stocks affected. 
@@ -742,7 +727,6 @@ BEGIN
 			,[dblVoucherCost] 
 			,[dblNewValue]
 			,[intCurrencyId] 
-			--,[dblExchangeRate] 
 			,[intTransactionId]
 			,[intTransactionDetailId] 
 			,[strTransactionId] 
@@ -770,7 +754,6 @@ BEGIN
 			,[dblNewCost] 
 			,[dblNewValue]
 			,[intCurrencyId] 
-			--,[dblExchangeRate] 
 			,[intTransactionId]
 			,[intTransactionDetailId] 
 			,[strTransactionId] 

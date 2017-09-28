@@ -36,8 +36,7 @@ BEGIN
 			,@t_intItemId AS INT 
 			,@t_intItemLocationId AS INT 
 			,@t_intItemUOMId AS INT 
-			,@t_dblQty AS NUMERIC(38, 20)
-			,@t_dblStockOut AS NUMERIC(38, 20)
+			,@t_dblQty AS NUMERIC(38, 20)			
 			,@t_dblCost AS NUMERIC(38, 20)
 			,@t_dblValue AS NUMERIC(38, 20)
 			,@t_strTransactionId AS NVARCHAR(50)
