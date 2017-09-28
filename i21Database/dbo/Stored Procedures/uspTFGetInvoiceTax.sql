@@ -117,8 +117,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN
@@ -177,8 +179,10 @@ BEGIN TRY
 					, tblARInvoice.strBOLNumber
 					, tblARInvoice.dtmDate
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
+					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN '' ELSE '' END) AS strDestinationCounty
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState
 					, tblSMCompanyLocation.strCity AS strOriginCity
+					, tblSMCompanyLocation.strCountry AS strOriginCountry
 					, tblSMCompanyLocation.strStateProvince AS strOriginState
 					, tblEMEntity.strName
 					, tblEMEntity.strFederalTaxId AS strCustomerFEIN
@@ -276,8 +280,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN
@@ -336,8 +342,10 @@ BEGIN TRY
 					, tblARInvoice.strBOLNumber
 					, tblARInvoice.dtmDate
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
+					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN '' ELSE '' END) AS strDestinationCounty
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState
 					, tblSMCompanyLocation.strCity AS strOriginCity
+					, tblSMCompanyLocation.strCountry AS strOriginCountry
 					, tblSMCompanyLocation.strStateProvince AS strOriginState
 					, tblEMEntity.strName
 					, tblEMEntity.strFederalTaxId AS strCustomerFEIN
@@ -481,8 +489,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN
@@ -541,8 +551,10 @@ BEGIN TRY
 					, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
 					, tblTRLoadHeader.dtmLoadDateTime AS dtmDate
 					, tblSMCompanyLocation.strCity AS strDestinationCity
+					, '' AS strDestinationCounty
 					, tblSMCompanyLocation.strStateProvince AS strDestinationState
 					, tblEMEntityLocation.strCity AS strOriginCity
+					, '' AS strOriginCounty
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblSMCompanyLocation.strLocationName AS strCustomerName
 					, tblSMCompanySetup.strEin AS strCustomerFEIN
@@ -639,8 +651,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFederalTaxId
@@ -692,8 +706,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN

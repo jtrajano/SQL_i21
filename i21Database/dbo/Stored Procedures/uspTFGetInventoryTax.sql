@@ -120,8 +120,10 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strOriginCity
+				, strOriginCounty
 				, strDestinationState
 				, strDestinationCity
+				, strDestinationCounty
 				, strTerminalControlNumber
 				, strTransporterIdType
 				, strVendorIdType
@@ -171,8 +173,10 @@ BEGIN TRY
 				, CompanySetup.strFederalTaxID
 				, Origin.strState AS strOriginState
 				, Origin.strCity AS strOriginCity
+				, '' AS strOriginCounty
 				, Destination.strStateProvince
 				, Destination.strCity AS strDestinationCity
+				, '' AS strDestinationCounty
 				, TCN.strTerminalControlNumber
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'
@@ -265,8 +269,10 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strOriginCity
+				, strOriginCounty
 				, strDestinationState
 				, strDestinationCity
+				, strDestinationCounty
 				, strTerminalControlNumber
 				, strTransporterIdType
 				, strVendorIdType
@@ -316,8 +322,10 @@ BEGIN TRY
 				, CompanySetup.strFederalTaxID
 				, Origin.strState AS strOriginState
 				, Origin.strCity AS strOriginCity
+				, '' AS strOriginCounty
 				, Destination.strStateProvince
 				, Destination.strCity AS strDestinationCity
+				, '' AS strDestinationCounty
 				, TCN.strTerminalControlNumber
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'
@@ -475,8 +483,10 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, strOriginState
 				, strOriginCity
+				, strOriginCounty
 				, strDestinationState
 				, strDestinationCity
+				, strDestinationCounty
 				, strCustomerName
 				, strCustomerFederalTaxId
 				, strTransporterIdType
@@ -526,8 +536,10 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strOriginCity
+				, strOriginCounty
 				, strDestinationState
 				, strDestinationCity
+				, strDestinationCounty
 				, @CompanyName
 				, @CompanyEIN
 				, strTransporterIdType
