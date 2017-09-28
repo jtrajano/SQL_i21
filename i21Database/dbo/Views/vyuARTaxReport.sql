@@ -128,14 +128,14 @@ LEFT OUTER JOIN (SELECT intInvoiceDetailId
 				 FROM tblARInvoiceDetailTax WITH (NOLOCK)
 				 GROUP BY intInvoiceDetailId
 ) TAXTOTAL ON TAXDETAIL.intInvoiceDetailId = TAXTOTAL.intInvoiceDetailId
-LEFT OUTER JOIN (SELECT intEntityId 
+LEFT OUTER JOIN (SELECT ENTITY.intEntityId 
 					  , strCustomerNumber= CASE WHEN CUS.strCustomerNumber = '' THEN ENTITY.strEntityNo ELSE CUS.strCustomerNumber END
 					  , strName  
 				 FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
-				 INNER JOIN (SELECT intEntityCustomerId
+				 INNER JOIN (SELECT intEntityId
 					              , strCustomerNumber
 							 FROM dbo.tblARCustomer WITH (NOLOCK)
-				 ) CUS ON ENTITY.intEntityId = CUS.intEntityCustomerId
+				 ) CUS ON ENTITY.intEntityId = CUS.intEntityId
 ) C ON I.intEntityCustomerId = C.intEntityId	
 LEFT OUTER JOIN (SELECT intCurrencyID
 						, strCurrency
@@ -304,14 +304,14 @@ LEFT OUTER JOIN (SELECT intInvoiceDetailId
 				 FROM tblARInvoiceDetailTax WITH (NOLOCK)
 				 GROUP BY intInvoiceDetailId
 ) TAXTOTAL ON TAXDETAIL.intInvoiceDetailId = TAXTOTAL.intInvoiceDetailId
-LEFT OUTER JOIN (SELECT intEntityId 
+LEFT OUTER JOIN (SELECT ENTITY.intEntityId 
 					  , strCustomerNumber= CASE WHEN CUS.strCustomerNumber = '' THEN ENTITY.strEntityNo ELSE CUS.strCustomerNumber END
 					  , strName  
 				 FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
-				 INNER JOIN (SELECT intEntityCustomerId
+				 INNER JOIN (SELECT intEntityId
 					              , strCustomerNumber
 							 FROM dbo.tblARCustomer WITH (NOLOCK)
-				 ) CUS ON ENTITY.intEntityId = CUS.intEntityCustomerId
+				 ) CUS ON ENTITY.intEntityId = CUS.intEntityId
 ) C ON I.intEntityCustomerId = C.intEntityId	
 LEFT OUTER JOIN (SELECT intCurrencyID
 						, strCurrency
