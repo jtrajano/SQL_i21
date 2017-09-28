@@ -226,11 +226,11 @@ if(_url.indexOf('version=TF') < 1) {
                     ]
                 },
 
-                { group: 'StorageLocation',
+                { group: 'StorageUnits',
                     items: [
                         {
-                            url: 'CRUDScripts/StorageLocation/AddStorageLocation.js?v='+version,
-                            title: 'AddStorageLocation',
+                            url: 'CRUDScripts/StorageLocation/AddStorageUnits.js?v='+version,
+                            title: 'AddStorageUnits',
                             preload: [
                                 functionalTest,
                                 commonIC

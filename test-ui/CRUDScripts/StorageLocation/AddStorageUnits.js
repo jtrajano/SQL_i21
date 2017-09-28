@@ -6,7 +6,7 @@ StartTest (function (t) {
         .displayText('===== Scenario 1: Add New Storage Location - Allow bin of the same name to be used in a different Sub Location. =====')
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
+        .clickMenuScreen('Storage Units','Screen')
         .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test SL - SH - 001')
         .waitUntilLoaded()
@@ -38,6 +38,8 @@ StartTest (function (t) {
                     .verifyStatusMessage('Saved')
                     .clickButton('Close')
 
+                    .clickMenuScreen('Storage Units','Screen')
+                    .waitUntilLoaded()
                     .clickButton('New')
                     .waitUntilLoaded('icstorageunit')
                     .enterData('Text Field','Name','Test SL - SH - 001')
@@ -56,19 +58,23 @@ StartTest (function (t) {
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
                     .waitUntilLoaded()
-                    .clickButton('Close')
-                    .waitUntilLoaded()
+            
                     .done();
             },
             continueOnFail: true
         })
-        .clearTextFilter('FilterGrid')
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Add New Storage Location - Allow bin of the same name to be used in a different Sub Location Done=====')
         //endregion
 
         /*====================================== Scenario 2: Add New Storage Location - Allow bin of the same name to be used in a different Sub Location ======================================*/
         //region
         .displayText('===== Scenario 2: Add New Storage Location - Allow bin of the same name to be used in a different Sub Location. =====')
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test SL - SH - 002')
         .waitUntilLoaded()
         .continueIf({
@@ -100,6 +106,8 @@ StartTest (function (t) {
                     .verifyStatusMessage('Saved')
                     .clickButton('Close')
 
+                    .clickMenuScreen('Storage Units','Screen')
+                    .waitUntilLoaded()
                     .clickButton('New')
                     .waitUntilLoaded('icstorageunit')
                     .enterData('Text Field','Name','Test SL - SH - 002')
@@ -117,13 +125,13 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
-                    .waitUntilLoaded()
+                
                     .done();
             },
             continueOnFail: true
         })
-        .clearTextFilter('FilterGrid')
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Add New Storage Location - Allow bin of the same name to be used in a different Sub Location Done=====')
         //endregion
 
@@ -131,6 +139,10 @@ StartTest (function (t) {
         /*====================================== Scenario 3: Update Storage Location ======================================*/
         //region
         .displayText('===== Scenario 3: Update Storage Location =====')
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
         .doubleClickSearchRowValue('Test SL - SH - 001', 'strUnitMeasure', 1)
         .waitUntilLoaded('icstorageunit')
         .enterData('Text Field','Description','Test SL - SH Updated')
@@ -139,8 +151,12 @@ StartTest (function (t) {
         .enterData('Text Field','Aisle','Test Aisle - Updated')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
+        .waitUntilLoaded()
         .verifyStatusMessage('Saved')
         .clickButton('Close')
+
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded()
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
         .waitUntilLoaded('icstorageunit')
@@ -149,13 +165,14 @@ StartTest (function (t) {
         .verifyData('Combo Box','SubLocation','Indy')
         .verifyData('Text Field','Aisle','Test Aisle - Updated')
         .clickButton('Close')
-        .clearTextFilter('FilterGrid')
         //endregion
 
 
         /*====================================== Scenario 4: Add Duplicate Storage Location ======================================*/
         //region
         .displayText('===== Scenario 4: Add Duplicate Storage Location =====')
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded()
         .clickButton('New')
         .waitUntilLoaded('icstorageunit')
         .enterData('Text Field','Name','Test SL - SH - 002')
@@ -178,6 +195,8 @@ StartTest (function (t) {
         /*====================================== Scenario 5: Check Required Fields ======================================*/
         //region
         .displayText('===== Scenario 5: Check Required Fields =====')
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded()
         .clickButton('New')
         .waitUntilLoaded('icstorageunit')
         .clickButton('Save')
