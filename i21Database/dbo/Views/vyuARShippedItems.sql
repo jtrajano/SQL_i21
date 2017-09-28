@@ -974,11 +974,11 @@ FROM (
 		 , dblQtyRemaining					= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
 	     , dblDiscount						= 0
 	     , dblPrice							= ARCC.dblOrderPrice
-	     , dblShipmentUnitPrice				= ((ARCC.dblOrderPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
+	     , dblShipmentUnitPrice				= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0
-	     , dblTotal							= ((ARCC.dblOrderPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
+	     , dblTotal							= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
 											* dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblNet)
 	     , intStorageLocationId				= NULL
 	     , intTermId						= NULL
@@ -1073,6 +1073,7 @@ FROM (
 		 , intItemWeightUOMId	 
 		 , dblCashPrice
 		 , dblOrderPrice
+		 , dblUnitPrice
 		 , dblDetailQuantity
 		 , intFreightTermId			 
 		 , dblShipQuantity

@@ -41,9 +41,9 @@ SET
 	,ARID.[dblItemWeight]			= ISNULL(ARID.[dblItemWeight], 1.00)
 	,ARID.[dblShipmentNetWt]		= ISNULL(ARID.[dblShipmentNetWt], [dblQtyShipped])
 	,ARID.[dblPrice]				= ISNULL(ARID.[dblPrice], @ZeroDecimal)
-	,ARID.[dblBasePrice]			= CASE WHEN ARID.[dblBasePrice] <> ARID.[dblPrice] AND ARID.[dblBasePrice] = @ZeroDecimal THEN (ISNULL(ARID.[dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END)) ELSE ISNULL(ARID.[dblBasePrice], @ZeroDecimal) END
+	,ARID.[dblBasePrice]			= ISNULL(ISNULL(ARID.[dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END), @ZeroDecimal)
 	,ARID.[dblUnitPrice] 			= ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal)
-	,[dblBaseUnitPrice]				= CASE WHEN ISNULL(ISNULL(ARID.[dblBaseUnitPrice], ARID.[dblBasePrice]), @ZeroDecimal) <> ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) AND ISNULL(ISNULL(ARID.[dblBaseUnitPrice], ARID.[dblUnitPrice]), @ZeroDecimal) = @ZeroDecimal THEN (ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END)) ELSE ISNULL(ARID.[dblBaseUnitPrice], @ZeroDecimal) END
+	,[dblBaseUnitPrice]				= ISNULL(ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END), @ZeroDecimal)
 	,ARID.[dblTotalTax]				= ISNULL(ARID.[dblTotalTax], @ZeroDecimal)
 	,ARID.[dblBaseTotalTax]			= ISNULL(ARID.[dblBaseTotalTax], @ZeroDecimal)
 	,ARID.[dblTotal]				= ISNULL(ARID.[dblTotal], @ZeroDecimal)
