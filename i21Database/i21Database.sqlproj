@@ -5701,6 +5701,7 @@
     <Build Include="dbo\Views\vyuSCGradingTagReportView.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICRetroactiveAvgCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveFIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
