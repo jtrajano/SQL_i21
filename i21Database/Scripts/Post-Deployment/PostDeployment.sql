@@ -246,6 +246,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultDataBalance.sql
 :r .\AP\UpdatePrepayVoucherStatus.sql
 :r .\AP\UpdateTaxGroupId.sql
+:r .\AP\UpdateBillDetailRate.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

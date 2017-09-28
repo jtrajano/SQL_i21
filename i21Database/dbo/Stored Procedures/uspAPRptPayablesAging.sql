@@ -37,7 +37,7 @@ SET ANSI_WARNINGS OFF
 --	<options />
 --</xmlparam>'
 
-DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @prepaidInnerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
+DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX),  @originInnerQuery NVARCHAR(MAX), @prepaidInnerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
 DECLARE @dateFrom DATETIME = NULL;
 DECLARE @dateTo DATETIME = NULL;
 DECLARE @dtmDateTo DATETIME = NULL;
@@ -159,17 +159,29 @@ SET @prepaidInnerQuery = 'SELECT --DISTINCT
 					,intPrepaidRowType
 				  FROM dbo.vyuAPPrepaidPayables'
 
+SET @originInnerQuery = 'SELECT --DISTINCT 
+					intBillId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+				  FROM dbo.vyuAPOriginPayables'
+
 IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 	END  
 END
 
@@ -181,11 +193,13 @@ BEGIN
 	BEGIN 
 		SET @innerQuery = @innerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @originInnerQuery = @originInnerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 	END
     ELSE 
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 	END  
 	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
 	SET @dateTo = @dtmDateTo;

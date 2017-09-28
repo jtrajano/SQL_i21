@@ -76,7 +76,7 @@ BEGIN
 										ELSE (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment') END,
 		[intBankAccountId] = A.intBankAccountId,
 		[intCurrencyId] = A.intCurrencyId,
-		[dblExchangeRate] = 0,
+		[dblExchangeRate] = A.dblExchangeRate,
 		[dtmDate] = A.dtmDatePaid,
 		[strPayee] = ISNULL(E.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityId)),
 		[intPayeeId] = B.intEntityId,

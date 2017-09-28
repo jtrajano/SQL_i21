@@ -1,7 +1,11 @@
-﻿CREATE VIEW [dbo].[vyuAPPrepaidPayables]
+﻿/**
+	Note: Consider all origin prepaid was already paid.
+*/
+CREATE VIEW [dbo].[vyuAPPrepaidPayables]
 AS
 
 --VENDOR PREPAYMENT
+--POSITIVE PART
 SELECT
 	A.dtmDate	
 	, A.intBillId 
@@ -25,13 +29,16 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 WHERE A.intTransactionType = 2 AND A.ysnPosted = 1
+AND NOT EXISTS (
+	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
+)
 UNION ALL
---VENDOR PREPAYMENT PAYMENT TRANSACTION
+--VENDOR PREPAYMENT PAYMENT TRANSACTION (this will remove the positive part and leave the negative part)
 SELECT 
 	  A.dtmDatePaid AS dtmDate 
 	, B.intBillId  
 	, C.strBillId
-	, B.dblPayment AS dblAmountPaid     
+	, B.dblPayment  AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -57,7 +64,11 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
 	AND C.ysnPosted = 1
 	AND C.intTransactionType = 2
 	AND A.ysnPrepay = 1
+	AND NOT EXISTS (
+	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
+)
 UNION ALL
+--NEGATIVE PART
 SELECT
 	A.dtmDate	
 	, A.intBillId 
@@ -81,33 +92,11 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 WHERE A.intTransactionType = 2 AND A.ysnPosted = 1
-UNION ALL --APPLIED PREPAYMENT
-SELECT
-	A.dtmDate
-	,B.intTransactionId
-	,C.strBillId
-	,B.dblAmountApplied * -1
-	,0 AS dblTotal
-	,0 AS dblAmountDue
-	,0 AS dblWithheld
-	,0 AS dblDiscount
-	,0 AS dblInterest
-	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
-	,D.strVendorId
-	,A.dtmDueDate
-	,A.ysnPosted
-	,C.ysnPaid
-	,A.intAccountId
-	,EC.strClass
-	,2
-FROM dbo.tblAPBill A
-INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
-INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
-INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-WHERE A.ysnPosted = 1 AND C.intTransactionType = 2
+AND NOT EXISTS (
+	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
+)
 UNION ALL
---VENDOR PREPAYMENT PAYMENT TRANSACTION
+--OFFSET VENDOR PREPAYMENT TRANSACTION
 SELECT 
 	  A.dtmDatePaid AS dtmDate 
 	, B.intBillId  
@@ -136,5 +125,37 @@ LEFT JOIN dbo.tblCMBankTransaction E
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
-	AND C.intTransactionType != 2
-	AND A.ysnPrepay = 1
+	AND C.intTransactionType = 2
+	AND A.ysnPrepay = 0
+	AND NOT EXISTS (
+	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = B.intBillId
+)
+UNION ALL --APPLIED PREPAYMENT
+SELECT
+	A.dtmDate
+	,B.intTransactionId
+	,C.strBillId
+	,B.dblAmountApplied * -1
+	,0 AS dblTotal
+	,0 AS dblAmountDue
+	,0 AS dblWithheld
+	,0 AS dblDiscount
+	,0 AS dblInterest
+	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+	,D.strVendorId
+	,A.dtmDueDate
+	,A.ysnPosted
+	,C.ysnPaid
+	,A.intAccountId
+	,EC.strClass
+	,2
+FROM dbo.tblAPBill A
+INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
+INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
+INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+WHERE A.ysnPosted = 1 AND C.intTransactionType = 2
+AND NOT EXISTS (
+	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
+)
+
