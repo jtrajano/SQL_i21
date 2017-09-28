@@ -21,7 +21,8 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , strUnitMeasure					= ICUMO.strUnitMeasure --ICUMP.strUnitMeasure
 	 , intPricingTypeId					= CTPT.intPricingTypeId
 	 , strPricingType					= CTPT.strPricingType	 
-	 , dblCashPrice						= (CTCD.dblCashPrice * dbo.fnCalculateQtyBetweenUOM(CTCD.intItemUOMId, ISNULL(CTCD.intPriceItemUOMId, CTCD.intItemUOMId), 1))  --CTCD.dblCashPrice 
+	 , dblCashPrice						= CTCD.dblCashPrice
+	 , dblUnitPrice						= CTCD.dblUnitPrice
 	 , intCurrencyExchangeRateTypeId	= CTCD.intRateTypeId
 	 , strCurrencyExchangeRateType		= SMCRT.strCurrencyExchangeRateType
 	 , intCurrencyExchangeRateId		= CTCD.intCurrencyExchangeRateId
@@ -29,7 +30,7 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , intSubCurrencyId					= ISNULL(CTCD.intBasisCurrencyId, CTCD.intConvPriceCurrencyId)
 	 , dblSubCurrencyRate				= CONVERT(NUMERIC(18,6),ISNULL(SMC.intCent, 1.000000))
 	 , strSubCurrency					= SMC.strCurrency
-	 , dblOrderPrice					= CTCD.dblCashPrice --/ (CASE WHEN CTCD.intItemUOMId <> CTCD.intPriceItemUOMId THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
+	 , dblOrderPrice					= CTCD.dblOrderPrice
 	 , intPriceItemUOMId				= ISNULL(CTCD.intPriceItemUOMId, CTCD.intItemUOMId)
 	 , strPriceUnitMeasure				= ISNULL(ICUMP.strUnitMeasure, ICUMO.strUnitMeasure)
 	 , dblBalance						= CTCD.dblBalance
@@ -56,12 +57,15 @@ FROM (
 		 , intContractSeq
 		 , dtmStartDate
 		 , dtmEndDate
-		 , intCurrencyId = CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN intInvoiceCurrencyId ELSE intCurrencyId END
+		 , intCurrencyId				= CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN ISNULL(intInvoiceCurrencyId, ISNULL(intBasisCurrencyId, ISNULL(intCurrencyId, intConvPriceCurrencyId))) ELSE ISNULL(intBasisCurrencyId, ISNULL(intCurrencyId, intConvPriceCurrencyId)) END
+		 , intSubCurrencyId				= ISNULL(intBasisCurrencyId, ISNULL(intCurrencyId, intConvPriceCurrencyId))
 		 , intCompanyLocationId
 		 , intItemId
 		 , intItemUOMId
 		 , intPriceItemUOMId
-		 , dblCashPrice = CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN dblCashPrice * dblRate ELSE dblCashPrice END
+		 , dblOrderPrice				= dblCashPrice
+		 , dblCashPrice					= dbo.fnCalculateQtyBetweenUOM(intItemUOMId, ISNULL(intPriceItemUOMId, intItemUOMId), 1) * (CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN dblFXPrice ELSE dblCashPrice END)
+		 , dblUnitPrice					= CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN dblFXPrice ELSE dblCashPrice END
 		 , dblBalance
 		 , dblScheduleQty
 		 , dblQuantity
@@ -69,9 +73,9 @@ FROM (
 		 , intFreightTermId
 		 , intShipViaId
 		 , intPricingTypeId
-		 , intRateTypeId
-		 , intCurrencyExchangeRateId
-		 , dblRate
+		 , intRateTypeId				= CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN intRateTypeId ELSE NULL END
+		 , intCurrencyExchangeRateId	= CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN intCurrencyExchangeRateId ELSE NULL END
+		 , dblRate						= CASE WHEN ysnUseFXPrice = 1 AND GETDATE() BETWEEN dtmFXValidFrom AND dtmFXValidTo THEN 1.000000/(CASE WHEN ISNULL(dblRate,1.000000) = 0 THEN 1.000000 ELSE ISNULL(dblRate,1.000000) END) ELSE 1.000000 END
 		 , intNetWeightUOMId
 		 , intInvoiceCurrencyId
 		 , ysnUseFXPrice
@@ -167,7 +171,7 @@ LEFT OUTER JOIN (
 		 , intMainCurrencyId
 		 , strCurrency
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
-) SMC ON ISNULL(CTCD.intBasisCurrencyId, CTCD.intConvPriceCurrencyId) = SMC.intCurrencyID
+) SMC ON CTCD.intSubCurrencyId = SMC.intCurrencyID
 LEFT OUTER JOIN (
 	SELECT intCurrencyID		 
 		 , intMainCurrencyId
