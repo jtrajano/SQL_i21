@@ -258,6 +258,7 @@ GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber
 
 SELECT strCustomerName		= E.strName
 	 , strCustomerNumber	= E.strEntityNo
+	 , strCustomerInfo		= E.strName + CHAR(13) + E.strEntityNo
      , strInvoiceNumber		= AGING.strInvoiceNumber
 	 , strRecordNumber		= AGING.strRecordNumber
 	 , intInvoiceId			= AGING.intInvoiceId
