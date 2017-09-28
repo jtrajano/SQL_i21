@@ -180,16 +180,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FeedStockUOM',
                     items: [
                         {
-                            url: 'CRUDScripts/FeedStockUOM/AddFeedStockUOM.js?v='+version,
-                            title: 'AddFeedStockUOM',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FeedStockUOM/DeleteFeedStockUOM.js?v='+version,
-                            title: 'DeleteFeedStockUOM',
+                            url: 'CRUDScripts/FeedStockUOM/AddAndDeleteFeedStockUOM.js?v='+version,
+                            title: 'AddAndDeleteFeedStockUOM',
                             preload: [
                                 functionalTest,
                                 commonIC
