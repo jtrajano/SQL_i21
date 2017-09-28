@@ -181,8 +181,8 @@ END
 												THEN NULL
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
 												THEN MIN(TL.strTransaction)
-											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
-												THEN NULL
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
+												THEN MIN(TL.strTransaction)
 											END)
 		,[intItemId]                = MIN(TR.intItemId)
 		,[intLotId]                 = NULL
