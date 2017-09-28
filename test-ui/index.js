@@ -167,16 +167,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'ProductionProcess',
                     items: [
                         {
-                            url: 'CRUDScripts/ProductionProcess/AddProductionProcess.js?v='+version,
-                            title: 'AddProductionProcess',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/ProductionProcess/DeleteProductionProcess.js?v='+version,
-                            title: 'DeleteProductionProcess',
+                            url: 'CRUDScripts/ProductionProcess/AddAndDeleteProductionProcess.js?v='+version,
+                            title: 'AddAndDeleteProductionProcess',
                             preload: [
                                 functionalTest,
                                 commonIC
