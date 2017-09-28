@@ -51,9 +51,9 @@ SET
 	,[dblItemWeight]			= ISNULL([dblItemWeight], 1.00)
 	,[dblShipmentNetWt]			= ISNULL([dblShipmentNetWt], [dblQtyShipped])
 	,[dblPrice]					= ISNULL([dblPrice], @ZeroDecimal)
-	,[dblBasePrice]				= CASE WHEN [dblBasePrice] <> [dblPrice] AND [dblBasePrice] = @ZeroDecimal THEN (ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END)) ELSE ISNULL([dblBasePrice], @ZeroDecimal) END
+	,[dblBasePrice]				= ISNULL(ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
 	,[dblUnitPrice] 			= ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal)
-	,[dblBaseUnitPrice]			= CASE WHEN ISNULL(ISNULL([dblBaseUnitPrice], [dblBasePrice]), @ZeroDecimal) <> ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) AND ISNULL(ISNULL([dblBaseUnitPrice], [dblUnitPrice]), @ZeroDecimal) = @ZeroDecimal THEN (ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END)) ELSE ISNULL([dblBaseUnitPrice], @ZeroDecimal) END
+	,[dblBaseUnitPrice]			= ISNULL(ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
 	,[dblTotalTax]				= ISNULL([dblTotalTax], @ZeroDecimal)
 	,[dblBaseTotalTax]			= ISNULL([dblBaseTotalTax], @ZeroDecimal)
 	,[dblTotal]					= ISNULL([dblTotal], @ZeroDecimal)
