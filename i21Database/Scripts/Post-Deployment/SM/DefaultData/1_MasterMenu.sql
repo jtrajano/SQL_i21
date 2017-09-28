@@ -866,7 +866,7 @@ SELECT @GeneralLedgerParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenu
 
 /* PRE-UPDATE 1730 to 1800 */
 UPDATE tblSMMasterMenu SET strCategory = N'Activity', strIcon = N'small-menu-activity' WHERE strMenuName IN ('General Journals', 'GL Account Detail', 'Batch Posting', 'Revalue Currency', 'Consolidate', 'Origin Audit Log') AND strModuleName = 'General Ledger'
-UPDATE tblSMMasterMenu SET strCategory = N'Maintenance', strIcon = N'small-menu-maintenance' WHERE strMenuName IN ('Audit Adjustment', 'Clone Accounts', 'Fiscal Years', 'Reallocations', 'Recurring Journals') AND strModuleName = 'General Ledger'
+UPDATE tblSMMasterMenu SET strCategory = N'Maintenance', strIcon = N'small-menu-maintenance' WHERE strMenuName IN ('Audit Adjustment', 'Clone Accounts', 'Fiscal Years', 'Fiscal Year', 'Reallocations', 'Recurring Journals') AND strModuleName = 'General Ledger'
 UPDATE tblSMMasterMenu SET strCategory = N'Import', strIcon = N'small-menu-import' WHERE strMenuName IN ('Import GL from Subledger', 'Import GL from CSV', 'GL Import Logs') AND strModuleName = 'General Ledger'
 UPDATE tblSMMasterMenu SET strCategory = N'Setup', strIcon = N'small-menu-setup' WHERE strMenuName IN ('Chart of Accounts', 'Account Structure', 'Account Groups', 'Segment Accounts', 'Build Accounts') AND strModuleName = 'General Ledger'
 
@@ -934,25 +934,22 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @GeneralLedgerSetupParentMenuId WHE
 /* START OF PLURALIZING */
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'General Journal' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId)
 --UPDATE tblSMMasterMenu SET strMenuName = 'General Journals', strDescription = 'General Journals' WHERE strMenuName = N'General Journal' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
-
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Import Budget from CSV' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = 'Import Budgets from CSV', strDescription = 'Import Budgets from CSV' WHERE strMenuName = N'Import Budget from CSV' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
-
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Fiscal Year' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = N'Fiscal Years', strDescription = N'Fiscal Years' WHERE strMenuName = N'Fiscal Year' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
-
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId and strCategory = 'Maintenance')
 --UPDATE tblSMMasterMenu SET strMenuName = 'Reallocations', strDescription = 'Reallocations' WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId and strCategory = 'Maintenance'
-
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Recurring Journal' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
 --UPDATE tblSMMasterMenu SET strMenuName = 'Recurring Journals', strDescription = 'Recurring Journals' WHERE strMenuName = N'Recurring Journal' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 /* END OF PLURALIZING */
-
 /* Start of moving report */
 --UPDATE tblSMMasterMenu SET intParentMenuID = @GeneralLedgerReportParentMenuId WHERE strMenuName = 'Reallocation' AND strModuleName = 'General Ledger' AND strType = 'Report' AND intParentMenuID = @GeneralLedgerParentMenuId
 --UPDATE tblSMMasterMenu SET intParentMenuID = @GeneralLedgerReportParentMenuId WHERE strMenuName = 'General Ledger By Account ID Detail' AND strModuleName = 'General Ledger' AND strType IN ('Report', 'Screen') AND intParentMenuID = @GeneralLedgerParentMenuId
 --UPDATE tblSMMasterMenu SET intParentMenuID = @GeneralLedgerReportParentMenuId WHERE strMenuName = 'Trial Balance Detail' AND strModuleName = 'General Ledger' AND strType IN ('Report', 'Screen') AND intParentMenuID = @GeneralLedgerParentMenuId
 /* End of moving report */
+
+/* Start of Rename */
+UPDATE tblSMMasterMenu SET strMenuName = N'Consolidate GL Entries', strDescription = N'Consolidate GL Entries' WHERE strMenuName = N'Consolidate' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
+UPDATE tblSMMasterMenu SET strMenuName = N'Fiscal Year', strDescription = N'Fiscal Year' WHERE strMenuName = N'Fiscal Years' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+/* End of Rename */
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'General Journals' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GeneralLedger.view.GeneralJournal?showSearch=true' WHERE strMenuName = N'General Journals' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
@@ -969,11 +966,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Revalue 
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'GeneralLedger.view.RevalueCurrency?showSearch=true' WHERE strMenuName = N'Revalue Currency' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Consolidate' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Consolidate GL Entries' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Consolidate', N'General Ledger', @GeneralLedgerActivitiesParentMenuId, N'Consolidate', N'Activity', N'Screen', N'GeneralLedger.view.Consolidate', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Consolidate GL Entries', N'General Ledger', @GeneralLedgerActivitiesParentMenuId, N'Consolidate GL Entries', N'Activity', N'Screen', N'GeneralLedger.view.Consolidate', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'GeneralLedger.view.Consolidate' WHERE strMenuName = N'Consolidate' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'GeneralLedger.view.Consolidate' WHERE strMenuName = N'Consolidate GL Entries' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Origin Audit Log' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -993,8 +990,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Clone Ac
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GeneralLedger.view.AccountClone' WHERE strMenuName = N'Clone Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 	
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Fiscal Years' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
-UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GeneralLedger.view.FiscalYear?showSearch=true' WHERE strMenuName = N'Fiscal Years' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Fiscal Year' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
+UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GeneralLedger.view.FiscalYear?showSearch=true' WHERE strMenuName = N'Fiscal Year' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Reallocations' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId and strCategory = 'Maintenance')
 UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'GeneralLedger.view.Reallocation?showSearch=true' WHERE strMenuName = N'Reallocations' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId and strCategory = 'Maintenance'
@@ -1079,7 +1076,6 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Account Adjustment' AND strMod
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Trial Balance Detail' AND strModuleName ='General Ledger' AND strCategory = 'Report'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'General Ledger By Account ID Detail' AND strModuleName ='General Ledger' AND strCategory = 'Report'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'General Ledger'
-
 /* END OF DELETING */
 
 /* FINANCIAL REPORT DESIGNER */
