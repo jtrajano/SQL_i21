@@ -5419,6 +5419,7 @@
     <Build Include="dbo\Views\vyuMFGetInventoryShipmentCustomField.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReleaseReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateBondStatus.sql" />
+    <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
