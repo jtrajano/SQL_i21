@@ -5688,6 +5688,8 @@
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetReceived.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertSiteRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertItemRecord.sql" />
+    <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
+    <Build Include="dbo\Views\vyuAPOriginPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5831,6 +5833,7 @@
     <None Include="Scripts\Post-Deployment\HD\RenameHDScreen.sql" />
     <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
