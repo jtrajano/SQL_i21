@@ -13,9 +13,9 @@
         "layout": "fit",
         "maximizable": true,
         "minHeight": 594,
-        "minWidth": 715,
+        "minWidth": 780,
         "title": "Copy Item Location",
-        "width": 715
+        "width": 780
     },
     "configAlternates": {
         "collapsible": "boolean",
@@ -191,7 +191,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "designer|createAlias": "advancefiltergrid",
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "height": null,
                                         "itemId": "grdItems",
                                         "layout|flex": 1,
@@ -301,6 +301,121 @@
                                             },
                                             "name": "MyColumn72",
                                             "designerId": "2de18d54-8828-4863-8091-4bc831a17736"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strCommodityCode",
+                                                "flex": 1,
+                                                "itemId": "colCommodity",
+                                                "text": "Commodity"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn7",
+                                            "designerId": "4c62d765-60ba-4a48-ae52-5e4c4aef3d79"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strCategoryCode",
+                                                "flex": 1,
+                                                "itemId": "colCategory",
+                                                "text": "Category"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn8",
+                                            "designerId": "11c7ebbe-bd6e-4bbe-b30b-d98532b1433e"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strManufacturer",
+                                                "flex": 1,
+                                                "itemId": "colManufacturer",
+                                                "text": "Manufacturer"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn9",
+                                            "designerId": "5e59be6d-1340-4018-ab8b-d57d77017e1e"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strBrandName",
+                                                "flex": 1,
+                                                "itemId": "colBrand",
+                                                "text": "Brand"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn11",
+                                            "designerId": "3983f1e3-8e77-4c2c-be31-baf1a69bfb49"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strVendorName",
+                                                "flex": 1,
+                                                "itemId": "colVendor",
+                                                "text": "Vendor"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn17",
+                                            "designerId": "78ebbcf2-8f68-40ba-a34d-2fdf97eb3971"
                                         },
                                         {
                                             "type": "Ext.view.Table",

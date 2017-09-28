@@ -29,6 +29,14 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemLocationViews(param));
         }
 
+        [HttpGet]
+        [ActionName("GetItemLocation")]
+        public async Task<HttpResponseMessage> GetItemLocation(GetParameter param)
+        {
+            var result = await _bl.GetItemLocation(param);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+
         public struct ItemLocationParam
         {
             public int ItemId { get; set; }

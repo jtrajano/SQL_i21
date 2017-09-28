@@ -33,8 +33,8 @@ Ext.define('Inventory.view.CopyItemLocation', {
 
     height: 594,
     minHeight: 594,
-    minWidth: 715,
-    width: 715,
+    minWidth: 780,
+    width: 780,
     layout: 'fit',
     collapsible: true,
     title: 'Copy Item Location',
@@ -93,7 +93,7 @@ Ext.define('Inventory.view.CopyItemLocation', {
                             },
                             items: [
                                 {
-                                    xtype: 'advancefiltergrid',
+                                    xtype: 'frmadvancesearchgrid',
                                     flex: 1,
                                     reference: 'grdItems',
                                     itemId: 'grdItems',
@@ -125,6 +125,41 @@ Ext.define('Inventory.view.CopyItemLocation', {
                                             itemId: 'colType',
                                             dataIndex: 'strType',
                                             text: 'Type'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            flex: 1,
+                                            itemId: 'colCommodity',
+                                            dataIndex: 'strCommodityCode',
+                                            text: 'Commodity'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            flex: 1,
+                                            itemId: 'colCategory',
+                                            dataIndex: 'strCategoryCode',
+                                            text: 'Category'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            flex: 1,
+                                            itemId: 'colManufacturer',
+                                            dataIndex: 'strManufacturer',
+                                            text: 'Manufacturer'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            flex: 1,
+                                            itemId: 'colBrand',
+                                            dataIndex: 'strBrandName',
+                                            text: 'Brand'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            flex: 1,
+                                            itemId: 'colVendor',
+                                            dataIndex: 'strVendorName',
+                                            text: 'Vendor'
                                         }
                                     ],
                                     dockedItems: [

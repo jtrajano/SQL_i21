@@ -9,6 +9,16 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
             },
             btnCopy: {
                 disabled: '{!hasSourceItem}'
+            },
+            grdItems: {
+                colStrItemNo: 'strItemNo',
+                colDescription: 'strItemDescription',
+                colType: 'strType',
+                colCommodity: 'strCommodityCode',
+                colCategory: 'strCategoryCode',
+                colManufacturer: 'strManufacturer',
+                colBrand: 'strBrandName',
+                colVendor: 'strVendorName'
             }
         }
     },
@@ -86,12 +96,14 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
     setupContext: function(config) {
         var me = this;
         var win = config.window;
-        var store = Ext.create('Inventory.store.Item', { pageSize: 0 });
+        var store = Ext.create('Inventory.store.ItemLocation', { pageSize: 0 });
         
+        store.getProxy().api.read = '../inventory/api/itemlocation/getitemlocation';
+
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store: store,
-            include: 'tblICItemLocations, tblICItemLocations.vyuICGetItemLocation',
+            //include: 'tblICItemLocations, tblICItemLocations.vyuICGetItemLocation',
             binding: me.config.binding
         });
 
