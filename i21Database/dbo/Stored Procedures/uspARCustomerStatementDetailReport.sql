@@ -49,6 +49,7 @@ DECLARE @temp_xml_table TABLE (
 DECLARE @temp_aging_table TABLE(	
 	 [strCustomerName]			NVARCHAR(100)
 	,[strEntityNo]				NVARCHAR(100)
+	,[strCustomerInfo]			NVARCHAR(200)
 	,[intEntityCustomerId]		INT
 	,[dblCreditLimit]			NUMERIC(18,6)
 	,[dblTotalAR]				NUMERIC(18,6)

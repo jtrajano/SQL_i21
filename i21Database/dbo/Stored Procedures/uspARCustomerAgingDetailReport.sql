@@ -18,6 +18,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			,[strRecordNumber]			NVARCHAR(100)
 			,[intInvoiceId]				INT
 			,[strCustomerName]			NVARCHAR(100)
+			,[strCustomerInfo]			NVARCHAR(200)
 			,[strBOLNumber]				NVARCHAR(100)
 			,[intEntityCustomerId]		INT
 			,[strCustomerNumber]		NVARCHAR(100)			
@@ -152,6 +153,7 @@ END
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'DECLARE @temp_aging_table TABLE(
      [strCustomerName]			NVARCHAR(100)
 	,[strCustomerNumber]		NVARCHAR(100)
+	,[strCustomerInfo]			NVARCHAR(200)
 	,[strInvoiceNumber]			NVARCHAR(100)
 	,[strRecordNumber]			NVARCHAR(100)
 	,[intInvoiceId]				INT	

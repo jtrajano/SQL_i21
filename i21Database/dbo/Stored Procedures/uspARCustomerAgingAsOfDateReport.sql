@@ -247,6 +247,7 @@ GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber
 
 SELECT strCustomerName		= E.strName
      , strEntityNo			= E.strEntityNo
+	 , strCustomerInfo		= E.strName + CHAR(13) + E.strEntityNo
 	 , intEntityCustomerId	= AGING.intEntityCustomerId
 	 , dblCreditLimit		= C.dblCreditLimit
 	 , dblTotalAR			= AGING.dblTotalAR
