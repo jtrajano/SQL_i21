@@ -5699,6 +5699,9 @@
     <Build Include="dbo\Stored Procedures\uspMFReleaseReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateBondStatus.sql" />
     <Build Include="dbo\Views\vyuSCGradingTagReportView.sql" />
+    <Build Include="dbo\Views\vyuAPOriginPayables.sql" />
+    <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
+    <Build Include="Scripts\Post-Deployment\AP\UpdateBillDetailRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

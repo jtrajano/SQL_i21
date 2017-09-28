@@ -30,7 +30,7 @@ INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 INNER JOIN tblCMBankTransaction C ON A.strPaymentRecordNum = C.strTransactionId
 WHERE C.ysnCheckVoid = 0
 --AND A.ysnOrigin = 0
-AND C.ysnClr = 0
+-- AND C.ysnClr = 0
 
 --FIX PAYMENT DETAIL AMOUNT
 --ONLY THOSE RECORDS THAT WERE NOT VOID
@@ -46,7 +46,7 @@ INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
 INNER JOIN tblCMBankTransaction C ON B.strPaymentRecordNum = C.strTransactionId
 WHERE C.ysnCheckVoid = 0
 --AND B.ysnOrigin = 0
-AND C.ysnClr = 0
+-- AND C.ysnClr = 0
 
 --PAYMENT TRANSACTION THAT IS NEED TO BECOME NEGATIVE
 --VOIDED TRANSACTION
