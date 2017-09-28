@@ -1769,7 +1769,7 @@ insert into tblSMTypeValue
 (
 	select strType = 'Status', strValue = strStatus, ysnDefault = convert(bit, 1), intConcurrencyId = 1 from
 	(
-		select distinct strStatus from tblSMActivity where intTransactionId in
+		select distinct strStatus from tblSMActivity where (strStatus is not null or ltrim(rtrim(strStatus)) <> '') and intTransactionId in
 		(
 			select intTransactionId from tblSMTransaction where intRecordId in
 			(
@@ -1791,7 +1791,7 @@ insert into tblSMTypeValue
 (
 	select strType = 'Priority', strValue = strPriority, ysnDefault = convert(bit, 1), intConcurrencyId = 1 from
 	(
-		select distinct strPriority from tblSMActivity where intTransactionId in
+		select distinct strPriority from tblSMActivity where (strPriority is not null or ltrim(rtrim(strPriority)) <> '') and intTransactionId in
 		(
 			select intTransactionId from tblSMTransaction where intRecordId in
 			(
@@ -1813,7 +1813,7 @@ insert into tblSMTypeValue
 (
 	select strType = 'Category', strValue = strCategory, ysnDefault = convert(bit, 1), intConcurrencyId = 1 from
 	(
-		select distinct strCategory from tblSMActivity where intTransactionId in
+		select distinct strCategory from tblSMActivity where (strCategory is not null or ltrim(rtrim(strCategory)) <> '') and intTransactionId in
 		(
 			select intTransactionId from tblSMTransaction where intRecordId in
 			(
