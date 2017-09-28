@@ -10,8 +10,8 @@
        [dblShrink] decimal(18, 6) NULL,
        [strUpDownNotes] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
        [intConcurrencyId] INT NULL,
-	   CONSTRAINT [PK_tblSTCheckoutMarkUpDowns_intCheckoutMarkUpDownId] PRIMARY KEY ([intCheckoutMarkUpDownId]),
-       CONSTRAINT [FK_tblSTCheckoutMarkUpDowns_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]),
-       CONSTRAINT [FK_tblSTCheckoutMarkUpDowns_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
-       CONSTRAINT [FK_tblSTCheckoutMarkUpDowns_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+CONSTRAINT [PK_tblSTCheckoutMarkUpDowns_intCheckoutMarkUpDownId] PRIMARY KEY ([intCheckoutMarkUpDownId]),
+CONSTRAINT [FK_tblSTCheckoutMarkUpDowns_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]),
+CONSTRAINT [FK_tblSTCheckoutMarkUpDowns_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
+CONSTRAINT [FK_tblSTCheckoutMarkUpDowns_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 )

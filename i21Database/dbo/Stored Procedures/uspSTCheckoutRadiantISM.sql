@@ -59,8 +59,8 @@ BEGIN
          , ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
          , ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0)
 	     , (CASE 
-                WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice THEN 0
-                WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < P.dblSalePrice THEN P.dblSalePrice - ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
+                WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice THEN CAST((ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0) AS DECIMAL(18,6))
+                WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < P.dblSalePrice THEN CAST((P.dblSalePrice - ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)) * ISNULL(CAST(Chk.SalesQuantity as int),0) AS DECIMAL(18,6))
             END) AS dblShrink
          , (CASE 
                 WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice THEN 'U Promotion'
