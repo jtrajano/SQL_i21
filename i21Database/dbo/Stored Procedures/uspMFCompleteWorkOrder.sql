@@ -576,6 +576,10 @@ BEGIN TRY
 				,intCreatedUserId
 				,dtmLastModified
 				,intLastModifiedUserId
+				,intSubLocationId 
+				,intStorageLocationId 
+				,dtmActualInputDateTime 
+				,intShiftId 
 				)
 			SELECT @intWorkOrderId
 				,intItemId
@@ -610,6 +614,10 @@ BEGIN TRY
 				,@intUserId
 				,@dtmCurrentDate
 				,@intUserId
+				,intSubLocationId 
+				,intStorageLocationId 
+				,@dtmPlannedDate 
+				,@intPlannedShiftId 
 			FROM dbo.tblICLot L
 			WHERE intLotId = @intInputLotId
 		END
@@ -629,6 +637,9 @@ BEGIN TRY
 				,intCreatedUserId
 				,dtmLastModified
 				,intLastModifiedUserId
+				,intStorageLocationId
+				,dtmActualInputDateTime 
+				,intShiftId 
 				)
 			SELECT @intWorkOrderId
 				,@intInputItemId
@@ -643,6 +654,9 @@ BEGIN TRY
 				,@intUserId
 				,@dtmCurrentDate
 				,@intUserId
+				,@intStorageLocationId
+				,@dtmPlannedDate 
+				,@intPlannedShiftId 
 		END
 
 		EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
