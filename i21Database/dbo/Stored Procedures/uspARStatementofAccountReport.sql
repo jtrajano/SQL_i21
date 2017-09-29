@@ -199,4 +199,4 @@ SELECT @strCustomerName
 	 , @dtmDateFrom
 	 , @dtmDateTo
 
---SELECT * FROM @temp_SOA_table
+SELECT * FROM @temp_SOA_table
