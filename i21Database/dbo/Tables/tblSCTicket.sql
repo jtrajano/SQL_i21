@@ -131,6 +131,7 @@
 	[strElevatorReceiptNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnRailCar] BIT DEFAULT 0 NOT NULL,
 	[strOfflineGuid] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
+    [ysnDeliverySheetPost] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -1058,3 +1059,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'strElevatorReceiptNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Rail Car',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnRailCar'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Flag for delivery sheet posted',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDeliverySheetPost'
