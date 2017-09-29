@@ -1,65 +1,111 @@
-﻿CREATE PROCEDURE [dbo].[uspARUpdateCustomerBudget]
+﻿CREATE PROCEDURE [dbo].[uspARUpdateCustomerBudget] 
 	@PaymentId	INT,
     @Post		BIT = 1
 AS
 
-DECLARE @customerId		INT
-	  , @totalAmount	NUMERIC(18,6)
-	  , @applyToBudget	BIT
-	  , @datePaid		DATETIME
-	  , @budgetId		INT
+DECLARE @customerId			INT
+	  , @totalAmount		NUMERIC(18,6)
+	  , @applyToBudget		BIT
+	  , @datePaid			DATETIME
+	  , @budgetId			INT
+	  , @i					INT = 0
+	  , @dblAmountPaid		DECIMAL(18,6)
+	  , @dtmBudgetBeginDate DATETIME
+	  , @dtmBudgetEndDate	DATETIME
 
 SELECT TOP 1
-	   @customerId		= intEntityCustomerId
-     , @totalAmount		= ISNULL(dblAmountPaid, 0.000000)
-	 , @applyToBudget	= ISNULL(ysnApplytoBudget, 0)
-	 , @datePaid		= dtmDatePaid
-FROM tblARPayment 
+	   @customerId			= arp.intEntityCustomerId
+     , @totalAmount			= ISNULL(arp.dblAmountPaid, 0.000000)
+	 , @applyToBudget		= ISNULL(arp.ysnApplytoBudget, 0)
+	 , @datePaid			= arp.dtmDatePaid
+	 , @dtmBudgetBeginDate	= arc.dtmBudgetBeginDate
+FROM tblARPayment arp
+INNER JOIN tblARCustomer arc
+	ON arc.intEntityId = arp.intEntityCustomerId
 WHERE intPaymentId = @PaymentId
 
+SELECT TOP 1 @dtmBudgetEndDate  = DATEADD(DAY,1,dtmBudgetDate) FROM tblARCustomerBudget WHERE intEntityCustomerId = @customerId ORDER BY dtmBudgetDate DESC
+SELECT ROW_NUMBER() OVER (ORDER BY intCustomerBudgetId) as CNT,* INTO #temp_ARCustomerBudget
+FROM tblARCustomerBudget 
+WHERE intEntityCustomerId = @customerId 
+
+DECLARE @amount DECIMAL(18,6) = @totalAmount;
 IF @applyToBudget = 1
 BEGIN
 	IF @Post = 1
 		BEGIN
-			SELECT TOP 1 
-				@budgetId		= intCustomerBudgetId
-			FROM
-				tblARCustomer C 
-			INNER JOIN 
-				tblARCustomerBudget CB 
-					ON C.[intEntityId] = CB.intEntityCustomerId
-			WHERE 
-				C.[intEntityId] = @customerId
-				AND (CB.ysnUsedBudget = 0 OR CB.dblBudgetAmount <> 0.0000000)
-				AND (ISNULL(@datePaid, GETDATE()) >= CB.dtmBudgetDate AND ISNULL(@datePaid, GETDATE()) < DATEADD(MONTH, 1, CB.dtmBudgetDate))
-			ORDER BY
-				CB.dtmBudgetDate
+			WHILE(@i < (SELECT COUNT(1) FROM #temp_ARCustomerBudget))
+				BEGIN
+					SET @i = @i +1;
+					SELECT @dblAmountPaid = 
+							CASE WHEN dblAmountPaid != dblBudgetAmount
+								THEN
+										CASE WHEN @amount >= dblBudgetAmount
+											THEN 
+												dblBudgetAmount - dblAmountPaid
+											ELSE
+												@amount - (dblAmountPaid)
+										END
+								END,
+							@amount = @amount - ISNULL(@dblAmountPaid,0)
+					FROM #temp_ARCustomerBudget WHERE CNT = @i
+	
+					UPDATE #temp_ARCustomerBudget
+					SET dblAmountPaid = CASE WHEN dblAmountPaid != dblBudgetAmount
+												THEN 
+												@dblAmountPaid
+												ELSE 
+												dblAmountPaid
+												END
+					WHERE CNT = @i
+
+					UPDATE t
+					SET t.dblAmountPaid = tmp.dblAmountPaid
+					FROM tblARCustomerBudget t
+					INNER JOIN #temp_ARCustomerBudget tmp
+						ON tmp.intCustomerBudgetId = t.intCustomerBudgetId
+				END
+			
+			DROP TABLE #temp_ARCustomerBudget
 		END
 	ELSE
 		BEGIN
-			SELECT TOP 1 
-				@budgetId		= intCustomerBudgetId
-			FROM
-				tblARCustomer C 
-			INNER JOIN 
-				tblARCustomerBudget CB 
-					ON C.[intEntityId] = CB.intEntityCustomerId
-			WHERE 
-				C.[intEntityId] = @customerId
-				AND CB.dblAmountPaid <> 0.0000000
-				AND (ISNULL(@datePaid, GETDATE()) >= CB.dtmBudgetDate AND ISNULL(@datePaid, GETDATE()) < DATEADD(MONTH, 1, CB.dtmBudgetDate))
-			ORDER BY
-				CB.dtmBudgetDate DESC
-		END
+			SET @dblAmountPaid = 0;
+			IF(@amount > (SELECT SUM(dblAmountPaid) FROM tblARCustomerBudget WHERE intEntityCustomerId = @customerId))
+				BEGIN
+					UPDATE tblARCustomerBudget
+					SET dblAmountPaid = 0.000000
+					WHERE intEntityCustomerId = @customerId
+				END
+			ELSE
+				BEGIN
+						WHILE(@i < (SELECT COUNT(1) FROM #temp_ARCustomerBudget))
+						BEGIN
+								SET @i = @i +1
 
-	IF ISNULL(@budgetId, 0) > 0
-		BEGIN
-			UPDATE tblARCustomerBudget 
-			SET dblAmountPaid	= CASE WHEN @Post = 1 THEN dblAmountPaid + @totalAmount ELSE dblAmountPaid - @totalAmount END
-				, ysnUsedBudget	= CASE WHEN @Post = 1 
-											THEN 1 
-										ELSE CASE WHEN dblAmountPaid - @totalAmount > 0 THEN 1 ELSE 0 END 
-									END
-			WHERE intCustomerBudgetId = @budgetId
-		END
+								SELECT @dblAmountPaid = 
+										(CASE WHEN dblAmountPaid = dblBudgetAmount
+											THEN
+												dblBudgetAmount
+											ELSE
+												CASE WHEN dblAmountPaid < dblBudgetAmount
+													THEN
+														dblBudgetAmount - dblAmountPaid
+													END
+											END),
+										@amount = CASE WHEN @amount > @dblAmountPaid THEN @amount - @dblAmountPaid ELSE @amount END
+								FROM #temp_ARCustomerBudget WHERE CNT = @i
+
+								UPDATE t
+								SET t.dblAmountPaid = t.dblBudgetAmount - @dblAmountPaid
+								FROM tblARCustomerBudget t
+								INNER JOIN #temp_ARCustomerBudget tmp
+									ON t.intEntityCustomerId = tmp.intEntityCustomerId
+									AND t.intCustomerBudgetId = tmp.intCustomerBudgetId
+								WHERE tmp.CNT = @i
+
+								SELECT @amount,@dblAmountPaid
+						END
+				END
+		END	
 END
