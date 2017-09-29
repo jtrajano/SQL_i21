@@ -5195,7 +5195,7 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colStockOnOrder',
                                                         width: 100,
                                                         align: 'right',
-                                                        text: 'On Order'
+                                                        text: 'Purchase Order'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -5235,7 +5235,7 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colStockCommitted',
                                                         width: 100,
                                                         align: 'right',
-                                                        text: 'Committed'
+                                                        text: 'Sales Order'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',

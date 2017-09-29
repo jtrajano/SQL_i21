@@ -15753,7 +15753,7 @@
                                                 "align": "right",
                                                 "itemId": "colStockOnOrder",
                                                 "summaryType": "sum",
-                                                "text": "On Order",
+                                                "text": "Purchase Order",
                                                 "width": 100
                                             },
                                             "configAlternates": {
@@ -15878,7 +15878,7 @@
                                                 "align": "right",
                                                 "itemId": "colStockCommitted",
                                                 "summaryType": "sum",
-                                                "text": "Committed",
+                                                "text": "Sales Order",
                                                 "width": 100
                                             },
                                             "configAlternates": {

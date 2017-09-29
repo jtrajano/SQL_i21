@@ -989,11 +989,17 @@ Ext.define('Inventory.view.ItemViewController', {
                 colStockInTransitInbound: 'dblInTransitInbound',
                 colStockOnHand: 'dblUnitOnHand',
                 colStockInTransitOutbound: 'dblInTransitOutbound',
-                colStockBackOrder: 'dblCalculatedBackOrder', // formerly, this is: colStockBackOrder: 'dblBackOrder',
+                colStockBackOrder: {
+                    dataIndex: 'dblCalculatedBackOrder', // formerly, this is: colStockBackOrder: 'dblBackOrder',
+                    hidden: true
+                },
                 colStockCommitted: 'dblOrderCommitted',
                 colStockOnStorage: 'dblUnitStorage',
                 colStockConsignedPurchase: 'dblConsignedPurchase',
-                colStockConsignedSale: 'dblConsignedSale',
+                colStockConsignedSale: {
+                    dataIndex: 'dblConsignedSale',
+                    hidden: true
+                },
                 colStockReserved: 'dblUnitReserved',
                 colStockAvailable: 'dblAvailable'
             },
