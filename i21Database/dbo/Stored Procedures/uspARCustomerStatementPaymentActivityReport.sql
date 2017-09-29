@@ -33,33 +33,6 @@ DECLARE @dtmDateToLocal				AS DATETIME			= NULL
 	  , @filter						AS NVARCHAR(MAX)	= ''
 	  , @intEntityCustomerId		AS INT				= NULL
 
-<<<<<<< HEAD
-DECLARE @temp_aging_table TABLE(
-     [strCustomerName]          NVARCHAR(100)
-    ,[strEntityNo]              NVARCHAR(100)
-	,[strCustomerInfo]			NVARCHAR(200)
-    ,[intEntityCustomerId]      INT
-    ,[dblCreditLimit]			NUMERIC(18,6)
-    ,[dblTotalAR]               NUMERIC(18,6)
-    ,[dblFuture]                NUMERIC(18,6)
-    ,[dbl0Days]                 NUMERIC(18,6)
-    ,[dbl10Days]                NUMERIC(18,6)
-    ,[dbl30Days]                NUMERIC(18,6)
-    ,[dbl60Days]                NUMERIC(18,6)
-    ,[dbl90Days]                NUMERIC(18,6)
-    ,[dbl91Days]                NUMERIC(18,6)
-    ,[dblTotalDue]              NUMERIC(18,6)
-    ,[dblAmountPaid]            NUMERIC(18,6)
-    ,[dblCredits]               NUMERIC(18,6)
-	,[dblPrepayments]			NUMERIC(18,6)
-    ,[dblPrepaids]              NUMERIC(18,6)
-    ,[dtmAsOfDate]              DATETIME
-    ,[strSalespersonName]       NVARCHAR(100)
-	,[strSourceTransaction]		NVARCHAR(100)
-)
-
-=======
->>>>>>> 6629b47... a. AR-5492
 DECLARE @temp_statement_table TABLE(
      [intEntityCustomerId]			INT
     ,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
