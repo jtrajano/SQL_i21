@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATPostDividend] 
 	@intDividendId INT = NULL,
 	@ysnPosted BIT = NULL,
+	@ysnRecap BIT = NULL,
 	@intUserId INT = NULL,
+	@batchIdUsed NVARCHAR(40) = NULL OUTPUT,
 	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
 	@success BIT = 0 OUTPUT 
@@ -19,8 +21,8 @@ SET ANSI_WARNINGS OFF
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage'
+DECLARE @MODULE_CODE NVARCHAR(25) = 'PAT'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Dividend'
-DECLARE @MODULE_CODE NVARCHAR(5)  = 'PAT'
 DECLARE @totalRecords INT
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @error NVARCHAR(200)
@@ -34,6 +36,8 @@ BEGIN TRANSACTION
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
+SET @batchIdUsed = @batchId;
 
 SELECT TOP 1 @intAPClearingId = intAPClearingGLAccount FROM tblPATCompanyPreference;
 
@@ -72,7 +76,7 @@ BEGIN
 			[strRateType]
 	)
 	SELECT	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	D.intDividendsGLAccount,
 		[dblDebit]						=	ROUND(C.dblDividendAmount,2),
 		[dblCredit]						=	0,
@@ -113,7 +117,7 @@ BEGIN
 	--AP Clearing
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmProcessDate), 0),
-		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+		[strBatchId]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	@intAPClearingId, 
 		[dblDebit]						=	0,
 		[dblCredit]						=	ROUND(B.dblDividendAmount,2),
@@ -152,37 +156,37 @@ END
 ELSE
 BEGIN
 	INSERT INTO @GLEntries(
-			[strTransactionId]
-			,[intTransactionId]
-			,[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[dblDebitForeign]           
-			,[dblDebitReport]            
-			,[dblCreditForeign]          
-			,[dblCreditReport]           
-			,[dblReportingRate]          
-			,[dblForeignRate]
-			,[strRateType]
+		[strTransactionId]
+		,[intTransactionId]
+		,[dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[dblDebitForeign]           
+		,[dblDebitReport]            
+		,[dblCreditForeign]          
+		,[dblCreditReport]           
+		,[dblReportingRate]          
+		,[dblForeignRate]
+		,[strRateType]
 	)
 	SELECT	
 		[strTransactionId]
@@ -226,7 +230,72 @@ END
 
 BEGIN TRY
 
-EXEC uspGLBookEntries @GLEntries, @ysnPosted
+	IF(ISNULL(@ysnRecap,0) = 0)
+	BEGIN
+		EXEC uspGLBookEntries @GLEntries, @ysnPosted
+	END
+	ELSE
+	BEGIN
+			SELECT * FROM @GLEntries
+			INSERT INTO tblGLPostRecap(
+				[strTransactionId]
+				,[intTransactionId]
+				,[intAccountId]
+				,[strDescription]
+				,[strJournalLineDescription]
+				,[strReference]	
+				,[dtmTransactionDate]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[dtmDate]
+				,[ysnIsUnposted]
+				,[intConcurrencyId]	
+				,[dblExchangeRate]
+				,[intUserId]
+				,[dtmDateEntered]
+				,[strBatchId]
+				,[strCode]
+				,[strModuleName]
+				,[strTransactionForm]
+				,[strTransactionType]
+				,[strAccountId]
+				,[strAccountGroup]
+			)
+			SELECT
+				[strTransactionId]
+				,A.[intTransactionId]
+				,A.[intAccountId]
+				,A.[strDescription]
+				,A.[strJournalLineDescription]
+				,A.[strReference]	
+				,A.[dtmTransactionDate]
+				,A.[dblDebit]
+				,A.[dblCredit]
+				,A.[dblDebitUnit]
+				,A.[dblCreditUnit]
+				,A.[dtmDate]
+				,A.[ysnIsUnposted]
+				,A.[intConcurrencyId]	
+				,A.[dblExchangeRate]
+				,A.[intUserId]
+				,A.[dtmDateEntered]
+				,A.[strBatchId]
+				,A.[strCode]
+				,A.[strModuleName]
+				,A.[strTransactionForm]
+				,A.[strTransactionType]
+				,B.strAccountId
+				,C.strAccountGroup
+			FROM @GLEntries A
+			INNER JOIN dbo.tblGLAccount B 
+				ON A.intAccountId = B.intAccountId
+			INNER JOIN dbo.tblGLAccountGroup C
+				ON B.intAccountGroupId = C.intAccountGroupId
+
+			GOTO Post_Commit;
+	END
 END TRY
 BEGIN CATCH
 	SET @error = ERROR_MESSAGE()
@@ -234,7 +303,7 @@ BEGIN CATCH
 	GOTO Post_Rollback
 END CATCH
 
-IF ISNULL(@ysnPosted,0) = 0
+IF (ISNULL(@ysnPosted,0) = 0)
 BEGIN
 	
 	UPDATE tblGLDetail SET ysnIsUnposted = 1
