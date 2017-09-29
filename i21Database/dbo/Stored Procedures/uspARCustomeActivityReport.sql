@@ -6,30 +6,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 
-DECLARE @temp_aging_table TABLE(	
-	 [strCustomerName]			NVARCHAR(100)
-	,[strEntityNo]				NVARCHAR(100)
-	,[strCustomerInfo]			NVARCHAR(200)
-	,[intEntityCustomerId]		INT
-	,[dblCreditLimit]			NUMERIC(18,6)
-	,[dblTotalAR]				NUMERIC(18,6)
-	,[dblFuture]				NUMERIC(18,6)
-	,[dbl0Days]					NUMERIC(18,6)
-	,[dbl10Days]				NUMERIC(18,6)
-	,[dbl30Days]				NUMERIC(18,6)
-	,[dbl60Days]				NUMERIC(18,6)
-	,[dbl90Days]				NUMERIC(18,6)
-	,[dbl91Days]				NUMERIC(18,6)
-	,[dblTotalDue]				NUMERIC(18,6)
-	,[dblAmountPaid]			NUMERIC(18,6)
-	,[dblCredits]				NUMERIC(18,6)
-	,[dblPrepayments]			NUMERIC(18,6)
-	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME
-	,[strSalespersonName]		NVARCHAR(100)
-	,[strSourceTransaction]		NVARCHAR(100)
-)
-
 -- Declare the variables.
 DECLARE  @strAsOfDateTo					AS NVARCHAR(50)
 		,@strAsOfDateFrom				AS NVARCHAR(50)
@@ -131,7 +107,32 @@ SET @strRecordNumber = ISNULL(REVERSE(SUBSTRING(REVERSE(@strRecordNumber),PATIND
 SET @strPaymentMethod = REPLACE (@strPaymentMethod, ',', '''')
 SET @strPaymentMethod = ISNULL(REVERSE(SUBSTRING(REVERSE(@strPaymentMethod),PATINDEX('%[A-Za-z0-9]%',REVERSE(@strPaymentMethod)),LEN(@strPaymentMethod) - (PATINDEX('%[A-Za-z0-9]%',REVERSE(@strPaymentMethod)) - 1)) ), NULL)
 
-INSERT INTO @temp_aging_table
+TRUNCATE TABLE tblARCustomerAgingStagingTable
+INSERT INTO tblARCustomerAgingStagingTable (
+	   strCustomerName
+	 , strCustomerNumber
+	 , strCustomerInfo
+	 , intEntityCustomerId
+	 , dblCreditLimit
+	 , dblTotalAR
+	 , dblFuture
+	 , dbl0Days
+	 , dbl10Days
+	 , dbl30Days
+	 , dbl60Days
+	 , dbl90Days
+	 , dbl91Days
+	 , dblTotalDue
+	 , dblAmountPaid
+	 , dblCredits
+	 , dblPrepayments
+	 , dblPrepaids
+	 , dtmAsOfDate
+	 , strSalespersonName
+	 , strSourceTransaction
+	 , strCompanyName
+	 , strCompanyAddress
+)
 EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, NULL, NULL, NULL
  
 SELECT DISTINCT
@@ -330,7 +331,7 @@ INNER JOIN (SELECT
 				,[dblPrepaids]				
 				,[dtmAsOfDate]				
 			FROM 
-				@temp_aging_table) Aging ON I.intEntityCustomerId = Aging.intEntityCustomerId
+				tblARCustomerAgingStagingTable) Aging ON I.intEntityCustomerId = Aging.intEntityCustomerId
 LEFT JOIN (SELECT 
 				intEntityCustomerId, 
 				dtmLastPaymentDate 

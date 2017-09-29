@@ -286,6 +286,8 @@ SELECT strCustomerName		= E.strName
 	 , intCompanyLocationId	= AGING.intCompanyLocationId
 	 , strSourceTransaction	= @strSourceTransactionLocal
 	 , strType				= AGING.strType
+	 , strCompanyName		= COMPANY.strCompanyName
+	 , strCompanyAddress	= COMPANY.strCompanyAddress
 FROM
 (SELECT A.strInvoiceNumber
      , A.strRecordNumber
@@ -738,3 +740,8 @@ LEFT JOIN (SELECT intEntityId
 				 , strEntityNo 
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 ) E ON C.intEntityId = E.intEntityId
+OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY

@@ -33,6 +33,7 @@ DECLARE @dtmDateToLocal				AS DATETIME			= NULL
 	  , @filter						AS NVARCHAR(MAX)	= ''
 	  , @intEntityCustomerId		AS INT				= NULL
 
+<<<<<<< HEAD
 DECLARE @temp_aging_table TABLE(
      [strCustomerName]          NVARCHAR(100)
     ,[strEntityNo]              NVARCHAR(100)
@@ -57,6 +58,8 @@ DECLARE @temp_aging_table TABLE(
 	,[strSourceTransaction]		NVARCHAR(100)
 )
 
+=======
+>>>>>>> 6629b47... a. AR-5492
 DECLARE @temp_statement_table TABLE(
      [intEntityCustomerId]			INT
     ,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -122,10 +125,35 @@ IF @strLocationNameLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
 
 IF @ysnSearchOnly = 0
-BEGIN
-	INSERT INTO @temp_aging_table
-	EXEC dbo.uspARCustomerAgingAsOfDateReport NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
-END
+	BEGIN
+		TRUNCATE TABLE tblARCustomerAgingStagingTable
+		INSERT INTO tblARCustomerAgingStagingTable (
+			   strCustomerName
+			 , strCustomerNumber
+			 , strCustomerInfo
+			 , intEntityCustomerId
+			 , dblCreditLimit
+			 , dblTotalAR
+			 , dblFuture
+			 , dbl0Days
+			 , dbl10Days
+			 , dbl30Days
+			 , dbl60Days
+			 , dbl90Days
+			 , dbl91Days
+			 , dblTotalDue
+			 , dblAmountPaid
+			 , dblCredits
+			 , dblPrepayments
+			 , dblPrepaids
+			 , dtmAsOfDate
+			 , strSalespersonName
+			 , strSourceTransaction
+			 , strCompanyName
+			 , strCompanyAddress
+		)
+		EXEC dbo.uspARCustomerAgingAsOfDateReport NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
+	END
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 
 'SELECT * 
@@ -335,19 +363,19 @@ IF @ysnIncludeBudgetLocal = 1
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN        
 		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0
-        UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
+        UPDATE tblARCustomerAgingStagingTable SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
     END
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
         DELETE FROM @temp_statement_table WHERE ISNULL(dblBalance, 0) = 0
-        DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+        DELETE FROM tblARCustomerAgingStagingTable WHERE dblTotalAR = 0
     END
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
-		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0 
+		DELETE FROM tblARCustomerAgingStagingTable WHERE dblTotalAR < 0 
 	END
 
 INSERT INTO @temp_cf_table (
@@ -517,7 +545,7 @@ FROM (
 		FROM @temp_cf_table
 	) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
 ) MAINREPORT
-LEFT JOIN @temp_aging_table AS AGINGREPORT 
+LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN (
 	SELECT intEntityId

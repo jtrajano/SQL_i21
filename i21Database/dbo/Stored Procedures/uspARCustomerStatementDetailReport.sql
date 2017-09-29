@@ -46,30 +46,6 @@ DECLARE @temp_xml_table TABLE (
 	,[datatype]		NVARCHAR(50)
 )
 
-DECLARE @temp_aging_table TABLE(	
-	 [strCustomerName]			NVARCHAR(100)
-	,[strEntityNo]				NVARCHAR(100)
-	,[strCustomerInfo]			NVARCHAR(200)
-	,[intEntityCustomerId]		INT
-	,[dblCreditLimit]			NUMERIC(18,6)
-	,[dblTotalAR]				NUMERIC(18,6)
-	,[dblFuture]				NUMERIC(18,6)
-	,[dbl0Days]					NUMERIC(18,6)
-	,[dbl10Days]				NUMERIC(18,6)
-	,[dbl30Days]				NUMERIC(18,6)
-	,[dbl60Days]				NUMERIC(18,6)
-	,[dbl90Days]				NUMERIC(18,6)
-	,[dbl91Days]				NUMERIC(18,6)
-	,[dblTotalDue]				NUMERIC(18,6)
-	,[dblAmountPaid]			NUMERIC(18,6)
-	,[dblCredits]				NUMERIC(18,6)
-	,[dblPrepayments]			NUMERIC(18,6)
-	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME
-	,[strSalespersonName]		NVARCHAR(100)
-	,[strSourceTransaction]		NVARCHAR(100)
-)
-
 DECLARE @temp_statement_table TABLE(
 	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,[strTransactionType]			NVARCHAR(100)
@@ -148,7 +124,32 @@ ELSE
 		SET @innerQuery = 'AND I.dtmPostDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo+''
 	END
 
-INSERT INTO @temp_aging_table
+TRUNCATE TABLE tblARCustomerAgingStagingTable
+INSERT INTO tblARCustomerAgingStagingTable (
+	   strCustomerName
+	 , strCustomerNumber
+	 , strCustomerInfo
+	 , intEntityCustomerId
+	 , dblCreditLimit
+	 , dblTotalAR
+	 , dblFuture
+	 , dbl0Days
+	 , dbl10Days
+	 , dbl30Days
+	 , dbl60Days
+	 , dbl90Days
+	 , dbl91Days
+	 , dblTotalDue
+	 , dblAmountPaid
+	 , dblCredits
+	 , dblPrepayments
+	 , dblPrepaids
+	 , dtmAsOfDate
+	 , strSalespersonName
+	 , strSourceTransaction
+	 , strCompanyName
+	 , strCompanyAddress
+)
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
 
 DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmDate')
@@ -296,5 +297,5 @@ SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
 	 , strCompanyAddress			= STATEMENTREPORT.strCompanyAddress
 	 , dtmAsOfDate					= @dtmDateTo
 FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT 
+INNER JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
