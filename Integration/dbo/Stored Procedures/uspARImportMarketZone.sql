@@ -110,6 +110,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportMarketZone]
 	--================================================
 	IF(@Update = 1 AND @MarketZoneCode IS NULL) 
 	BEGIN
-		SELECT @Total = COUNT(gamkt_key) from tblARTempMarketZone
+		--SELECT @Total = COUNT(gamkt_key) from tblARTempMarketZone
+		select @Total = COUNT(gamkt_key) from gamktmst where gamkt_key  
+			COLLATE Latin1_General_CI_AS not in ( select strMarketZoneCode from tblARMarketZone)
 	END'
 	)
