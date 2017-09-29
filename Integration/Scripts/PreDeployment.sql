@@ -196,6 +196,7 @@
 :r "..\dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateTMCustomerView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateETExportTankManagementSiteView.sql"
 
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
