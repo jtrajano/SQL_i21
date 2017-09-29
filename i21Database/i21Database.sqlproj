@@ -5693,6 +5693,7 @@
     <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
     <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
     <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
+    <Build Include="dbo\Views\vyuSCTicketScreenView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
