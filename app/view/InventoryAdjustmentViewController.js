@@ -95,13 +95,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intLocationId',
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
-                            },
-                            {
-                                column: 'dblOnHand',
-                                value: '{getOnHandFilterValue}',
-                                conjunction: 'and',
-                                condition: 'gt'
-                            },
+                            }
                         ]
                     }
                 },
@@ -128,12 +122,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intSubLocationId',
                                 value: '{grdInventoryAdjustment.selection.intSubLocationId}',
                                 conjunction: 'and'
-                            },
-                            {
-                                column: 'dblOnHand',
-                                value: '{getOnHandFilterValue}',
-                                conjunction: 'and',
-                                condition: 'gt'
                             }
                         ]
                     }
@@ -393,7 +381,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intCompanyLocationId',
                                 value: '{grdInventoryAdjustment.selection.intNewLocationId}',
                                 conjunction: 'and',
-                                condition: 'blk'
+                                condition: 'eq'
                             },
                             {
                                 column: 'strClassification',
@@ -915,12 +903,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewWeightPerQty', null);
             current.set('dblLineTotal', 0.00);
 
-            current.set('strStorageLocation', records[0].get('strStorageLocationName'));
-            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('strStorageLocation', null);
+            current.set('intStorageLocationId', null);
             current.set('intSubLocationId', records[0].get('intSubLocationId'));
-            current.set('dblQuantity', records[0].get('dblOnHand'));
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
-            current.set('strItemUOM', records[0].get('strUnitMeasure'));
+            current.set('dblQuantity', null);
+            current.set('intItemUOMId', null);
+            current.set('strItemUOM', null);
         }
         else if (combo.itemId === 'cboStorageLocation') {
             current.set('intStorageLocationId', record.get('intStorageLocationId'));
@@ -946,12 +934,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewWeightPerQty', null);
             current.set('dblLineTotal', 0.00);
 
-            current.set('strSubLocation', records[0].get('strSubLocationName'));
-            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            // current.set('strSubLocation', records[0].get('strSubLocationName'));
+            // current.set('intSubLocationId', records[0].get('intSubLocationId'));
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
-            current.set('dblQuantity', records[0].get('dblOnHand'));
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
-            current.set('strItemUOM', records[0].get('strUnitMeasure'));
+            current.set('dblQuantity', null);
+            current.set('intItemUOMId', null);
+            current.set('strItemUOM', null);
         }
 
         else if (combo.itemId === 'cboNewItemNo') {

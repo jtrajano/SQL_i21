@@ -19,7 +19,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         'Inventory.store.BufferedItemOwner',
         'Inventory.store.BufferedItemStockUOMView',
         'GeneralLedger.controls.RecapTab',
-        'GeneralLedger.controls.PostHistory'
+        'GeneralLedger.controls.PostHistory',
+        'Inventory.store.BufferedItemSubLocationsLookup',
+        'Inventory.store.BufferedItemStorageLocationsLookup'
     ],
 
     stores: {
@@ -72,10 +74,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             type: 'icbufferedstocktrackingitemview'
         },
         subLocation: {
-            type: 'smcompanylocationsublocationbuffered'
+            type: 'icbuffereditemsublocationslookup'
         },
         storageLocation: {
-            type: 'icbufferedstoragelocation'
+            type: 'icbuffereditemstoragelocationslookup'
         },
         lot: {
             type: 'icbufferedpostedlot'
@@ -115,10 +117,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             type: 'icbuffereditemowner'
         },
         fromSubLocation: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemsublocationslookup'
         },    
         fromStorageLocation: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemstoragelocationslookup'
         }
     },
 

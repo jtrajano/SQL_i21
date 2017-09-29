@@ -404,6 +404,12 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 },
                                                                 {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
                                                                     dataIndex: 'intItemLocationId',
                                                                     dataType: 'numeric',
                                                                     text: 'Item Location Id',
@@ -422,34 +428,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'intStorageLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Storage Unit Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strStorageLocationName',
+                                                                    dataIndex: 'strClassification',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Unit',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'dblOnHand',
-                                                                    dataType: 'float',
-                                                                    text: 'Available Qty',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intItemUOMId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item UOM Id',
+                                                                    text: 'Classification',
                                                                     hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'UOM',
-                                                                    flex: 1
                                                                 }
                                                             ],
                                                             itemId: 'cboSubLocation',
@@ -475,12 +457,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'intItemLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'numeric',
                                                                     text: 'Storage Location Id',
@@ -496,30 +472,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
                                                                     text: 'Storage Unit',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strSubLocationName',
-                                                                    dataType: 'string',
-                                                                    hidden: true,
-                                                                    text: 'Storage Location'
-                                                                },
-                                                                {
-                                                                    dataIndex: 'dblOnHand',
-                                                                    dataType: 'float',
-                                                                    text: 'Available Qty',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intItemUOMId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item UOM Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'UOM',
                                                                     flex: 1
                                                                 }
                                                             ],
@@ -1147,34 +1099,40 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intCompanyLocationSubLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Storage Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataIndex: 'intLocationId',
                                                                     dataType: 'numeric',
                                                                     text: 'Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Company Location Name',
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Storage Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Location Name',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strSubLocationDescription',
+                                                                    dataIndex: 'strClassification',
                                                                     dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
+                                                                    text: 'Classification',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboNewSubLocation',
