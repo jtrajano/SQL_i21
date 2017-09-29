@@ -128,6 +128,7 @@
 	,SCT.ysnRailCar
 	,SCD.strDeliverySheetNumber
 	,SCListTicket.strTicketType
+	,SCT.ysnDeliverySheetPost
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intMatchTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
     
 	,SMC.strLocationName AS strProcessingLocationName
@@ -205,7 +206,7 @@
 	,CAST (0 AS BIT) ysnDateModified
 	,SCT.intConcurrencyId
 	,SCT.strOfflineGuid
-  from tblSCTicket SCT
+  FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
 	LEFT JOIN tblSCListTicketTypes SCListTicket on SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag
