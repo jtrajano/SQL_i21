@@ -221,7 +221,7 @@ INNER JOIN (
 			JOIN (SELECT intInvoiceDetailId
 									, intTaxCodeId
 									, strCalculationMethod
-									, dblRate = 0
+									, dblRate
 									, dblAdjustedTax = 0 --case when ysnTaxExempt = 1 then 0 else dblAdjustedTax end
 									, dblTax = 0 
 								FROM dbo.tblARInvoiceDetailTax idx WITH (NOLOCK) 
