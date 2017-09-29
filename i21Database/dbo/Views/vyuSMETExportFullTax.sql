@@ -188,7 +188,7 @@ FROM
 	)
 	, Locale6LC6OnFET		= 'N'
 	FROM tblICItem Item 
-	INNER JOIN tblICCategory Category ON Item.intCategoryId = Category.intCategoryId
+	INNER JOIN tblICCategory Category ON Item.intCategoryId = Category.intCategoryId AND Item.strStatus = 'Active'
 	INNER JOIN tblICCategoryTax CategoryTax ON Category.intCategoryId = CategoryTax.intCategoryId
 	INNER JOIN tblSMTaxCode TaxCode ON CategoryTax.intTaxClassId = TaxCode.intTaxClassId
 	INNER JOIN tblSMTaxCodeRate TaxCodeRate ON TaxCode.intTaxCodeId = TaxCodeRate.intTaxCodeId
