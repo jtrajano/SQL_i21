@@ -24,10 +24,13 @@ emEnt.strName AS strCustomerName
 ,cfVehicle.strNoticeMessageLine1 as strNoticeMessageLine
 ,icItem.strItemNo as strItem
 ,icItem.strDescription as strItemDescription
+,strDepartment =  cfDept.strDepartment
 FROM   dbo.tblCFVehicle AS cfVehicle 
 INNER JOIN dbo.tblCFAccount AS cfAccount ON cfAccount.intAccountId = cfVehicle.intAccountId 
 INNER JOIN dbo.tblARCustomer AS arCust ON arCust.intEntityId = cfAccount.intCustomerId
 INNER JOIN dbo.tblEMEntity AS emEnt ON emEnt.intEntityId = arCust.intEntityId
+LEFT JOIN tblCFDepartment cfDept
+	ON cfVehicle.intDepartmentId = cfDept.intDepartmentId
 LEFT JOIN dbo.tblICItem AS icItem ON icItem.intItemId = cfVehicle.intExpenseItemId
 
 
