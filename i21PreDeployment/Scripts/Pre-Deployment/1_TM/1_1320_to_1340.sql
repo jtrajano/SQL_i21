@@ -103,13 +103,13 @@ BEGIN
     DROP CONSTRAINT [FK_tblTMDispatch_tblTMSite]
 END
 GO
-IF NOT EXISTS (SELECT TOP 1 1 FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_tblTMDispatch_tblTMSite1]') AND parent_object_id = OBJECT_ID(N'[dbo].[tblTMDispatch]'))
-AND EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblTMDispatch' and TABLE_TYPE = N'BASE TABLE')
-BEGIN
-    ALTER TABLE [dbo].[tblTMDispatch] WITH CHECK ADD  CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY([intSiteID])
-    REFERENCES [dbo].[tblTMSite] ([intSiteID])
-END
-GO
+--IF NOT EXISTS (SELECT TOP 1 1 FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_tblTMDispatch_tblTMSite1]') AND parent_object_id = OBJECT_ID(N'[dbo].[tblTMDispatch]'))
+--AND EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblTMDispatch' and TABLE_TYPE = N'BASE TABLE')
+--BEGIN
+--    ALTER TABLE [dbo].[tblTMDispatch] WITH CHECK ADD  CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY([intSiteID])
+--    REFERENCES [dbo].[tblTMSite] ([intSiteID])
+--END
+--GO
 IF EXISTS (SELECT TOP 1 1 FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_tblTMDispatch_tblTMSite1]') AND parent_object_id = OBJECT_ID(N'[dbo].[tblTMDispatch]'))
 BEGIN
     ALTER TABLE [dbo].[tblTMDispatch] CHECK CONSTRAINT [FK_tblTMDispatch_tblTMSite1]
