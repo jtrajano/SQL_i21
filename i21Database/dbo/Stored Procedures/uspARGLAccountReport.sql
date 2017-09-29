@@ -48,7 +48,7 @@ FROM (
 	GROUP BY GLD.intAccountId, GLAD.strAccountId, strAccountCategory
 ) GL
 OUTER APPLY (
-	SELECT dblTotalAR				= SUM(dblTotalAR) + SUM(dblPrepayments)
+	SELECT dblTotalAR				= SUM(dblTotalAR) + ABS(SUM(dblPrepayments))
 	     , dblTotalPrepayments		= SUM(dblPrepayments)
 		 , dblTotalReportBalance    = SUM(dblTotalAR)
 	FROM tblARCustomerAgingStagingTable
