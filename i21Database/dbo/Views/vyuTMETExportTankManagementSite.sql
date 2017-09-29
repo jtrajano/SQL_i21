@@ -23,8 +23,8 @@ SELECT
 	,ROUND(ISNULL(A.dblTotalReserve,0),2) TotalReserve
 	,ISNULL(RTRIM(LTRIM(F.strItemNo)),'') Product
 	,CASE ISNULL(A.ysnTaxable,0) WHEN 1 THEN 'Yes' ELSE 'No' END SalesTax
-	,ISNULL(G.strTaxGroup,'') TaxStateID
-	,'' TaxLocale1
+	,ISNULL(LEFT(G.strTaxGroup,2),'') TaxStateID
+	,ISNULL(G.intTaxGroupId,'') TaxLocale1
 	,'' TaxLocale2
 	,CASE A.intDeliveryTermID WHEN NULL THEN
 			ISNULL(C.strTermCode,'')
