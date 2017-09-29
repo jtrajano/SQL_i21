@@ -156,11 +156,103 @@ IF @strLocationNameLocal IS NOT NULL
 
 IF @ysnSearchOnly = 0
 	BEGIN
-		INSERT INTO @temp_aging_table
+		TRUNCATE TABLE tblARCustomerAgingStagingTable
+		INSERT INTO tblARCustomerAgingStagingTable (
+			   strCustomerName
+			 , strCustomerNumber
+			 , intEntityCustomerId
+			 , dblCreditLimit
+			 , dblTotalAR
+			 , dblFuture
+			 , dbl0Days
+			 , dbl10Days
+			 , dbl30Days
+			 , dbl60Days
+			 , dbl90Days
+			 , dbl91Days
+			 , dblTotalDue
+			 , dblAmountPaid
+			 , dblCredits
+			 , dblPrepayments
+			 , dblPrepaids
+			 , dtmAsOfDate
+			 , strSalespersonName
+			 , strSourceTransaction
+			 , strCompanyName
+			 , strCompanyAddress
+		)		
 		EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, 1
+		INSERT INTO @temp_aging_table
+		SELECT strCustomerName
+			 , strCustomerNumber
+             , intEntityCustomerId
+             , dblCreditLimit
+             , dblTotalAR
+             , dblFuture
+             , dbl0Days
+             , dbl10Days
+             , dbl30Days
+             , dbl60Days
+             , dbl90Days
+             , dbl91Days
+             , dblTotalDue
+             , dblAmountPaid
+             , dblCredits
+	         , dblPrepayments
+             , dblPrepaids
+             , dtmAsOfDate
+             , strSalespersonName
+	         , strSourceTransaction
+		FROM tblARCustomerAgingStagingTable
 
-		INSERT INTO @temp_balanceforward_table
+		TRUNCATE TABLE tblARCustomerAgingStagingTable
+		INSERT INTO tblARCustomerAgingStagingTable (
+			   strCustomerName
+			 , strCustomerNumber
+			 , intEntityCustomerId
+			 , dblCreditLimit
+			 , dblTotalAR
+			 , dblFuture
+			 , dbl0Days
+			 , dbl10Days
+			 , dbl30Days
+			 , dbl60Days
+			 , dbl90Days
+			 , dbl91Days
+			 , dblTotalDue
+			 , dblAmountPaid
+			 , dblCredits
+			 , dblPrepayments
+			 , dblPrepaids
+			 , dtmAsOfDate
+			 , strSalespersonName
+			 , strSourceTransaction
+			 , strCompanyName
+			 , strCompanyAddress
+		)
 		EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmBalanceForwardDateLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
+		INSERT INTO @temp_balanceforward_table
+		SELECT strCustomerName
+			 , strCustomerNumber
+             , intEntityCustomerId
+             , dblCreditLimit
+             , dblTotalAR
+             , dblFuture
+             , dbl0Days
+             , dbl10Days
+             , dbl30Days
+             , dbl60Days
+             , dbl90Days
+             , dbl91Days
+             , dblTotalDue
+             , dblAmountPaid
+             , dblCredits
+	         , dblPrepayments
+             , dblPrepaids
+             , dtmAsOfDate
+             , strSalespersonName
+	         , strSourceTransaction
+		FROM tblARCustomerAgingStagingTable
 	END
 
 SET @queryForCF = CAST('' AS NVARCHAR(MAX)) + '

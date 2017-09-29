@@ -5703,6 +5703,8 @@
     <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailRate.sql" />
     <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
+    <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
