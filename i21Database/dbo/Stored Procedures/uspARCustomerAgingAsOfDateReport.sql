@@ -265,6 +265,8 @@ SELECT strCustomerName		= E.strName
 	 , dtmAsOfDate          = @dtmDateToLocal
 	 , strSalespersonName   = 'strSalespersonName'
 	 , strSourceTransaction	= @strSourceTransactionLocal
+	 , strCompanyName		= COMPANY.strCompanyName
+	 , strCompanyAddress	= COMPANY.strCompanyAddress
 FROM
 (SELECT A.intEntityCustomerId
      , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
@@ -719,5 +721,10 @@ LEFT JOIN (SELECT intEntityId
 				 , strEntityNo 
 			FROM tblEMEntity WITH (NOLOCK)
 ) E ON C.intEntityId = E.intEntityId
+OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY
 WHERE ISNULL(AGING.intEntityCustomerId, 0) > 0
 ORDER BY strCustomerName

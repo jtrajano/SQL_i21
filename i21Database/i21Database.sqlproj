@@ -5691,6 +5691,8 @@
     <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
     <Build Include="dbo\Views\vyuAPOriginPayables.sql" />
     <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
+    <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -6671,4 +6671,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intSort" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0200a5a1-ea4b-4b12-b97f-e2e74774d497" ChangeDateTime="09/29/2017 02:46:17">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerAgingStagingTable].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerAgingStagingTable]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInvoiceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3b4fa2c0-183c-4abf-9c35-28f394ebc5b5" ChangeDateTime="09/29/2017 04:24:32">
+    <Property Name="ElementName" Value="[dbo].[tblARGLSummaryStagingTable].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARGLSummaryStagingTable]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAccountId" />
+  </Operation>
 </Operations>
