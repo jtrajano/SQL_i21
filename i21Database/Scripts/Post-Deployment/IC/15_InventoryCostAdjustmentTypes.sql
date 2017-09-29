@@ -16,6 +16,9 @@ USING	(
 		UNION ALL 
 		SELECT	id = 2
 				,name = 'New Cost'
+		UNION ALL 
+		SELECT	id = 3
+				,name = 'Adjust Stock Value'
 
 ) AS InventoryCostAdjustmentTypeHardValues
 	ON  InventoryCostAdjustmentTypes.intInventoryCostAdjustmentTypeId = InventoryCostAdjustmentTypeHardValues.id

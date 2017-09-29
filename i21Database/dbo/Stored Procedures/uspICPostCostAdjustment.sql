@@ -15,6 +15,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustment]
 	@ItemsToAdjust AS ItemCostAdjustmentTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
 	,@intEntityUserSecurityId AS INT
+	,@ysnPost AS BIT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -128,7 +129,7 @@ BEGIN
 			,[intCostUOMId]
 			,[dblVoucherCost] 
 			,[dblNewValue]
-			,[intCurrencyId] 
+			,[intCurrencyId]
 			,[intTransactionId]
 			,[intTransactionDetailId] 
 			,[strTransactionId] 
@@ -290,31 +291,64 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST) AND (@strActualCostId IS NULL)
 	BEGIN TRY
-		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveAvg
-			@dtmDate
-			,@intItemId 
-			,@intItemLocationId 
-			,@intSubLocationId
-			,@intStorageLocationId 
-			,@intItemUOMId
-			,@dblQty
-			,@intCostUOMId 
-			,@dblNewCost
-			,@dblNewValue 
-			,@intTransactionId 
-			,@intTransactionDetailId 
-			,@strTransactionId 
-			,@intSourceTransactionId 
-			,@intSourceTransactionDetailId 
-			,@strSourceTransactionId 
-			,@strBatchId 
-			,@intTransactionTypeId 
-			,@intEntityUserSecurityId 
-			,@intRelatedInventoryTransactionId 
-			,@TransactionFormName 
-			,@intFobPointId 
-			,@intInTransitSourceLocationId 
-
+		-- If there is a stock qty, do the typical cost adjustment. 
+		IF dbo.fnGetItemOnHandQty(@intItemId, @intItemLocationId) > 0
+		BEGIN 
+			EXEC @ReturnValue = dbo.uspICPostAdjustAvgCost
+				@dtmDate
+				,@intItemId 
+				,@intItemLocationId 
+				,@intSubLocationId
+				,@intStorageLocationId 
+				,@intItemUOMId
+				,@dblQty
+				,@intCostUOMId 
+				,@dblNewCost
+				,@dblNewValue 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@intSourceTransactionId 
+				,@intSourceTransactionDetailId 
+				,@strSourceTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@intEntityUserSecurityId 
+				,@intRelatedInventoryTransactionId 
+				,@TransactionFormName 
+				,@intFobPointId 
+				,@intInTransitSourceLocationId 
+				,@ysnPost
+		END 
+		-- If there is NO stock qty, do the retroactive adjustment. 
+		ELSE 
+		BEGIN 
+			EXEC @ReturnValue = dbo.uspICPostAdjustRetroactiveAvgCost
+				@dtmDate
+				,@intItemId 
+				,@intItemLocationId 
+				,@intSubLocationId
+				,@intStorageLocationId 
+				,@intItemUOMId
+				,@dblQty
+				,@intCostUOMId 
+				,@dblNewCost
+				,@dblNewValue 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@intSourceTransactionId 
+				,@intSourceTransactionDetailId 
+				,@strSourceTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@intEntityUserSecurityId 
+				,@intRelatedInventoryTransactionId 
+				,@TransactionFormName 
+				,@intFobPointId 
+				,@intInTransitSourceLocationId 
+				,@ysnPost
+		END 
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 

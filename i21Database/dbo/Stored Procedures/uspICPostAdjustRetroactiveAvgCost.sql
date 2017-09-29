@@ -1,7 +1,7 @@
 ﻿/*
 
 */
-CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveAvg]
+CREATE PROCEDURE [dbo].[uspICPostAdjustRetroactiveAvgCost]
 	@dtmDate AS DATETIME
 	,@intItemId AS INT
 	,@intItemLocationId AS INT
@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveAvg]
 	,@strTransactionForm AS NVARCHAR(50) = 'Bill'
 	,@intFobPointId AS TINYINT = NULL
 	,@intInTransitSourceLocationId AS INT = NULL  
+	,@ysnPost AS BIT = 1 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -47,6 +48,7 @@ BEGIN
 	-- Declare the cost types
 	DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 			,@COST_ADJ_TYPE_New_Cost AS INT = 2
+			,@COST_ADJ_Adjust_Stock_Value AS INT = 3
 
 	-- Create the variables for the internal transaction types used by costing. 
 	DECLARE @INV_TRANS_TYPE_Auto_Variance AS INT = 1
@@ -201,6 +203,50 @@ BEGIN
 	END 
 END 
 
+-- Log the original cost
+BEGIN 
+	DECLARE @DummyInventoryTransactionId AS INT 
+	SET @DummyInventoryTransactionId = -CAST(RAND() * 1000000 AS INT) 
+	
+	IF NOT EXISTS (
+		SELECT	* 
+		FROM	tblICInventoryFIFOCostAdjustmentLog cl
+		WHERE	cl.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+				AND cl.intInventoryFIFOId = @CostBucketId
+	)
+	BEGIN 
+		INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
+			[intInventoryFIFOId]
+			,[intInventoryTransactionId] 
+			,[intInventoryCostAdjustmentTypeId] 
+			,[dblQty] 
+			,[dblCost] 
+			,[dblValue] 
+			,[ysnIsUnposted] 
+			,[dtmCreated] 
+			,[strRelatedTransactionId] 
+			,[intRelatedTransactionId] 
+			,[intCreatedUserId] 
+			,[intCreatedEntityUserId] 
+		)
+		SELECT
+			[intInventoryFIFOId] = cb.intInventoryFIFOId
+			,[intInventoryTransactionId] = @DummyInventoryTransactionId 
+			,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
+			,[dblQty] = cb.dblStockIn
+			,[dblCost] = cb.dblCost
+			,[dblValue] = NULL 
+			,[ysnIsUnposted]  = 0 
+			,[dtmCreated] = GETDATE()
+			,[strRelatedTransactionId] = cb.strTransactionId 
+			,[intRelatedTransactionId] = cb.intTransactionId
+			,[intCreatedUserId] = @intEntityUserSecurityId
+			,[intCreatedEntityUserId] = @intEntityUserSecurityId
+		FROM tblICInventoryFIFO cb 
+		WHERE	cb.intInventoryFIFOId = @CostBucketId
+	END 
+END 
+
 -- Initialize the Running Qty (converted to stock UOM), Running Value, and Average Cost. 
 BEGIN 	
 	SELECT	@StockItemUOMId = dbo.fnGetItemStockUOM(@intItemId) 			
@@ -314,11 +360,11 @@ BEGIN
 
 		-- Calculate the Average Cost 
 		SET @RetroactiveAverageCost = 
-			CASE	WHEN @RunningQty > 0 AND @t_dblQty > 0 THEN 
+			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
 						@RunningValue / @RunningQty
-					WHEN @RunningQty <= 0 AND @t_dblQty > 0 THEN 
+					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
 						@t_dblQty * @t_dblCost / @t_dblQty
-					WHEN @t_dblQty <= 0  THEN 
+					ELSE 
 						@RetroactiveAverageCost
 			END 
 
@@ -400,6 +446,56 @@ BEGIN
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
 			FROM	dbo.tblICInventoryTransaction t
 			WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
+
+
+		END 
+
+		-- Log the cost adjustment 
+		BEGIN 
+			INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
+				[intInventoryFIFOId]
+				,[intInventoryTransactionId] 
+				,[intInventoryCostAdjustmentTypeId] 
+				,[dblQty] 
+				,[dblCost] 
+				,[dblValue] 
+				,[ysnIsUnposted] 
+				,[dtmCreated] 
+				,[strRelatedTransactionId] 
+				,[intRelatedTransactionId] 
+				,[intCreatedUserId] 
+				,[intCreatedEntityUserId] 
+			)
+			SELECT
+				[intInventoryFIFOId] = @CostBucketId
+				,[intInventoryTransactionId] = @DummyInventoryTransactionId 
+				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_Adjust_Stock_Value
+				,[dblQty] = NULL 
+				,[dblCost] = NULL 
+				,[dblValue] = 
+					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+								@CostAdjustment
+							WHEN @t_dblQty < 0 THEN 
+								(dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty) * @RetroactiveAverageCost)
+								- (@t_dblQty * @t_dblCost)
+							ELSE 
+								0
+					END 
+				,[ysnIsUnposted]  = CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+				,[dtmCreated] = GETDATE()
+				,[strRelatedTransactionId] = @strTransactionId 
+				,[intRelatedTransactionId] = @intTransactionId
+				,[intCreatedUserId] = @intEntityUserSecurityId
+				,[intCreatedEntityUserId] = @intEntityUserSecurityId
+			WHERE		
+				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+							@CostAdjustment
+						WHEN @t_dblQty < 0 THEN 
+							(dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty) * @RetroactiveAverageCost)
+							- (@t_dblQty * @t_dblCost)
+						ELSE 
+							0
+				END <> 0 
 		END 
 
 		-- Initial fetch attempt
@@ -473,7 +569,18 @@ BEGIN
 		,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
 		,@intForexRateTypeId					= NULL
 		,@dblForexRate							= 1
-		,@strDescription						= @strDescription
+		,@strDescription						= @strDescription	
+
+		UPDATE	tblICInventoryTransaction 
+		SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+		WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+END 
+
+-- Update the log with correct inventory transaction id
+BEGIN 
+	UPDATE	tblICInventoryFIFOCostAdjustmentLog 
+	SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
 END 
 
 -- Update the average cost
