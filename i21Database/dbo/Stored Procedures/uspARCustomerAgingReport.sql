@@ -12,52 +12,28 @@ SET ANSI_WARNINGS OFF
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
 		SET @xmlParam = NULL
-
-		DECLARE @temp_aging_table TABLE(	
-			 [strCustomerName]			NVARCHAR(100)
-			,[strEntityNo]				NVARCHAR(100)
-			,[intEntityCustomerId]		INT
-			,[dblCreditLimit]			NUMERIC(18,6)
-			,[dblTotalAR]				NUMERIC(18,6)
-			,[dblFuture]				NUMERIC(18,6)
-			,[dbl0Days]					NUMERIC(18,6)
-			,[dbl10Days]				NUMERIC(18,6)
-			,[dbl30Days]				NUMERIC(18,6)
-			,[dbl60Days]				NUMERIC(18,6)
-			,[dbl90Days]				NUMERIC(18,6)
-			,[dbl91Days]				NUMERIC(18,6)
-			,[dblTotalDue]				NUMERIC(18,6)
-			,[dblAmountPaid]			NUMERIC(18,6)
-			,[dblCredits]				NUMERIC(18,6)
-			,[dblPrepayments]			NUMERIC(18,6)
-			,[dblPrepaids]				NUMERIC(18,6)
-			,[dtmAsOfDate]				DATETIME
-			,[strSalespersonName]		NVARCHAR(100)
-			,[strCompanyName]		    NVARCHAR(MAX)
-			,[strCompanyAddress]	    NVARCHAR(MAX)
-		)
-
-		SELECT * FROM @temp_aging_table
+		
+		SELECT * FROM tblARCustomerAgingStagingTable
 	END
 
 -- Declare the variables.
-DECLARE  @strAsOfDateTo				AS NVARCHAR(50)
-		,@strAsOfDateFrom	        AS NVARCHAR(50)
-		,@strSalesperson			AS NVARCHAR(100)
-		,@strCustomerName			AS NVARCHAR(100)
-		,@xmlDocumentId				AS INT
-		,@query						AS NVARCHAR(MAX)
-		,@filter					AS NVARCHAR(MAX) = ''
-		,@fieldname					AS NVARCHAR(50)
-		,@condition					AS NVARCHAR(20)
-		,@id						AS INT 
-		,@from						AS NVARCHAR(100)
-		,@to						AS NVARCHAR(100)
-		,@join						AS NVARCHAR(10)
-		,@begingroup				AS NVARCHAR(50)
-		,@endgroup					AS NVARCHAR(50)
-		,@datatype					AS NVARCHAR(50)
-		,@strSourceTransaction	    AS NVARCHAR(100)
+DECLARE  @dtmDateTo				DATETIME
+      , @dtmDateFrom			DATETIME
+	  , @intEntityCustomerId	INT	= NULL
+	  , @strSalesperson			NVARCHAR(100)
+	  , @strCustomerName		NVARCHAR(100)
+	  , @xmlDocumentId			INT
+	  , @filter					NVARCHAR(MAX) = ''
+	  , @fieldname				NVARCHAR(50)
+	  , @condition				NVARCHAR(20)
+	  , @id						INT 
+	  , @from					NVARCHAR(100)
+	  , @to						NVARCHAR(100)
+	  , @join					NVARCHAR(10)
+	  , @begingroup				NVARCHAR(50)
+	  , @endgroup				NVARCHAR(50)
+	  , @datatype				NVARCHAR(50)
+	  , @strSourceTransaction	NVARCHAR(100)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -99,8 +75,8 @@ SELECT  @strSalesperson = ISNULL([from], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
 
-SELECT	@strAsOfDateFrom = ISNULL([from], '')
-       ,@strAsOfDateTo   = ISNULL([to], '')
+SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
+ 	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 
@@ -108,66 +84,7 @@ SELECT  @strSourceTransaction = ISNULL([from], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSourceTransaction'
 
-SET @strAsOfDateFrom = CASE WHEN @strAsOfDateFrom IS NULL THEN '''''' ELSE ''''+@strAsOfDateFrom+'''' END
-SET @strAsOfDateTo   = CASE WHEN @strAsOfDateTo IS NULL THEN '''''' ELSE ''''+@strAsOfDateTo+'''' END
-SET @strCustomerName = CASE WHEN @strCustomerName IS NULL THEN '''''' ELSE ''''+@strCustomerName+'''' END
-SET @strSalesperson  = CASE WHEN @strSalesperson IS NULL THEN '''''' ELSE ''''+@strSalesperson+'''' END
-SET @strSourceTransaction  = CASE WHEN @strSourceTransaction IS NULL THEN '''''' ELSE ''''+@strSourceTransaction+'''' END
-	
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'strSalespersonName', 'strSourceTransaction')
-
-WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
-BEGIN
-	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
-	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
-	
-	DELETE FROM @temp_xml_table WHERE id = @id
-
-	IF EXISTS(SELECT 1 FROM @temp_xml_table)
-	BEGIN
-		SET @filter = @filter + ' AND '
-	END
-END
-
-SET @query = 'DECLARE @temp_aging_table TABLE(	
-	 [strCustomerName]			NVARCHAR(100)
-	,[strEntityNo]				NVARCHAR(100)
-	,[intEntityCustomerId]		INT
-	,[dblCreditLimit]			NUMERIC(18,6)
-	,[dblTotalAR]				NUMERIC(18,6)
-	,[dblFuture]				NUMERIC(18,6)
-	,[dbl0Days]					NUMERIC(18,6)
-	,[dbl10Days]				NUMERIC(18,6)
-	,[dbl30Days]				NUMERIC(18,6)
-	,[dbl60Days]				NUMERIC(18,6)
-	,[dbl90Days]				NUMERIC(18,6)
-	,[dbl91Days]				NUMERIC(18,6)
-	,[dblTotalDue]				NUMERIC(18,6)
-	,[dblAmountPaid]			NUMERIC(18,6)
-	,[dblCredits]				NUMERIC(18,6)
-	,[dblPrepayments]			NUMERIC(18,6)
-	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME
-	,[strSalespersonName]		NVARCHAR(100)
-	,[strSourceTransaction]		NVARCHAR(100)
-)
-
-DECLARE @dtmDateTo				DATETIME
-       ,@dtmDateFrom			DATETIME
-	   ,@strCustomerName		NVARCHAR(100)
-	   ,@strSalesperson			NVARCHAR(100)
-	   ,@strSourceTransaction	NVARCHAR(100)
-	   ,@intEntityCustomerId	INT	= NULL
-
-SET @dtmDateTo   = CAST(CASE WHEN '+@strAsOfDateTo+' <> '''' THEN '+@strAsOfDateTo+' ELSE GETDATE() END AS DATETIME)
-SET @dtmDateFrom = CAST(CASE WHEN '+@strAsOfDateFrom+' <> '''' THEN '+@strAsOfDateFrom+' ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
-SET @strCustomerName = ISNULL('+@strCustomerName+', NULL)
-SET @strSalesperson = ISNULL('+@strSalesperson+', NULL)
-SET @strSourceTransaction = ISNULL('+@strSourceTransaction+', NULL)
-
-IF ISNULL(@strCustomerName, '''''''') <> ''''
-	SELECT TOP 1 @intEntityCustomerId = intEntityCustomerId FROM vyuARCustomerSearch WITH (NOLOCK) WHERE strName = @strCustomerName
-
+-- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)
 ELSE 			  
@@ -177,20 +94,36 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
- 
-INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson, @intEntityCustomerId, @strSourceTransaction
 
-DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+IF ISNULL(@strCustomerName, '') <> ''
+	SELECT TOP 1 @intEntityCustomerId = intEntityId FROM tblEMEntity WITH (NOLOCK) WHERE strName = @strCustomerName
 
-SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-     , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
-     , * 
-FROM @temp_aging_table'
+TRUNCATE TABLE tblARCustomerAgingStagingTable
+INSERT INTO tblARCustomerAgingStagingTable (
+	   strCustomerName
+	 , strCustomerNumber
+	 , intEntityCustomerId
+	 , dblCreditLimit
+	 , dblTotalAR
+	 , dblFuture
+	 , dbl0Days
+	 , dbl10Days
+	 , dbl30Days
+	 , dbl60Days
+	 , dbl90Days
+	 , dbl91Days
+	 , dblTotalDue
+	 , dblAmountPaid
+	 , dblCredits
+	 , dblPrepayments
+	 , dblPrepaids
+	 , dtmAsOfDate
+	 , strSalespersonName
+	 , strSourceTransaction
+	 , strCompanyName
+	 , strCompanyAddress
+)
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom, @dtmDateTo, @strSalesperson, @intEntityCustomerId, @strSourceTransaction
+EXEC dbo.uspARGLAccountReport @dtmDateTo
 
-IF ISNULL(@filter,'') != ''
-BEGIN
-	SET @query = @query + ' WHERE ' + @filter
-END
-
-EXEC sp_executesql @query
+SELECT * FROM tblARCustomerAgingStagingTable  WHERE ISNULL(dblTotalAR, 0) <> 0

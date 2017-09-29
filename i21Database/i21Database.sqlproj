@@ -5420,6 +5420,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReleaseReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateBondStatus.sql" />
     <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
+    <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

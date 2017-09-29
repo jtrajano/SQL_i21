@@ -14,37 +14,7 @@
 AS
 	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT)	
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
-	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]
-	DECLARE @temp_aging_table TABLE(
-		 [strCustomerName]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,[strCustomerNumber]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,[strInvoiceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,[strRecordNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,[intInvoiceId]				INT	
-		,[strBOLNumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,[intEntityCustomerId]		INT	
-		,[dblCreditLimit]			NUMERIC(18,6)
-		,[dblTotalAR]				NUMERIC(18,6)
-		,[dblFuture]				NUMERIC(18,6)
-		,[dbl0Days]					NUMERIC(18,6)
-		,[dbl10Days]				NUMERIC(18,6)
-		,[dbl30Days]				NUMERIC(18,6)
-		,[dbl60Days]				NUMERIC(18,6)
-		,[dbl90Days]				NUMERIC(18,6)
-		,[dbl91Days]				NUMERIC(18,6)
-		,[dblTotalDue]				NUMERIC(18,6)
-		,[dblAmountPaid]			NUMERIC(18,6)
-		,[dblInvoiceTotal]			NUMERIC(18,6)
-		,[dblCredits]				NUMERIC(18,6)
-		,[dblPrepayments]			NUMERIC(18,6)
-		,[dblPrepaids]				NUMERIC(18,6)
-		,[dtmDate]					DATETIME
-		,[dtmDueDate]				DATETIME
-		,[dtmAsOfDate]				DATETIME
-		,[strSalespersonName]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,[intCompanyLocationId]		INT
-		,[strSourceTransaction]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	)
+	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]	
 	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
 	      , @dblMinimumSC		NUMERIC(18, 6) = 0
 
@@ -99,10 +69,42 @@ AS
 	--GET CUSTOMER AGING IF CALCULATION IS BY CUSTOMER BALANCE
 	IF (@calculation = 'By Customer Balance')
 		BEGIN
-			INSERT INTO @temp_aging_table
+			TRUNCATE TABLE tblARCustomerAgingStagingTable
+			INSERT INTO tblARCustomerAgingStagingTable (
+				   strCustomerName
+				, strCustomerNumber
+				, strInvoiceNumber
+				, strRecordNumber
+				, intInvoiceId
+				, strBOLNumber
+				, intEntityCustomerId
+				, dblCreditLimit
+				, dblTotalAR
+				, dblFuture
+				, dbl0Days
+				, dbl10Days
+				, dbl30Days
+				, dbl60Days
+				, dbl90Days
+				, dbl91Days
+				, dblTotalDue
+				, dblAmountPaid
+				, dblInvoiceTotal
+				, dblCredits
+				, dblPrepayments
+				, dblPrepaids
+				, dtmDate
+				, dtmDueDate
+				, dtmAsOfDate
+				, strSalespersonName
+				, intCompanyLocationId
+				, strSourceTransaction
+				, strCompanyName
+				, strCompanyAddress
+			)
 			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDate, NULL
 
-			DELETE FROM @temp_aging_table
+			DELETE FROM tblARCustomerAgingStagingTable
 			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('CF Tran'))
 		END
 
@@ -191,7 +193,7 @@ AS
 						BEGIN
 							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
 
-							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
+							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId = @entityId							
 							SELECT TOP 1 @dblMinimumSC = dblMinimumCharge FROM tblARCustomer C 
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.intEntityCustomerId = @entityId
 			
@@ -214,7 +216,7 @@ AS
 																		ELSE
 																			SC.dblPercentage
 						 											END, dbo.fnARGetDefaultDecimal())
-									FROM @temp_aging_table AGING
+									FROM tblARCustomerAgingStagingTable AGING
 										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
 										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
 									WHERE AGING.intEntityCustomerId = @entityId
