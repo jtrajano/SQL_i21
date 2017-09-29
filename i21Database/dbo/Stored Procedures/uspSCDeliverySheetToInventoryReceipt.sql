@@ -50,6 +50,7 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@batchIdUsed AS INT
 		,@recapId AS INT
 		,@dblTotal AS DECIMAL(18,6)
+		,@dblNetUnits AS DECIMAL(38,20)
 		,@returnValue AS BIT
 		,@requireApproval AS BIT
 		,@intLocationId AS INT;
@@ -337,7 +338,8 @@ END
 	IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
-			
+			SELECT @dblNetUnits = SUM(dblQty) FROM @ItemsForItemReceipt
+			EXEC dbo.uspSCProcessHoldTicket @intDeliverySheetId,@intEntityId, @dblNetUnits , @intUserId, 'I', 0, 1
 			--VOUCHER intergration
 			CREATE TABLE #tmpItemReceiptIds (
 				[intInventoryReceiptItemId] [INT] PRIMARY KEY,

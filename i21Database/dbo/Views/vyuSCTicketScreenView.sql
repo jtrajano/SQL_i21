@@ -130,6 +130,7 @@
 	,SCT.ysnRailCar
 	,SCD.strDeliverySheetNumber
 	,SCListTicket.strTicketType
+	,SCT.ysnDeliverySheetPost
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intMatchTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
     
 	,SMC.strLocationName AS strProcessingLocationName
