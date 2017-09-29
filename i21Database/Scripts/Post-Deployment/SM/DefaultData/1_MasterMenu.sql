@@ -4179,6 +4179,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Types' AN
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'CRM.view.Type' WHERE strMenuName = 'Types' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitors' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Competitors', N'CRM', @CRMMaintenanceParentMenuId, N'CRM Type', N'Maintenance', N'Screen', N'EntityManagement.view.EntityDirect?showSearch=true&searchCommand=EntityCompetitor', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'EntityManagement.view.EntityDirect?showSearch=true&searchCommand=EntityCompetitor' WHERE strMenuName = 'Competitors' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Event' AND strModuleName = 'CRM' AND intParentMenuID = @CRMCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'New Event', N'CRM', @CRMCreateParentMenuId, N'CRM New Event', N'Create', N'Screen', N'GlobalComponentEngine.view.Activity?type=event&action=new&entityType=AccountsReceivable.view.EntityProspect&caller=Prospect', N'small-menu-create', 0, 0, 0, 1, 0, 1)
