@@ -42,6 +42,7 @@ SELECT
 	,ysnHasEmailSetup		= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrency			= SMC.strCurrency
 	,strCurrencyDescription	= SMC.strDescription
+	,strComments			= SO.strComments
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 LEFT OUTER JOIN (
 	 SELECT intEntityId
