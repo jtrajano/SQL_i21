@@ -237,8 +237,8 @@ if(_url.indexOf('version=TF') < 1) {
                             ]
                         },
                         {
-                            url: 'CRUDScripts/StorageLocation/DeleteStorageLocation.js?v='+version,
-                            title: 'DeleteStorageLocation',
+                            url: 'CRUDScripts/StorageLocation/DeleteStorageUnit.js?v='+version,
+                            title: 'DeleteStorageUnit',
                             preload: [
                                 functionalTest,
                                 commonIC
