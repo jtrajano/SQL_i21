@@ -14,7 +14,7 @@ BEGIN
 	SET @strReturnValue = ISNULL(@strGLDescription, @strAccountDescription)
 	
 	-- Output: 
-	-- {GL Description|GL Account Description} ({Item No} in {Transaction Id})  
+	-- {GL Description|GL Account Description} ({Item No} in {Transaction Id})
 	SET @strReturnValue = 
 			ISNULL(@strReturnValue, '') 
 			+ CASE WHEN LEN(@strReturnValue) > 0 THEN ' ' ELSE '' END 
