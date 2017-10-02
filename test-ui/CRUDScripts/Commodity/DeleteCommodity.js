@@ -7,6 +7,7 @@ StartTest (function (t) {
         .displayText('=====  Create Commodity to Delete =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded('')
         .filterGridRecords('Search', 'FilterGrid', 'Delete - Commodity 1')
         .waitUntilLoaded()
         .continueIf({
@@ -24,13 +25,17 @@ StartTest (function (t) {
                     .enterData('Text Field','Description','Commodity with No UOM and Attribute')
                     .clickCheckBox('ExchangeTraded',true)
                     .clickButton('Save')
-                    .clickButton('Close')
+                  
 
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded('')
 
+        .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('Delete - Commodity 1', 1)
         .waitUntilLoaded('')
         .clickButton('Delete')
@@ -43,6 +48,8 @@ StartTest (function (t) {
 
         //region Scenario 2: Delete Used Commodity
         .displayText('=====  Scenario 2: Delete Used Commodity =====')
+        .clickMenuScreen('Commodities','Screen')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('Gasoline', 1)
         .waitUntilLoaded('')
         .clickButton('Delete')

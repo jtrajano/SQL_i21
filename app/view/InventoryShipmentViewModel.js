@@ -79,6 +79,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 {
                     intSourceType: 3,
                     strSourceType: 'Pick Lot'
+                },
+                {
+                    intSourceType: 4,
+                    strSourceType: 'Delivery Sheet'
                 }
             ],
             fields: [
@@ -288,6 +292,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         readOnlyItemDropdown: function (get) {
             var orderType = get('current.intOrderType');
+            if(get('current.intSourceType') === 4)
+                return true;
             switch (orderType) {
                 case 4:
                     return false;
@@ -496,6 +502,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
 
             switch (get('current.intSourceType')) {
                 case 1: // Scale  
+                case 4: // Delivery Sheet
                     return true; 
                 default:  
                     return posted;  
@@ -506,6 +513,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
 
             switch (get('current.intSourceType')) {
                 case 1: // Scale  
+                case 4: // Delivery Sheets
                     return true; 
                 default:  
                     return !posted;  

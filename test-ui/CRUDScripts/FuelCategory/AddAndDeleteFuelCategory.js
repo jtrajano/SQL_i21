@@ -5,23 +5,10 @@ StartTest (function (t) {
         //region
         .displayText('===== Scenario 1: Fuel Category - Add a Record  =====')
         .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded()
         .clickMenuScreen('Fuel Types','Screen')
         .waitUntilLoaded()
-        .continueIf({
-            expected: 'icfueltype',
-            actual: function(win){
-                return win.alias[0].replace('widget.', '');
-            },
-            success: function(next){
-                new iRely.FunctionalTest().start(t, next)
-                    .waitUntilLoaded()
-                    .clickButton('Close')
-                    .waitUntilLoaded()
-                    .done();
-            },
-            continueOnFail: true
-        })
-
+  
         .clickButton('FuelCategory')
         .waitUntilLoaded('')
         .filterGridRecords('GridTemplate', 'FilterGrid', 'Test Fuel Category1')
@@ -134,7 +121,6 @@ StartTest (function (t) {
 
         /*====================================== Scenario 3-7 ======================================*/
         //region
-
         .clickButton('FuelCategory')
         .waitUntilLoaded('')
         .filterGridRecords('GridTemplate', 'FilterGrid', 'Test Fuel Category5')

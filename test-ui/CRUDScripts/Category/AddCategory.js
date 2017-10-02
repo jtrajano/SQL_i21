@@ -18,7 +18,6 @@ new iRely.FunctionalTest().start(t)
 
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
-                    .clickMenuScreen('Categories','Screen')
                     .clickButton('New')
                     .waitUntilLoaded('')
                     .enterData('Text Field','CategoryCode','Inventory Category - 001')
@@ -44,13 +43,16 @@ new iRely.FunctionalTest().start(t)
                     .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
                     .clickButton('Save')
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
-                    .waitUntilLoaded()
+                   
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+      
         .displayText('===== Scenario 1: Add New Category - Inventory Type Done =====')
         //endregion
 
@@ -60,6 +62,7 @@ new iRely.FunctionalTest().start(t)
         //region
         .displayText('===== Scenario 2: Add New Category - Bundle =====')
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Bundle Category - 001')
         .waitUntilLoaded()
         .continueIf({
@@ -88,13 +91,17 @@ new iRely.FunctionalTest().start(t)
 
                     .clickButton('Save')
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                
 
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+ 
         .displayText('===== Scenario 2: Add New Category - Bundle Done=====')
         //endregion
 
@@ -104,6 +111,7 @@ new iRely.FunctionalTest().start(t)
         //region
         .displayText('===== Scenario 3: Add New Category - Kit =====')
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Kit Category - 001')
         .waitUntilLoaded()
         .continueIf({
@@ -130,12 +138,14 @@ new iRely.FunctionalTest().start(t)
                     .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '40000-0000-001', 'strAccountId')
                     .clickButton('Save')
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Scenario 3: Add New Category - Kit Done=====')
         //endregion
 
@@ -145,6 +155,7 @@ new iRely.FunctionalTest().start(t)
         //region
         .displayText('===== Scenario 4: Add New Category - Finished Good Type =====')
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Finished Good Category - 001')
         .waitUntilLoaded()
         .continueIf({
@@ -180,14 +191,17 @@ new iRely.FunctionalTest().start(t)
                     .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16040-0000-000', 'strAccountId')
                     .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16060-0000-000', 'strAccountId')
                     .clickButton('Save')
+                    .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
 
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Scenario 4: Add New Category - Finished Good Type Done =====')
         //endregion
 
@@ -196,6 +210,7 @@ new iRely.FunctionalTest().start(t)
         //region
         .displayText('===== Scenario 5: Add New Category - Non Inventory =====')
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Non Inventory Category - 001')
         .waitUntilLoaded()
         .continueIf({
@@ -222,13 +237,17 @@ new iRely.FunctionalTest().start(t)
                     .verifyGridData('GlAccounts', 1, 'colAccountCategory', 'General')
                     .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '10003-0000-000', 'strAccountId')
                     .clickButton('Save')
+                    .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                    
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Scenario 5: Add New Category - Non Inventory Done =====')
         //endregion
 
@@ -238,6 +257,7 @@ new iRely.FunctionalTest().start(t)
         //region
         .displayText('===== Scenario 6: Add New Category - Other Charge Type =====')
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Other Charge Category - 001')
         .waitUntilLoaded()
         .continueIf({
@@ -267,13 +287,17 @@ new iRely.FunctionalTest().start(t)
                     .selectGridComboBoxRowValue('GlAccounts', 2, 'strAccountId', '10003-0000-000', 'strAccountId')
                     .selectGridComboBoxRowValue('GlAccounts', 3, 'strAccountId', '10003-0007-000', 'strAccountId')
                     .clickButton('Save')
+                    .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                    
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Scenario 6: Add New Category - Other Charge Type Done=====')
         //endregion
 
@@ -283,6 +307,7 @@ new iRely.FunctionalTest().start(t)
         //region
         .displayText('===== Scenario 7: Add New Category - Raw Material Type =====')
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Raw Material Category - 001')
         .waitUntilLoaded()
         .continueIf({
@@ -321,14 +346,17 @@ new iRely.FunctionalTest().start(t)
                     .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
                     .selectGridComboBoxRowValue('GlAccounts', 7, 'strAccountId', '16060-0000-000', 'strAccountId')
                     .clickButton('Save')
+                    .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
 
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Scenario 7: Add New Category - Raw Material Type Done =====')
         //endregion
 
@@ -337,6 +365,7 @@ new iRely.FunctionalTest().start(t)
         //region
         .displayText('===== Scenario 8: Add New Category - Service =====')
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Service Category - 001')
         .waitUntilLoaded()
         .continueIf({
@@ -363,18 +392,19 @@ new iRely.FunctionalTest().start(t)
                     .verifyGridData('GlAccounts', 1, 'colAccountCategory', 'General')
                     .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '10003-0000-000', 'strAccountId')
                     .clickButton('Save')
+                    .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
 
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Scenario 8: Add New Category - Service Done=====')
         //endregion
-
-
 
 
 
@@ -382,6 +412,7 @@ new iRely.FunctionalTest().start(t)
         //region
         .displayText('===== Scenario 9: Add New Category - Software =====')
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Software Category - 001')
         .waitUntilLoaded()
         .continueIf({
@@ -411,7 +442,6 @@ new iRely.FunctionalTest().start(t)
                     .selectGridComboBoxRowValue('GlAccounts', 2, 'strAccountId', '42002-0007-000', 'strAccountId')
                     .clickButton('Save')
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
                     //endregion
 
                     .done();
@@ -419,6 +449,9 @@ new iRely.FunctionalTest().start(t)
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
         .displayText('===== Scenario 9: Add New Category - Software Done=====')
         //endregion
 
@@ -426,6 +459,8 @@ new iRely.FunctionalTest().start(t)
         /*======================================  Scenario 10: Update Category ======================================*/
         .displayText('===== Scenario 10: Update Category =====')
         .clickMenuScreen('Categories','Screen')
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
         .waitUntilLoaded()
         .doubleClickSearchRowValue('Inventory Category - 001', 'strCategoryCode', 1)
         .waitUntilLoaded()
@@ -435,13 +470,15 @@ new iRely.FunctionalTest().start(t)
         .selectGridComboBoxRowValue('Tax',1,'strTaxClass','Checkoff','strTaxClass')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
+        .waitUntilLoaded('')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
 
-
-        .selectSearchRowNumber(1)
-        .clickButton('OpenSelected')
-        .waitUntilLoaded('')
+        .clickMenuScreen('Categories','Screen')
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .doubleClickSearchRowValue('Inventory Category - 001', 'strCategoryCode', 1)
+        .waitUntilLoaded()
         .verifyData('Text Field','Description','Updated Test Category Code')
         .clickButton('Close')
         .displayText('===== Scenario 10: Update Category Done=====')

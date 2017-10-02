@@ -7,6 +7,7 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
         .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Delete - Category 1')
         .waitUntilLoaded()
         .continueIf({
@@ -31,6 +32,8 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .clickButton('Close')
 
+                    .clickMenuScreen('Categories','Screen')
+                    .waitUntilLoaded()
                     .doubleClickSearchRowValue('Delete - Category 1', 1)
                     .waitUntilLoaded('')
                     .clickButton('Delete')
@@ -38,18 +41,21 @@ StartTest (function (t) {
                     .clickMessageBoxButton('yes')
                     .waitUntilLoaded('')
                     .clearTextFilter('FilterGrid')
-
                     .waitUntilLoaded()
                     .done();
             },
             continueOnFail: true
         })
-        .clearTextFilter('FilterGrid')
+     
         .displayText('=====  Scenario 1: Delete Unused Category Done=====')
         //endregion
 
         //region Scenario 2: Delete Used Category
         .displayText('=====  Scenario 2: Delete Used Category =====')
+        .clickMenuScreen('Categories','Screen')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
         .selectSearchRowNumber([1])
         .clickButton('OpenSelected')
         .waitUntilLoaded('')
