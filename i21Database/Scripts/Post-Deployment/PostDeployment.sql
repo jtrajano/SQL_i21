@@ -266,17 +266,6 @@ print 'BEGIN POST DEPLOYMENT'
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
 
---Help Desk
-:R .\HD\DefaultData\1_StatusData.sql
-:R .\HD\DefaultData\2_Screen.sql
-:R .\HD\HDEntryDataFix.sql
-:R .\HD\CustomField.sql
-:R .\HD\RemoveHDObsoleteScreen.sql
-:R .\HD\RenameHDScreen.sql
-
---CRM
-:R .\CRM\SplitCRMData.sql
-
 --Contract Management
 :R .\CT\1_MasterTables.sql
 :R .\CT\172To173.sql
@@ -413,5 +402,17 @@ print 'BEGIN POST DEPLOYMENT'
 
 --TR
 :r .\TR\RemoveObsoleteScreen.sql
+
+--Help Desk
+:R .\HD\DefaultData\1_StatusData.sql
+:R .\HD\DefaultData\2_Screen.sql
+:R .\HD\HDEntryDataFix.sql
+:R .\HD\CustomField.sql
+:R .\HD\RemoveHDObsoleteScreen.sql
+:R .\HD\RenameHDScreen.sql
+
+--CRM
+:R .\CRM\SplitCRMData.sql
+:R .\CRM\RenameCRMScreen.sql
 
 print 'END POST DEPLOYMENT'
