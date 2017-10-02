@@ -107,11 +107,7 @@ SET ANSI_WARNINGS OFF
 			,[intTransactionTypeId] 		 	
 		)	
 		SELECT LD.intItemId
-			,intItemLocationId = (
-				SELECT TOP (1) intItemLocationId
-				FROM tblICItemLocation
-				WHERE intItemId = LD.intItemId
-				)
+			,IL.intItemLocationId
 			,LD.intItemUOMId
 			,NULL
 			,LD.intPSubLocationId
@@ -120,9 +116,17 @@ SET ANSI_WARNINGS OFF
 			,LD.intLoadId
 			,CAST(L.strLoadNumber AS VARCHAR(100))
 			,22
-		FROM tblLGLoadDetail LD
-		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		FROM tblLGLoadDetail LD	INNER JOIN tblLGLoad L 
+				ON L.intLoadId = LD.intLoadId
+			LEFT JOIN vyuCTContractDetailView CT 
+				ON CT.intContractDetailId = LD.intPContractDetailId
+			LEFT JOIN tblICItemLocation IL 
+				ON IL.intLocationId = CT.intCompanyLocationId 
+				AND IL.intItemId = LD.intItemId
 		WHERE LD.intLoadDetailId = @intSourceId;
+
+		-- Reduce the Inbound In-Transit Qty when posting an IR. 
+		-- Or Increase it back when unposting the IR. 
 		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
 
 		SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId

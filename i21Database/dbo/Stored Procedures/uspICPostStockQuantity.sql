@@ -44,6 +44,19 @@ BEGIN
 	SET @dblWeightPerQty = ISNULL(@dblWeightPerQty, 0)
 END 
 
+-----------------------------------------
+-- Do not update an In-Transit Location 
+-----------------------------------------
+IF EXISTS (
+	SELECT	TOP 1 1 
+	FROM	tblICItemLocation il
+	WHERE	il.intItemLocationId = @intItemLocationId
+			AND il.intLocationId IS NULL 
+)
+BEGIN 
+	RETURN; 
+END 
+
 -----------------------------------
 -- Update the Item Stock table
 -----------------------------------
