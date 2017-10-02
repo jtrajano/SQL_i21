@@ -61,7 +61,7 @@ namespace iRely.Inventory.Model
         public decimal? dblConsignedSale { get; set; }
         public decimal? dblUnitReserved { get; set; }
         public decimal? dblAvailable { get; set; }
-        public decimal? dblExtendedCost { get; set; }
+        public decimal? dblExtended { get; set; }
         public bool? ysnStockUnit { get; set; }
     }
 }

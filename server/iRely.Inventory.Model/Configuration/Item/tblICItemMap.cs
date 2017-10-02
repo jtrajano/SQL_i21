@@ -1037,7 +1037,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblConsignedSale).HasColumnName("dblConsignedSale");
             this.Property(t => t.dblUnitReserved).HasColumnName("dblUnitReserved");
             this.Property(t => t.dblAvailable).HasColumnName("dblAvailable");
-            this.Property(t => t.dblExtendedCost).HasColumnName("dblExtendedCost");
+            this.Property(t => t.dblExtended).HasColumnName("dblExtended");
         }
     }
 
@@ -1100,7 +1100,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblConsignedSale).HasColumnName("dblConsignedSale");
             this.Property(t => t.dblUnitReserved).HasColumnName("dblUnitReserved");
             this.Property(t => t.dblAvailable).HasColumnName("dblAvailable");
-            this.Property(t => t.dblExtendedCost).HasColumnName("dblExtendedCost");
+            this.Property(t => t.dblExtended).HasColumnName("dblExtended");
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
         }
     }
