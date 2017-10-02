@@ -2,15 +2,14 @@
 AS 
 
 SELECT 
-	[state] = LEFT(strTaxCode, CASE WHEN charindex(' ', strTaxCode) = 0 THEN LEN(strTaxCode) ELSE charindex(' ', strTaxCode) - 1 END)
+	[state] = LEFT(tblSMTaxGroup.strTaxGroup, 2) --LEFT(strTaxCode, CASE WHEN charindex(' ', strTaxCode) = 0 THEN LEN(strTaxCode) ELSE charindex(' ', strTaxCode) - 1 END)
 	,county = ltrim(substring(strTaxCode,charindex(' ',strTaxCode), CHARINDEX(' ',ltrim(SUBSTRING(strTaxCode,charindex(' ',strTaxCode),LEN(strTaxCode)-charindex(' ',strTaxCode)))) ))
 	,city = strCity
 	,sales_tax = dblRate
 	,st_acct = tblGLAccount.strAccountId
-	,use_tax = 0.00
+	,use_tax = 0.000000 --0.00
 	,ut_acct = '00000000'
-	,chrTaxCode = REPLACE(tblSMTaxCode.strTaxCode, ' ', '')
-
+	,chrTaxCode = LEFT(tblSMTaxGroup.strTaxGroup, 2) + cast(tblSMTaxGroup.intTaxGroupId as nvarchar) --REPLACE(tblSMTaxCode.strTaxCode, ' ', '')
 FROM tblSMTaxCode
 INNER JOIN 
 (
@@ -28,10 +27,10 @@ INNER JOIN
 )tblTaxEffect
 ON tblSMTaxCode.intTaxCodeId = tblTaxEffect.intTaxCodeId
 INNER JOIN tblGLAccount on tblGLAccount.intAccountId = tblSMTaxCode.intSalesTaxAccountId
-
-WHERE tblSMTaxCode.intTaxCodeId IN 
-	(select intTaxCodeId 
+INNER JOIN (select tblSMTaxGroupCode.intTaxCodeId, tblSMTaxGroup.intTaxGroupId, strTaxGroup
 	from tblSMTaxGroup 
 	INNER JOIN tblSMTaxGroupCode on tblSMTaxGroup.intTaxGroupId = tblSMTaxGroupCode.intTaxGroupId
 	INNER JOIN tblETExportFilterTaxGroup on tblETExportFilterTaxGroup.intTaxGroupId = tblSMTaxGroup.intTaxGroupId
-	)
+	INNER JOIN tblETExportTaxCodeMapping on tblETExportTaxCodeMapping.intTaxCodeId = tblSMTaxGroupCode.intTaxCodeId and tblETExportTaxCodeMapping.strTaxCodeReference = 'SST'
+) tblSMTaxGroup
+ON tblSMTaxCode.intTaxCodeId = tblSMTaxGroup.intTaxCodeId
