@@ -111,7 +111,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -178,7 +178,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         //     iRely.Msg.showWait('Loading storage measurement conversions...');
         //     Ext.Ajax.request({
         //         timeout: 120000,
-        //         url: '../Inventory/api/StorageLocation/GetStorageBinMeasurementReading',
+        //         url: './Inventory/api/StorageLocation/GetStorageBinMeasurementReading',
         //         method: 'Get',
         //         params: {
         //             intStorageLocationId: storageLocationId

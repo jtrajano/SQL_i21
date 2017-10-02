@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class TagBl : BusinessLayer<tblICTag>, ITagBl 
     {
         #region Constructor
-        public TagBl(IRepository db) : base(db)
+        public TagBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

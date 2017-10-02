@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class CompanyPreferenceBl : BusinessLayer<tblICCompanyPreference>, ICompanyPreferenceBl 
     {
         #region Constructor
-        public CompanyPreferenceBl(IRepository db) : base(db)
+        public CompanyPreferenceBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

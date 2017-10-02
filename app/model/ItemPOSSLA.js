@@ -22,7 +22,7 @@ Ext.define('Inventory.model.ItemPOSSLA', {
                         proxy: {
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/itempossla/get'
+                                read: './inventory/api/itempossla/get'
                             },
                             reader: {
                                 type: 'json',

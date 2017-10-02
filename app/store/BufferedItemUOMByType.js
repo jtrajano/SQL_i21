@@ -27,7 +27,7 @@ Ext.define('Inventory.store.BufferedItemUOMByType', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/item/getitemuomsbytype'
+                    read: './inventory/api/item/getitemuomsbytype'
                 },
                 reader: {
                     type: 'json',

@@ -24,7 +24,7 @@ Ext.define('Inventory.model.ItemFactory', {
                             extraParams: { include: 'tblICItemFactoryManufacturingCells.vyuICGetItemFactoryManufacturingCell, tblSMCompanyLocation' },
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/itemfactory/get'
+                                read: './inventory/api/itemfactory/get'
                             },
                             reader: {
                                 type: 'json',

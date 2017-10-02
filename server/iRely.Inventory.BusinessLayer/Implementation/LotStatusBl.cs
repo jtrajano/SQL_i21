@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class LotStatusBl : BusinessLayer<tblICLotStatus>, ILotStatusBl 
     {
         #region Constructor
-        public LotStatusBl(IRepository db) : base(db)
+        public LotStatusBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

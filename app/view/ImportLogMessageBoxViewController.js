@@ -65,7 +65,7 @@ Ext.define('Inventory.view.ImportLogMessageBoxViewController', {
         colColumn.renderer = this.fieldRenderer;
         colStatus.renderer = this.fieldRenderer;
         win.show();
-        var context = me.setupContext( {window : win} );
+        var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
     },
 
     fieldRenderer: function(value, metaData, record, rowIndex, colIndex, store, view) {

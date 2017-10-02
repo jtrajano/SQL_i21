@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedOriginAttribute', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/commodityattribute/searchoriginattributes'
+                    read: './inventory/api/commodityattribute/searchoriginattributes'
                 },
                 reader: {
                     type: 'json',

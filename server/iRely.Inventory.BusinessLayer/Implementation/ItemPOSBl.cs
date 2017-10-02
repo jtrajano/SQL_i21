@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemPOSCategoryBl : BusinessLayer<tblICItemPOSCategory>, IItemPOSCategoryBl 
     {
         #region Constructor
-        public ItemPOSCategoryBl(IRepository db) : base(db)
+        public ItemPOSCategoryBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }
@@ -23,7 +23,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemPOSSLABl : BusinessLayer<tblICItemPOSSLA>, IItemPOSSLABl
     {
         #region Constructor
-        public ItemPOSSLABl(IRepository db) : base(db)
+        public ItemPOSSLABl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

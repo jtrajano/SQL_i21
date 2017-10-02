@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemCommodityCostBl : BusinessLayer<tblICItemCommodityCost>, IItemCommodityCostBl 
     {
         #region Constructor
-        public ItemCommodityCostBl(IRepository db) : base(db)
+        public ItemCommodityCostBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

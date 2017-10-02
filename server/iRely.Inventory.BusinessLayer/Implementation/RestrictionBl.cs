@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class RestrictionBl : BusinessLayer<tblICRestriction>, IRestrictionBl 
     {
         #region Constructor
-        public RestrictionBl(IRepository db)
+        public RestrictionBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;

@@ -20,10 +20,10 @@ Ext.define('Inventory.store.FuelTaxClass', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/fueltaxclass/get',
-                    update: '../inventory/api/fueltaxclass/put',
-                    create: '../inventory/api/fueltaxclass/post',
-                    destroy: '../inventory/api/fueltaxclass/delete'
+                    read: './inventory/api/fueltaxclass/get',
+                    update: './inventory/api/fueltaxclass/put',
+                    create: './inventory/api/fueltaxclass/post',
+                    destroy: './inventory/api/fueltaxclass/delete'
                 },
                 reader: {
                     type: 'json',

@@ -80,16 +80,16 @@ Ext.define('Inventory.view.InventoryUOMViewModel', {
             switch(get('current.strUnitType')){
                 case 'Area':
                 case 'Length':
-                    return '../Inventory/api/UnitMeasure/GetAreaLengthUOMs';
+                    return './Inventory/api/UnitMeasure/GetAreaLengthUOMs';
                     break;
                 case 'Quantity':
                 case 'Volume':
                 case 'Weight':
                 case 'Packed':
-                    return '../Inventory/api/UnitMeasure/GetQuantityVolumeWeightPackedAreaUOMs';
+                    return './Inventory/api/UnitMeasure/GetQuantityVolumeWeightPackedAreaUOMs';
                     break;
                 case 'Time':
-                    return '../Inventory/api/UnitMeasure/GetTimeUOMs';
+                    return './Inventory/api/UnitMeasure/GetTimeUOMs';
                     break;
             };
         }

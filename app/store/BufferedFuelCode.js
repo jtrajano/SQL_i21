@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedFuelCode', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/fuelcode/search'
+                    read: './inventory/api/fuelcode/search'
                 },
                 reader: {
                     type: 'json',

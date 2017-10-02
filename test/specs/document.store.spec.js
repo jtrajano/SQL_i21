@@ -10,9 +10,9 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "../Inventory/api/Document/Get",
-                "update": "../Inventory/api/Document/Put",
-                "create": "../Inventory/api/Document/Post"
+                "read": "./Inventory/api/Document/Get",
+                "update": "./Inventory/api/Document/Put",
+                "create": "./Inventory/api/Document/Post"
             }
         }
     }

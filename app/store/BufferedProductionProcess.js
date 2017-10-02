@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedProductionProcess', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/processcode/search'
+                    read: './inventory/api/processcode/search'
                 },
                 reader: {
                     type: 'json',

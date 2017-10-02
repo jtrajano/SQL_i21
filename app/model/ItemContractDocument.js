@@ -26,7 +26,7 @@ Ext.define('Inventory.model.ItemContractDocument', {
                         },
                         proxy: {
                             api: {
-                                read: '../inventory/api/itemcontract/getcontractdocument',
+                                read: './inventory/api/itemcontract/getcontractdocument',
                             },
                             type: 'rest',
                             reader: {

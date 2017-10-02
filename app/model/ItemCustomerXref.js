@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemCustomerXref', {
                             extraParams: { include: 'tblARCustomer, tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/itemcustomerxref/get'
+                                read: './inventory/api/itemcustomerxref/get'
                             },
                             reader: {
                                 type: 'json',

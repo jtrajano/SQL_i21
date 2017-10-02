@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedInventoryTag', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/tag/search'
+                    read: './inventory/api/tag/search'
                 },
                 reader: {
                     type: 'json',

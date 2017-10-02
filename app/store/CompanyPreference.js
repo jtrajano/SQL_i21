@@ -21,10 +21,10 @@ Ext.define('Inventory.store.CompanyPreference', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/companypreference/get',
-                    update: '../inventory/api/companypreference/put',
-                    create: '../inventory/api/companypreference/post',
-                    destroy: '../inventory/api/companypreference/delete'
+                    read: './inventory/api/companypreference/get',
+                    update: './inventory/api/companypreference/put',
+                    create: './inventory/api/companypreference/post',
+                    destroy: './inventory/api/companypreference/delete'
                 },
                 reader: {
                     type: 'json',

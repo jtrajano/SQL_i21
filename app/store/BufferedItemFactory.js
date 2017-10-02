@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedItemFactory', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/itemfactory/search'
+                    read: './inventory/api/itemfactory/search'
                 },
                 reader: {
                     type: 'json',

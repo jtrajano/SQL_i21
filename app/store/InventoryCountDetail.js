@@ -17,10 +17,10 @@ Ext.define('Inventory.store.InventoryCountDetail', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/inventorycountdetail/get',
-                    update: '../inventory/api/inventorycountdetail/put',
-                    create: '../inventory/api/inventorycountdetail/post',
-                    destroy: '../inventory/api/inventorycountdetail/delete'
+                    read: './inventory/api/inventorycountdetail/get',
+                    update: './inventory/api/inventorycountdetail/put',
+                    create: './inventory/api/inventorycountdetail/post',
+                    destroy: './inventory/api/inventorycountdetail/delete'
                 },
                 reader: {
                     type: 'json',

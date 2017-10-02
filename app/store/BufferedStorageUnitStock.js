@@ -15,7 +15,7 @@ Ext.define('Inventory.store.BufferedStorageUnitStock', {
     proxy: {
         type: 'rest',
         api: {
-            read: '../inventory/api/storagelocation/getstorageunitstock'
+            read: './inventory/api/storagelocation/getstorageunitstock'
         },
         reader: {
             type: 'json',

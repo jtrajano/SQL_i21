@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemVendorXrefBl : BusinessLayer<tblICItemVendorXref>, IItemVendorXrefBl
     {
         #region Constructor
-        public ItemVendorXrefBl(IRepository db)
+        public ItemVendorXrefBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;
@@ -24,7 +24,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemCustomerXrefBl : BusinessLayer<tblICItemCustomerXref>, IItemCustomerXrefBl
     {
         #region Constructor
-        public ItemCustomerXrefBl(IRepository db)
+        public ItemCustomerXrefBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;

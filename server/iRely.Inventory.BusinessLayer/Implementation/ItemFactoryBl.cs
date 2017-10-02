@@ -15,7 +15,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemFactoryBl : BusinessLayer<tblICItemFactory>, IItemFactoryBl 
     {
         #region Constructor
-        public ItemFactoryBl(IRepository db) : base(db)
+        public ItemFactoryBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }
@@ -64,7 +64,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemOwnerBl : BusinessLayer<tblICItemOwner>, IItemOwnerBl
     {
         #region Constructor
-        public ItemOwnerBl(IRepository db)
+        public ItemOwnerBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;

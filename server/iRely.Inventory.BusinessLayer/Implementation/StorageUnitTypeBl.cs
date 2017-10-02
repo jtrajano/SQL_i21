@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class StorageUnitTypeBl : BusinessLayer<tblICStorageUnitType>, IStorageUnitTypeBl 
     {
         #region Constructor
-        public StorageUnitTypeBl(IRepository db) : base(db)
+        public StorageUnitTypeBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

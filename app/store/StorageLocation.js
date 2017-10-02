@@ -20,10 +20,10 @@ Ext.define('Inventory.store.StorageLocation', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/storagelocation/get',
-                    update: '../inventory/api/storagelocation/put',
-                    create: '../inventory/api/storagelocation/post',
-                    destroy: '../inventory/api/storagelocation/delete'
+                    read: './inventory/api/storagelocation/get',
+                    update: './inventory/api/storagelocation/put',
+                    create: './inventory/api/storagelocation/post',
+                    destroy: './inventory/api/storagelocation/delete'
                 },
                 reader: {
                     type: 'json',

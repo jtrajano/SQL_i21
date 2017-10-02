@@ -560,7 +560,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext({window: win});
+            var context = win.context ? win.context.initialize() : me.setupContext({window: win});
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -627,7 +627,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     getTotalLocationStockOnHand: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, intLotId, intItemUOMId, callback) {
         ic.utils.ajax({
             timeout: 120000,
-            url: '../inventory/api/itemstock/getlocationstockonhand',
+            url: './inventory/api/itemstock/getlocationstockonhand',
             params: {
                 intLocationId: intLocationId,
                 intItemId: intItemId,
@@ -960,7 +960,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 var id = current.get('intInventoryCountId');
                 win.down("#grdPhysicalCount").setLoading("Deleting records...");
                 ic.utils.ajax({
-                    url: '../inventory/api/inventorycount/deletealldetails',
+                    url: './inventory/api/inventorycount/deletealldetails',
                     method: 'DELETE',
                     params: {
                         intInventoryCountId: id
@@ -1126,7 +1126,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 }
 
                 var rx = ic.utils.ajax({
-                    url: "../inventory/api/inventorycount/" + resource,
+                    url: "./inventory/api/inventorycount/" + resource,
                     method: "PUT",
                     params: requestParams
                 })
@@ -1166,7 +1166,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             var showAddScreen = function () {
                 var search = i21.ModuleMgr.Search;
                 search.scope = me;
-                search.url = '../inventory/api/inventorycount/getprintvariance?countid=' + countid;
+                search.url = './inventory/api/inventorycount/getprintvariance?countid=' + countid;
                // search.filter = filters;
 
                 if (current.get('ysnIncludeOnHand')) {
@@ -1261,7 +1261,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             if (current) {
                 Inventory.Utils.ajax({
                     timeout: 120000,
-                    url: '../inventory/api/inventorycount/lockinventory?inventorycountid',
+                    url: './inventory/api/inventorycount/lockinventory?inventorycountid',
                     method: 'POST',
                     params: {
                         intInventoryCountId: current.get('intInventoryCountId'),
@@ -1307,7 +1307,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var doPost = function (){
             var current = currentRecord; 
             ic.utils.ajax({
-                url: '../inventory/api/inventorycount/posttransaction',
+                url: './inventory/api/inventorycount/posttransaction',
                 params:{
                     strTransactionId: current.get('strCountNo'),
                     isPost: current.get('ysnPosted') ? false : true,
@@ -1371,7 +1371,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
         var doRecap = function (currentRecord){
             ic.utils.ajax({
-                url: '../inventory/api/inventorycount/posttransaction',
+                url: './inventory/api/inventorycount/posttransaction',
                 params:{
                     strTransactionId: currentRecord.get('strCountNo'),
                     isPost: isAfterPostCall ? ysnPosted : currentRecord.get('ysnPosted') ? false : true,
@@ -1429,7 +1429,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                posturl: '../inventory/api/inventorycount/posttransaction',
+                posturl: './inventory/api/inventorycount/posttransaction',
                 strTransactionId: strCountNo,
                 isPost: !posted,
                 isRecap: false,
@@ -1520,7 +1520,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                posturl: '../inventory/api/inventorycount/posttransaction',
+                posturl: './inventory/api/inventorycount/posttransaction',
                 strTransactionId: currentRecord.get('strCountNo'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
@@ -1859,7 +1859,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
         ic.utils.ajax({
             timeout: 120000,   
-            url: '../inventory/api/item/getitemstockuomsummary',
+            url: './inventory/api/item/getitemstockuomsummary',
             params: {
                 ItemId: itemId,
                 LocationId: locationId,

@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemContract', {
                         proxy: {
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/itemcontract/getcontractitem'
+                                read: './inventory/api/itemcontract/getcontractitem'
                             },
                             reader: {
                                 type: 'json',

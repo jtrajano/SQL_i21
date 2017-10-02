@@ -15,7 +15,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemPricingBl : BusinessLayer<tblICItemPricing>, IItemPricingBl 
     {
         #region Constructor
-        public ItemPricingBl(IRepository db) : base(db)
+        public ItemPricingBl(IInventoryRepository db) : base(db)
         {
             _db = db;
             _db.ContextManager.Database.CommandTimeout = 60000;
@@ -55,7 +55,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemPricingLevelBl : BusinessLayer<tblICItemPricingLevel>, IItemPricingLevelBl
     {
         #region Constructor
-        public ItemPricingLevelBl(IRepository db)
+        public ItemPricingLevelBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;
@@ -108,7 +108,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemSpecialPricingBl : BusinessLayer<tblICItemSpecialPricing>, IItemSpecialPricingBl
     {
         #region Constructor
-        public ItemSpecialPricingBl(IRepository db)
+        public ItemSpecialPricingBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;

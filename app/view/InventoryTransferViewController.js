@@ -302,7 +302,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -584,7 +584,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 
         var doPost = function (){
             ic.utils.ajax({
-                url: '../Inventory/api/InventoryTransfer/PostTransaction',
+                url: './Inventory/api/InventoryTransfer/PostTransaction',
                 params:{
                     strTransactionId: current.get('strTransferNo'),
                     isPost: current.get('ysnPosted') ? false : true,
@@ -698,7 +698,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 
         var doRecap = function () {
             ic.utils.ajax({
-                url: '../Inventory/api/InventoryTransfer/PostTransaction',
+                url: './Inventory/api/InventoryTransfer/PostTransaction',
                 params: {
                     strTransactionId: current.get('strTransferNo'),
                     isPost: isAfterPostCall ? ysnPosted : current.get('ysnPosted') ? false : true,

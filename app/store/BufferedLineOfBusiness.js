@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedLineOfBusiness', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/lineofbusiness/search'
+                    read: './inventory/api/lineofbusiness/search'
                 },
                 reader: {
                     type: 'json',

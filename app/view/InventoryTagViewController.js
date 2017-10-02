@@ -22,7 +22,7 @@ Ext.define('Inventory.view.InventoryTagViewController', {
             title:  'Search Inventory Tag',
             type: 'Inventory.Tag',
             api: {
-                read: '../Inventory/api/Tag/Search'
+                read: './Inventory/api/Tag/Search'
             },
             columns: [
                 {dataIndex: 'intTagId',text: "Tag Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
@@ -69,7 +69,7 @@ Ext.define('Inventory.view.InventoryTagViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();

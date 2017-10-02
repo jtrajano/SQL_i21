@@ -26,7 +26,7 @@ Ext.define('Inventory.store.BufferedPackedUOM', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/unitmeasure/searchpackeduoms'
+                    read: './inventory/api/unitmeasure/searchpackeduoms'
                 },
                 reader: {
                     type: 'json',

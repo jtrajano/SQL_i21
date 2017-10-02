@@ -243,7 +243,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( { window : win } );
+            var context = win.context ? win.context.initialize() : me.setupContext( { window : win } );
             me.intItemId = config.param.itemId;
             me.defaultUOM = config.param.defaultUOM;
             if (config.action === 'new') {
@@ -563,7 +563,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         var current = win.viewModel.data.current;
         
         ic.utils.ajax({
-            url: '../Inventory/api/ItemLocation/CheckCostingMethod',
+            url: './Inventory/api/ItemLocation/CheckCostingMethod',
             method: 'POST',
             params: {
                 ItemId: current.get('intItemId'),

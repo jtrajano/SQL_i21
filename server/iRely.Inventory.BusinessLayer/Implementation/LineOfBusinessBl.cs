@@ -13,7 +13,7 @@
 //    public class LineOfBusinessBl : BusinessLayer<tblSMLineOfBusiness>, ILineOfBusinessBl 
 //    {
 //        #region Constructor
-//        public LineOfBusinessBl(IRepository db) : base(db)
+//        public LineOfBusinessBl(IInventoryRepository db) : base(db)
 //        {
 //            _db = db;
 //        }

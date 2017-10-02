@@ -31,7 +31,7 @@ Ext.define('Inventory.view.LotHistoryViewController', {
 
         if(config) {
             win.show();
-            var context = me.setupContext({ window: win });
+            var context = win.context ? win.context.initialize() : me.setupContext({ window: win });
 
             if (config.id) {
                 config.filters = [

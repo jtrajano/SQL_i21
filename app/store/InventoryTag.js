@@ -20,10 +20,10 @@ Ext.define('Inventory.store.InventoryTag', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/tag/get',
-                    update: '../inventory/api/tag/put',
-                    create: '../inventory/api/tag/post',
-                    destroy: '../inventory/api/tag/delete'
+                    read: './inventory/api/tag/get',
+                    update: './inventory/api/tag/put',
+                    create: './inventory/api/tag/post',
+                    destroy: './inventory/api/tag/delete'
                 },
                 reader: {
                     type: 'json',

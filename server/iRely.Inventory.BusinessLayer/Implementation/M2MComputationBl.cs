@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
     public class M2MComputationBl : BusinessLayer<tblICM2MComputation>, IM2MComputationBl
     {
         #region Constructor
-        public M2MComputationBl(IRepository db) : base(db)
+        public M2MComputationBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace iRely.Inventory.BusinessLayer
 {
-    public class InventoryRepository : Repository, IGlobalComponentEngineRepository
+    public class InventoryRepository : Repository, IInventoryRepository
     {
         public InventoryRepository()
             : base(new InventoryEntities())

@@ -20,10 +20,10 @@ Ext.define('Inventory.store.PackType', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/packtype/getpacktypes',
-                    update: '../inventory/api/packtype/putpacktypes',
-                    create: '../inventory/api/packtype/postpacktypes',
-                    destroy: '../inventory/api/packtype/deletepacktypes'
+                    read: './inventory/api/packtype/getpacktypes',
+                    update: './inventory/api/packtype/putpacktypes',
+                    create: './inventory/api/packtype/postpacktypes',
+                    destroy: './inventory/api/packtype/deletepacktypes'
                 },
                 reader: {
                     type: 'json',

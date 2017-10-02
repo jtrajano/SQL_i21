@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class CountGroupBl : BusinessLayer<tblICCountGroup>, ICountGroupBl 
     {
         #region Constructor
-        public CountGroupBl(IRepository db) : base(db)
+        public CountGroupBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

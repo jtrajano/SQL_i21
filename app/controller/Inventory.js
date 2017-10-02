@@ -100,13 +100,13 @@ Ext.define('Inventory.controller.Inventory', {
     },
 
     init: function() {
-        Ext.Loader.loadScript("../Inventory/app/lib/underscore.js");
-        Ext.Loader.loadScript("../Inventory/app/lib/rx.all.js");
-        Ext.Loader.loadScript("../Inventory/app/lib/numeraljs/numeral.js");
+        Ext.Loader.loadScript("./app/Inventory/lib/underscore.js");
+        Ext.Loader.loadScript("./app/Inventory/lib/rx.all.js");
+        Ext.Loader.loadScript("./app/Inventory/lib/numeraljs/numeral.js");
         
         // Ext.Ajax.request({
         //     timeout: 120000,
-        //     url: '../Inventory/api/Item/GetEmpty',
+        //     url: './Inventory/api/Item/GetEmpty',
         //     method: 'GET'
         // });
         app.getController('GeneralLedger.controller.Global');
@@ -504,7 +504,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strReceiptNumber',
                 displayTitle: 'Inventory Receipt',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryReceipt/Search',
+                url: './Inventory/api/InventoryReceipt/Search',
                 fields: [
                     {name: 'intInventoryReceiptId', type: 'int'},
                     {name: 'strReceiptNumber', type: 'string'}
@@ -516,7 +516,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strReceiptNumber',
                 displayTitle: 'Inventory Receipt Details',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryReceipt/SearchReceiptItems',
+                url: './Inventory/api/InventoryReceipt/SearchReceiptItems',
                 fields: [
                     {name: 'intInventoryReceiptId', type: 'int'},
                     {name: 'strReceiptNumber', type: 'string'},
@@ -529,7 +529,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strReceiptNumber',
                 displayTitle: 'Inventory Receipt Charges',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryReceipt/SearchReceiptCharges',
+                url: './Inventory/api/InventoryReceipt/SearchReceiptCharges',
                 fields: [
                     {name: 'intInventoryReceiptId', type: 'int'},
                     {name: 'strReceiptNumber', type: 'string'}
@@ -541,7 +541,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strReceiptNumber',
                 displayTitle: 'Inventory Receipt Lots',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryReceipt/SearchReceiptItemLots',
+                url: './Inventory/api/InventoryReceipt/SearchReceiptItemLots',
                 fields: [
                     {name: 'intInventoryReceiptId', type: 'int'},
                     {name: 'strReceiptNumber', type: 'string'},
@@ -554,7 +554,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strReceiptNumber',
                 displayTitle: 'Inventory Receipt Vouchers',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryReceipt/SearchReceiptVouchers',
+                url: './Inventory/api/InventoryReceipt/SearchReceiptVouchers',
                 fields: [
                     {name: 'intInventoryReceiptId', type: 'int'},
                     {name: 'strReceiptNumber', type: 'string'},
@@ -567,7 +567,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strShipmentNumber',
                 displayTitle: 'Inventory Shipment',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryShipment/Search',
+                url: './Inventory/api/InventoryShipment/Search',
                 fields: [
                     {name: 'intInventoryShipmentId', type: 'int'},
                     {name: 'strShipmentNumber', type: 'string'}
@@ -579,7 +579,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strShipmentNumber',
                 displayTitle: 'Inventory Shipment Details',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryShipment/SearchShipmentItems',
+                url: './Inventory/api/InventoryShipment/SearchShipmentItems',
                 fields: [
                     {name: 'intInventoryShipmentId', type: 'int'},
                     {name: 'strShipmentNumber', type: 'string'}
@@ -591,7 +591,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strShipmentNumber',
                 displayTitle: 'Inventory Shipment Lots',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryShipment/SearchShipmentItemLots',
+                url: './Inventory/api/InventoryShipment/SearchShipmentItemLots',
                 fields: [
                     {name: 'intInventoryShipmentId', type: 'int'},
                     {name: 'strShipmentNumber', type: 'string'}
@@ -603,7 +603,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strAdjustmentNo',
                 displayTitle: 'Inventory Adjustment',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryAdjustment/Search',
+                url: './Inventory/api/InventoryAdjustment/Search',
                 fields: [
                     {name: 'intInventoryShipmentId', type: 'int'},
                     {name: 'strAdjustmentNo', type: 'string'},
@@ -616,7 +616,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strAdjustmentNo',
                 displayTitle: 'Inventory Adjustment Details',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryAdjustment/SearchAdjustmentDetails',
+                url: './Inventory/api/InventoryAdjustment/SearchAdjustmentDetails',
                 fields: [
                     {name: 'intInventoryAdjustmentDetailId', type: 'int'},
                     {name: 'intInventoryShipmentId', type: 'int'},
@@ -630,7 +630,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strItemNo',
                 displayTitle: 'Item',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/Item/Search',
+                url: './Inventory/api/Item/Search',
                 fields: [
                     {name: 'intItemId', type: 'int'},
                     {name: 'strItemNo', type: 'string'},
@@ -643,7 +643,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strItemNo',
                 displayTitle: 'Item Locations',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/ItemLocation/SearchItemLocationViews',
+                url: './Inventory/api/ItemLocation/SearchItemLocationViews',
                 fields: [
                     {name: 'intItemId', type: 'int'},
                     {name: 'strItemNo', type: 'string'},
@@ -655,7 +655,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strItemNo',
                 displayTitle: 'Item Pricing',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/ItemPricing/SearchItemPricingViews',
+                url: './Inventory/api/ItemPricing/SearchItemPricingViews',
                 fields: [
                     {name: 'intItemId', type: 'int'},
                     {name: 'strItemNo', type: 'string'}

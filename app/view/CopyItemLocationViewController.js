@@ -64,7 +64,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
             return;
         }
         ic.utils.ajax({
-            url: '../inventory/api/item/copyitemlocation',
+            url: './inventory/api/item/copyitemlocation',
             params: {
                 intSourceItemId: sourceItem.get('intItemId'),
                 strDestinationItemIds: destinationItemIds.join()
@@ -98,7 +98,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
         var win = config.window;
         var store = Ext.create('Inventory.store.ItemLocation', { pageSize: 0 });
         
-        store.getProxy().api.read = '../inventory/api/itemlocation/getitemlocation';
+        store.getProxy().api.read = './inventory/api/itemlocation/getitemlocation';
 
         win.context = Ext.create('iRely.Engine', {
             window : win,
@@ -121,7 +121,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
 
         if(config) {
             win.show();
-            var context = me.setupContext( { window : win } );
+            var context = win.context ? win.context.initialize() : me.setupContext( { window : win } );
             context.data.load();
         }
     }

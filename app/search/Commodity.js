@@ -5,7 +5,7 @@ Ext.define('Inventory.search.Commodity', {
         title: 'Search Commodity',
         type: 'Inventory.Commodity',
         api: {
-            read: '../inventory/api/commodity/search'
+            read: './inventory/api/commodity/search'
         },
         columns: [
             { dataIndex: 'intCommodityId', text: "Commodity Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true },

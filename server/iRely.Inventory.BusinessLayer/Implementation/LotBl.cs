@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class LotBl : BusinessLayer<tblICLot>, ILotBl 
     {
         #region Constructor
-        public LotBl(IRepository db) : base(db)
+        public LotBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

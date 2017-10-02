@@ -25,7 +25,7 @@ Ext.define('Inventory.model.ItemUOM', {
                             extraParams: { include: 'tblICUnitMeasure, WeightUOM, DimensionUOM, VolumeUOM, tblICUnitMeasure.vyuICGetUOMConversions' },
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/itemuom/get'
+                                read: './inventory/api/itemuom/get'
                             },
                             reader: {
                                 type: 'json',

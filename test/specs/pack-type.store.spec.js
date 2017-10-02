@@ -10,9 +10,9 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "../Inventory/api/PackType/GetPackTypes",
-                "update": "../Inventory/api/PackType/PutPackTypes",
-                "create": "../Inventory/api/PackType/PostPackTypes"
+                "read": "./Inventory/api/PackType/GetPackTypes",
+                "update": "./Inventory/api/PackType/PutPackTypes",
+                "create": "./Inventory/api/PackType/PostPackTypes"
             }
         }
     }

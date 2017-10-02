@@ -20,10 +20,10 @@ Ext.define('Inventory.store.BuildAssembly', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/buildassembly/get',
-                    update: '../inventory/api/buildassembly/put',
-                    create: '../inventory/api/buildassembly/post',
-                    destroy: '../inventory/api/buildassembly/delete'
+                    read: './inventory/api/buildassembly/get',
+                    update: './inventory/api/buildassembly/put',
+                    create: './inventory/api/buildassembly/post',
+                    destroy: './inventory/api/buildassembly/delete'
                 },
                 reader: {
                     type: 'json',

@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemCertificationBl : BusinessLayer<tblICItemCertification>, IItemCertificationBl 
     {
         #region Constructor
-        public ItemCertificationBl(IRepository db) : base(db)
+        public ItemCertificationBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

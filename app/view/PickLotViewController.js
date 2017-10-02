@@ -42,8 +42,9 @@ Ext.define('Inventory.view.PickLotViewController', {
     show: function (config) {
         "use strict";
         var me = this;
+        var win = me.getView();
         me.getView().show();
-        var context = me.setupContext();
+        var context = win.context ? win.context.initialize() : me.setupContext();
         config.filters = [
             {
                 column: 'intCustomerEntityId',

@@ -7,7 +7,7 @@ Ext.define('Inventory.search.Item', {
             title: 'Search Items',
             type: 'Inventory.Item',
             api: {
-                read: '../inventory/api/item/search'
+                read: './inventory/api/item/search'
             },
             columns: [
                 {dataIndex: 'intItemId', text: "Item Id", flex: 1, dataType: 'numeric', key: true, hidden: true},
@@ -62,7 +62,7 @@ Ext.define('Inventory.search.Item', {
         {
             title: 'Locations',
             api: {
-                read: '../inventory/api/itemlocation/searchitemlocationviews'
+                read: './inventory/api/itemlocation/searchitemlocationviews'
             },
             columns: [
 
@@ -163,7 +163,7 @@ Ext.define('Inventory.search.Item', {
         {
             title: 'Pricing',
             api: {
-                read: '../inventory/api/itempricing/searchitemstockpricingviews'
+                read: './inventory/api/itempricing/searchitemstockpricingviews'
             },
             columns: [
                 { dataIndex: 'intPricingKey', text: 'Pricing Key', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },
@@ -197,7 +197,7 @@ Ext.define('Inventory.search.Item', {
         {
             title: 'Item UOM',
             api: {
-                read: '../inventory/api/itemuom/searchuoms'
+                read: './inventory/api/itemuom/searchuoms'
             },
             columns: [
                 { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, flex: 1, dataType: 'numeric', hidden: true },

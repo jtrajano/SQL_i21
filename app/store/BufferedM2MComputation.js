@@ -14,7 +14,7 @@ Ext.define('Inventory.store.BufferedM2MComputation', {
     proxy: {
         type: 'rest',
         api: {
-            read: '../inventory/api/m2mcomputation/search'
+            read: './inventory/api/m2mcomputation/search'
         },
         reader: {
             type: 'json',

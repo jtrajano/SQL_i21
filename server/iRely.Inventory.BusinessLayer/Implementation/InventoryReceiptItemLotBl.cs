@@ -12,7 +12,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class InventoryReceiptItemLotBl : BusinessLayer<tblICInventoryReceiptItemLot>, IInventoryReceiptItemLotBl
     {
-        public InventoryReceiptItemLotBl(IRepository db)
+        public InventoryReceiptItemLotBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;

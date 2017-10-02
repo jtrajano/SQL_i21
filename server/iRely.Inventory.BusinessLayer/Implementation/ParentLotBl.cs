@@ -15,7 +15,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ParentLotBl : BusinessLayer<tblICParentLot>, IParentLotBl 
     {
         #region Constructor
-        public ParentLotBl(IRepository db) : base(db)
+        public ParentLotBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

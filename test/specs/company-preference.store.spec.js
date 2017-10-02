@@ -10,9 +10,9 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "../Inventory/api/CompanyPreference/Get",
-                "update": "../Inventory/api/CompanyPreference/Put",
-                "create": "../Inventory/api/CompanyPreference/Post"
+                "read": "./Inventory/api/CompanyPreference/Get",
+                "update": "./Inventory/api/CompanyPreference/Put",
+                "create": "./Inventory/api/CompanyPreference/Post"
             }
         }
     }

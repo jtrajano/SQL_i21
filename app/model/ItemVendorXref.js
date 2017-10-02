@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemVendorXref', {
                             extraParams: { include: 'vyuAPVendor, tblICItemUOM.tblICUnitMeasure, tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/itemvendorxref/get'
+                                read: './inventory/api/itemvendorxref/get'
                             },
                             reader: {
                                 type: 'json',

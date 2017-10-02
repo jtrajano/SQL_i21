@@ -14,7 +14,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class MeasurementBl : BusinessLayer<tblICMeasurement>, IMeasurementBl
     {
-        public MeasurementBl(IRepository db)
+        public MeasurementBl(IInventoryRepository db)
             : base(db)
         {
         }

@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemBundle', {
                             extraParams: { include: 'BundleItem, tblICItemUOM.tblICUnitMeasure' },
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/itembundle/get'
+                                read: './inventory/api/itembundle/get'
                             },
                             reader: {
                                 type: 'json',

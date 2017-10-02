@@ -7,7 +7,7 @@ Ext.define('Inventory.search.InventoryAdjustment', {
             title: 'Search Inventory Adjustment',
             type: 'Inventory.InventoryAdjustment',
             api: {
-                read: '../inventory/api/inventoryadjustment/search'
+                read: './inventory/api/inventoryadjustment/search'
             },
             columns: [
                 { dataIndex: 'intInventoryAdjustmentId', text: 'Inventory Adjustment Id', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -62,7 +62,7 @@ Ext.define('Inventory.search.InventoryAdjustment', {
         {
             title: 'Details',
             api: {
-                read: '../Inventory/api/InventoryAdjustment/SearchAdjustmentDetails'
+                read: './Inventory/api/InventoryAdjustment/SearchAdjustmentDetails'
             },
             columns: [
                 { dataIndex: 'intInventoryAdjustmentDetailId', text: 'Inventory Adjustment Detail Id', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },

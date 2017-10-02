@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedEquipmentLength', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/equipmentlength/search'
+                    read: './inventory/api/equipmentlength/search'
                 },
                 reader: {
                     type: 'json',

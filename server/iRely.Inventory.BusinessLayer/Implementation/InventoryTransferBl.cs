@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class InventoryTransferBl : BusinessLayer<tblICInventoryTransfer>, IInventoryTransferBl 
     {
         #region Constructor
-        public InventoryTransferBl(IRepository db) : base(db)
+        public InventoryTransferBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

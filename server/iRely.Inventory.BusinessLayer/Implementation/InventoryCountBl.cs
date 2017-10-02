@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class InventoryCountBl : BusinessLayer<tblICInventoryCount>, IInventoryCountBl 
     {
         #region Constructor
-        public InventoryCountBl(IRepository db)
+        public InventoryCountBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;

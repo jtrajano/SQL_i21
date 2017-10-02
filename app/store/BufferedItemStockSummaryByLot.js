@@ -15,7 +15,7 @@ Ext.define('Inventory.store.BufferedItemStockSummaryByLot', {
     proxy: {
         type: 'rest',
         api: {
-            read: '../inventory/api/inventorycount/getitemstocksummarybylot'
+            read: './inventory/api/inventorycount/getitemstocksummarybylot'
         },
         reader: {
             type: 'json',

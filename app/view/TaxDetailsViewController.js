@@ -111,7 +111,7 @@ Ext.define('Inventory.view.TaxDetailsViewController', {
         win.minWidth = 760;
         win.show();
 
-        var context = me.setupContext();
+        var context = win.context ? win.context.initialize() : me.setupContext();
         if (config.param.ReceiptId) {
             me.intInventoryReceiptId = config.param.ReceiptId;
             config.filters = [{

@@ -298,7 +298,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -701,7 +701,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             iRely.Msg.showWait('Duplicating category...');
             ic.utils.ajax({
                 timeout: 120000,
-                url: '../inventory/api/category/duplicatecategory',
+                url: './inventory/api/category/duplicatecategory',
                 params: {
                     intCategoryId: current.get('intCategoryId')
                 },

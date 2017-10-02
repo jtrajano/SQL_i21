@@ -21,10 +21,10 @@ Ext.define('Inventory.store.StorageMeasurementReading', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/storagemeasurementreading/get',
-                    update: '../inventory/api/storagemeasurementreading/put',
-                    create: '../inventory/api/storagemeasurementreading/post',
-                    destroy: '../inventory/api/storagemeasurementreading/delete'
+                    read: './inventory/api/storagemeasurementreading/get',
+                    update: './inventory/api/storagemeasurementreading/put',
+                    create: './inventory/api/storagemeasurementreading/post',
+                    destroy: './inventory/api/storagemeasurementreading/delete'
                 },
                 reader: {
                     type: 'json',

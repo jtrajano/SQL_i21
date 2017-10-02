@@ -7,7 +7,7 @@ Ext.define('Inventory.search.InventoryTransfer', {
             title: 'Search Inventory Transfer',
             type: 'Inventory.InventoryTransfer',
             api: {
-                read: '../inventory/api/inventorytransfer/search'
+                read: './inventory/api/inventorytransfer/search'
             },
             columns: [
 
@@ -62,7 +62,7 @@ Ext.define('Inventory.search.InventoryTransfer', {
         {
             title: 'Details',
             api: {
-                read: '../Inventory/api/InventoryTransfer/SearchTransferDetails'
+                read: './Inventory/api/InventoryTransfer/SearchTransferDetails'
             },
             columns: [
                 { dataIndex: 'intInventoryTransferId', text: 'InventoryTransferId', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },

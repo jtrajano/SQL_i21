@@ -45,8 +45,9 @@ Ext.define('Inventory.view.LineOfBusinessViewController', {
     show : function() {
         "use strict";
         var me = this;
+        var win = me.getView();
         me.getView().show();
-        var context = me.setupContext();
+        var context = win.context ? win.context.initialize() : me.setupContext();
         context.data.load();
     }
 });

@@ -22,7 +22,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
             title:  'Search Certification Programs',
             type: 'Inventory.CertificationProgram',
             api: {
-                read: '../inventory/api/certification/search'
+                read: './inventory/api/certification/search'
             },
             columns: [
                 {dataIndex: 'intCertificationId',text: "Certification Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
@@ -105,7 +105,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();

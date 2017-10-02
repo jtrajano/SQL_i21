@@ -15,7 +15,7 @@ Ext.define('Inventory.store.BufferedItemStorageLocationsLookup', {
     proxy: {
         type: 'rest',
         api: {
-            read: '../inventory/api/itemstock/getitemstoragelocations'
+            read: './inventory/api/itemstock/getitemstoragelocations'
         },
         reader: {
             type: 'json',
