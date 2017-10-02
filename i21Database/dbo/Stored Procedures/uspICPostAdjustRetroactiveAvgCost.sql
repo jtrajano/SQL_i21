@@ -368,6 +368,20 @@ BEGIN
 						@RetroactiveAverageCost
 			END 
 
+		-- Update the cost bucket cost. 
+		IF @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId
+		BEGIN 
+			UPDATE	cb
+			SET		cb.dblCost = 
+						(cb.dblStockIn * cb.dblCost + @CostAdjustment)
+						/ cb.dblStockIn
+			FROM	tblICInventoryFIFO cb
+			WHERE	cb.intItemId = @intItemId
+					AND cb.intInventoryFIFOId = @CostBucketId
+					AND @RetroactiveAverageCost IS NOT NULL 
+					AND cb.dblStockIn <> 0 
+		END
+
 		-- Check if the system needs to escalate the cost adjustment. 
 		SET @EscalateInventoryTransactionId = NULL 
 		SELECT	TOP 1 
@@ -446,8 +460,6 @@ BEGIN
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
 			FROM	dbo.tblICInventoryTransaction t
 			WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
-
-
 		END 
 
 		-- Log the cost adjustment 
@@ -483,8 +495,8 @@ BEGIN
 					END 
 				,[ysnIsUnposted]  = CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 				,[dtmCreated] = GETDATE()
-				,[strRelatedTransactionId] = @strTransactionId 
-				,[intRelatedTransactionId] = @intTransactionId
+				,[strRelatedTransactionId] = @t_strTransactionId 
+				,[intRelatedTransactionId] = @t_intTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
 			WHERE		

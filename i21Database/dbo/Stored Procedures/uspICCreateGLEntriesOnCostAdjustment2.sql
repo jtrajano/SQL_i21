@@ -34,6 +34,11 @@ DECLARE @INV_TRANS_TYPE_Auto_Variance AS INT = 1
 		-- Fob Point types: 
 		,@FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2
+
+		-- Declare the cost types
+		,@COST_ADJ_TYPE_Original_Cost AS INT = 1
+		,@COST_ADJ_TYPE_New_Cost AS INT = 2
+		,@COST_ADJ_Adjust_Stock_Value AS INT = 3
 		
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
@@ -236,6 +241,7 @@ AS
 				ON i.intItemId = t.intItemId
 			INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
 				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 	WHERE	t.strBatchId = @strBatchId
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
 	UNION ALL 
@@ -265,6 +271,7 @@ AS
 				ON i.intItemId = t.intItemId
 			INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
 				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 	WHERE	t.strBatchId = @strBatchId
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
 	UNION ALL 
@@ -294,6 +301,7 @@ AS
 				ON i.intItemId = t.intItemId
 			INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
 				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 	WHERE	t.strBatchId = @strBatchId
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
 	UNION ALL 
@@ -323,6 +331,7 @@ AS
 				ON i.intItemId = t.intItemId
 			INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
 				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 	WHERE	t.strBatchId = @strBatchId
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
 
@@ -424,6 +433,6 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
+			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
