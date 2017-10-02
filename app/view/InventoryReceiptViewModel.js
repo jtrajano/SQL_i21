@@ -368,6 +368,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 case 1: // Scale  
                 case 3: // Transport Load
                 case 4: // Settle Storage 
+                case 5: // Delivery Sheet
                     return true;
                 default:  
                     return posted;
@@ -387,6 +388,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 case 1: // Scale  
                 case 3: // Transport Load
                 case 4: // Settle Storage 
+                case 5: // Delivery Sheet
                     return true;
                 default:  
                     return !posted;
@@ -714,6 +716,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         readOnlyItemDropdown: function (get) {
             var receiptType = get('current.strReceiptType');
+            if(get('current.intSourceType') === 5)
+                return true;
             switch (receiptType) {
                 case 'Direct' :
                     return false;
