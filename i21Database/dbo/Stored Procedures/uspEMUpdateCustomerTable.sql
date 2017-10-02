@@ -9,18 +9,18 @@ BEGIN
 	DECLARE @Param AS NVARCHAR(MAX)
 	DECLARE @PreviousValue AS NVARCHAR(MAX)
 
-	IF CHARINDEX('--', @Field, 0) <=0 AND CHARINDEX('--', @Value, 0) <=0 AND @Field not in ('strCustomerNumber', 'intEntityCustomerId') AND (@Id is not null and @Id > 0)
+	IF CHARINDEX('--', @Field, 0) <=0 AND CHARINDEX('--', @Value, 0) <=0 AND @Field not in ('strCustomerNumber', 'intEntityId') AND (@Id is not null and @Id > 0)
 	BEGIN
 	
 		SET @Param = '@Value AS NVARCHAR(200), @Id	AS INT, @PreviousValue AS NVARCHAR(MAX) OUTPUT'
-		SET @Com = 'SELECT @PreviousValue = CAST(' + @Field + ' as NVARCHAR) FROM tblARCustomer where intEntityCustomerId = @Id'
+		SET @Com = 'SELECT @PreviousValue = CAST(' + @Field + ' as NVARCHAR) FROM tblARCustomer where intEntityId = @Id'
 		
 		EXECUTE sp_executesql @Com, @Param, @Value, @Id, @PreviousValue OUTPUT
 
 		
 
 		SET @Param = '@Value AS NVARCHAR(200), @Id	AS INT'
-		SET @Com = 'UPDATE tblARCustomer SET ' +@Field + ' = @Value WHERE intEntityCustomerId = @Id' 
+		SET @Com = 'UPDATE tblARCustomer SET ' +@Field + ' = @Value WHERE intEntityId = @Id' 
 	
 		EXECUTE sp_executesql @Com, @Param, @Value, @Id
 
