@@ -112,7 +112,7 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( { window : win } );
+            var context = win.context ? win.context.initialize() : me.setupContext( { window : win } );
             me.intCategoryId = config.param.CategoryId;
             if (config.param.action === 'new') {
                 context.data.addRecord();

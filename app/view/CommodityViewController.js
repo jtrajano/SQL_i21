@@ -315,7 +315,7 @@ Ext.define('Inventory.view.CommodityViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -391,7 +391,7 @@ Ext.define('Inventory.view.CommodityViewController', {
 
         iRely.Msg.showWait('Converting units...');
         ic.utils.ajax({
-            url: '../inventory/api/item/getunitconversion',
+            url: './inventory/api/item/getunitconversion',
             method: 'Post',
             params: {
                 intFromUnitMeasureId: unitMeasureId,

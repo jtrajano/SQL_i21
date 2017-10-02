@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class CategoryTaxBl : BusinessLayer<tblICCategoryTax>, ICategoryTaxBl 
     {
         #region Constructor
-        public CategoryTaxBl(IRepository db)
+        public CategoryTaxBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;

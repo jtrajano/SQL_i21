@@ -46,7 +46,7 @@ Ext.define('Inventory.view.CountGroupViewController', {
         "use strict";
         var me = this;
         me.getView().show();
-        var context = me.setupContext();
+        var context = win.context ? win.context.initialize() : me.setupContext();
         context.data.load();
     },
 

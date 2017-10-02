@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemAssembly', {
                             extraParams: { include: 'vyuICGetAssemblyItem' },
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/itemassembly/get'
+                                read: './inventory/api/itemassembly/get'
                             },
                             reader: {
                                 type: 'json',

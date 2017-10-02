@@ -15,7 +15,7 @@ namespace iRely.Inventory.BusinessLayer
     public class CommodityBl : BusinessLayer<tblICCommodity>, ICommodityBl 
     {
         #region Constructor
-        public CommodityBl(IRepository db) : base(db)
+        public CommodityBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

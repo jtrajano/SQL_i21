@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemAssemblyBl : BusinessLayer<tblICItemAssembly>, IItemAssemblyBl 
     {
         #region Constructor
-        public ItemAssemblyBl(IRepository db) : base(db)
+        public ItemAssemblyBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

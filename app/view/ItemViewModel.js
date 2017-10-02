@@ -143,7 +143,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Category/Search'
+                    read: './Inventory/api/Category/Search'
                 },
                 reader: {
                     type: 'json',
@@ -161,7 +161,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Category/Search'
+                    read: './Inventory/api/Category/Search'
                 },
                 reader: {
                     type: 'json',
@@ -221,7 +221,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetItemUOMsByType'
+                    read: './Inventory/api/Item/GetItemUOMsByType'
                 },
                 extraParams: {
                     intItemId: '{current.intItemId}',
@@ -746,7 +746,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Commodity/Search'
+                    read: './Inventory/api/Commodity/Search'
                 },
                 reader: {
                     type: 'json',
@@ -764,7 +764,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Commodity/Search'
+                    read: './Inventory/api/Commodity/Search'
                 },
                 reader: {
                     type: 'json',
@@ -819,7 +819,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/SearchAssemblyComponents'
+                    read: './Inventory/api/Item/SearchAssemblyComponents'
                 },
                 reader: {
                     type: 'json',
@@ -905,7 +905,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/LotStatus/Get'
+                    read: './Inventory/api/LotStatus/Get'
                 },
                 reader: {
                     type: 'json',

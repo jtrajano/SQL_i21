@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemKitBl : BusinessLayer<tblICItemKit>, IItemKitBl 
     {
         #region Constructor
-        public ItemKitBl(IRepository db) : base(db)
+        public ItemKitBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

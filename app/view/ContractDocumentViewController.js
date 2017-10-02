@@ -22,7 +22,7 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
             title:  'Search Contract Document',
             type: 'Inventory.Document',
             api: {
-                read: '../inventory/api/document/search'
+                read: './inventory/api/document/search'
             },
             columns: [
                 {dataIndex: 'intDocumentId',text: "Document Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
@@ -91,7 +91,7 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();

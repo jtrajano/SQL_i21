@@ -7,7 +7,7 @@ Ext.define('Inventory.search.InventoryShipment', {
             title: 'Search Inventory Shipment',
             type: 'Inventory.InventoryShipment',
             api: {
-                read: '../inventory/api/inventoryshipment/search'
+                read: './inventory/api/inventoryshipment/search'
             },
             columns: [
                 { dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -84,7 +84,7 @@ Ext.define('Inventory.search.InventoryShipment', {
         {
             title: 'Details',
             api: {
-                read: '../Inventory/api/InventoryShipment/SearchShipmentItems'
+                read: './Inventory/api/InventoryShipment/SearchShipmentItems'
             },
             columns: [
                 { dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -112,7 +112,7 @@ Ext.define('Inventory.search.InventoryShipment', {
         {
             title: 'Lots',
             api: {
-                read: '../Inventory/api/InventoryShipment/SearchShipmentItemLots'
+                read: './Inventory/api/InventoryShipment/SearchShipmentItemLots'
             },
             columns: [
                 { dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -144,7 +144,7 @@ Ext.define('Inventory.search.InventoryShipment', {
         {
             title: 'Invoices',
             api: {
-                read: '../Inventory/api/InventoryShipment/SearchShipmentInvoice'
+                read: './Inventory/api/InventoryShipment/SearchShipmentInvoice'
             },
             columns: [
                 { dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, dataType: 'numeric', key: true, hidden: true},
@@ -185,7 +185,7 @@ Ext.define('Inventory.search.InventoryShipment', {
     /*Support functions*/
     processShipmentToInvoice: function (shipmentId, callback) {
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryShipment/ProcessInvoice',
+            url: './Inventory/api/InventoryShipment/ProcessInvoice',
             params:{
                 id: shipmentId
             },
@@ -231,7 +231,7 @@ Ext.define('Inventory.search.InventoryShipment', {
     
     onRefreshInvoicesClick: function (control) {
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryShipment/UpdateShipmentInvoice',
+            url: './Inventory/api/InventoryShipment/UpdateShipmentInvoice',
             method: 'post'  
         })
         .subscribe(
@@ -242,7 +242,7 @@ Ext.define('Inventory.search.InventoryShipment', {
 
                 if (grdSearch && grdSearch.length > 0){
                     grdSearch.forEach(function (grid) {
-                        if (grid && grid.url == '../Inventory/api/InventoryShipment/SearchShipmentInvoice'){
+                        if (grid && grid.url == './Inventory/api/InventoryShipment/SearchShipmentInvoice'){
                             var store = grid ? grid.getStore() : null;
                             if (store){
                                 store.reload({

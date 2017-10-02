@@ -17,7 +17,7 @@ Ext.define('Inventory.view.StockDetailViewController', {
             win.modal = (!config.param || !config.param.modalMode) ? false : config.param.modalMode;
             win.show();
 
-            var context = me.setupContext({ window: win});
+            var context = win.context ? win.context.initialize() : me.setupContext({ window: win});
 
             switch(config.action) {
                 case 'view':

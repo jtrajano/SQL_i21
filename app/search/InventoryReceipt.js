@@ -6,7 +6,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
             title: 'Search Inventory Receipt',
             type: 'Inventory.InventoryReceipt',
             api: {
-                read: '../inventory/api/inventoryreceipt/search'
+                read: './inventory/api/inventoryreceipt/search'
             },
             columns: [
                 { dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -97,7 +97,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
         {
             title: 'Details',
             api: {
-                read: '../Inventory/api/InventoryReceipt/SearchReceiptItems'
+                read: './Inventory/api/InventoryReceipt/SearchReceiptItems'
             },
             columns: [
                 { dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -131,7 +131,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
         {
             title: 'Charges',
             api: {
-                read: '../Inventory/api/InventoryReceipt/SearchReceiptCharges'
+                read: './Inventory/api/InventoryReceipt/SearchReceiptCharges'
             },
             columns: [
                 { dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -160,7 +160,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
         {
             title: 'Lots',
             api: {
-                read: '../Inventory/api/InventoryReceipt/SearchReceiptItemLots'
+                read: './Inventory/api/InventoryReceipt/SearchReceiptItemLots'
             },
             columns: [
                 { dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -194,7 +194,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
         // {
         //     title: 'Vouchers',
         //     api: {
-        //         read: '../Inventory/api/InventoryReceipt/SearchReceiptVouchers'
+        //         read: './Inventory/api/InventoryReceipt/SearchReceiptVouchers'
         //     },
         //     columns: [
         //         { dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, dataType: 'numeric', key: true, hidden: true },
@@ -237,7 +237,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
 
     processReceiptToVoucher: function (receiptId, callback) {
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryReceipt/ProcessBill',
+            url: './Inventory/api/InventoryReceipt/ProcessBill',
             params:{
                 id: receiptId
             },
@@ -258,7 +258,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
 
     onRefreshVoucherClick: function (control) {
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryReceipt/UpdateReceiptVoucher',
+            url: './Inventory/api/InventoryReceipt/UpdateReceiptVoucher',
             method: 'post'
         })
             .subscribe(
@@ -269,7 +269,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
 
                 if (grdSearch && grdSearch.length > 0) {
                     grdSearch.forEach(function (grid) {
-                        if (grid && grid.url == '../Inventory/api/InventoryReceipt/SearchReceiptVouchers') {
+                        if (grid && grid.url == './Inventory/api/InventoryReceipt/SearchReceiptVouchers') {
                             var store = grid ? grid.getStore() : null;
                             if (store) {
                                 store.reload({
@@ -414,7 +414,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
 
             Ext.Ajax.request({
                 timeout: 120000,
-                url: '../Inventory/api/InventoryReceipt/GetStatusUnitCost?id=' + record.get('intInventoryReceiptId'),
+                url: './Inventory/api/InventoryReceipt/GetStatusUnitCost?id=' + record.get('intInventoryReceiptId'),
                 method: 'get',
                 success: function (response) {
                     var jsonData = Ext.decode(response.responseText);

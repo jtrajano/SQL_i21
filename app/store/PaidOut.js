@@ -25,7 +25,7 @@ Ext.define('Inventory.store.PaidOut', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/paidout/getpaidouts'
+                    read: './inventory/api/paidout/getpaidouts'
                 },
                 reader: {
                     type: 'json',

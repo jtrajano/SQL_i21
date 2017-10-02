@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemNoteBl : BusinessLayer<tblICItemNote>, IItemNoteBl 
     {
         #region Constructor
-        public ItemNoteBl(IRepository db) : base(db)
+        public ItemNoteBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
     public class InventoryReceiptChargeTaxBl : BusinessLayer<tblICInventoryReceiptChargeTax>, IInventoryReceiptChargeTaxBl 
     {
         #region Constructor
-        public InventoryReceiptChargeTaxBl(IRepository db)
+        public InventoryReceiptChargeTaxBl(IInventoryRepository db)
             : base(db)
         {
             _db = db;

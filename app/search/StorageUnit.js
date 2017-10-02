@@ -6,7 +6,7 @@ Ext.define('Inventory.search.StorageUnit', {
             title:  'Search Storage Units',
             type: 'Inventory.StorageLocation',
             api: {
-                read: '../inventory/api/storagelocation/search'
+                read: './inventory/api/storagelocation/search'
             },
             columns: [
                 {dataIndex: 'intStorageLocationId',text: "Storage Unit Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedParentLot', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/parentlot/search'
+                    read: './inventory/api/parentlot/search'
                 },
                 reader: {
                     type: 'json',

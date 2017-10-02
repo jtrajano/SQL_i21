@@ -4,7 +4,7 @@ Ext.define('Inventory.search.InventoryValuationSummary', {
     searchConfigs: [
         {
             title: 'Inventory Valuation Summary',
-            url: '../inventory/api/item/searchinventoryvaluationsummary',
+            url: './inventory/api/item/searchinventoryvaluationsummary',
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', allowSort: true, flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strItemDescription', text: 'Description', allowSort: true, flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },

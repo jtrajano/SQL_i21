@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class StockReservationBl : BusinessLayer<tblICStockReservation>, IStockReservationBl 
     {
         #region Constructor
-        public StockReservationBl(IRepository db) : base(db)
+        public StockReservationBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

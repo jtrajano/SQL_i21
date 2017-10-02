@@ -20,10 +20,10 @@ Ext.define('Inventory.store.FeedStockCode', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/feedstock/get',
-                    update: '../inventory/api/feedstock/put',
-                    create: '../inventory/api/feedstock/post',
-                    destroy: '../inventory/api/feedstock/delete'
+                    read: './inventory/api/feedstock/get',
+                    update: './inventory/api/feedstock/put',
+                    create: './inventory/api/feedstock/post',
+                    destroy: './inventory/api/feedstock/delete'
                 },
                 reader: {
                     type: 'json',

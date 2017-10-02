@@ -7,7 +7,7 @@ Ext.define('Inventory.search.StorageMeasurementReading', {
             title: 'Search Storage Measurement Reading',
             type: 'Inventory.StorageMeasurementReading',
             api: {
-                read: '../inventory/api/storagemeasurementreading/search'
+                read: './inventory/api/storagemeasurementreading/search'
             },
             columns: [
                 { dataIndex: 'intLocationId', text: 'Location', flex: 1, dataType: 'numeric', key: true, hidden: true },
@@ -53,7 +53,7 @@ Ext.define('Inventory.search.StorageMeasurementReading', {
             title: 'Search Reading Details',
             type: 'Inventory.StorageMeasurementReading',
             api: {
-                read: '../inventory/api/storagemeasurementreading/searchstoragemeasurementreadingconversion'
+                read: './inventory/api/storagemeasurementreading/searchstoragemeasurementreadingconversion'
             },
             columns: [
                 { dataIndex: 'intStorageMeasurementReadingConversionId', key: true, dataType: 'numeric', text: "Storage Measurement Reading Conversion Id", hidden: true, flex: 1 },

@@ -65,7 +65,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
     verifyValuation: function (date) {
         return ic.utils.ajax({
             timeout: 120000,
-            url: '../Inventory/api/InventoryValuation/CompareRebuiltValuationSnapshot',
+            url: './Inventory/api/InventoryValuation/CompareRebuiltValuationSnapshot',
             method: "GET",
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -79,7 +79,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
     rebuild: function (data) {
         return ic.utils.ajax({
             timeout: 0, //120000,
-            url: '../Inventory/api/InventoryValuation/RebuildInventory',
+            url: './Inventory/api/InventoryValuation/RebuildInventory',
             method: "post",
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -124,7 +124,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                         iRely.Functions.showCustomDialog('warning', 'yesno', "Rebuild inventory completed but discrepancies were found. Do you want to download the logs to check discrepancies manually?", function (button) {
                             if (button === 'yes') {
                                 ic.utils.ajax({
-                                    url: '../Inventory/api/InventoryValuation/GetDiscrepancies',
+                                    url: './Inventory/api/InventoryValuation/GetDiscrepancies',
                                     params: {
                                         dtmDate: data.dtmStartDate
                                     }
@@ -232,7 +232,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext({ window: win });
+            var context = win.context ? win.context.initialize() : me.setupContext({ window: win });
             me.setupAdditionalBinding({ window: win, context: context, viewModel: vm });
             context.data.addRecord();
         }

@@ -14,7 +14,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ReadingPointBl : BusinessLayer<tblICReadingPoint>, IReadingPointBl
     {
-        public ReadingPointBl(IRepository db)
+        public ReadingPointBl(IInventoryRepository db)
             : base(db)
         {
         }

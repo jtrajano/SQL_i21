@@ -22,7 +22,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
             title:  'Search Manufacturing Cells',
             type: 'Inventory.ManufacturingCell',
             api: {
-                read: '../Inventory/api/ManufacturingCell/SearchManufacturingCells'
+                read: './Inventory/api/ManufacturingCell/SearchManufacturingCells'
             },
             columns: [
                 {dataIndex: 'intManufacturingCellId',text: "Manufacturing Cell Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
@@ -116,7 +116,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();

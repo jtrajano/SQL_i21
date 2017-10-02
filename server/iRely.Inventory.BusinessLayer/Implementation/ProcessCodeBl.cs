@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ProcessCodeBl : BusinessLayer<tblICRinProcess>, IProcessCodeBl 
     {
         #region Constructor
-        public ProcessCodeBl(IRepository db) : base(db)
+        public ProcessCodeBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

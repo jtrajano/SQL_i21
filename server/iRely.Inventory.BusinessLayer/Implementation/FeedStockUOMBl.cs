@@ -17,7 +17,7 @@ namespace iRely.Inventory.BusinessLayer
     public class FeedStockUOMBl : BusinessLayer<tblICRinFeedStockUOM>, IFeedStockUOMBl 
     {
         #region Constructor
-        public FeedStockUOMBl(IRepository db) : base(db)
+        public FeedStockUOMBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

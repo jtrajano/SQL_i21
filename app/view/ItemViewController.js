@@ -1946,7 +1946,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         iRely.Msg.showWait('Converting units...');
         ic.utils.ajax({
-            url: '../Inventory/api/Item/GetUnitConversion',
+            url: './Inventory/api/Item/GetUnitConversion',
             method: 'Post',
             params: {
                 intFromUnitMeasureId: unitMeasureId,
@@ -1993,7 +1993,7 @@ Ext.define('Inventory.view.ItemViewController', {
             var current = grid.view.getRecord(rowIndex);
             var uomConversion = win.viewModel.storeInfo.uomConversion;
             ic.utils.ajax({
-                url: '../Inventory/api/Item/CheckStockUnit',
+                url: './Inventory/api/Item/CheckStockUnit',
                 method: 'POST',
                 params: {
                     ItemId: current.get('intItemId'),
@@ -2035,7 +2035,7 @@ Ext.define('Inventory.view.ItemViewController', {
                                     }
                                 }
                                 ic.utils.ajax({
-                                    url: '../Inventory/api/Item/ConvertItemToNewStockUnit',
+                                    url: './Inventory/api/Item/ConvertItemToNewStockUnit',
                                     method: 'POST',
                                     params: {
                                         ItemId: current.get('intItemId'),
@@ -2267,7 +2267,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var showAddScreen = function() {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
-            search.url = '../i21/api/CompanyLocation/Search';
+            search.url = './i21/api/CompanyLocation/Search';
             search.columns = [
                 { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
                 { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
@@ -2551,7 +2551,7 @@ Ext.define('Inventory.view.ItemViewController', {
         
         ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/ItemLocation/Search',
+                url: './Inventory/api/ItemLocation/Search',
                 params: {
                     intItemLocationId: records[0].data.intItemLocationId
                 },
@@ -3533,7 +3533,7 @@ Ext.define('Inventory.view.ItemViewController', {
             iRely.Msg.showWait('Duplicating item...');
             ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/Item/DuplicateItem',
+                url: './Inventory/api/Item/DuplicateItem',
                 params: {
                     ItemId: current.get('intItemId')
                 },
@@ -3553,7 +3553,7 @@ Ext.define('Inventory.view.ItemViewController', {
             );
             // Ext.Ajax.request({
             //     timeout: 120000,
-            //     url: '../Inventory/api/Item/DuplicateItem?ItemId=' + current.get('intItemId'),
+            //     url: './Inventory/api/Item/DuplicateItem?ItemId=' + current.get('intItemId'),
             //     method: 'GET',
             //     success: function(response){
             //         var jsonData = Ext.decode(response.responseText);

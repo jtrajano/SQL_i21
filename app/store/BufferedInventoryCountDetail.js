@@ -23,10 +23,10 @@ Ext.define('Inventory.store.BufferedInventoryCountDetail', {
             destroy: 'DELETE'
         },
         api: {
-            create: '../inventory/api/inventorycountdetail/post',
-            read: '../inventory/api/inventorycount/getinventorycountdetails',
-            update: '../inventory/api/inventorycountdetail/updatedetail',
-            destroy: '../inventory/api/inventorycountdetail/deletedetail',
+            create: './inventory/api/inventorycountdetail/post',
+            read: './inventory/api/inventorycount/getinventorycountdetails',
+            update: './inventory/api/inventorycountdetail/updatedetail',
+            destroy: './inventory/api/inventorycountdetail/deletedetail',
         },
         reader: {
             type: 'json',

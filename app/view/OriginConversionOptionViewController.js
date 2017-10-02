@@ -29,7 +29,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var win = me.getView();
                 
         jQuery.ajax({
-            url: '../Inventory/api/CompanyPreference/Get',
+            url: './Inventory/api/CompanyPreference/Get',
             method: 'get',
             params: {
                 page: 1,
@@ -239,7 +239,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
     ajaxRequest: function (viewModel, originTypes, type, lineOfBusiness, win) {
         jQuery.ajax({
-            url: '../Inventory/api/ImportData/ImportOrigins',
+            url: './Inventory/api/ImportData/ImportOrigins',
             method: 'post',
             headers: {
                 'Content-Type': 'multipart/form-data',

@@ -15,7 +15,7 @@ UnitTestEngine.testStore({
             }],
             "type": "rest",
             "api": {
-                "read": "../Inventory/api/UnitMeasure/Search"
+                "read": "./Inventory/api/UnitMeasure/Search"
             }
         }
     }

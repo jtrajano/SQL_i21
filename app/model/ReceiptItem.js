@@ -25,7 +25,7 @@ Ext.define('Inventory.model.ReceiptItem', {
                         proxy: {
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/inventoryreceipt/getreceiptitems'
+                                read: './inventory/api/inventoryreceipt/getreceiptitems'
                             },
                             reader: {
                                 type: 'json',

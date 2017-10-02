@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class CommodityUOMBl : BusinessLayer<tblICCommodityUnitMeasure>, ICommodityUOMBl 
     {
         #region Constructor
-        public CommodityUOMBl(IRepository db) : base(db)
+        public CommodityUOMBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

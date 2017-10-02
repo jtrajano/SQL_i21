@@ -2,7 +2,7 @@
 
 namespace iRely.Inventory.BusinessLayer
 {
-    public interface IGlobalComponentEngineRepository : IRepository
+    public interface IInventoryRepository : IRepository
     {
     }
 }

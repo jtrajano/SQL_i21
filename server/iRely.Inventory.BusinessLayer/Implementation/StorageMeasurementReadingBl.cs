@@ -15,7 +15,7 @@ namespace iRely.Inventory.BusinessLayer
     public class StorageMeasurementReadingBl : BusinessLayer<tblICStorageMeasurementReading>, IStorageMeasurementReadingBl 
     {
         #region Constructor
-        public StorageMeasurementReadingBl(IRepository db) : base(db)
+        public StorageMeasurementReadingBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

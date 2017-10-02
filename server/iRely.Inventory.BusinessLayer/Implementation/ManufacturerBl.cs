@@ -14,7 +14,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ManufacturerBl : BusinessLayer<tblICManufacturer>, IManufacturerBl 
     {
         #region Constructor
-        public ManufacturerBl(IRepository db) : base(db)
+        public ManufacturerBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

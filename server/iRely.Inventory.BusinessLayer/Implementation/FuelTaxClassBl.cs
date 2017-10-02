@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class FuelTaxClassBl : BusinessLayer<tblICFuelTaxClass>, IFuelTaxClassBl 
     {
         #region Constructor
-        public FuelTaxClassBl(IRepository db) : base(db)
+        public FuelTaxClassBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

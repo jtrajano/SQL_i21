@@ -15,7 +15,7 @@ namespace iRely.Inventory.BusinessLayer
     public class CategoryUOMBl : BusinessLayer<tblICCategoryUOM>, ICategoryUOMBl 
     {
         #region Constructor
-        public CategoryUOMBl(IRepository db) : base(db)
+        public CategoryUOMBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

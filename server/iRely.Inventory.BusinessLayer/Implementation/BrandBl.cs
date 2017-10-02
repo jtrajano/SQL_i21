@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     public class BrandBl : BusinessLayer<tblICBrand>, IBrandBl 
     {
         #region Constructor
-        public BrandBl(IRepository db) : base(db)
+        public BrandBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

@@ -88,8 +88,9 @@ Ext.define('Inventory.view.BrandViewController', {
     show: function () {
         "use strict";
         var me = this;
+        var win = me.getView();
         me.getView().show();
-        var context = me.setupContext();
+        var context = win.context ? win.context.initialize() : me.setupContext();
         context.data.load();
     },
 

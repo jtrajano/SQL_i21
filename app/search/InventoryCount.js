@@ -7,7 +7,7 @@ Ext.define('Inventory.search.InventoryCount', {
             title: 'Search Inventory Count',
             type: 'Inventory.InventoryCount',
             api: {
-                read: '../inventory/api/inventorycount/search'
+                read: './inventory/api/inventorycount/search'
             },
             columns: [
                 { dataIndex: 'intInventoryCountId', text: "Count Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
@@ -68,7 +68,7 @@ Ext.define('Inventory.search.InventoryCount', {
             title: 'Search Count Group',
             type: 'Inventory.Item',
             api: {
-                read: '../Inventory/api/CountGroup/Search'
+                read: './Inventory/api/CountGroup/Search'
             },
             columns: [
                 { dataIndex: 'intCountGroupId', text: 'Count Group Id', flex: 1, defaultSort: true, sortOrder: 'ASC', dataType: 'numeric', key: true, hidden: true },
@@ -124,7 +124,7 @@ Ext.define('Inventory.search.InventoryCount', {
     onOpenCountGroupClick: function(e) {
         var panel = e.up('panel');
         var grid = panel ? panel.query('#grdSearch') : null;
-        grid = _.filter(grid, { url: '../Inventory/api/CountGroup/Search' });
+        grid = _.filter(grid, { url: './Inventory/api/CountGroup/Search' });
         if(grid && grid.length > 0) {
             grid = grid[0];
             var selection = grid.getSelectionModel().selected;
@@ -157,7 +157,7 @@ Ext.define('Inventory.search.InventoryCount', {
                     close: function() { 
                         var panel = e.up('panel');
                         var grid = panel ? panel.query('#grdSearch') : null;
-                        grid = _.filter(grid, { url: '../Inventory/api/CountGroup/Search' });
+                        grid = _.filter(grid, { url: './Inventory/api/CountGroup/Search' });
                         if(grid && grid.length > 0) {
                             grid = grid[0];
                             if(grid) {

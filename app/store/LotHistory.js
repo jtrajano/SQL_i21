@@ -13,7 +13,7 @@ Ext.define('Inventory.store.LotHistory', {
     proxy: {
         type: 'rest',
         api: {
-            read: '../inventory/api/lot/gethistory',
+            read: './inventory/api/lot/gethistory',
         },
         reader: {
             type: 'json',

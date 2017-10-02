@@ -14,7 +14,7 @@ namespace iRely.Inventory.BusinessLayer
     public class FeedStockCodeBl : BusinessLayer<tblICRinFeedStock>, IFeedStockCodeBl 
     {
         #region Constructor
-        public FeedStockCodeBl(IRepository db) : base(db)
+        public FeedStockCodeBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

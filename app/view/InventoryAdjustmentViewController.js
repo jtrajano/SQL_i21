@@ -646,7 +646,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext({window: win});
+            var context = win.context ? win.context.initialize() : me.setupContext({window: win});
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -1113,7 +1113,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         ic.utils.ajax({
             timeout: 120000,   
-            url: '../inventory/api/item/getitemstockuomsummary',
+            url: './inventory/api/item/getitemstockuomsummary',
             params: {
                 ItemId: itemId,
                 LocationId: locationId,
@@ -1379,7 +1379,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         var doPost = function (){
             ic.utils.ajax({
-                url: '../inventory/api/inventoryadjustment/posttransaction',
+                url: './inventory/api/inventoryadjustment/posttransaction',
                 params:{
                     strTransactionId: current.get('strAdjustmentNo'),
                     isPost: current.get('ysnPosted') ? false : true,
@@ -1452,7 +1452,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         var doRecap = function (){
             ic.utils.ajax({
-                url: '../inventory/api/inventoryadjustment/posttransaction',
+                url: './inventory/api/inventoryadjustment/posttransaction',
                 params:{
                     strTransactionId: current.get('strAdjustmentNo'),
                     isPost: isAfterPostCall ? ysnPosted : current.get('ysnPosted') ? false : true,

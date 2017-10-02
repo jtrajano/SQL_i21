@@ -15,7 +15,7 @@ Ext.define('Inventory.view.CopyItemLocationViewModel', {
                 },
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/item/get'
+                    read: './inventory/api/item/get'
                 },
                 reader: {
                     type: 'json',

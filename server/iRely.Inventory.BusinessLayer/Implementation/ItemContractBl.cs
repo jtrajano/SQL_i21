@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class ItemContractBl : BusinessLayer<tblICItemContract>, IItemContractBl 
     {
         #region Constructor
-        public ItemContractBl(IRepository db) : base(db)
+        public ItemContractBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

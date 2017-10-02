@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ReceiptInspection', {
                         proxy: {
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/inventoryreceipt/getreceiptinspections'
+                                read: './inventory/api/inventoryreceipt/getreceiptinspections'
                             },
                             reader: {
                                 type: 'json',

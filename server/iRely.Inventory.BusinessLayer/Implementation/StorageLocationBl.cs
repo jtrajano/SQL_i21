@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class StorageLocationBl : BusinessLayer<tblICStorageLocation>, IStorageLocationBl 
     {
         #region Constructor
-        public StorageLocationBl(IRepository db) : base(db)
+        public StorageLocationBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

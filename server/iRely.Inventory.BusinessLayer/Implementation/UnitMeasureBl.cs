@@ -15,7 +15,7 @@ namespace iRely.Inventory.BusinessLayer
     public class UnitMeasureBl : BusinessLayer<tblICUnitMeasure>, IUnitMeasureBl 
     {
         #region Constructor
-        public UnitMeasureBl(IRepository db) : base(db)
+        public UnitMeasureBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

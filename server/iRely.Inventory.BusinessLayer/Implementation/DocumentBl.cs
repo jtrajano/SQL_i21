@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
     public class DocumentBl : BusinessLayer<tblICDocument>, IDocumentBl 
     {
         #region Constructor
-        public DocumentBl(IRepository db) : base(db)
+        public DocumentBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

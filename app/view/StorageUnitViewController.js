@@ -228,7 +228,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -357,7 +357,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             iRely.Msg.showWait('Duplicating Storage Unit...');
             ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/StorageLocation/DuplicateStorageLocation',
+                url: './Inventory/api/StorageLocation/DuplicateStorageLocation',
                 params: {
                     StorageLocationId: current.get('intStorageLocationId')
                 },

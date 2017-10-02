@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class InventoryShipmentBl : BusinessLayer<tblICInventoryShipment>, IInventoryShipmentBl 
     {
         #region Constructor
-        public InventoryShipmentBl(IRepository db) : base(db)
+        public InventoryShipmentBl(IInventoryRepository db) : base(db)
         {
             _db = db;
             _db.ContextManager.Database.CommandTimeout = 180000;

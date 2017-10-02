@@ -779,7 +779,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();
@@ -908,7 +908,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if(customerId) {
             ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/InventoryShipment/GetCustomerCurrency',
+                url: './Inventory/api/InventoryShipment/GetCustomerCurrency',
                 method: 'GET',
                 params: {
                     entityId: customerId
@@ -1164,7 +1164,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         failureFn = failureFn && (failureFn instanceof Function) ? failureFn : function(){ /*empty function*/ };
 
         ic.utils.ajax({
-            url: '../accountsreceivable/api/common/getitemprice',
+            url: './accountsreceivable/api/common/getitemprice',
             params: {
                 intItemId: cfg.ItemId,
                 intCustomerId: cfg.CustomerId,
@@ -1541,7 +1541,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/InventoryShipment/Ship',
+                postURL: './Inventory/api/InventoryShipment/Ship',
                 strTransactionId: currentRecord.get('strShipmentNumber'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
@@ -1633,7 +1633,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
             ic.utils.ajax({
                 timeout: 120000,
-                url: '../Inventory/api/InventoryShipment/ProcessShipmentToInvoice',
+                url: './Inventory/api/InventoryShipment/ProcessShipmentToInvoice',
                 params: {
                     id: current.get('intInventoryShipmentId')
                 },
@@ -2531,7 +2531,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var showAddScreen = function () {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
-            search.url = '../Inventory/api/InventoryShipment/GetAddOrders?CustomerId=' + CustomerId + '&OrderType=' + OrderType + '&SourceType=' + SourceType;
+            search.url = './Inventory/api/InventoryShipment/GetAddOrders?CustomerId=' + CustomerId + '&OrderType=' + OrderType + '&SourceType=' + SourceType;
             search.columns = [
                 { dataIndex: 'intKey', text: 'Key', flex: 1, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
                 { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string' },
@@ -2977,7 +2977,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             if (current) {
                 ic.utils.ajax({
                     timeout: 120000,
-                    url: '../Inventory/api/InventoryShipment/CalculateCharges',
+                    url: './Inventory/api/InventoryShipment/CalculateCharges',
                     params: {
                         id: current.get('intInventoryShipmentId')
                     },
@@ -3158,7 +3158,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var doPost = function (){
             var current = currentRecord; 
             ic.utils.ajax({
-                url: '../Inventory/api/InventoryShipment/Ship',
+                url: './Inventory/api/InventoryShipment/Ship',
                 params:{
                     strTransactionId: current.get('strShipmentNumber'),
                     isPost: current.get('ysnPosted') ? false : true,
@@ -3320,7 +3320,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 	// 	var txtShipFromAddress = win.down('#txtShipFromAddress');
 
     //       ic.utils.ajax({
-    //             url: '../i21/api/companylocation/search'
+    //             url: './i21/api/companylocation/search'
     //         })
     //         .flatMap(function(res) {
     //             var json = JSON.parse(res.responseText);
@@ -3397,7 +3397,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var doRecap = function (currentRecord){
             ic.utils.ajax({
-                url: '../Inventory/api/InventoryShipment/Ship',
+                url: './Inventory/api/InventoryShipment/Ship',
                 params:{
                     strTransactionId: currentRecord.get('strShipmentNumber'),
                     isPost: isAfterPostCall ? ysnPosted : currentRecord.get('ysnPosted') ? false : true,

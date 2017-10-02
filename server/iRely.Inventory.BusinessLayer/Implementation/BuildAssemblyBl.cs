@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class BuildAssemblyBl : BusinessLayer<tblICBuildAssembly>, IBuildAssemblyBl 
     {
         #region Constructor
-        public BuildAssemblyBl(IRepository db) : base(db)
+        public BuildAssemblyBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

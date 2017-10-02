@@ -16,7 +16,7 @@ namespace iRely.Inventory.BusinessLayer
     public class InventoryAdjustmentBl : BusinessLayer<tblICInventoryAdjustment>, IInventoryAdjustmentBl 
     {
         #region Constructor
-        public InventoryAdjustmentBl(IRepository db) : base(db)
+        public InventoryAdjustmentBl(IInventoryRepository db) : base(db)
         {
             _db = db;
         }

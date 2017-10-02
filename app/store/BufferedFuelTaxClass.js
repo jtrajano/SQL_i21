@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedFuelTaxClass', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/fueltaxclass/search'
+                    read: './inventory/api/fueltaxclass/search'
                 },
                 reader: {
                     type: 'json',

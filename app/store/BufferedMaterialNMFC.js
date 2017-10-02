@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedMaterialNMFC', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/materialnmfc/search'
+                    read: './inventory/api/materialnmfc/search'
                 },
                 reader: {
                     type: 'json',

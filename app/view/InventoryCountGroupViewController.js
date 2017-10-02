@@ -7,7 +7,7 @@ Ext.define('Inventory.view.InventoryCountGroupViewController', {
             title: 'Search Inventory Count Group',
             type: 'Inventory.InventoryCountGroup',
             api: {
-                read: '../inventory/api/countgroup/search'
+                read: './inventory/api/countgroup/search'
             },
             columns: [
                 {dataIndex: 'intCountGroupId', text: "Count Group Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
@@ -53,7 +53,7 @@ Ext.define('Inventory.view.InventoryCountGroupViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();

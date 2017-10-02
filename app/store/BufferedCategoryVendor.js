@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedCategoryVendor', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../inventory/api/categoryvendor/search'
+                    read: './inventory/api/categoryvendor/search'
                 },
                 reader: {
                     type: 'json',

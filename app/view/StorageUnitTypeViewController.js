@@ -23,7 +23,7 @@ Ext.define('Inventory.view.StorageUnitTypeViewController', {
             title:  'Search Storage Unit Type',
             type: 'Inventory.StorageUnitType',
             api: {
-                read: '../Inventory/api/StorageUnitType/Search'
+                read: './Inventory/api/StorageUnitType/Search'
             },
             columns: [
                 {dataIndex: 'intStorageUnitTypeId',text: "Storage Unit Type Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
@@ -90,7 +90,7 @@ Ext.define('Inventory.view.StorageUnitTypeViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
 
             if (config.action === 'new') {
                 context.data.addRecord();
