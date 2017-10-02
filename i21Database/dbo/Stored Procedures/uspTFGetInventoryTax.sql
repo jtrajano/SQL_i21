@@ -173,10 +173,10 @@ BEGIN TRY
 				, CompanySetup.strFederalTaxID
 				, Origin.strState AS strOriginState
 				, Origin.strCity AS strOriginCity
-				, '' AS strOriginCounty
+				, tblSMTaxCode.strCounty AS strOriginCounty
 				, Destination.strStateProvince
 				, Destination.strCity AS strDestinationCity
-				, '' AS strDestinationCounty
+				, NULL AS strDestinationCounty
 				, TCN.strTerminalControlNumber
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'
@@ -322,10 +322,10 @@ BEGIN TRY
 				, CompanySetup.strFederalTaxID
 				, Origin.strState AS strOriginState
 				, Origin.strCity AS strOriginCity
-				, '' AS strOriginCounty
+				, tblSMTaxCode.strCounty AS strOriginCounty
 				, Destination.strStateProvince
 				, Destination.strCity AS strDestinationCity
-				, '' AS strDestinationCounty
+				, NULL AS strDestinationCounty
 				, TCN.strTerminalControlNumber
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'

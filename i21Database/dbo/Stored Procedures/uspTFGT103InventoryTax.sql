@@ -137,10 +137,10 @@ BEGIN TRY
 			, tblSMCompanySetup.strFederalTaxID
 			, tblEMEntityLocation.strState AS strOriginState
 			, tblEMEntityLocation.strCity AS strOriginCity
-			, '' AS strOriginCounty
+			, tblSMTaxCode.strCounty AS strOriginCounty
 			, tblSMCompanyLocation.strStateProvince AS strDestinationState
 			, tblSMCompanyLocation.strCity AS strDestinationCity
-			, '' AS strDestinationCounty
+			, NULL AS strDestinationCounty
 			, tblTFTerminalControlNumber.strTerminalControlNumber
 			, strTransporterIdType = 'FEIN'
 			, strVendorIdType = 'FEIN'
