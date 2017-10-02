@@ -27,15 +27,7 @@ DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
-DECLARE @intLoadId INT
-DECLARE @dblTicketFreightRate AS DECIMAL (9, 6)
-DECLARE @intScaleStationId AS INT
-DECLARE @intFreightItemId AS INT
-DECLARE @intFreightVendorId AS INT
 DECLARE @ysnIsStorage AS BIT
-DECLARE @intLoadContractId AS INT
-DECLARE @dblLoadScheduledUnits AS NUMERIC(38, 20)
-DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
@@ -127,8 +119,7 @@ OPEN intListCursor;
 								FROM	tblCTContractCost CC WHERE CC.intContractDetailId = @intLoopContractId
 
 								IF	ISNULL(@intLoopContractId,0) != 0
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intDeliverySheetId, 'Scale', @intTicketItemUOMId
-								EXEC dbo.uspSCUpdateTicketContractUsed @intDeliverySheetId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intDeliverySheetId, 'Delivery Sheet', @intTicketItemUOMId
 							END
 							
 							INSERT INTO @ItemsForItemReceipt (
@@ -340,6 +331,7 @@ END
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 			SELECT @dblNetUnits = SUM(dblQty) FROM @ItemsForItemReceipt
 			EXEC dbo.uspSCProcessHoldTicket @intDeliverySheetId,@intEntityId, @dblNetUnits , @intUserId, 'I', 0, 1
+			UPDATE tblSCTicket SET ysnDeliverySheetPost = 1 WHERE intDeliverySheetId = @intDeliverySheetId;
 			--VOUCHER intergration
 			CREATE TABLE #tmpItemReceiptIds (
 				[intInventoryReceiptItemId] [INT] PRIMARY KEY,
@@ -362,7 +354,7 @@ END
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 				SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
-				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intPricingTypeId,0) <= 1 AND ISNULL(@intOwnershipType,0) = 1
+				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@intOwnershipType,0) = 1
 				BEGIN
 					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 					SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
