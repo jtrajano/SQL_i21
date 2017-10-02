@@ -41,11 +41,6 @@ BEGIN TRY
 				RAISERROR('External shipment no. has not been received. Cannot continue.', 16, 1)
 			END
 		END
-
-		EXEC uspLGUpdateInboundIntransitQty @intLoadId = @intLoadId
-			,@ysnInventorize = @ysnPost
-			,@ysnUnShip = @ysnUnShip
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
 		
 		IF(ISNULL(@strFOBPoint,'') = 'Origin')
 		BEGIN		
@@ -53,6 +48,13 @@ BEGIN TRY
 				 @intLoadId = @intLoadId
 				,@ysnPost = @ysnPost
 				,@intPurchaseSale = 1
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+			-- Increase the Inbound In-Transit Qty.
+			EXEC uspLGUpdateInboundIntransitQty 
+				@intLoadId = @intLoadId
+				,@ysnInventorize = @ysnPost
+				,@ysnUnShip = @ysnUnShip
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 		END
 
@@ -80,9 +82,16 @@ BEGIN TRY
 	ELSE IF @intPurchaseSale = 3
 	BEGIN
 		EXEC uspLGPostInTransitCosting 
-				@intLoadId = @intLoadId
+			@intLoadId = @intLoadId
 			,@ysnPost = @ysnPost
 			,@intPurchaseSale = @intPurchaseSale
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+		-- Increase the Inbound In-Transit Qty.
+		EXEC uspLGUpdateInboundIntransitQty 
+			@intLoadId = @intLoadId
+			,@ysnInventorize = @ysnPost
+			,@ysnUnShip = @ysnUnShip
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
 
 		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
