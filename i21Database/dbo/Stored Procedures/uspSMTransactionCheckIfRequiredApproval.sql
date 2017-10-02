@@ -17,7 +17,8 @@ BEGIN
 			inner join tblSMApprovalListUserSecurity d on d.intApprovalListId = c.intApprovalListId
 		where 
 			screen.strNamespace = @type and
-			em.intEntityId = @currentUserEntityId and (
+			em.intEntityId = @transactionEntityId and 
+			(
 				(d.dblAmountLessThanEqual = 0 and d.dblAmountOver = 0) or
 				(d.dblAmountLessThanEqual = 0 and (d.dblAmountOver > 0 and @amount > d.dblAmountOver)) or
 				((d.dblAmountLessThanEqual > 0 and @amount <= d.dblAmountLessThanEqual) and d.dblAmountOver = 0) or
