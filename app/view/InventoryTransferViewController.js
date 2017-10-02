@@ -227,7 +227,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 colNewLotID: {
                     dataIndex: 'strNewLotId'
                 },
-                colCost: 'dblCost',
+                colCost: {
+                    dataIndex: 'dblCost',
+                    hidden: true,
+                    editor: {
+                        readOnly: true 
+                    }                   
+                },
                 chkDestinationWeights: {
                     dataIndex: 'ysnWeights',
                     disabled: '{destinationWeightsDisabled}'

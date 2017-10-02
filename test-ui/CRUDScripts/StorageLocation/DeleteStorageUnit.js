@@ -7,7 +7,7 @@ StartTest (function (t) {
         .displayText('===== Scenario 1: Delete Unused Storage Location. =====')
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
+        .clickMenuScreen('Storage Units','Screen')
         .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test SL - SH - 010')
         .waitUntilLoaded()
@@ -38,16 +38,20 @@ StartTest (function (t) {
                     .clickButton('Save')
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
-                    .waitUntilLoaded()
+              
                     //endregion
 
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
+        .waitUntilLoaded('')
+
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded('')
         .clearTextFilter('FilterGrid')
-        .clickMenuScreen('Storage Locations','Screen')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('Test SL - SH - 010', 'strUnitMeasure', 1)
         .waitUntilLoaded('')
         .clickButton('Delete')
@@ -63,6 +67,8 @@ StartTest (function (t) {
         /*====================================== Scenario 2: Delete Used Storage Location ======================================*/
         //region
         .displayText('=====  Scenario 2: Delete Unused Storage Location =====')
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded('')
         .doubleClickSearchRowValue('RM Storage', 'strUnitMeasure', 1)
         .waitUntilLoaded('')
         .clickButton('Delete')
@@ -75,14 +81,13 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded()
-        .clearTextFilter('FilterGrid')
         .displayText('=====  Scenario 2: Delete Used Storage Location Done=====')
         //endregion
 
 
         /*====================================== Scenario 3: Delete Multiple Storage Location ======================================*/
         .displayText('=====  Scenario 3: Delete Multiple Storage Location =====')
-        .clickMenuScreen('Storage Locations','Screen')
+        .clickMenuScreen('Storage Units','Screen')
         .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'DELETE SL - SH')
         .waitUntilLoaded()
@@ -114,6 +119,8 @@ StartTest (function (t) {
                     .verifyStatusMessage('Saved')
                     .clickButton('Close')
 
+                    .clickMenuScreen('Storage Units','Screen')
+                    .waitUntilLoaded('')
                     .clickButton('New')
                     .waitUntilLoaded('icstorageunit')
                     .enterData('Text Field','Name','DELETE SL - SH - 002')
@@ -132,15 +139,17 @@ StartTest (function (t) {
                     .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
                     .waitUntilLoaded()
-                    .clickButton('Close')
-                    .waitUntilLoaded()
+                  
                     .done();
             },
             continueOnFail: true
         })
-        .clearTextFilter('FilterGrid')
+        .clickButton('Close')
+        .waitUntilLoaded()
 
         .displayText('=====  Scenario 3: Delete Multiple Storage Location =====')
+        .clickMenuScreen('Storage Units','Screen')
+        .waitUntilLoaded('')
         .filterGridRecords('Search', 'FilterGrid', 'DELETE SL - SH')
         .selectSearchRowNumber([1,2])
         .clickButton('OpenSelected')

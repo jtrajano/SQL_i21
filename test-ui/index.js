@@ -167,16 +167,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'ProductionProcess',
                     items: [
                         {
-                            url: 'CRUDScripts/ProductionProcess/AddProductionProcess.js?v='+version,
-                            title: 'AddProductionProcess',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/ProductionProcess/DeleteProductionProcess.js?v='+version,
-                            title: 'DeleteProductionProcess',
+                            url: 'CRUDScripts/ProductionProcess/AddAndDeleteProductionProcess.js?v='+version,
+                            title: 'AddAndDeleteProductionProcess',
                             preload: [
                                 functionalTest,
                                 commonIC
@@ -188,16 +180,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FeedStockUOM',
                     items: [
                         {
-                            url: 'CRUDScripts/FeedStockUOM/AddFeedStockUOM.js?v='+version,
-                            title: 'AddFeedStockUOM',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FeedStockUOM/DeleteFeedStockUOM.js?v='+version,
-                            title: 'DeleteFeedStockUOM',
+                            url: 'CRUDScripts/FeedStockUOM/AddAndDeleteFeedStockUOM.js?v='+version,
+                            title: 'AddAndDeleteFeedStockUOM',
                             preload: [
                                 functionalTest,
                                 commonIC
@@ -209,16 +193,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FuelType',
                     items: [
                         {
-                            url: 'CRUDScripts/FuelType/AddFuelType.js?v='+version,
-                            title: 'AddFuelType',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FuelType/DeleteFuelType.js?v='+version,
-                            title: 'DeleteFuelType',
+                            url: 'CRUDScripts/FuelType/AddAndDeleteFuelType.js?v='+version,
+                            title: 'AddAndDeleteFuelType',
                             preload: [
                                 functionalTest,
                                 commonIC
@@ -250,19 +226,19 @@ if(_url.indexOf('version=TF') < 1) {
                     ]
                 },
 
-                { group: 'StorageLocation',
+                { group: 'StorageUnits',
                     items: [
                         {
-                            url: 'CRUDScripts/StorageLocation/AddStorageLocation.js?v='+version,
-                            title: 'AddStorageLocation',
+                            url: 'CRUDScripts/StorageLocation/AddStorageUnits.js?v='+version,
+                            title: 'AddStorageUnits',
                             preload: [
                                 functionalTest,
                                 commonIC
                             ]
                         },
                         {
-                            url: 'CRUDScripts/StorageLocation/DeleteStorageLocation.js?v='+version,
-                            title: 'DeleteStorageLocation',
+                            url: 'CRUDScripts/StorageLocation/DeleteStorageUnit.js?v='+version,
+                            title: 'DeleteStorageUnit',
                             preload: [
                                 functionalTest,
                                 commonIC

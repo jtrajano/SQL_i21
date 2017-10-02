@@ -258,8 +258,8 @@
       <HintPath>..\packages\iRely.Common.17.3.6478.11148\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="iRely.Reports.Helper, Version=17.3.6477.2770, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\iRely.Reports.Helper.17.3.6477.2770\lib\net45\iRely.Reports.Helper.dll</HintPath>
+    <Reference Include="iRely.Reports.Helper, Version=17.3.6480.14477, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\iRely.Reports.Helper.17.3.6480.14477\lib\net45\iRely.Reports.Helper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">

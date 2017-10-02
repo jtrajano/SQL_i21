@@ -7,6 +7,7 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
         .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test_LB')
         .waitUntilLoaded()
         .continueIf({
@@ -26,14 +27,16 @@ StartTest (function (t) {
                     .verifyStatusMessage('Edited')
                     .clickButton('Save')
                     .waitUntilLoaded()
+                    .waitUntilLoaded()
                     .verifyStatusMessage('Saved')
-                    .clickButton('Close')
 
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
         .waitUntilLoaded()
         .displayText('===== Add stock UOM first Done  =====')
         //endregion
@@ -43,6 +46,7 @@ StartTest (function (t) {
         //region
         .displayText('===== Scenario 2. Add Conversion UOMs =====')
         .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test_5 LB bag')
         .waitUntilLoaded()
         .continueIf({
@@ -62,20 +66,22 @@ StartTest (function (t) {
                     .selectComboBoxRowNumber('UnitType',7,0)
                     .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
                     .enterGridData('Conversion', 1, 'dblConversionToStock', '5')
-                    .verifyStatusMessage('Edited')
                     .clickButton('Save')
                     .waitUntilLoaded()
-                    .verifyStatusMessage('Saved')
-                    .clickButton('Close')
-                    .waitUntilLoaded()
+                  
 
                     .done();
             },
             continueOnFail: true
         })
+
         .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
 
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .filterGridRecords('Search', 'FilterGrid', 'Test_10 LB bag')
         .waitUntilLoaded()
         .continueIf({
@@ -98,14 +104,15 @@ StartTest (function (t) {
                     .verifyStatusMessage('Edited')
                     .clickButton('Save')
                     .waitUntilLoaded()
-                    .verifyStatusMessage('Saved')
-                    .clickButton('Close')
+                
 
                     .done();
             },
             continueOnFail: true
         })
         .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickButton('Close')
         .waitUntilLoaded()
         .displayText('===== Add Conversion UOM Done  =====')
         //endregion
@@ -114,6 +121,8 @@ StartTest (function (t) {
         /*====================================== Scenario 3. Update UOM ======================================*/
         //region
         .displayText('===== Scenario 3. Update UOM =====')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .doubleClickSearchRowValue('Test_10 LB bag', 'strUnitMeasure', 1)
         .waitUntilLoaded('')
         .enterData('Text Field','UnitMeasure','Test_10 LB bag - Updated')
@@ -122,11 +131,12 @@ StartTest (function (t) {
         .enterGridData('Conversion', 2, 'dblConversionToStock', '4.53592')
         .selectGridComboBoxRowNumber('Conversion',3,'colOtherUOM',8)
         .enterGridData('Conversion', 3, 'dblConversionToStock', '50')
-        .verifyStatusMessage('Edited')
         .clickButton('Save')
         .waitUntilLoaded()
-        .verifyStatusMessage('Saved')
         .clickButton('Close') 
+
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
         .waitUntilLoaded('')
@@ -141,6 +151,8 @@ StartTest (function (t) {
         /*====================================== Scenario 4: Check Required Fields ======================================*/
         //region
         .displayText('===== Scenario 4: Check Required Fields =====')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .clickButton('New')
         .waitUntilLoaded('')
         .clickButton('Save')
@@ -149,6 +161,8 @@ StartTest (function (t) {
 
         /*====================================== Scenario 5. Add duplicate Inventory UOM ======================================*/
         .displayText('===== Scenario 5. Add duplicate Inventory UOM  =====')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .waitUntilLoaded()
         .clickButton('New')
         .waitUntilLoaded('')
         .enterData('Text Field','UnitMeasure','Test_LB')
