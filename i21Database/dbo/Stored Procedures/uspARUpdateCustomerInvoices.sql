@@ -1404,8 +1404,8 @@ BEGIN TRY
 		IL.[ysnSuccess] = 1
 		AND ISNULL(ITG.[ysnResetDetails], 0) = 0
 	
-	IF ISNULL(@IntegrationLogId, 0) <> 0
-		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
+	-- IF ISNULL(@IntegrationLogId, 0) <> 0
+	-- 	EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 	
 END TRY
 BEGIN CATCH

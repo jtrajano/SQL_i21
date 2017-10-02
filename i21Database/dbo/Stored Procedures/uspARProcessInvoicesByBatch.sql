@@ -40,6 +40,11 @@ DECLARE @CurrentErrorMessage	NVARCHAR(250)
 SET @ZeroDecimal = 0.000000
 SET @DateNow = CAST(GETDATE() AS DATE)
 
+--#mark modification 101
+DECLARE @NewBathId NVARCHAR(40)
+EXEC dbo.uspSMGetStartingNumber 3, @NewBathId OUT
+--#mark modification 101
+
 DECLARE @SourceColumn AS NVARCHAR (500)
 		,@SourceTable AS NVARCHAR (500)	
 		
@@ -1020,7 +1025,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @IdsForUnPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1531,7 +1536,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1575,7 +1580,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 1
 			,@UserId			= @UserId
@@ -1631,7 +1636,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1675,7 +1680,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 1
 			,@UserId			= @UserId
@@ -1809,7 +1814,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1853,7 +1858,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 1
 			,@UserId			= @UserId
