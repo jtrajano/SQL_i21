@@ -129,7 +129,7 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[strRateType]                   =    Details.strCurrencyExchangeRateType,
-		[strDocument]					=	NULL,
+		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
@@ -196,7 +196,7 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
-		[strDocument]					=	NULL,
+		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
 		[intConcurrencyId]				=	1
 	FROM tblAPBill A
@@ -291,7 +291,7 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
-		[strDocument]					=	NULL,
+		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
@@ -403,7 +403,7 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
-		[strDocument]					=	NULL,
+		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
@@ -505,7 +505,7 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
-		[strDocument]					=	NULL,
+		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
@@ -595,7 +595,7 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
-		[strDocument]					=	NULL,
+		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
@@ -637,6 +637,7 @@ BEGIN
 	,D.ysnTaxAdjusted
 	,D.intAccountId
 	,A.strReference
+	,A.strVendorOrderNumber
 	,C.strVendorId
 	,D.intBillDetailTaxId
 	,A.intCurrencyId
@@ -704,7 +705,7 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
-		[strDocument]					=	NULL,
+		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
@@ -734,6 +735,7 @@ BEGIN
 	,D.ysnTaxAdjusted
 	,D.intAccountId
 	,A.strReference
+	,A.strVendorOrderNumber
 	,C.strVendorId
 	,D.intBillDetailTaxId
 	,A.intCurrencyId
