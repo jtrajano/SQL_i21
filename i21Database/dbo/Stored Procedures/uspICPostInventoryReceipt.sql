@@ -1606,6 +1606,7 @@ BEGIN
 	UPDATE @InTransit_Inbound
 	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
 
+	-- Update the Inbound and Outbound In-Transit Qty for the Transfer Orders. 
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
 	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
 
