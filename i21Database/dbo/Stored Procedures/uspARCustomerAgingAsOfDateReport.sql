@@ -93,6 +93,11 @@ BEGIN
     DROP TABLE #POSTEDINVOICES
 END
 
+IF(OBJECT_ID('tempdb..#FUTUREINVOICES') IS NOT NULL)
+BEGIN
+    DROP TABLE #FUTUREINVOICES
+END
+
 IF(OBJECT_ID('tempdb..#PREPAIDS') IS NOT NULL)
 BEGIN
     DROP TABLE #PREPAIDS
@@ -204,12 +209,38 @@ INNER JOIN (SELECT intAccountCategoryId
 ) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 
 --#POSTEDINVOICES
+SELECT I.intInvoiceId
+	 , I.intPaymentId
+	 , I.intEntityCustomerId
+	 , I.dtmPostDate
+	 , I.dtmDueDate
+	 , I.strTransactionType
+	 , I.strType
+	 , I.dblInvoiceTotal
+	 , I.dblAmountDue
+	 , I.dblDiscount
+	 , I.dblInterest
+INTO #POSTEDINVOICES
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+	LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
+	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+WHERE I.ysnPosted = 1
+  AND I.ysnCancelled = 0
+  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+  AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
+  AND (@intEntityCustomerIdLocal IS NULL OR intEntityCustomerId = @intEntityCustomerIdLocal)
+  AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+  AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
+  AND (@strCompanyLocationLocal IS NULL OR CL.strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
+
+--#FUTUREINVOICES
 SELECT intInvoiceId
 	 , intEntityCustomerId
 	 , dtmPostDate
 	 , strTransactionType
 	 , I.strType
-INTO #POSTEDINVOICES
+INTO #FUTUREINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
 	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
@@ -303,19 +334,9 @@ FROM
 				 END
       , dblAvailableCredit		= 0
 	  , dblPrepayments			= 0
-FROM dbo.tblARInvoice I WITH (NOLOCK)
-    LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
-	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-WHERE I.ysnPosted = 1
-	AND I.ysnCancelled = 0
-	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-    AND I.strTransactionType IN ('Invoice', 'Debit Memo')
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
-    AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
-	AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
-	AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
-	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
-	AND (@strCompanyLocationLocal IS NULL OR strLocationName LIKE '%'+@strCompanyLocationLocal+'%')
+FROM #POSTEDINVOICES I WITH (NOLOCK)
+WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')    
+  AND ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
 
 UNION ALL
                                     
@@ -336,22 +357,11 @@ SELECT dtmPostDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 90 THEN 'Over 90' END
      , dblAvailableCredit		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 	 , dblPrepayments			= 0
-FROM dbo.tblARInvoice I WITH (NOLOCK)
+FROM #POSTEDINVOICES I WITH (NOLOCK)
 	LEFT JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN #INVOICETOTALPAYMENT PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN #PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId	
-    LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
-	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-WHERE I.ysnPosted = 1
-	AND I.ysnCancelled = 0
-    AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-    AND ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
-    AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
-	AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
-	AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
-	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
-	AND (@strCompanyLocationLocal IS NULL OR strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
+WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
 
 UNION ALL
                                     
@@ -372,22 +382,11 @@ SELECT dtmPostDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 				 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateToLocal) > 90 THEN 'Over 90' END
      , dblAvailableCredit		= 0
 	 , dblPrepayments			= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
-FROM dbo.tblARInvoice I WITH (NOLOCK)
+FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN #PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId 
-    LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
-	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-WHERE I.ysnPosted = 1
-	AND I.ysnCancelled = 0
-    AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-    AND ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
-    AND I.intAccountId IN (SELECT intAccountId FROM #GLACCOUNTS)
-	AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
-	AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
-	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
-	AND (@strCompanyLocationLocal IS NULL OR strLocationName LIKE '%'+@strCompanyLocationLocal+'%')	
+WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
                                    
 UNION ALL
 
@@ -412,7 +411,7 @@ SELECT P.dtmDatePaid
 	 , dblPrepayments			= 0
 FROM dbo.tblARPayment P WITH (NOLOCK)
     LEFT JOIN #PAYMENTDETAIL PD ON P.intPaymentId = PD.intPaymentId
-    LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))				    	
+    LEFT JOIN #FUTUREINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) AND I.strType <> 'CF Tran'
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
   AND (@intEntityCustomerIdLocal IS NULL OR P.intEntityCustomerId = @intEntityCustomerIdLocal)
@@ -452,21 +451,11 @@ SELECT I.dtmPostDate
 				   END
         , dblAvailableCredit	= 0 
 		, dblPrepayments		= 0
-FROM dbo.tblARInvoice I WITH (NOLOCK)
+FROM #POSTEDINVOICES I WITH (NOLOCK)
     LEFT JOIN #ARPAYMENTDETAILS ARPD ON I.intInvoiceId = ARPD.intInvoiceId
 	LEFT JOIN #APPAYMENTDETAILS APPD ON I.intInvoiceId = APPD.intInvoiceId
 	LEFT JOIN #PREPAIDSINVOICES PC ON I.intInvoiceId = PC.intInvoiceId
-    LEFT JOIN #SALESPERSON SP ON I.intEntitySalespersonId = SP.intEntityId
-	LEFT JOIN #COMPANYLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-WHERE I.ysnPosted = 1
-	AND I.ysnCancelled = 0
-	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal        
-	AND (@intEntityCustomerIdLocal IS NULL OR I.intEntityCustomerId = @intEntityCustomerIdLocal)
-	AND (@strSalespersonLocal IS NULL OR SP.strName LIKE '%'+@strSalespersonLocal+'%')
-	AND (@strSourceTransactionLocal IS NULL OR I.strType LIKE '%'+@strSourceTransactionLocal+'%')
-	AND (@strCompanyLocationLocal IS NULL OR strLocationName LIKE '%'+@strCompanyLocationLocal+'%')
-	AND ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
+WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
 
 UNION ALL
 
@@ -492,12 +481,12 @@ FROM tblARCustomerBudget CB
 					, ysnCustomerBudgetTieBudget
 			   FROM tblARCustomer 
 	) CUST ON CB.intEntityCustomerId = CUST.intEntityId
-WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
-	AND CB.dblAmountPaid < CB.dblBudgetAmount 
+WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND CB.dblAmountPaid < CB.dblBudgetAmount
+	AND (@intEntityCustomerIdLocal IS NULL OR CB.intEntityCustomerId = @intEntityCustomerIdLocal) 
 	AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
-	AND (@intEntityCustomerIdLocal IS NULL OR CB.intEntityCustomerId = @intEntityCustomerIdLocal)
-
 ) AS A  
+
 
 LEFT JOIN
           
@@ -627,7 +616,7 @@ SELECT I.intInvoiceId
 	 , I.strType
 FROM dbo.tblARPayment P WITH (NOLOCK)
     LEFT JOIN #PAYMENTDETAIL PD ON P.intPaymentId = PD.intPaymentId
-    LEFT JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))    	
+    LEFT JOIN #FUTUREINVOICES I ON PD.intInvoiceId = I.intInvoiceId AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) AND I.strType <> 'CF Tran'
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND (@intEntityCustomerIdLocal IS NULL OR P.intEntityCustomerId = @intEntityCustomerIdLocal)
@@ -693,10 +682,10 @@ FROM tblARCustomerBudget CB
 					, ysnCustomerBudgetTieBudget
 			   FROM tblARCustomer 
 	) CUST ON CB.intEntityCustomerId = CUST.intEntityId
-WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
-	AND CB.dblAmountPaid < CB.dblBudgetAmount 
+WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND CB.dblAmountPaid < CB.dblBudgetAmount
+	AND (@intEntityCustomerIdLocal IS NULL OR CB.intEntityCustomerId = @intEntityCustomerIdLocal) 
 	AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
-	AND (@intEntityCustomerIdLocal IS NULL OR CB.intEntityCustomerId = @intEntityCustomerIdLocal)
 
 ) AS TBL) AS B
           
@@ -713,11 +702,11 @@ WHERE
 	OR ISNULL(@intEntityCustomerIdLocal, 0) = 0
 GROUP BY A.intEntityCustomerId) AS AGING
 
-LEFT JOIN (SELECT intEntityId
+INNER JOIN (SELECT intEntityId
 				 , dblCreditLimit 
 			FROM dbo.tblARCustomer WITH (NOLOCK)
 ) C ON AGING.intEntityCustomerId = C.intEntityId
-LEFT JOIN (SELECT intEntityId
+INNER JOIN (SELECT intEntityId
 			     , strName
 				 , strEntityNo 
 			FROM tblEMEntity WITH (NOLOCK)
@@ -727,5 +716,4 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-WHERE ISNULL(AGING.intEntityCustomerId, 0) > 0
 ORDER BY strCustomerName
