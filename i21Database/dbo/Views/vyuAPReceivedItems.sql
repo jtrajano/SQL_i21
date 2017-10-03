@@ -912,7 +912,7 @@ FROM
 		,[intContractSequence]						=	NULL
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
-		,[intShipmentId]							=	A.intInventoryShipmentId     
+		,[intShipmentId]							=	NULL
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	A.intCostUnitMeasureId
 		,[strUOM]									=	NULL

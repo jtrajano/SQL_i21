@@ -5709,6 +5709,19 @@
     <Build Include="dbo\Stored Procedures\uspSCUnpostDeliverySheet.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReverseScheduleQty.sql" />
+    <Build Include="dbo\Tables\tblAPSearchRecordVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucher2.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucherCharges.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucherItems.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucherPriceCharges.sql" />
+    <Build Include="dbo\Views\vyuAPGetShipmentChargesForBilling.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPopulateRecordVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetStatusUnitCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPProcessToBill.sql" />
+    <Build Include="dbo\Views\vyuAPShipmentChargesForBilling.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateBillFromShipmentCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPProcessShipmentChargeToBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
