@@ -1105,7 +1105,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                         },
                         {
                             xtype: 'panel',
-                            height: 881,
+                            height: 930,
                             padding: '15 0 0 0',
                             bodyPadding: 10,
                             title: 'Import Origin Data',
@@ -1619,6 +1619,46 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                                     height: 59,
                                                     padding: '0 0 0 10',
                                                     text: '"Imports opening stock for all items and locations. Grain opening balances must be entered manually after taking a physical reading."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    height: 49,
+                                    itemId: 'cntOriginRecipeFormula',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableRecipeFormula}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginRecipeFormula',
+                                            text: 'Recipe/Formula'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 41,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    padding: '0 0 0 10',
+                                                    text: '"Imports Recipe/Formula. Users should verify whether the Recipies and Formulas are correct before proceeding to next step."'
                                                 }
                                             ]
                                         }

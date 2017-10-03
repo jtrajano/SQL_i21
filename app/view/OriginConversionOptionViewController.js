@@ -105,7 +105,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var type = null;
         var originType = null;
         var grainType = null;
-        var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
+        var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance", "RecipeFormula"];
         var grain = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
         
         switch (button.itemId) {
@@ -212,6 +212,9 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 break;
             case "btnOriginBalance":
                 originType = 7;
+                break;
+            case "btnOriginRecipeFormula":
+                originType = 8;
                 break;
         }
 

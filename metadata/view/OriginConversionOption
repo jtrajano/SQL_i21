@@ -3131,7 +3131,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": 10,
-                                "height": 881,
+                                "height": 930,
                                 "padding": "15 0 0 0",
                                 "title": "Import Origin Data"
                             },
@@ -4549,6 +4549,119 @@
                                                     },
                                                     "name": "MyLabel9",
                                                     "designerId": "91bdb6c1-276c-4fe5-aa02-148b417396a3"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "container|padding": "",
+                                        "height": 49,
+                                        "itemId": "cntOriginRecipeFormula",
+                                        "layout": "hbox",
+                                        "margin": "0 0 5 0"
+                                    },
+                                    "configAlternates": {
+                                        "container|align": "string",
+                                        "container|padding": "auto",
+                                        "height": "auto",
+                                        "itemId": "string",
+                                        "layout": "string",
+                                        "margin": "auto",
+                                        "scrollable": "boolean"
+                                    },
+                                    "name": "MyContainer24",
+                                    "designerId": "c940c235-67de-472c-ac47-fa5fd767d67e",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.button.Button",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "bind": [
+                                                    "{",
+                                                    "    disabled: '{disableRecipeFormula}'",
+                                                    "}"
+                                                ],
+                                                "height": 40,
+                                                "itemId": "btnOriginRecipeFormula",
+                                                "layout|flex": 1,
+                                                "text": "Recipe/Formula"
+                                            },
+                                            "configAlternates": {
+                                                "bind": "object",
+                                                "height": "auto",
+                                                "itemId": "string",
+                                                "layout|flex": "number",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyButton25",
+                                            "designerId": "8fb37574-6d28-4b7d-b24d-fdf3d8a0545e",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "bind",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "height": 41,
+                                                "layout": "hbox",
+                                                "layout|flex": 2,
+                                                "padding": 2
+                                            },
+                                            "configAlternates": {
+                                                "container|align": "string",
+                                                "height": "auto",
+                                                "layout": "string",
+                                                "layout|flex": "number",
+                                                "padding": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyContainer13",
+                                            "designerId": "7d0cf4b0-d6ba-4548-b80a-ca77a5a26eff",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.Label",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": null,
+                                                        "padding": "0 0 0 10",
+                                                        "text": "\"Imports Recipe/Formula. Users should verify whether the Recipies and Formulas are correct before proceeding to next step.\""
+                                                    },
+                                                    "configAlternates": {
+                                                        "itemId": "string",
+                                                        "padding": "auto",
+                                                        "text": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyLabel9",
+                                                    "designerId": "b345b097-d9d2-44fa-a3ab-3a8ca0e92ab4"
                                                 }
                                             ]
                                         }

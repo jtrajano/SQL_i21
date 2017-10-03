@@ -66,5 +66,9 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
         disableBalance: function(get) {
             return get('currentTask') !== 'Balance' || !get('hasLob');
         },
+        
+        disableRecipeFormula: function(get){
+            return get('currentTask') !== 'RecipeFormula' || !get('hasLob') || get('lineOfBusiness') !== 'Petro';
+        }
     }
 });
