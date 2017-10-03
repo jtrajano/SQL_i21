@@ -234,10 +234,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         readOnly: true 
                     }                   
                 },
-                chkDestinationWeights: {
-                    dataIndex: 'ysnWeights',
-                    disabled: '{destinationWeightsDisabled}'
-                }
+                // chkDestinationWeights: {
+                //     dataIndex: 'ysnWeights',
+                //     disabled: '{destinationWeightsDisabled}'
+                // }
             },
             pgePostPreview: {
                 title: '{pgePreviewTitle}'

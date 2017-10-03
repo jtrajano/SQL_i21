@@ -2772,29 +2772,6 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Check",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "ysnWeights",
-                                                "itemId": "chkDestinationWeights",
-                                                "text": "Destination Weights",
-                                                "width": 120
-                                            },
-                                            "configAlternates": {
-                                                "dataIndex": "datafield",
-                                                "itemId": "string",
-                                                "text": "string",
-                                                "width": "auto",
-                                                "scrollable": "boolean"
-                                            },
-                                            "name": "MyCheck2",
-                                            "designerId": "19062049-a5e8-4e12-b326-0b613d1282cf"
-                                        },
-                                        {
                                             "type": "Ext.grid.plugin.CellEditing",
                                             "reference": {
                                                 "name": "plugins",

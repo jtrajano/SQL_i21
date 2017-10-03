@@ -30,7 +30,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
         'Ext.grid.Panel',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
-        'Ext.grid.column.Check',
         'Ext.grid.plugin.CellEditing',
         'Ext.view.Table',
         'Ext.toolbar.Paging'
@@ -1053,13 +1052,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                             xtype: 'numberfield',
                                                             quantityField: true
                                                         }
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'chkDestinationWeights',
-                                                        width: 120,
-                                                        dataIndex: 'ysnWeights',
-                                                        text: 'Destination Weights'
                                                     }
                                                 ],
                                                 plugins: [

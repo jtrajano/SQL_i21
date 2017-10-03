@@ -5282,7 +5282,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
             searchSettings: {
                 scope: me,
-                type: 'Inventory',
+                type: 'Inventory.GetAddOrders',
                 url: './inventory/api/inventoryreceipt/getaddorders?vendorid=' + VendorId + '&ReceiptType=' + ReceiptType + '&SourceType=' + SourceType + '&CurrencyId=' + CurrencyId,
                 columns: [
                     { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
