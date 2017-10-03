@@ -30,13 +30,21 @@ BEGIN TRY
 				SELECT 1
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
-				WHERE SH.strType = 'From Scale' AND SH.intInventoryReceiptId = @InventoryReceiptId
+				WHERE SH.strType = CASE 
+										WHEN @intSourceType=1 THEN 'From Scale'
+										WHEN @intSourceType=5 THEN 'From Delivery Sheet'
+								   END		 
+				AND SH.intInventoryReceiptId = @InventoryReceiptId
 				)
 			BEGIN
 				SELECT @intCustomerStorageId = CS.intCustomerStorageId
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
-				WHERE SH.strType = 'From Scale' AND SH.intInventoryReceiptId = @InventoryReceiptId
+				WHERE SH.strType = CASE 
+										WHEN @intSourceType=1 THEN 'From Scale'
+										WHEN @intSourceType=5 THEN 'From Delivery Sheet'
+								   END 
+				AND SH.intInventoryReceiptId = @InventoryReceiptId
 			
 				IF EXISTS(SELECT 1 FROM tblARInvoiceDetail WHERE intCustomerStorageId = @intCustomerStorageId)
 				BEGIN
