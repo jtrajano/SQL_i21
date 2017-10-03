@@ -165,7 +165,10 @@ BEGIN TRY
 				FROM	tblCTContractDetail			CD	
 
 			)							CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId
-											AND	CD.intRowNum					=	CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN 1 ELSE CD.intRowNum END
+											AND	CD.intContractDetailId			=	CASE	WHEN	PF.intContractDetailId IS NOT NULL 
+																							THEN	PF.intContractDetailId 
+																							ELSE	CD.intContractDetailId 
+																					END		
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
 	JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId			LEFT
