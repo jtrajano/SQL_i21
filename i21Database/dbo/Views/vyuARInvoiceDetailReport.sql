@@ -22,6 +22,7 @@ SELECT I.intInvoiceId
 	 , dblTotalTax			= ISNULL(ID.dblTotalTax, 0)
 	 , dblDiscount			= ISNULL(ID.dblDiscount, 0)
 	 , dblTotal				= ISNULL(ID.dblTotal, 0)
+	 , ysnPosted			= I.ysnPosted
 FROM 
 	dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (SELECT intInvoiceId
