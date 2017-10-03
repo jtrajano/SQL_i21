@@ -109,7 +109,7 @@ BEGIN
 		WHEN @msgId = 80093 THEN 'Stock quantity is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
 		WHEN @msgId = 80094 THEN '%s costing method is Average Costing and it will be received in %s as Actual costing. This is not allowed to avoid bad computation of the average cost. Try receiving the stocks using Inventory Receipt instead of Transport Load.'
 		WHEN @msgId = 80095 THEN 'The %s cannot be accrued to the same Shipment Customer.'
-		WHEN @msgId = 80096 THEN 'As of %s, there is no stock available for %s in %s. However, there are stocks as of %s. You can use it as the transaction date instead of %s.'
+		WHEN @msgId = 80096 THEN 'Stock is not available as of %s for %s in %s. However, there are stocks as of %s. You can use it or any later date instead of %s.'
 		WHEN @msgId = 80097 THEN 'Sub Location is invalid or missing for item %s.'
 		WHEN @msgId = 80098 THEN 'Storage Unit is invalid or missing for item %s.'
 		WHEN @msgId = 80099 THEN 'New Quantity for item %s is required.'
