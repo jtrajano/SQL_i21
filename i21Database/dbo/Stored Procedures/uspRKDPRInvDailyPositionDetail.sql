@@ -651,21 +651,6 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 				)t) t1	WHERE dblAdjustmentAmount <> dblOriginalQuantity 
 			) AS  CollateralPurchases
 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strCustomer,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
-					  [Storage Due] ,	dtmLastStorageAccrueDate ,strScheduleId,intFromCommodityUnitMeasureId)
-			SELECT distinct 12,[Storage Type],@strDescription,[Storage Type] strType,dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(Balance, 0)) dblTotal,r.intCommodityId  ,Loc AS strLocation ,
-			i.strItemNo,strName,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
-			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS [Storage Due]  
-			,dtmLastStorageAccrueDate ,strScheduleId,@intCommodityUnitMeasureId  
-			FROM vyuGRGetStorageOffSiteDetail  r
-				JOIN tblEMEntity e on r.intEntityId=e.intEntityId
-			join tblICItem i on r.intItemId=i.intItemId
-			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1 
-			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-			WHERE  ysnDPOwnedType = 1  
-			AND r.intCommodityId = @intCommodityId  AND intCompanyLocationId  = CASE WHEN ISNULL(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end 
-			AND r.intEntityId= @intVendorId 
-
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strCustomer,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId)
 			SELECT 13,'Pur Basis Deliveries',@strDescription,'Purchase Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0))
