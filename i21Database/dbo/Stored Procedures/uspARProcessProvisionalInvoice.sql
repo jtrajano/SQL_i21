@@ -209,7 +209,7 @@ BEGIN TRY
 		,[strItemDescription]				= ARSID.[strItemDescription] 
 		,[intOrderUOMId]					= ARSID.[intItemUOMId]
 		,[dblQtyOrdered]					= ARSID.[dblQtyOrdered] 
-		,[intItemUOMId]						= ARSID.[intShipmentItemUOMId]
+		,[intItemUOMId]						= ARSID.[intItemUOMId]
 		,[dblQtyShipped]					= ARSID.[dblShipmentQuantity]
 		,[dblDiscount]						= ARSID.[dblDiscount]
 		,[dblPrice]							= ISNULL(ARSID.[dblPrice], ARID.[dblPrice]) 
