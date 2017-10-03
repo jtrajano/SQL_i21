@@ -98,3 +98,5 @@ GO
 GO
 :r "..\Scripts\IC\uspICDCUomMigrationPt.sql"
 GO
+:r "..\Scripts\IC\uspICDCRecipeFormulaMigrationPt.sql"
+GO

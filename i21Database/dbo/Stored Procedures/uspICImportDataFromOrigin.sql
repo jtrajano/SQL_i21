@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICImportDataFromOrigin]
 	@strLineOfBusiness VARCHAR(50),
-	@strType VARCHAR(50)
+	@strType VARCHAR(50),
+	@intEntityUserSecurityId INT
 AS
 
 IF @strLineOfBusiness IS NULL OR LTRIM(RTRIM(@strLineOfBusiness)) = ''
@@ -25,6 +26,7 @@ BEGIN
 	ELSE IF @strType = 'Items'				EXEC dbo.uspICDCItemMigrationPt
 	ELSE IF @strType = 'ItemGLAccts'		EXEC dbo.uspICDCItmGLAcctsMigrationPt
 	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryPt
+	ELSE IF @strType = 'RecipeFormula'		EXEC dbo.uspICDCRecipeFormulaMigrationPt @intEntityUserSecurityId
 END
 ELSE IF @strLineOfBusiness = 'Ag'
 BEGIN

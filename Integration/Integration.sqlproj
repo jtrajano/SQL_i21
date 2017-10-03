@@ -433,5 +433,6 @@
     <None Include="dbo\Stored Procedures\uspGRImportWeightGrades.sql" />
     <None Include="dbo\Stored Procedures\deleteSP.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateETExportTankManagementSiteView.sql" />
+    <None Include="Scripts\IC\uspICDCRecipeFormulaMigrationPt.sql" />
   </ItemGroup>
 </Project>
