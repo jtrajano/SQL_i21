@@ -20,7 +20,9 @@ SELECT TOP 100 PERCENT
 ,ISNULL(CS.dblDiscountsDue,0)-ISNULL(CS.dblDiscountsPaid,0) AS dblDiscountUnPaid
 ,ISNULL(CS.dblStorageDue,0)-ISNULL(CS.dblStoragePaid,0) AS dblStorageUnPaid
 ,SH.intContractHeaderId
-,CH.strContractNumber 
+,CH.strContractNumber
+,CS.intDeliverySheetId
+,DeliverySheet.strDeliverySheetNumber
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId=CS.intCompanyLocationId  
 LEFT JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=CS.intStorageTypeId  
@@ -29,6 +31,7 @@ JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.
 JOIN tblEMEntity E ON E.intEntityId = CS.intEntityId
 JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=CS.intStorageScheduleId
 LEFT JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId=CS.intCustomerStorageId
-LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId=SH.intContractHeaderId  
-Where ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=0 AND SH.strType IN('From Scale','From Transfer')
+LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId=SH.intContractHeaderId
+LEFT JOIN tblSCDeliverySheet DeliverySheet ON DeliverySheet.intDeliverySheetId=CS.intDeliverySheetId  
+Where ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=0 AND SH.strType IN('From Scale','From Transfer','From Delivery Sheet')
 ORDER BY CS.intCustomerStorageId
