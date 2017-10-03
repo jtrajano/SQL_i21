@@ -5979,6 +5979,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var dblFranchise = 0;
         var dblWeightLossPercentage = 0;
 
+        var dblTotalWeightLoss = 0.00;
+        var dblTotalNetShippedWt = 0.00;
+        var dblTotalReceivedWt = 0.00;        
+
         // Check if item is Inbound Shipment
         if (sourceType === 2) {
             Ext.Array.each(ReceiptItems.data.items, function (item) {
@@ -6007,17 +6011,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             dblWeightUOMConvFactor, 
                             dblNetShippedWt
                         );
-                    }
-                   
-                    // Calculate the Gain/Loss 
-                    dblWeightLossPercentage = ic.utils.Math.round(((dblNetShippedWt - dblNetReceivedWt) / dblNetShippedWt) * 100, 2);
-                    dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
+                    }                   
+                    
+                    dblTotalReceivedWt += dblNetReceivedWt; 
+                    dblTotalNetShippedWt += dblNetShippedWt;                    
+                    dblTotalWeightLoss += (dblNetReceivedWt - dblNetShippedWt);
                 }
             });
         }
 
+        dblTotalWeightLoss = ic.utils.Math.round(dblTotalWeightLoss, 2);
+        dblWeightLossPercentage = ic.utils.Math.round(
+            dblTotalNetShippedWt != 0 ? (dblTotalReceivedWt - dblTotalNetShippedWt) / dblTotalNetShippedWt * 100 : 0.00
+            , 2
+        );
+
         return {
-            dblWeightLoss: dblWeightLoss,
+            dblWeightLoss: dblTotalWeightLoss,
             dblWeightLossPercentage: dblWeightLossPercentage
         };
     },
