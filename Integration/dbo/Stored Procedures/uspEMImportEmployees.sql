@@ -240,9 +240,8 @@ BEGIN
 
 	SELECT premp_emp INTO #tmpprempmst 
 	FROM prempmst
-		where NOT EXISTS (SELECT TOP 1 1  FROM tblSMUserSecurity WHERE strEmployeeOriginId = premp_emp COLLATE Latin1_General_CI_AS ) 
-			AND  NOT EXISTS (SELECT TOP 1 1  FROM tblPREmployee WHERE strEmployeeId = premp_emp COLLATE Latin1_General_CI_AS)
-			and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
+		where (premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee))
+		and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
 		
 	WHILE (EXISTS(SELECT 1 FROM #tmpprempmst))
 	BEGIN
@@ -633,9 +632,8 @@ IF(@Update = 1 AND @EmployeId IS NULL)
 BEGIN
 	SELECT @Total = COUNT(premp_emp)  			
 	FROM prempmst
-	WHERE NOT EXISTS (SELECT TOP 1 1  FROM tblSMUserSecurity WHERE strEmployeeOriginId = premp_emp COLLATE Latin1_General_CI_AS ) 
-			AND  NOT EXISTS (SELECT TOP 1 1  FROM tblPREmployee WHERE strEmployeeId = premp_emp COLLATE Latin1_General_CI_AS)
-			and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
+	where (premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)) 	
+	and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
 END
 
 
