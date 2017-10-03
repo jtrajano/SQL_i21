@@ -1098,7 +1098,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 					
 			@Invoices I
 		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN
 			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge') ) ICI
@@ -1110,6 +1110,7 @@ IF(ISNULL(@Post,0)) = 1
 		WHERE
 			ARID.[dblPrice] = @ZeroDecimal
 			AND CTCD.[strPricingType] <> 'Index'
+			AND ISNULL(ARID.[intLoadDetailId],0) = 0
 
 
 		UNION
