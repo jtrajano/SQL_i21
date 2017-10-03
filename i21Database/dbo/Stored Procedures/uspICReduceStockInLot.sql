@@ -88,6 +88,7 @@ BEGIN
 				AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+		ORDER BY cb.dtmDate ASC, cb.intInventoryLotId ASC, cb.intItemId ASC, cb.intItemLocationId ASC, cb.intLotId ASC, cb.intItemUOMId ASC
 
 		IF @UnitsOnHand > 0 AND @strCostBucketDate IS NOT NULL 
 		BEGIN 

@@ -83,6 +83,7 @@ BEGIN
 				AND cb.intItemLocationId = @intItemLocationId
 				AND cb.intItemUOMId = @intItemUOMId
 				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+		ORDER BY cb.dtmDate DESC, cb.intItemId ASC, cb.intItemLocationId ASC, cb.intInventoryLIFOStorageId DESC
 
 		IF @UnitsOnStorage > 0 AND @strCostBucketDate IS NOT NULL 
 		BEGIN 
