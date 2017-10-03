@@ -26,12 +26,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemStockUOM>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -40,12 +40,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemStockUOMTotals>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -75,12 +75,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICInventoryCountItemStockLookup>()
                     .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemStockUOMId", "DESC").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemStockUOMId", "DESC").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(param.cancellationToken)
             };
         }
 
@@ -89,12 +89,12 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetItemSubLocations>()
                     .Filter(param, true);
 
-            var data = await query.ExecuteProjection(param, "intSubLocationId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intSubLocationId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(param.cancellationToken)
             };
         }
 
@@ -103,12 +103,12 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetItemStorageLocation>()
                     .Filter(param, true);
 
-            var data = await query.ExecuteProjection(param, "intStorageLocationId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intStorageLocationId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(param.cancellationToken)
             };
         }
 		
@@ -116,12 +116,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemStockUOMForAdjustment>()
                         .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemUOMId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemUOMId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

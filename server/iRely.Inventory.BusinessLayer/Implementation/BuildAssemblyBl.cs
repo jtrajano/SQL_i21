@@ -45,12 +45,12 @@ namespace iRely.Inventory.BusinessLayer
                     strDescription = p.strDescription
                 })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intBuildAssemblyId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intBuildAssemblyId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

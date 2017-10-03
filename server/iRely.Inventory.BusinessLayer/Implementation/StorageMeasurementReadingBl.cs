@@ -84,12 +84,12 @@ namespace iRely.Inventory.BusinessLayer
             sorts.AddRange(param.sort.ToList());
             param.sort = sorts;
 
-            var data = await query.ExecuteProjection(param, "intStorageMeasurementReadingId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intStorageMeasurementReadingId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

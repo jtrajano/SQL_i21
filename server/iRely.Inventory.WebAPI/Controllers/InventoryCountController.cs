@@ -128,13 +128,13 @@ namespace iRely.Inventory.WebApi
                     .Filter(param, true);
             try
             {
-                var data = await query.Execute(param, "intInventoryCountDetailId").ToListAsync();
+                var data = await query.Execute(param, "intInventoryCountDetailId").ToListAsync(param.cancellationToken);
 
                 result = new SearchResult()
                 {
                     data = data.AsQueryable(),
                     success = true,
-                    total = await query.CountAsync(),
+                    total = await query.CountAsync(param.cancellationToken),
                     summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }

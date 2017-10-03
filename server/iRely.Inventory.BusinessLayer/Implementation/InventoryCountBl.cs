@@ -54,12 +54,12 @@ namespace iRely.Inventory.BusinessLayer
             sorts.AddRange(param.sort.ToList());
             param.sort = sorts;
 
-            var data = await query.Execute(param, "intInventoryCountId").ToListAsync();
+            var data = await query.Execute(param, "intInventoryCountId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -76,12 +76,12 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetCountSheet>()
                 .Where(p => p.intInventoryCountId == CountId)
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intInventoryCountId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryCountId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -159,12 +159,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemStockSummary>()
                     .Filter(param, true);
-            var data = await query.Execute(param, "intKey").ToListAsync();
+            var data = await query.Execute(param, "intKey").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -181,8 +181,8 @@ namespace iRely.Inventory.BusinessLayer
 
             return new GetObjectResult()
             {
-                data = await query.AsNoTracking().ToListAsync(),
-                total = await query.CountAsync()
+                data = await query.AsNoTracking().ToListAsync(param.cancellationToken),
+                total = await query.CountAsync(param.cancellationToken)
             };
         }
 
@@ -190,12 +190,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemStockSummaryByLot>()
                     .Filter(param, true);
-            var data = await query.Execute(param, "intKey").ToListAsync();
+            var data = await query.Execute(param, "intKey").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -205,12 +205,12 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetCountSheet>()
                 .Where(p => p.intInventoryCountId == CountId && p.dblVariance != 0)
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intInventoryCountId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryCountId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

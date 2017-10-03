@@ -54,12 +54,12 @@ namespace iRely.Inventory.BusinessLayer
             sorts.AddRange(param.sort.ToList());
             param.sort = sorts;
 
-            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -255,12 +255,12 @@ namespace iRely.Inventory.BusinessLayer
             sorts.AddRange(param.sort.ToList());
             param.sort = sorts;
 
-            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -289,12 +289,12 @@ namespace iRely.Inventory.BusinessLayer
             sorts.AddRange(param.sort.ToList());
             param.sort = sorts;
 
-            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -306,12 +306,12 @@ namespace iRely.Inventory.BusinessLayer
                 var query = _db.GetQuery<vyuICGetShipmentAddSalesContract>()
                     .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
                     .Filter(param, true);
-                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync(param.cancellationToken);
 
                 return new SearchResult()
                 {
                     data = data.AsQueryable(),
-                    total = await query.CountAsync(),
+                    total = await query.CountAsync(param.cancellationToken),
                     summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }
@@ -320,12 +320,12 @@ namespace iRely.Inventory.BusinessLayer
                 var query = _db.GetQuery<vyuICGetShipmentAddSalesContractPickLot>()
                     .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
                     .Filter(param, true);
-                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync(param.cancellationToken);
 
                 return new SearchResult()
                 {
                     data = data.AsQueryable(),
-                    total = await query.CountAsync(),
+                    total = await query.CountAsync(param.cancellationToken),
                     summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }
@@ -334,12 +334,12 @@ namespace iRely.Inventory.BusinessLayer
                 var query = _db.GetQuery<vyuICGetShipmentAddSalesOrder>()
                     .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
                     .Filter(param, true);
-                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync(param.cancellationToken);
 
                 return new SearchResult()
                 {
                     data = data.AsQueryable(),
-                    total = await query.CountAsync(),
+                    total = await query.CountAsync(param.cancellationToken),
                     summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }
@@ -373,12 +373,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICShipmentInvoice>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intInventoryShipmentItemId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentItemId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -412,12 +412,12 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetCustomerCurrency>()
                 .Where(p => p.intEntityId == entityId);
 
-            var data = await query.ExecuteProjection(param, "intEntityId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intEntityId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(param.cancellationToken)
             };
         }
         public SaveResult UpdateShipmentInvoice()

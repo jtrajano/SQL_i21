@@ -48,12 +48,12 @@ namespace iRely.Inventory.BusinessLayer
                     intConcurrencyId = p.intConcurrencyId
                 })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemContractId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemContractId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -72,12 +72,12 @@ namespace iRely.Inventory.BusinessLayer
                     intConcurrencyId = p.intConcurrencyId
                  })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemContractId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemContractId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

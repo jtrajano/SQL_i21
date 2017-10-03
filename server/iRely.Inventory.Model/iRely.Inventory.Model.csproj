@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.4.1.9004, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
       <HintPath>..\packages\Autofac.3.5.0\lib\net40\Autofac.dll</HintPath>
       <Private>False</Private>
@@ -82,8 +86,8 @@
       <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=17.42.6473.33963, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\iRely.Common.17.42.6473.33963-alpha\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=17.4.6485.10355, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\iRely.Common.17.4.6485.10355\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">

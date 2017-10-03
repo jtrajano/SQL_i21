@@ -21,12 +21,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryReceiptItemTax>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intInventoryReceiptItemTaxId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryReceiptItemTaxId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

@@ -35,12 +35,12 @@ namespace iRely.Inventory.BusinessLayer
                    strLocationName = p.tblSMCompanyLocation.strLocationName,
                })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemFactoryId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemFactoryId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -49,12 +49,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemFactoryManufacturingCell>()
                            .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemFactoryManufacturingCellId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemFactoryManufacturingCellId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

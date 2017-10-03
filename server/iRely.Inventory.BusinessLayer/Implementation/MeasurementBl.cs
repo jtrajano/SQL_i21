@@ -23,11 +23,11 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICMeasurement>()
                 .Filter(param, true);
-            var data = await query.Execute(param, "intMeasurementId").ToListAsync();
+            var data = await query.Execute(param, "intMeasurementId").ToListAsync(param.cancellationToken);
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

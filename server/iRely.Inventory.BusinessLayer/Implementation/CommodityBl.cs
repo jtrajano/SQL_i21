@@ -25,12 +25,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICCommodity>()
                 .Filter(param, true);
-            var data = await query.Execute(param, "intCommodityId").ToListAsync();
+            var data = await query.Execute(param, "intCommodityId").ToListAsync(param.cancellationToken);
                 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -55,12 +55,12 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<tblICCommodity>()
                 .Include("tblICCommodityUnitMeasures.tblICUnitMeasure")                
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

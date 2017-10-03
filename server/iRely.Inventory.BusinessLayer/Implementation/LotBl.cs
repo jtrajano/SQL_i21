@@ -25,12 +25,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICItemLot>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "strItemNo", "ASC").ToListAsync();
+            var data = await query.ExecuteProjection(param, "strItemNo", "ASC").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(param.cancellationToken)
             };
         }
         #endregion
@@ -39,12 +39,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICLotHistory>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "dtmDate", "DESC").ToListAsync();
+            var data = await query.ExecuteProjection(param, "dtmDate", "DESC").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(param.cancellationToken)
             };
         }
     }

@@ -49,12 +49,12 @@ namespace iRely.Inventory.BusinessLayer
                     strRinProcessId = p.RinProcess.strRinProcessCode
                })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intFuelTypeId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intFuelTypeId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

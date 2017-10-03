@@ -23,12 +23,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICItemSubLocations>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemSubLocationId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemSubLocationId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }

@@ -51,12 +51,12 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetPackedUOM>()
                 .Where(p => p.strUnitType == "Packed")
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -65,12 +65,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICUnitMeasure>().Where(p => p.strUnitType == "Area" || p.strUnitType == "Length")
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -79,12 +79,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICUnitMeasure>().Where(p => p.strUnitType == "Quantity" || p.strUnitType == "Volume" || p.strUnitType == "Weight" || p.strUnitType == "Packed" || p.strUnitType == "Area")
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
@@ -93,12 +93,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICUnitMeasure>().Where(p => p.strUnitType == "Time")
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync(),
+                total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
