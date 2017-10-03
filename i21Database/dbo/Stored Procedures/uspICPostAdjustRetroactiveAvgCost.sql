@@ -48,31 +48,36 @@ BEGIN
 	-- Declare the cost types
 	DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 			,@COST_ADJ_TYPE_New_Cost AS INT = 2
-			,@COST_ADJ_Adjust_Stock_Value AS INT = 3
+			,@COST_ADJ_TYPE_Adjust_Value AS INT = 3
+			,@COST_ADJ_TYPE_Adjust_Sold AS INT = 4
+			,@COST_ADJ_TYPE_Adjust_WIP AS INT = 5
+			,@COST_ADJ_TYPE_Adjust_InTransit AS INT = 6
+			,@COST_ADJ_TYPE_Adjust_InventoryAdjustment AS INT = 7
 
 	-- Create the variables for the internal transaction types used by costing. 
-	DECLARE @INV_TRANS_TYPE_Auto_Variance AS INT = 1
-			,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-			,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+	DECLARE
+			-- @INV_TRANS_TYPE_Auto_Variance AS INT = 1
+			--,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+			--,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 
-			,@INV_TRANS_TYPE_Inventory_Receipt AS INT = 4
+
+			--,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
+			--,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
+			--,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
+			--,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
+			--,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
+
+			--,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
+			--,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
+			--,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
+			--,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39		
+			--,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
+
+			@INV_TRANS_TYPE_Inventory_Receipt AS INT = 4
 			,@INV_TRANS_TYPE_Inventory_Shipment AS INT = 5
-
-			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
-			,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
-			,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
-			,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
-			,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
-
-			,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
-			,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
-			,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
-			,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39		
-			,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
 
 			,@INV_TRANS_TYPE_Consume AS INT = 8
 			,@INV_TRANS_TYPE_Produce AS INT = 9
-			,@INV_TRANS_TYPE_Build_Assembly AS INT = 11
 			,@INV_TRANS_Inventory_Transfer AS INT = 12
 
 			,@INV_TRANS_TYPE_ADJ_Item_Change AS INT = 15
@@ -101,6 +106,7 @@ BEGIN
 			,@t_intTransactionDetailId AS INT  
 			,@t_intTransactionTypeId AS INT 
 			,@t_strBatchId AS NVARCHAR(50) 
+			,@t_intLocationId AS INT 
 
 			,@EscalateInventoryTransactionId AS INT 
 			,@EscalateInventoryTransactionTypeId AS INT 
@@ -308,7 +314,10 @@ BEGIN
 			,t.intTransactionDetailId
 			,t.intTransactionTypeId
 			,t.strBatchId 
-	FROM	tblICInventoryTransaction t 
+			,il.intLocationId
+	FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
+				ON t.intItemLocationId = il.intItemLocationId
+				AND t.intItemId = il.intItemId
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
@@ -330,6 +339,7 @@ BEGIN
 		,@t_intTransactionDetailId
 		,@t_intTransactionTypeId
 		,@t_strBatchId
+		,@t_intLocationId
 	;
 
 	WHILE @@FETCH_STATUS = 0 
@@ -475,13 +485,47 @@ BEGIN
 				,[dtmCreated] 
 				,[strRelatedTransactionId] 
 				,[intRelatedTransactionId] 
+				,[intRelatedInventoryTransactionId]
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
 			)
 			SELECT
 				[intInventoryFIFOId] = @CostBucketId
 				,[intInventoryTransactionId] = @DummyInventoryTransactionId 
-				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_Adjust_Stock_Value
+				,[intInventoryCostAdjustmentTypeId] = 
+						CASE	WHEN @t_dblQty > 0 THEN 
+									CASE	WHEN @t_intTransactionTypeId = @InventoryTransactionStartId THEN 
+												@COST_ADJ_TYPE_Adjust_Value
+											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
+												@COST_ADJ_TYPE_Adjust_WIP
+											WHEN @t_intLocationId IS NULL THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit
+											WHEN @t_intTransactionTypeId IN (
+													@INV_TRANS_TYPE_ADJ_Item_Change
+													,@INV_TRANS_TYPE_ADJ_Split_Lot
+													,@INV_TRANS_TYPE_ADJ_Lot_Merge
+													,@INV_TRANS_TYPE_ADJ_Lot_Move
+												) THEN 
+													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+											ELSE 
+												@COST_ADJ_TYPE_Adjust_Value
+									END 
+								WHEN @t_dblQty < 0 THEN 
+									CASE	WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
+												@COST_ADJ_TYPE_Adjust_WIP
+											WHEN @t_intLocationId IS NULL THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit								
+											WHEN @t_intTransactionTypeId IN (
+													@INV_TRANS_TYPE_ADJ_Item_Change
+													,@INV_TRANS_TYPE_ADJ_Split_Lot
+													,@INV_TRANS_TYPE_ADJ_Lot_Merge
+													,@INV_TRANS_TYPE_ADJ_Lot_Move
+												) THEN 
+													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+											ELSE 
+												@COST_ADJ_TYPE_Adjust_Sold
+									END 
+						END 
 				,[dblQty] = NULL 
 				,[dblCost] = NULL 
 				,[dblValue] = 
@@ -497,6 +541,7 @@ BEGIN
 				,[dtmCreated] = GETDATE()
 				,[strRelatedTransactionId] = @t_strTransactionId 
 				,[intRelatedTransactionId] = @t_intTransactionId
+				,[intRelatedInventoryTransactionId] = @t_intInventoryTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
 			WHERE		
@@ -524,6 +569,7 @@ BEGIN
 			,@t_intTransactionDetailId
 			,@t_intTransactionTypeId
 			,@t_strBatchId
+			,@t_intLocationId
 		;		
 	END 
 
