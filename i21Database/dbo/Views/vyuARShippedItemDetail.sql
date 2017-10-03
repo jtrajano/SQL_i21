@@ -29,7 +29,7 @@ SELECT
 	,[dblQtyRemaining]				= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
 	,[dblDiscount]					= 0.00
 	,[dblPrice]						= ARCC.dblOrderPrice
-	,[dblShipmentUnitPrice]			= ((ARCC.dblOrderPrice * ISNULL(ARCC.dblSubCurrencyRate, 1.000000)) * dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
+	,[dblShipmentUnitPrice]			= (ARCC.dblOrderPrice / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
 	,[strPricing]					= ''
 	,[dblTotalTax]					= 0.00
 	,[dblTotal]						= ((ARCC.dblOrderPrice * ISNULL(ARCC.dblSubCurrencyRate, 1.000000)) * dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
@@ -44,7 +44,7 @@ SELECT
 	,[intTaxGroupId]				= NULL
 	,[strTaxGroup]					= NULL
 	,[dblWeight]					= dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1.000000)
-	,[intWeightUOMId]				= ARCC.intPriceItemUOMId
+	,[intWeightUOMId]				= LD.intWeightItemUOMId
 	,[strWeightUnitMeasure]			= ARCC.strUnitMeasure
 	,[dblGrossWt]					= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblGross)
 	,[dblTareWt]					= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblTare)
