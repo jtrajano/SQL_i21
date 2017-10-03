@@ -2933,9 +2933,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Collateral' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Collateral', N'Risk Management', @RiskManagementActivitiesParentMenuId, N'Collateral', N'Activity', N'Screen', N'RiskManagement.view.Collateral', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
+	VALUES (N'Collateral', N'Risk Management', @RiskManagementActivitiesParentMenuId, N'Collateral', N'Activity', N'Screen', N'RiskManagement.view.Collateral?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'RiskManagement.view.Collateral' WHERE strMenuName = 'Collateral' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'RiskManagement.view.Collateral?showSearch=true' WHERE strMenuName = 'Collateral' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Derivative Screen' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
