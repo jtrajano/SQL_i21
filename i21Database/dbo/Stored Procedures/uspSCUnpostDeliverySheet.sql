@@ -34,6 +34,7 @@ BEGIN TRY
 		
 		IF @strInOutFlag = 'I'
 			BEGIN
+
 				CREATE TABLE #tmpItemReceiptIds (
 					[intInventoryReceiptId] [INT] PRIMARY KEY,
 					[strReceiptNumber] [VARCHAR](100),
@@ -91,6 +92,7 @@ BEGIN TRY
 					DEALLOCATE voucherCursor 
 
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
+					EXEC [dbo].[uspSCReverseScheduleQty] @InventoryReceiptId, @intUserId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 

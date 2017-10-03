@@ -5696,6 +5696,7 @@
     <Build Include="dbo\Views\vyuSCTicketScreenView.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUnpostDeliverySheet.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseScheduleQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
