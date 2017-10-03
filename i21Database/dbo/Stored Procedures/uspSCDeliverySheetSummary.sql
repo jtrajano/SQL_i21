@@ -170,8 +170,7 @@ BEGIN
 		INNER JOIN tblSCTicket SC ON IRI.intSourceId = SC.intTicketId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
 		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 AND IR.intSourceType IN (1,5) 
-		AND GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0
-		AND SC.intStorageScheduleTypeId > 0), 0)
+		AND GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0), 0)
 
 		--For DP contract
 		SET @DP = 
@@ -246,8 +245,7 @@ IF ISNULL(@intEntityId,0) = 0
 		INNER JOIN tblSCTicket SC ON IRI.intSourceId = SC.intTicketId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
 		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 AND IR.intSourceType IN (1,5) 
-		AND GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0
-		AND SC.intStorageScheduleTypeId > 0), 0)
+		AND GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0), 0)
 
 		--For DP contract
 		SET @DP = 
