@@ -24,7 +24,13 @@ BEGIN
 	FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
 
 	INSERT INTO @splitDetails(intSplitDetailId, intEntityId, dblSplitPercent)
-	SELECT intSplitDetailId, intEntityId, dblSplitPercent FROM [tblEMEntitySplitDetail] WHERE intSplitId = @intSplitId
+	SELECT EMESD.intSplitDetailId, EMESD.intEntityId, EMESD.dblSplitPercent
+	FROM
+		[tblEMEntitySplitDetail] EMESD
+	INNER JOIN
+		[tblARCustomer] ARC
+			ON EMESD.[intEntityId] = ARC.[intEntityId] 
+	WHERE EMESD.intSplitId = @intSplitId
 
 	WHILE EXISTS(SELECT NULL FROM @splitDetails)
 		BEGIN
@@ -96,13 +102,15 @@ BEGIN
 	  , dblInvoiceTotal     = dblInvoiceTotal * @dblSplitPercent
 	  , dblTax				= dblTax * @dblSplitPercent
 	  , dblSplitPercent     = ISNULL(@dblSplitPercent, 1)
-	WHERE intInvoiceId = @intInvoiceId
+	WHERE ISNULL(@intSplitEntityId, 0) <> 0 
+	AND intInvoiceId = @intInvoiceId
+
 		
 	INSERT INTO @InvoiceDetails
-	SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId
+	SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE  ISNULL(@intSplitEntityId, 0) <> 0 AND intInvoiceId = @intInvoiceId 
 
 	DECLARE @TransactionType varchar(20)
-	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
+	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice WHERE  ISNULL(@intSplitEntityId, 0) <> 0 AND intInvoiceId = @intInvoiceId)
 
 	WHILE EXISTS(SELECT NULL FROM @InvoiceDetails)
 		BEGIN
