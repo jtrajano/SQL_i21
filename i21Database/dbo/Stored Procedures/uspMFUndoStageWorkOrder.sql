@@ -300,8 +300,10 @@ BEGIN TRY
 			AND RS.intSubstituteItemId = @intInputItemId
 	END
 
+	Select @dblAdjustByQuantity=abs(@dblAdjustByQuantity)
+
 	UPDATE tblMFProductionSummary
-	SET dblInputQuantity = dblInputQuantity - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intRecipeItemUOMId, @dblNewWeight), 0)
+	SET dblInputQuantity = dblInputQuantity - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intRecipeItemUOMId, @dblAdjustByQuantity), 0)
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intItemId = @intInputItemId
 
