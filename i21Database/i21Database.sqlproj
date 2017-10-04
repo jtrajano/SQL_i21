@@ -5697,6 +5697,7 @@
     <Build Include="dbo\Stored Procedures\uspSCUnpostDeliverySheet.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReverseScheduleQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
