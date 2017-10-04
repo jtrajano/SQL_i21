@@ -34,8 +34,8 @@ SELECT L.intLoadId
 	,ISNULL(MSC.strCurrency,SC.strCurrency) AS strCurrency
 	,SubCurrency.strCurrency AS strSubCurrency
 	,ISNULL(SubCurrency.intCent, 0) intCent
-	,receiptItem.intInventoryReceiptItem
-	,receiptItem.ysnPosted
+	,receiptItem.intInventoryReceiptItemId
+	,receipt.ysnPosted
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	AND L.intPurchaseSale = 1
