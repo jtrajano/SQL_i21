@@ -8,10 +8,10 @@ SELECT ItemNumber
 , Authority2
 , Authority2Description
 , [Description]
-, ISNULL(MAX(FETRatePerUnit), 0.000000) / 100 AS FETRatePerUnit
+, ISNULL(MAX(FETRatePerUnit), 0.000000) AS FETRatePerUnit
 , FETGLAccount
 , EFTonFET
-, ISNULL(MAX(SETRatePerUnit), 0.000000) / 100 AS SETRatePerUnit
+, ISNULL(MAX(SETRatePerUnit), 0.000000) AS SETRatePerUnit
 , SETGLAccount
 , EFTonSET
 , CASE WHEN ISNULL(MAX(SSTMethod), 'P') = 'U' THEN ISNULL(MAX(SSTRatePerUnit), 0.000000) ELSE ISNULL(MAX(SSTRatePerUnit), 0.000000) / 100 END AS SSTRatePerUnit
