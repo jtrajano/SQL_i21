@@ -55,7 +55,7 @@ BEGIN TRY
 		,strUOM
 		,strHigherPositionRefNo
 	)
-	SELECT 	 s.intStageReceiptId
+	SELECT 	 @intStageReceiptId
 			,POSNR  
 			,RIGHT(MATNR,8)  
 			,WERKS  
@@ -74,7 +74,7 @@ BEGIN TRY
 			,LFIMG  NVARCHAR(100)
 			,VRKME  NVARCHAR(100)
 			,HIPOS  NVARCHAR(100)
-			) x Join tblIPReceiptStage s on x.VBELN=s.strDeliveryNo
+			)
 
 	--Containers
 	Insert Into tblIPReceiptItemContainerStage(
@@ -86,7 +86,7 @@ BEGIN TRY
 		,dblQuantity
 		,strUOM
 	)
-	SELECT 	 s.intStageReceiptId
+	SELECT 	 @intStageReceiptId
 			,EXIDV   
 			,VHILM  
 			,VBELN   
@@ -100,7 +100,7 @@ BEGIN TRY
 			,POSNR   NVARCHAR(100)
 			,VEMNG   NVARCHAR(100)
 			,VEMEH   NVARCHAR(100)
-			) x Join tblIPReceiptStage s on x.VBELN=s.strDeliveryNo
+			)
 
 	Select TOP 1 strDeliveryNo AS strInfo1, '' strInfo2,CONVERT(VARCHAR(500),@intStageReceiptId) AS strSessionId From tblIPReceiptStage Where intStageReceiptId=@intStageReceiptId
 
