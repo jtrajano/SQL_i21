@@ -10,7 +10,7 @@ SELECT CAST (ROW_NUMBER() OVER (ORDER BY dtmDate DESC) AS INT) AS [intBatchPosti
 [dblDebit],
 [dblCredit],
 ISNULL([dblDebitUnit], 0.000000) as dblDebitUnit,
-[dblCreditUnit],
+ISNULL([dblCreditUnit], 0.000000) as dblCreditUnit,
 [strDescription],
 [strCode],    
 [strReference],
