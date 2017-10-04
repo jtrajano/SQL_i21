@@ -5722,6 +5722,7 @@
     <Build Include="dbo\Views\vyuAPShipmentChargesForBilling.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBillFromShipmentCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessShipmentChargeToBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
