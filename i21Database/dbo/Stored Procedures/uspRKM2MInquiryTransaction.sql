@@ -120,7 +120,7 @@ SELECT intContractDetailId,avgLot/intTotLot FROM(
 	*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,
 	max(CASE WHEN ISNULL(ysnMultiplePriceFixation,0)=1 THEN ch.dblNoOfLots ELSE cdv.dblNoOfLots end) intTotLot,cdv.intContractDetailId
           FROM tblCTContractDetail  cdv
-	JOIN tblCTContractHeader ch on cdv.intContractHeaderId=ch.intContractHeaderId and ch.intCommodityId=@intCommodityId and cdv.dblBalance >0
+	JOIN tblCTContractHeader ch on cdv.intContractHeaderId=ch.intContractHeaderId and ch.intCommodityId=@intCommodityId
     JOIN tblCTPriceFixation pf on  case when isnull(ch.ysnMultiplePriceFixation,0)=1 then pf.intContractHeaderId else pf.intContractDetailId end = case when isnull(ch.ysnMultiplePriceFixation,0)=1 then cdv.intContractHeaderId else cdv.intContractDetailId end    
     JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and cdv.intPricingTypeId<>1
     and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId 
@@ -247,7 +247,7 @@ AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisD
               ,cd.intCompanyLocationId,cd.intMarketZoneId,cd.intContractStatusId,dtmContractDate,
               ffm.ysnExpired
 FROM vyuRKM2MGetContractDetailView  cd
-JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId and  cd.intCommodityId= @intCommodityId and dblBalance>0
+JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId and  cd.intCommodityId= @intCommodityId 
 JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId=@intQuantityUOMId
 JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityId and  cuc2.intUnitMeasureId  = @intPriceUOMId
 LEFT JOIN @tblContractCost cc on cd.intContractDetailId=cc.intContractDetailId
@@ -323,7 +323,7 @@ LEFT JOIN vyuRKPurchaseIntransitView iv on iv.intContractDetailId=cd.intContract
 )t 
 )t where  isnull(dblOpenQty,0) >0 )t1 
 
-if isnull(@ysnIncludeInventoryM2M,0) = 0
+if isnull(@ysnIncludeInventoryM2M,0) = 1
 BEGIN
 
 INSERT INTO @tblFinalDetail (intContractHeaderId,
