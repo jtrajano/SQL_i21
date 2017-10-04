@@ -131,7 +131,7 @@ LEFT JOIN (
 		 , ITEM.strItemNo
 		 , ITEM.strInvoiceComments
 		 , strItemType			= ITEM.strType
-		 , strItemDescription	= cASE WHEN ISNULL(ID.intTicketHoursWorkedId, 0) <> 0 THEN ID.strItemDescription ELSE ITEM.strDescription END
+		 , strItemDescription	= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
 		 , SO.strBOLNumber
 		 , RECIPE.intRecipeId
 		 , RECIPE.intOneLinePrintId
