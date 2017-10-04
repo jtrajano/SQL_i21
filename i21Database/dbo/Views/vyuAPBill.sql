@@ -57,7 +57,8 @@ SELECT
 	EN.strName AS strContactName,
 	CL.strLocationName AS strReceivingLocation,
 	strStoreLocation = (SELECT SCL.strLocationName FROM dbo.tblSMCompanyLocation SCL WHERE SCL.intCompanyLocationId = A.intStoreLocationId),
-	strOrderedBy = (SELECT UEN.strName FROM dbo.tblEMEntity UEN WHERE UEN.intEntityId = A.intOrderById)
+	strOrderedBy = (SELECT UEN.strName FROM dbo.tblEMEntity UEN WHERE UEN.intEntityId = A.intOrderById),
+	B.strVendorId
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
