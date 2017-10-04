@@ -5724,6 +5724,7 @@
     <Build Include="dbo\Stored Procedures\uspAPProcessShipmentChargeToBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateCost.sql" />
     <Build Include="dbo\Tables\tblVRUOMXref.sql" />
+    <Build Include="dbo\Tables\tblVRVendorSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
