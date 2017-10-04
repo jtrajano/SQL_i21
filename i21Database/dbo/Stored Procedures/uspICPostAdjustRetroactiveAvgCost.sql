@@ -56,42 +56,26 @@ BEGIN
 
 	-- Create the variables for the internal transaction types used by costing. 
 	DECLARE
-			-- @INV_TRANS_TYPE_Auto_Variance AS INT = 1
-			--,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-			--,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
-
-
-			--,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
-			--,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
-			--,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
-			--,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
-			--,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
-
-			--,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
-			--,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
-			--,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
-			--,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39		
-			--,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
-
 			@INV_TRANS_TYPE_Inventory_Receipt AS INT = 4
 			,@INV_TRANS_TYPE_Inventory_Shipment AS INT = 5
 
 			,@INV_TRANS_TYPE_Consume AS INT = 8
 			,@INV_TRANS_TYPE_Produce AS INT = 9
 			,@INV_TRANS_Inventory_Transfer AS INT = 12
-
 			,@INV_TRANS_TYPE_ADJ_Item_Change AS INT = 15
 			,@INV_TRANS_TYPE_ADJ_Split_Lot AS INT = 17
 			,@INV_TRANS_TYPE_ADJ_Lot_Merge AS INT = 19
 			,@INV_TRANS_TYPE_ADJ_Lot_Move AS INT = 20
+			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 
 	DECLARE	@RunningQty AS NUMERIC(38, 20)
-			,@RunningValue AS NUMERIC(38, 20)
-			,@PreviousRunningQty AS NUMERIC(38, 20)
+			,@NewRunningValue AS NUMERIC(38, 20)
+			,@OriginalRunningValue AS NUMERIC(38, 20)
 			,@CurrentValue AS NUMERIC(38, 20)
 
 			,@CostAdjustment AS NUMERIC(38, 20)			
-			,@RetroactiveAverageCost AS NUMERIC(38, 20)
+			,@OriginalAverageCost AS NUMERIC(38, 20)
+			,@NewAverageCost AS NUMERIC(38, 20)
 
 			,@t_intInventoryTransactionId AS INT 
 			,@t_intItemId AS INT 
@@ -171,6 +155,8 @@ END
 BEGIN 
 	DECLARE @InventoryTransactionStartId AS INT
 			,@CostBucketId AS INT  
+			,@CostBucketOriginalCost AS NUMERIC(38, 20)
+			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
 
 	SELECT	TOP 1 
 			@InventoryTransactionStartId = t.intInventoryTransactionId 
@@ -184,6 +170,8 @@ BEGIN
 
 	SELECT	TOP 1 
 			@CostBucketId = cb.intInventoryFIFOId
+			,@CostBucketOriginalCost = cb.dblCost
+			,@CostBucketOriginalValue = ISNULL(cb.dblStockIn, 0) * ISNULL(cb.dblCost, 0)
 	FROM	tblICInventoryFIFO cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -207,6 +195,8 @@ BEGIN
 			RETURN -80062;
 		END
 	END 
+
+	SET @CostBucketOriginalValue = ISNULL(@CostBucketOriginalValue, 0) 
 END 
 
 -- Log the original cost
@@ -268,9 +258,7 @@ BEGIN
 			AND t.intInventoryTransactionId < @InventoryTransactionStartId
 
 	SET @RunningQty = ISNULL(@RunningQty, 0) 
-	SET @PreviousRunningQty = ISNULL(@RunningQty, 0) 
-
-	SELECT	@RunningValue = SUM (
+	SELECT	@NewRunningValue = SUM (
 				ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0) 
 			) 
 	FROM	tblICInventoryTransaction t 
@@ -279,8 +267,8 @@ BEGIN
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId < @InventoryTransactionStartId
 
-	SELECT @RetroactiveAverageCost = 
-		CASE	WHEN @RunningQty > 0 THEN ISNULL(@RunningValue, 0) / @RunningQty
+	SELECT @NewAverageCost = 
+		CASE	WHEN @RunningQty > 0 THEN ISNULL(@NewRunningValue, 0) / @RunningQty
 				ELSE 
 					(
 						SELECT	TOP 1 
@@ -295,7 +283,8 @@ BEGIN
 							t.intInventoryTransactionId DESC 
 					)
 		END 	
-	SET @RetroactiveAverageCost = ISNULL(@RetroactiveAverageCost, 0) 			
+	SET @NewAverageCost = ISNULL(@NewAverageCost, 0) 			
+	SET @OriginalAverageCost = @NewAverageCost 
 END 
 
 -- Loop to perform the retroactive computation
@@ -322,6 +311,8 @@ BEGIN
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId >= @InventoryTransactionStartId
+			AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
+	ORDER BY t.intInventoryTransactionId ASC 
 
 	OPEN loopRetroactive;
 
@@ -347,48 +338,65 @@ BEGIN
 		SET @t_dblQty = ISNULL(@t_dblQty, 0)
 		SET @t_dblCost = ISNULL(@t_dblCost, 0)
 		SET @t_dblValue = ISNULL(@t_dblValue, 0) 
-		SET @RunningValue = ISNULL(@RunningValue, 0) 
+		SET @NewRunningValue = ISNULL(@NewRunningValue, 0) 
+		SET @OriginalRunningValue = ISNULL(@OriginalRunningValue, 0) 
 		SET @RunningQty = ISNULL(@RunningQty, 0) 
 		SET @CurrentValue = ISNULL(@CurrentValue, 0) 
 
 		-- Calculate the current value 
 		SET @CurrentValue = @t_dblQty * @t_dblCost + @t_dblValue
 		
-		-- Calculate the Running Value. 
-		SET @RunningValue += 
+		-- Calcualte the New Running Value.
+		SET @OriginalRunningValue += 
 			CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-						@CurrentValue + @CostAdjustment
+						@CostBucketOriginalValue
 					WHEN @t_dblQty < 0 THEN 
-						@t_dblQty * @RetroactiveAverageCost -- Reduce the stock using the retroactive avg cost. 
+						@t_dblQty * @OriginalAverageCost
+					ELSE 
+						@CurrentValue
+			END 
+
+		-- Calculate the New Running Value. 
+		SET @NewRunningValue += 
+			CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+						@CostBucketOriginalValue + @CostAdjustment
+					WHEN @t_dblQty < 0 THEN 
+						@t_dblQty * @NewAverageCost -- Reduce the stock using the new avg cost. 
 					ELSE 
 						@CurrentValue
 			END 
 
 		-- Calculate the running qty. 
-		SET @PreviousRunningQty = @RunningQty
 		SET @RunningQty += dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty)
 
-		-- Calculate the Average Cost 
-		SET @RetroactiveAverageCost = 
+		-- Calculate the Original Average Cost 
+		SET @OriginalAverageCost = 
 			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
-						@RunningValue / @RunningQty
+						@OriginalRunningValue / @RunningQty
 					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
-						@t_dblQty * @t_dblCost / @t_dblQty
+						@t_dblQty * @CostBucketOriginalCost / @t_dblQty
 					ELSE 
-						@RetroactiveAverageCost
+						@OriginalAverageCost
+			END 		
+
+		-- Calculate the New Average Cost 
+		SET @NewAverageCost = 
+			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
+						@NewRunningValue / @RunningQty
+					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
+						@t_dblQty * @CostBucketOriginalCost / @t_dblQty
+					ELSE 
+						@NewAverageCost
 			END 
 
 		-- Update the cost bucket cost. 
 		IF @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId
 		BEGIN 
 			UPDATE	cb
-			SET		cb.dblCost = 
-						(cb.dblStockIn * cb.dblCost + @CostAdjustment)
-						/ cb.dblStockIn
+			SET		cb.dblCost = (@CostBucketOriginalValue + @CostAdjustment) / cb.dblStockIn
 			FROM	tblICInventoryFIFO cb
 			WHERE	cb.intItemId = @intItemId
 					AND cb.intInventoryFIFOId = @CostBucketId
-					AND @RetroactiveAverageCost IS NOT NULL 
 					AND cb.dblStockIn <> 0 
 		END
 
@@ -414,9 +422,7 @@ BEGIN
 		BEGIN 
 			-- Calculate the value to be escalated. 
 			SET @EscalateCostAdjustment = 0 
-			SET @EscalateCostAdjustment -= 
-					(dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty) * @RetroactiveAverageCost)
-					- (@t_dblQty * @t_dblCost)
+			SET @EscalateCostAdjustment -= (@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
 			
 			-- Insert data into the #tmpRevalueProducedItems table. 
 			INSERT INTO #tmpRevalueProducedItems (
@@ -534,8 +540,7 @@ BEGIN
 					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 								@CostAdjustment
 							WHEN @t_dblQty < 0 THEN 
-								(dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty) * @RetroactiveAverageCost)
-								- (@t_dblQty * @t_dblCost)
+								(@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
 							ELSE 
 								0
 					END 
@@ -550,8 +555,7 @@ BEGIN
 				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 							@CostAdjustment
 						WHEN @t_dblQty < 0 THEN 
-							(dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty) * @RetroactiveAverageCost)
-							- (@t_dblQty * @t_dblCost)
+							(@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
 						ELSE 
 							0
 				END <> 0 
@@ -581,14 +585,6 @@ END
 
 -- Book the cost adjustment. 
 BEGIN 
-	-- Get the current valuation 
-	SET @CurrentValue = NULL 
-	SELECT	@CurrentValue = SUM(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)) 
-	FROM	tblICInventoryTransaction t
-	WHERE	t.intItemId = @intItemId
-			AND t.intItemLocationId = @intItemLocationId
-			AND ISNULL(t.ysnIsUnposted, 0) = 0 
-
 	SET @strNewCost = CONVERT(NVARCHAR, CAST(@CostAdjustment AS MONEY), 1)
 
 	SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
@@ -596,7 +592,14 @@ BEGIN
 	WHERE	i.intItemId = @intItemId
 
 	-- Calculate the cost adjustment. 
-	SET @CostAdjustment = @RunningValue - @CurrentValue
+	SET @CurrentValue = NULL 
+	SELECT	@CurrentValue = 
+				ISNULL(@NewRunningValue, 0) 
+				- SUM(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)) 
+	FROM	tblICInventoryTransaction t
+	WHERE	t.intItemId = @intItemId
+			AND t.intItemLocationId = @intItemLocationId
+			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 
 	-- Create the 'Cost Adjustment' inventory transaction. 
 	EXEC [uspICPostInventoryTransaction]
@@ -609,14 +612,14 @@ BEGIN
 		,@dblQty								= 0
 		,@dblUOMQty								= 0
 		,@dblCost								= 0
-		,@dblValue								= @CostAdjustment
+		,@dblValue								= @CurrentValue
 		,@dblSalesPrice							= 0
 		,@intCurrencyId							= NULL 
 		,@intTransactionId						= @intTransactionId
 		,@intTransactionDetailId				= @intTransactionDetailId
 		,@strTransactionId						= @strTransactionId
 		,@strBatchId							= @strBatchId
-		,@intTransactionTypeId					= @intTransactionTypeId 
+		,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
 		,@intLotId								= NULL  
 		,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
 		,@intRelatedTransactionId				= @t_intTransactionId 
@@ -646,9 +649,9 @@ END
 -- Update the average cost
 BEGIN 
 	UPDATE	p
-	SET		p.dblAverageCost = @RetroactiveAverageCost
+	SET		p.dblAverageCost = @NewAverageCost
 	FROM	tblICItemPricing p 
 	WHERE	p.intItemId = @intItemId
 			AND p.intItemLocationId = @intItemLocationId
-			AND @RetroactiveAverageCost IS NOT NULL 
+			AND @NewAverageCost IS NOT NULL 
 END
