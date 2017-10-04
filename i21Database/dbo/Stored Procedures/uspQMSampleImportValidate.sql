@@ -378,6 +378,37 @@ BEGIN TRY
 			END
 		END
 
+		-- Check whether header fields values are same for a sample no
+		IF (
+				(
+					SELECT COUNT(1) AS intCount
+					FROM (
+						SELECT DISTINCT CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
+							,strItemShortName
+							,strSampleTypeName
+							,strVendorName
+							,strContractNumber
+							,strContainerNumber
+							,strMarks
+							,dblSequenceQuantity
+							,strSampleStatus
+						FROM tblQMSampleImport
+						WHERE strSampleNumber = @strSampleNumber
+						) t
+					) > 1
+				)
+			SELECT @strPreviousErrMsg += 'Sample should have same values for the header fields. '
+
+		-- Check whether a sample no contains the same property name multiple times
+		IF EXISTS (
+				SELECT 1
+				FROM tblQMSampleImport
+				WHERE strSampleNumber = @strSampleNumber
+				GROUP BY strPropertyName
+				HAVING COUNT(*) > 1
+				)
+			SELECT @strPreviousErrMsg += 'Sample contains same property name multiple times. '
+
 		-- After all validation, insert / update the error
 		IF ISNULL(@strPreviousErrMsg, '') <> ''
 		BEGIN
