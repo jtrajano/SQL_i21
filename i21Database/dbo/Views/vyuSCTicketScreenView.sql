@@ -1,8 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketScreenView]
 	AS select 
-	SCT.intConcurrencyId
-	,SCT.strOfflineGuid
-	,SCT.intTicketId
+	SCT.intTicketId
 	,SCT.strTicketStatus
 	,SCT.strTicketNumber
 	,SCT.intScaleSetupId
@@ -200,6 +198,8 @@
 		END) strLoadInfo
 
 	,CAST (0 AS BIT) ysnDateModified
+	,SCT.intConcurrencyId
+	,SCT.strOfflineGuid
   from tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -223,7 +223,6 @@
 	LEFT JOIN tblICItem ICFees on ICFees.intItemId = SCSetup.intDefaultFeeItemId
 	LEFT JOIN tblICItemUOM ICIUOM on ICIUOM.intItemUOMId = intItemUOMIdTo
 	LEFT JOIN tblICUnitMeasure ICUM on ICUM.intUnitMeasureId = ICIUOM.intUnitMeasureId
-	LEFT JOIN tblICStorageLocation ICStorageLoc on ICStorageLoc.intSubLocationId = SCT.intSubLocationId
 
 	LEFT JOIN tblGRStorageType GRStorage on GRStorage.strStorageTypeCode = SCT.strDistributionOption
 	LEFT JOIN tblGRDiscountId GRDiscountId on GRDiscountId.intDiscountId = SCT.intDiscountId
