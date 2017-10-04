@@ -24,6 +24,12 @@ BEGIN TRY
 		,@dblQty NUMERIC(38, 20)
 		,@ysnLoadProcessEnabled BIT
 		,@intDockDoorId INT
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intInventoryTransactionType AS INT = 5
+		,@intTransactionId INT
+		,@strTransactionId NVARCHAR(50)
+		,@intInventoryShipmentId INT
+
 	DECLARE @tblTasks TABLE (
 		intTaskRecordId INT Identity(1, 1)
 		,intTaskId INT
@@ -66,7 +72,7 @@ BEGIN TRY
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
-	SELECT @intEntityCustomerId = intEntityCustomerId
+	SELECT @intEntityCustomerId = intEntityCustomerId,@intInventoryShipmentId=intInventoryShipmentId
 	FROM tblICInventoryShipment
 	WHERE strShipmentNumber = @strReferenceNo
 
@@ -142,7 +148,7 @@ BEGIN TRY
 			,@dblMoveQty = @dblMoveQty
 			,@intMoveItemUOMId = @intMoveItemUOMId
 			,@intUserId = @intUserId
-			,@blnValidateLotReservation = 1
+			,@blnValidateLotReservation = 0
 			,@blnInventoryMove = @blnInventoryMove
 
 		SELECT TOP 1 @intNewLotId = intLotId
@@ -180,6 +186,8 @@ BEGIN TRY
 				,intLotId = @intNewLotId
 				,intFromStorageLocationId = @intNewStorageLocationId
 			WHERE intTaskId = @intTaskId
+
+			Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
 		END
 
 		INSERT INTO tblMFPickForWOStaging (
@@ -431,7 +439,7 @@ BEGIN TRY
 				,@dblMoveQty = @dblMoveQty
 				,@intMoveItemUOMId = @intMoveItemUOMId
 				,@intUserId = @intUserId
-				,@blnValidateLotReservation = 1
+				,@blnValidateLotReservation = 0
 				,@blnInventoryMove = @blnInventoryMove
 
 			SELECT TOP 1 @intNewLotId = intLotId
@@ -469,6 +477,8 @@ BEGIN TRY
 					,intLotId = @intNewLotId
 					,intFromStorageLocationId = @intNewStorageLocationId
 				WHERE intTaskId = @intTaskId
+
+				Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
 			END
 
 			INSERT INTO tblMFPickForWOStaging (
@@ -669,6 +679,48 @@ BEGIN TRY
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 7
 		WHERE intOrderHeaderId = @intOrderHeaderId
+	END
+	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+	BEGIN
+		SELECT @intTransactionId = @intInventoryShipmentId
+
+		SELECT @strTransactionId = @strReferenceNo
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
+
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = T.intFromStorageLocationId
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intTransactionId
+			,strTransactionId = @strTransactionId
+			,intTransactionTypeId = @intInventoryTransactionType
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId =@intOrderHeaderId 
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
 	END
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

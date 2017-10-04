@@ -123,10 +123,14 @@ LEFT OUTER JOIN (SELECT intInvoiceDetailId
 				 FROM tblARInvoiceDetailTax WITH (NOLOCK)
 				 GROUP BY intInvoiceDetailId
 ) TAXTOTAL ON TAXDETAIL.intInvoiceDetailId = TAXTOTAL.intInvoiceDetailId
-LEFT OUTER JOIN (SELECT intEntityId
-				      , strCustomerNumber
-				      , strName
-				 FROM dbo.vyuARCustomer WITH (NOLOCK)
+LEFT OUTER JOIN (SELECT intEntityId 
+					  , strCustomerNumber= CASE WHEN CUS.strCustomerNumber = '' THEN ENTITY.strEntityNo ELSE CUS.strCustomerNumber END
+					  , strName  
+				 FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
+				 INNER JOIN (SELECT intEntityCustomerId
+					              , strCustomerNumber
+							 FROM dbo.tblARCustomer WITH (NOLOCK)
+				 ) CUS ON ENTITY.intEntityId = CUS.intEntityCustomerId
 ) C ON I.intEntityCustomerId = C.intEntityId	
 LEFT OUTER JOIN (SELECT intCurrencyID
 						, strCurrency
@@ -200,7 +204,7 @@ INNER JOIN (
 			JOIN (SELECT intInvoiceDetailId
 									, intTaxCodeId
 									, strCalculationMethod
-									, dblRate = 0
+									, dblRate
 									, dblAdjustedTax = 0 --case when ysnTaxExempt = 1 then 0 else dblAdjustedTax end
 									, dblTax = 0 
 								FROM dbo.tblARInvoiceDetailTax idx WITH (NOLOCK) 
@@ -291,10 +295,14 @@ LEFT OUTER JOIN (SELECT intInvoiceDetailId
 				 FROM tblARInvoiceDetailTax WITH (NOLOCK)
 				 GROUP BY intInvoiceDetailId
 ) TAXTOTAL ON TAXDETAIL.intInvoiceDetailId = TAXTOTAL.intInvoiceDetailId
-LEFT OUTER JOIN (SELECT intEntityId
-				      , strCustomerNumber
-				      , strName
-				 FROM dbo.vyuARCustomer WITH (NOLOCK)
+LEFT OUTER JOIN (SELECT intEntityId 
+					  , strCustomerNumber= CASE WHEN CUS.strCustomerNumber = '' THEN ENTITY.strEntityNo ELSE CUS.strCustomerNumber END
+					  , strName  
+				 FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
+				 INNER JOIN (SELECT intEntityCustomerId
+					              , strCustomerNumber
+							 FROM dbo.tblARCustomer WITH (NOLOCK)
+				 ) CUS ON ENTITY.intEntityId = CUS.intEntityCustomerId
 ) C ON I.intEntityCustomerId = C.intEntityId	
 LEFT OUTER JOIN (SELECT intCurrencyID
 						, strCurrency

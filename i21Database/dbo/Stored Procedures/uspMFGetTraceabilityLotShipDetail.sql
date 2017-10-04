@@ -22,6 +22,7 @@ Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.intEntityCustomerId
 		Where shl.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)
+		Order by sh.intInventoryShipmentId
 
 	If @ysnParentLot=1
 		Select 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
@@ -38,3 +39,4 @@ Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.intEntityCustomerId
 		Where l.intParentLotId=@intLotId
+		Order by sh.intInventoryShipmentId

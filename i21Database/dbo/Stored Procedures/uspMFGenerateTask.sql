@@ -45,6 +45,11 @@ BEGIN TRY
 		,@intLotItemUOMId INT
 		,@intPreferenceId INT
 		,@intParentLotId INT
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intInventoryTransactionType AS INT = 5
+		,@intTransactionId INT
+		,@strTransactionId NVARCHAR(50)
+		,@intInventoryShipmentId INT
 
 	SELECT @ysnPickByQty = 1
 
@@ -279,7 +284,7 @@ BEGIN TRY
 
 			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
 			BEGIN
-				SELECT @intEntityCustomerId = intEntityCustomerId
+				SELECT @intEntityCustomerId = intEntityCustomerId,@intInventoryShipmentId=intInventoryShipmentId
 				FROM tblICInventoryShipment
 				WHERE strShipmentNumber = @strReferenceNo
 
@@ -375,7 +380,7 @@ BEGIN TRY
 					,10
 					,11
 					)
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
@@ -459,13 +464,15 @@ BEGIN TRY
 											WHEN (
 													(I.intUnitPerLayer * I.intLayerPerPallet > 0)
 													AND (
-														(L.dblQty - (
-															SUM(ISNULL(CASE 
-																		WHEN T.intTaskTypeId = 13
-																			THEN L.dblQty - T.dblQty
-																		ELSE T.dblQty
-																		END, 0))
-															)) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
+														(
+															L.dblQty - (
+																SUM(ISNULL(CASE 
+																			WHEN T.intTaskTypeId = 13
+																				THEN L.dblQty - T.dblQty
+																			ELSE T.dblQty
+																			END, 0))
+																)
+															) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
 														)
 													)
 												THEN 1
@@ -573,7 +580,7 @@ BEGIN TRY
 			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 				AND UT.ysnAllowPick = 1
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
 				AND T.intTaskTypeId NOT IN (
@@ -659,13 +666,15 @@ BEGIN TRY
 											WHEN (
 													(I.intUnitPerLayer * I.intLayerPerPallet > 0)
 													AND (
-														(L.dblQty - (
-															SUM(ISNULL(CASE 
-																		WHEN T.intTaskTypeId = 13
-																			THEN L.dblQty - T.dblQty
-																		ELSE T.dblQty
-																		END, 0))
-															)) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
+														(
+															L.dblQty - (
+																SUM(ISNULL(CASE 
+																			WHEN T.intTaskTypeId = 13
+																				THEN L.dblQty - T.dblQty
+																			ELSE T.dblQty
+																			END, 0))
+																)
+															) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
 														)
 													)
 												THEN 1
@@ -939,7 +948,6 @@ BEGIN TRY
 			--			ELSE 0
 			--			END
 			--		,L.dtmDateCreated ASC
-
 			--	--- INSERT ALL THE LOTS OUTSIDE ALLOWABLE PICK DAY RANGE
 			--	INSERT INTO @tblLot (
 			--		intLotId
@@ -1133,7 +1141,6 @@ BEGIN TRY
 			--			END
 			--		,L.dtmDateCreated ASC
 			--END
-
 			SELECT @intLotRecordId = MIN(intLotRecordId)
 			FROM @tblLot
 
@@ -1486,6 +1493,49 @@ BEGIN TRY
 		FROM tblMFTask
 		WHERE intOrderHeaderId = @intOrderHeaderId
 			AND intTaskStateId <> 4
+	END
+
+	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+	BEGIN
+		SELECT @intTransactionId = @intInventoryShipmentId
+
+		SELECT @strTransactionId = @strReferenceNo
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
+
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = T.intFromStorageLocationId
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intTransactionId
+			,strTransactionId = @strTransactionId
+			,intTransactionTypeId = @intInventoryTransactionType
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId =@intOrderHeaderId 
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
 	END
 END TRY
 

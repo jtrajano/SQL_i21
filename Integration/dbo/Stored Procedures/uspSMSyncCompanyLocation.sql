@@ -517,7 +517,7 @@ BEGIN
        ON ISNULL(CL.[strLocationNumber], ''000'') = A.strNumber  COLLATE Latin1_General_CI_AS AND CL.strLocationName = A.strName COLLATE Latin1_General_CI_AS
      LEFT JOIN  
       tblGLCOACrossReference CA  
-       ON CL.[intCashAccount] = CA.[inti21Id]  
+       ON CL.[intUndepositedFundsId] = CA.[inti21Id]  
      LEFT JOIN  
       tblGLCOACrossReference FE  
        ON CL.[intFreightExpenses] = FE.[inti21Id]  
@@ -863,7 +863,7 @@ BEGIN
        ON ISNULL(CL.[strLocationNumber], ''000'') = U.strNumber COLLATE Latin1_General_CI_AS AND CL.strLocationName = U.strName COLLATE Latin1_General_CI_AS  
      LEFT JOIN  
       tblGLCOACrossReference CA  
-       ON CL.[intCashAccount] = CA.[inti21Id]  
+       ON CL.[intUndepositedFundsId] = CA.[inti21Id]  
      LEFT JOIN  
       tblGLCOACrossReference FE  
        ON CL.[intFreightExpenses] = FE.[inti21Id]  
@@ -938,7 +938,7 @@ BEGIN
       ,[ysnAgroguideInterface]  
       ,[ysnLocationActive]  
       ,[intProfitCenter]  
-      ,[intCashAccount]  
+      --,[intCashAccount]  
       ,[intDepositAccount]  
       ,[intARAccount]  
       ,[intAPAccount]  
@@ -955,6 +955,7 @@ BEGIN
       ,[intSalesAccount]  
       ,[intCostofGoodsSold]  
       ,[intInventory]  
+	  ,[intUndepositedFundsId]
       ,[strInvoiceType]  
       ,[strDefaultInvoicePrinter]  
       ,[strPickTicketType]  
@@ -1131,7 +1132,7 @@ BEGIN
        ELSE 0  
         END)        --<ysnLocationActive, bit,>  
       ,ISNULL(AG.[agloc_gl_profit_center],0) --<intProfitCenter, int,>    --TODO  
-      ,ISNULL(CA.[inti21Id],0)      --<agloc_cash, int,>  
+      --,ISNULL(CA.[inti21Id],0)      --<agloc_cash, int,>  
       ,0         --<intDepositAccount, int,>  
       ,0         --<intARAccount, int,>  
       ,0         --<intAPAccount, int,>  
@@ -1148,6 +1149,7 @@ BEGIN
       ,0         --<intSalesAccount, int,>  
       ,0         --<intCostofGoodsSold, int,>  
       ,0         --<intInventory, int,>  
+	  ,ISNULL(CA.[inti21Id],0)      --<agloc_cash, int,>  
       ,(CASE UPPER(AG.[agloc_ivc_type_phs7])  
        WHEN ''P'' THEN ''Plain full page''  
        WHEN ''H'' THEN ''Plain half page''  
@@ -1480,7 +1482,7 @@ BEGIN
          ELSE 0  
           END)  
       ,[intProfitCenter] = ISNULL(AG.[agloc_gl_profit_center],0)  
-      ,[intCashAccount] = ISNULL(CA.[inti21Id],0)  
+      --,[intCashAccount] = ISNULL(CA.[inti21Id],0)  
       ,[intDepositAccount] = ISNULL([intDepositAccount],0)  
       ,[intARAccount] = ISNULL([intARAccount],0)  
       ,[intAPAccount] = ISNULL([intAPAccount],0)  
@@ -1497,6 +1499,7 @@ BEGIN
       ,[intSalesAccount] = ISNULL([intSalesAccount],0)  
       ,[intCostofGoodsSold] = ISNULL([intCostofGoodsSold],0)  
       ,[intInventory] = ISNULL([intInventory],0)  
+	  ,[intUndepositedFundsId] = ISNULL(CA.[inti21Id],0)  
       ,[strInvoiceType] =   
         (CASE UPPER(AG.[agloc_ivc_type_phs7])  
          WHEN ''P'' THEN ''Plain full page''  
@@ -2014,7 +2017,7 @@ BEGIN
 		   ON ISNULL(CL.[strLocationNumber], ''000'') = A.strNumber  COLLATE Latin1_General_CI_AS AND CL.strLocationName = A.strName COLLATE Latin1_General_CI_AS
 		 LEFT JOIN  
 		  tblGLCOACrossReference CA  
-		   ON CL.[intCashAccount] = CA.[inti21Id]  
+		   ON CL.[intUndepositedFundsId] = CA.[inti21Id]  
 		 LEFT JOIN  
 		  tblGLCOACrossReference FE  
 		   ON CL.[intFreightExpenses] = FE.[inti21Id]  
@@ -2111,7 +2114,7 @@ BEGIN
 		   ON ISNULL(CL.[strLocationNumber], ''000'') = U.strNumber COLLATE Latin1_General_CI_AS AND CL.strLocationName = U.strName COLLATE Latin1_General_CI_AS  
 		 LEFT JOIN  
 		  tblGLCOACrossReference CA  
-		   ON CL.[intCashAccount] = CA.[inti21Id]  
+		   ON CL.[intUndepositedFundsId] = CA.[inti21Id]  
 		 LEFT JOIN  
 		  tblGLCOACrossReference FE  
 		   ON CL.[intFreightExpenses] = FE.[inti21Id]  
@@ -2187,7 +2190,7 @@ BEGIN
 			,[ysnAgroguideInterface]  
 			,[ysnLocationActive]  
 			,[intProfitCenter]  
-			,[intCashAccount]  
+			--,[intCashAccount]  
 			,[intDepositAccount]  
 			,[intARAccount]  
 			,[intAPAccount]  
@@ -2204,6 +2207,7 @@ BEGIN
 			,[intSalesAccount]  
 			,[intCostofGoodsSold]  
 			,[intInventory]  
+			,[intUndepositedFundsId]
 			,[strInvoiceType]  
 			,[strDefaultInvoicePrinter]  
 			,[strPickTicketType]  
@@ -2315,7 +2319,7 @@ BEGIN
 			,0										    --<ysnAgroguideInterface, bit,>  
 			,1										    --<ysnLocationActive, bit,>  
 			,PT.[ptloc_gl_profit_center]				--<intProfitCenter, int,>    --TODO  
-			,0							        		--<ptloc_cash, int,>  
+			--,0							        		--<ptloc_cash, int,>  
 			,0							        	    --<intDepositAccount, int,>  
 			,0							        	    --<intARAccount, int,>  
 			,0							        	    --<intAPAccount, int,>  
@@ -2332,6 +2336,7 @@ BEGIN
 			,0											--<intSalesAccount, int,>  
 			,0											--<intCostofGoodsSold, int,>  
 			,0											--<intInventory, int,>  
+			,0							        		-- [intUndepositedFundsId] <ptloc_cash, int,>  
 			,(CASE UPPER(PT.[ptloc_ivc_type_fpl])  
 			 WHEN ''F'' THEN ''Forms''  
 			 WHEN ''L'' THEN ''Laser''  

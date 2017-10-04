@@ -78,12 +78,26 @@ BEGIN
 
 	IF @CostBucketId IS NULL AND @AllowNegativeInventory = @ALLOW_NEGATIVE_NO
 	BEGIN 
-		IF @UnitsOnStorage > 0 
+		-- Get the available stock in the cost bucket. 
+		DECLARE @strCostBucketDate AS VARCHAR(20) 
+		SELECT	TOP 1 
+				@strCostBucketDate = CONVERT(NVARCHAR(20), cb.dtmDate, 101)  
+		FROM	tblICInventoryLotStorage cb
+		WHERE	cb.intItemId = @intItemId
+				AND cb.intItemLocationId = @intItemLocationId
+				AND cb.intLotId = @intLotId
+				AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+				AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
+				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+		ORDER BY cb.dtmDate ASC, cb.intInventoryLotStorageId ASC, cb.intItemId ASC, cb.intItemLocationId ASC, cb.intLotId ASC, cb.intItemUOMId ASC
+
+		IF @UnitsOnStorage > 0 AND @strCostBucketDate IS NOT NULL 
 		BEGIN 
+			--'As of {Transaction Date}, there is no stock available for {Item} in {Location}. 
+			-- However, there are stocks as of {Cost Bucket Date}. You can use it as the transaction date instead of {Transaction Date}.' 
 			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
-			EXEC uspICRaiseError 80096, @strDate, @strItemNo, @strLocationName;
+			EXEC uspICRaiseError 80096, @strDate, @strItemNo, @strLocationName, @strCostBucketDate, @strDate;
 		END 
-		ELSE 
 		BEGIN 
 			--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
 			EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 

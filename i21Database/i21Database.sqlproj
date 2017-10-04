@@ -5413,9 +5413,15 @@
     <Build Include="dbo\Tables\tblQMSampleImportError.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImportValidate.sql" />
+    <Build Include="dbo\Tables\tblMFPackingItemCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMatchingLotAvailableQtyValidation.sql" />
-    <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
+    <Build Include="dbo\Views\vyuMFGetPostedDate.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryShipmentCustomField.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReleaseReservation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateBondStatus.sql" />
+    <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
     <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
