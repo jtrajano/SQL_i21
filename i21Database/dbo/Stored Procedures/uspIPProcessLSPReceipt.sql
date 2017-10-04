@@ -131,9 +131,7 @@ Begin
 			--Add Audit Trail Record
 			Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intReceiptId) + '","keyValue":' + CONVERT(VARCHAR,@intReceiptId) + ',"iconCls":"small-new-plus","leaf":true}'
 	
-			Select @dtmDate=DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @dtmReceiptDate)
-			If @dtmDate is null
-				Set @dtmDate =  GETUTCDATE()
+			Set @dtmDate =  GETUTCDATE()
 
 			Select TOP 1 @intEntityId=intEntityVendorId From tblAPVendor 
 			Where strVendorAccountNum=(Select strWarehouseVendorAccNo From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
