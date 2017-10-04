@@ -169,8 +169,11 @@
 		CASE WHEN (SELECT ISNULL(ICAttribute.intCommodityAttributeId,0) FROM tblICCommodityAttribute ICAttribute WHERE ICAttribute.intCommodityId = SCT.intCommodityId ) > 1 THEN 1
 		ELSE 0 END
 	 AS BIT) AS ysnHasCommodityGrade
+	 ,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom
+	 ,ICIUOM.dblUnitQty AS dblUnitQtyTo
 
 	,SCSetup.strStationShortDescription
+	,SCSetup.strWeightDescription
 	,SCSetup.intFreightItemId
 	,SCSetup.intDefaultFeeItemId
 	,SCSetup.ysnMultipleWeights
@@ -223,6 +226,7 @@
 	LEFT JOIN tblICItem ICFreight on ICFreight.intItemId = SCSetup.intFreightItemId
 	LEFT JOIN tblICItem ICFees on ICFees.intItemId = SCSetup.intDefaultFeeItemId
 	LEFT JOIN tblICItemUOM ICIUOM on ICIUOM.intItemUOMId = intItemUOMIdTo
+	LEFT JOIN tblICItemUOM ICIUOMFrom on ICIUOMFrom.intItemUOMId = intItemUOMIdFrom
 	LEFT JOIN tblICUnitMeasure ICUM on ICUM.intUnitMeasureId = ICIUOM.intUnitMeasureId
 	LEFT JOIN tblICStorageLocation ICStorageLoc on ICStorageLoc.intSubLocationId = SCT.intSubLocationId
 
