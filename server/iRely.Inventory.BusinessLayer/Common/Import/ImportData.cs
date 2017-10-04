@@ -26,8 +26,10 @@ namespace iRely.Inventory.BusinessLayer
             try
             {
                 var type = Type.GetType("iRely.Inventory.BusinessLayer.Import" + name);
+                if(type == null)
+                    throw new Exception("Import for " + name + " is not yet supported.");
                 var instance = (IImportDataLogic)Activator.CreateInstance(type);
-
+                
                 instance.Context = context;
                 instance.Data = data;
                 return instance.Import();

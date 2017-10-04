@@ -140,11 +140,11 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
             error: function(jqXHR, status, error) {
                 iRely.Msg.close();
                 var json = JSON.parse(jqXHR.responseText);
-                i21.functions.showCustomDialog('error', 'ok', 'Import completed with error(s)! ' + json.info,
+                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
                     function() {
                         win.close();
 
-                        if (json.messages !== null && json.messages.length > 0) {
+                        if (json.messages && json.messages.length > 0) {
                             iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
                                 data: json
                             });

@@ -151,6 +151,9 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             case "btnImportCommodities":
                 type = "Commodities";
                 break;
+            case "btnImportCommodityUOM":
+                type = "CommodityUOM";
+                break;
             case "btnImportItems":
                 type = "Items";
                 break;
@@ -329,7 +332,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var win = button.up('window');
 
         var data = [];
-        var columns = getTemplateColumns(button.text);
+        var columns = getTemplateColumns(button.menuId);
         download( data, columns, button.text + ".csv" );
     }
 });
@@ -420,61 +423,61 @@ function download( data, columns, filename ) {
 
 function getTemplateColumns(name) {
     switch (name) {
-        case "Fuel Categories":
+        case "fuelcategories":
             return ["Fuel Category", "Description", "Equivalence Value"];
-        case "Feed Stocks":
+        case "feedstocks":
             return ["Code", "Description"];
-        case "Fuel Codes":
+        case "fuelcodes":
             return ["Code", "Description"];
-        case "Process Codes":
+        case "processcodes":
             return ["Code", "Description"];
-        case "Units of Measurement":
+        case "uom":
             return ["Unit of Measure", "Symbol", "Unit Type"];
-        case "Feed Stock UOMs":
+        case "feedstockuom":
             return ["Unit of Measure", "Code"];
-        case "Fuel Types":
+        case "fueltypes":
             return ["Fuel Category", "Feed Stock", "Batch No", "Ending Rin Gallons", "Equivalence Value", "Fuel Code",
                 "Production Process", "Feed Stock UOM", "Feed Stock Factor", "Renewable Biomass", "Percent of Denaturant", "Deduct Denaturant"];
-        case "Storage Unit Types":
+        case "storageunittypes":
             return ["Name", "Description", "Internal Code", "Capacity UOM", "Max Weight", "Allows Picking", "Dimension UOM",
                 "Height", "Depth", "Width", "Pallet Stack", "Pallet Columns", "Pallet Rows"];
-        case "Storage Units":
+        case "storageunits":
             return ["Name", "Description", "Storage Unit Type", "Location", "Storage Location", "Parent Unit", "Restriction Type",
                 "Aisle", "Min Batch Size", "Batch Size", "Batch Size UOM", "Commodity", "Pack Factor", "Effective Depth", "Units Per Foot", "Residual Units",
                 "Sequence", "Active", "X Position", "Y Position", "Z Position", "Allow Consume", "Allow Multiple Items",
                 "Allow Multiple Lots", "Merge on Move", "Cycle Counted", "Default Warehouse Staging Unit"];
-        case "Line of Business":
+        case "lineofbusiness":
             return ["Line of Business"];
-        case "Categories":
+        case "categories":
             return ["Category Code", "Description", "Inventory Type", "Line of Business", "Costing Method", "Inventory Valuation",
                 "GL Division No", "Sales Analysis"];
-        case "Brands":
+        case "brands":
             return ["Brand Code", "Brand Name", "Manufacturer"];
-        case "Manufacturers":
+        case "manufacturers":
             return ["Manufacturer"];
-        case "Commodities":
+        case "commodities":
             return ["Commodity Code", "Description", "Exchange Traded", "Decimals on DPR", "Default Future Market", "Price Checks Min",
                 "Price Checks Max", "Checkoff Tax Desc", "Checkoff All States", "Insurance Tax Desc", "Insurance All States",
                 "Crop End Date Current", "Crop End Date New", "EDI Code", "Default Schedule Store", "Discount", "Scale Auto Dist Default"];
-        case "Items":
+        case "items":
             return ["Item No","Type","Short Name","Description","Manufacturer","Status","Commodity","Lot Tracking","Brand","Model No","Category","Stocked Item","Dyed Fuel","Barcode Print","MSDS Required","EPA Number","Inbound Tax","Outbound Tax","Restricted Chemical","Fuel Item","List Bundle Items Separately","Fuel Inspect Fee","RIN Required","Fuel Category","Denaturant Percentage","Tonnage Tax","Load Tracking","Mix Order","Hand Add Ingredients","Medication Tag","Ingredient Tag","Volume Rebate Group","Physical Item","Extend Pick Ticket","Export EDI","Hazard Material","Material Fee","Auto Blend","User Group Fee Percentage","Wgt Tolerance Percentage","Over Receive Tolerance Percentage","Maintenance Calculation Method","Rate","NACS Category","WIC Code","Receipt Comment Req","Count Code","Landed Cost","Lead Time","Taxable","Keywords","Case Qty","Date Ship","Tax Exempt","Drop Ship","Commissionable","Special Commission","Tank Required","Available for TM","Default Percentage Full","Patronage Category","Direct Sale"];
-        case "Item GL Account Categories":
+        case "accountcategories":
             return ["Category", "Group", "Restricted"];
-        case "Item GL Accounts":
+        case "accounts":
             return ["Item No", "Account Category", "Account Id"];
-        case "Item UOM":
+        case "itemuom":
             return ["Item No", "UOM", "Unit Qty", "Weight UOM", "UPC Code", "Short UPC Code", "Is Stock Unit",
                 "Allow Purchase", "Allow Sale", "Length", "Width", "Height", "Dimension UOM",
                 "Volume", "Volume UOM", "Max Qty"];
-        case "Contract Items":
+        case "contractitems":
             return ["Item No","Location","Contract Name","Origin","Grade","Grade Type","Garden","Yield","Tolerance","Franchise"];
-        case "Inventory Count":
+        case "inventorycountdetails":
             return ["Location", "Count Group", "Description", "Date", "Item No", "Storage Location", "Storage Unit", 
                 "Physical Count", "UOM", "Lot No", "Pallets", "Qty Per Pallet", "Count by Lots", "Count by Pallets", "Recount"];
-        case "Item Pricing":
+        case "itempricing":
             return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
                 "Amount/Percent", "Retail Price", "MSRP"];
-        case "Item Location":
+        case "itemlocation":
             return ["Item No","Location","POS Description","Vendor Id","Costing Method","Storage Location","Storage Unit",
                 "Sale UOM","Purchase UOM","Family","Class","Product Code","Passport Fuel ID 1","Passport Fuel ID 2","Passport Fuel ID 3",
                 "Tax Flag 1","Tax Flag 2","Tax Flag 3","Tax Flag 4","Promotional Item","Promotion Item","Deposit Required","Deposit PLU",
@@ -484,8 +487,10 @@ function getTemplateColumns(name) {
                 "Reorder Point","Min Order","Suggested Qty","Lead Time (Days)","Inventory Count Group","Counted","Counted Daily",
                 "Count by Serial Number","Serial Number Begin","Serial Number End","Auto Calculate Freight","Freight Rate",
                 "Freight Term","Ship Via"];
-        case "Item Pricing Levels":
+        case "itempricinglevels":
             return ["Item No", "Location", "Price Level", "UOM", "Min", "Max", "Pricing Method",
                 "Amount/Percent", "Unit Price", "Commission On", "Comm Amount/Percent"];
+        case "commodityuom":
+            return ["Commodity Code", "UOM", "Unit Qty", "Is Stock Unit", "Is Default UOM"]; 
     }
 }

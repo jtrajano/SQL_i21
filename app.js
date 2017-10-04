@@ -26,10 +26,5 @@ Ext.application({
         'CopyItemLocation',
         'InventoryCountDetails'
     ],
-    name: 'Inventory',
-
-    launch: function() {
-        Ext.create('Inventory.view.Item', {renderTo: Ext.getBody()});
-    }
-
+    name: 'Inventory'
 });

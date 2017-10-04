@@ -77,13 +77,22 @@ namespace iRely.Inventory.BusinessLayer
             }
         }
 
+        /// <summary>
+        /// Gets the required field names that need to be present and must be filled out in the CSV template.
+        /// </summary>
+        /// <returns> Returns a string array of required field names.</returns>
         protected abstract string[] GetRequiredFields();
 
+        /// <summary>
+        ///     Checks if the if all the required fields are present in the CSV template.
+        /// </summary>
+        /// <param name="headers">The array of headers or field names available in the CSV template.</param>
+        /// <param name="missingFields">This outputs a list of field names that were missing in the CSV template.</param>
+        /// <returns>Returns true if all required field names are present in the CSV template.</returns>
         protected bool ValidHeaders(string[] headers, out List<string> missingFields)
         {
             string[] requiredFields = GetRequiredFields();
             List<string> mf = new List<string>();
-
             if (requiredFields.Length == 0)
             {
                 missingFields = mf;
@@ -113,6 +122,10 @@ namespace iRely.Inventory.BusinessLayer
             return validCnt == requiredFields.Length;
         }
 
+        /// <summary>
+        /// Checks whether there are duplicated records or rows in the CSV template.
+        /// </summary>
+        /// <returns>Returns true if duplicates were found, false otherwise.</returns>
         protected bool HasLocalDuplicate(ImportDataResult dr, string field, string value, int row)
         {
             if (string.IsNullOrEmpty(value))

@@ -158,6 +158,7 @@
   <ItemGroup>
     <Compile Include="Common\Common.cs" />
     <Compile Include="Common\GlobalSettings.cs" />
+    <Compile Include="Common\Import\ImportCommodityUOM.cs" />
     <Compile Include="Common\Import\ImportData.cs" />
     <Compile Include="Common\Import\IImportLogic.cs" />
     <Compile Include="Common\Import\ImportBrands.cs" />
