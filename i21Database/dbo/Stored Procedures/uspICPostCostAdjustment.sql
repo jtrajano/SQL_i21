@@ -333,29 +333,30 @@ BEGIN
 	IF (@CostingMethod = @FIFO) AND (@strActualCostId IS NULL)
 	BEGIN TRY
 		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveFIFO
-				@dtmDate
-				,@intItemId 
-				,@intItemLocationId 
-				,@intSubLocationId 
-				,@intStorageLocationId 
-				,@intItemUOMId 
-				,@dblQty 
-				,@intCostUOMId 
-				,@dblNewCost 
-				,@dblNewValue 
-				,@intTransactionId 
-				,@intTransactionDetailId 
-				,@strTransactionId 
-				,@intSourceTransactionId 
-				,@intSourceTransactionDetailId 
-				,@strSourceTransactionId 
-				,@strBatchId 
-				,@intTransactionTypeId 
-				,@intEntityUserSecurityId 
-				,@intRelatedInventoryTransactionId 
-				,@TransactionFormName 
-				,@intFobPointId 
-				,@intInTransitSourceLocationId 
+			@dtmDate
+			,@intItemId 
+			,@intItemLocationId 
+			,@intSubLocationId
+			,@intStorageLocationId 
+			,@intItemUOMId
+			,@dblQty
+			,@intCostUOMId 
+			,@dblNewCost
+			,@dblNewValue 
+			,@intTransactionId 
+			,@intTransactionDetailId 
+			,@strTransactionId 
+			,@intSourceTransactionId 
+			,@intSourceTransactionDetailId 
+			,@strSourceTransactionId 
+			,@strBatchId 
+			,@intTransactionTypeId 
+			,@intEntityUserSecurityId 
+			,@intRelatedInventoryTransactionId 
+			,@TransactionFormName 
+			,@intFobPointId 
+			,@intInTransitSourceLocationId 
+			,@ysnPost
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -373,29 +374,30 @@ BEGIN
 	IF (@CostingMethod = @LIFO) AND (@strActualCostId IS NULL)
 	BEGIN TRY
 		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveLIFO
-				@dtmDate
-				,@intItemId 
-				,@intItemLocationId 
-				,@intSubLocationId 
-				,@intStorageLocationId 
-				,@intItemUOMId 
-				,@dblQty 
-				,@intCostUOMId 
-				,@dblNewCost 
-				,@dblNewValue 
-				,@intTransactionId 
-				,@intTransactionDetailId 
-				,@strTransactionId 
-				,@intSourceTransactionId 
-				,@intSourceTransactionDetailId 
-				,@strSourceTransactionId 
-				,@strBatchId 
-				,@intTransactionTypeId 
-				,@intEntityUserSecurityId 
-				,@intRelatedInventoryTransactionId 
-				,@TransactionFormName 
-				,@intFobPointId 
-				,@intInTransitSourceLocationId 
+			@dtmDate
+			,@intItemId 
+			,@intItemLocationId 
+			,@intSubLocationId
+			,@intStorageLocationId 
+			,@intItemUOMId
+			,@dblQty
+			,@intCostUOMId 
+			,@dblNewCost
+			,@dblNewValue 
+			,@intTransactionId 
+			,@intTransactionDetailId 
+			,@strTransactionId 
+			,@intSourceTransactionId 
+			,@intSourceTransactionDetailId 
+			,@strSourceTransactionId 
+			,@strBatchId 
+			,@intTransactionTypeId 
+			,@intEntityUserSecurityId 
+			,@intRelatedInventoryTransactionId 
+			,@TransactionFormName 
+			,@intFobPointId 
+			,@intInTransitSourceLocationId 
+			,@ysnPost
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -453,22 +455,22 @@ BEGIN
 	IF (ISNULL(@strActualCostId, '') <> '')
 	BEGIN TRY
 		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveActual
-			@dtmDate 
+			@dtmDate
 			,@intItemId 
 			,@intItemLocationId 
-			,@intSubLocationId 
+			,@intSubLocationId
 			,@intStorageLocationId 
-			,@intItemUOMId 
-			,@dblQty 
+			,@intItemUOMId
+			,@dblQty
 			,@intCostUOMId 
-			,@dblNewCost 
+			,@dblNewCost
 			,@dblNewValue 
 			,@intTransactionId 
 			,@intTransactionDetailId 
 			,@strTransactionId 
 			,@intSourceTransactionId 
 			,@intSourceTransactionDetailId 
-			,@strSourceTransactionId
+			,@strSourceTransactionId 
 			,@strBatchId 
 			,@intTransactionTypeId 
 			,@intEntityUserSecurityId 
@@ -477,6 +479,7 @@ BEGIN
 			,@intFobPointId 
 			,@intInTransitSourceLocationId 
 			,@strActualCostId 
+			,@ysnPost
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 

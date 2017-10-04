@@ -413,14 +413,21 @@ BEGIN
 					,[intSubLocationId]				= t.intSubLocationId
 					,[intStorageLocationId]			= t.intStorageLocationId
 					,[ysnIsStorage]					= NULL 
-					,[strActualCostId]				= CASE WHEN t.intCostingMethod = @ACTUALCOST THEN t.strTransactionId ELSE NULL END 
+					,[strActualCostId]				= actualCostCb.strActualCostId  
 					,[intSourceTransactionId]		= t.intTransactionId
 					,[intSourceTransactionDetailId]	= t.intTransactionDetailId
 					,[strSourceTransactionId]		= t.strTransactionId
 					,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
 					,[intFobPointId]				= t.intFobPointId
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-			FROM	dbo.tblICInventoryTransaction t
+			FROM	dbo.tblICInventoryTransaction t LEFT JOIN tblICInventoryActualCost actualCostCb
+						ON actualCostCb.strTransactionId = t.strTransactionId
+						AND actualCostCb.intTransactionId = t.intTransactionId
+						AND actualCostCb.intTransactionDetailId = t.intTransactionDetailId
+						AND actualCostCb.intItemId = t.intItemId
+						AND actualCostCb.intItemLocationId = t.intItemLocationId
+						AND t.intCostingMethod = @ACTUALCOST
+						AND actualCostCb.ysnIsUnposted = 0 
 			WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
 		END 
 
@@ -532,10 +539,10 @@ END
 -- Book the cost adjustment. 
 BEGIN 
 	-- Calculate the value to book. 
-	-- Formula: (Remaining Qty x Original Cost) - (Remaining Qty x New Cost)
+	-- Formula: (Remaining Qty x New Cost) - (Remaining Qty x Original Cost)
 	SELECT	@CurrentCostAdjustment = 
-				(cb.dblStockIn - cb.dblStockOut) * @CostBucketOriginalCost
-				- (cb.dblStockIn - cb.dblStockOut) * cb.dblCost
+				(cb.dblStockIn - cb.dblStockOut) * cb.dblCost 
+				- (cb.dblStockIn - cb.dblStockOut) * @CostBucketOriginalCost
 	FROM	tblICInventoryFIFO cb
 	WHERE	cb.intInventoryFIFOId = @CostBucketId
 
@@ -570,7 +577,7 @@ BEGIN
 		,@strRelatedTransactionId				= @t_strTransactionId
 		,@strTransactionForm					= @strTransactionForm
 		,@intEntityUserSecurityId				= @intEntityUserSecurityId
-		,@intCostingMethod						= @AVERAGECOST
+		,@intCostingMethod						= @FIFO -- TODO: Double check the costing method. Make sure it matches with the SP. 
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 		,@intFobPointId							= @intFobPointId 
 		,@intInTransitSourceLocationId			= @intInTransitSourceLocationId

@@ -467,14 +467,21 @@ BEGIN
 					,[intSubLocationId]				= t.intSubLocationId
 					,[intStorageLocationId]			= t.intStorageLocationId
 					,[ysnIsStorage]					= NULL 
-					,[strActualCostId]				= CASE WHEN t.intCostingMethod = @ACTUALCOST THEN t.strTransactionId ELSE NULL END 
+					,[strActualCostId]				= actualCostCb.strActualCostId 
 					,[intSourceTransactionId]		= t.intTransactionId
 					,[intSourceTransactionDetailId]	= t.intTransactionDetailId
 					,[strSourceTransactionId]		= t.strTransactionId
 					,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
 					,[intFobPointId]				= t.intFobPointId
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-			FROM	dbo.tblICInventoryTransaction t
+			FROM	dbo.tblICInventoryTransaction t LEFT JOIN tblICInventoryActualCost actualCostCb
+						ON actualCostCb.strTransactionId = t.strTransactionId
+						AND actualCostCb.intTransactionId = t.intTransactionId
+						AND actualCostCb.intTransactionDetailId = t.intTransactionDetailId
+						AND actualCostCb.intItemId = t.intItemId
+						AND actualCostCb.intItemLocationId = t.intItemLocationId
+						AND t.intCostingMethod = @ACTUALCOST
+						AND actualCostCb.ysnIsUnposted = 0 
 			WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
 		END 
 
@@ -591,7 +598,8 @@ BEGIN
 	FROM	tblICItem i 
 	WHERE	i.intItemId = @intItemId
 
-	-- Calculate the cost adjustment. 
+	-- Calculate the value to book. 
+	-- Formula: (New Running Value) - (Original Running Value)
 	SET @CurrentValue = NULL 
 	SELECT	@CurrentValue = 
 				ISNULL(@NewRunningValue, 0) 
