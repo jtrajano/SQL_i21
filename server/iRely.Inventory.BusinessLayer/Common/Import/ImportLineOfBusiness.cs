@@ -21,7 +21,6 @@ namespace iRely.Inventory.BusinessLayer
             tblSMLineOfBusiness fc = new tblSMLineOfBusiness();
             fc.ysnVisibleOnWeb = true;
             bool valid = true;
-            int? lu;
 
             for (var i = 0; i < fieldCount; i++)
             {
