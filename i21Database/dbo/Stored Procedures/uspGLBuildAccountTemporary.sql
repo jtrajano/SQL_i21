@@ -181,7 +181,12 @@ BEGIN TRY
 	DECLARE @accountLength  INT 
 	SELECT TOP 1 @accountLength = sum(intLength) FROM tblGLAccountStructure
 	IF EXISTS (SELECT TOP 1 1 FROM #ConstructAccount WHERE @accountLength <> LEN(REPLACE(strCode,@strDivider,'')))
-	 THROW 51000, 'Selected Segments did not match the Account Structure', 1;  
+	BEGIN
+		IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+		RAISERROR('Selected Segments did not match the Account Structure', 16, 1);
+		RETURN;
+	END
+		
 
 	INSERT INTO tblGLTempAccount
 	(strAccountId,strPrimary,strSegment,strDescription,strAccountGroup,intAccountGroupId, intAccountCategoryId,
