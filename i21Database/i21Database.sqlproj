@@ -5841,6 +5841,7 @@
     <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailRate.sql" />
+    <Build Include="dbo\Functions\fnHDCoalesceJiraKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
