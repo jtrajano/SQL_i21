@@ -88,8 +88,8 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			
 		SELECT
 			 @ItemId				= tblARInvoiceDetail.[intItemId]
-			,@ItemPrice				= tblARInvoiceDetail.[dblPrice] / ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
-			,@QtyShipped			= tblARInvoiceDetail.[dblQtyShipped]
+			,@ItemPrice				= (CASE WHEN ISNULL(tblARInvoiceDetail.[intLoadDetailId],0) = 0 THEN tblARInvoiceDetail.[dblPrice] ELSE ISNULL(tblARInvoiceDetail.[dblUnitPrice], @ZeroDecimal) END) / ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
+			,@QtyShipped			= (CASE WHEN ISNULL(tblARInvoiceDetail.[intLoadDetailId],0) = 0 THEN tblARInvoiceDetail.[dblQtyShipped] ELSE ISNULL(tblARInvoiceDetail.[dblShipmentNetWt], @ZeroDecimal) END)
 			,@TaxGroupId			= tblARInvoiceDetail.[intTaxGroupId]
 			,@SiteId				= tblARInvoiceDetail.[intSiteId]
 			,@SubCurrencyRate		= ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
