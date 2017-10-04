@@ -131,7 +131,7 @@ BEGIN TRY
 		FROM dbo.tblGRStorageType ST
 		WHERE ST.strStorageTypeCode = @strDistributionOption
 		
-		IF @intStorageTypeId is NULL
+		IF ISNULL(@intStorageTypeId,0) <= 0 
 		BEGIN
 	   		SELECT	@intStorageTypeId = ST.intDefaultStorageTypeId
 			FROM	dbo.tblSCScaleSetup ST	        
@@ -170,6 +170,7 @@ BEGIN TRY
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 1
+						,intStorageScheduleTypeId = @intStorageTypeId
 				FROM	dbo.tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
 						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
