@@ -3,7 +3,7 @@
 	,@intNewStorageLocationId INT
 	,@dblMoveQty NUMERIC(38, 20)
 	,@intUserId INT
-	,@blnValidateLotReservation BIT = 0
+	,@blnValidateLotReservation BIT = 1
 	,@blnInventoryMove BIT = 0
 	,@intItemUOMId INT = NULL
 AS
@@ -138,7 +138,12 @@ BEGIN TRY
 				)
 	END
 
-	IF (@dblMoveQty = @dblLotQty)
+	IF (CASE 
+				WHEN @intLotItemUOMId = @intItemUOMId
+					AND @intWeightUOMId IS NOT NULL
+					THEN @dblMoveQty * @dblWeightPerQty
+				ELSE @dblMoveQty
+				END) = @dblLotAvailableQty
 	BEGIN
 		SET @blnIsPartialMove = 0
 	END
