@@ -168,25 +168,26 @@ BEGIN TRY
 		IF(@dblRemainingUnits > 0)
 		BEGIN
 			SET @dblRemainingUnitStorage = (@dblRemainingUnits *-1);
-			INSERT INTO @ItemsForItemShipment (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,intTransactionDetailId
-				,strTransactionId
-				,intTransactionTypeId
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId
-				,ysnIsStorage 
+				INSERT INTO @ItemsForItemShipment (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId
+					,ysnIsStorage
+					,intStorageScheduleTypeId 
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnitStorage , @intEntityId, @strDistributionOption, NULL
 				SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
@@ -194,35 +195,35 @@ BEGIN TRY
 				IF(@dblRemainingUnits > 0)
 					BEGIN
 						INSERT INTO @ItemsForItemShipment (
-						intItemId
-						,intItemLocationId
-						,intItemUOMId
-						,dtmDate
-						,dblQty
-						,dblUOMQty
-						,dblCost
-						,dblSalesPrice
-						,intCurrencyId
-						,dblExchangeRate
-						,intTransactionId
-						,intTransactionDetailId
-						,strTransactionId
-						,intTransactionTypeId
-						,intLotId
-						,intSubLocationId
-						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-						,ysnIsStorage 
-					)
-					EXEC dbo.uspSCGetScaleItemForItemShipment 
-						 @intTicketId
-						,@strSourceType
-						,@intUserId
-						,@dblRemainingUnits
-						,@dblCost
-						,@intEntityId
-						,@intContractId
-						,'SPT'
-						,@LineItems
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+							,ysnIsStorage 
+						)
+						EXEC dbo.uspSCGetScaleItemForItemShipment 
+							 @intTicketId
+							,@strSourceType
+							,@intUserId
+							,@dblRemainingUnits
+							,@dblCost
+							,@intEntityId
+							,@intContractId
+							,'SPT'
+							,@LineItems
 					END
 		END
 			UPDATE @LineItems set intTicketId = @intTicketId
@@ -307,7 +308,7 @@ BEGIN TRY
 		ELSE
 			BEGIN
 			IF(@dblRemainingUnits IS NULL)
-				SET @dblRemainingUnits = @dblNetUnits
+				SET @dblRemainingUnits = (@dblNetUnits * -1)
 			INSERT INTO @ItemsForItemShipment (
 				intItemId
 				,intItemLocationId
@@ -326,7 +327,8 @@ BEGIN TRY
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsStorage 
+				,ysnIsStorage
+				,intStorageScheduleTypeId 
 			)
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
 			SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
