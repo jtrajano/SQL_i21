@@ -514,7 +514,9 @@ BEGIN
 									CASE	WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
 											WHEN @t_intLocationId IS NULL THEN 
-												@COST_ADJ_TYPE_Adjust_InTransit								
+												@COST_ADJ_TYPE_Adjust_InTransit
+											WHEN @EscalateInventoryTransactionTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit	
 											WHEN @t_intTransactionTypeId IN (
 													@INV_TRANS_TYPE_ADJ_Item_Change
 													,@INV_TRANS_TYPE_ADJ_Split_Lot
@@ -645,7 +647,7 @@ END
 BEGIN 
 	UPDATE	p
 	SET		p.dblAverageCost = @RetroactiveAverageCost
-	FROM	tblICItemPricing p
+	FROM	tblICItemPricing p 
 	WHERE	p.intItemId = @intItemId
 			AND p.intItemLocationId = @intItemLocationId
 			AND @RetroactiveAverageCost IS NOT NULL 
