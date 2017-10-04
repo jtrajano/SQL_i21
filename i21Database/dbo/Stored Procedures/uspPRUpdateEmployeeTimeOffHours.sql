@@ -48,7 +48,7 @@ BEGIN
 
 	--Clean-up Next Award Date
 	UPDATE #tmpEmployees 
-		SET dtmNextAward = CASE WHEN (dtmNextAward = dtmLastAward) THEN
+		SET dtmNextAward = CASE WHEN (dtmNextAward <= dtmLastAward) THEN
 								CASE WHEN (strAwardPeriod IN ('Start of Week', 'End of Week')) THEN
 										DATEADD(WK, 1, dtmNextAward)
 									 WHEN (strAwardPeriod IN ('Start of Month', 'End of Month')) THEN
@@ -57,6 +57,17 @@ BEGIN
 										DATEADD(QQ, 1, dtmNextAward)
 									 WHEN (strAwardPeriod IN ('Start of Year', 'End of Year', 'Anniversary Date')) THEN
 										DATEADD(YY, 1, dtmNextAward)
+									 ELSE dtmNextAward 
+								END
+							WHEN (dtmNextAward > GETDATE()) THEN
+								CASE WHEN (strAwardPeriod IN ('Start of Week', 'End of Week')) THEN
+										DATEADD(WK, -1, dtmNextAward)
+									 WHEN (strAwardPeriod IN ('Start of Month', 'End of Month')) THEN
+										DATEADD(MM, -1, dtmNextAward)
+									 WHEN (strAwardPeriod IN ('Start of Quarter', 'End of Quarter')) THEN
+										DATEADD(QQ, -1, dtmNextAward)
+									 WHEN (strAwardPeriod IN ('Start of Year', 'End of Year', 'Anniversary Date')) THEN
+										DATEADD(YY, -1, dtmNextAward)
 									 ELSE dtmNextAward 
 								END
 							ELSE
@@ -111,7 +122,6 @@ BEGIN
 							END * dblRate * dblRateFactor
 						ELSE 0
 						END
-		
 
 	--Update Each Employee Hours
 	DECLARE @intEmployeeId INT
