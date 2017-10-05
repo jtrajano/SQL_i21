@@ -1,5 +1,4 @@
-﻿
-CREATE FUNCTION [dbo].[fnCFRemoteTaxes] 
+﻿CREATE FUNCTION [dbo].[fnCFRemoteTaxes] 
     (   
 		 @strTaxState					NVARCHAR(MAX)   = ''
 		,@strTaxCodeId					NVARCHAR(MAX)	= ''
@@ -30,6 +29,7 @@ CREATE FUNCTION [dbo].[fnCFRemoteTaxes]
 		,@intCustomerId					INT			
 		,@intCustomerLocationId			INT			
 		,@dtmTransactionDate			DATETIME	
+		,@DisregardExemptionSetup		BIT				= 0
     )
 RETURNS @tblTaxTable TABLE
     (
@@ -99,7 +99,7 @@ BEGIN
 
 	SET @ZeroDecimal = 0.000000
 	SELECT @intItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @intItemId 
-	DECLARE @DisregardExemptionSetup BIT
+	--DECLARE @DisregardExemptionSetup BIT
 
 	INSERT INTO @tblNetworkTaxMapping
 	SELECT

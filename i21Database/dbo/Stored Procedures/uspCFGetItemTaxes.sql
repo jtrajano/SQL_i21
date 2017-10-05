@@ -26,6 +26,7 @@
 	,@StateSalesTax					NUMERIC(18,6)	= 0.000000
 	,@CountySalesTax				NUMERIC(18,6)	= 0.000000
 	,@CitySalesTax					NUMERIC(18,6)	= 0.000000
+	,@DisregardExemptionSetup		BIT				= 0 
 AS    
 		
 SELECT
@@ -78,6 +79,7 @@ FROM
 	,@intARItemLocationId			
 	,@intCustomerId				
 	,@intCustomerLocationId		
-	,@dtmTransactionDate)
+	,@dtmTransactionDate
+	,@DisregardExemptionSetup)
 
 	RETURN
