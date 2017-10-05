@@ -93,7 +93,6 @@ BEGIN
 		,strStatus					NVARCHAR(MAX)
 		,ysnSuccessful				BIT
 		,intInvoiceId				INT
-		,strRecordId                NVARCHAR(5)
 		,strTransactionType 		NVARCHAR(25)
 	)
 
@@ -318,7 +317,6 @@ BEGIN
 							,strStatus
 							,ysnSuccessful
 							,intInvoiceId			
-							,strRecordId       
 							,strTransactionType	
 					)
 					SELECT
@@ -331,7 +329,6 @@ BEGIN
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
 							,intInvoiceId = @intNewInvoiceId
-							,strRecordId  = @intNewInvoiceId     
 							,strTransactionType = 'Invoice'
 					
 					GOTO CONTINUELOOP
@@ -374,7 +371,6 @@ BEGIN
 							,strStatus
 							,ysnSuccessful
 							,intInvoiceId 
-							,strRecordId 
 							,strTransactionType
 
 					)
@@ -388,7 +384,6 @@ BEGIN
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
 							,intInvoiceId = @intNewInvoiceId
-							,strRecordId  = @intNewInvoiceId     
 							,strTransactionType = 'Invoice'
 					GOTO CONTINUELOOP
 				END
@@ -510,7 +505,6 @@ BEGIN
 						,strStatus
 						,ysnSuccessful
 						,intInvoiceId 
-						,strRecordId  
 							,strTransactionType 
 				)
 				SELECT
@@ -538,7 +532,6 @@ BEGIN
 
 						,ysnSuccessful = 1
 						,intInvoiceId = @intNewInvoiceId
-						,strRecordId  = @intNewInvoiceId     
 							,strTransactionType = 'Invoice'
 			END
 
