@@ -35,9 +35,9 @@
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 		
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand like @ScreenName+'%' AND intParentMenuID IS NOT NULL)
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand like @screenName+'%' AND intParentMenuID IS NOT NULL)
 		BEGIN
-			Select TOP 1 @intMenuId = intMenuID FROM tblSMMasterMenu WHERE strCommand like @ScreenName+'%' AND intParentMenuID IS NOT NULL
+			Select TOP 1 @intMenuId = intMenuID FROM tblSMMasterMenu WHERE strCommand like @screenName+'%' AND intParentMenuID IS NOT NULL
 
 			SELECT @intModuleMenuId = intMenuID FROM tblSMMasterMenu WHERE intParentMenuID = 0 and intMenuID in 
 			(
