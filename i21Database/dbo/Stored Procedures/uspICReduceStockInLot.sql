@@ -92,10 +92,11 @@ BEGIN
 
 		IF @UnitsOnHand > 0 AND @strCostBucketDate IS NOT NULL 
 		BEGIN 
-			--'As of {Transaction Date}, there is no stock available for {Item} in {Location}. 
-			-- However, there are stocks as of {Cost Bucket Date}. You can use it as the transaction date instead of {Transaction Date}.' 
+			--'Stock is not available for {Item} at {Location} as of {Transaction Date}. Use the nearest stock available date of {Cost Bucket Date} or later.'
 			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
-			EXEC uspICRaiseError 80096, @strDate, @strItemNo, @strLocationName, @strCostBucketDate, @strDate;
+
+			SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, @intSubLocationId, @intStorageLocationId)
+			EXEC uspICRaiseError 80096, @strItemNo, @strLocationName, @strDate, @strCostBucketDate;
 		END 
 		ELSE 
 		BEGIN 
