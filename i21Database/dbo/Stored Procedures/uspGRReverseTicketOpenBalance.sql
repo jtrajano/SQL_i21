@@ -243,7 +243,10 @@ BEGIN TRY
 
 	END
 
-	EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
+	IF @strSourceType < > 'InventoryShipment'
+	BEGIN
+			EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
+	END
 	 
 END TRY
 BEGIN CATCH
