@@ -182,6 +182,12 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderInputLot WI
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
 	JOIN dbo.tblICItem I ON I.intItemId = WI.intItemId
+	Where WI.intWorkOrderInputLotId Not in (Select x.intTransactionId
+	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
+			intTransactionId int
+			,strTransactionType nvarchar(50)
+) x Where x.strTransactionType='INPUT')
+
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -209,6 +215,12 @@ BEGIN TRY
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
 		AND WP.ysnProductionReversed = 0
 	JOIN dbo.tblICItem I ON I.intItemId = WP.intItemId
+	Where WP.intWorkOrderProducedLotId Not in (Select x.intTransactionId
+	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
+			intTransactionId int
+			,strTransactionType nvarchar(50)
+) x Where x.strTransactionType='OUTPUT')
+
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -244,6 +256,11 @@ BEGIN TRY
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = UnPvt.intItemId
 		AND IU.ysnStockUnit = 1
 	JOIN dbo.tblICItem I ON I.intItemId = UnPvt.intItemId
+	Where UnPvt.strTransactionType Not in (Select x.strTransactionType
+	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
+			intTransactionId int
+			,strTransactionType nvarchar(50)
+) x Where x.strTransactionType in ('dblOpeningQuantity','dblCountQuantity','dblOpeningOutputQuantity','dblCountOutputQuantity') and x.intTransactionId=UnPvt.intProductionSummaryId)
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -270,6 +287,11 @@ BEGIN TRY
 	FROM tblMFWorkOrderProducedLotTransaction WLT
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WLT.intWorkOrderId
 	JOIN dbo.tblICItem I ON I.intItemId = WLT.intItemId
+	Where WLT.intWorkOrderProducedLotTransactionId Not in (Select x.intTransactionId
+	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
+			intTransactionId int
+			,strTransactionType nvarchar(50)
+) x Where x.strTransactionType in ('Queued Qty Adj','Cycle Count Adj'))
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute

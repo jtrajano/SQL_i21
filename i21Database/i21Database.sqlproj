@@ -5729,6 +5729,7 @@
     <Build Include="dbo\Tables\tblSMIdentityUserClaims.sql" />
     <Build Include="dbo\Tables\tblSMIdentityUserLogins.sql" />
     <Build Include="dbo\Tables\tblSMIdentityUserRoles.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetYieldViewTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
