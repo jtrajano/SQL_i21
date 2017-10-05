@@ -5690,6 +5690,7 @@
     <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
     <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
     <Build Include="dbo\Views\vyuARDocumentMaintenanceMessageDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetYieldViewTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
