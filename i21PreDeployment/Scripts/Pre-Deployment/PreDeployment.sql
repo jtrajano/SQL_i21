@@ -55,7 +55,7 @@
 :r .\6_GL\2_1430_to_1440.sql
 --:r .\6_GL\3_1440_to_1510.sql
 :r .\6_GL\4_1440_to_1530.sql
-:r .\6_GL\AccountCategory.sql
+:r .\6_GL\1730.sql
 
 -- AR
 :r .\7_AR\3_fnARGetCustomerDefaultContact.sql
