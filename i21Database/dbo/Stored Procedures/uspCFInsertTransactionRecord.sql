@@ -78,6 +78,10 @@
 	,@intBuyingHost						INT				= 0
 	,@intForeignCustomerId				INT				= 0
 
+
+	,@strInvoiceReportNumber			NVARCHAR(MAX)	= NULL
+	,@dtmInvoiceDate					DATETIME		= NULL				
+
 	
 	
 	--,@LC7							NUMERIC(18,6)	= 0.000000
@@ -299,6 +303,22 @@ BEGIN
 	END
 
 	DECLARE @ysnCreateSite BIT 
+	DECLARE @strAllowExemptionsOnExtAndRetailTrans NVARCHAR(MAX)
+
+
+	---------------------------------------------------------
+	----				    DEFAULT			   			 ----
+	---------------------------------------------------------
+
+	SELECT TOP 1 
+	@strAllowExemptionsOnExtAndRetailTrans = strAllowExemptionsOnExtAndRetailTrans
+	FROM tblCFNetwork
+	WHERE intNetworkId = @intNetworkId
+
+	
+	---------------------------------------------------------
+
+
 	------------------------------------------------------------
 	--					AUTO CREATE SITE
 	-- if transaction is remote or ext remote				  --
@@ -320,6 +340,7 @@ BEGIN
 				,intPPHostId		
 				,strPPSiteType		
 				,strSiteType
+				,strAllowExemptionsOnExtAndRetailTrans
 			)
 			SELECT
 				intNetworkId			= @intNetworkId
@@ -350,6 +371,7 @@ BEGIN
 											WHEN 'R' 
 												THEN 'Extended Remote'
 											END)
+				,@strAllowExemptionsOnExtAndRetailTrans
 
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
@@ -825,6 +847,8 @@ BEGIN
 			,[ysnDuplicate]
 			,[strOriginalProductNumber]
 			,[intOverFilledTransactionId]
+			,[dtmInvoiceDate]
+			,[strInvoiceReportNumber]
 		)
 		VALUES
 		(
@@ -869,6 +893,8 @@ BEGIN
 			,@ysnDuplicate
 			,@strProductId
 			,@intOverFilledTransactionId
+			,@dtmInvoiceDate
+			,@strInvoiceReportNumber
 		)			
 	
 		DECLARE @Pk	INT		
