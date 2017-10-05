@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLot]
 	,@strTransactionForm AS NVARCHAR(50) = 'Bill'
 	,@intFobPointId AS TINYINT = NULL
 	,@intInTransitSourceLocationId AS INT = NULL  
+	,@ysnPost AS BIT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -47,47 +48,35 @@ BEGIN
 	-- Declare the cost types
 	DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 			,@COST_ADJ_TYPE_New_Cost AS INT = 2
+			,@COST_ADJ_TYPE_Adjust_Value AS INT = 3
+			,@COST_ADJ_TYPE_Adjust_Sold AS INT = 4
+			,@COST_ADJ_TYPE_Adjust_WIP AS INT = 5
+			,@COST_ADJ_TYPE_Adjust_InTransit AS INT = 6
+			,@COST_ADJ_TYPE_Adjust_InTransit_Inventory AS INT = 7
+			,@COST_ADJ_TYPE_Adjust_InTransit_Sold AS INT = 8
+			,@COST_ADJ_TYPE_Adjust_InventoryAdjustment AS INT = 9
 
 	-- Create the variables for the internal transaction types used by costing. 
-	DECLARE @INV_TRANS_TYPE_Auto_Variance AS INT = 1
-			,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-			,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
-
-			,@INV_TRANS_TYPE_Inventory_Receipt AS INT = 4
+	DECLARE
+			@INV_TRANS_TYPE_Inventory_Receipt AS INT = 4
 			,@INV_TRANS_TYPE_Inventory_Shipment AS INT = 5
-
-			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
-			,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
-			,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
-			,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
-			,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
-
-			,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
-			,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
-			,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
-			,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39		
-			,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
 
 			,@INV_TRANS_TYPE_Consume AS INT = 8
 			,@INV_TRANS_TYPE_Produce AS INT = 9
-			,@INV_TRANS_TYPE_Build_Assembly AS INT = 11
 			,@INV_TRANS_Inventory_Transfer AS INT = 12
-
 			,@INV_TRANS_TYPE_ADJ_Item_Change AS INT = 15
 			,@INV_TRANS_TYPE_ADJ_Split_Lot AS INT = 17
 			,@INV_TRANS_TYPE_ADJ_Lot_Merge AS INT = 19
 			,@INV_TRANS_TYPE_ADJ_Lot_Move AS INT = 20
+			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
+			,@INV_TRANS_TYPE_Invoice AS INT = 33
 
-	DECLARE	@RunningQty AS NUMERIC(38, 20)
-			,@RunningValue AS NUMERIC(38, 20)
-			,@PreviousRunningQty AS NUMERIC(38, 20)
-			,@PreviousRunningValue AS NUMERIC(38, 20)
-			,@CurrentValue AS NUMERIC(38, 20)
-
-			,@CostAdjustment AS NUMERIC(38, 20)		
-			,@CostAdjustmentPerLot AS NUMERIC(38, 20)			
+	DECLARE	
+			@CostAdjustment AS NUMERIC(38, 20)			
+			,@CostAdjustmentPerLot AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
-			,@RetroactiveCostBucketCost AS NUMERIC(38, 20)			
+			,@CostBucketNewCost AS NUMERIC(38, 20)			
+			,@TotalCostAdjustment AS NUMERIC(38, 20)
 
 			,@t_intInventoryTransactionId AS INT 
 			,@t_intItemId AS INT 
@@ -102,6 +91,7 @@ BEGIN
 			,@t_intTransactionDetailId AS INT  
 			,@t_intTransactionTypeId AS INT 
 			,@t_strBatchId AS NVARCHAR(50) 
+			,@t_intLocationId AS INT 
 			,@t_intLotId AS INT 
 
 			,@EscalateInventoryTransactionId AS INT 
@@ -168,6 +158,8 @@ END
 BEGIN 
 	DECLARE @InventoryTransactionStartId AS INT
 			,@CostBucketId AS INT  
+			,@CostBucketOriginalCost AS NUMERIC(38, 20)
+			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
 
 	SELECT	TOP 1 
 			@InventoryTransactionStartId = t.intInventoryTransactionId 
@@ -241,6 +233,40 @@ BEGIN
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 END 
 
+-- Remember the original cost from the cost bucket
+BEGIN 
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCostBucketOriginal')) 
+	BEGIN 
+		CREATE TABLE #tmpCostBucketOriginal (
+			[intInventoryLotId] INT PRIMARY KEY CLUSTERED	
+			,[intLotId] INT 
+			,[dblCost] NUMERIC(38, 20)
+			,[dblValue] NUMERIC(38, 20)
+		)
+
+		CREATE NONCLUSTERED INDEX [IX_tmpCostBucketOriginal] ON dbo.#tmpCostBucketOriginal(intLotId ASC);
+	END 
+
+	DELETE FROM #tmpCostBucketOriginal
+	INSERT INTO #tmpCostBucketOriginal (
+			[intInventoryLotId]
+			,[intLotId] 
+			,[dblCost] 
+			,[dblValue] 
+	)
+	SELECT cb.intInventoryLotId
+			,cb.intLotId 
+			,cb.dblCost 
+			,dblValue = cb.dblStockIn * cb.dblCost
+	FROM	tblICInventoryLot cb
+	WHERE	cb.intItemId = @intItemId
+			AND cb.intItemLocationId = @intItemLocationId
+			AND cb.intTransactionId = @intSourceTransactionId
+			AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+			AND cb.strTransactionId = @strSourceTransactionId
+			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+END 
+
 -- There could be more than one lot record per item received. 
 -- Calculate how much cost adjustment goes for each lot qty. 
 BEGIN 
@@ -259,6 +285,50 @@ BEGIN
 		RETURN; 
 END 
 
+-- Log the original cost
+BEGIN 
+	DECLARE @DummyInventoryTransactionId AS INT 
+	SET @DummyInventoryTransactionId = -CAST(RAND() * 1000000 AS INT) 
+	
+	BEGIN 
+		INSERT INTO tblICInventoryLotCostAdjustmentLog (
+				[intInventoryLotId]
+				,[intInventoryTransactionId] 
+				,[intInventoryCostAdjustmentTypeId] 
+				,[dblQty] 
+				,[dblCost] 
+				,[dblValue] 
+				,[ysnIsUnposted] 
+				,[dtmCreated] 
+				,[strRelatedTransactionId] 
+				,[intRelatedTransactionId] 
+				,[intCreatedUserId] 
+				,[intCreatedEntityUserId] 
+		)
+		SELECT
+				[intInventoryLotId] = cb.intInventoryLotId
+				,[intInventoryTransactionId] = @DummyInventoryTransactionId 
+				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
+				,[dblQty] = cb.dblStockIn
+				,[dblCost] = cb.dblCost
+				,[dblValue] = NULL 
+				,[ysnIsUnposted]  = 0 
+				,[dtmCreated] = GETDATE()
+				,[strRelatedTransactionId] = cb.strTransactionId 
+				,[intRelatedTransactionId] = cb.intTransactionId
+				,[intCreatedUserId] = @intEntityUserSecurityId
+				,[intCreatedEntityUserId] = @intEntityUserSecurityId
+		FROM	tblICInventoryLot cb LEFT JOIN tblICInventoryLotCostAdjustmentLog cl
+					ON cb.intInventoryLotId = cl.intInventoryLotId
+		WHERE	cb.intItemId = @intItemId
+				AND cb.intItemLocationId = @intItemLocationId
+				AND cb.intTransactionId = @intSourceTransactionId
+				AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+				AND cb.strTransactionId = @strSourceTransactionId
+				AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+				AND cl.intInventoryLotId IS NULL 
+	END 
+END 
 
 -- Loop to perform the retroactive computation
 BEGIN 
@@ -307,53 +377,54 @@ BEGIN
 		SET @t_dblQty = ISNULL(@t_dblQty, 0)
 		SET @t_dblCost = ISNULL(@t_dblCost, 0)
 		SET @t_dblValue = ISNULL(@t_dblValue, 0) 
-		SET @RunningValue = ISNULL(@RunningValue, 0) 
-		SET @RunningQty = ISNULL(@RunningQty, 0) 
-		SET @CurrentValue = ISNULL(@CurrentValue, 0) 
-		SET @CurrentCostAdjustment = ISNULL(@CurrentCostAdjustment, 0) 
-
-		-- Calculate the current value 
-		SET @CurrentValue = @t_dblQty * @t_dblCost + @t_dblValue
+		SET @CostBucketNewCost = ISNULL(@CostBucketNewCost, 0) 
+		SET @CurrentCostAdjustment = ISNULL(@CurrentCostAdjustment, 0) 		
 
 		SET @IsSourceTransaction = 0
 		SELECT	@IsSourceTransaction = 1 
-		FROM	#tmpRetroactiveTransactions 
-		WHERE	intInventoryTransactionId = @t_intInventoryTransactionId
+		WHERE	@t_intItemId = @intItemId
+				AND @t_intItemLocationId = @intItemLocationId
+				AND @t_strTransactionId = @strSourceTransactionId
+				AND @t_intTransactionId = @intSourceTransactionId
+				AND @t_intTransactionDetailId = @intSourceTransactionDetailId
+				AND @t_dblQty > 0 
+
+		-- Get the original cost bucket value
+		IF @IsSourceTransaction = 1
+		BEGIN 
+			SELECT	@CostBucketOriginalValue = cbo.dblValue
+					,@CostBucketOriginalCost = cbo.dblCost
+			FROM	tblICInventoryLot cb INNER JOIN #tmpCostBucketOriginal cbo
+						ON cb.intInventoryLotId = cbo.intInventoryLotId
+			WHERE	cbo.intLotId = @t_intLotId
+					AND cb.intItemId = @t_intItemId
+					AND cb.intItemLocationId = @t_intItemLocationId
+					AND cb.intItemUOMId = @t_intItemUOMId					
+		END 
 
 		-- Calculate the Cost Bucket cost 
-		SET @RetroactiveCostBucketCost = 
-			CASE	WHEN @t_dblQty > 0 AND @IsSourceTransaction = 1 THEN 
-						(@CurrentValue + (@CostAdjustmentPerLot * @t_dblQty)) / @t_dblQty
+		SET @CostBucketNewCost = 
+			CASE	WHEN @IsSourceTransaction = 1 THEN 
+						(@CostBucketOriginalValue + @CostAdjustmentPerLot * @t_dblQty) / @t_dblQty
 					ELSE
-						@RetroactiveCostBucketCost
+						@CostBucketNewCost
 			END 
 		
-		-- Calculate the Running Value. 
-		SET @PreviousRunningValue = @RunningValue 
-		SET @RunningValue += 
-			CASE	WHEN @t_dblQty > 0 AND @IsSourceTransaction = 1 THEN 
-						@CurrentValue + (@CostAdjustmentPerLot * @t_dblQty)
-					WHEN @t_dblQty < 0 THEN 
-						@t_dblQty * @RetroactiveCostBucketCost -- Reduce the stock using the retroactive avg cost. 
-					ELSE 
-						@CurrentValue
-			END 
-
 		-- Calculate the current cost adjustment
 		SET @CurrentCostAdjustment = 
-			CASE	WHEN @t_dblQty > 0 AND @IsSourceTransaction = 1 THEN 
-						@CostAdjustment 
+			CASE	WHEN @IsSourceTransaction = 1  THEN 
+						@CostAdjustmentPerLot * @t_dblQty 
 					WHEN @t_dblQty < 0 THEN 
-						(@t_dblQty * @RetroactiveCostBucketCost) - (@t_dblQty * @t_dblCost) 
+						(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost) 
  					ELSE 
 						0
 			END 
 
 		-- Update the cost bucket
-		IF  @t_dblQty > 0 AND @IsSourceTransaction = 1
+		IF  @IsSourceTransaction = 1
 		BEGIN 
 			UPDATE  cb
-			SET		cb.dblCost = @RetroactiveCostBucketCost
+			SET		cb.dblCost = (@CostBucketOriginalValue + @CostAdjustment) / cb.dblStockIn 
 			FROM	tblICInventoryLot cb
 			WHERE	cb.intLotId = @t_intLotId
 					AND cb.ysnIsUnposted = 0 
@@ -361,53 +432,6 @@ BEGIN
 					AND cb.intTransactionDetailId = @t_intTransactionDetailId
 					AND cb.strTransactionId = @t_strTransactionId	
 		END 
-
-		-- Book the cost adjustment. 
-		IF @CurrentCostAdjustment <> 0
-		BEGIN 
-			SET @strNewCost = CONVERT(NVARCHAR, CAST(@CostAdjustment AS MONEY), 1)
-
-			SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
-			FROM	tblICItem i 
-			WHERE	i.intItemId = @intItemId
-
-			-- Create the 'Cost Adjustment' inventory transaction. 
-			EXEC [uspICPostInventoryTransaction]
-				@intItemId								= @intItemId
-				,@intItemLocationId						= @intItemLocationId
-				,@intItemUOMId							= @intItemUOMId
-				,@intSubLocationId						= @intSubLocationId
-				,@intStorageLocationId					= @intStorageLocationId
-				,@dtmDate								= @dtmDate
-				,@dblQty								= 0
-				,@dblUOMQty								= 0
-				,@dblCost								= 0
-				,@dblValue								= @CurrentCostAdjustment
-				,@dblSalesPrice							= 0
-				,@intCurrencyId							= NULL 
-				,@intTransactionId						= @intTransactionId
-				,@intTransactionDetailId				= @intTransactionDetailId
-				,@strTransactionId						= @strTransactionId
-				,@strBatchId							= @strBatchId
-				,@intTransactionTypeId					= @intTransactionTypeId 
-				,@intLotId								= @t_intLotId   
-				,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
-				,@intRelatedTransactionId				= @t_intTransactionId 
-				,@strRelatedTransactionId				= @t_strTransactionId
-				,@strTransactionForm					= @strTransactionForm
-				,@intEntityUserSecurityId				= @intEntityUserSecurityId
-				,@intCostingMethod						= @AVERAGECOST
-				,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-				,@intFobPointId							= @intFobPointId 
-				,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-				,@intForexRateTypeId					= NULL
-				,@dblForexRate							= 1
-				,@strDescription						= @strDescription
-		END 
-
-		-- Calculate the running qty. 
-		SET @PreviousRunningQty = @RunningQty
-		SET @RunningQty += @t_dblQty
 
 		-- Check if the system needs to escalate the cost adjustment. 
 		SET @EscalateInventoryTransactionId = NULL 
@@ -431,7 +455,7 @@ BEGIN
 		BEGIN 
 			-- Calculate the value to be escalated. 
 			SET @EscalateCostAdjustment = 0 
-			SET @EscalateCostAdjustment -= (@t_dblQty * @RetroactiveCostBucketCost) - (@t_dblQty * @t_dblCost)
+			SET @EscalateCostAdjustment -= (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 			
 			-- Insert data into the #tmpRevalueProducedItems table. 
 			INSERT INTO #tmpRevalueProducedItems (
@@ -476,15 +500,107 @@ BEGIN
 					,[intSubLocationId]				= t.intSubLocationId
 					,[intStorageLocationId]			= t.intStorageLocationId
 					,[ysnIsStorage]					= NULL 
-					,[strActualCostId]				= CASE WHEN t.intCostingMethod = @ACTUALCOST THEN t.strTransactionId ELSE NULL END 
+					,[strActualCostId]				= actualCostCb.strActualCostId  
 					,[intSourceTransactionId]		= t.intTransactionId
 					,[intSourceTransactionDetailId]	= t.intTransactionDetailId
 					,[strSourceTransactionId]		= t.strTransactionId
 					,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
 					,[intFobPointId]				= t.intFobPointId
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-			FROM	dbo.tblICInventoryTransaction t
+			FROM	dbo.tblICInventoryTransaction t LEFT JOIN tblICInventoryActualCost actualCostCb
+						ON actualCostCb.strTransactionId = t.strTransactionId
+						AND actualCostCb.intTransactionId = t.intTransactionId
+						AND actualCostCb.intTransactionDetailId = t.intTransactionDetailId
+						AND actualCostCb.intItemId = t.intItemId
+						AND actualCostCb.intItemLocationId = t.intItemLocationId
+						AND t.intCostingMethod = @ACTUALCOST
+						AND actualCostCb.ysnIsUnposted = 0 
 			WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
+		END 
+
+		-- Log the cost adjustment 
+		BEGIN 
+			INSERT INTO tblICInventoryLotCostAdjustmentLog (
+				[intInventoryLotId]
+				,[intInventoryTransactionId] 
+				,[intInventoryCostAdjustmentTypeId] 
+				,[dblQty] 
+				,[dblCost] 
+				,[dblValue] 
+				,[ysnIsUnposted] 
+				,[dtmCreated] 
+				,[strRelatedTransactionId] 
+				,[intRelatedTransactionId] 
+				,[intRelatedInventoryTransactionId]
+				,[intCreatedUserId] 
+				,[intCreatedEntityUserId] 
+			)
+			SELECT
+				[intInventoryLotId] = @CostBucketId
+				,[intInventoryTransactionId] = @DummyInventoryTransactionId 
+				,[intInventoryCostAdjustmentTypeId] = 
+						CASE	WHEN @t_dblQty > 0 THEN 
+									CASE	WHEN @t_intTransactionTypeId = @InventoryTransactionStartId THEN 
+												@COST_ADJ_TYPE_Adjust_Value
+											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
+												@COST_ADJ_TYPE_Adjust_WIP
+											WHEN @t_intLocationId IS NULL THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit
+											WHEN @t_intTransactionTypeId IN (
+													@INV_TRANS_TYPE_ADJ_Item_Change
+													,@INV_TRANS_TYPE_ADJ_Split_Lot
+													,@INV_TRANS_TYPE_ADJ_Lot_Merge
+													,@INV_TRANS_TYPE_ADJ_Lot_Move
+												) THEN 
+													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+											ELSE 
+												@COST_ADJ_TYPE_Adjust_Value
+									END 
+								WHEN @t_dblQty < 0 THEN 
+									CASE	WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
+												@COST_ADJ_TYPE_Adjust_WIP
+											WHEN @EscalateInventoryTransactionTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit_Inventory	
+											WHEN @t_intLocationId IS NULL AND @t_intTransactionTypeId = @INV_TRANS_TYPE_Invoice THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit_Sold
+											WHEN @t_intLocationId IS NULL THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit
+											WHEN @t_intTransactionTypeId IN (
+													@INV_TRANS_TYPE_ADJ_Item_Change
+													,@INV_TRANS_TYPE_ADJ_Split_Lot
+													,@INV_TRANS_TYPE_ADJ_Lot_Merge
+													,@INV_TRANS_TYPE_ADJ_Lot_Move
+												) THEN 
+													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+											ELSE 
+												@COST_ADJ_TYPE_Adjust_Sold
+									END 
+						END 
+				,[dblQty] = NULL 
+				,[dblCost] = NULL 
+				,[dblValue] = 
+					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+								@CostAdjustment
+							WHEN @t_dblQty < 0 THEN 
+								(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							ELSE 
+								0
+					END 
+				,[ysnIsUnposted]  = CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+				,[dtmCreated] = GETDATE()
+				,[strRelatedTransactionId] = @t_strTransactionId 
+				,[intRelatedTransactionId] = @t_intTransactionId
+				,[intRelatedInventoryTransactionId] = @t_intInventoryTransactionId
+				,[intCreatedUserId] = @intEntityUserSecurityId
+				,[intCreatedEntityUserId] = @intEntityUserSecurityId
+			WHERE		
+				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+							@CostAdjustment
+						WHEN @t_dblQty < 0 THEN 
+							(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+						ELSE 
+							0
+				END <> 0 
 		END 
 
 		-- Initial fetch attempt
@@ -508,6 +624,68 @@ BEGIN
 	CLOSE loopRetroactive;
 	DEALLOCATE loopRetroactive;
 END 
+
+-- Book the cost adjustment. 
+BEGIN 
+	-- Calculate the value to book. 
+	-- Formula: (Remaining Qty x New Cost) - (Remaining Qty x Original Cost)
+	SELECT	@CurrentCostAdjustment = 
+				SUM((cb.dblStockIn - cb.dblStockOut) * cb.dblCost)
+				- SUM((cb.dblStockIn - cb.dblStockOut) * cbo.dblCost) 
+	FROM	tblICInventoryLot cb INNER JOIN #tmpCostBucketOriginal cbo
+				ON cb.intInventoryLotId = cbo.intInventoryLotId
+
+	SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
+
+	SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
+	FROM	tblICItem i 
+	WHERE	i.intItemId = @intItemId
+
+	-- Create the 'Cost Adjustment' inventory transaction. 
+	EXEC [uspICPostInventoryTransaction]
+		@intItemId								= @intItemId
+		,@intItemLocationId						= @intItemLocationId
+		,@intItemUOMId							= @intItemUOMId
+		,@intSubLocationId						= @intSubLocationId
+		,@intStorageLocationId					= @intStorageLocationId
+		,@dtmDate								= @dtmDate
+		,@dblQty								= 0
+		,@dblUOMQty								= 0
+		,@dblCost								= 0
+		,@dblValue								= @CurrentCostAdjustment
+		,@dblSalesPrice							= 0
+		,@intCurrencyId							= NULL 
+		,@intTransactionId						= @intTransactionId
+		,@intTransactionDetailId				= @intTransactionDetailId
+		,@strTransactionId						= @strTransactionId
+		,@strBatchId							= @strBatchId
+		,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
+		,@intLotId								= NULL  
+		,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
+		,@intRelatedTransactionId				= @t_intTransactionId 
+		,@strRelatedTransactionId				= @t_strTransactionId
+		,@strTransactionForm					= @strTransactionForm
+		,@intEntityUserSecurityId				= @intEntityUserSecurityId
+		,@intCostingMethod						= @FIFO -- TODO: Double check the costing method. Make sure it matches with the SP. 
+		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+		,@intFobPointId							= @intFobPointId 
+		,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+		,@intForexRateTypeId					= NULL
+		,@dblForexRate							= 1
+		,@strDescription						= @strDescription	
+
+		UPDATE	tblICInventoryTransaction 
+		SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+		WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+END 
+
+-- Update the log with correct inventory transaction id
+BEGIN 
+	UPDATE	tblICInventoryLotCostAdjustmentLog 
+	SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+END 
+
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRetroactiveTransactions')) 
 	DROP TABLE #tmpRetroactiveTransactions 
