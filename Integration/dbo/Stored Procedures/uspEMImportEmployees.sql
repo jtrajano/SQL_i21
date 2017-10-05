@@ -632,7 +632,7 @@ IF(@Update = 1 AND @EmployeId IS NULL)
 BEGIN
 	SELECT @Total = COUNT(premp_emp)  			
 	FROM prempmst
-	where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
+	where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
 END
 
 
