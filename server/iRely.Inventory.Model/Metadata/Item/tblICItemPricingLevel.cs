@@ -22,6 +22,7 @@ namespace iRely.Inventory.Model
         public string strPricingMethod { get; set; }
         public decimal? dblAmountRate { get; set; }
         public decimal? dblUnitPrice { get; set; }
+        public DateTime? dtmEffectiveDate { get; set; }
         public string strCommissionOn { get; set; }
         public decimal? dblCommissionRate { get; set; }
         public int? intCurrencyId { get; set; }
@@ -141,6 +142,7 @@ namespace iRely.Inventory.Model
         public string strPricingMethod { get; set; }
         public decimal? dblAmountRate { get; set; }
         public decimal? dblUnitPrice { get; set; }
+        public DateTime? dtmEffectiveDate { get; set; }
         public string strCommissionOn { get; set; }
         public decimal? dblCommissionRate { get; set; }
         public int? intCurrencyId { get; set; }

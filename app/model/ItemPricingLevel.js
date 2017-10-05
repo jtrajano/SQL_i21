@@ -48,6 +48,7 @@ Ext.define('Inventory.model.ItemPricingLevel', {
         { name: 'strPricingMethod', type: 'string' },
         { name: 'dblAmountRate', type: 'float' },
         { name: 'dblUnitPrice', type: 'float' },
+        { name: 'dtmEffectiveDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'strCommissionOn', type: 'string' },
         { name: 'dblCommissionRate', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },

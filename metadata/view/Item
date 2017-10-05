@@ -14316,6 +14316,40 @@
                                                             ]
                                                         },
                                                         {
+                                                            "type": "Ext.grid.column.Date",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "defaultWidth": 80,
+                                                                "itemId": "colPricingLevelEffectiveDate",
+                                                                "text": "Effective Date",
+                                                                "width": 80
+                                                            },
+                                                            "configAlternates": {
+                                                                "defaultWidth": "number",
+                                                                "itemId": "string",
+                                                                "text": "string",
+                                                                "width": "auto"
+                                                            },
+                                                            "name": "MyDateColumn2",
+                                                            "designerId": "dd0440a9-7f7c-4811-90c4-7d23e8a279a1",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Date",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "name": "MyDateField5",
+                                                                    "designerId": "328ac523-8375-44be-a2c3-b2dd7060c6b4"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
                                                             "type": "Ext.grid.column.Column",
                                                             "reference": {
                                                                 "name": "columns",

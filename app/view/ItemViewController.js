@@ -901,6 +901,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colPricingLevelAmount: 'dblAmountRate',
                 colPricingLevelUnitPrice: 'dblUnitPrice',
+                colPricingLevelEffectiveDate: 'dtmEffectiveDate',
                 colPricingLevelCommissionOn: {
                     dataIndex: 'strCommissionOn',
                     editor: {
@@ -1635,6 +1636,7 @@ Ext.define('Inventory.view.ItemViewController', {
             // Validate the Unit of Measure. 
             // Make sure Unit Qty value of 1 is only used once.  
             var uomStore = config.viewModel.data.current.tblICItemUOMs();   
+            var pricingLevelStore = config.viewModel.data.current.tblICItemPricingLevels();
             var stockKeepingTypes = ['Inventory', 'Finished Good', 'Raw Material'];     
             if(uomStore) {
                 if (stockKeepingTypes.includes(itemType))
@@ -1673,6 +1675,23 @@ Ext.define('Inventory.view.ItemViewController', {
                                 iRely.Functions.showCustomDialog('question', 'yesno', msg, msgAction);
                                 return;
                             }
+                        }
+                    }
+                }
+            }
+            
+            if(pricingLevelStore.count() > 0) {
+                //Validate effective date duplicates
+                for (var i = 0; i < pricingLevelStore.count(); i++){
+                    var p = pricingLevelStore.data.items[i],
+                        duplicateCount = 1;
+                    for(var ii = i + 1; (!p.dummy && ii < pricingLevelStore.count()); ii++){
+                        var pp = pricingLevelStore.data.items[ii];
+                        duplicateCount += (!pp.dummy && Ext.Date.isEqual(p.data.dtmEffectiveDate, pp.data.dtmEffectiveDate)) ? 1: 0;
+                        if(duplicateCount > 1) {
+                            iRely.Msg.showError('Pricing levels cannot have the same effective date.', Ext.MessageBox.OK, win);
+                            action(false);
+                            return;
                         }
                     }
                 }

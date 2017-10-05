@@ -4745,6 +4745,16 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
+                                                                        xtype: 'datecolumn',
+                                                                        itemId: 'colPricingLevelEffectiveDate',
+                                                                        width: 80,
+                                                                        defaultWidth: 80,
+                                                                        text: 'Effective Date',
+                                                                        editor: {
+                                                                            xtype: 'datefield'
+                                                                        }
+                                                                    },
+                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colPricingLevelCommissionOn',
                                                                         dataIndex: 'strFieldName',
