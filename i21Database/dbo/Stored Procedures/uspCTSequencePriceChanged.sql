@@ -35,7 +35,10 @@ BEGIN TRY
 			@ErrorMessage					NVARCHAR(250),
 			@CreatedIvoices					NVARCHAR(MAX),
 			@UpdatedIvoices					NVARCHAR(MAX),
-			@strShipmentNumber				NVARCHAR(50)
+			@strShipmentNumber				NVARCHAR(50),
+			@intBillDetailId				INT,
+			@strVendorOrderNumber			NVARCHAR(50),
+			@ysnBillPosted					BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -81,18 +84,22 @@ BEGIN TRY
 		IF OBJECT_ID('tempdb..#tblReceipt') IS NOT NULL  								
 		DROP TABLE #tblReceipt								
 
-		SELECT	DISTINCT ISNULL(IR.ysnPosted,0) ysnPosted, strReceiptNumber, RI.intInventoryReceiptItemId, RI.intInventoryReceiptId,BD.intBillId
+		SELECT	DISTINCT ISNULL(IR.ysnPosted,0) ysnPosted, strReceiptNumber, RI.intInventoryReceiptItemId, RI.intInventoryReceiptId,BD.intBillId,BD.intBillDetailId,ISNULL(BL.ysnPosted,0) AS ysnBillPosted
 		INTO	#tblReceipt
 		FROM	tblICInventoryReceipt		IR
 		JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptId		=	IR.intInventoryReceiptId
    LEFT	JOIN	tblAPBillDetail				BD	ON	BD.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
+   LEFT	JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
 		WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract' --AND RI.dblUnitCost <> ISNULL(@dblCashPrice,0) 
 
 		SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt
 
 		WHILE ISNULL(@intInventoryReceiptId,0) > 0
 		BEGIN
-			SELECT	@intBillId = intBillId FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
+			SELECT	@intBillId = NULL, @intBillDetailId = NULL
+
+			SELECT	@intBillId = intBillId, @intBillDetailId = intBillDetailId,@strVendorOrderNumber = strReceiptNumber,@ysnBillPosted = ysnBillPosted FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
+
 			IF ISNULL(@intBillId,0) = 0
 			BEGIN
 				INSERT	INTO @voucherDetailReceipt (intInventoryReceiptType,intInventoryReceiptItemId,dblCost)
@@ -105,11 +112,14 @@ BEGIN TRY
 				INSERT INTO @voucherDetailReceiptCharge(intInventoryReceiptChargeId)
 				SELECT intInventoryReceiptChargeId FROM tblICInventoryReceiptCharge WHERE intInventoryReceiptId = @intInventoryReceiptId
 
+				SELECT @strVendorOrderNumber = strTicketNumber FROM tblSCTicket WHERE intContractId = @intContractDetailId
+
 				EXEC [dbo].[uspAPCreateBillData] 
 					 @userId						=	@intUserId
 					,@vendorId						=	@intEntityId
 					,@voucherDetailReceipt			=	@voucherDetailReceipt
 					,@voucherDetailReceiptCharge	=	@voucherDetailReceiptCharge
+					,@vendorOrderNumber				=	@strVendorOrderNumber
 					,@billId						=	@intNewBillId OUTPUT
 
 				EXEC [dbo].[uspAPPostBill] 
@@ -120,6 +130,21 @@ BEGIN TRY
 					,@userId = @intUserId
 					,@success = @ysnSuccess OUTPUT
 			END
+			ELSE
+			BEGIN
+				IF ISNULL(@ysnBillPosted,0) = 1
+				BEGIN
+					EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+				END
+
+				EXEC uspAPUpdateCost @intBillDetailId,@dblCashPrice,1
+
+				IF ISNULL(@ysnBillPosted,0) = 1
+				BEGIN
+					EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+				END
+			END
+
 			SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE intInventoryReceiptId > @intInventoryReceiptId
 		END
 		
