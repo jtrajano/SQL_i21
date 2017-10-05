@@ -349,7 +349,7 @@ IF(@Checking = 1)
 	FROM
 		[tblARPayment] P				--Origin Posted Payments Table
 	INNER JOIN	
-		[agpaymst] P1
+		#tmppaydet P1
 			ON P.[strNotes] COLLATE Latin1_General_CI_AS = P1.[agpay_ivc_no] COLLATE Latin1_General_CI_AS
 			AND P.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[agpay_ref_no] COLLATE Latin1_General_CI_AS
 			AND P.dblAmountPaid = P1.agpay_amt
