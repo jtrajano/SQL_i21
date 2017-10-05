@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARSearchLetterCustomer]
 (
-	@intLetterId	INT,
-	@ysnEmailOnly	BIT = 0
+	@intLetterId	INT
 )
 AS
 DECLARE @strLetterName			NVARCHAR(MAX),
@@ -359,11 +358,6 @@ IF ISNULL(@strLetterName, '') <> ''
 			  AND ISNULL(CC.strEmail, '') <> '' 
 			  AND CC.strEmailDistributionOption LIKE '%Letter%'
 		) EMAILSETUP
-
-		IF @ysnEmailOnly = 1
-			DELETE FROM @temp_return_table WHERE ysnHasEmailSetup = 0
-		ELSE
-			DELETE FROM @temp_return_table WHERE ysnHasEmailSetup = 1
 
 		IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
 			BEGIN

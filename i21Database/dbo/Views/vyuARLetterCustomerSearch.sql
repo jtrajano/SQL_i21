@@ -13,6 +13,14 @@ SELECT
 	, [dbl121DaysSum]
 	, [dblTotalARSum]
 	, [dblCreditLimit]
+	, ysnHasEmailSetup = CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM 
-	[vyuARCollectionOverdueReport]
+	[vyuARCollectionOverdueReport] ARC
+OUTER APPLY (
+	SELECT intEmailSetupCount = COUNT(*) 
+	FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
+	WHERE intCustomerEntityId = ARC.intEntityCustomerId 
+	  AND ISNULL(strEmail, '') <> '' 
+	  AND strEmailDistributionOption LIKE '%Letter%'
+) EMAILSETUP
  

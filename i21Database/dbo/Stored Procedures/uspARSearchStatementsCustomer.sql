@@ -6,7 +6,6 @@
 	,@strCompanyLocation	NVARCHAR(100) = NULL
 	,@strAccountCode		NVARCHAR(50) = NULL
 	,@ysnDetailedFormat		BIT	= 0
-	,@ysnEmailOnly			BIT = 0
 	,@ysnIncludeBudget		BIT = 0
 	,@ysnPrintCreditBalance BIT = 1
 	,@ysnPrintOnlyPastDue	BIT = 0
@@ -139,11 +138,6 @@ ELSE
 				AND CC.strEmailDistributionOption LIKE '%Statements%'
 		) EMAILSETUP
 	END
-
-IF @ysnEmailOnly = 1
-	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 0
-ELSE
-	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 1
 
 IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
 	BEGIN

@@ -57,6 +57,8 @@ SELECT
 										--		ON ARI1.intInvoiceId = ARPD.intInvoiceId)
 										) THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END 	
 	,strInvoiceReportNumber			= CFT.strInvoiceReportNumber
+	,strBatchId						= ARI.strBatchId
+	,dtmBatchDate					= dtmBatchDate
 FROM         
 	(SELECT 
 		intInvoiceId,
@@ -87,7 +89,9 @@ FROM
 		intCurrencyId, 
 		intTermId,
 		intEntityCustomerId,
-		dblTotalTermDiscount
+		dblTotalTermDiscount,		
+		strBatchId,
+		dtmBatchDate
 	 FROM 
 		dbo.tblARInvoice) AS ARI 
 INNER JOIN
