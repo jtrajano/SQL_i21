@@ -93,6 +93,7 @@ BEGIN TRY
 		   ,W.strWorkOrderNo
 		   ,WS.strName AS strWorkOrderStatus
 		   ,S.strSampleNumber
+		   ,S.strSampleRefNo
 		   ,SS.strSecondaryStatus AS strSampleStatus
 		   ,ST.strSampleTypeName  
 		   ,S.intSampleId  
@@ -135,7 +136,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intWorkOrderId,strWorkOrderNo'
-	SET @strColumnsList = @strColumnsList + ',strWorkOrderStatus,strSampleNumber,strSampleStatus,strSampleTypeName,intSampleId,dtmSampleReceivedDate,strComment'
+	SET @strColumnsList = @strColumnsList + ',strWorkOrderStatus,strSampleNumber,strSampleRefNo,strSampleStatus,strSampleTypeName,intSampleId,dtmSampleReceivedDate,strComment'
 	SET @strColumnsList = @strColumnsList + ',' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
 	intTotalCount
@@ -147,6 +148,7 @@ BEGIN TRY
 	,strWorkOrderNo
 	,strWorkOrderStatus
 	,strSampleNumber
+	,strSampleRefNo
 	,strSampleStatus
 	,strSampleTypeName
 	,intSampleId
@@ -163,6 +165,7 @@ BEGIN TRY
 			,strWorkOrderNo
 			,strWorkOrderStatus
 			,strSampleNumber
+			,strSampleRefNo
 			,strSampleStatus
 			,strSampleTypeName  
 			,CQ.intSampleId  
