@@ -2,6 +2,7 @@
 AS
 SELECT S.intSampleId
 	,S.strSampleNumber
+	,S.strSampleRefNo
 	,ST.strSampleTypeName
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
 	,CY.strCommodityCode
