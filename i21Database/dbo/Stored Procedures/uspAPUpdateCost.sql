@@ -10,6 +10,7 @@ AS
 
 BEGIN TRY
 DECLARE @newCost DECIMAL(18,6) = @cost;
+DECLARE @receiptCost DECIMAL(18,6) = 0;
 DECLARE @posted BIT = 0;
 DECLARE @voucherId INT;
 DECLARE @hasReceipt BIT = 0;
@@ -28,6 +29,7 @@ SELECT
 	,@hasReceipt = CASE WHEN voucherDetail.intInventoryReceiptItemId > 0 THEN 1 ELSE 0 END
 	,@differentCost = CASE WHEN receiptItem.dblUnitCost != @newCost THEN 1 ELSE 0 END
 	,@contractDetailId =  voucherDetail.intContractDetailId
+	,@receiptCost = receiptItem.dblUnitCost
 FROM tblAPBill voucher
 INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
 LEFT JOIN tblICInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = voucherDetail.intInventoryReceiptItemId
@@ -58,7 +60,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 IF @costAdjustment = 1
 BEGIN
 	UPDATE voucherDetail
-		SET voucherDetail.dblOldCost = voucherDetail.dblCost
+		SET voucherDetail.dblOldCost = @receiptCost
 		,voucherDetail.dblCost = @newCost
 	FROM tblAPBillDetail voucherDetail
 	WHERE voucherDetail.intBillDetailId = @billDetailId 
