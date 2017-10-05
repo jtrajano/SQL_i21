@@ -565,6 +565,13 @@ BEGIN
 			INNER JOIN tblARInvoice IVC on IVC.intEntityCustomerId = C.intEntityId		
 			WHERE
 				intInvoiceId > @maxInvoiceId
+				
+		--UPDATE Tax Total		
+			UPDATE tblARInvoice  SET tblARInvoice.dblTax = Tax
+			FROM (SELECT ID.intInvoiceId,SUM(ID.dblTotal) as Tax FROM tblARInvoice I
+			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+			where I.intInvoiceId > @maxInvoiceId AND ID.dblPrice = 0 
+			GROUP BY ID.intInvoiceId) GRP WHERE GRP.intInvoiceId = tblARInvoice.intInvoiceId				
 
 	END
 
