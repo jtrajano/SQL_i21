@@ -42,7 +42,7 @@ GO
 :r "..\Scripts\SM\FixCompanyLocationNumber.sql"
 :r "..\Scripts\SM\SetDefaultValues.sql"
 :r "..\Scripts\SM\InsertOriginTaxClassXRef.sql"
-:r "..\Scripts\SM\CopyCashToUndepositedFund.sql
+:r "..\Scripts\SM\CopyCashToUndepositedFund.sql"
 
 --Patronage
 :r "..\Scripts\PAT\DropStoredProcedures.sql"
