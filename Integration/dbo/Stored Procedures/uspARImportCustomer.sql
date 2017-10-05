@@ -577,6 +577,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			
 					SET @ContactEntityId = SCOPE_IDENTITY()
 					
+					if @strPhone <> ''''
+						INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone) VALUES (@ContactEntityId, @strPhone)
 					
 					-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEMEntityContact.strContactNumber to 20 characters				
 							
@@ -1240,6 +1242,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 					SET @ContactEntityId = SCOPE_IDENTITY()
 
+					if @strPhone <> ''''
+						INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone) VALUES (@ContactEntityId, @strPhone)
 					-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEMEntityContact.strContactNumber to 20 characters				
 
 					--Get intContactId				
