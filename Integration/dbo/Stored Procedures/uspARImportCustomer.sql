@@ -328,7 +328,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
 			DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 			DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
-		
+			DECLARE @OriginCurrency				NVARCHAR(50)
+			DECLARE @intCurrencyId				INT
 			--Grain Tab
 			DECLARE @strDPAContract				NVARCHAR(50)
 			DECLARE @dtmDPADate					DATETIME
@@ -355,6 +356,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			BEGIN
 		
 				SELECT @originCustomer = agcus_key FROM #tmpagcusmst
+				
+				SET @OriginCurrency = ''''
+
 				BEGIN TRY
 					BEGIN TRANSACTION @TransName
 					SAVE TRAN @TransName
@@ -438,6 +442,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@dblBudgetAmountForBudgetBilling = agcus_budget_amt,
 						@strBudgetBillingBeginMonth	= agcus_budget_beg_mm,	
 						@strBudgetBillingEndMonth	= agcus_budget_end_mm,
+						@OriginCurrency 			= agcus_dflt_currency,
 						--Grain Tab
 						@strDPAContract = agcus_dpa_cnt,				
 						@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),					
@@ -458,7 +463,14 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 					DECLARE @EntityId INT
 					SET @EntityId = SCOPE_IDENTITY()
-				
+
+					SET @intCurrencyId = null
+					IF @OriginCurrency <> ''''
+					BEGIN
+						select @intCurrencyId = intCurrencyID from tblSMCurrency where strCurrency = @OriginCurrency
+					END
+
+
 					INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType], [intConcurrencyId]) values( @EntityId, ''Customer'', 1 )
 					--INSERT into Customer
 					INSERT [dbo].[tblARCustomer](
@@ -498,7 +510,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[intMarketZoneId],			
 					[ysnHoldBatchGrainPayment],	
 					[ysnFederalWithholding], 
-					[intTermsId])
+					[intTermsId],
+					[intCurrencyId])
 					VALUES						
 					(@EntityId,
 					 NULL, 
@@ -535,7 +548,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @intMarketZoneId,			
 					 @ysnHoldBatchGrainPayment,	
 					 @ysnFederalWithholding, 
-					 @intTermsId)
+					 @intTermsId,
+					 @intCurrencyId)
 				 
 					 --Get intEntityCustomerId
 					 SELECT @intEntityCustomerId = intEntityId FROM tblARCustomer WHERE intEntityId = @EntityId
@@ -977,6 +991,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
 			DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 			DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
+			DECLARE @OriginCurrency				NVARCHAR(50)
+			DECLARE @intCurrencyId				INT
 			--Grain Tab
 			DECLARE @strDPAContract				NVARCHAR(50)
 			DECLARE @dtmDPADate					DATETIME
@@ -1005,6 +1021,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				BEGIN TRY
 					
 					SELECT @originCustomer = ptcus_cus_no FROM #tmpptcusmst
+					SET @OriginCurrency = ''''
 					BEGIN TRANSACTION @TransName
 					SAVE TRAN @TransName
 					SELECT TOP 1
@@ -1108,6 +1125,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					DECLARE @EntityId INT
 					SET @EntityId = SCOPE_IDENTITY()
 
+
+					SET @intCurrencyId = null
+					select @intCurrencyId = intDefaultCurrencyId from tblSMCompanyPreference
+
+					
 					INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType],[intConcurrencyId]) values( @EntityId, ''Customer'', 0 )
 
 					--INSERT into Customer
@@ -1137,7 +1159,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[dblBudgetAmountForBudgetBilling],
 					[strBudgetBillingBeginMonth],
 					[strBudgetBillingEndMonth], 
-					[intTermsId]
+					[intTermsId],
+					[intCurrencyId]
 					--Grain Tab
 					--[strDPAContract],
 					--[dtmDPADate],
@@ -1176,7 +1199,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @dblBudgetAmountForBudgetBilling,
 					 @strBudgetBillingBeginMonth,
 					 @strBudgetBillingEndMonth, 
-					 @intTermsId
+					 @intTermsId,
+					 @intCurrencyId
 					 --@strDPAContract,
 					 --@dtmDPADate,
 					 --@strGBReceiptNumber,
