@@ -101,6 +101,7 @@ BEGIN TRY
 			,I.strDescription
 			,S.strContainerNumber
 			,S.strSampleNumber
+			,S.strSampleRefNo
 			,ST.strSampleTypeName
 			,SS.strStatus
 			,S.intSampleId
@@ -158,7 +159,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'intTotalCount,strContractNumber,strName,strContractItemName,strBundleItemNo,strItemNo,strDescription'
-	SET @strColumnsList = @strColumnsList + ',strLoadNumber,strContainerNumber,strMarks,strShipperCode,strShipperName,strSubLocationName,strSampleNumber,strSampleTypeName'
+	SET @strColumnsList = @strColumnsList + ',strLoadNumber,strContainerNumber,strMarks,strShipperCode,strShipperName,strSubLocationName,strSampleNumber,strSampleRefNo,strSampleTypeName'
 	SET @strColumnsList = @strColumnsList + ',strStatus,intSampleId,dtmSampleReceivedDate,dtmSamplingEndDate,strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
   intTotalCount
@@ -175,6 +176,7 @@ BEGIN TRY
   ,strShipperName
   ,strSubLocationName
   ,strSampleNumber  
+  ,strSampleRefNo
   ,strSampleTypeName  
   ,strStatus  
   ,intSampleId  
@@ -197,6 +199,7 @@ BEGIN TRY
 		,strShipperName
 		,strSubLocationName
 		,strSampleNumber
+		,strSampleRefNo
 		,strSampleTypeName
 		,strStatus
 		,CQ.intSampleId

@@ -24,6 +24,7 @@ SELECT TR.intTestResultId
 	,ISNULL(L.intLotId, PL.intParentLotId) AS intLotId
 	,ISNULL(L.strLotNumber, PL.strParentLotNumber) AS strLotNumber
 	,S.strSampleNumber
+	,S.strSampleRefNo
 	,E.strName
 	,SS.strStatus
 	,S.intSampleId

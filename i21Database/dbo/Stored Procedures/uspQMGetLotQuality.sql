@@ -97,6 +97,7 @@ BEGIN TRY
 			,LS.strSecondaryStatus AS strLotStatus
 			,L.strLotAlias
 			,S.strSampleNumber
+			,S.strSampleRefNo
 			,SS.strSecondaryStatus AS strSampleStatus
 			,ISNULL(L.dblWeight,L.dblQty) AS dblLotQty
 			,U.strUnitMeasure
@@ -143,7 +144,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intLotId,strLotNumber'
-	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strSampleStatus,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
+	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strSampleRefNo,strSampleStatus,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
 	SET @strColumnsList = @strColumnsList + ',strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
 	intTotalCount
@@ -156,6 +157,7 @@ BEGIN TRY
 	,strLotStatus
 	,strLotAlias
 	,strSampleNumber
+	,strSampleRefNo
 	,strSampleStatus
 	,dblLotQty  
 	,strUnitMeasure
@@ -174,6 +176,7 @@ BEGIN TRY
 			,strLotStatus
 			,strLotAlias
 			,strSampleNumber
+			,strSampleRefNo
 			,strSampleStatus
 			,dblLotQty
 			,strUnitMeasure
