@@ -336,24 +336,25 @@ OPEN intListCursor;
 					BEGIN
 					SET @dblLoopContractUnits = @dblLoopContractUnits * -1
 					INSERT INTO @ItemsForItemShipment (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,intTransactionDetailId
-							,strTransactionId
-							,intTransactionTypeId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+						,ysnIsStorage
+						,intStorageScheduleTypeId
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
 					END

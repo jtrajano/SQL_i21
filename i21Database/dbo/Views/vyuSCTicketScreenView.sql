@@ -1,8 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketScreenView]
 	AS select 
-	SCT.intConcurrencyId
-	,SCT.strOfflineGuid
-	,SCT.intTicketId
+	SCT.intTicketId
 	,SCT.strTicketStatus
 	,SCT.strTicketNumber
 	,SCT.intScaleSetupId
@@ -168,8 +166,11 @@
 		CASE WHEN (SELECT ISNULL(ICAttribute.intCommodityAttributeId,0) FROM tblICCommodityAttribute ICAttribute WHERE ICAttribute.intCommodityId = SCT.intCommodityId ) > 1 THEN 1
 		ELSE 0 END
 	 AS BIT) AS ysnHasCommodityGrade
+	 ,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom
+	 ,ICIUOM.dblUnitQty AS dblUnitQtyTo
 
 	,SCSetup.strStationShortDescription
+	,SCSetup.strWeightDescription
 	,SCSetup.intFreightItemId
 	,SCSetup.intDefaultFeeItemId
 	,SCSetup.ysnMultipleWeights
@@ -200,6 +201,8 @@
 		END) strLoadInfo
 
 	,CAST (0 AS BIT) ysnDateModified
+	,SCT.intConcurrencyId
+	,SCT.strOfflineGuid
   from tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -222,8 +225,8 @@
 	LEFT JOIN tblICItem ICFreight on ICFreight.intItemId = SCSetup.intFreightItemId
 	LEFT JOIN tblICItem ICFees on ICFees.intItemId = SCSetup.intDefaultFeeItemId
 	LEFT JOIN tblICItemUOM ICIUOM on ICIUOM.intItemUOMId = intItemUOMIdTo
+	LEFT JOIN tblICItemUOM ICIUOMFrom on ICIUOMFrom.intItemUOMId = intItemUOMIdFrom
 	LEFT JOIN tblICUnitMeasure ICUM on ICUM.intUnitMeasureId = ICIUOM.intUnitMeasureId
-	LEFT JOIN tblICStorageLocation ICStorageLoc on ICStorageLoc.intSubLocationId = SCT.intSubLocationId
 
 	LEFT JOIN tblGRStorageType GRStorage on GRStorage.strStorageTypeCode = SCT.strDistributionOption
 	LEFT JOIN tblGRDiscountId GRDiscountId on GRDiscountId.intDiscountId = SCT.intDiscountId
