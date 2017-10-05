@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFGenerateILMS]
 	@xmlParam NVARCHAR(MAX) = NULL
-
 AS
 	
 SET QUOTED_IDENTIFIER OFF
@@ -15,9 +14,7 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	IF (ISNULL(@xmlParam,'') = '')
-	BEGIN
-		DECLARE @Output TABLE(
+	DECLARE @Output TABLE(
 			dtmBlendedDate DATE
 			, dblPrimary_a NUMERIC
 			, dblPrimary_b NUMERIC
@@ -29,9 +26,7 @@ BEGIN TRY
 			, dtmFromDate DATE
 			, dtmToDate DATE)
 
-		SELECT * FROM @Output
-	END
-	ELSE
+	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN	
 		DECLARE @idoc INT
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -68,21 +63,13 @@ BEGIN TRY
 
 		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IL'
 
-		--SELECT intProductCodeId
-		--	, strProductCode
-		--INTO #tmpFGCodes
-		--FROM tblTFProductCode
-		--WHERE intTaxAuthorityId = @TaxAuthorityId
-		--	AND (strProductCode LIKE 'B%'
-		--	OR strProductCode LIKE 'D%'
-		--	OR strProductCode IN ('999'))
-
 		INSERT INTO @RawMaterialCode
 		SELECT intProductCodeId
 		FROM tblTFProductCode
 		WHERE intTaxAuthorityId = @TaxAuthorityId
 			AND strProductCode IN ('160', '228', '285', '145', '073', '999')
 
+		INSERT INTO @Output
 		SELECT 
 			--Blend.intBlendTransactionId
 			--, Blend.strBlendTransactionNo
@@ -127,6 +114,8 @@ BEGIN TRY
 			OR AgentItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode))
 
 	END
+
+	SELECT * FROM @Output
 
 END TRY
 BEGIN CATCH
