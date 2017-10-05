@@ -65,6 +65,9 @@ BEGIN TRY
 		,@intProductTypeId INT
 		,@intProductValueId INT
 		,@intValidDate INT
+		,@intItemContractId INT
+		,@intCountryID INT
+		,@strCountry NVARCHAR(50)
 
 	SELECT @intValidDate = (
 			SELECT DATEPART(dy, GETDATE())
@@ -132,6 +135,9 @@ BEGIN TRY
 			,@intShipperEntityId = NULL
 			,@intProductTypeId = NULL
 			,@intProductValueId = NULL
+			,@intItemContractId = NULL
+			,@intCountryID = NULL
+			,@strCountry = NULL
 
 		SELECT @dtmSampleReceivedDate = dtmSampleReceivedDate
 			,@strSampleRefNo = strSampleNumber
@@ -264,9 +270,22 @@ BEGIN TRY
 					)
 		END
 
-		SELECT @intLocationId = intCompanyLocationId
-		FROM tblCTContractDetail
-		WHERE intContractDetailId = @intContractDetailId
+		-- Contract details
+		SELECT @intProductTypeId = 8
+			,@intProductValueId = CD.intContractDetailId
+			,@intItemContractId = CD.intItemContractId
+			,@intCountryID = ISNULL(IM.intOriginId, IC.intCountryId)
+			,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
+			,@intLocationId = CD.intCompanyLocationId
+		--,@intItemId = CD.intItemId
+		--,@dblRepresentingQty = CD.dblQuantity
+		--,@intRepresentingUOMId = CD.intUnitMeasureId
+		FROM tblCTContractDetail CD
+		JOIN tblICItem IM ON IM.intItemId = CD.intItemId
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
+		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
+		WHERE CD.intContractDetailId = @intContractDetailId
 
 		-- Business Date and Shift Id
 		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
@@ -330,9 +349,6 @@ BEGIN TRY
 					)
 		END
 
-		SELECT @intProductTypeId = 8 -- Need to check.
-			,@intProductValueId = @intContractDetailId -- Need to check.
-
 		INSERT INTO tblQMSample (
 			intConcurrencyId
 			,intSampleTypeId
@@ -393,18 +409,18 @@ BEGIN TRY
 			,@intSampleTypeId
 			,@strSampleNumber
 			,@strSampleRefNo
-			,@intProductTypeId
-			,@intProductValueId
+			,@intProductTypeId -- Need to check.
+			,@intProductValueId -- Need to check.
 			,@intSampleStatusId
 			,@intItemId -- Need to check. whether we need the validation with Contract Seq item and import excel item
-			,NULL
+			,@intItemContractId
 			,@intContractHeaderId
 			,@intContractDetailId
 			,NULL
 			,NULL
 			,NULL
 			,NULL
-			,NULL -- intCountryID -- Need to check to take from contract
+			,@intCountryID
 			,0
 			,NULL
 			,@intEntityId
@@ -427,7 +443,7 @@ BEGIN TRY
 			,@strContainerNumber
 			,@strMarks
 			,NULL
-			,NULL -- strCountry -- If intCountryID fills, fill this value -- Need to check
+			,@strCountry
 			,NULL
 			,NULL -- intLoadContainerId -- Need to check
 			,NULL -- intLoadDetailContainerLinkId -- Need to check
