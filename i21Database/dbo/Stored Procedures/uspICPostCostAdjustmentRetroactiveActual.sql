@@ -53,21 +53,24 @@ BEGIN
 			,@COST_ADJ_TYPE_Adjust_Sold AS INT = 4
 			,@COST_ADJ_TYPE_Adjust_WIP AS INT = 5
 			,@COST_ADJ_TYPE_Adjust_InTransit AS INT = 6
-			,@COST_ADJ_TYPE_Adjust_InventoryAdjustment AS INT = 7
+			,@COST_ADJ_TYPE_Adjust_InTransit_Inventory AS INT = 7
+			,@COST_ADJ_TYPE_Adjust_InTransit_Sold AS INT = 8
+			,@COST_ADJ_TYPE_Adjust_InventoryAdjustment AS INT = 9
 
 	-- Create the variables for the internal transaction types used by costing. 
-	DECLARE	@INV_TRANS_TYPE_Inventory_Receipt AS INT = 4
+	DECLARE
+			@INV_TRANS_TYPE_Inventory_Receipt AS INT = 4
 			,@INV_TRANS_TYPE_Inventory_Shipment AS INT = 5
 
 			,@INV_TRANS_TYPE_Consume AS INT = 8
 			,@INV_TRANS_TYPE_Produce AS INT = 9
 			,@INV_TRANS_Inventory_Transfer AS INT = 12
-
 			,@INV_TRANS_TYPE_ADJ_Item_Change AS INT = 15
 			,@INV_TRANS_TYPE_ADJ_Split_Lot AS INT = 17
 			,@INV_TRANS_TYPE_ADJ_Lot_Merge AS INT = 19
 			,@INV_TRANS_TYPE_ADJ_Lot_Move AS INT = 20
 			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
+			,@INV_TRANS_TYPE_Invoice AS INT = 33
 
 	DECLARE	
 			@CostAdjustment AS NUMERIC(38, 20)			
@@ -474,10 +477,12 @@ BEGIN
 								WHEN @t_dblQty < 0 THEN 
 									CASE	WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
+											WHEN @EscalateInventoryTransactionTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit_Inventory	
+											WHEN @t_intLocationId IS NULL AND @t_intTransactionTypeId = @INV_TRANS_TYPE_Invoice THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit_Sold
 											WHEN @t_intLocationId IS NULL THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit
-											WHEN @EscalateInventoryTransactionTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN 
-												@COST_ADJ_TYPE_Adjust_InTransit	
 											WHEN @t_intTransactionTypeId IN (
 													@INV_TRANS_TYPE_ADJ_Item_Change
 													,@INV_TRANS_TYPE_ADJ_Split_Lot
