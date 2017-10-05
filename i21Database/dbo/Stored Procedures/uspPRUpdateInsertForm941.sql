@@ -148,7 +148,7 @@ BEGIN
 			,dblFIT = ISNULL(FIT.dblTotal, 0)
 			,dblTaxableSS = (SSTAX.dblTotal - (SSTAX.dblTotal * TIPS.dblTipsPercent)) / 0.124
 			,dblTaxableSSTips = (SSTAX.dblTotal * TIPS.dblTipsPercent) / 0.124
-			,dblTaxableMed = (SSMED.dblTotal) / 0.029
+			,dblTaxableMed = ((SSMED.dblTotal) - (ADDMED.dblTotal)) / 0.029
 			,dblTaxableAddMed = (ADDMED.dblTotal) / 0.009
 			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotal, 0))
 			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotal, 0))
