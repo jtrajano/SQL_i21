@@ -196,6 +196,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	A.strReference,
 		[intConcurrencyId]				=	1
 	FROM tblAPBill A
 	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
@@ -289,6 +291,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	A.strReference,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
@@ -399,6 +403,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
@@ -499,6 +505,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
@@ -587,6 +595,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
@@ -695,6 +705,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
