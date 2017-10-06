@@ -773,26 +773,18 @@ BEGIN TRY
 				,SL.intSubLocationId
 			FROM dbo.tblICItemStockUOM S
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
-				AND SL.ysnAllowConsume = 1
+				AND SL.ysnAllowConsume = 1 AND S.intItemId = @intItemId AND S.dblOnHand - S.dblUnitReserved > 0
 			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 				AND IU.ysnStockUnit = 1
+			JOIN dbo.tblICItem I on I.intItemId =S.intItemId
 			WHERE S.intItemId = @intItemId
 				AND IL.intLocationId = @intLocationId
 				AND (
 					S.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intProductionStageLocationId, S.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
-							ELSE S.intStorageLocationId
-							END
-						)
-					OR S.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intPMStageLocationId, S.intStorageLocationId)
+								THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), S.intStorageLocationId)
 							WHEN @intConsumptionMethodId = 2
 								THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
 							ELSE S.intStorageLocationId
@@ -826,9 +818,9 @@ BEGIN TRY
 					,L.intItemId
 					,(
 						CASE 
-							WHEN intWeightUOMId IS NOT NULL
-								THEN dblWeight
-							ELSE dblQty
+							WHEN L.intWeightUOMId IS NOT NULL
+								THEN L.dblWeight
+							ELSE L.dblQty
 							END
 						) - ISNULL((
 							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -841,9 +833,9 @@ BEGIN TRY
 							), 0)
 					,(
 						CASE 
-							WHEN intWeightUOMId IS NOT NULL
+							WHEN L.intWeightUOMId IS NOT NULL
 								THEN L.dblQty
-							ELSE dblQty / (
+							ELSE L.dblQty / (
 									CASE 
 										WHEN L.dblWeightPerQty = 0
 											OR L.dblWeightPerQty IS NULL
@@ -888,15 +880,16 @@ BEGIN TRY
 					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1
+					AND SL.ysnAllowConsume = 1 AND L.dblQty > 0
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
-				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
+				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId and SI.intItemId = @intItemId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+				JOIN dbo.tblICItem I on I.intItemId =L.intItemId
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
@@ -905,16 +898,7 @@ BEGIN TRY
 						L.intStorageLocationId = (
 							CASE 
 								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						OR L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+									THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
 								WHEN @intConsumptionMethodId = 2
 									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 								ELSE L.intStorageLocationId
@@ -951,9 +935,9 @@ BEGIN TRY
 				,L.intItemId
 				,(
 					CASE 
-						WHEN intWeightUOMId IS NOT NULL
-							THEN dblWeight
-						ELSE dblQty
+						WHEN L.intWeightUOMId IS NOT NULL
+							THEN L.dblWeight
+						ELSE L.dblQty
 						END
 					) - ISNULL((
 						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -966,7 +950,7 @@ BEGIN TRY
 						), 0)
 				,(
 					CASE 
-						WHEN intWeightUOMId IS NOT NULL
+						WHEN L.intWeightUOMId IS NOT NULL
 							THEN L.dblQty
 						ELSE dblQty / (
 								CASE 
@@ -1011,7 +995,7 @@ BEGIN TRY
 				,L.intSubLocationId
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-				AND SL.ysnAllowConsume = 1
+				AND SL.ysnAllowConsume = 1 AND L.intItemId = @intItemId AND L.dblQty > 0
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
@@ -1019,6 +1003,7 @@ BEGIN TRY
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 				AND BS.strPrimaryStatus = 'Active'
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+			JOIN dbo.tblICItem I on I.intItemId =L.intItemId
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus = 'Active'
@@ -1027,16 +1012,7 @@ BEGIN TRY
 					L.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						)
-					OR L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+								THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
 							WHEN @intConsumptionMethodId = 2
 								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 							ELSE L.intStorageLocationId
@@ -1077,9 +1053,9 @@ BEGIN TRY
 					,L.intItemId
 					,(
 						CASE 
-							WHEN intWeightUOMId IS NOT NULL
-								THEN dblWeight
-							ELSE dblQty
+							WHEN L.intWeightUOMId IS NOT NULL
+								THEN L.dblWeight
+							ELSE L.dblQty
 							END
 						) - ISNULL((
 							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -1092,9 +1068,9 @@ BEGIN TRY
 							), 0)
 					,(
 						CASE 
-							WHEN intWeightUOMId IS NOT NULL
+							WHEN L.intWeightUOMId IS NOT NULL
 								THEN L.dblQty
-							ELSE dblQty / (
+							ELSE L.dblQty / (
 									CASE 
 										WHEN L.dblWeightPerQty = 0
 											OR L.dblWeightPerQty IS NULL
@@ -1139,15 +1115,16 @@ BEGIN TRY
 					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1
+					AND SL.ysnAllowConsume = 1 AND L.dblQty > 0
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
-				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
+				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId and SI.intItemId = @intItemId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+				JOIN dbo.tblICItem I on I.intItemId =L.intItemId
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
@@ -1156,16 +1133,7 @@ BEGIN TRY
 						L.intStorageLocationId = (
 							CASE 
 								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						OR L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+									THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
 								WHEN @intConsumptionMethodId = 2
 									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 								ELSE L.intStorageLocationId
@@ -1202,9 +1170,9 @@ BEGIN TRY
 				,L.intItemId
 				,(
 					CASE 
-						WHEN intWeightUOMId IS NOT NULL
-							THEN dblWeight
-						ELSE dblQty
+						WHEN L.intWeightUOMId IS NOT NULL
+							THEN L.dblWeight
+						ELSE L.dblQty
 						END
 					) - ISNULL((
 						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -1217,9 +1185,9 @@ BEGIN TRY
 						), 0)
 				,(
 					CASE 
-						WHEN intWeightUOMId IS NOT NULL
+						WHEN L.intWeightUOMId IS NOT NULL
 							THEN L.dblQty
-						ELSE dblQty / (
+						ELSE L.dblQty / (
 								CASE 
 									WHEN L.dblWeightPerQty = 0
 										OR L.dblWeightPerQty IS NULL
@@ -1262,7 +1230,7 @@ BEGIN TRY
 				,L.intSubLocationId
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-				AND SL.ysnAllowConsume = 1
+				AND SL.ysnAllowConsume = 1 AND L.intItemId = @intItemId AND L.dblQty > 0
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
@@ -1270,6 +1238,7 @@ BEGIN TRY
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 				AND BS.strPrimaryStatus = 'Active'
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+			JOIN dbo.tblICItem I on I.intItemId =L.intItemId
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus = 'Active'
@@ -1278,16 +1247,7 @@ BEGIN TRY
 					L.intStorageLocationId = (
 						CASE 
 							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						)
-					OR L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+								THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
 							WHEN @intConsumptionMethodId = 2
 								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 							ELSE L.intStorageLocationId
@@ -1329,9 +1289,9 @@ BEGIN TRY
 					,L.intItemId
 					,(
 						CASE 
-							WHEN intWeightUOMId IS NOT NULL
-								THEN dblWeight
-							ELSE dblQty
+							WHEN L.intWeightUOMId IS NOT NULL
+								THEN L.dblWeight
+							ELSE L.dblQty
 							END
 						) - ISNULL((
 							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -1344,9 +1304,9 @@ BEGIN TRY
 							), 0)
 					,(
 						CASE 
-							WHEN intWeightUOMId IS NOT NULL
+							WHEN L.intWeightUOMId IS NOT NULL
 								THEN L.dblQty
-							ELSE dblQty / (
+							ELSE L.dblQty / (
 									CASE 
 										WHEN L.dblWeightPerQty = 0
 											OR L.dblWeightPerQty IS NULL
@@ -1389,13 +1349,14 @@ BEGIN TRY
 					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1
+					AND SL.ysnAllowConsume = 1 AND L.intItemId = @intItemId AND L.dblQty = 0
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+				JOIN dbo.tblICItem I on I.intItemId =L.intItemId
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
@@ -1404,16 +1365,7 @@ BEGIN TRY
 						L.intStorageLocationId = (
 							CASE 
 								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						OR L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+									THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
 								WHEN @intConsumptionMethodId = 2
 									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 								ELSE L.intStorageLocationId
@@ -1668,16 +1620,16 @@ BEGIN TRY
 					,L.intItemId
 					,(
 						CASE 
-							WHEN intWeightUOMId IS NOT NULL
-								THEN dblWeight
-							ELSE dblQty
+							WHEN L.intWeightUOMId IS NOT NULL
+								THEN L.dblWeight
+							ELSE L.dblQty
 							END
 						)
 					,(
 						CASE 
-							WHEN intWeightUOMId IS NOT NULL
+							WHEN L.intWeightUOMId IS NOT NULL
 								THEN L.dblQty
-							ELSE dblQty / (
+							ELSE L.dblQty / (
 									CASE 
 										WHEN L.dblWeightPerQty = 0
 											OR L.dblWeightPerQty IS NULL
@@ -1705,7 +1657,7 @@ BEGIN TRY
 					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1
+					AND SL.ysnAllowConsume = 1 AND L.intItemId = @intItemId AND L.dblQty > 0
 				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
@@ -1713,6 +1665,7 @@ BEGIN TRY
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+				JOIN dbo.tblICItem I on I.intItemId =L.intItemId
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
@@ -1721,16 +1674,7 @@ BEGIN TRY
 						L.intStorageLocationId = (
 							CASE 
 								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						OR L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+									THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
 								WHEN @intConsumptionMethodId = 2
 									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
 								ELSE L.intStorageLocationId
