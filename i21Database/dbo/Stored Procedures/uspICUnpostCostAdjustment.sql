@@ -205,9 +205,9 @@ END
 
 -- Update the flags
 BEGIN 
-	--------------------------------------------------------------
-	-- Update the ysnIsUnposted flag for related transactions 
-	--------------------------------------------------------------
+	-------------------------------------------------------------------
+	-- Update the ysnIsUnposted flag for the inventory transactions 
+	-------------------------------------------------------------------
 	UPDATE	t
 	SET		ysnIsUnposted = 1
 	FROM	tblICInventoryTransaction t
@@ -215,15 +215,26 @@ BEGIN
 			AND t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0
 
-	--------------------------------------------------------------
-	-- Update the ysnIsUnposted flag for related LOT transactions 
-	--------------------------------------------------------------
+	-------------------------------------------------------------------
+	-- Update the ysnIsUnposted flag for the LOT transactions 
+	-------------------------------------------------------------------
 	UPDATE	t
 	SET		ysnIsUnposted = 1
 	FROM	dbo.tblICInventoryLotTransaction t
 	WHERE	t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0
+
+	-------------------------------------------------------------------
+	-- Update the ysnIsUnposted flag in the GL Detail 
+	-------------------------------------------------------------------
+	UPDATE	gd
+	SET		ysnIsUnposted = 1
+	FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
+				ON gd.intJournalLineNo = t.intInventoryTransactionId
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND gd.ysnIsUnposted = 0 
 END
 
 -----------------------------------------
@@ -233,5 +244,6 @@ EXEC dbo.uspICCreateGLEntriesOnCostAdjustment
 	@strBatchId 
 	,@intEntityUserSecurityId 
 	,NULL 
+	,0
 	,@AccountCategory_Cost_Adjustment 
 ;

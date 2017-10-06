@@ -2,6 +2,7 @@
 	@strBatchId AS NVARCHAR(20)
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
+	,@ysnPost AS INT = 1
 	,@AccountCategory_Cost_Adjustment AS NVARCHAR(50) = 'AP Clearing' 
 AS
 
@@ -52,8 +53,6 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 					
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
-
-DECLARE @ysnIsUnposted AS BIT = 0
 
 -- Get the GL Account ids to use
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
@@ -602,7 +601,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -651,7 +650,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -705,7 +704,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -754,7 +753,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -807,7 +806,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -860,7 +859,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -914,7 +913,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -962,7 +961,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -1022,7 +1021,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -1076,7 +1075,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -1125,7 +1124,7 @@ SELECT
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnIsUnposted, 0) = 1 THEN 0 ELSE 1 END 
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= NULL 
 		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
