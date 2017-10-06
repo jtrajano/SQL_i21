@@ -5423,6 +5423,7 @@
     <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
     <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGenerateWhereClause.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

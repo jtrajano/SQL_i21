@@ -8,16 +8,6 @@ BEGIN TRY
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
-
-	RETURN
-
-	DECLARE @intTransactionCount INT
-
-	SELECT @intTransactionCount = @@TRANCOUNT
-
-	IF @intTransactionCount = 0
-		BEGIN TRANSACTION
-
 	DECLARE @ImportHeader TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intSampleImportId INT
@@ -68,6 +58,8 @@ BEGIN TRY
 		,@intItemContractId INT
 		,@intCountryID INT
 		,@strCountry NVARCHAR(50)
+		,@intRepresentingUOMId INT
+		,@strItemNo NVARCHAR(50)
 
 	SELECT @intValidDate = (
 			SELECT DATEPART(dy, GETDATE())
@@ -100,10 +92,10 @@ BEGIN TRY
 		,strSampleStatus
 	ORDER BY intSampleImportId
 
-	--SELECT *
-	--FROM @ImportHeader
 	SELECT @intSampleImportId = MIN(intSampleImportId)
 	FROM @ImportHeader
+
+	BEGIN TRANSACTION
 
 	WHILE (ISNULL(@intSampleImportId, 0) > 0)
 	BEGIN
@@ -138,6 +130,8 @@ BEGIN TRY
 			,@intItemContractId = NULL
 			,@intCountryID = NULL
 			,@strCountry = NULL
+			,@intRepresentingUOMId = NULL
+			,@strItemNo = NULL
 
 		SELECT @dtmSampleReceivedDate = dtmSampleReceivedDate
 			,@strSampleRefNo = strSampleNumber
@@ -156,6 +150,7 @@ BEGIN TRY
 
 		SELECT @intItemId = intItemId
 			,@intCategoryId = intCategoryId
+			,@strItemNo = strItemNo
 		FROM tblICItem
 		WHERE strShortName = @strItemShortName
 
@@ -263,23 +258,61 @@ BEGIN TRY
 
 		IF ISNULL(@intContractDetailId, 0) = 0
 		BEGIN
+			SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Contract already contains Sample. '
+
 			RAISERROR (
-					'Contract already contains Sample. '
+					@ErrMsg
 					,16
 					,1
 					)
 		END
+		ELSE
+		BEGIN
+			DECLARE @dblCQuantity NUMERIC(18, 6)
+			DECLARE @intSeqItemId INT
+			DECLARE @strCItemNo NVARCHAR(50)
+
+			SELECT @dblCQuantity = CD.dblQuantity
+				,@intSeqItemId = CD.intItemId
+				,@strCItemNo = I.strItemNo
+			FROM tblCTContractDetail CD
+			JOIN tblICItem I ON I.intItemId = CD.intItemId
+			WHERE CD.intContractDetailId = @intContractDetailId
+
+			IF @intItemId <> @intSeqItemId
+			BEGIN
+				SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Item is not matching with Contract Sequence Item(' + @strCItemNo + '). '
+
+				RAISERROR (
+						@ErrMsg
+						,16
+						,1
+						)
+			END
+
+			IF ISNUMERIC(@dblSequenceQuantity) = 1
+			BEGIN
+				IF @dblSequenceQuantity > @dblCQuantity
+				BEGIN
+					SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Quantity cannot be greater than Contract Sequence Quantity(' + LTRIM(@dblCQuantity) + '). '
+
+					RAISERROR (
+							@ErrMsg
+							,16
+							,1
+							)
+				END
+			END
+		END
 
 		-- Contract details
-		SELECT @intProductTypeId = 8
+		SELECT @intProductTypeId = 8 -- Contract Line Item
 			,@intProductValueId = CD.intContractDetailId
 			,@intItemContractId = CD.intItemContractId
 			,@intCountryID = ISNULL(IM.intOriginId, IC.intCountryId)
 			,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
 			,@intLocationId = CD.intCompanyLocationId
-		--,@intItemId = CD.intItemId
-		--,@dblRepresentingQty = CD.dblQuantity
-		--,@intRepresentingUOMId = CD.intUnitMeasureId
+			,@intRepresentingUOMId = CD.intUnitMeasureId
 		FROM tblCTContractDetail CD
 		JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
@@ -409,10 +442,10 @@ BEGIN TRY
 			,@intSampleTypeId
 			,@strSampleNumber
 			,@strSampleRefNo
-			,@intProductTypeId -- Need to check.
-			,@intProductValueId -- Need to check.
+			,@intProductTypeId
+			,@intProductValueId
 			,@intSampleStatusId
-			,@intItemId -- Need to check. whether we need the validation with Contract Seq item and import excel item
+			,@intItemId
 			,@intItemContractId
 			,@intContractHeaderId
 			,@intContractDetailId
@@ -431,10 +464,10 @@ BEGIN TRY
 			,@dtmSampleReceivedDate
 			,@dtmCurrentDate
 			,@intCreatedUserId
-			,1 -- dblSampleQty -- Need to check
-			,NULL --intSampleUOMId -- Need to check
-			,@dblSequenceQuantity -- dblRepresentingQty -- Need to check
-			,NULL --intRepresentingUOMId -- Need to check to take from seq uom
+			,NULL
+			,NULL
+			,@dblSequenceQuantity
+			,@intRepresentingUOMId
 			,NULL
 			,@dtmSampleReceivedDate
 			,@dtmSampleReceivedDate
@@ -445,10 +478,10 @@ BEGIN TRY
 			,NULL
 			,@strCountry
 			,NULL
-			,NULL -- intLoadContainerId -- Need to check
-			,NULL -- intLoadDetailContainerLinkId -- Need to check
-			,NULL -- intLoadId -- Need to check
-			,NULL -- intLoadDetailId -- Need to check
+			,NULL
+			,NULL
+			,NULL
+			,NULL
 			,@dtmBusinessDate
 			,@intShiftId
 			,@intLocationId
@@ -609,13 +642,15 @@ BEGIN TRY
 		WHERE intSampleImportId > @intSampleImportId
 	END
 
-	IF @intTransactionCount = 0
-		COMMIT TRANSACTION
+	DELETE
+	FROM tblQMSampleImport
+
+	COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @intTransactionCount = 0
+		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

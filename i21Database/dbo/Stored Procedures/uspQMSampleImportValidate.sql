@@ -35,6 +35,8 @@ BEGIN TRY
 		,@intProductId INT
 		,@intContractDetailId INT
 
+	BEGIN TRANSACTION
+
 	DELETE
 	FROM tblQMSampleImportError
 
@@ -238,61 +240,6 @@ BEGIN TRY
 				SELECT @strPreviousErrMsg += 'Invalid Result. '
 		END
 
-		-- Template and Property Validation
-		IF (
-				ISNULL(@intItemId, 0) > 0
-				AND ISNULL(@intSampleTypeId, 0) > 0
-				)
-		BEGIN
-			SELECT @intProductId = (
-					SELECT P.intProductId
-					FROM tblQMProduct AS P
-					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
-					WHERE P.intProductTypeId = 2 -- Item
-						AND P.intProductValueId = @intItemId
-						AND PC.intSampleTypeId = @intSampleTypeId
-						AND P.ysnActive = 1
-					)
-
-			IF (
-					@intProductId IS NULL
-					AND ISNULL(@intCategoryId, 0) > 0
-					)
-				SELECT @intProductId = (
-						SELECT P.intProductId
-						FROM tblQMProduct AS P
-						JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
-						WHERE P.intProductTypeId = 1 -- Item Category
-							AND P.intProductValueId = @intCategoryId
-							AND PC.intSampleTypeId = @intSampleTypeId
-							AND P.ysnActive = 1
-						)
-
-			IF @intProductId IS NULL
-				SELECT @strPreviousErrMsg += 'Quality Template is not configured for the Item and Sample Type. '
-			ELSE
-			BEGIN
-				IF NOT EXISTS (
-						SELECT 1
-						FROM tblQMProduct AS PRD
-						JOIN tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
-						JOIN tblQMProductTest AS PT ON PT.intProductId = PP.intProductId
-							AND PT.intProductId = PRD.intProductId
-						JOIN tblQMTest AS T ON T.intTestId = PP.intTestId
-							AND T.intTestId = PT.intTestId
-						JOIN tblQMTestProperty AS TP ON TP.intPropertyId = PP.intPropertyId
-							AND TP.intTestId = PP.intTestId
-							AND TP.intTestId = T.intTestId
-							AND TP.intTestId = PT.intTestId
-						JOIN tblQMProperty AS PRT ON PRT.intPropertyId = PP.intPropertyId
-							AND PRT.intPropertyId = TP.intPropertyId
-						JOIN tblQMProductPropertyValidityPeriod AS PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
-						WHERE PRT.strPropertyName = @strPropertyName
-						)
-					SELECT @strPreviousErrMsg += 'Property is not available in the Template. '
-			END
-		END
-
 		-- Contract Sequence Check
 		IF ISNULL(@intContractHeaderId, 0) > 0
 		BEGIN
@@ -357,24 +304,81 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				DECLARE @dblCQuantity NUMERIC(18, 6)
+				DECLARE @intSeqItemId INT
+				DECLARE @strItemNo NVARCHAR(50)
+
+				SELECT @dblCQuantity = CD.dblQuantity
+					,@intSeqItemId = CD.intItemId
+					,@strItemNo = I.strItemNo
+				FROM tblCTContractDetail CD
+				JOIN tblICItem I ON I.intItemId = CD.intItemId
+				WHERE CD.intContractDetailId = @intContractDetailId
+
+				IF @intItemId <> @intSeqItemId
+					SELECT @strPreviousErrMsg += 'Item is not matching with Contract Sequence Item.(' + LTRIM(@strItemNo) + '). '
+
 				IF ISNUMERIC(@dblSequenceQuantity) = 1
 				BEGIN
-					IF EXISTS (
-							SELECT 1
-							FROM @ContractDetail
-							WHERE intContractDetailId = @intContractDetailId
-								AND dblQuantity < @dblSequenceQuantity
-							)
-					BEGIN
-						DECLARE @dblCQuantity NUMERIC(18, 6)
-
-						SELECT @dblCQuantity = dblQuantity
-						FROM @ContractDetail
-						WHERE intContractDetailId = @intContractDetailId
-
-						SELECT @strPreviousErrMsg += 'Quantity cannot be greater than Contract Sequence Quantity.( ' + LTRIM(@dblCQuantity) + '). '
-					END
+					IF @dblSequenceQuantity > @dblCQuantity
+						SELECT @strPreviousErrMsg += 'Quantity cannot be greater than Contract Sequence Quantity.(' + LTRIM(@dblCQuantity) + '). '
 				END
+			END
+		END
+
+		-- Template and Property Validation
+		IF (
+				ISNULL(@intItemId, 0) > 0
+				AND ISNULL(@intSampleTypeId, 0) > 0
+				)
+		BEGIN
+			SELECT @intProductId = (
+					SELECT P.intProductId
+					FROM tblQMProduct AS P
+					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+					WHERE P.intProductTypeId = 2 -- Item
+						AND P.intProductValueId = @intItemId
+						AND PC.intSampleTypeId = @intSampleTypeId
+						AND P.ysnActive = 1
+					)
+
+			IF (
+					@intProductId IS NULL
+					AND ISNULL(@intCategoryId, 0) > 0
+					)
+				SELECT @intProductId = (
+						SELECT P.intProductId
+						FROM tblQMProduct AS P
+						JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+						WHERE P.intProductTypeId = 1 -- Item Category
+							AND P.intProductValueId = @intCategoryId
+							AND PC.intSampleTypeId = @intSampleTypeId
+							AND P.ysnActive = 1
+						)
+
+			IF @intProductId IS NULL
+				SELECT @strPreviousErrMsg += 'Quality Template is not configured for the Item and Sample Type. '
+			ELSE
+			BEGIN
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblQMProduct AS PRD
+						JOIN tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
+						JOIN tblQMProductTest AS PT ON PT.intProductId = PP.intProductId
+							AND PT.intProductId = PRD.intProductId
+						JOIN tblQMTest AS T ON T.intTestId = PP.intTestId
+							AND T.intTestId = PT.intTestId
+						JOIN tblQMTestProperty AS TP ON TP.intPropertyId = PP.intPropertyId
+							AND TP.intTestId = PP.intTestId
+							AND TP.intTestId = T.intTestId
+							AND TP.intTestId = PT.intTestId
+						JOIN tblQMProperty AS PRT ON PRT.intPropertyId = PP.intPropertyId
+							AND PRT.intPropertyId = TP.intPropertyId
+						JOIN tblQMProductPropertyValidityPeriod AS PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
+						WHERE PRD.intProductId = @intProductId
+							AND PRT.strPropertyName = @strPropertyName
+						)
+					SELECT @strPreviousErrMsg += 'Property is not available in the Template. '
 			END
 		END
 
@@ -404,6 +408,7 @@ BEGIN TRY
 				SELECT 1
 				FROM tblQMSampleImport
 				WHERE strSampleNumber = @strSampleNumber
+					AND strPropertyName = @strPropertyName
 				GROUP BY strPropertyName
 				HAVING COUNT(*) > 1
 				)
@@ -495,6 +500,8 @@ BEGIN TRY
 		,intCreatedUserId
 		,dtmCreated
 	FROM tblQMSampleImportError
+
+	COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
