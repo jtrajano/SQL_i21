@@ -187,6 +187,7 @@ IF @ysnSearchOnly = 0
 		INSERT INTO @temp_aging_table
 		SELECT strCustomerName
 			 , strCustomerNumber
+			 , strCustomerInfo
              , intEntityCustomerId
              , dblCreditLimit
              , dblTotalAR
