@@ -354,7 +354,7 @@ BEGIN
 		--		ON (VI.intItemId = UOM.intItemId OR VI.intCategoryId = @ItemCategoryId)
 		--		AND VI.intStockUOMId = UOM.intItemUOMId
 		WHERE 
-			(VI.intItemId = @ItemId OR VI.intCategoryId = @ItemCategoryId)
+			(VI.intItemId = @ItemId OR (VI.intCategoryId = @ItemCategoryId AND ISNULL(VI.intItemId,0) = 0))
 			AND VI.intLocationId = @LocationId 
 			--AND (@ItemUOMId IS NULL OR UOM.intItemUOMId = @ItemUOMId)
 			
@@ -385,7 +385,7 @@ BEGIN
 									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'R'
-			AND (intItemId = @ItemId OR intCategoryId = @ItemCategoryId)
+			AND (intItemId = @ItemId OR (intCategoryId = @ItemCategoryId AND ISNULL(intItemId,0) = 0))
 			AND (ISNULL(intCustomerLocationId,0) = 0 OR (intCustomerLocationId = @ShipToLocationId AND ISNULL(@ShipToLocationId,0) <> 0))
 					
 		
@@ -413,7 +413,7 @@ BEGIN
 									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'O'
-			AND (intItemId = @ItemId OR intCategoryId = @ItemCategoryId)
+			AND (intItemId = @ItemId OR (intCategoryId = @ItemCategoryId AND ISNULL(intItemId,0) = 0))
 			AND (ISNULL(intCustomerLocationId,0) = 0 OR (intCustomerLocationId = @ShipToLocationId AND ISNULL(@ShipToLocationId,0) <> 0))
 						
 		DECLARE @SpecialGroupPricing TABLE(
@@ -525,7 +525,7 @@ BEGIN
 				ON SP.strCustomerGroup = CG.strGroupName					
 		
 		--Customer Group - Rack Vendor No + Rack Item No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR SP.intCategoryId = @ItemCategoryId)) AND (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR (SP.intCategoryId = @ItemCategoryId AND ISNULL(SP.intItemId,0) = 0))) AND (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				SET @intSort = @intSort + 1
@@ -547,7 +547,7 @@ BEGIN
 			END
 
 		--Customer Group - Rack Vendor No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR SP.intCategoryId = @ItemCategoryId)) AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR (SP.intCategoryId = @ItemCategoryId AND ISNULL(SP.intItemId,0) = 0))) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				SET @intSort = @intSort + 1
@@ -665,7 +665,7 @@ BEGIN
 			
 
 		--Customer - Rack Vendor No + Rack Item No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR SP.intCategoryId = @ItemCategoryId)) AND (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR (SP.intCategoryId = @ItemCategoryId AND ISNULL(SP.intItemId,0) = 0))) AND (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				SET @intSort = @intSort + 1
@@ -709,7 +709,7 @@ BEGIN
 			END
 
 		--Customer - Rack Item No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR SP.intCategoryId = @ItemCategoryId)) AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR (SP.intCategoryId = @ItemCategoryId AND ISNULL(SP.intItemId,0) = 0))) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				SET @intSort = @intSort + 1
