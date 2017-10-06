@@ -3,8 +3,8 @@ CREATE PROCEDURE uspGLSetMultiCompanyId
 AS
 BEGIN
 	SET NOCOUNT ON;
-	UPDATE tblGLDetail set intMultiCompanyId = @intMultCompanyId
-	UPDATE tblGLJournal set intCompanyId = @intMultCompanyId
-	UPDATE tblGLJournalDetail set intCompanyId = @intMultCompanyId
+	UPDATE tblGLDetail set intMultiCompanyId = @intMultCompanyId WHERE intMultiCompanyId IS NULL
+	UPDATE tblGLJournal set intCompanyId = @intMultCompanyId WHERE intCompanyId IS NULL
+	UPDATE tblGLJournalDetail set intCompanyId = @intMultCompanyId WHERE intCompanyId IS NULL
 END
 GO
