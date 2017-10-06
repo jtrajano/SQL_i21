@@ -25,7 +25,7 @@ Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
 		Order by sh.intInventoryShipmentId
 
 	If @ysnParentLot=1
-		Select 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
+		Select DISTINCT 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
 		mt.intCategoryId,mt.strCategoryCode,shl.dblQuantityShipped AS dblQuantity,
 		um.strUnitMeasure AS strUOM,
 		sh.dtmShipDate AS dtmTransactionDate,c.strName ,'S' AS strType
