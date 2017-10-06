@@ -2551,7 +2551,6 @@
     <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPriceId.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAuditLog.sql" />
     <Build Include="dbo\Functions\fnARGetLocationItemVendorDetailsForPricing.sql" />
-    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnCostAdjustment.sql" />
     <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCalendarDetailException.sql" />
     <Build Include="dbo\Tables\tblPATRefund.sql" />
@@ -2819,9 +2818,6 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Delete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_LoadPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnFIFOCosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLIFOCosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLotCosting.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotCostAdjustmentLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLIFO.sql" />
@@ -3038,7 +3034,6 @@
     <Build Include="dbo\Stored Procedures\uspMFShiftActivity_Create.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLot.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnActualCosting.sql" />
     <Build Include="dbo\Tables\tblICInventoryActualCostAdjustmentLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnActualCost.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
@@ -4505,10 +4500,7 @@
     <Build Include="dbo\Stored Procedures\uspGRReverseSettleStorage.sql" />
     <Build Include="dbo\Tables\tblCTPriceContract.sql" />
     <None Include="Scripts\Post-Deployment\EM\036_MoveTheTermsPerType.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCostingStockOut.sql" />
     <Build Include="dbo\Stored Procedures\uspICRecalcAveCostOnCostAdjustment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCostingCBOut.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGeneratePutAwayTask.sql" />
     <Build Include="dbo\Views\vyuARPrepaymentContractDefault.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertRecurringSalesOrder.sql" />
@@ -4520,7 +4512,6 @@
     <Build Include="dbo\Tables\tblSMActivityFollowUp.sql" />
     <Build Include="dbo\Tables\tblSMActivityFollowUpTemplate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting2.sql" />
     <Build Include="dbo\Functions\fnSCCalculateDiscountSplit.sql" />
     <Build Include="dbo\Views\vyuGLAccountFiscalBudget.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationWithType.sql" />
@@ -5707,7 +5698,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveActual.sql" />
     <Build Include="dbo\Functions\fnGetItemOnHandQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostAdjustRetroactiveAvgCost.sql" />
-    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnCostAdjustment2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
