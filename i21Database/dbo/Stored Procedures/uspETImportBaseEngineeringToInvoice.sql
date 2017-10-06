@@ -249,7 +249,7 @@ BEGIN
 								,@NewInvoiceId             = @intNewInvoiceId OUTPUT
 								,@ErrorMessage             = @strErrorMessage OUTPUT
 								,@ItemId                   = @intItemId
-								,@ItemQtyShipped           = @dblPrebuyQuantity
+								,@ItemQtyShipped           = @dblQuantity
 								,@ItemPrice                = @dblPrebuyPrice
 								,@ItemSiteId               = @intSiteId
 								,@TransactionType	       = @strTransactionType
@@ -287,7 +287,7 @@ BEGIN
 									,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
 									,@ErrorMessage = @strErrorMessage OUTPUT
 									,@ItemId                   = @intItemId
-									,@ItemQtyShipped           = @dblNonContractQuantity
+									,@ItemQtyShipped           = @dblQuantity
 									,@ItemPrice                = @dblPrice
 									,@ItemSiteId               = @intSiteId
 									,@ItemPercentFull		   = 0
@@ -338,7 +338,8 @@ BEGIN
 								--ROLLBACK TRANSACTION
 								GOTO LOGERROR
 							END
-
+						
+						EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
 						EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
 						COMMIT TRANSACTION
 						GOTO LOGSUCCESS
@@ -431,6 +432,7 @@ BEGIN
 						END
 					ELSE
 						BEGIN 
+							EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
 							----Update Tax Details
 							EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
 							EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
