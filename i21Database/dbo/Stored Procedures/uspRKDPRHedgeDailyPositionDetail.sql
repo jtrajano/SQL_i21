@@ -430,10 +430,11 @@ BEGIN
 		) t1
 				
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
-					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency)
-	SELECT @strDescription, 'Net Payable  ($)' [strType],dblUnitCost-dblQtyReceived dblTotal,
-		intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost1,
-		dblQtyReceived,intCommodityId,strCurrency
+					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,strContractType)
+	SELECT @strDescription, 'Net Payable  ($)' [strType],dblQtyReceived dblTotal,
+		intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,
+		case when isnull(dblUnitCost1,0)=0 then 1 else dblUnitCost1 end dblUnitCost1,
+		dblQtyReceived,intCommodityId,strCurrency,strContractType
 	 FROM(					
 			SELECT DISTINCT ri.intInventoryReceiptItemId
 			,cl.strLocationName
@@ -441,13 +442,13 @@ BEGIN
 			,st.dtmTicketDateTime
 			,strCustomerReference
 			,'SPT' strDistributionOption
-			,dblOrderQty*dblUnitCost AS dblUnitCost
+			,dblUnitCost AS dblUnitCost
 			,dblUnitCost dblUnitCost1
-			,isnull((Select SUM((bd.dblQtyReceived*bd.dblCost)-isnull(b.dblAmountDue,0)) FROM tblAPBillDetail bd 
+			,ri.dblLineTotal - isnull((SELECT top 1 b.dblPayment FROM tblAPBillDetail bd 
 				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
-				WHERE bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1),0) AS dblQtyReceived
+				WHERE  bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1 ),0) AS dblQtyReceived
 			,st.intCommodityId
-			,cd.intContractHeaderId, cd.strContractNumber,cur.strCurrency
+			,cd.intContractHeaderId, cd.strContractNumber,cur.strCurrency,'CNT' strContractType
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
@@ -466,34 +467,35 @@ BEGIN
 			,st.dtmTicketDateTime
 			,strCustomerReference
 			,'SPT' strDistributionOption
-			,dblOrderQty*dblUnitCost AS dblUnitCost
+			,dblUnitCost AS dblUnitCost
 			,dblUnitCost dblUnitCost1
-			,isnull((SELECT (bd.dblQtyReceived*bd.dblCost)-isnull(b.dblAmountDue,0) FROM tblAPBillDetail bd 
+			,ri.dblLineTotal - isnull((SELECT top 1 b.dblPayment FROM tblAPBillDetail bd 
 				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
 				WHERE  bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1 ),0) AS dblQtyReceived
-			,st.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber,cur.strCurrency
+			,st.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber,cur.strCurrency,'SPT' strContractType
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			inner join tblICItem i on ri.intItemId=i.intItemId
 			INNER JOIN tblICItemUOM iu on iu.intItemUOMId=ri.intUnitMeasureId
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('SPT') and  intSourceType = 1 AND strReceiptType IN ('Direct') AND i.intCommodityId = @intCommodityId  
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('SPT') and  intSourceType = 1 AND i.intCommodityId = @intCommodityId  
 			JOIN tblSMCurrency cur on cur.intCurrencyID=st.intCurrencyId
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId		
 			INNER JOIN tblICCommodityUnitMeasure um on um.intCommodityId= @intCommodityId and um.intUnitMeasureId=iu.intUnitMeasureId	
-			WHERE r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
+			WHERE  i.intCommodityId=@intCommodityId and r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
+			AND strReceiptType IN ('Purchase Contract')	
 			
 			)t
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
-		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency)
+		dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strCurrency,strContractType)
 
 	SELECT @strDescription, 'Net Receivable  ($)' [strType],isnull(dblUnitCost,0)-isnull(dblQtyReceived,0) AS dblTotal,strLocationName,
 			intContractHeaderId,strContractNumber
 			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
-			,strDistributionOption, dblUnitCost
-			,dblQtyReceived,@intCommodityId,strCurrency			
+			,strDistributionOption,case when isnull(dblUnitCost1,0)=0 then 1 else dblUnitCost1 end dblUnitCost
+			,dblQtyReceived,@intCommodityId,strCurrency,strContractType			
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
@@ -504,8 +506,9 @@ BEGIN
 				,cd.intContractHeaderId
 				,cd.strContractNumber
 				,isi.dblQuantity * isi.dblUnitPrice AS dblUnitCost
+				,isi.dblUnitPrice AS dblUnitCost1
 				,R.dblAmountPaid as dblQtyReceived
-				,st.intCommodityId,cd.intUnitMeasureId,cur.strCurrency
+				,st.intCommodityId,cd.intUnitMeasureId,cur.strCurrency,'CNT' strContractType
 			FROM tblICInventoryShipment ici
 			INNER JOIN tblICInventoryShipmentItem isi ON isi.intInventoryShipmentId = ici.intInventoryShipmentId			
 			INNER JOIN tblSCTicket st ON st.intTicketId = isi.intSourceId AND strDistributionOption IN ('CNT')
@@ -524,8 +527,8 @@ UNION
 			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
-			,strDistributionOption, dblUnitCost
-			,dblQtyReceived,@intCommodityId,strCurrency	
+			,strDistributionOption,case when isnull(dblUnitCost1,0)=0 then 1 else dblUnitCost1 end dblUnitCost
+			,dblQtyReceived,@intCommodityId,strCurrency,strContractType	
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
@@ -536,9 +539,10 @@ UNION
 				,null as intContractHeaderId
 				,null as strContractNumber
 				,isi.dblQuantity * isi.dblUnitPrice AS dblUnitCost
+				,isi.dblUnitPrice AS dblUnitCost1
 				,st.intCommodityId
 				,isnull(R.dblAmountPaid, 0) dblQtyReceived,
-				isi.intItemUOMId as intUnitMeasureId,cur.strCurrency
+				isi.intItemUOMId as intUnitMeasureId,cur.strCurrency,'SPT' strContractType
 			FROM tblICInventoryShipment ici
 			INNER JOIN tblICInventoryShipmentItem isi ON isi.intInventoryShipmentId = ici.intInventoryShipmentId
 			INNER JOIN tblSCTicket st ON st.intTicketId = isi.intSourceId AND strDistributionOption IN ('SPT')
@@ -553,123 +557,18 @@ UNION
 			) t	
 			
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
-					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId)
-	SELECT @strDescription, 'NP Un-Paid Quantity' [strType],(isnull(dblUnitCost,0)-isnull(dblQtyReceived,0))/case when isnull(dblUnitCost1,0)=0 then 1 else  dblUnitCost1 end dblTotal,
-		intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost1,
-		dblQtyReceived,intCommodityId
-	 FROM(					
-			SELECT DISTINCT ri.intInventoryReceiptItemId
-			,cl.strLocationName
-			,st.strTicketNumber
-			,st.dtmTicketDateTime
-			,strCustomerReference
-			,'SPT' strDistributionOption
-			,dblOrderQty*dblUnitCost AS dblUnitCost
-			,dblUnitCost dblUnitCost1
-			,dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,
-			isnull((Select sum((bd.dblQtyReceived*bd.dblCost)-isnull(b.dblAmountDue,0)) FROM tblAPBillDetail bd 
-				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
-				WHERE bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1),0)) AS dblQtyReceived			
+					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType)
 
-			,st.intCommodityId
-			,cd.intContractHeaderId,cd.strContractNumber
-			FROM tblICInventoryReceipt r
-			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
-			INNER JOIN vyuRKContractDetail cd ON cd.intContractHeaderId = ri.intOrderId AND cd.intContractDetailId=intLineNo 
-			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
-			WHERE intSourceType = 1
-				AND strReceiptType IN ('Purchase Contract')	AND cd.intCommodityId = @intCommodityId	
-				AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
-		
-		UNION ALL
-		SELECT * FROM (
-		SELECT DISTINCT ri.intInventoryReceiptItemId
-			,cl.strLocationName
-			,st.strTicketNumber
-			,st.dtmTicketDateTime
-			,strCustomerReference
-			,'SPT' strDistributionOption
-			,dblOrderQty*dblUnitCost AS dblUnitCost
-			,dblUnitCost dblUnitCost1
-			,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,
-			isnull((SELECT (bd.dblQtyReceived*bd.dblCost)-isnull(b.dblAmountDue,0) FROM tblAPBillDetail bd 
-				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
-				WHERE  bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1 ),0)) AS dblQtyReceived
+	select strCommodityCode,'NP Un-Paid Quantity' strType,dblTotal/dblUnitCost,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
+					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType
+					 FROM @tempFinal where strType='Net Payable  ($)' and intCommodityId=@intCommodityId
 
-			,st.intCommodityId, NULL as intContractHeaderId, NULL as strContractNumber
-			FROM tblICInventoryReceipt r
-			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			inner join tblICItem i on ri.intItemId=i.intItemId
-			INNER JOIN tblICItemUOM iu on iu.intItemUOMId=ri.intUnitMeasureId
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('SPT') and  intSourceType = 1 AND strReceiptType IN ('Direct') AND i.intCommodityId = @intCommodityId  
-			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId		
-			INNER JOIN tblICCommodityUnitMeasure um on um.intCommodityId= @intCommodityId and um.intUnitMeasureId=iu.intUnitMeasureId	
-			WHERE r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end)t where dblQtyReceived >0 				
-			)t
---done
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
-	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId)
+	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType)
+	select @strDescription,'NR Un-Paid Quantity' strType,dblTotal/dblUnitCost,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
+	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType from @tempFinal where strType= 'Net Receivable  ($)' and intCommodityId=@intCommodityId
 
-	SELECT  @strDescription, 'NR Un-Paid Quantity' [strType], CASE WHEN dblQtyReceived IS NULL then dblQuantity else dblQtyReceived end AS dblTotal,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber			
-			,strTicketNumber
-			,dtmTicketDateTime
-			,strCustomerReference
-			,strDistributionOption, dblUnitCost
-			,dblQtyReceived,@intCommodityId
-			
-		FROM (
-			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
-				,cl.strLocationName
-				,st.strTicketNumber
-				,st.dtmTicketDateTime
-				,strCustomerReference
-				,'Sales Contract' strDistributionOption
-				,cd.intContractHeaderId
-				,cd.strContractNumber
-				,isi.dblQuantity AS dblUnitCost
-				,(isnull(SUM(R.dblAmountDue) over (partition BY isi.intInventoryShipmentItemId ), 0)/sum(isnull(dblPrice,1)) over (partition BY isi.intInventoryShipmentItemId) ) as dblQtyReceived,
-				cd.intUnitMeasureId as intUnitMeasureId,isi.dblQuantity
-			FROM tblICInventoryShipment ici
-			INNER JOIN tblICInventoryShipmentItem isi ON isi.intInventoryShipmentId = ici.intInventoryShipmentId
-			JOIN tblARInvoiceDetail I on isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
-			JOIN vyuARCustomerPaymentHistoryReport R ON R.intInvoiceId = I.intInvoiceId
-			INNER JOIN tblSCTicket st ON st.intTicketId = isi.intSourceId AND strDistributionOption IN ('CNT') and  intOrderType IN (1) AND intSourceType = 1
-			INNER JOIN vyuRKContractDetail cd ON cd.intContractHeaderId = isi.intOrderId AND cd.intPricingTypeId = 1
-			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
-			WHERE st.intCommodityId = @intCommodityId
-				AND st.intProcessingLocationId= case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-			) t where isnull(dblQtyReceived,0) > 0
-		
-		UNION ALL
-		
-		SELECT  @strDescription, 'NR Un-Paid Quantity' [strType],case when dblQtyReceived is null then dblQuantity else dblQtyReceived end AS dblTotal,intInventoryReceiptItemId,strLocationName,null as intContractHeaderId,null strContractNumber
-			,strTicketNumber
-			,dtmTicketDateTime
-			,strCustomerReference
-			,strDistributionOption, dblUnitCost
-			,dblQtyReceived,@intCommodityId			
-		FROM (
-			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
-				,cl.strLocationName
-				,st.strTicketNumber
-				,st.dtmTicketDateTime
-				,strCustomerReference
-				,'Spot Sale' strDistributionOption
-				,isi.dblQuantity AS dblUnitCost
-				,st.intCommodityId
-				,(isnull(SUM(R.dblAmountDue) over (partition BY isi.intInventoryShipmentItemId ), 0)/sum(isnull(dblPrice,1)) over (partition BY isi.intInventoryShipmentItemId) ) as dblQtyReceived,
-				isi.intItemUOMId as intUnitMeasureId,isi.dblQuantity
-			FROM tblICInventoryShipment ici
-			INNER JOIN tblICInventoryShipmentItem isi ON isi.intInventoryShipmentId = ici.intInventoryShipmentId
-			JOIN tblARInvoiceDetail I on isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
-			JOIN vyuARCustomerPaymentHistoryReport R ON R.intInvoiceId = I.intInvoiceId
-			INNER JOIN tblSCTicket st ON st.intTicketId = isi.intSourceId AND strDistributionOption IN ('SPT') and intOrderType IN (4)	AND intSourceType = 1
-			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
-			WHERE  st.intCommodityId = @intCommodityId
-				AND st.intProcessingLocationId= case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-			) t WHERE isnull(dblQtyReceived,0) > 0
-
+	
 	INSERT INTO @tempFinal(strCommodityCode,strType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId)
 	SELECT @strDescription
 		,'Avail for Spot Sale' [strType]
