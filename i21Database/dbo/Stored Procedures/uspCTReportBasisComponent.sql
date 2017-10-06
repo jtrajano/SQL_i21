@@ -12,7 +12,8 @@ AS
 			@EndFromDate			DATETIME,
 			@EndToDate				DATETIME,
 			@Position				NVARCHAR(100),
-			@Vendor					NVARCHAR(900)
+			@Vendor					NVARCHAR(900),
+			@strMappingXML			NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -87,26 +88,6 @@ AS
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intContractDetailId'
 
-	SELECT	@ContractFromDate = [from],@ContractToDate = [to]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'ContractDate'
-
-	SELECT	@StartFromDate = [from],@StartToDate = [to]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'StartDate'
-
-	SELECT	@EndFromDate = [from],@EndToDate = [to]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'EndDate'
-
-	SELECT	@Position = [from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'Position'
-
-	SELECT	@Vendor = [from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'Vendor'
-
 	IF OBJECT_ID('tempdb..##BasisComponent') IS NOT NULL  				
 		DROP TABLE ##BasisComponent				
 
@@ -140,7 +121,10 @@ AS
 				CD.strInternalComment,
 				CD.intContractDetailId,
 				CD.strPosition AS Position,
-				CD.dtmPlannedAvailabilityDate
+				CD.dtmPlannedAvailabilityDate,
+				CD.strProductType,
+				CD.strContractBasis,
+				CD.strContractStatus
 
 		FROM	vyuCTSearchContractDetail	CD
 		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
@@ -175,7 +159,10 @@ AS
 				CD.strInternalComment,
 				CD.intContractDetailId,
 				CD.strPosition,
-				CD.dtmPlannedAvailabilityDate
+				CD.dtmPlannedAvailabilityDate,
+				CD.strProductType,
+				CD.strContractBasis,
+				CD.strContractStatus
 
 		FROM	vyuCTSearchContractDetail	CD
 
@@ -207,104 +194,39 @@ AS
 				CD.strInternalComment,
 				CD.intContractDetailId,
 				CD.strPosition,
-				CD.dtmPlannedAvailabilityDate
+				CD.dtmPlannedAvailabilityDate,
+				CD.strProductType,
+				CD.strContractBasis,
+				CD.strContractStatus
 
 		FROM	vyuCTSearchContractDetail	CD
 	)t
 	
-	
+	SELECT @strMappingXML = 
+	'<mappings>
+		<mapping><fieldname>ContractDate</fieldname><fromField>dtmContractDate</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>StartDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>EndDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>Position</fieldname><fromField>Position</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
+		<mapping><fieldname>Vendor</fieldname><fromField>strCustomerVendor</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
+		<mapping><fieldname>ProductType</fieldname><fromField>strProductType</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
+	</mappings>'
+
 	IF ISNULL(@intContractDetailId,'') <> ''
 	BEGIN
 		SET @Condition = ' intContractDetailId IN (' + @intContractDetailId + ') '
 	END
 	ELSE
 	BEGIN
-		IF RTRIM(LTRIM(ISNULL(@Position,''))) <> ''
-		BEGIN
-			SET @Condition = ' Position IN (''' + @Position + ''') '
-		END
-
-		IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''
-		BEGIN
-			SET @Condition = @Condition + ' AND '
-		END
-
-		IF RTRIM(LTRIM(ISNULL(@Vendor,''))) <> ''
-		BEGIN
-			SET @Condition = ' strCustomerVendor IN (''' + @Vendor + ''') '
-		END
-		ELSE
-		BEGIN
-			IF LTRIM(RTRIM(ISNULL(@Condition,''))) <> ''
-				SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
-		END
-
-		IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''
-		BEGIN
-			SET @Condition = @Condition + ' AND '
-		END
-
-		IF @ContractFromDate IS NOT NULL AND @ContractToDate IS NOT NULL
-		BEGIN
-			SET @Condition = @Condition +  ' dtmContractDate BETWEEN ''' + CONVERT(NVARCHAR(20), @ContractFromDate,101)  + ''' AND ''' + CONVERT(NVARCHAR(20), @ContractToDate,101) +''' '
-		END
-		ELSE IF @ContractFromDate IS NOT NULL AND @ContractToDate IS NULL
-		BEGIN
-			SET @Condition = @Condition +  ' dtmContractDate = ''' + @ContractFromDate + ''' '
-		END
-		ELSE
-		BEGIN
-			IF LTRIM(RTRIM(ISNULL(@Condition,''))) <> ''
-				SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
-		END
-
-		IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''
-		BEGIN
-			SET @Condition = @Condition + ' AND '
-		END
-
-		IF @StartFromDate IS NOT NULL AND @StartToDate IS NOT NULL
-		BEGIN
-			SET @Condition = @Condition +  ' dtmStartDate >= ''' + CONVERT(NVARCHAR(20), @StartFromDate,101) + ''' AND  DATEADD(d, 0, DATEDIFF(d, 0, dtmStartDate)) <=''' + CONVERT(NVARCHAR(20), @StartToDate,101) +''''
-		END
-		ELSE IF @StartFromDate IS NOT NULL AND @StartToDate IS NULL
-		BEGIN
-			SET @Condition = @Condition +  ' ''' + CONVERT(NVARCHAR(20), @StartFromDate,101) + ''' BETWEEN dtmStartDate AND dtmEndDate'
-		END
-		ELSE IF @StartFromDate IS  NULL AND @StartToDate IS NOT NULL
-		BEGIN
-			SET @Condition = @Condition +  ' ''' + CONVERT(NVARCHAR(20), @StartToDate,101) + ''' BETWEEN dtmStartDate AND dtmEndDate'
-		END
-		ELSE
-		BEGIN
-			IF LTRIM(RTRIM(ISNULL(@Condition,''))) <> ''
-				SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
-		END
-
-		IF LEN(@Condition) > 0 AND ISNULL(@intContractDetailId,'') = ''
-		BEGIN
-			SET @Condition = @Condition + ' AND '
-		END
-
-		IF @EndFromDate IS NOT NULL AND @EndToDate IS NOT NULL
-		BEGIN
-			SET @Condition = @Condition +  ' dtmStartDate >= ''' + CONVERT(NVARCHAR(20), @EndFromDate,101) + ''' AND  DATEADD(d, 0, DATEDIFF(d, 0, dtmEndDate)) <=''' + CONVERT(NVARCHAR(20), @EndToDate,101) +''''
-		END
-		ELSE IF @EndFromDate IS NOT NULL AND @EndToDate IS NULL
-		BEGIN
-			SET @Condition = @Condition +  ' ''' + CONVERT(NVARCHAR(20), @EndFromDate,101) + ''' BETWEEN dtmStartDate AND dtmEndDate'
-		END
-		ELSE IF @EndFromDate IS  NULL AND @EndToDate IS NOT NULL
-		BEGIN
-			SET @Condition = @Condition +  ' ''' + CONVERT(NVARCHAR(20), @EndToDate,101) + ''' BETWEEN dtmStartDate AND dtmEndDate'
-		END
-		ELSE
-		BEGIN
-			IF LTRIM(RTRIM(ISNULL(@Condition,''))) <> ''
-				SET @Condition = SUBSTRING(@Condition,0,LEN(@Condition) -3)
-		END
+		EXEC	uspCTGenerateWhereClause
+				@strDataXML= @xmlParam
+			   ,@strMappingXML = @strMappingXML
+			   ,@strClause = @Condition OUTPUT
 	END
 	
-	SET @SQL = 'SELECT * FROM ##BasisComponent WHERE ' + @Condition
+	IF LEN(LTRIM(RTRIM(ISNULL(@Condition,'')))) > 0
+		SET @SQL = 'SELECT * FROM ##BasisComponent WHERE ' + @Condition
+	ELSE
+		SET @SQL = 'SELECT * FROM ##BasisComponent'
 
 	EXEC sp_executesql @SQL
