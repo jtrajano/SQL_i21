@@ -52,4 +52,11 @@ GO
 	AND A.strTransactionId = B.strBillId
 	AND ISNULL(A.strDocument,'') = ''
 
+	--FOR MULTICOMPANY
+	DECLARE @intMultCompanyId INT
+	SELECT TOP 1 @intMultCompanyId = C.intMultiCompanyId FROM 
+	tblSMMultiCompany MC join tblSMCompanySetup C ON C.intMultiCompanyId = MC.intMultiCompanyId
+	UPDATE tblGLDetail set intMultiCompanyId = @intMultCompanyId WHERE intMultiCompanyId IS NULL
+	UPDATE tblGLJournal set intCompanyId = @intMultCompanyId WHERE intMultiCompanyId IS NULL
+	UPDATE tblGLJournalDetail set intCompanyId = @intMultCompanyId WHERE intMultiCompanyId IS NULL
 GO
