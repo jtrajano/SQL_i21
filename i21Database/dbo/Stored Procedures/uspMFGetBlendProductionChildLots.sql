@@ -106,6 +106,8 @@ SELECT wcl.intWorkOrderConsumedLotId
 	,CSL.strSubLocationName
 	,CL.strLocationName
 	,i.strLotTracking
+	,wcl.intSubLocationId
+	,wcl.intStorageLocationId
 FROM tblMFWorkOrderConsumedLot wcl
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICItem i ON wcl.intItemId = i.intItemId
@@ -199,6 +201,8 @@ SELECT wcl.intWorkOrderConsumedLotId
 		,CSL.strSubLocationName
 		,CL.strLocationName
 		,i.strLotTracking
+		,wcl.intSubLocationId
+		,wcl.intStorageLocationId
 FROM tblMFWorkOrderConsumedLot wcl
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICLot l ON wcl.intLotId = l.intLotId
