@@ -337,15 +337,15 @@ GO
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.GrainStorageType')
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
-        VALUES (N'', N'Storage Type', N'Grain.view.GrainStorageType', N'Grain', N'', 0)
+		VALUES (N'', N'Storage Type', N'Grain.view.GrainStorageType', N'Ticket Management', N'', 0)
 	ELSE
-		UPDATE tblSMScreen SET strScreenName = N'Storage Type', strModule = N'Grain' WHERE strNamespace = 'Grain.view.GrainStorageType'
+		UPDATE tblSMScreen SET strScreenName = N'Storage Type', strModule = N'Ticket Management' WHERE strNamespace = 'Grain.view.GrainStorageType'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts')
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
-        VALUES (N'', N'Bill Storage', N'Grain.view.BillStorageAndDiscounts', N'Grain', N'', 0)
+        VALUES (N'', N'Bill Storage', N'Grain.view.BillStorageAndDiscounts', N'Ticket Management', N'', 0)
 	ELSE
-		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Grain' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
+		UPDATE tblSMScreen SET strScreenName = N'Bill Storage', strModule = N'Ticket Management' WHERE strNamespace = 'Grain.view.BillStorageAndDiscounts'
 
 	DELETE tblSMScreen WHERE strModule = 'Grain' AND strNamespace IN('Grain.view.StorageType', 'Grain.view.QualityDiscounts', 'Grain.view.StorageStatement')
 
@@ -427,10 +427,15 @@ GO
 	BEGIN
 		UPDATE tblSMScreen SET strScreenName = N'Quality View' WHERE strNamespace = 'Quality.view.QualityException'
 	END
-GO
-	PRINT N'END INSERT DEFAULT SCREEN'
-GO
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EnergyTrac.view.Report')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (N'', N'Delivery Metrics', N'EnergyTrac.view.Report', N'Energy Trac', N'', 0)
+	ELSE
+		UPDATE tblSMScreen SET strScreenName = N'Delivery Metrics', strModule = N'Energy Trac' WHERE strNamespace = 'EnergyTrac.view.Report'
+
+GO
+	
 	--Manufacturing
 	DELETE from tblSMScreen where strModule='Manufacturing' and strNamespace in ('Manufacturing.view.DataSource','Manufacturing.view.ItemMachine','Manufacturing.view.BlendSheetItemGridRowExpander')
 
@@ -446,4 +451,73 @@ GO
 		UPDATE tblSMScreen SET strScreenName = N'File Operation' WHERE strModule='Integration' and strNamespace = 'Integration.view.CopyMoveDeleteFile'
 	END
 
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.Consolidate')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Consolidate GL Entries', N'GeneralLedger.view.Consolidate', N'GeneralLedger', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Consolidate GL Entries', strModule = N'General Ledger' WHERE strNamespace = 'GeneralLedger.view.Consolidate'
+GO
+
+
+-- Patronage - Start Screen Rename --
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.CustomerStock')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Stock', N'Patronage.view.CustomerStock', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Stock', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.CustomerStock'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.EquityDetail')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Equity', N'Patronage.view.EquityDetail', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Equity', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.EquityDetail'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.PrintLetter')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Mailer', N'Patronage.view.PrintLetter', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Mailer', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.PrintLetter'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.RefundCalculationWorksheet')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Refunds', N'Patronage.view.RefundCalculationWorksheet', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Refunds', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.RefundCalculationWorksheet'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.VolumeDetail')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Volume', N'Patronage.view.VolumeDetail', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Volume', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.VolumeDetail'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Patronage.view.ProcessDividend')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Dividends', N'Patronage.view.ProcessDividend', N'Patronage', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Dividends', strModule = N'Patronage' WHERE strNamespace = 'Patronage.view.ProcessDividend'
+GO
+
+-- Patronage - End Screen Rename --
+
+----------------------------Contract Management------------
+
+UPDATE tblSMScreen set ysnAvailable = 0 WHERE strScreenName IN ('Allocations','Contract Ag Petro','Contract Options','Cost Type','Cost Type New','Deferred Payment Rates','Freight Rates','Freight Rate New','Market Zone','Price Contracts','Weight Grade New','Approval Basis','Packing Description','Delivery Sheet','Acre Contract','Approval','Crop Year New')
+AND strModule = 'Contract Management'
+
+UPDATE tblSMScreen SET strScreenName = N'Weight Grade',strNamespace = 'ContractManagement.view.WeightGrade' 
+WHERE strNamespace = 'ContractManagement.view.WeightsGrades' AND strModule = N'Contract Management'
+
+UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'ContractManagement.view.PriceContracts' 
+WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
+
+------------------------END Contract Management------------
+
+PRINT N'END INSERT DEFAULT SCREEN'
 GO
