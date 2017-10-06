@@ -5706,6 +5706,7 @@
     <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
     <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
     <Build Include="dbo\Views\vyuSCTicketScreenView.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1710_to_1730_UpdateHomePanelDashboard.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUnpostDeliverySheet.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReverseScheduleQty.sql" />
