@@ -156,20 +156,19 @@ END
 
 -- Get the top cost bucket.
 BEGIN 
-	DECLARE @InventoryTransactionStartId AS INT
-			,@CostBucketId AS INT  
+	DECLARE @CostBucketId AS INT  
 			,@CostBucketOriginalCost AS NUMERIC(38, 20)
 			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
 
-	SELECT	TOP 1 
-			@InventoryTransactionStartId = t.intInventoryTransactionId 
-	FROM	tblICInventoryTransaction t
-	WHERE	t.intItemId = @intItemId
-			AND t.intItemLocationId = @intItemLocationId
-			AND t.intTransactionId = @intSourceTransactionId
-			AND ISNULL(t.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
-			AND t.strTransactionId = @strSourceTransactionId
-			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+	--SELECT	TOP 1 
+	--		@InventoryTransactionStartId = t.intInventoryTransactionId 
+	--FROM	tblICInventoryTransaction t
+	--WHERE	t.intItemId = @intItemId
+	--		AND t.intItemLocationId = @intItemLocationId
+	--		AND t.intTransactionId = @intSourceTransactionId
+	--		AND ISNULL(t.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+	--		AND t.strTransactionId = @strSourceTransactionId
+	--		AND ISNULL(t.ysnIsUnposted, 0) = 0 
 
 	SELECT	TOP 1 
 			@CostBucketId = cb.intInventoryLotId
@@ -347,8 +346,12 @@ BEGIN
 			,t.intTransactionTypeId
 			,t.strBatchId 
 			,t.intLotId 
+			,il.intLocationId
 	FROM	tblICInventoryTransaction t INNER JOIN #tmpRetroactiveTransactions tmp
 				ON t.intInventoryTransactionId = tmp.intInventoryTransactionId
+			INNER JOIN tblICItemLocation il
+				ON t.intItemLocationId = il.intItemLocationId
+				AND t.intItemId = il.intItemId
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
@@ -370,6 +373,7 @@ BEGIN
 		,@t_intTransactionTypeId
 		,@t_strBatchId
 		,@t_intLotId
+		,@t_intLocationId
 	;
 
 	WHILE @@FETCH_STATUS = 0 
@@ -540,7 +544,7 @@ BEGIN
 				,[intInventoryTransactionId] = @DummyInventoryTransactionId 
 				,[intInventoryCostAdjustmentTypeId] = 
 						CASE	WHEN @t_dblQty > 0 THEN 
-									CASE	WHEN @t_intTransactionTypeId = @InventoryTransactionStartId THEN 
+									CASE	WHEN @IsSourceTransaction = 1 AND @t_intLocationId IS NOT NULL THEN 
 												@COST_ADJ_TYPE_Adjust_Value
 											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
@@ -579,8 +583,8 @@ BEGIN
 				,[dblQty] = NULL 
 				,[dblCost] = NULL 
 				,[dblValue] = 
-					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-								@CostAdjustment
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@t_dblQty * @CostAdjustmentPerLot
 							WHEN @t_dblQty < 0 THEN 
 								(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 							ELSE 
@@ -594,8 +598,8 @@ BEGIN
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
 			WHERE		
-				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-							@CostAdjustment
+				CASE	WHEN @IsSourceTransaction = 1 THEN 
+							@t_dblQty * @CostAdjustmentPerLot
 						WHEN @t_dblQty < 0 THEN 
 							(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 						ELSE 
@@ -618,6 +622,7 @@ BEGIN
 			,@t_intTransactionTypeId
 			,@t_strBatchId
 			,@t_intLotId
+			,@t_intLocationId
 		;		
 	END 
 

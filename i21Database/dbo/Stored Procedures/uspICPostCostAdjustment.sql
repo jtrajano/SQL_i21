@@ -438,6 +438,7 @@ BEGIN
 			,@TransactionFormName 
 			,@intFobPointId 
 			,@intInTransitSourceLocationId 
+			,@ysnPost
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
