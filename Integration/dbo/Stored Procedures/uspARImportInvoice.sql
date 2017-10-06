@@ -17,8 +17,10 @@ BEGIN
 	--================================================
 
 	DECLARE  @ZeroDecimal		DECIMAL(18,6)
-	SET @ZeroDecimal = 0.000000	
-	
+	SET @ZeroDecimal = 0.000000
+	DECLARE @cnt INT = 1
+	DECLARE @SQLCMD NVARCHAR(4000)	
+			
 	IF (@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0)
 		BEGIN
 			SET @StartDate = NULL
@@ -377,8 +379,7 @@ BEGIN
 			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL AND agstm_sst_amt <> 0
 
 			--IMPORT LOCALE TAX DETAILS 			
-			DECLARE @cnt INT = 1
-			DECLARE @SQLCMD NVARCHAR(4000)
+
 			WHILE @cnt < 13
 					BEGIN
 					   SET @SQLCMD = ' INSERT INTO [dbo].[tblARInvoiceDetail]
@@ -504,8 +505,7 @@ BEGIN
 			WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND ptstm_sst_amt <> 0
 
 			--IMPORT LOCALE TAX DETAILS 			
-			DECLARE @cnt INT = 1
-			DECLARE @SQLCMD NVARCHAR(4000)
+
 			WHILE @cnt < 13
 					BEGIN
 					   SET @SQLCMD = ' INSERT INTO [dbo].[tblARInvoiceDetail]
