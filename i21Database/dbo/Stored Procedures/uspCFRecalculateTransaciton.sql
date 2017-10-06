@@ -781,7 +781,7 @@ BEGIN
 					,[ysnSeparateOnInvoice]		
 					,[ysnCheckoffTax]			
 					,[ysnTaxExempt]		
-					,[ysnTaxOnly]	
+					,ISNULL([ysnTaxOnly],0)	
 					,[strNotes]  				
 				FROM
 				@tblCFRemoteTax
@@ -1911,7 +1911,7 @@ BEGIN
 					,[ysnSeparateOnInvoice]		
 					,[ysnCheckoffTax]			
 					,[ysnTaxExempt]		
-					,[ysnTaxOnly]	
+					,ISNULL([ysnTaxOnly],0)	
 					,[strNotes]  				
 				FROM
 				@tblCFRemoteTax

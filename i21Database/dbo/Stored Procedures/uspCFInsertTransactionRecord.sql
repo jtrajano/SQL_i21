@@ -291,6 +291,25 @@ BEGIN
 	BEGIN 
 		SET @strTransactionType = 'Local/Network'
 	END
+	ELSE IF (@strNetworkType = 'CFN')
+	BEGIN
+		IF(@strTransactionType = 'R')
+		BEGIN
+			SET @strTransactionType = 'Remote'
+		END
+		ELSE IF (@strTransactionType = 'D' OR @strTransactionType = 'C' OR @strTransactionType = 'N')
+		BEGIN
+			SET @strTransactionType = 'Local/Network'
+		END
+		ELSE IF (@strTransactionType = 'F')
+		BEGIN
+			SET @strTransactionType = 'Foreign Sales'
+		END
+		ELSE IF (@strTransactionType = 'E')
+		BEGIN
+			SET @strTransactionType = 'Extended Remote'
+		END
+	END
 
 
 	IF(@dblOriginalGrossPrice < 0)
