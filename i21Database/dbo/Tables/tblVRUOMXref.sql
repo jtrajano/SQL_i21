@@ -11,4 +11,4 @@
 	CONSTRAINT [FK_tblVRUOMXref_tblVRVendorSetup] FOREIGN KEY([intVendorSetupId]) REFERENCES [dbo].[tblVRVendorSetup] ([intVendorSetupId])
 
 );
-
+GO
