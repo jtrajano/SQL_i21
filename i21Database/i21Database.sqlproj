@@ -5692,6 +5692,7 @@
     <Build Include="dbo\Views\vyuARDocumentMaintenanceMessageDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetYieldViewTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGenerateWhereClause.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
