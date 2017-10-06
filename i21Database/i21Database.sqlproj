@@ -5731,6 +5731,8 @@
     <Build Include="dbo\Tables\tblSMIdentityUserLogins.sql" />
     <Build Include="dbo\Tables\tblSMIdentityUserRoles.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetYieldViewTransaction.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysical.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
