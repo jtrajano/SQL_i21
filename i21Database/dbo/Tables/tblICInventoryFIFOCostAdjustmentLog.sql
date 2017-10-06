@@ -23,6 +23,7 @@
 		[dtmCreated] DATETIME NULL, 
 		[strRelatedTransactionId] NVARCHAR(50), 
 		[intRelatedTransactionId] INT,
+		[intRelatedTransactionDetailId] INT,
 		[intRelatedInventoryTransactionId] INT,
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityUserId] INT NULL, 

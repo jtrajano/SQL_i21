@@ -2819,8 +2819,6 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_LoadPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotCostAdjustmentLog.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnFIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLIFO.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultDecimal.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
@@ -3033,9 +3031,7 @@
     <Build Include="dbo\Functions\fnTRConcatString.sql" />
     <Build Include="dbo\Stored Procedures\uspMFShiftActivity_Create.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLot.sql" />
     <Build Include="dbo\Tables\tblICInventoryActualCostAdjustmentLog.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnActualCost.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
     <Build Include="dbo\Functions\fnEMGetCustomerGroupMember.sql" />
     <Build Include="dbo\Views\vyuEMCustomerGroupWithDetail.sql" />
@@ -5697,7 +5693,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveActual.sql" />
     <Build Include="dbo\Functions\fnGetItemOnHandQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostAdjustRetroactiveAvgCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>

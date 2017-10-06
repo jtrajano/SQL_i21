@@ -535,6 +535,7 @@ BEGIN
 				,[dtmCreated] 
 				,[strRelatedTransactionId] 
 				,[intRelatedTransactionId] 
+				,[intRelatedTransactionDetailId] 
 				,[intRelatedInventoryTransactionId]
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
@@ -594,6 +595,7 @@ BEGIN
 				,[dtmCreated] = GETDATE()
 				,[strRelatedTransactionId] = @t_strTransactionId 
 				,[intRelatedTransactionId] = @t_intTransactionId
+				,[intRelatedTransactionDetailId] = @t_intTransactionDetailId
 				,[intRelatedInventoryTransactionId] = @t_intInventoryTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId

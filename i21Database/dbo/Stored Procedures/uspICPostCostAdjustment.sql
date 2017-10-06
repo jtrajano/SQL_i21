@@ -288,7 +288,7 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST) AND (@strActualCostId IS NULL)
 	BEGIN TRY
-		EXEC @ReturnValue = dbo.uspICPostAdjustRetroactiveAvgCost
+		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveAvg
 			@dtmDate
 			,@intItemId 
 			,@intItemLocationId 
