@@ -762,12 +762,7 @@ BEGIN TRY
 			L.intStorageLocationId = CASE 
 				WHEN I.intConsumptionMethodId = 2
 					THEN I.intStorageLocationId
-				ELSE @intProductionStageLocationId
-				END
-			OR L.intStorageLocationId = CASE 
-				WHEN I.intConsumptionMethodId = 2
-					THEN I.intStorageLocationId
-				ELSE @intPMStageLocationId
+				ELSE (Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End)
 				END
 			)
 	GROUP BY I.intItemId
