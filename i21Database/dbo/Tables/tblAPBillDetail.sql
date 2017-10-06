@@ -17,6 +17,7 @@
 	[intContractDetailId]    INT             NULL,
 	[intCustomerStorageId]    INT             NULL,
 	[intStorageLocationId] INT             NULL,
+	[intLocationId] INT             NULL,
 	[intLoadDetailId]    INT             NULL,
 	[intLoadId]    INT             NULL,
 	[intCCSiteDetailId]    INT             NULL,
