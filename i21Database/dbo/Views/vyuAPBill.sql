@@ -58,7 +58,8 @@ SELECT
 	CL.strLocationName AS strReceivingLocation,
 	strStoreLocation = (SELECT SCL.strLocationName FROM dbo.tblSMCompanyLocation SCL WHERE SCL.intCompanyLocationId = A.intStoreLocationId),
 	strOrderedBy = (SELECT UEN.strName FROM dbo.tblEMEntity UEN WHERE UEN.intEntityId = A.intOrderById),
-	B.strVendorId
+	B.strVendorId,
+	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -74,6 +75,18 @@ FROM
 		ON CL.intCompanyLocationId = A.intShipToId
 	INNER JOIN dbo.tblSMTerm ST
 		ON ST.intTermID = A.intTermsId
+	CROSS APPLY (
+		SELECT TOP 1
+			COUNT(commodity.intCommodityId) intCount, 
+			commodity.intCommodityId,
+			commodity.strCommodityCode
+		FROM dbo.tblAPBillDetail detail
+		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
+		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
+		WHERE detail.intBillId = A.intBillId
+		GROUP BY commodity.intCommodityId, commodity.strCommodityCode
+		ORDER BY COUNT(commodity.intCommodityId) DESC
+	) commodity
 	LEFT JOIN dbo.tblSMShipVia SV
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN
