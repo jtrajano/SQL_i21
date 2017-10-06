@@ -2,7 +2,7 @@
 (
 	[intExceptionId] INT IDENTITY NOT NULL,
 	[intReportingComponentId] INT NOT NULL,
-	[strExceptionType] NVARCHAR(50) NOT NULL,
+	[strExceptionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTransactionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intTransactionNumberId] INT NULL,
 	[dtmDate] DATETIME NULL,
