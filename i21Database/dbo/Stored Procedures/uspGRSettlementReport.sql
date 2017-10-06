@@ -175,7 +175,10 @@ BEGIN
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END 
-	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END						 
+	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
+	   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals ELSE NULL END
+	   ,dblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
+	   ,lblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' ELSE NULL END						 
 	   ,blbHeaderLogo = @companyLogo						 	   						 
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -241,6 +244,15 @@ BEGIN
 				  WHERE intInvoiceId IS NOT NULL
 				  GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
+    
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblTotal) dblTotals
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intBillId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
 
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId
 		AND (
@@ -643,6 +655,9 @@ BEGIN
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END 
 	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
+	   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals ELSE NULL END
+	   ,dblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
+	   ,lblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' ELSE NULL END
 	   ,blbHeaderLogo = @companyLogo
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -701,6 +716,16 @@ BEGIN
 				  WHERE intInvoiceId IS NOT NULL
 				  GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
+    
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblTotal) dblTotals
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intBillId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
+
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
@@ -801,6 +826,9 @@ BEGIN
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END
 	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
+	   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals ELSE NULL END
+	   ,dblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
+	   ,lblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' ELSE NULL END
 	   ,blbHeaderLogo = @companyLogo
 	FROM tblCMBankTransaction BNKTRN
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -862,6 +890,15 @@ BEGIN
 				  WHERE intInvoiceId IS NOT NULL
 				  GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
+    
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblTotal) dblTotals 
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intBillId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
 
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId
 		AND BNKTRN.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
@@ -1243,6 +1280,9 @@ BEGIN
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
 	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END 
 	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
+	   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals ELSE NULL END
+	   ,dblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
+	   ,lblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' ELSE NULL END
 	   ,blbHeaderLogo = @companyLogo					    	   					    
 	FROM tblCMBankTransaction BNKTRN	
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1299,6 +1339,15 @@ BEGIN
 				 FROM tblAPPaymentDetail WHERE intInvoiceId IS NOT NULL
 				 GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
+    
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblTotal) dblTotals
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intBillId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
 
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
