@@ -16,129 +16,71 @@ AS
 
 DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
+	  , @dtmAsOfDate				AS DATETIME			= NULL
 
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
+SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
 
-IF @strStatementFormat = 'Balance Forward'
-	BEGIN
-		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
-			  @dtmDateTo				= @strAsOfDate
-			, @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-			, @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-			, @ysnIncludeBudget			= @ysnIncludeBudget
-			, @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-			, @ysnPrintFromCF			= 0
-			, @ysnSearchOnly			= 1
-			, @strAccountStatusCode		= @strAccountStatusCodeLocal
-			, @strLocationName			= @strLocationNameLocal
-	END
-ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
-	BEGIN
-		EXEC dbo.uspARCustomerStatementReport
-		      @dtmDateTo				= @strAsOfDate
-		    , @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-		    , @ysnIncludeBudget			= @ysnIncludeBudget
-		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-			, @ysnSearchOnly			= 1
-		    , @strAccountStatusCode		= @strAccountStatusCodeLocal
-		    , @strLocationName			= @strLocationNameLocal
-		    , @strStatementFormat		= @strStatementFormat
-	END
-ELSE IF @strStatementFormat = 'Payment Activity'
-	BEGIN
-		EXEC dbo.uspARCustomerStatementPaymentActivityReport
-			  @dtmDateTo				= @strAsOfDate
-		    , @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-		    , @ysnIncludeBudget			= @ysnIncludeBudget
-		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-			, @ysnSearchOnly			= 1
-		    , @strAccountStatusCode		= @strAccountStatusCodeLocal
-		    , @strLocationName			= @strLocationNameLocal
-	END
+TRUNCATE TABLE tblARCustomerAgingStagingTable
+INSERT INTO tblARCustomerAgingStagingTable (
+	   strCustomerName
+	 , strCustomerNumber
+	 , intEntityCustomerId
+	 , dblCreditLimit
+	 , dblTotalAR
+	 , dblFuture
+	 , dbl0Days
+	 , dbl10Days
+	 , dbl30Days
+	 , dbl60Days
+	 , dbl90Days
+	 , dbl91Days
+	 , dblTotalDue
+	 , dblAmountPaid
+	 , dblCredits
+	 , dblPrepayments
+	 , dblPrepaids
+	 , dtmAsOfDate
+	 , strSalespersonName
+	 , strSourceTransaction
+	 , strCompanyName
+	 , strCompanyAddress
+)
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo = @dtmAsOfDate
+										, @strCompanyLocation = @strCompanyLocation
 
 TRUNCATE TABLE tblARSearchStatementCustomer
-
-IF @strStatementFormat IN ('Balance Forward', 'Payment Activity')
-	BEGIN
-		TRUNCATE TABLE tblARSearchStatementCustomer
-		INSERT INTO tblARSearchStatementCustomer (
+INSERT INTO tblARSearchStatementCustomer (
 			  intEntityCustomerId
 			, strCustomerNumber
 			, strCustomerName
 			, dblARBalance
-			, strTransactionId
-			, strTransactionDate
 			, dblTotalAmount
 			, ysnHasEmailSetup
 			, intConcurrencyId
 		)
-		SELECT intEntityCustomerId		= STAGING.intEntityCustomerId
-			 , strCustomerNumber		= STAGING.strCustomerNumber
-			 , strCustomerName			= STAGING.strCustomerName
-			 , dblARBalance				= STAGING.dblTotalBalance
-			 , strTransactionId			= NULL
-			 , strTransactionDate		= NULL
-			 , dblTotalAmount			= STAGING.dblTotalBalance
-			 , ysnHasEmailSetup			= CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
-			 , intConcurrencyId			= 1
-		FROM (
-			SELECT intEntityCustomerId
-				 , strCustomerNumber
-				 , strCustomerName
-				 , dblTotalBalance = SUM(ISNULL(dblBalance, 0))
-			FROM dbo.tblARCustomerStatementStagingTable WITH (NOLOCK)
-			GROUP BY intEntityCustomerId, strCustomerName, strCustomerNumber
-		) STAGING		
-		OUTER APPLY (
-			SELECT intEmailSetupCount = COUNT(*) 
-			FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
-			WHERE CC.intCustomerEntityId = STAGING.intEntityCustomerId 
-				AND ISNULL(CC.strEmail, '') <> '' 
-				AND CC.strEmailDistributionOption LIKE '%Statements%'
-		) EMAILSETUP
-	END
-ELSE
-	BEGIN
-		TRUNCATE TABLE tblARSearchStatementCustomer
-		INSERT INTO tblARSearchStatementCustomer (
-			  intEntityCustomerId
-			, strCustomerNumber
-			, strCustomerName
-			, dblARBalance
-			, strTransactionId
-			, strTransactionDate
-			, dblTotalAmount
-			, ysnHasEmailSetup
-			, intConcurrencyId
-		)
-		SELECT intEntityCustomerId		= STAGING.intEntityCustomerId
-			 , strCustomerNumber		= STAGING.strCustomerNumber
-			 , strCustomerName			= STAGING.strCustomerName
-			 , dblARBalance				= STAGING.dblTotalBalance
-			 , strTransactionId			= NULL
-			 , strTransactionDate		= NULL
-			 , dblTotalAmount			= STAGING.dblTotalBalance
-			 , ysnHasEmailSetup			= CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
-			 , intConcurrencyId			= 1
-		FROM (
-			SELECT intEntityCustomerId
-				 , strCustomerNumber
-				 , strCustomerName
-				 , dblTotalBalance = SUM(ISNULL(dblAmountDue, 0))
-			FROM dbo.tblARCustomerStatementStagingTable WITH (NOLOCK)
-			GROUP BY intEntityCustomerId, strCustomerName, strCustomerNumber
-		) STAGING		
-		OUTER APPLY (
-			SELECT intEmailSetupCount = COUNT(*) 
-			FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
-			WHERE CC.intCustomerEntityId = STAGING.intEntityCustomerId 
-				AND ISNULL(CC.strEmail, '') <> '' 
-				AND CC.strEmailDistributionOption LIKE '%Statements%'
-		) EMAILSETUP
-	END
+SELECT AGING.intEntityCustomerId
+	 , AGING.strCustomerNumber
+	 , AGING.strCustomerName
+	 , AGING.dblTotalAR
+	 , AGING.dblTotalAR
+	 , ysnHasEmailSetup			= CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , 1
+FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
+INNER JOIN (
+	SELECT intEntityId
+	FROM tblARCustomer WITH (NOLOCK)
+	WHERE ISNULL(strStatementFormat, 'Open Item') = ISNULL(@strStatementFormat, 'Open Item')
+) C ON AGING.intEntityCustomerId = C.intEntityId
+OUTER APPLY (
+	SELECT intEmailSetupCount = COUNT(*) 
+	FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+	WHERE CC.intCustomerEntityId = AGING.intEntityCustomerId 
+		AND ISNULL(CC.strEmail, '') <> '' 
+		AND CC.strEmailDistributionOption LIKE '%Statements%'
+) EMAILSETUP
+WHERE ISNULL(AGING.dblTotalAR, 0) <> 0
 
 IF @ysnEmailOnly = 1
 	DELETE FROM tblARSearchStatementCustomer WHERE ysnHasEmailSetup = 0
