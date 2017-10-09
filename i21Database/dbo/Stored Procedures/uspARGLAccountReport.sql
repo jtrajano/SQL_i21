@@ -33,6 +33,7 @@ FROM (
 	WHERE GLD.ysnIsUnposted = 0
 	AND GLD.dtmDate <= @dtmAsOfDate
 	GROUP BY GLD.intAccountId, GLAD.strAccountId, strAccountCategory
+	HAVING ISNULL(SUM(dblDebit) - SUM(dblCredit), 0) > 0.00
 
 	UNION ALL 
 
@@ -46,6 +47,7 @@ FROM (
 	WHERE GLD.ysnIsUnposted = 0
 	AND GLD.dtmDate <= @dtmAsOfDate
 	GROUP BY GLD.intAccountId, GLAD.strAccountId, strAccountCategory
+	HAVING ISNULL(SUM(dblDebit) - SUM(dblCredit), 0) > 0.00
 ) GL
 OUTER APPLY (
 	SELECT dblTotalAR				= SUM(dblTotalAR) + ABS(SUM(dblPrepayments))
