@@ -144,6 +144,8 @@
 	,GRDiscountId.strDiscountId
 	,GRSSR.strScheduleId
 	,GRSSR.strScheduleDescription
+	,GRStorage.ysnDPOwnedType
+	,GRStorage.ysnCustomerStorage
 
 	,EMSplit.strSplitNumber
 	,EMEntityFarm.strFarmDescription
