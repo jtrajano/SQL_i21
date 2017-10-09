@@ -83,7 +83,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_mkt_sign_yn = CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END,
 				agcus_ga_hold_pay_yn = CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END,
 				agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END,
-				agcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+				agcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId)),
 				agcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				agcus_srvchr_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				agcus_dflt_mkt_zone = (SELECT strMarketZoneCode FROM tblARMarketZone WHERE intMarketZoneId = Cus.intMarketZoneId)	
@@ -570,11 +570,22 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 													UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
 													@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 				
-					
-
 					DECLARE @ContactEntityId INT
 			
 					SET @ContactEntityId = SCOPE_IDENTITY()
+
+					DECLARE @AccountStatusId INT
+					SET @AccountStatusId = NULL
+
+					SELECT @AccountStatusId = intAccountStatusId FROM tblARAccountStatus
+						WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = (SELECT agcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS
+							FROM agcusmst WHERE agcus_key = @originCustomer)
+
+					IF @AccountStatusId IS NOT NULL
+					BEGIN			
+						INSERT INTO tblARCustomerAccountStatus (intEntityCustomerId, intAccountStatusId, intConcurrencyId)
+						SELECT @EntityId, @AccountStatusId, 1
+					END
 					
 					if @strPhone <> ''''
 						INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone) VALUES (@ContactEntityId, @strPhone)
@@ -761,7 +772,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
 				ptcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
 				ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
-				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId)),
 				ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				ptcus_terms_code = (SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255 )
@@ -1240,6 +1251,19 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					DECLARE @ContactEntityId INT
 
 					SET @ContactEntityId = SCOPE_IDENTITY()
+
+					DECLARE @AccountStatusId INT
+					SET @AccountStatusId = NULL
+
+					SELECT @AccountStatusId = intAccountStatusId FROM tblARAccountStatus
+						WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = (SELECT ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS
+							FROM ptcusmst WHERE ptcus_cus_no = @originCustomer)
+
+					IF @AccountStatusId IS NOT NULL
+					BEGIN			
+						INSERT INTO tblARCustomerAccountStatus (intEntityCustomerId, intAccountStatusId, intConcurrencyId)
+						SELECT @EntityId, @AccountStatusId, 1
+					END
 
 					if @strPhone <> ''''
 						INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone) VALUES (@ContactEntityId, @strPhone)
