@@ -9,6 +9,7 @@
 	[dblMinimumFinanceCharge]   NUMERIC (18, 6) NULL DEFAULT 0,
     [intGracePeriod]			INT             NULL,
     [ysnAllowCatchUpCharges]	BIT             CONSTRAINT [DF_tblARServiceCharge_ysnAllowCatchUpCharges] DEFAULT ((0)) NOT NULL,
+	[ysnImported]				BIT             CONSTRAINT [DF_tblARServiceCharge_ysnImported] DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]			INT             NOT NULL DEFAULT ((0)),
     CONSTRAINT [PK_tblARServiceCharge_intServiceChargeId] PRIMARY KEY CLUSTERED ([intServiceChargeId] ASC),
     CONSTRAINT [UQ_tblARServiceCharge_strServiceChargeCode] UNIQUE NONCLUSTERED ([strServiceChargeCode] ASC)

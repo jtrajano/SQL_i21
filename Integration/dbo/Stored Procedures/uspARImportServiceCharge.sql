@@ -66,7 +66,8 @@ BEGIN
 			 [dblPercentage],
 			 [dblServiceChargeAPR],
 			 [dblMinimumCharge],
-			 [intGracePeriod])
+			 [intGracePeriod],
+			 [ysnImported])
 		 SELECT 
 			 agsrv_srv_no
 			,agsrv_desc
@@ -75,6 +76,7 @@ BEGIN
 			,0
 			,0
 			,0
+			,1
 		FROM agsrvmst LEFT JOIN 
 		tblARServiceCharge ON agsrvmst.agsrv_srv_no  = tblARServiceCharge.strServiceChargeCode COLLATE Latin1_General_CI_AS
 		WHERE tblARServiceCharge.strServiceChargeCode IS NULL
@@ -178,7 +180,8 @@ BEGIN
 			 [dblServiceChargeAPR],
 			 [dblMinimumCharge],
 			 [intGracePeriod],			 
-			 [ysnAllowCatchUpCharges])
+			 [ysnAllowCatchUpCharges],
+			 [ysnImported])
 		 SELECT 
 			 ptsrv_code
 			,ptsrv_desc
@@ -190,7 +193,8 @@ BEGIN
 			,(CASE	WHEN ptsrv_allow_mthly_chg_freq = ''Y''
 							THEN 1
 						ELSE 0
-						END)
+						END
+			,1)
 		FROM ptsrvmst LEFT JOIN 
 		tblARServiceCharge ON ptsrvmst.ptsrv_code  = tblARServiceCharge.strServiceChargeCode COLLATE Latin1_General_CI_AS
 		WHERE tblARServiceCharge.strServiceChargeCode IS NULL
