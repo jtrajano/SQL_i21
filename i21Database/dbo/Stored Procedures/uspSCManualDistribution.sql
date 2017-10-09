@@ -269,7 +269,7 @@ OPEN intListCursor;
 				END
 			IF @ysnIsStorage = 1
 			BEGIN
-				IF @ysnDPStorage = 1 AND ISNULL(@intLoopContractId,0) = 0
+				IF @ysnDPStorage = 1
 					BEGIN
 					SET @strReceiptType = 'Delayed Price'
 					INSERT INTO @LineItems (
