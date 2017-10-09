@@ -146,8 +146,9 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 					@Email			= rtrim(ltrim(sscon_email))
 				from @Contacts where id = @id
 				
-				insert into tblEMEntity(strName, strContactNumber, strTitle)
-				select @Name, @ContactNumber, @Title
+				insert into tblEMEntity(strName, strContactNumber, strTitle, strEmail)
+				select @Name, @ContactNumber, @Title, @Email
+
 
 				declare @intContactId int
 				
@@ -159,6 +160,9 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 						insert into tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
 						select top 1 @intContactId, @CP, intContactDetailTypeId from tblEMContactDetailType where strType = 'Phone' and strField = 'Home' 
 					end
+
+					insert into tblEMEntityPhoneNumber(intEntityId, strPhone)
+					select @intContactId, @CP
 				end
 
 				if @WorkPhone <> ''
