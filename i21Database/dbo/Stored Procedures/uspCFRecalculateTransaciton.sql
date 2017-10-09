@@ -46,6 +46,27 @@
 
 ,@BatchRecalculate					BIT				=	0
 
+,@Tax1								NVARCHAR(MAX)	= ''
+,@Tax2								NVARCHAR(MAX)	= ''
+,@Tax3								NVARCHAR(MAX)	= ''
+,@Tax4								NVARCHAR(MAX)	= ''
+,@Tax5								NVARCHAR(MAX)	= ''
+,@Tax6								NVARCHAR(MAX)	= ''
+,@Tax7								NVARCHAR(MAX)	= ''
+,@Tax8								NVARCHAR(MAX)	= ''
+,@Tax9								NVARCHAR(MAX)	= ''
+,@Tax10								NVARCHAR(MAX)	= ''
+,@TaxValue1							NUMERIC(18,6)	= 0.000000
+,@TaxValue2							NUMERIC(18,6)	= 0.000000
+,@TaxValue3							NUMERIC(18,6)	= 0.000000
+,@TaxValue4							NUMERIC(18,6)	= 0.000000
+,@TaxValue5							NUMERIC(18,6)	= 0.000000
+,@TaxValue6							NUMERIC(18,6)	= 0.000000
+,@TaxValue7							NUMERIC(18,6)	= 0.000000
+,@TaxValue8							NUMERIC(18,6)	= 0.000000
+,@TaxValue9							NUMERIC(18,6)	= 0.000000
+,@TaxValue10						NUMERIC(18,6)	= 0.000000
+
 AS
 
 BEGIN
@@ -683,7 +704,28 @@ BEGIN
 				,@CityTax1						=@CityTax1			
 				,@StateSalesTax					=@StateSalesTax		
 				,@CountySalesTax				=@CountySalesTax	
-				,@CitySalesTax					=@CitySalesTax		
+				,@CitySalesTax					=@CitySalesTax
+				,@Tax1							=@Tax1		
+				,@Tax2							=@Tax2		
+				,@Tax3							=@Tax3		
+				,@Tax4							=@Tax4		
+				,@Tax5							=@Tax5		
+				,@Tax6							=@Tax6		
+				,@Tax7							=@Tax7		
+				,@Tax8							=@Tax8		
+				,@Tax9							=@Tax9		
+				,@Tax10							=@Tax10		
+				,@TaxValue1						=@TaxValue1	
+				,@TaxValue2						=@TaxValue2	
+				,@TaxValue3						=@TaxValue3	
+				,@TaxValue4						=@TaxValue4	
+				,@TaxValue5						=@TaxValue5	
+				,@TaxValue6						=@TaxValue6	
+				,@TaxValue7						=@TaxValue7	
+				,@TaxValue8						=@TaxValue8	
+				,@TaxValue9						=@TaxValue9	
+				,@TaxValue10					=@TaxValue10
+
 
 				--SELECT * FROM @tblCFRemoteTax
 
@@ -787,6 +829,7 @@ BEGIN
 				@tblCFRemoteTax
 				WHERE ysnInvalidSetup = 0
 
+				--SELECT * FROM @tblCFRemoteTax
 				--SELECT * from @LineItemTaxDetailStagingTable
 
 
@@ -1813,6 +1856,26 @@ BEGIN
 				,@CountySalesTax				=@CountySalesTax	
 				,@CitySalesTax					=@CitySalesTax	
 				,@DisregardExemptionSetup		=1
+				,@Tax1							=@Tax1		
+				,@Tax2							=@Tax2		
+				,@Tax3							=@Tax3		
+				,@Tax4							=@Tax4		
+				,@Tax5							=@Tax5		
+				,@Tax6							=@Tax6		
+				,@Tax7							=@Tax7		
+				,@Tax8							=@Tax8		
+				,@Tax9							=@Tax9		
+				,@Tax10							=@Tax10		
+				,@TaxValue1						=@TaxValue1	
+				,@TaxValue2						=@TaxValue2	
+				,@TaxValue3						=@TaxValue3	
+				,@TaxValue4						=@TaxValue4	
+				,@TaxValue5						=@TaxValue5	
+				,@TaxValue6						=@TaxValue6	
+				,@TaxValue7						=@TaxValue7	
+				,@TaxValue8						=@TaxValue8	
+				,@TaxValue9						=@TaxValue9	
+				,@TaxValue10					=@TaxValue10
 
 				--SELECT * FROM @tblCFRemoteTax
 
@@ -2244,6 +2307,26 @@ BEGIN
 				,@StateSalesTax					=@StateSalesTax		
 				,@CountySalesTax				=@CountySalesTax	
 				,@CitySalesTax					=@CitySalesTax
+				,@Tax1							=@Tax1		
+				,@Tax2							=@Tax2		
+				,@Tax3							=@Tax3		
+				,@Tax4							=@Tax4		
+				,@Tax5							=@Tax5		
+				,@Tax6							=@Tax6		
+				,@Tax7							=@Tax7		
+				,@Tax8							=@Tax8		
+				,@Tax9							=@Tax9		
+				,@Tax10							=@Tax10		
+				,@TaxValue1						=@TaxValue1	
+				,@TaxValue2						=@TaxValue2	
+				,@TaxValue3						=@TaxValue3	
+				,@TaxValue4						=@TaxValue4	
+				,@TaxValue5						=@TaxValue5	
+				,@TaxValue6						=@TaxValue6	
+				,@TaxValue7						=@TaxValue7	
+				,@TaxValue8						=@TaxValue8	
+				,@TaxValue9						=@TaxValue9	
+				,@TaxValue10					=@TaxValue10
 
 				UPDATE @tblCFRemoteTax SET ysnInvalidSetup = 1 , dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
@@ -2341,6 +2424,10 @@ BEGIN
 	--				TAX COMPUTATION					 --
 	---------------------------------------------------
 
+
+	SELECT * FROM @tblCFRemoteTax
+	SELECT * FROM @tblCFCalculatedTax
+	SELECT * FROM @tblCFOriginalTax
 
 
 

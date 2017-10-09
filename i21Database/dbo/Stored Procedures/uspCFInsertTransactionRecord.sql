@@ -40,6 +40,26 @@
 	,@StateSalesTax					NUMERIC(18,6)	= 0.000000
 	,@CountySalesTax				NUMERIC(18,6)	= 0.000000
 	,@CitySalesTax					NUMERIC(18,6)	= 0.000000
+	,@Tax1							NVARCHAR(MAX)	= NULL
+	,@Tax2							NVARCHAR(MAX)	= NULL
+	,@Tax3							NVARCHAR(MAX)	= NULL
+	,@Tax4							NVARCHAR(MAX)	= NULL
+	,@Tax5							NVARCHAR(MAX)	= NULL
+	,@Tax6							NVARCHAR(MAX)	= NULL
+	,@Tax7							NVARCHAR(MAX)	= NULL
+	,@Tax8							NVARCHAR(MAX)	= NULL
+	,@Tax9							NVARCHAR(MAX)	= NULL
+	,@Tax10							NVARCHAR(MAX)	= NULL
+	,@TaxValue1						NUMERIC(18,6)	= 0.000000
+	,@TaxValue2						NUMERIC(18,6)	= 0.000000
+	,@TaxValue3						NUMERIC(18,6)	= 0.000000
+	,@TaxValue4						NUMERIC(18,6)	= 0.000000
+	,@TaxValue5						NUMERIC(18,6)	= 0.000000
+	,@TaxValue6						NUMERIC(18,6)	= 0.000000
+	,@TaxValue7						NUMERIC(18,6)	= 0.000000
+	,@TaxValue8						NUMERIC(18,6)	= 0.000000
+	,@TaxValue9						NUMERIC(18,6)	= 0.000000
+	,@TaxValue10					NUMERIC(18,6)	= 0.000000
 
 	-------------SITE RELATED-------------
 	,@strSiteId						NVARCHAR(MAX)
@@ -1056,6 +1076,27 @@ BEGIN
 		,@CitySalesTax					=   @CitySalesTax		
 		,@strGUID						=   @strGUID		
 		,@strProcessDate				=	@strProcessDate
+		,@Tax1							=	@Tax1		
+		,@Tax2							=	@Tax2		
+		,@Tax3							=	@Tax3		
+		,@Tax4							=	@Tax4		
+		,@Tax5							=	@Tax5		
+		,@Tax6							=	@Tax6		
+		,@Tax7							=	@Tax7		
+		,@Tax8							=	@Tax8		
+		,@Tax9							=	@Tax9		
+		,@Tax10							=	@Tax10		
+		,@TaxValue1						=	@TaxValue1	
+		,@TaxValue2						=	@TaxValue2	
+		,@TaxValue3						=	@TaxValue3	
+		,@TaxValue4						=	@TaxValue4	
+		,@TaxValue5						=	@TaxValue5	
+		,@TaxValue6						=	@TaxValue6	
+		,@TaxValue7						=	@TaxValue7	
+		,@TaxValue8						=	@TaxValue8	
+		,@TaxValue9						=	@TaxValue9	
+		,@TaxValue10					=	@TaxValue10
+
 
 		------------------------------------------------------------
 		--			UPDATE TRANSACTION DEPENDS ON PRICING		  --
