@@ -94,6 +94,8 @@ BEGIN
 			,@t_intTransactionTypeId AS INT 
 			,@t_strBatchId AS NVARCHAR(50) 
 			,@t_intLocationId AS INT 
+			,@t_strRelatedTransactionId AS NVARCHAR(50)
+			,@t_intRelatedTransactionId AS INT 
 
 			,@EscalateInventoryTransactionId AS INT 
 			,@EscalateInventoryTransactionTypeId AS INT 
@@ -298,7 +300,7 @@ BEGIN
 			,t.intItemId
 			,t.intItemLocationId
 			,t.intItemUOMId
-			,t.dblQty
+			,dblQty = ISNULL(-cbOut.dblQty, t.dblQty)
 			,t.dblCost
 			,t.dblValue
 			,t.strTransactionId
@@ -307,9 +309,14 @@ BEGIN
 			,t.intTransactionTypeId
 			,t.strBatchId 
 			,il.intLocationId
+			,t.strRelatedTransactionId
+			,t.intRelatedTransactionId
 	FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
 				ON t.intItemLocationId = il.intItemLocationId
 				AND t.intItemId = il.intItemId
+			LEFT JOIN tblICInventoryFIFOOut cbOut 
+				ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbOut.intRevalueFifoId IS NOT NULL 
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
@@ -334,6 +341,8 @@ BEGIN
 		,@t_intTransactionTypeId
 		,@t_strBatchId
 		,@t_intLocationId
+		,@t_strRelatedTransactionId
+		,@t_intRelatedTransactionId 
 	;
 
 	WHILE @@FETCH_STATUS = 0 
@@ -387,7 +396,7 @@ BEGIN
 			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
 						@NewRunningValue / @RunningQty
 					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
-						@t_dblQty * @CostBucketOriginalCost / @t_dblQty
+						(@t_dblQty * @CostBucketOriginalCost + @CostAdjustment) / @t_dblQty
 					ELSE 
 						@NewAverageCost
 			END 
@@ -416,7 +425,8 @@ BEGIN
 				AND ISNULL(t.ysnIsUnposted, 0) = 0
 				AND ISNULL(t.dblQty, 0) > 0 				
 				AND 1 = 
-					CASE WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 1 
+					CASE WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt THEN 0 
+						 WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 1 
 						 WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @t_intTransactionDetailId THEN 1 
 						 ELSE 0 
 					END 
@@ -426,7 +436,7 @@ BEGIN
 			-- Calculate the value to be escalated. 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment -= (@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
-			
+
 			-- Insert data into the #tmpRevalueProducedItems table. 
 			INSERT INTO #tmpRevalueProducedItems (
 					[intItemId] 
@@ -559,9 +569,9 @@ BEGIN
 					END 
 				,[ysnIsUnposted]  = CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 				,[dtmCreated] = GETDATE()
-				,[strRelatedTransactionId] = @t_strTransactionId 
-				,[intRelatedTransactionId] = @t_intTransactionId
-				,[intRelatedTransactionDetailId] = @t_intTransactionDetailId
+				,[strRelatedTransactionId] = ISNULL(@t_strRelatedTransactionId, @t_strTransactionId)
+				,[intRelatedTransactionId] = ISNULL(@t_intRelatedTransactionId, @t_intTransactionId) 
+				,[intRelatedTransactionDetailId] = CASE WHEN @t_strRelatedTransactionId IS NULL THEN @t_intTransactionDetailId ELSE NULL END 
 				,[intRelatedInventoryTransactionId] = @t_intInventoryTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
@@ -590,6 +600,9 @@ BEGIN
 			,@t_intTransactionTypeId
 			,@t_strBatchId
 			,@t_intLocationId
+			,@t_strRelatedTransactionId
+			,@t_intRelatedTransactionId 
+
 		;		
 	END 
 
