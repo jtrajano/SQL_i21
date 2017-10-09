@@ -1,15 +1,25 @@
 ﻿CREATE PROCEDURE [dbo].[uspARContactOriginSync]
-	@ContactNumber NVARCHAR(20) = NULL
+	@ContactNumber NVARCHAR(20) = NULL,
+	@EntityId INT = NULL
 
 	AS
-		
+
+	DECLARE @EntityNo NVARCHAR(50)
+	SET @EntityNo = NULL
+	IF @EntityId is not null
+	BEGIN		
+
+		SELECT @EntityNo = strCustomerNumber from tblEMEntityToContact A
+			JOIN tblARCustomer B
+				ON A.intEntityId = B.intEntityId
+	END		
 	--================================================
 	--     UPDATE/INSERT IN ORIGIN	
 	--================================================
 	IF(@ContactNumber IS NOT NULL) 
 	BEGIN
 		--UPDATE IF EXIST IN THE ORIGIN
-		IF(EXISTS(SELECT 1 FROM ssconmst WHERE sscon_contact_id = UPPER(@ContactNumber)))
+		IF(@EntityNo <> '' AND EXISTS(SELECT 1 FROM ssconmst WHERE LTRIM(RTRIM(sscon_contact_id)) = UPPER( LTRIM(RTRIM(@ContactNumber)) ) AND LTRIM(RTRIM(sscon_cus_no)) = UPPER(LTRIM(RTRIM(@EntityNo))) ))
 		BEGIN			
 			UPDATE ssconmst
 				SET 
@@ -28,6 +38,8 @@
 				INNER JOIN [tblEMEntityToContact] EntToCon
 					on EntToCon.intEntityContactId = Contact.intEntityId
 				INNER JOIN tblEMEntity E ON E.intEntityId = EntToCon.intEntityId
+				INNER JOIN vyuEMEntityType ET
+					ON ET.intEntityId = E.intEntityId and Customer = 1
 				LEFT JOIN tblEMEntityPhoneNumber P
 					ON P.intEntityId = Contact.intEntityId
 				LEFT JOIN tblEMEntityMobileNumber M
@@ -36,6 +48,7 @@
 					ON F.intEntityId = Contact.intEntityId AND 
 						F.intContactDetailTypeId = ( SELECT TOP 1 intContactDetailTypeId from tblEMContactDetailType where strType = 'Phone' and strField = 'Fax' )
 				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND UPPER(sscon_contact_id) = SUBSTRING(UPPER(@ContactNumber),1,20)
+				AND (@EntityId is null or Contact.intEntityId = @EntityId)
 
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
@@ -81,7 +94,9 @@
 				INNER JOIN [tblEMEntityToContact] EntToCon
 					on EntToCon.intEntityContactId = Contact.intEntityId
 				INNER JOIN tblEMEntity E ON E.intEntityId = EntToCon.intEntityId
-				INNER JOIN tblARCustomer C on C.[intEntityId] = EntToCon.intEntityId
+				INNER JOIN tblARCustomer C on C.[intEntityId] = EntToCon.intEntityId				
+				INNER JOIN vyuEMEntityType ET
+					ON ET.intEntityId = E.intEntityId and Customer = 1
 				LEFT JOIN tblEMEntityPhoneNumber P
 					ON P.intEntityId = Contact.intEntityId
 				LEFT JOIN tblEMEntityMobileNumber M
@@ -90,6 +105,7 @@
 					ON F.intEntityId = Contact.intEntityId AND 
 						F.intContactDetailTypeId = ( SELECT TOP 1 intContactDetailTypeId from tblEMContactDetailType where strType = 'Phone' and strField = 'Fax' )
 				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND C.strCustomerNumber <> ''
+				AND (@EntityId is null or Contact.intEntityId = @EntityId)
 			--FROM tblEMEntityContact Contact
 			--	INNER JOIN tblEMEntity E ON E.intEntityId = Contact.intEntityContactId
 			--	INNER JOIN tblARCustomerToContact  CusToCon ON Contact.intEntityContactId = CusToCon.intEntityContactId
