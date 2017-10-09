@@ -221,8 +221,7 @@ BEGIN TRY
 			LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Item.intWeightUOMId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Shipment.intShipFromLocationId
 			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Shipment.intShipToLocationId
-			LEFT JOIN tblARCustomer Customer ON Customer.intEntityId = Shipment.intEntityCustomerId
-			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = Customer.intEntityId
+			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = Shipment.intEntityCustomerId
 			LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = Shipment.intShipViaId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
 			LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ShipmentItem.intOrderId
