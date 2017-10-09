@@ -21,7 +21,7 @@ DECLARE @dtmDateTo						DATETIME
       , @dtmDateFrom					DATETIME
 	  , @intEntityCustomerId			INT	= NULL
 	  , @strSalesperson					NVARCHAR(100)
-	  , @strCustomerName				NVARCHAR(100)
+	  , @strCustomerName				NVARCHAR(MAX)
 	  , @xmlDocumentId					INT
 	  , @filter							NVARCHAR(MAX) = ''
 	  , @fieldname						NVARCHAR(50)
@@ -36,7 +36,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @strSourceTransaction			NVARCHAR(100)
 	  , @strAgedBalances				NVARCHAR(100)
 	  , @ysnPrintOnlyOverCreditLimit	BIT
-		
+	
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -104,10 +104,7 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-
-IF ISNULL(@strCustomerName, '') <> ''
-	SELECT TOP 1 @intEntityCustomerId = intEntityId FROM tblEMEntity WITH (NOLOCK) WHERE strName = @strCustomerName
-
+	
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName
@@ -133,7 +130,11 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyName
 	 , strCompanyAddress
 )
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom, @dtmDateTo, @strSalesperson, @intEntityCustomerId, @strSourceTransaction
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
+										, @dtmDateTo = @dtmDateTo
+										, @strSalesperson = @strSalesperson
+										, @strSourceTransaction = @strSourceTransaction
+										, @strCustomerName	= @strCustomerName
 EXEC dbo.uspARGLAccountReport @dtmDateTo
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE dblTotalAR = 0

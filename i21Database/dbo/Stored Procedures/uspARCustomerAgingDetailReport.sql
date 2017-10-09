@@ -19,7 +19,6 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 -- Declare the variables.
 DECLARE @dtmDateTo				DATETIME
       , @dtmDateFrom			DATETIME
-	  , @intEntityCustomerId	INT	= NULL
 	  , @strSalesperson			NVARCHAR(100)
 	  , @strCustomerName		NVARCHAR(100)
 	  , @xmlDocumentId			INT
@@ -108,9 +107,6 @@ IF @dtmDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
-IF ISNULL(@strCustomerName, '') <> ''
-	SELECT TOP 1 @intEntityCustomerId = intEntityId FROM tblEMEntity WITH (NOLOCK) WHERE strName = @strCustomerName
-
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName
@@ -145,7 +141,11 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	, strCompanyName
 	, strCompanyAddress
 )
-EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom, @dtmDateTo, @strSalesperson, @strSourceTransaction, @intEntityCustomerId
+EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
+											  , @dtmDateTo = @dtmDateTo
+											  , @strSalesperson = @strSalesperson
+											  , @strSourceTransaction = @strSourceTransaction
+											  , @strCustomerName = @strCustomerName
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
 
