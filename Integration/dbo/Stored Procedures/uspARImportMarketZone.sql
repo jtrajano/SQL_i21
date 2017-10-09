@@ -83,9 +83,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportMarketZone]
 		
 			--Insert into tblARMarketZone
 			INSERT [dbo].[tblARMarketZone]
-			([strMarketZoneCode],[strDescription])
+			([strMarketZoneCode],[strDescription],[ysnImported])
 			VALUES
-			(@strMarketZoneCode,@strDescription)						
+			(@strMarketZoneCode,@strDescription,1)						
 	
 		
 			IF(@@ERROR <> 0) 
