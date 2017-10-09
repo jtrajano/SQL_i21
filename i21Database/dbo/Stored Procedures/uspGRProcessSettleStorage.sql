@@ -932,6 +932,11 @@ BEGIN TRY
 		FROM	@SettleVoucherCreate
 		WHERE	intSettleVoucherKey = @intSettleVoucherKey
 		
+		SELECT  @dblUnits=SUM(dblUnits)
+		FROM	@SettleVoucherCreate 
+		WHERE   intCustomerStorageId=@intCustomerStorageId 
+		AND	    strOrderType = @strOrderType 
+
 		SELECT	@intItemLocationId = intItemLocationId 
 		FROM	tblICItemLocation 
 		WHERE	intItemId = @ItemId 
@@ -1084,7 +1089,7 @@ BEGIN TRY
 			 a.[intCustomerStorageId] AS [intCustomerStorageId]
 			,a.[intItemId] AS [intItemId]
 			,NULL AS [intAccountId]
-			,@dblUnits AS [dblQtyReceived]
+			,a.dblUnits AS [dblQtyReceived]
 			,a.[strItemNo] AS [strMiscDescription]
 			,a.[dblCashPrice] AS [dblCost]
 			,a.[intContractHeaderId] AS [intContractHeaderId]
