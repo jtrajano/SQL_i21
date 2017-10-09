@@ -286,7 +286,7 @@
     <None Include="Scripts\Pre-Deployment\21_PR\4_1710_to_1720.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\6_GL\AccountCategory.sql" />
+    <None Include="Scripts\Pre-Deployment\6_GL\1730.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\3_fnARGetCustomerDefaultContact.sql" />

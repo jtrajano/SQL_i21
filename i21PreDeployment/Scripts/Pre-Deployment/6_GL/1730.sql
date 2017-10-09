@@ -9,7 +9,9 @@
                SELECT * FROM [$(TableName)]
 --------------------------------------------------------------------------------------
 */
-GO
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLAccountCategory]') AND type in (N'U'))
-ALTER TABLE dbo.tblGLAccountCategory ALTER COLUMN strAccountCategory  [nvarchar](50) COLLATE Latin1_General_CI_AS NULL;
-GO
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLCurrentFiscalYear]') AND type in (N'U')) 
+BEGIN
+    UPDATE CF 
+    SET intFiscalYearId = F.intFiscalYearId
+    FROM tblGLCurrentFiscalYear  CF JOIN tblGLFiscalYear F ON F.dtmDateFrom = CF.dtmBeginDate
+END
