@@ -75,6 +75,20 @@ DECLARE @temp_statement_table TABLE(
 	,[strCompanyAddress]	 NVARCHAR(MAX)
 )
 
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
+BEGIN
+    DROP TABLE #CUSTOMERS
+END
+
+SELECT intEntityCustomerId
+	 , strCustomerNumber	= CAST(strCustomerNumber COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , strCustomerName		= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , dblCreditLimit
+	 , dblARBalance
+INTO #CUSTOMERS
+FROM tblARCustomer
+WHERE 1 = 0
+
 -- Prepare the XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
 
@@ -100,6 +114,10 @@ SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmDate'
 
+SELECT @strCustomerName = [from]
+FROM @temp_xml_table
+WHERE [fieldname] IN ('strName', 'strCustomerName')
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -122,6 +140,41 @@ ELSE
 	BEGIN
 		SET @innerQuery = 'AND I.dtmPostDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo+''
 	END
+
+IF ISNULL(@strCustomerName, '') <> ''
+	BEGIN
+		INSERT INTO #CUSTOMERS
+		SELECT TOP 1 intEntityCustomerId	= intEntityCustomerId 
+				   , strCustomerNumber		= C.strCustomerNumber
+				   , strCustomerName		= EC.strName
+				   , dblCreditLimit         = C.dblCreditLimit
+				   , dblARBalance           = C.dblARBalance        
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+					, strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			WHERE strName = @strCustomerName
+		) EC ON C.intEntityCustomerId = EC.intEntityId
+		WHERE C.ysnActive = 1
+	END
+ELSE
+	BEGIN
+		INSERT INTO #CUSTOMERS
+		SELECT intEntityCustomerId	= intEntityCustomerId 
+			 , strCustomerNumber	= C.strCustomerNumber
+			 , strCustomerName		= EC.strName
+			 , dblCreditLimit		= C.dblCreditLimit
+			 , dblARBalance			= C.dblARBalance
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+					, strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			WHERE (@strCustomerName IS NULL OR strName LIKE '%'+ @strCustomerName +'%')
+		) EC ON C.intEntityCustomerId = EC.intEntityId
+		WHERE C.ysnActive = 1
+END
 
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
@@ -148,31 +201,9 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyName
 	 , strCompanyAddress
 )
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
-
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmDate')
-
-SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
-
-WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
-BEGIN
-	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
-	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
-	
-		IF (@fieldname = 'strName' OR @fieldname = 'strCustomerName' )
-			SET @filter = REPLACE (@filter, '|^|', ''',''')
-			SET @filter = REPLACE (@filter, ''',''''', '''')
-			SET @filter = REPLACE (@filter, '=', 'IN (')
-			SET @filter = @filter + ')'
-			SET @filter = REPLACE (@filter, '))', ')')
-
-	DELETE FROM @temp_xml_table WHERE id = @id
-
-	IF EXISTS(SELECT 1 FROM @temp_xml_table)
-	BEGIN
-		SET @filter = @filter + ' AND '
-	END
-END
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom = @dtmDateFrom
+										  , @dtmDateTo = @dtmDateTo
+										  , @strCustomerName = @strCustomerName
  
 SET @query = 'SELECT * FROM
 (SELECT I.strInvoiceNumber AS strReferenceNumber
@@ -207,7 +238,7 @@ SET @query = 'SELECT * FROM
 FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
 		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
-	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
+	INNER JOIN (vyuARCustomer C INNER JOIN #CUSTOMERS CC ON C.intEntityCustomerId = CC.intEntityCustomerId) ON I.intEntityCustomerId = C.intEntityCustomerId
 	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0

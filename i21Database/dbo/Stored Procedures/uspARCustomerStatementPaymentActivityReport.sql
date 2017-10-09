@@ -5,10 +5,10 @@
 	, @ysnPrintCreditBalance	AS BIT				= 1
 	, @ysnIncludeBudget			AS BIT				= 0
 	, @ysnPrintOnlyPastDue		AS BIT				= 0
-	, @ysnSearchOnly			AS BIT				= 0
 	, @strCustomerNumber		AS NVARCHAR(MAX)	= NULL
 	, @strAccountStatusCode		AS NVARCHAR(MAX)	= NULL
 	, @strLocationName			AS NVARCHAR(MAX)	= NULL
+	, @strCustomerName			AS NVARCHAR(MAX)	= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -26,12 +26,12 @@ DECLARE @dtmDateToLocal				AS DATETIME			= NULL
 	  , @strCustomerNumberLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
+	  , @strCustomerNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strDateTo					AS NVARCHAR(50)
 	  , @strDateFrom				AS NVARCHAR(50)
 	  , @query						AS NVARCHAR(MAX)
 	  , @queryBudget				AS NVARCHAR(MAX)
 	  , @filter						AS NVARCHAR(MAX)	= ''
-	  , @intEntityCustomerId		AS INT				= NULL
 		
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -81,6 +81,20 @@ DECLARE @temp_cf_table TABLE(
 	,[dtmInvoiceDate]			DATETIME
 )
 
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
+BEGIN
+    DROP TABLE #CUSTOMERS
+END
+
+SELECT intEntityCustomerId
+	 , strCustomerNumber	= CAST(strCustomerNumber COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , strCustomerName		= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , dblCreditLimit
+	 , dblARBalance
+INTO #CUSTOMERS
+FROM tblARCustomer
+WHERE 1 = 0
+
 SET @dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 SET @ysnPrintZeroBalanceLocal	= ISNULL(@ysnPrintZeroBalance, 0)
@@ -95,12 +109,40 @@ SET @strDateFrom				= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		SET @filter = 'strCustomerNumber = ''' + @strCustomerNumberLocal + ''''
-
-		SELECT TOP 1 @intEntityCustomerId = intEntityCustomerId 
-		FROM vyuARCustomerSearch WITH (NOLOCK)
-		WHERE strCustomerNumber = @strCustomerNumberLocal
+		INSERT INTO #CUSTOMERS
+		SELECT TOP 1 intEntityCustomerId    = intEntityCustomerId 
+					, strCustomerNumber      = C.strCustomerNumber
+					, strCustomerName        = EC.strName
+					, dblCreditLimit         = C.dblCreditLimit
+					, dblARBalance           = C.dblARBalance        
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+					, strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			WHERE strEntityNo = @strCustomerNumberLocal
+		) EC ON C.intEntityCustomerId = EC.intEntityId
+		WHERE C.ysnActive = 1
+			AND C.strStatementFormat = 'Payment Activity'
 	END
+ELSE
+	BEGIN
+		INSERT INTO #CUSTOMERS
+		SELECT intEntityCustomerId  = intEntityCustomerId 
+				, strCustomerNumber	= C.strCustomerNumber
+				, strCustomerName      = EC.strName
+				, dblCreditLimit       = C.dblCreditLimit
+				, dblARBalance         = C.dblARBalance
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+					, strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			WHERE (@strCustomerNameLocal IS NULL OR strName LIKE '%'+ @strCustomerNameLocal +'%')
+		) EC ON C.intEntityCustomerId = EC.intEntityId
+		WHERE C.ysnActive = 1
+			AND C.strStatementFormat = 'Payment Activity'
+END
 
 IF @strAccountStatusCodeLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strAccountStatusCode LIKE (%''' + @strAccountStatusCodeLocal + '''%)'
@@ -108,35 +150,36 @@ IF @strAccountStatusCodeLocal IS NOT NULL
 IF @strLocationNameLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
 
-IF @ysnSearchOnly = 0
-	BEGIN
-		TRUNCATE TABLE tblARCustomerAgingStagingTable
-		INSERT INTO tblARCustomerAgingStagingTable (
-			   strCustomerName
-			 , strCustomerNumber
-			 , intEntityCustomerId
-			 , dblCreditLimit
-			 , dblTotalAR
-			 , dblFuture
-			 , dbl0Days
-			 , dbl10Days
-			 , dbl30Days
-			 , dbl60Days
-			 , dbl90Days
-			 , dbl91Days
-			 , dblTotalDue
-			 , dblAmountPaid
-			 , dblCredits
-			 , dblPrepayments
-			 , dblPrepaids
-			 , dtmAsOfDate
-			 , strSalespersonName
-			 , strSourceTransaction
-			 , strCompanyName
-			 , strCompanyAddress
-		)
-		EXEC dbo.uspARCustomerAgingAsOfDateReport NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
-	END
+TRUNCATE TABLE tblARCustomerAgingStagingTable
+INSERT INTO tblARCustomerAgingStagingTable (
+		strCustomerName
+		, strCustomerNumber
+		, intEntityCustomerId
+		, dblCreditLimit
+		, dblTotalAR
+		, dblFuture
+		, dbl0Days
+		, dbl10Days
+		, dbl30Days
+		, dbl60Days
+		, dbl90Days
+		, dbl91Days
+		, dblTotalDue
+		, dblAmountPaid
+		, dblCredits
+		, dblPrepayments
+		, dblPrepaids
+		, dtmAsOfDate
+		, strSalespersonName
+		, strSourceTransaction
+		, strCompanyName
+		, strCompanyAddress
+)
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
+										  , @strCompanyLocation = @strLocationNameLocal
+										  , @ysnIncludeBudget = @ysnIncludeBudgetLocal
+										  , @ysnIncludeCredits = @ysnPrintCreditBalanceLocal
+										  , @strCustomerName = @strCustomerNameLocal
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -166,7 +209,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
 	  , dblARBalance		= CUST.dblARBalance
 FROM vyuARCustomer C
-	INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
+	INNER JOIN #CUSTOMERS CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
 	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
 	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId
 		AND I.ysnPosted  = 1
@@ -217,7 +260,7 @@ IF @ysnIncludeBudgetLocal = 1
         SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
             'SELECT intEntityCustomerId         = C.intEntityCustomerId 
 			      , strCustomerNumber           = C.strCustomerNumber
-				  , strCustomerName             = C.strName
+				  , strCustomerName             = C.strCustomerName
 				  , dblCreditLimit              = C.dblCreditLimit
 				  , intInvoiceId				= CB.intCustomerBudgetId
 			      , strInvoiceNumber			= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
@@ -240,10 +283,9 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strStatementFooterComment	= NULL
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
-				  , dblARBalance				= CUST.dblARBalance
+				  , dblARBalance				= C.dblARBalance
             FROM tblARCustomerBudget CB
-                INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId
-                INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId    
+            INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
             OUTER APPLY (
 					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
 					FROM (
@@ -454,8 +496,4 @@ FROM (
 ) MAINREPORT
 LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN (
-	SELECT intEntityCustomerId
-	FROM dbo.tblARCustomer WITH (NOLOCK)
-	WHERE strStatementFormat = 'Payment Activity'
-) CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId

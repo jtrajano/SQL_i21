@@ -19,7 +19,6 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 -- Declare the variables.
 DECLARE  @dtmDateTo				DATETIME
       , @dtmDateFrom			DATETIME
-	  , @intEntityCustomerId	INT	= NULL
 	  , @strSalesperson			NVARCHAR(100)
 	  , @strCustomerName		NVARCHAR(100)
 	  , @xmlDocumentId			INT
@@ -34,7 +33,7 @@ DECLARE  @dtmDateTo				DATETIME
 	  , @endgroup				NVARCHAR(50)
 	  , @datatype				NVARCHAR(50)
 	  , @strSourceTransaction	NVARCHAR(100)
-		
+
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -94,10 +93,7 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-
-IF ISNULL(@strCustomerName, '') <> ''
-	SELECT TOP 1 @intEntityCustomerId = intEntityId FROM tblEMEntity WITH (NOLOCK) WHERE strName = @strCustomerName
-
+	
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName
@@ -123,7 +119,11 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyName
 	 , strCompanyAddress
 )
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom, @dtmDateTo, @strSalesperson, @intEntityCustomerId, @strSourceTransaction
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
+										, @dtmDateTo = @dtmDateTo
+										, @strSalesperson = @strSalesperson
+										, @strSourceTransaction = @strSourceTransaction
+										, @strCustomerName	= @strCustomerName
 EXEC dbo.uspARGLAccountReport @dtmDateTo
 
 SELECT * FROM tblARCustomerAgingStagingTable  WHERE ISNULL(dblTotalAR, 0) <> 0
