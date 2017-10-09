@@ -152,7 +152,7 @@
 
 	,ICItem.strItemNo
 	,ICCA.strDescription AS strGrade
-	,ICStorageLocation.strDescription
+	,ICStorageLocation.strName AS strStorageLocation
 	,ICUM.strUnitMeasure
 	,ICCommodity.dblPriceCheckMin
 	,ICCommodity.dblPriceCheckMax
@@ -216,7 +216,6 @@
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on EMSplit.intSplitId = SCT.intSplitId
 	LEFT JOIN tblEMEntityFarm EMEntityFarm on EMEntityFarm.intFarmFieldId = SCT.intFarmFieldId
-	
 
 	LEFT JOIN tblICItem ICItem on ICItem.intItemId = SCT.intItemId
 	LEFT JOIN tblICCommodity ICCommodity on ICCommodity.intCommodityId = SCT.intCommodityId
@@ -232,7 +231,6 @@
 	LEFT JOIN tblGRDiscountId GRDiscountId on GRDiscountId.intDiscountId = SCT.intDiscountId
 	LEFT JOIN tblGRStorageScheduleRule GRSSR on GRSSR.intStorageScheduleRuleId = SCT.intStorageScheduleId
 
-	
 	LEFT JOIN vyuCTContractDetailView CT on CT.intContractDetailId = SCT.intContractId
 	LEFT JOIN vyuCTEntity CTEntity on CTEntity.intEntityId = SCT.intHaulerId
 	LEFT JOIN tblCTWeightGrade CTGrade on CTGrade.intWeightGradeId = SCT.intGradeId
