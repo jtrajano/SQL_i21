@@ -35,6 +35,7 @@ BEGIN TRY
 		,@intWorkOrderConsumedLotId INT
 		,@intWorkOrderInputLotId INT
 		,@intCategoryId int
+		,@ysnKittingEnabled bit
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -128,6 +129,12 @@ BEGIN TRY
 			AND intManufacturingCellId = @intManufacturingCellId
 	END
 
+	SELECT @ysnKittingEnabled = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 27 --PM Staging Location
+
 	INSERT INTO dbo.tblMFWorkOrder (
 		strWorkOrderNo
 		,intManufacturingProcessId
@@ -156,6 +163,9 @@ BEGIN TRY
 		,intSalesRepresentativeId
 		,intSupervisorId
 		,dtmOrderDate
+		,ysnKittingEnabled
+		,dblPlannedQuantity
+		,intKitStatusId
 		)
 	SELECT @strWorkOrderNo
 		,@intManufacturingProcessId
@@ -184,6 +194,9 @@ BEGIN TRY
 		,@intSalesRepresentativeId
 		,@intSupervisorId
 		,@dtmPlannedDate
+		,@ysnKittingEnabled
+		,@dblQuantity
+		,Case When @ysnKittingEnabled=1 Then 6 Else NULL End
 
 	SET @intWorkOrderId = SCOPE_IDENTITY()
 
