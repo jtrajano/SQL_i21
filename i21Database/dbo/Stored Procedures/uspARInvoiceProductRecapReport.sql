@@ -1,296 +1,276 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceProductRecapReport]
-	@strCustomerName NVARCHAR(100)	
+	@strCustomerName NVARCHAR(MAX)	
 AS
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @tblCustomers TABLE (
+	    intEntityCustomerId			INT	  
+	  , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	  , strCustomerName				NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	  , dblCreditLimit				NUMERIC(18, 6)
+)
+
+INSERT INTO @tblCustomers
+SELECT C.intEntityId 
+	 , C.strCustomerNumber
+	 , EC.strName
+	 , C.dblCreditLimit
+FROM tblARCustomer C WITH (NOLOCK)
+INNER JOIN (
+	SELECT intEntityId
+		 , strName
+	FROM dbo.tblEMEntity WITH (NOLOCK)
+	WHERE (@strCustomerName IS NULL OR strName LIKE '%'+ @strCustomerName +'%')
+) EC ON C.intEntityId = EC.intEntityId
+WHERE ysnActive = 1
+
+
 SELECT DISTINCT
-	ABC.intEntityCustomerId,
-	ARC.strName,
-	ABC.intCompanyLocationId,
-	SMCL.strLocationNumber,
-	ABC.intItemId,
-	ABC.intTaxCodeId,
-	strProductNo					= CASE WHEN ABC.strTransactionType = 'Items' THEN ABC.strItemNo  
+	  ABC.intEntityCustomerId
+	, ARC.strCustomerName
+	, ABC.intCompanyLocationId
+	, LOCATION.strLocationNumber
+	, ABC.intItemId
+	, ABC.intTaxCodeId
+	, strProductNo					= CASE WHEN ABC.strTransactionType = 'Items' THEN ABC.strItemNo  
 										   WHEN ABC.strTransactionType IN ('Payments','Customer Prepayment','Overpayment') THEN 'RCV' 
 										   WHEN ABC.strTransactionType = 'TaxCodes' THEN ABC.strTaxCode
 										   WHEN ABC.strTransactionType = 'Service Charge' THEN 'Service Charges'
 										   WHEN ABC.strTransactionType = 'Debit Memo' THEN 'DEBIT MEMO'
-									  END,
-	intSortNo					= CASE WHEN ABC.strTransactionType = 'Items' THEN 4
+									  END
+	, intSortNo					= CASE WHEN ABC.strTransactionType = 'Items' THEN 4
 										   WHEN ABC.strTransactionType IN ('Payments','Customer Prepayment','Overpayment') THEN 1
 										   WHEN ABC.strTransactionType = 'TaxCodes' THEN 5
 										   WHEN ABC.strTransactionType = 'Service Charge' THEN 2
 										   WHEN ABC.strTransactionType = 'Debit Memo' THEN 3
-									  END,
-	ABC.strDescription,	
-	ABC.strTransactionType,
-	ABC.strType,
-	dblUnits						= ABC.dblQtyShipped,
-	dblAmounts						= ABC.dblInvoiceTotal
+									  END
+	, ABC.strDescription
+	, ABC.strTransactionType
+	, ABC.strType
+	, dblUnits						= ABC.dblQtyShipped
+	, dblAmounts					= ABC.dblInvoiceTotal
 FROM 
 (
 	--- Items
-	SELECT 
-		Items.intEntityCustomerId,
-		Items.intCompanyLocationId,
-		Items.strTransactionType,
-		Items.strType,
-		Items.dblInvoiceTotal,
-		Items.intItemId,
-		strItemNo						= ISNULL(ICI.strItemNo, 'MISC'),
-		strDescription					= ISNULL(ICI.strDescription, Items.strItemDescription),
-		Items.dblQtyShipped,
-		Items.intTaxCodeId,
-		strTaxCode						= NULL
-	FROM 
-	(
-		SELECT 
-			intEntityCustomerId			=	ARI.intEntityCustomerId,			
-			intCompanyLocationId		=	ARI.intCompanyLocationId,
-			strTransactionType			=	'Items',
-			strType						=	NULL,
-			dblInvoiceTotal				=	0.000000,
-			intItemId					=	ARID.intItemId,	
-			strItemDescription			=	ARID.strItemDescription,
-			dblQtyShipped				=	SUM(ARID.dblQtyShipped),
-			intTaxCodeId				=	NULL		
-
-		FROM 
-			tblARInvoice ARI
-		INNER JOIN 
-			(SELECT 
-				intInvoiceId,
-				intInvoiceDetailId,
-				intItemId,	
-				strItemDescription		= CASE WHEN ISNULL(strItemDescription,'') = '' THEN 'MISC' ELSE strItemDescription END,		
-				dblQtyShipped,
-				intTaxGroupId	
-			 FROM 
-				tblARInvoiceDetail WHERE intInvoiceId IN (SELECT intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = 8)) ARID ON ARI.intInvoiceId = ARID.intInvoiceId	
-		GROUP BY		 
-			ARI.intEntityCustomerId,
-			ARI.intCompanyLocationId,
-			ARID.intItemId,
-			ARID.strItemDescription
+	SELECT Items.intEntityCustomerId
+		 , Items.intCompanyLocationId
+		 , Items.strTransactionType
+		 , Items.strType
+		 , Items.dblInvoiceTotal
+		 , Items.intItemId
+		 , strItemNo						= ISNULL(ICI.strItemNo, 'MISC')
+		 , strDescription					= ISNULL(ICI.strDescription, Items.strItemDescription)
+		 , Items.dblQtyShipped
+		 , Items.intTaxCodeId
+		 , strTaxCode						= NULL
+	FROM (
+		SELECT intEntityCustomerId		=	ARI.intEntityCustomerId
+			 , intCompanyLocationId		=	ARI.intCompanyLocationId
+			 , strTransactionType		=	'Items'
+			 , strType					=	NULL
+			 , dblInvoiceTotal			=	0.000000
+			 , intItemId				=	ARID.intItemId
+			 , strItemDescription		=	ARID.strItemDescription
+			 , dblQtyShipped			=	SUM(ARID.dblQtyShipped)
+			 , intTaxCodeId				=	NULL
+		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intInvoiceId
+				 , intInvoiceDetailId
+				 , intItemId
+				 , strItemDescription	= CASE WHEN ISNULL(strItemDescription,'') = '' THEN 'MISC' ELSE strItemDescription END
+				 , dblQtyShipped
+				 , intTaxGroupId
+			 FROM dbo.tblARInvoiceDetail 
+		) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
+		WHERE ARI.ysnPosted = 1
+		GROUP BY ARI.intEntityCustomerId
+			   , ARI.intCompanyLocationId
+			   , ARID.intItemId
+			   , ARID.strItemDescription
 	) Items
-	LEFT JOIN 
-	(SELECT
-		intItemId,
-		strItemNo,
-		strDescription					
-	 FROM
-		tblICItem) ICI ON Items.intItemId = ICI.intItemId
+	LEFT JOIN (
+		SELECT intItemId
+			 , strItemNo
+			 , strDescription
+		FROM dbo.tblICItem WITH (NOLOCK)
+	) ICI ON Items.intItemId = ICI.intItemId
 	
 	UNION ALL
 
 	--- Tax Codes 
-	SELECT 
-		Taxes.intEntityCustomerId,
-		Taxes.intCompanyLocationId,
-		Taxes.strTransactionType,
-		Taxes.strType,
-		Taxes.dblInvoiceTotal,
-		Taxes.intItemId,
-		strItemNo						= NULL,
-		strDescription					= SMTC.strDescription,
-		Taxes.dblQtyShipped,
-		Taxes.intTaxCodeId,
-		strTaxCode						= SMTC.strTaxCode
-	FROM 
-	(
-		SELECT 
-		intEntityCustomerId			=	ARI.intEntityCustomerId,		
-		intCompanyLocationId		=	ARI.intCompanyLocationId,
-		strTransactionType			=	'TaxCodes',
-		strType						=	NULL,
-		dblInvoiceTotal				=	SUM(ARIDT.dblAdjustedTax),
-		intItemId					=	NULL,	
-		dblQtyShipped				=	0.000000,
-		intTaxCodeId				=	ARIDT.intTaxCodeId		
-	FROM 
-		tblARInvoice ARI
-	INNER JOIN 
-		(SELECT 
-			intInvoiceId,
-			intInvoiceDetailId,
-			intItemId,
-			dblQtyShipped,
-			intTaxGroupId	
-		 FROM 
-			tblARInvoiceDetail ) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
-	INNER JOIN 
-		(SELECT 
-			ART.intInvoiceDetailId,
-			ART.intTaxGroupId,
-			ART.intTaxCodeId,
-			SMTC.strTaxCode,
-			ART.dblAdjustedTax
-		 FROM
-			tblARInvoiceDetailTax ART
-		 INNER JOIN 
-			(SELECT 
-				intTaxCodeId, 
-				strTaxCode,
-				strDescription 
-			FROM 
-				tblSMTaxCode) SMTC ON ART.intTaxCodeId = SMTC.intTaxCodeId
-		) ARIDT ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId AND ARID.intTaxGroupId = ARIDT.intTaxGroupId
-	WHERE 
-		ARI.strType NOT IN ('Service Charge')
-		AND ARI.strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Debit Memo')
-		AND ARIDT.intTaxCodeId IS NOT NULL		
-	GROUP BY		
-		ARI.intEntityCustomerId,
-		ARI.intCompanyLocationId,
-		ARIDT.intTaxCodeId
-	) Taxes
-	LEFT JOIN 
-		(SELECT
-			intTaxCodeId,
-			strTaxCode,
-			strDescription
-		 FROM
-			tblSMTaxCode) SMTC ON Taxes.intTaxCodeId = SMTC.intTaxCodeId
+	SELECT TAXES.intEntityCustomerId
+		 , TAXES.intCompanyLocationId
+		 , TAXES.strTransactionType
+		 , TAXES.strType
+		 , TAXES.dblInvoiceTotal
+		 , TAXES.intItemId
+		 , strItemNo					= NULL
+		 , strDescription				= SMTC.strDescription
+		 , TAXES.dblQtyShipped
+		 , TAXES.intTaxCodeId
+		 , strTaxCode					= SMTC.strTaxCode
+	FROM (
+		SELECT intEntityCustomerId		= ARI.intEntityCustomerId
+			 , intCompanyLocationId		= ARI.intCompanyLocationId
+		     , strTransactionType		= 'TaxCodes'
+			 , strType					= NULL
+		     , dblInvoiceTotal			= SUM(ARIDT.dblAdjustedTax)
+			 , intItemId				= NULL
+			 , dblQtyShipped			= CASE WHEN SUM(ISNULL(ARIDT.dblRate, 0)) > 0 THEN SUM(ISNULL(ARIDT.dblAdjustedTax, 0)) / SUM(ISNULL(ARIDT.dblRate, 0)) ELSE 0 END
+			 , intTaxCodeId				= ARIDT.intTaxCodeId
+		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intInvoiceId
+				 , intInvoiceDetailId
+				 , intItemId
+				 , dblQtyShipped
+				 , intTaxGroupId	
+			FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+		) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
+		INNER JOIN (
+			SELECT ART.intInvoiceDetailId
+				 , ART.intTaxGroupId
+				 , ART.intTaxCodeId
+				 , SMTC.strTaxCode
+				 , ART.dblAdjustedTax
+				 , ART.dblRate
+			FROM dbo.tblARInvoiceDetailTax ART WITH (NOLOCK)
+			INNER JOIN (
+				SELECT intTaxCodeId
+					 , strTaxCode
+					 , strDescription
+				FROM dbo.tblSMTaxCode WITH (NOLOCK)
+			) SMTC ON ART.intTaxCodeId = SMTC.intTaxCodeId
+		) ARIDT ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId 
+			   AND ARID.intTaxGroupId = ARIDT.intTaxGroupId
+		WHERE ARI.ysnPosted = 1
+		  AND ARI.strType NOT IN ('Service Charge')
+		  AND ARI.strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Debit Memo')
+		  AND ARIDT.intTaxCodeId IS NOT NULL		
+		GROUP BY ARI.intEntityCustomerId
+			   , ARI.intCompanyLocationId
+			   , ARIDT.intTaxCodeId
+	) TAXES
+	LEFT JOIN (
+		SELECT intTaxCodeId
+			 , strTaxCode
+			 , strDescription
+		FROM dbo.tblSMTaxCode WITH (NOLOCK)
+	) SMTC ON TAXES.intTaxCodeId = SMTC.intTaxCodeId
 
 	UNION ALL
 
 	--- Debit Memo
-	SELECT 
-		intEntityCustomerId			=	ARI.intEntityCustomerId,		
-		intCompanyLocationId		=	ARI.intCompanyLocationId,
-		strTransactionType			=	ARI.strTransactionType,
-		strType						=	NULL,
-		dblInvoiceTotal				=	SUM(ARI.dblInvoiceSubtotal),
-		intItemId					=	NULL,	
-		strItemNo					=	NULL,
-		strDescription				=	'Debit Memos',
-		dblQtyShipped				=	0.000000,
-		intTaxCodeId				=	NULL,
-		strTaxCode					=	NULL
-	FROM 
-		tblARInvoice ARI
-	INNER JOIN 
-		(SELECT 
-			intInvoiceId,
-			intInvoiceDetailId,
-			intItemId,
-			dblQtyShipped,
-			intTaxGroupId	
-		 FROM 
-			tblARInvoiceDetail ) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
-	LEFT JOIN 
-		(SELECT 
-			intInvoiceDetailId,
-			intTaxGroupId,
-			intTaxCodeId,
-			dblAdjustedTax
-		 FROM
-			tblARInvoiceDetailTax
-		) ARIDT ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId AND ARID.intTaxGroupId = ARIDT.intTaxGroupId
-	WHERE 
-		ARI.strType NOT IN ('Service Charge')
-		AND ARI.strTransactionType IN ('Debit Memo')		
-	GROUP BY		
-		ARI.intEntityCustomerId,
-		ARI.intCompanyLocationId,
-		ARI.strTransactionType		
+	SELECT intEntityCustomerId		= ARI.intEntityCustomerId
+		 , intCompanyLocationId		= ARI.intCompanyLocationId
+		 , strTransactionType		= ARI.strTransactionType
+		 , strType					= NULL
+		 , dblInvoiceTotal			= SUM(ARI.dblInvoiceSubtotal)
+		 , intItemId				= NULL
+		 , strItemNo				= NULL
+		 , strDescription			= 'Debit Memos'
+		 , dblQtyShipped			= 0.000000
+		 , intTaxCodeId				= NULL
+		 , strTaxCode				= NULL
+	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intInvoiceId
+			 , intInvoiceDetailId
+			 , intItemId
+			 , dblQtyShipped
+			 , intTaxGroupId	
+		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+	) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
+	LEFT JOIN (
+		SELECT intInvoiceDetailId
+			 , intTaxGroupId
+			 , intTaxCodeId
+			 , dblAdjustedTax
+		 FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
+	) ARIDT ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId 
+		   AND ARID.intTaxGroupId = ARIDT.intTaxGroupId
+	WHERE ARI.ysnPosted = 1
+	  AND ARI.strType NOT IN ('Service Charge')
+	  AND ARI.strTransactionType IN ('Debit Memo')
+	GROUP BY ARI.intEntityCustomerId
+		   , ARI.intCompanyLocationId
+		   , ARI.strTransactionType
 	 
 	UNION ALL
 
 	--- Overpayment,  Customer Prepayment
-	SELECT 
-		intEntityCustomerId			=	ARI.intEntityCustomerId,		
-		intCompanyLocationId		=	ARI.intCompanyLocationId,
-		strTransactionType			=	ARI.strTransactionType,
-		strType						=	NULL,
-		dblInvoiceTotal				=	SUM(ARI.dblInvoiceSubtotal),
-		intItemId					=	NULL,	
-		strItemNo					=	NULL,		
-		strDescription				=	'RCV' + ' - ' + ARI.strTransactionType,
-		dblQtyShipped				=	0.000000,
-		intTaxCodeId				=	NULL,
-		strTaxCode					=	NULL
-	FROM 
-		tblARInvoice ARI
-	WHERE 
-		ARI.strTransactionType IN ('Overpayment', 'Customer Prepayment')		
-	GROUP BY		
-		ARI.intEntityCustomerId,
-		ARI.intCompanyLocationId,
-		ARI.strTransactionType	
+	SELECT intEntityCustomerId		= ARI.intEntityCustomerId		
+		 , intCompanyLocationId		= ARI.intCompanyLocationId
+		 , strTransactionType		= ARI.strTransactionType
+		 , strType					= NULL
+		 , dblInvoiceTotal			= SUM(ARI.dblInvoiceSubtotal)
+		 , intItemId				= NULL
+		 , strItemNo				= NULL		
+		 , strDescription			= 'RCV' + ' - ' + ARI.strTransactionType
+		 , dblQtyShipped			= 0.000000
+		 , intTaxCodeId				= NULL
+		 , strTaxCode				= NULL
+	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+	WHERE ARI.ysnPosted = 1 
+	  AND ARI.strTransactionType IN ('Overpayment', 'Customer Prepayment')		
+	GROUP BY ARI.intEntityCustomerId
+		   , ARI.intCompanyLocationId
+		   , ARI.strTransactionType	
 		
 	UNION ALL
 
 	--- Payments
-	SELECT 
-		intEntityCustomerId			=	ARI.intEntityCustomerId,		
-		intCompanyLocationId		=	ARI.intCompanyLocationId,
-		strTransactionType			=	'Payments',
-		strType						=	NULL,
-		dblInvoiceTotal				=	SUM(ARI.dblPayment),
-		intItemId					=	NULL,	
-		strImportFormat				=	NULL,
-		strDescription				=	'RCV' + ' - ' + 'Payments',
-		dblQtyShipped				=	0.000000,
-		intTaxCodeId				=	NULL,
-		strTaxCode					=	NULL
-	FROM 
-		tblARInvoice ARI
-	WHERE 
-		ARI.strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Debit Memo')				
-	GROUP BY		
-		ARI.intEntityCustomerId,
-		ARI.intCompanyLocationId
+	SELECT intEntityCustomerId		= ARI.intEntityCustomerId
+		 , intCompanyLocationId		= ARI.intCompanyLocationId
+		 , strTransactionType		= 'Payments'
+		 , strType					= NULL
+		 , dblInvoiceTotal			= SUM(ARI.dblPayment)
+		 , intItemId				= NULL
+		 , strImportFormat			= NULL
+		 , strDescription			= 'RCV' + ' - ' + 'Payments'
+		 , dblQtyShipped			= 0.000000
+		 , intTaxCodeId				= NULL
+		 , strTaxCode				= NULL
+	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+	WHERE ARI.ysnPosted = 1
+	  AND ARI.strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Debit Memo')
+	GROUP BY ARI.intEntityCustomerId
+		   , ARI.intCompanyLocationId
 
 	UNION ALL
 
 	--- Service Charges
-	SELECT 
-		intEntityCustomerId			=	ARI.intEntityCustomerId,		
-		intCompanyLocationId		=	ARI.intCompanyLocationId,
-		strTransactionType			=	ARI.strType,
-		strType						=	ARI.strType,
-		dblInvoiceTotal				=	SUM(ARI.dblInvoiceSubtotal),
-		intItemId					=	NULL,	
-		strItemNo					=	NULL,
-		strDescription				=	ARI.strType,
-		dblQtyShipped				=	0.000000,
-		intTaxCodeId				=	NULL,
-		strTaxCode					=	NULL
-	FROM 
-		tblARInvoice ARI
-	WHERE 
-		ARI.strType IN ('Service Charge')			
-	GROUP BY		
-		ARI.intEntityCustomerId,
-		ARI.intCompanyLocationId,		
-		ARI.strType
+	SELECT intEntityCustomerId		= ARI.intEntityCustomerId
+		 , intCompanyLocationId		= ARI.intCompanyLocationId
+		 , strTransactionType		= ARI.strType
+		 , strType					= ARI.strType
+		 , dblInvoiceTotal			= SUM(ARI.dblInvoiceTotal)
+		 , intItemId				= NULL
+		 , strItemNo				= NULL
+		 , strDescription			= ARI.strType
+		 , dblQtyShipped			= 0.000000
+		 , intTaxCodeId				= NULL
+		 , strTaxCode				= NULL
+	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+	WHERE ARI.ysnPosted = 1
+	  AND ARI.strType IN ('Service Charge')			
+	GROUP BY ARI.intEntityCustomerId
+		   , ARI.intCompanyLocationId
+		   , ARI.strType
 		
 ) ABC
-INNER JOIN
-	(SELECT 
-		ARC.intEntityId,
-		EME.strName
-	 FROM
-		tblARCustomer ARC
-	 INNER JOIN
-		(SELECT
-			intEntityId,
-			strName
-		 FROM
-			tblEMEntity
-	 WHERE 
-		(@strCustomerName IS NULL OR strName LIKE '%'+@strCustomerName+'%')) EME ON ARC.intEntityId = EME.intEntityId) ARC ON ABC.intEntityCustomerId = ARC.intEntityId
-LEFT JOIN
-	(SELECT 
-		intCompanyLocationId,
-		strLocationNumber,
-		strLocationName
-	 FROM 
-		tblSMCompanyLocation) SMCL ON ABC.intCompanyLocationId = SMCL.intCompanyLocationId
-ORDER BY 
-	ABC.intCompanyLocationId, intSortNo
+INNER JOIN @tblCustomers ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+LEFT JOIN (
+	SELECT intCompanyLocationId
+		 , strLocationNumber
+		 , strLocationName
+	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+) LOCATION ON ABC.intCompanyLocationId = LOCATION.intCompanyLocationId
+WHERE ISNULL(ABC.dblQtyShipped, 0) <> 0 OR ISNULL(ABC.dblInvoiceTotal, 0) <> 0
+ORDER BY ABC.intCompanyLocationId, intSortNo
