@@ -5694,6 +5694,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGenerateWhereClause.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityType.sql" />
+    <Build Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

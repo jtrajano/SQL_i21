@@ -216,6 +216,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
 :r .\AR\DefaultData\30_UpdateBatchIdUsed.sql
 :r .\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql
+:r .\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

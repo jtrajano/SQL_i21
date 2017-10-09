@@ -6,6 +6,7 @@
     [strReviewPeriod]			NVARCHAR(25)  COLLATE Latin1_General_CI_AS NULL,
 	[strScheduleType]			NVARCHAR(25)  COLLATE Latin1_General_CI_AS NULL,
 	[strEntityIds]				NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
+	[intEntityId]				INT NULL,
     [dtmStartDate]				DATETIME NULL, 
 	[dtmEndDate]				DATETIME NULL, 	
 	[intCommissionPlanId]		INT NULL,
@@ -15,5 +16,6 @@
     [ysnAdjustPrevious]			BIT NULL, 
     [intConcurrencyId]			INT NOT NULL DEFAULT ((0)),
 	CONSTRAINT [PK_tblARCommissionSchedule_intCommissionScheduleId] PRIMARY KEY CLUSTERED ([intCommissionScheduleId] ASC),
+	CONSTRAINT [FK_tblARCommissionSchedule_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [UK_tblARCommissionSchedule_strCommissionScheduleName] UNIQUE (strCommissionScheduleName)
 )
