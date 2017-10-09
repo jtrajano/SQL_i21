@@ -5737,6 +5737,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
     <Build Include="dbo\Tables\tblVRProgram.sql" />
     <Build Include="dbo\Tables\tblVRCustomerXref.sql" />
+    <Build Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
