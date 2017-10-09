@@ -5735,6 +5735,8 @@
     <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGenerateWhereClause.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
+    <Build Include="dbo\Tables\tblVRProgram.sql" />
+    <Build Include="dbo\Tables\tblVRCustomerXref.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
