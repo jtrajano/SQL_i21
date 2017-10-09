@@ -97,7 +97,7 @@ BEGIN
 	--------------------------------------------------------
 	-- FROM INVENTORY RECEIPT
 	--------------------------------------------------------
-	SELECT
+	SELECT  DISTINCT 
 	BNKTRN.intBankAccountId,
 	BNKTRN.intTransactionId,
 	BNKTRN.strTransactionId,
@@ -273,7 +273,8 @@ BEGIN
 	--------------------------------------------------------
 	-- FROM INVENTORY SHIPMENT
 	--------------------------------------------------------
-	UNION ALL SELECT
+	UNION ALL 
+	SELECT  DISTINCT 
 	BNKTRN.intBankAccountId,
 	BNKTRN.intTransactionId,
 	BNKTRN.strTransactionId,
@@ -448,7 +449,8 @@ BEGIN
 	--------------------------------------------------------
 	-- FROM SETTLE STORAGE
 	--------------------------------------------------------
-	UNION ALL SELECT
+	UNION ALL 
+	SELECT  DISTINCT 
 	BNKTRN.intBankAccountId,
 	BNKTRN.intTransactionId,
 	BNKTRN.strTransactionId,
@@ -558,7 +560,7 @@ BEGIN
 	--------------------------------------------------------
 	-- FROM INVENTORY RECEIPT
 	--------------------------------------------------------
-	SELECT
+	SELECT   DISTINCT 
 	BNKTRN.intBankAccountId,
 	BNKTRN.intTransactionId,
 	BNKTRN.strTransactionId,
@@ -734,7 +736,8 @@ BEGIN
 	--------------------------------------------------------
 	-- FROM INVENTORY SHIPMENT
 	--------------------------------------------------------
-	UNION ALL SELECT
+	UNION ALL 
+	SELECT   DISTINCT 
 	BNKTRN.intBankAccountId,
 	BNKTRN.intTransactionId,
 	BNKTRN.strTransactionId,
@@ -909,7 +912,8 @@ BEGIN
 	--------------------------------------------------------
 	-- FROM SETTLE STORAGE
 	--------------------------------------------------------
-	UNION ALL SELECT
+	UNION ALL 
+	SELECT   DISTINCT 
 	BNKTRN.intBankAccountId,
 	BNKTRN.intTransactionId,
 	BNKTRN.strTransactionId,
