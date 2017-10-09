@@ -83,9 +83,9 @@ EXEC(
 		
 			--Insert into tblARAccountStatus
 			INSERT [dbo].[tblARAccountStatus]
-			([strAccountStatusCode],[strDescription])
+			([strAccountStatusCode],[strDescription],[ysnImported])
 			VALUES
-			(@strAccountStatusCode,@strDescription)						
+			(@strAccountStatusCode,@strDescription,1)						
 	
 		
 			IF(@@ERROR <> 0) 
