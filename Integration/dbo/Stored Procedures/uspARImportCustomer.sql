@@ -227,8 +227,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				
 				-- INSERT Contact to ssonmst
 				DECLARE @ContactNumber nvarchar(20)
-			
-				select top 1 @ContactNumber = substring(Con.strContactNumber,1,20)
+				DECLARE @ContactID	INT
+				select top 1 @ContactNumber = substring(Con.strContactNumber,1,20),
+				@ContactID = Con.intEntityId
 				FROM tblEMEntity Ent
 				INNER JOIN tblARCustomer Cus 
 					ON Ent.intEntityId = Cus.intEntityId
@@ -239,7 +240,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					ON CusToCon.intEntityContactId = Con.intEntityId									
 				WHERE Cus.strCustomerNumber = @CustomerId
 								
-				EXEC uspARContactOriginSync @ContactNumber
+				EXEC uspARContactOriginSync @ContactNumber, @ContactID
 				
 				
 
