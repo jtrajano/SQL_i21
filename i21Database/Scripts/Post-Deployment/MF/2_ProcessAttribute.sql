@@ -1518,6 +1518,12 @@ BEGIN
 		,5
 		,'Select strName As ValueMember, strName As DisplayMember From tblMFWorkOrderStatus Where intStatusId in (1,9,10)'
 END
+ELSE
+BEGIN
+	Update dbo.tblMFAttribute
+	Set intAttributeTypeId =1
+	WHERE intAttributeId = 70
+END
 GO
 IF NOT EXISTS (
 		SELECT *
