@@ -93,7 +93,8 @@ OUTER APPLY (
 	WHERE P.intEntityCustomerId = CAR.intEntityCustomerId 
 		AND P.ysnPosted = 1 
 		AND PM.strPaymentMethod != 'CF Invoice'
-	ORDER BY P.intPaymentId DESC) PAYMENT
+	ORDER BY P.intPaymentId DESC
+) PAYMENT
 OUTER APPLY (
 	SELECT dblYTDSales = SUM(CASE WHEN strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') 
 								  THEN ISNULL(dblInvoiceSubtotal, 0) * -1 
